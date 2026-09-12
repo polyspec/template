@@ -1,0 +1,57 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "row",
+      "iter": {
+        "type": "Var",
+        "name": "rows",
+        "span": [
+          9,
+          13
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Member",
+            "object": {
+              "type": "LoopMeta",
+              "loop": "row",
+              "field": "value_",
+              "span": [
+                18,
+                28
+              ]
+            },
+            "key": "name",
+            "span": [
+              18,
+              33
+            ]
+          },
+          "span": [
+            15,
+            34
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "\n",
+          "span": [
+            34,
+            35
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        38
+      ]
+    }
+  ]
+}

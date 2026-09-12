@@ -1,0 +1,115 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Var",
+            "name": "html",
+            "span": [
+              7,
+              11
+            ]
+          }
+        ],
+        "span": [
+          3,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        13,
+        14
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "page",
+                "span": [
+                  22,
+                  26
+                ]
+              }
+            ],
+            "span": [
+              17,
+              27
+            ]
+          }
+        ],
+        "span": [
+          17,
+          33
+        ]
+      },
+      "span": [
+        14,
+        34
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        34,
+        35
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "escape",
+        "args": [
+          {
+            "type": "Var",
+            "name": "html",
+            "span": [
+              45,
+              49
+            ]
+          }
+        ],
+        "span": [
+          38,
+          50
+        ]
+      },
+      "span": [
+        35,
+        51
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        51,
+        52
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "json",
+        "args": [
+          {
+            "type": "List",
+            "items": [
+              {
+                "type": "Spread",
+                "expr": {
+                  "type": "Var",
+                  "name": "m",
+                  "span": [
+                    12,
+                    13
+                  ]
+                },
+                "span": [
+                  9,
+                  13
+                ]
+              }
+            ],
+            "span": [
+              8,
+              14
+            ]
+          }
+        ],
+        "span": [
+          3,
+          15
+        ]
+      },
+      "span": [
+        0,
+        16
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        16,
+        17
+      ]
+    }
+  ]
+}

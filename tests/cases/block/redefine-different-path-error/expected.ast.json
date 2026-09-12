@@ -1,0 +1,26 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Block",
+      "id": "head",
+      "path": "a.tpl",
+      "scope": [],
+      "span": [
+        0,
+        14
+      ]
+    },
+    {
+      "type": "Block",
+      "id": "head",
+      "path": "b.tpl",
+      "scope": [],
+      "span": [
+        15,
+        29
+      ]
+    }
+  ]
+}

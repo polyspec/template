@@ -1,0 +1,24 @@
+{
+    "name": "polyspec/template-php-ext",
+    "description": "Tests of the PHP extension that renders templates with the native implementation",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Polyspec\\Template\\Native\\Tests\\": "tests/"
+        }
+    },
+    "bin": ["bin/template-ext.php"],
+    "scripts": {
+        "test": "./run-tests.sh"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

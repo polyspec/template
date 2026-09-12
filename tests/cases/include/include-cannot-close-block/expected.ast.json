@@ -1,0 +1,41 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Literal",
+            "kind": "bool",
+            "value": true,
+            "span": [
+              3,
+              7
+            ]
+          },
+          "body": [
+            {
+              "type": "Include",
+              "path": "close.tpl",
+              "span": [
+                9,
+                22
+              ]
+            }
+          ],
+          "span": [
+            0,
+            8
+          ]
+        }
+      ],
+      "else": null,
+      "span": [
+        0,
+        26
+      ]
+    }
+  ]
+}

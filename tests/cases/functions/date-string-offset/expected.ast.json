@@ -1,0 +1,264 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2026-09-11T00:00:00Z",
+            "span": [
+              8,
+              30
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d H:i",
+            "span": [
+              32,
+              43
+            ]
+          }
+        ],
+        "span": [
+          3,
+          44
+        ]
+      },
+      "span": [
+        0,
+        45
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        45,
+        46
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2026-09-11 10:00:00+09:00",
+            "span": [
+              54,
+              81
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "H:i P",
+            "span": [
+              83,
+              90
+            ]
+          }
+        ],
+        "span": [
+          49,
+          91
+        ]
+      },
+      "span": [
+        46,
+        92
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        92,
+        93
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2026-09-10 23:30:00-01:00",
+            "span": [
+              101,
+              128
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d H:i",
+            "span": [
+              130,
+              141
+            ]
+          }
+        ],
+        "span": [
+          96,
+          142
+        ]
+      },
+      "span": [
+        93,
+        143
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        143,
+        144
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2026-09-11",
+            "span": [
+              152,
+              164
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "y D",
+            "span": [
+              166,
+              171
+            ]
+          }
+        ],
+        "span": [
+          147,
+          172
+        ]
+      },
+      "span": [
+        144,
+        173
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        173,
+        174
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1789084800.9,
+            "span": [
+              182,
+              194
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "H:i:s",
+            "span": [
+              196,
+              203
+            ]
+          }
+        ],
+        "span": [
+          177,
+          204
+        ]
+      },
+      "span": [
+        174,
+        205
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        205,
+        206
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2026-09-11 09:00:00",
+            "span": [
+              214,
+              235
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "U",
+            "span": [
+              237,
+              240
+            ]
+          }
+        ],
+        "span": [
+          209,
+          241
+        ]
+      },
+      "span": [
+        206,
+        242
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        242,
+        243
+      ]
+    }
+  ]
+}

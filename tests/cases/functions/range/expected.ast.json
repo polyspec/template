@@ -1,0 +1,347 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "range",
+                "args": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      14,
+                      15
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 4,
+                    "span": [
+                      17,
+                      18
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  19
+                ]
+              }
+            ],
+            "span": [
+              3,
+              20
+            ]
+          }
+        ],
+        "span": [
+          3,
+          26
+        ]
+      },
+      "span": [
+        0,
+        27
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        27,
+        28
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "range",
+                "args": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 0,
+                    "span": [
+                      42,
+                      43
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 10,
+                    "span": [
+                      45,
+                      47
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 5,
+                    "span": [
+                      49,
+                      50
+                    ]
+                  }
+                ],
+                "span": [
+                  36,
+                  51
+                ]
+              }
+            ],
+            "span": [
+              31,
+              52
+            ]
+          }
+        ],
+        "span": [
+          31,
+          58
+        ]
+      },
+      "span": [
+        28,
+        59
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        59,
+        60
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "range",
+                "args": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 3,
+                    "span": [
+                      74,
+                      75
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      77,
+                      78
+                    ]
+                  },
+                  {
+                    "type": "Unary",
+                    "op": "-",
+                    "operand": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 1,
+                      "span": [
+                        81,
+                        82
+                      ]
+                    },
+                    "span": [
+                      80,
+                      82
+                    ]
+                  }
+                ],
+                "span": [
+                  68,
+                  83
+                ]
+              }
+            ],
+            "span": [
+              63,
+              84
+            ]
+          }
+        ],
+        "span": [
+          63,
+          90
+        ]
+      },
+      "span": [
+        60,
+        91
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        91,
+        92
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "range",
+                "args": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      106,
+                      107
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 0,
+                    "span": [
+                      109,
+                      110
+                    ]
+                  }
+                ],
+                "span": [
+                  100,
+                  111
+                ]
+              }
+            ],
+            "span": [
+              95,
+              112
+            ]
+          }
+        ],
+        "span": [
+          95,
+          118
+        ]
+      },
+      "span": [
+        92,
+        119
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        119,
+        120
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "range",
+                "args": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      134,
+                      135
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      137,
+                      138
+                    ]
+                  }
+                ],
+                "span": [
+                  128,
+                  139
+                ]
+              }
+            ],
+            "span": [
+              123,
+              140
+            ]
+          }
+        ],
+        "span": [
+          123,
+          146
+        ]
+      },
+      "span": [
+        120,
+        147
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        147,
+        148
+      ]
+    }
+  ]
+}

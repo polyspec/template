@@ -1,0 +1,72 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "x\n",
+      "span": [
+        0,
+        2
+      ]
+    },
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Binary",
+            "op": "&&",
+            "left": {
+              "type": "Var",
+              "name": "a",
+              "span": [
+                5,
+                6
+              ]
+            },
+            "right": {
+              "type": "Var",
+              "name": "b",
+              "span": [
+                13,
+                14
+              ]
+            },
+            "span": [
+              5,
+              14
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "yes\n",
+              "span": [
+                16,
+                20
+              ]
+            }
+          ],
+          "span": [
+            2,
+            15
+          ]
+        }
+      ],
+      "else": null,
+      "span": [
+        2,
+        23
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "y\n",
+      "span": [
+        24,
+        26
+      ]
+    }
+  ]
+}

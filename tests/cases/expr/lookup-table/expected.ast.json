@@ -1,0 +1,527 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "m",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "key": "k",
+        "span": [
+          3,
+          6
+        ]
+      },
+      "span": [
+        0,
+        7
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        7,
+        8
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "m",
+          "span": [
+            11,
+            12
+          ]
+        },
+        "key": "zz",
+        "span": [
+          11,
+          15
+        ]
+      },
+      "span": [
+        8,
+        16
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        16,
+        17
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "m",
+          "span": [
+            20,
+            21
+          ]
+        },
+        "key": "2",
+        "span": [
+          20,
+          23
+        ]
+      },
+      "span": [
+        17,
+        24
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        24,
+        25
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "m",
+          "span": [
+            28,
+            29
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2,
+          "span": [
+            30,
+            31
+          ]
+        },
+        "span": [
+          28,
+          32
+        ]
+      },
+      "span": [
+        25,
+        33
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        33,
+        34
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "l",
+          "span": [
+            37,
+            38
+          ]
+        },
+        "key": "1",
+        "span": [
+          37,
+          40
+        ]
+      },
+      "span": [
+        34,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        41,
+        42
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "l",
+          "span": [
+            45,
+            46
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "1",
+          "span": [
+            47,
+            50
+          ]
+        },
+        "span": [
+          45,
+          51
+        ]
+      },
+      "span": [
+        42,
+        52
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        52,
+        53
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "l",
+          "span": [
+            56,
+            57
+          ]
+        },
+        "key": "5",
+        "span": [
+          56,
+          59
+        ]
+      },
+      "span": [
+        53,
+        60
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        60,
+        61
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "l",
+          "span": [
+            64,
+            65
+          ]
+        },
+        "index": {
+          "type": "Unary",
+          "op": "-",
+          "operand": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              67,
+              68
+            ]
+          },
+          "span": [
+            66,
+            68
+          ]
+        },
+        "span": [
+          64,
+          69
+        ]
+      },
+      "span": [
+        61,
+        70
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        70,
+        71
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "l",
+          "span": [
+            74,
+            75
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1.5,
+          "span": [
+            76,
+            79
+          ]
+        },
+        "span": [
+          74,
+          80
+        ]
+      },
+      "span": [
+        71,
+        81
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        81,
+        82
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "n",
+          "span": [
+            85,
+            86
+          ]
+        },
+        "key": "x",
+        "span": [
+          85,
+          88
+        ]
+      },
+      "span": [
+        82,
+        89
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        89,
+        90
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "str",
+          "span": [
+            93,
+            96
+          ]
+        },
+        "key": "x",
+        "span": [
+          93,
+          98
+        ]
+      },
+      "span": [
+        90,
+        99
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        99,
+        100
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            103,
+            104
+          ]
+        },
+        "key": "x",
+        "span": [
+          103,
+          106
+        ]
+      },
+      "span": [
+        100,
+        107
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        107,
+        108
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "num",
+          "span": [
+            111,
+            114
+          ]
+        },
+        "key": "x",
+        "span": [
+          111,
+          116
+        ]
+      },
+      "span": [
+        108,
+        117
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        117,
+        118
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Member",
+          "object": {
+            "type": "Var",
+            "name": "m",
+            "span": [
+              121,
+              122
+            ]
+          },
+          "key": "k",
+          "span": [
+            121,
+            124
+          ]
+        },
+        "key": "deep",
+        "span": [
+          121,
+          129
+        ]
+      },
+      "span": [
+        118,
+        130
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        130,
+        131
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "l",
+          "span": [
+            134,
+            135
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "01",
+          "span": [
+            136,
+            140
+          ]
+        },
+        "span": [
+          134,
+          141
+        ]
+      },
+      "span": [
+        131,
+        142
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        142,
+        143
+      ]
+    }
+  ]
+}

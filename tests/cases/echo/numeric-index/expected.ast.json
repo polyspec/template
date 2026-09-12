@@ -1,0 +1,107 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "items",
+          "span": [
+            3,
+            8
+          ]
+        },
+        "key": "1",
+        "span": [
+          3,
+          10
+        ]
+      },
+      "span": [
+        0,
+        11
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        11,
+        12
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "items",
+          "span": [
+            15,
+            20
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "1",
+          "span": [
+            21,
+            24
+          ]
+        },
+        "span": [
+          15,
+          25
+        ]
+      },
+      "span": [
+        12,
+        26
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        26,
+        27
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "m",
+          "span": [
+            30,
+            31
+          ]
+        },
+        "key": "2",
+        "span": [
+          30,
+          33
+        ]
+      },
+      "span": [
+        27,
+        34
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        34,
+        35
+      ]
+    }
+  ]
+}

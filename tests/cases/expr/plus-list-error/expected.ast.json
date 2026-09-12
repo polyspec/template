@@ -1,0 +1,45 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "items",
+          "span": [
+            7,
+            12
+          ]
+        },
+        "span": [
+          3,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        13,
+        14
+      ]
+    }
+  ]
+}

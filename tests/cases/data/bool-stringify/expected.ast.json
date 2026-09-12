@@ -1,0 +1,132 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "t",
+        "span": [
+          3,
+          4
+        ]
+      },
+      "span": [
+        0,
+        5
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        5,
+        6
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "f",
+        "span": [
+          9,
+          10
+        ]
+      },
+      "span": [
+        6,
+        11
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        11,
+        12
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Var",
+          "name": "t",
+          "span": [
+            15,
+            16
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1,
+          "span": [
+            19,
+            20
+          ]
+        },
+        "span": [
+          15,
+          20
+        ]
+      },
+      "span": [
+        12,
+        21
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        21,
+        22
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Var",
+          "name": "f",
+          "span": [
+            25,
+            26
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "x",
+          "span": [
+            29,
+            32
+          ]
+        },
+        "span": [
+          25,
+          32
+        ]
+      },
+      "span": [
+        22,
+        33
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        33,
+        34
+      ]
+    }
+  ]
+}

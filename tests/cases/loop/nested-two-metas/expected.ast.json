@@ -1,0 +1,115 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "outer",
+      "iter": {
+        "type": "Var",
+        "name": "rows",
+        "span": [
+          11,
+          15
+        ]
+      },
+      "body": [
+        {
+          "type": "For",
+          "name": "inner",
+          "iter": {
+            "type": "Var",
+            "name": "outer",
+            "span": [
+              28,
+              33
+            ]
+          },
+          "body": [
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "LoopMeta",
+                "loop": "outer",
+                "field": "index_",
+                "span": [
+                  38,
+                  50
+                ]
+              },
+              "span": [
+                35,
+                51
+              ]
+            },
+            {
+              "type": "Text",
+              "value": ".",
+              "span": [
+                51,
+                52
+              ]
+            },
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "LoopMeta",
+                "loop": "inner",
+                "field": "index_",
+                "span": [
+                  55,
+                  67
+                ]
+              },
+              "span": [
+                52,
+                68
+              ]
+            },
+            {
+              "type": "Text",
+              "value": "=",
+              "span": [
+                68,
+                69
+              ]
+            },
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "Var",
+                "name": "inner",
+                "span": [
+                  72,
+                  77
+                ]
+              },
+              "span": [
+                69,
+                78
+              ]
+            },
+            {
+              "type": "Text",
+              "value": "\n",
+              "span": [
+                78,
+                79
+              ]
+            }
+          ],
+          "empty": null,
+          "span": [
+            17,
+            82
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        86
+      ]
+    }
+  ]
+}

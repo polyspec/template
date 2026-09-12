@@ -1,0 +1,22 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Include",
+      "path": "parts/a b.tpl",
+      "span": [
+        0,
+        19
+      ]
+    },
+    {
+      "type": "Include",
+      "path": "notes",
+      "span": [
+        20,
+        31
+      ]
+    }
+  ]
+}

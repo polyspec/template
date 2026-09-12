@@ -1,0 +1,19 @@
+[package]
+name = "bench-rust"
+version = "0.0.1"
+edition = "2024"
+description = "Render throughput measurement for the Rust implementation"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "bench-rust"
+path = "src/main.rs"
+
+[dependencies]
+polyspec-template = { path = "../../../../packages/template-rust" }
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+sha2 = "0.10"
+
+[profile.release]
+debug = false

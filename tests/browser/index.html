@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Browser rendering test</title>
+</head>
+<body>
+<pre id="output"></pre>
+<script type="module">
+import { Engine, MapLoader, parseJson } from '/packages/template-ts/dist/index.mjs';
+
+// The test page reads the case list injected by the test, renders every case with a map loader
+// and writes one JSON result per case into #output.
+window.renderCases = async (cases) => {
+  const results = [];
+  for (const item of cases) {
+    try {
+      const engine = new Engine({ loader: new MapLoader(item.templates), ...(item.delimiters ? { delimiters: item.delimiters } : {}) });
+      const options = {};
+      if (item.define) options.define = item.define;
+      if (item.env) options.env = item.env;
+      const html = engine.render('input.tpl', parseJson(item.data), options);
+      results.push({ id: item.id, html });
+    } catch (error) {
+      if (error.code && error.template === undefined) {
+        results.push({ id: item.id, error: { code: error.code, template: 'input.tpl', line: 0, col: 0 } });
+      } else {
+        results.push({ id: item.id, error: error.code ? { code: error.code, template: error.template, line: error.line, col: error.col } : String(error) });
+      }
+    }
+  }
+  document.getElementById('output').textContent = JSON.stringify(results);
+  return results;
+};
+</script>
+</body>
+</html>

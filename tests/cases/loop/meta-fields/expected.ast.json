@@ -1,0 +1,169 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "x",
+      "iter": {
+        "type": "Var",
+        "name": "xs",
+        "span": [
+          7,
+          9
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "x",
+            "field": "index_",
+            "span": [
+              14,
+              22
+            ]
+          },
+          "span": [
+            11,
+            23
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "/",
+          "span": [
+            23,
+            24
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "x",
+            "field": "size_",
+            "span": [
+              27,
+              34
+            ]
+          },
+          "span": [
+            24,
+            35
+          ]
+        },
+        {
+          "type": "Text",
+          "value": " ",
+          "span": [
+            35,
+            36
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "x",
+            "field": "key_",
+            "span": [
+              39,
+              45
+            ]
+          },
+          "span": [
+            36,
+            46
+          ]
+        },
+        {
+          "type": "Text",
+          "value": " ",
+          "span": [
+            46,
+            47
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "x",
+            "field": "value_",
+            "span": [
+              50,
+              58
+            ]
+          },
+          "span": [
+            47,
+            59
+          ]
+        },
+        {
+          "type": "Text",
+          "value": " ",
+          "span": [
+            59,
+            60
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "x",
+            "field": "first_",
+            "span": [
+              63,
+              71
+            ]
+          },
+          "span": [
+            60,
+            72
+          ]
+        },
+        {
+          "type": "Text",
+          "value": " ",
+          "span": [
+            72,
+            73
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "x",
+            "field": "last_",
+            "span": [
+              76,
+              83
+            ]
+          },
+          "span": [
+            73,
+            84
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "\n",
+          "span": [
+            84,
+            85
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        88
+      ]
+    }
+  ]
+}

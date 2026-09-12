@@ -1,0 +1,236 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            8,
+            9
+          ]
+        },
+        "span": [
+          3,
+          9
+        ]
+      },
+      "span": [
+        0,
+        10
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        10,
+        11
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "||",
+        "left": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            14,
+            15
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            19,
+            20
+          ]
+        },
+        "span": [
+          14,
+          20
+        ]
+      },
+      "span": [
+        11,
+        21
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        21,
+        22
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "||",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 0,
+          "span": [
+            25,
+            26
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "",
+          "span": [
+            30,
+            32
+          ]
+        },
+        "span": [
+          25,
+          32
+        ]
+      },
+      "span": [
+        22,
+        33
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        33,
+        34
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Unary",
+        "op": "!",
+        "operand": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            38,
+            39
+          ]
+        },
+        "span": [
+          37,
+          39
+        ]
+      },
+      "span": [
+        34,
+        40
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        40,
+        41
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "x",
+          "span": [
+            44,
+            47
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2,
+          "span": [
+            51,
+            52
+          ]
+        },
+        "span": [
+          44,
+          52
+        ]
+      },
+      "span": [
+        41,
+        53
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        53,
+        54
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Var",
+          "name": "missing",
+          "span": [
+            57,
+            64
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            68,
+            69
+          ]
+        },
+        "span": [
+          57,
+          69
+        ]
+      },
+      "span": [
+        54,
+        70
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        70,
+        71
+      ]
+    }
+  ]
+}

@@ -1,0 +1,429 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "s",
+          "span": [
+            8,
+            9
+          ]
+        },
+        "span": [
+          3,
+          9
+        ]
+      },
+      "span": [
+        0,
+        10
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        10,
+        11
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Var",
+          "name": "s",
+          "span": [
+            14,
+            15
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 3,
+          "span": [
+            19,
+            20
+          ]
+        },
+        "span": [
+          14,
+          20
+        ]
+      },
+      "span": [
+        11,
+        21
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        21,
+        22
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Literal",
+          "kind": "null",
+          "value": null,
+          "span": [
+            25,
+            29
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "",
+          "span": [
+            33,
+            35
+          ]
+        },
+        "span": [
+          25,
+          35
+        ]
+      },
+      "span": [
+        22,
+        36
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        36,
+        37
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "List",
+          "items": [
+            {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                41,
+                42
+              ]
+            }
+          ],
+          "span": [
+            40,
+            43
+          ]
+        },
+        "right": {
+          "type": "List",
+          "items": [
+            {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                48,
+                49
+              ]
+            }
+          ],
+          "span": [
+            47,
+            50
+          ]
+        },
+        "span": [
+          40,
+          50
+        ]
+      },
+      "span": [
+        37,
+        51
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        51,
+        52
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Map",
+          "entries": [
+            {
+              "key": {
+                "type": "Literal",
+                "kind": "string",
+                "value": "a",
+                "span": [
+                  56,
+                  59
+                ]
+              },
+              "value": {
+                "type": "Literal",
+                "kind": "number",
+                "value": 1,
+                "span": [
+                  63,
+                  64
+                ]
+              }
+            },
+            {
+              "key": {
+                "type": "Literal",
+                "kind": "string",
+                "value": "b",
+                "span": [
+                  66,
+                  69
+                ]
+              },
+              "value": {
+                "type": "Literal",
+                "kind": "number",
+                "value": 2,
+                "span": [
+                  73,
+                  74
+                ]
+              }
+            }
+          ],
+          "span": [
+            55,
+            75
+          ]
+        },
+        "right": {
+          "type": "Map",
+          "entries": [
+            {
+              "key": {
+                "type": "Literal",
+                "kind": "string",
+                "value": "b",
+                "span": [
+                  80,
+                  83
+                ]
+              },
+              "value": {
+                "type": "Literal",
+                "kind": "number",
+                "value": 2,
+                "span": [
+                  87,
+                  88
+                ]
+              }
+            },
+            {
+              "key": {
+                "type": "Literal",
+                "kind": "string",
+                "value": "a",
+                "span": [
+                  90,
+                  93
+                ]
+              },
+              "value": {
+                "type": "Literal",
+                "kind": "number",
+                "value": 1,
+                "span": [
+                  97,
+                  98
+                ]
+              }
+            }
+          ],
+          "span": [
+            79,
+            99
+          ]
+        },
+        "span": [
+          55,
+          99
+        ]
+      },
+      "span": [
+        52,
+        100
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        100,
+        101
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "!=",
+        "left": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "a",
+          "span": [
+            104,
+            107
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "b",
+          "span": [
+            111,
+            114
+          ]
+        },
+        "span": [
+          104,
+          114
+        ]
+      },
+      "span": [
+        101,
+        115
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        115,
+        116
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Literal",
+          "kind": "null",
+          "value": null,
+          "span": [
+            119,
+            123
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "null",
+          "value": null,
+          "span": [
+            127,
+            131
+          ]
+        },
+        "span": [
+          119,
+          131
+        ]
+      },
+      "span": [
+        116,
+        132
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        132,
+        133
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1,
+          "span": [
+            136,
+            137
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "bool",
+          "value": true,
+          "span": [
+            141,
+            145
+          ]
+        },
+        "span": [
+          136,
+          145
+        ]
+      },
+      "span": [
+        133,
+        146
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        146,
+        147
+      ]
+    }
+  ]
+}

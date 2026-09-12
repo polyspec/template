@@ -1,0 +1,125 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "upper",
+        "args": [
+          {
+            "type": "Call",
+            "name": "raw",
+            "args": [
+              {
+                "type": "Var",
+                "name": "x",
+                "span": [
+                  7,
+                  8
+                ]
+              }
+            ],
+            "span": [
+              3,
+              9
+            ]
+          }
+        ],
+        "span": [
+          3,
+          17
+        ]
+      },
+      "span": [
+        0,
+        18
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        18,
+        19
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "upper",
+        "args": [
+          {
+            "type": "Call",
+            "name": "raw",
+            "args": [
+              {
+                "type": "Var",
+                "name": "x",
+                "span": [
+                  32,
+                  33
+                ]
+              }
+            ],
+            "span": [
+              28,
+              34
+            ]
+          }
+        ],
+        "span": [
+          22,
+          35
+        ]
+      },
+      "span": [
+        19,
+        36
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        36,
+        37
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Var",
+            "name": "x",
+            "span": [
+              44,
+              45
+            ]
+          }
+        ],
+        "span": [
+          40,
+          46
+        ]
+      },
+      "span": [
+        37,
+        47
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        47,
+        48
+      ]
+    }
+  ]
+}

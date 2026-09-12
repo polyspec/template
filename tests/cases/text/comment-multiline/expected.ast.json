@@ -1,0 +1,14 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "text\nafter\n",
+      "span": [
+        0,
+        24
+      ]
+    }
+  ]
+}

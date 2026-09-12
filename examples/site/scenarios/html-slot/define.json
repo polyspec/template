@@ -1,0 +1,6 @@
+{
+  "layout": "layout.tpl",
+  "content": {
+    "html": "<p class=\"server\">pre-rendered &amp; safe</p>\n"
+  }
+}

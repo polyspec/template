@@ -1,0 +1,6 @@
+flowchart LR
+  Files["scenario directory"] --> Adapter["language adapter"]
+  Adapter --> Scenario["Scenario"]
+  Scenario --> Request["RenderRequest"]
+  Request --> Engine["Engine.render"]
+  Engine --> Output["UTF-8 output"]

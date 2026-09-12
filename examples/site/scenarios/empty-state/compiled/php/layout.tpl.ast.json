@@ -1,0 +1,52 @@
+{
+  "type": "Template",
+  "name": "layout.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<main class=\"empty-page\">\n",
+      "span": [
+        0,
+        26
+      ]
+    },
+    {
+      "type": "IfBlock",
+      "id": "content",
+      "body": [
+        {
+          "type": "Block",
+          "id": "content",
+          "path": null,
+          "scope": [],
+          "span": [
+            39,
+            50
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "<p class=\"empty\">No content definition.</p>\n",
+          "span": [
+            55,
+            99
+          ]
+        }
+      ],
+      "span": [
+        26,
+        102
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</main>\n",
+      "span": [
+        103,
+        111
+      ]
+    }
+  ]
+}

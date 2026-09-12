@@ -1,0 +1,78 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "IfBlock",
+      "id": "a",
+      "body": [
+        {
+          "type": "Text",
+          "value": "yes",
+          "span": [
+            6,
+            9
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "no",
+          "span": [
+            12,
+            14
+          ]
+        }
+      ],
+      "span": [
+        0,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        17,
+        18
+      ]
+    },
+    {
+      "type": "IfBlock",
+      "id": "b",
+      "body": [
+        {
+          "type": "Text",
+          "value": "yes",
+          "span": [
+            24,
+            27
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "no",
+          "span": [
+            30,
+            32
+          ]
+        }
+      ],
+      "span": [
+        18,
+        35
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        35,
+        36
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+name: Documentation site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'examples/site/**'
+      - 'packages/**'
+      - 'tools/showcase/**'
+      - 'scripts/check-showcase-html.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/docs-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/configure-pages@v5
+      - run: npm ci
+      - run: make docs-check
+      - run: make showcase-check
+      - run: make docs-static-check
+        env:
+          VITEPRESS_BASE: /${{ github.event.repository.name }}/
+      - run: |
+          npm run build -w @polyspec/template
+          mkdir -p docs/.vitepress/dist/examples
+          cp -R examples/site docs/.vitepress/dist/examples/site
+          test -s docs/.vitepress/dist/examples/site/index.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/.vitepress/dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

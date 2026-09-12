@@ -1,0 +1,22 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p>\n",
+      "span": [
+        0,
+        4
+      ]
+    },
+    {
+      "type": "Include",
+      "path": "missing.tpl",
+      "span": [
+        4,
+        19
+      ]
+    }
+  ]
+}

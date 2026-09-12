@@ -1,0 +1,112 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "keys",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "m",
+                    "span": [
+                      13,
+                      14
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  15
+                ]
+              }
+            ],
+            "span": [
+              3,
+              16
+            ]
+          }
+        ],
+        "span": [
+          3,
+          22
+        ]
+      },
+      "span": [
+        0,
+        23
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        23,
+        24
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "keys",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      37,
+                      38
+                    ]
+                  }
+                ],
+                "span": [
+                  32,
+                  39
+                ]
+              }
+            ],
+            "span": [
+              27,
+              40
+            ]
+          }
+        ],
+        "span": [
+          27,
+          46
+        ]
+      },
+      "span": [
+        24,
+        47
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        47,
+        48
+      ]
+    }
+  ]
+}

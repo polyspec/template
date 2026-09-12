@@ -1,0 +1,32 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<main>",
+      "span": [
+        0,
+        6
+      ]
+    },
+    {
+      "type": "Block",
+      "id": "content",
+      "path": null,
+      "scope": [],
+      "span": [
+        6,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</main>\n",
+      "span": [
+        17,
+        25
+      ]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "var page = ",
+      "span": [
+        0,
+        11
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "page",
+                "span": [
+                  21,
+                  25
+                ]
+              }
+            ],
+            "span": [
+              16,
+              26
+            ]
+          }
+        ],
+        "span": [
+          16,
+          32
+        ]
+      },
+      "span": [
+        11,
+        35
+      ]
+    },
+    {
+      "type": "Text",
+      "value": ";\n",
+      "span": [
+        35,
+        37
+      ]
+    }
+  ]
+}

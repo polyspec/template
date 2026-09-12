@@ -1,0 +1,29 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Block",
+      "id": "h",
+      "path": null,
+      "scope": [
+        {
+          "name": "item",
+          "expr": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              10,
+              11
+            ]
+          }
+        }
+      ],
+      "span": [
+        0,
+        12
+      ]
+    }
+  ]
+}

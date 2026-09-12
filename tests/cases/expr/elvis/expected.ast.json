@@ -1,0 +1,169 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "t",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "then": null,
+        "else": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "d",
+          "span": [
+            8,
+            11
+          ]
+        },
+        "span": [
+          3,
+          11
+        ]
+      },
+      "span": [
+        0,
+        12
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        12,
+        13
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "",
+          "span": [
+            16,
+            18
+          ]
+        },
+        "then": null,
+        "else": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "d",
+          "span": [
+            22,
+            25
+          ]
+        },
+        "span": [
+          16,
+          25
+        ]
+      },
+      "span": [
+        13,
+        26
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        26,
+        27
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 0,
+          "span": [
+            30,
+            31
+          ]
+        },
+        "then": null,
+        "else": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "d",
+          "span": [
+            35,
+            38
+          ]
+        },
+        "span": [
+          30,
+          38
+        ]
+      },
+      "span": [
+        27,
+        39
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        39,
+        40
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "0",
+          "span": [
+            43,
+            46
+          ]
+        },
+        "then": null,
+        "else": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "d",
+          "span": [
+            50,
+            53
+          ]
+        },
+        "span": [
+          43,
+          53
+        ]
+      },
+      "span": [
+        40,
+        54
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        54,
+        55
+      ]
+    }
+  ]
+}

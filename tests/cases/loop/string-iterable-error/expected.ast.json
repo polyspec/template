@@ -1,0 +1,48 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "c",
+      "iter": {
+        "type": "Var",
+        "name": "s",
+        "span": [
+          7,
+          8
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "c",
+            "span": [
+              12,
+              13
+            ]
+          },
+          "span": [
+            9,
+            14
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        17,
+        18
+      ]
+    }
+  ]
+}

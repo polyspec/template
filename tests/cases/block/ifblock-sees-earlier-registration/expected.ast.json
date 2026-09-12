@@ -1,0 +1,52 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Block",
+      "id": "head",
+      "path": "a.tpl",
+      "scope": [],
+      "span": [
+        0,
+        14
+      ]
+    },
+    {
+      "type": "IfBlock",
+      "id": "head",
+      "body": [
+        {
+          "type": "Text",
+          "value": "yes",
+          "span": [
+            24,
+            27
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "no",
+          "span": [
+            30,
+            32
+          ]
+        }
+      ],
+      "span": [
+        15,
+        35
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        35,
+        36
+      ]
+    }
+  ]
+}

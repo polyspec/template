@@ -1,0 +1,10 @@
+{
+  "title": "Pre-rendered HTML slot",
+  "description": "The layout is selected by define while a server-produced HTML fragment is passed as a define entry.",
+  "focus": [
+    "layout target",
+    "assign data",
+    "HTML define"
+  ],
+  "target": "layout"
+}

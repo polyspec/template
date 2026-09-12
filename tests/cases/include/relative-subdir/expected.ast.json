@@ -1,0 +1,22 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Include",
+      "path": "parts/head.tpl",
+      "span": [
+        0,
+        18
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "<main></main>\n",
+      "span": [
+        19,
+        33
+      ]
+    }
+  ]
+}

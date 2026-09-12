@@ -1,0 +1,2 @@
+{= upper(s)}
+{= s | upper}

@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant Caller
+    participant Adapter
+    participant Engine
+    Caller->>Adapter: loadScenario()
+    Adapter-->>Caller: Scenario
+    Caller->>Adapter: buildRequest(Scenario)
+    Adapter-->>Caller: RenderRequest
+    Caller->>Adapter: renderTwice(RenderRequest)
+    Adapter->>Engine: render(target, assign, define, env)
+    Engine-->>Adapter: first UTF-8 bytes
+    Adapter->>Engine: render(target, assign, define, env)
+    Engine-->>Adapter: second UTF-8 bytes
+    Adapter-->>Caller: RepeatResult

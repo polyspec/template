@@ -1,0 +1,30 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "LoopMeta",
+        "loop": "row",
+        "field": "index_",
+        "span": [
+          3,
+          13
+        ]
+      },
+      "span": [
+        0,
+        14
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        14,
+        15
+      ]
+    }
+  ]
+}

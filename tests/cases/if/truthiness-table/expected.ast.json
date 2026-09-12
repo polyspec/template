@@ -1,0 +1,100 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "v",
+      "iter": {
+        "type": "Var",
+        "name": "values",
+        "span": [
+          7,
+          13
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "v",
+            "field": "index_",
+            "span": [
+              18,
+              26
+            ]
+          },
+          "span": [
+            15,
+            27
+          ]
+        },
+        {
+          "type": "Text",
+          "value": ":",
+          "span": [
+            27,
+            28
+          ]
+        },
+        {
+          "type": "If",
+          "branches": [
+            {
+              "test": {
+                "type": "Var",
+                "name": "v",
+                "span": [
+                  31,
+                  32
+                ]
+              },
+              "body": [
+                {
+                  "type": "Text",
+                  "value": "T",
+                  "span": [
+                    33,
+                    34
+                  ]
+                }
+              ],
+              "span": [
+                28,
+                33
+              ]
+            }
+          ],
+          "else": [
+            {
+              "type": "Text",
+              "value": "F",
+              "span": [
+                37,
+                38
+              ]
+            }
+          ],
+          "span": [
+            28,
+            41
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "\n",
+          "span": [
+            41,
+            42
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        45
+      ]
+    }
+  ]
+}

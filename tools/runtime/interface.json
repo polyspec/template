@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "PreparedRender",
+  "purpose": "Reuse bound request state and the parsed target across renders.",
+  "state": {
+    "engine": "owns loader, parser, function registry, limits and template cache",
+    "prepared": "owns bound assign, define registry, environment and target reference",
+    "render": "creates fresh scope, output and execution state for every call"
+  },
+  "operations": [
+    {
+      "name": "prepare",
+      "owner": "Engine",
+      "parameters": ["target", "assign", "options"],
+      "returns": "PreparedRender",
+      "errors": ["template, bind and define errors"],
+      "mutates": "engine template cache only"
+    },
+    {
+      "name": "render",
+      "owner": "PreparedRender",
+      "parameters": [],
+      "returns": "string",
+      "errors": ["runtime and limit errors"],
+      "mutates": "per-render state only"
+    }
+  ],
+  "languages": {
+    "rust": {"engine": "Engine::prepare", "prepared": "PreparedRender::render"},
+    "go": {"engine": "Engine.Prepare", "prepared": "PreparedRender.Render"},
+    "typescript": {"engine": "EngineCore.prepare", "prepared": "PreparedRender.render"},
+    "php": {"engine": "Engine::prepare", "prepared": "PreparedRender::render"}
+  }
+}

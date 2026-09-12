@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "languages": [
+    "ts",
+    "go",
+    "rust",
+    "php"
+  ],
+  "proof": [
+    "Every language rendered the same UTF-8 bytes as the TypeScript API.",
+    "Every language rendered each scenario twice with the same output.",
+    "The TypeScript API rendered each scenario twice with the same output.",
+    "Every scenario renders the layout definition with shared mock assign data; the page composition example keeps layout, contents, loop and conditional behavior visible in small source templates."
+  ],
+  "scenarios": [
+    {
+      "id": "empty-state",
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "bytes": 78,
+      "sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+      "api": {
+        "bytes": 78,
+        "sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+        "repeatSha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+        "repeatEqual": true
+      },
+      "renders": {
+        "ts": {
+          "bytes": 78,
+          "sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatSha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "go": {
+          "bytes": 78,
+          "sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatSha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "rust": {
+          "bytes": 78,
+          "sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatSha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "php": {
+          "bytes": 78,
+          "sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatSha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "id": "html-slot",
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "bytes": 111,
+      "sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+      "api": {
+        "bytes": 111,
+        "sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+        "repeatSha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+        "repeatEqual": true
+      },
+      "renders": {
+        "ts": {
+          "bytes": 111,
+          "sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatSha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "go": {
+          "bytes": 111,
+          "sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatSha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "rust": {
+          "bytes": 111,
+          "sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatSha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "php": {
+          "bytes": 111,
+          "sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatSha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "id": "scope-precedence",
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "bytes": 177,
+      "sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+      "api": {
+        "bytes": 177,
+        "sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+        "repeatSha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+        "repeatEqual": true
+      },
+      "renders": {
+        "ts": {
+          "bytes": 177,
+          "sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatSha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "go": {
+          "bytes": 177,
+          "sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatSha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "rust": {
+          "bytes": 177,
+          "sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatSha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "php": {
+          "bytes": 177,
+          "sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatSha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        }
+      },
+      "status": "pass"
+    }
+  ],
+  "status": "pass"
+}

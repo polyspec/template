@@ -1,0 +1,14 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "{ debug: true }\n{}\n${x}\n{a:1}\n{\n  color: red;\n}\n{ x = 1 }\n",
+      "span": [
+        0,
+        58
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1e+21,
+        "span": [
+          3,
+          7
+        ]
+      },
+      "span": [
+        0,
+        8
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        8,
+        9
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 100000000000000000000,
+        "span": [
+          12,
+          16
+        ]
+      },
+      "span": [
+        9,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        17,
+        18
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2e+21,
+          "span": [
+            21,
+            25
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1,
+          "span": [
+            28,
+            29
+          ]
+        },
+        "span": [
+          21,
+          29
+        ]
+      },
+      "span": [
+        18,
+        30
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        30,
+        31
+      ]
+    }
+  ]
+}
