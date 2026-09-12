@@ -8,6 +8,7 @@ on:
       - 'examples/site/**'
       - 'packages/**'
       - 'tools/showcase/**'
+      - 'scripts/check-docs-static.mjs'
       - 'scripts/check-showcase-html.mjs'
       - 'Makefile'
       - 'CHANGELOG.md'
