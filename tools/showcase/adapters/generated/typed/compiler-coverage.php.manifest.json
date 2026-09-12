@@ -6,11 +6,11 @@
   "sourceDigest": "0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
   "contractDigest": "737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea",
-  "compilerDigest": "ea47e1146b44bde41f334bbfb0674680550f60bc8eadd056ef9e9f0f767035fa",
+  "compilerDigest": "36a0804103dc63802c47f7c623ed50630a8a00d99378a0e62d101d36d9a29251",
   "files": {
     "compiler-coverage.php": {
       "path": "compiler-coverage.php",
-      "artifactDigest": "2e7942fe1b7ed7633442f0b7fcaa98f5b9df71c06e3db9786eb097816b06b71d"
+      "artifactDigest": "c40a0f7503e289bb2e8aa060dc470790a11e73b517f720cc70245e6ad026d8f6"
     }
   }
 }

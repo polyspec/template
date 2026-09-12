@@ -9,6 +9,7 @@ use Polyspec\Template\Render\Context;
 use Polyspec\Template\Render\Frame;
 use Polyspec\Template\Render\RuntimeBindings;
 use Polyspec\Template\Render\RuntimeEnvironment;
+use Polyspec\Template\Render\Scope;
 use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\BindError;
 use Polyspec\Template\Value\MapValue;
@@ -46,18 +47,18 @@ function generated_list(array $items): array { $result = []; foreach ($items as 
 function generated_map(array $items): MapValue { $result = new MapValue(); foreach ($items as $item) { if ($item['spread']) { foreach ($item['value']->entries() as $key => $value) $result->set($key, $value); } else $result->set((string) $item['key'], $item['value']); } return $result; }
 function generated_env(mixed $input): array { if ($input === null) $input = []; if (!is_array($input)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env is not an object'); $timezone = $input['timezone'] ?? 'Z'; $now = $input['now'] ?? (float) time(); if (!is_string($timezone)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string'); if (!is_int($now) && !is_float($now)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number'); return ['timezone' => $timezone, 'now' => (float) $now]; }
 
-function render_card_tpl(Assign $assign, Definitions $definitions, Input_card_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData): void {
+function render_card_tpl(Assign $assign, Definitions $definitions, Input_card_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
     $frame = new Frame("card.tpl", [0,30], $rootData);
-    $label = $input->label;
+    $scope->locals->set("label", $input->label);
     $context->at($frame, [0,16]); $context->write("<p class=\"card\">");
-    $context->at($frame, [16,25]); $context->write($runtime->escape($label, $frame, [19,24]));
+    $context->at($frame, [16,25]); $context->write($runtime->escape($scope->lookup($frame, "label"), $frame, [19,24]));
     $context->at($frame, [25,30]); $context->write("</p>\n");
 }
-function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData): void {
+function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
     $frame = new Frame("layout.tpl", [0,27,62,72,96,133,187,264,301,388,459,464,479,559,563,578,582,588,604,651,680,691], $rootData);
 
-    $values = generated_list([['spread' => false, 'value' => 0], ['spread' => true, 'value' => $assign->numbers]]);
-    $merged = generated_map([['spread' => true, 'value' => $assign->lookup], ['spread' => false, 'key' => "z", 'value' => "Z"]]);
+    $scope->locals->set("values", generated_list([['spread' => false, 'value' => 0], ['spread' => true, 'value' => $assign->numbers]]));
+    $scope->locals->set("merged", generated_map([['spread' => true, 'value' => $assign->lookup], ['spread' => false, 'key' => "z", 'value' => "Z"]]));
     $context->at($frame, [62,76]); $context->write("<section>\n<h1>");
     $context->at($frame, [76,90]); $context->write($runtime->escape($assign->page?->title, $frame, [79,89]));
     $context->at($frame, [90,115]); $context->write("</h1>\n<p class=\"escaped\">");
@@ -71,9 +72,9 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
     $context->at($frame, [237,238]); $context->write("|");
     $context->at($frame, [238,259]); $context->write($runtime->escape(($runtime->truthy($assign->empty_map) && $runtime->truthy($assign->flag)), $frame, [241,258]));
     $context->at($frame, [259,267]); $context->write("</p>\n<p>");
-    $context->at($frame, [267,280]); $context->write($runtime->escape($runtime->index($values, 1), $frame, [270,279]));
+    $context->at($frame, [267,280]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, "values"), 1), $frame, [270,279]));
     $context->at($frame, [280,281]); $context->write("|");
-    $context->at($frame, [281,296]); $context->write($runtime->escape($runtime->index($merged, "z"), $frame, [284,295]));
+    $context->at($frame, [281,296]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, "merged"), "z"), $frame, [284,295]));
     $context->at($frame, [296,301]); $context->write("</p>\n");
     if ($runtime->truthy(($runtime->truthy($assign->flag) && $runtime->truthy($runtime->binary("==", $assign->page?->title, "Guide", $frame, [312,333]))))) {
         $context->at($frame, [334,358]); $context->write("<strong>matched</strong>");    } else {
@@ -87,8 +88,10 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
     $context->at($frame, [426,454]); $context->write($runtime->escape($runtime->call("default", ["", "fallback"], $frame, [429,453]), $frame, [429,453]));
     $context->at($frame, [454,464]); $context->write("</p>\n<ul>\n");
     $row_entries = $runtime->entries($assign->rows, $frame, [464,581]);
+    $row_had = $scope->locals->has("row");
+    $row_previous = $scope->locals->get("row");
     foreach ($row_entries as $row_index => [$row_key, $row_value]) {
-        $row = $row_value;
+        $scope->locals->set("row", $row_value);
         $row_size = count($row_entries);
         $row_first = $row_index === 0;
         $row_last = $row_index + 1 === count($row_entries);
@@ -99,19 +102,20 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
             $context->at($frame, [497,498]); $context->write("/");
             $context->at($frame, [498,511]); $context->write($runtime->escape($row_size, $frame, [501,510]));
             $context->at($frame, [511,512]); $context->write(":");
-            $context->at($frame, [512,524]); $context->write($runtime->escape($row?->name, $frame, [515,523]));
+            $context->at($frame, [512,524]); $context->write($runtime->escape($scope->lookup($frame, "row")?->name, $frame, [515,523]));
             $context->at($frame, [524,525]); $context->write(":");
             $context->at($frame, [525,539]); $context->write($runtime->escape($row_first, $frame, [528,538]));
             $context->at($frame, [539,540]); $context->write(":");
             $context->at($frame, [540,553]); $context->write($runtime->escape($row_last, $frame, [543,552]));
             $context->at($frame, [553,559]); $context->write("</li>\n");
     }
+    if ($row_had) $scope->locals->set("row", $row_previous); else $scope->locals->remove("row");
     if (count($row_entries) === 0) {
             $context->at($frame, [563,578]); $context->write("<li>empty</li>\n");
     }
     $context->at($frame, [582,588]); $context->write("</ul>\n");
     $context->enter("partial.tpl", $frame, [588,603]);
-    try { render_partial_tpl($assign, $definitions, new Input_partial_tpl(values: $values), $context, $runtime, $rootData); } finally { $context->leave(); }
+    try { render_partial_tpl($assign, $definitions, new Input_partial_tpl(values: $scope->lookup($frame, "values")), $context, $runtime, $rootData, $scope); } finally { $context->leave(); }
     if ($definitions->content !== null) {
             $context->at($frame, [616,630]); $context->write("<p>defined</p>");
     } else {
@@ -129,21 +133,22 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
             if ($definition->data->has_label) $input->label = $definition->data->label;
         }
         $input->label = $assign->page?->title;
+        $blockScope = new Scope();
         $context->enter("card.tpl", $frame, [651,679]);
-        try { render_card_tpl($assign, $definitions, $input, $context, $runtime, $rootData); } finally { $context->leave(); }
+        try { render_card_tpl($assign, $definitions, $input, $context, $runtime, $rootData, $blockScope); } finally { $context->leave(); }
     }
     $context->at($frame, [680,691]); $context->write("</section>\n");
 }
-function render_partial_tpl(Assign $assign, Definitions $definitions, Input_partial_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData): void {
+function render_partial_tpl(Assign $assign, Definitions $definitions, Input_partial_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
     $frame = new Frame("partial.tpl", [0,38], $rootData);
-    $values = $input->values;
+    $scope->locals->set("values", $input->values);
     $context->at($frame, [0,20]); $context->write("<p class=\"included\">");
-    $context->at($frame, [20,33]); $context->write($runtime->escape($runtime->index($values, 2), $frame, [23,32]));
+    $context->at($frame, [20,33]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, "values"), 2), $frame, [23,32]));
     $context->at($frame, [33,38]); $context->write("</p>\n");
 }
-function render_template(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData): void { switch ($target) {
-        case "layout.tpl": render_layout_tpl($assign, $definitions, new Input_layout_tpl(), $context, $runtime, $rootData); return;
+function render_template(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void { switch ($target) {
+        case "layout.tpl": render_layout_tpl($assign, $definitions, new Input_layout_tpl(), $context, $runtime, $rootData, $scope); return;
         default: throw $context->fail('E_LOAD_NOT_FOUND', null, null, 'template ' . $target . ' does not exist');
 } }
-final class GeneratedExecution implements PreparedExecution { public function __construct(private readonly string $target, private readonly Assign $assign, private readonly Definitions $definitions, private readonly MapValue $rootData, private readonly array $env, private readonly RuntimeEnvironment $services, private readonly ?string $html) {} public function render(): string { $context = new Context($this->services, $this->rootData, $this->env, $this->target); $runtime = new RuntimeBindings($context); $context->enter($this->target, null, null); try { if ($this->html !== null) $context->write($this->html); else render_template($this->target, $this->assign, $this->definitions, $context, $runtime, $this->rootData); return $context->output(); } finally { $context->leave(); } } }
+final class GeneratedExecution implements PreparedExecution { public function __construct(private readonly string $target, private readonly Assign $assign, private readonly Definitions $definitions, private readonly MapValue $rootData, private readonly array $env, private readonly RuntimeEnvironment $services, private readonly ?string $html) {} public function render(): string { $context = new Context($this->services, $this->rootData, $this->env, $this->target); $runtime = new RuntimeBindings($context); $scope = new Scope(); $context->enter($this->target, null, null); try { if ($this->html !== null) $context->write($this->html); else render_template($this->target, $this->assign, $this->definitions, $context, $runtime, $this->rootData, $scope); return $context->output(); } finally { $context->leave(); } } }
 final class GeneratedProgram implements Program { public readonly RuntimeEnvironment $runtime; public function __construct(?RuntimeEnvironment $runtime = null) { $this->runtime = $runtime ?? new RuntimeEnvironment(); } public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender { if (!is_string($target)) throw new InvalidArgumentException('generated target must be a template name'); [$typedAssign, $rootData] = generated_bind_assign($assign); [$definitions, $targets] = generated_bind_definitions($options['define'] ?? []); $resolved = $targets[$target] ?? null; $targetName = $resolved['target'] ?? $target; $html = $resolved['html'] ?? null; return new PreparedRender(new GeneratedExecution($targetName, $typedAssign, $definitions, $rootData, generated_env($options['env'] ?? []), $this->runtime, $html)); } public function render(string|array $target, mixed $assign = [], array $options = []): string { return $this->prepare($target, $assign, $options)->render(); } }
