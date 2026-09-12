@@ -27,6 +27,7 @@
 
 - Passed one mutable render scope through generated Rust templates. Includes now share assignments with their caller, blocks create isolated scopes, loop variables restore the previous binding, and typed template boundaries convert values through the common runtime value model.
 - Passed one mutable render scope through generated PHP templates with the same include sharing, block isolation and loop-binding restoration rules.
+- Added complete generated PHP conformance. All 211 canonical cases now compile or render to their expected diagnostic or exact HTML; source-block registration, nested loop metadata, spread errors and literal dollar signs use the shared runtime rules.
 
 - Separated compilation mode (`ast` or `gen`), compiled-artifact refresh (`dev`, `true` or `false`) and final HTML page-cache TTL (`null` or `0` means permanent) in the four runtimes. Added tests for artifact refresh and page-cache expiration.
 - Verified that AST measurement reparses on every render and generated measurement calls generated host-language source. Both paths must produce the same HTML and SHA-256 before timing is recorded.
