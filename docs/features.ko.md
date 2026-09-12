@@ -4,20 +4,20 @@
 
 | ID | 기능 | 상태 | Client 지원 | 근거 |
 |---|---|---|---|---|
-| spec | Template language specification | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/lexical.ko.md) |
-| ast-schema | Canonical AST schema | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/ast.ko.md) |
-| conformance-suite | Cross-language conformance suite | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/conformance.ko.md) |
-| template-ts | TypeScript runtime | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](spec/compiler.ko.md) |
-| template-browser | Browser ESM runtime | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/browser.ko.md) |
-| template-go | Go runtime | implemented | go: pass<br>php: unsupported<br>rust: unsupported<br>typescript: unsupported | [근거](spec/compiler.ko.md) |
-| template-rust | Rust runtime | implemented | go: unsupported<br>php: unsupported<br>rust: pass<br>typescript: unsupported | [근거](spec/compiler.ko.md) |
-| template-php | PHP runtime | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [근거](spec/compiler.ko.md) |
-| template-php-ext | PHP native extension | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [근거](operations/testing.ko.md) |
-| performance-measurements | Performance measurements | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/benchmark.ko.md) |
-| showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/showcase.ko.md) |
-| generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/compiler.ko.md) |
-| docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/documentation.ko.md) |
-| release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/testing.ko.md) |
-| dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/dependencies.ko.md) |
+| spec | Template language specification | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/lexical) |
+| ast-schema | Canonical AST schema | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/ast) |
+| conformance-suite | Cross-language conformance suite | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/conformance) |
+| template-ts | TypeScript runtime | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](spec/compiler) |
+| template-browser | Browser ESM runtime | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/browser) |
+| template-go | Go runtime | implemented | go: pass<br>php: unsupported<br>rust: unsupported<br>typescript: unsupported | [근거](spec/compiler) |
+| template-rust | Rust runtime | implemented | go: unsupported<br>php: unsupported<br>rust: pass<br>typescript: unsupported | [근거](spec/compiler) |
+| template-php | PHP runtime | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [근거](spec/compiler) |
+| template-php-ext | PHP native extension | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [근거](operations/testing) |
+| performance-measurements | Performance measurements | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/benchmark) |
+| showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/showcase) |
+| generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/compiler) |
+| docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/documentation) |
+| release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/testing) |
+| dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/dependencies) |
 
 `make feature-check`로 모든 계약과 참조 경로를 검사한다. implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.

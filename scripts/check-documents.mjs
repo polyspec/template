@@ -30,7 +30,8 @@ function checkLinks(path, text) {
       continue;
     }
     const local = resolve(root, dirname(path), decodeURIComponent(target));
-    if (!existsSync(local)) errors.push(`${path}: missing link target: ${target}`);
+    const candidates = [local, `${local}.md`, `${local}.ko.md`, join(local, 'index.md')];
+    if (!candidates.some(existsSync)) errors.push(`${path}: missing link target: ${target}`);
   }
 }
 
