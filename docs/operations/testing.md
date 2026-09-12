@@ -27,3 +27,5 @@ Mutation tests are required evidence. They damage an interface operation, an art
 Every specification rule has one machine-checked evidence route. Canonical fixtures directly cover executable language behavior. Rules about schemas, host binding, public runtime structure, compiler artifacts and publication boundaries are listed in `tests/rule-evidence.json` with their verification command and concrete test files. An unknown rule, missing evidence file, duplicate non-fixture assignment or rule with no route fails `make rules-check`.
 
 The short performance run is a correctness regression, not a stable speed score. It creates three fresh samples for every language-mode row, verifies output identity and validates all metric fields without replacing the committed 21-sample report.
+
+Before publication, `make release-check` requires a clean source worktree, creates a detached temporary worktree at `HEAD`, installs the locked JavaScript dependencies and browser, and runs the complete release matrix there. PHP test dependencies are installed by their package targets. The temporary checkout is removed whether the matrix succeeds or fails.
