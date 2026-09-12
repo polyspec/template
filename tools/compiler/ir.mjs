@@ -55,6 +55,10 @@ function resolveTemplate(from, path) {
 
 export function lowerSourceGraph(graph, manifest) {
   if (manifest.schema !== 3) throw new Error('compiler: type manifest schema must be 3');
+  if (manifest.root !== 'Assign' && manifest.root !== 'any') {
+    throw new Error('compiler: type manifest root must be Assign or any');
+  }
+  const dynamicRoot = manifest.root === 'any';
   const records = new Map(Object.entries(manifest.records ?? {}).map(([name, fields]) => [name, new Map(Object.entries(fields).map(([field, type]) => [field, parseType(type)]))]));
   const root = new Map(Object.entries(manifest.fields ?? {}).map(([name, type]) => [name, parseType(type)]));
   const functions = new Map(Object.entries(manifest.functions ?? {}).map(([name, signature]) => {
@@ -88,7 +92,7 @@ export function lowerSourceGraph(graph, manifest) {
       }
       case 'Var': {
         const local = scope.get(node.name);
-        const valueType = local ?? root.get(node.name);
+        const valueType = local ?? root.get(node.name) ?? (dynamicRoot ? parseType('any?') : null);
         if (!valueType) throw new Error(`compiler: variable ${node.name} is missing from the type manifest`);
         return { op: local ? 'local' : 'root', name: node.name, valueType, span: node.span };
       }
@@ -213,7 +217,7 @@ export function lowerSourceGraph(graph, manifest) {
             name,
             valueType,
             scope: blockScope.get(name) ?? null,
-            root: root.has(name) ? lowerExpr({ type: 'Var', name, span: node.span }, scope, loops) : null,
+            root: root.has(name) || dynamicRoot ? lowerExpr({ type: 'Var', name, span: node.span }, scope, loops) : null,
           }));
           return { op: 'block', id: node.id, path, target, definition, inputs, span: node.span };
         }
@@ -232,7 +236,7 @@ export function lowerSourceGraph(graph, manifest) {
   const entry = manifest.entry;
   if (typeof entry !== 'string' || !templates.has(entry)) throw new Error('compiler: type manifest entry must name a source graph template');
   if (templateInputs.get(entry).size !== 0) throw new Error('compiler: entry template cannot require template inputs');
-  return { schema: 1, entry, fields: root, records, functions, definitions, templates };
+  return { schema: 1, entry, dynamicRoot, fields: root, records, functions, definitions, templates };
 }
 
 export { parseType, typeSource };
