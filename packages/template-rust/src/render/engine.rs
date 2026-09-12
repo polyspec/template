@@ -207,6 +207,9 @@ impl Engine {
         assign: &serde_json::Value,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
+        if self.compile_mode == CompileMode::Gen {
+            return Err(TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", "prepare is unavailable in generated compile mode; use render"));
+        }
         let name = match target {
             RenderTarget::Name(name) => name.to_owned(),
             RenderTarget::Ast(ast) => ast.name.clone(),
