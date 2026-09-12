@@ -8,7 +8,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
-	bench benchmark-check docs-static-check clean
+	bench benchmark-check benchmark-smoke release-test-matrix docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -46,6 +46,7 @@ help: ## List targets
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
 	@echo "  consumer-check         Install package artifacts and compare AST/generated output"
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
+	@echo "  release-test-matrix    Run every commercial release verification layer"
 	@echo "  clean                  Remove build outputs"
 
 check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
@@ -193,6 +194,29 @@ bench: typed-generator ## Measure production AST and generated artifacts
 benchmark-check: ## Verify committed benchmark structure and equal output
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs --check
+
+benchmark-smoke: typed-generator ## Measure a fresh short equal-output sample without changing committed results
+	node scripts/check-benchmark-smoke.mjs
+
+release-test-matrix: ## Run all release layers in deterministic order
+	@echo "[release 1/7] contracts, generated documentation and static analysis"
+	$(MAKE) docs-check rules-check runtime-interface-check compiler-interface-check lint
+	@echo "[release 2/7] lexer, parser, value, runtime and page-cache units"
+	$(MAKE) test-ts test-go test-rust test-php
+	@echo "[release 3/7] IR, generated source and host compiler checks"
+	$(MAKE) typed-generator-compile-check
+	@echo "[release 4/7] complete AST/generated conformance and extension support"
+	$(MAKE) conformance-all-modes test-ext
+	@echo "[release 5/7] positioned errors, recovery and mutation rejection"
+	node scripts/check-compiler-interface-mutations.mjs
+	node scripts/check-ast-artifact.mjs
+	node scripts/check-generated-artifact.mjs
+	node scripts/check-showcase-contract.mjs
+	node scripts/check-benchmark-results.mjs
+	@echo "[release 6/7] isolated package and browser consumers"
+	$(MAKE) consumer-check test-browser
+	@echo "[release 7/7] static presentation and fresh performance contract"
+	$(MAKE) showcase-check benchmark-smoke docs-verify-idempotent
 
 showcase-check: build-ts ## Verify example-site parity, repeatability and browser output
 	$(MAKE) typed-generator-compile-check

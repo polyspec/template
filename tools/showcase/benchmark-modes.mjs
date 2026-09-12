@@ -77,7 +77,8 @@ function compileSamples(language, mode) {
 
 function timed(command, args, mode, count, warm) {
   const started = process.hrtime.bigint();
-  const result = spawnSync('/usr/bin/time', ['-l', command, ...args], {
+  const timeArguments = process.platform === 'darwin' ? ['-l'] : ['-v'];
+  const result = spawnSync('/usr/bin/time', [...timeArguments, command, ...args], {
     cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
     env: {
       ...process.env,
@@ -90,14 +91,16 @@ function timed(command, args, mode, count, warm) {
   const processMs = Number(process.hrtime.bigint() - started) / 1e6;
   if (result.status !== 0) throw new Error(`${command} benchmark failed\n${result.stdout ?? ''}${result.stderr ?? ''}`);
   const payload = JSON.parse(result.stdout.trim().split('\n').at(-1));
-  const rssBytes = Number(result.stderr.match(/(\d+)\s+maximum resident set size/)?.[1]);
-  if (!Number.isFinite(rssBytes)) throw new Error(`${command} benchmark did not report peak RSS`);
+  const rss = process.platform === 'darwin'
+    ? Number(result.stderr.match(/(\d+)\s+maximum resident set size/)?.[1]) / 1024 / 1024
+    : Number(result.stderr.match(/Maximum resident set size \(kbytes\):\s*(\d+)/)?.[1]) / 1024;
+  if (!Number.isFinite(rss)) throw new Error(`${command} benchmark did not report peak RSS`);
   if (payload.bytes !== Buffer.byteLength(expected) || payload.outputSha256 !== expectedHash || payload.repeatSha256 !== expectedHash || payload.preparedSha256 !== expectedHash) {
     throw new Error(`${payload.language}/${mode} output contract mismatch`);
   }
   if (payload.iterations !== count || !Number.isFinite(payload.renderSeconds) || !Number.isFinite(payload.preparedRenderSeconds)) throw new Error(`${payload.language}/${mode} measurement payload is invalid`);
   return {
-    processMs, rssMiB: rssBytes / 1024 / 1024,
+    processMs, rssMiB: rss,
     renderMs: payload.renderSeconds * 1000 / count,
     preparedRenderMs: payload.preparedRenderSeconds * 1000 / count,
   };

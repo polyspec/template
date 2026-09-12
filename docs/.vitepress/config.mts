@@ -39,6 +39,7 @@ const englishSidebar = [
     items: [
       { text: 'Development', link: '/operations/development' },
       { text: 'Conformance', link: '/operations/conformance' },
+      { text: 'Release testing', link: '/operations/testing' },
       { text: 'Browser rendering', link: '/operations/browser' },
       { text: 'Example site', link: '/operations/showcase' },
       { text: 'Publication', link: '/operations/publication' },
@@ -76,6 +77,7 @@ const koreanSidebar = [
     items: [
       { text: '개발', link: '/operations/development.ko' },
       { text: '적합성 절차', link: '/operations/conformance.ko' },
+      { text: '릴리스 테스트', link: '/operations/testing.ko' },
       { text: '브라우저 렌더링', link: '/operations/browser.ko' },
       { text: '예제 사이트', link: '/operations/showcase.ko' },
       { text: '발행', link: '/operations/publication.ko' },
@@ -108,6 +110,7 @@ const koreanRoutes = [
   '/spec/examples.ko',
   '/operations/development.ko',
   '/operations/conformance.ko',
+  '/operations/testing.ko',
   '/operations/browser.ko',
   '/operations/showcase.ko',
   '/operations/publication.ko',
