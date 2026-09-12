@@ -6,7 +6,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
-	conformance-generated-ts conformance-generated-go conformance-generated-php \
+	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check showcase showcase-check showcase-compile \
 	docs-static-check clean
 
@@ -96,8 +96,13 @@ conformance-generated-ts: build-ts ## TypeScript generated compiler conformance 
 conformance-generated-go: build-ts ## Go generated compiler conformance suite
 	node tests/runner/conformance-generated-go.mjs
 
+conformance-generated-rust: build-ts ## Rust generated compiler conformance suite
+	node tests/runner/conformance-generated-rust.mjs
+
 conformance-generated-php: build-ts ## PHP generated compiler conformance suite
 	node tests/runner/conformance-generated-php.mjs
+
+conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php ## AST and generated conformance in all four languages
 
 parity: ## Cross-language output comparison
 	node tests/runner/parity.mjs
