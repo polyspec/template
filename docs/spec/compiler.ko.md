@@ -18,6 +18,8 @@ compiler와 runtime의 단일 계약 원본은 [`tools/compiler/interface.json`]
 
 하나의 source graph와 명시적인 type manifest를 하나의 typed program으로 lower한다. `ast`는 언어 중립적인 canonical AST artifact를 생성한다. `gen`은 같은 typed program을 선택한 TypeScript, Go, Rust, PHP backend로 전달한다. JavaScript ESM은 TypeScript backend가 만드는 배포 artifact이며 별도 의미 구현이 아니다.
 
+Canonical artifact manifest는 각 template의 digest 항목과 함께 source 각 줄의 시작 byte offset을 기록한다. Generated program은 이 line index와 보존된 node·expression span을 조합해 runtime에 template source를 읽지 않고 원본 line과 column을 보고한다.
+
 각 backend는 별도 `LanguageBackend` 구현이다. Backend는 구조화한 code writer를 통해 선언부와 직접적인 template 제어 흐름을 생성한다. Scenario 이름, 고정 request data, 예상 output 또는 직렬화한 AST node interpreter를 포함하지 않는다.
 
 ## 공개 구조

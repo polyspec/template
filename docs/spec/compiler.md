@@ -18,6 +18,8 @@ The single compiler and runtime contract source is [`tools/compiler/interface.js
 
 One source graph and one explicit type manifest are lowered to one typed program. `ast` emits a language-neutral canonical AST artifact. `gen` sends the same typed program to the selected TypeScript, Go, Rust or PHP backend. JavaScript ESM is a delivery artifact produced from the TypeScript backend, not a separate semantic implementation.
 
+The canonical artifact manifest stores every template's source-line start byte offsets with its digest entry. Generated programs combine this line index with preserved node and expression spans to report the original line and column without reading template source at runtime.
+
 Each backend is a separate `LanguageBackend` implementation. A backend emits declarations and direct template control flow through a structured code writer. It does not contain scenario names, fixed request data, expected output or an interpreter for serialized AST nodes.
 
 ## Public structures
