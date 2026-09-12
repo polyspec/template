@@ -7,69 +7,61 @@ const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifest = JSON.parse(readFileSync(resolve(root, 'tools/compiler/interface.json'), 'utf8'));
 const check = process.argv.includes('--check');
 const operation = name => manifest.operations.find(item => item.name === name);
+const fields = name => manifest.types[name].fields.join(' + ');
 const signature = item => `+${item.name}(${item.parameters.join(', ')}) ${item.returns}`;
 
 const flow = [
   'flowchart LR',
-  `  SourceGraph["SourceGraph<br/>${manifest.types.SourceGraph.fields.join(' + ')}"] --> Lower["Compiler.${operation('lowerSourceGraph').name}"]`,
-  `  TypeManifest["TypeManifest<br/>${manifest.types.TypeManifest.fields.join(' + ')}"] --> Lower`,
-  `  Lower --> TypedProgram["TypedProgram<br/>${manifest.types.TypedProgram.fields.join(' + ')}"]`,
-  `  TypedProgram --> Emit["LanguageBackend.${operation('emit').name}"]`,
-  `  Emit --> GeneratedModule["GeneratedModule<br/>${manifest.types.GeneratedModule.types.join(' + ')}"]`,
-  `  GeneratedModule --> Render["${operation('render').name}(${operation('render').parameters.join(', ')})"]`,
-  '  Render --> Block["generated block function"]',
-  '  Block --> Child["generated child template function"]',
+  `  Source["SourceGraph<br/>${fields('SourceGraph')}"] --> Parse["Compiler.${operation('parseSourceGraph').name}"]`,
+  '  Parse --> AST["canonical AST graph"]',
+  `  Types["TypeManifest<br/>${fields('TypeManifest')}"] --> Lower["Compiler.${operation('lowerSourceGraph').name}"]`,
+  '  AST --> Lower',
+  `  Lower --> Typed["TypedProgram<br/>${fields('TypedProgram')}"]`,
+  '  Typed --> AstArtifact["AST artifact"]',
+  '  Typed --> Backend["LanguageBackend"]',
+  '  Backend --> GeneratedArtifact["generated host artifact"]',
+  '  AstArtifact --> AstProgram["AstProgram"]',
+  '  GeneratedArtifact --> GeneratedProgram["GeneratedProgram"]',
+  '  AstProgram --> Program["Program.prepare + Program.render"]',
+  '  GeneratedProgram --> Program',
+  '  RuntimeBindings["RuntimeBindings"] --> AstProgram',
+  '  RuntimeBindings --> GeneratedProgram',
   '',
 ].join('\n');
 
-const compilerOperations = manifest.operations.filter(item => item.owner === 'Compiler');
-const backendOperations = manifest.operations.filter(item => item.owner === 'LanguageBackend');
-const moduleOperations = manifest.operations.filter(item => item.owner === 'GeneratedModule');
-const classes = [
-  'classDiagram',
-  '  class Compiler {',
-  ...compilerOperations.map(item => `    ${signature(item)}`),
+const classes = ['classDiagram'];
+for (const [name, component] of Object.entries(manifest.components)) {
+  classes.push(`  class ${name} {`);
+  for (const field of component.owns) classes.push(`    +${field}`);
+  for (const op of component.operations) classes.push(`    ${signature(operation(op))}`);
+  classes.push('  }');
+}
+for (const name of ['SourceGraph', 'TypeManifest', 'TypedProgram', 'ArtifactManifest', 'RenderRequest']) {
+  classes.push(`  class ${name} {`);
+  for (const field of manifest.types[name].fields) classes.push(`    +${field}`);
+  classes.push('  }');
+}
+classes.push(
+  '  class Program {',
+  '    +prepare(RenderRequest) PreparedRender',
+  '    +render(RenderRequest) UTF-8 string',
   '  }',
-  '  class LanguageBackend {',
-  ...backendOperations.map(item => `    ${signature(item)}`),
-  '  }',
-  '  class GeneratedModule {',
-  ...moduleOperations.map(item => `    ${signature(item)}`),
-  '  }',
-  '  class SourceGraph {',
-  ...manifest.types.SourceGraph.fields.map(field => `    +${field}`),
-  '  }',
-  '  class TypeManifest {',
-  ...manifest.types.TypeManifest.fields.map(field => `    +${field}`),
-  '  }',
-  '  class TypedProgram {',
-  ...manifest.types.TypedProgram.fields.map(field => `    +${field}`),
-  '  }',
-  '  class Definition~T~ {',
-  ...manifest.types['Definition<T>'].fields.map(field => `    +${field}`),
-  '  }',
-  '  class DefinitionData~T~',
-  '  class Definitions',
-  '  class Input~T~',
-  '  class FunctionSignature {',
-  ...manifest.types.FunctionSignature.fields.map(field => `    +${field}`),
-  '  }',
-  '  SourceGraph --> Compiler : input',
-  '  TypeManifest --> Compiler : input',
-  '  Compiler --> TypedProgram : output',
-  '  TypedProgram --> LanguageBackend : input',
-  '  LanguageBackend --> GeneratedModule : source',
-  '  GeneratedModule --> Definitions',
-  '  Definitions --> Definition~T~',
-  '  Definition~T~ --> DefinitionData~T~ : data',
-  '  DefinitionData~T~ --> Input~T~ : field types',
-  '  TypeManifest --> FunctionSignature : functions',
-  '',
-].join('\n');
+  '  class AstProgram',
+  '  class GeneratedProgram',
+  '  Program <|-- AstProgram',
+  '  Program <|-- GeneratedProgram',
+  '  Compiler --> TypedProgram',
+  '  Compiler --> LanguageBackend',
+  '  LanguageBackend --> ArtifactManifest',
+  '  ArtifactStore --> ArtifactManifest',
+  '  ArtifactStore --> Program',
+  '  Engine --> Program',
+  ''
+);
 
 for (const [relative, content] of [
   ['tools/compiler/generated/compiler-architecture.mmd', flow],
-  ['tools/compiler/generated/compiler-classes.mmd', classes],
+  ['tools/compiler/generated/compiler-classes.mmd', classes.join('\n')],
 ]) {
   const path = resolve(root, relative);
   if (check) {
