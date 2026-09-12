@@ -1,39 +1,35 @@
 package render
 
 import (
-	"errors"
-	"fmt"
 	"math"
-	"regexp"
-	"strconv"
 
 	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
 	"github.com/polyspec/template/value"
 )
-
-var indexPattern = regexp.MustCompile(`^(0|[1-9][0-9]*)$`)
 
 // Evaluator evaluates expressions (docs/spec/expressions.md).
 type Evaluator struct {
 	context *Context
+	runtime *RuntimeBindings
 	depth   int
 }
 
 // NewEvaluator creates an evaluator.
-func NewEvaluator(context *Context) *Evaluator { return &Evaluator{context: context} }
+func NewEvaluator(context *Context) *Evaluator {
+	return &Evaluator{context: context, runtime: NewRuntimeBindings(context)}
+}
 
 func (e *Evaluator) fail(frame *Frame, span ast.Span, code errs.Code, message string) error {
-	return e.context.Fail(code, frame, &span, message)
+	return e.runtime.Error(frame, span, code, message)
 }
 
 // Evaluate evaluates an expression in a frame.
 func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 	e.depth++
 	defer func() { e.depth-- }()
-	if e.depth > e.context.Services.Limits().ExpressionDepth {
-		return nil, e.fail(frame, ast.SpanOf(expr), errs.RuntimeLimit, fmt.Sprintf("expression nesting exceeds %d", e.context.Services.Limits().ExpressionDepth))
+	if err := e.runtime.Limit("expression", e.depth, frame, ast.SpanOf(expr)); err != nil {
+		return nil, err
 	}
 	switch n := expr.(type) {
 	case *ast.Literal:
@@ -65,7 +61,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		return Lookup(object, n.Key), nil
+		return e.runtime.Member(object, n.Key), nil
 	case *ast.Index:
 		object, err := e.Evaluate(n.Object, frame)
 		if err != nil {
@@ -75,7 +71,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		return Lookup(object, key), nil
+		return e.runtime.Index(object, key), nil
 	case *ast.Call:
 		args := make([]value.Value, len(n.Args))
 		for i, arg := range n.Args {
@@ -85,20 +81,20 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			}
 			args[i] = v
 		}
-		return e.call(n.Name, args, frame, n.Span)
+		return e.runtime.Call(n.Name, args, frame, n.Span)
 	case *ast.Unary:
 		operand, err := e.Evaluate(n.Operand, frame)
 		if err != nil {
 			return nil, err
 		}
 		if n.Op == "!" {
-			return !value.IsTruthy(operand), nil
+			return !e.runtime.Truthy(operand), nil
 		}
-		x, err := e.number(operand, frame, n.Span)
+		x, err := e.runtime.Number(operand, frame, n.Span)
 		if err != nil {
 			return nil, err
 		}
-		return e.finite(-x, frame, n.Span)
+		return e.runtime.Finite(-x, frame, n.Span)
 	case *ast.Binary:
 		return e.binary(n, frame)
 	case *ast.Ternary:
@@ -106,7 +102,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		if value.IsTruthy(test) {
+		if e.runtime.Truthy(test) {
 			if n.Then == nil {
 				return test, nil
 			}
@@ -157,7 +153,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			if err != nil {
 				return nil, err
 			}
-			key, err := e.stringify(keyValue, frame, ast.SpanOf(pair.Key))
+			key, err := e.runtime.Stringify(keyValue, frame, ast.SpanOf(pair.Key))
 			if err != nil {
 				return nil, err
 			}
@@ -187,27 +183,27 @@ func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		if !value.IsTruthy(left) {
+		if !e.runtime.Truthy(left) {
 			return false, nil
 		}
 		right, err := e.Evaluate(n.Right, frame)
 		if err != nil {
 			return nil, err
 		}
-		return value.IsTruthy(right), nil
+		return e.runtime.Truthy(right), nil
 	case "||":
 		left, err := e.Evaluate(n.Left, frame)
 		if err != nil {
 			return nil, err
 		}
-		if value.IsTruthy(left) {
+		if e.runtime.Truthy(left) {
 			return true, nil
 		}
 		right, err := e.Evaluate(n.Right, frame)
 		if err != nil {
 			return nil, err
 		}
-		return value.IsTruthy(right), nil
+		return e.runtime.Truthy(right), nil
 	case "??":
 		left, err := e.Evaluate(n.Left, frame)
 		if err != nil {
@@ -233,11 +229,11 @@ func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 			return nil, e.fail(frame, span, errs.RuntimeStringify, "a list or map cannot be converted to text")
 		}
 		if value.IsString(left) || value.IsString(right) {
-			l, err := e.stringify(left, frame, span)
+			l, err := e.runtime.Stringify(left, frame, span)
 			if err != nil {
 				return nil, err
 			}
-			r, err := e.stringify(right, frame, span)
+			r, err := e.runtime.Stringify(right, frame, span)
 			if err != nil {
 				return nil, err
 			}
@@ -249,24 +245,24 @@ func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 	case "*":
 		return e.arith(left, right, frame, span, func(a, b float64) float64 { return a * b })
 	case "/":
-		divisor, err := e.number(right, frame, span)
+		divisor, err := e.runtime.Number(right, frame, span)
 		if err != nil {
 			return nil, err
 		}
 		if divisor == 0 {
 			return nil, e.fail(frame, span, errs.RuntimeDivZero, "division by zero")
 		}
-		dividend, err := e.number(left, frame, span)
+		dividend, err := e.runtime.Number(left, frame, span)
 		if err != nil {
 			return nil, err
 		}
-		return e.finite(dividend/divisor, frame, span)
+		return e.runtime.Finite(dividend/divisor, frame, span)
 	case "%":
-		dividend, err := e.number(left, frame, span)
+		dividend, err := e.runtime.Number(left, frame, span)
 		if err != nil {
 			return nil, err
 		}
-		divisor, err := e.number(right, frame, span)
+		divisor, err := e.runtime.Number(right, frame, span)
 		if err != nil {
 			return nil, err
 		}
@@ -278,17 +274,17 @@ func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 		}
 		return math.Mod(dividend, divisor), nil
 	case "==":
-		return value.LooseEquals(left, right), nil
+		return e.runtime.Equal(left, right, false), nil
 	case "!=":
-		return !value.LooseEquals(left, right), nil
+		return !e.runtime.Equal(left, right, false), nil
 	case "===":
-		return value.StrictEquals(left, right), nil
+		return e.runtime.Equal(left, right, true), nil
 	case "!==":
-		return !value.StrictEquals(left, right), nil
+		return !e.runtime.Equal(left, right, true), nil
 	case "<", ">", "<=", ">=":
-		order, ok := value.Compare(left, right)
-		if !ok {
-			return nil, e.fail(frame, span, errs.RuntimeCompare, fmt.Sprintf("%s and %s have no order", value.TypeOf(left), value.TypeOf(right)))
+		order, err := e.runtime.Compare(left, right, frame, span)
+		if err != nil {
+			return nil, err
 		}
 		switch n.Op {
 		case "<":
@@ -303,20 +299,20 @@ func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 		switch r := right.(type) {
 		case value.List:
 			for _, item := range r {
-				if value.LooseEquals(item, left) {
+				if e.runtime.Equal(item, left, false) {
 					return true, nil
 				}
 			}
 			return false, nil
 		case *value.OrderedMap:
-			key, err := e.stringify(left, frame, span)
+			key, err := e.runtime.Stringify(left, frame, span)
 			if err != nil {
 				return nil, err
 			}
 			return r.Has(key), nil
 		}
 		if text, ok := value.TextOf(right); ok {
-			needle, err := e.stringify(left, frame, span)
+			needle, err := e.runtime.Stringify(left, frame, span)
 			if err != nil {
 				return nil, err
 			}
@@ -337,101 +333,13 @@ func contains(text, needle string) bool {
 }
 
 func (e *Evaluator) arith(left, right value.Value, frame *Frame, span ast.Span, op func(a, b float64) float64) (value.Value, error) {
-	a, err := e.number(left, frame, span)
+	a, err := e.runtime.Number(left, frame, span)
 	if err != nil {
 		return nil, err
 	}
-	b, err := e.number(right, frame, span)
+	b, err := e.runtime.Number(right, frame, span)
 	if err != nil {
 		return nil, err
 	}
-	return e.finite(op(a, b), frame, span)
-}
-
-func (e *Evaluator) number(v value.Value, frame *Frame, span ast.Span) (float64, error) {
-	n, err := functions.ToNumber(v)
-	if err != nil {
-		var fe *functions.Error
-		if errors.As(err, &fe) {
-			return 0, e.fail(frame, span, fe.Code, fe.Message)
-		}
-		return 0, err
-	}
-	return n, nil
-}
-
-func (e *Evaluator) finite(v float64, frame *Frame, span ast.Span) (value.Value, error) {
-	if math.IsInf(v, 0) || math.IsNaN(v) {
-		return nil, e.fail(frame, span, errs.RuntimeType, "arithmetic result is not finite")
-	}
-	return v, nil
-}
-
-func (e *Evaluator) stringify(v value.Value, frame *Frame, span ast.Span) (string, error) {
-	text, err := value.Stringify(v)
-	if err != nil {
-		return "", e.fail(frame, span, errs.RuntimeStringify, err.Error())
-	}
-	return text, nil
-}
-
-func (e *Evaluator) call(name string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
-	ctx := functions.Context{Env: e.context.Env}
-	if builtin, ok := e.context.Services.Builtins()[name]; ok {
-		if len(args) < builtin.Min || (builtin.Max >= 0 && len(args) > builtin.Max) {
-			return nil, e.fail(frame, span, errs.RuntimeArity, fmt.Sprintf("%s accepts %d to %d arguments, got %d", name, builtin.Min, builtin.Max, len(args)))
-		}
-		result, err := builtin.Call(args, ctx)
-		if err != nil {
-			var fe *functions.Error
-			if errors.As(err, &fe) {
-				return nil, e.fail(frame, span, fe.Code, fe.Message)
-			}
-			return nil, err
-		}
-		return result, nil
-	}
-	host, ok := e.context.Services.Functions()[name]
-	if !ok {
-		return nil, e.fail(frame, span, errs.RuntimeUnknownFunction, name+" is not a function")
-	}
-	result, err := host(args, ctx)
-	if err != nil {
-		return nil, e.fail(frame, span, errs.RuntimeHostFunction, name+" failed: "+err.Error())
-	}
-	bound, err := value.Bind(result)
-	if err != nil {
-		var be *value.BindError
-		if errors.As(err, &be) {
-			return nil, e.fail(frame, span, be.Code, be.Message)
-		}
-		return nil, err
-	}
-	return bound, nil
-}
-
-// Lookup implements EXP-19.
-func Lookup(container, key value.Value) value.Value {
-	switch c := container.(type) {
-	case *value.OrderedMap:
-		if text, ok := value.TextOf(key); ok {
-			return c.MustGet(text)
-		}
-		if n, ok := key.(float64); ok && n == math.Trunc(n) {
-			return c.MustGet(value.NumberToString(n))
-		}
-		return nil
-	case value.List:
-		index := -1
-		if n, ok := key.(float64); ok && n == math.Trunc(n) {
-			index = int(n)
-		} else if text, ok := value.TextOf(key); ok && indexPattern.MatchString(text) {
-			index, _ = strconv.Atoi(text)
-		}
-		if index < 0 || index >= len(c) {
-			return nil
-		}
-		return c[index]
-	}
-	return nil
+	return e.runtime.Finite(op(a, b), frame, span)
 }

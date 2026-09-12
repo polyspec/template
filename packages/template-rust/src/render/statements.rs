@@ -2,10 +2,10 @@
 
 use crate::ast::{Expr, IfBranch, Node, ScopeItem};
 use crate::error::{ErrorCode, Span, TemplateError};
-use crate::escape::escape_html;
 use crate::loader::resolve_path;
 use crate::render::context::{DefineEntry, Frame, LoopMeta, RenderContext, Scope};
 use crate::render::expressions::Evaluator;
+use crate::render::runtime_bindings::RuntimeBindings;
 use crate::value::{OrderedMap, Value};
 use std::rc::Rc;
 
@@ -37,20 +37,8 @@ impl<'c, 'e> Renderer<'c, 'e> {
             Node::Text { value, span } => self.context.write(value, frame, *span),
             Node::Echo { expr, span } => {
                 let value = self.evaluate(expr, frame, scope)?;
-                match &value {
-                    // A safe string is written as is (RT-32).
-                    Value::Safe(text) => self.context.write(text, frame, *span),
-                    // A string is escaped from its own storage, without an intermediate copy.
-                    Value::Str(text) => {
-                        let escaped = escape_html(text);
-                        self.context.write(&escaped, frame, *span)
-                    }
-                    other => {
-                        let text = Evaluator::new(self.context).stringify(other, frame, expr.span())?;
-                        let escaped = escape_html(&text);
-                        self.context.write(&escaped, frame, *span)
-                    }
-                }
+                let text = RuntimeBindings::new().escape(self.context, &value, frame, expr.span())?;
+                self.context.write(&text, frame, *span)
             }
             Node::If { branches, r#else, .. } => self.render_if(branches, r#else.as_deref(), frame, scope),
             Node::For {
@@ -86,7 +74,8 @@ impl<'c, 'e> Renderer<'c, 'e> {
 
     fn render_if(&mut self, branches: &[IfBranch], r#else: Option<&[Node]>, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
         for branch in branches {
-            if self.evaluate(&branch.test, frame, scope)?.is_truthy() {
+            let test = self.evaluate(&branch.test, frame, scope)?;
+            if RuntimeBindings::new().truthy(&test) {
                 return self.render_nodes(&branch.body, frame, scope);
             }
         }
@@ -108,23 +97,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
         scope: &mut Scope,
     ) -> Result<(), TemplateError> {
         let iterable = self.evaluate(iter, frame, scope)?;
-        let entries: Vec<(Value, Value)> = match iterable {
-            Value::Null => Vec::new(),
-            Value::List(list) => list
-                .iter()
-                .enumerate()
-                .map(|(index, value)| (Value::Number(index as f64), value.clone()))
-                .collect(),
-            Value::Map(map) => map.iter().map(|(key, value)| (Value::text(key.clone()), value.clone())).collect(),
-            _ => {
-                return Err(self.context.fail(
-                    ErrorCode::E_RUNTIME_TYPE,
-                    Some(frame),
-                    Some(span),
-                    "loop requires a list, a map or null",
-                ));
-            }
-        };
+        let entries = RuntimeBindings::new().entries(self.context, &iterable, frame, span)?;
         if entries.is_empty() {
             if let Some(nodes) = empty {
                 return self.render_nodes(nodes, frame, scope);
@@ -143,7 +116,8 @@ impl<'c, 'e> Renderer<'c, 'e> {
         });
         let mut result = Ok(());
         for (index, (key, value)) in entries.into_iter().enumerate() {
-            if let Err(error) = self.context.count_iteration(frame, span) {
+            self.context.iterations += 1;
+            if let Err(error) = RuntimeBindings::new().limit(self.context, "iteration", self.context.iterations, frame, span) {
                 result = Err(error);
                 break;
             }

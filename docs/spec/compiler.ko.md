@@ -26,7 +26,7 @@ compiler와 runtime의 단일 계약 원본은 [`tools/compiler/interface.json`]
 
 모든 generated module은 논리 구조 `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest`, `GeneratedProgram`을 노출한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
-Generated expression은 truthiness, 문자열 변환, escaping, 숫자 변환, 동등성, 정렬, lookup, collection 생성, 함수, limit, error를 target runtime의 `RuntimeBindings`로 처리한다. AST evaluator도 같은 binding을 사용한다. Backend는 typed operand에서 data-model 규칙과 정확히 같은 경우에만 native operation을 생성할 수 있다.
+Generated expression은 truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검증, 동등성, 정렬, lookup, 반복 entry, 함수, limit, error를 target runtime의 `RuntimeBindings`로 처리한다. 네 runtime의 AST evaluator와 statement renderer는 이미 이 경계를 사용하며 실제 선언을 compiler manifest와 대조한다. Backend는 typed operand에서 data-model 규칙과 정확히 같은 경우에만 native operation을 생성할 수 있다.
 
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 
@@ -42,4 +42,4 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 
 ## 구현 상태
 
-AST compiler와 runtime은 구현됐다. Generated 실행은 partial이다. 현재 showcase 시나리오 5개로만 검증했고 typed compiler는 `default` 내장 함수만 받으며 별도 showcase generator와 주입 callback을 사용한다. 이 경로는 이 계약을 만족하지 않으므로 generated compiler를 완성하면서 제거한다.
+AST compiler와 runtime은 구현됐다. Generated 실행은 partial이다. 현재 showcase 시나리오 5개로만 검증했고 typed compiler는 `default` 내장 함수만 받으며 별도 showcase generator를 사용한다. 이 경로는 이 계약을 만족하지 않으므로 generated compiler를 완성하면서 제거한다.

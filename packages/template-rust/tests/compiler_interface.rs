@@ -7,6 +7,18 @@ use syn::{Fields, ImplItem, Item, TraitItem};
 struct Manifest {
     #[serde(rename = "runtimeContract")]
     runtime_contract: RuntimeContract,
+    languages: Languages,
+}
+
+#[derive(Deserialize)]
+struct Languages {
+    rust: RustMapping,
+}
+
+#[derive(Deserialize)]
+struct RustMapping {
+    #[serde(rename = "runtimeBindingsExplicitContext")]
+    runtime_bindings_explicit_context: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -15,6 +27,8 @@ struct RuntimeContract {
     program: ProgramContract,
     #[serde(rename = "Engine")]
     engine: EngineContract,
+    #[serde(rename = "RuntimeBindings")]
+    runtime_bindings: BindingsContract,
 }
 
 #[derive(Deserialize)]
@@ -26,6 +40,11 @@ struct ProgramContract {
 struct EngineContract {
     owns: Vec<String>,
     operations: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct BindingsContract {
+    operations: Vec<Operation>,
 }
 
 #[derive(Deserialize)]
@@ -102,4 +121,45 @@ fn runtime_declarations_match_manifest() {
             .iter()
             .any(|item| matches!(item, Item::Struct(item) if item.ident == "AstProgram"))
     );
+
+    let bindings_source = syn::parse_file(&fs::read_to_string("src/render/runtime_bindings.rs").unwrap()).unwrap();
+    let implementation = bindings_source
+        .items
+        .iter()
+        .find_map(|item| match item {
+            Item::Impl(item) => match item.self_ty.as_ref() {
+                syn::Type::Path(path) if path.path.is_ident("RuntimeBindings") => Some(item),
+                _ => None,
+            },
+            _ => None,
+        })
+        .expect("RuntimeBindings implementation is missing");
+    let operations: Vec<_> = implementation
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            ImplItem::Fn(method) if method.sig.ident != "new" => Some(method.sig.ident.to_string()),
+            _ => None,
+        })
+        .collect();
+    let expected: Vec<_> = manifest
+        .runtime_contract
+        .runtime_bindings
+        .operations
+        .iter()
+        .map(|operation| operation.name.clone())
+        .collect();
+    assert_eq!(operations, expected);
+    for operation in &manifest.runtime_contract.runtime_bindings.operations {
+        let method = implementation
+            .items
+            .iter()
+            .find_map(|item| match item {
+                ImplItem::Fn(method) if method.sig.ident == operation.name => Some(method),
+                _ => None,
+            })
+            .unwrap();
+        let context_count = usize::from(manifest.languages.rust.runtime_bindings_explicit_context.contains(&operation.name));
+        assert_eq!(method.sig.inputs.len() - 1, operation.parameters.len() + context_count);
+    }
 }

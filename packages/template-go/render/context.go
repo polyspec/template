@@ -148,12 +148,3 @@ func (c *Context) Enter(name string, frame *Frame, span *ast.Span) error {
 
 // Leave pops the render chain.
 func (c *Context) Leave() { c.Chain = c.Chain[:len(c.Chain)-1] }
-
-// CountIteration implements RT-20.
-func (c *Context) CountIteration(frame *Frame, span *ast.Span) error {
-	c.Iterations++
-	if c.Iterations > c.Services.Limits().Iterations {
-		return c.Fail(errs.RuntimeLimit, frame, span, fmt.Sprintf("loop iterations exceed %d", c.Services.Limits().Iterations))
-	}
-	return nil
-}

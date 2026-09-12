@@ -35,6 +35,14 @@ describe('Engine', () => {
     expect(() => engine.render('a.tpl', {})).toThrow(TemplateError);
   });
 
+  it('applies the configured expression-depth limit', () => {
+    const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': '{= !true}' }), limits: { expressionDepth: 1 } }));
+    expect(() => engine.render('a.tpl', {})).toThrow(expect.objectContaining({
+      code: 'E_RUNTIME_LIMIT',
+      message: 'expression nesting exceeds 1',
+    }));
+  });
+
   it('renders a parsed AST through the render-only entry', () => {
     const ast = parse('{= a + 1}', 'x.tpl');
     const engine = new RenderEngine(new RenderAstProgram({ loader: new MapLoader({ 'x.tpl': ast }) }));

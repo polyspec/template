@@ -2,39 +2,38 @@
 
 use crate::ast::{BinaryOp, Expr, LoopMetaField, MapEntry, UnaryOp};
 use crate::error::{ErrorCode, Span, TemplateError};
-use crate::functions::{FunctionContext, builtins, to_number};
 use crate::render::context::{Frame, RenderContext, Scope};
-use crate::value::bind::bind;
-use crate::value::{OrderedMap, Value, compare_values, loose_equals, strict_equals, stringify};
+use crate::render::runtime_bindings::RuntimeBindings;
+use crate::value::{OrderedMap, Value};
 use std::cmp::Ordering;
 
 /// Evaluates expressions against a frame and a scope.
 pub struct Evaluator<'c, 'e> {
     context: &'c mut RenderContext<'e>,
+    runtime: RuntimeBindings,
     depth: usize,
 }
 
 impl<'c, 'e> Evaluator<'c, 'e> {
     /// Creates an evaluator over a render context.
     pub fn new(context: &'c mut RenderContext<'e>) -> Evaluator<'c, 'e> {
-        Evaluator { context, depth: 0 }
+        Evaluator {
+            context,
+            runtime: RuntimeBindings::new(),
+            depth: 0,
+        }
     }
 
     fn fail(&self, frame: &Frame, span: Span, code: ErrorCode, message: impl Into<String>) -> TemplateError {
-        self.context.fail(code, Some(frame), Some(span), message)
+        self.runtime.error(self.context, frame, span, code, message)
     }
 
     /// Evaluates an expression.
     pub fn evaluate(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, TemplateError> {
         self.depth += 1;
-        if self.depth > self.context.engine.limits.expression_depth {
+        if let Err(error) = self.runtime.limit(self.context, "expression", self.depth, frame, expr.span()) {
             self.depth -= 1;
-            return Err(self.fail(
-                frame,
-                expr.span(),
-                ErrorCode::E_RUNTIME_LIMIT,
-                format!("expression nesting exceeds {}", self.context.engine.limits.expression_depth),
-            ));
+            return Err(error);
         }
         let result = self.evaluate_node(expr, frame, scope);
         self.depth -= 1;
@@ -70,41 +69,41 @@ impl<'c, 'e> Evaluator<'c, 'e> {
             }
             Expr::Member { object, key, .. } => {
                 let container = self.evaluate(object, frame, scope)?;
-                Ok(lookup(&container, &Value::text(key.clone())))
+                Ok(self.runtime.member(&container, key))
             }
             Expr::Index { object, index, .. } => {
                 let container = self.evaluate(object, frame, scope)?;
                 let key = self.evaluate(index, frame, scope)?;
-                Ok(lookup(&container, &key))
+                Ok(self.runtime.index(&container, &key))
             }
             Expr::Call { name, args, span } => {
                 let mut values = Vec::with_capacity(args.len());
                 for arg in args {
                     values.push(self.evaluate(arg, frame, scope)?);
                 }
-                self.call(name, values, frame, *span)
+                self.runtime.call(self.context, name, values, frame, *span)
             }
             Expr::Unary { op, operand, span } => {
                 let value = self.evaluate(operand, frame, scope)?;
                 if *op == UnaryOp::Not {
-                    return Ok(Value::Bool(!value.is_truthy()));
+                    return Ok(Value::Bool(!self.runtime.truthy(&value)));
                 }
-                let number = self.number(&value, frame, *span)?;
-                self.finite(-number, frame, *span)
+                let number = self.runtime.number(self.context, &value, frame, *span)?;
+                self.runtime.finite(self.context, -number, frame, *span)
             }
             Expr::Binary { op, left, right, span } => self.binary(*op, left, right, *span, frame, scope),
             Expr::Ternary { test, then, r#else, .. } => {
                 let condition = self.evaluate(test, frame, scope)?;
                 match then {
                     None => {
-                        if condition.is_truthy() {
+                        if self.runtime.truthy(&condition) {
                             Ok(condition)
                         } else {
                             self.evaluate(r#else, frame, scope)
                         }
                     }
                     Some(then) => {
-                        if condition.is_truthy() {
+                        if self.runtime.truthy(&condition) {
                             self.evaluate(then, frame, scope)
                         } else {
                             self.evaluate(r#else, frame, scope)
@@ -147,7 +146,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                         }
                         MapEntry::Entry { key, value } => {
                             let key_value = self.evaluate(key, frame, scope)?;
-                            let key_text = self.stringify(&key_value, frame, key.span())?;
+                            let key_text = self.runtime.stringify(self.context, &key_value, frame, key.span())?;
                             let value = self.evaluate(value, frame, scope)?;
                             map.insert(key_text, value);
                         }
@@ -171,17 +170,19 @@ impl<'c, 'e> Evaluator<'c, 'e> {
         match op {
             BinaryOp::And => {
                 let l = self.evaluate(left, frame, scope)?;
-                if !l.is_truthy() {
+                if !self.runtime.truthy(&l) {
                     return Ok(Value::Bool(false));
                 }
-                return Ok(Value::Bool(self.evaluate(right, frame, scope)?.is_truthy()));
+                let right = self.evaluate(right, frame, scope)?;
+                return Ok(Value::Bool(self.runtime.truthy(&right)));
             }
             BinaryOp::Or => {
                 let l = self.evaluate(left, frame, scope)?;
-                if l.is_truthy() {
+                if self.runtime.truthy(&l) {
                     return Ok(Value::Bool(true));
                 }
-                return Ok(Value::Bool(self.evaluate(right, frame, scope)?.is_truthy()));
+                let right = self.evaluate(right, frame, scope)?;
+                return Ok(Value::Bool(self.runtime.truthy(&right)));
             }
             BinaryOp::Coalesce => {
                 let l = self.evaluate(left, frame, scope)?;
@@ -206,32 +207,32 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                     ));
                 }
                 if l.is_string() || r.is_string() {
-                    let mut text = self.stringify(&l, frame, span)?;
-                    text.push_str(&self.stringify(&r, frame, span)?);
+                    let mut text = self.runtime.stringify(self.context, &l, frame, span)?;
+                    text.push_str(&self.runtime.stringify(self.context, &r, frame, span)?);
                     return Ok(Value::text(text));
                 }
-                let sum = self.number(&l, frame, span)? + self.number(&r, frame, span)?;
-                self.finite(sum, frame, span)
+                let sum = self.runtime.number(self.context, &l, frame, span)? + self.runtime.number(self.context, &r, frame, span)?;
+                self.runtime.finite(self.context, sum, frame, span)
             }
             BinaryOp::Subtract => {
-                let value = self.number(&l, frame, span)? - self.number(&r, frame, span)?;
-                self.finite(value, frame, span)
+                let value = self.runtime.number(self.context, &l, frame, span)? - self.runtime.number(self.context, &r, frame, span)?;
+                self.runtime.finite(self.context, value, frame, span)
             }
             BinaryOp::Multiply => {
-                let value = self.number(&l, frame, span)? * self.number(&r, frame, span)?;
-                self.finite(value, frame, span)
+                let value = self.runtime.number(self.context, &l, frame, span)? * self.runtime.number(self.context, &r, frame, span)?;
+                self.runtime.finite(self.context, value, frame, span)
             }
             BinaryOp::Divide => {
-                let divisor = self.number(&r, frame, span)?;
+                let divisor = self.runtime.number(self.context, &r, frame, span)?;
                 if divisor == 0.0 {
                     return Err(self.fail(frame, span, ErrorCode::E_RUNTIME_DIV_ZERO, "division by zero"));
                 }
-                let value = self.number(&l, frame, span)? / divisor;
-                self.finite(value, frame, span)
+                let value = self.runtime.number(self.context, &l, frame, span)? / divisor;
+                self.runtime.finite(self.context, value, frame, span)
             }
             BinaryOp::Remainder => {
-                let dividend = self.number(&l, frame, span)?;
-                let divisor = self.number(&r, frame, span)?;
+                let dividend = self.runtime.number(self.context, &l, frame, span)?;
+                let divisor = self.runtime.number(self.context, &r, frame, span)?;
                 if dividend.fract() != 0.0 || divisor.fract() != 0.0 {
                     return Err(self.fail(frame, span, ErrorCode::E_RUNTIME_TYPE, "% requires integer operands"));
                 }
@@ -240,19 +241,12 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                 }
                 Ok(Value::Number(dividend % divisor))
             }
-            BinaryOp::Equal => Ok(Value::Bool(loose_equals(&l, &r))),
-            BinaryOp::NotEqual => Ok(Value::Bool(!loose_equals(&l, &r))),
-            BinaryOp::StrictEqual => Ok(Value::Bool(strict_equals(&l, &r))),
-            BinaryOp::StrictNotEqual => Ok(Value::Bool(!strict_equals(&l, &r))),
+            BinaryOp::Equal => Ok(Value::Bool(self.runtime.equal(&l, &r, false))),
+            BinaryOp::NotEqual => Ok(Value::Bool(!self.runtime.equal(&l, &r, false))),
+            BinaryOp::StrictEqual => Ok(Value::Bool(self.runtime.equal(&l, &r, true))),
+            BinaryOp::StrictNotEqual => Ok(Value::Bool(!self.runtime.equal(&l, &r, true))),
             BinaryOp::Less | BinaryOp::Greater | BinaryOp::LessEqual | BinaryOp::GreaterEqual => {
-                let Some(order) = compare_values(&l, &r) else {
-                    return Err(self.fail(
-                        frame,
-                        span,
-                        ErrorCode::E_RUNTIME_COMPARE,
-                        format!("{} and {} have no order", l.value_type().name(), r.value_type().name()),
-                    ));
-                };
+                let order = self.runtime.compare(self.context, &l, &r, frame, span)?;
                 Ok(Value::Bool(match op {
                     BinaryOp::Less => order == Ordering::Less,
                     BinaryOp::Greater => order == Ordering::Greater,
@@ -261,13 +255,13 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                 }))
             }
             BinaryOp::In => match &r {
-                Value::List(list) => Ok(Value::Bool(list.iter().any(|item| loose_equals(item, &l)))),
+                Value::List(list) => Ok(Value::Bool(list.iter().any(|item| self.runtime.equal(item, &l, false)))),
                 Value::Map(map) => {
-                    let key = self.stringify(&l, frame, span)?;
+                    let key = self.runtime.stringify(self.context, &l, frame, span)?;
                     Ok(Value::Bool(map.contains_key(&key)))
                 }
                 other if other.is_string() => {
-                    let needle = self.stringify(&l, frame, span)?;
+                    let needle = self.runtime.stringify(self.context, &l, frame, span)?;
                     Ok(Value::Bool(other.as_text().unwrap_or("").contains(&needle)))
                 }
                 _ => Err(self.fail(
@@ -281,104 +275,8 @@ impl<'c, 'e> Evaluator<'c, 'e> {
             BinaryOp::And | BinaryOp::Or | BinaryOp::Coalesce => unreachable!("short-circuiting operator"),
         }
     }
-
-    fn number(&self, value: &Value, frame: &Frame, span: Span) -> Result<f64, TemplateError> {
-        to_number(value).map_err(|error| self.fail(frame, span, error.code, error.message))
-    }
-
-    fn finite(&self, value: f64, frame: &Frame, span: Span) -> Result<Value, TemplateError> {
-        if value.is_finite() {
-            Ok(Value::Number(value))
-        } else {
-            Err(self.fail(frame, span, ErrorCode::E_RUNTIME_TYPE, "arithmetic result is not finite"))
-        }
-    }
-
-    /// Stringifies a value; a list or map is E_RUNTIME_STRINGIFY at the span.
-    pub fn stringify(&self, value: &Value, frame: &Frame, span: Span) -> Result<String, TemplateError> {
-        stringify(value).map_err(|_| {
-            self.fail(
-                frame,
-                span,
-                ErrorCode::E_RUNTIME_STRINGIFY,
-                "a list or map cannot be converted to text",
-            )
-        })
-    }
-
-    fn call(&mut self, name: &str, args: Vec<Value>, frame: &Frame, span: Span) -> Result<Value, TemplateError> {
-        let function_context = FunctionContext { env: &self.context.env };
-        if let Some(builtin) = builtins().get(name) {
-            if args.len() < builtin.min || args.len() > builtin.max {
-                let range = if builtin.min == builtin.max {
-                    builtin.min.to_string()
-                } else {
-                    format!("{} to {}", builtin.min, builtin.max)
-                };
-                return Err(self.fail(
-                    frame,
-                    span,
-                    ErrorCode::E_RUNTIME_ARITY,
-                    format!("{name} accepts {range} arguments, got {}", args.len()),
-                ));
-            }
-            return (builtin.call)(&args, &function_context).map_err(|error| self.fail(frame, span, error.code, error.message));
-        }
-        let Some(host) = self.context.engine.functions.get(name) else {
-            return Err(self.fail(
-                frame,
-                span,
-                ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
-                format!("{name} is not a function"),
-            ));
-        };
-        match host(&args, &function_context) {
-            Ok(value) => {
-                let json = crate::value::bind::to_json_value(&value);
-                bind(&json).map_err(|error| self.fail(frame, span, error.code, error.message))
-            }
-            Err(message) => Err(self.fail(frame, span, ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("{name} failed: {message}"))),
-        }
-    }
 }
 
 fn is_collection(value: &Value) -> bool {
     matches!(value, Value::List(_) | Value::Map(_))
-}
-
-/// EXP-19 lookup.
-pub fn lookup(container: &Value, key: &Value) -> Value {
-    match container {
-        Value::Map(map) => {
-            if let Some(text) = key.as_text() {
-                return map.get(text).cloned().unwrap_or(Value::Null);
-            }
-            if let Value::Number(number) = key
-                && number.fract() == 0.0
-            {
-                return map
-                    .get(&crate::value::number::number_to_string(*number))
-                    .cloned()
-                    .unwrap_or(Value::Null);
-            }
-            Value::Null
-        }
-        Value::List(list) => {
-            let index: Option<i64> = match key {
-                Value::Number(number) if number.fract() == 0.0 => Some(*number as i64),
-                other => other
-                    .as_text()
-                    .and_then(|text| if is_index_text(text) { text.parse().ok() } else { None }),
-            };
-            match index {
-                Some(index) if index >= 0 && (index as usize) < list.len() => list[index as usize].clone(),
-                _ => Value::Null,
-            }
-        }
-        _ => Value::Null,
-    }
-}
-
-fn is_index_text(text: &str) -> bool {
-    text == "0" || (text.starts_with(|c: char| ('1'..='9').contains(&c)) && text.bytes().all(|b| b.is_ascii_digit()))
 }
