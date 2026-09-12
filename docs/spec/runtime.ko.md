@@ -59,7 +59,7 @@ compiler manifest는 공개 `Program`, `Engine`, `AstProgram`, generated program
 
 ## 언어 간 렌더 계약
 
-실행 가능한 showcase의 어댑터 경계에는 하나의 원본인 [인터페이스 manifest](../../tools/showcase/adapters/interface.json)가 있다. 이 manifest는 타입, 필드 순서, nullable 여부, 필수 필드, 소유 관계, 생성자, 연산, 오류, 전제조건, 상태 전이와 언어별 이름 매핑을 선언한다. 각 언어의 native 타입은 이 계약을 표현하며 계약을 다시 설계하지 않는다.
+실행 가능한 showcase의 어댑터 경계는 공통 [compiler interface manifest](../../tools/compiler/interface.json)에 포함한다. 이 manifest는 타입, 필드 순서, nullable 여부, 필수 필드, 소유 관계, 생성자, 연산, 오류, 전제조건, 상태 전이와 언어별 이름 매핑을 선언한다. 각 언어의 native 타입은 이 계약을 표현하며 계약을 다시 설계하지 않는다.
 
 ```mermaid
 flowchart LR

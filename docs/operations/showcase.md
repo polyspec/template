@@ -27,7 +27,7 @@ For example, the portal scenario registers two templates:
 
 ## Contract gate
 
-The adapter structures are designed in [interface.json](../../tools/showcase/adapters/interface.json). It is the source for the generated declarations and Mermaid files under `tools/showcase/adapters/generated/`, while the language adapters implement the mapped type and operation names. The generator and checker are permanent repository tools, so a declaration or diagram can never drift silently from the manifest.
+The adapter structures are part of the shared [compiler interface manifest](../../tools/compiler/interface.json). That manifest is the source for the generated declarations and Mermaid files under `tools/showcase/adapters/generated/`, while the language adapters implement the mapped type and operation names. The generator and checker are permanent repository tools, so a declaration or diagram can never drift silently from the manifest.
 
 Run the gate directly with:
 
