@@ -98,7 +98,7 @@ fn generated_mode_uses_the_same_prepared_render_contract() {
         loader: Some(Box::new(loader)),
         compile: polyspec_template::CompileOptions {
             mode: polyspec_template::CompileMode::Gen,
-            generated_renderer: Some(generated_render),
+            generated_renderer: Some(Box::new(generated_render)),
         },
         ..Default::default()
     });

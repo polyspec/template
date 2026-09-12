@@ -168,4 +168,6 @@ make showcase-check
 
 타입 고정 생성기는 `make typed-generator`로 실행한다. 전체 compiled source graph manifest와 명시적 타입 manifest를 읽는다. 언어 backend를 실행하기 전에 공통 compiler IR이 모든 템플릿을 검증하고 include와 block 경로를 해석하며 root 변수, local, loop item, record member, 함수 호출의 타입을 결정한다. 그 뒤 graph의 템플릿마다 정적 함수 하나와 닫힌 template dispatch를 생성하고, manifest에서 도출한 assign과 record 선언을 PHP·Go·Rust·TypeScript 소스에 넣는다. nullable 필드는 각각 `?T`, `*T`, `Option<T>`, 선택 속성으로 변환한다. `make compiler-ir-check`는 canonical node와 expression의 모든 종류 및 선언되지 않은 symbol 거부를 검사한다. `make typed-generator-check`는 산출물 재현성을 확인한다. `make typed-generator-compile-check`는 생성 파일을 모두 컴파일하고 content와 layout 함수를 렌더하여 네 출력이 커밋된 React 페이지 바이트와 같은지 검사한다. 임의의 JSON만으로는 정적 타입을 안전하게 추론할 수 없으므로 manifest가 필요하다.
 
+showcase의 generated 실행도 AST 실행과 같은 public Engine API로 진입한다. 각 adapter는 생성 산출물과 함께 `compile.mode = gen`을 설정한 뒤 `Engine.render`를 호출한다. 생성 callback은 `Engine.prepare`가 만든 정규화된 `GeneratedRequest`를 받는다. 계약 검사기는 adapter가 `render` 안에서 분기하여 생성 소스를 직접 호출하면 실패한다.
+
 소비 애플리케이션 통합은 [실행 체크리스트](../plans/execution-checklist.ko.md)의 Wave 7에서 별도로 추적한다.

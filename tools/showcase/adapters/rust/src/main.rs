@@ -3,7 +3,8 @@ mod native_templates;
 mod native_direct;
 
 use polyspec_template::{
-    DefineInput, Engine, EngineOptions, Env, MapLoader, RenderOptions, RenderTarget,
+    CompileMode, CompileOptions, DefineInput, Engine, EngineOptions, Env, GeneratedPreparedRender,
+    MapLoader, RenderOptions, RenderTarget,
 };
 use render_adapter::{
     DefineEntry, DefineRegistry, Environment, RenderAdapter, RenderRequest, RepeatResult, Scenario,
@@ -16,6 +17,38 @@ use std::path::{Path, PathBuf};
 struct Adapter {
     root: PathBuf,
     engine: Engine,
+}
+
+fn runtime_value_to_json(value: &polyspec_template::Value) -> Value {
+    match value {
+        polyspec_template::Value::Null => Value::Null,
+        polyspec_template::Value::Bool(value) => Value::Bool(*value),
+        polyspec_template::Value::Number(value) => serde_json::Number::from_f64(*value).map(Value::Number).unwrap_or(Value::Null),
+        polyspec_template::Value::Str(value) | polyspec_template::Value::Safe(value) => Value::String(value.clone()),
+        polyspec_template::Value::List(value) => Value::Array(value.iter().map(runtime_value_to_json).collect()),
+        polyspec_template::Value::Map(value) => Value::Object(value.iter().map(|(key, value)| (key.clone(), runtime_value_to_json(value))).collect()),
+    }
+}
+
+fn generated_render_request(request: polyspec_template::GeneratedRequest) -> RenderRequest {
+    let assign = request.root.iter().map(|(key, value)| (key.clone(), runtime_value_to_json(value))).collect();
+    let define = request.registry.into_iter().map(|(id, entry)| {
+        let value = match entry {
+            polyspec_template::render::context::DefineEntry::Template { template, data } => DefineEntry {
+                template: Some(template),
+                data: data.map(|data| data.iter().map(|(key, value)| (key.clone(), runtime_value_to_json(value))).collect()),
+                html: None,
+            },
+            polyspec_template::render::context::DefineEntry::Html(html) => DefineEntry { template: None, data: None, html: Some(html) },
+        };
+        (id, value)
+    }).collect();
+    RenderRequest {
+        target: request.target_name,
+        assign,
+        define,
+        env: Some(Environment { timezone: Some(request.env.timezone), now: Some(request.env.now) }),
+    }
 }
 
 impl Adapter {
@@ -35,9 +68,19 @@ impl Adapter {
         } else {
             artifact_loader(&root, "rust")?
         };
+        let generated = std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated");
+        let generated_root = root.clone();
         let engine = Engine::new(EngineOptions {
             loader: Some(Box::new(loader)),
             legacy_wrappers,
+            compile: if generated { CompileOptions {
+                mode: CompileMode::Gen,
+                generated_renderer: Some(Box::new(move |request| {
+                    let request = generated_render_request(request);
+                    let root = generated_root.clone();
+                    Ok(GeneratedPreparedRender { render: Box::new(move || native_direct::generated_direct_render(&root, &request)) })
+                })),
+            }} else { CompileOptions::default() },
             ..Default::default()
         });
         Ok(Adapter { root, engine })
@@ -150,9 +193,6 @@ impl RenderAdapter for Adapter {
     }
 
     fn render(&self, request: &RenderRequest) -> Result<String, String> {
-        if std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated") {
-            return native_direct::generated_direct_render(&self.root, request);
-        }
         let mut options = RenderOptions::default();
         for (id, entry) in &request.define {
             options.define.insert(
