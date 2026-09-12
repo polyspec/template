@@ -1,0 +1,96 @@
+{
+  "scenario": "scope-precedence",
+  "condition": "fresh process, same input, same output contract",
+  "results": [
+    {
+      "language": "typescript",
+      "mode": "ast",
+      "samples": 7,
+      "median_ms": 62.595125,
+      "min_ms": 60.077458,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "typescript",
+      "mode": "generated",
+      "samples": 7,
+      "median_ms": 61.791792,
+      "min_ms": 56.360166,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "javascript",
+      "mode": "ast",
+      "samples": 7,
+      "median_ms": 36.150792,
+      "min_ms": 35.685708,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "javascript",
+      "mode": "generated",
+      "samples": 7,
+      "median_ms": 36.147917,
+      "min_ms": 33.911708,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "go",
+      "mode": "ast",
+      "samples": 7,
+      "median_ms": 2.751833,
+      "min_ms": 2.439208,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "go",
+      "mode": "generated",
+      "samples": 7,
+      "median_ms": 2.609375,
+      "min_ms": 2.421583,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "rust",
+      "mode": "ast",
+      "samples": 7,
+      "median_ms": 4.404458,
+      "min_ms": 3.204625,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "rust",
+      "mode": "generated",
+      "samples": 7,
+      "median_ms": 2.501875,
+      "min_ms": 2.126125,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "php",
+      "mode": "ast",
+      "samples": 7,
+      "median_ms": 53.43175,
+      "min_ms": 53.133875,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    },
+    {
+      "language": "php",
+      "mode": "generated",
+      "samples": 7,
+      "median_ms": 51.939208,
+      "min_ms": 51.387875,
+      "output_bytes": 177,
+      "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    }
+  ]
+}
