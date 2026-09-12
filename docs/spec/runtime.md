@@ -197,7 +197,7 @@ The support-level graph is generated from the same manifest as the language decl
 flowchart TB
   SourceCompiler["source-compiler: parse, encodeArtifact"] --> ArtifactRuntime["artifact-runtime: loadArtifact, render"]
   ArtifactRuntime --> CoreRuntime["core-runtime: render"]
-  NativeBackend["native-source-backend: optional generated mode"] --> CoreRuntime
+  GeneratedCompiler["generated-compiler: typed source + load"] --> CoreRuntime
 ```
 
 ## Names and loading

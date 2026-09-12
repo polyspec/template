@@ -23,8 +23,8 @@
         "render"
       ]
     },
-    "native-source-backend": {
-      "description": "Optional backend that emits executable source for one host language.",
+    "generated-compiler": {
+      "description": "Compiler that emits typed executable source for the selected host language.",
       "operations": [
         "compileNative",
         "loadNative"
@@ -53,7 +53,7 @@
         "bind assign and define",
         "call generated renderer"
       ],
-      "requiredSupportLevel": "native-source-backend",
+      "requiredSupportLevel": "generated-compiler",
       "status": "implemented"
     }
   },
@@ -414,7 +414,7 @@
         "core-runtime",
         "source-compiler",
         "artifact-runtime",
-        "native-source-backend"
+        "generated-compiler"
       ],
       "file": "typescript.ts",
       "generated": "generated/render_adapter.ts",
@@ -433,7 +433,7 @@
         "core-runtime",
         "source-compiler",
         "artifact-runtime",
-        "native-source-backend"
+        "generated-compiler"
       ],
       "file": "javascript.mjs",
       "generated": "generated/render_adapter.mjs",
@@ -452,7 +452,7 @@
         "core-runtime",
         "source-compiler",
         "artifact-runtime",
-        "native-source-backend"
+        "generated-compiler"
       ],
       "file": "go/main.go",
       "generated": "go/render_adapter.go",
@@ -471,7 +471,7 @@
         "core-runtime",
         "source-compiler",
         "artifact-runtime",
-        "native-source-backend"
+        "generated-compiler"
       ],
       "file": "rust/src/main.rs",
       "generated": "rust/src/render_adapter.rs",
@@ -490,7 +490,7 @@
         "core-runtime",
         "source-compiler",
         "artifact-runtime",
-        "native-source-backend"
+        "generated-compiler"
       ],
       "file": "php.php",
       "generated": "generated/render_adapter.php",
