@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "groups": [
+    {
+      "name": "serialized-ast-schema",
+      "rules": ["AST-8"],
+      "verification": "make schema-check",
+      "files": ["scripts/check-schema.mjs"]
+    },
+    {
+      "name": "conformance-protocol",
+      "rules": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "ERR-1", "ERR-3", "ERR-4", "ERR-6"],
+      "verification": "make conformance-all-modes",
+      "files": ["tests/runner/conformance.mjs", "tests/runner/parity.mjs"]
+    },
+    {
+      "name": "lexer-parser-units",
+      "rules": ["EXP-1", "GRM-1", "GRM-5", "GRM-23", "LEX-8", "LEX-12"],
+      "verification": "make test-ts test-go test-rust test-php",
+      "files": ["packages/template-ts/tests/parser/parser.test.ts", "packages/template-go/parser/parser_test.go", "packages/template-rust/tests/parser.rs", "packages/template-php/tests/Parser/ParserTest.php"]
+    },
+    {
+      "name": "host-functions",
+      "rules": ["FUN-9", "FUN-43", "FUN-44", "FUN-45", "FUN-46", "FUN-47", "FUN-48", "FUN-49"],
+      "verification": "make test-ts test-go test-rust test-php test-ext",
+      "files": ["packages/template-ts/tests/render/engine.test.ts", "packages/template-go/functions/functions_test.go", "packages/template-rust/tests/functions.rs", "packages/template-php/tests/Functions/FunctionsTest.php", "packages/template-php-ext/tests/EngineTest.php"]
+    },
+    {
+      "name": "runtime-public-contract",
+      "rules": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-10", "RT-11", "RT-20", "RT-23", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41"],
+      "verification": "make test-ts test-go test-rust test-php",
+      "files": ["packages/template-ts/tests/render/engine.test.ts", "packages/template-go/engine_test.go", "packages/template-rust/tests/functions.rs", "packages/template-php/tests/EngineRefreshTest.php"]
+    },
+    {
+      "name": "showcase-interface-contract",
+      "rules": ["RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53"],
+      "verification": "make contract-check",
+      "files": ["scripts/check-showcase-contract.mjs", "tools/compiler/interface.json"]
+    },
+    {
+      "name": "compiler-artifact-contract",
+      "rules": ["RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69"],
+      "verification": "make typed-generator-compile-check",
+      "files": ["scripts/check-ast-artifact.mjs", "scripts/check-generated-artifact.mjs", "scripts/check-compiler-ir.mjs", "scripts/check-typed-generator.mjs"]
+    },
+    {
+      "name": "host-value-binding",
+      "rules": ["VAL-1", "VAL-7", "VAL-11", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18"],
+      "verification": "make test-ts test-go test-rust test-php test-ext",
+      "files": ["packages/template-ts/tests/value/value.test.ts", "packages/template-go/value/value_test.go", "packages/template-rust/tests/value.rs", "packages/template-php/tests/Value/ValueTest.php", "packages/template-php-ext/tests/EngineTest.php"]
+    }
+  ]
+}
