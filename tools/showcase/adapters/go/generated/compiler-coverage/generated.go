@@ -62,39 +62,39 @@ scope.Locals["label"] = generatedValue(input.Label)
     generatedWrite(context, "</p>\n", frame, ast.Span{25, 30})
 }
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
-	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691}, rootData)
+	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695}, rootData)
 
-    scope.Locals["values"] = generatedValue(func() []float64 { result := []float64{}; result = append(result, float64(0)); result = append(result, generatedListSpread[float64](runtime, assign.Numbers, frame, ast.Span{14, 24})...); return result }())
-    scope.Locals["merged"] = generatedValue(func() OrderedMap[string, string] { result := NewOrderedMap[string, string](); for _, entry := range generatedMapSpread[string, string](runtime, assign.Lookup, frame, ast.Span{38, 47}).Entries() { result.Set(entry.Key, entry.Value) }; result.Set("z", "Z"); return result }())
-    generatedWrite(context, "<section>\n<h1>", frame, ast.Span{62, 76})
-    generatedWrite(context, generatedEscape(runtime, assign.Page.Title, frame, ast.Span{79, 89}), frame, ast.Span{76, 90})
-    generatedWrite(context, "</h1>\n<p class=\"escaped\">", frame, ast.Span{90, 115})
-    generatedWrite(context, generatedEscape(runtime, assign.Dangerous, frame, ast.Span{118, 127}), frame, ast.Span{115, 128})
-    generatedWrite(context, "</p>\n<p class=\"logical\">", frame, ast.Span{128, 152})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, "x") }(), frame, ast.Span{155, 166}), frame, ast.Span{152, 167})
-    generatedWrite(context, "|", frame, ast.Span{167, 168})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := false; if generatedTruthy(runtime, left) { return true }; return generatedTruthy(runtime, float64(2)) }(), frame, ast.Span{171, 181}), frame, ast.Span{168, 182})
-    generatedWrite(context, "</p>\n<p class=\"empty-truthiness\">", frame, ast.Span{182, 215})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_list; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{218, 236}), frame, ast.Span{215, 237})
-    generatedWrite(context, "|", frame, ast.Span{237, 238})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_map; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{241, 258}), frame, ast.Span{238, 259})
-    generatedWrite(context, "</p>\n<p>", frame, ast.Span{259, 267})
-    generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, "values")), float64(1)), frame, ast.Span{270, 279}), frame, ast.Span{267, 280})
-    generatedWrite(context, "|", frame, ast.Span{280, 281})
-    generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, generatedResult[OrderedMap[string, string]](scope.Lookup(frame, "merged")), "z"), frame, ast.Span{284, 295}), frame, ast.Span{281, 296})
-    generatedWrite(context, "</p>\n", frame, ast.Span{296, 301})
-	if generatedTruthy(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, generatedBinary[bool](runtime, "==", assign.Page.Title, "Guide", frame, ast.Span{312, 333})) }()) {
-        generatedWrite(context, "<strong>matched</strong>", frame, ast.Span{334, 358})	} else {
-        generatedWrite(context, "<strong>missed</strong>", frame, ast.Span{361, 384})
+    scope.Locals["values"] = generatedValue(func() []float64 { result := []float64{}; result = append(result, float64(0)); result = append(result, generatedListSpread[float64](runtime, assign.Numbers, frame, ast.Span{16, 26})...); return result }())
+    scope.Locals["merged"] = generatedValue(func() OrderedMap[string, string] { result := NewOrderedMap[string, string](); for _, entry := range generatedMapSpread[string, string](runtime, assign.Lookup, frame, ast.Span{42, 51}).Entries() { result.Set(entry.Key, entry.Value) }; result.Set("z", "Z"); return result }())
+    generatedWrite(context, "<section>\n<h1>", frame, ast.Span{66, 80})
+    generatedWrite(context, generatedEscape(runtime, assign.Page.Title, frame, ast.Span{83, 93}), frame, ast.Span{80, 94})
+    generatedWrite(context, "</h1>\n<p class=\"escaped\">", frame, ast.Span{94, 119})
+    generatedWrite(context, generatedEscape(runtime, assign.Dangerous, frame, ast.Span{122, 131}), frame, ast.Span{119, 132})
+    generatedWrite(context, "</p>\n<p class=\"logical\">", frame, ast.Span{132, 156})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, "x") }(), frame, ast.Span{159, 170}), frame, ast.Span{156, 171})
+    generatedWrite(context, "|", frame, ast.Span{171, 172})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := false; if generatedTruthy(runtime, left) { return true }; return generatedTruthy(runtime, float64(2)) }(), frame, ast.Span{175, 185}), frame, ast.Span{172, 186})
+    generatedWrite(context, "</p>\n<p class=\"empty-truthiness\">", frame, ast.Span{186, 219})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_list; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{222, 240}), frame, ast.Span{219, 241})
+    generatedWrite(context, "|", frame, ast.Span{241, 242})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_map; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{245, 262}), frame, ast.Span{242, 263})
+    generatedWrite(context, "</p>\n<p>", frame, ast.Span{263, 271})
+    generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, "values")), float64(1)), frame, ast.Span{274, 283}), frame, ast.Span{271, 284})
+    generatedWrite(context, "|", frame, ast.Span{284, 285})
+    generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, generatedResult[OrderedMap[string, string]](scope.Lookup(frame, "merged")), "z"), frame, ast.Span{288, 299}), frame, ast.Span{285, 300})
+    generatedWrite(context, "</p>\n", frame, ast.Span{300, 305})
+	if generatedTruthy(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, generatedBinary[bool](runtime, "==", assign.Page.Title, "Guide", frame, ast.Span{316, 337})) }()) {
+        generatedWrite(context, "<strong>matched</strong>", frame, ast.Span{338, 362})	} else {
+        generatedWrite(context, "<strong>missed</strong>", frame, ast.Span{365, 388})
 	}
-    generatedWrite(context, "\n<p>", frame, ast.Span{387, 391})
-    generatedWrite(context, generatedEscape(runtime, func() string { if generatedTruthy(runtime, assign.Flag) { return "yes" }; return "no" }(), frame, ast.Span{394, 413}), frame, ast.Span{391, 414})
-    generatedWrite(context, "|", frame, ast.Span{414, 415})
-    generatedWrite(context, generatedEscape(runtime, generatedBinary[float64](runtime, "+", generatedUnary[float64](runtime, "-", float64(1), frame, ast.Span{418, 420}), float64(3), frame, ast.Span{418, 424}), frame, ast.Span{418, 424}), frame, ast.Span{415, 425})
-    generatedWrite(context, "|", frame, ast.Span{425, 426})
-    generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(""), generatedValue("fallback")}, frame, ast.Span{429, 453}), frame, ast.Span{429, 453}), frame, ast.Span{426, 454})
-    generatedWrite(context, "</p>\n<ul>\n", frame, ast.Span{454, 464})
-    { entries := generatedEntries(runtime, assign.Rows, frame, ast.Span{464, 581})
+    generatedWrite(context, "\n<p>", frame, ast.Span{391, 395})
+    generatedWrite(context, generatedEscape(runtime, func() string { if generatedTruthy(runtime, assign.Flag) { return "yes" }; return "no" }(), frame, ast.Span{398, 417}), frame, ast.Span{395, 418})
+    generatedWrite(context, "|", frame, ast.Span{418, 419})
+    generatedWrite(context, generatedEscape(runtime, generatedBinary[float64](runtime, "+", generatedUnary[float64](runtime, "-", float64(1), frame, ast.Span{422, 424}), float64(3), frame, ast.Span{422, 428}), frame, ast.Span{422, 428}), frame, ast.Span{419, 429})
+    generatedWrite(context, "|", frame, ast.Span{429, 430})
+    generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(""), generatedValue("fallback")}, frame, ast.Span{433, 457}), frame, ast.Span{433, 457}), frame, ast.Span{430, 458})
+    generatedWrite(context, "</p>\n<ul>\n", frame, ast.Span{458, 468})
+    { entries := generatedEntries(runtime, assign.Rows, frame, ast.Span{468, 585})
     entriesSize := len(entries)
     lastIndex := entriesSize - 1
     previous, hadPrevious := scope.Locals["row"]
@@ -103,48 +103,48 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
         scope.Locals["row"] = row_value
         scope.Loops["row"] = append(scope.Loops["row"], &render.LoopMeta{Index: row_index, Key: row_key, Value: row_value, Size: entriesSize, First: row_index == 0, Last: row_index == lastIndex})
         context.Iterations++
-        generatedLimit(runtime, "iteration", context.Iterations, frame, ast.Span{464, 581})
-            generatedWrite(context, "<li>", frame, ast.Span{479, 483})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").Index, frame, ast.Span{486, 496}), frame, ast.Span{483, 497})
-            generatedWrite(context, "/", frame, ast.Span{497, 498})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").Size, frame, ast.Span{501, 510}), frame, ast.Span{498, 511})
-            generatedWrite(context, ":", frame, ast.Span{511, 512})
-            generatedWrite(context, generatedEscape(runtime, generatedResult[Row](scope.Lookup(frame, "row")).Name, frame, ast.Span{515, 523}), frame, ast.Span{512, 524})
-            generatedWrite(context, ":", frame, ast.Span{524, 525})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").First, frame, ast.Span{528, 538}), frame, ast.Span{525, 539})
-            generatedWrite(context, ":", frame, ast.Span{539, 540})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").Last, frame, ast.Span{543, 552}), frame, ast.Span{540, 553})
-            generatedWrite(context, "</li>\n", frame, ast.Span{553, 559})
+        generatedLimit(runtime, "iteration", context.Iterations, frame, ast.Span{468, 585})
+            generatedWrite(context, "<li>", frame, ast.Span{483, 487})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").Index, frame, ast.Span{490, 500}), frame, ast.Span{487, 501})
+            generatedWrite(context, "/", frame, ast.Span{501, 502})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").Size, frame, ast.Span{505, 514}), frame, ast.Span{502, 515})
+            generatedWrite(context, ":", frame, ast.Span{515, 516})
+            generatedWrite(context, generatedEscape(runtime, generatedResult[Row](scope.Lookup(frame, "row")).Name, frame, ast.Span{519, 527}), frame, ast.Span{516, 528})
+            generatedWrite(context, ":", frame, ast.Span{528, 529})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").First, frame, ast.Span{532, 542}), frame, ast.Span{529, 543})
+            generatedWrite(context, ":", frame, ast.Span{543, 544})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").Last, frame, ast.Span{547, 556}), frame, ast.Span{544, 557})
+            generatedWrite(context, "</li>\n", frame, ast.Span{557, 563})
         scope.Loops["row"] = scope.Loops["row"][:len(scope.Loops["row"])-1]
     }
     if hadPrevious { scope.Locals["row"] = previous } else { delete(scope.Locals, "row") }
     if entriesSize == 0 {
-            generatedWrite(context, "<li>empty</li>\n", frame, ast.Span{563, 578})
+            generatedWrite(context, "<li>empty</li>\n", frame, ast.Span{567, 582})
     }
     }
-    generatedWrite(context, "</ul>\n", frame, ast.Span{582, 588})
-    generatedEnter(context, "partial.tpl", frame, ast.Span{588, 603})
+    generatedWrite(context, "</ul>\n", frame, ast.Span{586, 592})
+    generatedEnter(context, "partial.tpl", frame, ast.Span{592, 607})
     func() { defer context.Leave(); render_partial_tpl(assign, definitions, Input_partial_tpl{Values: generatedResult[[]float64](scope.Lookup(frame, "values"))}, context, runtime, rootData, scope) }()
     if definitions.Content != nil {
-            generatedWrite(context, "<p>defined</p>", frame, ast.Span{616, 630})
+            generatedWrite(context, "<p>defined</p>", frame, ast.Span{620, 634})
     } else {
-            generatedWrite(context, "<p>missing</p>", frame, ast.Span{633, 647})
+            generatedWrite(context, "<p>missing</p>", frame, ast.Span{637, 651})
     }
-    generatedWrite(context, "\n", frame, ast.Span{650, 651})
+    generatedWrite(context, "\n", frame, ast.Span{654, 655})
     { definition := definitions.Content
-    if definition == nil { panic(runtime.Error(frame, ast.Span{651, 679}, errs.RuntimeBlockUndefined, "define content is not registered")) }
-    if definition != nil && definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{651, 679}) } else {
+    if definition == nil { panic(runtime.Error(frame, ast.Span{655, 683}, errs.RuntimeBlockUndefined, "define content is not registered")) }
+    if definition != nil && definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{655, 683}) } else {
         input := Input_card_tpl{}
         if definition != nil && definition.Data != nil {
             if definition.Data.Label != nil { input.Label = *definition.Data.Label }
         }
         input.Label = assign.Page.Title
         blockScope := render.NewScope()
-        generatedEnter(context, "card.tpl", frame, ast.Span{651, 679})
+        generatedEnter(context, "card.tpl", frame, ast.Span{655, 683})
         func() { defer context.Leave(); render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope) }()
     }
     }
-    generatedWrite(context, "</section>\n", frame, ast.Span{680, 691})
+    generatedWrite(context, "</section>\n", frame, ast.Span{684, 695})
 }
 func render_partial_tpl(assign Assign, definitions *Definitions, input Input_partial_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame("partial.tpl", errs.LineIndex{0, 38}, rootData)
