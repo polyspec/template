@@ -1,5 +1,5 @@
-{values = [0, ...numbers]}
-{merged = [...lookup, 'z' => 'Z']}
+{: values = [0, ...numbers]}
+{: merged = [...lookup, 'z' => 'Z']}
 <section>
 <h1>{= page.title}</h1>
 <p class="escaped">{= dangerous}</p>

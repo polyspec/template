@@ -467,6 +467,7 @@ impl<'a> TemplateParser<'a> {
 
     fn parse_assignment(&mut self, context: &TagContext, body_start: usize) -> Result<usize, TemplateError> {
         let bytes = self.bytes();
+        let body_start = skip_horizontal_space(bytes, body_start);
         let name_length = ident_length(bytes, body_start);
         let operator_start = skip_horizontal_space(bytes, body_start + name_length);
         let operator_length = assign_operator_length(bytes, operator_start);

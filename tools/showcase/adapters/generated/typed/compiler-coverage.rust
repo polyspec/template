@@ -50,39 +50,39 @@ scope.locals.insert("label".to_string(), generated_value(&input.label)?);
     let escaped = runtime.escape(context, &scope.lookup(&frame, "label"), &frame, [19, 24])?; context.write(&escaped, &frame, [16, 25])?;
     context.write("</p>\n", &frame, [25, 30])?;
  Ok(()) }
-fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: InputLayoutTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: "layout.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691])), context: Rc::clone(root_data) };
+fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: InputLayoutTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: "layout.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695])), context: Rc::clone(root_data) };
 
-    scope.locals.insert("values".to_string(), { let mut result = Vec::new(); result.push(Value::Number(0f64)); result.extend(runtime.list_spread(context, &generated_value(&assign.numbers)?, &frame, [14, 24])?); Value::list(result) });
-    scope.locals.insert("merged".to_string(), { let mut result = RuntimeOrderedMap::new(); for (key, value) in runtime.map_spread(context, &generated_value(&assign.lookup)?, &frame, [38, 47])?.iter() { result.insert(key.clone(), value.clone()); } result.insert(runtime.stringify(context, &Value::text("z"), &frame, [49, 52])?, Value::text("Z")); Value::map(result) });
-    context.write("<section>\n<h1>", &frame, [62, 76])?;
-    let escaped = runtime.escape(context, &runtime.member(&generated_value(&assign.page)?, "title"), &frame, [79, 89])?; context.write(&escaped, &frame, [76, 90])?;
-    context.write("</h1>\n<p class=\"escaped\">", &frame, [90, 115])?;
-    let escaped = runtime.escape(context, &generated_value(&assign.dangerous)?, &frame, [118, 127])?; context.write(&escaped, &frame, [115, 128])?;
-    context.write("</p>\n<p class=\"logical\">", &frame, [128, 152])?;
-    let escaped = runtime.escape(context, &{ let left = generated_value(&assign.flag)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&Value::text("x")) }) }, &frame, [155, 166])?; context.write(&escaped, &frame, [152, 167])?;
-    context.write("|", &frame, [167, 168])?;
-    let escaped = runtime.escape(context, &{ let left = Value::Bool(false); Value::Bool(if runtime.truthy(&left) { true } else { runtime.truthy(&Value::Number(2f64)) }) }, &frame, [171, 181])?; context.write(&escaped, &frame, [168, 182])?;
-    context.write("</p>\n<p class=\"empty-truthiness\">", &frame, [182, 215])?;
-    let escaped = runtime.escape(context, &{ let left = generated_value(&assign.empty_list)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&generated_value(&assign.flag)?) }) }, &frame, [218, 236])?; context.write(&escaped, &frame, [215, 237])?;
-    context.write("|", &frame, [237, 238])?;
-    let escaped = runtime.escape(context, &{ let left = generated_value(&assign.empty_map)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&generated_value(&assign.flag)?) }) }, &frame, [241, 258])?; context.write(&escaped, &frame, [238, 259])?;
-    context.write("</p>\n<p>", &frame, [259, 267])?;
-    let escaped = runtime.escape(context, &runtime.index(&scope.lookup(&frame, "values"), &Value::Number(1f64)), &frame, [270, 279])?; context.write(&escaped, &frame, [267, 280])?;
-    context.write("|", &frame, [280, 281])?;
-    let escaped = runtime.escape(context, &runtime.index(&scope.lookup(&frame, "merged"), &Value::text("z")), &frame, [284, 295])?; context.write(&escaped, &frame, [281, 296])?;
-    context.write("</p>\n", &frame, [296, 301])?;
-    if runtime.truthy(&{ let left = generated_value(&assign.flag)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&runtime.binary(context, polyspec_template::ast::BinaryOp::Equal, &runtime.member(&generated_value(&assign.page)?, "title"), &Value::text("Guide"), &frame, [312, 333])?) }) }) {
-        context.write("<strong>matched</strong>", &frame, [334, 358])?;    } else {
-        context.write("<strong>missed</strong>", &frame, [361, 384])?;
+    scope.locals.insert("values".to_string(), { let mut result = Vec::new(); result.push(Value::Number(0f64)); result.extend(runtime.list_spread(context, &generated_value(&assign.numbers)?, &frame, [16, 26])?); Value::list(result) });
+    scope.locals.insert("merged".to_string(), { let mut result = RuntimeOrderedMap::new(); for (key, value) in runtime.map_spread(context, &generated_value(&assign.lookup)?, &frame, [42, 51])?.iter() { result.insert(key.clone(), value.clone()); } result.insert(runtime.stringify(context, &Value::text("z"), &frame, [53, 56])?, Value::text("Z")); Value::map(result) });
+    context.write("<section>\n<h1>", &frame, [66, 80])?;
+    let escaped = runtime.escape(context, &runtime.member(&generated_value(&assign.page)?, "title"), &frame, [83, 93])?; context.write(&escaped, &frame, [80, 94])?;
+    context.write("</h1>\n<p class=\"escaped\">", &frame, [94, 119])?;
+    let escaped = runtime.escape(context, &generated_value(&assign.dangerous)?, &frame, [122, 131])?; context.write(&escaped, &frame, [119, 132])?;
+    context.write("</p>\n<p class=\"logical\">", &frame, [132, 156])?;
+    let escaped = runtime.escape(context, &{ let left = generated_value(&assign.flag)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&Value::text("x")) }) }, &frame, [159, 170])?; context.write(&escaped, &frame, [156, 171])?;
+    context.write("|", &frame, [171, 172])?;
+    let escaped = runtime.escape(context, &{ let left = Value::Bool(false); Value::Bool(if runtime.truthy(&left) { true } else { runtime.truthy(&Value::Number(2f64)) }) }, &frame, [175, 185])?; context.write(&escaped, &frame, [172, 186])?;
+    context.write("</p>\n<p class=\"empty-truthiness\">", &frame, [186, 219])?;
+    let escaped = runtime.escape(context, &{ let left = generated_value(&assign.empty_list)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&generated_value(&assign.flag)?) }) }, &frame, [222, 240])?; context.write(&escaped, &frame, [219, 241])?;
+    context.write("|", &frame, [241, 242])?;
+    let escaped = runtime.escape(context, &{ let left = generated_value(&assign.empty_map)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&generated_value(&assign.flag)?) }) }, &frame, [245, 262])?; context.write(&escaped, &frame, [242, 263])?;
+    context.write("</p>\n<p>", &frame, [263, 271])?;
+    let escaped = runtime.escape(context, &runtime.index(&scope.lookup(&frame, "values"), &Value::Number(1f64)), &frame, [274, 283])?; context.write(&escaped, &frame, [271, 284])?;
+    context.write("|", &frame, [284, 285])?;
+    let escaped = runtime.escape(context, &runtime.index(&scope.lookup(&frame, "merged"), &Value::text("z")), &frame, [288, 299])?; context.write(&escaped, &frame, [285, 300])?;
+    context.write("</p>\n", &frame, [300, 305])?;
+    if runtime.truthy(&{ let left = generated_value(&assign.flag)?; Value::Bool(if !runtime.truthy(&left) { false } else { runtime.truthy(&runtime.binary(context, polyspec_template::ast::BinaryOp::Equal, &runtime.member(&generated_value(&assign.page)?, "title"), &Value::text("Guide"), &frame, [316, 337])?) }) }) {
+        context.write("<strong>matched</strong>", &frame, [338, 362])?;    } else {
+        context.write("<strong>missed</strong>", &frame, [365, 388])?;
     }
-    context.write("\n<p>", &frame, [387, 391])?;
-    let escaped = runtime.escape(context, &if runtime.truthy(&generated_value(&assign.flag)?) { Value::text("yes") } else { Value::text("no") }, &frame, [394, 413])?; context.write(&escaped, &frame, [391, 414])?;
-    context.write("|", &frame, [414, 415])?;
-    let escaped = runtime.escape(context, &runtime.binary(context, polyspec_template::ast::BinaryOp::Add, &runtime.unary(context, polyspec_template::ast::UnaryOp::Negate, &Value::Number(1f64), &frame, [418, 420])?, &Value::Number(3f64), &frame, [418, 424])?, &frame, [418, 424])?; context.write(&escaped, &frame, [415, 425])?;
-    context.write("|", &frame, [425, 426])?;
-    let escaped = runtime.escape(context, &runtime.call(context, "default", vec![Value::text(""), Value::text("fallback")], &frame, [429, 453])?, &frame, [429, 453])?; context.write(&escaped, &frame, [426, 454])?;
-    context.write("</p>\n<ul>\n", &frame, [454, 464])?;
-    { let entries = runtime.entries(context, &generated_value(&assign.rows)?, &frame, [464, 581])?;
+    context.write("\n<p>", &frame, [391, 395])?;
+    let escaped = runtime.escape(context, &if runtime.truthy(&generated_value(&assign.flag)?) { Value::text("yes") } else { Value::text("no") }, &frame, [398, 417])?; context.write(&escaped, &frame, [395, 418])?;
+    context.write("|", &frame, [418, 419])?;
+    let escaped = runtime.escape(context, &runtime.binary(context, polyspec_template::ast::BinaryOp::Add, &runtime.unary(context, polyspec_template::ast::UnaryOp::Negate, &Value::Number(1f64), &frame, [422, 424])?, &Value::Number(3f64), &frame, [422, 428])?, &frame, [422, 428])?; context.write(&escaped, &frame, [419, 429])?;
+    context.write("|", &frame, [429, 430])?;
+    let escaped = runtime.escape(context, &runtime.call(context, "default", vec![Value::text(""), Value::text("fallback")], &frame, [433, 457])?, &frame, [433, 457])?; context.write(&escaped, &frame, [430, 458])?;
+    context.write("</p>\n<ul>\n", &frame, [458, 468])?;
+    { let entries = runtime.entries(context, &generated_value(&assign.rows)?, &frame, [468, 585])?;
     let row_size = entries.len();
     let row_last_index = entries.len().saturating_sub(1);
     let row_previous = scope.locals.get("row").cloned();
@@ -90,40 +90,40 @@ fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: Inpu
         scope.locals.insert("row".to_string(), row_value.clone());
         scope.loops.entry("row".to_string()).or_default().push(polyspec_template::render::context::LoopMeta { index: row_index_raw, key: row_key, value: row_value, first: row_index_raw == 0, last: row_index_raw == row_last_index, size: row_size });
         context.iterations += 1;
-        runtime.limit(context, "iteration", context.iterations, &frame, [464, 581])?;
-            context.write("<li>", &frame, [479, 483])?;
-            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [486, 496], "row", "index_")?, &frame, [486, 496])?; context.write(&escaped, &frame, [483, 497])?;
-            context.write("/", &frame, [497, 498])?;
-            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [501, 510], "row", "size_")?, &frame, [501, 510])?; context.write(&escaped, &frame, [498, 511])?;
-            context.write(":", &frame, [511, 512])?;
-            let escaped = runtime.escape(context, &runtime.member(&scope.lookup(&frame, "row"), "name"), &frame, [515, 523])?; context.write(&escaped, &frame, [512, 524])?;
-            context.write(":", &frame, [524, 525])?;
-            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [528, 538], "row", "first_")?, &frame, [528, 538])?; context.write(&escaped, &frame, [525, 539])?;
-            context.write(":", &frame, [539, 540])?;
-            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [543, 552], "row", "last_")?, &frame, [543, 552])?; context.write(&escaped, &frame, [540, 553])?;
-            context.write("</li>\n", &frame, [553, 559])?;
+        runtime.limit(context, "iteration", context.iterations, &frame, [468, 585])?;
+            context.write("<li>", &frame, [483, 487])?;
+            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [490, 500], "row", "index_")?, &frame, [490, 500])?; context.write(&escaped, &frame, [487, 501])?;
+            context.write("/", &frame, [501, 502])?;
+            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [505, 514], "row", "size_")?, &frame, [505, 514])?; context.write(&escaped, &frame, [502, 515])?;
+            context.write(":", &frame, [515, 516])?;
+            let escaped = runtime.escape(context, &runtime.member(&scope.lookup(&frame, "row"), "name"), &frame, [519, 527])?; context.write(&escaped, &frame, [516, 528])?;
+            context.write(":", &frame, [528, 529])?;
+            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [532, 542], "row", "first_")?, &frame, [532, 542])?; context.write(&escaped, &frame, [529, 543])?;
+            context.write(":", &frame, [543, 544])?;
+            let escaped = runtime.escape(context, &generated_loop_meta(runtime, context, scope, &frame, [547, 556], "row", "last_")?, &frame, [547, 556])?; context.write(&escaped, &frame, [544, 557])?;
+            context.write("</li>\n", &frame, [557, 563])?;
         scope.loops.get_mut("row").expect("generated loop stack").pop();
     }
     if scope.loops.get("row").is_some_and(Vec::is_empty) { scope.loops.remove("row"); }
     if let Some(previous) = row_previous { scope.locals.insert("row".to_string(), previous); } else { scope.locals.remove("row"); }
     if entries.is_empty() {
-            context.write("<li>empty</li>\n", &frame, [563, 578])?;
+            context.write("<li>empty</li>\n", &frame, [567, 582])?;
     }
     }
-    context.write("</ul>\n", &frame, [582, 588])?;
-    context.enter("partial.tpl", Some(&frame), Some([588, 603]))?;
+    context.write("</ul>\n", &frame, [586, 592])?;
+    context.enter("partial.tpl", Some(&frame), Some([592, 607]))?;
     let rendered = render_partial_tpl(assign, definitions, InputPartialTpl { values: generated_result::<Vec<f64>>(&scope.lookup(&frame, "values"))? }, context, runtime, root_data, scope);
     context.leave();
     rendered?;
     if definitions.content.is_some() {
-            context.write("<p>defined</p>", &frame, [616, 630])?;
+            context.write("<p>defined</p>", &frame, [620, 634])?;
     } else {
-            context.write("<p>missing</p>", &frame, [633, 647])?;
+            context.write("<p>missing</p>", &frame, [637, 651])?;
     }
-    context.write("\n", &frame, [650, 651])?;
-    { if definitions.content.is_none() { return Err(runtime.error(context, &frame, [651, 679], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, "define content is not registered")); }
+    context.write("\n", &frame, [654, 655])?;
+    { if definitions.content.is_none() { return Err(runtime.error(context, &frame, [655, 683], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, "define content is not registered")); }
     let definition = definitions.content.clone();
-    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &frame, [651, 679])?; } else {
+    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &frame, [655, 683])?; } else {
         let mut input = InputCardTpl::default();
 
         if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) {
@@ -131,13 +131,13 @@ fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: Inpu
         }
         input.label = generated_result::<String>(&runtime.member(&generated_value(&assign.page)?, "title"))?;
         let mut block_scope = Scope::default();
-        context.enter("card.tpl", Some(&frame), Some([651, 679]))?;
+        context.enter("card.tpl", Some(&frame), Some([655, 683]))?;
         let rendered = render_card_tpl(assign, definitions, input, context, runtime, root_data, &mut block_scope);
         context.leave();
         rendered?;
     }
     }
-    context.write("</section>\n", &frame, [680, 691])?;
+    context.write("</section>\n", &frame, [684, 695])?;
  Ok(()) }
 fn render_partial_tpl(assign: &Assign, definitions: &mut Definitions, input: InputPartialTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: "partial.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 38])), context: Rc::clone(root_data) };
 scope.locals.insert("values".to_string(), generated_value(&input.values)?);

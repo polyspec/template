@@ -4,10 +4,10 @@
   "target": "canonical",
   "entry": "layout.tpl",
   "delimiters": null,
-  "sourceDigest": "612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722",
+  "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea",
-  "compilerDigest": "e8b0fa74c9fc2e3b40c857cd2505c7c2c5eeb54267911cdc5ad8bdd0537d0f5e",
+  "contractDigest": "f9341f63ca2aa10efe76e2403815424f462f950ae77dbc7e29f1899920acf4e2",
+  "compilerDigest": "c7cb0dd8678250c5600f58d4f3ea26a60c5481766447686ed43acd450fe0f8b8",
   "files": {
     "content.tpl": {
       "path": "content.tpl.ast.json",
@@ -25,14 +25,14 @@
     },
     "layout.tpl": {
       "path": "layout.tpl.ast.json",
-      "sourceDigest": "8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06",
-      "artifactDigest": "3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c",
+      "sourceDigest": "8b9462afffb5aa9d81c6d17412eb9f828016bc33298cdb15eaa66eaa1d0b9431",
+      "artifactDigest": "d2b3dad690424e3615e082aa4459d1d90467f792e114a0d922fd0585f83ea2b8",
       "lines": [
         0,
-        42,
-        66,
-        95,
-        106
+        44,
+        68,
+        97,
+        108
       ]
     }
   }

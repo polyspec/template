@@ -3,14 +3,14 @@
   "mode": "gen",
   "target": "php",
   "entry": "layout.tpl",
-  "sourceDigest": "612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722",
+  "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea",
+  "contractDigest": "f9341f63ca2aa10efe76e2403815424f462f950ae77dbc7e29f1899920acf4e2",
   "compilerDigest": "9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf",
   "files": {
     "scope-precedence.php": {
       "path": "scope-precedence.php",
-      "artifactDigest": "be73d4e5d9990980b89327bf832350087a9bd3f21a855e6a5f844ca41e74aa0d"
+      "artifactDigest": "ef857983d5b5e2f0121f334a2d2c343d22f6e770ced8996c711a71a70c0107b6"
     }
   }
 }
