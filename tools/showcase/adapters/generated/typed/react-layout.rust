@@ -10,11 +10,22 @@ use std::collections::HashMap;
     pub defined_label: Option<String>,
     pub page: Option<Page>,
 }
-pub fn render(assign: &Assign, slots: &HashMap<String, String>) -> String { let mut out = String::new();
+fn render_content_tpl(assign: &Assign, slots: &HashMap<String, String>) -> String { let mut out = String::new();
+    out.push_str("<section data-react-island id=\"counter\">\n<p>");
+    out.push_str(&escape(&assign.island_label.clone().unwrap_or_default().to_string()));
+    out.push_str("</p>\n</section>\n");
+ out }
+fn render_layout_tpl(assign: &Assign, slots: &HashMap<String, String>) -> String { let mut out = String::new();
     out.push_str("<main>\n<h1>");
     out.push_str(&escape(&assign.title.clone().unwrap_or_default().to_string()));
     out.push_str("</h1>\n");
     out.push_str(slots.get("content").map(String::as_str).unwrap_or(""));
     out.push_str("</main>\n");
  out }
+fn render_template(target: &str, assign: &Assign, slots: &HashMap<String, String>) -> String { match target {
+        "content.tpl" => render_content_tpl(assign, slots),
+        "layout.tpl" => render_layout_tpl(assign, slots),
+        _ => panic!("generated template is missing: {target}"),
+} }
+pub fn render(assign: &Assign, slots: &HashMap<String, String>) -> String { render_template("layout.tpl", assign, slots) }
 fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }
