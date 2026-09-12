@@ -28,6 +28,6 @@ for (const [language, [relative, enginePattern, preparedPattern]] of Object.entr
   const mapping = manifest.languages[language];
   if (!mapping || !mapping.engine || !mapping.pageCache) throw new Error(`${language}: missing manifest mapping`);
   const pageCache = readFileSync(resolve(root, pageCaches[language]), 'utf8');
-  if (!/getOrSet|get_or_set/.test(pageCache)) throw new Error(`${language}: missing PageCache getOrSet operation`);
+  if (!/getOrSet|GetOrSet|get_or_set/.test(pageCache)) throw new Error(`${language}: missing PageCache getOrSet operation`);
 }
 process.stdout.write('runtime interface: four language mappings passed\n');

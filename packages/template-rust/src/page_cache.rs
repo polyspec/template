@@ -51,8 +51,12 @@ impl PageCache {
 
     /// Returns a cached page or renders and stores it on a miss.
     pub fn get_or_set<F>(&mut self, key: &str, ttl: Option<f64>, now: f64, render: F) -> Result<String, String>
-    where F: FnOnce() -> Result<String, String> {
-        if let Some(html) = self.get(key, now) { return Ok(html); }
+    where
+        F: FnOnce() -> Result<String, String>,
+    {
+        if let Some(html) = self.get(key, now) {
+            return Ok(html);
+        }
         let html = render()?;
         self.set(key, html.clone(), ttl, now)?;
         Ok(html)

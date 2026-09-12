@@ -15,7 +15,23 @@ fn ttl_zero_and_null_are_permanent() {
 fn get_or_set_skips_renderer_on_hit() {
     let mut cache = PageCache::new();
     let mut calls = 0;
-    assert_eq!(cache.get_or_set("page", None, 100.0, || { calls += 1; Ok("first".to_string()) }).unwrap(), "first");
-    assert_eq!(cache.get_or_set("page", None, 100.0, || { calls += 1; Ok("second".to_string()) }).unwrap(), "first");
+    assert_eq!(
+        cache
+            .get_or_set("page", None, 100.0, || {
+                calls += 1;
+                Ok("first".to_string())
+            })
+            .unwrap(),
+        "first"
+    );
+    assert_eq!(
+        cache
+            .get_or_set("page", None, 100.0, || {
+                calls += 1;
+                Ok("second".to_string())
+            })
+            .unwrap(),
+        "first"
+    );
     assert_eq!(calls, 1);
 }

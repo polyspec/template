@@ -35,7 +35,13 @@ func TestPageCacheGetOrSetSkipsRendererOnHit(t *testing.T) {
 	now := time.Unix(100, 0)
 	cache := NewPageCache(func() time.Time { return now })
 	calls := 0
-	if html, err := cache.GetOrSet("page", nil, func() (string, error) { calls++; return "first", nil }); err != nil || html != "first" { t.Fatalf("first: %q %v", html, err) }
-	if html, err := cache.GetOrSet("page", nil, func() (string, error) { calls++; return "second", nil }); err != nil || html != "first" { t.Fatalf("second: %q %v", html, err) }
-	if calls != 1 { t.Fatalf("calls = %d, want 1", calls) }
+	if html, err := cache.GetOrSet("page", nil, func() (string, error) { calls++; return "first", nil }); err != nil || html != "first" {
+		t.Fatalf("first: %q %v", html, err)
+	}
+	if html, err := cache.GetOrSet("page", nil, func() (string, error) { calls++; return "second", nil }); err != nil || html != "first" {
+		t.Fatalf("second: %q %v", html, err)
+	}
+	if calls != 1 {
+		t.Fatalf("calls = %d, want 1", calls)
+	}
 }
