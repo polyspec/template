@@ -150,7 +150,7 @@ sequenceDiagram
 인터페이스는 두 실행 모드를 선언한다.
 
 - **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 현재 모든 언어가 사용하는 구현된 공통 모드다.
-- **생성 모드**는 시작 전에 호스트 언어 모듈을 만들고 정규 템플릿 표현을 모듈에 내장한 뒤 한 번 로드하고 요청마다 렌더러를 호출한다. 현재 TypeScript·JavaScript·Go·Rust·PHP를 지원한다. 생성 모듈은 여전히 패키지의 AST 렌더러를 사용하며, AST 노드를 호스트 코드로 직접 낮추는 최적화는 별도 작업이고 이 계약을 유지해야 한다.
+- **생성 모드**는 시작 전에 정규 AST의 각 노드를 호스트 언어 렌더러로 낮추고 그 렌더러를 한 번 로드한 뒤 요청마다 호출한다. 현재 TypeScript·JavaScript·Go·Rust·PHP를 지원한다. 요청 중에는 템플릿 AST를 파싱하거나 해석하지 않으며, 생성 결과는 AST 모드의 assign·define·오류·멱등성 계약을 유지해야 한다.
 
 ```mermaid
 flowchart LR

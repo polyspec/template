@@ -1,5 +1,6 @@
 mod render_adapter;
 mod native_templates;
+mod native_direct;
 
 use polyspec_template::{
     DefineInput, Engine, EngineOptions, Env, MapLoader, RenderOptions, RenderTarget,
@@ -149,6 +150,9 @@ impl RenderAdapter for Adapter {
     }
 
     fn render(&self, request: &RenderRequest) -> Result<String, String> {
+        if std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated") {
+            return native_direct::generated_direct_render(&self.root, request);
+        }
         let mut options = RenderOptions::default();
         for (id, entry) in &request.define {
             options.define.insert(
