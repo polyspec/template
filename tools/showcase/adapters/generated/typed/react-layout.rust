@@ -1,5 +1,4 @@
 // Generated.
-use std::collections::HashMap;
 #[derive(Clone, Default)] enum GeneratedValue { #[default] Null }
 #[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
 #[derive(Clone, Default)] struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
@@ -29,24 +28,35 @@ fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool {
 }
 #[derive(Clone, Default)] struct Input_content_tpl {  }
 #[derive(Clone, Default)] struct Input_layout_tpl {  }
-fn render_content_tpl(assign: &Assign, slots: &HashMap<String, String>, input: Input_content_tpl) -> String { let mut out = String::new();
+#[derive(Clone)] struct Definition<T> { html: Option<String>, data: Option<T> }
+#[derive(Clone, Default)] struct Definitions { content: Option<Definition<Input_content_tpl>>, layout: Option<Definition<Input_layout_tpl>> }
+fn render_content_tpl(assign: &Assign, definitions: &Definitions, input: Input_content_tpl) -> String { let mut out = String::new();
 
     out.push_str("<section data-react-island id=\"counter\">\n<p>");
     out.push_str(&escape(&assign.island_label.clone().unwrap_or_default().to_string()));
     out.push_str("</p>\n</section>\n");
  out }
-fn render_layout_tpl(assign: &Assign, slots: &HashMap<String, String>, input: Input_layout_tpl) -> String { let mut out = String::new();
+fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: Input_layout_tpl) -> String { let mut out = String::new();
 
     out.push_str("<main>\n<h1>");
     out.push_str(&escape(&assign.title.clone().unwrap_or_default().to_string()));
     out.push_str("</h1>\n");
-    out.push_str(slots.get("content").map(String::as_str).unwrap_or(""));
+    { let definition = definitions.content.as_ref();
+    if definition.is_none() { panic!("generated definition content is missing"); }
+    if let Some(html) = definition.and_then(|value| value.html.as_ref()) { out.push_str(html); } else {
+        let mut input = Input_content_tpl::default();
+
+        if let Some(data) = definition.and_then(|value| value.data.clone()) { input = data; }
+
+        out.push_str(&render_content_tpl(assign, definitions, input));
+    }
+    }
     out.push_str("</main>\n");
  out }
-fn render_template(target: &str, assign: &Assign, slots: &HashMap<String, String>) -> String { match target {
-        "content.tpl" => render_content_tpl(assign, slots, Input_content_tpl::default()),
-        "layout.tpl" => render_layout_tpl(assign, slots, Input_layout_tpl::default()),
+fn render_template(target: &str, assign: &Assign, definitions: &Definitions) -> String { match target {
+        "content.tpl" => render_content_tpl(assign, definitions, Input_content_tpl::default()),
+        "layout.tpl" => render_layout_tpl(assign, definitions, Input_layout_tpl::default()),
         _ => panic!("generated template is missing or requires inputs: {target}"),
 } }
-pub fn render(assign: &Assign, slots: &HashMap<String, String>) -> String { render_template("layout.tpl", assign, slots) }
+fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
 fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }

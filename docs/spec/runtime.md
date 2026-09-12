@@ -43,7 +43,7 @@ falls back to AST execution. `artifact_refresh` remains `dev`, `true`, or
 - **RT-64** Artifact refresh is `dev`, `true` or `false`. `dev` refreshes on every call, `true` refreshes after a source version change, and `false` does not refresh at runtime. Missing or stale artifacts under `false` are errors.
 - **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-66** `getOrSet` returns the cached HTML on a hit without calling `render`; on a miss it calls `render` once, stores the returned HTML with the TTL, and returns it.
-- **RT-63** The prepared render contract is declared in [`tools/runtime/interface.json`](../../tools/runtime/interface.json). `scripts/check-runtime-interface.mjs` fails when any required language mapping or operation is missing.
+- **RT-67** The prepared render contract is declared in [`tools/runtime/interface.json`](../../tools/runtime/interface.json). `scripts/check-runtime-interface.mjs` fails when any required language mapping or operation is missing.
 - **RT-42** `delimiters` in the engine options and in `parse` selects the tag delimiters as defined in the lexical document. The default is `{}`. A delimiter directive in a template file overrides the option for that file.
 
 ## Cross-language render contract
@@ -164,6 +164,7 @@ The logical request has this JSON shape:
 - **RT-57** A compiled artifact contains the canonical AST and a manifest containing its schema version, language, scenario, source SHA-256, artifact SHA-256 and template artifact paths. The artifact is generated before service startup and is loaded once into the process.
 - **RT-58** Artifact refresh has three policies: `dev` refreshes on every call, `true` refreshes after a source version change, and `false` reads only the deployed artifact and fails when it is missing or stale. These policies apply independently after `compile.mode` has selected the artifact representation.
 - **RT-59** Parsing, source file discovery and artifact generation do not occur in the request path. Rendering the same artifact with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
+- **RT-68** A typed generated artifact declares its assign, definitions and template inputs. A generated block calls its target template function directly after applying root assign, definition data and block scope in that order. A pre-rendered string slot is not a generated template target.
 
 The interface declares two execution modes:
 
