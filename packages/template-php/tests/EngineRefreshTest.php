@@ -32,9 +32,9 @@ final class EngineRefreshTest extends TestCase
         self::assertSame('1', $engine->render('a.tpl'));
     }
 
-    public function testGeneratedModeUsesTheSamePreparedRenderContract(): void
+    public function testGeneratedModeUsesPreparedRenderWithoutLoadingAnAstArtifact(): void
     {
-        $engine = new Engine(new ArrayLoader(['ignored' => '']), [
+        $engine = new Engine(new ArrayLoader(), [
             'compile' => ['mode' => 'gen', 'generated_renderer' => static fn (GeneratedRequest $request): GeneratedPreparedRender => new GeneratedPreparedRender(static fn (): string => 'generated')],
         ]);
 

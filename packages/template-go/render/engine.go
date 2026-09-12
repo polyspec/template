@@ -97,16 +97,23 @@ type Engine struct {
 	now             func() float64
 }
 
-// PreparedRender stores bound request state for repeated renders.
-type PreparedRender struct {
+type preparedExecution interface {
+	render() (string, error)
+}
+
+type astPreparedExecution struct {
 	engine     *Engine
 	root       *value.OrderedMap
 	registry   map[string]*DefineEntry
 	env        functions.Env
 	targetName string
 	template   *ParsedTemplate
-	generated  *GeneratedPreparedRender
 }
+
+type generatedPreparedExecution struct{ generated *GeneratedPreparedRender }
+
+// PreparedRender stores exactly one AST or generated execution for repeated renders.
+type PreparedRender struct{ execution preparedExecution }
 
 type cached struct {
 	version  string
@@ -130,7 +137,9 @@ func NewEngine(options Options, now func() float64) (*Engine, error) {
 		return nil, fmt.Errorf("%q is not a compile mode", mode)
 	}
 	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, legacyWrappers: options.LegacyWrappers, artifactRefresh: refresh, compileMode: mode, generatedRender: options.Compile.Generated, cache: map[string]cached{}, now: now}
-	if e.now == nil { e.now = func() float64 { return float64(time.Now().Unix()) } }
+	if e.now == nil {
+		e.now = func() float64 { return float64(time.Now().Unix()) }
+	}
 	if e.loader == nil {
 		e.loader = loader.NewMapLoader(nil)
 	}
@@ -206,13 +215,13 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 // Prepare binds request data and resolves the target template once.
 func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*PreparedRender, error) {
 	var name string
-	var template *ParsedTemplate
+	var parsedTarget *ParsedTemplate
 	switch t := target.(type) {
 	case string:
 		name = t
 	case *ast.Template:
 		name = t.Name
-		template = &ParsedTemplate{AST: t}
+		parsedTarget = &ParsedTemplate{AST: t}
 	default:
 		return nil, fmt.Errorf("render target must be a name or a template")
 	}
@@ -235,11 +244,6 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*Prepar
 	if entry, ok := registry[name]; ok && entry.HTML == nil {
 		targetName = entry.Template
 	}
-	if template == nil && e.compileMode != CompileModeGen {
-		if template, err = e.LoadTemplate(targetName, nil, nil); err != nil {
-			return nil, err
-		}
-	}
 	if e.compileMode == CompileModeGen {
 		if e.generatedRender == nil {
 			return nil, errors.New("generated compile mode requires GeneratedRender")
@@ -248,9 +252,18 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*Prepar
 		if err != nil {
 			return nil, err
 		}
-		return &PreparedRender{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template, generated: generated}, nil
+		if generated == nil || generated.Render == nil {
+			return nil, errors.New("generated renderer returned no Render function")
+		}
+		return &PreparedRender{execution: &generatedPreparedExecution{generated: generated}}, nil
 	}
-	return &PreparedRender{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template}, nil
+	template := parsedTarget
+	if template == nil {
+		if template, err = e.LoadTemplate(targetName, nil, nil); err != nil {
+			return nil, err
+		}
+	}
+	return &PreparedRender{execution: &astPreparedExecution{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template}}, nil
 }
 
 // Render renders a template by name or AST (RT-3, RT-4).
@@ -264,12 +277,12 @@ func (e *Engine) Render(target any, assign any, options RenderOptions) (string, 
 
 // Render renders the prepared request.
 func (p *PreparedRender) Render() (string, error) {
-	if p.generated != nil {
-		if p.generated.Render == nil {
-			return "", errors.New("generated prepared render has no Render function")
-		}
-		return p.generated.Render()
-	}
+	return p.execution.render()
+}
+
+func (p *generatedPreparedExecution) render() (string, error) { return p.generated.Render() }
+
+func (p *astPreparedExecution) render() (string, error) {
 	context := NewContext(p.engine, p.root, p.env, p.targetName)
 	for id, entry := range p.registry {
 		context.Registry[id] = entry

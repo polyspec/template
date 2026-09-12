@@ -43,6 +43,17 @@ PageCache.getOrSet(key, ttl, render)
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
 - **RT-67** 준비된 렌더 계약은 [`tools/runtime/interface.json`](../../tools/runtime/interface.json)에 선언한다. `scripts/check-runtime-interface.mjs`는 필요한 언어 매핑이나 연산이 하나라도 없으면 실패한다.
+- **RT-69** `PreparedRender`는 명시적인 `AstPreparedExecution` 또는 `GeneratedPreparedExecution` 중 정확히 하나만 소유한다. generated 실행은 빈 AST나 AST 자리표시자를 만들거나 보유하지 않고, AST 실행은 generated renderer를 보유하지 않는다. 네 런타임에서 이 배타 구조가 사라지면 인터페이스 검사가 실패해야 한다.
+
+준비 실행 도표는 runtime interface manifest에서 생성한다.
+
+```mermaid
+<!--@include: ../../tools/runtime/generated/prepared-execution-flow.mmd-->
+```
+
+```mermaid
+<!--@include: ../../tools/runtime/generated/prepared-execution-classes.mmd-->
+```
 - **RT-42** 엔진 옵션과 `parse`의 `delimiters`는 렉시컬 문서가 정의하는 대로 태그 구분자를 선택한다. 기본값은 `{}`다. 템플릿 파일의 구분자 지시문은 그 파일에 대해 옵션보다 우선한다.
 
 ## 언어 간 렌더 계약

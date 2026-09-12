@@ -1,5 +1,5 @@
 {
-  "schema": 2,
+  "schema": 3,
   "name": "TemplateRuntime",
   "purpose": "Keep compilation, compiled-artifact refresh and final-page caching as independent policies.",
   "types": {
@@ -14,7 +14,20 @@
     },
     "PreparedRender": {
       "operations": ["render"],
-      "invariant": "ast and gen prepared requests expose the same render operation and repeat semantics"
+      "fields": ["execution"],
+      "invariant": "owns exactly one PreparedExecution variant and exposes the same render operation and repeat semantics"
+    },
+    "PreparedExecution": {
+      "variants": ["AstPreparedExecution", "GeneratedPreparedExecution"],
+      "invariant": "the variants are disjoint; AST state never contains a generated renderer and generated state never contains an AST placeholder"
+    },
+    "AstPreparedExecution": {
+      "fields": ["engine", "rootData", "registry", "env", "targetName", "template"],
+      "operation": "interpret the prepared AST"
+    },
+    "GeneratedPreparedExecution": {
+      "fields": ["generated"],
+      "operation": "call the prepared generated renderer"
     },
     "AstArtifact": "canonical AST plus source version",
     "GeneratedArtifact": "typed host-language renderer plus source version",
@@ -30,9 +43,9 @@
     "page_cache": "Stores the final HTML produced from template, define and assign inputs; a hit bypasses business logic and template rendering.",
     "page_cache_ttl": "A positive value expires after that many seconds; 0 and null mean forever."
   },
-    "request": {
+  "request": {
     "fields": ["target", "assign", "define", "env"],
-      "invariant": "assign is root data and define is the template registry; they are not interchangeable. The generated renderer receives the normalized target, bound assign, bound define and resolved env."
+    "invariant": "assign is root data and define is the template registry; they are not interchangeable. The generated renderer receives the normalized target, bound assign, bound define and resolved env."
   },
   "operations": [
     {
@@ -86,9 +99,9 @@
     }
   ],
   "languages": {
-    "rust": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "PageCache"},
-    "go": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "cache.PageCache"},
-    "typescript": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "PageCache"},
-    "php": {"engine": "Engine", "compile": "compile array", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "PageCache"}
+    "rust": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "preparedExecution": "PreparedExecution", "prepared": "PreparedRender", "pageCache": "PageCache"},
+    "go": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "preparedExecution": "preparedExecution", "prepared": "PreparedRender", "pageCache": "cache.PageCache"},
+    "typescript": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "preparedExecution": "PreparedExecution", "prepared": "PreparedRender", "pageCache": "PageCache"},
+    "php": {"engine": "Engine", "compile": "compile array", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "preparedExecution": "PreparedExecution", "prepared": "PreparedRender", "pageCache": "PageCache"}
   }
 }
