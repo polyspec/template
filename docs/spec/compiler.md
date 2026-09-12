@@ -36,7 +36,7 @@ Dynamic source graphs use a generated type manifest derived from parsed template
 
 Every generated module exposes the logical structures `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest` and `GeneratedProgram`. A generated program implements the same `Program.prepare(RenderRequest)` and `Program.render(RenderRequest)` operations as an AST program. Template-specific functions are private and invoke each other directly for include and block targets.
 
-All four generated backends pass the runtime `RenderScope` to generated template functions. An include passes the same scope so assignments remain visible to its caller. A block creates a fresh scope and seeds it only from root data, definition data and explicit block arguments. Loop bindings are installed temporarily and restored after the loop. Root-only block fallback is represented separately in the IR from a normal scope-aware dynamic lookup. The generated support level remains partial until the four-language matrix passes.
+All four generated backends pass the runtime `RenderScope` to generated template functions. An include passes the same scope so assignments remain visible to its caller. A block creates a fresh scope and seeds it only from root data, definition data and explicit block arguments. Loop bindings are installed temporarily and restored after the loop. Each generated loop materializes its entries and computes the size and final index once before iteration; each iteration installs the current index, key, value, first and last metadata in the scope. Root-only block fallback is represented separately in the IR from a normal scope-aware dynamic lookup. The generated support level remains partial until the four-language matrix passes.
 
 `RuntimeServices` is the common runtime interface used by both program modes. The concrete `RuntimeEnvironment` owns resource limits and the host-function registry, validates registrations once, and implements that interface. Each `AstProgram` and `GeneratedProgram` owns one environment. AST-only template loading belongs to the AST renderer and is not part of the environment or generated execution state. `RuntimeBindings` consumes `RuntimeServices`, so generated code uses the same value and error semantics without depending on an AST loader or interpreter.
 
@@ -64,7 +64,7 @@ Generated files are completed in a temporary location and replaced atomically. A
 
 ## Implementation status
 
-The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly. TypeScript and PHP generated programs pass the complete conformance suite. Generated execution remains partial until Go and Rust pass the same suite.
+The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly. TypeScript, Go and PHP generated programs pass the complete conformance suite. Generated execution remains partial until Rust passes the same suite.
 
 Generated artifacts use the same refresh boundary as canonical AST artifacts. `dev` always emits a fresh source file and manifest, `true` verifies source, type, contract and compiler digests before deciding whether to rebuild, and `false` reads and verifies only the deployed generated source and its manifest. Source and manifest replacements are atomic, with the manifest committed last.
 

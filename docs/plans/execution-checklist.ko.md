@@ -242,7 +242,8 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T7.7 | production artifact로 parser 기반 showcase 구문 강조, 크기 제한 artifact/source 보기와 React island 예제 생성 | `make showcase-check` | [ ] |
 | T7.8 | production artifact를 사용해 출력이 같은 AST/generated 성능 측정 재실행 | `make bench`; `make showcase` | [ ] |
 | T7.9 | 명세, 기능 상태, 변경 기록, 생성 Mermaid, 정적 문서와 완료 근거 동기화 | `make docs-check`; `make docs-verify-idempotent` | [ ] |
-| T7.10 | 깨끗한 checkout의 release gate 통과와 정적 사이트 배포 | `make release-check`; CI와 Pages 성공 | [ ] |
+| T7.10 | 상용 release test pyramid 강제: lexer/parser/IR/runtime 단위 검사, generated source compile 검사, 전체 mode matrix, 위치 오류와 실패 복구 회귀, mutation 거부, 격리 package·browser 소비, 출력 동일 성능 회귀 | `make release-test-matrix` | [ ] |
+| T7.11 | 깨끗한 checkout의 release gate 통과와 정적 사이트 배포 | `make release-check`; CI와 Pages 성공 | [ ] |
 
 ## 병렬성 요약
 
@@ -255,7 +256,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | W4 | 트랙 G, R, P | 각 트랙 안에서 1 → 11; T4.X는 모든 트랙 뒤 |
 | W5 | 없음 | T5.1 → T5.6 |
 | W6 | T6.1–T6.5, T6.7 | T6.6은 모두 끝난 뒤 |
-| W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 | compiler 계약과 구현 뒤에 증명과 발행 수행 |
+| W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler 계약과 구현 뒤에 증명과 발행 수행 |
 
 ## 완료 정의
 
@@ -264,5 +265,6 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.
 - `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 mode·언어·케이스 조합 1,688개를 모두 통과하고 generated 실행에서 AST로 fallback하지 않음.
+- `make release-test-matrix`가 단위, generated source compile, 적합성, 위치 오류와 실패 복구, mutation 거부, 격리 소비, browser DOM 출력, 성능 동일성의 각 release 계층을 독립적으로 증명.
 - 깨끗한 checkout에서 `make consumer-check`, `make showcase-check`, `make docs-verify-idempotent`, `make release-check` 통과.
 - `docs/features.md`와 `docs/features.ko.md`가 모든 행에 동일한 상태 필드와 근거 링크를 가짐.

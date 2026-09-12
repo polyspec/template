@@ -242,7 +242,8 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 | T7.7 | Generate parser-backed showcase highlighting, bounded artifact/source views and the React island example from production artifacts | `make showcase-check` | [ ] |
 | T7.8 | Rerun equal-output AST/generated performance measurements with production artifacts | `make bench`; `make showcase` | [ ] |
 | T7.9 | Synchronize specifications, feature status, changelog, generated Mermaid, static documentation and completion evidence | `make docs-check`; `make docs-verify-idempotent` | [ ] |
-| T7.10 | Pass the clean-checkout release gate and deploy the static site | `make release-check`; CI and Pages success | [ ] |
+| T7.10 | Enforce the commercial release test pyramid: lexer/parser/IR/runtime units, generated-source compile tests, full mode matrix, positioned errors and recovery regressions, mutation rejection, isolated package and browser consumption, and equal-output performance regressions | `make release-test-matrix` | [ ] |
+| T7.11 | Pass the clean-checkout release gate and deploy the static site | `make release-check`; CI and Pages success | [ ] |
 
 ## Parallelism summary
 
@@ -255,7 +256,7 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 | W4 | tracks G, R, P | inside each track: 1 → 11; T4.X after all tracks |
 | W5 | none | T5.1 → T5.6 |
 | W6 | T6.1–T6.5, T6.7 | T6.6 after all |
-| W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 | compiler contract and implementation precede proof and publication |
+| W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler contract and implementation precede proof and publication |
 
 ## Definition of done
 
@@ -264,5 +265,6 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 - `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
 - `make test-browser` passes.
 - `make conformance-all-modes` passes all 1,688 TypeScript, Go, Rust and PHP mode-language-case cells without a fallback from generated execution to AST execution.
+- `make release-test-matrix` proves each release layer independently: units, generated-source compilation, conformance, positioned errors and failure recovery, mutation rejection, isolated consumers, browser DOM output and performance parity.
 - `make consumer-check`, `make showcase-check`, `make docs-verify-idempotent` and `make release-check` pass in a clean checkout.
 - `docs/features.md` and `docs/features.ko.md` carry identical status fields with evidence links for every row.
