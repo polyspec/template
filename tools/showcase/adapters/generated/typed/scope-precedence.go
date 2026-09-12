@@ -22,6 +22,7 @@ func (m OrderedMap[K, V]) Entries() []OrderedEntry[K, V] { return m.entries }
 func generatedMapGet[K comparable, V any](value OrderedMap[K, V], key K) V { result, _ := value.Get(key); return result }
 func generatedListGet[T any](value []T, index int) T { if index >= 0 && index < len(value) { return value[index] }; var zero T; return zero }
 func generatedTernary[T any](test bool, yes, no T) T { if test { return yes }; return no }
+func generatedEscape(value any) string { if value == nil { return "" }; return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "\"", "&quot;", "'", "&#39;").Replace(fmt.Sprint(value)) }
 func generatedTruthy(value any) bool { switch value := value.(type) { case nil: return false; case bool: return value; case float64: return value != 0; case string: return value != ""; default: return true } }
 func generatedUnary(op string, value any) any { if op == "!" { return !generatedTruthy(value) }; return -value.(float64) }
 func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
@@ -33,13 +34,13 @@ root_label := input.Root_label
 defined_label := input.Defined_label
 layout_local := input.Layout_local
     out.WriteString("<article>\n<h1>")
-    fmt.Fprint(&out, title)
+    out.WriteString(generatedEscape(title))
     out.WriteString("</h1>\n<p class=\"root\">")
-    fmt.Fprint(&out, root_label)
+    out.WriteString(generatedEscape(root_label))
     out.WriteString("</p>\n<p class=\"defined\">")
-    fmt.Fprint(&out, defined_label)
+    out.WriteString(generatedEscape(defined_label))
     out.WriteString("</p>\n<p class=\"local\">")
-    fmt.Fprint(&out, generatedCall("default", []any{valueOrZero(layout_local), "missing"}))
+    out.WriteString(generatedEscape(generatedCall("default", []any{valueOrZero(layout_local), "missing"})))
     out.WriteString("</p>\n</article>\n")
  return out.String() }
 func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder

@@ -1,0 +1,43 @@
+// Generated.
+#[derive(Clone, Default)] enum GeneratedValue { #[default] Null }
+#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
+#[derive(Clone, Default)] struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
+impl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } fn get(&self, key: &K) -> Option<&V> { self.entries.iter().find(|entry| &entry.key == key).map(|entry| &entry.value) } fn entries(&self) -> &Vec<OrderedEntry<K, V>> { &self.entries } }
+trait GeneratedTruthy { fn generated_truthy(&self) -> bool; }
+impl GeneratedTruthy for bool { fn generated_truthy(&self) -> bool { *self } }
+impl GeneratedTruthy for f64 { fn generated_truthy(&self) -> bool { *self != 0.0 } }
+impl GeneratedTruthy for String { fn generated_truthy(&self) -> bool { !self.is_empty() } }
+impl<T> GeneratedTruthy for Vec<T> { fn generated_truthy(&self) -> bool { !self.is_empty() } }
+impl<K, V> GeneratedTruthy for OrderedMap<K, V> { fn generated_truthy(&self) -> bool { !self.entries.is_empty() } }
+impl<T: GeneratedTruthy> GeneratedTruthy for Option<T> { fn generated_truthy(&self) -> bool { self.as_ref().is_some_and(GeneratedTruthy::generated_truthy) } }
+fn generated_truthy<T: GeneratedTruthy>(value: &T) -> bool { value.generated_truthy() }
+trait GeneratedContains<T> { fn generated_contains(&self, value: &T) -> bool; }
+impl<T: PartialEq> GeneratedContains<T> for Vec<T> { fn generated_contains(&self, value: &T) -> bool { self.contains(value) } }
+impl<K: PartialEq, V> GeneratedContains<K> for OrderedMap<K, V> { fn generated_contains(&self, value: &K) -> bool { self.get(value).is_some() } }
+impl GeneratedContains<String> for String { fn generated_contains(&self, value: &String) -> bool { self.contains(value) } }
+fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool { collection.generated_contains(value) }
+
+#[derive(Clone, Default)] pub struct Assign {
+    pub heading: String,
+}
+#[derive(Clone, Default)] pub struct Input_layout_tpl {  }
+#[derive(Clone, Default)] pub struct DefinitionData_layout_tpl {  }
+#[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
+#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<()>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
+fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: Input_layout_tpl) -> String { let mut out = String::new();
+
+    out.push_str("<section class=\"notice\">\n<h1>");
+    out.push_str(&escape(&assign.heading.clone().to_string()));
+    out.push_str("</h1>\n");
+    { let definition = definitions.content.as_ref();
+    let html = definition.and_then(|value| value.html.as_ref()).expect("generated definition content requires html");
+    out.push_str(html);
+    }
+    out.push_str("</section>\n");
+ out }
+pub fn render_template(target: &str, assign: &Assign, definitions: &Definitions) -> String { match target {
+        "layout.tpl" => render_layout_tpl(assign, definitions, Input_layout_tpl::default()),
+        _ => panic!("generated template is missing or requires inputs: {target}"),
+} }
+pub fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
+fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }

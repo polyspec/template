@@ -28,6 +28,7 @@ func (m OrderedMap[K, V]) Entries() []OrderedEntry[K, V] { return m.entries }
 func generatedMapGet[K comparable, V any](value OrderedMap[K, V], key K) V { result, _ := value.Get(key); return result }
 func generatedListGet[T any](value []T, index int) T { if index >= 0 && index < len(value) { return value[index] }; var zero T; return zero }
 func generatedTernary[T any](test bool, yes, no T) T { if test { return yes }; return no }
+func generatedEscape(value any) string { if value == nil { return "" }; return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "\"", "&quot;", "'", "&#39;").Replace(fmt.Sprint(value)) }
 func generatedTruthy(value any) bool { switch value := value.(type) { case nil: return false; case bool: return value; case float64: return value != 0; case string: return value != ""; default: return true } }
 func generatedUnary(op string, value any) any { if op == "!" { return !generatedTruthy(value) }; return -value.(float64) }
 func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
@@ -36,7 +37,7 @@ func valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero 
 func render_card_tpl(assign Assign, definitions Definitions, input Input_card_tpl) string { var out strings.Builder
 label := input.Label
     out.WriteString("<p class=\"card\">")
-    fmt.Fprint(&out, label)
+    out.WriteString(generatedEscape(label))
     out.WriteString("</p>\n")
  return out.String() }
 func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder
@@ -46,22 +47,22 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
     merged := func() OrderedMap[string, string] { result := NewOrderedMap[string, string](); for _, entry := range assign.Lookup.Entries() { result.Set(entry.Key, entry.Value) }; result.Set("z", "Z"); return result }()
     _ = merged
     out.WriteString("<section>\n<h1>")
-    fmt.Fprint(&out, assign.Page.Title)
+    out.WriteString(generatedEscape(assign.Page.Title))
     out.WriteString("</h1>\n<p>")
-    fmt.Fprint(&out, generatedListGet(values, int(float64(1))))
+    out.WriteString(generatedEscape(generatedListGet(values, int(float64(1)))))
     out.WriteString("|")
-    fmt.Fprint(&out, generatedMapGet(merged, "z"))
+    out.WriteString(generatedEscape(generatedMapGet(merged, "z")))
     out.WriteString("</p>\n")
 	if generatedTruthy(generatedBinary("&&", assign.Flag, generatedBinary("==", assign.Page.Title, "Guide"))) {
         out.WriteString("<strong>matched</strong>")	} else {
         out.WriteString("<strong>missed</strong>")
 	}
     out.WriteString("\n<p>")
-    fmt.Fprint(&out, generatedTernary(generatedTruthy(assign.Flag), "yes", "no"))
+    out.WriteString(generatedEscape(generatedTernary(generatedTruthy(assign.Flag), "yes", "no")))
     out.WriteString("|")
-    fmt.Fprint(&out, generatedBinary("+", generatedUnary("-", float64(1)), float64(3)))
+    out.WriteString(generatedEscape(generatedBinary("+", generatedUnary("-", float64(1)), float64(3))))
     out.WriteString("|")
-    fmt.Fprint(&out, generatedCall("default", []any{"", "fallback"}))
+    out.WriteString(generatedEscape(generatedCall("default", []any{"", "fallback"})))
     out.WriteString("</p>\n<ul>\n")
     { entries := assign.Rows
     for row_index, entry := range entries {
@@ -72,15 +73,15 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
         row_first := row_index == 0
         row_last := row_index + 1 == len(entries)
             out.WriteString("<li>")
-            fmt.Fprint(&out, row_index)
+            out.WriteString(generatedEscape(row_index))
             out.WriteString("/")
-            fmt.Fprint(&out, row_size)
+            out.WriteString(generatedEscape(row_size))
             out.WriteString(":")
-            fmt.Fprint(&out, row.Name)
+            out.WriteString(generatedEscape(row.Name))
             out.WriteString(":")
-            fmt.Fprint(&out, row_first)
+            out.WriteString(generatedEscape(row_first))
             out.WriteString(":")
-            fmt.Fprint(&out, row_last)
+            out.WriteString(generatedEscape(row_last))
             out.WriteString("</li>\n")
     }
     if len(entries) == 0 {
@@ -111,7 +112,7 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
 func render_partial_tpl(assign Assign, definitions Definitions, input Input_partial_tpl) string { var out strings.Builder
 values := input.Values
     out.WriteString("<p class=\"included\">")
-    fmt.Fprint(&out, generatedListGet(values, int(float64(2))))
+    out.WriteString(generatedEscape(generatedListGet(values, int(float64(2)))))
     out.WriteString("</p>\n")
  return out.String() }
 func RenderTemplate(target string, assign Assign, definitions Definitions) string { switch target {

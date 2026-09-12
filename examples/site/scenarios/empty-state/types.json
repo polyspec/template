@@ -1,0 +1,13 @@
+{
+  "schema": 3,
+  "root": "Assign",
+  "entry": "layout.tpl",
+  "fields": { "page": "string" },
+  "records": {},
+  "defines": {
+    "content": { "optional": true, "html": true },
+    "layout": { "template": "layout.tpl" }
+  },
+  "functions": {},
+  "templates": {}
+}
