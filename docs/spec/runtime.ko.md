@@ -180,7 +180,7 @@ sequenceDiagram
 인터페이스는 두 실행 모드를 선언한다.
 
 - **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 완성된 cross-language mode다.
-- **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 네 core runtime 모두 generated 적합성 case 211개를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
+- **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 네 core runtime 모두 generated 적합성 case 216개를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
 
 ```mermaid
 flowchart LR
