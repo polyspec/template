@@ -1,0 +1,25 @@
+{
+  "schema": 2,
+  "root": "Assign",
+  "entry": "layout.tpl",
+  "fields": {
+    "flag": "boolean",
+    "page": "Page",
+    "numbers": "list<number>",
+    "lookup": "map<string,string>",
+    "rows": "list<Row>"
+  },
+  "records": {
+    "Page": { "title": "string" },
+    "Row": { "name": "string" },
+    "Slot": { "template": "string?", "html": "string?" }
+  },
+  "defines": { "content": "Slot?", "layout": "Template" },
+  "functions": {
+    "default": { "args": ["string", "string"], "returns": "string" }
+  },
+  "templates": {
+    "partial.tpl": { "values": "list<number>" },
+    "card.tpl": { "label": "string" }
+  }
+}

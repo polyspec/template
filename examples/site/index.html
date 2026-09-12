@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Template execution lab</title><link rel="stylesheet" href="./styles.css"></head>
 <body><header class="hero"><p class="eyebrow">TEMPLATE · STATIC RENDER PROOF</p><h1>Template execution lab</h1><p class="lede">The shared source is parsed before this page is built. AST mode executes the committed nodes; generated mode lowers those same nodes into host-language renderers. Both modes use the same assign, define and output contract.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">PASS</strong></div><div class="status-card"><span>AST mode</span><strong class="pass">IMPLEMENTED</strong></div><div class="status-card"><span>Generated mode</span><strong class="pass">5 LANGUAGES</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
-<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>217</td><td>7ee9bca83598…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
+<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>226</td><td>04985b52081a…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
 <section class="panel"><div class="section-heading"><div><p class="eyebrow">02 · INPUT AND OUTPUT</p><h2>Small SSR situations</h2></div><p>Each card shows the exact assign data, define map, every template file, compiled artifact manifest and final HTML.</p></div><div class="scenario-list"><article class="scenario" id="compiler-coverage">
   <header class="scenario-header"><div><h3>Generated compiler coverage</h3><p>One readable page executes every canonical statement and expression family through AST and generated modes.</p></div><div class="tags"><span class="tag">expressions</span><span class="tag">loops and loop metadata</span><span class="tag">include scope</span><span class="tag">define and block scope</span></div></header>
   <div class="scenario-meta">
@@ -44,7 +44,7 @@
 &lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= page.title}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
 &lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= values[1]}</span>|<span class="syntax-template syntax-echo">{= merged[&#39;z&#39;]}</span>&lt;/<span class="syntax-tag">p</span>&gt;
 <span class="syntax-template syntax-if">{? flag &amp;&amp; page.title == &#39;Guide&#39;}</span>&lt;<span class="syntax-tag">strong</span>&gt;matched&lt;/<span class="syntax-tag">strong</span>&gt;<span class="syntax-template syntax-if">{:}</span>&lt;<span class="syntax-tag">strong</span>&gt;missed&lt;/<span class="syntax-tag">strong</span>&gt;<span class="syntax-template syntax-if">{/}</span>
-&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= flag ? &#39;yes&#39; : &#39;no&#39;}</span>|<span class="syntax-template syntax-echo">{= -1 + 3}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= flag ? &#39;yes&#39; : &#39;no&#39;}</span>|<span class="syntax-template syntax-echo">{= -1 + 3}</span>|<span class="syntax-template syntax-echo">{= &#39;&#39; | default(&#39;fallback&#39;)}</span>&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;<span class="syntax-tag">ul</span>&gt;
 <span class="syntax-template syntax-for">{@ row = rows}</span>
 &lt;<span class="syntax-tag">li</span>&gt;<span class="syntax-template syntax-echo">{= row.index_}</span>/<span class="syntax-template syntax-echo">{= row.size_}</span>:<span class="syntax-template syntax-echo">{= row.name}</span>:<span class="syntax-template syntax-echo">{= row.first_}</span>:<span class="syntax-template syntax-echo">{= row.last_}</span>&lt;/<span class="syntax-tag">li</span>&gt;
@@ -73,8 +73,8 @@
     },
     &quot;layout.tpl&quot;: {
       &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
-      &quot;sourceSha256&quot;: &quot;e0ab16413c62cca5ed33c04d77f38ec2d6254adbc5a2bae03d05bdc613820a98&quot;,
-      &quot;artifactSha256&quot;: &quot;fe84f20ee85f4df48e83d873a2d56c3ba9ccfb4264eb48b54e1218ad53cb9d85&quot;
+      &quot;sourceSha256&quot;: &quot;6bfb1a92eb46c57f8ae2c40a0c4de5f7c00e3021ef0fa5747e518dc5b4bd4ee4&quot;,
+      &quot;artifactSha256&quot;: &quot;8596d90a3228b0de94d1299814be3bb3c112d91157354828b02641efb06702c8&quot;
     },
     &quot;partial.tpl&quot;: {
       &quot;artifact&quot;: &quot;partial.tpl.ast.json&quot;,
@@ -522,10 +522,53 @@ typescript/layout.tpl.ast.json · layout.tpl
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
-      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
         257,
-        267
+        258
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;&quot;,
+            &quot;span&quot;: [
+              261,
+              263
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;fallback&quot;,
+            &quot;span&quot;: [
+              274,
+              284
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          261,
+          285
+        ]
+      },
+      &quot;span&quot;: [
+        258,
+        286
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;span&quot;: [
+        286,
+        296
       ]
     },
     {
@@ -535,8 +578,8 @@ typescript/layout.tpl.ast.json · layout.tpl
         &quot;type&quot;: &quot;Var&quot;,
         &quot;name&quot;: &quot;rows&quot;,
         &quot;span&quot;: [
-          276,
-          280
+          305,
+          309
         ]
       },
       &quot;body&quot;: [
@@ -544,8 +587,8 @@ typescript/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;&quot;,
           &quot;span&quot;: [
-            282,
-            286
+            311,
+            315
           ]
         },
         {
@@ -555,21 +598,21 @@ typescript/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;index_&quot;,
             &quot;span&quot;: [
-              289,
-              299
+              318,
+              328
             ]
           },
           &quot;span&quot;: [
-            286,
-            300
+            315,
+            329
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;/&quot;,
           &quot;span&quot;: [
-            300,
-            301
+            329,
+            330
           ]
         },
         {
@@ -579,21 +622,21 @@ typescript/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;size_&quot;,
             &quot;span&quot;: [
-              304,
-              313
+              333,
+              342
             ]
           },
           &quot;span&quot;: [
-            301,
-            314
+            330,
+            343
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            314,
-            315
+            343,
+            344
           ]
         },
         {
@@ -604,27 +647,27 @@ typescript/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;row&quot;,
               &quot;span&quot;: [
-                318,
-                321
+                347,
+                350
               ]
             },
             &quot;key&quot;: &quot;name&quot;,
             &quot;span&quot;: [
-              318,
-              326
+              347,
+              355
             ]
           },
           &quot;span&quot;: [
-            315,
-            327
+            344,
+            356
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            327,
-            328
+            356,
+            357
           ]
         },
         {
@@ -634,21 +677,21 @@ typescript/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;first_&quot;,
             &quot;span&quot;: [
-              331,
-              341
+              360,
+              370
             ]
           },
           &quot;span&quot;: [
-            328,
-            342
+            357,
+            371
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            342,
-            343
+            371,
+            372
           ]
         },
         {
@@ -658,21 +701,21 @@ typescript/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;last_&quot;,
             &quot;span&quot;: [
-              346,
-              355
+              375,
+              384
             ]
           },
           &quot;span&quot;: [
-            343,
-            356
+            372,
+            385
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            356,
-            362
+            385,
+            391
           ]
         }
       ],
@@ -681,30 +724,30 @@ typescript/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            366,
-            381
+            395,
+            410
           ]
         }
       ],
       &quot;span&quot;: [
-        267,
-        384
+        296,
+        413
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/ul&gt;\n&quot;,
       &quot;span&quot;: [
-        385,
-        391
+        414,
+        420
       ]
     },
     {
       &quot;type&quot;: &quot;Include&quot;,
       &quot;path&quot;: &quot;partial.tpl&quot;,
       &quot;span&quot;: [
-        391,
-        406
+        420,
+        435
       ]
     },
     {
@@ -715,8 +758,8 @@ typescript/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;defined&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            419,
-            433
+            448,
+            462
           ]
         }
       ],
@@ -725,22 +768,22 @@ typescript/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;missing&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            436,
-            450
+            465,
+            479
           ]
         }
       ],
       &quot;span&quot;: [
-        407,
-        453
+        436,
+        482
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;\n&quot;,
       &quot;span&quot;: [
-        453,
-        454
+        482,
+        483
       ]
     },
     {
@@ -756,29 +799,29 @@ typescript/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;page&quot;,
               &quot;span&quot;: [
-                471,
-                475
+                500,
+                504
               ]
             },
             &quot;key&quot;: &quot;title&quot;,
             &quot;span&quot;: [
-              471,
-              481
+              500,
+              510
             ]
           }
         }
       ],
       &quot;span&quot;: [
-        454,
-        482
+        483,
+        511
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
       &quot;span&quot;: [
-        483,
-        494
+        512,
+        523
       ]
     }
   ]
@@ -854,8 +897,8 @@ go/manifest.json
     },
     &quot;layout.tpl&quot;: {
       &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
-      &quot;sourceSha256&quot;: &quot;e0ab16413c62cca5ed33c04d77f38ec2d6254adbc5a2bae03d05bdc613820a98&quot;,
-      &quot;artifactSha256&quot;: &quot;fe84f20ee85f4df48e83d873a2d56c3ba9ccfb4264eb48b54e1218ad53cb9d85&quot;
+      &quot;sourceSha256&quot;: &quot;6bfb1a92eb46c57f8ae2c40a0c4de5f7c00e3021ef0fa5747e518dc5b4bd4ee4&quot;,
+      &quot;artifactSha256&quot;: &quot;8596d90a3228b0de94d1299814be3bb3c112d91157354828b02641efb06702c8&quot;
     },
     &quot;partial.tpl&quot;: {
       &quot;artifact&quot;: &quot;partial.tpl.ast.json&quot;,
@@ -1303,10 +1346,53 @@ go/layout.tpl.ast.json · layout.tpl
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
-      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
         257,
-        267
+        258
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;&quot;,
+            &quot;span&quot;: [
+              261,
+              263
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;fallback&quot;,
+            &quot;span&quot;: [
+              274,
+              284
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          261,
+          285
+        ]
+      },
+      &quot;span&quot;: [
+        258,
+        286
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;span&quot;: [
+        286,
+        296
       ]
     },
     {
@@ -1316,8 +1402,8 @@ go/layout.tpl.ast.json · layout.tpl
         &quot;type&quot;: &quot;Var&quot;,
         &quot;name&quot;: &quot;rows&quot;,
         &quot;span&quot;: [
-          276,
-          280
+          305,
+          309
         ]
       },
       &quot;body&quot;: [
@@ -1325,8 +1411,8 @@ go/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;&quot;,
           &quot;span&quot;: [
-            282,
-            286
+            311,
+            315
           ]
         },
         {
@@ -1336,21 +1422,21 @@ go/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;index_&quot;,
             &quot;span&quot;: [
-              289,
-              299
+              318,
+              328
             ]
           },
           &quot;span&quot;: [
-            286,
-            300
+            315,
+            329
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;/&quot;,
           &quot;span&quot;: [
-            300,
-            301
+            329,
+            330
           ]
         },
         {
@@ -1360,21 +1446,21 @@ go/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;size_&quot;,
             &quot;span&quot;: [
-              304,
-              313
+              333,
+              342
             ]
           },
           &quot;span&quot;: [
-            301,
-            314
+            330,
+            343
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            314,
-            315
+            343,
+            344
           ]
         },
         {
@@ -1385,27 +1471,27 @@ go/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;row&quot;,
               &quot;span&quot;: [
-                318,
-                321
+                347,
+                350
               ]
             },
             &quot;key&quot;: &quot;name&quot;,
             &quot;span&quot;: [
-              318,
-              326
+              347,
+              355
             ]
           },
           &quot;span&quot;: [
-            315,
-            327
+            344,
+            356
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            327,
-            328
+            356,
+            357
           ]
         },
         {
@@ -1415,21 +1501,21 @@ go/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;first_&quot;,
             &quot;span&quot;: [
-              331,
-              341
+              360,
+              370
             ]
           },
           &quot;span&quot;: [
-            328,
-            342
+            357,
+            371
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            342,
-            343
+            371,
+            372
           ]
         },
         {
@@ -1439,21 +1525,21 @@ go/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;last_&quot;,
             &quot;span&quot;: [
-              346,
-              355
+              375,
+              384
             ]
           },
           &quot;span&quot;: [
-            343,
-            356
+            372,
+            385
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            356,
-            362
+            385,
+            391
           ]
         }
       ],
@@ -1462,30 +1548,30 @@ go/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            366,
-            381
+            395,
+            410
           ]
         }
       ],
       &quot;span&quot;: [
-        267,
-        384
+        296,
+        413
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/ul&gt;\n&quot;,
       &quot;span&quot;: [
-        385,
-        391
+        414,
+        420
       ]
     },
     {
       &quot;type&quot;: &quot;Include&quot;,
       &quot;path&quot;: &quot;partial.tpl&quot;,
       &quot;span&quot;: [
-        391,
-        406
+        420,
+        435
       ]
     },
     {
@@ -1496,8 +1582,8 @@ go/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;defined&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            419,
-            433
+            448,
+            462
           ]
         }
       ],
@@ -1506,22 +1592,22 @@ go/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;missing&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            436,
-            450
+            465,
+            479
           ]
         }
       ],
       &quot;span&quot;: [
-        407,
-        453
+        436,
+        482
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;\n&quot;,
       &quot;span&quot;: [
-        453,
-        454
+        482,
+        483
       ]
     },
     {
@@ -1537,29 +1623,29 @@ go/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;page&quot;,
               &quot;span&quot;: [
-                471,
-                475
+                500,
+                504
               ]
             },
             &quot;key&quot;: &quot;title&quot;,
             &quot;span&quot;: [
-              471,
-              481
+              500,
+              510
             ]
           }
         }
       ],
       &quot;span&quot;: [
-        454,
-        482
+        483,
+        511
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
       &quot;span&quot;: [
-        483,
-        494
+        512,
+        523
       ]
     }
   ]
@@ -1635,8 +1721,8 @@ rust/manifest.json
     },
     &quot;layout.tpl&quot;: {
       &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
-      &quot;sourceSha256&quot;: &quot;e0ab16413c62cca5ed33c04d77f38ec2d6254adbc5a2bae03d05bdc613820a98&quot;,
-      &quot;artifactSha256&quot;: &quot;fe84f20ee85f4df48e83d873a2d56c3ba9ccfb4264eb48b54e1218ad53cb9d85&quot;
+      &quot;sourceSha256&quot;: &quot;6bfb1a92eb46c57f8ae2c40a0c4de5f7c00e3021ef0fa5747e518dc5b4bd4ee4&quot;,
+      &quot;artifactSha256&quot;: &quot;8596d90a3228b0de94d1299814be3bb3c112d91157354828b02641efb06702c8&quot;
     },
     &quot;partial.tpl&quot;: {
       &quot;artifact&quot;: &quot;partial.tpl.ast.json&quot;,
@@ -2084,10 +2170,53 @@ rust/layout.tpl.ast.json · layout.tpl
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
-      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
         257,
-        267
+        258
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;&quot;,
+            &quot;span&quot;: [
+              261,
+              263
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;fallback&quot;,
+            &quot;span&quot;: [
+              274,
+              284
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          261,
+          285
+        ]
+      },
+      &quot;span&quot;: [
+        258,
+        286
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;span&quot;: [
+        286,
+        296
       ]
     },
     {
@@ -2097,8 +2226,8 @@ rust/layout.tpl.ast.json · layout.tpl
         &quot;type&quot;: &quot;Var&quot;,
         &quot;name&quot;: &quot;rows&quot;,
         &quot;span&quot;: [
-          276,
-          280
+          305,
+          309
         ]
       },
       &quot;body&quot;: [
@@ -2106,8 +2235,8 @@ rust/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;&quot;,
           &quot;span&quot;: [
-            282,
-            286
+            311,
+            315
           ]
         },
         {
@@ -2117,21 +2246,21 @@ rust/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;index_&quot;,
             &quot;span&quot;: [
-              289,
-              299
+              318,
+              328
             ]
           },
           &quot;span&quot;: [
-            286,
-            300
+            315,
+            329
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;/&quot;,
           &quot;span&quot;: [
-            300,
-            301
+            329,
+            330
           ]
         },
         {
@@ -2141,21 +2270,21 @@ rust/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;size_&quot;,
             &quot;span&quot;: [
-              304,
-              313
+              333,
+              342
             ]
           },
           &quot;span&quot;: [
-            301,
-            314
+            330,
+            343
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            314,
-            315
+            343,
+            344
           ]
         },
         {
@@ -2166,27 +2295,27 @@ rust/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;row&quot;,
               &quot;span&quot;: [
-                318,
-                321
+                347,
+                350
               ]
             },
             &quot;key&quot;: &quot;name&quot;,
             &quot;span&quot;: [
-              318,
-              326
+              347,
+              355
             ]
           },
           &quot;span&quot;: [
-            315,
-            327
+            344,
+            356
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            327,
-            328
+            356,
+            357
           ]
         },
         {
@@ -2196,21 +2325,21 @@ rust/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;first_&quot;,
             &quot;span&quot;: [
-              331,
-              341
+              360,
+              370
             ]
           },
           &quot;span&quot;: [
-            328,
-            342
+            357,
+            371
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            342,
-            343
+            371,
+            372
           ]
         },
         {
@@ -2220,21 +2349,21 @@ rust/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;last_&quot;,
             &quot;span&quot;: [
-              346,
-              355
+              375,
+              384
             ]
           },
           &quot;span&quot;: [
-            343,
-            356
+            372,
+            385
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            356,
-            362
+            385,
+            391
           ]
         }
       ],
@@ -2243,30 +2372,30 @@ rust/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            366,
-            381
+            395,
+            410
           ]
         }
       ],
       &quot;span&quot;: [
-        267,
-        384
+        296,
+        413
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/ul&gt;\n&quot;,
       &quot;span&quot;: [
-        385,
-        391
+        414,
+        420
       ]
     },
     {
       &quot;type&quot;: &quot;Include&quot;,
       &quot;path&quot;: &quot;partial.tpl&quot;,
       &quot;span&quot;: [
-        391,
-        406
+        420,
+        435
       ]
     },
     {
@@ -2277,8 +2406,8 @@ rust/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;defined&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            419,
-            433
+            448,
+            462
           ]
         }
       ],
@@ -2287,22 +2416,22 @@ rust/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;missing&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            436,
-            450
+            465,
+            479
           ]
         }
       ],
       &quot;span&quot;: [
-        407,
-        453
+        436,
+        482
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;\n&quot;,
       &quot;span&quot;: [
-        453,
-        454
+        482,
+        483
       ]
     },
     {
@@ -2318,29 +2447,29 @@ rust/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;page&quot;,
               &quot;span&quot;: [
-                471,
-                475
+                500,
+                504
               ]
             },
             &quot;key&quot;: &quot;title&quot;,
             &quot;span&quot;: [
-              471,
-              481
+              500,
+              510
             ]
           }
         }
       ],
       &quot;span&quot;: [
-        454,
-        482
+        483,
+        511
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
       &quot;span&quot;: [
-        483,
-        494
+        512,
+        523
       ]
     }
   ]
@@ -2416,8 +2545,8 @@ php/manifest.json
     },
     &quot;layout.tpl&quot;: {
       &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
-      &quot;sourceSha256&quot;: &quot;e0ab16413c62cca5ed33c04d77f38ec2d6254adbc5a2bae03d05bdc613820a98&quot;,
-      &quot;artifactSha256&quot;: &quot;fe84f20ee85f4df48e83d873a2d56c3ba9ccfb4264eb48b54e1218ad53cb9d85&quot;
+      &quot;sourceSha256&quot;: &quot;6bfb1a92eb46c57f8ae2c40a0c4de5f7c00e3021ef0fa5747e518dc5b4bd4ee4&quot;,
+      &quot;artifactSha256&quot;: &quot;8596d90a3228b0de94d1299814be3bb3c112d91157354828b02641efb06702c8&quot;
     },
     &quot;partial.tpl&quot;: {
       &quot;artifact&quot;: &quot;partial.tpl.ast.json&quot;,
@@ -2865,10 +2994,53 @@ php/layout.tpl.ast.json · layout.tpl
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
-      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
         257,
-        267
+        258
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;&quot;,
+            &quot;span&quot;: [
+              261,
+              263
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;fallback&quot;,
+            &quot;span&quot;: [
+              274,
+              284
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          261,
+          285
+        ]
+      },
+      &quot;span&quot;: [
+        258,
+        286
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
+      &quot;span&quot;: [
+        286,
+        296
       ]
     },
     {
@@ -2878,8 +3050,8 @@ php/layout.tpl.ast.json · layout.tpl
         &quot;type&quot;: &quot;Var&quot;,
         &quot;name&quot;: &quot;rows&quot;,
         &quot;span&quot;: [
-          276,
-          280
+          305,
+          309
         ]
       },
       &quot;body&quot;: [
@@ -2887,8 +3059,8 @@ php/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;&quot;,
           &quot;span&quot;: [
-            282,
-            286
+            311,
+            315
           ]
         },
         {
@@ -2898,21 +3070,21 @@ php/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;index_&quot;,
             &quot;span&quot;: [
-              289,
-              299
+              318,
+              328
             ]
           },
           &quot;span&quot;: [
-            286,
-            300
+            315,
+            329
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;/&quot;,
           &quot;span&quot;: [
-            300,
-            301
+            329,
+            330
           ]
         },
         {
@@ -2922,21 +3094,21 @@ php/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;size_&quot;,
             &quot;span&quot;: [
-              304,
-              313
+              333,
+              342
             ]
           },
           &quot;span&quot;: [
-            301,
-            314
+            330,
+            343
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            314,
-            315
+            343,
+            344
           ]
         },
         {
@@ -2947,27 +3119,27 @@ php/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;row&quot;,
               &quot;span&quot;: [
-                318,
-                321
+                347,
+                350
               ]
             },
             &quot;key&quot;: &quot;name&quot;,
             &quot;span&quot;: [
-              318,
-              326
+              347,
+              355
             ]
           },
           &quot;span&quot;: [
-            315,
-            327
+            344,
+            356
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            327,
-            328
+            356,
+            357
           ]
         },
         {
@@ -2977,21 +3149,21 @@ php/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;first_&quot;,
             &quot;span&quot;: [
-              331,
-              341
+              360,
+              370
             ]
           },
           &quot;span&quot;: [
-            328,
-            342
+            357,
+            371
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            342,
-            343
+            371,
+            372
           ]
         },
         {
@@ -3001,21 +3173,21 @@ php/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;last_&quot;,
             &quot;span&quot;: [
-              346,
-              355
+              375,
+              384
             ]
           },
           &quot;span&quot;: [
-            343,
-            356
+            372,
+            385
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            356,
-            362
+            385,
+            391
           ]
         }
       ],
@@ -3024,30 +3196,30 @@ php/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            366,
-            381
+            395,
+            410
           ]
         }
       ],
       &quot;span&quot;: [
-        267,
-        384
+        296,
+        413
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/ul&gt;\n&quot;,
       &quot;span&quot;: [
-        385,
-        391
+        414,
+        420
       ]
     },
     {
       &quot;type&quot;: &quot;Include&quot;,
       &quot;path&quot;: &quot;partial.tpl&quot;,
       &quot;span&quot;: [
-        391,
-        406
+        420,
+        435
       ]
     },
     {
@@ -3058,8 +3230,8 @@ php/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;defined&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            419,
-            433
+            448,
+            462
           ]
         }
       ],
@@ -3068,22 +3240,22 @@ php/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;missing&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            436,
-            450
+            465,
+            479
           ]
         }
       ],
       &quot;span&quot;: [
-        407,
-        453
+        436,
+        482
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;\n&quot;,
       &quot;span&quot;: [
-        453,
-        454
+        482,
+        483
       ]
     },
     {
@@ -3099,29 +3271,29 @@ php/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;page&quot;,
               &quot;span&quot;: [
-                471,
-                475
+                500,
+                504
               ]
             },
             &quot;key&quot;: &quot;title&quot;,
             &quot;span&quot;: [
-              471,
-              481
+              500,
+              510
             ]
           }
         }
       ],
       &quot;span&quot;: [
-        454,
-        482
+        483,
+        511
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
       &quot;span&quot;: [
-        483,
-        494
+        512,
+        523
       ]
     }
   ]
@@ -3213,6 +3385,8 @@ function render_compiler_coverage__layout_tpl(root, define, env, parent, scenari
   out += escapeValue(truthy(lookup(ctx, root, &quot;flag&quot;)) ? &quot;yes&quot; : &quot;no&quot;);
   out += &quot;|&quot;;
   out += escapeValue(binary(&quot;+&quot;, unary(&quot;-&quot;, 1), 3));
+  out += &quot;|&quot;;
+  out += escapeValue(call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;]));
   out += &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;;
   { const loopEntries = entries(lookup(ctx, root, &quot;rows&quot;));
   for (let loopIndex = 0; loopIndex &lt; loopEntries.length; loopIndex += 1) {
@@ -3298,6 +3472,8 @@ function render_compiler_coverage__layout_tpl(root, define, env, parent, scenari
   out += escapeValue(truthy(lookup(ctx, root, &quot;flag&quot;)) ? &quot;yes&quot; : &quot;no&quot;);
   out += &quot;|&quot;;
   out += escapeValue(binary(&quot;+&quot;, unary(&quot;-&quot;, 1), 3));
+  out += &quot;|&quot;;
+  out += escapeValue(call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;]));
   out += &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;;
   { const loopEntries = entries(lookup(ctx, root, &quot;rows&quot;));
   for (let loopIndex = 0; loopIndex &lt; loopEntries.length; loopIndex += 1) {
@@ -3385,6 +3561,8 @@ func generated_compiler_coverage__layout_tpl(root *value.OrderedMap, define Defi
 	if err := generatedEcho(&amp;out, generatedTernary(generatedLookup(ctx, root, &quot;flag&quot;), &quot;yes&quot;, &quot;no&quot;)); err != nil { return &quot;&quot;, err }
 	out.WriteString(&quot;|&quot;)
 	if err := generatedEcho(&amp;out, generatedBinaryFull(&quot;+&quot;, generatedUnaryFull(&quot;-&quot;, float64(1)), float64(3))); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;|&quot;)
+	if err := generatedEcho(&amp;out, generatedCall(&quot;default&quot;, []value.Value{&quot;&quot;, &quot;fallback&quot;})); err != nil { return &quot;&quot;, err }
 	out.WriteString(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;)
 	{
 		loopEntries, err := generatedEntries(generatedLookup(ctx, root, &quot;rows&quot;))
@@ -3476,6 +3654,8 @@ fn generated_compiler_coverage__layout_tpl(root: &amp;Map&lt;String, Value&gt;, 
     generated_echo_full(&amp;mut out, generated_ternary(generated_lookup(&amp;ctx, root, &quot;flag&quot;), Value::String(&quot;yes&quot;.to_string()), Value::String(&quot;no&quot;.to_string())))?;
     out.push_str(&quot;|&quot;);
     generated_echo_full(&amp;mut out, generated_binary_full(&quot;+&quot;, generated_unary_full(&quot;-&quot;, serde_json::json!(1)), serde_json::json!(3)))?;
+    out.push_str(&quot;|&quot;);
+    generated_echo_full(&amp;mut out, generated_call(&quot;default&quot;, vec![Value::String(&quot;&quot;.to_string()), Value::String(&quot;fallback&quot;.to_string())]))?;
     out.push_str(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
     {
         let loop_entries = generated_entries(generated_lookup(&amp;ctx, root, &quot;rows&quot;))?;
@@ -3560,6 +3740,8 @@ function generated_compiler_coverage__layout_tpl(MapValue $root, MapValue $defin
     $out .= generated_escape_full(generated_ternary(generated_lookup($ctx, $root, &#39;flag&#39;), &#39;yes&#39;, &#39;no&#39;));
     $out .= &quot;|&quot;;
     $out .= generated_escape_full(generated_binary_full(&#39;+&#39;, generated_unary_full(&#39;-&#39;, 1), 3));
+    $out .= &quot;|&quot;;
+    $out .= generated_escape_full(generated_call(&#39;default&#39;, [&#39;&#39;, &#39;fallback&#39;]));
     $out .= &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;;
     $loopEntries = generated_entries(generated_lookup($ctx, $root, &#39;rows&#39;));
     foreach ($loopEntries as $loopIndex =&gt; [$loopKey, $loopValue]) {
@@ -3611,11 +3793,11 @@ function generated_compiler_coverage__partial_tpl(MapValue $root, MapValue $defi
     $out .= &quot;&lt;/p&gt;\n&quot;;
     return $out;
 }</pre></details></section>
-    <section class="output"><p class="output-label">Output · 217 bytes · 7ee9bca83598…</p><pre>&lt;<span class="syntax-tag">section</span>&gt;
+    <section class="output"><p class="output-label">Output · 226 bytes · 04985b52081a…</p><pre>&lt;<span class="syntax-tag">section</span>&gt;
 &lt;<span class="syntax-tag">h1</span>&gt;Guide&lt;/<span class="syntax-tag">h1</span>&gt;
 &lt;<span class="syntax-tag">p</span>&gt;10|Z&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;<span class="syntax-tag">strong</span>&gt;matched&lt;/<span class="syntax-tag">strong</span>&gt;
-&lt;<span class="syntax-tag">p</span>&gt;yes|2&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span>&gt;yes|2|fallback&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;<span class="syntax-tag">ul</span>&gt;
 &lt;<span class="syntax-tag">li</span>&gt;0/2:A:true:false&lt;/<span class="syntax-tag">li</span>&gt;
 &lt;<span class="syntax-tag">li</span>&gt;1/2:B:false:true&lt;/<span class="syntax-tag">li</span>&gt;

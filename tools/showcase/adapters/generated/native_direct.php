@@ -80,6 +80,8 @@ function generated_compiler_coverage__layout_tpl(MapValue $root, MapValue $defin
     $out .= generated_escape_full(generated_ternary(generated_lookup($ctx, $root, 'flag'), 'yes', 'no'));
     $out .= "|";
     $out .= generated_escape_full(generated_binary_full('+', generated_unary_full('-', 1), 3));
+    $out .= "|";
+    $out .= generated_escape_full(generated_call('default', ['', 'fallback']));
     $out .= "</p>\n<ul>\n";
     $loopEntries = generated_entries(generated_lookup($ctx, $root, 'rows'));
     foreach ($loopEntries as $loopIndex => [$loopKey, $loopValue]) {

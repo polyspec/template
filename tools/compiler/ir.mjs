@@ -55,6 +55,13 @@ export function lowerSourceGraph(graph, manifest) {
   const root = new Map(Object.entries(manifest.fields ?? {}).map(([name, type]) => [name, parseType(type)]));
   const functions = new Map(Object.entries(manifest.functions ?? {}).map(([name, signature]) => [name, { args: (signature.args ?? []).map(parseType), returns: parseType(signature.returns ?? 'any') }]));
   const definitions = new Map(Object.entries(manifest.defines ?? {}).map(([name, type]) => [name, parseType(type)]));
+  const templateInputs = new Map(Object.entries(manifest.templates ?? {}).map(([name, fields]) => {
+    if (!graph.templates.has(name) || !fields || typeof fields !== 'object' || Array.isArray(fields)) {
+      throw new Error(`typed generator: template input declaration ${name} is invalid`);
+    }
+    return [name, new Map(Object.entries(fields).map(([field, type]) => [field, parseType(type)]))];
+  }));
+  for (const name of graph.templates.keys()) if (!templateInputs.has(name)) templateInputs.set(name, new Map());
   const templates = new Map();
 
   function lowerExpr(node, scope, loops) {
@@ -123,7 +130,17 @@ export function lowerSourceGraph(graph, manifest) {
       }
       case 'Map': {
         const entries = node.entries.map(item => item.type === 'Spread' ? { spread: true, value: lowerExpr(item.expr, scope, loops) } : { spread: false, key: lowerExpr(item.key, scope, loops), value: lowerExpr(item.value, scope, loops) });
-        return { op: 'map', entries, valueType: parseType('map<any,any>') };
+        let keyType = parseType('any');
+        let valueType = parseType('any');
+        for (const entry of entries) {
+          const spreadType = entry.spread ? required(entry.value.valueType) : null;
+          if (entry.spread && spreadType.kind !== 'map') throw new Error(`typed generator: map spread requires a map, got ${typeSource(entry.value.valueType)}`);
+          const key = entry.spread ? spreadType.key : entry.key.valueType;
+          const value = entry.spread ? spreadType.value : entry.value.valueType;
+          keyType = keyType.kind === 'any' ? key : mergeType(keyType, key);
+          valueType = valueType.kind === 'any' ? value : mergeType(valueType, value);
+        }
+        return { op: 'map', entries, valueType: parseType(`map<${typeSource(keyType)},${typeSource(valueType)}>`)};
       }
     }
   }
@@ -155,7 +172,14 @@ export function lowerSourceGraph(graph, manifest) {
         case 'Include': {
           const target = resolveTemplate(templateName, node.path);
           if (!graph.templates.has(target)) throw new Error(`typed generator: included template ${target} is missing from the source graph`);
-          return { op: 'include', target };
+          const inputs = [...templateInputs.get(target)].map(([name, valueType]) => {
+            const value = lowerExpr({ type: 'Var', name }, scope, loops);
+            if (!sameType(value.valueType, valueType) || value.valueType.optional && !valueType.optional) {
+              throw new Error(`typed generator: include ${target} input ${name} requires ${typeSource(valueType)}, got ${typeSource(value.valueType)}`);
+            }
+            return { name, value, valueType };
+          });
+          return { op: 'include', target, inputs };
         }
         case 'Block': {
           if (node.id !== null && !definitions.has(node.id)) throw new Error(`typed generator: definition ${node.id} is missing from the type manifest`);
@@ -171,9 +195,13 @@ export function lowerSourceGraph(graph, manifest) {
     });
   }
 
-  for (const [name, ast] of graph.templates) templates.set(name, { name, body: lowerNodes(ast.body, name) });
+  for (const [name, ast] of graph.templates) {
+    const inputs = templateInputs.get(name);
+    templates.set(name, { name, inputs, body: lowerNodes(ast.body, name, inputs) });
+  }
   const entry = manifest.entry;
   if (typeof entry !== 'string' || !templates.has(entry)) throw new Error('typed generator: type manifest entry must name a source graph template');
+  if (templateInputs.get(entry).size !== 0) throw new Error('typed generator: entry template cannot require template inputs');
   return { schema: 1, entry, fields: root, records, functions, definitions, templates };
 }
 

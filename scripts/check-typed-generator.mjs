@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -8,6 +8,7 @@ const root = resolve(new URL('..', import.meta.url).pathname);
 const generated = resolve(root, 'tools/showcase/adapters/generated/typed');
 const temporary = mkdtempSync(join(tmpdir(), 'polyspec-typed-generator-'));
 const expected = readFileSync(resolve(root, 'examples/site/scenarios/react-boundary/expected.html'), 'utf8');
+const coverageExpected = readFileSync(resolve(root, 'examples/site/scenarios/compiler-coverage/expected.html'), 'utf8');
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { cwd: options.cwd ?? root, encoding: 'utf8', env: { ...process.env, ...options.env } });
@@ -34,8 +35,30 @@ try {
   writeFileSync(resolve(temporary, 'rust-check.rs'), `mod generated { include!(${JSON.stringify(resolve(generated, 'react-layout.rust'))}); pub fn parity() -> String { let assign = Assign { title: Some("Server rendered shell".to_string()), island_label: Some("Interactive island".to_string()), ..Default::default() }; let mut slots = std::collections::HashMap::new(); let content = render_template("content.tpl", &assign, &slots); slots.insert("content".to_string(), content); render(&assign, &slots) } }\nfn main() { assert_eq!(generated::parity(), ${JSON.stringify(expected)}); }\n`);
   run(rustc, ['--edition', '2024', resolve(temporary, 'rust-check.rs'), '-o', resolve(temporary, 'rust-check')]);
   run(resolve(temporary, 'rust-check'), []);
+
+  const coverageTs = resolve(generated, 'compiler-coverage.ts');
+  run('npx', ['tsc', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', coverageTs]);
+  run('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', temporary, coverageTs]);
+  writeFileSync(resolve(temporary, 'typescript-coverage-check.mjs'), `import { render } from './compiler-coverage.js';\nconst assign = { flag: true, page: { title: 'Guide' }, numbers: [10, 20], lookup: new Map([['x', 'X']]), rows: [{ name: 'A' }, { name: 'B' }] };\nconst actual = render(assign, { content: '<p class="card">Guide</p>\\n' });\nif (actual !== ${JSON.stringify(coverageExpected)}) throw new Error('TypeScript compiler coverage differs');\n`);
+  run('node', [resolve(temporary, 'typescript-coverage-check.mjs')]);
+
+  const goCoverage = resolve(temporary, 'go-coverage');
+  mkdirSync(goCoverage);
+  copyFileSync(resolve(generated, 'compiler-coverage.go'), resolve(goCoverage, 'generated.go'));
+  writeFileSync(resolve(goCoverage, 'generated_test.go'), `package generated\nimport "testing"\nfunc TestCompilerCoverage(t *testing.T) { lookup := NewOrderedMap[string, string](); lookup.Set("x", "X"); assign := Assign{Flag: true, Page: Page{Title: "Guide"}, Numbers: []float64{10, 20}, Lookup: lookup, Rows: []Row{{Name: "A"}, {Name: "B"}}}; actual := Render(assign, map[string]string{"content": "<p class=\\"card\\">Guide</p>\\n"}); if actual != ${JSON.stringify(coverageExpected)} { t.Fatalf("compiler coverage differs: %q", actual) } }\n`);
+  run('go', ['test', '.'], { cwd: goCoverage, env: { GO111MODULE: 'off' } });
+
+  const coveragePhp = resolve(generated, 'compiler-coverage.php');
+  run('php', ['-l', coveragePhp]);
+  run('php', ['-r', `require ${JSON.stringify(coveragePhp)}; $assign = new Assign(flag: true, page: new Page(title: 'Guide'), numbers: [10.0, 20.0], lookup: ['x' => 'X'], rows: [new Row(name: 'A'), new Row(name: 'B')]); $actual = render($assign, ['content' => "<p class=\\"card\\">Guide</p>\\n"]); if ($actual !== ${JSON.stringify(coverageExpected)}) throw new RuntimeException('PHP compiler coverage differs');`]);
+
+  const coverageRust = resolve(generated, 'compiler-coverage.rust');
+  run(rustc, ['--crate-type', 'lib', '--edition', '2024', coverageRust, '--out-dir', temporary]);
+  writeFileSync(resolve(temporary, 'rust-coverage-check.rs'), `mod generated { include!(${JSON.stringify(coverageRust)}); pub fn parity() -> String { let mut lookup = OrderedMap::new(); lookup.set("x".to_string(), "X".to_string()); let assign = Assign { flag: true, page: Page { title: "Guide".to_string() }, numbers: vec![10.0, 20.0], lookup, rows: vec![Row { name: "A".to_string() }, Row { name: "B".to_string() }] }; let mut slots = std::collections::HashMap::new(); slots.insert("content".to_string(), "<p class=\\"card\\">Guide</p>\\n".to_string()); render(&assign, &slots) } }\nfn main() { assert_eq!(generated::parity(), ${JSON.stringify(coverageExpected)}); }\n`);
+  run(rustc, ['--edition', '2024', resolve(temporary, 'rust-coverage-check.rs'), '-o', resolve(temporary, 'rust-coverage-check')]);
+  run(resolve(temporary, 'rust-coverage-check'), []);
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write('typed generator: TypeScript, Go, Rust and PHP outputs compile and render identical React page bytes\n');
+process.stdout.write('typed generator: TypeScript, Go, Rust and PHP compile and render identical React and full compiler-coverage bytes\n');

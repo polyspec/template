@@ -28,7 +28,7 @@ const graph = {
       { type: 'Block', id: 'content', path: 'card.tpl', scope: [{ name: 'label', expr: variable('fallback') }], span },
       { type: 'IfBlock', id: 'content', body: [{ type: 'Text', value: 'defined', span }], else: [{ type: 'Text', value: 'missing', span }], span },
     ] }],
-    ['partial.tpl', { type: 'Template', name: 'partial.tpl', body: [{ type: 'Echo', expr: variable('fallback'), span }] }],
+    ['partial.tpl', { type: 'Template', name: 'partial.tpl', body: [{ type: 'Echo', expr: variable('local'), span }] }],
     ['card.tpl', { type: 'Template', name: 'card.tpl', body: [{ type: 'Text', value: 'card', span }] }],
   ]),
 };
@@ -41,6 +41,7 @@ const manifest = {
   records: { Page: { title: 'string?' }, Row: { name: 'string' }, Slot: { template: 'string?', html: 'string?' } },
   defines: { content: 'Slot?' },
   functions: { default: { args: ['any', 'any'], returns: 'any' } },
+  templates: { 'partial.tpl': { local: 'string' } },
 };
 
 const program = lowerSourceGraph(graph, manifest);
@@ -74,6 +75,8 @@ const expectedNodes = ['text', 'echo', 'set', 'if', 'for', 'include', 'block', '
 const expectedExprs = ['literal', 'root', 'local', 'loop-meta', 'member', 'index', 'call', 'unary', 'binary', 'ternary', 'list', 'map'];
 for (const op of expectedNodes) if (!nodeOps.has(op)) throw new Error(`compiler IR did not lower node ${op}`);
 for (const op of expectedExprs) if (!exprOps.has(op)) throw new Error(`compiler IR did not lower expression ${op}`);
+const include = program.templates.get('main.tpl').body.find(node => node.op === 'include');
+if (include?.inputs?.[0]?.name !== 'local' || include.inputs[0].value.op !== 'local') throw new Error('compiler IR did not bind an include input from caller scope');
 
 const invalid = structuredClone(graph);
 invalid.templates.get('partial.tpl').body[0].expr.name = 'undeclared';
