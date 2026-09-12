@@ -168,18 +168,18 @@ sequenceDiagram
 
 ## 지원 레벨과 컴파일 artifact
 
-- **RT-54** 인터페이스 manifest는 하나의 compiler와 두 모드를 선언한다. `ast`는 `AstArtifact`, `gen`은 타입 고정 `GeneratedArtifact`를 반환한다. 두 artifact는 같은 artifact store와 prepared render 계약을 거친다.
+- **RT-54** 인터페이스 manifest는 하나의 compiler와 동등한 두 mode를 선언한다. `ast`는 `AstArtifact`, `gen`은 host language source와 artifact manifest를 반환한다. 둘 다 같은 prepared render 계약을 가진 `Program`을 만든다.
 - **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다.
-- **RT-56** production 지원 구현은 `core-runtime`, `source-compiler`, `artifact-runtime`과 두 compiler 모드를 모두 제공한다. 생성된 호스트 언어 소스는 같은 compiler 계약이 선택하는 `gen` artifact다.
-- **RT-57** 컴파일 artifact는 정규 AST와 schema 버전, 언어, 시나리오, 원본 SHA-256, artifact SHA-256, 템플릿 artifact 경로를 가진 manifest를 포함한다. artifact는 서비스 시작 전에 생성되고 프로세스에 한 번 로드된다.
-- **RT-58** 산출물 갱신에는 세 정책이 있다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 배포된 산출물만 읽고 누락·오래됨이면 실패한다. 이 정책은 `compile.mode`가 산출물 표현을 선택한 뒤 독립적으로 적용된다.
-- **RT-59** 요청 경로에서는 파싱, 원본 파일 탐색, artifact 생성이 실행되지 않는다. 같은 artifact에 같은 assign, define, environment를 적용하면 같은 출력 바이트를 만들고 request를 변경하지 않는다.
+- **RT-56** TypeScript, Go, Rust, PHP는 `core-runtime`, `artifact-runtime`과 두 `Program` variant를 제공한다. Build compiler는 `source-compiler`와 generated target backend 네 개를 제공한다. JavaScript ESM은 TypeScript backend가 생성하며 별도 의미 구현으로 세지 않는다.
+- **RT-57** Artifact manifest는 contract format, mode, target language, entry, source digest, type digest, contract digest, output path를 포함한다. Artifact는 service 시작 전에 생성하고 process에 한 번 load하거나 정적으로 연결한다.
+- **RT-58** Artifact 갱신은 build 정책이다. `dev`는 compiler를 호출할 때마다 재생성하고, `true`는 source, type, contract digest가 달라지면 재생성하며, `false`는 source를 읽지 않고 배포 artifact만 사용한다. Development watcher는 재생성 뒤 정적으로 연결한 Go와 Rust process를 rebuild하고 restart한다.
+- **RT-59** Render request 경로에서는 parsing, source 탐색, artifact 생성, host compilation을 하지 않는다. 같은 program을 같은 assign, define, environment로 render하면 같은 output byte를 만들고 request를 변경하지 않는다.
 - **RT-68** 타입 고정 generated artifact는 assign, 필드 전달 여부를 보존하는 definition data, definitions와 template input을 선언한다. 생성된 block은 root assign, 전달된 definition data 필드, block scope 순서로 입력을 적용한 뒤 대상 template 함수를 직접 호출한다. 미리 렌더한 문자열 slot은 generated template target이 아니다.
 
 인터페이스는 두 실행 모드를 선언한다.
 
-- **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 현재 모든 언어가 사용하는 구현된 공통 모드다.
-- **생성 모드**는 시작 전에 정규 AST의 각 노드를 호스트 언어 렌더러로 낮추고 그 렌더러를 한 번 로드한 뒤 요청마다 호출한다. 현재 TypeScript·JavaScript·Go·Rust·PHP를 지원한다. 요청 중에는 템플릿 AST를 파싱하거나 해석하지 않으며, 생성 결과는 AST 모드의 assign·define·오류·멱등성 계약을 유지해야 한다.
+- **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 완성된 cross-language mode다.
+- **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 모든 target runtime에서 211개 적합성 case를 통과할 때까지 partial이다. Request에서 template AST를 parse하거나 해석하지 않는다.
 
 ```mermaid
 flowchart LR
@@ -287,4 +287,4 @@ flowchart TB
 
 - **RT-40** 엔진은 템플릿을 `name@version`마다 한 번 파싱하고 로더가 같은 버전을 보고하는 동안 파싱된 템플릿을 재사용한다.
 - **RT-41** 파싱된 템플릿은 AST JSON으로 저장하고 다시 로드할 수 있다. AST 렌더는 소스 렌더와 같은 출력을 만든다.
-- **RT-60** showcase compiler는 `node tools/showcase/compile.mjs --mode dev|changed|off`로 artifact를 생성한다. `dev`는 항상 쓰고, `changed`는 일치하는 원본·artifact 해시를 재사용하며, `off`는 쓰거나 원본을 파싱하지 않는다.
+- **RT-60** Build compiler는 `--refresh dev|true|false`를 받는다. `dev`는 항상 쓰고, `true`는 source, type, contract digest가 일치하는 artifact를 재사용하며, `false`는 source를 읽거나 parse하지 않고 artifact도 쓰지 않는다.

@@ -227,17 +227,22 @@ T6.6 is complete. On 2026-09-11, `make check` passed; `make test-ext` built the 
 
 Exit criteria: `make check`, `make showcase-check`, and `make docs-verify-idempotent` pass.
 
-## Wave 7 — Consumer integration (parallel, separate repositories)
+## Wave 7 — Generated compiler completion and packaged consumption
 
-Dependencies: T4.X.2. Each task is executed in the consuming application and recorded in that application's own documents.
+Dependencies: T4.X.2. All verification is self-contained in this repository. Package-consumer checks install immutable package artifacts into isolated temporary projects and do not depend on another application checkout.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T7.1 | Go application: add module dependency, embed templates with `embed.FS`, render a layout with a template definition registry | consuming application build and tests | [ ] |
-| T7.2 | Browser: bundle the ESM build or precompiled AST JSON, render with the same JSON data as the server, compare with server output in a browser test | consuming application browser tests | [ ] |
-| T7.3 | PHP application: composer path dependency, filesystem loader, layout rendering | consuming application tests | [ ] |
-
-T7.3 is open. Shared template examples verify assign, define and rendering; consuming application integration must be implemented and verified in that application. The PHP application oracle and temporary Composer consumer scripts have been removed from this example repository.
+| T7.1 | Define one compiler/runtime manifest, generated declarations, ownership and support-level diagrams; reject structural drift in TypeScript, Go, Rust and PHP | `make compiler-interface-check`; `make runtime-interface-check` | [ ] |
+| T7.2 | Replace generated callbacks and showcase-only generation with one compiler pipeline and four host backends; remove compatibility options and fallback paths | package tests; compiler mutation tests | [ ] |
+| T7.3 | Support every specified node, expression, built-in and host function in generated execution | generated compiler tests | [ ] |
+| T7.4 | Run every one of the 211 cases through AST and generated execution in TypeScript, Go, Rust and PHP | `make conformance-all-modes` | [ ] |
+| T7.5 | Verify artifact refresh at the build boundary: `dev` always rebuilds, `true` rebuilds on digest change, `false` reads no source | artifact lifecycle tests | [ ] |
+| T7.6 | Install npm, Go, Cargo and Composer artifacts in isolated temporary projects and render the same assign/define page | `make consumer-check` | [ ] |
+| T7.7 | Generate parser-backed showcase highlighting, bounded artifact/source views and the React island example from production artifacts | `make showcase-check` | [ ] |
+| T7.8 | Rerun equal-output AST/generated performance measurements with production artifacts | `make bench`; `make showcase` | [ ] |
+| T7.9 | Synchronize specifications, feature status, changelog, generated Mermaid, static documentation and completion evidence | `make docs-check`; `make docs-verify-idempotent` | [ ] |
+| T7.10 | Pass the clean-checkout release gate and deploy the static site | `make release-check`; CI and Pages success | [ ] |
 
 ## Parallelism summary
 
@@ -250,12 +255,14 @@ T7.3 is open. Shared template examples verify assign, define and rendering; cons
 | W4 | tracks G, R, P | inside each track: 1 → 11; T4.X after all tracks |
 | W5 | none | T5.1 → T5.6 |
 | W6 | T6.1–T6.5, T6.7 | T6.6 after all |
-| W7 | T7.1–T7.3 | none |
+| W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 | compiler contract and implementation precede proof and publication |
 
 ## Definition of done
 
-- Every task in W0–W6 is `done`.
+- Every task in W0–W7 is `done`.
 - `make check` passes on a clean checkout with Node 26.8.1, Go 1.27.1, Rust 1.98.1 and PHP 8.5.
 - `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
 - `make test-browser` passes.
+- `make conformance-all-modes` passes all 1,688 TypeScript, Go, Rust and PHP mode-language-case cells without a fallback from generated execution to AST execution.
+- `make consumer-check`, `make showcase-check`, `make docs-verify-idempotent` and `make release-check` pass in a clean checkout.
 - `docs/features.md` and `docs/features.ko.md` carry identical status fields with evidence links for every row.

@@ -1,21 +1,45 @@
-# Typed compiler contract
+# Compiler contract
 
-The compiler has one shared structure before its output branches by host language. A source graph contains canonical template ASTs. The type manifest fixes assign fields, records, callable functions, definition targets and template inputs. `lowerSourceGraph` resolves names, paths, scopes and types into a `TypedProgram`; each language backend only expresses that program in its host syntax.
+[한국어](compiler.ko.md).
 
-The contract source is [`tools/compiler/interface.json`](../../tools/compiler/interface.json). `make compiler-interface-check` rejects a missing or private generated API, a stale diagram and any generated module that restores the pre-rendered string-slot path.
+The compiler owns template parsing, validation, lowering and artifact emission. Runtime packages execute an already compiled program. They do not parse source or invoke a host compiler in a render request.
+
+The contract source is [`tools/compiler/interface.json`](../../tools/compiler/interface.json). Generated declarations and Mermaid diagrams must match that manifest. TypeScript, Go, Rust and PHP mappings may change spelling and error transport; they may not change ownership, field order, operation placement or state transitions.
+
+## Pipeline
 
 ```mermaid
 <!--@include: ../../tools/compiler/generated/compiler-architecture.mmd-->
 ```
 
-Generated modules expose the same logical components. Language spelling differs only through the manifest mapping: `renderTemplate` becomes `RenderTemplate` in Go and `render_template` in Rust and PHP.
-
 ```mermaid
 <!--@include: ../../tools/compiler/generated/compiler-classes.mmd-->
 ```
 
-`Definition<T>.data` has the fixed, partial `DefinitionData<T>` shape of its declared target. It preserves whether each field was supplied, so an omitted data field cannot erase a root assign value. A generated block creates `Input<T>` in the order `assign`, present definition data fields, block scope, then calls the generated child template function directly. `Definition<T>.html` is the explicit branch that returns already trusted HTML. It does not masquerade as a compiled template.
+One source graph and one explicit type manifest are lowered to one typed program. `ast` emits a language-neutral canonical AST artifact. `gen` sends the same typed program to the selected TypeScript, Go, Rust or PHP backend. JavaScript ESM is a delivery artifact produced from the TypeScript backend, not a separate semantic implementation.
 
-The generator emits source text because host compilers consume source text. This is a normal compiler backend boundary. Correctness depends on every emitted declaration and statement coming from the typed program. Scenario names, fixed fields and pre-rendered output are not backend inputs.
+Each backend is a separate `LanguageBackend` implementation. A backend emits declarations and direct template control flow through a structured code writer. It does not contain scenario names, fixed request data, expected output or an interpreter for serialized AST nodes.
 
-The current generated-module support level accepts the `default` built-in. Its type manifest entry must set `implementation` to `builtin`. Any other built-in or a host function fails while the shared IR is built, before a language backend emits source. A backend must not leave a generated function stub that fails only when a page renders.
+## Public structures
+
+`TypeManifest` declares assign fields, record fields, definition targets, template inputs and host-function signatures. Types are never inferred from one request value. An explicit `any` declaration uses the runtime value model without creating another execution mode.
+
+Every generated module exposes the logical structures `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest` and `GeneratedProgram`. A generated program implements the same `Program.prepare(RenderRequest)` and `Program.render(RenderRequest)` operations as an AST program. Template-specific functions are private and invoke each other directly for include and block targets.
+
+Generated expressions use the target runtime's `RuntimeBindings` for truthiness, string conversion, escaping, numeric conversion, equality, ordering, lookup, collection construction, functions, limits and errors. The AST evaluator uses the same bindings. A backend may emit a native operation only when the typed operands make that operation exactly equivalent to the data-model rules.
+
+Built-ins are known to the compiler. A referenced host function requires a manifest signature and a runtime implementation. Missing signatures fail before emission. Missing runtime implementations, arity errors and host failures use the same error fields as AST execution.
+
+## Artifact refresh
+
+Compilation mode and artifact refresh are independent build settings.
+
+- `dev` parses, validates and emits on every compiler invocation. A development watcher rebuilds and restarts a statically linked Go or Rust process.
+- `true` computes source, type and contract digests and emits only when a digest changed.
+- `false` reads no template source and emits nothing. It validates and uses the deployed artifact.
+
+Generated files are completed in a temporary location and replaced atomically. An artifact manifest records its mode, target, entry, source digest, type digest, contract digest and files. A missing, corrupt or incompatible artifact fails before runtime startup.
+
+## Implementation status
+
+The AST compiler and runtimes are implemented. Generated execution is partial: it is currently verified by five showcase scenarios, accepts only the `default` built-in in the typed compiler and uses a separate showcase generator and injected callback. These paths do not satisfy this contract and are removed as the generated compiler is completed.

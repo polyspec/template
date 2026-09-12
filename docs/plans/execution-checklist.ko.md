@@ -227,17 +227,22 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 
 종료 기준: `make check`, `make showcase-check`, `make docs-verify-idempotent` 통과.
 
-## Wave 7 — 소비 애플리케이션 통합 (병렬, 별도 저장소)
+## Wave 7 — generated compiler 완성과 패키지 소비 검증
 
-의존: T4.X.2. 각 작업은 소비 애플리케이션에서 수행하고 그 애플리케이션의 문서에 기록한다.
+의존: T4.X.2. 모든 검증은 이 저장소 안에서 독립적으로 수행한다. 패키지 소비 검사는 불변 package artifact를 격리한 임시 프로젝트에 설치하며 다른 애플리케이션 checkout에 의존하지 않는다.
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
-| T7.1 | Go 애플리케이션: 모듈 의존 추가, `embed.FS`로 템플릿 임베드, 템플릿 define 레지스트리로 레이아웃 렌더 | 소비 애플리케이션의 빌드와 테스트 | [ ] |
-| T7.2 | 브라우저: ESM 빌드 또는 사전 컴파일된 AST JSON을 번들, 서버와 같은 JSON 데이터로 렌더, 브라우저 테스트에서 서버 출력과 비교 | 소비 애플리케이션의 브라우저 테스트 | [ ] |
-| T7.3 | PHP 애플리케이션: composer path 의존, 파일시스템 로더, 레이아웃 렌더 | 소비 애플리케이션의 테스트 | [ ] |
-
-T7.3은 미완료다. 공통 템플릿 예제는 assign, define, 렌더를 검증하며 소비 애플리케이션 통합은 해당 애플리케이션에서 구현하고 검증해야 한다. PHP 애플리케이션 오라클과 임시 Composer 소비자 스크립트는 이 예제 저장소에서 제거했다.
+| T7.1 | compiler/runtime manifest 하나, 생성 선언부, 소유 관계와 지원 수준 도표를 정의하고 TypeScript·Go·Rust·PHP 구조 이탈을 거부 | `make compiler-interface-check`; `make runtime-interface-check` | [ ] |
+| T7.2 | generated callback과 showcase 전용 생성을 하나의 compiler pipeline과 네 host backend로 교체하고 호환 옵션과 fallback 경로 제거 | package test; compiler mutation test | [ ] |
+| T7.3 | 모든 명세 node, expression, 내장 함수와 host 함수를 generated 실행에서 지원 | generated compiler test | [ ] |
+| T7.4 | 211개 케이스 전체를 TypeScript·Go·Rust·PHP의 AST와 generated 실행으로 검증 | `make conformance-all-modes` | [ ] |
+| T7.5 | build 경계 artifact 갱신 검증: `dev`는 항상 재생성, `true`는 digest 변경 시 재생성, `false`는 source를 읽지 않음 | artifact lifecycle test | [ ] |
+| T7.6 | npm·Go·Cargo·Composer artifact를 격리한 임시 프로젝트에 설치하고 같은 assign/define page 렌더 | `make consumer-check` | [ ] |
+| T7.7 | production artifact로 parser 기반 showcase 구문 강조, 크기 제한 artifact/source 보기와 React island 예제 생성 | `make showcase-check` | [ ] |
+| T7.8 | production artifact를 사용해 출력이 같은 AST/generated 성능 측정 재실행 | `make bench`; `make showcase` | [ ] |
+| T7.9 | 명세, 기능 상태, 변경 기록, 생성 Mermaid, 정적 문서와 완료 근거 동기화 | `make docs-check`; `make docs-verify-idempotent` | [ ] |
+| T7.10 | 깨끗한 checkout의 release gate 통과와 정적 사이트 배포 | `make release-check`; CI와 Pages 성공 | [ ] |
 
 ## 병렬성 요약
 
@@ -250,12 +255,14 @@ T7.3은 미완료다. 공통 템플릿 예제는 assign, define, 렌더를 검�
 | W4 | 트랙 G, R, P | 각 트랙 안에서 1 → 11; T4.X는 모든 트랙 뒤 |
 | W5 | 없음 | T5.1 → T5.6 |
 | W6 | T6.1–T6.5, T6.7 | T6.6은 모두 끝난 뒤 |
-| W7 | T7.1–T7.3 | 없음 |
+| W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 | compiler 계약과 구현 뒤에 증명과 발행 수행 |
 
 ## 완료 정의
 
-- W0–W6의 모든 작업이 `done`.
+- W0–W7의 모든 작업이 `done`.
 - Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.
+- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 mode·언어·케이스 조합 1,688개를 모두 통과하고 generated 실행에서 AST로 fallback하지 않음.
+- 깨끗한 checkout에서 `make consumer-check`, `make showcase-check`, `make docs-verify-idempotent`, `make release-check` 통과.
 - `docs/features.md`와 `docs/features.ko.md`가 모든 행에 동일한 상태 필드와 근거 링크를 가짐.
