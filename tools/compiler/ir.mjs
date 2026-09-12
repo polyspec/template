@@ -10,7 +10,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 export function loadSourceGraph(manifestPath) {
   const absolute = resolve(manifestPath);
   const manifest = JSON.parse(readFileSync(absolute, 'utf8'));
-  if (manifest.schema !== 2 || manifest.mode !== 'ast' || !manifest.files || typeof manifest.files !== 'object') {
+  if (manifest.schema !== 3 || manifest.mode !== 'ast' || typeof manifest.compilerDigest !== 'string' || !manifest.files || typeof manifest.files !== 'object') {
     throw new Error('compiler: source graph manifest is invalid');
   }
   const base = dirname(absolute);

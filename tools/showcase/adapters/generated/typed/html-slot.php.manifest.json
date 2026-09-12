@@ -1,15 +1,16 @@
 {
-  "schema": 2,
+  "schema": 3,
   "mode": "gen",
   "target": "php",
   "entry": "layout.tpl",
   "sourceDigest": "6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
+  "contractDigest": "b67ea646ebcbd314a6bfb5c0488b6d5caaa0e237073ba1f9252a01369d492b35",
+  "compilerDigest": "8c88764c46db59cac05c34d954cf12f174470c7cf9601a4d8f4b12df9ca7d041",
   "files": {
     "html-slot.php": {
       "path": "html-slot.php",
-      "artifactDigest": "54596a997d4333e702456a8abab3a4abdd38c3cc4e8de34c13f0bd68680725be"
+      "artifactDigest": "bedc015fc2f2736640c0e3ff34553477d1781977ab178ebce7e7e92c821a6338"
     }
   }
 }

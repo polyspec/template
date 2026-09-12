@@ -1,15 +1,16 @@
 {
-  "schema": 2,
+  "schema": 3,
   "mode": "gen",
   "target": "rust",
   "entry": "layout.tpl",
   "sourceDigest": "626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
+  "contractDigest": "b67ea646ebcbd314a6bfb5c0488b6d5caaa0e237073ba1f9252a01369d492b35",
+  "compilerDigest": "0058cd772c0763ab2a0a934b915230b6452743460033dce00c5b866e2caee7cc",
   "files": {
     "react-boundary.rust": {
       "path": "react-boundary.rust",
-      "artifactDigest": "6d4f5da3fa895a69a8f96e1141d942cd1b6f3e90fb14dcf73bece1b0b8bdda82"
+      "artifactDigest": "3af448a2872db8ba1014e8f31427d41301dba1197ee296251e3410ed1f174bcd"
     }
   }
 }

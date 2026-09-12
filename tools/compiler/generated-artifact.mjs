@@ -16,7 +16,7 @@ export function verifyGeneratedArtifact(output, target, expected = null) {
   const manifestPath = generatedManifestPath(output);
   if (!existsSync(manifestPath)) throw new Error(`generated artifact manifest is missing: ${manifestPath}`);
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  if (manifest.schema !== 2 || manifest.mode !== 'gen' || manifest.target !== target) {
+  if (manifest.schema !== 3 || manifest.mode !== 'gen' || manifest.target !== target) {
     throw new Error('generated artifact manifest identity differs');
   }
   const file = manifest.files?.[basename(output)];
@@ -24,7 +24,7 @@ export function verifyGeneratedArtifact(output, target, expected = null) {
     throw new Error(`generated artifact is missing or corrupt: ${output}`);
   }
   if (expected) {
-    for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest']) {
+    for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest', 'compilerDigest']) {
       if (manifest[key] !== expected[key]) throw new Error(`generated artifact ${key} differs`);
     }
   }
@@ -33,7 +33,7 @@ export function verifyGeneratedArtifact(output, target, expected = null) {
 
 function expectedMetadata(graphPath, typeManifestPath) {
   const graph = JSON.parse(readFileSync(graphPath, 'utf8'));
-  if (graph.schema !== 2 || graph.mode !== 'ast' || graph.target !== 'canonical') {
+  if (graph.schema !== 3 || graph.mode !== 'ast' || graph.target !== 'canonical') {
     throw new Error('generated compiler requires a canonical AST artifact manifest');
   }
   const typeBytes = readFileSync(typeManifestPath);
@@ -44,14 +44,15 @@ function expectedMetadata(graphPath, typeManifestPath) {
   return { entry: graph.entry, sourceDigest: graph.sourceDigest, typeDigest, contractDigest };
 }
 
-export function compileGeneratedArtifact({ graphPath, typeManifestPath, target, output, refresh, compile, check = false }) {
+export function compileGeneratedArtifact({ graphPath, typeManifestPath, target, output, refresh, compilerDigest, compile, check = false }) {
   output = resolve(output);
   if (refresh === 'false') {
     if (check) throw new Error('artifact check cannot use the false refresh policy');
     return verifyGeneratedArtifact(output, target);
   }
   if (refresh !== 'dev' && refresh !== 'true') throw new Error(`${refresh} is not an artifact refresh policy`);
-  const expected = expectedMetadata(resolve(graphPath), resolve(typeManifestPath));
+  if (typeof compilerDigest !== 'string' || compilerDigest.length !== 64) throw new Error('generated compiler digest is missing');
+  const expected = { ...expectedMetadata(resolve(graphPath), resolve(typeManifestPath)), compilerDigest };
   if (refresh === 'true' && !check) {
     try {
       return verifyGeneratedArtifact(output, target, expected);
@@ -62,7 +63,7 @@ export function compileGeneratedArtifact({ graphPath, typeManifestPath, target, 
   const source = compile();
   const artifactDigest = hash(source);
   const manifest = {
-    schema: 2,
+    schema: 3,
     mode: 'gen',
     target,
     ...expected,

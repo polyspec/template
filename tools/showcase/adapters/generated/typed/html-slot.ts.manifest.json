@@ -1,15 +1,16 @@
 {
-  "schema": 2,
+  "schema": 3,
   "mode": "gen",
   "target": "ts",
   "entry": "layout.tpl",
   "sourceDigest": "6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
+  "contractDigest": "b67ea646ebcbd314a6bfb5c0488b6d5caaa0e237073ba1f9252a01369d492b35",
+  "compilerDigest": "447f9e7375712f96fbdb53f6adac12b666b5d513af5d67b74927538d21acfdd1",
   "files": {
     "html-slot.ts": {
       "path": "html-slot.ts",
-      "artifactDigest": "9086f767cf67be4bc473f204744efeee074c5fcd489c2fdc58cb90c21ef973a6"
+      "artifactDigest": "0b3e4cce0891aefd6127a59f810f797de5e3083bdc8e789c9cc23e497362f05b"
     }
   }
 }
