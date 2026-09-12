@@ -88,12 +88,14 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
     $context->at($frame, [426,454]); $context->write($runtime->escape($runtime->call("default", ["", "fallback"], $frame, [429,453]), $frame, [429,453]));
     $context->at($frame, [454,464]); $context->write("</p>\n<ul>\n");
     $row_entries = $runtime->entries($assign->rows, $frame, [464,581]);
+    $row_size = count($row_entries);
+    $row_last_index = $row_size - 1;
     $row_had = $scope->locals->has("row");
     $row_previous = $scope->locals->get("row");
     foreach ($row_entries as $row_index => [$row_key, $row_value]) {
         $scope->locals->set("row", $row_value);
         $row_stack = $scope->loops["row"] ?? [];
-        $row_stack[] = ['index_' => (float) $row_index, 'size_' => (float) count($row_entries), 'first_' => $row_index === 0, 'last_' => $row_index + 1 === count($row_entries), 'key_' => $row_key, 'value_' => $row_value];
+        $row_stack[] = ['index_' => (float) $row_index, 'size_' => (float) $row_size, 'first_' => $row_index === 0, 'last_' => $row_index === $row_last_index, 'key_' => $row_key, 'value_' => $row_value];
         $scope->loops["row"] = $row_stack;
         $context->iterations++;
         $runtime->limit('iteration', $context->iterations, $frame, [464,581]);
@@ -113,7 +115,7 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
         if ($row_stack === []) unset($scope->loops["row"]); else $scope->loops["row"] = $row_stack;
     }
     if ($row_had) $scope->locals->set("row", $row_previous); else $scope->locals->remove("row");
-    if (count($row_entries) === 0) {
+    if ($row_size === 0) {
             $context->at($frame, [563,578]); $context->write("<li>empty</li>\n");
     }
     $context->at($frame, [582,588]); $context->write("</ul>\n");

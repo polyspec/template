@@ -138,15 +138,16 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
     context.output.write("</p>\n<ul>\n");
     {
         const row_entries = runtime.entries(assign.rows, frame, [464, 581]);
+        const row_size = row_entries.length;
+        const row_last_index = row_size - 1;
         const row_had = scope.locals.has("row");
         const row_previous = scope.locals.get("row");
         try {
-            for (let row_index = 0; row_index < row_entries.length; row_index += 1) {
+            for (let row_index = 0; row_index < row_size; row_index += 1) {
                 const [row_key, row_value] = row_entries[row_index];
                 scope.locals.set("row", row_value);
-                const row_size = row_entries.length;
                 const row_first = row_index === 0;
-                const row_last = row_index + 1 === row_entries.length;
+                const row_last = row_index === row_last_index;
                 context.iterations += 1;
                 runtime.limit('iteration', context.iterations, frame, [464, 581]);
                 context.at(frame, [479, 483]);
@@ -179,7 +180,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
             else
                 scope.locals.delete("row");
         }
-        if (row_entries.length === 0) {
+        if (row_size === 0) {
             context.at(frame, [563, 578]);
             context.output.write("<li>empty</li>\n");
         }

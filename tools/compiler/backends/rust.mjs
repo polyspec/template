@@ -95,14 +95,15 @@ ${'    '.repeat(n)}}` : ''}`;
     const iterable = emitExpression(node.iter, target);
     const source = node.iter.valueType.kind === 'map' ? `${iterable}.entries().iter().map(|entry| (entry.key.clone(), entry.value.clone())).collect::<Vec<_>>()` : `${iterable}.iter().cloned().enumerate().map(|(key, value)| (key as f64, value)).collect::<Vec<_>>()`;
     return indent(n, `{ let entries = ${source};
+let ${name}_size = entries.len() as f64;
+let ${name}_last_index = entries.len().saturating_sub(1);
 let ${name}_previous = scope.locals.get(${quote(node.name)}).cloned();
 for (${name}_index_raw, (${name}_key, ${name}_value)) in entries.iter().cloned().enumerate() {
     let _ = &${name}_key;
     scope.locals.insert(${quote(node.name)}.to_string(), generated_value(&${name}_value)?);
     let ${name}_index = ${name}_index_raw as f64;
-    let ${name}_size = entries.len() as f64;
     let ${name}_first = ${name}_index_raw == 0;
-    let ${name}_last = ${name}_index_raw + 1 == entries.len();
+    let ${name}_last = ${name}_index_raw == ${name}_last_index;
     context.iterations += 1;
     runtime.limit(context, "iteration", context.iterations, &frame, ${rustSpan(node.span)})?;
 ${emitNodes(node.body, target, n + 1)}
