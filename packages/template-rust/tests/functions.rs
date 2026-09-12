@@ -4,7 +4,7 @@ use polyspec_template::functions::builtins;
 use polyspec_template::functions::date::{format_date, parse_offset, to_unix_seconds};
 use polyspec_template::functions::encoding::{percent_encode, to_json};
 use polyspec_template::value::{OrderedMap, Value};
-use polyspec_template::{ArtifactRefresh, Engine, EngineOptions, ErrorCode, MapLoader, RenderOptions, RenderTarget};
+use polyspec_template::{ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, MapLoader, RenderOptions, RenderTarget};
 
 #[test]
 fn date_parsing_and_formatting() {
@@ -56,7 +56,7 @@ fn builtins_declare_arity() {
 fn engine_renders_and_registers_functions() {
     let mut loader = MapLoader::new();
     loader.set("a.tpl", "<b>{= x}</b> {= twice(2)} {= wrap('a')}");
-    let mut engine = Engine::new(EngineOptions {
+    let mut engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()
     });
@@ -86,44 +86,12 @@ fn engine_renders_and_registers_functions() {
     assert_eq!(html, "<b>&lt;</b> 4 [a]");
 }
 
-fn generated_render(_: polyspec_template::GeneratedRequest) -> Result<polyspec_template::render::engine::GeneratedPreparedRender, String> {
-    Ok(polyspec_template::render::engine::GeneratedPreparedRender {
-        render: Box::new(|| Ok("generated".to_string())),
-    })
-}
-
-#[test]
-fn generated_mode_uses_prepared_render_without_loading_an_ast_artifact() {
-    let engine = Engine::new(EngineOptions {
-        loader: Some(Box::new(MapLoader::new())),
-        compile: polyspec_template::CompileOptions {
-            mode: polyspec_template::CompileMode::Gen,
-            generated_renderer: Some(Box::new(generated_render)),
-        },
-        ..Default::default()
-    });
-    assert_eq!(
-        engine
-            .render(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default())
-            .unwrap(),
-        "generated"
-    );
-    assert_eq!(
-        engine
-            .prepare(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default())
-            .unwrap()
-            .render()
-            .unwrap(),
-        "generated"
-    );
-}
-
 #[test]
 fn engine_reports_host_failures_and_limits() {
     let mut loader = MapLoader::new();
     loader.set("a.tpl", "x\n{= boom()}");
     loader.set("b.tpl", "{@ i = range(1, 10)}{= i}{/}");
-    let mut engine = Engine::new(EngineOptions {
+    let mut engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         limits: Some(polyspec_template::Limits {
             iterations: 5,
@@ -148,7 +116,7 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
     let ast = polyspec_template::parse(b"{= a + 1}", "x.tpl", &Default::default()).expect("parse");
     let mut loader = MapLoader::new();
     loader.set_ast("x.tpl", ast.clone());
-    let engine = Engine::new(EngineOptions {
+    let engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()
     });
@@ -174,7 +142,7 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
 fn artifact_refresh_policies_are_independent_of_rendering() {
     let mut dev_loader = MapLoader::new();
     dev_loader.set("a.tpl", "1");
-    let dev = Engine::new(EngineOptions {
+    let dev = AstProgram::new(EngineOptions {
         loader: Some(Box::new(dev_loader)),
         artifact_refresh: ArtifactRefresh::Dev,
         ..Default::default()
@@ -187,7 +155,7 @@ fn artifact_refresh_policies_are_independent_of_rendering() {
 
     let mut immutable_loader = MapLoader::new();
     immutable_loader.set("a.tpl", "1");
-    let immutable = Engine::new(EngineOptions {
+    let immutable = AstProgram::new(EngineOptions {
         loader: Some(Box::new(immutable_loader)),
         artifact_refresh: ArtifactRefresh::False,
         ..Default::default()

@@ -3,7 +3,7 @@
 use crate::ast::Template;
 use crate::error::{ErrorCode, LineIndex, Span, TemplateError};
 use crate::functions::Env;
-use crate::render::engine::Engine;
+use crate::render::engine::AstProgram;
 use crate::value::{OrderedMap, Value};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -115,7 +115,7 @@ impl Scope {
 /// State of one render call.
 pub struct RenderContext<'e> {
     /// The engine.
-    pub engine: &'e Engine,
+    pub engine: &'e AstProgram,
     /// Root data.
     pub root: Rc<OrderedMap>,
     /// Environment.
@@ -134,7 +134,7 @@ pub struct RenderContext<'e> {
 
 impl<'e> RenderContext<'e> {
     /// Creates a render context.
-    pub fn new(engine: &'e Engine, root: Rc<OrderedMap>, env: Env, entry: &str) -> RenderContext<'e> {
+    pub fn new(engine: &'e AstProgram, root: Rc<OrderedMap>, env: Env, entry: &str) -> RenderContext<'e> {
         RenderContext {
             engine,
             root,

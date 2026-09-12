@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use Polyspec\Template\PreparedExecution;
+use Polyspec\Template\PreparedRender;
+use Polyspec\Template\Program;
+use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\MapValue;
 use Polyspec\Template\Value\Json;
 use Polyspec\Template\TemplateError;
@@ -40,6 +44,19 @@ function generated_template(string $name, string $scenario, MapValue $root, MapV
         default => throw new RuntimeException('generated scenario is missing: ' . $scenario),
     }; }
 function generatedDirectRender(string $rootPath, RenderRequest $request): string { $entry = $request->define->get($request->target); $name = $request->target; if ($entry instanceof DefineEntry && $entry->template !== null) $name = $entry->template; return generated_template($name, basename($rootPath), $request->assign, $request->define, new MapValue()); }
+
+final class GeneratedExecution implements PreparedExecution { public function __construct(private readonly string $root, private readonly RenderRequest $request) {} public function render(): string { return generatedDirectRender($this->root, $this->request); } }
+final class GeneratedProgram implements Program {
+    public function __construct(private readonly string $root) {}
+    public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender {
+        if (!is_string($target)) throw new InvalidArgumentException('generated target must be a template name');
+        $root = $assign instanceof MapValue ? $assign : Bind::map($assign); $define = new MapValue();
+        foreach ($options['define'] ?? [] as $id => $entry) { if (is_string($entry)) { $define->set((string) $id, new DefineEntry($entry, null, null)); continue; } if (isset($entry['html'])) { $define->set((string) $id, new DefineEntry(null, null, $entry['html'])); continue; } $data = array_key_exists('data', $entry) ? Bind::map($entry['data']) : null; $define->set((string) $id, new DefineEntry($entry['template'], $data, null)); }
+        $env = $options['env'] ?? []; $request = new RenderRequest($target, $root, $define, new Environment($env['timezone'] ?? 'Z', isset($env['now']) ? (float) $env['now'] : (float) time()));
+        return new PreparedRender(new GeneratedExecution($this->root, $request));
+    }
+    public function render(string|array $target, mixed $assign = [], array $options = []): string { return $this->prepare($target, $assign, $options)->render(); }
+}
 
 function generated_escape_full(mixed $value): string { if (is_bool($value)) $value = $value ? 'true' : 'false'; return generated_escape($value); }
 function generated_index(mixed $value, mixed $key): mixed { if ($value instanceof MapValue) return $value->get((string) $key); if (is_array($value)) return $value[(int) $key] ?? null; return null; }

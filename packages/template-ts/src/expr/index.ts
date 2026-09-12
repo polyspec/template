@@ -1,7 +1,7 @@
 // Standalone expression API used by the expression fixtures (CNF-12 to CNF-14).
 import type { Expr } from '../ast.js';
 import { Source } from '../source.js';
-import { EngineCore } from '../render/engine.js';
+import { AstProgramCore } from '../render/engine.js';
 import { Frame, RenderContext } from '../render/context.js';
 import { Evaluator } from '../render/expressions.js';
 import { bindMap } from '../value/bind.js';
@@ -40,7 +40,7 @@ export function parseExpression(text: string): Expr {
 
 // Evaluates a bare expression AST against root data.
 export function evaluateExpression(expr: Expr, data: unknown): Value {
-  const engine = new EngineCore();
+  const engine = new AstProgramCore();
   const root = bindMap(data ?? {});
   const context = new RenderContext(engine, root, { timezone: 'Z', now: 0 }, 'expression');
   const frame = new Frame({ ast: { type: 'Template', name: 'expression', body: [] }, lines: null }, root);

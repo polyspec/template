@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
+	template "github.com/polyspec/template"
 	"github.com/polyspec/template/functions"
 	"github.com/polyspec/template/value"
 )
@@ -67,6 +69,19 @@ func generatedTemplate(name, scenario string, root *value.OrderedMap, define Def
 func generatedDirectRender(rootPath string, request RenderRequest) (string, error) {
 	entry, ok := request.Define.Get(request.Target); name := request.Target; if ok { if path, isPath := entry.(string); isPath { name = path } else if typed, isTyped := entry.(DefineEntry); isTyped && typed.Template != nil { name = *typed.Template } }; return generatedTemplate(name, filepath.Base(rootPath), request.Assign, request.Define, map[string]value.Value{})
 }
+
+type GeneratedProgram struct { Root string }
+type generatedPrepared struct { Program *GeneratedProgram; Request RenderRequest }
+func (p *generatedPrepared) Render() (string, error) { return generatedDirectRender(p.Program.Root, p.Request) }
+func (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) {
+	name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }
+	root, err := value.BindMap(assign); if err != nil { return nil, err }
+	definitions := value.NewOrderedMap()
+	for id, input := range options.Define { if input.HTML != nil { definitions.Set(id, DefineEntry{HTML: input.HTML}); continue }; templateName := input.Template; var data *value.OrderedMap; if input.Data != nil { data, err = value.BindMap(input.Data); if err != nil { return nil, err } }; definitions.Set(id, DefineEntry{Template: &templateName, Data: data}) }
+	timezone := "Z"; now := float64(time.Now().Unix()); if options.Env != nil { if options.Env.Timezone != "" { timezone = options.Env.Timezone }; now = options.Env.Now }
+	return &generatedPrepared{Program: p, Request: RenderRequest{Target: name, Assign: root, Define: definitions, Env: &Environment{Timezone: &timezone, Now: &now}}}, nil
+}
+func (p *GeneratedProgram) Render(target any, assign any, options template.RenderOptions) (string, error) { prepared, err := p.Prepare(target, assign, options); if err != nil { return "", err }; return prepared.Render() }
 
 type generatedCollectionItem struct { Key value.Value; Value value.Value; Spread bool }
 type generatedEntry struct { Key value.Value; Value value.Value }

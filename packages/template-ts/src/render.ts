@@ -5,6 +5,6 @@ export { SafeString, type Value, type MapValue, type ListValue } from './value/v
 export { bind, BindError } from './value/bind.js';
 export { parseJson, parseJsonBytes, JsonSyntaxError } from './value/json.js';
 export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';
-export { EngineCore as Engine, type EngineOptions, type RenderOptions, type DefineInput } from './render/engine.js';
+export { AstProgramCore as AstProgram, Engine, type EngineOptions, type Program, type RenderOptions, type DefineInput } from './render/engine.js';
 export type { Limits } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';

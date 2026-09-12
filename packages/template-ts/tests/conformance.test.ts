@@ -2,7 +2,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { BindError, Engine, parse, parseJsonBytes, TemplateError } from '../src/index.js';
+import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
 import { casesDir, toJsonValue } from './helpers.js';
 
@@ -34,7 +34,7 @@ function run(testCase: Case): { html: string } | { error: TemplateError } {
   const optionsBytes = readIf(join(testCase.dir, 'options.json'));
   const options = (plain(optionsBytes) ?? {}) as { delimiters?: string };
   try {
-    const engine = new Engine({ loader: new FsLoader(testCase.dir), ...(options.delimiters ? { delimiters: options.delimiters } : {}) });
+    const engine = new Engine(new AstProgram({ loader: new FsLoader(testCase.dir), ...(options.delimiters ? { delimiters: options.delimiters } : {}) }));
     const assign = readIf(join(testCase.dir, 'data.json'));
     const define = plain(readIf(join(testCase.dir, 'define.json'))) as Record<string, string | { template?: string; data?: unknown; html?: string }> | undefined;
     const env = plain(readIf(join(testCase.dir, 'env.json'))) as { timezone?: string; now?: number } | undefined;

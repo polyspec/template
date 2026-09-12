@@ -13,11 +13,12 @@ npm install @polyspec/template
 ## Render on a server
 
 ```ts
-import { Engine } from '@polyspec/template';
+import { AstProgram, Engine } from '@polyspec/template';
 import { FsLoader } from '@polyspec/template/node';
 
-const engine = new Engine({ loader: new FsLoader('templates') });
-engine.register('greet', ([name]) => `Hello, ${name}`);
+const program = new AstProgram({ loader: new FsLoader('templates') });
+program.register('greet', ([name]) => `Hello, ${name}`);
+const engine = new Engine(program);
 const assign = { title: 'Home' };
 const html = engine.render('layout', assign, {
   define: { layout: 'layout.tpl', content: 'pages/home.tpl' },
@@ -28,9 +29,9 @@ const html = engine.render('layout', assign, {
 ## Render in a browser
 
 ```ts
-import { Engine, MapLoader, parseJson } from '@polyspec/template';
+import { AstProgram, Engine, MapLoader, parseJson } from '@polyspec/template';
 
-const engine = new Engine({ loader: new MapLoader({ 'card.tpl': '<b>{= name}</b>' }) });
+const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': '<b>{= name}</b>' }) }));
 const assign = parseJson(document.getElementById('state').textContent);
 document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
 ```
@@ -42,9 +43,9 @@ document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
 `@polyspec/template/render` exports an engine that accepts parsed templates (AST JSON) and does not include the lexer and parser.
 
 ```ts
-import { Engine, MapLoader } from '@polyspec/template/render';
+import { AstProgram, Engine, MapLoader } from '@polyspec/template/render';
 
-const engine = new Engine({ loader: new MapLoader({ 'card.tpl': cardAst }) });
+const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': cardAst }) }));
 ```
 
 ## API
@@ -52,9 +53,10 @@ const engine = new Engine({ loader: new MapLoader({ 'card.tpl': cardAst }) });
 | Export | Description |
 | --- | --- |
 | `parse(source, name, { delimiters })` | Parses one template into its AST. `source` is a string or UTF-8 bytes. |
-| `new Engine({ loader, functions, limits, delimiters })` | Creates an engine. `loader` defaults to an empty `MapLoader`. |
+| `new AstProgram({ loader, functions, limits, delimiters })` | Creates an AST program. `loader` defaults to an empty `MapLoader`. |
+| `new Engine(program)` | Creates an engine that delegates to one AST or generated program. |
 | `engine.render(nameOrAst, assign, { define, env })` | Renders a template to a string. `assign` contains variables; `define` supplies template paths or HTML entries. |
-| `engine.register(name, fn)` | Registers a host function `(args, { env }) => value`. |
+| `astProgram.register(name, fn)` | Registers a host function `(args, { env }) => value`. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. |
 | `parseJson`, `parseJsonBytes` | Order-preserving JSON parsers for assign data. |
 | `TemplateError` | Error with `code`, `template`, `line`, `col`, `offset`, `end`, `message`. |
@@ -63,8 +65,8 @@ const engine = new Engine({ loader: new MapLoader({ 'card.tpl': cardAst }) });
 ## Command line
 
 ```sh
-node bin/template.mjs parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+node bin/template.mjs parse FILE [--root DIR] [--delimiters OC]
+node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.

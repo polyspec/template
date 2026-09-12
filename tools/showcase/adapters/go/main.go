@@ -23,36 +23,20 @@ type Adapter struct {
 var _ RenderAdapter = (*Adapter)(nil)
 
 func NewAdapter(root string) (*Adapter, error) {
-	templateLoader, err := artifactLoader(root, "go")
+	var program template.Program
 	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
-		templateLoader = loader.NewMapLoader(map[string]string{})
+		program = &GeneratedProgram{Root: root}
+	} else {
+		templateLoader, err := artifactLoader(root, "go")
+		if err != nil {
+			return nil, err
+		}
+		program, err = template.NewAstProgram(template.Options{Loader: templateLoader})
+		if err != nil {
+			return nil, err
+		}
 	}
-	if err != nil {
-		return nil, err
-	}
-	engine, err := template.NewEngine(template.Options{
-		Loader: templateLoader,
-		Compile: func() template.CompileOptions {
-			if os.Getenv("SHOWCASE_EXECUTION_MODE") != "generated" {
-				return template.CompileOptions{Mode: template.CompileModeAST}
-			}
-			return template.CompileOptions{Mode: template.CompileModeGen, Generated: func(request template.GeneratedRequest) (*template.GeneratedPreparedRender, error) {
-				generatedRequest := RenderRequest{Target: request.TargetName, Assign: request.Root, Define: value.NewOrderedMap(), Env: &Environment{Timezone: &request.Env.Timezone, Now: &request.Env.Now}}
-				for id, entry := range request.Registry {
-					if entry.HTML != nil {
-						generatedRequest.Define.Set(id, DefineEntry{HTML: entry.HTML})
-						continue
-					}
-					templateName := entry.Template
-					generatedRequest.Define.Set(id, DefineEntry{Template: &templateName, Data: entry.Data})
-				}
-				return &template.GeneratedPreparedRender{Render: func() (string, error) { return generatedDirectRender(root, generatedRequest) }}, nil
-			}}
-		}(),
-	})
-	if err != nil {
-		return nil, err
-	}
+	engine := template.NewEngine(program)
 	return &Adapter{root: root, engine: engine}, nil
 }
 

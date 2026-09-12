@@ -47,25 +47,6 @@ type RenderOptions = render.RenderOptions
 // DefineInput is a template definition.
 type DefineInput = render.DefineInput
 
-// CompileMode selects AST interpretation or generated source execution.
-type CompileMode = render.CompileMode
-
-const (
-	// CompileModeAST interprets the compiled AST artifact.
-	CompileModeAST = render.CompileModeAST
-	// CompileModeGen executes a generated host-language artifact.
-	CompileModeGen = render.CompileModeGen
-)
-
-// CompileOptions configure the selected compilation artifact.
-type CompileOptions = render.CompileOptions
-
-// GeneratedRequest is the normalized request passed to generated code.
-type GeneratedRequest = render.GeneratedRequest
-
-// GeneratedPreparedRender is a prepared generated render operation.
-type GeneratedPreparedRender = render.GeneratedPreparedRender
-
 // ParseOptions configure Parse.
 type ParseOptions struct {
 	Delimiters string
@@ -119,17 +100,33 @@ func parseWithLines(source []byte, name string, d parser.Delimiters) (*render.Pa
 	return &render.ParsedTemplate{AST: template, Lines: src.Lines}, nil
 }
 
-// Engine parses, caches and renders templates.
-type Engine struct {
-	*render.Engine
+// Prepared is one normalized render operation that can be executed repeatedly.
+type Prepared = render.Prepared
+
+// Program prepares and renders one compiled template representation.
+type Program interface {
+	Prepare(target any, assign any, options RenderOptions) (Prepared, error)
+	Render(target any, assign any, options RenderOptions) (string, error)
 }
 
-// NewEngine creates an engine with the parser attached.
-func NewEngine(options Options) (*Engine, error) {
+// Engine delegates requests to one complete program.
+type Engine struct{ program Program }
+
+// NewEngine creates an engine from an AST or generated program.
+func NewEngine(program Program) *Engine { return &Engine{program: program} }
+
+// Prepare delegates to the selected program.
+func (e *Engine) Prepare(target any, assign any, options RenderOptions) (Prepared, error) {
+	return e.program.Prepare(target, assign, options)
+}
+
+// Render delegates to the selected program.
+func (e *Engine) Render(target any, assign any, options RenderOptions) (string, error) {
+	return e.program.Render(target, assign, options)
+}
+
+// NewAstProgram creates an AST program with the parser attached.
+func NewAstProgram(options Options) (*render.Engine, error) {
 	options.Parse = parseWithLines
-	core, err := render.NewEngine(options, func() float64 { return float64(time.Now().Unix()) })
-	if err != nil {
-		return nil, err
-	}
-	return &Engine{core}, nil
+	return render.NewEngine(options, func() float64 { return float64(time.Now().Unix()) })
 }

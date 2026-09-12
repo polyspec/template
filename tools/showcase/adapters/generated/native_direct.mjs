@@ -84,6 +84,16 @@ export function renderGenerated(scenarioRoot, target, root, define, env) {
   const scenario = scenarioRoot.split('/').pop();
   return renderTemplate(name, root, define, env, root, scenario);
 }
+export class GeneratedProgram {
+  constructor(scenarioRoot) { this.scenarioRoot = scenarioRoot; }
+  prepare(target, assign, options = {}) {
+    if (!(assign instanceof Map)) throw new Error('generated assign must be a map');
+    const define = options.define instanceof Map ? options.define : new Map(Object.entries(options.define ?? {}));
+    const env = { timezone: options.env?.timezone ?? 'Z', now: options.env?.now ?? Math.floor(Date.now() / 1000) };
+    return { render: () => renderGenerated(this.scenarioRoot, target, assign, define, env) };
+  }
+  render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
+}
 
 function render_compiler_coverage__card_tpl(root, define, env, parent, scenario) {
   let ctx = new Map(parent ?? root);

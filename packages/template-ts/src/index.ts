@@ -2,7 +2,7 @@
 import type { Template } from './ast.js';
 import { parseTemplate } from './parser/parser.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from './parser/scanner.js';
-import { EngineCore, PreparedRender, type EngineOptions, type RenderOptions } from './render/engine.js';
+import { AstProgramCore, type EngineOptions, type RenderOptions } from './render/engine.js';
 import type { ParsedTemplate } from './render/context.js';
 import { Source } from './source.js';
 
@@ -12,7 +12,8 @@ export { SafeString, type Value, type MapValue, type ListValue } from './value/v
 export { bind, BindError } from './value/bind.js';
 export { parseJson, parseJsonBytes, JsonSyntaxError } from './value/json.js';
 export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';
-export type { ArtifactRefresh, CompileMode, CompileOptions, EngineOptions, GeneratedPreparedRender, GeneratedRenderer, GeneratedRequest, RenderOptions, DefineInput } from './render/engine.js';
+export type { ArtifactRefresh, EngineOptions, Program, RenderOptions, DefineInput } from './render/engine.js';
+export { Engine } from './render/engine.js';
 export type { Limits } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';
 export type { Delimiters } from './parser/scanner.js';
@@ -43,7 +44,7 @@ function parseWithLines(source: string | Uint8Array, name: string, delimiters: D
 
 // An engine that parses the sources its loader returns. The render-only entry point exports an
 // engine that takes parsed templates instead.
-export class Engine extends EngineCore {
+export class AstProgram extends AstProgramCore {
   // Creates an engine with the parser attached.
   constructor(options: EngineOptions = {}) {
     super({ ...options, parse: parseWithLines });
@@ -51,5 +52,5 @@ export class Engine extends EngineCore {
 }
 
 export type { ParsedTemplate };
-export { PreparedRender };
+export type { PreparedRender } from './render/engine.js';
 export type { RenderOptions as EngineRenderOptions };

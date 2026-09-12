@@ -8,6 +8,7 @@ declare(strict_types=1);
 //   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 
 use Polyspec\Template\Ast;
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\FilesystemLoader;
 use Polyspec\Template\TemplateError;
@@ -110,9 +111,9 @@ try {
         if ($source === false) {
             usage("cannot read {$file}");
         }
-        fwrite(STDOUT, Ast::toJson(Engine::parse($source, $name, $engineOptions)));
+        fwrite(STDOUT, Ast::toJson(AstProgram::parse($source, $name, $engineOptions)));
     } else {
-        $engine = new Engine(new FilesystemLoader($root), $engineOptions);
+        $engine = new Engine(new AstProgram(new FilesystemLoader($root), $engineOptions));
         $renderOptions = [];
         $assign = [];
         try {

@@ -4,8 +4,8 @@ mod common;
 
 use common::{json_equal, repo_root};
 use polyspec_template::{
-    Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json, env_from_json,
-    parse,
+    AstProgram, Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json,
+    env_from_json, parse,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -49,14 +49,13 @@ enum Outcome {
 }
 
 fn render_case(dir: &Path) -> Outcome {
-    let engine = Engine::new(EngineOptions {
+    let engine = Engine::new(AstProgram::new(EngineOptions {
         loader: Some(Box::new(FsLoader::new(dir))),
         functions: Default::default(),
         limits: None,
         delimiters: delimiters_of(dir),
         artifact_refresh: Default::default(),
-        compile: Default::default(),
-    });
+    }));
     let assign = match read_json(&dir.join("data.json")) {
         None => serde_json::Value::Object(Default::default()),
         Some(Ok(value)) => value,

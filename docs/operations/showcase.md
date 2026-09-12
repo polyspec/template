@@ -54,12 +54,12 @@ The four API examples below read the same scenario directory. They do not constr
 
 ```ts
 import { readFileSync } from 'node:fs';
-import { Engine } from '@polyspec/template';
+import { AstProgram, Engine } from '@polyspec/template';
 import { FsLoader } from '@polyspec/template/node';
 
 const root = 'examples/site/scenarios/scope-precedence';
 const readJson = (name: string) => JSON.parse(readFileSync(`${root}/${name}`, 'utf8'));
-const engine = new Engine({ loader: new FsLoader(root) });
+const engine = new Engine(new AstProgram({ loader: new FsLoader(root) }));
 const assign = readJson('data.json');
 const define = readJson('define.json');
 const html = engine.render('layout', assign, { define });
@@ -70,12 +70,12 @@ console.log(html);
 
 ```js
 import { readFileSync } from 'node:fs';
-import { Engine } from '@polyspec/template';
+import { AstProgram, Engine } from '@polyspec/template';
 import { FsLoader } from '@polyspec/template/node';
 
 const root = 'examples/site/scenarios/scope-precedence';
 const readJson = name => JSON.parse(readFileSync(`${root}/${name}`, 'utf8'));
-const engine = new Engine({ loader: new FsLoader(root) });
+const engine = new Engine(new AstProgram({ loader: new FsLoader(root) }));
 const assign = readJson('data.json');
 const define = readJson('define.json');
 const html = engine.render('layout', assign, { define });
@@ -105,10 +105,11 @@ func read(path string) []byte {
 
 func main() {
 	root := "examples/site/scenarios/scope-precedence"
-	engine, err := template.NewEngine(template.Options{Loader: template.NewFSLoader(os.DirFS(root))})
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS(root))})
 	if err != nil {
 		panic(err)
 	}
+	engine := template.NewEngine(program)
 
 	var assign map[string]any
 	if err := json.Unmarshal(read(root+"/data.json"), &assign); err != nil {
@@ -131,16 +132,16 @@ func main() {
 ### Rust
 
 ```rust
-use polyspec_template::{defines_from_json, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget};
+use polyspec_template::{defines_from_json, AstProgram, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget};
 
 fn render() -> Result<String, Box<dyn std::error::Error>> {
     let root = "examples/site/scenarios/scope-precedence";
     let assign: serde_json::Value = serde_json::from_slice(&std::fs::read(format!("{root}/data.json"))?)?;
     let define_json: serde_json::Value = serde_json::from_slice(&std::fs::read(format!("{root}/define.json"))?)?;
-    let engine = Engine::new(EngineOptions {
+    let engine = Engine::new(AstProgram::new(EngineOptions {
         loader: Some(Box::new(FsLoader::new(root))),
         ..Default::default()
-    });
+    }));
 
     let options = RenderOptions {
         define: defines_from_json(&define_json)?,
@@ -170,8 +171,8 @@ This compares the committed HTML, JSON and AST artifacts with fresh artifact-onl
 
 The type-fixed generator runs with `make typed-generator`. It reads the complete compiled source-graph manifest and an explicit type manifest. Before a language backend runs, the shared compiler IR validates every template, resolves include and block paths, and types root variables, template inputs, locals, loop items, record members and function calls. An include declares the values required by its target and the compiler binds each value from caller scope; generated template functions therefore do not pretend that include-local values belong to root assign data. Each definition also declares its generated template target and whether HTML is accepted. The compiler rejects block scope fields that its target template did not declare. The compiler emits one static function per graph template plus a closed template dispatch in PHP, Go, Rust and TypeScript, with manifest-derived assign, definition, template-input and record declarations. A generated block consumes the typed definition registry and invokes its generated child function itself; callers never pre-render a string slot. Definition data records preserve field presence. Input precedence is root assign, then supplied definition data fields, then explicit block scope. Nullable fields become `?T`, `*T`, `Option<T>` and optional properties respectively. Lists and insertion-ordered maps retain their element types recursively. `make compiler-ir-check` covers every canonical node and expression variant and verifies rejection of undeclared symbols. `make typed-generator-check` verifies reproducibility. `make typed-generator-compile-check` compiles and executes all five scenario graphs in each of the four generated languages and requires byte-identical output. A manifest is required because arbitrary JSON does not contain enough information to infer static types safely.
 
-Generated showcase execution enters the same public Engine API as AST execution. Each adapter configures `compile.mode = gen` with its generated artifact, then calls `Engine.render`; the generated callback receives the normalized `GeneratedRequest` produced by `Engine.prepare`. The contract checker rejects adapters that branch inside `render` and call generated source directly.
+Generated showcase execution enters the same public Engine API as AST execution. Each generated artifact implements `GeneratedProgram`; each adapter constructs `Engine` with either `AstProgram` or `GeneratedProgram`, then calls `Engine.render`. The contract checker rejects removed callback types and mode selection inside the engine.
 
-Generated mode supplies an empty loader because its host-language artifact is the executable template graph. It does not package an AST graph as an unused loader input. AST mode alone loads the compiled AST artifacts.
+Generated mode supplies no loader because its host-language artifact is the executable template graph. It does not package an AST graph as unused input. `AstProgram` alone loads compiled AST artifacts.
 
 The `compiler-coverage` scenario prevents a narrow generated backend from passing on text-only templates. One page executes assignment, list and map spread, member and index access, function, unary, binary and ternary expressions, conditionals, loops and every loop metadata field, an include that shares local scope, an if-block, definition data and block scope. It also exposes all five HTML escape characters, boolean results from `&&` and `||`, and empty-list/map truthiness in the rendered HTML. The contract runs that page through AST and generated mode in every runtime and requires the same 351 UTF-8 bytes after repeated rendering and failure recovery.

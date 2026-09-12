@@ -13,11 +13,13 @@ composer require polyspec/template
 ## 렌더
 
 ```php
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\FilesystemLoader;
 
-$engine = new Engine(new FilesystemLoader('templates'));
-$engine->register('greet', fn (array $args): string => 'Hello, ' . $args[0]);
+$program = new AstProgram(new FilesystemLoader('templates'));
+$program->register('greet', fn (array $args): string => 'Hello, ' . $args[0]);
+$engine = new Engine($program);
 $assign = ['title' => 'Home'];
 $html = $engine->render('layout', $assign, [
     'define' => ['layout' => ['template' => 'layout.tpl'], 'content' => ['template' => 'pages/home.tpl']],
@@ -31,9 +33,9 @@ assign 데이터는 PHP 배열 또는 `Polyspec\Template\Value\Json::parse()`가
 
 ```php
 use Polyspec\Template\Ast;
-use Polyspec\Template\Engine;
+use Polyspec\Template\AstProgram;
 
-$ast = Engine::parse(file_get_contents('layout.tpl'), 'layout.tpl');
+$ast = AstProgram::parse(file_get_contents('layout.tpl'), 'layout.tpl');
 $json = Ast::toJson($ast);
 ```
 
@@ -43,10 +45,11 @@ $json = Ast::toJson($ast);
 
 | 멤버 | 설명 |
 | --- | --- |
-| `Engine::parse(string $source, string $name, array $options = [])` | 템플릿 하나를 AST(중첩 배열)로 파싱한다. `$options['delimiters']`가 구분자를 선택한다. |
-| `new Engine(?LoaderInterface $loader = null, array $options = [])` | 엔진을 생성한다. 옵션: `functions`, `limits`, `delimiters`. |
+| `AstProgram::parse(string $source, string $name, array $options = [])` | 템플릿 하나를 AST(중첩 배열)로 파싱한다. `$options['delimiters']`가 구분자를 선택한다. |
+| `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | AST program을 생성한다. 옵션: `functions`, `limits`, `delimiters`. |
+| `new Engine(Program $program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | 템플릿 이름 또는 파싱된 템플릿을 렌더한다. `$assign`은 변수를 담고 옵션은 `define`, `env`다. |
-| `$engine->register(string $name, callable $fn)` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. |
+| `$astProgram->register(string $name, callable $fn)` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. |
 | `ArrayLoader`, `FilesystemLoader` | 메모리 로더와 파일시스템 로더. |
 | `Json::parse(string $bytes)` | assign 데이터용 순서 보존 JSON 파서. |
 | `TemplateError` | `errorCode`, `template`, `errorLine`, `errorCol`, `offset`, `end`와 `toArray()`를 가진 예외. |
@@ -55,8 +58,8 @@ $json = Ast::toJson($ast);
 ## 명령줄
 
 ```sh
-php bin/template.php parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+php bin/template.php parse FILE [--root DIR] [--delimiters OC]
+php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
