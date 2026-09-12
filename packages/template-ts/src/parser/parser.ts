@@ -2,6 +2,7 @@
 // as defined in docs/spec/lexical.md and docs/spec/grammar.md.
 import type { Block, Expr, If, IfBlock, For, Node, Set as SetNode, Template } from '../ast.js';
 import { errorAt, type ErrorCode, type TemplateError } from '../errors.js';
+import type { Token, TokenType } from '../expr/lexer.js';
 import { ExpressionParser } from '../expr/parser.js';
 import type { Source } from '../source.js';
 import { RawTagReader } from './block-tag.js';
@@ -10,6 +11,53 @@ import {
   type Delimiters, type Wrapper,
 } from './scanner.js';
 import { standaloneRanges, type Range, type TagRange } from './standalone.js';
+
+/** Parser-owned source range for one accepted template tag. */
+export interface SyntaxTag extends TagRange {
+  kind: 'assignment' | 'block' | 'close' | 'comment' | 'directive' | 'echo' | 'else' | 'elseif' | 'for' | 'if' | 'ifblock' | 'include';
+}
+
+/** Canonical AST and the exact tag ranges accepted while producing it. */
+export interface TemplateAnalysis {
+  ast: Template;
+  tags: readonly SyntaxTag[];
+  tokens: readonly SyntaxToken[];
+}
+
+/** Expression token range emitted by the lexer used during template parsing. */
+export interface SyntaxToken {
+  start: number;
+  end: number;
+  kind: 'keyword' | 'number' | 'operator' | 'string' | 'variable';
+}
+
+function syntaxToken(token: Token): SyntaxToken {
+  const keywords: ReadonlySet<TokenType> = new Set(['NULL', 'TRUE', 'FALSE']);
+  const variables: ReadonlySet<TokenType> = new Set(['IDENT', 'DOT_IDENT', 'DOT_INDEX']);
+  const kind: SyntaxToken['kind'] = token.type === 'STRING' ? 'string'
+    : token.type === 'NUMBER' ? 'number'
+      : keywords.has(token.type) ? 'keyword'
+        : variables.has(token.type) ? 'variable' : 'operator';
+  return { start: token.start, end: token.end, kind };
+}
+
+function syntaxKind(sigil: string | null): SyntaxTag['kind'] {
+  switch (sigil) {
+    case null: return 'assignment';
+    case '*': return 'comment';
+    case '=': return 'echo';
+    case '@': return 'for';
+    case '?': return 'if';
+    case '?#': return 'ifblock';
+    case ':?': return 'elseif';
+    case ':': return 'else';
+    case '/': return 'close';
+    case '+': return 'include';
+    case '#': return 'block';
+    case '%': return 'directive';
+    default: throw new Error(`unknown accepted tag sigil ${JSON.stringify(sigil)}`);
+  }
+}
 
 const RESERVED = new Set(['true', 'false', 'null', 'in']);
 const ASSIGN_HEAD = /^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)/;
@@ -42,6 +90,11 @@ interface TagContext {
 }
 
 export function parseTemplate(source: Source, delimiters: Delimiters = DEFAULT_DELIMITERS): Template {
+  return analyzeTemplate(source, delimiters).ast;
+}
+
+/** Parses a template once and returns its AST with parser-owned syntax ranges. */
+export function analyzeTemplate(source: Source, delimiters: Delimiters = DEFAULT_DELIMITERS): TemplateAnalysis {
   return new TemplateParser(source, delimiters).parse();
 }
 
@@ -50,7 +103,8 @@ class TemplateParser {
   private readonly text: string;
   private readonly root: Item[] = [];
   private readonly frames: Frame[] = [];
-  private readonly tags: TagRange[] = [];
+  private readonly tags: SyntaxTag[] = [];
+  private readonly expressionParsers: ExpressionParser[] = [];
   private sawTag = false;
   private textBeforeFirstTagIsWhitespace = true;
 
@@ -72,14 +126,20 @@ class TemplateParser {
     return frame ? frame.items : this.root;
   }
 
-  parse(): Template {
+  parse(): TemplateAnalysis {
     this.scan();
     const frame = this.frames[this.frames.length - 1];
     if (frame) {
       throw this.fail('E_PARSE_UNCLOSED_BLOCK', frame.openStart, frame.openStart + 1, 'block is not closed before the end of the file');
     }
     const removed = standaloneRanges(this.text, this.tags);
-    return { type: 'Template', name: this.name, body: this.finalize(this.root, removed) };
+    return {
+      ast: { type: 'Template', name: this.name, body: this.finalize(this.root, removed) },
+      tags: this.tags,
+      tokens: this.expressionParsers.flatMap(parser => parser.lexer.consumed
+        .filter(token => token.type !== 'CLOSE' && token.type !== 'EOF')
+        .map(syntaxToken)),
+    };
   }
 
   // Pass 1: text scanning and tag parsing.
@@ -233,17 +293,19 @@ class TemplateParser {
     if (isDirective && !firstTag) {
       throw this.fail('E_PARSE_INVALID_DIRECTIVE', context.start, context.start + 1, 'delimiter directive is not the first tag');
     }
-    this.tags.push({ start: context.start, end, echo });
+    this.tags.push({ start: context.start, end, echo, kind: syntaxKind(sigil) });
     return end;
   }
 
   private expressionParser(context: TagContext, start: number): ExpressionParser {
-    return new ExpressionParser(
+    const parser = new ExpressionParser(
       this.source,
       start,
       { close: this.delimiters.close, closeCount: context.closeCount, openIndex: context.open },
       this.name,
     );
+    this.expressionParsers.push(parser);
+    return parser;
   }
 
   private rawReader(context: TagContext): RawTagReader {

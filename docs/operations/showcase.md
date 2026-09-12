@@ -175,4 +175,6 @@ Generated showcase execution enters the same public Engine API as AST execution.
 
 Generated mode supplies no loader because its host-language artifact is the executable template graph. It does not package an AST graph as unused input. `AstProgram` alone loads compiled AST artifacts.
 
+The static source view calls `analyze` once while building the site. Template tag boundaries and grammar kinds come from the template parser, while variables, literals and operators come from tokens consumed by the expression lexer. The site build fails on invalid template source. Compiled artifacts and generated source use bounded, two-axis scroll containers so a scenario remains readable without truncating its evidence.
+
 The `compiler-coverage` scenario prevents a narrow generated backend from passing on text-only templates. One page executes assignment, list and map spread, member and index access, function, unary, binary and ternary expressions, conditionals, loops and every loop metadata field, an include that shares local scope, an if-block, definition data and block scope. It also exposes all five HTML escape characters, boolean results from `&&` and `||`, and empty-list/map truthiness in the rendered HTML. The contract runs that page through AST and generated mode in every runtime and requires the same 351 UTF-8 bytes after repeated rendering and failure recovery.

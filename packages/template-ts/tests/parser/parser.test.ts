@@ -1,6 +1,6 @@
 // Parser behavior that the fixtures do not cover directly.
 import { describe, expect, it } from 'vitest';
-import { parse, TemplateError } from '../../src/index.js';
+import { analyze, parse, TemplateError } from '../../src/index.js';
 
 function codeOf(fn: () => unknown): string | null {
   try {
@@ -51,5 +51,23 @@ describe('spans', () => {
   it('counts bytes, not code units', () => {
     const ast = parse('é{= a}', 't.tpl');
     expect(ast.body[1]?.span).toEqual([2, 7]);
+  });
+});
+
+describe('syntax analysis', () => {
+  it('returns only parser-accepted tag ranges and their grammar kinds', () => {
+    const source = '<style>.a { @media x { } }</style>{/re/.test(s)}{= title}{? ok}yes{:}no{/}';
+    const result = analyze(source, 't.tpl');
+    expect(result.tags.map(tag => ({ source: source.slice(tag.start, tag.end), kind: tag.kind }))).toEqual([
+      { source: '{= title}', kind: 'echo' },
+      { source: '{? ok}', kind: 'if' },
+      { source: '{:}', kind: 'else' },
+      { source: '{/}', kind: 'close' },
+    ]);
+    expect(result.ast.body.map(node => node.type)).toEqual(['Text', 'Echo', 'If']);
+    expect(result.tokens.map(token => ({ source: source.slice(token.start, token.end), kind: token.kind }))).toEqual([
+      { source: 'title', kind: 'variable' },
+      { source: 'ok', kind: 'variable' },
+    ]);
   });
 });

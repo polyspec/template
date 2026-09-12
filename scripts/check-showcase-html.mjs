@@ -36,6 +36,15 @@ if (stack.length) fail(`HTML has unclosed tags: ${stack.join(', ')}`);
 const scenarioCount = (html.match(/<article class="scenario"/g) ?? []).length;
 const expectedCount = JSON.parse(readFileSync(join(site, 'data', 'scenarios.json'), 'utf8')).scenarios.length;
 if (scenarioCount !== expectedCount) fail(`HTML contains ${scenarioCount} scenarios; expected ${expectedCount}`);
+if ((html.match(/<pre class="template-files">/g) ?? []).length < scenarioCount) fail('template source blocks are missing their syntax-highlight class');
+if ((html.match(/<span class="syntax-template syntax-/g) ?? []).length < scenarioCount) fail('template parser ranges are not rendered as syntax tokens');
+for (const kind of ['variable', 'string', 'number', 'operator']) {
+  if (!html.includes(`class="syntax-${kind}"`)) fail(`template lexer ${kind} tokens are not rendered`);
+}
+if ((html.match(/<summary>compiled artifacts<\/summary><pre class="long-code">/g) ?? []).length !== scenarioCount) fail('compiled artifact blocks are not scroll containers');
+if ((html.match(/<summary>generated renderers<\/summary><pre class="long-code">/g) ?? []).length !== scenarioCount) fail('generated renderer blocks are not scroll containers');
+const css = readFileSync(join(site, 'styles.css'), 'utf8');
+if (!/\.long-code\s*\{[^}]*max-block-size:\s*min\(34rem,\s*70vh\)[^}]*overflow:\s*auto/s.test(css)) fail('long code blocks have no bounded two-axis scroll container');
 for (const href of [...html.matchAll(/href="([^"]+)"/g)].map(match => match[1])) {
   if (href.startsWith('#')) continue;
   if (href.startsWith('../../spec/') || href.startsWith('../../operations/')) {

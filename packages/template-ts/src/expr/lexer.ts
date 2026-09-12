@@ -107,6 +107,8 @@ export class ExpressionLexer {
   private previous: Token | null = null;
   private lookahead: Token | null = null;
   private readonly closeIsExpressionChar: boolean;
+  /** Tokens consumed by the parser, including the closing delimiter. */
+  readonly consumed: Token[] = [];
 
   constructor(
     private readonly source: Source,
@@ -135,6 +137,7 @@ export class ExpressionLexer {
     const token = this.peek();
     this.lookahead = null;
     this.previous = token;
+    this.consumed.push(token);
     return token;
   }
 
