@@ -171,7 +171,9 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  Source[".tpl source"] --> Compiler["Compiler.compile(sourceGraph, compile.mode)"]
+  Source[".tpl source graph"] --> Validate["validate AST + types + scope"]
+  Validate --> IR["shared compiler IR"]
+  IR --> Compiler["Compiler.emit(compile.mode)"]
   Compiler --> ASTArtifact["AstArtifact"]
   Compiler --> GenArtifact["GeneratedArtifact<br/>typed host source"]
   ASTArtifact --> Store["ArtifactStore.loadOrRefresh(refresh)"]

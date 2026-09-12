@@ -6,7 +6,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
-	contract-generate contract-check typed-generator typed-generator-check typed-generator-compile-check showcase showcase-check showcase-compile \
+	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check showcase showcase-check showcase-compile \
 	docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -165,12 +165,15 @@ showcase-check: build-ts ## Verify example-site parity, repeatability and browse
 
 typed-generator: ## Generate type-fixed host source from canonical AST
 	@mkdir -p tools/showcase/adapters/generated/typed
-	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --ast examples/site/scenarios/react-boundary/compiled/typescript/layout.tpl.ast.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
+	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/react-boundary/compiled/typescript/manifest.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
 
 typed-generator-check: ## Verify type-fixed generated source is reproducible
-	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --ast examples/site/scenarios/react-boundary/compiled/typescript/layout.tpl.ast.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
+	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/react-boundary/compiled/typescript/manifest.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
 
-typed-generator-compile-check: typed-generator-check ## Compile-check all type-fixed generated sources
+compiler-ir-check: ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
+	node scripts/check-compiler-ir.mjs
+
+typed-generator-compile-check: compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
