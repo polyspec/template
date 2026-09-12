@@ -55,3 +55,4 @@
 - TypeScript, Go, Rust, PHP의 truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검사, 동등성, 정렬, lookup, 반복 entry, 함수 호출, limit, 위치 오류를 `RuntimeBindings`로 통합했다. AST evaluator와 statement renderer가 이 경계를 사용하고 compiler interface gate가 runtime 연산 누락을 거부한다. TypeScript와 PHP의 표현식 깊이 검사는 고정값 대신 설정된 제한값을 사용한다.
 - Typed IR이 모든 source span을 보존하고 명시적인 동적 member, index, spread, loop 연산과 built-in·host 함수 signature를 받도록 확장했다. 잘못된 symbol과 함수 구현 종류는 lowering 단계에서 계속 실패한다. 현재 compiler 계약 digest에 맞춰 canonical AST manifest를 갱신했다.
 - 단일 파일에 섞여 있던 호스트 소스 생성기를 하나의 compiler 진입점과 독립적인 TypeScript·Go·Rust·PHP backend 모듈로 교체했다. 공통 IR 순회, 이름 변환, 재귀 타입 대응을 언어 emitter 밖으로 분리하고 artifact를 원자적으로 교체하며, 현재 생성 프로그램 20개가 계속 컴파일되고 바이트가 같은 HTML을 렌더하는지 확인했다.
+- 실제 compiler 모듈에 manifest의 LanguageBackend 계약을 강제했다. 모든 backend가 동일한 네 연산으로 선언부, runtime 지원, template 함수, program entry를 제공하고 compiler가 그 순서를 소유한다. interface gate는 JavaScript backend 모듈 네 개를 파싱하며 mutation test로 backend 연산 하나가 빠지면 검증이 실패함을 증명한다.

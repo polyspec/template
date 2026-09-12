@@ -33,6 +33,26 @@ for (const [owner, names] of Object.entries(expectedOperations)) {
   if (actual.join(',') !== names.join(',')) throw new Error(`${owner} operations differ: ${actual.join(',')}`);
 }
 
+const backendDirectory = process.env.TEMPLATE_BACKEND_DIRECTORY
+  ? resolve(process.env.TEMPLATE_BACKEND_DIRECTORY)
+  : resolve(root, 'tools/compiler/backends');
+const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.mjs', php: 'php.mjs' };
+const backendOperations = manifest.components.LanguageBackend.operations;
+for (const [language, filename] of Object.entries(backendFiles)) {
+  const path = resolve(backendDirectory, filename);
+  const source = ts.createSourceFile(path, readFileSync(path, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  const exportedFunctions = source.statements
+    .filter(ts.isFunctionDeclaration)
+    .filter(statement => statement.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.ExportKeyword))
+    .map(statement => statement.name?.text)
+    .filter(Boolean);
+  for (const operation of backendOperations) {
+    if (!exportedFunctions.includes(operation)) throw new Error(`${language}: LanguageBackend.${operation} is missing`);
+  }
+  if (!exportedFunctions.includes('createTarget')) throw new Error(`${language}: backend expression emitter is missing`);
+  if (exportedFunctions.includes('emitProgram')) throw new Error(`${language}: backend bypasses the compiler section contract`);
+}
+
 const core = manifest.supportLevels?.core;
 if (core?.languages?.join(',') !== 'typescript,go,rust,php') throw new Error('core languages are missing or reordered');
 if (core?.compileModes?.join(',') !== 'ast,gen' || core.conformanceCases !== 211) throw new Error('core support level is incomplete');

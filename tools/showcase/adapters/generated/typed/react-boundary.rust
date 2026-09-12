@@ -1,4 +1,20 @@
 // Generated.
+#[derive(Clone, Default)] pub struct Page { pub title: Option<String> }
+#[derive(Clone, Default)] pub struct Slot { pub template: Option<String>, pub html: Option<String> }
+#[derive(Clone, Default)] pub struct Assign {
+    pub title: Option<String>,
+    pub heading: Option<String>,
+    pub island_label: Option<String>,
+    pub root_label: Option<String>,
+    pub defined_label: Option<String>,
+    pub page: Option<Page>,
+}
+#[derive(Clone, Default)] pub struct Input_content_tpl {  }
+#[derive(Clone, Default)] pub struct Input_layout_tpl {  }
+#[derive(Clone, Default)] pub struct DefinitionData_content_tpl {  }
+#[derive(Clone, Default)] pub struct DefinitionData_layout_tpl {  }
+#[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
+#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<DefinitionData_content_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
 #[derive(Clone, Default)] enum GeneratedValue { #[default] Null }
 #[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
 #[derive(Clone, Default)] struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
@@ -16,22 +32,7 @@ impl<T: PartialEq> GeneratedContains<T> for Vec<T> { fn generated_contains(&self
 impl<K: PartialEq, V> GeneratedContains<K> for OrderedMap<K, V> { fn generated_contains(&self, value: &K) -> bool { self.get(value).is_some() } }
 impl GeneratedContains<String> for String { fn generated_contains(&self, value: &String) -> bool { self.contains(value) } }
 fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool { collection.generated_contains(value) }
-#[derive(Clone, Default)] pub struct Page { pub title: Option<String> }
-#[derive(Clone, Default)] pub struct Slot { pub template: Option<String>, pub html: Option<String> }
-#[derive(Clone, Default)] pub struct Assign {
-    pub title: Option<String>,
-    pub heading: Option<String>,
-    pub island_label: Option<String>,
-    pub root_label: Option<String>,
-    pub defined_label: Option<String>,
-    pub page: Option<Page>,
-}
-#[derive(Clone, Default)] pub struct Input_content_tpl {  }
-#[derive(Clone, Default)] pub struct Input_layout_tpl {  }
-#[derive(Clone, Default)] pub struct DefinitionData_content_tpl {  }
-#[derive(Clone, Default)] pub struct DefinitionData_layout_tpl {  }
-#[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
-#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<DefinitionData_content_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
+fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;").replace('\'', "&#39;") }
 fn render_content_tpl(assign: &Assign, definitions: &Definitions, input: Input_content_tpl) -> String { let mut out = String::new();
 
     out.push_str("<section data-react-island id=\"counter\">\n<p>");
@@ -63,4 +64,3 @@ pub fn render_template(target: &str, assign: &Assign, definitions: &Definitions)
         _ => panic!("generated template is missing or requires inputs: {target}"),
 } }
 pub fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
-fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;").replace('\'', "&#39;") }

@@ -2,7 +2,7 @@ import {
   baseTarget, definitionDataName, emitExpression, emitNodes, exportedName,
   fieldName, functionName, goType, indent, inputName, optional,
   phpDefinitionDataField, phpField, phpInputField, phpType, quote,
-  rustType, templateBodies as buildTemplateBodies, tsField,
+  rustType, tsField,
 } from '../backend-support.mjs';
 
 export const language = 'ts';
@@ -41,15 +41,11 @@ export function createTarget() {
   return target;
 }
 
-function moduleContext(program, manifest, target) {
+export function emitDeclarations(context) {
+  const { program, manifest, templateBodies } = context;
   const fields = manifest.fields ?? {};
   const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
   const tsRecords = Object.entries(records).map(([name, members]) => `export interface ${name} {\n${Object.entries(members).map(([key, type]) => `  ${tsField(key, type)}`).join('\n')}\n}`).join('\n');
-  return { program, fields, templateBodies: buildTemplateBodies(program, target), tsRecords };
-}
-
-export function emitDeclarations(context) {
-  const { program, fields, templateBodies, tsRecords } = context;
   const inputTypes = templateBodies.map(template => `export interface ${template.input} { ${[...template.inputs].map(([name, type]) => tsField(name, type.source)).join(' ')} }`).join('\n');
   const definitionsType = `export type DefinitionData<T> = Partial<T>;\nexport interface Definition<T> { html?: string; data?: DefinitionData<T>; }\nexport interface Definitions { ${[...program.definitions].map(([name, definition]) => `${fieldName(name)}?: Definition<${definition.template ? inputName(definition.template) : 'Record<never, never>'}>;`).join(' ')} }`;
   return `// Generated.\n${tsRecords}\nexport interface Assign {\n${Object.entries(fields).map(([name, type]) => `  ${tsField(name, type)}`).join('\n')}\n}\n${inputTypes}\n${definitionsType}`;
@@ -69,9 +65,4 @@ export function emitEntry(context) {
   const { program, templateBodies } = context;
   const dispatch = templateBodies.filter(template => template.inputs.size === 0).map(template => `    case ${quote(template.name)}: return ${template.function}(assign, definitions, {});`).join('\n');
   return `export function renderTemplate(target: string, assign: Assign, definitions: Definitions): string {\n  switch (target) {\n${dispatch}\n    default: throw new Error('generated template is missing or requires inputs: ' + target);\n  }\n}\nexport function render(assign: Assign, definitions: Definitions): string { return renderTemplate(${quote(program.entry)}, assign, definitions); }`;
-}
-
-export function emitProgram(program, manifest, target) {
-  const context = moduleContext(program, manifest, target);
-  return [emitDeclarations(context), emitRuntime(context), emitTemplates(context), emitEntry(context), ''].join('\n');
 }
