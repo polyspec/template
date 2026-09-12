@@ -1,9 +1,11 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, posix, resolve } from 'node:path';
 
 const nodeKinds = new Set(['Text', 'Echo', 'If', 'For', 'Set', 'Include', 'Block', 'IfBlock']);
 const exprKinds = new Set(['Literal', 'Var', 'LoopMeta', 'Member', 'Index', 'Call', 'Unary', 'Binary', 'Ternary', 'List', 'Map']);
 const scalarTypes = new Set(['null', 'boolean', 'number', 'string', 'any']);
+const hash = value => createHash('sha256').update(value).digest('hex');
 
 export function loadSourceGraph(manifestPath) {
   const absolute = resolve(manifestPath);
@@ -14,8 +16,10 @@ export function loadSourceGraph(manifestPath) {
   const base = dirname(absolute);
   const templates = new Map();
   for (const [name, entry] of Object.entries(manifest.files)) {
-    if (!entry || typeof entry.path !== "string") throw new Error(`compiler: ${name} has no AST artifact path`);
-    const ast = JSON.parse(readFileSync(resolve(base, entry.path), 'utf8'));
+    if (!entry || typeof entry.path !== 'string' || typeof entry.artifactDigest !== 'string') throw new Error(`compiler: ${name} has no complete AST artifact entry`);
+    const bytes = readFileSync(resolve(base, entry.path));
+    if (hash(bytes) !== entry.artifactDigest) throw new Error(`compiler: AST artifact ${name} is corrupt`);
+    const ast = JSON.parse(bytes.toString('utf8'));
     if (ast?.type !== 'Template' || ast.name !== name || !Array.isArray(ast.body)) throw new Error(`compiler: ${name} is not a canonical Template AST`);
     templates.set(name, ast);
   }

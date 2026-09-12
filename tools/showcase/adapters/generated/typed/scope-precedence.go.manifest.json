@@ -1,0 +1,15 @@
+{
+  "schema": 2,
+  "mode": "gen",
+  "target": "go",
+  "entry": "layout.tpl",
+  "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
+  "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
+  "contractDigest": "17278ce3a1e628fdebe22170f24aa2d105c3c41192c33198426907013f251bdc",
+  "files": {
+    "scope-precedence.go": {
+      "path": "scope-precedence.go",
+      "artifactDigest": "7e10a0c8c668ffa31070fcab5bc55f326ad4ca24ccddc25d40f155ebce8b7a7a"
+    }
+  }
+}

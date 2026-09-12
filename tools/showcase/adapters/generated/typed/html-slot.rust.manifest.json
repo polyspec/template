@@ -1,0 +1,15 @@
+{
+  "schema": 2,
+  "mode": "gen",
+  "target": "rust",
+  "entry": "layout.tpl",
+  "sourceDigest": "6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a",
+  "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
+  "contractDigest": "17278ce3a1e628fdebe22170f24aa2d105c3c41192c33198426907013f251bdc",
+  "files": {
+    "html-slot.rust": {
+      "path": "html-slot.rust",
+      "artifactDigest": "e9e6d622f7a4d6ef3b653de7cc79b54dc49640f4110738fd9e0b363085beb4a5"
+    }
+  }
+}
