@@ -10,21 +10,21 @@
         "kind": "string",
         "value": "visible only in layout",
         "span": [
-          16,
-          40
+          18,
+          42
         ]
       },
       "span": [
         0,
-        41
+        43
       ]
     },
     {
       "type": "Text",
       "value": "<section class=\"scope\">\n",
       "span": [
-        42,
-        66
+        44,
+        68
       ]
     },
     {
@@ -40,29 +40,29 @@
               "type": "Var",
               "name": "page",
               "span": [
-                83,
-                87
+                85,
+                89
               ]
             },
             "key": "title",
             "span": [
-              83,
-              93
+              85,
+              95
             ]
           }
         }
       ],
       "span": [
-        66,
-        94
+        68,
+        96
       ]
     },
     {
       "type": "Text",
       "value": "</section>\n",
       "span": [
-        95,
-        106
+        97,
+        108
       ]
     }
   ]

@@ -91,6 +91,7 @@ pub fn assign_operator_length(bytes: &[u8], index: usize) -> usize {
 
 /// Whether the text at `index` (after the open delimiter) is the assignment form (LEX-6).
 pub fn assignment_form(bytes: &[u8], index: usize) -> bool {
+    let index = skip_horizontal_space(bytes, index);
     let name = ident_length(bytes, index);
     if name == 0 {
         return false;

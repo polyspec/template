@@ -92,22 +92,22 @@ function render_content_tpl(assign, definitions, input, context, runtime, rootDa
     context.output.write("</p>\n</article>\n");
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame("layout.tpl", [0, 42, 66, 95, 106], rootData);
+    const frame = new Frame("layout.tpl", [0, 44, 68, 97, 108], rootData);
     scope.locals.set("layout_local", "visible only in layout");
-    context.at(frame, [42, 66]);
+    context.at(frame, [44, 68]);
     context.output.write("<section class=\"scope\">\n");
     {
         let definition = definitions.content;
         if (definition === undefined)
-            throw runtime.error(frame, [66, 94], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
+            throw runtime.error(frame, [68, 96], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
         if (definition?.html !== undefined) {
-            context.at(frame, [66, 94]);
+            context.at(frame, [68, 96]);
             context.output.write(definition.html);
         }
         else {
             const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: (assign.page)?.title });
             const blockScope = new Scope();
-            context.enter("content.tpl", frame, [66, 94]);
+            context.enter("content.tpl", frame, [68, 96]);
             try {
                 render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
             }
@@ -116,7 +116,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
             }
         }
     }
-    context.at(frame, [95, 106]);
+    context.at(frame, [97, 108]);
     context.output.write("</section>\n");
 }
 function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {

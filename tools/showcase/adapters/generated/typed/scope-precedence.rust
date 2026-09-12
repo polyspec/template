@@ -50,13 +50,13 @@ scope.locals.insert("layout_local".to_string(), generated_value(&input.layout_lo
     let escaped = runtime.escape(context, &runtime.call(context, "default", vec![scope.lookup(&frame, "layout_local"), Value::text("missing")], &frame, [125, 158])?, &frame, [125, 158])?; context.write(&escaped, &frame, [122, 159])?;
     context.write("</p>\n</article>\n", &frame, [159, 175])?;
  Ok(()) }
-fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: InputLayoutTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: "layout.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 42, 66, 95, 106])), context: Rc::clone(root_data) };
+fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: InputLayoutTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: "layout.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 44, 68, 97, 108])), context: Rc::clone(root_data) };
 
     scope.locals.insert("layout_local".to_string(), Value::text("visible only in layout"));
-    context.write("<section class=\"scope\">\n", &frame, [42, 66])?;
-    { if definitions.content.is_none() { return Err(runtime.error(context, &frame, [66, 94], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, "define content is not registered")); }
+    context.write("<section class=\"scope\">\n", &frame, [44, 68])?;
+    { if definitions.content.is_none() { return Err(runtime.error(context, &frame, [68, 96], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, "define content is not registered")); }
     let definition = definitions.content.clone();
-    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &frame, [66, 94])?; } else {
+    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &frame, [68, 96])?; } else {
         let mut input = InputContentTpl::default();
         input.root_label = generated_result::<String>(&generated_value(&assign.root_label)?)?;
         input.defined_label = generated_result::<String>(&generated_value(&assign.defined_label)?)?;
@@ -68,13 +68,13 @@ fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: Inpu
         }
         input.title = generated_result::<String>(&runtime.member(&generated_value(&assign.page)?, "title"))?;
         let mut block_scope = Scope::default();
-        context.enter("content.tpl", Some(&frame), Some([66, 94]))?;
+        context.enter("content.tpl", Some(&frame), Some([68, 96]))?;
         let rendered = render_content_tpl(assign, definitions, input, context, runtime, root_data, &mut block_scope);
         context.leave();
         rendered?;
     }
     }
-    context.write("</section>\n", &frame, [95, 106])?;
+    context.write("</section>\n", &frame, [97, 108])?;
  Ok(()) }
 fn render_template(target: &str, assign: &Assign, definitions: &mut Definitions, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { match target {
         "layout.tpl" => render_layout_tpl(assign, definitions, InputLayoutTpl::default(), context, runtime, root_data, scope),

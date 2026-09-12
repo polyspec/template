@@ -25,7 +25,7 @@ type Wrapper struct {
 
 var wrappers = []Wrapper{{"\"", "\""}, {"'", "'"}, {"/*", "*/"}, {"<!--", "-->"}}
 
-var assignForm = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*[ \t]*(\+\+|--|[-+*/%]=|=([^=>]|$))`)
+var assignForm = regexp.MustCompile(`^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*(\+\+|--|[-+*/%]=|=([^=>]|$))`)
 var loopForm = regexp.MustCompile(`^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=`)
 
 func isHorizontalSpace(c byte) bool { return c == ' ' || c == '\t' }

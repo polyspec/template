@@ -77,67 +77,67 @@ function render_card_tpl(assign, definitions, input, context, runtime, rootData,
     context.output.write("</p>\n");
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame("layout.tpl", [0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691], rootData);
-    scope.locals.set("values", [0, ...runtime.listSpread(assign.numbers, frame, [14, 24])]);
-    scope.locals.set("merged", new Map([...runtime.mapSpread(assign.lookup, frame, [38, 47]), [runtime.stringify("z", frame, [49, 52]), "Z"]]));
-    context.at(frame, [62, 76]);
+    const frame = new Frame("layout.tpl", [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], rootData);
+    scope.locals.set("values", [0, ...runtime.listSpread(assign.numbers, frame, [16, 26])]);
+    scope.locals.set("merged", new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify("z", frame, [53, 56]), "Z"]]));
+    context.at(frame, [66, 80]);
     context.output.write("<section>\n<h1>");
-    context.at(frame, [76, 90]);
-    context.output.write(runtime.escape((assign.page)?.title, frame, [79, 89]));
-    context.at(frame, [90, 115]);
+    context.at(frame, [80, 94]);
+    context.output.write(runtime.escape((assign.page)?.title, frame, [83, 93]));
+    context.at(frame, [94, 119]);
     context.output.write("</h1>\n<p class=\"escaped\">");
-    context.at(frame, [115, 128]);
-    context.output.write(runtime.escape(assign.dangerous, frame, [118, 127]));
-    context.at(frame, [128, 152]);
+    context.at(frame, [119, 132]);
+    context.output.write(runtime.escape(assign.dangerous, frame, [122, 131]));
+    context.at(frame, [132, 156]);
     context.output.write("</p>\n<p class=\"logical\">");
-    context.at(frame, [152, 167]);
-    context.output.write(runtime.escape((() => { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy("x") : false; })(), frame, [155, 166]));
-    context.at(frame, [167, 168]);
+    context.at(frame, [156, 171]);
+    context.output.write(runtime.escape((() => { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy("x") : false; })(), frame, [159, 170]));
+    context.at(frame, [171, 172]);
     context.output.write("|");
-    context.at(frame, [168, 182]);
-    context.output.write(runtime.escape((() => { const left = false; return runtime.truthy(left) ? true : runtime.truthy(2); })(), frame, [171, 181]));
-    context.at(frame, [182, 215]);
+    context.at(frame, [172, 186]);
+    context.output.write(runtime.escape((() => { const left = false; return runtime.truthy(left) ? true : runtime.truthy(2); })(), frame, [175, 185]));
+    context.at(frame, [186, 219]);
     context.output.write("</p>\n<p class=\"empty-truthiness\">");
-    context.at(frame, [215, 237]);
-    context.output.write(runtime.escape((() => { const left = assign.empty_list; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [218, 236]));
-    context.at(frame, [237, 238]);
+    context.at(frame, [219, 241]);
+    context.output.write(runtime.escape((() => { const left = assign.empty_list; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [222, 240]));
+    context.at(frame, [241, 242]);
     context.output.write("|");
-    context.at(frame, [238, 259]);
-    context.output.write(runtime.escape((() => { const left = assign.empty_map; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [241, 258]));
-    context.at(frame, [259, 267]);
+    context.at(frame, [242, 263]);
+    context.output.write(runtime.escape((() => { const left = assign.empty_map; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [245, 262]));
+    context.at(frame, [263, 271]);
     context.output.write("</p>\n<p>");
-    context.at(frame, [267, 280]);
-    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "values"), 1), frame, [270, 279]));
-    context.at(frame, [280, 281]);
+    context.at(frame, [271, 284]);
+    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "values"), 1), frame, [274, 283]));
+    context.at(frame, [284, 285]);
     context.output.write("|");
-    context.at(frame, [281, 296]);
-    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "merged"), "z"), frame, [284, 295]));
-    context.at(frame, [296, 301]);
+    context.at(frame, [285, 300]);
+    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "merged"), "z"), frame, [288, 299]));
+    context.at(frame, [300, 305]);
     context.output.write("</p>\n");
-    if (runtime.truthy((() => { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(runtime.binary("==", (assign.page)?.title, "Guide", frame, [312, 333])) : false; })())) {
-        context.at(frame, [334, 358]);
+    if (runtime.truthy((() => { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(runtime.binary("==", (assign.page)?.title, "Guide", frame, [316, 337])) : false; })())) {
+        context.at(frame, [338, 362]);
         context.output.write("<strong>matched</strong>");
     }
     else {
-        context.at(frame, [361, 384]);
+        context.at(frame, [365, 388]);
         context.output.write("<strong>missed</strong>");
     }
-    context.at(frame, [387, 391]);
+    context.at(frame, [391, 395]);
     context.output.write("\n<p>");
-    context.at(frame, [391, 414]);
-    context.output.write(runtime.escape((runtime.truthy(assign.flag) ? "yes" : "no"), frame, [394, 413]));
-    context.at(frame, [414, 415]);
+    context.at(frame, [395, 418]);
+    context.output.write(runtime.escape((runtime.truthy(assign.flag) ? "yes" : "no"), frame, [398, 417]));
+    context.at(frame, [418, 419]);
     context.output.write("|");
-    context.at(frame, [415, 425]);
-    context.output.write(runtime.escape(runtime.binary("+", runtime.unary("-", 1, frame, [418, 420]), 3, frame, [418, 424]), frame, [418, 424]));
-    context.at(frame, [425, 426]);
+    context.at(frame, [419, 429]);
+    context.output.write(runtime.escape(runtime.binary("+", runtime.unary("-", 1, frame, [422, 424]), 3, frame, [422, 428]), frame, [422, 428]));
+    context.at(frame, [429, 430]);
     context.output.write("|");
-    context.at(frame, [426, 454]);
-    context.output.write(runtime.escape(runtime.call("default", ["", "fallback"], frame, [429, 453]), frame, [429, 453]));
-    context.at(frame, [454, 464]);
+    context.at(frame, [430, 458]);
+    context.output.write(runtime.escape(runtime.call("default", ["", "fallback"], frame, [433, 457]), frame, [433, 457]));
+    context.at(frame, [458, 468]);
     context.output.write("</p>\n<ul>\n");
     {
-        const row_entries = runtime.entries(assign.rows, frame, [464, 581]);
+        const row_entries = runtime.entries(assign.rows, frame, [468, 585]);
         const row_size = row_entries.length;
         const row_last_index = row_size - 1;
         const row_had = scope.locals.has("row");
@@ -149,28 +149,28 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
                 const row_first = row_index === 0;
                 const row_last = row_index === row_last_index;
                 context.iterations += 1;
-                runtime.limit('iteration', context.iterations, frame, [464, 581]);
-                context.at(frame, [479, 483]);
+                runtime.limit('iteration', context.iterations, frame, [468, 585]);
+                context.at(frame, [483, 487]);
                 context.output.write("<li>");
-                context.at(frame, [483, 497]);
-                context.output.write(runtime.escape(row_index, frame, [486, 496]));
-                context.at(frame, [497, 498]);
+                context.at(frame, [487, 501]);
+                context.output.write(runtime.escape(row_index, frame, [490, 500]));
+                context.at(frame, [501, 502]);
                 context.output.write("/");
-                context.at(frame, [498, 511]);
-                context.output.write(runtime.escape(row_size, frame, [501, 510]));
-                context.at(frame, [511, 512]);
+                context.at(frame, [502, 515]);
+                context.output.write(runtime.escape(row_size, frame, [505, 514]));
+                context.at(frame, [515, 516]);
                 context.output.write(":");
-                context.at(frame, [512, 524]);
-                context.output.write(runtime.escape(scope.lookup(frame, "row")?.name, frame, [515, 523]));
-                context.at(frame, [524, 525]);
+                context.at(frame, [516, 528]);
+                context.output.write(runtime.escape(scope.lookup(frame, "row")?.name, frame, [519, 527]));
+                context.at(frame, [528, 529]);
                 context.output.write(":");
-                context.at(frame, [525, 539]);
-                context.output.write(runtime.escape(row_first, frame, [528, 538]));
-                context.at(frame, [539, 540]);
+                context.at(frame, [529, 543]);
+                context.output.write(runtime.escape(row_first, frame, [532, 542]));
+                context.at(frame, [543, 544]);
                 context.output.write(":");
-                context.at(frame, [540, 553]);
-                context.output.write(runtime.escape(row_last, frame, [543, 552]));
-                context.at(frame, [553, 559]);
+                context.at(frame, [544, 557]);
+                context.output.write(runtime.escape(row_last, frame, [547, 556]));
+                context.at(frame, [557, 563]);
                 context.output.write("</li>\n");
             }
         }
@@ -181,13 +181,13 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
                 scope.locals.delete("row");
         }
         if (row_size === 0) {
-            context.at(frame, [563, 578]);
+            context.at(frame, [567, 582]);
             context.output.write("<li>empty</li>\n");
         }
     }
-    context.at(frame, [582, 588]);
+    context.at(frame, [586, 592]);
     context.output.write("</ul>\n");
-    context.enter("partial.tpl", frame, [588, 603]);
+    context.enter("partial.tpl", frame, [592, 607]);
     try {
         render_partial_tpl(assign, definitions, { values: scope.lookup(frame, "values") }, context, runtime, rootData, scope);
     }
@@ -195,27 +195,27 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
         context.leave();
     }
     if (definitions.content !== undefined) {
-        context.at(frame, [616, 630]);
+        context.at(frame, [620, 634]);
         context.output.write("<p>defined</p>");
     }
     else {
-        context.at(frame, [633, 647]);
+        context.at(frame, [637, 651]);
         context.output.write("<p>missing</p>");
     }
-    context.at(frame, [650, 651]);
+    context.at(frame, [654, 655]);
     context.output.write("\n");
     {
         let definition = definitions.content;
         if (definition === undefined)
-            throw runtime.error(frame, [651, 679], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
+            throw runtime.error(frame, [655, 683], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
         if (definition?.html !== undefined) {
-            context.at(frame, [651, 679]);
+            context.at(frame, [655, 683]);
             context.output.write(definition.html);
         }
         else {
             const input = Object.assign({}, definition?.data ?? {}, { label: (assign.page)?.title });
             const blockScope = new Scope();
-            context.enter("card.tpl", frame, [651, 679]);
+            context.enter("card.tpl", frame, [655, 683]);
             try {
                 render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
             }
@@ -224,7 +224,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
             }
         }
     }
-    context.at(frame, [680, 691]);
+    context.at(frame, [684, 695]);
     context.output.write("</section>\n");
 }
 function render_partial_tpl(assign, definitions, input, context, runtime, rootData, scope) {
