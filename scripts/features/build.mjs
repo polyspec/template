@@ -8,7 +8,8 @@ const clients = ['go', 'php', 'rust', 'typescript'];
 const docLink = (feature, ko) => {
   let doc = feature.docs[0] ?? '';
   if (ko && doc.endsWith('.md')) doc = doc.replace(/\.md$/, '.ko.md');
-  return doc.startsWith('docs/') ? doc.slice('docs/'.length) : `../${doc}`;
+  doc = doc.replace(/^docs\//, '').replace(/\.ko\.md$|\.md$/, '');
+  return doc || '.';
 };
 const table = (ko) => manifest.features.map(feature => `| ${feature.id} | ${ko ? feature.title_ko : feature.title} | ${feature.status} | ${clients.map(client => `${client}: ${feature.clients[client]}`).join('<br>')} | [${ko ? '근거' : 'Evidence'}](${docLink(feature, ko)}) |`).join('\n');
 const body = `# Feature status\n\nThe executable source is [contracts/features.json](../contracts/features.json). Each entry defines inputs, outputs, state transitions, errors, client support, fixtures, tests, verification commands and paired documentation.\n\n| ID | Feature | Status | Client support | Evidence |\n|---|---|---|---|---|\n${table(false)}\n\nRun \`make feature-check\` to validate every contract and referenced path. An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.\n`;
