@@ -1,18 +1,14 @@
 // Generated.
 package generated
 import ("fmt"; "strings")
-type Page struct { Title string }
+
 type Assign struct {
-	Page Page
-	Root_label string
-	Defined_label string
+	Heading string
 }
-type Input_content_tpl struct { Title string; Root_label string; Defined_label string; Layout_local *string }
 type Input_layout_tpl struct {  }
-type DefinitionData_content_tpl struct { Title *string; Root_label *string; Defined_label *string; Layout_local **string }
 type DefinitionData_layout_tpl struct {  }
 type Definition[T any] struct { HTML *string; Data *T }
-type Definitions struct { Content *Definition[DefinitionData_content_tpl]; Layout *Definition[DefinitionData_layout_tpl] }
+type Definitions struct { Content *Definition[struct{}]; Layout *Definition[DefinitionData_layout_tpl] }
 type OrderedEntry[K comparable, V any] struct { Key K; Value V }
 type OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }
 func NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }
@@ -28,39 +24,14 @@ func generatedUnary(op string, value any) any { if op == "!" { return !generated
 func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
 func generatedCall(name string, args []any) any { if name == "default" && len(args) == 2 { if generatedTruthy(args[0]) { return args[0] }; return args[1] }; panic("generated function is not linked: "+name) }
 func valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }
-func render_content_tpl(assign Assign, definitions Definitions, input Input_content_tpl) string { var out strings.Builder
-title := input.Title
-root_label := input.Root_label
-defined_label := input.Defined_label
-layout_local := input.Layout_local
-    out.WriteString("<article>\n<h1>")
-    out.WriteString(generatedEscape(title))
-    out.WriteString("</h1>\n<p class=\"root\">")
-    out.WriteString(generatedEscape(root_label))
-    out.WriteString("</p>\n<p class=\"defined\">")
-    out.WriteString(generatedEscape(defined_label))
-    out.WriteString("</p>\n<p class=\"local\">")
-    out.WriteString(generatedEscape(generatedCall("default", []any{valueOrZero(layout_local), "missing"})))
-    out.WriteString("</p>\n</article>\n")
- return out.String() }
 func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder
 
-    layout_local := "visible only in layout"
-    _ = layout_local
-    out.WriteString("<section class=\"scope\">\n")
+    out.WriteString("<section class=\"notice\">\n<h1>")
+    out.WriteString(generatedEscape(assign.Heading))
+    out.WriteString("</h1>\n")
     { definition := definitions.Content
-    if definition == nil { panic("generated definition content is missing") }
-    if definition != nil && definition.HTML != nil { out.WriteString(*definition.HTML) } else {
-        input := Input_content_tpl{Root_label: assign.Root_label, Defined_label: assign.Defined_label}
-        if definition != nil && definition.Data != nil {
-            if definition.Data.Title != nil { input.Title = *definition.Data.Title }
-            if definition.Data.Root_label != nil { input.Root_label = *definition.Data.Root_label }
-            if definition.Data.Defined_label != nil { input.Defined_label = *definition.Data.Defined_label }
-            if definition.Data.Layout_local != nil { input.Layout_local = *definition.Data.Layout_local }
-        }
-        input.Title = assign.Page.Title
-        out.WriteString(render_content_tpl(assign, definitions, input))
-    }
+    if definition == nil || definition.HTML == nil { panic("generated definition content requires html") }
+    out.WriteString(*definition.HTML)
     }
     out.WriteString("</section>\n")
  return out.String() }
