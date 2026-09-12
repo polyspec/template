@@ -12,7 +12,7 @@ const scenariosRoot = join(root, 'examples', 'site', 'scenarios');
 const manifest = JSON.parse(readFileSync(join(adapterRoot, 'interface.json'), 'utf8'));
 const operationNames = manifest.operations.map(operation => operation.name);
 const languageNames = ['typescript', 'javascript', 'go', 'rust', 'php'];
-const requiredSupportLevels = ['core-runtime', 'source-compiler', 'artifact-runtime', 'native-source-backend'];
+const requiredSupportLevels = ['core-runtime', 'source-compiler', 'artifact-runtime', 'generated-compiler'];
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -55,7 +55,7 @@ function checkSupportLevels() {
     for (const level of requiredSupportLevels) assert(levels.includes(level), `${language} does not support ${level}`);
   }
   assert(manifest.executionModes?.ast?.requiredSupportLevel === 'artifact-runtime', 'AST execution mode must require artifact-runtime');
-  assert(manifest.executionModes?.generated?.requiredSupportLevel === 'native-source-backend', 'generated execution mode must require native-source-backend');
+  assert(manifest.executionModes?.generated?.requiredSupportLevel === 'generated-compiler', 'generated execution mode must require generated-compiler');
   assert(manifest.executionModes?.ast?.status === 'implemented', 'AST execution mode must be implemented');
 }
 

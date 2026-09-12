@@ -3,7 +3,7 @@ flowchart LR
   ASTCompile --> ASTArtifact["canonical AST artifact"]
   ASTArtifact --> ASTLoad["artifact-runtime<br/>load once"]
   ASTLoad --> ASTRender["bind assign + define<br/>interpret AST"]
-  Source --> NativeCompile["native-source-backend<br/>compileNative"]
+  Source --> NativeCompile["generated-compiler<br/>compileNative"]
   NativeCompile --> NativeArtifact["generated host-language source"]
   NativeArtifact --> NativeLoad["loadNative<br/>load once"]
   NativeLoad --> NativeRender["bind assign + define<br/>call direct node renderer"]

@@ -197,7 +197,7 @@ node scripts/check-showcase-contract.mjs
 flowchart TB
   SourceCompiler["source-compiler: parse, encodeArtifact"] --> ArtifactRuntime["artifact-runtime: loadArtifact, render"]
   ArtifactRuntime --> CoreRuntime["core-runtime: render"]
-  NativeBackend["native-source-backend: optional generated mode"] --> CoreRuntime
+  GeneratedCompiler["generated-compiler: typed source + load"] --> CoreRuntime
 ```
 
 ## 이름과 로딩
