@@ -91,14 +91,15 @@ fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: InputLay
     let escaped = generated_escape(runtime, context, &generated_call::<String>(runtime, context, "default", vec![generated_value(&"".to_string())?, generated_value(&"fallback".to_string())?], &frame, [429, 453])?, &frame, [429, 453])?; context.write(&escaped, &frame, [426, 454])?;
     context.write("</p>\n<ul>\n", &frame, [454, 464])?;
     { let entries = assign.rows.clone().iter().cloned().enumerate().map(|(key, value)| (key as f64, value)).collect::<Vec<_>>();
+    let row_size = entries.len() as f64;
+    let row_last_index = entries.len().saturating_sub(1);
     let row_previous = scope.locals.get("row").cloned();
     for (row_index_raw, (row_key, row_value)) in entries.iter().cloned().enumerate() {
         let _ = &row_key;
         scope.locals.insert("row".to_string(), generated_value(&row_value)?);
         let row_index = row_index_raw as f64;
-        let row_size = entries.len() as f64;
         let row_first = row_index_raw == 0;
-        let row_last = row_index_raw + 1 == entries.len();
+        let row_last = row_index_raw == row_last_index;
         context.iterations += 1;
         runtime.limit(context, "iteration", context.iterations, &frame, [464, 581])?;
             context.write("<li>", &frame, [479, 483])?;

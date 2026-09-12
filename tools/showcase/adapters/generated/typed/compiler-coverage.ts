@@ -78,14 +78,14 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     context.at(frame, [426,454]); context.output.write(runtime.escape(runtime.call("default", ["", "fallback"] as unknown as Value[], frame, [429,453]) as unknown as Value, frame, [429,453]));
     context.at(frame, [454,464]); context.output.write("</p>\n<ul>\n");
     { const row_entries = runtime.entries(assign.rows as unknown as Value, frame, [464,581]);
+    const row_size = row_entries.length; const row_last_index = row_size - 1;
     const row_had = scope.locals.has("row"); const row_previous = scope.locals.get("row");
     try {
-    for (let row_index = 0; row_index < row_entries.length; row_index += 1) {
+    for (let row_index = 0; row_index < row_size; row_index += 1) {
         const [row_key, row_value] = row_entries[row_index]!;
         scope.locals.set("row", row_value);
-        const row_size = row_entries.length;
         const row_first = row_index === 0;
-        const row_last = row_index + 1 === row_entries.length;
+        const row_last = row_index === row_last_index;
         context.iterations += 1;
         runtime.limit('iteration', context.iterations, frame, [464,581]);
             context.at(frame, [479,483]); context.output.write("<li>");
@@ -101,7 +101,7 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
             context.at(frame, [553,559]); context.output.write("</li>\n");
     }
     } finally { if (row_had) scope.locals.set("row", row_previous as Value); else scope.locals.delete("row"); }
-    if (row_entries.length === 0) {
+    if (row_size === 0) {
             context.at(frame, [563,578]); context.output.write("<li>empty</li>\n");
     }
     }

@@ -151,7 +151,8 @@ export function lowerSourceGraph(graph, manifest) {
         const left = lowerExpr(node.left, scope, loops);
         const right = lowerExpr(node.right, scope, loops);
         const boolean = ['&&', '||', '==', '!=', '===', '!==', '<', '>', '<=', '>=', 'in'].includes(node.op);
-        return { op: 'binary', operator: node.op, left, right, valueType: boolean ? parseType('boolean') : mergeType(left.valueType, right.valueType), span: node.span };
+        const arithmetic = ['-', '*', '/', '%'].includes(node.op);
+        return { op: 'binary', operator: node.op, left, right, valueType: boolean ? parseType('boolean') : arithmetic ? parseType('number') : mergeType(left.valueType, right.valueType), span: node.span };
       }
       case 'Ternary': {
         const test = lowerExpr(node.test, scope, loops);
@@ -161,28 +162,28 @@ export function lowerSourceGraph(graph, manifest) {
       }
       case 'List': {
         const items = node.items.map(item => ({ spread: item.type === 'Spread', value: lowerExpr(item.type === 'Spread' ? item.expr : item, scope, loops), span: item.span }));
-        let itemType = parseType('any');
+        let itemType = null;
         for (const item of items) {
           const spreadType = item.spread ? required(item.value.valueType) : null;
           if (item.spread && spreadType.kind !== 'list' && spreadType.kind !== 'any') throw new Error(`compiler: list spread requires a list or any, got ${typeSource(item.value.valueType)}`);
           const candidate = item.spread ? spreadType.kind === 'list' ? spreadType.item : parseType('any') : item.value.valueType;
-          itemType = itemType.kind === 'any' ? candidate : mergeType(itemType, candidate);
+          itemType = itemType === null ? candidate : mergeType(itemType, candidate);
         }
-        return { op: 'list', items, valueType: parseType(`list<${typeSource(itemType)}>`), span: node.span };
+        return { op: 'list', items, valueType: parseType(`list<${typeSource(itemType ?? parseType('any'))}>`), span: node.span };
       }
       case 'Map': {
         const entries = node.entries.map(item => item.type === 'Spread' ? { spread: true, value: lowerExpr(item.expr, scope, loops), span: item.span } : { spread: false, key: lowerExpr(item.key, scope, loops), value: lowerExpr(item.value, scope, loops), span: item.span });
-        let keyType = parseType('any');
-        let valueType = parseType('any');
+        let keyType = null;
+        let valueType = null;
         for (const entry of entries) {
           const spreadType = entry.spread ? required(entry.value.valueType) : null;
           if (entry.spread && spreadType.kind !== 'map' && spreadType.kind !== 'any') throw new Error(`compiler: map spread requires a map or any, got ${typeSource(entry.value.valueType)}`);
           const key = entry.spread ? spreadType.kind === 'map' ? spreadType.key : parseType('any') : entry.key.valueType;
           const value = entry.spread ? spreadType.kind === 'map' ? spreadType.value : parseType('any') : entry.value.valueType;
-          keyType = keyType.kind === 'any' ? key : mergeType(keyType, key);
-          valueType = valueType.kind === 'any' ? value : mergeType(valueType, value);
+          keyType = keyType === null ? key : mergeType(keyType, key);
+          valueType = valueType === null ? value : mergeType(valueType, value);
         }
-        return { op: 'map', entries, valueType: parseType(`map<${typeSource(keyType)},${typeSource(valueType)}>`), span: node.span };
+        return { op: 'map', entries, valueType: parseType(`map<${typeSource(keyType ?? parseType('any'))},${typeSource(valueType ?? parseType('any'))}>`), span: node.span };
       }
     }
   }
