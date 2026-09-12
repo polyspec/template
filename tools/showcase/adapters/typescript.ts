@@ -29,12 +29,12 @@ function readJson(root: string, name: string): unknown {
   return parseJsonBytes(new Uint8Array(readFileSync(join(root, name))));
 }
 
-function readArtifactTemplates(root: string, language: string): Map<string, Template> {
-  const artifactRoot = join(root, 'compiled', language);
-  const manifest = JSON.parse(readFileSync(join(artifactRoot, 'manifest.json'), 'utf8')) as { templates: Record<string, { artifact: string }> };
+function readArtifactTemplates(root: string): Map<string, Template> {
+  const artifactRoot = join(root, 'compiled', 'ast');
+  const manifest = JSON.parse(readFileSync(join(artifactRoot, 'manifest.json'), 'utf8')) as { files: Record<string, { path: string }> };
   const templates = new Map<string, Template>();
-  for (const [name, entry] of Object.entries(manifest.templates)) {
-    templates.set(name, JSON.parse(readFileSync(join(artifactRoot, entry.artifact), 'utf8')) as Template);
+  for (const [name, entry] of Object.entries(manifest.files)) {
+    templates.set(name, JSON.parse(readFileSync(join(artifactRoot, entry.path), 'utf8')) as Template);
   }
   return templates;
 }
@@ -113,7 +113,7 @@ export class Adapter implements RenderAdapter {
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
     this.engine = new Engine(generated
       ? new GeneratedProgram(root)
-      : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root, 'typescript')) }));
+      : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root)) }));
   }
 
   loadScenario(): Scenario {

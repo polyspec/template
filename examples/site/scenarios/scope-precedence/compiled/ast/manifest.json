@@ -1,0 +1,21 @@
+{
+  "schema": 2,
+  "mode": "ast",
+  "target": "canonical",
+  "entry": "layout.tpl",
+  "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
+  "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
+  "contractDigest": "2af801e2f13fd1ac24b5630e0e6333e9c7ac14051597ce6271c44c34d4021b97",
+  "files": {
+    "content.tpl": {
+      "path": "content.tpl.ast.json",
+      "sourceDigest": "c79abf1a243053bd7c145f39700c8d00b06a5d23eb222ae4d445e7e6102f6b7d",
+      "artifactDigest": "b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd"
+    },
+    "layout.tpl": {
+      "path": "layout.tpl.ast.json",
+      "sourceDigest": "8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06",
+      "artifactDigest": "3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c"
+    }
+  }
+}

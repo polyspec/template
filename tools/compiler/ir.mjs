@@ -8,14 +8,14 @@ const scalarTypes = new Set(['null', 'boolean', 'number', 'string', 'any']);
 export function loadSourceGraph(manifestPath) {
   const absolute = resolve(manifestPath);
   const manifest = JSON.parse(readFileSync(absolute, 'utf8'));
-  if (manifest.schema !== 1 || !manifest.templates || typeof manifest.templates !== 'object') {
+  if (manifest.schema !== 2 || manifest.mode !== 'ast' || !manifest.files || typeof manifest.files !== 'object') {
     throw new Error('typed generator: source graph manifest is invalid');
   }
   const base = dirname(absolute);
   const templates = new Map();
-  for (const [name, entry] of Object.entries(manifest.templates)) {
-    if (!entry || typeof entry.artifact !== 'string') throw new Error(`typed generator: ${name} has no AST artifact`);
-    const ast = JSON.parse(readFileSync(resolve(base, entry.artifact), 'utf8'));
+  for (const [name, entry] of Object.entries(manifest.files)) {
+    if (!entry || typeof entry.path !== "string") throw new Error(`typed generator: ${name} has no AST artifact path`);
+    const ast = JSON.parse(readFileSync(resolve(base, entry.path), 'utf8'));
     if (ast?.type !== 'Template' || ast.name !== name || !Array.isArray(ast.body)) throw new Error(`typed generator: ${name} is not a canonical Template AST`);
     templates.set(name, ast);
   }

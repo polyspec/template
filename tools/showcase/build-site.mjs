@@ -79,13 +79,8 @@ function generatedFunctions(source, scenarioId) {
 }
 
 function scenarioCard(scenario, result) {
-  const languages = result.renders ? Object.keys(result.renders) : results.languages;
-  const artifact = {};
-  for (const language of languages) {
-    const artifactLanguage = language === 'ts' ? 'typescript' : language;
-    const manifestPath = join(site, 'scenarios', scenario.id, 'compiled', artifactLanguage, 'manifest.json');
-    if (existsSync(manifestPath)) artifact[artifactLanguage] = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  }
+  const artifactRoot = join(site, 'scenarios', scenario.id, 'compiled', 'ast');
+  const artifact = JSON.parse(readFileSync(join(artifactRoot, 'manifest.json'), 'utf8'));
   const templateSource = Object.entries(scenario.templates).map(([name, source]) => `--- ${name}\n${highlightTemplate(source, name)}`).join('\n\n');
   const integrationSource = (scenario.integrationFiles ?? []).map(file => `--- ${file.name}\n${escapeHtml(file.source)}`).join('\n\n');
   const generatedSource = [
@@ -95,14 +90,11 @@ function scenarioCard(scenario, result) {
     ['rust', join(root, 'tools', 'showcase', 'adapters', 'rust', 'src', 'native_direct.rs')],
     ['php', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.php')],
   ].map(([language, path]) => `${language}/native_direct · generated functions for ${scenario.id}\n${generatedFunctions(readFileSync(path, 'utf8'), scenario.id)}`).join('\n\n');
-  const artifactText = Object.entries(artifact).map(([language, manifest]) => {
-    const artifactRoot = join(site, 'scenarios', scenario.id, 'compiled', language);
-    const files = Object.entries(manifest.templates).map(([name, entry]) => {
-      const source = readFileSync(join(artifactRoot, entry.artifact), 'utf8');
-      return `${language}/${entry.artifact} · ${name}\n${source}`;
-    }).join('\n\n');
-    return `${language}/manifest.json\n${JSON.stringify(manifest, null, 2)}\n\n${files}`;
+  const artifactFiles = Object.entries(artifact.files).map(([name, entry]) => {
+    const source = readFileSync(join(artifactRoot, entry.path), 'utf8');
+    return `ast/${entry.path} · ${name}\n${source}`;
   }).join('\n\n');
+  const artifactText = `ast/manifest.json\n${JSON.stringify(artifact, null, 2)}\n\n${artifactFiles}`;
   const proofCells = results.languages.map(language => `<td class="${result.renders?.[language]?.status === 'pass' ? 'pass' : 'fail'}">${result.renders?.[language]?.status?.toUpperCase() ?? 'N/A'}</td>`).join('');
   return `<article class="scenario" id="${escapeHtml(scenario.id)}">
   <header class="scenario-header"><div><h3>${escapeHtml(scenario.title)}</h3><p>${escapeHtml(scenario.description)}</p></div><div class="tags">${scenario.focus.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div></header>

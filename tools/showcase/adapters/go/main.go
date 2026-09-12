@@ -27,7 +27,7 @@ func NewAdapter(root string) (*Adapter, error) {
 	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
 		program = &GeneratedProgram{Root: root}
 	} else {
-		templateLoader, err := artifactLoader(root, "go")
+		templateLoader, err := artifactLoader(root)
 		if err != nil {
 			return nil, err
 		}
@@ -40,28 +40,29 @@ func NewAdapter(root string) (*Adapter, error) {
 	return &Adapter{root: root, engine: engine}, nil
 }
 
-func artifactLoader(root, language string) (*loader.MapLoader, error) {
-	manifestBytes, err := os.ReadFile(filepath.Join(root, "compiled", language, "manifest.json"))
+func artifactLoader(root string) (*loader.MapLoader, error) {
+	base := filepath.Join(root, "compiled", "ast")
+	manifestBytes, err := os.ReadFile(filepath.Join(base, "manifest.json"))
 	if err != nil {
-		return nil, fmt.Errorf("compiled %s manifest: %w", language, err)
+		return nil, fmt.Errorf("compiled AST manifest: %w", err)
 	}
 	var manifest struct {
-		Templates map[string]struct {
-			Artifact string `json:"artifact"`
-		} `json:"templates"`
+		Files map[string]struct {
+			Path string `json:"path"`
+		} `json:"files"`
 	}
 	if err := json.Unmarshal(manifestBytes, &manifest); err != nil {
-		return nil, fmt.Errorf("compiled %s manifest: %w", language, err)
+		return nil, fmt.Errorf("compiled AST manifest: %w", err)
 	}
 	result := loader.NewMapLoader(nil)
-	for name, entry := range manifest.Templates {
-		data, err := os.ReadFile(filepath.Join(root, "compiled", language, entry.Artifact))
+	for name, entry := range manifest.Files {
+		data, err := os.ReadFile(filepath.Join(base, entry.Path))
 		if err != nil {
-			return nil, fmt.Errorf("compiled %s/%s: %w", language, name, err)
+			return nil, fmt.Errorf("compiled AST/%s: %w", name, err)
 		}
 		tree, err := ast.DecodeTemplate(data)
 		if err != nil {
-			return nil, fmt.Errorf("compiled %s/%s: %w", language, name, err)
+			return nil, fmt.Errorf("compiled AST/%s: %w", name, err)
 		}
 		result.SetAST(name, tree)
 	}

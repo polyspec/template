@@ -14,7 +14,7 @@
 | template-php | PHP 렉서, 파서, 렌더러, 함수, CLI | implemented | passed | not-deployed | [패키지](../packages/template-php/README.ko.md) |
 | template-php-ext | Rust 크레이트로 빌드하는 PHP 확장 | implemented | passed | not-deployed | [패키지](../packages/template-php-ext/README.ko.md) |
 | performance-measurements | 출력 동일성 검증 뒤 기록하는 시나리오별 AST와 generated 측정값 | in-progress | pending | not-deployed | [성능 측정](operations/benchmark.ko.md) |
-| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·언어별 커밋 AST artifact·parser 기반 구문 강조·크기가 제한된 artifact 보기·처리량 결과를 제공하는 예제 사이트 | in-progress | pending | not-deployed | [예제 사이트](operations/showcase.ko.md) |
+| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·하나의 커밋 canonical AST graph·parser 기반 구문 강조·크기가 제한된 artifact 보기·처리량 결과를 제공하는 예제 사이트 | in-progress | pending | not-deployed | [예제 사이트](operations/showcase.ko.md) |
 | generated-mode | 정규 AST에서 직접 생성한 TypeScript·Go·Rust·PHP 호스트 언어 렌더러 | in-progress | pending | not-deployed | [compiler 계약](spec/compiler.ko.md) |
 | docs-check | 문서 링크, 번역 쌍, 코드 블록, 상태 검사 | implemented | passed | not-deployed | [문서 절차](operations/documentation.ko.md) |
 
