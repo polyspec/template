@@ -12,7 +12,7 @@ import (
 )
 
 var reserved = map[string]bool{"true": true, "false": true, "null": true, "in": true}
-var assignHead = regexp.MustCompile(`^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)`)
+var assignHead = regexp.MustCompile(`^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)`)
 var loopHead = regexp.MustCompile(`^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=`)
 var whitespaceOnlyPattern = regexp.MustCompile(`^[ \t\r\n]*$`)
 
@@ -216,7 +216,7 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 	sigil := sigilAfter(text, c.open)
 	bodyStart := c.open + 1
 	if sigil != "" {
-		bodyStart = skipHorizontalSpace(text, c.open+1) + len(sigil)
+		bodyStart = skipHorizontalSpace(text, skipHorizontalSpace(text, c.open+1)+len(sigil))
 	}
 	firstTag := !p.sawTag
 	p.sawTag = true

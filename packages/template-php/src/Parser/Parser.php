@@ -18,7 +18,7 @@ use Polyspec\Template\TemplateError;
 final class Parser
 {
     private const RESERVED = ['true' => true, 'false' => true, 'null' => true, 'in' => true];
-    private const ASSIGN_HEAD = '/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
+    private const ASSIGN_HEAD = '/^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
     private const LOOP_HEAD = '/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/';
 
     private string $open;
@@ -151,7 +151,7 @@ final class Parser
     {
         $text = $this->text;
         $sigil = Scanner::sigilAfter($text, $open);
-        $bodyStart = $sigil === null ? $open + 1 : Scanner::skipHorizontalSpace($text, $open + 1) + strlen($sigil);
+        $bodyStart = $sigil === null ? $open + 1 : Scanner::skipHorizontalSpace($text, Scanner::skipHorizontalSpace($text, $open + 1) + strlen($sigil));
         $firstTag = !$this->sawTag;
         $this->sawTag = true;
         $echo = false;
