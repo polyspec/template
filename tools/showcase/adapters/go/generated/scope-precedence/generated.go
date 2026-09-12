@@ -41,27 +41,26 @@ func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero 
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: "Z", Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != "" { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
-func render_content_tpl(assign Assign, definitions Definitions, input Input_content_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) {
+func render_content_tpl(assign Assign, definitions Definitions, input Input_content_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame("content.tpl", errs.LineIndex{0, 10, 29, 64, 105, 164, 175}, rootData)
-title := input.Title
-root_label := input.Root_label
-defined_label := input.Defined_label
-layout_local := input.Layout_local
+scope.Locals["title"] = generatedValue(input.Title)
+scope.Locals["root_label"] = generatedValue(input.Root_label)
+scope.Locals["defined_label"] = generatedValue(input.Defined_label)
+scope.Locals["layout_local"] = generatedValue(input.Layout_local)
     generatedWrite(context, "<article>\n<h1>", frame, ast.Span{0, 14})
-    generatedWrite(context, generatedEscape(runtime, title, frame, ast.Span{17, 22}), frame, ast.Span{14, 23})
+    generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, "title")), frame, ast.Span{17, 22}), frame, ast.Span{14, 23})
     generatedWrite(context, "</h1>\n<p class=\"root\">", frame, ast.Span{23, 45})
-    generatedWrite(context, generatedEscape(runtime, root_label, frame, ast.Span{48, 58}), frame, ast.Span{45, 59})
+    generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, "root_label")), frame, ast.Span{48, 58}), frame, ast.Span{45, 59})
     generatedWrite(context, "</p>\n<p class=\"defined\">", frame, ast.Span{59, 83})
-    generatedWrite(context, generatedEscape(runtime, defined_label, frame, ast.Span{86, 99}), frame, ast.Span{83, 100})
+    generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, "defined_label")), frame, ast.Span{86, 99}), frame, ast.Span{83, 100})
     generatedWrite(context, "</p>\n<p class=\"local\">", frame, ast.Span{100, 122})
-    generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(valueOrZero(layout_local)), generatedValue("missing")}, frame, ast.Span{125, 158}), frame, ast.Span{125, 158}), frame, ast.Span{122, 159})
+    generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(generatedResult[*string](scope.Lookup(frame, "layout_local"))), generatedValue("missing")}, frame, ast.Span{125, 158}), frame, ast.Span{125, 158}), frame, ast.Span{122, 159})
     generatedWrite(context, "</p>\n</article>\n", frame, ast.Span{159, 175})
 }
-func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) {
+func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 42, 66, 95, 106}, rootData)
 
-    layout_local := "visible only in layout"
-    _ = layout_local
+    scope.Locals["layout_local"] = generatedValue("visible only in layout")
     generatedWrite(context, "<section class=\"scope\">\n", frame, ast.Span{42, 66})
     { definition := definitions.Content
     if definition == nil { panic(runtime.Error(frame, ast.Span{66, 94}, errs.RuntimeBlockUndefined, "define content is not registered")) }
@@ -74,18 +73,19 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
             if definition.Data.Layout_local != nil { input.Layout_local = *definition.Data.Layout_local }
         }
         input.Title = assign.Page.Title
+        blockScope := render.NewScope()
         generatedEnter(context, "content.tpl", frame, ast.Span{66, 94})
-        func() { defer context.Leave(); render_content_tpl(assign, definitions, input, context, runtime, rootData) }()
+        func() { defer context.Leave(); render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope) }()
     }
     }
     generatedWrite(context, "</section>\n", frame, ast.Span{95, 106})
 }
-func renderTemplate(target string, assign Assign, definitions Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) { switch target {
-	case "layout.tpl": render_layout_tpl(assign, definitions, Input_layout_tpl{}, context, runtime, rootData); return
+func renderTemplate(target string, assign Assign, definitions Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) { switch target {
+	case "layout.tpl": render_layout_tpl(assign, definitions, Input_layout_tpl{}, context, runtime, rootData, scope); return
 	default: panic(context.Fail(errs.LoadNotFound, nil, nil, "template " + target + " does not exist"))
 } }
 type generatedTarget struct { target string; html *string }
-func generatedBindDefinitions(input map[string]template.DefineInput) (Definitions, map[string]generatedTarget, error) { plain := map[string]any{}; targets := map[string]generatedTarget{}; for id, input := range input { switch id {
+func generatedBindDefinitions(input map[string]template.DefineInput) (Definitions, map[string]generatedTarget, error) { _ = input; plain := map[string]any{}; targets := map[string]generatedTarget{}; for id, input := range input { _ = input; switch id {
 		case "content":
 			if input.HTML != nil { if false || input.Template != "" || input.Data != nil { return Definitions{}, nil, fmt.Errorf("define.%s has an invalid html entry", id) }; plain[id] = map[string]any{"html": *input.HTML}; targets[id] = generatedTarget{html: input.HTML}; continue }
 			if input.Template != "content.tpl" { return Definitions{}, nil, fmt.Errorf("define.%s has an invalid template", id) }; plain[id] = map[string]any{"data": generatedPlain(input.Data)}; targets[id] = generatedTarget{target: "content.tpl"}
@@ -97,7 +97,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (Definition
 type GeneratedProgram struct { Runtime *template.RuntimeEnvironment }
 func NewGeneratedProgram(options template.Options) (*GeneratedProgram, error) { runtime, err := template.NewRuntimeEnvironment(options.Limits, options.Functions); if err != nil { return nil, err }; return &GeneratedProgram{Runtime: runtime}, nil }
 type generatedPrepared struct { target string; assign Assign; definitions Definitions; rootData *value.OrderedMap; env functions.Env; runtime *template.RuntimeEnvironment; html *string }
-func (p *generatedPrepared) Render() (output string, err error) { defer func() { if failure := recover(); failure != nil { if failureError, ok := failure.(error); ok { err = failureError } else { panic(failure) } } }(); context := render.NewContext(p.runtime, p.rootData, p.env, p.target); runtime := render.NewRuntimeBindings(context); if err := context.Enter(p.target, nil, nil); err != nil { return "", err }; defer context.Leave(); if p.html != nil { if err := context.Write(*p.html, nil, nil); err != nil { return "", err } } else { renderTemplate(p.target, p.assign, p.definitions, context, runtime, p.rootData) }; return context.Output(), nil }
+func (p *generatedPrepared) Render() (output string, err error) { defer func() { if failure := recover(); failure != nil { if failureError, ok := failure.(error); ok { err = failureError } else { panic(failure) } } }(); context := render.NewContext(p.runtime, p.rootData, p.env, p.target); runtime := render.NewRuntimeBindings(context); scope := render.NewScope(); if err := context.Enter(p.target, nil, nil); err != nil { return "", err }; defer context.Leave(); if p.html != nil { if err := context.Write(*p.html, nil, nil); err != nil { return "", err } } else { renderTemplate(p.target, p.assign, p.definitions, context, runtime, p.rootData, scope) }; return context.Output(), nil }
 func (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) { name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }; rootData, err := value.BindMap(assign); if err != nil { return nil, err }; var typedAssign Assign; if err := generatedDecode(rootData, &typedAssign); err != nil { return nil, err }; definitions, targets, err := generatedBindDefinitions(options.Define); if err != nil { return nil, err }; resolved := targets[name]; targetName := name; if resolved.target != "" { targetName = resolved.target }; return &generatedPrepared{target: targetName, assign: typedAssign, definitions: definitions, rootData: rootData, env: generatedEnv(options), runtime: p.Runtime, html: resolved.html}, nil }
 func (p *GeneratedProgram) Render(target any, assign any, options template.RenderOptions) (string, error) { prepared, err := p.Prepare(target, assign, options); if err != nil { return "", err }; return prepared.Render() }
 var _ template.Program = (*GeneratedProgram)(nil)
