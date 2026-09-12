@@ -4,6 +4,7 @@
 - generated-program 컴파일 게이트가 선언된 PHP 런타임 의존성을 직접 설치하도록 해 깨끗한 checkout에서도 독립 showcase와 문서 배포 검사가 실행되게 했다.
 - 모든 한국어 문서 쌍을 한국어 탐색 메뉴와 `ko-KR` HTML 메타데이터를 가진 `/ko/` locale로 발행하고, locale 경로와 해석되지 않은 테마 보간을 검사하는 정적 사이트 회귀 게이트를 추가했다.
 - Pages 구성, artifact 업로드, 배포 action을 현재 안정 major로 갱신했다.
+- Go 패키지에 외부 모듈과 checksum 파일이 없으므로 CI의 Go 의존성 캐시를 끄고 잘못된 루트 모듈 탐색을 제거했다.
 
 [English](CHANGELOG.md).
 
