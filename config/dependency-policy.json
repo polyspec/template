@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "exceptions": [
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "esbuild",
+      "reason": "The latest stable release removes transforms required by the current package and documentation build chains.",
+      "removalCondition": "Remove the pin when the latest stable release is accepted by both build chains and make test-ts docs-verify-idempotent passes.",
+      "verification": ["make test-ts", "make docs-verify-idempotent"]
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "typescript",
+      "reason": "The latest stable release is outside the current lint peer contract and breaks declaration generation.",
+      "removalCondition": "Remove the pin when the lint peer contract accepts the release and make test-ts passes with declaration output enabled.",
+      "verification": ["make test-ts"]
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/template-php/composer.json",
+      "package": "phpunit/phpunit",
+      "reason": "The latest stable release requires a PHP version newer than the package's declared PHP 8.2 minimum.",
+      "removalCondition": "Remove the constraint when the latest stable release supports PHP 8.2 or the product contract intentionally raises its minimum.",
+      "verification": ["make test-php"]
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/template-php-ext/composer.json",
+      "package": "phpunit/phpunit",
+      "reason": "The latest stable release requires a PHP version newer than the extension's declared PHP 8.2 minimum.",
+      "removalCondition": "Remove the constraint when the latest stable release supports PHP 8.2 or the product contract intentionally raises its minimum.",
+      "verification": ["make test-ext"]
+    }
+  ]
+}

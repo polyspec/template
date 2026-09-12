@@ -12,7 +12,7 @@ make release-test-matrix
 
 | 계층 | 범위 | 실패 근거 |
 | --- | --- | --- |
-| 계약 | Manifest에서 생성한 선언과 Mermaid, 문서 쌍, schema, 공개 API 문서화, format과 정적 분석 | 구조 이탈, 오래된 생성 파일, 문서가 없는 API 또는 잘못된 source |
+| 계약 | Manifest에서 생성한 선언과 Mermaid, 문서 쌍, schema, 공개 API 문서화, lock 의존성 보안 권고, format과 정적 분석 | 구조 이탈, 오래된 생성 파일, 알려진 의존성 취약점, 문서가 없는 API 또는 잘못된 source |
 | 단위 | 모든 core package의 lexer, parser, 데이터 모델, 함수, runtime, limit, artifact refresh, page cache | 가장 작은 package와 test가 결함을 식별한다. |
 | Compiler | Canonical AST 생명주기, typed IR 거부, generated backend 네 개와 host compiler 검사 | 거부된 IR node, 오래된 artifact 또는 target compiler 진단 |
 | 적합성 | Canonical case 211개를 AST 네 개와 generated program 네 개로 실행하고 PHP 확장 지원 수준도 검사 | 정확한 언어, 모드, case와 출력 또는 구조화 진단 차이 |
