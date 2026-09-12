@@ -1,14 +1,38 @@
 classDiagram
   class Compiler {
-    +loadSourceGraph(source graph manifest) SourceGraph
-    +lowerSourceGraph(SourceGraph, TypeManifest) TypedProgram
+    +sourceGraph
+    +typeManifest
+    +typedProgram
+    +loadSourceGraph(source manifest) SourceGraph
+    +parseSourceGraph(SourceGraph) canonical AST graph
+    +lowerSourceGraph(canonical AST graph, TypeManifest) TypedProgram
+    +emitArtifact(TypedProgram, CompileMode, LanguageBackend) ArtifactManifest and files
   }
   class LanguageBackend {
-    +emit(TypedProgram) GeneratedModule source
+    +target
+    +emitDeclarations(TypedProgram) host declarations
+    +emitRuntime(TypedProgram) host runtime bindings
+    +emitTemplates(TypedProgram) host template functions
+    +emitEntry(TypedProgram) host program entry
   }
-  class GeneratedModule {
-    +renderTemplate(target, Assign, Definitions) UTF-8 string
-    +render(Assign, Definitions) UTF-8 string
+  class ArtifactStore {
+    +artifactManifest
+    +files
+    +load(ArtifactManifest) Program
+    +regenerate(CompileMode, LanguageBackend) ArtifactManifest
+    +loadOrRefresh(CompileMode, ArtifactRefresh) Program
+  }
+  class Engine {
+    +program
+    +prepare(RenderRequest) PreparedRender
+    +render(RenderRequest) UTF-8 string
+  }
+  class PageCache {
+    +html
+    +ttl
+    +get(cacheKey) UTF-8 string or miss
+    +put(cacheKey, html, ttl) void
+    +getOrSet(cacheKey, ttl, render) UTF-8 string
   }
   class SourceGraph {
     +entry
@@ -30,25 +54,33 @@ classDiagram
     +definitions
     +templates
   }
-  class Definition~T~ {
-    +html
-    +data
+  class ArtifactManifest {
+    +schema
+    +mode
+    +target
+    +entry
+    +sourceDigest
+    +typeDigest
+    +contractDigest
+    +files
   }
-  class DefinitionData~T~
-  class Definitions
-  class Input~T~
-  class FunctionSignature {
-    +implementation
-    +args
-    +returns
+  class RenderRequest {
+    +target
+    +assign
+    +define
+    +env
   }
-  SourceGraph --> Compiler : input
-  TypeManifest --> Compiler : input
-  Compiler --> TypedProgram : output
-  TypedProgram --> LanguageBackend : input
-  LanguageBackend --> GeneratedModule : source
-  GeneratedModule --> Definitions
-  Definitions --> Definition~T~
-  Definition~T~ --> DefinitionData~T~ : data
-  DefinitionData~T~ --> Input~T~ : field types
-  TypeManifest --> FunctionSignature : functions
+  class Program {
+    +prepare(RenderRequest) PreparedRender
+    +render(RenderRequest) UTF-8 string
+  }
+  class AstProgram
+  class GeneratedProgram
+  Program <|-- AstProgram
+  Program <|-- GeneratedProgram
+  Compiler --> TypedProgram
+  Compiler --> LanguageBackend
+  LanguageBackend --> ArtifactManifest
+  ArtifactStore --> ArtifactManifest
+  ArtifactStore --> Program
+  Engine --> Program

@@ -43,7 +43,7 @@ falls back to AST execution. `artifact_refresh` remains `dev`, `true`, or
 - **RT-64** Artifact refresh is `dev`, `true` or `false`. `dev` refreshes on every call, `true` refreshes after a source version change, and `false` does not refresh at runtime. Missing or stale artifacts under `false` are errors.
 - **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-66** `getOrSet` returns the cached HTML on a hit without calling `render`; on a miss it calls `render` once, stores the returned HTML with the TTL, and returns it.
-- **RT-67** The prepared render contract is declared in [`tools/runtime/interface.json`](../../tools/runtime/interface.json). `scripts/check-runtime-interface.mjs` fails when any required language mapping or operation is missing.
+- **RT-67** The prepared render contract is declared in the single product manifest, [`tools/compiler/interface.json`](../../tools/compiler/interface.json). Interface checks fail when any required language mapping, support level or operation is missing.
 - **RT-69** `PreparedRender` owns exactly one explicit `AstPreparedExecution` or `GeneratedPreparedExecution`. Generated execution never creates or retains an AST placeholder, and AST execution never retains a generated renderer. The four runtimes must fail the interface gate if this disjoint structure is removed.
 
 The prepared execution diagrams are generated from the runtime interface manifest:

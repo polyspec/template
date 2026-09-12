@@ -1,45 +1,49 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const manifest = JSON.parse(readFileSync(resolve(root, 'tools/compiler/interface.json'), 'utf8'));
-if (manifest.schema !== 1 || manifest.name !== 'TypedTemplateCompiler') throw new Error('invalid compiler interface manifest');
-const operationNames = manifest.operations?.map(operation => operation.name).join(',');
-if (operationNames !== 'loadSourceGraph,lowerSourceGraph,emit,renderTemplate,render') throw new Error('compiler operations are missing or reordered');
-for (const name of ['SourceGraph', 'TypeManifest', 'FunctionSignature', 'TypedProgram', 'DefinitionData<T>', 'Definition<T>', 'Definitions', 'Input<T>', 'GeneratedModule']) {
-  if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
-}
+const manifestPath = resolve(root, 'tools/compiler/interface.json');
+const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+if (manifest.schema !== 2 || manifest.name !== 'TemplateCompiler') throw new Error('invalid compiler interface manifest');
+if (existsSync(resolve(root, 'tools/runtime/interface.json'))) throw new Error('runtime contract must not duplicate the compiler manifest');
 
-const outputs = {
-  typescript: ['tools/showcase/adapters/generated/typed/compiler-coverage.ts', [
-    /export interface Assign/, /export type DefinitionData<T>/, /export interface Definition<T>/, /export interface Definitions/,
-    /export interface Input_card_tpl/, /export function renderTemplate\(/, /export function render\(/,
-  ]],
-  go: ['tools/showcase/adapters/generated/typed/compiler-coverage.go', [
-    /type Assign struct/, /type DefinitionData_card_tpl struct/, /type Definition\[T any\] struct/, /type Definitions struct/,
-    /type Input_card_tpl struct/, /func RenderTemplate\(/, /func Render\(/,
-  ]],
-  rust: ['tools/showcase/adapters/generated/typed/compiler-coverage.rust', [
-    /pub struct Assign/, /pub struct DefinitionData_card_tpl/, /pub struct Definition<T>/, /pub struct Definitions/,
-    /pub struct Input_card_tpl/, /pub fn render_template\(/, /pub fn render\(/,
-  ]],
-  php: ['tools/showcase/adapters/generated/typed/compiler-coverage.php', [
-    /final class Assign/, /final class DefinitionData_card_tpl/, /final class Definition/, /final class Definitions/,
-    /final class Input_card_tpl/, /function render_template\(/, /function render\(/,
-  ]],
+const requiredTypes = [
+  'CompileMode', 'ArtifactRefresh', 'SourceGraph', 'TypeManifest', 'TypedProgram',
+  'ArtifactManifest', 'RenderRequest', 'Program', 'AstProgram', 'GeneratedProgram',
+  'RuntimeBindings', 'FunctionSignature', 'DefinitionData<T>', 'Definition<T>',
+  'Definitions', 'Input<T>',
+];
+for (const name of requiredTypes) if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
+
+const expectedOperations = {
+  Compiler: ['loadSourceGraph', 'parseSourceGraph', 'lowerSourceGraph', 'emitArtifact'],
+  LanguageBackend: ['emitDeclarations', 'emitRuntime', 'emitTemplates', 'emitEntry'],
+  ArtifactStore: ['load', 'regenerate', 'loadOrRefresh'],
+  Program: ['prepare', 'render'],
+  PageCache: ['get', 'put', 'getOrSet'],
 };
-
-for (const [language, [file, patterns]] of Object.entries(outputs)) {
-  const mapping = manifest.languages?.[language];
-  for (const field of ['assign', 'definitionData', 'definition', 'definitions', 'input', 'renderTemplate', 'render']) {
-    if (!mapping?.[field]) throw new Error(`${language}: compiler mapping ${field} is missing`);
-  }
-  const source = readFileSync(resolve(root, file), 'utf8');
-  for (const pattern of patterns) if (!pattern.test(source)) throw new Error(`${language}: generated module does not implement ${pattern}`);
-  if (/\bslots\b|map\[string\]string|HashMap<String, String>/.test(source)) throw new Error(`${language}: generated module still accepts pre-rendered string slots`);
-  if (/generatedCall|generated_call/.test(source)) throw new Error(`${language}: generated module defers unsupported function failure until render time`);
+for (const [owner, names] of Object.entries(expectedOperations)) {
+  const actual = manifest.operations.filter(item => item.owner === owner).map(item => item.name);
+  if (actual.join(',') !== names.join(',')) throw new Error(`${owner} operations differ: ${actual.join(',')}`);
 }
 
-process.stdout.write('compiler interface: four generated module structures passed\n');
+const core = manifest.supportLevels?.core;
+if (core?.languages?.join(',') !== 'typescript,go,rust,php') throw new Error('core languages are missing or reordered');
+if (core?.compileModes?.join(',') !== 'ast,gen' || core.conformanceCases !== 211) throw new Error('core support level is incomplete');
+for (const language of core.languages) {
+  const mapping = manifest.languages?.[language];
+  if (!mapping?.backend || mapping.program?.join(',') !== 'AstProgram,GeneratedProgram' || !mapping.error) {
+    throw new Error(`${language}: compiler mapping is incomplete`);
+  }
+}
+
+const requiredForbidden = [
+  'generated renderer callback', 'AST fallback from generated mode',
+  'showcase-specific compiler', 'legacy wrapper compatibility',
+  'parsing or code generation during render',
+];
+if (manifest.forbidden?.join('\n') !== requiredForbidden.join('\n')) throw new Error('forbidden architecture list differs');
+
+process.stdout.write('compiler interface: single product manifest structure passed\n');

@@ -1,9 +1,15 @@
 flowchart LR
-  SourceGraph["SourceGraph<br/>entry + templates"] --> Lower["Compiler.lowerSourceGraph"]
-  TypeManifest["TypeManifest<br/>entry + fields + records + functions + defines + templates"] --> Lower
-  Lower --> TypedProgram["TypedProgram<br/>entry + fields + records + functions + definitions + templates"]
-  TypedProgram --> Emit["LanguageBackend.emit"]
-  Emit --> GeneratedModule["GeneratedModule<br/>Assign + DefinitionData<T> + Definition<T> + Definitions + Input<T>"]
-  GeneratedModule --> Render["render(Assign, Definitions)"]
-  Render --> Block["generated block function"]
-  Block --> Child["generated child template function"]
+  Source["SourceGraph<br/>entry + templates"] --> Parse["Compiler.parseSourceGraph"]
+  Parse --> AST["canonical AST graph"]
+  Types["TypeManifest<br/>entry + fields + records + functions + defines + templates"] --> Lower["Compiler.lowerSourceGraph"]
+  AST --> Lower
+  Lower --> Typed["TypedProgram<br/>entry + fields + records + functions + definitions + templates"]
+  Typed --> AstArtifact["AST artifact"]
+  Typed --> Backend["LanguageBackend"]
+  Backend --> GeneratedArtifact["generated host artifact"]
+  AstArtifact --> AstProgram["AstProgram"]
+  GeneratedArtifact --> GeneratedProgram["GeneratedProgram"]
+  AstProgram --> Program["Program.prepare + Program.render"]
+  GeneratedProgram --> Program
+  RuntimeBindings["RuntimeBindings"] --> AstProgram
+  RuntimeBindings --> GeneratedProgram

@@ -4,7 +4,7 @@
 
 Compiler는 template parsing, validation, lowering, artifact emission을 소유한다. Runtime package는 이미 compile한 program을 실행한다. Render request에서 source를 parse하거나 host compiler를 호출하지 않는다.
 
-계약 원본은 [`tools/compiler/interface.json`](../../tools/compiler/interface.json)이다. 생성 선언부와 Mermaid 도표는 이 manifest와 일치해야 한다. TypeScript, Go, Rust, PHP mapping은 표기와 오류 전달 방식을 바꿀 수 있지만 소유 관계, field 순서, operation 위치, 상태 전이를 바꿀 수 없다.
+compiler와 runtime의 단일 계약 원본은 [`tools/compiler/interface.json`](../../tools/compiler/interface.json)이다. 생성 선언부와 Mermaid 도표는 이 manifest와 일치해야 한다. TypeScript, Go, Rust, PHP mapping은 표기와 오류 전달 방식을 바꿀 수 있지만 소유 관계, field 순서, operation 위치, 상태 전이를 바꿀 수 없다.
 
 ## Pipeline
 
