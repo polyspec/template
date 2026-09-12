@@ -35,7 +35,7 @@ export const indent = (level, source) => source.split('\n').map(line => line.len
 
 export function emitExpression(node, target) {
   if (node.op === 'literal') return target.literal(node.value, node.valueType);
-  if (node.op === 'root') return target.var(fieldName(node.name), node.valueType.source);
+  if (node.op === 'root') return target.var(fieldName(node.name), node.valueType.source, node);
   if (node.op === 'local') return target.local(fieldName(node.name), node.valueType.source);
   if (node.op === 'loop-meta') return target.loopMeta(node.loop, node.field);
   if (node.op === 'member') return target.member(emitExpression(node.object, target), fieldName(node.key), node.object.valueType, node);
@@ -44,8 +44,8 @@ export function emitExpression(node, target) {
   if (node.op === 'unary') return target.unary(node.operator, emitExpression(node.operand, target), node);
   if (node.op === 'binary') return target.binary(node.operator, emitExpression(node.left, target), emitExpression(node.right, target), node);
   if (node.op === 'ternary') return target.ternary(emitExpression(node.test, target), emitExpression(node.then, target), emitExpression(node.otherwise, target), node);
-  if (node.op === 'list') return target.list(node.items.map(item => ({ spread: item.spread, value: emitExpression(item.value, target), node: item.value })), node.valueType, node);
-  if (node.op === 'map') return target.map(node.entries.map(item => item.spread ? { spread: true, value: emitExpression(item.value, target), node: item.value } : { spread: false, value: [emitExpression(item.key, target), emitExpression(item.value, target)], node: item }), node.valueType, node);
+  if (node.op === 'list') return target.list(node.items.map(item => ({ spread: item.spread, value: emitExpression(item.value, target), node: item.value, span: item.span })), node.valueType, node);
+  if (node.op === 'map') return target.map(node.entries.map(item => item.spread ? { spread: true, value: emitExpression(item.value, target), node: item.value, span: item.span } : { spread: false, value: [emitExpression(item.key, target), emitExpression(item.value, target)], node: item, span: item.span }), node.valueType, node);
   throw new Error(`compiler backend: unsupported IR expression ${node.op}`);
 }
 

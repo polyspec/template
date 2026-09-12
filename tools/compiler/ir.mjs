@@ -7,6 +7,22 @@ const exprKinds = new Set(['Literal', 'Var', 'LoopMeta', 'Member', 'Index', 'Cal
 const scalarTypes = new Set(['null', 'boolean', 'number', 'string', 'any']);
 const hash = value => createHash('sha256').update(value).digest('hex');
 
+/** A structured compile diagnostic with the same observable location fields as render errors. */
+export class CompilerError extends Error {
+  constructor(code, template, span, lines, message) {
+    super(message);
+    this.name = 'CompilerError';
+    this.code = code;
+    this.template = template;
+    this.span = span;
+    const offset = span?.[0] ?? 0;
+    let line = 0;
+    while (line + 1 < lines.length && lines[line + 1] <= offset) line++;
+    this.line = line + 1;
+    this.col = offset - lines[line] + 1;
+  }
+}
+
 export function loadSourceGraph(manifestPath) {
   const absolute = resolve(manifestPath);
   const manifest = JSON.parse(readFileSync(absolute, 'utf8'));
@@ -50,10 +66,10 @@ function sameType(left, right) { return typeSource(required(left)) === typeSourc
 function acceptsType(actual, expected) { return required(expected).kind === 'any' || sameType(actual, expected); }
 function mergeType(left, right) { return sameType(left, right) ? { ...required(left), optional: left.optional || right.optional } : parseType('any'); }
 
-function resolveTemplate(from, path) {
+function resolveTemplate(from, path, span = [0, 0], lines = [0]) {
   const value = path.startsWith('/') ? path.slice(1) : posix.join(posix.dirname(from), path);
   const normalized = posix.normalize(value);
-  if (normalized === '..' || normalized.startsWith('../')) throw new Error(`compiler: ${path} leaves the source graph root`);
+  if (normalized === '..' || normalized.startsWith('../')) throw new CompilerError('E_LOAD_OUTSIDE_ROOT', from, span, lines, `${path} leaves the source graph root`);
   return normalized;
 }
 
@@ -98,11 +114,11 @@ export function lowerSourceGraph(graph, manifest) {
         const local = scope.get(node.name);
         const valueType = local ?? root.get(node.name) ?? (dynamicRoot ? parseType('any?') : null);
         if (!valueType) throw new Error(`compiler: variable ${node.name} is missing from the type manifest`);
-        return { op: local ? 'local' : 'root', name: node.name, valueType, span: node.span };
+        return { op: local ? 'local' : 'root', name: node.name, valueType, scope: local || dynamicRoot, span: node.span };
       }
       case 'LoopMeta': {
         const item = loops.get(node.loop);
-        if (!item) throw new Error(`compiler: ${node.loop}.${node.field} has no enclosing typed loop`);
+        if (!item) throw new CompilerError('E_RUNTIME_UNKNOWN_LOOP', null, node.span, [0], `${node.loop}.${node.field} has no enclosing loop`);
         const valueType = node.field === 'key_' ? parseType('any') : node.field === 'value_' ? item : node.field === 'first_' || node.field === 'last_' ? parseType('boolean') : parseType('number');
         return { op: 'loop-meta', loop: node.loop, field: node.field, valueType, span: node.span };
       }
@@ -144,7 +160,7 @@ export function lowerSourceGraph(graph, manifest) {
         return { op: 'ternary', test, then, otherwise, valueType: mergeType(then.valueType, otherwise.valueType), span: node.span };
       }
       case 'List': {
-        const items = node.items.map(item => ({ spread: item.type === 'Spread', value: lowerExpr(item.type === 'Spread' ? item.expr : item, scope, loops) }));
+        const items = node.items.map(item => ({ spread: item.type === 'Spread', value: lowerExpr(item.type === 'Spread' ? item.expr : item, scope, loops), span: item.span }));
         let itemType = parseType('any');
         for (const item of items) {
           const spreadType = item.spread ? required(item.value.valueType) : null;
@@ -155,7 +171,7 @@ export function lowerSourceGraph(graph, manifest) {
         return { op: 'list', items, valueType: parseType(`list<${typeSource(itemType)}>`), span: node.span };
       }
       case 'Map': {
-        const entries = node.entries.map(item => item.type === 'Spread' ? { spread: true, value: lowerExpr(item.expr, scope, loops) } : { spread: false, key: lowerExpr(item.key, scope, loops), value: lowerExpr(item.value, scope, loops) });
+        const entries = node.entries.map(item => item.type === 'Spread' ? { spread: true, value: lowerExpr(item.expr, scope, loops), span: item.span } : { spread: false, key: lowerExpr(item.key, scope, loops), value: lowerExpr(item.value, scope, loops), span: item.span });
         let keyType = parseType('any');
         let valueType = parseType('any');
         for (const entry of entries) {
@@ -175,7 +191,8 @@ export function lowerSourceGraph(graph, manifest) {
     if (!Array.isArray(body)) throw new Error(`compiler: ${templateName} body is not a node list`);
     const scope = new Map(inheritedScope);
     const loops = new Map(inheritedLoops);
-    return body.map(node => {
+    try {
+      return body.map(node => {
       if (!nodeKinds.has(node?.type)) throw new Error(`compiler: invalid node ${node?.type ?? typeof node}`);
       switch (node.type) {
         case 'Text': return { op: 'text', value: node.value, span: node.span };
@@ -196,8 +213,8 @@ export function lowerSourceGraph(graph, manifest) {
           return { op: 'for', name: node.name, iter, itemType, body: lowerNodes(node.body, templateName, nestedScope, nestedLoops), empty: node.empty ? lowerNodes(node.empty, templateName, scope, loops) : null, span: node.span };
         }
         case 'Include': {
-          const target = resolveTemplate(templateName, node.path);
-          if (!graph.templates.has(target)) throw new Error(`compiler: included template ${target} is missing from the source graph`);
+          const target = resolveTemplate(templateName, node.path, node.span, graph.lines?.get(templateName) ?? [0]);
+          if (!graph.templates.has(target)) throw new CompilerError('E_LOAD_NOT_FOUND', templateName, node.span, graph.lines?.get(templateName) ?? [0], `template ${target} does not exist`);
           const inputs = [...templateInputs.get(target)].map(([name, valueType]) => {
             const value = lowerExpr({ type: 'Var', name, span: node.span }, scope, loops);
             if (!acceptsType(value.valueType, valueType) || value.valueType.optional && !valueType.optional) {
@@ -209,7 +226,7 @@ export function lowerSourceGraph(graph, manifest) {
         }
         case 'Block': {
           if (node.id !== null && !definitions.has(node.id)) throw new Error(`compiler: definition ${node.id} is missing from the type manifest`);
-          const path = node.path === null ? null : resolveTemplate(templateName, node.path);
+          const path = node.path === null ? null : resolveTemplate(templateName, node.path, node.span, graph.lines?.get(templateName) ?? [0]);
           if (path !== null && !graph.templates.has(path)) throw new Error(`compiler: block template ${path} is missing from the source graph`);
           const definition = node.id === null ? null : definitions.get(node.id);
           const target = path ?? definition?.template ?? null;
@@ -223,7 +240,7 @@ export function lowerSourceGraph(graph, manifest) {
             name,
             valueType,
             scope: blockScope.get(name) ?? null,
-            root: root.has(name) || dynamicRoot ? { op: 'root', name, valueType: root.get(name) ?? parseType('any?'), span: node.span } : null,
+            root: root.has(name) || dynamicRoot ? { op: 'root', name, valueType: root.get(name) ?? parseType('any?'), scope: false, span: node.span } : null,
           }));
           return { op: 'block', id: node.id, path, target, definition, inputs, span: node.span };
         }
@@ -232,7 +249,13 @@ export function lowerSourceGraph(graph, manifest) {
           return { op: 'if-block', id: node.id, body: lowerNodes(node.body, templateName, scope, loops), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null, span: node.span };
         }
       }
-    });
+      });
+    } catch (error) {
+      if (error instanceof CompilerError && error.template === null) {
+        throw new CompilerError(error.code, templateName, error.span, graph.lines?.get(templateName) ?? [0], error.message);
+      }
+      throw error;
+    }
   }
 
   for (const [name, ast] of graph.templates) {
