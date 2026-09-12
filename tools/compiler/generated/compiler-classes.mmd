@@ -1,0 +1,23 @@
+classDiagram
+  class Compiler {
+    +loadSourceGraph(source graph manifest) SourceGraph
+    +lowerSourceGraph(SourceGraph, TypeManifest) TypedProgram
+  }
+  class LanguageBackend {
+    +emit(TypedProgram) GeneratedModule source
+  }
+  class GeneratedModule {
+    +renderTemplate(target, Assign, Definitions) UTF-8 string
+    +render(Assign, Definitions) UTF-8 string
+  }
+  class Definition~T~ {
+    +html
+    +data
+  }
+  class Definitions
+  class Input~T~
+  Compiler --> LanguageBackend : TypedProgram
+  LanguageBackend --> GeneratedModule : source
+  GeneratedModule --> Definitions
+  Definitions --> Definition~T~
+  Definition~T~ --> Input~T~ : data

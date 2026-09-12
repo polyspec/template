@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "TypedTemplateCompiler",
+  "purpose": "Define one typed compiler structure that every generated language module must expose.",
+  "types": {
+    "SourceGraph": {
+      "fields": ["entry", "templates"],
+      "invariant": "Every template is a canonical AST artifact reachable from the graph root."
+    },
+    "TypeManifest": {
+      "fields": ["entry", "fields", "records", "functions", "defines", "templates"],
+      "invariant": "Types and fixed definition targets are explicit compiler inputs and are never inferred from one request value."
+    },
+    "TypedProgram": {
+      "fields": ["entry", "fields", "records", "functions", "definitions", "templates"],
+      "invariant": "All symbols, paths, expression types and block inputs are resolved before a language backend runs."
+    },
+    "Definition<T>": {
+      "fields": ["html", "data"],
+      "invariant": "html bypasses template execution; data has the fixed input type of the declared target template."
+    },
+    "Definitions": {
+      "fields": "one optional Definition<T> field for every declared define key",
+      "invariant": "Generated code cannot select a template target absent from the type manifest."
+    },
+    "Input<T>": {
+      "fields": "the fields declared for template T",
+      "invariant": "Block input precedence is assign, definition.data, block scope."
+    },
+    "GeneratedModule": {
+      "types": ["Assign", "Definition<T>", "Definitions", "Input<T>"],
+      "operations": ["renderTemplate", "render"],
+      "invariant": "A block invokes its generated child function directly; callers do not supply a pre-rendered string slot."
+    }
+  },
+  "operations": [
+    {
+      "name": "loadSourceGraph",
+      "owner": "Compiler",
+      "parameters": ["source graph manifest"],
+      "returns": "SourceGraph"
+    },
+    {
+      "name": "lowerSourceGraph",
+      "owner": "Compiler",
+      "parameters": ["SourceGraph", "TypeManifest"],
+      "returns": "TypedProgram"
+    },
+    {
+      "name": "emit",
+      "owner": "LanguageBackend",
+      "parameters": ["TypedProgram"],
+      "returns": "GeneratedModule source"
+    },
+    {
+      "name": "renderTemplate",
+      "owner": "GeneratedModule",
+      "parameters": ["target", "Assign", "Definitions"],
+      "returns": "UTF-8 string"
+    },
+    {
+      "name": "render",
+      "owner": "GeneratedModule",
+      "parameters": ["Assign", "Definitions"],
+      "returns": "UTF-8 string"
+    }
+  ],
+  "languages": {
+    "typescript": {
+      "assign": "Assign",
+      "definition": "Definition<T>",
+      "definitions": "Definitions",
+      "input": "Input_<template>",
+      "renderTemplate": "renderTemplate",
+      "render": "render"
+    },
+    "go": {
+      "assign": "Assign",
+      "definition": "Definition[T]",
+      "definitions": "Definitions",
+      "input": "Input_<template>",
+      "renderTemplate": "RenderTemplate",
+      "render": "Render"
+    },
+    "rust": {
+      "assign": "Assign",
+      "definition": "Definition<T>",
+      "definitions": "Definitions",
+      "input": "Input_<template>",
+      "renderTemplate": "render_template",
+      "render": "render"
+    },
+    "php": {
+      "assign": "Assign",
+      "definition": "Definition",
+      "definitions": "Definitions",
+      "input": "Input_<template>",
+      "renderTemplate": "render_template",
+      "render": "render"
+    }
+  }
+}

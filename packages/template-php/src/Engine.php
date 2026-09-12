@@ -33,6 +33,7 @@ final class GeneratedPreparedRender
 /** Normalized request shared by AST and generated renderers. */
 final class GeneratedRequest
 {
+    /** Creates the normalized input passed to a generated renderer. */
     public function __construct(
         public readonly string $targetName,
         public readonly MapValue $rootData,
