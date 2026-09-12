@@ -66,3 +66,4 @@
 - Showcase 전용 renderer generator를 제품 compiler artifact로 교체했다. TypeScript, JavaScript, Go, Rust, PHP adapter는 시나리오별 `GeneratedProgram`을 선택하고 Go artifact는 분리된 package를 사용하며 JavaScript 배포 artifact는 TypeScript backend 출력에서 compile한다.
 - Compiler IR에 명시적인 동적 root type 계약을 추가했다. 동적 root는 선언되지 않은 입력 이름을 optional runtime value로 받으면서 선언된 template input, record, definition, function signature는 유지하고, 고정 `Assign` root는 선언되지 않은 field를 계속 거부한다.
 - Generated runtime 오류가 template source를 읽지 않고 정확한 원본 위치를 유지할 수 있도록 각 template의 source line byte index를 canonical artifact와 typed IR에 보존했다.
+- 네 runtime의 unary와 eager binary 값 의미를 공통 `RuntimeBindings` 계약으로 옮겼다. AST evaluator에는 단축 평가 제어 흐름만 남기고 실제 연산을 위임해 generated backend가 산술·비교·membership 의미를 다시 정의하지 못하게 했다.

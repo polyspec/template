@@ -29,6 +29,89 @@ final class RuntimeBindings
     }
 
     /** @param array{0: int, 1: int} $span */
+    public function unary(string $operator, mixed $operand, Frame $frame, array $span): mixed
+    {
+        return match ($operator) {
+            '!' => !$this->truthy($operand),
+            '-' => $this->finite(-$this->number($operand, $frame, $span), $frame, $span),
+            default => throw $this->error($frame, $span, 'E_RUNTIME_TYPE', "unknown operator {$operator}"),
+        };
+    }
+
+    /** @param array{0: int, 1: int} $span */
+    public function binary(string $operator, mixed $left, mixed $right, Frame $frame, array $span): mixed
+    {
+        switch ($operator) {
+            case '+':
+                if (Value::isCollection($left) || Value::isCollection($right)) {
+                    throw $this->error($frame, $span, 'E_RUNTIME_STRINGIFY', 'a list or map cannot be converted to text');
+                }
+                if (Value::isString($left) || Value::isString($right)) {
+                    return $this->stringify($left, $frame, $span).$this->stringify($right, $frame, $span);
+                }
+
+                return $this->finite($this->number($left, $frame, $span) + $this->number($right, $frame, $span), $frame, $span);
+            case '-':
+                return $this->finite($this->number($left, $frame, $span) - $this->number($right, $frame, $span), $frame, $span);
+            case '*':
+                return $this->finite($this->number($left, $frame, $span) * $this->number($right, $frame, $span), $frame, $span);
+            case '/':
+                $divisor = $this->number($right, $frame, $span);
+                if ($divisor == 0.0) {
+                    throw $this->error($frame, $span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
+                }
+
+                return $this->finite($this->number($left, $frame, $span) / $divisor, $frame, $span);
+            case '%':
+                $dividend = $this->number($left, $frame, $span);
+                $divisor = $this->number($right, $frame, $span);
+                if (!Number::isInteger($dividend) || !Number::isInteger($divisor)) {
+                    throw $this->error($frame, $span, 'E_RUNTIME_TYPE', '% requires integer operands');
+                }
+                if ($divisor == 0.0) {
+                    throw $this->error($frame, $span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
+                }
+
+                return fmod($dividend, $divisor);
+            case '==': return $this->equal($left, $right, false);
+            case '!=': return !$this->equal($left, $right, false);
+            case '===': return $this->equal($left, $right, true);
+            case '!==': return !$this->equal($left, $right, true);
+            case '<':
+            case '>':
+            case '<=':
+            case '>=':
+                $order = $this->compare($left, $right, $frame, $span);
+
+                return match ($operator) {
+                    '<' => $order < 0,
+                    '>' => $order > 0,
+                    '<=' => $order <= 0,
+                    default => $order >= 0,
+                };
+            case 'in':
+                if (is_array($right)) {
+                    foreach ($right as $item) {
+                        if ($this->equal($item, $left, false)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                if ($right instanceof MapValue) {
+                    return $right->has($this->stringify($left, $frame, $span));
+                }
+                if (Value::isString($right)) {
+                    return str_contains(Value::textOf($right), $this->stringify($left, $frame, $span));
+                }
+                throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'in requires a list, map or string on the right');
+            default:
+                throw $this->error($frame, $span, 'E_RUNTIME_TYPE', "unknown operator {$operator}");
+        }
+    }
+
+    /** @param array{0: int, 1: int} $span */
     public function stringify(mixed $value, Frame $frame, array $span): string
     {
         $text = Value::stringify($value);

@@ -47,6 +47,7 @@ classDiagram
   }
   class TypeManifest {
     +entry
+    +root
     +fields
     +records
     +functions
@@ -54,6 +55,7 @@ classDiagram
     +templates
   }
   class TypedProgram {
+    +dynamicRoot
     +entry
     +fields
     +records
@@ -86,6 +88,8 @@ classDiagram
   class GeneratedProgram
   class RuntimeBindings {
     +truthy(value) bool
+    +unary(operator, operand, frame, span) value or error
+    +binary(operator, left, right, frame, span) value or error
     +stringify(value, frame, span) string or error
     +escape(value, frame, span) string or error
     +number(value, frame, span) number or error
