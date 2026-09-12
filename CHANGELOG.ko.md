@@ -63,3 +63,4 @@
 - TypeScript, Go, Rust, PHP에서 구체적인 `RuntimeEnvironment`가 자원 제한과 host 함수를 공통으로 소유하게 했다. AST program은 runtime service를 이 환경에 위임하고 generated-program 계약도 같은 환경을 요구하며 parser와 Reflection 검사는 field, operation, signature 또는 소유 관계 이탈을 거부한다.
 - 제품 compiler가 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram` 구현을 생성하게 했다. Package 단위 통합 검사는 현재 시나리오 5개를 모두 이 program으로 compile하고 실행해 바이트가 같은 HTML을 요구한다.
 - Schema 3 AST와 generated artifact manifest에 compiler 구현 digest를 추가했다. `true` 갱신 정책은 parser나 backend 변경 뒤 artifact를 다시 만들고 `false`는 source, type, contract 또는 compiler 입력을 읽지 않고 배포 파일을 검증한다.
+- Showcase 전용 renderer generator를 제품 compiler artifact로 교체했다. TypeScript, JavaScript, Go, Rust, PHP adapter는 시나리오별 `GeneratedProgram`을 선택하고 Go artifact는 분리된 package를 사용하며 JavaScript 배포 artifact는 TypeScript backend 출력에서 compile한다.

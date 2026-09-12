@@ -890,7 +890,7 @@
           "call generated renderer"
         ],
         "requiredSupportLevel": "generated-compiler",
-        "status": "implemented"
+        "status": "partial"
       }
     },
     "artifactRefresh": {

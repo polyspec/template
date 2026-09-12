@@ -39,3 +39,16 @@ export function generatedCompilerDigest(language) {
     'tools/compiler/ir.mjs',
   ]);
 }
+
+/** Identifies TypeScript-to-JavaScript delivery compilation. */
+export function typescriptDeliveryDigest() {
+  return digestFiles([
+    'package-lock.json',
+    'tools/compiler/backend-support.mjs',
+    'tools/compiler/backends/typescript.mjs',
+    'tools/compiler/compiler.mjs',
+    'tools/compiler/generated-artifact.mjs',
+    'tools/compiler/ir.mjs',
+    'tools/showcase/compile-generated.mjs',
+  ]);
+}

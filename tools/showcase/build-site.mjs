@@ -57,39 +57,18 @@ function code(label, value, highlighted = false, scrollable = false) {
   return `<details open><summary>${escapeHtml(label)}</summary><pre${classes ? ` class="${classes}"` : ''}>${content}</pre></details>`;
 }
 
-function generatedFunctions(source, scenarioId) {
-  const prefix = scenarioId.replace(/[^A-Za-z0-9_]/g, '_') + '__';
-  const lines = source.split('\n');
-  const functions = [];
-  for (let index = 0; index < lines.length; index += 1) {
-    if (!new RegExp(`^(?:export )?(?:function|func|fn)\\s+(?:render_|generated_)${prefix}`).test(lines[index])) continue;
-    const body = [];
-    let depth = 0;
-    do {
-      const line = lines[index];
-      body.push(line);
-      depth += (line.match(/\{/g) ?? []).length - (line.match(/\}/g) ?? []).length;
-      index += 1;
-    } while (index < lines.length && depth > 0);
-    index -= 1;
-    functions.push(body.join('\n'));
-  }
-  if (functions.length === 0) throw new Error(`generated functions are missing for ${scenarioId}`);
-  return functions.join('\n\n');
-}
-
 function scenarioCard(scenario, result) {
   const artifactRoot = join(site, 'scenarios', scenario.id, 'compiled', 'ast');
   const artifact = JSON.parse(readFileSync(join(artifactRoot, 'manifest.json'), 'utf8'));
   const templateSource = Object.entries(scenario.templates).map(([name, source]) => `--- ${name}\n${highlightTemplate(source, name)}`).join('\n\n');
   const integrationSource = (scenario.integrationFiles ?? []).map(file => `--- ${file.name}\n${escapeHtml(file.source)}`).join('\n\n');
   const generatedSource = [
-    ['typescript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.ts')],
-    ['javascript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.mjs')],
-    ['go', join(root, 'tools', 'showcase', 'adapters', 'go', 'native_direct.go')],
-    ['rust', join(root, 'tools', 'showcase', 'adapters', 'rust', 'src', 'native_direct.rs')],
-    ['php', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.php')],
-  ].map(([language, path]) => `${language}/native_direct · generated functions for ${scenario.id}\n${generatedFunctions(readFileSync(path, 'utf8'), scenario.id)}`).join('\n\n');
+    ['typescript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'typed', `${scenario.id}.ts`)],
+    ['javascript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'javascript', `${scenario.id}.js`)],
+    ['go', join(root, 'tools', 'showcase', 'adapters', 'go', 'generated', scenario.id, 'generated.go')],
+    ['rust', join(root, 'tools', 'showcase', 'adapters', 'generated', 'typed', `${scenario.id}.rust`)],
+    ['php', join(root, 'tools', 'showcase', 'adapters', 'generated', 'typed', `${scenario.id}.php`)],
+  ].map(([language, path]) => `${language} · product generated program\n${readFileSync(`${path}.manifest.json`, 'utf8')}\n${readFileSync(path, 'utf8')}`).join('\n\n');
   const artifactFiles = Object.entries(artifact.files).map(([name, entry]) => {
     const source = readFileSync(join(artifactRoot, entry.path), 'utf8');
     return `ast/${entry.path} · ${name}\n${source}`;

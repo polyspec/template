@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -23,7 +23,22 @@ import type {
   Scenario,
 } from './generated/render_adapter.ts';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.ts';
-import { GeneratedProgram } from './generated/native_direct.ts';
+import { GeneratedProgram as CompilerCoverageProgram } from './generated/typed/compiler-coverage.ts';
+import { GeneratedProgram as EmptyStateProgram } from './generated/typed/empty-state.ts';
+import { GeneratedProgram as HtmlSlotProgram } from './generated/typed/html-slot.ts';
+import { GeneratedProgram as ReactBoundaryProgram } from './generated/typed/react-boundary.ts';
+import { GeneratedProgram as ScopePrecedenceProgram } from './generated/typed/scope-precedence.ts';
+
+function generatedProgram(root: string) {
+  switch (basename(root)) {
+    case 'compiler-coverage': return new CompilerCoverageProgram();
+    case 'empty-state': return new EmptyStateProgram();
+    case 'html-slot': return new HtmlSlotProgram();
+    case 'react-boundary': return new ReactBoundaryProgram();
+    case 'scope-precedence': return new ScopePrecedenceProgram();
+    default: throw new Error(`generated program is missing for scenario ${basename(root)}`);
+  }
+}
 
 function readJson(root: string, name: string): unknown {
   return parseJsonBytes(new Uint8Array(readFileSync(join(root, name))));
@@ -112,7 +127,7 @@ export class Adapter implements RenderAdapter {
     this.root = root;
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
     this.engine = new Engine(generated
-      ? new GeneratedProgram(root)
+      ? generatedProgram(root)
       : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root)) }));
   }
 

@@ -46,7 +46,7 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 
 ## 구현 상태
 
-AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 이 program들은 현재 showcase 시나리오 5개를 동일하게 렌더한다. Generated 실행은 여전히 partial이다. Typed compiler는 `default` 내장 함수만 받고 showcase에는 별도 generator가 남아 있다. 남은 경로는 이 계약을 만족하지 않으므로 generated compiler를 완성하면서 제거한다.
+AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 showcase는 이 artifact를 TypeScript, JavaScript, Go, Rust, PHP에서 직접 실행한다. Typed compiler가 `default` 내장 함수만 받고 전체 적합성 suite를 통과하지 않았으므로 generated 실행은 여전히 partial이다.
 
 Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract·compiler digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 
