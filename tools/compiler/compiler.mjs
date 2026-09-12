@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { loadSourceGraph, lowerSourceGraph } from './ir.mjs';
 import { templateBodies } from './backend-support.mjs';
 import { compileGeneratedArtifact } from './generated-artifact.mjs';
+import { generatedCompilerDigest } from './compiler-digest.mjs';
 import * as typescript from './backends/typescript.mjs';
 import * as go from './backends/go.mjs';
 import * as rust from './backends/rust.mjs';
@@ -42,6 +43,7 @@ function main(args) {
     output,
     refresh,
     check,
+    compilerDigest: generatedCompilerDigest(language),
     compile: () => compileSource(graph, manifest, language),
   });
   process.stdout.write(`compiler ${language}: ${check ? 'checked' : refresh === 'false' ? 'loaded' : 'ready'} ${output}\n`);

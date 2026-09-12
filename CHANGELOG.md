@@ -61,3 +61,5 @@
 - Added digest-bound generated artifact manifests and independent `dev`, `true` and `false` refresh behavior with integrity checks and atomic replacement.
 - Removed canonical AST ownership from render frames and standardized `RenderFrame` and `RenderScope` fields and operations across TypeScript, Go, Rust and PHP.
 - Added a concrete `RuntimeEnvironment` in TypeScript, Go, Rust and PHP as the common owner of resource limits and host functions. AST programs now delegate runtime services to it, the generated-program contract requires the same environment, and parser/Reflection checks reject field, operation, signature or ownership drift.
+- Made the product compiler emit concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP. Package-level integration checks compile and execute all five current scenarios through those programs and require byte-identical HTML.
+- Added compiler implementation digests to schema 3 AST and generated artifact manifests. The `true` refresh policy now rebuilds after parser or backend changes, while `false` verifies deployed files without reading source, type, contract or compiler inputs.

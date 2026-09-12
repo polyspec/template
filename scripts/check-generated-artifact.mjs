@@ -12,6 +12,8 @@ const temporary = mkdtempSync(join(tmpdir(), 'polyspec-generated-artifact-'));
 const graph = join(temporary, 'graph.json');
 const types = join(temporary, 'types.json');
 const output = join(temporary, 'page.ts');
+const compilerA = 'a'.repeat(64);
+const compilerB = 'b'.repeat(64);
 
 try {
   copyFileSync(join(fixture, 'compiled/ast/manifest.json'), graph);
@@ -27,36 +29,41 @@ try {
   let compilations = 0;
   const compile = value => () => { compilations += 1; return value; };
 
-  const first = compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compile: compile('first\n') });
+  const first = compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compilerDigest: compilerA, compile: compile('first\n') });
   assert.equal(readFileSync(output, 'utf8'), 'first\n');
   assert.equal(first.mode, 'gen');
   assert.equal(first.target, 'ts');
+  assert.equal(first.compilerDigest, compilerA);
 
-  compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'true', compile: () => { throw new Error('unchanged artifact was recompiled'); } });
+  compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'true', compilerDigest: compilerA, compile: () => { throw new Error('unchanged artifact was recompiled'); } });
   assert.equal(compilations, 1);
 
-  writeFileSync(output, 'damaged\n');
-  compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'true', compile: compile('second\n') });
+  compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'true', compilerDigest: compilerB, compile: compile('second\n') });
   assert.equal(readFileSync(output, 'utf8'), 'second\n');
   assert.equal(compilations, 2);
 
+  writeFileSync(output, 'damaged\n');
+  compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'true', compilerDigest: compilerB, compile: compile('third\n') });
+  assert.equal(readFileSync(output, 'utf8'), 'third\n');
+  assert.equal(compilations, 3);
+
   compileGeneratedArtifact({ graphPath: join(temporary, 'missing-graph.json'), typeManifestPath: join(temporary, 'missing-types.json'), target: 'ts', output, refresh: 'false', compile: () => { throw new Error('false refresh invoked compiler'); } });
-  compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', check: true, compile: compile('second\n') });
+  compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compilerDigest: compilerB, check: true, compile: compile('third\n') });
   assert.throws(
-    () => compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', check: true, compile: compile('stale\n') }),
+    () => compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compilerDigest: compilerB, check: true, compile: compile('stale\n') }),
     /artifact is stale/,
   );
 
   const beforeSource = readFileSync(output);
   const beforeManifest = readFileSync(generatedManifestPath(output));
   assert.throws(
-    () => compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compile: () => { throw new Error('compile failed'); } }),
+    () => compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compilerDigest: compilerB, compile: () => { throw new Error('compile failed'); } }),
     /compile failed/,
   );
   assert.deepEqual(readFileSync(output), beforeSource);
   assert.deepEqual(readFileSync(generatedManifestPath(output)), beforeManifest);
   assert.throws(
-    () => compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'sometimes', compile: compile('unused') }),
+    () => compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'sometimes', compilerDigest: compilerB, compile: compile('unused') }),
     /artifact refresh policy/,
   );
   writeFileSync(join(temporary, graphFile.path), '{}');

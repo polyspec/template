@@ -1,15 +1,16 @@
 {
-  "schema": 2,
+  "schema": 3,
   "mode": "gen",
   "target": "php",
   "entry": "layout.tpl",
   "sourceDigest": "626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
+  "contractDigest": "b67ea646ebcbd314a6bfb5c0488b6d5caaa0e237073ba1f9252a01369d492b35",
+  "compilerDigest": "8c88764c46db59cac05c34d954cf12f174470c7cf9601a4d8f4b12df9ca7d041",
   "files": {
     "react-boundary.php": {
       "path": "react-boundary.php",
-      "artifactDigest": "f3d2e117b3559d88035fc892013cec42a4cc9da72b70ddd7aebff5f69e20406c"
+      "artifactDigest": "6cf8b9aff54f0b255c02e354c6be0139229b52403e25243a789765189826f8f8"
     }
   }
 }
