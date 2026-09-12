@@ -1,17 +1,13 @@
 <?php
-final class Page { public function __construct(public readonly ?string $title = null) {} }
-final class Slot { public function __construct(public readonly ?string $template = null, public readonly ?string $html = null) {} }
+final class Page { public function __construct(public readonly string $title) {} }
 final class Assign { public function __construct(
-public readonly ?string $title = null,
-public readonly ?string $heading = null,
-public readonly ?string $island_label = null,
-public readonly ?string $root_label = null,
-public readonly ?string $defined_label = null,
-public readonly ?Page $page = null
+public readonly Page $page,
+public readonly string $root_label,
+public readonly string $defined_label
 ) {} }
-final class Input_content_tpl { public function __construct() {} }
+final class Input_content_tpl { public function __construct(public string $title, public string $root_label, public string $defined_label, public ?string $layout_local = null) {} }
 final class Input_layout_tpl { public function __construct() {} }
-final class DefinitionData_content_tpl { public function __construct() {} }
+final class DefinitionData_content_tpl { public function __construct(public bool $has_title = false, public ?string $title = null, public bool $has_root_label = false, public ?string $root_label = null, public bool $has_defined_label = false, public ?string $defined_label = null, public bool $has_layout_local = false, public ?string $layout_local = null) {} }
 final class DefinitionData_layout_tpl { public function __construct() {} }
 final class Definition { public function __construct(public readonly ?string $html = null, public readonly mixed $data = null) {} }
 final class Definitions { public function __construct(public readonly ?Definition $content = null, public readonly ?Definition $layout = null) {} }
@@ -24,33 +20,43 @@ function generated_map(array $items): array { $result = []; foreach ($items as $
 function generated_in(mixed $value, mixed $collection): bool { return is_array($collection) ? (array_is_list($collection) ? in_array($value, $collection, true) : array_key_exists((string) $value, $collection)) : (is_string($collection) && str_contains($collection, (string) $value)); }
 function generated_call(string $name, array $args): mixed { if ($name === 'default' && count($args) === 2) return generated_truthy($args[0]) ? $args[0] : $args[1]; throw new RuntimeException('generated function is not linked: ' . $name); }
 function render_content_tpl(Assign $assign, Definitions $definitions, Input_content_tpl $input): string { $out = '';
-
-    $out .= "<section data-react-island id=\"counter\">\n<p>";
-    $out .= generated_escape($assign->island_label);
-    $out .= "</p>\n</section>\n";
+$title = $input->title;
+$root_label = $input->root_label;
+$defined_label = $input->defined_label;
+$layout_local = $input->layout_local;
+    $out .= "<article>\n<h1>";
+    $out .= generated_escape($title);
+    $out .= "</h1>\n<p class=\"root\">";
+    $out .= generated_escape($root_label);
+    $out .= "</p>\n<p class=\"defined\">";
+    $out .= generated_escape($defined_label);
+    $out .= "</p>\n<p class=\"local\">";
+    $out .= generated_escape(generated_call("default", [$layout_local, "missing"]));
+    $out .= "</p>\n</article>\n";
  return $out; }
 function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input): string { $out = '';
 
-    $out .= "<main>\n<h1>";
-    $out .= generated_escape($assign->title);
-    $out .= "</h1>\n";
+    $layout_local = "visible only in layout";
+    $out .= "<section class=\"scope\">\n";
     $definition = $definitions->content;
     if ($definition === null) throw new RuntimeException("generated definition content is missing");
     if ($definition?->html !== null) {
         $out .= $definition->html;
     } else {
         if ($definition?->data !== null && !($definition->data instanceof DefinitionData_content_tpl)) throw new RuntimeException("generated definition content data has an invalid type");
-        $input = new Input_content_tpl();
+        $input = new Input_content_tpl(title: ($definition?->data !== null && $definition->data->has_title ? $definition->data->title : throw new RuntimeException("generated input content.tpl.title is missing")), root_label: $assign->root_label, defined_label: $assign->defined_label, layout_local: null);
         if ($definition?->data !== null) {
-
+            if ($definition->data->has_title) $input->title = $definition->data->title;
+            if ($definition->data->has_root_label) $input->root_label = $definition->data->root_label;
+            if ($definition->data->has_defined_label) $input->defined_label = $definition->data->defined_label;
+            if ($definition->data->has_layout_local) $input->layout_local = $definition->data->layout_local;
         }
-
+        $input->title = $assign->page?->title;
         $out .= render_content_tpl($assign, $definitions, $input);
     }
-    $out .= "</main>\n";
+    $out .= "</section>\n";
  return $out; }
 function render_template(string $target, Assign $assign, Definitions $definitions): string { return match ($target) {
-        "content.tpl" => render_content_tpl($assign, $definitions, new Input_content_tpl()),
         "layout.tpl" => render_layout_tpl($assign, $definitions, new Input_layout_tpl()),
         default => throw new RuntimeException('generated template is missing or requires inputs: ' . $target),
 }; }

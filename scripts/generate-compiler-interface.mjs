@@ -39,13 +39,15 @@ const classes = [
   '  class Definition~T~ {',
   ...manifest.types['Definition<T>'].fields.map(field => `    +${field}`),
   '  }',
+  '  class DefinitionData~T~',
   '  class Definitions',
   '  class Input~T~',
   '  Compiler --> LanguageBackend : TypedProgram',
   '  LanguageBackend --> GeneratedModule : source',
   '  GeneratedModule --> Definitions',
   '  Definitions --> Definition~T~',
-  '  Definition~T~ --> Input~T~ : data',
+  '  Definition~T~ --> DefinitionData~T~ : data',
+  '  DefinitionData~T~ --> Input~T~ : field types',
   '',
 ].join('\n');
 

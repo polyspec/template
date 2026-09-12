@@ -172,10 +172,12 @@ typed-generator: ## Generate type-fixed host source from canonical AST
 	@mkdir -p tools/showcase/adapters/generated/typed
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/react-boundary/compiled/typescript/manifest.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/compiler-coverage/compiled/typescript/manifest.json --manifest examples/site/scenarios/compiler-coverage/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/compiler-coverage.$$lang; done
+	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/scope-precedence/compiled/typescript/manifest.json --manifest examples/site/scenarios/scope-precedence/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/scope-precedence.$$lang; done
 
 typed-generator-check: ## Verify type-fixed generated source is reproducible
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/react-boundary/compiled/typescript/manifest.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/compiler-coverage/compiled/typescript/manifest.json --manifest examples/site/scenarios/compiler-coverage/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/compiler-coverage.$$lang; done
+	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/scope-precedence/compiled/typescript/manifest.json --manifest examples/site/scenarios/scope-precedence/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/scope-precedence.$$lang; done
 
 compiler-ir-check: ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
 	node scripts/check-compiler-ir.mjs

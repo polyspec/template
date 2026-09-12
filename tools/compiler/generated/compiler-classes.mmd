@@ -14,10 +14,12 @@ classDiagram
     +html
     +data
   }
+  class DefinitionData~T~
   class Definitions
   class Input~T~
   Compiler --> LanguageBackend : TypedProgram
   LanguageBackend --> GeneratedModule : source
   GeneratedModule --> Definitions
   Definitions --> Definition~T~
-  Definition~T~ --> Input~T~ : data
+  Definition~T~ --> DefinitionData~T~ : data
+  DefinitionData~T~ --> Input~T~ : field types

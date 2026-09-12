@@ -12,6 +12,9 @@ public readonly array $rows
 final class Input_card_tpl { public function __construct(public string $label) {} }
 final class Input_layout_tpl { public function __construct() {} }
 final class Input_partial_tpl { public function __construct(public array $values) {} }
+final class DefinitionData_card_tpl { public function __construct(public bool $has_label = false, public ?string $label = null) {} }
+final class DefinitionData_layout_tpl { public function __construct() {} }
+final class DefinitionData_partial_tpl { public function __construct(public bool $has_values = false, public ?array $values = null) {} }
 final class Definition { public function __construct(public readonly ?string $html = null, public readonly mixed $data = null) {} }
 final class Definitions { public function __construct(public readonly ?Definition $content = null, public readonly ?Definition $layout = null) {} }
 function generated_truthy(mixed $value): bool { return $value !== null && $value !== false && $value !== '' && $value !== 0 && $value !== []; }
@@ -84,8 +87,11 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
     if ($definition?->html !== null) {
         $out .= $definition->html;
     } else {
-        if ($definition?->data !== null && !($definition->data instanceof Input_card_tpl)) throw new RuntimeException("generated definition content data has an invalid type");
-        $input = $definition?->data === null ? new Input_card_tpl(label: $assign->page?->title) : clone $definition->data;
+        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_card_tpl)) throw new RuntimeException("generated definition content data has an invalid type");
+        $input = new Input_card_tpl(label: ($definition?->data !== null && $definition->data->has_label ? $definition->data->label : throw new RuntimeException("generated input card.tpl.label is missing")));
+        if ($definition?->data !== null) {
+            if ($definition->data->has_label) $input->label = $definition->data->label;
+        }
         $input->label = $assign->page?->title;
         $out .= render_card_tpl($assign, $definitions, $input);
     }

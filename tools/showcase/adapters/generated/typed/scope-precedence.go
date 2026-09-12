@@ -2,23 +2,17 @@
 package generated
 import ("fmt"; "strings")
 type Page struct { Title string }
-type Row struct { Name string }
-type Slot struct { Template *string; Html *string }
 type Assign struct {
-	Flag bool
 	Page Page
-	Numbers []float64
-	Lookup OrderedMap[string, string]
-	Rows []Row
+	Root_label string
+	Defined_label string
 }
-type Input_card_tpl struct { Label string }
+type Input_content_tpl struct { Title string; Root_label string; Defined_label string; Layout_local *string }
 type Input_layout_tpl struct {  }
-type Input_partial_tpl struct { Values []float64 }
-type DefinitionData_card_tpl struct { Label *string }
+type DefinitionData_content_tpl struct { Title *string; Root_label *string; Defined_label *string; Layout_local **string }
 type DefinitionData_layout_tpl struct {  }
-type DefinitionData_partial_tpl struct { Values *[]float64 }
 type Definition[T any] struct { HTML *string; Data *T }
-type Definitions struct { Content *Definition[DefinitionData_card_tpl]; Layout *Definition[DefinitionData_layout_tpl] }
+type Definitions struct { Content *Definition[DefinitionData_content_tpl]; Layout *Definition[DefinitionData_layout_tpl] }
 type OrderedEntry[K comparable, V any] struct { Key K; Value V }
 type OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }
 func NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }
@@ -33,86 +27,41 @@ func generatedUnary(op string, value any) any { if op == "!" { return !generated
 func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
 func generatedCall(name string, args []any) any { if name == "default" && len(args) == 2 { if generatedTruthy(args[0]) { return args[0] }; return args[1] }; panic("generated function is not linked: "+name) }
 func valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }
-func render_card_tpl(assign Assign, definitions Definitions, input Input_card_tpl) string { var out strings.Builder
-label := input.Label
-    out.WriteString("<p class=\"card\">")
-    fmt.Fprint(&out, label)
-    out.WriteString("</p>\n")
+func render_content_tpl(assign Assign, definitions Definitions, input Input_content_tpl) string { var out strings.Builder
+title := input.Title
+root_label := input.Root_label
+defined_label := input.Defined_label
+layout_local := input.Layout_local
+    out.WriteString("<article>\n<h1>")
+    fmt.Fprint(&out, title)
+    out.WriteString("</h1>\n<p class=\"root\">")
+    fmt.Fprint(&out, root_label)
+    out.WriteString("</p>\n<p class=\"defined\">")
+    fmt.Fprint(&out, defined_label)
+    out.WriteString("</p>\n<p class=\"local\">")
+    fmt.Fprint(&out, generatedCall("default", []any{valueOrZero(layout_local), "missing"}))
+    out.WriteString("</p>\n</article>\n")
  return out.String() }
 func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder
 
-    values := func() []float64 { result := []float64{}; result = append(result, float64(0)); result = append(result, assign.Numbers...); return result }()
-    _ = values
-    merged := func() OrderedMap[string, string] { result := NewOrderedMap[string, string](); for _, entry := range assign.Lookup.Entries() { result.Set(entry.Key, entry.Value) }; result.Set("z", "Z"); return result }()
-    _ = merged
-    out.WriteString("<section>\n<h1>")
-    fmt.Fprint(&out, assign.Page.Title)
-    out.WriteString("</h1>\n<p>")
-    fmt.Fprint(&out, generatedListGet(values, int(float64(1))))
-    out.WriteString("|")
-    fmt.Fprint(&out, generatedMapGet(merged, "z"))
-    out.WriteString("</p>\n")
-	if generatedTruthy(generatedBinary("&&", assign.Flag, generatedBinary("==", assign.Page.Title, "Guide"))) {
-        out.WriteString("<strong>matched</strong>")	} else {
-        out.WriteString("<strong>missed</strong>")
-	}
-    out.WriteString("\n<p>")
-    fmt.Fprint(&out, generatedTernary(generatedTruthy(assign.Flag), "yes", "no"))
-    out.WriteString("|")
-    fmt.Fprint(&out, generatedBinary("+", generatedUnary("-", float64(1)), float64(3)))
-    out.WriteString("|")
-    fmt.Fprint(&out, generatedCall("default", []any{"", "fallback"}))
-    out.WriteString("</p>\n<ul>\n")
-    { entries := assign.Rows
-    for row_index, entry := range entries {
-        row_key, row_value := float64(row_index), entry
-        _ = row_key
-        row := row_value
-        row_size := float64(len(entries))
-        row_first := row_index == 0
-        row_last := row_index + 1 == len(entries)
-            out.WriteString("<li>")
-            fmt.Fprint(&out, row_index)
-            out.WriteString("/")
-            fmt.Fprint(&out, row_size)
-            out.WriteString(":")
-            fmt.Fprint(&out, row.Name)
-            out.WriteString(":")
-            fmt.Fprint(&out, row_first)
-            out.WriteString(":")
-            fmt.Fprint(&out, row_last)
-            out.WriteString("</li>\n")
-    }
-    if len(entries) == 0 {
-            out.WriteString("<li>empty</li>\n")
-    }
-    }
-    out.WriteString("</ul>\n")
-    out.WriteString(render_partial_tpl(assign, definitions, Input_partial_tpl{Values: values}))
-    if definitions.Content != nil {
-            out.WriteString("<p>defined</p>")
-    } else {
-            out.WriteString("<p>missing</p>")
-    }
-    out.WriteString("\n")
+    layout_local := "visible only in layout"
+    _ = layout_local
+    out.WriteString("<section class=\"scope\">\n")
     { definition := definitions.Content
     if definition == nil { panic("generated definition content is missing") }
     if definition != nil && definition.HTML != nil { out.WriteString(*definition.HTML) } else {
-        input := Input_card_tpl{}
+        input := Input_content_tpl{Root_label: assign.Root_label, Defined_label: assign.Defined_label}
         if definition != nil && definition.Data != nil {
-            if definition.Data.Label != nil { input.Label = *definition.Data.Label }
+            if definition.Data.Title != nil { input.Title = *definition.Data.Title }
+            if definition.Data.Root_label != nil { input.Root_label = *definition.Data.Root_label }
+            if definition.Data.Defined_label != nil { input.Defined_label = *definition.Data.Defined_label }
+            if definition.Data.Layout_local != nil { input.Layout_local = *definition.Data.Layout_local }
         }
-        input.Label = assign.Page.Title
-        out.WriteString(render_card_tpl(assign, definitions, input))
+        input.Title = assign.Page.Title
+        out.WriteString(render_content_tpl(assign, definitions, input))
     }
     }
     out.WriteString("</section>\n")
- return out.String() }
-func render_partial_tpl(assign Assign, definitions Definitions, input Input_partial_tpl) string { var out strings.Builder
-values := input.Values
-    out.WriteString("<p class=\"included\">")
-    fmt.Fprint(&out, generatedListGet(values, int(float64(2))))
-    out.WriteString("</p>\n")
  return out.String() }
 func RenderTemplate(target string, assign Assign, definitions Definitions) string { switch target {
 	case "layout.tpl": return render_layout_tpl(assign, definitions, Input_layout_tpl{})

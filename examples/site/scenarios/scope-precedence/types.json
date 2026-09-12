@@ -1,0 +1,28 @@
+{
+  "schema": 3,
+  "root": "Assign",
+  "entry": "layout.tpl",
+  "fields": {
+    "page": "Page",
+    "root_label": "string",
+    "defined_label": "string"
+  },
+  "records": {
+    "Page": { "title": "string" }
+  },
+  "defines": {
+    "content": { "template": "content.tpl", "optional": true, "html": true },
+    "layout": { "template": "layout.tpl" }
+  },
+  "functions": {
+    "default": { "args": ["string?", "string"], "returns": "string" }
+  },
+  "templates": {
+    "content.tpl": {
+      "title": "string",
+      "root_label": "string",
+      "defined_label": "string",
+      "layout_local": "string?"
+    }
+  }
+}
