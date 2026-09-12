@@ -60,15 +60,19 @@ function statuses(path) {
   const ids = new Set();
   return rows.map(row => {
     const cells = row.split('|').slice(1, -1).map(c => c.trim());
-    const [id, , implementation, verification, deployment, evidence] = cells;
-    if (cells.length !== 6 || !['not-started', 'in-progress', 'implemented'].includes(implementation) ||
-        !['pending', 'passed', 'failed'].includes(verification) ||
-        !['not-deployed', 'deployed'].includes(deployment) || !/\]\([^)]+\)/.test(evidence ?? '')) {
+    const [id, , status, supportOrVerification, evidenceOrDeployment, legacyEvidence] = cells;
+    const featureTable = cells.length === 5;
+    const valid = featureTable
+      ? ['planned', 'partial', 'implemented'].includes(status) && /(?:go|php|rust|typescript):/.test(supportOrVerification ?? '') && /\]\([^)]+\)/.test(evidenceOrDeployment ?? '')
+      : cells.length === 6 && ['not-started', 'in-progress', 'implemented'].includes(status) &&
+        ['pending', 'passed', 'failed'].includes(supportOrVerification) &&
+        ['not-deployed', 'deployed'].includes(evidenceOrDeployment) && /\]\([^)]+\)/.test(legacyEvidence ?? '');
+    if (!valid) {
       errors.push(`${path}: invalid status or missing evidence for ${id}`);
     }
     if (ids.has(id)) errors.push(`${path}: duplicate feature ID: ${id}`);
     ids.add(id);
-    return [id, implementation, verification, deployment];
+    return featureTable ? [id, status, supportOrVerification] : [id, status, supportOrVerification, evidenceOrDeployment];
   });
 }
 if (JSON.stringify(statuses('docs/features.md')) !== JSON.stringify(statuses('docs/features.ko.md'))) {
