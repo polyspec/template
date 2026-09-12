@@ -1,0 +1,11 @@
+{
+  "title": "Generated compiler coverage",
+  "description": "One readable page executes every canonical statement and expression family through AST and generated modes.",
+  "focus": [
+    "expressions",
+    "loops and loop metadata",
+    "include scope",
+    "define and block scope"
+  ],
+  "target": "layout"
+}

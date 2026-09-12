@@ -1,0 +1,7 @@
+{
+  "layout": "layout.tpl",
+  "content": {
+    "template": "card.tpl",
+    "data": { "label": "define" }
+  }
+}

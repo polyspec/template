@@ -15,6 +15,55 @@
   ],
   "scenarios": [
     {
+      "id": "compiler-coverage",
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "bytes": 217,
+      "sha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+      "api": {
+        "bytes": 217,
+        "sha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+        "repeatSha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+        "repeatEqual": true
+      },
+      "renders": {
+        "ts": {
+          "bytes": 217,
+          "sha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatSha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "go": {
+          "bytes": 217,
+          "sha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatSha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "rust": {
+          "bytes": 217,
+          "sha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatSha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "php": {
+          "bytes": 217,
+          "sha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatSha256": "7ee9bca8359854aef6c802c9f7d7851e98ccd1c06d6cec62c45d26a157764975",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        }
+      },
+      "status": "pass"
+    },
+    {
       "id": "empty-state",
       "source": null,
       "target": "layout",

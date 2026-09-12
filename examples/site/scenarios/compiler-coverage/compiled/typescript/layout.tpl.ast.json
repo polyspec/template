@@ -1,0 +1,658 @@
+{
+  "type": "Template",
+  "name": "layout.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "values",
+      "expr": {
+        "type": "List",
+        "items": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 0,
+            "span": [
+              11,
+              12
+            ]
+          },
+          {
+            "type": "Spread",
+            "expr": {
+              "type": "Var",
+              "name": "numbers",
+              "span": [
+                17,
+                24
+              ]
+            },
+            "span": [
+              14,
+              24
+            ]
+          }
+        ],
+        "span": [
+          10,
+          25
+        ]
+      },
+      "span": [
+        0,
+        26
+      ]
+    },
+    {
+      "type": "Set",
+      "name": "merged",
+      "expr": {
+        "type": "Map",
+        "entries": [
+          {
+            "type": "Spread",
+            "expr": {
+              "type": "Var",
+              "name": "lookup",
+              "span": [
+                41,
+                47
+              ]
+            },
+            "span": [
+              38,
+              47
+            ]
+          },
+          {
+            "key": {
+              "type": "Literal",
+              "kind": "string",
+              "value": "z",
+              "span": [
+                49,
+                52
+              ]
+            },
+            "value": {
+              "type": "Literal",
+              "kind": "string",
+              "value": "Z",
+              "span": [
+                56,
+                59
+              ]
+            }
+          }
+        ],
+        "span": [
+          37,
+          60
+        ]
+      },
+      "span": [
+        27,
+        61
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "<section>\n<h1>",
+      "span": [
+        62,
+        76
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "page",
+          "span": [
+            79,
+            83
+          ]
+        },
+        "key": "title",
+        "span": [
+          79,
+          89
+        ]
+      },
+      "span": [
+        76,
+        90
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</h1>\n<p>",
+      "span": [
+        90,
+        99
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "values",
+          "span": [
+            102,
+            108
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1,
+          "span": [
+            109,
+            110
+          ]
+        },
+        "span": [
+          102,
+          111
+        ]
+      },
+      "span": [
+        99,
+        112
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        112,
+        113
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "merged",
+          "span": [
+            116,
+            122
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "z",
+          "span": [
+            123,
+            126
+          ]
+        },
+        "span": [
+          116,
+          127
+        ]
+      },
+      "span": [
+        113,
+        128
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>\n",
+      "span": [
+        128,
+        133
+      ]
+    },
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Binary",
+            "op": "&&",
+            "left": {
+              "type": "Var",
+              "name": "flag",
+              "span": [
+                136,
+                140
+              ]
+            },
+            "right": {
+              "type": "Binary",
+              "op": "==",
+              "left": {
+                "type": "Member",
+                "object": {
+                  "type": "Var",
+                  "name": "page",
+                  "span": [
+                    144,
+                    148
+                  ]
+                },
+                "key": "title",
+                "span": [
+                  144,
+                  154
+                ]
+              },
+              "right": {
+                "type": "Literal",
+                "kind": "string",
+                "value": "Guide",
+                "span": [
+                  158,
+                  165
+                ]
+              },
+              "span": [
+                144,
+                165
+              ]
+            },
+            "span": [
+              136,
+              165
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "<strong>matched</strong>",
+              "span": [
+                166,
+                190
+              ]
+            }
+          ],
+          "span": [
+            133,
+            166
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "<strong>missed</strong>",
+          "span": [
+            193,
+            216
+          ]
+        }
+      ],
+      "span": [
+        133,
+        219
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n<p>",
+      "span": [
+        219,
+        223
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "flag",
+          "span": [
+            226,
+            230
+          ]
+        },
+        "then": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "yes",
+          "span": [
+            233,
+            238
+          ]
+        },
+        "else": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "no",
+          "span": [
+            241,
+            245
+          ]
+        },
+        "span": [
+          226,
+          245
+        ]
+      },
+      "span": [
+        223,
+        246
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        246,
+        247
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Unary",
+          "op": "-",
+          "operand": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              251,
+              252
+            ]
+          },
+          "span": [
+            250,
+            252
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 3,
+          "span": [
+            255,
+            256
+          ]
+        },
+        "span": [
+          250,
+          256
+        ]
+      },
+      "span": [
+        247,
+        257
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>\n<ul>\n",
+      "span": [
+        257,
+        267
+      ]
+    },
+    {
+      "type": "For",
+      "name": "row",
+      "iter": {
+        "type": "Var",
+        "name": "rows",
+        "span": [
+          276,
+          280
+        ]
+      },
+      "body": [
+        {
+          "type": "Text",
+          "value": "<li>",
+          "span": [
+            282,
+            286
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "row",
+            "field": "index_",
+            "span": [
+              289,
+              299
+            ]
+          },
+          "span": [
+            286,
+            300
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "/",
+          "span": [
+            300,
+            301
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "row",
+            "field": "size_",
+            "span": [
+              304,
+              313
+            ]
+          },
+          "span": [
+            301,
+            314
+          ]
+        },
+        {
+          "type": "Text",
+          "value": ":",
+          "span": [
+            314,
+            315
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Member",
+            "object": {
+              "type": "Var",
+              "name": "row",
+              "span": [
+                318,
+                321
+              ]
+            },
+            "key": "name",
+            "span": [
+              318,
+              326
+            ]
+          },
+          "span": [
+            315,
+            327
+          ]
+        },
+        {
+          "type": "Text",
+          "value": ":",
+          "span": [
+            327,
+            328
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "row",
+            "field": "first_",
+            "span": [
+              331,
+              341
+            ]
+          },
+          "span": [
+            328,
+            342
+          ]
+        },
+        {
+          "type": "Text",
+          "value": ":",
+          "span": [
+            342,
+            343
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "row",
+            "field": "last_",
+            "span": [
+              346,
+              355
+            ]
+          },
+          "span": [
+            343,
+            356
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "</li>\n",
+          "span": [
+            356,
+            362
+          ]
+        }
+      ],
+      "empty": [
+        {
+          "type": "Text",
+          "value": "<li>empty</li>\n",
+          "span": [
+            366,
+            381
+          ]
+        }
+      ],
+      "span": [
+        267,
+        384
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</ul>\n",
+      "span": [
+        385,
+        391
+      ]
+    },
+    {
+      "type": "Include",
+      "path": "partial.tpl",
+      "span": [
+        391,
+        406
+      ]
+    },
+    {
+      "type": "IfBlock",
+      "id": "content",
+      "body": [
+        {
+          "type": "Text",
+          "value": "<p>defined</p>",
+          "span": [
+            419,
+            433
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "<p>missing</p>",
+          "span": [
+            436,
+            450
+          ]
+        }
+      ],
+      "span": [
+        407,
+        453
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        453,
+        454
+      ]
+    },
+    {
+      "type": "Block",
+      "id": "content",
+      "path": null,
+      "scope": [
+        {
+          "name": "label",
+          "expr": {
+            "type": "Member",
+            "object": {
+              "type": "Var",
+              "name": "page",
+              "span": [
+                471,
+                475
+              ]
+            },
+            "key": "title",
+            "span": [
+              471,
+              481
+            ]
+          }
+        }
+      ],
+      "span": [
+        454,
+        482
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</section>\n",
+      "span": [
+        483,
+        494
+      ]
+    }
+  ]
+}
