@@ -6,6 +6,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
+	conformance-generated-ts \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check showcase showcase-check showcase-compile \
 	docs-static-check clean
 
@@ -88,6 +89,9 @@ test-php: build-php ## PHP unit tests
 
 conformance: ## Cross-language conformance suite
 	node tests/runner/conformance.mjs
+
+conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
+	node tests/runner/conformance-generated-ts.mjs
 
 parity: ## Cross-language output comparison
 	node tests/runner/parity.mjs

@@ -1,5 +1,5 @@
 // Generated.
-import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from '@polyspec/template';
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, bind, bindMap } from '@polyspec/template';
 const generatedRecords = { "Page": { "title": { "kind": "string", "optional": true } }, "Slot": { "template": { "kind": "string", "optional": true }, "html": { "kind": "string", "optional": true } } };
 const generatedAssign = { "title": { "kind": "string", "optional": true }, "heading": { "kind": "string", "optional": true }, "island_label": { "kind": "string", "optional": true }, "root_label": { "kind": "string", "optional": true }, "defined_label": { "kind": "string", "optional": true }, "page": { "kind": "record", "name": "Page", "optional": true } };
 const generatedDefinitionSpecs = { "content": { "field": "content", "target": "content.tpl", "html": true, "input": {} }, "layout": { "field": "layout", "target": "layout.tpl", "html": false, "input": {} } };
@@ -66,7 +66,7 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function render_content_tpl(assign, definitions, input, context, runtime, rootData) {
+function render_content_tpl(assign, definitions, input, context, runtime, rootData, scope) {
     const frame = new Frame("content.tpl", [0, 41, 65, 76], rootData);
     context.at(frame, [0, 44]);
     context.output.write("<section data-react-island id=\"counter\">\n<p>");
@@ -75,7 +75,7 @@ function render_content_tpl(assign, definitions, input, context, runtime, rootDa
     context.at(frame, [60, 76]);
     context.output.write("</p>\n</section>\n");
 }
-function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
     const frame = new Frame("layout.tpl", [0, 7, 26, 38, 46], rootData);
     context.at(frame, [0, 11]);
     context.output.write("<main>\n<h1>");
@@ -93,9 +93,10 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
         }
         else {
             const input = Object.assign({}, definition?.data ?? {}, {});
+            const blockScope = new Scope();
             context.enter("content.tpl", frame, [26, 37]);
             try {
-                render_content_tpl(assign, definitions, input, context, runtime, rootData);
+                render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
             }
             finally {
                 context.leave();
@@ -105,13 +106,13 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
     context.at(frame, [38, 46]);
     context.output.write("</main>\n");
 }
-function renderTemplate(target, assign, definitions, context, runtime, rootData) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
     switch (target) {
         case "content.tpl":
-            render_content_tpl(assign, definitions, {}, context, runtime, rootData);
+            render_content_tpl(assign, definitions, {}, context, runtime, rootData, scope);
             return;
         case "layout.tpl":
-            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
             return;
         default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');
     }
@@ -129,8 +130,8 @@ export class GeneratedProgram {
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== 'string')
         throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
-        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope);
         return context.output.toString();
     }
     finally {

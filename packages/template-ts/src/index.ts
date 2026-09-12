@@ -15,7 +15,7 @@ export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.j
 export type { ArtifactRefresh, EngineOptions, Program, RenderOptions, DefineInput } from './render/engine.js';
 export { Engine } from './render/engine.js';
 export { RuntimeEnvironment } from './render/runtime-environment.js';
-export { Frame, RenderContext } from './render/context.js';
+export { Frame, RenderContext, Scope } from './render/context.js';
 export { RuntimeBindings } from './render/runtime-bindings.js';
 export type { Limits } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';
