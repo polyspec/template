@@ -24,9 +24,11 @@ const binaryVariant = {
 
 export function createTarget({ program }) {
   const target = baseTarget(language);
-  target.var = (name, type) => program.dynamicRoot ? `generated_member::<${rustType(type)}>(runtime, root_data.as_ref(), ${quote(name)})?` : `assign.${name}${optional(type) ? '.clone().unwrap_or_default()' : '.clone()'}`;
+  target.convert = (value, _source, destination) => `generated_convert::<${rustType(destination.source)}, _>(&${value})?`;
+  target.var = (name, type, node) => program.dynamicRoot ? node.scope ? `generated_result::<${rustType(type)}>(&scope.lookup(&frame, ${quote(name)}))?` : `generated_member::<${rustType(type)}>(runtime, root_data.as_ref(), ${quote(name)})?` : `assign.${name}${optional(type) ? '.clone().unwrap_or_default()' : '.clone()'}`;
+  target.local = (name, type) => `generated_result::<${rustType(type)}>(&scope.lookup(&frame, ${quote(name)}))?`;
   target.member = (object, key, owner, node) => owner.kind === 'any' ? `generated_member::<${rustResult(node)}, _>(runtime, &${object}, ${quote(key)})?` : `${object}.${key}.clone()`;
-  target.set = (name, value, level) => indent(level, `let ${fieldName(name)} = ${value}; let _ = &${fieldName(name)};`);
+  target.set = (name, value, level) => indent(level, `scope.locals.insert(${quote(name)}.to_string(), generated_value(&${value})?);`);
   target.text = (value, level, node) => indent(level, `context.write(${quote(value)}, &frame, ${rustSpan(node.span)})?;`);
   target.echo = (expression, level, node) => indent(level, `let escaped = generated_escape(runtime, context, &${expression}, &frame, ${rustSpan(node.expr.span)})?; context.write(&escaped, &frame, ${rustSpan(node.span)})?;`);
   target.block = (node, n) => {
@@ -34,15 +36,16 @@ export function createTarget({ program }) {
 let Some(html) = definition.and_then(|value| value.html.as_ref()) else { return Err(runtime.error(context, &frame, ${rustSpan(node.span)}, ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, ${quote(`define ${node.id} is not registered`)})); };
 context.write(html, &frame, ${rustSpan(node.span)})?;
 }`);
-    const defaults = node.inputs.filter(item => item.root).map(item => `input.${fieldName(item.name)} = ${emitExpression(item.root, target)};`).join('\n');
+    const defaults = node.inputs.filter(item => item.root).map(item => `input.${fieldName(item.name)} = ${target.convert(emitExpression(item.root, target), item.root.valueType, item.valueType)};`).join('\n');
     const defined = node.inputs.map(item => `if let Some(value) = data.${fieldName(item.name)}.clone() { input.${fieldName(item.name)} = value; }`).join('\n');
-    const scoped = node.inputs.filter(item => item.scope).map(item => `input.${fieldName(item.name)} = ${emitExpression(item.scope, target)};`).join('\n');
-    const call = `${functionName(node.target)}(assign, definitions, input, context, runtime, root_data)`;
+    const scoped = node.inputs.filter(item => item.scope).map(item => `input.${fieldName(item.name)} = ${target.convert(emitExpression(item.scope, target), item.scope.valueType, item.valueType)};`).join('\n');
+    const call = `${functionName(node.target)}(assign, definitions, input, context, runtime, root_data, &mut block_scope)`;
     const mutable = node.inputs.length > 0 ? 'mut ' : '';
     const dataMerge = node.inputs.length > 0 ? `if let Some(data) = definition.and_then(|value| value.data.as_ref()) {\n${indent(1, defined)}\n}` : '';
     if (node.id === null) return indent(n, `{ let ${mutable}input = ${rustInput(node.target)}::default();
 ${defaults}
 ${scoped}
+let mut block_scope = Scope::default();
 context.enter(${quote(node.target)}, Some(&frame), Some(${rustSpan(node.span)}))?;
 let rendered = ${call};
 context.leave();
@@ -57,6 +60,7 @@ if let Some(html) = definition.and_then(|value| value.html.as_ref()) { context.w
 ${indent(1, defaults)}
 ${indent(1, dataMerge)}
 ${indent(1, scoped)}
+    let mut block_scope = Scope::default();
     context.enter(${quote(node.target)}, Some(&frame), Some(${rustSpan(node.span)}))?;
     let rendered = ${call};
     context.leave();
@@ -91,9 +95,10 @@ ${'    '.repeat(n)}}` : ''}`;
     const iterable = emitExpression(node.iter, target);
     const source = node.iter.valueType.kind === 'map' ? `${iterable}.entries().iter().map(|entry| (entry.key.clone(), entry.value.clone())).collect::<Vec<_>>()` : `${iterable}.iter().cloned().enumerate().map(|(key, value)| (key as f64, value)).collect::<Vec<_>>()`;
     return indent(n, `{ let entries = ${source};
+let ${name}_previous = scope.locals.get(${quote(node.name)}).cloned();
 for (${name}_index_raw, (${name}_key, ${name}_value)) in entries.iter().cloned().enumerate() {
     let _ = &${name}_key;
-    let ${name} = ${name}_value.clone();
+    scope.locals.insert(${quote(node.name)}.to_string(), generated_value(&${name}_value)?);
     let ${name}_index = ${name}_index_raw as f64;
     let ${name}_size = entries.len() as f64;
     let ${name}_first = ${name}_index_raw == 0;
@@ -101,14 +106,15 @@ for (${name}_index_raw, (${name}_key, ${name}_value)) in entries.iter().cloned()
     context.iterations += 1;
     runtime.limit(context, "iteration", context.iterations, &frame, ${rustSpan(node.span)})?;
 ${emitNodes(node.body, target, n + 1)}
-}${node.empty ? `
+}
+if let Some(previous) = ${name}_previous { scope.locals.insert(${quote(node.name)}.to_string(), previous); } else { scope.locals.remove(${quote(node.name)}); }${node.empty ? `
 if entries.is_empty() {
 ${emitNodes(node.empty, target, n + 1)}
 }` : ''}
 }`);
   };
   target.include = (node, n) => indent(n, `context.enter(${quote(node.target)}, Some(&frame), Some(${rustSpan(node.span)}))?;
-let rendered = ${functionName(node.target)}(assign, definitions, ${rustInput(node.target)} { ${node.inputs.map(item => `${fieldName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')} }, context, runtime, root_data);
+let rendered = ${functionName(node.target)}(assign, definitions, ${rustInput(node.target)} { ${node.inputs.map(item => `${fieldName(item.name)}: ${target.convert(emitExpression(item.value, target), item.value.valueType, item.valueType)}`).join(', ')} }, context, runtime, root_data, scope);
 context.leave();
 rendered?;`);
   return target;
@@ -123,7 +129,7 @@ export function emitDeclarations(context) {
   const definitionDataTypes = templateBodies.map(template => `#[derive(Clone, Default, Deserialize, Serialize)] pub struct ${rustDefinitionData(template.name)} { ${[...template.inputs].map(([name, type]) => `pub ${fieldName(name)}: Option<${rustType(type.source)}>`).join(', ')} }`).join('\n');
   const definitionsType = `#[derive(Clone, Deserialize, Serialize)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }\n#[derive(Clone, Default, Deserialize, Serialize)] pub struct Definitions { ${[...program.definitions].map(([name, definition]) => `pub ${fieldName(name)}: Option<Definition<${definition.template ? rustDefinitionData(definition.template) : '()'}>>`).join(', ')} }`;
   const assignType = program.dynamicRoot ? '#[derive(Clone, Default, Deserialize, Serialize)] pub struct Assign {}' : `#[derive(Clone, Default, Deserialize, Serialize)] pub struct Assign {\n${Object.entries(fields).map(([name, type]) => `    pub ${name}: ${rustType(type)},`).join('\n')}\n}`;
-  return `// Generated.\nuse polyspec_template::{ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RuntimeEnvironment, TemplateError, Value, bind, to_json_value};\nuse polyspec_template::ast::{BinaryOp, UnaryOp};\nuse polyspec_template::error::{LineIndex, Span};\nuse polyspec_template::render::context::{Frame, RenderContext};\nuse polyspec_template::render::runtime_bindings::RuntimeBindings;\nuse serde::{Deserialize, Deserializer, Serialize, Serializer};\nuse serde::de::{DeserializeOwned, MapAccess, Visitor};\nuse serde::ser::SerializeMap;\nuse serde_json::{Map as JsonMap, Value as JsonValue};\nuse std::collections::HashMap;\nuse std::fmt;\nuse std::rc::Rc;\n${rustRecords}\n${assignType}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}\npub struct ArtifactManifest { pub schema: u32, pub mode: String, pub target: String, pub entry: String, pub source_digest: String, pub type_digest: String, pub contract_digest: String, pub files: HashMap<String, String> }`;
+  return `// Generated.\nuse polyspec_template::{ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RuntimeEnvironment, TemplateError, Value, bind, to_json_value};\nuse polyspec_template::ast::{BinaryOp, UnaryOp};\nuse polyspec_template::error::{LineIndex, Span};\nuse polyspec_template::render::context::{Frame, RenderContext, Scope};\nuse polyspec_template::render::runtime_bindings::RuntimeBindings;\nuse serde::{Deserialize, Deserializer, Serialize, Serializer};\nuse serde::de::{DeserializeOwned, MapAccess, Visitor};\nuse serde::ser::SerializeMap;\nuse serde_json::{Map as JsonMap, Value as JsonValue};\nuse std::collections::HashMap;\nuse std::fmt;\nuse std::rc::Rc;\n${rustRecords}\n${assignType}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}\npub struct ArtifactManifest { pub schema: u32, pub mode: String, pub target: String, pub entry: String, pub source_digest: String, pub type_digest: String, pub contract_digest: String, pub files: HashMap<String, String> }`;
 }
 
 export function emitRuntime() {
@@ -138,6 +144,7 @@ impl<'de, K, V> Deserialize<'de> for OrderedMap<K, V> where K: Deserialize<'de> 
 fn generated_conversion_error(message: impl Into<String>) -> TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message) }
 fn generated_value<T: Serialize>(input: &T) -> Result<Value, TemplateError> { let json = serde_json::to_value(input).map_err(|error| generated_conversion_error(error.to_string()))?; bind(&json).map_err(|error| generated_conversion_error(error.message)) }
 fn generated_result<T: DeserializeOwned>(input: &Value) -> Result<T, TemplateError> { serde_json::from_value(to_json_value(input)).map_err(|error| generated_conversion_error(error.to_string())) }
+fn generated_convert<T: DeserializeOwned, V: Serialize>(input: &V) -> Result<T, TemplateError> { generated_result(&generated_value(input)?) }
 fn generated_truthy<T: Serialize>(runtime: &RuntimeBindings, input: &T) -> Result<bool, TemplateError> { Ok(runtime.truthy(&generated_value(input)?)) }
 fn generated_unary<T: DeserializeOwned, V: Serialize>(runtime: &RuntimeBindings, context: &RenderContext<'_>, operator: UnaryOp, input: &V, frame: &Frame, span: Span) -> Result<T, TemplateError> { let result = runtime.unary(context, operator, &generated_value(input)?, frame, span)?; generated_result(&result) }
 fn generated_binary<T: DeserializeOwned, L: Serialize, R: Serialize>(runtime: &RuntimeBindings, context: &RenderContext<'_>, operator: BinaryOp, left: &L, right: &R, frame: &Frame, span: Span) -> Result<T, TemplateError> { let result = runtime.binary(context, operator, &generated_value(left)?, &generated_value(right)?, frame, span)?; generated_result(&result) }
@@ -150,13 +157,13 @@ fn generated_escape<T: Serialize>(runtime: &RuntimeBindings, context: &RenderCon
 export function emitTemplates(context) {
   return context.templateBodies.map(template => {
     const typed = context.program.templates.get(template.name);
-    return `fn ${template.function}(assign: &Assign, definitions: &Definitions, input: ${rustInput(template.name)}, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime); let frame = Frame { name: ${quote(template.name)}.to_string(), lines: Some(${rustLines(typed.lines)}), context: Rc::clone(root_data) };\n${[...template.inputs].map(([name]) => `let ${fieldName(name)} = input.${fieldName(name)};`).join('\n')}\n${template.body}\n Ok(()) }`;
+    return `fn ${template.function}(assign: &Assign, definitions: &Definitions, input: ${rustInput(template.name)}, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: ${quote(template.name)}.to_string(), lines: Some(${rustLines(typed.lines)}), context: Rc::clone(root_data) };\n${[...template.inputs].map(([name]) => `scope.locals.insert(${quote(name)}.to_string(), generated_value(&input.${fieldName(name)})?);`).join('\n')}\n${template.body}\n Ok(()) }`;
   }).join('\n');
 }
 
 export function emitEntry(context) {
-  const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `        ${quote(template.name)} => ${template.function}(assign, definitions, ${rustInput(template.name)}::default(), context, runtime, root_data),`).join('\n');
+  const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `        ${quote(template.name)} => ${template.function}(assign, definitions, ${rustInput(template.name)}::default(), context, runtime, root_data, scope),`).join('\n');
   const definitionCases = [...context.program.definitions].map(([id, definition]) => `            ${quote(id)} => { if let Some(html) = &input.html { if ${definition.html ? 'false' : 'true'} || input.template.is_some() || input.data.is_some() { return Err(generated_error(name, format!("define.{id} has an invalid html entry"))); } plain.insert(id.clone(), serde_json::json!({"html": html})); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some(${quote(definition.template ?? '')}) { return Err(generated_error(name, format!("define.{id} has an invalid template"))); } plain.insert(id.clone(), serde_json::json!({"data": input.data})); targets.insert(id.clone(), GeneratedTarget { target: Some(${quote(definition.template ?? '')}.to_string()), html: None }); } },`).join('\n');
   const bindAssign = context.program.dynamicRoot ? 'Assign::default()' : 'serde_json::from_value(assign.clone()).map_err(|error| generated_error(name, error.to_string()))?';
-  return `fn render_template(target: &str, assign: &Assign, definitions: &Definitions, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>) -> Result<(), TemplateError> { match target {\n${dispatch}\n        _ => Err(context.fail(ErrorCode::E_LOAD_NOT_FOUND, None, None, format!("template {target} does not exist"))),\n} }\nfn generated_error(template: &str, message: String) -> TemplateError { TemplateError::without_position(ErrorCode::E_DATA_UNSUPPORTED_TYPE, template, message) }\nstruct GeneratedTarget { target: Option<String>, html: Option<String> }\nfn generated_bind_definitions(name: &str, input: &HashMap<String, polyspec_template::DefineInput>) -> Result<(Definitions, HashMap<String, GeneratedTarget>), TemplateError> { let mut plain = JsonMap::new(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {\n${definitionCases}\n            _ => return Err(generated_error(name, format!("define.{id} is not declared"))),\n        } } let definitions = serde_json::from_value(JsonValue::Object(plain)).map_err(|error| generated_error(name, error.to_string()))?; Ok((definitions, targets)) }\npub struct GeneratedProgram { pub runtime: RuntimeEnvironment }\nimpl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -> GeneratedProgram { GeneratedProgram { runtime } } }\nimpl Program for GeneratedProgram { fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, TemplateError> { let RenderTarget::Name(name) = target else { return Err(generated_error(${quote(context.program.entry)}, "generated target must be a template name".to_string())); }; let typed_assign: Assign = ${bindAssign}; let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); let (definitions, targets) = generated_bind_definitions(name, &options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: "Z".to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(move || { let mut context = RenderContext::new(&self.runtime, Rc::clone(&root_data), env.clone(), &target_name); let runtime = RuntimeBindings::new(); context.enter(&target_name, None, None)?; let result = if let Some(html) = &html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&root_data) }; context.write(html, &frame, [0, 0]) } else { render_template(&target_name, &typed_assign, &definitions, &mut context, &runtime, &root_data) }; context.leave(); result?; Ok(context.output) })) } fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> { self.prepare(target, assign, options)?.render() } }`;
+  return `fn render_template(target: &str, assign: &Assign, definitions: &Definitions, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { match target {\n${dispatch}\n        _ => Err(context.fail(ErrorCode::E_LOAD_NOT_FOUND, None, None, format!("template {target} does not exist"))),\n} }\nfn generated_error(template: &str, message: String) -> TemplateError { TemplateError::without_position(ErrorCode::E_DATA_UNSUPPORTED_TYPE, template, message) }\nstruct GeneratedTarget { target: Option<String>, html: Option<String> }\nfn generated_bind_definitions(name: &str, input: &HashMap<String, polyspec_template::DefineInput>) -> Result<(Definitions, HashMap<String, GeneratedTarget>), TemplateError> { let mut plain = JsonMap::new(); let mut targets = HashMap::new(); let _ = (&mut plain, &mut targets, &input); for (id, input) in input { let _ = input; match id.as_str() {\n${definitionCases}\n            _ => return Err(generated_error(name, format!("define.{id} is not declared"))),\n        } } let definitions = serde_json::from_value(JsonValue::Object(plain)).map_err(|error| generated_error(name, error.to_string()))?; Ok((definitions, targets)) }\npub struct GeneratedProgram { pub runtime: RuntimeEnvironment }\nimpl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -> GeneratedProgram { GeneratedProgram { runtime } } }\nimpl Program for GeneratedProgram { fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, TemplateError> { let RenderTarget::Name(name) = target else { return Err(generated_error(${quote(context.program.entry)}, "generated target must be a template name".to_string())); }; let typed_assign: Assign = ${bindAssign}; let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); let (definitions, targets) = generated_bind_definitions(name, &options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: "Z".to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(move || { let mut context = RenderContext::new(&self.runtime, Rc::clone(&root_data), env.clone(), &target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); context.enter(&target_name, None, None)?; let result = if let Some(html) = &html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&root_data) }; context.write(html, &frame, [0, 0]) } else { render_template(&target_name, &typed_assign, &definitions, &mut context, &runtime, &root_data, &mut scope) }; context.leave(); result?; Ok(context.output) })) } fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> { self.prepare(target, assign, options)?.render() } }`;
 }
