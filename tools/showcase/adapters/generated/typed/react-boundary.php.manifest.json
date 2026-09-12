@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "d56094099ab339567839a4e18a937de73b5696f18cb7f3272bf0de6a0422cf57",
+  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
   "files": {
     "react-boundary.php": {
       "path": "react-boundary.php",

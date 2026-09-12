@@ -1,12 +1,13 @@
 // Engine: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 import type { Template } from '../ast.js';
 import { errorAt, TemplateError, type Span } from '../errors.js';
-import { builtins, type BuiltIn, type Env, type HostFunction } from '../functions/index.js';
+import { type Env, type HostFunction } from '../functions/index.js';
 import { MapLoader, resolvePath, type Loader, type LoadResult, PathError } from '../loader.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from '../parser/scanner.js';
 import { BindError, bind, bindMap } from '../value/bind.js';
 import type { MapValue, Value } from '../value/value.js';
-import { DEFAULT_LIMITS, Frame, RenderContext, Scope, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
+import { Frame, RenderContext, Scope, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
+import { RuntimeEnvironment } from './runtime-environment.js';
 import { Renderer } from './statements.js';
 
 export type ParseFunction = (source: string | Uint8Array, name: string, delimiters: Delimiters) => ParsedTemplate;
@@ -95,9 +96,7 @@ export class Engine implements Program {
 /** AST program core with template loading, host functions, limits and parsed artifacts. */
 export class AstProgramCore implements RuntimeServices, Program {
   readonly loader: Loader;
-  readonly functions = new Map<string, HostFunction>();
-  readonly builtins: ReadonlyMap<string, BuiltIn> = builtins;
-  private readonly runtimeLimits: Limits;
+  readonly runtime: RuntimeEnvironment;
   readonly delimiters: Delimiters;
   private readonly parseFunction: ParseFunction | null;
   readonly artifactRefresh: ArtifactRefresh;
@@ -106,7 +105,7 @@ export class AstProgramCore implements RuntimeServices, Program {
   // Creates an engine. An unknown delimiter pair raises an error here, before any render.
   constructor(options: EngineOptions = {}) {
     this.loader = options.loader ?? new MapLoader();
-    this.runtimeLimits = { ...DEFAULT_LIMITS, ...options.limits };
+    this.runtime = new RuntimeEnvironment(options.limits, options.functions);
     this.parseFunction = options.parse ?? null;
     this.artifactRefresh = options.artifactRefresh ?? 'true';
     if (options.delimiters !== undefined) {
@@ -116,24 +115,21 @@ export class AstProgramCore implements RuntimeServices, Program {
     } else {
       this.delimiters = DEFAULT_DELIMITERS;
     }
-    for (const [name, fn] of Object.entries(options.functions ?? {})) this.register(name, fn);
   }
 
   // FUN-43, FUN-44.
   register(name: string, fn: HostFunction): void {
-    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error(`${JSON.stringify(name)} is not an identifier`);
-    if (this.builtins.has(name)) throw new Error(`${name} is a built-in function`);
-    this.functions.set(name, fn);
+    this.runtime.register(name, fn);
   }
 
   /** Returns the host function registered under a name. */
   hostFunction(name: string): HostFunction | undefined {
-    return this.functions.get(name);
+    return this.runtime.hostFunction(name);
   }
 
   /** Returns the active resource limits. */
   limits(): Limits {
-    return this.runtimeLimits;
+    return this.runtime.limits();
   }
 
   // RT-9, RT-40: loads a template by name through the loader and caches it by version.

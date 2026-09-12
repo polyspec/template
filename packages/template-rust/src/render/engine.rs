@@ -7,6 +7,7 @@ use crate::loader::{Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
 use crate::parser::scanner::{DEFAULT_DELIMITERS, Delimiters, parse_delimiters};
 use crate::render::context::{DefineEntry, Frame, Limits, ParsedTemplate, RenderContext, RuntimeServices, Scope};
+use crate::render::runtime_environment::RuntimeEnvironment;
 use crate::render::statements::Renderer;
 use crate::source::Source;
 use crate::value::OrderedMap;
@@ -117,10 +118,8 @@ impl Engine {
 pub struct AstProgram {
     /// The loader.
     pub loader: Box<dyn Loader>,
-    /// Host functions.
-    pub functions: HashMap<String, HostFunction>,
-    /// Limits.
-    pub limits: Limits,
+    /// Host functions and limits shared with generated programs.
+    pub runtime: RuntimeEnvironment,
     /// Delimiters.
     pub delimiters: Delimiters,
     /// Controls when loaded template artifacts are refreshed.
@@ -152,8 +151,7 @@ impl AstProgram {
         };
         AstProgram {
             loader: options.loader.unwrap_or_else(|| Box::new(MapLoader::new())),
-            functions: options.functions,
-            limits: options.limits.unwrap_or_default(),
+            runtime: RuntimeEnvironment::new(options.limits, options.functions),
             delimiters,
             artifact_refresh: options.artifact_refresh,
             cache: RefCell::new(HashMap::new()),
@@ -162,16 +160,7 @@ impl AstProgram {
 
     /// FUN-43, FUN-44: registers a host function. Returns an error message for an invalid or built-in name.
     pub fn register(&mut self, name: &str, function: HostFunction) -> Result<(), String> {
-        let valid = name.bytes().next().is_some_and(|b| b.is_ascii_alphabetic() || b == b'_')
-            && name.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_');
-        if !valid {
-            return Err(format!("{name:?} is not an identifier"));
-        }
-        if crate::functions::builtins().contains_key(name) {
-            return Err(format!("{name} is a built-in function"));
-        }
-        self.functions.insert(name.to_string(), function);
-        Ok(())
+        self.runtime.register(name, function)
     }
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
@@ -282,11 +271,11 @@ impl Program for AstProgram {
 
 impl RuntimeServices for AstProgram {
     fn limits(&self) -> Limits {
-        self.limits
+        self.runtime.limits()
     }
 
     fn host_function(&self, name: &str) -> Option<&HostFunction> {
-        self.functions.get(name)
+        self.runtime.host_function(name)
     }
 }
 

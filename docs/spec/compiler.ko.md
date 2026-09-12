@@ -28,7 +28,7 @@ Typed IR은 모든 symbol, template path, definition target, function signature,
 
 모든 generated module은 논리 구조 `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest`, `GeneratedProgram`을 노출한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
-`RuntimeServices`는 두 program mode가 함께 소유하는 runtime 경계다. 자원 제한과 host 함수 조회를 제공한다. AST에만 필요한 template loading은 AST renderer에 속하며 generated 실행 상태에는 들어가지 않는다. `RuntimeBindings`가 `RuntimeServices`를 사용하므로 generated 코드는 AST loader나 interpreter에 의존하지 않고 같은 값·오류 의미를 사용한다.
+`RuntimeServices`는 두 program mode가 함께 사용하는 runtime interface다. 구체적인 `RuntimeEnvironment`가 자원 제한과 host 함수 registry를 소유하고 등록을 한 번 검증하며 이 interface를 구현한다. 각 `AstProgram`과 `GeneratedProgram`은 environment 하나를 소유한다. AST에만 필요한 template loading은 AST renderer에 속하며 environment나 generated 실행 상태에는 들어가지 않는다. `RuntimeBindings`가 `RuntimeServices`를 사용하므로 generated 코드는 AST loader나 interpreter에 의존하지 않고 같은 값·오류 의미를 사용한다.
 
 Generated expression은 truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검증, 동등성, 정렬, lookup, 반복 entry, 함수, limit, error를 target runtime의 `RuntimeBindings`로 처리한다. 네 runtime의 AST evaluator와 statement renderer는 이미 이 경계를 사용하며 실제 선언을 compiler manifest와 대조한다. Backend는 typed operand에서 data-model 규칙과 정확히 같은 경우에만 native operation을 생성할 수 있다.
 
@@ -51,3 +51,5 @@ AST compiler와 runtime은 구현됐다. Generated 실행은 partial이다. 현�
 Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 
 두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 네 언어의 필드와 연산을 검사한다.
+
+같은 gate가 TypeScript compiler API, Go AST, Rust syntax tree, PHP Reflection으로 구체적인 `RuntimeEnvironment`의 field 순서, operation 소속과 인자 수를 검사한다. AST program이 limits나 host 함수 상태를 중복 소유하지 않고 environment를 소유하는지도 함께 확인한다.

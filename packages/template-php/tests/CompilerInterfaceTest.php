@@ -9,8 +9,9 @@ use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Program;
 use Polyspec\Template\Render\RuntimeBindings;
-use Polyspec\Template\Render\RuntimeServices;
 use Polyspec\Template\Render\Frame;
+use Polyspec\Template\Render\RuntimeEnvironment;
+use Polyspec\Template\Render\RuntimeServices;
 use Polyspec\Template\Render\Scope;
 
 /** Verifies public runtime declarations against the common compiler manifest. */
@@ -46,6 +47,7 @@ final class CompilerInterfaceTest extends TestCase
         $ast = new \ReflectionClass(AstProgram::class);
         self::assertFalse($ast->isAbstract());
         self::assertTrue($ast->implementsInterface(Program::class));
+        self::assertTrue($ast->hasProperty('runtime'));
 
         $bindings = new \ReflectionClass(RuntimeBindings::class);
         self::assertFalse($bindings->isAbstract());
@@ -65,6 +67,21 @@ final class CompilerInterfaceTest extends TestCase
         ));
         foreach ($contract['RuntimeServices']['operations'] as $operation) {
             self::assertSame(count($operation['parameters']), $services->getMethod($operation['name'])->getNumberOfParameters());
+        }
+
+        $runtime = new \ReflectionClass(RuntimeEnvironment::class);
+        self::assertFalse($runtime->isAbstract());
+        self::assertTrue($runtime->implementsInterface(RuntimeServices::class));
+        self::assertSame($manifest['languages']['php']['runtimeEnvironmentFields'], array_map(
+            static fn (\ReflectionProperty $property): string => $property->getName(),
+            $runtime->getProperties(),
+        ));
+        self::assertSame($manifest['languages']['php']['runtimeEnvironmentOperations'], array_values(array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            array_filter($runtime->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
+        )));
+        foreach ($contract['RuntimeEnvironment']['operations'] as $operation) {
+            self::assertSame(count($operation['parameters']), $runtime->getMethod($operation['name'])->getNumberOfParameters());
         }
         foreach ([Frame::class => 'frameFields', Scope::class => 'scopeFields'] as $class => $mapping) {
             self::assertSame($manifest['languages']['php'][$mapping], array_map(

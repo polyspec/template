@@ -175,6 +175,18 @@
       ],
       "invariant": "AST and generated programs expose the same resource limits and host function lookup without coupling render state to an AST loader."
     },
+    "RuntimeEnvironment": {
+      "fields": [
+        "limits",
+        "hostFunctions"
+      ],
+      "operations": [
+        "register",
+        "limits",
+        "hostFunction"
+      ],
+      "invariant": "One concrete environment owns limits and host functions and serves both AST and generated programs."
+    },
     "RenderFrame": {
       "fields": [
         "name",
@@ -251,12 +263,13 @@
         "getOrSet"
       ]
     },
-    "RuntimeServices": {
+    "RuntimeEnvironment": {
       "owns": [
         "limits",
         "hostFunctions"
       ],
       "operations": [
+        "register",
         "limits",
         "hostFunction"
       ]
@@ -299,7 +312,10 @@
     },
     "AstProgram": {
       "kind": "concrete",
-      "implements": "Program"
+      "implements": "Program",
+      "owns": [
+        "runtime"
+      ]
     },
     "GeneratedProgram": {
       "kind": "generated-concrete",
@@ -430,6 +446,36 @@
     "RuntimeServices": {
       "kind": "interface",
       "operations": [
+        {
+          "name": "limits",
+          "parameters": [],
+          "returns": "Limits"
+        },
+        {
+          "name": "hostFunction",
+          "parameters": [
+            "name"
+          ],
+          "returns": "HostFunction or missing"
+        }
+      ]
+    },
+    "RuntimeEnvironment": {
+      "kind": "concrete",
+      "implements": "RuntimeServices",
+      "fields": [
+        "limits",
+        "hostFunctions"
+      ],
+      "operations": [
+        {
+          "name": "register",
+          "parameters": [
+            "name",
+            "function"
+          ],
+          "returns": "void or error"
+        },
         {
           "name": "limits",
           "parameters": [],
@@ -604,14 +650,23 @@
       "returns": "UTF-8 string"
     },
     {
+      "name": "register",
+      "owner": "RuntimeEnvironment",
+      "parameters": [
+        "name",
+        "function"
+      ],
+      "returns": "void or error"
+    },
+    {
       "name": "limits",
-      "owner": "RuntimeServices",
+      "owner": "RuntimeEnvironment",
       "parameters": [],
       "returns": "Limits"
     },
     {
       "name": "hostFunction",
-      "owner": "RuntimeServices",
+      "owner": "RuntimeEnvironment",
       "parameters": [
         "name"
       ],
@@ -631,6 +686,15 @@
         "limits": "limits",
         "hostFunction": "hostFunction"
       },
+      "runtimeEnvironmentFields": [
+        "runtimeLimits",
+        "hostFunctions"
+      ],
+      "runtimeEnvironmentOperations": [
+        "register",
+        "limits",
+        "hostFunction"
+      ],
       "frameFields": [
         "name",
         "lines",
@@ -657,6 +721,15 @@
         "limits": "Limits",
         "hostFunction": "HostFunction"
       },
+      "runtimeEnvironmentFields": [
+        "limits",
+        "hostFunctions"
+      ],
+      "runtimeEnvironmentOperations": [
+        "Register",
+        "Limits",
+        "HostFunction"
+      ],
       "frameFields": [
         "Name",
         "Lines",
@@ -694,6 +767,15 @@
         "limits": "limits",
         "hostFunction": "host_function"
       },
+      "runtimeEnvironmentFields": [
+        "limits",
+        "host_functions"
+      ],
+      "runtimeEnvironmentOperations": [
+        "register",
+        "limits",
+        "host_function"
+      ],
       "frameFields": [
         "name",
         "lines",
@@ -720,6 +802,15 @@
         "limits": "limits",
         "hostFunction": "hostFunction"
       },
+      "runtimeEnvironmentFields": [
+        "limits",
+        "hostFunctions"
+      ],
+      "runtimeEnvironmentOperations": [
+        "register",
+        "limits",
+        "hostFunction"
+      ],
       "frameFields": [
         "name",
         "lines",
