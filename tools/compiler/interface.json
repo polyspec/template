@@ -15,9 +15,13 @@
       "fields": ["entry", "fields", "records", "functions", "definitions", "templates"],
       "invariant": "All symbols, paths, expression types and block inputs are resolved before a language backend runs."
     },
+    "DefinitionData<T>": {
+      "fields": "one presence-preserving optional field for every Input<T> field",
+      "invariant": "An absent field does not overwrite assign; a present nullable field can explicitly carry null."
+    },
     "Definition<T>": {
       "fields": ["html", "data"],
-      "invariant": "html bypasses template execution; data has the fixed input type of the declared target template."
+      "invariant": "html bypasses template execution; data has the fixed DefinitionData<T> type of the declared target template."
     },
     "Definitions": {
       "fields": "one optional Definition<T> field for every declared define key",
@@ -28,7 +32,7 @@
       "invariant": "Block input precedence is assign, definition.data, block scope."
     },
     "GeneratedModule": {
-      "types": ["Assign", "Definition<T>", "Definitions", "Input<T>"],
+      "types": ["Assign", "DefinitionData<T>", "Definition<T>", "Definitions", "Input<T>"],
       "operations": ["renderTemplate", "render"],
       "invariant": "A block invokes its generated child function directly; callers do not supply a pre-rendered string slot."
     }
@@ -69,6 +73,7 @@
     "typescript": {
       "assign": "Assign",
       "definition": "Definition<T>",
+      "definitionData": "DefinitionData<T>",
       "definitions": "Definitions",
       "input": "Input_<template>",
       "renderTemplate": "renderTemplate",
@@ -77,6 +82,7 @@
     "go": {
       "assign": "Assign",
       "definition": "Definition[T]",
+      "definitionData": "DefinitionData_<template>",
       "definitions": "Definitions",
       "input": "Input_<template>",
       "renderTemplate": "RenderTemplate",
@@ -85,6 +91,7 @@
     "rust": {
       "assign": "Assign",
       "definition": "Definition<T>",
+      "definitionData": "DefinitionData_<template>",
       "definitions": "Definitions",
       "input": "Input_<template>",
       "renderTemplate": "render_template",
@@ -93,6 +100,7 @@
     "php": {
       "assign": "Assign",
       "definition": "Definition",
+      "definitionData": "DefinitionData_<template>",
       "definitions": "Definitions",
       "input": "Input_<template>",
       "renderTemplate": "render_template",

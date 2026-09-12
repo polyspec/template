@@ -164,7 +164,7 @@ The logical request has this JSON shape:
 - **RT-57** A compiled artifact contains the canonical AST and a manifest containing its schema version, language, scenario, source SHA-256, artifact SHA-256 and template artifact paths. The artifact is generated before service startup and is loaded once into the process.
 - **RT-58** Artifact refresh has three policies: `dev` refreshes on every call, `true` refreshes after a source version change, and `false` reads only the deployed artifact and fails when it is missing or stale. These policies apply independently after `compile.mode` has selected the artifact representation.
 - **RT-59** Parsing, source file discovery and artifact generation do not occur in the request path. Rendering the same artifact with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
-- **RT-68** A typed generated artifact declares its assign, definitions and template inputs. A generated block calls its target template function directly after applying root assign, definition data and block scope in that order. A pre-rendered string slot is not a generated template target.
+- **RT-68** A typed generated artifact declares its assign, presence-preserving definition data, definitions and template inputs. A generated block calls its target template function directly after applying root assign, supplied definition data fields and block scope in that order. A pre-rendered string slot is not a generated template target.
 
 The interface declares two execution modes:
 

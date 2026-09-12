@@ -29,8 +29,11 @@ fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool {
 #[derive(Clone, Default)] pub struct Input_card_tpl { pub label: String }
 #[derive(Clone, Default)] pub struct Input_layout_tpl {  }
 #[derive(Clone, Default)] pub struct Input_partial_tpl { pub values: Vec<f64> }
+#[derive(Clone, Default)] pub struct DefinitionData_card_tpl { pub label: Option<String> }
+#[derive(Clone, Default)] pub struct DefinitionData_layout_tpl {  }
+#[derive(Clone, Default)] pub struct DefinitionData_partial_tpl { pub values: Option<Vec<f64>> }
 #[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
-#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<Input_card_tpl>>, pub layout: Option<Definition<Input_layout_tpl>> }
+#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<DefinitionData_card_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
 fn render_card_tpl(assign: &Assign, definitions: &Definitions, input: Input_card_tpl) -> String { let mut out = String::new();
 let label = input.label;
     out.push_str("<p class=\"card\">");
@@ -95,7 +98,9 @@ fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: Input_la
     if let Some(html) = definition.and_then(|value| value.html.as_ref()) { out.push_str(html); } else {
         let mut input = Input_card_tpl::default();
 
-        if let Some(data) = definition.and_then(|value| value.data.clone()) { input = data; }
+        if let Some(data) = definition.and_then(|value| value.data.as_ref()) {
+            if let Some(value) = data.label.clone() { input.label = value; }
+        }
         input.label = assign.page.clone().title;
         out.push_str(&render_card_tpl(assign, definitions, input));
     }

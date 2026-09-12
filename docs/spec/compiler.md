@@ -14,6 +14,6 @@ Generated modules expose the same logical components. Language spelling differs 
 <!--@include: ../../tools/compiler/generated/compiler-classes.mmd-->
 ```
 
-`Definition<T>.data` has the fixed `Input<T>` shape of its declared target. A generated block creates that input in the order `assign`, `definition.data`, `block scope`, then calls the generated child template function directly. `Definition<T>.html` is the explicit branch that returns already trusted HTML. It does not masquerade as a compiled template.
+`Definition<T>.data` has the fixed, partial `DefinitionData<T>` shape of its declared target. It preserves whether each field was supplied, so an omitted data field cannot erase a root assign value. A generated block creates `Input<T>` in the order `assign`, present definition data fields, block scope, then calls the generated child template function directly. `Definition<T>.html` is the explicit branch that returns already trusted HTML. It does not masquerade as a compiled template.
 
 The generator emits source text because host compilers consume source text. This is a normal compiler backend boundary. Correctness depends on every emitted declaration and statement coming from the typed program. Scenario names, fixed fields and pre-rendered output are not backend inputs.

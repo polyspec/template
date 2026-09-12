@@ -14,8 +14,11 @@ type Assign struct {
 type Input_card_tpl struct { Label string }
 type Input_layout_tpl struct {  }
 type Input_partial_tpl struct { Values []float64 }
+type DefinitionData_card_tpl struct { Label *string }
+type DefinitionData_layout_tpl struct {  }
+type DefinitionData_partial_tpl struct { Values *[]float64 }
 type Definition[T any] struct { HTML *string; Data *T }
-type Definitions struct { Content *Definition[Input_card_tpl]; Layout *Definition[Input_layout_tpl] }
+type Definitions struct { Content *Definition[DefinitionData_card_tpl]; Layout *Definition[DefinitionData_layout_tpl] }
 type OrderedEntry[K comparable, V any] struct { Key K; Value V }
 type OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }
 func NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }
@@ -39,7 +42,9 @@ label := input.Label
 func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder
 
     values := func() []float64 { result := []float64{}; result = append(result, float64(0)); result = append(result, assign.Numbers...); return result }()
+    _ = values
     merged := func() OrderedMap[string, string] { result := NewOrderedMap[string, string](); for _, entry := range assign.Lookup.Entries() { result.Set(entry.Key, entry.Value) }; result.Set("z", "Z"); return result }()
+    _ = merged
     out.WriteString("<section>\n<h1>")
     fmt.Fprint(&out, assign.Page.Title)
     out.WriteString("</h1>\n<p>")
@@ -94,7 +99,9 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
     if definition == nil { panic("generated definition content is missing") }
     if definition != nil && definition.HTML != nil { out.WriteString(*definition.HTML) } else {
         input := Input_card_tpl{}
-        if definition != nil && definition.Data != nil { input = *definition.Data }
+        if definition != nil && definition.Data != nil {
+            if definition.Data.Label != nil { input.Label = *definition.Data.Label }
+        }
         input.Label = assign.Page.Title
         out.WriteString(render_card_tpl(assign, definitions, input))
     }

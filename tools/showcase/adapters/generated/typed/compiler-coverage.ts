@@ -19,7 +19,8 @@ export interface Assign {
 export interface Input_card_tpl { label: string; }
 export interface Input_layout_tpl {  }
 export interface Input_partial_tpl { values: Array<number>; }
-export interface Definition<T> { html?: string; data?: Partial<T>; }
+export type DefinitionData<T> = Partial<T>;
+export interface Definition<T> { html?: string; data?: DefinitionData<T>; }
 export interface Definitions { content?: Definition<Input_card_tpl>; layout?: Definition<Input_layout_tpl>; }
 function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_card_tpl): string { let out = '';
   const label = input.label;

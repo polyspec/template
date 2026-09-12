@@ -11,6 +11,8 @@ public readonly ?Page $page = null
 ) {} }
 final class Input_content_tpl { public function __construct() {} }
 final class Input_layout_tpl { public function __construct() {} }
+final class DefinitionData_content_tpl { public function __construct() {} }
+final class DefinitionData_layout_tpl { public function __construct() {} }
 final class Definition { public function __construct(public readonly ?string $html = null, public readonly mixed $data = null) {} }
 final class Definitions { public function __construct(public readonly ?Definition $content = null, public readonly ?Definition $layout = null) {} }
 function generated_truthy(mixed $value): bool { return $value !== null && $value !== false && $value !== '' && $value !== 0 && $value !== []; }
@@ -37,8 +39,11 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
     if ($definition?->html !== null) {
         $out .= $definition->html;
     } else {
-        if ($definition?->data !== null && !($definition->data instanceof Input_content_tpl)) throw new RuntimeException("generated definition content data has an invalid type");
-        $input = $definition?->data === null ? new Input_content_tpl() : clone $definition->data;
+        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_content_tpl)) throw new RuntimeException("generated definition content data has an invalid type");
+        $input = new Input_content_tpl();
+        if ($definition?->data !== null) {
+
+        }
 
         $out .= render_content_tpl($assign, $definitions, $input);
     }

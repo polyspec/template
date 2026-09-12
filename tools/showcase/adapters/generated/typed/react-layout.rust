@@ -28,8 +28,10 @@ fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool {
 }
 #[derive(Clone, Default)] pub struct Input_content_tpl {  }
 #[derive(Clone, Default)] pub struct Input_layout_tpl {  }
+#[derive(Clone, Default)] pub struct DefinitionData_content_tpl {  }
+#[derive(Clone, Default)] pub struct DefinitionData_layout_tpl {  }
 #[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
-#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<Input_content_tpl>>, pub layout: Option<Definition<Input_layout_tpl>> }
+#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<DefinitionData_content_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
 fn render_content_tpl(assign: &Assign, definitions: &Definitions, input: Input_content_tpl) -> String { let mut out = String::new();
 
     out.push_str("<section data-react-island id=\"counter\">\n<p>");
@@ -46,7 +48,9 @@ fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: Input_la
     if let Some(html) = definition.and_then(|value| value.html.as_ref()) { out.push_str(html); } else {
         let mut input = Input_content_tpl::default();
 
-        if let Some(data) = definition.and_then(|value| value.data.clone()) { input = data; }
+        if let Some(data) = definition.and_then(|value| value.data.as_ref()) {
+
+        }
 
         out.push_str(&render_content_tpl(assign, definitions, input));
     }
