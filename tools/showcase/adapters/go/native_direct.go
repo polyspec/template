@@ -97,7 +97,17 @@ func generated_compiler_coverage__layout_tpl(root *value.OrderedMap, define Defi
 	ctx["merged"] = generatedMap([]generatedCollectionItem{{Value: generatedLookup(ctx, root, "lookup"), Spread: true}, {Key: "z", Value: "Z"}})
 	out.WriteString("<section>\n<h1>")
 	if err := generatedEcho(&out, generatedMember(generatedLookup(ctx, root, "page"), "title")); err != nil { return "", err }
-	out.WriteString("</h1>\n<p>")
+	out.WriteString("</h1>\n<p class=\"escaped\">")
+	if err := generatedEcho(&out, generatedLookup(ctx, root, "dangerous")); err != nil { return "", err }
+	out.WriteString("</p>\n<p class=\"logical\">")
+	if err := generatedEcho(&out, generatedBinaryFull("&&", generatedLookup(ctx, root, "flag"), "x")); err != nil { return "", err }
+	out.WriteString("|")
+	if err := generatedEcho(&out, generatedBinaryFull("||", false, float64(2))); err != nil { return "", err }
+	out.WriteString("</p>\n<p class=\"empty-truthiness\">")
+	if err := generatedEcho(&out, generatedBinaryFull("&&", generatedLookup(ctx, root, "empty_list"), generatedLookup(ctx, root, "flag"))); err != nil { return "", err }
+	out.WriteString("|")
+	if err := generatedEcho(&out, generatedBinaryFull("&&", generatedLookup(ctx, root, "empty_map"), generatedLookup(ctx, root, "flag"))); err != nil { return "", err }
+	out.WriteString("</p>\n<p>")
 	if err := generatedEcho(&out, generatedIndex(generatedLookup(ctx, root, "values"), float64(1))); err != nil { return "", err }
 	out.WriteString("|")
 	if err := generatedEcho(&out, generatedIndex(generatedLookup(ctx, root, "merged"), "z")); err != nil { return "", err }

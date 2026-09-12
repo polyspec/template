@@ -203,7 +203,7 @@ function plain(mixed $value): mixed
         $result = [];
         foreach ($value->entries() as $key => $item) $result[$key] = plain($item);
 
-        return $result;
+        return $result === [] ? (object) [] : $result;
     }
     if (is_array($value)) return array_map('plain', $value);
 

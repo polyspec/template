@@ -152,8 +152,7 @@ contract-generate: ## Generate showcase declarations and Mermaid diagrams
 contract-check: build-ts ## Verify generated declarations, implementations and runtime state recovery
 	node scripts/check-showcase-contract.mjs
 
-showcase: build-ts ## Build the executable example site and its result artifacts
-	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
+showcase: typed-generator ## Build the executable example site and its result artifacts
 	node tools/showcase/generate-direct.mjs
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
@@ -172,14 +171,15 @@ showcase-check: build-ts ## Verify example-site parity, repeatability and browse
 showcase-compile: build-ts ## Generate committed per-language AST artifacts
 	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
 
-typed-generator: ## Generate type-fixed host source from canonical AST
+typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
 	@mkdir -p tools/showcase/adapters/generated/typed
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/react-boundary/compiled/typescript/manifest.json --manifest examples/site/scenarios/react-boundary/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-boundary.$$lang; done
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/compiler-coverage/compiled/typescript/manifest.json --manifest examples/site/scenarios/compiler-coverage/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/compiler-coverage.$$lang; done
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/scope-precedence/compiled/typescript/manifest.json --manifest examples/site/scenarios/scope-precedence/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/scope-precedence.$$lang; done
 	@for scenario in empty-state html-slot; do for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --graph examples/site/scenarios/$$scenario/compiled/typescript/manifest.json --manifest examples/site/scenarios/$$scenario/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/$$scenario.$$lang; done; done
 
-typed-generator-check: ## Verify type-fixed generated source is reproducible
+typed-generator-check: build-ts ## Verify type-fixed generated source is reproducible
+	node tools/showcase/compile.mjs --mode off --langs $(SHOWCASE_LANGS)
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/react-boundary/compiled/typescript/manifest.json --manifest examples/site/scenarios/react-boundary/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-boundary.$$lang; done
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/compiler-coverage/compiled/typescript/manifest.json --manifest examples/site/scenarios/compiler-coverage/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/compiler-coverage.$$lang; done
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/scope-precedence/compiled/typescript/manifest.json --manifest examples/site/scenarios/scope-precedence/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/scope-precedence.$$lang; done

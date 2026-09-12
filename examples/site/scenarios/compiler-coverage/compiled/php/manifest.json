@@ -10,8 +10,8 @@
     },
     "layout.tpl": {
       "artifact": "layout.tpl.ast.json",
-      "sourceSha256": "6bfb1a92eb46c57f8ae2c40a0c4de5f7c00e3021ef0fa5747e518dc5b4bd4ee4",
-      "artifactSha256": "8596d90a3228b0de94d1299814be3bb3c112d91157354828b02641efb06702c8"
+      "sourceSha256": "10ea1819adb17d5e7f2108ca111e33df72ecef80a8be1cc1db3dac7aaad77bb0",
+      "artifactSha256": "b8cc29842a6d727c2989151be4939864beceb76c294acd1a422f81af108cc932"
     },
     "partial.tpl": {
       "artifact": "partial.tpl.ast.json",

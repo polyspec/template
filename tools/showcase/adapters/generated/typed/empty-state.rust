@@ -42,4 +42,4 @@ pub fn render_template(target: &str, assign: &Assign, definitions: &Definitions)
         _ => panic!("generated template is missing or requires inputs: {target}"),
 } }
 pub fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
-fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }
+fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;").replace('\'', "&#39;") }

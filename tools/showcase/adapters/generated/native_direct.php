@@ -8,8 +8,8 @@ use Polyspec\Template\TemplateError;
 
 function generated_lookup(MapValue $ctx, MapValue $root, string $name): mixed { return $ctx->has($name) ? $ctx->get($name) : $root->get($name); }
 function generated_member(mixed $value, string $key): mixed { return $value instanceof MapValue ? $value->get($key) : null; }
-function generated_truthy(mixed $value): bool { return $value !== null && $value !== false && $value !== '' && $value !== 0; }
-function generated_escape(mixed $value): string { if ($value instanceof MapValue || is_array($value)) throw new RuntimeException('a collection cannot be converted to text'); return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
+function generated_truthy(mixed $value): bool { if ($value === null || $value === false || $value === '' || $value === 0) return false; if (is_array($value)) return $value !== []; if ($value instanceof MapValue) return $value->keys() !== []; return true; }
+function generated_escape(mixed $value): string { if ($value instanceof MapValue || is_array($value)) throw new RuntimeException('a collection cannot be converted to text'); return str_replace('&#039;', '&#39;', htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')); }
 function generated_call(string $name, array $args): mixed { if ($name === 'default') return generated_truthy($args[0] ?? null) ? ($args[0] ?? null) : ($args[1] ?? null); return null; }
 function generated_block(string $id, string $path, string $scenario, MapValue $root, MapValue $define, MapValue $scope): string { $entry = $define->get($id); if (!$entry instanceof DefineEntry) return ''; if ($entry->html !== null) return $entry->html; $context = $root->copy(); if ($entry->data !== null) foreach ($entry->data->entries() as $key => $value) $context->set($key, $value); foreach ($scope->entries() as $key => $value) $context->set($key, $value); return generated_template($entry->template ?? $path, $scenario, $root, $define, $context); }
 function generated_template(string $name, string $scenario, MapValue $root, MapValue $define, MapValue $parent): string { return match ($scenario) {
@@ -66,7 +66,17 @@ function generated_compiler_coverage__layout_tpl(MapValue $root, MapValue $defin
     $ctx->set('merged', generated_map([['value' => generated_lookup($ctx, $root, 'lookup'), 'spread' => true], ['key' => 'z', 'value' => 'Z', 'spread' => false]]));
     $out .= "<section>\n<h1>";
     $out .= generated_escape_full(generated_member(generated_lookup($ctx, $root, 'page'), 'title'));
-    $out .= "</h1>\n<p>";
+    $out .= "</h1>\n<p class=\"escaped\">";
+    $out .= generated_escape_full(generated_lookup($ctx, $root, 'dangerous'));
+    $out .= "</p>\n<p class=\"logical\">";
+    $out .= generated_escape_full(generated_binary_full('&&', generated_lookup($ctx, $root, 'flag'), 'x'));
+    $out .= "|";
+    $out .= generated_escape_full(generated_binary_full('||', false, 2));
+    $out .= "</p>\n<p class=\"empty-truthiness\">";
+    $out .= generated_escape_full(generated_binary_full('&&', generated_lookup($ctx, $root, 'empty_list'), generated_lookup($ctx, $root, 'flag')));
+    $out .= "|";
+    $out .= generated_escape_full(generated_binary_full('&&', generated_lookup($ctx, $root, 'empty_map'), generated_lookup($ctx, $root, 'flag')));
+    $out .= "</p>\n<p>";
     $out .= generated_escape_full(generated_index(generated_lookup($ctx, $root, 'values'), 1));
     $out .= "|";
     $out .= generated_escape_full(generated_index(generated_lookup($ctx, $root, 'merged'), 'z'));

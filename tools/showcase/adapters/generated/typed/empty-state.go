@@ -1,6 +1,6 @@
 // Generated.
 package generated
-import ("fmt"; "strings")
+import ("fmt"; "reflect"; "strings")
 
 type Assign struct {
 	Page string
@@ -19,10 +19,10 @@ func generatedMapGet[K comparable, V any](value OrderedMap[K, V], key K) V { res
 func generatedListGet[T any](value []T, index int) T { if index >= 0 && index < len(value) { return value[index] }; var zero T; return zero }
 func generatedTernary[T any](test bool, yes, no T) T { if test { return yes }; return no }
 func generatedEscape(value any) string { if value == nil { return "" }; return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "\"", "&quot;", "'", "&#39;").Replace(fmt.Sprint(value)) }
-func generatedTruthy(value any) bool { switch value := value.(type) { case nil: return false; case bool: return value; case float64: return value != 0; case string: return value != ""; default: return true } }
+func generatedTruthy(value any) bool { if value == nil { return false }; reflected := reflect.ValueOf(value); switch reflected.Kind() { case reflect.Bool: return reflected.Bool(); case reflect.Float32, reflect.Float64: return reflected.Float() != 0; case reflect.String, reflect.Array, reflect.Slice, reflect.Map: return reflected.Len() != 0; case reflect.Struct: field := reflected.FieldByName("entries"); if field.IsValid() { return field.Len() != 0 } }; return true }
 func generatedUnary(op string, value any) any { if op == "!" { return !generatedTruthy(value) }; return -value.(float64) }
 func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
-func generatedCall(name string, args []any) any { if name == "default" && len(args) == 2 { if generatedTruthy(args[0]) { return args[0] }; return args[1] }; panic("generated function is not linked: "+name) }
+func generatedDefault(value, fallback any) any { if generatedTruthy(value) { return value }; return fallback }
 func valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }
 func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder
 

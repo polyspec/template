@@ -8,7 +8,7 @@ const manifest = JSON.parse(readFileSync(resolve(root, 'tools/compiler/interface
 if (manifest.schema !== 1 || manifest.name !== 'TypedTemplateCompiler') throw new Error('invalid compiler interface manifest');
 const operationNames = manifest.operations?.map(operation => operation.name).join(',');
 if (operationNames !== 'loadSourceGraph,lowerSourceGraph,emit,renderTemplate,render') throw new Error('compiler operations are missing or reordered');
-for (const name of ['SourceGraph', 'TypeManifest', 'TypedProgram', 'DefinitionData<T>', 'Definition<T>', 'Definitions', 'Input<T>', 'GeneratedModule']) {
+for (const name of ['SourceGraph', 'TypeManifest', 'FunctionSignature', 'TypedProgram', 'DefinitionData<T>', 'Definition<T>', 'Definitions', 'Input<T>', 'GeneratedModule']) {
   if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
 }
 
@@ -39,6 +39,7 @@ for (const [language, [file, patterns]] of Object.entries(outputs)) {
   const source = readFileSync(resolve(root, file), 'utf8');
   for (const pattern of patterns) if (!pattern.test(source)) throw new Error(`${language}: generated module does not implement ${pattern}`);
   if (/\bslots\b|map\[string\]string|HashMap<String, String>/.test(source)) throw new Error(`${language}: generated module still accepts pre-rendered string slots`);
+  if (/generatedCall|generated_call/.test(source)) throw new Error(`${language}: generated module defers unsupported function failure until render time`);
 }
 
 process.stdout.write('compiler interface: four generated module structures passed\n');

@@ -45,3 +45,4 @@
 - showcase 템플릿 등록을 식별자와 경로의 직접 대응으로 단순화하고 define 데이터나 완성된 HTML이 필요한 경우에만 객체를 유지했으며 예제 페이지에서 포털 assign JSON과 두 소스 템플릿을 기본으로 펼쳐 보이게 했다.
 
 - TypeScript·Go·Rust·PHP에 동일한 `PageCache.getOrSet` miss/hit 계약을 추가했다. hit에서는 render callback을 호출하지 않고 저장된 HTML을 반환하며, miss에서는 한 번 호출하고 결과를 저장한다. 재생성 가능한 산출물을 dangling command continuation 없이 제거하도록 `make clean`도 수정했다.
+- TypeScript·Go·Rust·PHP 생성 소스의 동등성을 강화했다. HTML escape 문자 다섯 개를 동일하게 처리하고 논리 연산자는 항상 boolean을 반환하며 빈 list와 map은 공통 진릿값 규칙을 따르게 했다. 지원하지 않는 generated 함수는 런타임 stub으로 남기지 않고 공통 IR에서 실패한다. 빌드 순서는 `tpl`에서 AST, typed host source로 이어지도록 강제하고 compiler 계약 도표에 source, manifest, typed program, 함수 signature를 포함했다.

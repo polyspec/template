@@ -15,7 +15,7 @@
     "layout": { "template": "layout.tpl" }
   },
   "functions": {
-    "default": { "args": ["string?", "string"], "returns": "string" }
+    "default": { "implementation": "builtin", "args": ["string?", "string"], "returns": "string" }
   },
   "templates": {
     "content.tpl": {

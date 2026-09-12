@@ -128,10 +128,192 @@
     },
     {
       "type": "Text",
-      "value": "</h1>\n<p>",
+      "value": "</h1>\n<p class=\"escaped\">",
       "span": [
         90,
-        99
+        115
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "dangerous",
+        "span": [
+          118,
+          127
+        ]
+      },
+      "span": [
+        115,
+        128
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>\n<p class=\"logical\">",
+      "span": [
+        128,
+        152
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Var",
+          "name": "flag",
+          "span": [
+            155,
+            159
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "x",
+          "span": [
+            163,
+            166
+          ]
+        },
+        "span": [
+          155,
+          166
+        ]
+      },
+      "span": [
+        152,
+        167
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        167,
+        168
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "||",
+        "left": {
+          "type": "Literal",
+          "kind": "bool",
+          "value": false,
+          "span": [
+            171,
+            176
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2,
+          "span": [
+            180,
+            181
+          ]
+        },
+        "span": [
+          171,
+          181
+        ]
+      },
+      "span": [
+        168,
+        182
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>\n<p class=\"empty-truthiness\">",
+      "span": [
+        182,
+        215
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Var",
+          "name": "empty_list",
+          "span": [
+            218,
+            228
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "flag",
+          "span": [
+            232,
+            236
+          ]
+        },
+        "span": [
+          218,
+          236
+        ]
+      },
+      "span": [
+        215,
+        237
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        237,
+        238
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Var",
+          "name": "empty_map",
+          "span": [
+            241,
+            250
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "flag",
+          "span": [
+            254,
+            258
+          ]
+        },
+        "span": [
+          241,
+          258
+        ]
+      },
+      "span": [
+        238,
+        259
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>\n<p>",
+      "span": [
+        259,
+        267
       ]
     },
     {
@@ -142,8 +324,8 @@
           "type": "Var",
           "name": "values",
           "span": [
-            102,
-            108
+            270,
+            276
           ]
         },
         "index": {
@@ -151,26 +333,26 @@
           "kind": "number",
           "value": 1,
           "span": [
-            109,
-            110
+            277,
+            278
           ]
         },
         "span": [
-          102,
-          111
+          270,
+          279
         ]
       },
       "span": [
-        99,
-        112
+        267,
+        280
       ]
     },
     {
       "type": "Text",
       "value": "|",
       "span": [
-        112,
-        113
+        280,
+        281
       ]
     },
     {
@@ -181,8 +363,8 @@
           "type": "Var",
           "name": "merged",
           "span": [
-            116,
-            122
+            284,
+            290
           ]
         },
         "index": {
@@ -190,26 +372,26 @@
           "kind": "string",
           "value": "z",
           "span": [
-            123,
-            126
+            291,
+            294
           ]
         },
         "span": [
-          116,
-          127
+          284,
+          295
         ]
       },
       "span": [
-        113,
-        128
+        281,
+        296
       ]
     },
     {
       "type": "Text",
       "value": "</p>\n",
       "span": [
-        128,
-        133
+        296,
+        301
       ]
     },
     {
@@ -223,8 +405,8 @@
               "type": "Var",
               "name": "flag",
               "span": [
-                136,
-                140
+                304,
+                308
               ]
             },
             "right": {
@@ -236,14 +418,14 @@
                   "type": "Var",
                   "name": "page",
                   "span": [
-                    144,
-                    148
+                    312,
+                    316
                   ]
                 },
                 "key": "title",
                 "span": [
-                  144,
-                  154
+                  312,
+                  322
                 ]
               },
               "right": {
@@ -251,18 +433,18 @@
                 "kind": "string",
                 "value": "Guide",
                 "span": [
-                  158,
-                  165
+                  326,
+                  333
                 ]
               },
               "span": [
-                144,
-                165
+                312,
+                333
               ]
             },
             "span": [
-              136,
-              165
+              304,
+              333
             ]
           },
           "body": [
@@ -270,14 +452,14 @@
               "type": "Text",
               "value": "<strong>matched</strong>",
               "span": [
-                166,
-                190
+                334,
+                358
               ]
             }
           ],
           "span": [
-            133,
-            166
+            301,
+            334
           ]
         }
       ],
@@ -286,22 +468,22 @@
           "type": "Text",
           "value": "<strong>missed</strong>",
           "span": [
-            193,
-            216
+            361,
+            384
           ]
         }
       ],
       "span": [
-        133,
-        219
+        301,
+        387
       ]
     },
     {
       "type": "Text",
       "value": "\n<p>",
       "span": [
-        219,
-        223
+        387,
+        391
       ]
     },
     {
@@ -312,8 +494,8 @@
           "type": "Var",
           "name": "flag",
           "span": [
-            226,
-            230
+            394,
+            398
           ]
         },
         "then": {
@@ -321,8 +503,8 @@
           "kind": "string",
           "value": "yes",
           "span": [
-            233,
-            238
+            401,
+            406
           ]
         },
         "else": {
@@ -330,26 +512,26 @@
           "kind": "string",
           "value": "no",
           "span": [
-            241,
-            245
+            409,
+            413
           ]
         },
         "span": [
-          226,
-          245
+          394,
+          413
         ]
       },
       "span": [
-        223,
-        246
+        391,
+        414
       ]
     },
     {
       "type": "Text",
       "value": "|",
       "span": [
-        246,
-        247
+        414,
+        415
       ]
     },
     {
@@ -365,13 +547,13 @@
             "kind": "number",
             "value": 1,
             "span": [
-              251,
-              252
+              419,
+              420
             ]
           },
           "span": [
-            250,
-            252
+            418,
+            420
           ]
         },
         "right": {
@@ -379,26 +561,26 @@
           "kind": "number",
           "value": 3,
           "span": [
-            255,
-            256
+            423,
+            424
           ]
         },
         "span": [
-          250,
-          256
+          418,
+          424
         ]
       },
       "span": [
-        247,
-        257
+        415,
+        425
       ]
     },
     {
       "type": "Text",
       "value": "|",
       "span": [
-        257,
-        258
+        425,
+        426
       ]
     },
     {
@@ -412,8 +594,8 @@
             "kind": "string",
             "value": "",
             "span": [
-              261,
-              263
+              429,
+              431
             ]
           },
           {
@@ -421,27 +603,27 @@
             "kind": "string",
             "value": "fallback",
             "span": [
-              274,
-              284
+              442,
+              452
             ]
           }
         ],
         "span": [
-          261,
-          285
+          429,
+          453
         ]
       },
       "span": [
-        258,
-        286
+        426,
+        454
       ]
     },
     {
       "type": "Text",
       "value": "</p>\n<ul>\n",
       "span": [
-        286,
-        296
+        454,
+        464
       ]
     },
     {
@@ -451,8 +633,8 @@
         "type": "Var",
         "name": "rows",
         "span": [
-          305,
-          309
+          473,
+          477
         ]
       },
       "body": [
@@ -460,8 +642,8 @@
           "type": "Text",
           "value": "<li>",
           "span": [
-            311,
-            315
+            479,
+            483
           ]
         },
         {
@@ -471,21 +653,21 @@
             "loop": "row",
             "field": "index_",
             "span": [
-              318,
-              328
+              486,
+              496
             ]
           },
           "span": [
-            315,
-            329
+            483,
+            497
           ]
         },
         {
           "type": "Text",
           "value": "/",
           "span": [
-            329,
-            330
+            497,
+            498
           ]
         },
         {
@@ -495,21 +677,21 @@
             "loop": "row",
             "field": "size_",
             "span": [
-              333,
-              342
+              501,
+              510
             ]
           },
           "span": [
-            330,
-            343
+            498,
+            511
           ]
         },
         {
           "type": "Text",
           "value": ":",
           "span": [
-            343,
-            344
+            511,
+            512
           ]
         },
         {
@@ -520,27 +702,27 @@
               "type": "Var",
               "name": "row",
               "span": [
-                347,
-                350
+                515,
+                518
               ]
             },
             "key": "name",
             "span": [
-              347,
-              355
+              515,
+              523
             ]
           },
           "span": [
-            344,
-            356
+            512,
+            524
           ]
         },
         {
           "type": "Text",
           "value": ":",
           "span": [
-            356,
-            357
+            524,
+            525
           ]
         },
         {
@@ -550,21 +732,21 @@
             "loop": "row",
             "field": "first_",
             "span": [
-              360,
-              370
+              528,
+              538
             ]
           },
           "span": [
-            357,
-            371
+            525,
+            539
           ]
         },
         {
           "type": "Text",
           "value": ":",
           "span": [
-            371,
-            372
+            539,
+            540
           ]
         },
         {
@@ -574,21 +756,21 @@
             "loop": "row",
             "field": "last_",
             "span": [
-              375,
-              384
+              543,
+              552
             ]
           },
           "span": [
-            372,
-            385
+            540,
+            553
           ]
         },
         {
           "type": "Text",
           "value": "</li>\n",
           "span": [
-            385,
-            391
+            553,
+            559
           ]
         }
       ],
@@ -597,30 +779,30 @@
           "type": "Text",
           "value": "<li>empty</li>\n",
           "span": [
-            395,
-            410
+            563,
+            578
           ]
         }
       ],
       "span": [
-        296,
-        413
+        464,
+        581
       ]
     },
     {
       "type": "Text",
       "value": "</ul>\n",
       "span": [
-        414,
-        420
+        582,
+        588
       ]
     },
     {
       "type": "Include",
       "path": "partial.tpl",
       "span": [
-        420,
-        435
+        588,
+        603
       ]
     },
     {
@@ -631,8 +813,8 @@
           "type": "Text",
           "value": "<p>defined</p>",
           "span": [
-            448,
-            462
+            616,
+            630
           ]
         }
       ],
@@ -641,22 +823,22 @@
           "type": "Text",
           "value": "<p>missing</p>",
           "span": [
-            465,
-            479
+            633,
+            647
           ]
         }
       ],
       "span": [
-        436,
-        482
+        604,
+        650
       ]
     },
     {
       "type": "Text",
       "value": "\n",
       "span": [
-        482,
-        483
+        650,
+        651
       ]
     },
     {
@@ -672,29 +854,29 @@
               "type": "Var",
               "name": "page",
               "span": [
-                500,
-                504
+                668,
+                672
               ]
             },
             "key": "title",
             "span": [
-              500,
-              510
+              668,
+              678
             ]
           }
         }
       ],
       "span": [
-        483,
-        511
+        651,
+        679
       ]
     },
     {
       "type": "Text",
       "value": "</section>\n",
       "span": [
-        512,
-        523
+        680,
+        691
       ]
     }
   ]
