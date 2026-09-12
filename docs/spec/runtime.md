@@ -181,7 +181,7 @@ The logical request has this JSON shape:
 The interface declares two execution modes:
 
 - **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the complete cross-language mode.
-- **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust or PHP renderer before startup, loads or links that renderer once, and calls it for each request. This mode is partial until all 211 conformance cases pass in every target runtime. It does not parse or interpret template AST during a request.
+- **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust or PHP renderer before startup, loads or links that renderer once, and calls it for each request. All four core runtimes pass the 211-case generated conformance suite. Generated execution does not parse or interpret template AST during a request.
 
 ```mermaid
 flowchart LR

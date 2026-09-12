@@ -133,6 +133,9 @@ schema-check: ## Validate the AST schema and fixtures
 	node scripts/check-schema.mjs
 
 docs-check: ## Document checks
+	node scripts/generate-runtime-interface.mjs --check
+	node scripts/generate-compiler-interface.mjs --check
+	node scripts/generate-showcase-contract.mjs --check
 	node scripts/check-documents.mjs
 	@test ! -f scripts/check-schema.mjs || node scripts/check-schema.mjs
 	@test ! -f scripts/check-doc-coverage.mjs || node scripts/check-doc-coverage.mjs
