@@ -2,6 +2,37 @@
   "schema": 2,
   "name": "TemplateCompiler",
   "purpose": "Define one compiler, artifact and program contract followed by every core language.",
+  "evidence": {
+    "readingOrder": [
+      "tools/compiler/interface.json",
+      "docs/spec/lexical.md",
+      "docs/spec/grammar.md",
+      "docs/spec/expressions.md",
+      "docs/spec/data-model.md",
+      "docs/spec/functions.md",
+      "docs/spec/runtime.md",
+      "docs/spec/errors.md",
+      "docs/spec/conformance.md"
+    ],
+    "fixtures": "tests/cases",
+    "examples": [
+      "examples/site/scenarios/compiler-coverage",
+      "examples/site/scenarios/empty-state",
+      "examples/site/scenarios/html-slot",
+      "examples/site/scenarios/react-boundary",
+      "examples/site/scenarios/scope-precedence"
+    ],
+    "verificationCommands": [
+      "make compiler-interface-check",
+      "make conformance-all-modes",
+      "make release-test-matrix"
+    ],
+    "generatedEvidence": [
+      "tools/compiler/generated",
+      "tools/showcase/adapters/generated",
+      "examples/site/data"
+    ]
+  },
   "supportLevels": {
     "core": {
       "languages": [

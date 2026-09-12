@@ -6,6 +6,8 @@ Compiler는 template parsing, validation, lowering, artifact emission을 소유�
 
 compiler와 runtime의 단일 계약 원본은 [`tools/compiler/interface.json`](../../tools/compiler/interface.json)이다. 생성 선언부와 Mermaid 도표는 이 manifest와 일치해야 한다. TypeScript, Go, Rust, PHP mapping은 표기와 오류 전달 방식을 바꿀 수 있지만 소유 관계, field 순서, operation 위치, 상태 전이를 바꿀 수 없다.
 
+Manifest의 `evidence` section은 이 계약을 읽는 기계 판독 경로다. 명세 순서, 적합성 fixture, 실행 가능한 예제, 생성 artifact, 필수 검증 명령을 연결한다. Checker가 연결 대상의 누락을 거부하므로 AI나 유지보수자는 중복 요약에 의존하지 않고 계약에서 실행 증거까지 따라갈 수 있다.
+
 ## Pipeline
 
 ```mermaid
