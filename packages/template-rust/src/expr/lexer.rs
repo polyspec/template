@@ -318,8 +318,12 @@ impl<'a> ExpressionLexer<'a> {
         self.peek()?;
         let token = self.lookahead.take().expect("lookahead");
         self.previous = Some(token.clone());
-        if matches!(token.kind, TokenType::LParen | TokenType::LBracket) { self.nesting_depth += 1; }
-        if matches!(token.kind, TokenType::RParen | TokenType::RBracket) && self.nesting_depth > 0 { self.nesting_depth -= 1; }
+        if matches!(token.kind, TokenType::LParen | TokenType::LBracket) {
+            self.nesting_depth += 1;
+        }
+        if matches!(token.kind, TokenType::RParen | TokenType::RBracket) && self.nesting_depth > 0 {
+            self.nesting_depth -= 1;
+        }
         Ok(token)
     }
 
@@ -354,7 +358,21 @@ impl<'a> ExpressionLexer<'a> {
             });
         }
         if let Some(close) = self.options.close
-            && (self.previous.as_ref().is_some_and(|token| matches!(token.kind, TokenType::Ident | TokenType::Number | TokenType::Str | TokenType::Null | TokenType::True | TokenType::False | TokenType::RParen | TokenType::RBracket | TokenType::DotIdent | TokenType::DotIndex) && self.nesting_depth == 0) || !self.close_is_expression_char)
+            && (self.previous.as_ref().is_some_and(|token| {
+                matches!(
+                    token.kind,
+                    TokenType::Ident
+                        | TokenType::Number
+                        | TokenType::Str
+                        | TokenType::Null
+                        | TokenType::True
+                        | TokenType::False
+                        | TokenType::RParen
+                        | TokenType::RBracket
+                        | TokenType::DotIdent
+                        | TokenType::DotIndex
+                ) && self.nesting_depth == 0
+            }) || !self.close_is_expression_char)
         {
             let sequence: Vec<u8> = std::iter::repeat_n(close, self.options.close_count).collect();
             if bytes[start..].starts_with(&sequence) {
@@ -437,7 +455,10 @@ impl<'a> ExpressionLexer<'a> {
                 ));
             }
         }
-        let close_at_end = self.options.close.is_some_and(|close| self.nesting_depth == 0 && bytes[end..].starts_with(&[close]));
+        let close_at_end = self
+            .options
+            .close
+            .is_some_and(|close| self.nesting_depth == 0 && bytes[end..].starts_with(&[close]));
         if end < bytes.len() && (is_ident_part(bytes[end]) || (bytes[end] == b'.' && !close_at_end)) {
             let mut cursor = end + 1;
             while cursor < bytes.len() && (is_ident_part(bytes[cursor]) || bytes[cursor] == b'.') {
