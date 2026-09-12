@@ -13,4 +13,12 @@ describe('PageCache', () => {
     expect(cache.get('zero')).toBe('<p>zero</p>');
     expect(cache.get('null')).toBe('<p>null</p>');
   });
+
+  it('does not call the renderer on a cache hit', () => {
+    let calls = 0;
+    const cache = new PageCache(() => 100);
+    expect(cache.getOrSet('page', null, () => { calls++; return 'first'; })).toBe('first');
+    expect(cache.getOrSet('page', null, () => { calls++; return 'second'; })).toBe('first');
+    expect(calls).toBe(1);
+  });
 });

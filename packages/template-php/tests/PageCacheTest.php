@@ -23,4 +23,21 @@ final class PageCacheTest extends TestCase
         self::assertSame('zero', $cache->get('zero'));
         self::assertSame('null', $cache->get('null'));
     }
+
+    public function testGetOrSetSkipsRendererOnHit(): void
+    {
+        $cache = new PageCache();
+        $calls = 0;
+        self::assertSame('first', $cache->getOrSet('page', null, function () use (&$calls): string {
+            $calls++;
+
+            return 'first';
+        }));
+        self::assertSame('first', $cache->getOrSet('page', null, function () use (&$calls): string {
+            $calls++;
+
+            return 'second';
+        }));
+        self::assertSame(1, $calls);
+    }
 }

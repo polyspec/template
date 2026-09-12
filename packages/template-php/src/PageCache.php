@@ -40,6 +40,18 @@ final class PageCache
         ];
     }
 
+    /** Returns a cached page or renders and stores it on a miss. */
+    public function getOrSet(string $key, ?float $ttl, Closure $render): string
+    {
+        $cached = $this->get($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+        $html = $render();
+        $this->set($key, $html, $ttl);
+        return $html;
+    }
+
     public function delete(string $key): void
     {
         unset($this->entries[$key]);
