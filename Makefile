@@ -192,4 +192,4 @@ typed-generator-compile-check: compiler-ir-check typed-generator-check ## Compil
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
