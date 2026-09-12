@@ -1,6 +1,6 @@
 # AST
 
-[English](ast.md).
+[English](/spec/ast).
 
 AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 소스에 대해 같은 AST를 생성한다. JSON Schema는 [`schema/ast.schema.json`](https://github.com/polyspec/template/blob/main/schema/ast.schema.json)에 있다.
 

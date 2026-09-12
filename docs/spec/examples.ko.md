@@ -1,6 +1,6 @@
 # 예제
 
-[English](examples.md).
+[English](/spec/examples).
 
 이 문서는 페이지 하나 전체를 보여준다: 레이아웃, include된 파셜, scope 인자를 가진 템플릿 define, 루프를 가진 목록 define, 카드 define. 기대 출력은 아래 파일에 렉시컬, 문법, 표현식, 함수, 런타임 규칙을 적용해 도출한다.
 

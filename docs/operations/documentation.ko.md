@@ -1,6 +1,6 @@
 # 문서
 
-[English](documentation.md).
+[English](/operations/documentation).
 
 ## 문서 집합
 

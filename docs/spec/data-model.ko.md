@@ -1,6 +1,6 @@
 # 데이터 모델
 
-[English](data-model.md).
+[English](/spec/data-model).
 
 이 문서는 템플릿이 다루는 값 타입, safe 문자열, 값을 출력 텍스트로 변환하는 규칙, 호스트 언어 값을 템플릿 값으로 변환하는 규칙을 정의한다. 연산자는 [표현식](/ko/spec/expressions)에 정의한다. 오류 코드는 [오류](/ko/spec/errors)에 정의한다. 규칙 번호는 `VAL-n`이다.
 

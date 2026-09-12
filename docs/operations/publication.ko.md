@@ -1,6 +1,6 @@
 # 발행
 
-[English](publication.md).
+[English](/operations/publication).
 
 발행된 패키지는 없다. 각 패키지는 로컬 체크아웃에서 다음과 같이 설치한다. 레지스트리 발행은 실제로 이루어질 때 `docs/features.md`에 기록한다.
 

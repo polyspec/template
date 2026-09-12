@@ -1,6 +1,6 @@
 # 브라우저 렌더링
 
-[English](browser.md).
+[English](/operations/browser).
 
 TypeScript 패키지는 서버에서 실행되는 것과 같은 엔진으로 브라우저에서 렌더한다. 브라우저 테스트는 브라우저 빌드가 픽스처 케이스에 대해 기대 출력을 만드는지 검증한다.
 
