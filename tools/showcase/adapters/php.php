@@ -113,7 +113,7 @@ final class Adapter implements RenderAdapter
         $generated = getenv('SHOWCASE_EXECUTION_MODE') === 'generated';
         $program = $generated
             ? new GeneratedProgram($root)
-            : new AstProgram(artifactLoader($root, 'php'));
+            : new AstProgram(artifactLoader($root));
         $this->engine = new Engine($program);
     }
 
@@ -168,13 +168,13 @@ final class Adapter implements RenderAdapter
     }
 }
 
-function artifactLoader(string $root, string $language): ArrayLoader
+function artifactLoader(string $root): ArrayLoader
 {
-    $base = $root . '/compiled/' . $language;
+    $base = $root . '/compiled/ast';
     $manifest = json_decode((string) file_get_contents($base . '/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
     $templates = [];
-    foreach ($manifest['templates'] as $name => $entry) {
-        $templates[$name] = json_decode((string) file_get_contents($base . '/' . $entry['artifact']), true, 512, JSON_THROW_ON_ERROR);
+    foreach ($manifest['files'] as $name => $entry) {
+        $templates[$name] = json_decode((string) file_get_contents($base . '/' . $entry['path']), true, 512, JSON_THROW_ON_ERROR);
     }
     return new ArrayLoader($templates);
 }

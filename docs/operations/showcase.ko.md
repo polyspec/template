@@ -155,7 +155,7 @@ fn render() -> Result<String, Box<dyn std::error::Error>> {
 make showcase SHOWCASE_ITERS=3000 SHOWCASE_WARMUP=300
 ```
 
-이 명령은 각 시나리오의 언어별 AST artifact, `expected.html`, 사이트의 공통 입력인 `examples/site/data/scenarios.json`, 비교 결과인 `examples/site/data/results.json`, 측정값인 `examples/site/data/benchmark.json`을 쓴다. 각 artifact loader를 두 번 렌더하며 TypeScript API도 같은 엔진 인스턴스로 두 번 렌더한다. 네 구현은 애플리케이션 필터 없이 동일한 원시 UTF-8 바이트를 출력해야 한다.
+이 명령은 각 시나리오의 canonical AST graph 하나, `expected.html`, 사이트의 공통 입력인 `examples/site/data/scenarios.json`, 비교 결과인 `examples/site/data/results.json`, 측정값인 `examples/site/data/benchmark.json`을 쓴다. 모든 언어가 같은 AST graph를 읽어 두 번 렌더하며 TypeScript API도 같은 엔진 인스턴스로 두 번 렌더한다. 네 구현은 애플리케이션 필터 없이 동일한 원시 UTF-8 바이트를 출력해야 한다.
 
 벤치마크 드라이버는 워밍업과 측정에 같은 엔진 인스턴스를 사용한 뒤 한 번 더 렌더하고 해시를 비교한다. 구현·시나리오마다 독립 측정 5회를 기록한다. 사이트는 중앙 처리량과 표본별 평균 렌더 시간의 P95를 표시한다. 파싱과 캐시 구성이 끝난 뒤의 렌더 측정이며 개별 요청 지연 시간 측정은 아니다. 절대 시간은 기계와 툴체인에 따라 달라지므로 한 실행 안의 측정값을 비교한다.
 

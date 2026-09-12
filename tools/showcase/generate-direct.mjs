@@ -11,13 +11,13 @@ const check = process.argv.includes('--check');
 function scenarios() {
   const result = {};
   for (const entry of readdirSync(scenariosRoot, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-    const base = join(scenariosRoot, entry.name, 'compiled', 'typescript');
+    const base = join(scenariosRoot, entry.name, 'compiled', 'ast');
     const manifestPath = join(base, 'manifest.json');
     if (!entry.isDirectory() || !existsSync(manifestPath)) continue;
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
     result[entry.name] = {};
-    for (const [name, item] of Object.entries(manifest.templates)) {
-      result[entry.name][name] = JSON.parse(readFileSync(join(base, item.artifact), 'utf8'));
+    for (const [name, item] of Object.entries(manifest.files)) {
+      result[entry.name][name] = JSON.parse(readFileSync(join(base, item.path), 'utf8'));
     }
   }
   return result;

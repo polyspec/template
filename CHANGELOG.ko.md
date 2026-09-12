@@ -51,3 +51,4 @@
 - 파서가 승인한 태그 범위와 표현식 lexer token 범위를 반환하는 분석 출력을 추가했다. 정적 예제 사이트는 이 범위로 템플릿 문법을 하이라이트하고 compiled artifact와 generated source를 양방향 스크롤 영역에 표시한다.
 - 네 공개 runtime이 같은 `Engine`/`Program`/`AstProgram` 소유 구조를 제공하도록 구체적인 Go `AstProgram` 타입을 추가했다.
 - compiler manifest에 runtime 선언 계약을 추가했다. interface gate는 TypeScript, Go, Rust 선언을 각 언어 parser로, PHP 선언을 Reflection으로 추출한 뒤 연산, 인자 수, 소유 관계, AST program 구조를 manifest와 비교한다.
+- 중복된 showcase AST 디렉터리 네 벌을 시나리오별 canonical `compiled/ast` graph 하나로 교체했다. 제품 AST compiler는 source, type, contract digest를 기록하고 모든 파일 뒤에 manifest를 발행하며 실패한 빌드 뒤에도 이전 artifact를 보존하고 `false` 갱신 정책에서 템플릿 소스를 읽지 않고 배포 artifact를 검증한다.

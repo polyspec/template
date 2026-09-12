@@ -157,7 +157,7 @@ fn render() -> Result<String, Box<dyn std::error::Error>> {
 make showcase SHOWCASE_ITERS=3000 SHOWCASE_WARMUP=300
 ```
 
-This writes each scenario's committed per-language AST artifacts, `expected.html`, the site's shared inputs in `examples/site/data/scenarios.json`, the comparison results in `examples/site/data/results.json`, and measurements in `examples/site/data/benchmark.json`. Each artifact loader renders twice; the TypeScript API also renders twice through one engine instance. All four implementations must produce the same raw UTF-8 bytes without application filters.
+This writes one committed canonical AST graph for each scenario, `expected.html`, the site's shared inputs in `examples/site/data/scenarios.json`, the comparison results in `examples/site/data/results.json`, and measurements in `examples/site/data/benchmark.json`. Every language loads that same AST graph and renders twice; the TypeScript API also renders twice through one engine instance. All four implementations must produce the same raw UTF-8 bytes without application filters.
 
 The benchmark drivers keep one engine instance for warmup and measurement, then render once more and compare its hash. Five independent samples are recorded per implementation and scenario. The site reports median throughput and the P95 of the sample mean render times. These are warm renders after parsing and cache population, not individual request latency measurements. Absolute times depend on the machine and toolchain; compare measurements within one run.
 

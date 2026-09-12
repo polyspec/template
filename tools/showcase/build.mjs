@@ -53,11 +53,11 @@ function collectTemplates(dir, prefix = '', into = {}) {
 }
 
 function compiledTemplates(scenario) {
-  const artifactRoot = join(scenario.dir, 'compiled', 'typescript');
+  const artifactRoot = join(scenario.dir, 'compiled', 'ast');
   const manifest = readJson(join(artifactRoot, 'manifest.json'));
-  return Object.fromEntries(Object.entries(manifest.templates).map(([name, entry]) => [
+  return Object.fromEntries(Object.entries(manifest.files).map(([name, entry]) => [
     name,
-    readJson(join(artifactRoot, entry.artifact)),
+    readJson(join(artifactRoot, entry.path)),
   ]));
 }
 
