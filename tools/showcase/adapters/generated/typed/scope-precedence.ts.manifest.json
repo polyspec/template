@@ -1,15 +1,16 @@
 {
-  "schema": 2,
+  "schema": 3,
   "mode": "gen",
   "target": "ts",
   "entry": "layout.tpl",
   "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
+  "contractDigest": "b67ea646ebcbd314a6bfb5c0488b6d5caaa0e237073ba1f9252a01369d492b35",
+  "compilerDigest": "447f9e7375712f96fbdb53f6adac12b666b5d513af5d67b74927538d21acfdd1",
   "files": {
     "scope-precedence.ts": {
       "path": "scope-precedence.ts",
-      "artifactDigest": "100701f1fddf9c0974560f859131a3cb0f7490b3c5cc4ad9fee2d9728d88aa25"
+      "artifactDigest": "4dfa4fa450024e4d8ae2720c95578e02726f320f25b51ce48c588d2b709f0010"
     }
   }
 }

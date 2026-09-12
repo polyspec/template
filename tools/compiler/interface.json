@@ -89,9 +89,10 @@
         "sourceDigest",
         "typeDigest",
         "contractDigest",
+        "compilerDigest",
         "files"
       ],
-      "invariant": "Digests bind the artifact to its complete sources, types and compiler contract."
+      "invariant": "Digests bind the artifact to its complete sources, types, compiler contract and compiler implementation."
     },
     "RenderRequest": {
       "fields": [

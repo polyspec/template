@@ -1,26 +1,37 @@
 // Generated.
-#[derive(Clone, Default)] pub struct Page { pub title: String }
-#[derive(Clone, Default)] pub struct Assign {
+use polyspec_template::{ErrorCode, PreparedRender, Program, RenderOptions, RenderTarget, RuntimeEnvironment, TemplateError};
+use serde::{Deserialize, Deserializer};
+use serde::de::{MapAccess, Visitor};
+use serde_json::{Map as JsonMap, Value as JsonValue};
+use std::collections::HashMap;
+use std::fmt;
+#[derive(Clone, Default, Deserialize)] pub struct Page { pub title: String }
+#[derive(Clone, Default, Deserialize)] pub struct Assign {
     pub page: Page,
     pub root_label: String,
     pub defined_label: String,
 }
-#[derive(Clone, Default)] pub struct Input_content_tpl { pub title: String, pub root_label: String, pub defined_label: String, pub layout_local: Option<String> }
-#[derive(Clone, Default)] pub struct Input_layout_tpl {  }
-#[derive(Clone, Default)] pub struct DefinitionData_content_tpl { pub title: Option<String>, pub root_label: Option<String>, pub defined_label: Option<String>, pub layout_local: Option<Option<String>> }
-#[derive(Clone, Default)] pub struct DefinitionData_layout_tpl {  }
-#[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
-#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<DefinitionData_content_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
-#[derive(Clone, Default)] enum GeneratedValue { #[default] Null }
+#[derive(Clone, Default, Deserialize)] pub struct Input_content_tpl { pub title: String, pub root_label: String, pub defined_label: String, pub layout_local: Option<String> }
+#[derive(Clone, Default, Deserialize)] pub struct Input_layout_tpl {  }
+#[derive(Clone, Default, Deserialize)] pub struct DefinitionData_content_tpl { pub title: Option<String>, pub root_label: Option<String>, pub defined_label: Option<String>, pub layout_local: Option<Option<String>> }
+#[derive(Clone, Default, Deserialize)] pub struct DefinitionData_layout_tpl {  }
+#[derive(Clone, Deserialize)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
+#[derive(Clone, Default, Deserialize)] pub struct Definitions { pub content: Option<Definition<DefinitionData_content_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
+pub struct ArtifactManifest { pub schema: u32, pub mode: String, pub target: String, pub entry: String, pub source_digest: String, pub type_digest: String, pub contract_digest: String, pub files: HashMap<String, String> }
+type GeneratedValue = JsonValue;
 #[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
 #[derive(Clone, Default)] struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
 impl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } fn get(&self, key: &K) -> Option<&V> { self.entries.iter().find(|entry| &entry.key == key).map(|entry| &entry.value) } fn entries(&self) -> &Vec<OrderedEntry<K, V>> { &self.entries } }
+struct OrderedMapVisitor<K, V>(std::marker::PhantomData<(K, V)>);
+impl<'de, K, V> Visitor<'de> for OrderedMapVisitor<K, V> where K: Deserialize<'de> + PartialEq, V: Deserialize<'de> { type Value = OrderedMap<K, V>; fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result { formatter.write_str("an ordered object") } fn visit_map<A: MapAccess<'de>>(self, mut access: A) -> Result<Self::Value, A::Error> { let mut result = OrderedMap::new(); while let Some((key, value)) = access.next_entry()? { result.set(key, value); } Ok(result) } }
+impl<'de, K, V> Deserialize<'de> for OrderedMap<K, V> where K: Deserialize<'de> + PartialEq, V: Deserialize<'de> { fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { deserializer.deserialize_map(OrderedMapVisitor(std::marker::PhantomData)) } }
 trait GeneratedTruthy { fn generated_truthy(&self) -> bool; }
 impl GeneratedTruthy for bool { fn generated_truthy(&self) -> bool { *self } }
 impl GeneratedTruthy for f64 { fn generated_truthy(&self) -> bool { *self != 0.0 } }
 impl GeneratedTruthy for String { fn generated_truthy(&self) -> bool { !self.is_empty() } }
 impl<T> GeneratedTruthy for Vec<T> { fn generated_truthy(&self) -> bool { !self.is_empty() } }
 impl<K, V> GeneratedTruthy for OrderedMap<K, V> { fn generated_truthy(&self) -> bool { !self.entries.is_empty() } }
+impl GeneratedTruthy for GeneratedValue { fn generated_truthy(&self) -> bool { match self { JsonValue::Null => false, JsonValue::Bool(value) => *value, JsonValue::Number(value) => value.as_f64().is_some_and(|value| value != 0.0), JsonValue::String(value) => !value.is_empty(), JsonValue::Array(value) => !value.is_empty(), JsonValue::Object(value) => !value.is_empty() } } }
 impl<T: GeneratedTruthy> GeneratedTruthy for Option<T> { fn generated_truthy(&self) -> bool { self.as_ref().is_some_and(GeneratedTruthy::generated_truthy) } }
 fn generated_truthy<T: GeneratedTruthy>(value: &T) -> bool { value.generated_truthy() }
 trait GeneratedContains<T> { fn generated_contains(&self, value: &T) -> bool; }
@@ -71,3 +82,13 @@ pub fn render_template(target: &str, assign: &Assign, definitions: &Definitions)
         _ => panic!("generated template is missing or requires inputs: {target}"),
 } }
 pub fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
+fn generated_error(template: &str, message: String) -> TemplateError { TemplateError::without_position(ErrorCode::E_DATA_UNSUPPORTED_TYPE, template, message) }
+struct GeneratedTarget { target: Option<String>, html: Option<String> }
+fn generated_bind_definitions(name: &str, input: &HashMap<String, polyspec_template::DefineInput>) -> Result<(Definitions, HashMap<String, GeneratedTarget>), TemplateError> { let mut plain = JsonMap::new(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {
+            "content" => { if let Some(html) = &input.html { if false || input.template.is_some() || input.data.is_some() { return Err(generated_error(name, format!("define.{id} has an invalid html entry"))); } plain.insert(id.clone(), serde_json::json!({"html": html})); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("content.tpl") { return Err(generated_error(name, format!("define.{id} has an invalid template"))); } plain.insert(id.clone(), serde_json::json!({"data": input.data})); targets.insert(id.clone(), GeneratedTarget { target: Some("content.tpl".to_string()), html: None }); } },
+            "layout" => { if let Some(html) = &input.html { if true || input.template.is_some() || input.data.is_some() { return Err(generated_error(name, format!("define.{id} has an invalid html entry"))); } plain.insert(id.clone(), serde_json::json!({"html": html})); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("layout.tpl") { return Err(generated_error(name, format!("define.{id} has an invalid template"))); } plain.insert(id.clone(), serde_json::json!({"data": input.data})); targets.insert(id.clone(), GeneratedTarget { target: Some("layout.tpl".to_string()), html: None }); } },
+            _ => return Err(generated_error(name, format!("define.{id} is not declared"))),
+        } } let definitions = serde_json::from_value(JsonValue::Object(plain)).map_err(|error| generated_error(name, error.to_string()))?; Ok((definitions, targets)) }
+pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }
+impl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -> GeneratedProgram { GeneratedProgram { runtime } } }
+impl Program for GeneratedProgram { fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'static>, TemplateError> { let RenderTarget::Name(name) = target else { return Err(generated_error("layout.tpl", "generated target must be a template name".to_string())); }; let typed_assign: Assign = serde_json::from_value(assign.clone()).map_err(|error| generated_error(name, error.to_string()))?; let (definitions, targets) = generated_bind_definitions(name, &options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); Ok(PreparedRender::new(move || { if let Some(html) = &html { return Ok(html.clone()); } std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| render_template(&target_name, &typed_assign, &definitions))).map_err(|failure| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, failure.downcast_ref::<String>().cloned().or_else(|| failure.downcast_ref::<&str>().map(|value| value.to_string())).unwrap_or_else(|| "generated render failed".to_string()))) })) } fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> { self.prepare(target, assign, options)?.render() } }

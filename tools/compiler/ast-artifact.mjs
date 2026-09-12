@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, w
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { astCompilerDigest } from './compiler-digest.mjs';
 
 const projectRoot = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 const contractPath = join(projectRoot, 'tools/compiler/interface.json');
@@ -25,7 +26,7 @@ function verify(output, contractDigest) {
   const manifestPath = join(output, 'manifest.json');
   if (!existsSync(manifestPath)) throw new Error(`AST artifact manifest is missing: ${manifestPath}`);
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  if (manifest.schema !== 2 || manifest.mode !== 'ast' || manifest.target !== 'canonical') throw new Error('AST artifact manifest identity differs');
+  if (manifest.schema !== 3 || manifest.mode !== 'ast' || manifest.target !== 'canonical') throw new Error('AST artifact manifest identity differs');
   if (contractDigest !== null && manifest.contractDigest !== contractDigest) throw new Error('AST artifact contract digest differs');
   const files = Object.entries(manifest.files ?? {});
   if (files.length === 0 || !manifest.files[manifest.entry]) throw new Error('AST artifact source graph is incomplete');
@@ -40,8 +41,9 @@ function verify(output, contractDigest) {
 export function compileAst({ root, output, entry, refresh = 'true', typeManifest = null }) {
   root = resolve(root);
   output = resolve(output);
+  if (refresh === 'false') return verify(output, null);
   const contractDigest = hash(readFileSync(contractPath));
-  if (refresh === 'false') return verify(output, contractDigest);
+  const compilerDigest = astCompilerDigest();
   if (refresh !== 'dev' && refresh !== 'true') throw new Error(`${refresh} is not an artifact refresh policy`);
   const names = sourceNames(root);
   if (names.length === 0) throw new Error(`source graph has no .tpl files: ${root}`);
@@ -52,7 +54,7 @@ export function compileAst({ root, output, entry, refresh = 'true', typeManifest
   if (refresh === 'true' && existsSync(join(output, 'manifest.json'))) {
     try {
       const current = verify(output, null);
-      if (current.contractDigest === contractDigest && current.sourceDigest === sourceDigest && current.typeDigest === typeDigest && current.entry === entry) return current;
+      if (current.contractDigest === contractDigest && current.compilerDigest === compilerDigest && current.sourceDigest === sourceDigest && current.typeDigest === typeDigest && current.entry === entry) return current;
     } catch {
       // A changed or damaged artifact is rebuilt under the true refresh policy.
     }
@@ -69,7 +71,7 @@ export function compileAst({ root, output, entry, refresh = 'true', typeManifest
       writeFileSync(join(temporary, path), ast);
       files[name] = { path: posix.normalize(path), sourceDigest: hash(sources[name]), artifactDigest: hash(ast) };
     }
-    const manifest = { schema: 2, mode: 'ast', target: 'canonical', entry, sourceDigest, typeDigest, contractDigest, files };
+    const manifest = { schema: 3, mode: 'ast', target: 'canonical', entry, sourceDigest, typeDigest, contractDigest, compilerDigest, files };
     writeFileSync(join(temporary, 'manifest.json'), json(manifest));
     mkdirSync(output, { recursive: true });
     for (const file of Object.values(files)) {
