@@ -16,49 +16,56 @@ impl<T: PartialEq> GeneratedContains<T> for Vec<T> { fn generated_contains(&self
 impl<K: PartialEq, V> GeneratedContains<K> for OrderedMap<K, V> { fn generated_contains(&self, value: &K) -> bool { self.get(value).is_some() } }
 impl GeneratedContains<String> for String { fn generated_contains(&self, value: &String) -> bool { self.contains(value) } }
 fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool { collection.generated_contains(value) }
-#[derive(Clone, Default)] pub struct Page { pub title: Option<String> }
-#[derive(Clone, Default)] pub struct Slot { pub template: Option<String>, pub html: Option<String> }
+#[derive(Clone, Default)] pub struct Page { pub title: String }
 #[derive(Clone, Default)] pub struct Assign {
-    pub title: Option<String>,
-    pub heading: Option<String>,
-    pub island_label: Option<String>,
-    pub root_label: Option<String>,
-    pub defined_label: Option<String>,
-    pub page: Option<Page>,
+    pub page: Page,
+    pub root_label: String,
+    pub defined_label: String,
 }
-#[derive(Clone, Default)] pub struct Input_content_tpl {  }
+#[derive(Clone, Default)] pub struct Input_content_tpl { pub title: String, pub root_label: String, pub defined_label: String, pub layout_local: Option<String> }
 #[derive(Clone, Default)] pub struct Input_layout_tpl {  }
-#[derive(Clone, Default)] pub struct DefinitionData_content_tpl {  }
+#[derive(Clone, Default)] pub struct DefinitionData_content_tpl { pub title: Option<String>, pub root_label: Option<String>, pub defined_label: Option<String>, pub layout_local: Option<Option<String>> }
 #[derive(Clone, Default)] pub struct DefinitionData_layout_tpl {  }
 #[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
 #[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<DefinitionData_content_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
 fn render_content_tpl(assign: &Assign, definitions: &Definitions, input: Input_content_tpl) -> String { let mut out = String::new();
-
-    out.push_str("<section data-react-island id=\"counter\">\n<p>");
-    out.push_str(&escape(&assign.island_label.clone().unwrap_or_default().to_string()));
-    out.push_str("</p>\n</section>\n");
+let title = input.title;
+let root_label = input.root_label;
+let defined_label = input.defined_label;
+let layout_local = input.layout_local;
+    out.push_str("<article>\n<h1>");
+    out.push_str(&escape(&title.to_string()));
+    out.push_str("</h1>\n<p class=\"root\">");
+    out.push_str(&escape(&root_label.to_string()));
+    out.push_str("</p>\n<p class=\"defined\">");
+    out.push_str(&escape(&defined_label.to_string()));
+    out.push_str("</p>\n<p class=\"local\">");
+    out.push_str(&escape(&{ let value = layout_local.clone().unwrap_or_default(); if generated_truthy(&value) { value } else { "missing".to_string() } }.to_string()));
+    out.push_str("</p>\n</article>\n");
  out }
 fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: Input_layout_tpl) -> String { let mut out = String::new();
 
-    out.push_str("<main>\n<h1>");
-    out.push_str(&escape(&assign.title.clone().unwrap_or_default().to_string()));
-    out.push_str("</h1>\n");
+    let layout_local = "visible only in layout".to_string();
+    out.push_str("<section class=\"scope\">\n");
     { let definition = definitions.content.as_ref();
     if definition.is_none() { panic!("generated definition content is missing"); }
     if let Some(html) = definition.and_then(|value| value.html.as_ref()) { out.push_str(html); } else {
         let mut input = Input_content_tpl::default();
-
+        input.root_label = assign.root_label.clone();
+        input.defined_label = assign.defined_label.clone();
         if let Some(data) = definition.and_then(|value| value.data.as_ref()) {
-
+            if let Some(value) = data.title.clone() { input.title = value; }
+            if let Some(value) = data.root_label.clone() { input.root_label = value; }
+            if let Some(value) = data.defined_label.clone() { input.defined_label = value; }
+            if let Some(value) = data.layout_local.clone() { input.layout_local = value; }
         }
-
+        input.title = assign.page.clone().title;
         out.push_str(&render_content_tpl(assign, definitions, input));
     }
     }
-    out.push_str("</main>\n");
+    out.push_str("</section>\n");
  out }
 pub fn render_template(target: &str, assign: &Assign, definitions: &Definitions) -> String { match target {
-        "content.tpl" => render_content_tpl(assign, definitions, Input_content_tpl::default()),
         "layout.tpl" => render_layout_tpl(assign, definitions, Input_layout_tpl::default()),
         _ => panic!("generated template is missing or requires inputs: {target}"),
 } }

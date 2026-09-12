@@ -1,45 +1,45 @@
 // Generated.
 export interface Page {
-  title?: string;
-}
-export interface Slot {
-  template?: string;
-  html?: string;
+  title: string;
 }
 export interface Assign {
-  title?: string;
-  heading?: string;
-  island_label?: string;
-  root_label?: string;
-  defined_label?: string;
-  page?: Page;
+  page: Page;
+  root_label: string;
+  defined_label: string;
 }
-export interface Input_content_tpl {  }
+export interface Input_content_tpl { title: string; root_label: string; defined_label: string; layout_local?: string; }
 export interface Input_layout_tpl {  }
 export type DefinitionData<T> = Partial<T>;
 export interface Definition<T> { html?: string; data?: DefinitionData<T>; }
 export interface Definitions { content?: Definition<Input_content_tpl>; layout?: Definition<Input_layout_tpl>; }
 function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl): string { let out = '';
-
-    out += "<section data-react-island id=\"counter\">\n<p>";
-    out += escape(stringify(assign.island_label));
-    out += "</p>\n</section>\n";
+  const title = input.title;
+  const root_label = input.root_label;
+  const defined_label = input.defined_label;
+  const layout_local = input.layout_local;
+    out += "<article>\n<h1>";
+    out += escape(stringify(title));
+    out += "</h1>\n<p class=\"root\">";
+    out += escape(stringify(root_label));
+    out += "</p>\n<p class=\"defined\">";
+    out += escape(stringify(defined_label));
+    out += "</p>\n<p class=\"local\">";
+    out += escape(stringify(generatedDefault(layout_local, "missing")));
+    out += "</p>\n</article>\n";
   return out; }
 function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl): string { let out = '';
 
-    out += "<main>\n<h1>";
-    out += escape(stringify(assign.title));
-    out += "</h1>\n";
+    const layout_local = "visible only in layout";
+    out += "<section class=\"scope\">\n";
     { const definition = definitions.content;
     if (definition === undefined) throw new Error("generated definition content is missing");
     if (definition?.html !== undefined) out += definition.html;
-    else { const input = Object.assign({  }, definition?.data ?? {}, {  }) as Input_content_tpl; out += render_content_tpl(assign, definitions, input); }
+    else { const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: assign.page?.title }) as Input_content_tpl; out += render_content_tpl(assign, definitions, input); }
     }
-    out += "</main>\n";
+    out += "</section>\n";
   return out; }
 export function renderTemplate(target: string, assign: Assign, definitions: Definitions): string {
   switch (target) {
-    case "content.tpl": return render_content_tpl(assign, definitions, {});
     case "layout.tpl": return render_layout_tpl(assign, definitions, {});
     default: throw new Error('generated template is missing or requires inputs: ' + target);
   }

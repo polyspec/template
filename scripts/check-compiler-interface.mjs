@@ -8,32 +8,32 @@ const manifest = JSON.parse(readFileSync(resolve(root, 'tools/compiler/interface
 if (manifest.schema !== 1 || manifest.name !== 'TypedTemplateCompiler') throw new Error('invalid compiler interface manifest');
 const operationNames = manifest.operations?.map(operation => operation.name).join(',');
 if (operationNames !== 'loadSourceGraph,lowerSourceGraph,emit,renderTemplate,render') throw new Error('compiler operations are missing or reordered');
-for (const name of ['SourceGraph', 'TypeManifest', 'TypedProgram', 'Definition<T>', 'Definitions', 'Input<T>', 'GeneratedModule']) {
+for (const name of ['SourceGraph', 'TypeManifest', 'TypedProgram', 'DefinitionData<T>', 'Definition<T>', 'Definitions', 'Input<T>', 'GeneratedModule']) {
   if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
 }
 
 const outputs = {
   typescript: ['tools/showcase/adapters/generated/typed/compiler-coverage.ts', [
-    /export interface Assign/, /export interface Definition<T>/, /export interface Definitions/,
+    /export interface Assign/, /export type DefinitionData<T>/, /export interface Definition<T>/, /export interface Definitions/,
     /export interface Input_card_tpl/, /export function renderTemplate\(/, /export function render\(/,
   ]],
   go: ['tools/showcase/adapters/generated/typed/compiler-coverage.go', [
-    /type Assign struct/, /type Definition\[T any\] struct/, /type Definitions struct/,
+    /type Assign struct/, /type DefinitionData_card_tpl struct/, /type Definition\[T any\] struct/, /type Definitions struct/,
     /type Input_card_tpl struct/, /func RenderTemplate\(/, /func Render\(/,
   ]],
   rust: ['tools/showcase/adapters/generated/typed/compiler-coverage.rust', [
-    /pub struct Assign/, /pub struct Definition<T>/, /pub struct Definitions/,
+    /pub struct Assign/, /pub struct DefinitionData_card_tpl/, /pub struct Definition<T>/, /pub struct Definitions/,
     /pub struct Input_card_tpl/, /pub fn render_template\(/, /pub fn render\(/,
   ]],
   php: ['tools/showcase/adapters/generated/typed/compiler-coverage.php', [
-    /final class Assign/, /final class Definition/, /final class Definitions/,
+    /final class Assign/, /final class DefinitionData_card_tpl/, /final class Definition/, /final class Definitions/,
     /final class Input_card_tpl/, /function render_template\(/, /function render\(/,
   ]],
 };
 
 for (const [language, [file, patterns]] of Object.entries(outputs)) {
   const mapping = manifest.languages?.[language];
-  for (const field of ['assign', 'definition', 'definitions', 'input', 'renderTemplate', 'render']) {
+  for (const field of ['assign', 'definitionData', 'definition', 'definitions', 'input', 'renderTemplate', 'render']) {
     if (!mapping?.[field]) throw new Error(`${language}: compiler mapping ${field} is missing`);
   }
   const source = readFileSync(resolve(root, file), 'utf8');

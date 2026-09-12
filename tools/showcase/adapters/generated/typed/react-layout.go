@@ -13,8 +13,10 @@ type Assign struct {
 }
 type Input_content_tpl struct {  }
 type Input_layout_tpl struct {  }
+type DefinitionData_content_tpl struct {  }
+type DefinitionData_layout_tpl struct {  }
 type Definition[T any] struct { HTML *string; Data *T }
-type Definitions struct { Content *Definition[Input_content_tpl]; Layout *Definition[Input_layout_tpl] }
+type Definitions struct { Content *Definition[DefinitionData_content_tpl]; Layout *Definition[DefinitionData_layout_tpl] }
 type OrderedEntry[K comparable, V any] struct { Key K; Value V }
 type OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }
 func NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }
@@ -44,7 +46,9 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
     if definition == nil { panic("generated definition content is missing") }
     if definition != nil && definition.HTML != nil { out.WriteString(*definition.HTML) } else {
         input := Input_content_tpl{}
-        if definition != nil && definition.Data != nil { input = *definition.Data }
+        if definition != nil && definition.Data != nil {
+
+        }
 
         out.WriteString(render_content_tpl(assign, definitions, input))
     }

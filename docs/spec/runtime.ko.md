@@ -163,7 +163,7 @@ sequenceDiagram
 - **RT-57** 컴파일 artifact는 정규 AST와 schema 버전, 언어, 시나리오, 원본 SHA-256, artifact SHA-256, 템플릿 artifact 경로를 가진 manifest를 포함한다. artifact는 서비스 시작 전에 생성되고 프로세스에 한 번 로드된다.
 - **RT-58** 산출물 갱신에는 세 정책이 있다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 배포된 산출물만 읽고 누락·오래됨이면 실패한다. 이 정책은 `compile.mode`가 산출물 표현을 선택한 뒤 독립적으로 적용된다.
 - **RT-59** 요청 경로에서는 파싱, 원본 파일 탐색, artifact 생성이 실행되지 않는다. 같은 artifact에 같은 assign, define, environment를 적용하면 같은 출력 바이트를 만들고 request를 변경하지 않는다.
-- **RT-68** 타입 고정 generated artifact는 assign, definitions와 template input을 선언한다. 생성된 block은 root assign, definition data, block scope 순서로 입력을 적용한 뒤 대상 template 함수를 직접 호출한다. 미리 렌더한 문자열 slot은 generated template target이 아니다.
+- **RT-68** 타입 고정 generated artifact는 assign, 필드 전달 여부를 보존하는 definition data, definitions와 template input을 선언한다. 생성된 block은 root assign, 전달된 definition data 필드, block scope 순서로 입력을 적용한 뒤 대상 template 함수를 직접 호출한다. 미리 렌더한 문자열 slot은 generated template target이 아니다.
 
 인터페이스는 두 실행 모드를 선언한다.
 
