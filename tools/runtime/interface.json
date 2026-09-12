@@ -86,9 +86,9 @@
     }
   ],
   "languages": {
-    "rust": {"engine": "Engine", "compile": "CompileOptions", "prepared": "PreparedRender", "pageCache": "PageCache"},
-    "go": {"engine": "Engine", "compile": "CompileOptions", "prepared": "PreparedRender", "pageCache": "cache.PageCache"},
-    "typescript": {"engine": "Engine", "compile": "CompileOptions", "prepared": "PreparedRender", "pageCache": "PageCache"},
-    "php": {"engine": "Engine", "compile": "compile array", "prepared": "PreparedRender", "pageCache": "PageCache"}
+    "rust": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "PageCache"},
+    "go": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "cache.PageCache"},
+    "typescript": {"engine": "Engine", "compile": "CompileOptions", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "PageCache"},
+    "php": {"engine": "Engine", "compile": "compile array", "generatedRequest": "GeneratedRequest", "generatedPrepared": "GeneratedPreparedRender", "prepared": "PreparedRender", "pageCache": "PageCache"}
   }
 }

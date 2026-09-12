@@ -9,6 +9,7 @@ import {
   parseJsonBytes,
   type DefineInput,
   type Env,
+  type GeneratedRequest,
   type Template,
 } from '@polyspec/template';
 import type {
@@ -112,10 +113,18 @@ export class Adapter implements RenderAdapter {
     this.root = root;
     const metadata = objectValue(readJson(root, 'scenario.json'), 'scenario.json');
     const legacyWrappers = metadata.has('legacyWrappers') ? booleanField(metadata, 'legacyWrappers') : false;
-    const templates = process.env.SHOWCASE_EXECUTION_MODE === 'generated'
-      ? generatedTemplates(root)
-      : readArtifactTemplates(root, 'typescript');
-    this.engine = new Engine({ loader: new MapLoader(templates), legacyWrappers });
+    const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
+    const templates = generated ? generatedTemplates(root) : readArtifactTemplates(root, 'typescript');
+    this.engine = new Engine({
+      loader: new MapLoader(templates),
+      legacyWrappers,
+      compile: generated ? {
+        mode: 'gen',
+        generatedRenderer: (request: GeneratedRequest) => ({
+          render: () => renderGenerated(this.root, request.targetName, request.rootData, request.registry as unknown as DefineRegistry, request.env),
+        }),
+      } : { mode: 'ast' },
+    });
   }
 
   loadScenario(): Scenario {
@@ -138,7 +147,6 @@ export class Adapter implements RenderAdapter {
   }
 
   render(request: Readonly<RenderRequest>): string {
-    if (process.env.SHOWCASE_EXECUTION_MODE === 'generated') return renderGenerated(this.root, request.target, request.assign, request.define, request.env);
     const options: { define: Record<string, DefineInput>; env?: Partial<Env> } = {
       define: engineDefines(request.define),
     };

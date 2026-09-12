@@ -59,6 +59,26 @@ function checkSupportLevels() {
   assert(manifest.executionModes?.ast?.status === 'implemented', 'AST execution mode must be implemented');
 }
 
+function checkGeneratedEngineRoute() {
+  const checks = {
+    typescript: [/compile: generated \?/, /generatedRenderer:/, /render\(request:[\s\S]*?return this\.engine\.render/],
+    go: [/Compile:\s+func\(\) template\.CompileOptions/, /Mode: template\.CompileModeGen/, /func \(a \*Adapter\) Render[\s\S]*?return a\.engine\.Render/],
+    rust: [/compile: if generated/, /mode: CompileMode::Gen/, /fn render\(&self,[\s\S]*?self\.engine\s*\.render/],
+    php: [/\['mode' => \$generated \? 'gen' : 'ast'\]/, /\['generated_renderer'\]/, /public function render\(RenderRequest \$request\)[\s\S]*?\$this->engine->render/],
+  };
+  const forbidden = {
+    typescript: /render\(request:[^{]+\{\s*if \(process\.env\.SHOWCASE_EXECUTION_MODE/,
+    go: /func \(a \*Adapter\) Render[^{]+\{\s*if os\.Getenv/,
+    rust: /fn render\(&self,[^{]+\{\s*if std::env::var/,
+    php: /public function render\(RenderRequest \$request\): string\s*\{\s*if \(getenv/,
+  };
+  for (const [language, patterns] of Object.entries(checks)) {
+    const source = readContractFile(manifest.languages[language].file);
+    for (const pattern of patterns) assert(pattern.test(source), `${language}: generated execution is not connected through Engine compile.mode`);
+    assert(!forbidden[language].test(source), `${language}: render bypasses Engine in generated mode`);
+  }
+}
+
 function assertOrderedShape(actual, expected, path = '$') {
   if (actual === null || expected === null || typeof actual !== 'object' || typeof expected !== 'object') {
     assert(Object.is(actual, expected), `${path} differs: ${JSON.stringify(actual)} !== ${JSON.stringify(expected)}`);
@@ -207,6 +227,7 @@ function checkRuntime(language, scenarioPath, request, expectedHtml, mode = 'ast
 
 async function main() {
   checkSupportLevels();
+  checkGeneratedEngineRoute();
   run('manifest generator', process.execPath, ['scripts/generate-showcase-contract.mjs', '--check']);
   run('generated source generator', process.execPath, ['tools/showcase/generate-native.mjs', '--check']);
   run('direct source generator', process.execPath, ['tools/showcase/generate-direct.mjs', '--check']);

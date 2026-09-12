@@ -45,13 +45,17 @@ pub struct GeneratedPreparedRender {
 
 /// The normalized request shared by AST and generated renderers.
 pub struct GeneratedRequest {
+    /// Selected template name after definition resolution.
     pub target_name: String,
+    /// Bound root assign data.
     pub root: OrderedMap,
+    /// Bound template definition registry.
     pub registry: HashMap<String, DefineEntry>,
+    /// Resolved render environment.
     pub env: Env,
 }
 /// Prepares a normalized request with generated host-language code.
-pub type GeneratedRenderer = fn(GeneratedRequest) -> Result<GeneratedPreparedRender, String>;
+pub type GeneratedRenderer = Box<dyn Fn(GeneratedRequest) -> Result<GeneratedPreparedRender, String>>;
 
 /// Compilation settings shared by the runtime implementations.
 #[derive(Default)]
@@ -252,7 +256,7 @@ impl Engine {
             RenderTarget::Ast(ast) => Rc::new(ParsedTemplate { ast: ast.clone(), lines: None }),
         }};
         if self.compile_mode == CompileMode::Gen {
-            let renderer = self.generated_renderer.ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, "generated compile mode requires generated_renderer"))?;
+            let renderer = self.generated_renderer.as_ref().ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, "generated compile mode requires generated_renderer"))?;
             let request = GeneratedRequest { target_name: target_name.clone(), root: root.clone(), registry: registry.clone(), env: env.clone() };
             let generated = renderer(request).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, message))?;
             return Ok(PreparedRender { engine: self, root: Rc::new(root), registry, env, target_name, template, generated: Some(generated) });

@@ -47,6 +47,25 @@ type RenderOptions = render.RenderOptions
 // DefineInput is a template definition.
 type DefineInput = render.DefineInput
 
+// CompileMode selects AST interpretation or generated source execution.
+type CompileMode = render.CompileMode
+
+const (
+	// CompileModeAST interprets the compiled AST artifact.
+	CompileModeAST = render.CompileModeAST
+	// CompileModeGen executes a generated host-language artifact.
+	CompileModeGen = render.CompileModeGen
+)
+
+// CompileOptions configure the selected compilation artifact.
+type CompileOptions = render.CompileOptions
+
+// GeneratedRequest is the normalized request passed to generated code.
+type GeneratedRequest = render.GeneratedRequest
+
+// GeneratedPreparedRender is a prepared generated render operation.
+type GeneratedPreparedRender = render.GeneratedPreparedRender
+
 // ParseOptions configure Parse.
 type ParseOptions struct {
 	Delimiters     string

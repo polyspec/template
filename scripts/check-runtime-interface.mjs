@@ -27,6 +27,12 @@ const pageCaches = {
   typescript: 'packages/template-ts/src/page-cache.ts',
   php: 'packages/template-php/src/PageCache.php',
 };
+const publicGeneratedContracts = {
+  rust: ['packages/template-rust/src/lib.rs', /GeneratedPreparedRender, GeneratedRenderer, GeneratedRequest/],
+  go: ['packages/template-go/engine.go', /type GeneratedRequest = render\.GeneratedRequest[\s\S]*type GeneratedPreparedRender = render\.GeneratedPreparedRender/],
+  typescript: ['packages/template-ts/src/index.ts', /GeneratedPreparedRender, GeneratedRenderer, GeneratedRequest/],
+  php: ['packages/template-php/src/Engine.php', /final class GeneratedPreparedRender[\s\S]*final class GeneratedRequest/],
+};
 for (const [language, [relative, enginePattern, preparedPattern]] of Object.entries(files)) {
   const source = readFileSync(resolve(root, relative), 'utf8');
   if (!enginePattern.test(source)) throw new Error(`${language}: missing Engine prepare operation`);
@@ -37,8 +43,10 @@ for (const [language, [relative, enginePattern, preparedPattern]] of Object.entr
   const generatedRequestIndex = Math.max(source.lastIndexOf('generatedRenderer({'), source.lastIndexOf('generatedRender(GeneratedRequest'), source.lastIndexOf('new GeneratedRequest'), source.lastIndexOf('let request = GeneratedRequest'));
   if (modeIndex < 0 || bindIndex < 0 || generatedRequestIndex < 0 || bindIndex > generatedRequestIndex) throw new Error(`${language}: generated mode must use the normalized request after binding`);
   const mapping = manifest.languages[language];
-  if (!mapping || !mapping.engine || !mapping.compile || !mapping.prepared || !mapping.pageCache) throw new Error(`${language}: missing manifest mapping`);
+  if (!mapping || !mapping.engine || !mapping.compile || !mapping.generatedRequest || !mapping.generatedPrepared || !mapping.prepared || !mapping.pageCache) throw new Error(`${language}: missing manifest mapping`);
   const pageCache = readFileSync(resolve(root, pageCaches[language]), 'utf8');
   if (!/getOrSet|GetOrSet|get_or_set/.test(pageCache)) throw new Error(`${language}: missing PageCache getOrSet operation`);
+  const [publicPath, publicPattern] = publicGeneratedContracts[language];
+  if (!publicPattern.test(readFileSync(resolve(root, publicPath), 'utf8'))) throw new Error(`${language}: generated request contract is not public`);
 }
 process.stdout.write('runtime interface: four language mappings passed\n');
