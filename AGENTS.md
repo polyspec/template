@@ -20,6 +20,18 @@
 - Handle a defect by adding a failing test that reproduces it, fixing the code, and keeping the test.
 - Use repository-relative paths. Require explicit paths for external inputs.
 
+## Decision and acceptance rules
+
+- Define the invariant, acceptance condition and failure condition before changing an implementation. Tests provide evidence for those conditions; they do not define a weaker substitute after implementation.
+- Never weaken, skip or remove an accepted condition to make a failing implementation pass. Fix the implementation.
+- When an accepted condition is internally inconsistent or demonstrably wrong, explain the defect and its effect first. Amend the specification, test and documentation together before continuing implementation.
+- Existing code, history and convention are evidence to inspect, not authority. Keep them only when they satisfy the current contract and these rules.
+- When inspection reveals an anomaly, reproduce it at the smallest stable boundary. Decide whether it exposes a missing general rule, add that rule when it does, then keep the regression test that turns the reproduction from red to green.
+- An exception must have a narrow machine-checked boundary, a documented reason and a removal condition. Do not create an exception when the architecture can satisfy the invariant directly.
+- Use the latest stable dependency release that supports the project's declared runtime range. Do not treat a prerelease as stable.
+- Do not silently pin an older dependency. Record a reproducible compatibility reason and the condition that permits removing the pin, and make release checks reject stale or unexplained pins.
+- A release must reject known dependency vulnerabilities at the configured severity and must pass the complete release matrix with the exact locked dependency graph.
+
 ## Changes and history
 
 - Before reverting a change, check whether it is harmful. Revert a harmful change immediately. For a change that is not harmful, judge whether it is correct; remove an incorrect or unnecessary change; keep a correct change.
