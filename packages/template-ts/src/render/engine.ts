@@ -58,29 +58,40 @@ export interface RenderOptions {
   env?: Partial<Env>;
 }
 
-// A prepared request reuses binding, define resolution and the parsed target across renders.
-export class PreparedRender {
-  // Creates a prepared request from engine-owned bound state.
+interface PreparedExecution { render(): string; }
+
+class GeneratedPreparedExecution implements PreparedExecution {
+  constructor(private readonly generated: GeneratedPreparedRender) {}
+
+  render(): string { return this.generated.render(); }
+}
+
+class AstPreparedExecution implements PreparedExecution {
   constructor(
     private readonly engine: EngineCore,
-    private readonly rootData: MapValue | null,
-    private readonly registry: Map<string, DefineEntry> | null,
-    private readonly env: Env | null,
+    private readonly rootData: MapValue,
+    private readonly registry: Map<string, DefineEntry>,
+    private readonly env: Env,
     private readonly targetName: string,
-    private readonly template: ParsedTemplate | null,
-    private readonly generated: GeneratedPreparedRender | null = null,
+    private readonly template: ParsedTemplate,
   ) {}
 
-  // Renders the prepared request with fresh execution state.
   render(): string {
-    if (this.generated) return this.generated.render();
-    if (!this.rootData || !this.registry || !this.env || !this.template) throw new Error('prepared render is missing its AST state');
     const context = new RenderContext(this.engine, this.rootData, this.env, this.targetName);
     for (const [id, entry] of this.registry) context.registry.set(id, entry);
     context.enter(this.targetName, null, null);
     new Renderer(context).renderNodes(this.template.ast.body, new Frame(this.template, this.rootData));
     return context.output.toString();
   }
+}
+
+// A prepared request owns exactly one AST or generated execution.
+export class PreparedRender {
+  /** Creates a prepared request from one explicit execution variant. */
+  constructor(private readonly execution: PreparedExecution) {}
+
+  // Renders the prepared request with fresh execution state.
+  render(): string { return this.execution.render(); }
 }
 
 // An engine that renders parsed templates. It holds the loader, the host functions, the limits
@@ -166,13 +177,12 @@ export class EngineCore implements EngineServices {
     }
     const targetEntry = typeof target === 'string' ? registry.get(target) : undefined;
     const targetName = targetEntry && 'template' in targetEntry ? targetEntry.template : name;
-    const template: ParsedTemplate | null = this.compileMode === 'gen' ? null : (typeof target === 'string' ? this.loadTemplate(targetName, null, null) : { ast: target, lines: null });
     if (this.compileMode === 'gen') {
       if (!this.generatedRenderer) throw new Error('generated compile mode requires generatedRenderer');
-      return new PreparedRender(this, rootData, registry, env, targetName, template,
-        this.generatedRenderer({ target, targetName, rootData, registry, env }));
+      return new PreparedRender(new GeneratedPreparedExecution(this.generatedRenderer({ target, targetName, rootData, registry, env })));
     }
-    return new PreparedRender(this, rootData, registry, env, targetName, template);
+    const template = typeof target === 'string' ? this.loadTemplate(targetName, null, null) : { ast: target, lines: null };
+    return new PreparedRender(new AstPreparedExecution(this, rootData, registry, env, targetName, template));
   }
 
   // Renders a template name or a parsed template and returns the complete output (RT-3). It

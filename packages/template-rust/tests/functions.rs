@@ -87,23 +87,35 @@ fn engine_renders_and_registers_functions() {
 }
 
 fn generated_render(_: polyspec_template::GeneratedRequest) -> Result<polyspec_template::render::engine::GeneratedPreparedRender, String> {
-    Ok(polyspec_template::render::engine::GeneratedPreparedRender { render: Box::new(|| Ok("generated".to_string())) })
+    Ok(polyspec_template::render::engine::GeneratedPreparedRender {
+        render: Box::new(|| Ok("generated".to_string())),
+    })
 }
 
 #[test]
-fn generated_mode_uses_the_same_prepared_render_contract() {
-    let mut loader = MapLoader::new();
-    loader.set("ignored", "");
+fn generated_mode_uses_prepared_render_without_loading_an_ast_artifact() {
     let engine = Engine::new(EngineOptions {
-        loader: Some(Box::new(loader)),
+        loader: Some(Box::new(MapLoader::new())),
         compile: polyspec_template::CompileOptions {
             mode: polyspec_template::CompileMode::Gen,
             generated_renderer: Some(Box::new(generated_render)),
         },
         ..Default::default()
     });
-    assert_eq!(engine.render(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default()).unwrap(), "generated");
-    assert_eq!(engine.prepare(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default()).unwrap().render().unwrap(), "generated");
+    assert_eq!(
+        engine
+            .render(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default())
+            .unwrap(),
+        "generated"
+    );
+    assert_eq!(
+        engine
+            .prepare(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default())
+            .unwrap()
+            .render()
+            .unwrap(),
+        "generated"
+    );
 }
 
 #[test]

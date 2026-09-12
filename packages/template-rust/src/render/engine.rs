@@ -137,14 +137,24 @@ pub struct Engine {
 /// A render request with data, definitions and the target template prepared once.
 /// Reusing it avoids rebinding JSON and rebuilding the definition registry for every render.
 pub struct PreparedRender<'e> {
+    execution: PreparedExecution<'e>,
+}
+
+enum PreparedExecution<'e> {
+    Ast(AstPreparedExecution<'e>),
+    Gen(GeneratedPreparedExecution),
+}
+
+struct AstPreparedExecution<'e> {
     engine: &'e Engine,
     root: Rc<OrderedMap>,
     registry: HashMap<String, DefineEntry>,
     env: Env,
     target_name: String,
     template: Rc<ParsedTemplate>,
-    generated: Option<GeneratedPreparedRender>,
 }
+
+struct GeneratedPreparedExecution(GeneratedPreparedRender);
 
 impl Engine {
     /// Creates an engine. Panics when the delimiter option is not a delimiter pair.
@@ -249,34 +259,47 @@ impl Engine {
             },
             RenderTarget::Ast(ast) => ast.name.clone(),
         };
-        let template = if self.compile_mode == CompileMode::Gen {
-            Rc::new(ParsedTemplate { ast: Template { name: target_name.clone(), body: vec![] }, lines: None })
-        } else { match target {
-            RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
-            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate { ast: ast.clone(), lines: None }),
-        }};
         if self.compile_mode == CompileMode::Gen {
-            let renderer = self.generated_renderer.as_ref().ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, "generated compile mode requires generated_renderer"))?;
-            let request = GeneratedRequest { target_name: target_name.clone(), root: root.clone(), registry: registry.clone(), env: env.clone() };
-            let generated = renderer(request).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, message))?;
-            return Ok(PreparedRender { engine: self, root: Rc::new(root), registry, env, target_name, template, generated: Some(generated) });
+            let renderer = self.generated_renderer.as_ref().ok_or_else(|| {
+                TemplateError::without_position(
+                    ErrorCode::E_RUNTIME_TYPE,
+                    &target_name,
+                    "generated compile mode requires generated_renderer",
+                )
+            })?;
+            let request = GeneratedRequest {
+                target_name: target_name.clone(),
+                root: root.clone(),
+                registry: registry.clone(),
+                env: env.clone(),
+            };
+            let generated =
+                renderer(request).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, message))?;
+            return Ok(PreparedRender {
+                execution: PreparedExecution::Gen(GeneratedPreparedExecution(generated)),
+            });
         }
+        let template = match target {
+            RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
+            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
+                ast: ast.clone(),
+                lines: None,
+            }),
+        };
         Ok(PreparedRender {
-            engine: self,
-            root: Rc::new(root),
-            registry,
-            env,
-            target_name,
-            template,
-            generated: None,
+            execution: PreparedExecution::Ast(AstPreparedExecution {
+                engine: self,
+                root: Rc::new(root),
+                registry,
+                env,
+                target_name,
+                template,
+            }),
         })
     }
 
     /// Renders a template with data given as JSON.
     pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
-        if self.compile_mode == CompileMode::Gen {
-            return self.prepare(target, assign, options)?.render();
-        }
         self.prepare(target, assign, options)?.render()
     }
 }
@@ -284,9 +307,27 @@ impl Engine {
 impl PreparedRender<'_> {
     /// Renders the prepared request.
     pub fn render(&self) -> Result<String, TemplateError> {
-        if let Some(generated) = &self.generated {
-            return (generated.render)().map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message));
+        self.execution.render()
+    }
+}
+
+impl PreparedExecution<'_> {
+    fn render(&self) -> Result<String, TemplateError> {
+        match self {
+            PreparedExecution::Gen(execution) => execution.render(),
+            PreparedExecution::Ast(execution) => execution.render(),
         }
+    }
+}
+
+impl GeneratedPreparedExecution {
+    fn render(&self) -> Result<String, TemplateError> {
+        (self.0.render)().map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message))
+    }
+}
+
+impl AstPreparedExecution<'_> {
+    fn render(&self) -> Result<String, TemplateError> {
         let mut context = RenderContext::new(self.engine, Rc::clone(&self.root), self.env.clone(), &self.target_name);
         context.registry = self.registry.clone();
         context.enter(&self.target_name, None, None)?;

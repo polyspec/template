@@ -21,7 +21,9 @@ use Polyspec\Template\Value\MapValue;
 final class GeneratedPreparedRender
 {
     /** Creates a generated prepared request. */
-    public function __construct(private readonly \Closure $renderer) {}
+    public function __construct(private readonly \Closure $renderer)
+    {
+    }
 
     /** Renders the prepared generated request. */
     public function render(): string
@@ -41,13 +43,36 @@ final class GeneratedRequest
         public readonly array $registry,
         /** @var array{timezone: string, now: float} */
         public readonly array $env,
-    ) {}
+    ) {
+    }
 }
 
-/** Engine: template loading, caching, function registration and rendering. */
-final class PreparedRender
+/** One executable state held by a prepared render. */
+interface PreparedExecution
 {
-    /** Creates a prepared request. */
+    /** Renders this prepared execution. */
+    public function render(): string;
+}
+
+/** Prepared generated-code execution. */
+final class GeneratedPreparedExecution implements PreparedExecution
+{
+    /** Creates a generated execution. */
+    public function __construct(private readonly GeneratedPreparedRender $generated)
+    {
+    }
+
+    /** Renders generated host-language code. */
+    public function render(): string
+    {
+        return $this->generated->render();
+    }
+}
+
+/** Prepared AST interpreter execution. */
+final class AstPreparedExecution implements PreparedExecution
+{
+    /** Creates an AST execution from normalized request state. */
     public function __construct(
         private readonly Engine $engine,
         private readonly MapValue $rootData,
@@ -58,43 +83,33 @@ final class PreparedRender
         private readonly string $targetName,
         /** @var array{ast: array<string, mixed>, lines: list<int>|null} */
         private readonly array $template,
-        private readonly ?GeneratedPreparedRender $generated = null,
     ) {
+    }
+
+    /** Interprets the prepared AST with fresh execution state. */
+    public function render(): string
+    {
+        $context = new Context($this->engine, $this->rootData, $this->env, $this->targetName);
+        $context->registry = $this->registry;
+        $context->enter($this->targetName, null, null);
+        (new Renderer($context))->renderNodes($this->template['ast']['body'], new Frame($this->template, $this->rootData));
+
+        return $context->output();
+    }
+}
+
+/** A request prepared as exactly one AST or generated execution. */
+final class PreparedRender
+{
+    /** Creates a prepared request from one explicit execution variant. */
+    public function __construct(private readonly PreparedExecution $execution)
+    {
     }
 
     /** Renders the prepared request. */
     public function render(): string
     {
-        if ($this->generated !== null) {
-            return $this->generated->render();
-        }
-        return $this->engine->renderPrepared($this);
-    }
-
-    /** Returns the bound root data. */
-    public function rootData(): MapValue
-    {
-        return $this->rootData;
-    }
-    /** Returns the bound definition registry. */
-    public function registry(): array
-    {
-        return $this->registry;
-    }
-    /** Returns the resolved environment. */
-    public function env(): array
-    {
-        return $this->env;
-    }
-    /** Returns the resolved target name. */
-    public function targetName(): string
-    {
-        return $this->targetName;
-    }
-    /** Returns the cached parsed template. */
-    public function template(): array
-    {
-        return $this->template;
+        return $this->execution->render();
     }
 }
 
@@ -248,28 +263,20 @@ final class Engine
         }
         $targetEntry = is_string($target) ? ($registry[$target] ?? null) : null;
         $targetName = is_array($targetEntry) && isset($targetEntry['template']) ? $targetEntry['template'] : $name;
-        $template = $this->compileMode === 'gen' ? ['ast' => ['type' => 'Template', 'name' => $targetName, 'body' => []], 'lines' => null] : (is_string($target) ? $this->loadTemplate($targetName, null, null) : ['ast' => $target, 'lines' => null]);
-        $templateData = $template;
-
         if ($this->compileMode === 'gen') {
-            if ($this->generatedRenderer === null) throw new \LogicException('generated compile mode requires generated_renderer');
+            if ($this->generatedRenderer === null) {
+                throw new \LogicException('generated compile mode requires generated_renderer');
+            }
             $generated = ($this->generatedRenderer)(new GeneratedRequest($targetName, $rootData, $registry, $env));
-            if (!$generated instanceof GeneratedPreparedRender) throw new \LogicException('generated_renderer must return GeneratedPreparedRender');
-            return new PreparedRender($this, $rootData, $registry, $env, $targetName, $templateData, $generated);
+            if (!$generated instanceof GeneratedPreparedRender) {
+                throw new \LogicException('generated_renderer must return GeneratedPreparedRender');
+            }
+            return new PreparedRender(new GeneratedPreparedExecution($generated));
         }
 
-        return new PreparedRender($this, $rootData, $registry, $env, $targetName, $templateData);
-    }
+        $template = is_string($target) ? $this->loadTemplate($targetName, null, null) : ['ast' => $target, 'lines' => null];
 
-    /** Renders a prepared request without rebinding its assign or define data. */
-    public function renderPrepared(PreparedRender $prepared): string
-    {
-        $context = new Context($this, $prepared->rootData(), $prepared->env(), $prepared->targetName());
-        $context->registry = $prepared->registry();
-        $context->enter($prepared->targetName(), null, null);
-        (new Renderer($context))->renderNodes($prepared->template()['ast']['body'], new Frame($prepared->template(), $prepared->rootData()));
-
-        return $context->output();
+        return new PreparedRender(new AstPreparedExecution($this, $rootData, $registry, $env, $targetName, $template));
     }
 
     /**

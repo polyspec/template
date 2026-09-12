@@ -44,6 +44,17 @@ falls back to AST execution. `artifact_refresh` remains `dev`, `true`, or
 - **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-66** `getOrSet` returns the cached HTML on a hit without calling `render`; on a miss it calls `render` once, stores the returned HTML with the TTL, and returns it.
 - **RT-67** The prepared render contract is declared in [`tools/runtime/interface.json`](../../tools/runtime/interface.json). `scripts/check-runtime-interface.mjs` fails when any required language mapping or operation is missing.
+- **RT-69** `PreparedRender` owns exactly one explicit `AstPreparedExecution` or `GeneratedPreparedExecution`. Generated execution never creates or retains an AST placeholder, and AST execution never retains a generated renderer. The four runtimes must fail the interface gate if this disjoint structure is removed.
+
+The prepared execution diagrams are generated from the runtime interface manifest:
+
+```mermaid
+<!--@include: ../../tools/runtime/generated/prepared-execution-flow.mmd-->
+```
+
+```mermaid
+<!--@include: ../../tools/runtime/generated/prepared-execution-classes.mmd-->
+```
 - **RT-42** `delimiters` in the engine options and in `parse` selects the tag delimiters as defined in the lexical document. The default is `{}`. A delimiter directive in a template file overrides the option for that file.
 
 ## Cross-language render contract
