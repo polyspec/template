@@ -4,6 +4,7 @@ use crate::ast::{Expr, IfBranch, Node, ScopeItem};
 use crate::error::{ErrorCode, Span, TemplateError};
 use crate::loader::resolve_path;
 use crate::render::context::{DefineEntry, Frame, LoopMeta, RenderContext, Scope};
+use crate::render::engine::AstProgram;
 use crate::render::expressions::Evaluator;
 use crate::render::runtime_bindings::RuntimeBindings;
 use crate::value::{OrderedMap, Value};
@@ -12,12 +13,13 @@ use std::rc::Rc;
 /// Renders statement nodes into the output of a render context.
 pub struct Renderer<'c, 'e> {
     context: &'c mut RenderContext<'e>,
+    program: &'e AstProgram,
 }
 
 impl<'c, 'e> Renderer<'c, 'e> {
     /// Creates a renderer over a render context.
-    pub fn new(context: &'c mut RenderContext<'e>) -> Renderer<'c, 'e> {
-        Renderer { context }
+    pub fn new(context: &'c mut RenderContext<'e>, program: &'e AstProgram) -> Renderer<'c, 'e> {
+        Renderer { context, program }
     }
 
     fn evaluate(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, TemplateError> {
@@ -155,7 +157,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
 
     fn render_include(&mut self, path: &str, span: Span, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
         let name = self.resolve(path, frame, span)?;
-        let template = self.context.engine.load_template(&name, Some(frame), Some(span))?;
+        let template = self.program.load_template(&name, Some(frame), Some(span))?;
         self.context.enter(&name, Some(frame), Some(span))?;
         let included = Frame {
             template: Rc::clone(&template),
@@ -241,7 +243,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
             let value = self.evaluate(&item.expr, frame, scope)?;
             data.insert(item.name.clone(), value);
         }
-        let template = self.context.engine.load_template(&template_name, Some(frame), Some(span))?;
+        let template = self.program.load_template(&template_name, Some(frame), Some(span))?;
         self.context.enter(&template_name, Some(frame), Some(span))?;
         let block_frame = Frame {
             template: Rc::clone(&template),

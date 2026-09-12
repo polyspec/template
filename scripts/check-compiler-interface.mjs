@@ -18,7 +18,7 @@ if (manifest.showcaseAdapter?.name !== 'RenderAdapter' || manifest.showcaseAdapt
 const requiredTypes = [
   'CompileMode', 'ArtifactRefresh', 'SourceGraph', 'TypeManifest', 'TypedProgram',
   'ArtifactManifest', 'RenderRequest', 'Program', 'AstProgram', 'GeneratedProgram',
-  'RuntimeBindings', 'FunctionSignature', 'DefinitionData<T>', 'Definition<T>',
+  'RuntimeBindings', 'RuntimeServices', 'FunctionSignature', 'DefinitionData<T>', 'Definition<T>',
   'Definitions', 'Input<T>',
 ];
 for (const name of requiredTypes) if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
@@ -28,6 +28,7 @@ const expectedOperations = {
   LanguageBackend: ['emitDeclarations', 'emitRuntime', 'emitTemplates', 'emitEntry'],
   ArtifactStore: ['load', 'regenerate', 'loadOrRefresh'],
   Program: ['prepare', 'render'],
+  RuntimeServices: ['limits', 'hostFunction'],
   PageCache: ['get', 'put', 'getOrSet'],
 };
 for (const [owner, names] of Object.entries(expectedOperations)) {
@@ -60,8 +61,11 @@ if (core?.languages?.join(',') !== 'typescript,go,rust,php') throw new Error('co
 if (core?.compileModes?.join(',') !== 'ast,gen' || core.conformanceCases !== 211) throw new Error('core support level is incomplete');
 for (const language of core.languages) {
   const mapping = manifest.languages?.[language];
-  if (!mapping?.backend || mapping.program?.join(',') !== 'AstProgram,GeneratedProgram' || !mapping.error) {
+  if (!mapping?.backend || mapping.program?.join(',') !== 'AstProgram,GeneratedProgram' || mapping.runtimeServices !== 'RuntimeServices' || !mapping.error) {
     throw new Error(`${language}: compiler mapping is incomplete`);
+  }
+  for (const operation of manifest.types.RuntimeServices.operations) {
+    if (!mapping.runtimeServiceOperationNames?.[operation]) throw new Error(`${language}: RuntimeServices.${operation} name mapping is missing`);
   }
 }
 const rustContextOperations = ['stringify', 'escape', 'number', 'finite', 'compare', 'entries', 'call', 'limit', 'error'];
@@ -82,6 +86,8 @@ if (runtime.Engine?.owns?.join(',') !== 'program' || runtime.Engine?.implements 
 if (runtime.AstProgram?.implements !== 'Program' || runtime.GeneratedProgram?.implements !== 'Program') throw new Error('program implementation mapping differs');
 const runtimeBindingOperations = manifest.types.RuntimeBindings.operations;
 if (runtime.RuntimeBindings?.operations?.map(item => item.name).join(',') !== runtimeBindingOperations.join(',')) throw new Error('RuntimeBindings operations differ');
+const runtimeServiceOperations = manifest.types.RuntimeServices.operations;
+if (runtime.RuntimeServices?.operations?.map(item => item.name).join(',') !== runtimeServiceOperations.join(',')) throw new Error('RuntimeServices operations differ');
 
 function declaration(source, kind, name) {
   return source.statements.find(statement => statement.name?.text === name && statement.kind === kind);
@@ -118,6 +124,16 @@ if (bindingMethods?.map(item => item.name.getText(bindingsSource)).join(',') !==
 for (const operation of runtime.RuntimeBindings.operations) {
   const method = bindingMethods?.find(item => item.name.getText(bindingsSource) === operation.name);
   if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeBindings.${operation.name} signature differs`);
+}
+
+const contextPath = resolve(root, 'packages/template-ts/src/render/context.ts');
+const contextSource = ts.createSourceFile(contextPath, readFileSync(contextPath, 'utf8'), ts.ScriptTarget.Latest, true);
+const services = declaration(contextSource, ts.SyntaxKind.InterfaceDeclaration, 'RuntimeServices');
+const serviceMethods = services?.members.filter(ts.isMethodSignature);
+if (serviceMethods?.map(item => item.name.getText(contextSource)).join(',') !== runtimeServiceOperations.join(',')) throw new Error('typescript: RuntimeServices operations differ');
+for (const operation of runtime.RuntimeServices.operations) {
+  const method = serviceMethods?.find(item => item.name.getText(contextSource) === operation.name);
+  if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeServices.${operation.name} signature differs`);
 }
 
 function run(label, command, args, cwd) {

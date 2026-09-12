@@ -135,16 +135,16 @@ func (e *Engine) Register(name string, fn functions.HostFunction) error {
 	return nil
 }
 
-// Functions implements Services.
-func (e *Engine) Functions() map[string]functions.HostFunction { return e.functions }
+// HostFunction returns one registered host function.
+func (e *Engine) HostFunction(name string) (functions.HostFunction, bool) {
+	function, ok := e.functions[name]
+	return function, ok
+}
 
-// Builtins implements Services.
-func (e *Engine) Builtins() map[string]functions.BuiltIn { return functions.Builtins }
-
-// Limits implements Services.
+// Limits implements RuntimeServices.
 func (e *Engine) Limits() Limits { return e.limits }
 
-// LoadTemplate implements Services (RT-9, RT-40).
+// LoadTemplate loads an AST template (RT-9, RT-40).
 func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*ParsedTemplate, error) {
 	loaded, ok := e.loader.Load(name)
 	if !ok {
@@ -237,7 +237,7 @@ func (p *astPreparedExecution) render() (string, error) {
 	if err := context.Enter(p.targetName, nil, nil); err != nil {
 		return "", err
 	}
-	if err := NewRenderer(context).RenderNodes(p.template.AST.Body, NewFrame(p.template, p.root)); err != nil {
+	if err := NewRenderer(context, p.engine).RenderNodes(p.template.AST.Body, NewFrame(p.template, p.root)); err != nil {
 		return "", err
 	}
 	return context.Output(), nil

@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "2b6f89b8dd26f002c86286c0d2c4c007f070ef0174478d4b957db99561565343",
+  "contractDigest": "17278ce3a1e628fdebe22170f24aa2d105c3c41192c33198426907013f251bdc",
   "files": {
     "layout.tpl": {
       "path": "layout.tpl.ast.json",

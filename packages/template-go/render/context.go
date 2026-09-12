@@ -81,17 +81,15 @@ func (f *Frame) LoopMeta(name string) *LoopMeta {
 	return stack[len(stack)-1]
 }
 
-// Services are the engine operations the renderer needs.
-type Services interface {
-	Functions() map[string]functions.HostFunction
-	Builtins() map[string]functions.BuiltIn
+// RuntimeServices are the value semantics and limit state shared by both compiler modes.
+type RuntimeServices interface {
 	Limits() Limits
-	LoadTemplate(name string, from *Frame, span *ast.Span) (*ParsedTemplate, error)
+	HostFunction(name string) (functions.HostFunction, bool)
 }
 
 // Context is the state of one render.
 type Context struct {
-	Services   Services
+	Services   RuntimeServices
 	RootData   *value.OrderedMap
 	Env        functions.Env
 	EntryName  string
@@ -103,7 +101,7 @@ type Context struct {
 }
 
 // NewContext creates a render context.
-func NewContext(services Services, root *value.OrderedMap, env functions.Env, entry string) *Context {
+func NewContext(services RuntimeServices, root *value.OrderedMap, env functions.Env, entry string) *Context {
 	return &Context{Services: services, RootData: root, Env: env, EntryName: entry, Registry: map[string]*DefineEntry{}}
 }
 

@@ -28,6 +28,12 @@ type runtimeManifest struct {
 				Parameters []string `json:"parameters"`
 			} `json:"operations"`
 		} `json:"RuntimeBindings"`
+		RuntimeServices struct {
+			Operations []struct {
+				Name       string   `json:"name"`
+				Parameters []string `json:"parameters"`
+			} `json:"operations"`
+		} `json:"RuntimeServices"`
 	} `json:"runtimeContract"`
 }
 
@@ -120,6 +126,33 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 	}
 	if len(bindingMethods) != len(manifest.RuntimeContract.RuntimeBindings.Operations) {
 		t.Fatal("RuntimeBindings operation count differs")
+	}
+	contextFile, err := parser.ParseFile(token.NewFileSet(), "render/context.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var services *ast.InterfaceType
+	for _, declaration := range contextFile.Decls {
+		general, ok := declaration.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+		for _, spec := range general.Specs {
+			named, ok := spec.(*ast.TypeSpec)
+			if ok && named.Name.Name == "RuntimeServices" {
+				services, _ = named.Type.(*ast.InterfaceType)
+			}
+		}
+	}
+	if services == nil || len(services.Methods.List) != len(manifest.RuntimeContract.RuntimeServices.Operations) {
+		t.Fatal("RuntimeServices declaration differs")
+	}
+	for index, operation := range manifest.RuntimeContract.RuntimeServices.Operations {
+		field := services.Methods.List[index]
+		function, ok := field.Type.(*ast.FuncType)
+		if !ok || len(field.Names) != 1 || field.Names[0].Name != exported(operation.Name) || fieldCount(function.Params) != len(operation.Parameters) {
+			t.Fatalf("RuntimeServices.%s signature differs", operation.Name)
+		}
 	}
 }
 

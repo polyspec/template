@@ -160,7 +160,7 @@ final class RuntimeBindings
                 throw $this->error($frame, $span, $error->errorCode, $error->getMessage());
             }
         }
-        $host = $this->context->engine->hostFunction($name);
+        $host = $this->context->services->hostFunction($name);
         if ($host === null) {
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$name} is not a function");
         }
@@ -179,7 +179,8 @@ final class RuntimeBindings
     /** @param array{0: int, 1: int} $span */
     public function limit(string $kind, int $count, Frame $frame, array $span): void
     {
-        $maximum = $kind === 'expression' ? $this->context->engine->limits['expressionDepth'] : $this->context->engine->limits['iterations'];
+        $limits = $this->context->services->limits();
+        $maximum = $kind === 'expression' ? $limits['expressionDepth'] : $limits['iterations'];
         if ($count <= $maximum) {
             return;
         }

@@ -6,7 +6,7 @@ use crate::functions::{Env, HostFunction};
 use crate::loader::{Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
 use crate::parser::scanner::{DEFAULT_DELIMITERS, Delimiters, parse_delimiters};
-use crate::render::context::{DefineEntry, Frame, Limits, ParsedTemplate, RenderContext, Scope};
+use crate::render::context::{DefineEntry, Frame, Limits, ParsedTemplate, RenderContext, RuntimeServices, Scope};
 use crate::render::statements::Renderer;
 use crate::source::Source;
 use crate::value::OrderedMap;
@@ -284,6 +284,16 @@ impl Program for AstProgram {
     }
 }
 
+impl RuntimeServices for AstProgram {
+    fn limits(&self) -> Limits {
+        self.limits
+    }
+
+    fn host_function(&self, name: &str) -> Option<&HostFunction> {
+        self.functions.get(name)
+    }
+}
+
 impl PreparedRender<'_> {
     /// Creates a prepared operation from compiled program state.
     pub fn new(render: impl Fn() -> Result<String, TemplateError> + 'static) -> PreparedRender<'static> {
@@ -306,7 +316,7 @@ impl AstPreparedExecution<'_> {
             context: Rc::clone(&self.root),
         };
         let mut scope = Scope::default();
-        Renderer::new(&mut context).render_nodes(&self.template.ast.body, &frame, &mut scope)?;
+        Renderer::new(&mut context, self.engine).render_nodes(&self.template.ast.body, &frame, &mut scope)?;
         Ok(context.output)
     }
 }

@@ -13,6 +13,7 @@ use Polyspec\Template\Parser\Scanner;
 use Polyspec\Template\Render\Context;
 use Polyspec\Template\Render\Frame;
 use Polyspec\Template\Render\Renderer;
+use Polyspec\Template\Render\RuntimeServices;
 use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\BindError;
 use Polyspec\Template\Value\MapValue;
@@ -40,14 +41,14 @@ final class AstPreparedExecution implements PreparedExecution
         $context = new Context($this->engine, $this->rootData, $this->env, $this->targetName);
         $context->registry = $this->registry;
         $context->enter($this->targetName, null, null);
-        (new Renderer($context))->renderNodes($this->template['ast']['body'], new Frame($this->template, $this->rootData));
+        (new Renderer($context, $this->engine))->renderNodes($this->template['ast']['body'], new Frame($this->template, $this->rootData));
 
         return $context->output();
     }
 }
 
 /** AstProgram: template loading, caching, function registration and rendering. */
-final class AstProgram implements Program
+final class AstProgram implements Program, RuntimeServices
 {
     public const DEFAULT_LIMITS = [
         'iterations' => 1000000,
@@ -132,6 +133,12 @@ final class AstProgram implements Program
     public function hostFunction(string $name): ?callable
     {
         return $this->functions[$name] ?? null;
+    }
+
+    /** @return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} */
+    public function limits(): array
+    {
+        return $this->limits;
     }
 
     /**

@@ -2,8 +2,7 @@
 
 use crate::ast::Template;
 use crate::error::{ErrorCode, LineIndex, Span, TemplateError};
-use crate::functions::Env;
-use crate::render::engine::AstProgram;
+use crate::functions::{Env, HostFunction};
 use crate::value::{OrderedMap, Value};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -19,6 +18,14 @@ pub struct Limits {
     pub output_bytes: usize,
     /// Expression nesting depth.
     pub expression_depth: usize,
+}
+
+/// Runtime state required by both AST and generated programs.
+pub trait RuntimeServices {
+    /// Active resource limits.
+    fn limits(&self) -> Limits;
+    /// Host function registered under a name.
+    fn host_function(&self, name: &str) -> Option<&HostFunction>;
 }
 
 impl Default for Limits {
@@ -114,8 +121,8 @@ impl Scope {
 
 /// State of one render call.
 pub struct RenderContext<'e> {
-    /// The engine.
-    pub engine: &'e AstProgram,
+    /// Shared runtime services.
+    pub services: &'e dyn RuntimeServices,
     /// Root data.
     pub root: Rc<OrderedMap>,
     /// Environment.
@@ -134,9 +141,9 @@ pub struct RenderContext<'e> {
 
 impl<'e> RenderContext<'e> {
     /// Creates a render context.
-    pub fn new(engine: &'e AstProgram, root: Rc<OrderedMap>, env: Env, entry: &str) -> RenderContext<'e> {
+    pub fn new(services: &'e dyn RuntimeServices, root: Rc<OrderedMap>, env: Env, entry: &str) -> RenderContext<'e> {
         RenderContext {
-            engine,
+            services,
             root,
             env,
             entry: entry.to_string(),
@@ -158,12 +165,13 @@ impl<'e> RenderContext<'e> {
 
     /// Writes output, checking the size limit (RT-35).
     pub fn write(&mut self, text: &str, frame: &Frame, span: Span) -> Result<(), TemplateError> {
-        if self.output.len() + text.len() > self.engine.limits.output_bytes {
+        let limits = self.services.limits();
+        if self.output.len() + text.len() > limits.output_bytes {
             return Err(self.fail(
                 ErrorCode::E_RUNTIME_LIMIT,
                 Some(frame),
                 Some(span),
-                format!("output exceeds {} bytes", self.engine.limits.output_bytes),
+                format!("output exceeds {} bytes", limits.output_bytes),
             ));
         }
         self.output.push_str(text);
@@ -175,12 +183,13 @@ impl<'e> RenderContext<'e> {
         if self.chain.iter().any(|entry| entry == name) {
             return Err(self.fail(ErrorCode::E_LOAD_CYCLE, frame, span, format!("{name} is already being rendered")));
         }
-        if self.chain.len() > self.engine.limits.depth {
+        let limits = self.services.limits();
+        if self.chain.len() > limits.depth {
             return Err(self.fail(
                 ErrorCode::E_RUNTIME_DEPTH,
                 frame,
                 span,
-                format!("nesting depth exceeds {}", self.engine.limits.depth),
+                format!("nesting depth exceeds {}", limits.depth),
             ));
         }
         self.chain.push(name.to_string());
