@@ -33,15 +33,15 @@ const graph = {
   ]),
 };
 const manifest = {
-  schema: 2,
+  schema: 3,
   entry: 'main.tpl',
   fields: {
     flag: 'boolean', fallback: 'string', page: 'Page?', lookup: 'map<string,string>', numbers: 'list<number>', rows: 'list<Row>',
   },
   records: { Page: { title: 'string?' }, Row: { name: 'string' }, Slot: { template: 'string?', html: 'string?' } },
-  defines: { content: 'Slot?' },
+  defines: { content: { template: 'card.tpl', optional: true, html: true } },
   functions: { default: { args: ['any', 'any'], returns: 'any' } },
-  templates: { 'partial.tpl': { local: 'string' } },
+  templates: { 'partial.tpl': { local: 'string' }, 'card.tpl': { label: 'string' } },
 };
 
 const program = lowerSourceGraph(graph, manifest);

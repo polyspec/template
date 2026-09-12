@@ -74,7 +74,9 @@ function render_layout_tpl(assign: Assign, slots: Record<string, string>, input:
     out += render_partial_tpl(assign, slots, { values: values });
     if (slots["content"] !== undefined) {
             out += "<p>defined</p>";
-        }
+    } else {
+            out += "<p>missing</p>";
+    }
     out += "\n";
     out += slots["content"] ?? '';
     out += "</section>\n";
