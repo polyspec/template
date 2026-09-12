@@ -10,6 +10,8 @@ use Polyspec\Template\Engine;
 use Polyspec\Template\Program;
 use Polyspec\Template\Render\RuntimeBindings;
 use Polyspec\Template\Render\RuntimeServices;
+use Polyspec\Template\Render\Frame;
+use Polyspec\Template\Render\Scope;
 
 /** Verifies public runtime declarations against the common compiler manifest. */
 final class CompilerInterfaceTest extends TestCase
@@ -64,5 +66,16 @@ final class CompilerInterfaceTest extends TestCase
         foreach ($contract['RuntimeServices']['operations'] as $operation) {
             self::assertSame(count($operation['parameters']), $services->getMethod($operation['name'])->getNumberOfParameters());
         }
+        foreach ([Frame::class => 'frameFields', Scope::class => 'scopeFields'] as $class => $mapping) {
+            self::assertSame($manifest['languages']['php'][$mapping], array_map(
+                static fn (\ReflectionProperty $property): string => $property->getName(),
+                (new \ReflectionClass($class))->getProperties(\ReflectionProperty::IS_PUBLIC),
+            ));
+        }
+        $scope = new \ReflectionClass(Scope::class);
+        self::assertSame($manifest['languages']['php']['scopeOperations'], array_values(array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            array_filter($scope->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
+        )));
     }
 }

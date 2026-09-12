@@ -11,6 +11,13 @@ import (
 )
 
 type runtimeManifest struct {
+	Languages struct {
+		Go struct {
+			FrameFields     []string `json:"frameFields"`
+			ScopeFields     []string `json:"scopeFields"`
+			ScopeOperations []string `json:"scopeOperations"`
+		} `json:"go"`
+	} `json:"languages"`
 	RuntimeContract struct {
 		Program struct {
 			Operations []struct {
@@ -132,17 +139,44 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 		t.Fatal(err)
 	}
 	var services *ast.InterfaceType
+	contextTypes := map[string]*ast.TypeSpec{}
+	contextMethods := map[string][]string{}
 	for _, declaration := range contextFile.Decls {
+		if function, ok := declaration.(*ast.FuncDecl); ok && function.Recv != nil {
+			receiver := receiverName(function.Recv.List[0].Type)
+			contextMethods[receiver] = append(contextMethods[receiver], function.Name.Name)
+		}
 		general, ok := declaration.(*ast.GenDecl)
 		if !ok {
 			continue
 		}
 		for _, spec := range general.Specs {
 			named, ok := spec.(*ast.TypeSpec)
+			if ok {
+				contextTypes[named.Name.Name] = named
+			}
 			if ok && named.Name.Name == "RuntimeServices" {
 				services, _ = named.Type.(*ast.InterfaceType)
 			}
 		}
+	}
+	for name, expected := range map[string][]string{"Frame": manifest.Languages.Go.FrameFields, "Scope": manifest.Languages.Go.ScopeFields} {
+		structure, ok := contextTypes[name].Type.(*ast.StructType)
+		if !ok {
+			t.Fatalf("%s is not a struct", name)
+		}
+		actual := []string{}
+		for _, field := range structure.Fields.List {
+			for _, fieldName := range field.Names {
+				actual = append(actual, fieldName.Name)
+			}
+		}
+		if !equalNames(actual, expected) {
+			t.Fatalf("%s fields differ: %v", name, actual)
+		}
+	}
+	if !equalNames(contextMethods["Scope"], manifest.Languages.Go.ScopeOperations) {
+		t.Fatalf("Scope operations differ: %v", contextMethods["Scope"])
 	}
 	if services == nil || len(services.Methods.List) != len(manifest.RuntimeContract.RuntimeServices.Operations) {
 		t.Fatal("RuntimeServices declaration differs")
@@ -176,3 +210,15 @@ func fieldCount(fields *ast.FieldList) int {
 }
 
 func exported(name string) string { return string(name[0]-'a'+'A') + name[1:] }
+
+func equalNames(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+	return true
+}

@@ -21,21 +21,21 @@ func NewRenderer(context *Context, program *Engine) *Renderer {
 }
 
 // RenderNodes renders a node list in a frame.
-func (r *Renderer) RenderNodes(nodes []ast.Node, frame *Frame) error {
+func (r *Renderer) RenderNodes(nodes []ast.Node, frame *Frame, scope *Scope) error {
 	for _, node := range nodes {
-		if err := r.renderNode(node, frame); err != nil {
+		if err := r.renderNode(node, frame, scope); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *Renderer) renderNode(node ast.Node, frame *Frame) error {
+func (r *Renderer) renderNode(node ast.Node, frame *Frame, scope *Scope) error {
 	switch n := node.(type) {
 	case *ast.Text:
 		return r.context.Write(n.Value, frame, &n.Span)
 	case *ast.Echo:
-		v, err := r.evaluator.Evaluate(n.Expr, frame)
+		v, err := r.evaluator.EvaluateIn(n.Expr, frame, scope)
 		if err != nil {
 			return err
 		}
@@ -46,45 +46,45 @@ func (r *Renderer) renderNode(node ast.Node, frame *Frame) error {
 		return r.context.Write(text, frame, &n.Span)
 	case *ast.If:
 		for _, branch := range n.Branches {
-			test, err := r.evaluator.Evaluate(branch.Test, frame)
+			test, err := r.evaluator.EvaluateIn(branch.Test, frame, scope)
 			if err != nil {
 				return err
 			}
 			if r.evaluator.runtime.Truthy(test) {
-				return r.RenderNodes(branch.Body, frame)
+				return r.RenderNodes(branch.Body, frame, scope)
 			}
 		}
 		if n.Else != nil {
-			return r.RenderNodes(n.Else, frame)
+			return r.RenderNodes(n.Else, frame, scope)
 		}
 		return nil
 	case *ast.For:
-		return r.renderFor(n, frame)
+		return r.renderFor(n, frame, scope)
 	case *ast.Set:
-		v, err := r.evaluator.Evaluate(n.Expr, frame)
+		v, err := r.evaluator.EvaluateIn(n.Expr, frame, scope)
 		if err != nil {
 			return err
 		}
-		frame.Locals[n.Name] = v
+		scope.Locals[n.Name] = v
 		return nil
 	case *ast.Include:
-		return r.renderInclude(n.Path, n.Span, frame)
+		return r.renderInclude(n.Path, n.Span, frame, scope)
 	case *ast.Block:
-		return r.renderBlock(n, frame)
+		return r.renderBlock(n, frame, scope)
 	case *ast.IfBlock:
 		if _, ok := r.context.Registry[n.ID]; ok {
-			return r.RenderNodes(n.Body, frame)
+			return r.RenderNodes(n.Body, frame, scope)
 		}
 		if n.Else != nil {
-			return r.RenderNodes(n.Else, frame)
+			return r.RenderNodes(n.Else, frame, scope)
 		}
 		return nil
 	}
 	return nil
 }
 
-func (r *Renderer) renderFor(n *ast.For, frame *Frame) error {
-	iterable, err := r.evaluator.Evaluate(n.Iter, frame)
+func (r *Renderer) renderFor(n *ast.For, frame *Frame, scope *Scope) error {
+	iterable, err := r.evaluator.EvaluateIn(n.Iter, frame, scope)
 	if err != nil {
 		return err
 	}
@@ -94,20 +94,20 @@ func (r *Renderer) renderFor(n *ast.For, frame *Frame) error {
 	}
 	if len(entries) == 0 {
 		if n.Empty != nil {
-			return r.RenderNodes(n.Empty, frame)
+			return r.RenderNodes(n.Empty, frame, scope)
 		}
 		return nil
 	}
-	previous, hadLocal := frame.Locals[n.Name]
+	previous, hadLocal := scope.Locals[n.Name]
 	meta := &LoopMeta{Size: len(entries)}
-	frame.Loops[n.Name] = append(frame.Loops[n.Name], meta)
+	scope.Loops[n.Name] = append(scope.Loops[n.Name], meta)
 	defer func() {
-		stack := frame.Loops[n.Name]
-		frame.Loops[n.Name] = stack[:len(stack)-1]
+		stack := scope.Loops[n.Name]
+		scope.Loops[n.Name] = stack[:len(stack)-1]
 		if hadLocal {
-			frame.Locals[n.Name] = previous
+			scope.Locals[n.Name] = previous
 		} else {
-			delete(frame.Locals, n.Name)
+			delete(scope.Locals, n.Name)
 		}
 	}()
 	for i, item := range entries {
@@ -120,8 +120,8 @@ func (r *Renderer) renderFor(n *ast.For, frame *Frame) error {
 		meta.Value = item.Value
 		meta.First = i == 0
 		meta.Last = i == len(entries)-1
-		frame.Locals[n.Name] = item.Value
-		if err := r.RenderNodes(n.Body, frame); err != nil {
+		scope.Locals[n.Name] = item.Value
+		if err := r.RenderNodes(n.Body, frame, scope); err != nil {
 			return err
 		}
 	}
@@ -129,7 +129,7 @@ func (r *Renderer) renderFor(n *ast.For, frame *Frame) error {
 }
 
 func (r *Renderer) resolve(path string, frame *Frame, span ast.Span) (string, error) {
-	name, err := loader.ResolvePath(frame.Name(), path)
+	name, err := loader.ResolvePath(frame.Name, path)
 	if err != nil {
 		if errors.Is(err, loader.ErrOutsideRoot) {
 			return "", r.context.Fail(errs.LoadOutsideRoot, frame, &span, err.Error())
@@ -139,7 +139,7 @@ func (r *Renderer) resolve(path string, frame *Frame, span ast.Span) (string, er
 	return name, nil
 }
 
-func (r *Renderer) renderInclude(path string, span ast.Span, frame *Frame) error {
+func (r *Renderer) renderInclude(path string, span ast.Span, frame *Frame, scope *Scope) error {
 	name, err := r.resolve(path, frame, span)
 	if err != nil {
 		return err
@@ -153,11 +153,11 @@ func (r *Renderer) renderInclude(path string, span ast.Span, frame *Frame) error
 	}
 	defer r.context.Leave()
 	// RT-21: the included template shares the local scope and the loops of the including template.
-	shared := &Frame{Template: template, Context: frame.Context, Locals: frame.Locals, Loops: frame.Loops}
-	return r.RenderNodes(template.AST.Body, shared)
+	shared := &Frame{Name: template.AST.Name, Lines: template.Lines, Context: frame.Context}
+	return r.RenderNodes(template.AST.Body, shared, scope)
 }
 
-func (r *Renderer) renderBlock(n *ast.Block, frame *Frame) error {
+func (r *Renderer) renderBlock(n *ast.Block, frame *Frame, scope *Scope) error {
 	registry := r.context.Registry
 	var entry *DefineEntry
 	if n.ID != nil && n.Path == nil {
@@ -195,7 +195,7 @@ func (r *Renderer) renderBlock(n *ast.Block, frame *Frame) error {
 		}
 	}
 	for _, item := range n.Scope {
-		v, err := r.evaluator.Evaluate(item.Expr, frame)
+		v, err := r.evaluator.EvaluateIn(item.Expr, frame, scope)
 		if err != nil {
 			return err
 		}
@@ -209,5 +209,5 @@ func (r *Renderer) renderBlock(n *ast.Block, frame *Frame) error {
 		return err
 	}
 	defer r.context.Leave()
-	return r.RenderNodes(template.AST.Body, NewFrame(template, data))
+	return r.RenderNodes(template.AST.Body, NewFrame(template.AST.Name, template.Lines, data), NewScope())
 }

@@ -7,49 +7,18 @@ namespace Polyspec\Template\Render;
 use Polyspec\Template\Value\MapValue;
 
 /**
- * One rendered template file: local scope, context data and active loops (RT-11 to RT-14).
- *
- * The local scope and the loop stacks are objects so that an include can share them (RT-21).
+ * One rendered template location and its context data.
  */
 final class Frame
 {
-    /** @var list<int>|null */
-    public readonly ?array $lines;
-    public readonly string $name;
-
     /**
-     * @param array{ast: array<string, mixed>, lines: list<int>|null} $template
-     * @param \ArrayObject<string, list<array<string, mixed>>> $loops
+     * @param list<int>|null $lines
      */
     public function __construct(
-        public readonly array $template,
+        public readonly string $name,
+        public readonly ?array $lines,
         public readonly MapValue $context,
-        public readonly MapValue $locals = new MapValue(),
-        public readonly \ArrayObject $loops = new \ArrayObject(),
     ) {
-        $this->lines = $template['lines'];
-        $this->name = $template['ast']['name'];
     }
 
-    public function lookup(string $name): mixed
-    {
-        if ($this->locals->has($name)) {
-            return $this->locals->get($name);
-        }
-        if ($this->context->has($name)) {
-            return $this->context->get($name);
-        }
-
-        return null;
-    }
-
-    /**
-     * @return array<string, mixed>|null the innermost loop meta for the variable name
-     */
-    public function loopMeta(string $name): ?array
-    {
-        $stack = $this->loops[$name] ?? [];
-
-        return $stack === [] ? null : $stack[count($stack) - 1];
-    }
 }

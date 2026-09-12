@@ -59,3 +59,4 @@
 - Merged the showcase adapter contract into the compiler interface manifest. Contract declarations, adapter checks, Mermaid generation and canonical artifact digests now read the same design source, and the interface gate rejects a reintroduced duplicate manifest.
 - Separated `RuntimeServices` from AST template loading in all four runtimes. Render contexts now depend only on limits and host-function lookup, while AST statement renderers own template loading explicitly. The shared manifest and declaration checks enforce that boundary so generated programs can use `RuntimeBindings` without an AST program dependency.
 - Added digest-bound generated artifact manifests and independent `dev`, `true` and `false` refresh behavior with integrity checks and atomic replacement.
+- Removed canonical AST ownership from render frames and standardized `RenderFrame` and `RenderScope` fields and operations across TypeScript, Go, Rust and PHP.

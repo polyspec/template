@@ -72,9 +72,9 @@ final class ExprFixturesTest extends TestCase
         $engine = new AstProgram();
         $root = Bind::map($data ?? []);
         $context = new Context($engine, $root, ['timezone' => 'Z', 'now' => 0.0], 'expression');
-        $frame = new Frame(['ast' => ['type' => 'Template', 'name' => 'expression', 'body' => []], 'lines' => null], $root);
+        $frame = new Frame('expression', null, $root);
 
-        return (new Evaluator($context))->evaluate($expr, $frame);
+        return (new Evaluator($context))->evaluate($expr, $frame, new \Polyspec\Template\Render\Scope());
     }
 
     /**

@@ -19,7 +19,7 @@ const requiredTypes = [
   'CompileMode', 'ArtifactRefresh', 'SourceGraph', 'TypeManifest', 'TypedProgram',
   'ArtifactManifest', 'RenderRequest', 'Program', 'AstProgram', 'GeneratedProgram',
   'RuntimeBindings', 'RuntimeServices', 'FunctionSignature', 'DefinitionData<T>', 'Definition<T>',
-  'Definitions', 'Input<T>',
+  'Definitions', 'Input<T>', 'RenderFrame', 'RenderScope',
 ];
 for (const name of requiredTypes) if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
 
@@ -88,6 +88,9 @@ const runtimeBindingOperations = manifest.types.RuntimeBindings.operations;
 if (runtime.RuntimeBindings?.operations?.map(item => item.name).join(',') !== runtimeBindingOperations.join(',')) throw new Error('RuntimeBindings operations differ');
 const runtimeServiceOperations = manifest.types.RuntimeServices.operations;
 if (runtime.RuntimeServices?.operations?.map(item => item.name).join(',') !== runtimeServiceOperations.join(',')) throw new Error('RuntimeServices operations differ');
+if (runtime.RenderFrame?.fields?.join(',') !== manifest.types.RenderFrame.fields.join(',')) throw new Error('RenderFrame fields differ');
+if (runtime.RenderScope?.fields?.join(',') !== manifest.types.RenderScope.fields.join(',')) throw new Error('RenderScope fields differ');
+if (runtime.RenderScope?.operations?.join(',') !== manifest.types.RenderScope.operations.join(',')) throw new Error('RenderScope operations differ');
 
 function declaration(source, kind, name) {
   return source.statements.find(statement => statement.name?.text === name && statement.kind === kind);
@@ -135,6 +138,16 @@ for (const operation of runtime.RuntimeServices.operations) {
   const method = serviceMethods?.find(item => item.name.getText(contextSource) === operation.name);
   if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeServices.${operation.name} signature differs`);
 }
+const frame = declaration(contextSource, ts.SyntaxKind.ClassDeclaration, 'Frame');
+const frameConstructor = frame?.members.find(ts.isConstructorDeclaration);
+const frameFields = frameConstructor?.parameters.map(parameter => parameter.name.getText(contextSource));
+if (frameFields?.join(',') !== manifest.languages.typescript.frameFields.join(',')) throw new Error('typescript: RenderFrame fields differ');
+if (frameFields?.join(',') !== runtime.RenderFrame.fields.join(',')) throw new Error('typescript: RenderFrame logical fields differ');
+const scope = declaration(contextSource, ts.SyntaxKind.ClassDeclaration, 'Scope');
+const scopeFields = scope?.members.filter(ts.isPropertyDeclaration).map(item => item.name.getText(contextSource));
+const scopeOperations = scope?.members.filter(ts.isMethodDeclaration).map(item => item.name.getText(contextSource));
+if (scopeFields?.join(',') !== manifest.languages.typescript.scopeFields.join(',')) throw new Error('typescript: RenderScope fields differ');
+if (scopeOperations?.join(',') !== manifest.languages.typescript.scopeOperations.join(',')) throw new Error('typescript: RenderScope operations differ');
 
 function run(label, command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });

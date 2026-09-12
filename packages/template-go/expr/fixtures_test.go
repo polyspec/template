@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/errs"
 	"github.com/polyspec/template/expr"
 	"github.com/polyspec/template/functions"
@@ -131,8 +130,8 @@ func TestExpressionFixtures(t *testing.T) {
 					t.Fatal(err)
 				}
 				context := render.NewContext(engine, root, functions.Env{Timezone: "Z"}, "expression")
-				frame := render.NewFrame(&render.ParsedTemplate{AST: &ast.Template{Type: "Template", Name: "expression"}}, root)
-				result, err := render.NewEvaluator(context).Evaluate(tree, frame)
+				frame := render.NewFrame("expression", nil, root)
+				result, err := render.NewEvaluator(context).EvaluateIn(tree, frame, render.NewScope())
 				if err != nil {
 					t.Fatalf("case %d: %v", i, err)
 				}

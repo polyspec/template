@@ -82,17 +82,12 @@ pub struct LoopMeta {
 /// The template and context data of a rendered file (RT-11, RT-12).
 #[derive(Debug, Clone)]
 pub struct Frame {
-    /// The template being rendered.
-    pub template: Rc<ParsedTemplate>,
+    /// Template name used for path resolution and errors.
+    pub name: String,
+    /// Source line index, absent for precompiled artifacts.
+    pub lines: Option<LineIndex>,
     /// Context data.
     pub context: Rc<OrderedMap>,
-}
-
-impl Frame {
-    /// Template name.
-    pub fn name(&self) -> &str {
-        &self.template.ast.name
-    }
 }
 
 /// Local scope and active loops of a rendered file; shared with included templates (RT-21).
@@ -157,8 +152,8 @@ impl<'e> RenderContext<'e> {
     /// Creates an error at a span of a frame, or without position.
     pub fn fail(&self, code: ErrorCode, frame: Option<&Frame>, span: Option<Span>, message: impl Into<String>) -> TemplateError {
         match (frame, span) {
-            (Some(frame), Some(span)) => TemplateError::at(code, frame.name(), frame.template.lines.as_ref(), span, message),
-            (Some(frame), None) => TemplateError::without_position(code, frame.name(), message),
+            (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
+            (Some(frame), None) => TemplateError::without_position(code, &frame.name, message),
             _ => TemplateError::without_position(code, &self.entry, message),
         }
     }
