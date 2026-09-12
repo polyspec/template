@@ -70,6 +70,27 @@ function code(label, value, highlighted = false) {
   return `<details open><summary>${escapeHtml(label)}</summary><pre>${content}</pre></details>`;
 }
 
+function generatedFunctions(source, scenarioId) {
+  const prefix = scenarioId.replace(/[^A-Za-z0-9_]/g, '_') + '__';
+  const lines = source.split('\n');
+  const functions = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!new RegExp(`^(?:export )?(?:function|func|fn)\\s+(?:render_|generated_)${prefix}`).test(lines[index])) continue;
+    const body = [];
+    let depth = 0;
+    do {
+      const line = lines[index];
+      body.push(line);
+      depth += (line.match(/\{/g) ?? []).length - (line.match(/\}/g) ?? []).length;
+      index += 1;
+    } while (index < lines.length && depth > 0);
+    index -= 1;
+    functions.push(body.join('\n'));
+  }
+  if (functions.length === 0) throw new Error(`generated functions are missing for ${scenarioId}`);
+  return functions.join('\n\n');
+}
+
 function scenarioCard(scenario, result) {
   const languages = result.renders ? Object.keys(result.renders) : results.languages;
   const artifact = {};
@@ -86,7 +107,7 @@ function scenarioCard(scenario, result) {
     ['go', join(root, 'tools', 'showcase', 'adapters', 'go', 'native_direct.go')],
     ['rust', join(root, 'tools', 'showcase', 'adapters', 'rust', 'src', 'native_direct.rs')],
     ['php', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.php')],
-  ].map(([language, path]) => `${language}/native_direct · AST nodes lowered to host source\n${readFileSync(path, 'utf8')}`).join('\n\n');
+  ].map(([language, path]) => `${language}/native_direct · generated functions for ${scenario.id}\n${generatedFunctions(readFileSync(path, 'utf8'), scenario.id)}`).join('\n\n');
   const artifactText = Object.entries(artifact).map(([language, manifest]) => {
     const artifactRoot = join(site, 'scenarios', scenario.id, 'compiled', language);
     const files = Object.entries(manifest.templates).map(([name, entry]) => {

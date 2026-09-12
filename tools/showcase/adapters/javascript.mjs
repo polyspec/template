@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 
 import { Engine, MapLoader, parseJsonBytes } from '../../../packages/template-ts/dist/index.mjs';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.mjs';
-import { generatedTemplates } from './generated/native_templates.mjs';
 import { renderGenerated } from './generated/native_direct.mjs';
 
 /** @typedef {Map<string, unknown>} JsonObject */
@@ -98,10 +97,18 @@ export class Adapter {
     this.root = root;
     const metadata = objectValue(readJson(root, 'scenario.json'), 'scenario.json');
     const legacyWrappers = metadata.has('legacyWrappers') ? booleanField(metadata, 'legacyWrappers') : false;
-    const templates = process.env.SHOWCASE_EXECUTION_MODE === 'generated'
-      ? generatedTemplates(root)
-      : readArtifactTemplates(root, 'typescript');
-    this.engine = new Engine({ loader: new MapLoader(templates), legacyWrappers });
+    const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
+    const templates = generated ? new Map() : readArtifactTemplates(root, 'typescript');
+    this.engine = new Engine({
+      loader: new MapLoader(templates),
+      legacyWrappers,
+      compile: generated ? {
+        mode: 'gen',
+        generatedRenderer: request => ({
+          render: () => renderGenerated(this.root, request.targetName, request.rootData, request.registry, request.env),
+        }),
+      } : { mode: 'ast' },
+    });
   }
 
   loadScenario() {
@@ -127,7 +134,6 @@ export class Adapter {
   }
 
   render(request) {
-    if (process.env.SHOWCASE_EXECUTION_MODE === 'generated') return renderGenerated(this.root, request.target, request.assign, request.define, request.env);
     const options = { define: engineDefines(request.define) };
     if (request.env !== undefined) options.env = request.env;
     return this.engine.render(request.target, request.assign, options);

@@ -16,7 +16,8 @@ for (const tag of ['head', 'body', 'main', 'title']) {
   if (!new RegExp(`<${tag}\\b`, 'i').test(html)) fail(`showcase page is missing ${tag}`);
 }
 if (/<script\b/i.test(html)) fail('showcase page must not execute browser JavaScript');
-if (html.includes('{{') || html.includes('}}')) fail('showcase page contains unresolved template markers');
+const renderedChrome = html.replace(/<pre\b[^>]*>[\s\S]*?<\/pre>/gi, '');
+if (renderedChrome.includes('{{') || renderedChrome.includes('}}')) fail('showcase page contains unresolved template markers outside source examples');
 
 const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 const stack = [];

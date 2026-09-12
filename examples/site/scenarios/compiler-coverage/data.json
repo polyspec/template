@@ -1,0 +1,10 @@
+{
+  "flag": true,
+  "page": { "title": "Guide" },
+  "numbers": [10, 20],
+  "lookup": { "x": "X" },
+  "rows": [
+    { "name": "A" },
+    { "name": "B" }
+  ]
+}

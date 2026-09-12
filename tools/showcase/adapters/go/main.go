@@ -27,15 +27,15 @@ func NewAdapter(root string) (*Adapter, error) {
 	if err != nil {
 		return nil, err
 	}
-	loader, err := artifactLoader(root, "go")
+	templateLoader, err := artifactLoader(root, "go")
 	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
-		loader, err = generatedArtifactLoader(root, "go")
+		templateLoader = loader.NewMapLoader(map[string]string{})
 	}
 	if err != nil {
 		return nil, err
 	}
 	engine, err := template.NewEngine(template.Options{
-		Loader:         loader,
+		Loader:         templateLoader,
 		LegacyWrappers: legacyWrappers,
 		Compile: func() template.CompileOptions {
 			if os.Getenv("SHOWCASE_EXECUTION_MODE") != "generated" {

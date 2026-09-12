@@ -32,6 +32,13 @@ func generatedBlock(id, path, scenario string, root *value.OrderedMap, define De
 }
 func generatedTemplate(name, scenario string, root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
 	switch scenario {
+	case "compiler-coverage":
+		switch name {
+		case "card.tpl": return generated_compiler_coverage__card_tpl(root, define, parent)
+		case "layout.tpl": return generated_compiler_coverage__layout_tpl(root, define, parent)
+		case "partial.tpl": return generated_compiler_coverage__partial_tpl(root, define, parent)
+		default: return "", fmt.Errorf("generated template is missing: %s", name)
+		}
 	case "empty-state":
 		switch name {
 		case "layout.tpl": return generated_empty_state__layout_tpl(root, define, parent)
@@ -59,6 +66,109 @@ func generatedTemplate(name, scenario string, root *value.OrderedMap, define Def
 }
 func generatedDirectRender(rootPath string, request RenderRequest) (string, error) {
 	entry, ok := request.Define.Get(request.Target); name := request.Target; if ok { if path, isPath := entry.(string); isPath { name = path } else if typed, isTyped := entry.(DefineEntry); isTyped && typed.Template != nil { name = *typed.Template } }; return generatedTemplate(name, filepath.Base(rootPath), request.Assign, request.Define, map[string]value.Value{})
+}
+
+type generatedCollectionItem struct { Key value.Value; Value value.Value; Spread bool }
+type generatedEntry struct { Key value.Value; Value value.Value }
+func generatedCloneContext(source map[string]value.Value) map[string]value.Value { result := map[string]value.Value{}; for key, item := range source { result[key] = item }; return result }
+func generatedIndex(item, key value.Value) value.Value { if list, ok := item.(value.List); ok { index, ok := key.(float64); if ok && index >= 0 && int(index) < len(list) { return list[int(index)] }; return nil }; text, err := value.Stringify(key); if err != nil { return nil }; return generatedMember(item, text) }
+func generatedEntries(item value.Value) ([]generatedEntry, error) { result := []generatedEntry{}; if list, ok := item.(value.List); ok { for index, entry := range list { result = append(result, generatedEntry{float64(index), entry}) }; return result, nil }; if object, ok := item.(*value.OrderedMap); ok { for _, key := range object.Keys() { entry, _ := object.Get(key); result = append(result, generatedEntry{key, entry}) }; return result, nil }; if item == nil { return result, nil }; return nil, fmt.Errorf("generated renderer expected an iterable") }
+func generatedList(items []generatedCollectionItem) value.List { result := value.List{}; for _, item := range items { if item.Spread { if list, ok := item.Value.(value.List); ok { result = append(result, list...); continue }; panic("generated list spread requires a list") }; result = append(result, item.Value) }; return result }
+func generatedMap(items []generatedCollectionItem) *value.OrderedMap { result := value.NewOrderedMap(); for _, item := range items { if item.Spread { object, ok := item.Value.(*value.OrderedMap); if !ok { panic("generated map spread requires a map") }; for _, key := range object.Keys() { entry, _ := object.Get(key); result.Set(key, entry) }; continue }; key, err := value.Stringify(item.Key); if err != nil { panic(err) }; result.Set(key, item.Value) }; return result }
+func generatedTernary(test, thenValue, elseValue value.Value) value.Value { if generatedTruthy(test) { return thenValue }; return elseValue }
+func generatedUnaryFull(op string, item value.Value) value.Value { if op == "!" { return !generatedTruthy(item) }; if number, ok := item.(float64); ok { return -number }; panic("generated unary operator requires a number") }
+func generatedBinaryFull(op string, left, right value.Value) value.Value { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==": return value.LooseEquals(left, right); case "!=": return !value.LooseEquals(left, right); case "===": return value.StrictEquals(left, right); case "!==": return !value.StrictEquals(left, right); case "<", ">", "<=", ">=": order, ok := value.Compare(left, right); if !ok { panic("generated values have no order") }; if op == "<" { return order < 0 }; if op == ">" { return order > 0 }; if op == "<=" { return order <= 0 }; return order >= 0; case "+": if value.IsString(left) || value.IsString(right) { a, _ := value.Stringify(left); b, _ := value.Stringify(right); return a+b }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "in": if list, ok := right.(value.List); ok { for _, item := range list { if value.LooseEquals(left, item) { return true } }; return false }; if object, ok := right.(*value.OrderedMap); ok { key, _ := value.Stringify(left); return object.Has(key) }; if text, ok := value.TextOf(right); ok { needle, _ := value.Stringify(left); return strings.Contains(text, needle) } }; panic("unknown generated binary operator: "+op) }
+
+func generated_compiler_coverage__card_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString("<p class=\"card\">")
+	if err := generatedEcho(&out, generatedLookup(ctx, root, "label")); err != nil { return "", err }
+	out.WriteString("</p>\n")
+	return out.String(), nil
+}
+
+func generated_compiler_coverage__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	ctx["values"] = generatedList([]generatedCollectionItem{{Value: float64(0)}, {Value: generatedLookup(ctx, root, "numbers"), Spread: true}})
+	ctx["merged"] = generatedMap([]generatedCollectionItem{{Value: generatedLookup(ctx, root, "lookup"), Spread: true}, {Key: "z", Value: "Z"}})
+	out.WriteString("<section>\n<h1>")
+	if err := generatedEcho(&out, generatedMember(generatedLookup(ctx, root, "page"), "title")); err != nil { return "", err }
+	out.WriteString("</h1>\n<p>")
+	if err := generatedEcho(&out, generatedIndex(generatedLookup(ctx, root, "values"), float64(1))); err != nil { return "", err }
+	out.WriteString("|")
+	if err := generatedEcho(&out, generatedIndex(generatedLookup(ctx, root, "merged"), "z")); err != nil { return "", err }
+	out.WriteString("</p>\n")
+	if generatedTruthy(generatedBinaryFull("&&", generatedLookup(ctx, root, "flag"), generatedBinaryFull("==", generatedMember(generatedLookup(ctx, root, "page"), "title"), "Guide"))) {
+		out.WriteString("<strong>matched</strong>")
+	} else {
+		out.WriteString("<strong>missed</strong>")
+	}
+	out.WriteString("\n<p>")
+	if err := generatedEcho(&out, generatedTernary(generatedLookup(ctx, root, "flag"), "yes", "no")); err != nil { return "", err }
+	out.WriteString("|")
+	if err := generatedEcho(&out, generatedBinaryFull("+", generatedUnaryFull("-", float64(1)), float64(3))); err != nil { return "", err }
+	out.WriteString("</p>\n<ul>\n")
+	{
+		loopEntries, err := generatedEntries(generatedLookup(ctx, root, "rows"))
+		if err != nil { return "", err }
+		for loopIndex, loopEntry := range loopEntries {
+			previous := ctx
+			ctx = generatedCloneContext(ctx)
+			ctx["row"] = loopEntry.Value
+			ctx["row.key_"] = loopEntry.Key
+			ctx["row.value_"] = loopEntry.Value
+			ctx["row.index_"] = float64(loopIndex)
+			ctx["row.size_"] = float64(len(loopEntries))
+			ctx["row.first_"] = loopIndex == 0
+			ctx["row.last_"] = loopIndex+1 == len(loopEntries)
+			out.WriteString("<li>")
+			if err := generatedEcho(&out, generatedLookup(ctx, root, "row.index_")); err != nil { return "", err }
+			out.WriteString("/")
+			if err := generatedEcho(&out, generatedLookup(ctx, root, "row.size_")); err != nil { return "", err }
+			out.WriteString(":")
+			if err := generatedEcho(&out, generatedMember(generatedLookup(ctx, root, "row"), "name")); err != nil { return "", err }
+			out.WriteString(":")
+			if err := generatedEcho(&out, generatedLookup(ctx, root, "row.first_")); err != nil { return "", err }
+			out.WriteString(":")
+			if err := generatedEcho(&out, generatedLookup(ctx, root, "row.last_")); err != nil { return "", err }
+			out.WriteString("</li>\n")
+			ctx = previous
+		}
+		if len(loopEntries) == 0 {
+			out.WriteString("<li>empty</li>\n")
+		}
+	}
+	out.WriteString("</ul>\n")
+	included, err := generatedTemplate("partial.tpl", "compiler-coverage", root, define, ctx)
+	if err != nil { return "", err }
+	out.WriteString(included)
+	if _, ok := define.Get("content"); ok {
+		out.WriteString("<p>defined</p>")
+	} else {
+		out.WriteString("<p>missing</p>")
+	}
+	out.WriteString("\n")
+	blockScope := map[string]value.Value{}
+	blockScope["label"] = generatedMember(generatedLookup(ctx, root, "page"), "title")
+	blockHTML, err := generatedBlock("content", "", "compiler-coverage", root, define, blockScope)
+	if err != nil { return "", err }
+	out.WriteString(blockHTML)
+	out.WriteString("</section>\n")
+	return out.String(), nil
+}
+
+func generated_compiler_coverage__partial_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString("<p class=\"included\">")
+	if err := generatedEcho(&out, generatedIndex(generatedLookup(ctx, root, "values"), float64(2))); err != nil { return "", err }
+	out.WriteString("</p>\n")
+	return out.String(), nil
 }
 
 func generated_empty_state__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
