@@ -54,8 +54,8 @@ export function lowerSourceGraph(graph, manifest) {
   const records = new Map(Object.entries(manifest.records ?? {}).map(([name, fields]) => [name, new Map(Object.entries(fields).map(([field, type]) => [field, parseType(type)]))]));
   const root = new Map(Object.entries(manifest.fields ?? {}).map(([name, type]) => [name, parseType(type)]));
   const functions = new Map(Object.entries(manifest.functions ?? {}).map(([name, signature]) => {
-    if (signature?.implementation !== 'builtin' || name !== 'default') {
-      throw new Error(`typed generator: function ${name} is not supported by the generated-module level`);
+    if (!signature || !['builtin', 'host'].includes(signature.implementation)) {
+      throw new Error(`typed generator: function ${name} must declare builtin or host implementation`);
     }
     return [name, { args: (signature.args ?? []).map(parseType), returns: parseType(signature.returns ?? 'any'), implementation: signature.implementation }];
   }));
@@ -80,64 +80,67 @@ export function lowerSourceGraph(graph, manifest) {
     switch (node.type) {
       case 'Literal': {
         const kind = node.kind === 'bool' ? 'boolean' : node.kind;
-        return { op: 'literal', value: node.value, valueType: parseType(kind) };
+        return { op: 'literal', value: node.value, valueType: parseType(kind), span: node.span };
       }
       case 'Var': {
         const local = scope.get(node.name);
         const valueType = local ?? root.get(node.name);
         if (!valueType) throw new Error(`typed generator: variable ${node.name} is missing from the type manifest`);
-        return { op: local ? 'local' : 'root', name: node.name, valueType };
+        return { op: local ? 'local' : 'root', name: node.name, valueType, span: node.span };
       }
       case 'LoopMeta': {
         const item = loops.get(node.loop);
         if (!item) throw new Error(`typed generator: ${node.loop}.${node.field} has no enclosing typed loop`);
         const valueType = node.field === 'key_' ? parseType('any') : node.field === 'value_' ? item : node.field === 'first_' || node.field === 'last_' ? parseType('boolean') : parseType('number');
-        return { op: 'loop-meta', loop: node.loop, field: node.field, valueType };
+        return { op: 'loop-meta', loop: node.loop, field: node.field, valueType, span: node.span };
       }
       case 'Member': {
         const object = lowerExpr(node.object, scope, loops);
         const owner = required(object.valueType);
-        if (owner.kind !== 'record') throw new Error(`typed generator: member ${node.key} requires a record, got ${typeSource(object.valueType)}`);
+        if (owner.kind === 'any') return { op: 'member', object, key: node.key, valueType: parseType('any?'), span: node.span };
+        if (owner.kind !== 'record') throw new Error(`typed generator: member ${node.key} requires a record or any, got ${typeSource(object.valueType)}`);
         const valueType = records.get(owner.name)?.get(node.key);
         if (!valueType) throw new Error(`typed generator: ${owner.name}.${node.key} is missing from the type manifest`);
-        return { op: 'member', object, key: node.key, valueType: { ...valueType, optional: valueType.optional || object.valueType.optional } };
+        return { op: 'member', object, key: node.key, valueType: { ...valueType, optional: valueType.optional || object.valueType.optional }, span: node.span };
       }
       case 'Index': {
         const object = lowerExpr(node.object, scope, loops);
         const index = lowerExpr(node.index, scope, loops);
         const owner = required(object.valueType);
-        const valueType = owner.kind === 'list' ? owner.item : owner.kind === 'map' ? owner.value : null;
-        if (!valueType) throw new Error(`typed generator: index requires a list or map, got ${typeSource(object.valueType)}`);
-        return { op: 'index', object, index, valueType: { ...valueType, optional: true } };
+        const valueType = owner.kind === 'list' ? owner.item : owner.kind === 'map' ? owner.value : owner.kind === 'any' ? parseType('any') : null;
+        if (!valueType) throw new Error(`typed generator: index requires a list, map or any, got ${typeSource(object.valueType)}`);
+        return { op: 'index', object, index, valueType: { ...valueType, optional: true }, span: node.span };
       }
       case 'Call': {
         const signature = functions.get(node.name);
         if (!signature) throw new Error(`typed generator: function ${node.name} is missing from the type manifest`);
         const args = node.args.map(value => lowerExpr(value, scope, loops));
         if (signature.args.length && signature.args.length !== args.length) throw new Error(`typed generator: function ${node.name} expects ${signature.args.length} arguments`);
-        return { op: 'call', name: node.name, args, valueType: signature.returns };
+        return { op: 'call', name: node.name, implementation: signature.implementation, args, valueType: signature.returns, span: node.span };
       }
-      case 'Unary': return { op: 'unary', operator: node.op, operand: lowerExpr(node.operand, scope, loops), valueType: parseType(node.op === '!' ? 'boolean' : 'number') };
+      case 'Unary': return { op: 'unary', operator: node.op, operand: lowerExpr(node.operand, scope, loops), valueType: parseType(node.op === '!' ? 'boolean' : 'number'), span: node.span };
       case 'Binary': {
         const left = lowerExpr(node.left, scope, loops);
         const right = lowerExpr(node.right, scope, loops);
         const boolean = ['&&', '||', '==', '!=', '===', '!==', '<', '>', '<=', '>=', 'in'].includes(node.op);
-        return { op: 'binary', operator: node.op, left, right, valueType: boolean ? parseType('boolean') : mergeType(left.valueType, right.valueType) };
+        return { op: 'binary', operator: node.op, left, right, valueType: boolean ? parseType('boolean') : mergeType(left.valueType, right.valueType), span: node.span };
       }
       case 'Ternary': {
         const test = lowerExpr(node.test, scope, loops);
         const then = node.then === null ? test : lowerExpr(node.then, scope, loops);
         const otherwise = lowerExpr(node.else, scope, loops);
-        return { op: 'ternary', test, then, otherwise, valueType: mergeType(then.valueType, otherwise.valueType) };
+        return { op: 'ternary', test, then, otherwise, valueType: mergeType(then.valueType, otherwise.valueType), span: node.span };
       }
       case 'List': {
         const items = node.items.map(item => ({ spread: item.type === 'Spread', value: lowerExpr(item.type === 'Spread' ? item.expr : item, scope, loops) }));
         let itemType = parseType('any');
         for (const item of items) {
-          const candidate = item.spread && required(item.value.valueType).kind === 'list' ? required(item.value.valueType).item : item.value.valueType;
+          const spreadType = item.spread ? required(item.value.valueType) : null;
+          if (item.spread && spreadType.kind !== 'list' && spreadType.kind !== 'any') throw new Error(`typed generator: list spread requires a list or any, got ${typeSource(item.value.valueType)}`);
+          const candidate = item.spread ? spreadType.kind === 'list' ? spreadType.item : parseType('any') : item.value.valueType;
           itemType = itemType.kind === 'any' ? candidate : mergeType(itemType, candidate);
         }
-        return { op: 'list', items, valueType: parseType(`list<${typeSource(itemType)}>`)};
+        return { op: 'list', items, valueType: parseType(`list<${typeSource(itemType)}>`), span: node.span };
       }
       case 'Map': {
         const entries = node.entries.map(item => item.type === 'Spread' ? { spread: true, value: lowerExpr(item.expr, scope, loops) } : { spread: false, key: lowerExpr(item.key, scope, loops), value: lowerExpr(item.value, scope, loops) });
@@ -145,13 +148,13 @@ export function lowerSourceGraph(graph, manifest) {
         let valueType = parseType('any');
         for (const entry of entries) {
           const spreadType = entry.spread ? required(entry.value.valueType) : null;
-          if (entry.spread && spreadType.kind !== 'map') throw new Error(`typed generator: map spread requires a map, got ${typeSource(entry.value.valueType)}`);
-          const key = entry.spread ? spreadType.key : entry.key.valueType;
-          const value = entry.spread ? spreadType.value : entry.value.valueType;
+          if (entry.spread && spreadType.kind !== 'map' && spreadType.kind !== 'any') throw new Error(`typed generator: map spread requires a map or any, got ${typeSource(entry.value.valueType)}`);
+          const key = entry.spread ? spreadType.kind === 'map' ? spreadType.key : parseType('any') : entry.key.valueType;
+          const value = entry.spread ? spreadType.kind === 'map' ? spreadType.value : parseType('any') : entry.value.valueType;
           keyType = keyType.kind === 'any' ? key : mergeType(keyType, key);
           valueType = valueType.kind === 'any' ? value : mergeType(valueType, value);
         }
-        return { op: 'map', entries, valueType: parseType(`map<${typeSource(keyType)},${typeSource(valueType)}>`)};
+        return { op: 'map', entries, valueType: parseType(`map<${typeSource(keyType)},${typeSource(valueType)}>`), span: node.span };
       }
     }
   }
@@ -163,34 +166,34 @@ export function lowerSourceGraph(graph, manifest) {
     return body.map(node => {
       if (!nodeKinds.has(node?.type)) throw new Error(`typed generator: invalid node ${node?.type ?? typeof node}`);
       switch (node.type) {
-        case 'Text': return { op: 'text', value: node.value };
-        case 'Echo': return { op: 'echo', expr: lowerExpr(node.expr, scope, loops) };
+        case 'Text': return { op: 'text', value: node.value, span: node.span };
+        case 'Echo': return { op: 'echo', expr: lowerExpr(node.expr, scope, loops), span: node.span };
         case 'Set': {
           const expr = lowerExpr(node.expr, scope, loops);
           scope.set(node.name, expr.valueType);
-          return { op: 'set', name: node.name, expr };
+          return { op: 'set', name: node.name, expr, span: node.span };
         }
-        case 'If': return { op: 'if', branches: node.branches.map(branch => ({ test: lowerExpr(branch.test, scope, loops), body: lowerNodes(branch.body, templateName, scope, loops) })), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null };
+        case 'If': return { op: 'if', branches: node.branches.map(branch => ({ test: lowerExpr(branch.test, scope, loops), body: lowerNodes(branch.body, templateName, scope, loops), span: branch.span })), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null, span: node.span };
         case 'For': {
           const iter = lowerExpr(node.iter, scope, loops);
           const collection = required(iter.valueType);
-          if (collection.kind !== 'list' && collection.kind !== 'map') throw new Error(`typed generator: loop ${node.name} requires list or map, got ${typeSource(iter.valueType)}`);
-          const itemType = collection.kind === 'list' ? collection.item : collection.value;
+          if (collection.kind !== 'list' && collection.kind !== 'map' && collection.kind !== 'any') throw new Error(`typed generator: loop ${node.name} requires list, map or any, got ${typeSource(iter.valueType)}`);
+          const itemType = collection.kind === 'list' ? collection.item : collection.kind === 'map' ? collection.value : parseType('any');
           const nestedScope = new Map(scope).set(node.name, itemType);
           const nestedLoops = new Map(loops).set(node.name, itemType);
-          return { op: 'for', name: node.name, iter, itemType, body: lowerNodes(node.body, templateName, nestedScope, nestedLoops), empty: node.empty ? lowerNodes(node.empty, templateName, scope, loops) : null };
+          return { op: 'for', name: node.name, iter, itemType, body: lowerNodes(node.body, templateName, nestedScope, nestedLoops), empty: node.empty ? lowerNodes(node.empty, templateName, scope, loops) : null, span: node.span };
         }
         case 'Include': {
           const target = resolveTemplate(templateName, node.path);
           if (!graph.templates.has(target)) throw new Error(`typed generator: included template ${target} is missing from the source graph`);
           const inputs = [...templateInputs.get(target)].map(([name, valueType]) => {
-            const value = lowerExpr({ type: 'Var', name }, scope, loops);
+            const value = lowerExpr({ type: 'Var', name, span: node.span }, scope, loops);
             if (!sameType(value.valueType, valueType) || value.valueType.optional && !valueType.optional) {
               throw new Error(`typed generator: include ${target} input ${name} requires ${typeSource(valueType)}, got ${typeSource(value.valueType)}`);
             }
             return { name, value, valueType };
           });
-          return { op: 'include', target, inputs };
+          return { op: 'include', target, inputs, span: node.span };
         }
         case 'Block': {
           if (node.id !== null && !definitions.has(node.id)) throw new Error(`typed generator: definition ${node.id} is missing from the type manifest`);
@@ -206,13 +209,13 @@ export function lowerSourceGraph(graph, manifest) {
             name,
             valueType,
             scope: blockScope.get(name) ?? null,
-            root: root.has(name) ? lowerExpr({ type: 'Var', name }, scope, loops) : null,
+            root: root.has(name) ? lowerExpr({ type: 'Var', name, span: node.span }, scope, loops) : null,
           }));
-          return { op: 'block', id: node.id, path, target, definition, inputs };
+          return { op: 'block', id: node.id, path, target, definition, inputs, span: node.span };
         }
         case 'IfBlock': {
           if (!definitions.has(node.id)) throw new Error(`typed generator: definition ${node.id} is missing from the type manifest`);
-          return { op: 'if-block', id: node.id, body: lowerNodes(node.body, templateName, scope, loops), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null };
+          return { op: 'if-block', id: node.id, body: lowerNodes(node.body, templateName, scope, loops), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null, span: node.span };
         }
       }
     });
@@ -220,7 +223,7 @@ export function lowerSourceGraph(graph, manifest) {
 
   for (const [name, ast] of graph.templates) {
     const inputs = templateInputs.get(name);
-    templates.set(name, { name, inputs, body: lowerNodes(ast.body, name, inputs) });
+    templates.set(name, { name, inputs, body: lowerNodes(ast.body, name, inputs), span: ast.span ?? [0, 0] });
   }
   const entry = manifest.entry;
   if (typeof entry !== 'string' || !templates.has(entry)) throw new Error('typed generator: type manifest entry must name a source graph template');
