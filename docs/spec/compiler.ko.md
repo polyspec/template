@@ -38,6 +38,8 @@ TypeScript backend는 bind한 root, source line index가 있는 frame, render co
 
 PHP backend도 같은 실행 경계를 따른다. 생성된 template 함수는 `Context`, `Frame`, `RuntimeBindings`와 bind한 root map을 받고 context output limiter를 통해 출력하며 값 연산과 함수 호출을 package runtime에 위임한다. Typed map은 `MapValue`로 유지하므로 generated lookup, truthiness, ordering, spread가 PHP 배열의 key 변환에 영향을 받지 않고 data model을 보존한다.
 
+Go backend는 typed template 제어 흐름을 생성하되 관찰 가능한 값 연산을 `render.RuntimeBindings`로 전달한다. 생성 함수는 `render.Context`, source line index가 있는 frame과 render chain을 공유한다. 내부 오류 전파는 code와 source position을 포함한 원래의 구조화 template 오류를 보존하고, native typed value는 runtime 경계에서 canonical value model로 bind한다.
+
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 
 ## Artifact 갱신
