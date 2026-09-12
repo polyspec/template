@@ -7,7 +7,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
-	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check showcase showcase-check showcase-compile \
+	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
 	docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -44,6 +44,7 @@ help: ## List targets
 	@echo "  showcase               Build the example site, parity proof and benchmark artifact"
 	@echo "  showcase-compile       Generate committed canonical AST artifacts"
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
+	@echo "  consumer-check         Install package artifacts and compare AST/generated output"
 	@echo "  clean                  Remove build outputs"
 
 check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
@@ -103,6 +104,9 @@ conformance-generated-php: build-ts ## PHP generated compiler conformance suite
 	node tests/runner/conformance-generated-php.mjs
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php ## AST and generated conformance in all four languages
+
+consumer-check: typed-generator ## Install immutable package artifacts in isolated consumers
+	node scripts/check-package-consumers.mjs
 
 parity: ## Cross-language output comparison
 	node tests/runner/parity.mjs

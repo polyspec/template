@@ -50,6 +50,8 @@ The Go backend emits typed template control flow while routing observable value 
 
 The Rust backend likewise returns `Result` directly from generated template functions and delegates value operations to `RuntimeBindings`. It reconstructs `LineIndex` from verified artifact data, writes through `RenderContext`, and propagates structured errors without panic conversion. Serialization at the typed boundary converts generated records and collections to and from the canonical `Value` model.
 
+A Rust generated source module directly depends on `polyspec-template`, `serde` with its `derive` feature and `serde_json` with `preserve_order` and `arbitrary_precision`. These are compile-time dependencies of the generated module and must be declared by its host crate. The isolated Cargo consumer compiles the generated module against an extracted `.crate` package to enforce this boundary.
+
 Built-ins are known to the compiler. A referenced host function requires a manifest signature and a runtime implementation. Missing signatures fail before emission. Missing runtime implementations, arity errors and host failures use the same error fields as AST execution.
 
 ## Artifact refresh

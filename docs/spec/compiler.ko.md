@@ -50,6 +50,8 @@ Go backend는 typed template 제어 흐름을 생성하되 관찰 가능한 값 
 
 Rust backend도 생성된 template 함수에서 `Result`를 직접 반환하고 값 연산을 `RuntimeBindings`에 위임한다. 검증된 artifact 데이터에서 `LineIndex`를 복원하고 `RenderContext`를 통해 출력하며 panic 변환 없이 구조화 오류를 전달한다. Typed 경계의 직렬화는 생성 record와 collection을 canonical `Value` model과 상호 변환한다.
 
+Rust generated source module은 `polyspec-template`, `derive` feature를 켠 `serde`, `preserve_order`와 `arbitrary_precision` feature를 켠 `serde_json`에 직접 의존한다. 이는 generated module의 compile-time 의존성이므로 host crate가 직접 선언해야 한다. 격리 Cargo 소비 검사는 압축을 푼 `.crate` package를 대상으로 generated module을 compile해 이 경계를 강제한다.
+
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 
 ## Artifact 갱신
