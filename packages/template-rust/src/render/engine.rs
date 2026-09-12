@@ -279,9 +279,9 @@ impl RuntimeServices for AstProgram {
     }
 }
 
-impl PreparedRender<'_> {
+impl<'e> PreparedRender<'e> {
     /// Creates a prepared operation from compiled program state.
-    pub fn new(render: impl Fn() -> Result<String, TemplateError> + 'static) -> PreparedRender<'static> {
+    pub fn new(render: impl Fn() -> Result<String, TemplateError> + 'e) -> PreparedRender<'e> {
         PreparedRender { render: Box::new(render) }
     }
 

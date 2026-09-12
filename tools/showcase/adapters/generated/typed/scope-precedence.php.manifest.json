@@ -6,7 +6,7 @@
   "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "27635aeff469c08c0fec4ca610ef6bc5503a6d1ddd9d6588e92a17e980b95e54",
+  "compilerDigest": "5b8af1423388996f5813ef749ac29cb55187d43b6bc61c68c05e915a04814496",
   "files": {
     "scope-precedence.php": {
       "path": "scope-precedence.php",

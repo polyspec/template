@@ -132,6 +132,13 @@ func TestGeneratedProgram(t *testing.T) {
 }
 
 function checkRust() {
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'rust'), 'utf8');
+  assert.match(coverageSource, /RuntimeBindings::new\(\)/);
+  assert.match(coverageSource, /runtime\.binary\(/);
+  assert.match(coverageSource, /runtime\.call\(/);
+  for (const duplicate of ['trait GeneratedTruthy', 'trait GeneratedContains', 'fn generated_in(', 'fn escape(', 'catch_unwind']) {
+    assert.equal(coverageSource.includes(duplicate), false, `Rust generated source duplicates or flattens runtime semantics: ${duplicate}`);
+  }
   const test = join(root, 'packages/template-rust/tests/generated_program_check.rs');
   const modules = scenarios.map((id, index) => `mod generated_${index} {
     include!(${JSON.stringify(generatedSource(id, 'rust'))});
@@ -140,10 +147,17 @@ function checkRust() {
         let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
         program.render(polyspec_template::RenderTarget::Name(target), &assign, &options).unwrap()
     }
+    ${index === 0 ? `pub fn execute_limited(target: &str, assign: &serde_json::Value, options: &polyspec_template::RenderOptions) -> Result<String, polyspec_template::TemplateError> {
+        use polyspec_template::Program;
+        let mut limits = polyspec_template::Limits::default();
+        limits.output_bytes = 1;
+        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(Some(limits), std::collections::HashMap::new()));
+        program.render(polyspec_template::RenderTarget::Name(target), assign, options)
+    }` : ''}
 }`).join('\n');
   const cases = scenarios.map((id, index) => `#[test]
 fn generated_${index}_matches() {
-    let assign = serde_json::from_str(${JSON.stringify(fixture(id, 'data.json'))}).unwrap();
+    let assign: serde_json::Value = serde_json::from_str(${JSON.stringify(fixture(id, 'data.json'))}).unwrap();
     let define: std::collections::HashMap<String, serde_json::Value> = serde_json::from_str(${JSON.stringify(fixture(id, 'define.json'))}).unwrap();
     let mut options = polyspec_template::RenderOptions::default();
     for (name, entry) in define {
@@ -158,11 +172,14 @@ fn generated_${index}_matches() {
         }
     }
     ${fixtureExists(id, 'env.json') ? `options.env = Some(serde_json::from_str(${JSON.stringify(fixture(id, 'env.json'))}).unwrap());` : ''}
-    assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, assign, options), ${JSON.stringify(expected(id))});
+    assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, assign.clone(), options.clone()), ${JSON.stringify(expected(id))});
+    ${index === 0 ? `let error = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err();
+    assert_eq!(error.code, polyspec_template::ErrorCode::E_RUNTIME_LIMIT);
+    assert!(error.line > 0 && error.col > 0);` : ''}
 }`).join('\n');
   writeFileSync(test, `${modules}\n${cases}\n`);
   try {
-    run(resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--manifest-path', join(root, 'packages/template-rust/Cargo.toml'), '--test', 'generated_program_check']);
+    run(resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--manifest-path', join(root, 'packages/template-rust/Cargo.toml'), '--test', 'generated_program_check'], { env: { RUSTFLAGS: '-Dwarnings -Adead-code' } });
   } finally {
     rmSync(test);
   }

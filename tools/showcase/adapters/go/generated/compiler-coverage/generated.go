@@ -77,9 +77,9 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
     generatedWrite(context, "|", frame, ast.Span{237, 238})
     generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_map; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{241, 258}), frame, ast.Span{238, 259})
     generatedWrite(context, "</p>\n<p>", frame, ast.Span{259, 267})
-    generatedWrite(context, generatedEscape(runtime, generatedIndex[float64](runtime, values, float64(1)), frame, ast.Span{270, 279}), frame, ast.Span{267, 280})
+    generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, values, float64(1)), frame, ast.Span{270, 279}), frame, ast.Span{267, 280})
     generatedWrite(context, "|", frame, ast.Span{280, 281})
-    generatedWrite(context, generatedEscape(runtime, generatedIndex[string](runtime, merged, "z"), frame, ast.Span{284, 295}), frame, ast.Span{281, 296})
+    generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, merged, "z"), frame, ast.Span{284, 295}), frame, ast.Span{281, 296})
     generatedWrite(context, "</p>\n", frame, ast.Span{296, 301})
 	if generatedTruthy(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, generatedBinary[bool](runtime, "==", assign.Page.Title, "Guide", frame, ast.Span{312, 333})) }()) {
         generatedWrite(context, "<strong>matched</strong>", frame, ast.Span{334, 358})	} else {
@@ -145,7 +145,7 @@ func render_partial_tpl(assign Assign, definitions Definitions, input Input_part
 	frame := render.NewFrame("partial.tpl", errs.LineIndex{0, 38}, rootData)
 values := input.Values
     generatedWrite(context, "<p class=\"included\">", frame, ast.Span{0, 20})
-    generatedWrite(context, generatedEscape(runtime, generatedIndex[float64](runtime, values, float64(2)), frame, ast.Span{23, 32}), frame, ast.Span{20, 33})
+    generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, values, float64(2)), frame, ast.Span{23, 32}), frame, ast.Span{20, 33})
     generatedWrite(context, "</p>\n", frame, ast.Span{33, 38})
 }
 func renderTemplate(target string, assign Assign, definitions Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) { switch target {
