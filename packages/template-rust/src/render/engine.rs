@@ -43,8 +43,15 @@ pub struct GeneratedPreparedRender {
     pub render: Box<dyn Fn() -> Result<String, String>>,
 }
 
-/// Prepares a request with generated host-language code.
-pub type GeneratedRenderer = for<'a> fn(RenderTarget<'a>, &serde_json::Value, &RenderOptions) -> Result<GeneratedPreparedRender, String>;
+/// The normalized request shared by AST and generated renderers.
+pub struct GeneratedRequest {
+    pub target_name: String,
+    pub root: OrderedMap,
+    pub registry: HashMap<String, DefineEntry>,
+    pub env: Env,
+}
+/// Prepares a normalized request with generated host-language code.
+pub type GeneratedRenderer = fn(GeneratedRequest) -> Result<GeneratedPreparedRender, String>;
 
 /// Compilation settings shared by the runtime implementations.
 #[derive(Default)]
@@ -214,11 +221,6 @@ impl Engine {
         assign: &serde_json::Value,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
-        if self.compile_mode == CompileMode::Gen {
-            let renderer = self.generated_renderer.ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", "generated compile mode requires generated_renderer"))?;
-            let generated = renderer(target, assign, options).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message))?;
-            return Ok(PreparedRender { engine: self, root: Rc::new(OrderedMap::new()), registry: HashMap::new(), env: Env { timezone: "Z".to_string(), now: 0.0 }, target_name: "generated".to_string(), template: Rc::new(ParsedTemplate { ast: Template { name: "generated".to_string(), body: vec![] }, lines: None }), generated: Some(generated) });
-        }
         let name = match target {
             RenderTarget::Name(name) => name.to_owned(),
             RenderTarget::Ast(ast) => ast.name.clone(),
@@ -243,13 +245,18 @@ impl Engine {
             },
             RenderTarget::Ast(ast) => ast.name.clone(),
         };
-        let template = match target {
+        let template = if self.compile_mode == CompileMode::Gen {
+            Rc::new(ParsedTemplate { ast: Template { name: target_name.clone(), body: vec![] }, lines: None })
+        } else { match target {
             RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
-            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
-                ast: ast.clone(),
-                lines: None,
-            }),
-        };
+            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate { ast: ast.clone(), lines: None }),
+        }};
+        if self.compile_mode == CompileMode::Gen {
+            let renderer = self.generated_renderer.ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, "generated compile mode requires generated_renderer"))?;
+            let request = GeneratedRequest { target_name: target_name.clone(), root: root.clone(), registry: registry.clone(), env: env.clone() };
+            let generated = renderer(request).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, message))?;
+            return Ok(PreparedRender { engine: self, root: Rc::new(root), registry, env, target_name, template, generated: Some(generated) });
+        }
         Ok(PreparedRender {
             engine: self,
             root: Rc::new(root),

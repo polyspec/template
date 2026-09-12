@@ -29,8 +29,20 @@ const phpType = type => ({ string: 'string', number: 'float', boolean: 'bool', P
 function lookupType(name) { return fields[name] ?? 'unknown?'; }
 function expr(node, target) {
   if (node.type === 'Literal') return target.literal(node.value);
-  if (node.type === 'Var') return target.var(fieldName(node.name), lookupType(node.name));
+  if (node.type === 'Var') {
+    const type = lookupType(node.name);
+    if (typeName(type) === 'unknown') throw new Error(`typed generator: ${node.name} is missing from the type manifest`);
+    return target.var(fieldName(node.name), type);
+  }
+  if (node.type === 'LoopMeta') return target.loopMeta(node.loop, node.field);
   if (node.type === 'Member') return target.member(expr(node.object, target), fieldName(node.key));
+  if (node.type === 'Index') return target.index(expr(node.object, target), expr(node.index, target));
+  if (node.type === 'Call') return target.call(node.name, node.args.map(item => expr(item, target)));
+  if (node.type === 'Unary') return target.unary(node.op, expr(node.operand, target));
+  if (node.type === 'Binary') return target.binary(node.op, expr(node.left, target), expr(node.right, target));
+  if (node.type === 'Ternary') return target.ternary(expr(node.test, target), node.then === null ? target.literal(null) : expr(node.then, target), expr(node.else, target));
+  if (node.type === 'List') return target.list(node.items.map(item => item.type === 'Spread' ? expr(item.expr, target) : expr(item, target)));
+  if (node.type === 'Map') return target.map(node.entries.map(item => item.type === 'Spread' ? expr(item.expr, target) : [expr(item.key, target), expr(item.value, target)]));
   throw new Error(`typed generator: unsupported expression ${node.type}`);
 }
 function nodes(body, target, level = 1) {
@@ -41,8 +53,9 @@ function nodes(body, target, level = 1) {
     else if (node.type === 'Block') out.push(target.block(node.id, level));
     else if (node.type === 'IfBlock') out.push(target.ifBlock(node, level));
     else if (node.type === 'Set') out.push(target.set(node.name, expr(node.expr, target), level));
-    else if (node.type === 'If') throw new Error('typed generator: If requires a boolean expression type declaration');
-    else if (node.type === 'For') throw new Error('typed generator: For requires an iterable type declaration');
+    else if (node.type === 'If') out.push(target.ifNode(node, level));
+    else if (node.type === 'For') out.push(target.forNode(node, level));
+    else if (node.type === 'Include') out.push(target.include(node.path, level));
     else throw new Error(`typed generator: unsupported node ${node.type}`);
   }
   return out.join('\n');
