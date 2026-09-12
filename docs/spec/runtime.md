@@ -25,31 +25,30 @@ PageCache.getOrSet(key, ttl, render)
 
 ```
 
-`Engine` compilation and artifact refresh are separate settings. Set
-`compile.mode` to `ast` to interpret the parsed AST or to `gen` to call a
-generated renderer supplied by the language package. `gen` fails at startup
-or render time when no generated renderer is configured; it never silently
-falls back to AST execution. `artifact_refresh` remains `dev`, `true`, or
-`false` and controls when source artifacts are refreshed.
+`Engine` receives one complete `Program` and delegates `prepare` and
+`render` without inspecting its representation. `AstProgram` and
+`GeneratedProgram` implement that contract independently. The compiler and
+artifact store select the mode and refresh policy before constructing the
+engine.
 
 - **RT-2** `parse` produces the AST defined in the AST document without loading other templates. Includes and block tags are resolved during rendering.
 - **RT-3** `render` accepts a template name or a parsed template. With a name, the engine loads the template through its loader. It returns the complete output as one string.
 - **RT-4** `assign` is a map converted by the host binding rules. `define` is the template definition map (RT-24). `env` is a map with `timezone` and `now` as defined in the functions document. Each of `define` and `env` may be omitted; an omitted `define` is an empty map.
 - **RT-5** `functions` in the engine options and `register` add host functions as defined in the functions document.
 - **RT-6** `limits` in the engine options overrides the limit values of RT-33. An omitted limit keeps its default.
-- **RT-61** In both `ast` and `gen` modes, `prepare` binds `assign`, resolves `define` and `env`, selects the target template and loads the selected compiled artifact once. In `ast` mode the prepared request stores the AST; in `gen` mode it stores the generated prepared renderer. Both expose the same `PreparedRender.render` operation.
+- **RT-61** Both `AstProgram` and `GeneratedProgram` bind `assign`, resolve `define` and `env`, and select the target in `prepare`. The returned program-specific state exposes the same `PreparedRender.render` operation.
 - **RT-62** `PreparedRender.render` creates only per-render scope, output and execution state. Repeated calls with unchanged input produce identical UTF-8 bytes. `render` is equivalent to `prepare(...).render()` and remains the single-call convenience operation.
 - **RT-63** Compilation mode is `ast` or `gen`. `ast` produces an AST artifact interpreted by the AST renderer. `gen` produces host-language renderer code called directly. The generated renderer receives the same normalized request (`target`, bound `assign`, bound `define`, and resolved `env`) as the AST renderer. The mode does not select the artifact refresh policy.
-- **RT-64** Artifact refresh is `dev`, `true` or `false`. `dev` refreshes on every call, `true` refreshes after a source version change, and `false` does not refresh at runtime. Missing or stale artifacts under `false` are errors.
+- **RT-64** Artifact refresh is `dev`, `true` or `false`. Build coordination regenerates on every compiler invocation in `dev`, after a digest change in `true`, and never reads source under `false`. Missing, stale or corrupt deployed artifacts under `false` are errors.
 - **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-66** `getOrSet` returns the cached HTML on a hit without calling `render`; on a miss it calls `render` once, stores the returned HTML with the TTL, and returns it.
 - **RT-67** The prepared render contract is declared in the single product manifest, [`tools/compiler/interface.json`](../../tools/compiler/interface.json). Interface checks fail when any required language mapping, support level or operation is missing.
-- **RT-69** `PreparedRender` owns exactly one explicit `AstPreparedExecution` or `GeneratedPreparedExecution`. Generated execution never creates or retains an AST placeholder, and AST execution never retains a generated renderer. The four runtimes must fail the interface gate if this disjoint structure is removed.
+- **RT-69** `Engine` owns exactly one `Program`. Generated execution never creates or retains an AST placeholder, parser or AST renderer, and AST execution never retains generated code. The four runtimes must fail the interface gate if mode selection returns to the engine.
 
-The prepared execution diagrams are generated from the runtime interface manifest:
+The program diagrams are generated from the single product manifest:
 
 ```mermaid
-<!--@include: ../../tools/runtime/generated/prepared-execution-flow.mmd-->
+<!--@include: ../../tools/compiler/generated/compiler-architecture.mmd-->
 ```
 
 ```mermaid

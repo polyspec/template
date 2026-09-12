@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 // Command line interface as defined in docs/spec/conformance.md (CNF-4).
-//   parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-//   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+//   parse FILE [--root DIR] [--delimiters OC]
+//   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 import { readFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const distDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
-const { Engine, TemplateError, parse, parseJsonBytes, BindError } = await import(`${distDir}/index.mjs`);
+const { AstProgram, Engine, TemplateError, parse, parseJsonBytes, BindError } = await import(`${distDir}/index.mjs`);
 const { FsLoader } = await import(`${distDir}/node.mjs`);
 
 function usage(message) {
-  process.stderr.write(`${message}\nusage: template parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]\n`);
+  process.stderr.write(`${message}\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n`);
   process.exit(1);
 }
 
 const [command, file, ...rest] = process.argv.slice(2);
 if (!command || !file || !['parse', 'render'].includes(command)) usage('command and FILE are required');
 
-const options = { data: null, define: null, env: null, root: null, delimiters: null, 'legacy-wrappers': null };
+const options = { data: null, define: null, env: null, root: null, delimiters: null };
 for (let i = 0; i < rest.length; i++) {
   const flag = rest[i];
   const value = rest[i + 1];
@@ -62,7 +62,7 @@ try {
     const ast = parse(source, name, parseOptions);
     process.stdout.write(JSON.stringify(ast));
   } else {
-    const engine = new Engine(engineOptions);
+    const engine = new Engine(new AstProgram(engineOptions));
     const renderOptions = {};
     let assign = {};
     try {

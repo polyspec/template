@@ -8,7 +8,7 @@ use ext_php_rs::prelude::*;
 use ext_php_rs::types::{ZendHashTable, Zval};
 use polyspec_template::functions::helpers::FunctionContext;
 use polyspec_template::{
-    BindError, Engine as CoreEngine, EngineOptions, ErrorCode, FsLoader, Limits, ParseOptions, RenderOptions, RenderTarget,
+    AstProgram as CoreProgram, BindError, EngineOptions, ErrorCode, FsLoader, Limits, ParseOptions, RenderOptions, RenderTarget,
     TemplateError as EngineError, Value, defines_from_json, env_from_json, parse as core_parse, to_json_value,
 };
 
@@ -16,7 +16,7 @@ use polyspec_template::{
 #[php_class]
 #[php(name = "Polyspec\\Template\\Native\\Engine")]
 pub struct NativeEngine {
-    engine: CoreEngine,
+    engine: CoreProgram,
 }
 
 #[php_impl]
@@ -43,7 +43,7 @@ impl NativeEngine {
             }
         }
         Ok(NativeEngine {
-            engine: CoreEngine::new(engine_options),
+            engine: CoreProgram::new(engine_options),
         })
     }
 

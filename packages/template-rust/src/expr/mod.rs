@@ -8,7 +8,7 @@ use crate::error::TemplateError;
 use crate::expr::lexer::{ExpressionLexer, LexerOptions, TokenType};
 use crate::expr::parser::ExpressionParser;
 use crate::render::context::{Frame, ParsedTemplate, RenderContext, Scope};
-use crate::render::engine::Engine;
+use crate::render::engine::AstProgram;
 use crate::render::expressions::Evaluator;
 use crate::source::Source;
 use crate::value::Value;
@@ -61,7 +61,7 @@ pub fn parse_expression(text: &str) -> Result<Expr, TemplateError> {
 
 /// Evaluates a bare expression AST against root data given as JSON.
 pub fn evaluate_expression(expr: &Expr, data: &serde_json::Value) -> Result<Value, TemplateError> {
-    let engine = Engine::new(Default::default());
+    let engine = AstProgram::new(Default::default());
     let root = bind_map(data).map_err(|error| TemplateError::without_position(error.code, "expression", error.message))?;
     let root = Rc::new(root);
     let template = Rc::new(ParsedTemplate {

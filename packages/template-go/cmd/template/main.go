@@ -16,7 +16,7 @@ import (
 )
 
 func usage(message string) int {
-	fmt.Fprintf(os.Stderr, "%s\nusage: template parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]\n", message)
+	fmt.Fprintf(os.Stderr, "%s\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n", message)
 	return 1
 }
 
@@ -29,7 +29,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return usage("command and FILE are required")
 	}
 	command, file := args[0], args[1]
-	options := map[string]string{"data": "", "define": "", "env": "", "root": "", "delimiters": "", "legacy-wrappers": ""}
+	options := map[string]string{"data": "", "define": "", "env": "", "root": "", "delimiters": ""}
 	rest := args[2:]
 	for i := 0; i < len(rest); i++ {
 		flag := rest[i]
@@ -101,10 +101,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
-	engine, err := template.NewEngine(template.Options{Loader: template.NewFSLoader(os.DirFS(root)), Delimiters: options["delimiters"]})
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS(root)), Delimiters: options["delimiters"]})
 	if err != nil {
 		return fail(err)
 	}
+	engine := template.NewEngine(program)
 	var assign value.Value = value.NewOrderedMap()
 	if options["data"] != "" {
 		if assign, err = readJSON(options["data"]); err != nil {

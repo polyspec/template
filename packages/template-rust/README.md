@@ -7,10 +7,11 @@ Rust implementation of the template language: lexer, parser, renderer, built-in 
 ## Render
 
 ```rust
-use polyspec_template::{DefineInput, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget, Value};
+use polyspec_template::{AstProgram, DefineInput, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget, Value};
 
-let mut engine = Engine::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() });
-engine.register("greet", Box::new(|args, _| Ok(Value::text(format!("Hello, {}", args[0].as_text().unwrap_or(""))))))?;
+let mut program = AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() });
+program.register("greet", Box::new(|args, _| Ok(Value::text(format!("Hello, {}", args[0].as_text().unwrap_or(""))))))?;
+let engine = Engine::new(program);
 let assign = serde_json::json!({ "title": "Home" });
 let mut options = RenderOptions::default();
 options.define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
@@ -25,9 +26,10 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 | Item | Description |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | Parses one UTF-8 template into its AST with optional delimiters. |
-| `Engine::new(EngineOptions)` | Creates an engine with a loader, host functions, limits and delimiters. |
+| `AstProgram::new(EngineOptions)` | Creates an AST program with a loader, host functions, limits and delimiters. |
+| `Engine::new(Program)` | Creates an engine that delegates to one AST or generated program. |
 | `Engine::render(target, assign, &RenderOptions)` | Renders a template name or a parsed template to a string. `assign` contains variables and `define` supplies template or HTML entries. |
-| `Engine::register(name, function)` | Registers a host function `Fn(&[Value], &FunctionContext) -> Result<Value, String>`. |
+| `AstProgram::register(name, function)` | Registers a host function `Fn(&[Value], &FunctionContext) -> Result<Value, String>`. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. |
 | `parse_json`, `parse_json_bytes` | JSON parsing into template values. |
 | `TemplateError` | Error with `code`, `template`, `line`, `col`, `offset`, `end`, `message`. |
@@ -37,8 +39,8 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 ## Command line
 
 ```sh
-template parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+template parse FILE [--root DIR] [--delimiters OC]
+template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.

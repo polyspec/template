@@ -7,7 +7,7 @@ namespace Polyspec\Template\Tests;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Ast;
-use Polyspec\Template\Engine;
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Expr\Lexer;
 use Polyspec\Template\Expr\Parser;
 use Polyspec\Template\Render\Context;
@@ -69,7 +69,7 @@ final class ExprFixturesTest extends TestCase
      */
     public static function evaluate(array $expr, mixed $data): mixed
     {
-        $engine = new Engine();
+        $engine = new AstProgram();
         $root = Bind::map($data ?? []);
         $context = new Context($engine, $root, ['timezone' => 'Z', 'now' => 0.0], 'expression');
         $frame = new Frame(['ast' => ['type' => 'Template', 'name' => 'expression', 'body' => []], 'lines' => null], $root);

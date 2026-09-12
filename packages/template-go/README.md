@@ -24,13 +24,14 @@ import (
 )
 
 func main() {
-	engine, err := template.NewEngine(template.Options{Loader: template.NewFSLoader(os.DirFS("templates"))})
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS("templates"))})
 	if err != nil {
 		panic(err)
 	}
-	_ = engine.Register("greet", func(args []template.Value, _ functions.Context) (any, error) {
+	_ = program.Register("greet", func(args []template.Value, _ functions.Context) (any, error) {
 		return "Hello, " + args[0].(string), nil
 	})
+	engine := template.NewEngine(program)
 	assign := map[string]any{"title": "Home"}
 html, err := engine.Render("layout", assign, template.RenderOptions{
 	Define: map[string]template.DefineInput{"layout": {Template: "layout.tpl"}, "content": {Template: "pages/home.tpl"}},
@@ -52,7 +53,8 @@ Assign data is bound by the rules of the data model: `nil`, `bool`, integer and 
 var templates embed.FS
 
 sub, _ := fs.Sub(templates, "templates")
-engine, _ := template.NewEngine(template.Options{Loader: template.NewFSLoader(sub)})
+program, _ := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(sub)})
+engine := template.NewEngine(program)
 ```
 
 ## API
@@ -60,9 +62,10 @@ engine, _ := template.NewEngine(template.Options{Loader: template.NewFSLoader(su
 | Symbol | Description |
 | --- | --- |
 | `Parse(source, name, ParseOptions)` | Parses one template into its AST. `ParseOptions.Delimiters` selects the delimiter pair. |
-| `NewEngine(Options)` | Creates an engine with `Loader`, `Functions`, `Limits` and `Delimiters`. |
+| `NewAstProgram(Options)` | Creates an AST program with `Loader`, `Functions`, `Limits` and `Delimiters`. |
+| `NewEngine(Program)` | Creates an engine that delegates to one AST or generated program. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | Renders a template to a string. `assign` contains variables and `Define` supplies template or HTML entries. |
-| `(*Engine).Register(name, fn)` | Registers a host function `func(args []Value, ctx functions.Context) (any, error)`. |
+| `(*render.Engine).Register(name, fn)` | Registers a host function on an AST program. |
 | `NewMapLoader`, `NewFSLoader` | In-memory and `fs.FS` loaders. |
 | `ParseJSON` | Order-preserving JSON decoder for assign data. |
 | `Error` | Error with `Code`, `Template`, `Line`, `Col`, `Offset`, `End`, `Message`. |
@@ -72,8 +75,8 @@ engine, _ := template.NewEngine(template.Options{Loader: template.NewFSLoader(su
 
 ```sh
 go build -o template ./cmd/template
-./template parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-./template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+./template parse FILE [--root DIR] [--delimiters OC]
+./template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.

@@ -4,12 +4,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  AstProgram,
   Engine,
   MapLoader,
   parseJsonBytes,
   type DefineInput,
   type Env,
-  type GeneratedRequest,
   type Template,
 } from '@polyspec/template';
 import type {
@@ -23,7 +23,7 @@ import type {
   Scenario,
 } from './generated/render_adapter.ts';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.ts';
-import { renderGenerated } from './generated/native_direct.ts';
+import { GeneratedProgram } from './generated/native_direct.ts';
 
 function readJson(root: string, name: string): unknown {
   return parseJsonBytes(new Uint8Array(readFileSync(join(root, name))));
@@ -111,16 +111,9 @@ export class Adapter implements RenderAdapter {
   constructor(root: string) {
     this.root = root;
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
-    const templates = generated ? new Map<string, Template>() : readArtifactTemplates(root, 'typescript');
-    this.engine = new Engine({
-      loader: new MapLoader(templates),
-      compile: generated ? {
-        mode: 'gen',
-        generatedRenderer: (request: GeneratedRequest) => ({
-          render: () => renderGenerated(this.root, request.targetName, request.rootData, request.registry as unknown as DefineRegistry, request.env),
-        }),
-      } : { mode: 'ast' },
-    });
+    this.engine = new Engine(generated
+      ? new GeneratedProgram(root)
+      : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root, 'typescript')) }));
   }
 
   loadScenario(): Scenario {

@@ -13,22 +13,6 @@ export type ParseFunction = (source: string | Uint8Array, name: string, delimite
 
 // Controls when a compiled template artifact is refreshed.
 export type ArtifactRefresh = 'dev' | 'true' | 'false';
-/** Selects AST interpretation or a generated renderer. */
-export type CompileMode = 'ast' | 'gen';
-/** A prepared request produced by generated host-language code. */
-export interface GeneratedPreparedRender { render(): string; }
-/** The normalized request shared by AST and generated renderers. */
-export interface GeneratedRequest {
-  target: string | Template;
-  targetName: string;
-  rootData: MapValue;
-  registry: Map<string, DefineEntry>;
-  env: Env;
-}
-/** Prepares a normalized request with generated host-language code. */
-export type GeneratedRenderer = (request: GeneratedRequest) => GeneratedPreparedRender;
-/** Compilation settings shared by the runtime contract. */
-export interface CompileOptions { mode?: CompileMode; generatedRenderer?: GeneratedRenderer; }
 
 // What an engine is created with (RT-1, RT-5, RT-6, RT-42). Every field has a default.
 export interface EngineOptions {
@@ -41,7 +25,6 @@ export interface EngineOptions {
   // dev parses on every load, true refreshes when the loader version changes,
   // false keeps the first loaded artifact for the lifetime of the engine.
   artifactRefresh?: ArtifactRefresh;
-  compile?: CompileOptions;
 }
 
 // One template definition: a path, a definition entry, or ready HTML (RT-24).
@@ -57,17 +40,9 @@ export interface RenderOptions {
   env?: Partial<Env>;
 }
 
-interface PreparedExecution { render(): string; }
-
-class GeneratedPreparedExecution implements PreparedExecution {
-  constructor(private readonly generated: GeneratedPreparedRender) {}
-
-  render(): string { return this.generated.render(); }
-}
-
-class AstPreparedExecution implements PreparedExecution {
+class AstPreparedExecution {
   constructor(
-    private readonly engine: EngineCore,
+    private readonly engine: AstProgramCore,
     private readonly rootData: MapValue,
     private readonly registry: Map<string, DefineEntry>,
     private readonly env: Env,
@@ -85,17 +60,40 @@ class AstPreparedExecution implements PreparedExecution {
 }
 
 // A prepared request owns exactly one AST or generated execution.
-export class PreparedRender {
-  /** Creates a prepared request from one explicit execution variant. */
-  constructor(private readonly execution: PreparedExecution) {}
+export interface PreparedRender {
+  render(): string;
+}
 
-  // Renders the prepared request with fresh execution state.
+class AstPreparedRender implements PreparedRender {
+  constructor(private readonly execution: AstPreparedExecution) {}
+
   render(): string { return this.execution.render(); }
 }
 
-// An engine that renders parsed templates. It holds the loader, the host functions, the limits
-// and the parse cache (RT-1, RT-40). The entry point of the package extends it with the parser.
-export class EngineCore implements EngineServices {
+/** Prepares and renders one complete compiled template representation. */
+export interface Program {
+  prepare(target: string | Template, assign: unknown, options?: RenderOptions): PreparedRender;
+  render(target: string | Template, assign: unknown, options?: RenderOptions): string;
+}
+
+/** Delegates requests to one complete AST or generated program. */
+export class Engine implements Program {
+  /** Creates an engine that delegates to one program. */
+  constructor(readonly program: Program) {}
+
+  /** Delegates request preparation to the program. */
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender {
+    return this.program.prepare(target, assign, options);
+  }
+
+  /** Delegates rendering to the program. */
+  render(target: string | Template, assign: unknown, options: RenderOptions = {}): string {
+    return this.program.render(target, assign, options);
+  }
+}
+
+/** AST program core with template loading, host functions, limits and parsed artifacts. */
+export class AstProgramCore implements EngineServices, Program {
   readonly loader: Loader;
   readonly functions = new Map<string, HostFunction>();
   readonly builtins: ReadonlyMap<string, BuiltIn> = builtins;
@@ -103,8 +101,6 @@ export class EngineCore implements EngineServices {
   readonly delimiters: Delimiters;
   private readonly parseFunction: ParseFunction | null;
   readonly artifactRefresh: ArtifactRefresh;
-  readonly compileMode: CompileMode;
-  private readonly generatedRenderer: GeneratedRenderer | null;
   private readonly cache = new Map<string, { version: string; template: ParsedTemplate }>();
 
   // Creates an engine. An unknown delimiter pair raises an error here, before any render.
@@ -113,9 +109,6 @@ export class EngineCore implements EngineServices {
     this.limits = { ...DEFAULT_LIMITS, ...options.limits };
     this.parseFunction = options.parse ?? null;
     this.artifactRefresh = options.artifactRefresh ?? 'true';
-    this.compileMode = options.compile?.mode ?? 'ast';
-    if (this.compileMode !== 'ast' && this.compileMode !== 'gen') throw new Error(`${this.compileMode} is not a compile mode`);
-    this.generatedRenderer = options.compile?.generatedRenderer ?? null;
     if (options.delimiters !== undefined) {
       const delimiters = parseDelimiters(options.delimiters);
       if (delimiters === null) throw new Error(`${JSON.stringify(options.delimiters)} is not a delimiter pair`);
@@ -174,12 +167,8 @@ export class EngineCore implements EngineServices {
     }
     const targetEntry = typeof target === 'string' ? registry.get(target) : undefined;
     const targetName = targetEntry && 'template' in targetEntry ? targetEntry.template : name;
-    if (this.compileMode === 'gen') {
-      if (!this.generatedRenderer) throw new Error('generated compile mode requires generatedRenderer');
-      return new PreparedRender(new GeneratedPreparedExecution(this.generatedRenderer({ target, targetName, rootData, registry, env })));
-    }
     const template = typeof target === 'string' ? this.loadTemplate(targetName, null, null) : { ast: target, lines: null };
-    return new PreparedRender(new AstPreparedExecution(this, rootData, registry, env, targetName, template));
+    return new AstPreparedRender(new AstPreparedExecution(this, rootData, registry, env, targetName, template));
   }
 
   // Renders a template name or a parsed template and returns the complete output (RT-3). It

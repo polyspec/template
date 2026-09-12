@@ -61,26 +61,32 @@ function checkSupportLevels() {
 
 function checkGeneratedEngineRoute() {
   const checks = {
-    typescript: [/compile: generated \?/, /generatedRenderer:/, /render\(request:[\s\S]*?return this\.engine\.render/],
-    javascript: [/compile: generated \?/, /generatedRenderer:/, /render\(request\)[\s\S]*?return this\.engine\.render/],
-    go: [/Compile:\s+func\(\) template\.CompileOptions/, /Mode: template\.CompileModeGen/, /func \(a \*Adapter\) Render[\s\S]*?return a\.engine\.Render/],
-    rust: [/compile: if generated/, /mode: CompileMode::Gen/, /fn render\(&self,[\s\S]*?self\.engine\s*\.render/],
-    php: [/\['mode' => \$generated \? 'gen' : 'ast'\]/, /\['generated_renderer'\]/, /public function render\(RenderRequest \$request\)[\s\S]*?\$this->engine->render/],
-  };
-  const forbidden = {
-    typescript: /render\(request:[^{]+\{\s*if \(process\.env\.SHOWCASE_EXECUTION_MODE/,
-    javascript: /render\(request\)\s*\{\s*if \(process\.env\.SHOWCASE_EXECUTION_MODE/,
-    go: /func \(a \*Adapter\) Render[^{]+\{\s*if os\.Getenv/,
-    rust: /fn render\(&self,[^{]+\{\s*if std::env::var/,
-    php: /public function render\(RenderRequest \$request\): string\s*\{\s*if \(getenv/,
+    typescript: [/new Engine\(generated[\s\S]*?new GeneratedProgram/, /render\(request:[\s\S]*?return this\.engine\.render/],
+    javascript: [/new Engine\(generated[\s\S]*?new GeneratedProgram/, /render\(request\)[\s\S]*?return this\.engine\.render/],
+    go: [/program = &GeneratedProgram/, /engine := template\.NewEngine\(program\)/, /func \(a \*Adapter\) Render[\s\S]*?return a\.engine\.Render/],
+    rust: [/Engine::new\(native_direct::GeneratedProgram/, /fn render\(&self,[\s\S]*?self\.engine\s*\.render/],
+    php: [/new GeneratedProgram\(\$root\)/, /new Engine\(\$program\)/, /public function render\(RenderRequest \$request\)[\s\S]*?\$this->engine->render/],
   };
   for (const [language, patterns] of Object.entries(checks)) {
     const source = readContractFile(manifest.languages[language].file);
-    for (const pattern of patterns) assert(pattern.test(source), `${language}: generated execution is not connected through Engine compile.mode`);
-    assert(!forbidden[language].test(source), `${language}: render bypasses Engine in generated mode`);
+    for (const pattern of patterns) assert(pattern.test(source), `${language}: generated execution is not connected through a Program`);
   }
   const allSource = languageNames.map(language => readContractFile(manifest.languages[language].file)).join('\n');
+  assert(!/GeneratedRenderer|GeneratedRequest|GeneratedPreparedRender|generated_renderer|generatedRenderer/.test(allSource), 'adapter still uses the removed generated callback contract');
+  assert(!/CompileModeGen|CompileMode::Gen|compile\.mode/.test(allSource), 'adapter still selects generated execution inside an AST engine');
   assert(!allSource.includes('native_templates'), 'generated execution still packages an AST template loader');
+
+  const generatedChecks = {
+    typescript: ['generated/native_direct.ts', /export class GeneratedProgram/],
+    javascript: ['generated/native_direct.mjs', /export class GeneratedProgram/],
+    go: ['go/native_direct.go', /type GeneratedProgram struct[\s\S]*?func \(p \*GeneratedProgram\) Prepare/],
+    rust: ['rust/src/native_direct.rs', /pub struct GeneratedProgram[\s\S]*?impl Program for GeneratedProgram/],
+    php: ['generated/native_direct.php', /final class GeneratedProgram implements Program/],
+  };
+  for (const [language, [file, pattern]] of Object.entries(generatedChecks)) {
+    const generated = readContractFile(file);
+    assert(pattern.test(generated), `${language}: generated artifact does not implement Program`);
+  }
 }
 
 function assertOrderedShape(actual, expected, path = '$') {

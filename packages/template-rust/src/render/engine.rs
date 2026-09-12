@@ -1,4 +1,4 @@
-//! Engine: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
+//! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
 use crate::ast::Template;
 use crate::error::{ErrorCode, Span, TemplateError};
@@ -27,46 +27,7 @@ pub enum ArtifactRefresh {
     False,
 }
 
-/// Selects AST interpretation or a pre-generated renderer.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum CompileMode {
-    /// Interpret the parsed AST at render time.
-    #[default]
-    Ast,
-    /// Call the generated host-language renderer.
-    Gen,
-}
-
-/// A prepared renderer produced by the source generator.
-pub struct GeneratedPreparedRender {
-    /// Renders the already prepared request.
-    pub render: Box<dyn Fn() -> Result<String, String>>,
-}
-
-/// The normalized request shared by AST and generated renderers.
-pub struct GeneratedRequest {
-    /// Selected template name after definition resolution.
-    pub target_name: String,
-    /// Bound root assign data.
-    pub root: OrderedMap,
-    /// Bound template definition registry.
-    pub registry: HashMap<String, DefineEntry>,
-    /// Resolved render environment.
-    pub env: Env,
-}
-/// Prepares a normalized request with generated host-language code.
-pub type GeneratedRenderer = Box<dyn Fn(GeneratedRequest) -> Result<GeneratedPreparedRender, String>>;
-
-/// Compilation settings shared by the runtime implementations.
-#[derive(Default)]
-pub struct CompileOptions {
-    /// AST interpretation or generated renderer.
-    pub mode: CompileMode,
-    /// Renderer produced by the source generator.
-    pub generated_renderer: Option<GeneratedRenderer>,
-}
-
-/// Engine options.
+/// AstProgram options.
 #[derive(Default)]
 pub struct EngineOptions {
     /// Template loader; an empty map loader when absent.
@@ -79,9 +40,6 @@ pub struct EngineOptions {
     pub delimiters: Option<String>,
     /// Template artifact refresh policy.
     pub artifact_refresh: ArtifactRefresh,
-    /// Compilation mode.
-    /// Compilation settings.
-    pub compile: CompileOptions,
 }
 
 /// A template definition given to `render` (RT-24).
@@ -112,8 +70,51 @@ pub enum RenderTarget<'a> {
     Ast(&'a Template),
 }
 
-/// The engine.
+/// A complete AST or generated template program.
+pub trait Program {
+    /// Prepares a reusable render request.
+    fn prepare(
+        &self,
+        target: RenderTarget<'_>,
+        assign: &serde_json::Value,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'_>, TemplateError>;
+
+    /// Renders one request.
+    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError>;
+}
+
+/// Delegates requests to one complete program.
 pub struct Engine {
+    program: Box<dyn Program>,
+}
+
+impl Engine {
+    /// Creates an engine from an AST or generated program.
+    pub fn new(program: impl Program + 'static) -> Engine {
+        Engine {
+            program: Box::new(program),
+        }
+    }
+
+    /// Prepares a request through the selected program.
+    pub fn prepare(
+        &self,
+        target: RenderTarget<'_>,
+        assign: &serde_json::Value,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'_>, TemplateError> {
+        self.program.prepare(target, assign, options)
+    }
+
+    /// Renders a request through the selected program.
+    pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
+        self.program.render(target, assign, options)
+    }
+}
+
+/// AST program with a loader and canonical AST evaluator.
+pub struct AstProgram {
     /// The loader.
     pub loader: Box<dyn Loader>,
     /// Host functions.
@@ -124,25 +125,17 @@ pub struct Engine {
     pub delimiters: Delimiters,
     /// Controls when loaded template artifacts are refreshed.
     pub artifact_refresh: ArtifactRefresh,
-    /// Compilation mode.
-    pub compile_mode: CompileMode,
-    generated_renderer: Option<GeneratedRenderer>,
     cache: RefCell<HashMap<String, (String, Rc<ParsedTemplate>)>>,
 }
 
 /// A render request with data, definitions and the target template prepared once.
 /// Reusing it avoids rebinding JSON and rebuilding the definition registry for every render.
 pub struct PreparedRender<'e> {
-    execution: PreparedExecution<'e>,
-}
-
-enum PreparedExecution<'e> {
-    Ast(AstPreparedExecution<'e>),
-    Gen(GeneratedPreparedExecution),
+    render: Box<dyn Fn() -> Result<String, TemplateError> + 'e>,
 }
 
 struct AstPreparedExecution<'e> {
-    engine: &'e Engine,
+    engine: &'e AstProgram,
     root: Rc<OrderedMap>,
     registry: HashMap<String, DefineEntry>,
     env: Env,
@@ -150,23 +143,19 @@ struct AstPreparedExecution<'e> {
     template: Rc<ParsedTemplate>,
 }
 
-struct GeneratedPreparedExecution(GeneratedPreparedRender);
-
-impl Engine {
+impl AstProgram {
     /// Creates an engine. Panics when the delimiter option is not a delimiter pair.
-    pub fn new(options: EngineOptions) -> Engine {
+    pub fn new(options: EngineOptions) -> AstProgram {
         let delimiters = match options.delimiters {
             Some(value) => parse_delimiters(&value).unwrap_or_else(|| panic!("{value:?} is not a delimiter pair")),
             None => DEFAULT_DELIMITERS,
         };
-        Engine {
+        AstProgram {
             loader: options.loader.unwrap_or_else(|| Box::new(MapLoader::new())),
             functions: options.functions,
             limits: options.limits.unwrap_or_default(),
             delimiters,
             artifact_refresh: options.artifact_refresh,
-            compile_mode: options.compile.mode,
-            generated_renderer: options.compile.generated_renderer,
             cache: RefCell::new(HashMap::new()),
         }
     }
@@ -254,26 +243,6 @@ impl Engine {
             },
             RenderTarget::Ast(ast) => ast.name.clone(),
         };
-        if self.compile_mode == CompileMode::Gen {
-            let renderer = self.generated_renderer.as_ref().ok_or_else(|| {
-                TemplateError::without_position(
-                    ErrorCode::E_RUNTIME_TYPE,
-                    &target_name,
-                    "generated compile mode requires generated_renderer",
-                )
-            })?;
-            let request = GeneratedRequest {
-                target_name: target_name.clone(),
-                root: root.clone(),
-                registry: registry.clone(),
-                env: env.clone(),
-            };
-            let generated =
-                renderer(request).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, message))?;
-            return Ok(PreparedRender {
-                execution: PreparedExecution::Gen(GeneratedPreparedExecution(generated)),
-            });
-        }
         let template = match target {
             RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
             RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
@@ -281,15 +250,16 @@ impl Engine {
                 lines: None,
             }),
         };
+        let execution = AstPreparedExecution {
+            engine: self,
+            root: Rc::new(root),
+            registry,
+            env,
+            target_name,
+            template,
+        };
         Ok(PreparedRender {
-            execution: PreparedExecution::Ast(AstPreparedExecution {
-                engine: self,
-                root: Rc::new(root),
-                registry,
-                env,
-                target_name,
-                template,
-            }),
+            render: Box::new(move || execution.render()),
         })
     }
 
@@ -299,25 +269,30 @@ impl Engine {
     }
 }
 
+impl Program for AstProgram {
+    fn prepare(
+        &self,
+        target: RenderTarget<'_>,
+        assign: &serde_json::Value,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'_>, TemplateError> {
+        AstProgram::prepare(self, target, assign, options)
+    }
+
+    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
+        AstProgram::render(self, target, assign, options)
+    }
+}
+
 impl PreparedRender<'_> {
+    /// Creates a prepared operation from compiled program state.
+    pub fn new(render: impl Fn() -> Result<String, TemplateError> + 'static) -> PreparedRender<'static> {
+        PreparedRender { render: Box::new(render) }
+    }
+
     /// Renders the prepared request.
     pub fn render(&self) -> Result<String, TemplateError> {
-        self.execution.render()
-    }
-}
-
-impl PreparedExecution<'_> {
-    fn render(&self) -> Result<String, TemplateError> {
-        match self {
-            PreparedExecution::Gen(execution) => execution.render(),
-            PreparedExecution::Ast(execution) => execution.render(),
-        }
-    }
-}
-
-impl GeneratedPreparedExecution {
-    fn render(&self) -> Result<String, TemplateError> {
-        (self.0.render)().map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message))
+        (self.render)()
     }
 }
 

@@ -6,6 +6,7 @@ namespace Polyspec\Template\Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\FilesystemLoader;
 use Polyspec\Template\TemplateError;
@@ -57,7 +58,7 @@ final class ConformanceTest extends TestCase
 
             return;
         }
-        $ast = Engine::parse((string) file_get_contents("{$dir}/input.tpl"), 'input.tpl', self::options($dir));
+        $ast = AstProgram::parse((string) file_get_contents("{$dir}/input.tpl"), 'input.tpl', self::options($dir));
         $expected = json_decode((string) file_get_contents("{$dir}/expected.ast.json"), true);
         self::assertSame(Support::normalize($expected), Support::normalize(json_decode(\Polyspec\Template\Ast::toJson($ast), true)));
     }
@@ -81,7 +82,7 @@ final class ConformanceTest extends TestCase
     private static function render(string $dir): string|TemplateError
     {
         try {
-            $engine = new Engine(new FilesystemLoader($dir), self::options($dir));
+            $engine = new Engine(new AstProgram(new FilesystemLoader($dir), self::options($dir)));
             $assign = is_file("{$dir}/data.json") ? Json::parse((string) file_get_contents("{$dir}/data.json")) : [];
             $options = [];
             if (is_file("{$dir}/define.json")) {
