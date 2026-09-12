@@ -27,7 +27,6 @@ function checkLinks(path, text) {
     const target = match[1].replace(/^<|>$/g, '').split('#')[0];
     if (!target || /^[a-z]+:/i.test(target)) continue;
     if (target.startsWith('/')) {
-      if (!target.startsWith('/ko/')) errors.push(`${path}: unsupported absolute link: ${target}`);
       continue;
     }
     const local = resolve(root, dirname(path), decodeURIComponent(target));

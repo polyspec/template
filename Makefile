@@ -183,6 +183,7 @@ docs-verify-idempotent: ## Build the documentation site twice and compare
 
 docs-static-check: ## Build the documentation site as static files
 	npx vitepress build docs
+	node scripts/materialize-korean-routes.mjs
 	node scripts/check-docs-static.mjs
 
 contract-generate: ## Generate showcase declarations and Mermaid diagrams

@@ -23,16 +23,22 @@ for (const path of pages) {
   const name = relative(output, path);
   const html = readFileSync(path, 'utf8');
   const language = html.match(/<html\s+lang="([^"]+)"/)?.[1];
-  if (name === 'ko/index.html' || name.startsWith('ko/')) {
+  if (name === 'ko/index.html' || name.startsWith('ko/') || name.endsWith('.ko/index.html')) {
     korean += 1;
     if (language !== 'ko-KR') throw new Error(`${name}: expected html lang="ko-KR", received ${JSON.stringify(language)}`);
     if (!localeLink(html, 'spec/lexical') || !localeLink(html, 'operations/development')) {
       throw new Error(`${name}: Korean navigation does not remain in the Korean locale`);
     }
+    const englishRoute = name === 'ko/index.html' || name === 'index.ko/index.html'
+      ? '/'
+      : `/${name.replace(/^ko\//, '').replace(/\.ko\/index\.html$/, '').replace(/\.html$/, '')}`;
+    const englishLink = englishRoute === '/'
+      ? /href="\/[^"/]*\/"/.test(html) || html.includes('href="/"')
+      : new RegExp(`href="(?:/[^"/]+)?${englishRoute.replaceAll('/', '\\/')}"`).test(html);
+    if (!englishLink) throw new Error(`${name}: English translation link is missing or remains in Korean locale`);
   } else if (language !== 'en-US') {
     throw new Error(`${name}: expected html lang="en-US", received ${JSON.stringify(language)}`);
   }
-  if (name.endsWith('.ko.html')) throw new Error(`${name}: legacy suffix locale route was generated`);
   for (const match of html.matchAll(/href="([^"]+)"/g)) {
     const href = match[1];
     if (!href.startsWith('http') && (/\.ko(?:\.html)?/.test(href) || href.includes('/packages/') || href.includes('/schema/'))) {

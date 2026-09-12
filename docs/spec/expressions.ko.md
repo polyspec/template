@@ -1,6 +1,6 @@
 # 표현식
 
-[English](expressions.md).
+[English](/spec/expressions).
 
 이 문서는 태그 안에서 사용하는 표현식 언어를 정의한다: 토큰, 문법, 우선순위, 모든 연산자의 평가, 경로 조회, 루프 메타 접근, 진릿값, 동등과 순서. 값 타입, 문자열화, 호스트 바인딩은 [데이터 모델](/ko/spec/data-model)에 정의한다. 함수는 [함수](/ko/spec/functions)에 정의한다. 오류 코드는 [오류](/ko/spec/errors)에 정의한다. 규칙 번호는 `EXP-n`이다.
 

@@ -1,6 +1,6 @@
 # 태그 문법
 
-[English](grammar.md).
+[English](/spec/grammar).
 
 이 문서는 모든 태그의 본문과 블록의 구조를 정의한다. 태그 경계는 `lexical.md`가 정의한다. 표현식은 `expressions.md`가 정의한다. 각 태그의 평가는 `runtime.md`가 정의한다. AST 노드는 `ast.md`가 정의한다.
 

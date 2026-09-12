@@ -1,6 +1,6 @@
 # 의존성 정책
 
-[English](dependencies.md).
+[English](/operations/dependencies).
 
 선언한 runtime 범위를 지원하는 최신 안정 release를 사용한다. Prerelease는 이 규칙을 충족하지 않는다. 모든 lock file은 release 입력이며 `make dependency-audit`는 설정한 심각도에 해당하는 알려진 JavaScript와 PHP 보안 권고를 거부한다.
 

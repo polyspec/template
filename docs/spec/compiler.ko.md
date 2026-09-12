@@ -1,6 +1,6 @@
 # Compiler 계약
 
-[English](compiler.md).
+[English](/spec/compiler).
 
 Compiler는 template parsing, validation, lowering, artifact emission을 소유한다. Runtime package는 이미 compile한 program을 실행한다. Render request에서 source를 parse하거나 host compiler를 호출하지 않는다.
 

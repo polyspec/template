@@ -1,6 +1,6 @@
 # 개발
 
-[English](development.md).
+[English](/operations/development).
 
 ## 툴체인
 
