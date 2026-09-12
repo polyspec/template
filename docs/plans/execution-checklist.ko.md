@@ -241,7 +241,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T7.6 | npm·Go·Cargo·Composer artifact를 격리한 임시 프로젝트에 설치하고 같은 assign/define page 렌더 | `make consumer-check` | [x] |
 | T7.7 | production artifact로 parser 기반 showcase 구문 강조, 크기 제한 artifact/source 보기와 React island 예제 생성 | `make showcase-check` | [x] |
 | T7.8 | production artifact를 사용해 출력이 같은 AST/generated 성능 측정 재실행 | `make bench`; `make showcase` | [x] |
-| T7.9 | 명세, 기능 상태, 변경 기록, 생성 Mermaid, 정적 문서와 완료 근거 동기화 | `make docs-check`; `make docs-verify-idempotent` | [ ] |
+| T7.9 | 명세, 기능 상태, 변경 기록, 생성 Mermaid, 정적 문서와 완료 근거 동기화 | `make docs-check`; `make docs-verify-idempotent` | [x] |
 | T7.10 | 상용 release test pyramid 강제: lexer/parser/IR/runtime 단위 검사, generated source compile 검사, 전체 mode matrix, 위치 오류와 실패 복구 회귀, mutation 거부, 격리 package·browser 소비, 출력 동일 성능 회귀 | `make release-test-matrix` | [ ] |
 | T7.11 | 깨끗한 checkout의 release gate 통과와 정적 사이트 배포 | `make release-check`; CI와 Pages 성공 | [ ] |
 

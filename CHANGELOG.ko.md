@@ -32,6 +32,7 @@
 - Rust generated 전체 적합성 검사와 `conformance-all-modes` release 명령을 추가했다. Rust generated expression은 safe string, 동적 spread, 조건 분기, 중첩 loop metadata에서 runtime `Value` 모델을 유지하고 typed 변환은 assign, definition, template input 경계에서만 수행한다. 이 명령은 TypeScript, Go, Rust, PHP의 AST/generated cell 1,688개 전체를 통과한다.
 - 완성된 제품 compiler artifact로 정적 showcase를 다시 생성했다. 정적 HTML 검사가 parser 기반 template token, output HTML 하이라이트, compiled/generated source의 크기가 제한된 양방향 스크롤, 모든 입력·template 보기와 React island 경계를 통과한다.
 - 격리 package 소비 검증을 추가했다. npm tarball, local proxy를 통한 versioned Go module zip, 압축을 푼 Cargo `.crate`, Composer archive를 임시 소비 프로젝트에 설치하고 모든 언어의 AST와 generated program이 같은 177바이트 assign/define page를 생성하도록 요구한다.
+- 진단용 mode 측정을 제품 artifact 벤치마크로 교체했다. 8개 언어·모드 행이 모두 같은 177바이트를 출력한 뒤에만 독립 표본 21개로 compiler, cold process, 전체 render, prepared render, process, RSS의 중앙값과 P95를 기록한다. 생성되는 문서 표와 정적 예제 페이지는 검증된 같은 결과를 읽는다.
 
 - 네 런타임에서 컴파일 방식(`ast` 또는 `gen`), 컴파일 artifact 갱신(`dev`, `true` 또는 `false`), 최종 HTML 페이지 캐시 TTL(`null` 또는 `0`은 영구)을 분리했다. artifact 갱신과 페이지 캐시 만료 테스트를 추가했다.
 - 별도 벤치마크 workspace를 다시 구성해 구현의 AST 행은 매 렌더마다 파싱하고 생성 코드 행은 생성된 호스트 언어 소스를 직접 호출하게 했다. 참조 행도 측정하는 모든 렌더마다 파싱 또는 컴파일하며, 측정 전에 모든 행이 동일한 323바이트 HTML과 SHA-256을 생성해야 한다.

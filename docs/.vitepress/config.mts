@@ -2,6 +2,21 @@ import { defineConfig } from 'vitepress';
 
 const base = process.env.VITEPRESS_BASE ?? '/';
 
+const ebnfLanguage = {
+  name: 'EBNF',
+  scopeName: 'source.ebnf',
+  aliases: ['ebnf'],
+  patterns: [
+    { name: 'comment.line.number-sign.ebnf', match: '#.*$' },
+    { name: 'string.quoted.single.ebnf', begin: "'", end: "'", patterns: [{ name: 'constant.character.escape.ebnf', match: '\\\\.' }] },
+    { name: 'string.quoted.double.ebnf', begin: '"', end: '"', patterns: [{ name: 'constant.character.escape.ebnf', match: '\\\\.' }] },
+    { name: 'keyword.operator.ebnf', match: '::=|:=|=|\\||\\*|\\+|\\?|-' },
+    { name: 'punctuation.definition.group.ebnf', match: '[(){}\\[\\],;]' },
+    { name: 'entity.name.rule.ebnf', match: '\\b[A-Za-z_][A-Za-z0-9_-]*(?=\\s*(?:::=|:=|=))' },
+    { name: 'variable.other.ebnf', match: '\\b[A-Za-z_][A-Za-z0-9_-]*\\b' },
+  ],
+};
+
 const englishSidebar = [
   {
     text: 'Specification',
@@ -112,6 +127,9 @@ export default defineConfig({
   cleanUrls: true,
   ignoreDeadLinks: true,
   lastUpdated: false,
+  markdown: {
+    languages: [ebnfLanguage],
+  },
   themeConfig: {
     nav: [
       { text: 'Specification', link: '/spec/lexical' },

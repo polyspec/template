@@ -241,7 +241,7 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 | T7.6 | Install npm, Go, Cargo and Composer artifacts in isolated temporary projects and render the same assign/define page | `make consumer-check` | [x] |
 | T7.7 | Generate parser-backed showcase highlighting, bounded artifact/source views and the React island example from production artifacts | `make showcase-check` | [x] |
 | T7.8 | Rerun equal-output AST/generated performance measurements with production artifacts | `make bench`; `make showcase` | [x] |
-| T7.9 | Synchronize specifications, feature status, changelog, generated Mermaid, static documentation and completion evidence | `make docs-check`; `make docs-verify-idempotent` | [ ] |
+| T7.9 | Synchronize specifications, feature status, changelog, generated Mermaid, static documentation and completion evidence | `make docs-check`; `make docs-verify-idempotent` | [x] |
 | T7.10 | Enforce the commercial release test pyramid: lexer/parser/IR/runtime units, generated-source compile tests, full mode matrix, positioned errors and recovery regressions, mutation rejection, isolated package and browser consumption, and equal-output performance regressions | `make release-test-matrix` | [ ] |
 | T7.11 | Pass the clean-checkout release gate and deploy the static site | `make release-check`; CI and Pages success | [ ] |
 
