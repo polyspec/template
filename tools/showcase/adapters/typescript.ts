@@ -23,7 +23,6 @@ import type {
   Scenario,
 } from './generated/render_adapter.ts';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.ts';
-import { generatedTemplates } from './generated/native_templates.ts';
 import { renderGenerated } from './generated/native_direct.ts';
 
 function readJson(root: string, name: string): unknown {
@@ -114,7 +113,7 @@ export class Adapter implements RenderAdapter {
     const metadata = objectValue(readJson(root, 'scenario.json'), 'scenario.json');
     const legacyWrappers = metadata.has('legacyWrappers') ? booleanField(metadata, 'legacyWrappers') : false;
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
-    const templates = generated ? generatedTemplates(root) : readArtifactTemplates(root, 'typescript');
+    const templates = generated ? new Map<string, Template>() : readArtifactTemplates(root, 'typescript');
     this.engine = new Engine({
       loader: new MapLoader(templates),
       legacyWrappers,

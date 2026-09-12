@@ -21,6 +21,12 @@ fn generated_block(id: &str, path: &str, scenario: &str, root: &Map<String, Valu
 }
 fn generated_template(name: &str, scenario: &str, root: &Map<String, Value>, define: &DefineRegistry, parent: &Map<String, Value>) -> Result<String, String> {
     match scenario {
+        "compiler-coverage" => match name {
+            "card.tpl" => generated_compiler_coverage__card_tpl(root, define, parent),
+            "layout.tpl" => generated_compiler_coverage__layout_tpl(root, define, parent),
+            "partial.tpl" => generated_compiler_coverage__partial_tpl(root, define, parent),
+            _ => Err(format!("generated template is missing: {name}")),
+        },
         "empty-state" => match name {
             "layout.tpl" => generated_empty_state__layout_tpl(root, define, parent),
             _ => Err(format!("generated template is missing: {name}")),
@@ -47,6 +53,99 @@ pub fn generated_direct_render(root_path: &Path, request: &RenderRequest) -> Res
     generated_template(&name, root_path.file_name().and_then(|v| v.to_str()).unwrap_or_default(), &request.assign, &request.define, &Map::new())
 }
 
+struct GeneratedCollectionItem { key: Value, value: Value, spread: bool }
+fn generated_echo_full(out: &mut String, value: Value) -> Result<(), String> { let text = match value { Value::Number(number) if number.as_f64().is_some_and(|number| number.fract() == 0.0) => format!("{:.0}", number.as_f64().unwrap()), other => generated_string(other)? }; out.push_str(&text.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('\"', "&quot;").replace("'", "&#39;")); Ok(()) }
+fn generated_index(item: Value, key: Value) -> Value { match item { Value::Array(items) => key.as_u64().and_then(|index| items.get(index as usize)).cloned().unwrap_or(Value::Null), Value::Object(items) => generated_string(key).ok().and_then(|key| items.get(&key).cloned()).unwrap_or(Value::Null), _ => Value::Null } }
+fn generated_entries(item: Value) -> Result<Vec<(Value, Value)>, String> { match item { Value::Null => Ok(vec![]), Value::Array(items) => Ok(items.into_iter().enumerate().map(|(index, value)| (serde_json::json!(index), value)).collect()), Value::Object(items) => Ok(items.into_iter().map(|(key, value)| (Value::String(key), value)).collect()), _ => Err("generated renderer expected an iterable".to_string()) } }
+fn generated_list(items: Vec<GeneratedCollectionItem>) -> Value { let mut result = vec![]; for item in items { if item.spread { if let Value::Array(values) = item.value { result.extend(values); } else { panic!("generated list spread requires a list") } } else { result.push(item.value) } } Value::Array(result) }
+fn generated_map(items: Vec<GeneratedCollectionItem>) -> Value { let mut result = Map::new(); for item in items { if item.spread { if let Value::Object(values) = item.value { result.extend(values); } else { panic!("generated map spread requires a map") } } else { let key = generated_string(item.key).expect("generated map key must stringify"); result.insert(key, item.value); } } Value::Object(result) }
+fn generated_ternary(test: Value, then_value: Value, else_value: Value) -> Value { if generated_truthy(&test) { then_value } else { else_value } }
+fn generated_unary_full(op: &str, item: Value) -> Value { if op == "!" { return Value::Bool(!generated_truthy(&item)); } if let Some(number) = item.as_f64() { return serde_json::json!(-number); } panic!("generated unary operator requires a number") }
+fn generated_binary_full(op: &str, left: Value, right: Value) -> Value { match op { "&&" => Value::Bool(generated_truthy(&left) && generated_truthy(&right)), "||" => Value::Bool(generated_truthy(&left) || generated_truthy(&right)), "??" => if left.is_null() { right } else { left }, "==" | "===" => Value::Bool(left == right), "!=" | "!==" => Value::Bool(left != right), "+" => { if left.is_string() || right.is_string() { Value::String(format!("{}{}", generated_string(left).unwrap(), generated_string(right).unwrap())) } else { serde_json::json!(left.as_f64().unwrap() + right.as_f64().unwrap()) } }, "-" => serde_json::json!(left.as_f64().unwrap() - right.as_f64().unwrap()), "*" => serde_json::json!(left.as_f64().unwrap() * right.as_f64().unwrap()), "/" => serde_json::json!(left.as_f64().unwrap() / right.as_f64().unwrap()), "%" => serde_json::json!(left.as_i64().unwrap() % right.as_i64().unwrap()), "<" | ">" | "<=" | ">=" => { let order = if let (Some(a), Some(b)) = (left.as_f64(), right.as_f64()) { a.partial_cmp(&b) } else if let (Some(a), Some(b)) = (left.as_str(), right.as_str()) { Some(a.cmp(b)) } else { None }; let order = order.expect("generated values have no order"); Value::Bool(match op { "<" => order.is_lt(), ">" => order.is_gt(), "<=" => !order.is_gt(), _ => !order.is_lt() }) }, "in" => Value::Bool(match right { Value::Array(items) => items.contains(&left), Value::Object(items) => generated_string(left).ok().is_some_and(|key| items.contains_key(&key)), Value::String(text) => generated_string(left).ok().is_some_and(|needle| text.contains(&needle)), _ => false }), _ => panic!("unknown generated binary operator: {op}") } }
+
+fn generated_compiler_coverage__card_tpl(root: &Map<String, Value>, define: &DefineRegistry, parent: &Map<String, Value>) -> Result<String, String> {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str("<p class=\"card\">");
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "label"))?;
+    out.push_str("</p>\n");
+    Ok(out)
+}
+
+fn generated_compiler_coverage__layout_tpl(root: &Map<String, Value>, define: &DefineRegistry, parent: &Map<String, Value>) -> Result<String, String> {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    ctx.insert("values".to_string(), generated_list(vec![GeneratedCollectionItem { key: Value::Null, value: serde_json::json!(0), spread: false }, GeneratedCollectionItem { key: Value::Null, value: generated_lookup(&ctx, root, "numbers"), spread: true }]));
+    ctx.insert("merged".to_string(), generated_map(vec![GeneratedCollectionItem { key: Value::Null, value: generated_lookup(&ctx, root, "lookup"), spread: true }, GeneratedCollectionItem { key: Value::String("z".to_string()), value: Value::String("Z".to_string()), spread: false }]));
+    out.push_str("<section>\n<h1>");
+    generated_echo_full(&mut out, generated_member(generated_lookup(&ctx, root, "page"), "title"))?;
+    out.push_str("</h1>\n<p>");
+    generated_echo_full(&mut out, generated_index(generated_lookup(&ctx, root, "values"), serde_json::json!(1)))?;
+    out.push_str("|");
+    generated_echo_full(&mut out, generated_index(generated_lookup(&ctx, root, "merged"), Value::String("z".to_string())))?;
+    out.push_str("</p>\n");
+    if generated_truthy(&generated_binary_full("&&", generated_lookup(&ctx, root, "flag"), generated_binary_full("==", generated_member(generated_lookup(&ctx, root, "page"), "title"), Value::String("Guide".to_string())))) {
+        out.push_str("<strong>matched</strong>");
+    } else {
+        out.push_str("<strong>missed</strong>");
+    }
+    out.push_str("\n<p>");
+    generated_echo_full(&mut out, generated_ternary(generated_lookup(&ctx, root, "flag"), Value::String("yes".to_string()), Value::String("no".to_string())))?;
+    out.push_str("|");
+    generated_echo_full(&mut out, generated_binary_full("+", generated_unary_full("-", serde_json::json!(1)), serde_json::json!(3)))?;
+    out.push_str("</p>\n<ul>\n");
+    {
+        let loop_entries = generated_entries(generated_lookup(&ctx, root, "rows"))?;
+        for (loop_index, (loop_key, loop_value)) in loop_entries.iter().enumerate() {
+            let previous = ctx.clone();
+            ctx.insert("row".to_string(), loop_value.clone());
+            ctx.insert("row.key_".to_string(), loop_key.clone());
+            ctx.insert("row.value_".to_string(), loop_value.clone());
+            ctx.insert("row.index_".to_string(), serde_json::json!(loop_index));
+            ctx.insert("row.size_".to_string(), serde_json::json!(loop_entries.len()));
+            ctx.insert("row.first_".to_string(), Value::Bool(loop_index == 0));
+            ctx.insert("row.last_".to_string(), Value::Bool(loop_index + 1 == loop_entries.len()));
+            out.push_str("<li>");
+            generated_echo_full(&mut out, generated_lookup(&ctx, root, "row.index_"))?;
+            out.push_str("/");
+            generated_echo_full(&mut out, generated_lookup(&ctx, root, "row.size_"))?;
+            out.push_str(":");
+            generated_echo_full(&mut out, generated_member(generated_lookup(&ctx, root, "row"), "name"))?;
+            out.push_str(":");
+            generated_echo_full(&mut out, generated_lookup(&ctx, root, "row.first_"))?;
+            out.push_str(":");
+            generated_echo_full(&mut out, generated_lookup(&ctx, root, "row.last_"))?;
+            out.push_str("</li>\n");
+            ctx = previous;
+        }
+        if loop_entries.is_empty() {
+            out.push_str("<li>empty</li>\n");
+        }
+    }
+    out.push_str("</ul>\n");
+    out.push_str(&generated_template("partial.tpl", "compiler-coverage", root, define, &ctx)?);
+    if define.contains_key("content") {
+        out.push_str("<p>defined</p>");
+    } else {
+        out.push_str("<p>missing</p>");
+    }
+    out.push_str("\n");
+    let mut block_scope = Map::new();
+    block_scope.insert("label".to_string(), generated_member(generated_lookup(&ctx, root, "page"), "title"));
+    out.push_str(&generated_block("content", "", "compiler-coverage", root, define, &block_scope)?);
+    out.push_str("</section>\n");
+    Ok(out)
+}
+
+fn generated_compiler_coverage__partial_tpl(root: &Map<String, Value>, define: &DefineRegistry, parent: &Map<String, Value>) -> Result<String, String> {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str("<p class=\"included\">");
+    generated_echo_full(&mut out, generated_index(generated_lookup(&ctx, root, "values"), serde_json::json!(2)))?;
+    out.push_str("</p>\n");
+    Ok(out)
+}
+
 fn generated_empty_state__layout_tpl(root: &Map<String, Value>, define: &DefineRegistry, parent: &Map<String, Value>) -> Result<String, String> {
     let mut ctx = parent.clone();
     let mut out = String::new();
@@ -65,7 +164,7 @@ fn generated_html_slot__layout_tpl(root: &Map<String, Value>, define: &DefineReg
     let mut ctx = parent.clone();
     let mut out = String::new();
     out.push_str("<section class=\"notice\">\n<h1>");
-    generated_echo(&mut out, generated_lookup(&ctx, root, "heading"))?;
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "heading"))?;
     out.push_str("</h1>\n");
     let mut block_scope = Map::new();
     out.push_str(&generated_block("content", "", "html-slot", root, define, &block_scope)?);
@@ -77,7 +176,7 @@ fn generated_react_boundary__content_tpl(root: &Map<String, Value>, define: &Def
     let mut ctx = parent.clone();
     let mut out = String::new();
     out.push_str("<section data-react-island id=\"counter\">\n<p>");
-    generated_echo(&mut out, generated_lookup(&ctx, root, "island_label"))?;
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "island_label"))?;
     out.push_str("</p>\n</section>\n");
     Ok(out)
 }
@@ -86,7 +185,7 @@ fn generated_react_boundary__layout_tpl(root: &Map<String, Value>, define: &Defi
     let mut ctx = parent.clone();
     let mut out = String::new();
     out.push_str("<main>\n<h1>");
-    generated_echo(&mut out, generated_lookup(&ctx, root, "title"))?;
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "title"))?;
     out.push_str("</h1>\n");
     let mut block_scope = Map::new();
     out.push_str(&generated_block("content", "", "react-boundary", root, define, &block_scope)?);
@@ -98,13 +197,13 @@ fn generated_scope_precedence__content_tpl(root: &Map<String, Value>, define: &D
     let mut ctx = parent.clone();
     let mut out = String::new();
     out.push_str("<article>\n<h1>");
-    generated_echo(&mut out, generated_lookup(&ctx, root, "title"))?;
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "title"))?;
     out.push_str("</h1>\n<p class=\"root\">");
-    generated_echo(&mut out, generated_lookup(&ctx, root, "root_label"))?;
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "root_label"))?;
     out.push_str("</p>\n<p class=\"defined\">");
-    generated_echo(&mut out, generated_lookup(&ctx, root, "defined_label"))?;
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "defined_label"))?;
     out.push_str("</p>\n<p class=\"local\">");
-    generated_echo(&mut out, generated_call("default", vec![generated_lookup(&ctx, root, "layout_local"), Value::String("missing".to_string())]))?;
+    generated_echo_full(&mut out, generated_call("default", vec![generated_lookup(&ctx, root, "layout_local"), Value::String("missing".to_string())]))?;
     out.push_str("</p>\n</article>\n");
     Ok(out)
 }

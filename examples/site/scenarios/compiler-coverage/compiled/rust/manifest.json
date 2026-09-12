@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "language": "rust",
+  "scenario": "compiler-coverage",
+  "templates": {
+    "card.tpl": {
+      "artifact": "card.tpl.ast.json",
+      "sourceSha256": "d299dda7918a928780ca472de4e9ae7a7e4f75367f9086362e90b17f358318bc",
+      "artifactSha256": "c71d671a4b4be7fd23026955da5afbc49165a7f728c84c63ed270412eed1de82"
+    },
+    "layout.tpl": {
+      "artifact": "layout.tpl.ast.json",
+      "sourceSha256": "e0ab16413c62cca5ed33c04d77f38ec2d6254adbc5a2bae03d05bdc613820a98",
+      "artifactSha256": "fe84f20ee85f4df48e83d873a2d56c3ba9ccfb4264eb48b54e1218ad53cb9d85"
+    },
+    "partial.tpl": {
+      "artifact": "partial.tpl.ast.json",
+      "sourceSha256": "12756a90a2a53d5fe389cce876f6ce983af348dc3353acfe1ec92174feec491b",
+      "artifactSha256": "a232b8b0a382fbc97ddd38206a523765618e333af953f276376c71713b0d264c"
+    }
+  }
+}

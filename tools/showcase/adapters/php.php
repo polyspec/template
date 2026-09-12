@@ -13,7 +13,6 @@ use Polyspec\Template\Value\MapValue;
 $root = dirname(__DIR__, 3);
 require $root . '/packages/template-php/vendor/autoload.php';
 require __DIR__ . '/generated/render_adapter.php';
-require __DIR__ . '/generated/native_templates.php';
 require __DIR__ . '/generated/native_direct.php';
 
 function readJson(string $root, string $name): mixed
@@ -120,7 +119,7 @@ final class Adapter implements RenderAdapter
             $legacyWrappers = $value;
         }
         $generated = getenv('SHOWCASE_EXECUTION_MODE') === 'generated';
-        $loader = $generated ? generatedArtifactLoader($root) : artifactLoader($root, 'php');
+        $loader = $generated ? new ArrayLoader() : artifactLoader($root, 'php');
         $options = ['legacy_wrappers' => $legacyWrappers, 'compile' => ['mode' => $generated ? 'gen' : 'ast']];
         if ($generated) {
             $options['compile']['generated_renderer'] = static function (GeneratedRequest $request) use ($root): GeneratedPreparedRender {

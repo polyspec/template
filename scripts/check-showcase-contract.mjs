@@ -62,12 +62,14 @@ function checkSupportLevels() {
 function checkGeneratedEngineRoute() {
   const checks = {
     typescript: [/compile: generated \?/, /generatedRenderer:/, /render\(request:[\s\S]*?return this\.engine\.render/],
+    javascript: [/compile: generated \?/, /generatedRenderer:/, /render\(request\)[\s\S]*?return this\.engine\.render/],
     go: [/Compile:\s+func\(\) template\.CompileOptions/, /Mode: template\.CompileModeGen/, /func \(a \*Adapter\) Render[\s\S]*?return a\.engine\.Render/],
     rust: [/compile: if generated/, /mode: CompileMode::Gen/, /fn render\(&self,[\s\S]*?self\.engine\s*\.render/],
     php: [/\['mode' => \$generated \? 'gen' : 'ast'\]/, /\['generated_renderer'\]/, /public function render\(RenderRequest \$request\)[\s\S]*?\$this->engine->render/],
   };
   const forbidden = {
     typescript: /render\(request:[^{]+\{\s*if \(process\.env\.SHOWCASE_EXECUTION_MODE/,
+    javascript: /render\(request\)\s*\{\s*if \(process\.env\.SHOWCASE_EXECUTION_MODE/,
     go: /func \(a \*Adapter\) Render[^{]+\{\s*if os\.Getenv/,
     rust: /fn render\(&self,[^{]+\{\s*if std::env::var/,
     php: /public function render\(RenderRequest \$request\): string\s*\{\s*if \(getenv/,
@@ -77,6 +79,8 @@ function checkGeneratedEngineRoute() {
     for (const pattern of patterns) assert(pattern.test(source), `${language}: generated execution is not connected through Engine compile.mode`);
     assert(!forbidden[language].test(source), `${language}: render bypasses Engine in generated mode`);
   }
+  const allSource = languageNames.map(language => readContractFile(manifest.languages[language].file)).join('\n');
+  assert(!allSource.includes('native_templates'), 'generated execution still packages an AST template loader');
 }
 
 function assertOrderedShape(actual, expected, path = '$') {
@@ -229,7 +233,6 @@ async function main() {
   checkSupportLevels();
   checkGeneratedEngineRoute();
   run('manifest generator', process.execPath, ['scripts/generate-showcase-contract.mjs', '--check']);
-  run('generated source generator', process.execPath, ['tools/showcase/generate-native.mjs', '--check']);
   run('direct source generator', process.execPath, ['tools/showcase/generate-direct.mjs', '--check']);
   for (const language of languageNames) checkStaticImplementation(language);
 

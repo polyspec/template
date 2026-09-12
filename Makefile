@@ -143,7 +143,6 @@ contract-check: build-ts ## Verify generated declarations, implementations and r
 
 showcase: build-ts ## Build the executable example site and its result artifacts
 	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
-	node tools/showcase/generate-native.mjs
 	node tools/showcase/generate-direct.mjs
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
@@ -153,14 +152,13 @@ showcase: build-ts ## Build the executable example site and its result artifacts
 showcase-check: build-ts ## Verify example-site parity, repeatability and browser output
 	$(MAKE) typed-generator-compile-check
 	node tools/showcase/compile.mjs --mode off --langs $(SHOWCASE_LANGS)
-	node tools/showcase/generate-native.mjs --check
 	node tools/showcase/generate-direct.mjs --check
 	node tools/showcase/build.mjs --check --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
 	node tools/showcase/build-site.mjs --check
 	node scripts/check-showcase-html.mjs
 
-	showcase-compile: build-ts ## Generate committed per-language AST artifacts
+showcase-compile: build-ts ## Generate committed per-language AST artifacts
 	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
 
 typed-generator: ## Generate type-fixed host source from canonical AST

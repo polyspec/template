@@ -1,5 +1,4 @@
 mod render_adapter;
-mod native_templates;
 mod native_direct;
 
 use polyspec_template::{
@@ -23,6 +22,9 @@ fn runtime_value_to_json(value: &polyspec_template::Value) -> Value {
     match value {
         polyspec_template::Value::Null => Value::Null,
         polyspec_template::Value::Bool(value) => Value::Bool(*value),
+        polyspec_template::Value::Number(value) if value.fract() == 0.0 && *value >= i64::MIN as f64 && *value <= i64::MAX as f64 => {
+            Value::Number(serde_json::Number::from(*value as i64))
+        }
         polyspec_template::Value::Number(value) => serde_json::Number::from_f64(*value).map(Value::Number).unwrap_or(Value::Null),
         polyspec_template::Value::Str(value) | polyspec_template::Value::Safe(value) => Value::String(value.clone()),
         polyspec_template::Value::List(value) => Value::Array(value.iter().map(runtime_value_to_json).collect()),
@@ -63,12 +65,8 @@ impl Adapter {
             Some(Value::Bool(value)) => *value,
             Some(_) => return Err("scenario.legacyWrappers must be a boolean".to_string()),
         };
-        let loader = if std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated") {
-            native_templates::generated_loader(&root)?
-        } else {
-            artifact_loader(&root, "rust")?
-        };
         let generated = std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated");
+        let loader = if generated { MapLoader::new() } else { artifact_loader(&root, "rust")? };
         let generated_root = root.clone();
         let engine = Engine::new(EngineOptions {
             loader: Some(Box::new(loader)),

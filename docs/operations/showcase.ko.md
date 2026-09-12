@@ -170,4 +170,8 @@ make showcase-check
 
 showcase의 generated 실행도 AST 실행과 같은 public Engine API로 진입한다. 각 adapter는 생성 산출물과 함께 `compile.mode = gen`을 설정한 뒤 `Engine.render`를 호출한다. 생성 callback은 `Engine.prepare`가 만든 정규화된 `GeneratedRequest`를 받는다. 계약 검사기는 adapter가 `render` 안에서 분기하여 생성 소스를 직접 호출하면 실패한다.
 
+generated 모드에서는 호스트 언어 산출물 자체가 실행 가능한 template graph이므로 빈 loader를 전달한다. 사용하지 않는 AST graph를 loader 입력으로 함께 패키징하지 않는다. compiled AST artifact는 AST 모드에서만 읽는다.
+
+`compiler-coverage` 시나리오는 텍스트만 다루는 제한된 generated backend가 검사를 통과하지 못하게 한다. 한 페이지에서 assignment, list·map spread, member·index 접근, 함수·단항·이항·삼항 식, 조건문, 반복문과 모든 loop metadata, local scope를 공유하는 include, if-block, definition data와 block scope를 실행한다. 계약 검사는 이 페이지를 모든 runtime의 AST와 generated 모드로 실행하고 반복 렌더와 실패 복구 뒤에도 같은 UTF-8 217바이트인지 확인한다.
+
 소비 애플리케이션 통합은 [실행 체크리스트](../plans/execution-checklist.ko.md)의 Wave 7에서 별도로 추적한다.
