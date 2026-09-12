@@ -53,6 +53,9 @@ function checkSupportLevels() {
     assert(Array.isArray(levels), `${language} does not declare support levels`);
     for (const level of requiredSupportLevels) assert(levels.includes(level), `${language} does not support ${level}`);
   }
+  assert(manifest.executionModes?.ast?.requiredSupportLevel === 'artifact-runtime', 'AST execution mode must require artifact-runtime');
+  assert(manifest.executionModes?.generated?.requiredSupportLevel === 'native-source-backend', 'generated execution mode must require native-source-backend');
+  assert(manifest.executionModes?.ast?.status === 'implemented', 'AST execution mode must be implemented');
 }
 
 function assertOrderedShape(actual, expected, path = '$') {

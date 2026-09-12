@@ -133,7 +133,7 @@ sequenceDiagram
 - **RT-47** 어댑터는 공통 JSON을 해석해 native API 값을 만들 수 있지만 컨트롤러 데이터 추가, 필드 이름 변경, 필터 적용, 그 밖의 요청 재구성을 해서는 안 된다.
 - **RT-48** 성공한 일치성 검사는 완전한 UTF-8 출력 바이트를 비교한 뒤 같은 요청을 다시 렌더해 반복 바이트도 비교한다.
 - **RT-49** manifest는 `Adapter`, `Scenario`, `RenderRequest`, `DefineEntry`, `Environment`, `RepeatResult`의 설계 원본이다. record 필드와 union variant는 선언한 순서를 유지하며 소유 관계와 `from` 연결은 `Scenario`에서 `RenderRequest`로 어떤 값이 전달되는지 설명한다.
-- **RT-50** [계약 생성기](../../scripts/generate-showcase-contract.mjs)는 TypeScript, JavaScript, Go, Rust 선언부, PHP 선언부와 네 Mermaid 원본을 생성한다. 생성 파일이 manifest와 다르면 계약 게이트가 실패한다.
+- **RT-50** [계약 생성기](../../scripts/generate-showcase-contract.mjs)는 TypeScript, JavaScript, Go, Rust 선언부, PHP 선언부와 Mermaid 원본을 생성한다. 생성 파일이 manifest와 다르면 계약 게이트가 실패한다.
 - **RT-51** 언어 문법은 각 언어의 관례를 따를 수 있다(`NewAdapter`, `Adapter::new`, `__construct`는 생성자 이름이다). manifest 매핑을 통해 concrete type, 생성자 인자, 메서드 순서, 인자 타입, 반환 타입과 요청 필드는 동일하게 유지한다.
 - **RT-52** [계약 검사기](../../scripts/check-showcase-contract.mjs)는 소스 선언, TypeScript 컴파일, Go 인터페이스 대입과 포맷, Rust trait 컴파일, PHP 문법과 `ReflectionClass`, 생성된 런타임 assertion, 모든 showcase 시나리오에 대한 다섯 어댑터 실행을 검사한다.
 - **RT-53** 상태 증명은 `constructor -> loadScenario -> buildRequest -> renderTwice`를 실행하고, 잘못된 target 오류를 관찰하고, 원래 요청을 다시 렌더한 뒤 첫 번째·두 번째·복구 UTF-8 해시를 비교한다. 오류와 복구 과정에서 요청은 바뀌지 않는다.
@@ -142,11 +142,29 @@ sequenceDiagram
 
 - **RT-54** 인터페이스 manifest는 지원 레벨을 선언한다. `core-runtime`은 `register`와 `render`를 제공하고, `source-compiler`는 `parse`와 정규 AST 직렬화를 제공하며, `artifact-runtime`은 원본을 파싱하지 않고 정규 AST artifact를 로드한다. `native-source-backend`는 선택적인 호스트 언어 소스 생성 backend다.
 - **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다.
-- **RT-56** production 지원 구현은 `core-runtime`, `source-compiler`, `artifact-runtime`을 제공한다. 생성된 PHP 같은 native source artifact는 선택적인 `native-source-backend` 기능이며 언어 간 공통 artifact 형식이 아니다.
+- **RT-56** production 지원 구현은 `core-runtime`, `source-compiler`, `artifact-runtime`을 제공한다. 생성된 호스트 언어 소스는 선택적인 `native-source-backend` 기능이며 언어 간 공통 artifact 형식이 아니다.
 - **RT-57** 컴파일 artifact는 정규 AST와 schema 버전, 언어, 시나리오, 원본 SHA-256, artifact SHA-256, 템플릿 artifact 경로를 가진 manifest를 포함한다. artifact는 서비스 시작 전에 생성되고 프로세스에 한 번 로드된다.
 - **RT-58** 컴파일 모드는 세 가지다. `dev`는 항상 artifact를 재생성하고, `changed`는 원본 해시가 바뀐 artifact만 재생성하며, `off`는 기존 artifact만 읽고 누락·오래됨·잘못된 형식이면 실패한다.
 - **RT-59** 요청 경로에서는 파싱, 원본 파일 탐색, artifact 생성이 실행되지 않는다. 같은 artifact에 같은 assign, define, environment를 적용하면 같은 출력 바이트를 만들고 request를 변경하지 않는다.
 
+인터페이스는 두 실행 모드를 선언한다.
+
+- **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 현재 모든 언어가 사용하는 구현된 공통 모드다.
+- **생성 모드**는 시작 전에 같은 소스에서 호스트 언어 렌더러 소스를 생성하고 로드한 뒤 요청마다 호출한다. 언어별 backend는 같은 바이트, 반복성, 실패 검사를 통과한 뒤에만 이 모드를 제공할 수 있다.
+
+```mermaid
+flowchart LR
+  Source[".tpl source"] --> ASTCompile["source-compiler<br/>parse + encodeArtifact"]
+  ASTCompile --> ASTArtifact["canonical AST artifact"]
+  ASTArtifact --> ASTLoad["artifact-runtime<br/>load once"]
+  ASTLoad --> ASTRender["bind assign + define<br/>interpret AST"]
+  Source --> NativeCompile["native-source-backend<br/>compileNative"]
+  NativeCompile --> NativeArtifact["generated host-language source"]
+  NativeArtifact --> NativeLoad["loadNative<br/>load once"]
+  NativeLoad --> NativeRender["bind assign + define<br/>call generated renderer"]
+  ASTRender --> Bytes["same UTF-8 bytes"]
+  NativeRender --> Bytes
+```
 생성과 검증 명령은 다음과 같다.
 
 ```sh
@@ -156,11 +174,13 @@ node scripts/check-showcase-contract.mjs
 
 지원 레벨 도표도 언어별 선언부와 같은 manifest에서 생성한다.
 
+
+
 ```mermaid
 flowchart TB
   SourceCompiler["source-compiler: parse, encodeArtifact"] --> ArtifactRuntime["artifact-runtime: loadArtifact, render"]
   ArtifactRuntime --> CoreRuntime["core-runtime: render"]
-  NativeBackend["native-source-backend: optional"] --> ArtifactRuntime
+  NativeBackend["native-source-backend: optional generated mode"] --> CoreRuntime
 ```
 
 ## 이름과 로딩
@@ -224,7 +244,7 @@ flowchart TB
 ## 오류
 
 - **RT-36** 렌더 중 오류는 렌더를 중단한다. `render`는 부분 출력을 반환하지 않고 오류 문서에 정의된 오류 객체를 보고한다.
-- **RT-37** 실행 모드는 없다. 모든 오류 코드는 하나의 동작을 가진다.
+- **RT-37** 두 실행 모드에서 모든 오류 코드는 같은 동작을 가진다. 선택한 모드는 미리 준비된 렌더러 표현만 바꾸며 오류 코드, 요청 구조와 출력 계약은 바꾸지 않는다.
 
 ## 브라우저
 

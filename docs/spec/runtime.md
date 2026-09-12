@@ -133,7 +133,7 @@ The logical request has this JSON shape:
 - **RT-47** An adapter may decode the shared JSON and construct the native API values, but it must not add controller data, rename fields, apply filters or otherwise reshape the request.
 - **RT-48** A successful parity check compares the complete UTF-8 output bytes and then renders the same request again to compare the repeated bytes.
 - **RT-49** The manifest is the design source for `Adapter`, `Scenario`, `RenderRequest`, `DefineEntry`, `Environment` and `RepeatResult`. Its record fields and union variants keep their declared order; ownership and `from` links describe which values are transferred from `Scenario` into `RenderRequest`.
-- **RT-50** [The contract generator](../../scripts/generate-showcase-contract.mjs) produces the TypeScript, JavaScript, Go and Rust declarations, the PHP declarations and the four Mermaid sources. A generated file that differs from the manifest fails the contract gate.
+- **RT-50** [The contract generator](../../scripts/generate-showcase-contract.mjs) produces the TypeScript, JavaScript, Go and Rust declarations, the PHP declarations and the Mermaid sources. A generated file that differs from the manifest fails the contract gate.
 - **RT-51** Language syntax may follow local conventions (`NewAdapter`, `Adapter::new` and `__construct` are constructor names), while the concrete type, constructor parameter, method order, argument types, return types and request fields remain the same through the manifest mappings.
 - **RT-52** [The contract checker](../../scripts/check-showcase-contract.mjs) checks source declarations, TypeScript compilation, Go interface assignment and formatting, Rust trait compilation, PHP syntax and `ReflectionClass`, generated runtime assertions, and all five adapters on every showcase scenario.
 - **RT-53** The state proof performs `constructor -> loadScenario -> buildRequest -> renderTwice`, observes an invalid-target error, renders the original request again, and compares first, second and recovered UTF-8 hashes. The request remains unchanged across the failure and recovery path.
@@ -142,10 +142,29 @@ The logical request has this JSON shape:
 
 - **RT-54** The interface manifest declares support levels. `core-runtime` provides `register` and `render`; `source-compiler` provides `parse` and canonical AST serialization; `artifact-runtime` loads canonical AST artifacts without parsing source; `native-source-backend` is an optional host-language code-generation backend.
 - **RT-55** An implementation declares its supported levels in the manifest. Implementations declaring the same level expose the same logical types and operations, with language-specific spelling recorded only in the mapping. An unsupported operation is absent from that level; it is not an empty method or a runtime fallback.
-- **RT-56** Supported production implementations provide `core-runtime`, `source-compiler` and `artifact-runtime`. A native source artifact such as generated PHP is an optional `native-source-backend` capability and is not the cross-language artifact format.
+- **RT-56** Supported production implementations provide `core-runtime`, `source-compiler` and `artifact-runtime`. A generated host-language source is an optional `native-source-backend` capability and is not the cross-language artifact format.
 - **RT-57** A compiled artifact contains the canonical AST and a manifest containing its schema version, language, scenario, source SHA-256, artifact SHA-256 and template artifact paths. The artifact is generated before service startup and is loaded once into the process.
 - **RT-58** Compilation has three modes: `dev` always regenerates artifacts, `changed` regenerates artifacts whose source hash changed, and `off` reads only existing artifacts and fails when an artifact is missing, stale or invalid.
 - **RT-59** Parsing, source file discovery and artifact generation do not occur in the request path. Rendering the same artifact with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
+
+The interface declares two execution modes:
+
+- **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the implemented cross-language mode.
+- **Generated mode** compiles the same source into host-language renderer code before startup, loads that code once, and calls it for each request. A language may advertise this mode only after its backend passes the same byte, repeatability and failure checks.
+
+```mermaid
+flowchart LR
+  Source[".tpl source"] --> ASTCompile["source-compiler<br/>parse + encodeArtifact"]
+  ASTCompile --> ASTArtifact["canonical AST artifact"]
+  ASTArtifact --> ASTLoad["artifact-runtime<br/>load once"]
+  ASTLoad --> ASTRender["bind assign + define<br/>interpret AST"]
+  Source --> NativeCompile["native-source-backend<br/>compileNative"]
+  NativeCompile --> NativeArtifact["generated host-language source"]
+  NativeArtifact --> NativeLoad["loadNative<br/>load once"]
+  NativeLoad --> NativeRender["bind assign + define<br/>call generated renderer"]
+  ASTRender --> Bytes["same UTF-8 bytes"]
+  NativeRender --> Bytes
+```
 
 The generation and verification commands are:
 
@@ -160,7 +179,7 @@ The support-level graph is generated from the same manifest as the language decl
 flowchart TB
   SourceCompiler["source-compiler: parse, encodeArtifact"] --> ArtifactRuntime["artifact-runtime: loadArtifact, render"]
   ArtifactRuntime --> CoreRuntime["core-runtime: render"]
-  NativeBackend["native-source-backend: optional"] --> ArtifactRuntime
+  NativeBackend["native-source-backend: optional generated mode"] --> CoreRuntime
 ```
 
 ## Names and loading
@@ -224,7 +243,7 @@ flowchart TB
 ## Errors
 
 - **RT-36** An error during rendering aborts the render. `render` returns no partial output; it reports the error object defined in the errors document.
-- **RT-37** There are no execution modes. Every error code has one behavior.
+- **RT-37** Every error code has one behavior in both execution modes. The selected mode changes the prebuilt renderer representation, not the error code, request shape or output contract.
 
 ## Browser
 
