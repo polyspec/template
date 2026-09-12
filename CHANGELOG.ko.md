@@ -5,6 +5,7 @@
 - 모든 한국어 문서 쌍을 한국어 탐색 메뉴와 `ko-KR` HTML 메타데이터를 가진 `/ko/` locale로 발행하고, locale 경로와 해석되지 않은 테마 보간을 검사하는 정적 사이트 회귀 게이트를 추가했다.
 - Pages 구성, artifact 업로드, 배포 action을 현재 안정 major로 갱신했다.
 - Go 패키지에 외부 모듈과 checksum 파일이 없으므로 CI의 Go 의존성 캐시를 끄고 잘못된 루트 모듈 탐색을 제거했다.
+- 정적 Pages 발행을 전체 CI matrix 뒤로 옮기고 병렬 문서 workflow와 중복 문서·showcase 검사를 제거했다.
 
 [English](CHANGELOG.md).
 

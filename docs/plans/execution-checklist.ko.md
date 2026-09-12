@@ -213,8 +213,8 @@ W0 foundation ──► W1 specification (parallel docs) ──► W1.11 spec re
 | --- | --- | --- | --- | --- |
 | T6.1 | 성능 측정 | 언어별 AST와 generated 측정값; 측정 전 출력 동일성 검사 | `make showcase` | [x] |
 | T6.2 | 문서 커버리지 검사기 | `make doc-coverage`가 실행하는 `scripts/check-doc-coverage.mjs` (4개 패키지의 공개 심볼 문서화) | `make doc-coverage` | [x] |
-| T6.3 | 문서 사이트 | `docs/.vitepress/config.mts`, 정적 GitHub Pages workflow, 생성된 API 문서는 git 제외 | `make docs-static-check`; `make docs-verify-idempotent` | [x] |
-| T6.4 | CI 워크플로 | 기존 Makefile 타겟만 호출하는 `.github/workflows/ci.yml` | 워크플로 파일 lint | [x] |
+| T6.3 | 문서 사이트 | `docs/.vitepress/config.mts`, 검증 뒤 실행되는 정적 GitHub Pages job, 생성된 API 문서는 git 제외 | `make docs-static-check`; `make docs-verify-idempotent` | [x] |
+| T6.4 | CI 워크플로 | 기존 Makefile 타겟을 호출하고 모든 필수 job 통과 뒤에만 Pages를 배포하는 `.github/workflows/ci.yml` | 워크플로 파일 lint | [x] |
 | T6.5 | 발행 절차 | `docs/operations/publication.md`(.ko): Go, npm, composer 패키지의 로컬 불변 발행 | `make docs-check` | [x] |
 | T6.7 | 실행 가능한 예제 사이트 | `examples/site/` 시나리오와 정적 페이지; `tools/showcase/build.mjs`; AST/generated program 일치성, 반복 렌더, 동일 조건 모드 벤치마크 JSON 결과물 | `make showcase`; `make showcase-check` | [x] |
 | T6.6 | 최종 상태 | 테스트 리비전을 기록한 `docs/features.md`(.ko); `CHANGELOG.md`(.ko) | `make check` | [x] |
