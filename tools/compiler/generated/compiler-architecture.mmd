@@ -1,9 +1,9 @@
 flowchart LR
   Source["SourceGraph<br/>entry + templates"] --> Parse["Compiler.parseSourceGraph"]
   Parse --> AST["canonical AST graph"]
-  Types["TypeManifest<br/>entry + fields + records + functions + defines + templates"] --> Lower["Compiler.lowerSourceGraph"]
+  Types["TypeManifest<br/>entry + root + fields + records + functions + defines + templates"] --> Lower["Compiler.lowerSourceGraph"]
   AST --> Lower
-  Lower --> Typed["TypedProgram<br/>entry + fields + records + functions + definitions + templates"]
+  Lower --> Typed["TypedProgram<br/>dynamicRoot + entry + fields + records + functions + definitions + templates"]
   Typed --> AstArtifact["AST artifact"]
   Typed --> Backend["LanguageBackend"]
   Backend --> GeneratedArtifact["generated host artifact"]

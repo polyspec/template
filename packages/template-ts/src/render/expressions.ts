@@ -1,8 +1,6 @@
 // Expression evaluation (docs/spec/expressions.md).
 import type { Binary, Expr } from '../ast.js';
-import {
-  isString, textOf, type MapValue, type Value,
-} from '../value/value.js';
+import { type MapValue, type Value } from '../value/value.js';
 import { Scope, type Frame, type RenderContext } from './context.js';
 import { RuntimeBindings } from './runtime-bindings.js';
 
@@ -50,8 +48,7 @@ export class Evaluator {
         return this.runtime.call(expr.name, expr.args.map(arg => this.evaluate(arg, frame)), frame, expr.span);
       case 'Unary': {
         const operand = this.evaluate(expr.operand, frame);
-        if (expr.op === '!') return !this.runtime.truthy(operand);
-        return this.runtime.finite(-this.runtime.number(operand, frame, expr.span), frame, expr.span);
+        return this.runtime.unary(expr.op, operand, frame, expr.span);
       }
       case 'Binary':
         return this.binary(expr, frame);
@@ -109,58 +106,7 @@ export class Evaluator {
     }
     const left = this.evaluate(expr.left, frame);
     const right = this.evaluate(expr.right, frame);
-    const span = expr.span;
-    switch (expr.op) {
-      case '+':
-        if (isCollection(left) || isCollection(right)) throw this.runtime.error(frame, span, 'E_RUNTIME_STRINGIFY', 'a list or map cannot be converted to text');
-        if (isString(left) || isString(right)) return this.runtime.stringify(left, frame, span) + this.runtime.stringify(right, frame, span);
-        return this.runtime.finite(this.runtime.number(left, frame, span) + this.runtime.number(right, frame, span), frame, span);
-      case '-':
-        return this.runtime.finite(this.runtime.number(left, frame, span) - this.runtime.number(right, frame, span), frame, span);
-      case '*':
-        return this.runtime.finite(this.runtime.number(left, frame, span) * this.runtime.number(right, frame, span), frame, span);
-      case '/': {
-        const divisor = this.runtime.number(right, frame, span);
-        if (divisor === 0) throw this.runtime.error(frame, span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
-        return this.runtime.finite(this.runtime.number(left, frame, span) / divisor, frame, span);
-      }
-      case '%': {
-        const dividend = this.runtime.number(left, frame, span);
-        const divisor = this.runtime.number(right, frame, span);
-        if (!Number.isInteger(dividend) || !Number.isInteger(divisor)) {
-          throw this.runtime.error(frame, span, 'E_RUNTIME_TYPE', '% requires integer operands');
-        }
-        if (divisor === 0) throw this.runtime.error(frame, span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
-        return dividend % divisor;
-      }
-      case '==':
-        return this.runtime.equal(left, right, false);
-      case '!=':
-        return !this.runtime.equal(left, right, false);
-      case '===':
-        return this.runtime.equal(left, right, true);
-      case '!==':
-        return !this.runtime.equal(left, right, true);
-      case '<':
-      case '>':
-      case '<=':
-      case '>=': {
-        const order = this.runtime.compare(left, right, frame, span);
-        return expr.op === '<' ? order < 0 : expr.op === '>' ? order > 0 : expr.op === '<=' ? order <= 0 : order >= 0;
-      }
-      case 'in': {
-        if (Array.isArray(right)) return right.some(item => this.runtime.equal(item, left, false));
-        if (right instanceof Map) return right.has(this.runtime.stringify(left, frame, span));
-        if (isString(right)) return textOf(right).includes(this.runtime.stringify(left, frame, span));
-        throw this.runtime.error(frame, span, 'E_RUNTIME_TYPE', 'in requires a list, map or string on the right');
-      }
-      default:
-        throw this.runtime.error(frame, span, 'E_RUNTIME_TYPE', `unknown operator ${expr.op}`);
-    }
+    return this.runtime.binary(expr.op, left, right, frame, expr.span);
   }
 
-}
-
-function isCollection(value: Value): boolean {
-  return Array.isArray(value) || value instanceof Map;
 }

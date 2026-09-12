@@ -61,6 +61,7 @@
     "TypeManifest": {
       "fields": [
         "entry",
+        "root",
         "fields",
         "records",
         "functions",
@@ -71,6 +72,7 @@
     },
     "TypedProgram": {
       "fields": [
+        "dynamicRoot",
         "entry",
         "fields",
         "records",
@@ -127,6 +129,8 @@
     "RuntimeBindings": {
       "operations": [
         "truthy",
+        "unary",
+        "binary",
         "stringify",
         "escape",
         "number",
@@ -331,6 +335,27 @@
             "value"
           ],
           "returns": "bool"
+        },
+        {
+          "name": "unary",
+          "parameters": [
+            "operator",
+            "operand",
+            "frame",
+            "span"
+          ],
+          "returns": "value or error"
+        },
+        {
+          "name": "binary",
+          "parameters": [
+            "operator",
+            "left",
+            "right",
+            "frame",
+            "span"
+          ],
+          "returns": "value or error"
         },
         {
           "name": "stringify",
@@ -753,6 +778,8 @@
       ],
       "error": "Result",
       "runtimeBindingsExplicitContext": [
+        "unary",
+        "binary",
         "stringify",
         "escape",
         "number",

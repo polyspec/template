@@ -1,11 +1,10 @@
 //! Expression evaluation (docs/spec/expressions.md).
 
-use crate::ast::{BinaryOp, Expr, LoopMetaField, MapEntry, UnaryOp};
+use crate::ast::{BinaryOp, Expr, LoopMetaField, MapEntry};
 use crate::error::{ErrorCode, Span, TemplateError};
 use crate::render::context::{Frame, RenderContext, Scope};
 use crate::render::runtime_bindings::RuntimeBindings;
 use crate::value::{OrderedMap, Value};
-use std::cmp::Ordering;
 
 /// Evaluates expressions against a frame and a scope.
 pub struct Evaluator<'c, 'e> {
@@ -85,11 +84,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
             }
             Expr::Unary { op, operand, span } => {
                 let value = self.evaluate(operand, frame, scope)?;
-                if *op == UnaryOp::Not {
-                    return Ok(Value::Bool(!self.runtime.truthy(&value)));
-                }
-                let number = self.runtime.number(self.context, &value, frame, *span)?;
-                self.runtime.finite(self.context, -number, frame, *span)
+                self.runtime.unary(self.context, *op, &value, frame, *span)
             }
             Expr::Binary { op, left, right, span } => self.binary(*op, left, right, *span, frame, scope),
             Expr::Ternary { test, then, r#else, .. } => {
@@ -169,114 +164,33 @@ impl<'c, 'e> Evaluator<'c, 'e> {
     ) -> Result<Value, TemplateError> {
         match op {
             BinaryOp::And => {
-                let l = self.evaluate(left, frame, scope)?;
-                if !self.runtime.truthy(&l) {
+                let left = self.evaluate(left, frame, scope)?;
+                if !self.runtime.truthy(&left) {
                     return Ok(Value::Bool(false));
                 }
                 let right = self.evaluate(right, frame, scope)?;
                 return Ok(Value::Bool(self.runtime.truthy(&right)));
             }
             BinaryOp::Or => {
-                let l = self.evaluate(left, frame, scope)?;
-                if self.runtime.truthy(&l) {
+                let left = self.evaluate(left, frame, scope)?;
+                if self.runtime.truthy(&left) {
                     return Ok(Value::Bool(true));
                 }
                 let right = self.evaluate(right, frame, scope)?;
                 return Ok(Value::Bool(self.runtime.truthy(&right)));
             }
             BinaryOp::Coalesce => {
-                let l = self.evaluate(left, frame, scope)?;
-                return if l != Value::Null {
-                    Ok(l)
+                let left = self.evaluate(left, frame, scope)?;
+                return if left != Value::Null {
+                    Ok(left)
                 } else {
                     self.evaluate(right, frame, scope)
                 };
             }
             _ => {}
         }
-        let l = self.evaluate(left, frame, scope)?;
-        let r = self.evaluate(right, frame, scope)?;
-        match op {
-            BinaryOp::Add => {
-                if is_collection(&l) || is_collection(&r) {
-                    return Err(self.fail(
-                        frame,
-                        span,
-                        ErrorCode::E_RUNTIME_STRINGIFY,
-                        "a list or map cannot be converted to text",
-                    ));
-                }
-                if l.is_string() || r.is_string() {
-                    let mut text = self.runtime.stringify(self.context, &l, frame, span)?;
-                    text.push_str(&self.runtime.stringify(self.context, &r, frame, span)?);
-                    return Ok(Value::text(text));
-                }
-                let sum = self.runtime.number(self.context, &l, frame, span)? + self.runtime.number(self.context, &r, frame, span)?;
-                self.runtime.finite(self.context, sum, frame, span)
-            }
-            BinaryOp::Subtract => {
-                let value = self.runtime.number(self.context, &l, frame, span)? - self.runtime.number(self.context, &r, frame, span)?;
-                self.runtime.finite(self.context, value, frame, span)
-            }
-            BinaryOp::Multiply => {
-                let value = self.runtime.number(self.context, &l, frame, span)? * self.runtime.number(self.context, &r, frame, span)?;
-                self.runtime.finite(self.context, value, frame, span)
-            }
-            BinaryOp::Divide => {
-                let divisor = self.runtime.number(self.context, &r, frame, span)?;
-                if divisor == 0.0 {
-                    return Err(self.fail(frame, span, ErrorCode::E_RUNTIME_DIV_ZERO, "division by zero"));
-                }
-                let value = self.runtime.number(self.context, &l, frame, span)? / divisor;
-                self.runtime.finite(self.context, value, frame, span)
-            }
-            BinaryOp::Remainder => {
-                let dividend = self.runtime.number(self.context, &l, frame, span)?;
-                let divisor = self.runtime.number(self.context, &r, frame, span)?;
-                if dividend.fract() != 0.0 || divisor.fract() != 0.0 {
-                    return Err(self.fail(frame, span, ErrorCode::E_RUNTIME_TYPE, "% requires integer operands"));
-                }
-                if divisor == 0.0 {
-                    return Err(self.fail(frame, span, ErrorCode::E_RUNTIME_DIV_ZERO, "division by zero"));
-                }
-                Ok(Value::Number(dividend % divisor))
-            }
-            BinaryOp::Equal => Ok(Value::Bool(self.runtime.equal(&l, &r, false))),
-            BinaryOp::NotEqual => Ok(Value::Bool(!self.runtime.equal(&l, &r, false))),
-            BinaryOp::StrictEqual => Ok(Value::Bool(self.runtime.equal(&l, &r, true))),
-            BinaryOp::StrictNotEqual => Ok(Value::Bool(!self.runtime.equal(&l, &r, true))),
-            BinaryOp::Less | BinaryOp::Greater | BinaryOp::LessEqual | BinaryOp::GreaterEqual => {
-                let order = self.runtime.compare(self.context, &l, &r, frame, span)?;
-                Ok(Value::Bool(match op {
-                    BinaryOp::Less => order == Ordering::Less,
-                    BinaryOp::Greater => order == Ordering::Greater,
-                    BinaryOp::LessEqual => order != Ordering::Greater,
-                    _ => order != Ordering::Less,
-                }))
-            }
-            BinaryOp::In => match &r {
-                Value::List(list) => Ok(Value::Bool(list.iter().any(|item| self.runtime.equal(item, &l, false)))),
-                Value::Map(map) => {
-                    let key = self.runtime.stringify(self.context, &l, frame, span)?;
-                    Ok(Value::Bool(map.contains_key(&key)))
-                }
-                other if other.is_string() => {
-                    let needle = self.runtime.stringify(self.context, &l, frame, span)?;
-                    Ok(Value::Bool(other.as_text().unwrap_or("").contains(&needle)))
-                }
-                _ => Err(self.fail(
-                    frame,
-                    span,
-                    ErrorCode::E_RUNTIME_TYPE,
-                    "in requires a list, map or string on the right",
-                )),
-            },
-            // The short-circuiting operators returned above.
-            BinaryOp::And | BinaryOp::Or | BinaryOp::Coalesce => unreachable!("short-circuiting operator"),
-        }
+        let left = self.evaluate(left, frame, scope)?;
+        let right = self.evaluate(right, frame, scope)?;
+        self.runtime.binary(self.context, op, &left, &right, frame, span)
     }
-}
-
-fn is_collection(value: &Value) -> bool {
-    matches!(value, Value::List(_) | Value::Map(_))
 }
