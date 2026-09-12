@@ -7,6 +7,7 @@ namespace Polyspec\Template\Tests;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Engine;
 use Polyspec\Template\GeneratedPreparedRender;
+use Polyspec\Template\GeneratedRequest;
 use Polyspec\Template\Loader\ArrayLoader;
 
 final class EngineRefreshTest extends TestCase
@@ -33,8 +34,8 @@ final class EngineRefreshTest extends TestCase
 
     public function testGeneratedModeUsesTheSamePreparedRenderContract(): void
     {
-        $engine = new Engine(null, [
-            'compile' => ['mode' => 'gen', 'generated_renderer' => static fn (): GeneratedPreparedRender => new GeneratedPreparedRender(static fn (): string => 'generated')],
+        $engine = new Engine(new ArrayLoader(['ignored' => '']), [
+            'compile' => ['mode' => 'gen', 'generated_renderer' => static fn (GeneratedRequest $request): GeneratedPreparedRender => new GeneratedPreparedRender(static fn (): string => 'generated')],
         ]);
 
         self::assertSame('generated', $engine->render('ignored'));

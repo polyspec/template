@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/errs"
@@ -36,8 +37,17 @@ const (
 // GeneratedPreparedRender is a prepared request produced by generated code.
 type GeneratedPreparedRender struct{ Render func() (string, error) }
 
-// GeneratedRenderer prepares a request using generated host-language code.
-type GeneratedRenderer func(target any, assign any, options RenderOptions) (*GeneratedPreparedRender, error)
+// GeneratedRequest is the normalized request shared by AST and generated renderers.
+type GeneratedRequest struct {
+	Target     any
+	TargetName string
+	Root       *value.OrderedMap
+	Registry   map[string]*DefineEntry
+	Env        functions.Env
+}
+
+// GeneratedRenderer prepares a normalized request using generated host-language code.
+type GeneratedRenderer func(request GeneratedRequest) (*GeneratedPreparedRender, error)
 
 // CompileOptions configures compilation mode and its generated renderer.
 type CompileOptions struct {
@@ -120,6 +130,7 @@ func NewEngine(options Options, now func() float64) (*Engine, error) {
 		return nil, fmt.Errorf("%q is not a compile mode", mode)
 	}
 	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, legacyWrappers: options.LegacyWrappers, artifactRefresh: refresh, compileMode: mode, generatedRender: options.Compile.Generated, cache: map[string]cached{}, now: now}
+	if e.now == nil { e.now = func() float64 { return float64(time.Now().Unix()) } }
 	if e.loader == nil {
 		e.loader = loader.NewMapLoader(nil)
 	}
@@ -194,16 +205,6 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 
 // Prepare binds request data and resolves the target template once.
 func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*PreparedRender, error) {
-	if e.compileMode == CompileModeGen {
-		if e.generatedRender == nil {
-			return nil, errors.New("generated compile mode requires GeneratedRender")
-		}
-		generated, err := e.generatedRender(target, assign, options)
-		if err != nil {
-			return nil, err
-		}
-		return &PreparedRender{engine: e, generated: generated}, nil
-	}
 	var name string
 	var template *ParsedTemplate
 	switch t := target.(type) {
@@ -234,10 +235,20 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*Prepar
 	if entry, ok := registry[name]; ok && entry.HTML == nil {
 		targetName = entry.Template
 	}
-	if template == nil {
+	if template == nil && e.compileMode != CompileModeGen {
 		if template, err = e.LoadTemplate(targetName, nil, nil); err != nil {
 			return nil, err
 		}
+	}
+	if e.compileMode == CompileModeGen {
+		if e.generatedRender == nil {
+			return nil, errors.New("generated compile mode requires GeneratedRender")
+		}
+		generated, err := e.generatedRender(GeneratedRequest{Target: target, TargetName: targetName, Root: root, Registry: registry, Env: env})
+		if err != nil {
+			return nil, err
+		}
+		return &PreparedRender{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template, generated: generated}, nil
 	}
 	return &PreparedRender{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template}, nil
 }

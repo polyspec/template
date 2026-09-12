@@ -6,7 +6,11 @@
     "CompileMode": ["ast", "gen"],
     "Compile": {
       "fields": ["mode", "generatedRenderer"],
-      "invariant": "mode selects exactly one artifact representation; generatedRenderer is required only for gen"
+      "invariant": "mode selects exactly one artifact representation; both modes normalize the request before rendering; generatedRenderer is required only for gen"
+    },
+    "GeneratedRequest": {
+      "fields": ["target", "targetName", "rootData", "registry", "env"],
+      "invariant": "is created only after the same assign/define/env normalization used by AST mode"
     },
     "PreparedRender": {
       "operations": ["render"],
@@ -26,9 +30,9 @@
     "page_cache": "Stores the final HTML produced from template, define and assign inputs; a hit bypasses business logic and template rendering.",
     "page_cache_ttl": "A positive value expires after that many seconds; 0 and null mean forever."
   },
-  "request": {
+    "request": {
     "fields": ["target", "assign", "define", "env"],
-    "invariant": "assign is root data and define is the template registry; they are not interchangeable."
+      "invariant": "assign is root data and define is the template registry; they are not interchangeable. The generated renderer receives the normalized target, bound assign, bound define and resolved env."
   },
   "operations": [
     {

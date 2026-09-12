@@ -37,9 +37,9 @@ falls back to AST execution. `artifact_refresh` remains `dev`, `true`, or
 - **RT-4** `assign` is a map converted by the host binding rules. `define` is the template definition map (RT-24). `env` is a map with `timezone` and `now` as defined in the functions document. Each of `define` and `env` may be omitted; an omitted `define` is an empty map.
 - **RT-5** `functions` in the engine options and `register` add host functions as defined in the functions document.
 - **RT-6** `limits` in the engine options overrides the limit values of RT-33. An omitted limit keeps its default.
-- **RT-61** In `ast` mode, `prepare` binds `assign`, resolves `define` and `env`, selects the target template and loads or parses that template once. In `gen` mode the generated renderer owns the request and `prepare` is unavailable; `render` is the entry point.
+- **RT-61** In both `ast` and `gen` modes, `prepare` binds `assign`, resolves `define` and `env`, selects the target template and loads the selected compiled artifact once. In `ast` mode the prepared request stores the AST; in `gen` mode it stores the generated prepared renderer. Both expose the same `PreparedRender.render` operation.
 - **RT-62** `PreparedRender.render` creates only per-render scope, output and execution state. Repeated calls with unchanged input produce identical UTF-8 bytes. `render` is equivalent to `prepare(...).render()` and remains the single-call convenience operation.
-- **RT-63** Compilation mode is `ast` or `gen`. `ast` produces an AST artifact interpreted by the AST renderer. `gen` produces host-language renderer code called directly. The mode does not select the artifact refresh policy.
+- **RT-63** Compilation mode is `ast` or `gen`. `ast` produces an AST artifact interpreted by the AST renderer. `gen` produces host-language renderer code called directly. The generated renderer receives the same normalized request (`target`, bound `assign`, bound `define`, and resolved `env`) as the AST renderer. The mode does not select the artifact refresh policy.
 - **RT-64** Artifact refresh is `dev`, `true` or `false`. `dev` refreshes on every call, `true` refreshes after a source version change, and `false` does not refresh at runtime. Missing or stale artifacts under `false` are errors.
 - **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-66** `getOrSet` returns the cached HTML on a hit without calling `render`; on a miss it calls `render` once, stores the returned HTML with the TTL, and returns it.
@@ -162,7 +162,7 @@ The logical request has this JSON shape:
 - **RT-55** An implementation declares its supported levels in the manifest. Implementations declaring the same level expose the same logical types and operations, with language-specific spelling recorded only in the mapping. An unsupported operation is absent from that level; it is not an empty method or a runtime fallback.
 - **RT-56** Supported production implementations provide `core-runtime`, `source-compiler`, `artifact-runtime` and both compiler modes. A generated host-language source is the `gen` artifact selected by the same compiler contract.
 - **RT-57** A compiled artifact contains the canonical AST and a manifest containing its schema version, language, scenario, source SHA-256, artifact SHA-256 and template artifact paths. The artifact is generated before service startup and is loaded once into the process.
-- **RT-58** Compilation has three modes: `dev` always regenerates artifacts, `changed` regenerates artifacts whose source hash changed, and `off` reads only existing artifacts and fails when an artifact is missing, stale or invalid.
+- **RT-58** Artifact refresh has three policies: `dev` refreshes on every call, `true` refreshes after a source version change, and `false` reads only the deployed artifact and fails when it is missing or stale. These policies apply independently after `compile.mode` has selected the artifact representation.
 - **RT-59** Parsing, source file discovery and artifact generation do not occur in the request path. Rendering the same artifact with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
 
 The interface declares two execution modes:
@@ -178,8 +178,9 @@ flowchart LR
   ASTArtifact --> Store["ArtifactStore.loadOrRefresh(refresh)"]
   GenArtifact --> Store
   Store --> Prepared["Engine.prepare(request)"]
-  Prepared --> ASTRender["PreparedRender.render<br/>interpret AST"]
-  Prepared --> GenRender["PreparedRender.render<br/>call generated code"]
+  Prepared --> Normalized["normalized request<br/>assign + define + env"]
+  Normalized --> ASTRender["PreparedRender.render<br/>interpret AST"]
+  Normalized --> GenRender["PreparedRender.render<br/>call generated code"]
   ASTRender --> Bytes["same UTF-8 bytes"]
   GenRender --> Bytes
 ```

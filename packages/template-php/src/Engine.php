@@ -30,6 +30,19 @@ final class GeneratedPreparedRender
     }
 }
 
+/** Normalized request shared by AST and generated renderers. */
+final class GeneratedRequest
+{
+    public function __construct(
+        public readonly string $targetName,
+        public readonly MapValue $rootData,
+        /** @var array<string, array{template: string, data: MapValue|null}|array{html: string}> */
+        public readonly array $registry,
+        /** @var array{timezone: string, now: float} */
+        public readonly array $env,
+    ) {}
+}
+
 /** Engine: template loading, caching, function registration and rendering. */
 final class PreparedRender
 {
@@ -224,17 +237,6 @@ final class Engine
      */
     public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender
     {
-        if ($this->compileMode === 'gen') {
-            if ($this->generatedRenderer === null) {
-                throw new \LogicException('generated compile mode requires generated_renderer');
-            }
-            $generated = ($this->generatedRenderer)($target, $assign, $options);
-            if (!$generated instanceof GeneratedPreparedRender) {
-                throw new \LogicException('generated_renderer must return GeneratedPreparedRender');
-            }
-            $name = is_string($target) ? $target : (string) ($target['name'] ?? 'generated');
-            return new PreparedRender($this, new MapValue(), [], ['timezone' => 'Z', 'now' => 0.0], $name, ['ast' => ['type' => 'Template', 'name' => $name, 'body' => []], 'lines' => null], $generated);
-        }
         $name = is_string($target) ? $target : (string) $target['name'];
         try {
             $rootData = $assign === null ? new MapValue() : Bind::map($assign);
@@ -245,8 +247,15 @@ final class Engine
         }
         $targetEntry = is_string($target) ? ($registry[$target] ?? null) : null;
         $targetName = is_array($targetEntry) && isset($targetEntry['template']) ? $targetEntry['template'] : $name;
-        $template = is_string($target) ? $this->loadTemplate($targetName, null, null) : ['ast' => $target, 'lines' => null];
+        $template = $this->compileMode === 'gen' ? ['ast' => ['type' => 'Template', 'name' => $targetName, 'body' => []], 'lines' => null] : (is_string($target) ? $this->loadTemplate($targetName, null, null) : ['ast' => $target, 'lines' => null]);
         $templateData = $template;
+
+        if ($this->compileMode === 'gen') {
+            if ($this->generatedRenderer === null) throw new \LogicException('generated compile mode requires generated_renderer');
+            $generated = ($this->generatedRenderer)(new GeneratedRequest($targetName, $rootData, $registry, $env));
+            if (!$generated instanceof GeneratedPreparedRender) throw new \LogicException('generated_renderer must return GeneratedPreparedRender');
+            return new PreparedRender($this, $rootData, $registry, $env, $targetName, $templateData, $generated);
+        }
 
         return new PreparedRender($this, $rootData, $registry, $env, $targetName, $templateData);
     }
