@@ -41,7 +41,7 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - run: npm ci
       - run: make docs-check
       - run: make showcase-check
@@ -53,8 +53,8 @@ jobs:
           mkdir -p docs/.vitepress/dist/examples
           cp -R examples/site docs/.vitepress/dist/examples/site
           test -s docs/.vitepress/dist/examples/site/index.html
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs/.vitepress/dist
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
