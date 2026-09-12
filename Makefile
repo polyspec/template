@@ -8,7 +8,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
-	bench benchmark-check benchmark-smoke release-test-matrix release-check docs-static-check clean
+	bench benchmark-check benchmark-smoke dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -48,6 +48,8 @@ help: ## List targets
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  release-test-matrix    Run every commercial release verification layer"
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
+	@echo "  dependency-audit       Reject known JavaScript and PHP dependency advisories"
+	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
 	@echo "  clean                  Remove build outputs"
 
 check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
@@ -129,6 +131,15 @@ test-ext: ext ## Test the PHP extension
 rules-check: ## Check case.json rule identifiers against the specification
 	node scripts/check-rules.mjs
 
+dependency-policy-check: build-php ## Reject unexplained or stale stable-version pins
+	node scripts/check-dependency-policy.mjs
+	node scripts/check-dependency-policy-mutation.mjs
+
+dependency-audit: dependency-policy-check ## Reject known advisories in locked dependencies
+	npm audit --audit-level=moderate
+	cd $(PHP_DIR) && composer audit --locked --no-interaction
+	cd $(EXT_DIR) && composer audit --locked --no-interaction
+
 doc-coverage: ## Check that public symbols carry documentation comments
 	node scripts/check-doc-coverage.mjs
 
@@ -202,7 +213,7 @@ benchmark-smoke: typed-generator ## Measure a fresh short equal-output sample wi
 
 release-test-matrix: build-php ## Run all release layers in deterministic order
 	@echo "[release 1/7] contracts, generated documentation and static analysis"
-	$(MAKE) docs-check rules-check runtime-interface-check compiler-interface-check lint
+	$(MAKE) docs-check rules-check dependency-audit runtime-interface-check compiler-interface-check lint
 	@echo "[release 2/7] lexer, parser, value, runtime and page-cache units"
 	$(MAKE) test-ts test-go test-rust test-php
 	@echo "[release 3/7] IR, generated source and host compiler checks"
