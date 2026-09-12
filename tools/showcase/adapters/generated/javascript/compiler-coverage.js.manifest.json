@@ -1,16 +1,16 @@
 {
   "schema": 3,
   "mode": "gen",
-  "target": "ts",
+  "target": "js",
   "entry": "layout.tpl",
   "sourceDigest": "aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
   "contractDigest": "d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88",
-  "compilerDigest": "ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef",
+  "compilerDigest": "dc1284fb71be4b78c7bea96e417e3fd847250eb3e8013bcd15e6c68484995d20",
   "files": {
-    "compiler-coverage.ts": {
-      "path": "compiler-coverage.ts",
-      "artifactDigest": "ff01f6b90b2018dd19054f0d0cb146320220002e6a73f70400cdad43e83af2ec"
+    "compiler-coverage.js": {
+      "path": "compiler-coverage.js",
+      "artifactDigest": "754d772c6c2d4521a0fa57f45406ffed3ad943a713cf947412ad63aa4f8d9759"
     }
   }
 }

@@ -216,12 +216,12 @@ W0 foundation ──► W1 specification (parallel docs) ──► W1.11 spec re
 | T6.3 | 문서 사이트 | `docs/.vitepress/config.mts`, 정적 GitHub Pages workflow, 생성된 API 문서는 git 제외 | `make docs-static-check`; `make docs-verify-idempotent` | [x] |
 | T6.4 | CI 워크플로 | 기존 Makefile 타겟만 호출하는 `.github/workflows/ci.yml` | 워크플로 파일 lint | [x] |
 | T6.5 | 발행 절차 | `docs/operations/publication.md`(.ko): Go, npm, composer 패키지의 로컬 불변 발행 | `make docs-check` | [x] |
-| T6.7 | 실행 가능한 예제 사이트 | `examples/site/` 시나리오와 정적 페이지; `tools/showcase/build.mjs`; AST/직접 생성 렌더러 일치성, 반복 렌더, 동일 조건 모드 벤치마크 JSON 결과물 | `make showcase`; `make showcase-check` | [x] |
+| T6.7 | 실행 가능한 예제 사이트 | `examples/site/` 시나리오와 정적 페이지; `tools/showcase/build.mjs`; AST/generated program 일치성, 반복 렌더, 동일 조건 모드 벤치마크 JSON 결과물 | `make showcase`; `make showcase-check` | [x] |
 | T6.6 | 최종 상태 | 테스트 리비전을 기록한 `docs/features.md`(.ko); `CHANGELOG.md`(.ko) | `make check` | [x] |
 
 T6.2를 완료했다. `scripts/check-doc-coverage.mjs`는 `make doc-coverage`와 `make docs-check`에서 실행한다. 검사기는 문서화된 공개 심볼과 파일 250개를 보고한다(template-ts 55개, template-go 58개, template-php 25개, template-rust 1개, 파일 111개).
 
-T6.7은 공통 레이아웃, 중첩 파셜과 반복문, define 데이터와 scope 우선순위, HTML 슬롯, 없는 define을 다룬다. RT-43–RT-53에 따라 모든 시나리오는 모든 구현에서 같은 JSON 형태의 assign과 직접 경로 대응 define 레지스트리를 사용하며 모든 렌더는 `layout` target에서 시작한다. 어댑터 타입, 필드, 연산과 상태 전이는 `tools/compiler/interface.json`에 선언하고 생성기가 언어별 선언부와 Mermaid 원본을 만든다. `make contract-check`가 매핑된 구현과 실패 후 복구를 검증한다. 포털 레이아웃과 콘텐츠는 원본 스냅샷 바이트를 유지한다. `make showcase`가 5개 구현의 원시 출력과 반복 렌더 해시를 비교하고 AST 렌더러와 직접 생성 렌더러를 대조하며 HTML·JSON·동일 조건 모드 벤치마크 결과물을 쓴다. `make showcase-check`가 결과물과 정적 HTML 페이지를 검증한다. 예제는 애플리케이션 컨트롤러나 서비스에 의존하지 않는다.
+T6.7은 공통 레이아웃, 중첩 파셜과 반복문, define 데이터와 scope 우선순위, HTML 슬롯, 없는 define을 다룬다. RT-43–RT-53에 따라 모든 시나리오는 모든 구현에서 같은 JSON 형태의 assign과 직접 경로 대응 define 레지스트리를 사용하며 모든 렌더는 `layout` target에서 시작한다. 어댑터 타입, 필드, 연산과 상태 전이는 `tools/compiler/interface.json`에 선언하고 생성기가 언어별 선언부와 Mermaid 원본을 만든다. `make contract-check`가 매핑된 구현과 실패 후 복구를 검증한다. 포털 레이아웃과 콘텐츠는 원본 스냅샷 바이트를 유지한다. `make showcase`가 5개 구현의 원시 출력과 반복 렌더 해시를 비교하고 AST program과 제품 compiler artifact를 대조하며 HTML·JSON·동일 조건 모드 벤치마크 결과물을 쓴다. `make showcase-check`가 결과물과 정적 HTML 페이지를 검증한다. 예제는 애플리케이션 컨트롤러나 서비스에 의존하지 않는다.
 
 T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext`가 PHP 확장을 빌드하고 적합성 211건 중 211건과 확장 테스트 236개를 통과했다. `make showcase`가 출력 동일성과 반복 렌더 검사를 통과했다. 기능 상태와 변경 기록에 이 결과를 기록했다.
 
@@ -234,7 +234,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
 | T7.1 | compiler/runtime manifest 하나, 생성 선언부, 소유 관계와 지원 수준 도표를 정의하고 TypeScript·Go·Rust·PHP 구조 이탈을 거부 | `make compiler-interface-check`; `make runtime-interface-check` | [x] |
-| T7.2 | generated callback과 showcase 전용 생성을 하나의 compiler pipeline과 네 host backend로 교체하고 호환 옵션과 fallback 경로 제거 | package test; compiler mutation test | [ ] |
+| T7.2 | generated callback과 showcase 전용 생성을 하나의 compiler pipeline과 네 host backend로 교체하고 호환 옵션과 fallback 경로 제거 | package test; compiler mutation test | [x] |
 | T7.3 | 모든 명세 node, expression, 내장 함수와 host 함수를 generated 실행에서 지원 | generated compiler test | [ ] |
 | T7.4 | 211개 케이스 전체를 TypeScript·Go·Rust·PHP의 AST와 generated 실행으로 검증 | `make conformance-all-modes` | [ ] |
 | T7.5 | build 경계 artifact 갱신 검증: `dev`는 항상 재생성, `true`는 digest 변경 시 재생성, `false`는 source를 읽지 않음 | artifact lifecycle test | [x] |

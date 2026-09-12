@@ -82,7 +82,7 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     out += "</p>\n<ul>\n";
     { const row_entries = (assign.rows ?? []).map((value, key) => [key, value] as const);
     for (let row_index = 0; row_index < row_entries.length; row_index += 1) {
-        const [row_key, row_value] = row_entries[row_index];
+        const [row_key, row_value] = row_entries[row_index]!;
         const row = row_value;
         const row_size = row_entries.length;
         const row_first = row_index === 0;

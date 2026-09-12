@@ -1,16 +1,16 @@
 {
   "schema": 3,
   "mode": "gen",
-  "target": "rust",
+  "target": "js",
   "entry": "layout.tpl",
   "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88",
-  "compilerDigest": "bebab5402b13076edd04ad28cc04983c8db5688052a7e2fcff27ba7a9cfd9e72",
+  "compilerDigest": "dc1284fb71be4b78c7bea96e417e3fd847250eb3e8013bcd15e6c68484995d20",
   "files": {
-    "scope-precedence.rust": {
-      "path": "scope-precedence.rust",
-      "artifactDigest": "386e99bc1e3d6d8eb8768523143009e0dc851893616f21757b0727d6c1081190"
+    "scope-precedence.js": {
+      "path": "scope-precedence.js",
+      "artifactDigest": "4f1fd50b41fbdbe6cc511d91a4ef863a18bf805d763c53887bb17e3ae8a36b84"
     }
   }
 }

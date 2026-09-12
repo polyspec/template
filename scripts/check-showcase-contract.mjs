@@ -60,12 +60,20 @@ function checkSupportLevels() {
 }
 
 function checkGeneratedEngineRoute() {
+  for (const removed of [
+    join(root, 'tools/showcase/generate-direct.mjs'),
+    join(adapterRoot, 'generated/native_direct.ts'),
+    join(adapterRoot, 'generated/native_direct.mjs'),
+    join(adapterRoot, 'generated/native_direct.php'),
+    join(adapterRoot, 'go/native_direct.go'),
+    join(adapterRoot, 'rust/src/native_direct.rs'),
+  ]) assert(!existsSync(removed), `removed showcase generator path returned: ${removed}`);
   const checks = {
-    typescript: [/new Engine\(generated[\s\S]*?new GeneratedProgram/, /render\(request:[\s\S]*?return this\.engine\.render/],
-    javascript: [/new Engine\(generated[\s\S]*?new GeneratedProgram/, /render\(request\)[\s\S]*?return this\.engine\.render/],
-    go: [/program = &GeneratedProgram/, /engine := template\.NewEngine\(program\)/, /func \(a \*Adapter\) Render[\s\S]*?return a\.engine\.Render/],
-    rust: [/Engine::new\(native_direct::GeneratedProgram/, /fn render\(&self,[\s\S]*?self\.engine\s*\.render/],
-    php: [/new GeneratedProgram\(\$root\)/, /new Engine\(\$program\)/, /public function render\(RenderRequest \$request\)[\s\S]*?\$this->engine->render/],
+    typescript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/, /render\(request:[\s\S]*?return this\.engine\.render/],
+    javascript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/, /render\(request\)[\s\S]*?return this\.engine\.render/],
+    go: [/program, err = generatedProgram/, /engine := template\.NewEngine\(program\)/, /func \(a \*Adapter\) Render[\s\S]*?return a\.engine\.Render/],
+    rust: [/generated_engine\([\s\S]*?Engine::new\(generated::/, /fn render\(&self,[\s\S]*?self\.engine\s*\.render/],
+    php: [/generatedProgram\(\$root\)/, /new Engine\(\$program\)/, /public function render\(RenderRequest \$request\)[\s\S]*?\$this->engine->render/],
   };
   for (const [language, patterns] of Object.entries(checks)) {
     const source = readContractFile(manifest.languages[language].file);
@@ -76,16 +84,23 @@ function checkGeneratedEngineRoute() {
   assert(!/CompileModeGen|CompileMode::Gen|compile\.mode/.test(allSource), 'adapter still selects generated execution inside an AST engine');
   assert(!allSource.includes('native_templates'), 'generated execution still packages an AST template loader');
 
+  const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && existsSync(join(scenariosRoot, entry.name, 'scenario.json')))
+    .map(entry => entry.name)
+    .sort();
   const generatedChecks = {
-    typescript: ['generated/native_direct.ts', /export class GeneratedProgram/],
-    javascript: ['generated/native_direct.mjs', /export class GeneratedProgram/],
-    go: ['go/native_direct.go', /type GeneratedProgram struct[\s\S]*?func \(p \*GeneratedProgram\) Prepare/],
-    rust: ['rust/src/native_direct.rs', /pub struct GeneratedProgram[\s\S]*?impl Program for GeneratedProgram/],
-    php: ['generated/native_direct.php', /final class GeneratedProgram implements Program/],
+    typescript: id => [`generated/typed/${id}.ts`, /export class GeneratedProgram implements Program/],
+    javascript: id => [`generated/javascript/${id}.js`, /export class GeneratedProgram/],
+    go: id => [`go/generated/${id}/generated.go`, /type GeneratedProgram struct[\s\S]*?func \(p \*GeneratedProgram\) Prepare/],
+    rust: id => [`generated/typed/${id}.rust`, /pub struct GeneratedProgram[\s\S]*?impl Program for GeneratedProgram/],
+    php: id => [`generated/typed/${id}.php`, /final class GeneratedProgram implements Program/],
   };
-  for (const [language, [file, pattern]] of Object.entries(generatedChecks)) {
-    const generated = readContractFile(file);
-    assert(pattern.test(generated), `${language}: generated artifact does not implement Program`);
+  for (const [language, generatedCheck] of Object.entries(generatedChecks)) {
+    for (const scenario of scenarios) {
+      const [file, pattern] = generatedCheck(scenario);
+      const generated = readContractFile(file);
+      assert(pattern.test(generated), `${language}/${scenario}: generated artifact does not implement Program`);
+    }
   }
 }
 
@@ -239,7 +254,7 @@ async function main() {
   checkSupportLevels();
   checkGeneratedEngineRoute();
   run('manifest generator', process.execPath, ['scripts/generate-showcase-contract.mjs', '--check']);
-  run('direct source generator', process.execPath, ['tools/showcase/generate-direct.mjs', '--check']);
+  run('product generated compiler', process.execPath, ['tools/showcase/compile-generated.mjs', '--refresh', 'dev', '--check']);
   for (const language of languageNames) checkStaticImplementation(language);
 
   run('TypeScript declarations', 'npx', ['--no-install', 'tsc', '--noEmit', '-p', 'tools/showcase/adapters/tsconfig.json']);

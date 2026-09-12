@@ -60,7 +60,7 @@ export function createTarget() {
     const entries = `${name}_entries`;
     const iterable = emitExpression(node.iter, target);
     const makeEntries = node.iter.valueType.kind === 'map' ? `Array.from(${iterable}?.entries() ?? [])` : `(${iterable} ?? []).map((value, key) => [key, value] as const)`;
-    return indent(n, `{ const ${entries} = ${makeEntries};\nfor (let ${name}_index = 0; ${name}_index < ${entries}.length; ${name}_index += 1) {\n    const [${name}_key, ${name}_value] = ${entries}[${name}_index];\n    const ${name} = ${name}_value;\n    const ${name}_size = ${entries}.length;\n    const ${name}_first = ${name}_index === 0;\n    const ${name}_last = ${name}_index + 1 === ${entries}.length;\n${emitNodes(node.body, target, n + 1)}\n}${node.empty ? `\nif (${entries}.length === 0) {\n${emitNodes(node.empty, target, n + 1)}\n}` : ''}\n}`);
+    return indent(n, `{ const ${entries} = ${makeEntries};\nfor (let ${name}_index = 0; ${name}_index < ${entries}.length; ${name}_index += 1) {\n    const [${name}_key, ${name}_value] = ${entries}[${name}_index]!;\n    const ${name} = ${name}_value;\n    const ${name}_size = ${entries}.length;\n    const ${name}_first = ${name}_index === 0;\n    const ${name}_last = ${name}_index + 1 === ${entries}.length;\n${emitNodes(node.body, target, n + 1)}\n}${node.empty ? `\nif (${entries}.length === 0) {\n${emitNodes(node.empty, target, n + 1)}\n}` : ''}\n}`);
   };
   target.include = (node, n) => indent(n, `out += ${functionName(node.target)}(assign, definitions, { ${node.inputs.map(item => `${fieldName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')} });`);
   return target;

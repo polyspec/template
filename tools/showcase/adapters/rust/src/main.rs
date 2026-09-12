@@ -1,8 +1,41 @@
 mod render_adapter;
-mod native_direct;
+
+mod generated {
+    pub mod compiler_coverage {
+        include!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../generated/typed/compiler-coverage.rust"
+        ));
+    }
+    pub mod empty_state {
+        include!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../generated/typed/empty-state.rust"
+        ));
+    }
+    pub mod html_slot {
+        include!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../generated/typed/html-slot.rust"
+        ));
+    }
+    pub mod react_boundary {
+        include!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../generated/typed/react-boundary.rust"
+        ));
+    }
+    pub mod scope_precedence {
+        include!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../generated/typed/scope-precedence.rust"
+        ));
+    }
+}
 
 use polyspec_template::{
     AstProgram, DefineInput, Engine, EngineOptions, Env, MapLoader, RenderOptions, RenderTarget,
+    RuntimeEnvironment,
 };
 use render_adapter::{
     DefineEntry, DefineRegistry, Environment, RenderAdapter, RenderRequest, RepeatResult, Scenario,
@@ -22,7 +55,11 @@ impl Adapter {
         let root = root.as_ref().to_path_buf();
         let generated = std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated");
         let engine = if generated {
-            Engine::new(native_direct::GeneratedProgram { root: root.clone() })
+            generated_engine(
+                root.file_name()
+                    .and_then(|value| value.to_str())
+                    .unwrap_or_default(),
+            )?
         } else {
             Engine::new(AstProgram::new(EngineOptions {
                 loader: Some(Box::new(artifact_loader(&root)?)),
@@ -59,11 +96,14 @@ impl Adapter {
         let mut define = DefineRegistry::new();
         for (id, entry) in object {
             if let Some(template) = entry.as_str() {
-                define.insert(id.clone(), DefineEntry {
-                    template: Some(template.to_string()),
-                    data: None,
-                    html: None,
-                });
+                define.insert(
+                    id.clone(),
+                    DefineEntry {
+                        template: Some(template.to_string()),
+                        data: None,
+                        html: None,
+                    },
+                );
                 continue;
             }
             let parsed: DefineEntry = serde_json::from_value(entry.clone())
@@ -93,11 +133,44 @@ impl Adapter {
     }
 }
 
+fn generated_runtime() -> RuntimeEnvironment {
+    RuntimeEnvironment::new(None, std::collections::HashMap::new())
+}
+
+fn generated_engine(scenario: &str) -> Result<Engine, String> {
+    Ok(match scenario {
+        "compiler-coverage" => Engine::new(generated::compiler_coverage::GeneratedProgram::new(
+            generated_runtime(),
+        )),
+        "empty-state" => Engine::new(generated::empty_state::GeneratedProgram::new(
+            generated_runtime(),
+        )),
+        "html-slot" => Engine::new(generated::html_slot::GeneratedProgram::new(
+            generated_runtime(),
+        )),
+        "react-boundary" => Engine::new(generated::react_boundary::GeneratedProgram::new(
+            generated_runtime(),
+        )),
+        "scope-precedence" => Engine::new(generated::scope_precedence::GeneratedProgram::new(
+            generated_runtime(),
+        )),
+        _ => {
+            return Err(format!(
+                "generated program is missing for scenario {scenario}"
+            ));
+        }
+    })
+}
+
 fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
     #[derive(Deserialize)]
-    struct Entry { path: String }
+    struct Entry {
+        path: String,
+    }
     #[derive(Deserialize)]
-    struct Manifest { files: std::collections::BTreeMap<String, Entry> }
+    struct Manifest {
+        files: std::collections::BTreeMap<String, Entry>,
+    }
     let base = root.join("compiled").join("ast");
     let manifest_bytes = std::fs::read(base.join("manifest.json"))
         .map_err(|error| format!("compiled AST manifest: {error}"))?;
@@ -106,8 +179,10 @@ fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
     let mut loader = MapLoader::new();
     for (name, entry) in manifest.files {
         let path = base.join(entry.path);
-        let bytes = std::fs::read(&path).map_err(|error| format!("compiled AST/{name}: {error}"))?;
-        let ast = serde_json::from_slice(&bytes).map_err(|error| format!("compiled AST/{name}: {error}"))?;
+        let bytes =
+            std::fs::read(&path).map_err(|error| format!("compiled AST/{name}: {error}"))?;
+        let ast = serde_json::from_slice(&bytes)
+            .map_err(|error| format!("compiled AST/{name}: {error}"))?;
         loader.set_ast(&name, ast);
     }
     Ok(loader)
@@ -235,9 +310,11 @@ fn main() {
         .unwrap_or_else(|error| panic!("{error}"));
     let mut invalid = request.clone();
     invalid.target = "__contract_missing_target__".to_string();
-    let before_failure = serde_json::to_vec(&request_json(&request)).unwrap_or_else(|error| panic!("{error}"));
+    let before_failure =
+        serde_json::to_vec(&request_json(&request)).unwrap_or_else(|error| panic!("{error}"));
     let failure_observed = adapter.render(&invalid).is_err();
-    let after_failure = serde_json::to_vec(&request_json(&request)).unwrap_or_else(|error| panic!("{error}"));
+    let after_failure =
+        serde_json::to_vec(&request_json(&request)).unwrap_or_else(|error| panic!("{error}"));
     let recovered = adapter
         .render(&request)
         .unwrap_or_else(|error| panic!("{error}"));
