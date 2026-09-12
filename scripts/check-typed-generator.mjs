@@ -23,7 +23,7 @@ function run(command, args, options = {}) {
 }
 
 try {
-  run(process.execPath, [resolve(root, 'tools/compiler/generate-typed.mjs'), '--check', '--graph', resolve(root, 'examples/site/scenarios/react-boundary/compiled/ast/manifest.json'), '--manifest', resolve(root, 'examples/site/scenarios/react-boundary/types.json'), '--lang', 'ts', '--output', resolve(generated, 'react-boundary.ts')]);
+  run(process.execPath, [resolve(root, 'tools/compiler/compiler.mjs'), '--check', '--graph', resolve(root, 'examples/site/scenarios/react-boundary/compiled/ast/manifest.json'), '--manifest', resolve(root, 'examples/site/scenarios/react-boundary/types.json'), '--lang', 'ts', '--output', resolve(generated, 'react-boundary.ts')]);
   run('npx', ['tsc', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', resolve(generated, 'react-boundary.ts')]);
   run('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', temporary, resolve(generated, 'react-boundary.ts')]);
   writeFileSync(resolve(temporary, 'typescript-check.mjs'), `import { render } from './react-boundary.js';\nconst assign = { title: 'Server rendered shell', island_label: 'Interactive island' };\nconst actual = render(assign, { content: { data: {} } });\nif (actual !== ${JSON.stringify(expected)}) throw new Error('TypeScript generated output differs');\n`);
@@ -125,4 +125,4 @@ try {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write('typed generator: TypeScript, Go, Rust and PHP compile and render all five showcase scenarios identically\n');
+process.stdout.write('compiler: TypeScript, Go, Rust and PHP compile and render all five showcase scenarios identically\n');
