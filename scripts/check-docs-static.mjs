@@ -33,6 +33,12 @@ for (const path of pages) {
     throw new Error(`${name}: expected html lang="en-US", received ${JSON.stringify(language)}`);
   }
   if (name.endsWith('.ko.html')) throw new Error(`${name}: legacy suffix locale route was generated`);
+  for (const match of html.matchAll(/href="([^"]+)"/g)) {
+    const href = match[1];
+    if (!href.startsWith('http') && (/\.ko(?:\.html)?/.test(href) || href.includes('/packages/') || href.includes('/schema/'))) {
+      throw new Error(`${name}: link points to a source-only or legacy route: ${href}`);
+    }
+  }
   if (html.includes('{{ site.title }}') || html.includes('{{ resolveTitle(theme) }}')) {
     throw new Error(`${name}: unresolved theme interpolation`);
   }

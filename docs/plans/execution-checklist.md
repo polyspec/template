@@ -1,6 +1,6 @@
 # Execution checklist
 
-[한국어](execution-checklist.ko.md).
+[한국어](/ko/plans/execution-checklist).
 
 This document lists every task required to deliver the template engine: the specification, the conformance suite, the TypeScript, Go, Rust and PHP implementations, the PHP extension, the browser build, benchmarks and documentation. Tasks are grouped into waves. Tasks inside a wave marked `parallel` are independent of each other. A wave starts only when its listed dependencies are complete.
 

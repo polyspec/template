@@ -1,8 +1,8 @@
 # AST
 
-[한국어](ast.ko.md).
+[한국어](/ko/spec/ast).
 
-The AST is the result of parsing one template file. Every implementation produces the same AST for the same source. The JSON Schema is in [`schema/ast.schema.json`](../../schema/ast.schema.json).
+The AST is the result of parsing one template file. Every implementation produces the same AST for the same source. The JSON Schema is in [`schema/ast.schema.json`](https://github.com/polyspec/template/blob/main/schema/ast.schema.json).
 
 ## Structure
 

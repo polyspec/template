@@ -1,6 +1,6 @@
 # Compiler contract
 
-[한국어](compiler.ko.md).
+[한국어](/ko/spec/compiler).
 
 The compiler owns template parsing, validation, lowering and artifact emission. Runtime packages execute an already compiled program. They do not parse source or invoke a host compiler in a render request.
 

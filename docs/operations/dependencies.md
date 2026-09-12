@@ -1,6 +1,6 @@
 # Dependency policy
 
-[한국어](dependencies.ko.md).
+[한국어](/ko/operations/dependencies).
 
 Use the latest stable release that supports the declared runtime range. Prereleases do not satisfy this rule. Every lock file is part of the release input, and `make dependency-audit` rejects known JavaScript and PHP advisories at the configured severity.
 

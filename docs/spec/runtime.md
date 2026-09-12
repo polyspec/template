@@ -1,6 +1,6 @@
 # Runtime
 
-[한국어](runtime.ko.md).
+[한국어](/ko/spec/runtime).
 
 This document defines the engine API, template names and loading, scope, loops, includes, template definitions, block tags, output, limits, error behavior, browser rendering and artifact/page caching. Value rules are defined in [data-model.md](data-model.md), expression evaluation in [expressions.md](expressions.md), functions in [functions.md](functions.md), the AST in [ast.md](ast.md) and error codes in [errors.md](errors.md).
 

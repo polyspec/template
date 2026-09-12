@@ -2,7 +2,7 @@
 
 [English](conformance.md).
 
-적합성 스위트는 모든 구현이 `tests/cases/`의 케이스에 대해 같은 AST, 같은 출력, 같은 오류 필드를 만드는지 검증한다. 계약은 [적합성 명세](../spec/conformance.ko.md)에 있다.
+적합성 스위트는 모든 구현이 `tests/cases/`의 케이스에 대해 같은 AST, 같은 출력, 같은 오류 필드를 만드는지 검증한다. 계약은 [적합성 명세](/ko/spec/conformance)에 있다.
 
 ## 스위트 실행
 

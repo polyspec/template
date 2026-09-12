@@ -1,6 +1,6 @@
 # Release testing
 
-[한국어](testing.ko.md).
+[한국어](/ko/operations/testing).
 
 The release gate runs with:
 
