@@ -13,11 +13,13 @@ composer require polyspec/template
 ## Render
 
 ```php
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\FilesystemLoader;
 
-$engine = new Engine(new FilesystemLoader('templates'));
-$engine->register('greet', fn (array $args): string => 'Hello, ' . $args[0]);
+$program = new AstProgram(new FilesystemLoader('templates'));
+$program->register('greet', fn (array $args): string => 'Hello, ' . $args[0]);
+$engine = new Engine($program);
 $assign = ['title' => 'Home'];
 $html = $engine->render('layout', $assign, [
     'define' => ['layout' => ['template' => 'layout.tpl'], 'content' => ['template' => 'pages/home.tpl']],
@@ -31,9 +33,9 @@ Assign data is a PHP array or a value produced by `Polyspec\Template\Value\Json:
 
 ```php
 use Polyspec\Template\Ast;
-use Polyspec\Template\Engine;
+use Polyspec\Template\AstProgram;
 
-$ast = Engine::parse(file_get_contents('layout.tpl'), 'layout.tpl');
+$ast = AstProgram::parse(file_get_contents('layout.tpl'), 'layout.tpl');
 $json = Ast::toJson($ast);
 ```
 
@@ -43,10 +45,11 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 
 | Member | Description |
 | --- | --- |
-| `Engine::parse(string $source, string $name, array $options = [])` | Parses one template into its AST (nested arrays). `$options['delimiters']` selects the delimiters. |
-| `new Engine(?LoaderInterface $loader = null, array $options = [])` | Creates an engine. Options: `functions`, `limits`, `delimiters`. |
+| `AstProgram::parse(string $source, string $name, array $options = [])` | Parses one template into its AST (nested arrays). `$options['delimiters']` selects the delimiters. |
+| `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | Creates an AST program. Options: `functions`, `limits`, `delimiters`. |
+| `new Engine(Program $program)` | Creates an engine that delegates to one AST or generated program. |
 | `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | Renders a template name or a parsed template. `$assign` contains variables; options are `define` and `env`. |
-| `$engine->register(string $name, callable $fn)` | Registers a host function `fn(array $args, array $env): mixed`. |
+| `$astProgram->register(string $name, callable $fn)` | Registers a host function `fn(array $args, array $env): mixed`. |
 | `ArrayLoader`, `FilesystemLoader` | In-memory and filesystem loaders. |
 | `Json::parse(string $bytes)` | Order-preserving JSON parser for assign data. |
 | `TemplateError` | Exception with `errorCode`, `template`, `errorLine`, `errorCol`, `offset`, `end` and `toArray()`. |
@@ -55,8 +58,8 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 ## Command line
 
 ```sh
-php bin/template.php parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+php bin/template.php parse FILE [--root DIR] [--delimiters OC]
+php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.

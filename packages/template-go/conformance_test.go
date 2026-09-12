@@ -91,10 +91,11 @@ func renderCase(c conformanceCase) (string, error) {
 		}
 		options.Delimiters = opts.Delimiters
 	}
-	engine, err := template.NewEngine(options)
+	program, err := template.NewAstProgram(options)
 	if err != nil {
 		return "", err
 	}
+	engine := template.NewEngine(program)
 	var assign value.Value = value.NewOrderedMap()
 	if dataBytes := readIf(filepath.Join(c.dir, "data.json")); dataBytes != nil {
 		if assign, err = value.ParseJSON(dataBytes); err != nil {

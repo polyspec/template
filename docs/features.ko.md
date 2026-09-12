@@ -26,4 +26,4 @@
 
 어댑터 계약 강제 후 검증: `node scripts/check-showcase-contract.mjs`가 manifest 생성, 생성된 선언부, 소스 메서드 순서, TypeScript 컴파일, Go 인터페이스 컴파일과 포맷, Rust trait 컴파일, PHP reflection, 런타임 assertion 거부, 다섯 시나리오 요청, 실패 후 반복 해시를 TypeScript·JavaScript·Go·Rust·PHP에서 통과했다. `make docs-check`가 동기화된 Mermaid 계약과 문서 쌍 30개를 통과했다.
 
-현재 generated mode 범위: AST 실행은 211개 적합성 suite를 통과한다. generated 실행은 showcase 시나리오 5개로만 검증했고 typed compiler는 `default` 내장 함수만 받는다. generated callback 경로와 별도 showcase generator는 완전한 compiler 계약을 증명하지 않는다. 하나의 compiler가 전체 generated 적합성과 측정에 사용하는 artifact를 만들 때까지 성능과 showcase 검증은 pending이다.
+현재 generated mode 범위: AST 실행은 211개 적합성 suite를 통과한다. generated 실행은 showcase 시나리오 5개로만 검증했고 typed compiler는 `default` 내장 함수만 받는다. generated artifact는 이제 `AstProgram`과 같은 `Program` 계약을 구현하며 callback 경로는 제거됐다. 별도 showcase generator는 여전히 완전한 compiler 계약을 증명하지 않는다. 하나의 compiler가 전체 generated 적합성과 측정에 사용하는 artifact를 만들 때까지 성능과 showcase 검증은 pending이다.

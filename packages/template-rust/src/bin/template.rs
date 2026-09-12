@@ -3,7 +3,8 @@
 //!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 
 use polyspec_template::{
-    BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json, env_from_json, parse,
+    AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json,
+    env_from_json, parse,
 };
 use std::path::{Path, PathBuf};
 use std::process::exit;
@@ -111,14 +112,13 @@ fn main() {
         return;
     }
 
-    let engine = Engine::new(EngineOptions {
+    let engine = Engine::new(AstProgram::new(EngineOptions {
         loader: Some(Box::new(polyspec_template::FsLoader::new(&root))),
         functions: Default::default(),
         limits: None,
         delimiters: options.delimiters.clone(),
         artifact_refresh: Default::default(),
-        compile: Default::default(),
-    });
+    }));
     let assign = match &options.data {
         Some(path) => read_json(&root, path, &name),
         None => serde_json::Value::Object(Default::default()),

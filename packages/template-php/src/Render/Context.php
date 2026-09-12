@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Render;
 
-use Polyspec\Template\Engine;
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\MapValue;
 
@@ -28,7 +28,7 @@ final class Context
      * @param array{timezone: string, now: float} $env
      */
     public function __construct(
-        public readonly Engine $engine,
+        public readonly AstProgram $engine,
         public readonly MapValue $rootData,
         public readonly array $env,
         public readonly string $entryName,

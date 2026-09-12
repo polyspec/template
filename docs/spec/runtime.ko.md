@@ -25,30 +25,29 @@ PageCache.getOrSet(key, ttl, render)
 
 ```
 
-`Engine`의 컴파일 방식과 산출물 갱신 정책은 서로 별개입니다.
-`compile.mode`가 `ast`이면 파싱된 AST를 해석하고, `gen`이면 언어별로
-주입한 생성 렌더러를 호출합니다. `gen`인데 생성 렌더러가 없으면 AST로
-조용히 대체하지 않고 오류가 납니다. `artifact_refresh`의 `dev`, `true`,
-`false`는 소스 산출물을 언제 갱신할지만 결정합니다.
+`Engine`은 완성된 `Program` 하나를 받아 표현 방식을 검사하지 않고
+`prepare`와 `render`를 위임합니다. `AstProgram`과 `GeneratedProgram`은
+이 계약을 독립적으로 구현합니다. compiler와 artifact store가 engine을
+만들기 전에 mode와 갱신 정책을 선택합니다.
 
 - **RT-2** `parse`는 다른 템플릿을 로드하지 않고 AST 문서에 정의된 AST를 생성한다. include와 block 태그는 렌더 중에 해석한다.
 - **RT-3** `render`는 템플릿 이름 또는 파싱된 템플릿을 받는다. 이름을 받으면 엔진이 로더로 템플릿을 로드한다. 전체 출력을 하나의 문자열로 반환한다.
 - **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다.
 - **RT-5** 엔진 옵션의 `functions`와 `register`는 함수 문서에 정의된 대로 호스트 함수를 추가한다.
 - **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다.
-- **RT-61** `ast`와 `gen` 모두 `prepare`가 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target template을 선택하고 선택한 컴파일 산출물을 한 번 로드한다. `ast`의 준비 요청은 AST를 저장하고 `gen`의 준비 요청은 생성된 준비 렌더러를 저장한다. 두 모드 모두 동일한 `PreparedRender.render` 연산을 제공한다.
+- **RT-61** `AstProgram`과 `GeneratedProgram` 모두 `prepare`에서 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target을 선택한다. 반환된 program별 상태는 동일한 `PreparedRender.render` 연산을 제공한다.
 - **RT-62** `PreparedRender.render`는 렌더마다 필요한 scope, output, 실행 상태만 만든다. 입력이 바뀌지 않은 반복 호출은 같은 UTF-8 바이트를 출력한다. `render`는 `prepare(...).render()`와 같으며 단일 호출 편의 연산으로 유지한다.
 - **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 생성 렌더러도 AST renderer와 동일한 정규화 요청(`target`, 바인딩된 `assign`, 바인딩된 `define`, 해석된 `env`)을 받는다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
-- **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 런타임에 갱신하지 않는다. `false`에서 산출물이 없거나 오래되면 오류다.
+- **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. build coordinator는 `dev`에서 compiler 호출마다 생성하고, `true`에서 digest가 바뀐 뒤 생성하며, `false`에서 소스를 읽지 않는다. `false`에서 배포 산출물이 없거나 오래되거나 손상되면 오류다.
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
 - **RT-67** 준비된 렌더 계약은 단일 제품 manifest인 [`tools/compiler/interface.json`](../../tools/compiler/interface.json)에 선언한다. 인터페이스 검사는 필요한 언어 매핑, 지원 수준, 연산이 하나라도 없으면 실패한다.
-- **RT-69** `PreparedRender`는 명시적인 `AstPreparedExecution` 또는 `GeneratedPreparedExecution` 중 정확히 하나만 소유한다. generated 실행은 빈 AST나 AST 자리표시자를 만들거나 보유하지 않고, AST 실행은 generated renderer를 보유하지 않는다. 네 런타임에서 이 배타 구조가 사라지면 인터페이스 검사가 실패해야 한다.
+- **RT-69** `Engine`은 `Program` 하나만 소유한다. generated 실행은 AST 자리표시자, parser, AST renderer를 만들거나 보유하지 않고, AST 실행은 생성 코드를 보유하지 않는다. mode 선택이 engine 안으로 돌아오면 네 runtime의 인터페이스 검사가 실패해야 한다.
 
-준비 실행 도표는 runtime interface manifest에서 생성한다.
+program 도표는 단일 제품 manifest에서 생성한다.
 
 ```mermaid
-<!--@include: ../../tools/runtime/generated/prepared-execution-flow.mmd-->
+<!--@include: ../../tools/compiler/generated/compiler-architecture.mmd-->
 ```
 
 ```mermaid

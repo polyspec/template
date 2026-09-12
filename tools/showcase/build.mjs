@@ -188,7 +188,7 @@ if (!languages.includes('ts')) {
 }
 for (const language of languages) prepare(language);
 
-const { Engine, MapLoader } = await import(join(root, 'packages', 'template-ts', 'dist', 'index.mjs'));
+const { AstProgram, Engine, MapLoader } = await import(join(root, 'packages', 'template-ts', 'dist', 'index.mjs'));
 const scenarios = listScenarios();
 if (!scenarios.length) {
   process.stderr.write('no showcase scenarios found\n');
@@ -201,7 +201,7 @@ const siteScenarios = [];
 
 for (const scenario of scenarios) {
   for (const failure of verifySourceSnapshot(scenario)) failures.push(`${scenario.id}: ${failure}`);
-  const apiEngine = new Engine({ loader: new MapLoader(compiledTemplates(scenario)) });
+  const apiEngine = new Engine(new AstProgram({ loader: new MapLoader(compiledTemplates(scenario)) }));
   let apiFirst;
   let apiSecond;
   try {

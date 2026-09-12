@@ -52,12 +52,12 @@ engine.render('layout', assign, { define });
 
 ```ts
 import { readFileSync } from 'node:fs';
-import { Engine } from '@polyspec/template';
+import { AstProgram, Engine } from '@polyspec/template';
 import { FsLoader } from '@polyspec/template/node';
 
 const root = 'examples/site/scenarios/scope-precedence';
 const readJson = (name: string) => JSON.parse(readFileSync(`${root}/${name}`, 'utf8'));
-const engine = new Engine({ loader: new FsLoader(root) });
+const engine = new Engine(new AstProgram({ loader: new FsLoader(root) }));
 const assign = readJson('data.json');
 const define = readJson('define.json');
 const html = engine.render('layout', assign, { define });
@@ -68,12 +68,12 @@ console.log(html);
 
 ```js
 import { readFileSync } from 'node:fs';
-import { Engine } from '@polyspec/template';
+import { AstProgram, Engine } from '@polyspec/template';
 import { FsLoader } from '@polyspec/template/node';
 
 const root = 'examples/site/scenarios/scope-precedence';
 const readJson = name => JSON.parse(readFileSync(`${root}/${name}`, 'utf8'));
-const engine = new Engine({ loader: new FsLoader(root) });
+const engine = new Engine(new AstProgram({ loader: new FsLoader(root) }));
 const assign = readJson('data.json');
 const define = readJson('define.json');
 const html = engine.render('layout', assign, { define });
@@ -103,10 +103,11 @@ func read(path string) []byte {
 
 func main() {
 	root := "examples/site/scenarios/scope-precedence"
-	engine, err := template.NewEngine(template.Options{Loader: template.NewFSLoader(os.DirFS(root))})
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS(root))})
 	if err != nil {
 		panic(err)
 	}
+	engine := template.NewEngine(program)
 
 	var assign map[string]any
 	if err := json.Unmarshal(read(root+"/data.json"), &assign); err != nil {
@@ -129,16 +130,16 @@ func main() {
 ### Rust
 
 ```rust
-use polyspec_template::{defines_from_json, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget};
+use polyspec_template::{defines_from_json, AstProgram, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget};
 
 fn render() -> Result<String, Box<dyn std::error::Error>> {
     let root = "examples/site/scenarios/scope-precedence";
     let assign: serde_json::Value = serde_json::from_slice(&std::fs::read(format!("{root}/data.json"))?)?;
     let define_json: serde_json::Value = serde_json::from_slice(&std::fs::read(format!("{root}/define.json"))?)?;
-    let engine = Engine::new(EngineOptions {
+    let engine = Engine::new(AstProgram::new(EngineOptions {
         loader: Some(Box::new(FsLoader::new(root))),
         ..Default::default()
-    });
+    }));
 
     let options = RenderOptions {
         define: defines_from_json(&define_json)?,
@@ -168,9 +169,9 @@ make showcase-check
 
 타입 고정 생성기는 `make typed-generator`로 실행한다. 전체 compiled source graph manifest와 명시적 타입 manifest를 읽는다. 언어 backend를 실행하기 전에 공통 compiler IR이 모든 템플릿을 검증하고 include와 block 경로를 해석하며 root 변수, template input, local, loop item, record member, 함수 호출의 타입을 결정한다. include 대상은 필요한 값을 선언하고 compiler는 각 값을 호출자 scope에서 결합한다. 따라서 include에서만 전달되는 값을 root assign 필드인 것처럼 가장하지 않는다. 각 definition은 generated template target과 HTML 허용 여부도 선언한다. compiler는 대상 template이 선언하지 않은 block scope 필드를 거부한다. 그 뒤 graph의 템플릿마다 정적 함수 하나와 닫힌 template dispatch를 생성하고, manifest에서 도출한 assign·definition·template input·record 선언을 PHP·Go·Rust·TypeScript 소스에 넣는다. 생성된 block은 타입이 고정된 definition registry를 받아 자식 함수를 직접 호출하며, 호출자가 문자열 slot을 미리 렌더하지 않는다. Definition data record는 필드 전달 여부를 보존한다. 입력 우선순위는 root assign, 전달된 definition data 필드, 명시적인 block scope 순서다. nullable 필드는 각각 `?T`, `*T`, `Option<T>`, 선택 속성으로 변환하고 list와 삽입 순서 map은 원소 타입을 재귀적으로 유지한다. `make compiler-ir-check`는 canonical node와 expression의 모든 종류 및 선언되지 않은 symbol 거부를 검사한다. `make typed-generator-check`는 산출물 재현성을 확인한다. `make typed-generator-compile-check`는 다섯 시나리오 graph를 생성된 네 언어에서 모두 컴파일·실행하고 출력 바이트가 같은지 검사한다. 임의의 JSON만으로는 정적 타입을 안전하게 추론할 수 없으므로 manifest가 필요하다.
 
-showcase의 generated 실행도 AST 실행과 같은 public Engine API로 진입한다. 각 adapter는 생성 산출물과 함께 `compile.mode = gen`을 설정한 뒤 `Engine.render`를 호출한다. 생성 callback은 `Engine.prepare`가 만든 정규화된 `GeneratedRequest`를 받는다. 계약 검사기는 adapter가 `render` 안에서 분기하여 생성 소스를 직접 호출하면 실패한다.
+showcase의 generated 실행도 AST 실행과 같은 public Engine API로 진입한다. 각 생성 산출물은 `GeneratedProgram`을 구현한다. adapter는 `AstProgram` 또는 `GeneratedProgram`으로 `Engine`을 만든 뒤 `Engine.render`를 호출한다. 계약 검사기는 제거된 callback type과 engine 내부 mode 선택이 나타나면 실패한다.
 
-generated 모드에서는 호스트 언어 산출물 자체가 실행 가능한 template graph이므로 빈 loader를 전달한다. 사용하지 않는 AST graph를 loader 입력으로 함께 패키징하지 않는다. compiled AST artifact는 AST 모드에서만 읽는다.
+generated 모드에서는 호스트 언어 산출물 자체가 실행 가능한 template graph이므로 loader를 전달하지 않는다. 사용하지 않는 AST graph를 함께 패키징하지 않는다. compiled AST artifact는 `AstProgram`만 읽는다.
 
 `compiler-coverage` 시나리오는 텍스트만 다루는 제한된 generated backend가 검사를 통과하지 못하게 한다. 한 페이지에서 assignment, list·map spread, member·index 접근, 함수·단항·이항·삼항 식, 조건문, 반복문과 모든 loop metadata, local scope를 공유하는 include, if-block, definition data와 block scope를 실행한다. HTML escape 문자 다섯 개, `&&`와 `||`의 boolean 결과, 빈 list·map의 진릿값도 렌더된 HTML에 직접 노출한다. 계약 검사는 이 페이지를 모든 runtime의 AST와 generated 모드로 실행하고 반복 렌더와 실패 복구 뒤에도 같은 UTF-8 351바이트인지 확인한다.
 

@@ -26,35 +26,6 @@ const (
 	ArtifactRefreshFalse ArtifactRefresh = "false"
 )
 
-// CompileMode selects AST interpretation or a pre-generated renderer.
-type CompileMode string
-
-const (
-	CompileModeAST CompileMode = "ast"
-	CompileModeGen CompileMode = "gen"
-)
-
-// GeneratedPreparedRender is a prepared request produced by generated code.
-type GeneratedPreparedRender struct{ Render func() (string, error) }
-
-// GeneratedRequest is the normalized request shared by AST and generated renderers.
-type GeneratedRequest struct {
-	Target     any
-	TargetName string
-	Root       *value.OrderedMap
-	Registry   map[string]*DefineEntry
-	Env        functions.Env
-}
-
-// GeneratedRenderer prepares a normalized request using generated host-language code.
-type GeneratedRenderer func(request GeneratedRequest) (*GeneratedPreparedRender, error)
-
-// CompileOptions configures compilation mode and its generated renderer.
-type CompileOptions struct {
-	Mode      CompileMode
-	Generated GeneratedRenderer
-}
-
 // Options configure an engine (RT-1, RT-6, RT-42).
 type Options struct {
 	Loader          loader.Loader
@@ -63,7 +34,6 @@ type Options struct {
 	Delimiters      string
 	Parse           ParseFunc
 	ArtifactRefresh ArtifactRefresh
-	Compile         CompileOptions
 }
 
 // DefineInput is a template definition given to Render (RT-24).
@@ -89,8 +59,6 @@ type Engine struct {
 	delimiters      parser.Delimiters
 	parse           ParseFunc
 	artifactRefresh ArtifactRefresh
-	compileMode     CompileMode
-	generatedRender GeneratedRenderer
 	cache           map[string]cached
 	now             func() float64
 }
@@ -108,9 +76,12 @@ type astPreparedExecution struct {
 	template   *ParsedTemplate
 }
 
-type generatedPreparedExecution struct{ generated *GeneratedPreparedRender }
+// Prepared is a reusable prepared render operation.
+type Prepared interface {
+	Render() (string, error)
+}
 
-// PreparedRender stores exactly one AST or generated execution for repeated renders.
+// PreparedRender stores one AST execution for repeated renders.
 type PreparedRender struct{ execution preparedExecution }
 
 type cached struct {
@@ -127,14 +98,7 @@ func NewEngine(options Options, now func() float64) (*Engine, error) {
 	if refresh != ArtifactRefreshDev && refresh != ArtifactRefreshTrue && refresh != ArtifactRefreshFalse {
 		return nil, fmt.Errorf("%q is not an artifact refresh policy", refresh)
 	}
-	mode := options.Compile.Mode
-	if mode == "" {
-		mode = CompileModeAST
-	}
-	if mode != CompileModeAST && mode != CompileModeGen {
-		return nil, fmt.Errorf("%q is not a compile mode", mode)
-	}
-	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, artifactRefresh: refresh, compileMode: mode, generatedRender: options.Compile.Generated, cache: map[string]cached{}, now: now}
+	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, artifactRefresh: refresh, cache: map[string]cached{}, now: now}
 	if e.now == nil {
 		e.now = func() float64 { return float64(time.Now().Unix()) }
 	}
@@ -211,7 +175,7 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 }
 
 // Prepare binds request data and resolves the target template once.
-func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*PreparedRender, error) {
+func (e *Engine) Prepare(target any, assign any, options RenderOptions) (Prepared, error) {
 	var name string
 	var parsedTarget *ParsedTemplate
 	switch t := target.(type) {
@@ -242,19 +206,6 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*Prepar
 	if entry, ok := registry[name]; ok && entry.HTML == nil {
 		targetName = entry.Template
 	}
-	if e.compileMode == CompileModeGen {
-		if e.generatedRender == nil {
-			return nil, errors.New("generated compile mode requires GeneratedRender")
-		}
-		generated, err := e.generatedRender(GeneratedRequest{Target: target, TargetName: targetName, Root: root, Registry: registry, Env: env})
-		if err != nil {
-			return nil, err
-		}
-		if generated == nil || generated.Render == nil {
-			return nil, errors.New("generated renderer returned no Render function")
-		}
-		return &PreparedRender{execution: &generatedPreparedExecution{generated: generated}}, nil
-	}
 	template := parsedTarget
 	if template == nil {
 		if template, err = e.LoadTemplate(targetName, nil, nil); err != nil {
@@ -277,8 +228,6 @@ func (e *Engine) Render(target any, assign any, options RenderOptions) (string, 
 func (p *PreparedRender) Render() (string, error) {
 	return p.execution.render()
 }
-
-func (p *generatedPreparedExecution) render() (string, error) { return p.generated.Render() }
 
 func (p *astPreparedExecution) render() (string, error) {
 	context := NewContext(p.engine, p.root, p.env, p.targetName)

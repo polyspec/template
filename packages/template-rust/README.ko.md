@@ -7,10 +7,11 @@
 ## 렌더
 
 ```rust
-use polyspec_template::{DefineInput, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget, Value};
+use polyspec_template::{AstProgram, DefineInput, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget, Value};
 
-let mut engine = Engine::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() });
-engine.register("greet", Box::new(|args, _| Ok(Value::text(format!("Hello, {}", args[0].as_text().unwrap_or(""))))))?;
+let mut program = AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() });
+program.register("greet", Box::new(|args, _| Ok(Value::text(format!("Hello, {}", args[0].as_text().unwrap_or(""))))))?;
+let engine = Engine::new(program);
 let assign = serde_json::json!({ "title": "Home" });
 let mut options = RenderOptions::default();
 options.define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
@@ -25,9 +26,10 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 | 항목 | 설명 |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | 선택적인 구분자로 UTF-8 템플릿 하나를 AST로 파싱한다. |
-| `Engine::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 엔진을 생성한다. |
+| `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. |
+| `Engine::new(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `Engine::render(target, assign, &RenderOptions)` | 템플릿 이름 또는 파싱된 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 또는 HTML 항목을 제공한다. |
-| `Engine::register(name, function)` | 호스트 함수 `Fn(&[Value], &FunctionContext) -> Result<Value, String>`을 등록한다. |
+| `AstProgram::register(name, function)` | 호스트 함수 `Fn(&[Value], &FunctionContext) -> Result<Value, String>`을 등록한다. |
 | `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. |
 | `parse_json`, `parse_json_bytes` | 템플릿 값으로의 JSON 파싱. |
 | `TemplateError` | `code`, `template`, `line`, `col`, `offset`, `end`, `message`를 가진 오류. |
@@ -37,8 +39,8 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 ## 명령줄
 
 ```sh
-template parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+template parse FILE [--root DIR] [--delimiters OC]
+template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.

@@ -303,10 +303,10 @@ tag:  {= not a tag}
 각 구현은 로더로 템플릿을 읽고 출력을 문자열로 반환한다.
 
 ```ts
-import { Engine } from '@polyspec/template';
+import { AstProgram, Engine } from '@polyspec/template';
 import { FsLoader } from '@polyspec/template/node';
 
-const engine = new Engine({ loader: new FsLoader('templates') });
+const engine = new Engine(new AstProgram({ loader: new FsLoader('templates') }));
 const html = engine.render('layout', assign, {
   define: { layout: 'page.tpl', content: 'pages/list.tpl' },
   env: { timezone: '+09:00', now: 1789084800 },
@@ -314,19 +314,21 @@ const html = engine.render('layout', assign, {
 ```
 
 ```go
-engine, _ := template.NewEngine(template.Options{Loader: template.NewFSLoader(os.DirFS("templates"))})
+program, _ := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS("templates"))})
+engine := template.NewEngine(program)
 html, _ := engine.Render("layout", assign, template.RenderOptions{
 	Define: map[string]template.DefineInput{"layout": {Template: "page.tpl"}, "content": {Template: "pages/list.tpl"}},
 })
 ```
 
 ```php
-$engine = new Polyspec\Template\Engine(new Polyspec\Template\Loader\FilesystemLoader('templates'));
+$program = new Polyspec\Template\AstProgram(new Polyspec\Template\Loader\FilesystemLoader('templates'));
+$engine = new Polyspec\Template\Engine($program);
 $html = $engine->render('layout', $assign, ['define' => ['layout' => ['template' => 'page.tpl'], 'content' => ['template' => 'pages/list.tpl']]]);
 ```
 
 ```rust
-let engine = Engine::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() });
+let engine = Engine::new(AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() }));
 let mut options = RenderOptions::default();
 options.define.insert("layout".to_string(), DefineInput { template: Some("page.tpl".to_string()), ..Default::default() });
 options.define.insert("content".to_string(), DefineInput { template: Some("pages/list.tpl".to_string()), ..Default::default() });

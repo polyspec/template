@@ -3,9 +3,8 @@
 
 declare(strict_types=1);
 
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
-use Polyspec\Template\GeneratedPreparedRender;
-use Polyspec\Template\GeneratedRequest;
 use Polyspec\Template\Loader\ArrayLoader;
 use Polyspec\Template\Value\Json;
 use Polyspec\Template\Value\MapValue;
@@ -112,20 +111,10 @@ final class Adapter implements RenderAdapter
     public function __construct(private readonly string $root)
     {
         $generated = getenv('SHOWCASE_EXECUTION_MODE') === 'generated';
-        $loader = $generated ? new ArrayLoader() : artifactLoader($root, 'php');
-        $options = ['compile' => ['mode' => $generated ? 'gen' : 'ast']];
-        if ($generated) {
-            $options['compile']['generated_renderer'] = static function (GeneratedRequest $request) use ($root): GeneratedPreparedRender {
-                $define = new MapValue();
-                foreach ($request->registry as $id => $entry) {
-                    if (isset($entry['html'])) $define->set($id, new DefineEntry(null, null, $entry['html']));
-                    else $define->set($id, new DefineEntry($entry['template'], $entry['data'], null));
-                }
-                $renderRequest = new RenderRequest($request->targetName, $request->rootData, $define, new Environment($request->env['timezone'], $request->env['now']));
-                return new GeneratedPreparedRender(static fn (): string => generatedDirectRender($root, $renderRequest));
-            };
-        }
-        $this->engine = new Engine($loader, $options);
+        $program = $generated
+            ? new GeneratedProgram($root)
+            : new AstProgram(artifactLoader($root, 'php'));
+        $this->engine = new Engine($program);
     }
 
     public function loadScenario(): Scenario

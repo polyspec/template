@@ -3,9 +3,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { Engine, MapLoader, parseJsonBytes } from '../../../packages/template-ts/dist/index.mjs';
+import { AstProgram, Engine, MapLoader, parseJsonBytes } from '../../../packages/template-ts/dist/index.mjs';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.mjs';
-import { renderGenerated } from './generated/native_direct.mjs';
+import { GeneratedProgram } from './generated/native_direct.mjs';
 
 /** @typedef {Map<string, unknown>} JsonObject */
 /** @typedef {{ template: string, data?: JsonObject } | { html: string }} DefineEntry */
@@ -96,16 +96,9 @@ export class Adapter {
   constructor(root) {
     this.root = root;
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
-    const templates = generated ? new Map() : readArtifactTemplates(root, 'typescript');
-    this.engine = new Engine({
-      loader: new MapLoader(templates),
-      compile: generated ? {
-        mode: 'gen',
-        generatedRenderer: request => ({
-          render: () => renderGenerated(this.root, request.targetName, request.rootData, request.registry, request.env),
-        }),
-      } : { mode: 'ast' },
-    });
+    this.engine = new Engine(generated
+      ? new GeneratedProgram(root)
+      : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root, 'typescript')) }));
   }
 
   loadScenario() {
