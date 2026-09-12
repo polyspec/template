@@ -61,7 +61,7 @@ function syntaxKind(sigil: string | null, assignment = false): SyntaxTag['kind']
 }
 
 const RESERVED = new Set(['true', 'false', 'null', 'in']);
-const ASSIGN_HEAD = /^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=(?![=>]))/;
+const ASSIGN_HEAD = /^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=(?![=>]))/;
 const LOOP_HEAD = /^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/;
 
 interface TextPiece {

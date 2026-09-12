@@ -55,17 +55,17 @@ function render_content_tpl(Assign $assign, Definitions $definitions, Input_cont
     $context->at($frame, [159,175]); $context->write("</p>\n</article>\n");
 }
 function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
-    $frame = new Frame("layout.tpl", [0,42,66,95,106], $rootData);
+    $frame = new Frame("layout.tpl", [0,44,68,97,108], $rootData);
 
     $scope->locals->set("layout_local", "visible only in layout");
-    $context->at($frame, [42,66]); $context->write("<section class=\"scope\">\n");
+    $context->at($frame, [44,68]); $context->write("<section class=\"scope\">\n");
     $definition = $definitions->content;
-    if ($definition === null) throw $runtime->error($frame, [66,94], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
+    if ($definition === null) throw $runtime->error($frame, [68,96], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
     if ($definition?->html !== null) {
-        $context->at($frame, [66,94]); $context->write($definition->html);
+        $context->at($frame, [68,96]); $context->write($definition->html);
     } else {
-        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_content_tpl)) throw $runtime->error($frame, [66,94], 'E_RUNTIME_TYPE', "generated definition content data has an invalid type");
-        $input = new Input_content_tpl(title: ($definition?->data !== null && $definition->data->has_title ? $definition->data->title : throw $runtime->error($frame, [66,94], 'E_RUNTIME_TYPE', "generated input content.tpl.title is missing")), root_label: $assign->root_label, defined_label: $assign->defined_label, layout_local: null);
+        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_content_tpl)) throw $runtime->error($frame, [68,96], 'E_RUNTIME_TYPE', "generated definition content data has an invalid type");
+        $input = new Input_content_tpl(title: ($definition?->data !== null && $definition->data->has_title ? $definition->data->title : throw $runtime->error($frame, [68,96], 'E_RUNTIME_TYPE', "generated input content.tpl.title is missing")), root_label: $assign->root_label, defined_label: $assign->defined_label, layout_local: null);
         if ($definition?->data !== null) {
             if ($definition->data->has_title) $input->title = $definition->data->title;
             if ($definition->data->has_root_label) $input->root_label = $definition->data->root_label;
@@ -74,10 +74,10 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
         }
         $input->title = $assign->page?->title;
         $blockScope = new Scope();
-        $context->enter("content.tpl", $frame, [66,94]);
+        $context->enter("content.tpl", $frame, [68,96]);
         try { render_content_tpl($assign, $definitions, $input, $context, $runtime, $rootData, $blockScope); } finally { $context->leave(); }
     }
-    $context->at($frame, [95,106]); $context->write("</section>\n");
+    $context->at($frame, [97,108]); $context->write("</section>\n");
 }
 function render_template(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void { switch ($target) {
         case "layout.tpl": render_layout_tpl($assign, $definitions, new Input_layout_tpl(), $context, $runtime, $rootData, $scope); return;

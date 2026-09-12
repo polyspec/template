@@ -3,14 +3,14 @@
   "mode": "gen",
   "target": "js",
   "entry": "layout.tpl",
-  "sourceDigest": "612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722",
+  "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea",
+  "contractDigest": "f9341f63ca2aa10efe76e2403815424f462f950ae77dbc7e29f1899920acf4e2",
   "compilerDigest": "14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610",
   "files": {
     "scope-precedence.js": {
       "path": "scope-precedence.js",
-      "artifactDigest": "c835a36dbb46a3dff08d96284fc799d2f6b13f0446a3b8683f2682fd28bc1247"
+      "artifactDigest": "7f5afbec18459a1dc6860ed898836d8408462f81959adf7b3f313fee22c4ab49"
     }
   }
 }

@@ -12,7 +12,7 @@ import (
 )
 
 var reserved = map[string]bool{"true": true, "false": true, "null": true, "in": true}
-var assignHead = regexp.MustCompile(`^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)`)
+var assignHead = regexp.MustCompile(`^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)`)
 var loopHead = regexp.MustCompile(`^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=`)
 var whitespaceOnlyPattern = regexp.MustCompile(`^[ \t\r\n]*$`)
 

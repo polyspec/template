@@ -18,7 +18,7 @@ use Polyspec\Template\TemplateError;
 final class Parser
 {
     private const RESERVED = ['true' => true, 'false' => true, 'null' => true, 'in' => true];
-    private const ASSIGN_HEAD = '/^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
+    private const ASSIGN_HEAD = '/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
     private const LOOP_HEAD = '/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/';
 
     private string $open;
@@ -378,10 +378,11 @@ final class Parser
         }
         $name = $head[1];
         $operator = $head[2];
+        $nameStart = $bodyStart + strpos($head[0], $name);
         if (isset(self::RESERVED[$name])) {
-            throw $this->fail('E_PARSE_RESERVED_NAME', $bodyStart, $bodyStart + strlen($name), "{$name} is a reserved word");
+            throw $this->fail('E_PARSE_RESERVED_NAME', $nameStart, $nameStart + strlen($name), "{$name} is a reserved word");
         }
-        $variable = Ast::variable($name, $bodyStart, $bodyStart + strlen($name));
+        $variable = Ast::variable($name, $nameStart, $nameStart + strlen($name));
         $afterOperator = $bodyStart + strlen($head[0]);
         if ($operator === '++' || $operator === '--') {
             $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $afterOperator));
