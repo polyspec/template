@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Render;
 
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Loader\Path;
 
 /**
@@ -13,7 +14,7 @@ final class Renderer
 {
     private readonly Evaluator $evaluator;
 
-    public function __construct(private readonly Context $context)
+    public function __construct(private readonly Context $context, private readonly AstProgram $program)
     {
         $this->evaluator = new Evaluator($context);
     }
@@ -141,7 +142,7 @@ final class Renderer
     private function renderInclude(string $path, array $span, Frame $frame): void
     {
         $name = $this->resolve($path, $frame, $span);
-        $template = $this->context->engine->loadTemplate($name, $frame, $span);
+        $template = $this->program->loadTemplate($name, $frame, $span);
         $this->context->enter($name, $frame, $span);
         try {
             $included = new Frame($template, $frame->context, $frame->locals, $frame->loops);
@@ -192,7 +193,7 @@ final class Renderer
         foreach ($node['scope'] as $item) {
             $data->set($item['name'], $this->evaluator->evaluate($item['expr'], $frame));
         }
-        $template = $this->context->engine->loadTemplate($entry['template'], $frame, $node['span']);
+        $template = $this->program->loadTemplate($entry['template'], $frame, $node['span']);
         $this->context->enter($entry['template'], $frame, $node['span']);
         try {
             $this->renderNodes($template['ast']['body'], new Frame($template, $data));

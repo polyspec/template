@@ -1,8 +1,7 @@
 // Render state: frames, loop metas, template definitions, limits and error creation (docs/spec/runtime.md).
 import type { Template } from '../ast.js';
 import { errorAt, errorWithoutPosition, type ErrorCode, type LineIndex, type Span, type TemplateError } from '../errors.js';
-import type { BuiltIn, Env, HostFunction } from '../functions/index.js';
-import type { Loader } from '../loader.js';
+import type { Env, HostFunction } from '../functions/index.js';
 import { Output } from '../output.js';
 import type { MapValue, Value } from '../value/value.js';
 
@@ -63,12 +62,9 @@ export class Frame {
   }
 }
 
-export interface EngineServices {
-  loader: Loader;
-  functions: ReadonlyMap<string, HostFunction>;
-  builtins: ReadonlyMap<string, BuiltIn>;
-  limits: Limits;
-  loadTemplate(name: string, from: Frame | null, span: Span | null): ParsedTemplate;
+export interface RuntimeServices {
+  limits(): Limits;
+  hostFunction(name: string): HostFunction | undefined;
 }
 
 export class RenderContext {
@@ -80,13 +76,14 @@ export class RenderContext {
   private currentFrame: Frame | null = null;
 
   constructor(
-    readonly services: EngineServices,
+    readonly services: RuntimeServices,
     readonly rootData: MapValue,
     readonly env: Env,
     readonly entryName: string,
   ) {
-    this.output = new Output(services.limits.outputBytes, () => {
-      throw this.fail('E_RUNTIME_LIMIT', this.currentFrame, this.currentSpan, `output exceeds ${services.limits.outputBytes} bytes`);
+    const limits = services.limits();
+    this.output = new Output(limits.outputBytes, () => {
+      throw this.fail('E_RUNTIME_LIMIT', this.currentFrame, this.currentSpan, `output exceeds ${limits.outputBytes} bytes`);
     });
   }
 
@@ -103,8 +100,9 @@ export class RenderContext {
 
   enter(name: string, frame: Frame | null, span: Span | null): void {
     if (this.chain.includes(name)) throw this.fail('E_LOAD_CYCLE', frame, span, `${name} is already being rendered`);
-    if (this.chain.length > this.services.limits.depth) {
-      throw this.fail('E_RUNTIME_DEPTH', frame, span, `nesting depth exceeds ${this.services.limits.depth}`);
+    const limits = this.services.limits();
+    if (this.chain.length > limits.depth) {
+      throw this.fail('E_RUNTIME_DEPTH', frame, span, `nesting depth exceeds ${limits.depth}`);
     }
     this.chain.push(name);
   }

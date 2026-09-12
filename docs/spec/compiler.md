@@ -28,6 +28,8 @@ The typed IR resolves every symbol, template path, definition target, function s
 
 Every generated module exposes the logical structures `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest` and `GeneratedProgram`. A generated program implements the same `Program.prepare(RenderRequest)` and `Program.render(RenderRequest)` operations as an AST program. Template-specific functions are private and invoke each other directly for include and block targets.
 
+`RuntimeServices` is the common runtime boundary owned by both program modes. It exposes resource limits and host-function lookup. AST-only template loading belongs to the AST renderer and is not part of generated execution state. `RuntimeBindings` consumes `RuntimeServices`, so generated code uses the same value and error semantics without depending on an AST loader or interpreter.
+
 Generated expressions use the target runtime's `RuntimeBindings` for truthiness, string conversion, escaping, numeric conversion, finite-result validation, equality, ordering, lookup, iteration entries, functions, limits and errors. The AST evaluator and statement renderer already use this boundary in all four runtimes. Its declaration is extracted and checked against the compiler manifest. A backend may emit a native operation only when the typed operands make that operation exactly equivalent to the data-model rules.
 
 Built-ins are known to the compiler. A referenced host function requires a manifest signature and a runtime implementation. Missing signatures fail before emission. Missing runtime implementations, arity errors and host failures use the same error fields as AST execution.

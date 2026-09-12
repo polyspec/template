@@ -4,11 +4,12 @@ import { PathError, resolvePath } from '../loader.js';
 import { type MapValue, type Value } from '../value/value.js';
 import { Frame, type DefineEntry, type LoopMeta, type RenderContext } from './context.js';
 import { Evaluator } from './expressions.js';
+import type { AstProgramCore } from './engine.js';
 
 export class Renderer {
   private readonly evaluator: Evaluator;
 
-  constructor(private readonly context: RenderContext) {
+  constructor(private readonly context: RenderContext, private readonly program: AstProgramCore) {
     this.evaluator = new Evaluator(context);
   }
 
@@ -106,7 +107,7 @@ export class Renderer {
 
   private renderInclude(path: string, span: Span, frame: Frame): void {
     const name = this.resolve(path, frame, span);
-    const template = this.context.services.loadTemplate(name, frame, span);
+    const template = this.program.loadTemplate(name, frame, span);
     this.context.enter(name, frame, span);
     try {
       const included = new Frame(template, frame.context);
@@ -152,7 +153,7 @@ export class Renderer {
     const data: MapValue = new Map(this.context.rootData);
     if (entry.data) for (const [key, value] of entry.data) data.set(key, value);
     for (const item of node.scope) data.set(item.name, this.evaluator.evaluate(item.expr, frame));
-    const template = this.context.services.loadTemplate(entry.template, frame, node.span);
+    const template = this.program.loadTemplate(entry.template, frame, node.span);
     this.context.enter(entry.template, frame, node.span);
     try {
       this.renderNodes(template.ast.body, new Frame(template, data));

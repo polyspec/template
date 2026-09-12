@@ -142,7 +142,7 @@ func (r *RuntimeBindings) Entries(input value.Value, frame *Frame, span ast.Span
 // Call invokes a built-in or host function and binds its result.
 func (r *RuntimeBindings) Call(name string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
 	functionContext := functions.Context{Env: r.context.Env}
-	if builtin, ok := r.context.Services.Builtins()[name]; ok {
+	if builtin, ok := functions.Builtins[name]; ok {
 		if len(args) < builtin.Min || (builtin.Max >= 0 && len(args) > builtin.Max) {
 			return nil, r.Error(frame, span, errs.RuntimeArity, fmt.Sprintf("%s accepts %d to %d arguments, got %d", name, builtin.Min, builtin.Max, len(args)))
 		}
@@ -156,7 +156,7 @@ func (r *RuntimeBindings) Call(name string, args []value.Value, frame *Frame, sp
 		}
 		return result, nil
 	}
-	host, ok := r.context.Services.Functions()[name]
+	host, ok := r.context.Services.HostFunction(name)
 	if !ok {
 		return nil, r.Error(frame, span, errs.RuntimeUnknownFunction, name+" is not a function")
 	}

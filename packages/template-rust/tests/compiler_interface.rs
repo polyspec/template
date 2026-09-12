@@ -19,6 +19,15 @@ struct Languages {
 struct RustMapping {
     #[serde(rename = "runtimeBindingsExplicitContext")]
     runtime_bindings_explicit_context: Vec<String>,
+    #[serde(rename = "runtimeServiceOperationNames")]
+    runtime_service_operation_names: RuntimeServiceOperationNames,
+}
+
+#[derive(Deserialize)]
+struct RuntimeServiceOperationNames {
+    limits: String,
+    #[serde(rename = "hostFunction")]
+    host_function: String,
 }
 
 #[derive(Deserialize)]
@@ -29,6 +38,8 @@ struct RuntimeContract {
     engine: EngineContract,
     #[serde(rename = "RuntimeBindings")]
     runtime_bindings: BindingsContract,
+    #[serde(rename = "RuntimeServices")]
+    runtime_services: BindingsContract,
 }
 
 #[derive(Deserialize)]
@@ -161,5 +172,33 @@ fn runtime_declarations_match_manifest() {
             .unwrap();
         let context_count = usize::from(manifest.languages.rust.runtime_bindings_explicit_context.contains(&operation.name));
         assert_eq!(method.sig.inputs.len() - 1, operation.parameters.len() + context_count);
+    }
+
+    let context_source = syn::parse_file(&fs::read_to_string("src/render/context.rs").unwrap()).unwrap();
+    let services = context_source
+        .items
+        .iter()
+        .find_map(|item| match item {
+            Item::Trait(item) if item.ident == "RuntimeServices" => Some(item),
+            _ => None,
+        })
+        .expect("RuntimeServices trait is missing");
+    let service_methods: Vec<_> = services
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            TraitItem::Fn(method) => Some(method),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(service_methods.len(), manifest.runtime_contract.runtime_services.operations.len());
+    for (method, operation) in service_methods.iter().zip(&manifest.runtime_contract.runtime_services.operations) {
+        let expected = match operation.name.as_str() {
+            "limits" => &manifest.languages.rust.runtime_service_operation_names.limits,
+            "hostFunction" => &manifest.languages.rust.runtime_service_operation_names.host_function,
+            other => panic!("unknown RuntimeServices operation {other}"),
+        };
+        assert_eq!(method.sig.ident, expected);
+        assert_eq!(method.sig.inputs.len() - 1, operation.parameters.len());
     }
 }

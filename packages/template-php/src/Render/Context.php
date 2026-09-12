@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Render;
 
-use Polyspec\Template\AstProgram;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\MapValue;
 
@@ -28,7 +27,7 @@ final class Context
      * @param array{timezone: string, now: float} $env
      */
     public function __construct(
-        public readonly AstProgram $engine,
+        public readonly RuntimeServices $services,
         public readonly MapValue $rootData,
         public readonly array $env,
         public readonly string $entryName,
@@ -41,8 +40,9 @@ final class Context
             return;
         }
         $this->outputBytes += strlen($text);
-        if ($this->outputBytes > $this->engine->limits['outputBytes']) {
-            throw $this->fail('E_RUNTIME_LIMIT', $this->currentFrame, $this->currentSpan, 'output exceeds ' . $this->engine->limits['outputBytes'] . ' bytes');
+        $limits = $this->services->limits();
+        if ($this->outputBytes > $limits['outputBytes']) {
+            throw $this->fail('E_RUNTIME_LIMIT', $this->currentFrame, $this->currentSpan, 'output exceeds ' . $limits['outputBytes'] . ' bytes');
         }
         $this->output .= $text;
     }
@@ -81,8 +81,9 @@ final class Context
         if (in_array($name, $this->chain, true)) {
             throw $this->fail('E_LOAD_CYCLE', $frame, $span, "{$name} is already being rendered");
         }
-        if (count($this->chain) > $this->engine->limits['depth']) {
-            throw $this->fail('E_RUNTIME_DEPTH', $frame, $span, 'nesting depth exceeds ' . $this->engine->limits['depth']);
+        $limits = $this->services->limits();
+        if (count($this->chain) > $limits['depth']) {
+            throw $this->fail('E_RUNTIME_DEPTH', $frame, $span, 'nesting depth exceeds ' . $limits['depth']);
         }
         $this->chain[] = $name;
     }

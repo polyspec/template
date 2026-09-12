@@ -6,7 +6,7 @@ import { MapLoader, resolvePath, type Loader, type LoadResult, PathError } from 
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from '../parser/scanner.js';
 import { BindError, bind, bindMap } from '../value/bind.js';
 import type { MapValue, Value } from '../value/value.js';
-import { DEFAULT_LIMITS, Frame, RenderContext, type DefineEntry, type EngineServices, type Limits, type ParsedTemplate } from './context.js';
+import { DEFAULT_LIMITS, Frame, RenderContext, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
 import { Renderer } from './statements.js';
 
 export type ParseFunction = (source: string | Uint8Array, name: string, delimiters: Delimiters) => ParsedTemplate;
@@ -54,7 +54,7 @@ class AstPreparedExecution {
     const context = new RenderContext(this.engine, this.rootData, this.env, this.targetName);
     for (const [id, entry] of this.registry) context.registry.set(id, entry);
     context.enter(this.targetName, null, null);
-    new Renderer(context).renderNodes(this.template.ast.body, new Frame(this.template, this.rootData));
+    new Renderer(context, this.engine).renderNodes(this.template.ast.body, new Frame(this.template, this.rootData));
     return context.output.toString();
   }
 }
@@ -93,11 +93,11 @@ export class Engine implements Program {
 }
 
 /** AST program core with template loading, host functions, limits and parsed artifacts. */
-export class AstProgramCore implements EngineServices, Program {
+export class AstProgramCore implements RuntimeServices, Program {
   readonly loader: Loader;
   readonly functions = new Map<string, HostFunction>();
   readonly builtins: ReadonlyMap<string, BuiltIn> = builtins;
-  readonly limits: Limits;
+  private readonly runtimeLimits: Limits;
   readonly delimiters: Delimiters;
   private readonly parseFunction: ParseFunction | null;
   readonly artifactRefresh: ArtifactRefresh;
@@ -106,7 +106,7 @@ export class AstProgramCore implements EngineServices, Program {
   // Creates an engine. An unknown delimiter pair raises an error here, before any render.
   constructor(options: EngineOptions = {}) {
     this.loader = options.loader ?? new MapLoader();
-    this.limits = { ...DEFAULT_LIMITS, ...options.limits };
+    this.runtimeLimits = { ...DEFAULT_LIMITS, ...options.limits };
     this.parseFunction = options.parse ?? null;
     this.artifactRefresh = options.artifactRefresh ?? 'true';
     if (options.delimiters !== undefined) {
@@ -124,6 +124,16 @@ export class AstProgramCore implements EngineServices, Program {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error(`${JSON.stringify(name)} is not an identifier`);
     if (this.builtins.has(name)) throw new Error(`${name} is a built-in function`);
     this.functions.set(name, fn);
+  }
+
+  /** Returns the host function registered under a name. */
+  hostFunction(name: string): HostFunction | undefined {
+    return this.functions.get(name);
+  }
+
+  /** Returns the active resource limits. */
+  limits(): Limits {
+    return this.runtimeLimits;
   }
 
   // RT-9, RT-40: loads a template by name through the loader and caches it by version.

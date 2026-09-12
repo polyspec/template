@@ -12,11 +12,12 @@ import (
 type Renderer struct {
 	context   *Context
 	evaluator *Evaluator
+	program   *Engine
 }
 
 // NewRenderer creates a renderer.
-func NewRenderer(context *Context) *Renderer {
-	return &Renderer{context: context, evaluator: NewEvaluator(context)}
+func NewRenderer(context *Context, program *Engine) *Renderer {
+	return &Renderer{context: context, evaluator: NewEvaluator(context), program: program}
 }
 
 // RenderNodes renders a node list in a frame.
@@ -143,7 +144,7 @@ func (r *Renderer) renderInclude(path string, span ast.Span, frame *Frame) error
 	if err != nil {
 		return err
 	}
-	template, err := r.context.Services.LoadTemplate(name, frame, &span)
+	template, err := r.program.LoadTemplate(name, frame, &span)
 	if err != nil {
 		return err
 	}
@@ -200,7 +201,7 @@ func (r *Renderer) renderBlock(n *ast.Block, frame *Frame) error {
 		}
 		data.Set(item.Name, v)
 	}
-	template, err := r.context.Services.LoadTemplate(entry.Template, frame, &n.Span)
+	template, err := r.program.LoadTemplate(entry.Template, frame, &n.Span)
 	if err != nil {
 		return err
 	}
