@@ -1,6 +1,7 @@
 # 변경 기록
 
 - Composer lockfile을 선언된 최저 PHP 8.2 기준으로 해석하고, 오래되거나 platform이 어긋난 lock을 거부하는 정책 검사를 추가했다.
+- generated-program 컴파일 게이트가 선언된 PHP 런타임 의존성을 직접 설치하도록 해 깨끗한 checkout에서도 독립 showcase와 문서 배포 검사가 실행되게 했다.
 
 [English](CHANGELOG.md).
 
