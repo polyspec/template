@@ -6,7 +6,7 @@
   "sourceDigest": "aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
   "contractDigest": "d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88",
-  "compilerDigest": "e797e7c29c69b25585e82f1df30bb8eedc651c3f0cf2eaf00a3008b72d968998",
+  "compilerDigest": "8625b8cb6aea696f0492c2f4b2c355359a98de5d9db1474ae7617678d7e2c569",
   "files": {
     "compiler-coverage.ts": {
       "path": "compiler-coverage.ts",

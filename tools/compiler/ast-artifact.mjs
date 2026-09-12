@@ -10,6 +10,11 @@ const projectRoot = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 const contractPath = join(projectRoot, 'tools/compiler/interface.json');
 const hash = value => createHash('sha256').update(value).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
+const lineIndex = bytes => {
+  const starts = [0];
+  for (let index = 0; index < bytes.length; index++) if (bytes[index] === 0x0a) starts.push(index + 1);
+  return starts;
+};
 
 function sourceNames(root, directory = root) {
   const names = [];
@@ -31,6 +36,9 @@ function verify(output, contractDigest) {
   const files = Object.entries(manifest.files ?? {});
   if (files.length === 0 || !manifest.files[manifest.entry]) throw new Error('AST artifact source graph is incomplete');
   for (const [name, file] of files) {
+    if (!Array.isArray(file.lines) || file.lines.length === 0 || file.lines[0] !== 0 || file.lines.some((offset, index) => !Number.isInteger(offset) || offset < 0 || index > 0 && offset <= file.lines[index - 1])) {
+      throw new Error(`AST artifact line index is invalid: ${name}`);
+    }
     const path = join(output, file.path);
     if (!existsSync(path) || hash(readFileSync(path)) !== file.artifactDigest) throw new Error(`AST artifact is missing or corrupt: ${name}`);
   }
@@ -69,7 +77,7 @@ export function compileAst({ root, output, entry, refresh = 'true', typeManifest
       const path = `${name}.ast.json`;
       mkdirSync(dirname(join(temporary, path)), { recursive: true });
       writeFileSync(join(temporary, path), ast);
-      files[name] = { path: posix.normalize(path), sourceDigest: hash(sources[name]), artifactDigest: hash(ast) };
+      files[name] = { path: posix.normalize(path), sourceDigest: hash(sources[name]), artifactDigest: hash(ast), lines: lineIndex(sources[name]) };
     }
     const manifest = { schema: 3, mode: 'ast', target: 'canonical', entry, sourceDigest, typeDigest, contractDigest, compilerDigest, files };
     writeFileSync(join(temporary, 'manifest.json'), json(manifest));

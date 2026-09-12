@@ -6,12 +6,19 @@
   "sourceDigest": "6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
   "contractDigest": "d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88",
-  "compilerDigest": "4cd265a4b8bd32b8ad8334be0e27f9db2c101a01c8c6cbc8959851034ed3879f",
+  "compilerDigest": "f283a297c867a98504ca91106067887a519b517954bfbfd111be24d860116d41",
   "files": {
     "layout.tpl": {
       "path": "layout.tpl.ast.json",
       "sourceDigest": "43c54e2a5d18fbbc57a1ecdc73deb95dcaa74ffd9dc6732971be84d015d79263",
-      "artifactDigest": "b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689"
+      "artifactDigest": "b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689",
+      "lines": [
+        0,
+        25,
+        46,
+        58,
+        69
+      ]
     }
   }
 }
