@@ -53,13 +53,12 @@ function toPlain(value) {
 }
 
 try {
-  const engineOptions = { loader: new FsLoader(root), legacyWrappers: options['legacy-wrappers'] === 'true' };
+  const engineOptions = { loader: new FsLoader(root) };
   if (options.delimiters !== null) engineOptions.delimiters = options.delimiters;
   if (command === 'parse') {
     const source = new Uint8Array(readFileSync(filePath));
     const parseOptions = {};
     if (options.delimiters !== null) parseOptions.delimiters = options.delimiters;
-    if (options['legacy-wrappers'] === 'true') parseOptions.legacyWrappers = true;
     const ast = parse(source, name, parseOptions);
     process.stdout.write(JSON.stringify(ast));
   } else {

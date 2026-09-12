@@ -3,6 +3,5 @@
   "description": "The template engine owns the server HTML shell; a React root owns a marked island after the page arrives.",
   "focus": ["SSR shell", "React island", "client boundary"],
   "target": "layout",
-  "legacyWrappers": false,
   "integrationFiles": ["react-host.tsx" ]
 }

@@ -68,8 +68,7 @@ type GeneratedPreparedRender = render.GeneratedPreparedRender
 
 // ParseOptions configure Parse.
 type ParseOptions struct {
-	Delimiters     string
-	LegacyWrappers bool
+	Delimiters string
 }
 
 // NewMapLoader creates an in-memory loader.
@@ -101,19 +100,19 @@ func Parse(source []byte, name string, options ParseOptions) (*ast.Template, err
 	if err != nil {
 		return nil, err
 	}
-	parsed, err := parseWithLines(source, name, d, options.LegacyWrappers)
+	parsed, err := parseWithLines(source, name, d)
 	if err != nil {
 		return nil, err
 	}
 	return parsed.AST, nil
 }
 
-func parseWithLines(source []byte, name string, d parser.Delimiters, legacyWrappers bool) (*render.ParsedTemplate, error) {
+func parseWithLines(source []byte, name string, d parser.Delimiters) (*render.ParsedTemplate, error) {
 	src, err := lexer.FromBytes(name, source)
 	if err != nil {
 		return nil, err
 	}
-	template, err := parser.Parse(src, d, legacyWrappers)
+	template, err := parser.Parse(src, d)
 	if err != nil {
 		return nil, err
 	}

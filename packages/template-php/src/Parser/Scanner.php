@@ -90,46 +90,6 @@ final class Scanner
     }
 
     /**
-     * Removes single-brace C-style and HTML comment wrappers when compatibility mode is enabled.
-     */
-    public static function normalizeLegacyWrappers(string $text, string $open, string $close): string
-    {
-        $wrappers = [['/*', '*/'], ['<!--', '-->']];
-        $active = [];
-        $output = '';
-        $length = strlen($text);
-        $index = 0;
-        while ($index < $length) {
-            $closer = $active[count($active) - 1] ?? null;
-            if ($closer !== null && substr($text, $index, strlen($closer)) === $closer) {
-                array_pop($active);
-                $index += strlen($closer);
-                continue;
-            }
-            $opened = false;
-            foreach ($wrappers as [$opener, $wrapperCloser]) {
-                if (substr($text, $index, strlen($opener)) !== $opener) {
-                    continue;
-                }
-                $after = self::skipHorizontalSpace($text, $index + strlen($opener));
-                if (($text[$after] ?? null) === $open && self::startsTag($text, $after, $close)) {
-                    $active[] = $wrapperCloser;
-                    $index += strlen($opener);
-                    $opened = true;
-                    break;
-                }
-            }
-            if ($opened) {
-                continue;
-            }
-            $output .= $text[$index];
-            $index++;
-        }
-
-        return $output;
-    }
-
-    /**
      * LEX-21.
      */
     public static function isDelimiterChar(string $char): bool

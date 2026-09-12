@@ -23,10 +23,6 @@ type Adapter struct {
 var _ RenderAdapter = (*Adapter)(nil)
 
 func NewAdapter(root string) (*Adapter, error) {
-	legacyWrappers, err := readLegacyWrappers(root)
-	if err != nil {
-		return nil, err
-	}
 	templateLoader, err := artifactLoader(root, "go")
 	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
 		templateLoader = loader.NewMapLoader(map[string]string{})
@@ -35,8 +31,7 @@ func NewAdapter(root string) (*Adapter, error) {
 		return nil, err
 	}
 	engine, err := template.NewEngine(template.Options{
-		Loader:         templateLoader,
-		LegacyWrappers: legacyWrappers,
+		Loader: templateLoader,
 		Compile: func() template.CompileOptions {
 			if os.Getenv("SHOWCASE_EXECUTION_MODE") != "generated" {
 				return template.CompileOptions{Mode: template.CompileModeAST}
@@ -95,26 +90,6 @@ func readJSON(root, name string) (value.Value, error) {
 		return nil, err
 	}
 	return value.ParseJSON(data)
-}
-
-func readLegacyWrappers(root string) (bool, error) {
-	data, err := readJSON(root, "scenario.json")
-	if err != nil {
-		return false, err
-	}
-	metadata, ok := data.(*value.OrderedMap)
-	if !ok {
-		return false, fmt.Errorf("scenario.json must contain an object")
-	}
-	raw, ok := metadata.Get("legacyWrappers")
-	if !ok {
-		return false, nil
-	}
-	legacy, ok := raw.(bool)
-	if !ok {
-		return false, fmt.Errorf("scenario.legacyWrappers must be a boolean")
-	}
-	return legacy, nil
 }
 
 func readTarget(root string) (string, error) {

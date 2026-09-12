@@ -4,8 +4,8 @@
 declare(strict_types=1);
 
 // Command line interface as defined in docs/spec/conformance.md (CNF-4).
-//   parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-//   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+//   parse FILE [--root DIR] [--delimiters OC]
+//   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 
 use Polyspec\Template\Ast;
 use Polyspec\Template\Engine;
@@ -24,7 +24,7 @@ foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php
 
 function usage(string $message): never
 {
-    fwrite(STDERR, $message . "\nusage: template parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]\n");
+    fwrite(STDERR, $message . "\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n");
     exit(1);
 }
 
@@ -54,7 +54,7 @@ $file = $arguments[1] ?? null;
 if ($command === null || $file === null || !in_array($command, ['parse', 'render'], true)) {
     usage('command and FILE are required');
 }
-$options = ['data' => null, 'define' => null, 'env' => null, 'root' => null, 'delimiters' => null, 'legacy-wrappers' => null];
+$options = ['data' => null, 'define' => null, 'env' => null, 'root' => null, 'delimiters' => null];
 $rest = array_slice($arguments, 2);
 for ($i = 0; $i < count($rest); $i += 2) {
     $flag = $rest[$i];
@@ -101,9 +101,6 @@ try {
     $engineOptions = [];
     if ($options['delimiters'] !== null) {
         $engineOptions['delimiters'] = $options['delimiters'];
-    }
-    if ($options['legacy-wrappers'] === 'true') {
-        $engineOptions['legacy_wrappers'] = true;
     }
     if ($command === 'parse') {
         if ($filePath === false) {

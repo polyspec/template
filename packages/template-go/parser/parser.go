@@ -46,13 +46,7 @@ type tagContext struct {
 }
 
 // Parse parses a source into a template.
-func Parse(source *lexer.Source, delimiters Delimiters, legacyWrappers ...bool) (*ast.Template, error) {
-	if len(legacyWrappers) > 0 && legacyWrappers[0] {
-		normalized := normalizeLegacyWrappers(source.Text, delimiters)
-		if normalized != source.Text {
-			source = lexer.FromString(source.Name, normalized)
-		}
-	}
+func Parse(source *lexer.Source, delimiters Delimiters) (*ast.Template, error) {
 	root := []item{}
 	p := &templateParser{source: source, delimiters: delimiters, text: source.Text, root: &root, textBeforeFirstTagIsWhitespace: true}
 	return p.parse()

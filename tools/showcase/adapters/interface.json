@@ -82,9 +82,7 @@
       "root contains scenario.json",
       "scenario.json is valid JSON"
     ],
-    "reads": [
-      "scenario.json.legacyWrappers"
-    ],
+    "reads": [],
     "mutates": [
       "Adapter.engine configuration"
     ],
