@@ -15,6 +15,18 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+/// Controls when compiled template artifacts are refreshed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ArtifactRefresh {
+    /// Parse source on every load.
+    Dev,
+    /// Reuse an artifact until the loader version changes.
+    #[default]
+    True,
+    /// Keep the first artifact for the lifetime of the engine.
+    False,
+}
+
 /// Engine options.
 #[derive(Default)]
 pub struct EngineOptions {
@@ -28,6 +40,8 @@ pub struct EngineOptions {
     pub delimiters: Option<String>,
     /// Accept single-brace comment wrappers when enabled.
     pub legacy_wrappers: bool,
+    /// Template artifact refresh policy.
+    pub artifact_refresh: ArtifactRefresh,
 }
 
 /// A template definition given to `render` (RT-24).
@@ -70,6 +84,8 @@ pub struct Engine {
     pub delimiters: Delimiters,
     /// Whether legacy single-brace wrappers are normalized before parsing.
     pub legacy_wrappers: bool,
+    /// Controls when loaded template artifacts are refreshed.
+    pub artifact_refresh: ArtifactRefresh,
     cache: RefCell<HashMap<String, (String, Rc<ParsedTemplate>)>>,
 }
 
@@ -97,6 +113,7 @@ impl Engine {
             limits: options.limits.unwrap_or_default(),
             delimiters,
             legacy_wrappers: options.legacy_wrappers,
+            artifact_refresh: options.artifact_refresh,
             cache: RefCell::new(HashMap::new()),
         }
     }
@@ -131,7 +148,8 @@ impl Engine {
             });
         };
         if let Some((version, template)) = self.cache.borrow().get(name)
-            && version == loaded.version()
+            && (self.artifact_refresh == ArtifactRefresh::False
+                || (self.artifact_refresh == ArtifactRefresh::True && version == loaded.version()))
         {
             return Ok(Rc::clone(template));
         }

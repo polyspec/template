@@ -121,6 +121,7 @@ fn main() {
         limits: None,
         delimiters: options.delimiters.clone(),
         legacy_wrappers: options.legacy_wrappers,
+        artifact_refresh: Default::default(),
     });
     let assign = match &options.data {
         Some(path) => read_json(&root, path, &name),

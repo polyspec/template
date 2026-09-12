@@ -11,6 +11,9 @@ import { Renderer } from './statements.js';
 
 export type ParseFunction = (source: string | Uint8Array, name: string, delimiters: Delimiters, legacyWrappers?: boolean) => ParsedTemplate;
 
+// Controls when a compiled template artifact is refreshed.
+export type ArtifactRefresh = 'dev' | 'true' | 'false';
+
 // What an engine is created with (RT-1, RT-5, RT-6, RT-42). Every field has a default.
 export interface EngineOptions {
   loader?: Loader;
@@ -20,6 +23,9 @@ export interface EngineOptions {
   legacyWrappers?: boolean;
   // Parser used for sources returned by the loader; absent in the render-only build.
   parse?: ParseFunction;
+  // dev parses on every load, true refreshes when the loader version changes,
+  // false keeps the first loaded artifact for the lifetime of the engine.
+  artifactRefresh?: ArtifactRefresh;
 }
 
 // One template definition: a path, a definition entry, or ready HTML (RT-24).
@@ -67,6 +73,7 @@ export class EngineCore implements EngineServices {
   readonly delimiters: Delimiters;
   private readonly parseFunction: ParseFunction | null;
   private readonly legacyWrappers: boolean;
+  readonly artifactRefresh: ArtifactRefresh;
   private readonly cache = new Map<string, { version: string; template: ParsedTemplate }>();
 
   // Creates an engine. An unknown delimiter pair raises an error here, before any render.
@@ -75,6 +82,7 @@ export class EngineCore implements EngineServices {
     this.limits = { ...DEFAULT_LIMITS, ...options.limits };
     this.parseFunction = options.parse ?? null;
     this.legacyWrappers = options.legacyWrappers === true;
+    this.artifactRefresh = options.artifactRefresh ?? 'true';
     if (options.delimiters !== undefined) {
       const delimiters = parseDelimiters(options.delimiters);
       if (delimiters === null) throw new Error(`${JSON.stringify(options.delimiters)} is not a delimiter pair`);
@@ -102,7 +110,8 @@ export class EngineCore implements EngineServices {
       throw new TemplateError({ code: 'E_LOAD_NOT_FOUND', template: name, line: 0, col: 0, offset: 0, end: 0, message });
     }
     const cached = this.cache.get(name);
-    if (cached && cached.version === loaded.version) return cached.template;
+    if (this.artifactRefresh === 'false' && cached) return cached.template;
+    if (this.artifactRefresh === 'true' && cached && cached.version === loaded.version) return cached.template;
     let template: ParsedTemplate;
     if ('ast' in loaded) {
       template = { ast: loaded.ast, lines: null };

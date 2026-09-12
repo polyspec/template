@@ -12,11 +12,12 @@ export { SafeString, type Value, type MapValue, type ListValue } from './value/v
 export { bind, BindError } from './value/bind.js';
 export { parseJson, parseJsonBytes, JsonSyntaxError } from './value/json.js';
 export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';
-export type { EngineOptions, RenderOptions, DefineInput } from './render/engine.js';
+export type { ArtifactRefresh, EngineOptions, RenderOptions, DefineInput } from './render/engine.js';
 export type { Limits } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';
 export type { Delimiters } from './parser/scanner.js';
 export { Source } from './source.js';
+export { PageCache, type PageCacheTTL } from './page-cache.js';
 
 // What `parse` accepts besides the source and the name.
 export interface ParseOptions {

@@ -2,7 +2,7 @@
 
 [English](runtime.md).
 
-이 문서는 엔진 API, 템플릿 이름과 로딩, 스코프, 루프, include, 템플릿 define, block 태그, 출력, 제한, 오류 동작, 브라우저 렌더링, 캐싱을 정의한다. 값 규칙은 [data-model.ko.md](data-model.ko.md), 표현식 평가는 [expressions.ko.md](expressions.ko.md), 함수는 [functions.ko.md](functions.ko.md), AST는 [ast.ko.md](ast.ko.md), 오류 코드는 [errors.ko.md](errors.ko.md)에 정의되어 있다.
+이 문서는 엔진 API, 템플릿 이름과 로딩, 스코프, 루프, include, 템플릿 define, block 태그, 출력, 제한, 오류 동작, 브라우저 렌더링, 산출물과 페이지 캐시를 정의한다. 값 규칙은 [data-model.ko.md](data-model.ko.md), 표현식 평가는 [expressions.ko.md](expressions.ko.md), 함수는 [functions.ko.md](functions.ko.md), AST는 [ast.ko.md](ast.ko.md), 오류 코드는 [errors.ko.md](errors.ko.md)에 정의되어 있다.
 
 ## API
 
@@ -16,6 +16,10 @@ engine.render(target: name | Template, assign, { define, env }) -> string
 engine.prepare(target: name | Template, assign, { define, env }) -> PreparedRender
 prepared.render() -> string
 Loader.load(name) -> { source | ast, version }
+Compiler.compile(sourceGraph, mode: ast | gen) -> compiled artifact
+ArtifactStore.loadOrRefresh(sourceGraph, refresh: dev | true | false) -> compiled artifact
+PageCache.get(key) -> string | miss
+PageCache.put(key, html, ttl: positive seconds | 0 | null)
 ```
 
 - **RT-2** `parse`는 다른 템플릿을 로드하지 않고 AST 문서에 정의된 AST를 생성한다. include와 block 태그는 렌더 중에 해석한다.
@@ -25,6 +29,9 @@ Loader.load(name) -> { source | ast, version }
 - **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다.
 - **RT-61** `prepare`는 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target template을 선택하고 해당 템플릿을 한 번 로드하거나 파싱한다. 바인딩된 요청 상태를 소유하고 엔진의 캐시된 템플릿을 참조하는 준비된 요청을 반환한다.
 - **RT-62** `PreparedRender.render`는 렌더마다 필요한 scope, output, 실행 상태만 만든다. 입력이 바뀌지 않은 반복 호출은 같은 UTF-8 바이트를 출력한다. `render`는 `prepare(...).render()`와 같으며 단일 호출 편의 연산으로 유지한다.
+- **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
+- **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 런타임에 갱신하지 않는다. `false`에서 산출물이 없거나 오래되면 오류다.
+- **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-63** 준비된 렌더 계약은 [`tools/runtime/interface.json`](../../tools/runtime/interface.json)에 선언한다. `scripts/check-runtime-interface.mjs`는 필요한 언어 매핑이나 연산이 하나라도 없으면 실패한다.
 - **RT-42** 엔진 옵션과 `parse`의 `delimiters`는 렉시컬 문서가 정의하는 대로 태그 구분자를 선택한다. 기본값은 `{}`다. 템플릿 파일의 구분자 지시문은 그 파일에 대해 옵션보다 우선한다.
 

@@ -4,7 +4,7 @@ use polyspec_template::functions::builtins;
 use polyspec_template::functions::date::{format_date, parse_offset, to_unix_seconds};
 use polyspec_template::functions::encoding::{percent_encode, to_json};
 use polyspec_template::value::{OrderedMap, Value};
-use polyspec_template::{Engine, EngineOptions, ErrorCode, MapLoader, RenderOptions, RenderTarget};
+use polyspec_template::{ArtifactRefresh, Engine, EngineOptions, ErrorCode, MapLoader, RenderOptions, RenderTarget};
 
 #[test]
 fn date_parsing_and_formatting() {
@@ -135,5 +135,35 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
             .render(RenderTarget::Ast(&ast), &serde_json::json!({ "a": 2 }), &RenderOptions::default())
             .expect("render"),
         "3"
+    );
+}
+
+#[test]
+fn artifact_refresh_policies_are_independent_of_rendering() {
+    let mut dev_loader = MapLoader::new();
+    dev_loader.set("a.tpl", "1");
+    let dev = Engine::new(EngineOptions {
+        loader: Some(Box::new(dev_loader)),
+        artifact_refresh: ArtifactRefresh::Dev,
+        ..Default::default()
+    });
+    assert_eq!(
+        dev.render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .unwrap(),
+        "1"
+    );
+
+    let mut immutable_loader = MapLoader::new();
+    immutable_loader.set("a.tpl", "1");
+    let immutable = Engine::new(EngineOptions {
+        loader: Some(Box::new(immutable_loader)),
+        artifact_refresh: ArtifactRefresh::False,
+        ..Default::default()
+    });
+    assert_eq!(
+        immutable
+            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .unwrap(),
+        "1"
     );
 }

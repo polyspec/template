@@ -2,7 +2,7 @@
 
 [한국어](runtime.ko.md).
 
-This document defines the engine API, template names and loading, scope, loops, includes, template definitions, block tags, output, limits, error behavior, browser rendering and caching. Value rules are defined in [data-model.md](data-model.md), expression evaluation in [expressions.md](expressions.md), functions in [functions.md](functions.md), the AST in [ast.md](ast.md) and error codes in [errors.md](errors.md).
+This document defines the engine API, template names and loading, scope, loops, includes, template definitions, block tags, output, limits, error behavior, browser rendering and artifact/page caching. Value rules are defined in [data-model.md](data-model.md), expression evaluation in [expressions.md](expressions.md), functions in [functions.md](functions.md), the AST in [ast.md](ast.md) and error codes in [errors.md](errors.md).
 
 ## API
 
@@ -16,6 +16,10 @@ engine.render(target: name | Template, assign, { define, env }) -> string
 engine.prepare(target: name | Template, assign, { define, env }) -> PreparedRender
 prepared.render() -> string
 Loader.load(name) -> { source | ast, version }
+Compiler.compile(sourceGraph, mode: ast | gen) -> compiled artifact
+ArtifactStore.loadOrRefresh(sourceGraph, refresh: dev | true | false) -> compiled artifact
+PageCache.get(key) -> string | miss
+PageCache.put(key, html, ttl: positive seconds | 0 | null)
 ```
 
 - **RT-2** `parse` produces the AST defined in the AST document without loading other templates. Includes and block tags are resolved during rendering.
@@ -25,6 +29,9 @@ Loader.load(name) -> { source | ast, version }
 - **RT-6** `limits` in the engine options overrides the limit values of RT-33. An omitted limit keeps its default.
 - **RT-61** `prepare` binds `assign`, resolves `define` and `env`, selects the target template and loads or parses that template once. It returns a prepared request that owns the bound request state and references the engine's cached template.
 - **RT-62** `PreparedRender.render` creates only per-render scope, output and execution state. Repeated calls with unchanged input produce identical UTF-8 bytes. `render` is equivalent to `prepare(...).render()` and remains the single-call convenience operation.
+- **RT-63** Compilation mode is `ast` or `gen`. `ast` produces an AST artifact interpreted by the AST renderer. `gen` produces host-language renderer code called directly. The mode does not select the artifact refresh policy.
+- **RT-64** Artifact refresh is `dev`, `true` or `false`. `dev` refreshes on every call, `true` refreshes after a source version change, and `false` does not refresh at runtime. Missing or stale artifacts under `false` are errors.
+- **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-63** The prepared render contract is declared in [`tools/runtime/interface.json`](../../tools/runtime/interface.json). `scripts/check-runtime-interface.mjs` fails when any required language mapping or operation is missing.
 - **RT-42** `delimiters` in the engine options and in `parse` selects the tag delimiters as defined in the lexical document. The default is `{}`. A delimiter directive in a template file overrides the option for that file.
 
