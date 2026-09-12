@@ -1,5 +1,15 @@
 {
   "schema": 1,
+  "composerPlatforms": [
+    {
+      "manifest": "packages/template-php/composer.json",
+      "php": "8.2.0"
+    },
+    {
+      "manifest": "packages/template-php-ext/composer.json",
+      "php": "8.2.0"
+    }
+  ],
   "exceptions": [
     {
       "ecosystem": "npm",
@@ -16,22 +26,6 @@
       "reason": "The latest stable release is outside the current lint peer contract and breaks declaration generation.",
       "removalCondition": "Remove the pin when the lint peer contract accepts the release and make test-ts passes with declaration output enabled.",
       "verification": ["make test-ts"]
-    },
-    {
-      "ecosystem": "composer",
-      "manifest": "packages/template-php/composer.json",
-      "package": "phpunit/phpunit",
-      "reason": "The latest stable release requires a PHP version newer than the package's declared PHP 8.2 minimum.",
-      "removalCondition": "Remove the constraint when the latest stable release supports PHP 8.2 or the product contract intentionally raises its minimum.",
-      "verification": ["make test-php"]
-    },
-    {
-      "ecosystem": "composer",
-      "manifest": "packages/template-php-ext/composer.json",
-      "package": "phpunit/phpunit",
-      "reason": "The latest stable release requires a PHP version newer than the extension's declared PHP 8.2 minimum.",
-      "removalCondition": "Remove the constraint when the latest stable release supports PHP 8.2 or the product contract intentionally raises its minimum.",
-      "verification": ["make test-ext"]
     }
   ]
 }

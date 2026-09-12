@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const policyPath = process.argv[2] ? resolve(process.argv[2]) : join(root, 'config/dependency-policy.json');
 const policy = JSON.parse(readFileSync(policyPath, 'utf8'));
-if (policy.schema !== 1 || !Array.isArray(policy.exceptions)) throw new Error('dependency policy schema is invalid');
+if (policy.schema !== 1 || !Array.isArray(policy.composerPlatforms) || !Array.isArray(policy.exceptions)) throw new Error('dependency policy schema is invalid');
 
 function versionParts(version) {
   const match = String(version).match(/^(\d+)\.(\d+)\.(\d+)/);
@@ -28,6 +28,11 @@ function command(commandName, args, cwd) {
   const result = spawnSync(commandName, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
   if (![0, 1].includes(result.status) || result.error) throw new Error(`${commandName} dependency query failed: ${result.error?.message ?? result.stderr}`);
   return result.stdout.trim() ? JSON.parse(result.stdout) : {};
+}
+
+function requireCommand(commandName, args, cwd) {
+  const result = spawnSync(commandName, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  if (result.status !== 0 || result.error) throw new Error(`${commandName} ${args.join(' ')} failed: ${result.error?.message ?? result.stderr}`);
 }
 
 const declared = new Map();
@@ -52,7 +57,18 @@ for (const [name, detail] of Object.entries(npmOutdated)) {
   found.add(key);
 }
 
-const composerManifests = new Set(policy.exceptions.filter(item => item.ecosystem === 'composer').map(item => item.manifest));
+const composerManifests = new Set();
+for (const entry of policy.composerPlatforms) {
+  if (typeof entry.manifest !== 'string' || !/^\d+\.\d+\.\d+$/.test(entry.php)) throw new Error('dependency policy contains an invalid Composer platform');
+  if (composerManifests.has(entry.manifest)) throw new Error(`duplicate Composer platform: ${entry.manifest}`);
+  composerManifests.add(entry.manifest);
+  const manifestPath = join(root, entry.manifest);
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  const lock = JSON.parse(readFileSync(join(dirname(manifestPath), 'composer.lock'), 'utf8'));
+  if (manifest.config?.platform?.php !== entry.php) throw new Error(`${entry.manifest} does not lock Composer resolution to PHP ${entry.php}`);
+  if (lock['platform-overrides']?.php !== entry.php) throw new Error(`${entry.manifest} lock was not resolved for PHP ${entry.php}`);
+  requireCommand('composer', ['validate', '--strict', '--no-interaction', '--no-check-publish'], dirname(manifestPath));
+}
 for (const manifestPath of composerManifests) {
   const manifestDirectory = dirname(join(root, manifestPath));
   const report = command('composer', ['outdated', '--direct', '--locked', '--format=json'], manifestDirectory);
