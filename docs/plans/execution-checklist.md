@@ -213,8 +213,8 @@ Dependencies: T4.X.2. Tasks T6.1–T6.5 and T6.7 are `parallel`; T6.6 follows th
 | --- | --- | --- | --- | --- |
 | T6.1 | Performance measurements | Per-language AST and generated measurements; output equality check before timing | `make showcase` | [x] |
 | T6.2 | Documentation coverage checker | `scripts/check-doc-coverage.mjs` (exported symbols documented in four packages), run by `make doc-coverage` | `make doc-coverage` | [x] |
-| T6.3 | Documentation site | `docs/.vitepress/config.mts`, static GitHub Pages workflow, generated API docs excluded from git | `make docs-static-check`; `make docs-verify-idempotent` | [x] |
-| T6.4 | CI workflow | `.github/workflows/ci.yml` invoking existing Makefile targets only | workflow file lint | [x] |
+| T6.3 | Documentation site | `docs/.vitepress/config.mts`, gated static GitHub Pages job, generated API docs excluded from git | `make docs-static-check`; `make docs-verify-idempotent` | [x] |
+| T6.4 | CI workflow | `.github/workflows/ci.yml` invoking existing Makefile targets and deploying Pages only after every required job passes | workflow file lint | [x] |
 | T6.5 | Publication procedure | `docs/operations/publication.md`(.ko): local immutable publication of Go, npm and composer packages | `make docs-check` | [x] |
 | T6.7 | Executable example site | `examples/site/` scenarios and static page; `tools/showcase/build.mjs`; AST/generated-program parity, repeatability and same-condition mode benchmark JSON artifacts | `make showcase`; `make showcase-check` | [x] |
 | T6.6 | Final status | `docs/features.md`(.ko) with test revisions; `CHANGELOG.md`(.ko) | `make check` | [x] |

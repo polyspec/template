@@ -122,3 +122,36 @@ jobs:
       - run: make build-ts
       - run: node tests/runner/conformance.mjs --langs ts,php
       - run: make test-ext
+
+  pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [release, docs, typescript, browser, go, rust, php]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/configure-pages@v6
+      - run: npm ci
+      - run: make docs-static-check
+        env:
+          VITEPRESS_BASE: /${{ github.event.repository.name }}/
+      - run: |
+          npm run build -w @polyspec/template
+          mkdir -p docs/.vitepress/dist/examples
+          cp -R examples/site docs/.vitepress/dist/examples/site
+          test -s docs/.vitepress/dist/examples/site/index.html
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/.vitepress/dist
+      - id: deployment
+        uses: actions/deploy-pages@v5
