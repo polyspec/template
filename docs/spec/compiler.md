@@ -47,3 +47,5 @@ Generated files are completed in a temporary location and replaced atomically. A
 ## Implementation status
 
 The AST compiler and runtimes are implemented. Generated execution is partial: it is currently verified by five showcase scenarios, accepts only the `default` built-in in the typed compiler and uses a separate showcase generator. These paths do not satisfy this contract and are removed as the generated compiler is completed.
+
+Generated artifacts use the same refresh boundary as canonical AST artifacts. `dev` always emits a fresh source file and manifest, `true` verifies source, type and contract digests before deciding whether to rebuild, and `false` reads and verifies only the deployed generated source and its manifest. Source and manifest replacements are atomic, with the manifest committed last.

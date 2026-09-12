@@ -1,0 +1,15 @@
+{
+  "schema": 2,
+  "mode": "gen",
+  "target": "ts",
+  "entry": "layout.tpl",
+  "sourceDigest": "626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23",
+  "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
+  "contractDigest": "17278ce3a1e628fdebe22170f24aa2d105c3c41192c33198426907013f251bdc",
+  "files": {
+    "react-boundary.ts": {
+      "path": "react-boundary.ts",
+      "artifactDigest": "a779268268563f177dfc6327d036cee5f3f9dda10361acc8d7f57f00cc9903be"
+    }
+  }
+}
