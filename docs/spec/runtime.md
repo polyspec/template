@@ -22,13 +22,14 @@ PageCache.get(key) -> string | miss
 PageCache.put(key, html, ttl: positive seconds | 0 | null)
 PageCache.getOrSet(key, ttl, render)
 
+```
+
 `Engine` compilation and artifact refresh are separate settings. Set
 `compile.mode` to `ast` to interpret the parsed AST or to `gen` to call a
 generated renderer supplied by the language package. `gen` fails at startup
 or render time when no generated renderer is configured; it never silently
 falls back to AST execution. `artifact_refresh` remains `dev`, `true`, or
 `false` and controls when source artifacts are refreshed.
-```
 
 - **RT-2** `parse` produces the AST defined in the AST document without loading other templates. Includes and block tags are resolved during rendering.
 - **RT-3** `render` accepts a template name or a parsed template. With a name, the engine loads the template through its loader. It returns the complete output as one string.
