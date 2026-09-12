@@ -169,18 +169,18 @@ The logical request has this JSON shape:
 
 ## Support levels and compiled artifacts
 
-- **RT-54** The interface manifest declares one compiler with two modes. `ast` returns an `AstArtifact`; `gen` returns a typed `GeneratedArtifact`. Both artifacts go through the same artifact store and prepared render contract.
+- **RT-54** The interface manifest declares one compiler with two peer modes. `ast` returns an `AstArtifact`; `gen` returns host-language source and an artifact manifest. Both produce a `Program` with the same prepared render contract.
 - **RT-55** An implementation declares its supported levels in the manifest. Implementations declaring the same level expose the same logical types and operations, with language-specific spelling recorded only in the mapping. An unsupported operation is absent from that level; it is not an empty method or a runtime fallback.
-- **RT-56** Supported production implementations provide `core-runtime`, `source-compiler`, `artifact-runtime` and both compiler modes. A generated host-language source is the `gen` artifact selected by the same compiler contract.
-- **RT-57** A compiled artifact contains the canonical AST and a manifest containing its schema version, language, scenario, source SHA-256, artifact SHA-256 and template artifact paths. The artifact is generated before service startup and is loaded once into the process.
-- **RT-58** Artifact refresh has three policies: `dev` refreshes on every call, `true` refreshes after a source version change, and `false` reads only the deployed artifact and fails when it is missing or stale. These policies apply independently after `compile.mode` has selected the artifact representation.
-- **RT-59** Parsing, source file discovery and artifact generation do not occur in the request path. Rendering the same artifact with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
+- **RT-56** TypeScript, Go, Rust and PHP provide `core-runtime`, `artifact-runtime` and both `Program` variants. The build compiler provides `source-compiler` and the four generated target backends. JavaScript ESM is emitted by the TypeScript backend and is not counted as another semantic implementation.
+- **RT-57** An artifact manifest contains its contract format, mode, target language, entry, source digest, type digest, contract digest and output paths. The artifact is generated before service startup and is loaded or statically linked once into the process.
+- **RT-58** Artifact refresh is a build policy. `dev` regenerates on every compiler invocation, `true` regenerates when a source, type or contract digest changes, and `false` reads no source and uses only the deployed artifact. A development watcher rebuilds and restarts statically linked Go and Rust processes after regeneration.
+- **RT-59** Parsing, source discovery, artifact generation and host compilation never occur in the render request path. Rendering the same program with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
 - **RT-68** A typed generated artifact declares its assign, presence-preserving definition data, definitions and template inputs. A generated block calls its target template function directly after applying root assign, supplied definition data fields and block scope in that order. A pre-rendered string slot is not a generated template target.
 
 The interface declares two execution modes:
 
-- **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the implemented cross-language mode.
-- **Generated mode** lowers each canonical AST node into a host-language renderer before startup, loads that renderer once, and calls it for each request. The current implementation covers TypeScript, JavaScript, Go, Rust and PHP. It does not parse or interpret template AST during a request; generated output must retain the AST mode's assign, define, error and idempotence contract.
+- **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the complete cross-language mode.
+- **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust or PHP renderer before startup, loads or links that renderer once, and calls it for each request. This mode is partial until all 211 conformance cases pass in every target runtime. It does not parse or interpret template AST during a request.
 
 ```mermaid
 flowchart LR
@@ -287,4 +287,4 @@ flowchart TB
 
 - **RT-40** An engine parses a template once per `name@version` and reuses the parsed template while the loader reports the same version.
 - **RT-41** A parsed template may be stored and reloaded as its AST JSON. Rendering an AST produces the same output as rendering its source.
-- **RT-60** The showcase compiler writes artifacts with `node tools/showcase/compile.mjs --mode dev|changed|off`. `dev` always writes, `changed` reuses matching source and artifact hashes, and `off` never writes or parses source.
+- **RT-60** The build compiler accepts `--refresh dev|true|false`. `dev` always writes, `true` reuses artifacts whose source, type and contract digests match, and `false` never reads or parses source and never writes an artifact.

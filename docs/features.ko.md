@@ -13,9 +13,9 @@
 | template-rust | Rust 렉서, 파서, 렌더러, 준비된 렌더 상태, 함수, CLI | implemented | passed | not-deployed | [패키지](../packages/template-rust/README.ko.md) |
 | template-php | PHP 렉서, 파서, 렌더러, 함수, CLI | implemented | passed | not-deployed | [패키지](../packages/template-php/README.ko.md) |
 | template-php-ext | Rust 크레이트로 빌드하는 PHP 확장 | implemented | passed | not-deployed | [패키지](../packages/template-php-ext/README.ko.md) |
-| performance-measurements | 출력 동일성 검증 뒤 기록하는 시나리오별 AST와 generated 측정값 | implemented | passed | not-deployed | [성능 측정](operations/benchmark.ko.md) |
-| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·언어별 커밋 AST artifact·AST/생성 실행 모드 계약·지원 레벨 계약·정적 HTML 구조 검사·처리량 결과를 제공하는 예제 사이트 | implemented | passed | not-deployed | [예제 사이트](operations/showcase.ko.md) |
-| generated-mode | 정규 AST에서 직접 생성한 호스트 언어 렌더러와 일치성 검사(TypeScript·JavaScript·Go·Rust·PHP) | implemented | passed | not-deployed | [실행 모드](spec/runtime.ko.md#지원-레벨과-컴파일-artifact) |
+| performance-measurements | 출력 동일성 검증 뒤 기록하는 시나리오별 AST와 generated 측정값 | in-progress | pending | not-deployed | [성능 측정](operations/benchmark.ko.md) |
+| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·언어별 커밋 AST artifact·parser 기반 구문 강조·크기가 제한된 artifact 보기·처리량 결과를 제공하는 예제 사이트 | in-progress | pending | not-deployed | [예제 사이트](operations/showcase.ko.md) |
+| generated-mode | 정규 AST에서 직접 생성한 TypeScript·Go·Rust·PHP 호스트 언어 렌더러 | in-progress | pending | not-deployed | [compiler 계약](spec/compiler.ko.md) |
 | docs-check | 문서 링크, 번역 쌍, 코드 블록, 상태 검사 | implemented | passed | not-deployed | [문서 절차](operations/documentation.ko.md) |
 
 2026-09-12 검증: `make docs-check`가 문서 쌍 30개로 통과했다. `node scripts/check-schema.mjs`가 AST 파일 189개와 표현식 AST 53개를 검증했다. 문서 커버리지가 문서화된 공개 심볼과 파일 250개를 보고했다. `make check`가 lint, 네 패키지 단위 테스트, 5개 구현의 211개 케이스에 대한 적합성 1055건 중 1055건을 통과했다. `make test-browser`가 Chromium에서 통과했다. `make test-ext`가 PHP 확장을 빌드하고 적합성 211건 중 211건과 확장 테스트 236개를 통과했다.
@@ -25,3 +25,5 @@
 언어 간 계약 정의 후 검증: `make showcase`가 직접 경로 형태의 `define.json` 항목으로 같은 25개 조합을 통과했고 5개 시나리오의 모든 출력 해시를 유지했다. `make docs-check`가 런타임 계약 도표, 네 언어 예제, 문서 쌍 30개를 통과했다. 이제 빌드는 표준 assign·define 형태를 사용하지 않는 시나리오를 거부한다.
 
 어댑터 계약 강제 후 검증: `node scripts/check-showcase-contract.mjs`가 manifest 생성, 생성된 선언부, 소스 메서드 순서, TypeScript 컴파일, Go 인터페이스 컴파일과 포맷, Rust trait 컴파일, PHP reflection, 런타임 assertion 거부, 다섯 시나리오 요청, 실패 후 반복 해시를 TypeScript·JavaScript·Go·Rust·PHP에서 통과했다. `make docs-check`가 동기화된 Mermaid 계약과 문서 쌍 30개를 통과했다.
+
+현재 generated mode 범위: AST 실행은 211개 적합성 suite를 통과한다. generated 실행은 showcase 시나리오 5개로만 검증했고 typed compiler는 `default` 내장 함수만 받는다. generated callback 경로와 별도 showcase generator는 완전한 compiler 계약을 증명하지 않는다. 하나의 compiler가 전체 generated 적합성과 측정에 사용하는 artifact를 만들 때까지 성능과 showcase 검증은 pending이다.
