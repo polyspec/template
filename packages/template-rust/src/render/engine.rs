@@ -153,7 +153,12 @@ impl Engine {
     }
 
     /// Prepares a render request for repeated use.
-    pub fn prepare<'e>(&'e self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<PreparedRender<'e>, TemplateError> {
+    pub fn prepare<'e>(
+        &'e self,
+        target: RenderTarget<'_>,
+        assign: &serde_json::Value,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'e>, TemplateError> {
         let name = match target {
             RenderTarget::Name(name) => name.to_owned(),
             RenderTarget::Ast(ast) => ast.name.clone(),

@@ -11,6 +11,7 @@ use Polyspec\Template\Value\MapValue;
 $root = dirname(__DIR__, 3);
 require $root . '/packages/template-php/vendor/autoload.php';
 require __DIR__ . '/generated/render_adapter.php';
+require __DIR__ . '/generated/native_templates.php';
 
 function readJson(string $root, string $name): mixed
 {
@@ -115,7 +116,8 @@ final class Adapter implements RenderAdapter
             if (!is_bool($value)) throw new RuntimeException('scenario.legacyWrappers must be a boolean');
             $legacyWrappers = $value;
         }
-        $this->engine = new Engine(artifactLoader($root, 'php'), ['legacy_wrappers' => $legacyWrappers]);
+        $loader = getenv('SHOWCASE_EXECUTION_MODE') === 'generated' ? generatedArtifactLoader($root) : artifactLoader($root, 'php');
+        $this->engine = new Engine($loader, ['legacy_wrappers' => $legacyWrappers]);
     }
 
     public function loadScenario(): Scenario

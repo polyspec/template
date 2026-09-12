@@ -1,4 +1,5 @@
 mod render_adapter;
+mod native_templates;
 
 use polyspec_template::{
     DefineInput, Engine, EngineOptions, Env, MapLoader, RenderOptions, RenderTarget,
@@ -28,7 +29,11 @@ impl Adapter {
             Some(Value::Bool(value)) => *value,
             Some(_) => return Err("scenario.legacyWrappers must be a boolean".to_string()),
         };
-        let loader = artifact_loader(&root, "rust")?;
+        let loader = if std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated") {
+            native_templates::generated_loader(&root)?
+        } else {
+            artifact_loader(&root, "rust")?
+        };
         let engine = Engine::new(EngineOptions {
             loader: Some(Box::new(loader)),
             legacy_wrappers,
