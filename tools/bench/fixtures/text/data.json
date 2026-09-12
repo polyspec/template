@@ -1,8 +1,0 @@
-{
-  "site": { "lang": "en", "name": "Template", "year": 2026 },
-  "page": {
-    "title": "Specification overview",
-    "lead": "One specification and four implementations that render the same template to the same output.",
-    "updated": "2026-09-11"
-  }
-}

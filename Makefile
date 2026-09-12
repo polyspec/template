@@ -6,13 +6,9 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
-	bench bench-ts bench-php bench-go bench-rust bench-php-ext contract-generate contract-check showcase showcase-check showcase-compile \
+	contract-generate contract-check showcase showcase-check showcase-compile \
 	docs-static-check clean
 
-BENCH_ITERS  ?= 50000
-BENCH_WARMUP ?= 5000
-SHOWCASE_ITERS  ?= 3000
-SHOWCASE_WARMUP ?= 300
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
 TS_DIR   := packages/template-ts
@@ -44,8 +40,6 @@ help: ## List targets
 	@echo "  docs                   Build the documentation site"
 	@echo "  docs-verify-idempotent Build the documentation site twice and compare"
 	@echo "  docs-static-check      Build the static site and verify its entry page"
-	@echo "  bench                  Throughput comparison of four core implementations (BENCH_ITERS=$(BENCH_ITERS) BENCH_WARMUP=$(BENCH_WARMUP))"
-	@echo "  bench-ts|go|rust|php|php-ext  Throughput of one implementation"
 	@echo "  showcase               Build the example site, parity proof and benchmark artifact"
 	@echo "  showcase-compile       Generate committed per-language AST artifacts"
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
@@ -147,22 +141,12 @@ contract-generate: ## Generate showcase declarations and Mermaid diagrams
 contract-check: build-ts ## Verify generated declarations, implementations and runtime state recovery
 	node scripts/check-showcase-contract.mjs
 
-bench: ## Throughput comparison of every implementation
-	node tools/bench/run.mjs --iters $(BENCH_ITERS) --warmup $(BENCH_WARMUP)
-
-bench-ts bench-php bench-go bench-rust bench-php-ext: ## Throughput of one implementation
-	node tools/bench/run.mjs --langs $(subst bench-,,$@) --iters $(BENCH_ITERS) --warmup $(BENCH_WARMUP)
-
-
 showcase: build-ts ## Build the executable example site and its result artifacts
 	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
 	node tools/showcase/generate-native.mjs
 	node tools/showcase/generate-direct.mjs
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
-	node tools/bench/run.mjs --langs $(SHOWCASE_LANGS) --fixtures-dir examples/site/scenarios \
-		--iters $(SHOWCASE_ITERS) --warmup $(SHOWCASE_WARMUP) --json \
-		--output-json examples/site/data/benchmark.json
 	node tools/showcase/benchmark-modes.mjs > examples/site/data/mode-benchmark.json
 	node tools/showcase/build-site.mjs
 
@@ -180,4 +164,3 @@ showcase-compile: build-ts ## Generate committed per-language AST artifacts
 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target docs/.vitepress/dist docs/.vitepress/dist.first \
-		tools/bench/drivers/bench-go/bench-go tools/bench/drivers/bench-rust/target
