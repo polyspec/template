@@ -27,7 +27,7 @@
 
 ## 계약 게이트
 
-어댑터 구조는 [interface.json](../../tools/showcase/adapters/interface.json)에서 설계한다. 이 파일이 `tools/showcase/adapters/generated/` 아래의 선언부와 Mermaid 파일의 원본이며, 언어별 어댑터는 매핑된 타입과 연산 이름을 구현한다. 생성기와 검사기는 저장소의 영구 도구이므로 선언이나 도표가 manifest에서 조용히 벗어날 수 없다.
+어댑터 구조는 공통 [compiler interface manifest](../../tools/compiler/interface.json)에 포함한다. 이 manifest가 `tools/showcase/adapters/generated/` 아래의 선언부와 Mermaid 파일의 원본이며, 언어별 어댑터는 매핑된 타입과 연산 이름을 구현한다. 생성기와 검사기는 저장소의 영구 도구이므로 선언이나 도표가 manifest에서 조용히 벗어날 수 없다.
 
 게이트를 직접 실행하려면 다음 명령을 사용한다.
 
