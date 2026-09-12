@@ -209,6 +209,7 @@ async function main() {
   checkSupportLevels();
   run('manifest generator', process.execPath, ['scripts/generate-showcase-contract.mjs', '--check']);
   run('generated source generator', process.execPath, ['tools/showcase/generate-native.mjs', '--check']);
+  run('direct source generator', process.execPath, ['tools/showcase/generate-direct.mjs', '--check']);
   for (const language of languageNames) checkStaticImplementation(language);
 
   run('TypeScript declarations', 'npx', ['--no-install', 'tsc', '--noEmit', '-p', 'tools/showcase/adapters/tsconfig.json']);

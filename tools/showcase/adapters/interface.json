@@ -44,9 +44,10 @@
       "status": "implemented"
     },
     "generated": {
-      "description": "Generate host-language source before startup and call the generated renderer at runtime.",
+      "description": "Lower canonical AST nodes into executable host-language renderer source before startup and call it at runtime.",
       "input": "generated host-language source",
       "requestPath": [
+        "lower AST nodes",
         "compileNative",
         "loadNative",
         "bind assign and define",

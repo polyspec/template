@@ -10,6 +10,7 @@ const site = join(root, 'examples', 'site');
 const data = JSON.parse(readFileSync(join(site, 'data', 'scenarios.json'), 'utf8'));
 const results = JSON.parse(readFileSync(join(site, 'data', 'results.json'), 'utf8'));
 const benchmark = JSON.parse(readFileSync(join(site, 'data', 'benchmark.json'), 'utf8'));
+const modeBenchmark = JSON.parse(readFileSync(join(site, 'data', 'mode-benchmark.json'), 'utf8'));
 const check = process.argv.includes('--check');
 
 function escapeHtml(value) {
@@ -80,12 +81,12 @@ function scenarioCard(scenario, result) {
   const templateSource = Object.entries(scenario.templates).map(([name, source]) => `--- ${name}\n${highlightTemplate(source, name)}`).join('\n\n');
   const integrationSource = (scenario.integrationFiles ?? []).map(file => `--- ${file.name}\n${escapeHtml(file.source)}`).join('\n\n');
   const generatedSource = [
-    ['typescript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_templates.ts')],
-    ['javascript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_templates.mjs')],
-    ['go', join(root, 'tools', 'showcase', 'adapters', 'go', 'native_templates.go')],
-    ['rust', join(root, 'tools', 'showcase', 'adapters', 'rust', 'src', 'native_templates.rs')],
-    ['php', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_templates.php')],
-  ].map(([language, path]) => `${language}/native_templates · generated host source\n${readFileSync(path, 'utf8')}`).join('\n\n');
+    ['typescript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.ts')],
+    ['javascript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.mjs')],
+    ['go', join(root, 'tools', 'showcase', 'adapters', 'go', 'native_direct.go')],
+    ['rust', join(root, 'tools', 'showcase', 'adapters', 'rust', 'src', 'native_direct.rs')],
+    ['php', join(root, 'tools', 'showcase', 'adapters', 'generated', 'native_direct.php')],
+  ].map(([language, path]) => `${language}/native_direct · AST nodes lowered to host source\n${readFileSync(path, 'utf8')}`).join('\n\n');
   const artifactText = Object.entries(artifact).map(([language, manifest]) => {
     const artifactRoot = join(site, 'scenarios', scenario.id, 'compiled', language);
     const files = Object.entries(manifest.templates).map(([name, entry]) => {
@@ -98,20 +99,21 @@ function scenarioCard(scenario, result) {
   return `<article class="scenario" id="${escapeHtml(scenario.id)}">
   <header class="scenario-header"><div><h3>${escapeHtml(scenario.title)}</h3><p>${escapeHtml(scenario.description)}</p></div><div class="tags">${scenario.focus.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div></header>
   <div class="scenario-meta">
-    <section class="source"><p class="output-label">Inputs</p>${code('assign', JSON.stringify(scenario.assign, null, 2))}${code('define', JSON.stringify(scenario.define, null, 2))}${code('templates · parser ranges', templateSource, true)}${scenario.integrationFiles?.length ? code('integration source', integrationSource, true) : ''}${code('compiled artifacts', artifactText)}${code('generated source modules', generatedSource)}</section>
+  <section class="source"><p class="output-label">Inputs</p>${code('assign', JSON.stringify(scenario.assign, null, 2))}${code('define', JSON.stringify(scenario.define, null, 2))}${code('templates · parser ranges', templateSource, true)}${scenario.integrationFiles?.length ? code('integration source', integrationSource, true) : ''}${code('compiled artifacts', artifactText)}${code('generated renderers', generatedSource)}</section>
     <section class="output"><p class="output-label">Output · ${escapeHtml(digest(scenario.expectedHtml))}</p><pre>${highlightEscapedHtml(escapeHtml(scenario.expectedHtml))}</pre><table><thead><tr><th>Implementation</th>${results.languages.map(language => `<th>${escapeHtml(language)}</th>`).join('')}</tr></thead><tbody><tr><td>artifact render</td>${proofCells}</tr></tbody></table></section>
   </div>
 </article>`;
 }
 
 const measurementRows = benchmark.map(row => `<tr><td>${escapeHtml(row.fixture)}</td><td>${escapeHtml(row.lang)}</td><td>${escapeHtml(String(row.iters))}</td><td>${escapeHtml(row.output_sha256.slice(0, 12))}…</td></tr>`).join('');
+const modeRows = modeBenchmark.results.map(row => `<tr><td>${escapeHtml(row.language)}</td><td>${escapeHtml(row.mode)}</td><td>${row.median_ms.toFixed(2)} ms</td><td>${row.output_bytes}</td><td>${escapeHtml(row.output_sha256.slice(0, 12))}…</td></tr>`).join('');
 const cards = data.scenarios.map(scenario => scenarioCard(scenario, results.scenarios.find(item => item.id === scenario.id))).join('\n');
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Template execution lab</title><link rel="stylesheet" href="./styles.css"></head>
-<body><header class="hero"><p class="eyebrow">TEMPLATE · STATIC RENDER PROOF</p><h1>Template execution lab</h1><p class="lede">The shared source is compiled before this page is built. AST mode loads the canonical artifact once; generated mode loads host-language modules with embedded templates. Both modes use the same assign, define and output contract.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">${escapeHtml(results.status.toUpperCase())}</strong></div><div class="status-card"><span>AST mode</span><strong class="pass">IMPLEMENTED</strong></div><div class="status-card"><span>Generated mode</span><strong class="pass">5 LANGUAGES</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
+<body><header class="hero"><p class="eyebrow">TEMPLATE · STATIC RENDER PROOF</p><h1>Template execution lab</h1><p class="lede">The shared source is parsed before this page is built. AST mode executes the committed nodes; generated mode lowers those same nodes into host-language renderers. Both modes use the same assign, define and output contract.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">${escapeHtml(results.status.toUpperCase())}</strong></div><div class="status-card"><span>AST mode</span><strong class="pass">IMPLEMENTED</strong></div><div class="status-card"><span>Generated mode</span><strong class="pass">5 LANGUAGES</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
 <main><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th>${results.languages.map(language => `<th>${escapeHtml(language)}</th>`).join('')}</tr></thead><tbody>${results.scenarios.map(row => `<tr><td><a href="#${escapeHtml(row.id)}">${escapeHtml(row.id)}</a></td><td>${row.bytes}</td><td>${escapeHtml(row.sha256.slice(0, 12))}…</td>${results.languages.map(language => `<td class="${row.renders[language]?.status === 'pass' ? 'pass' : 'fail'}">${row.renders[language]?.status?.toUpperCase() ?? 'FAIL'}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>
 <section class="panel"><div class="section-heading"><div><p class="eyebrow">02 · INPUT AND OUTPUT</p><h2>Small SSR situations</h2></div><p>Each card shows the exact assign data, define map, every template file, compiled artifact manifest and final HTML.</p></div><div class="scenario-list">${cards}</div></section>
-<section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · PERFORMANCE</p><h2>Measured separately</h2></div><p>Compilation and artifact loading are build or process-start work. Runtime implementations prepare bound requests once and reuse their parsed artifact; the benchmark table records render measurements separately.</p></div><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody>${measurementRows}</tbody></table></div></section></main>
+<section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · PERFORMANCE</p><h2>Same request, two execution modes</h2></div><p>Each row starts the same adapter with the same input and checks the same output bytes. The median includes startup, loading and the adapter's fixed render and repeat checks; it is a mode comparison, not a machine independent score.</p></div><div class="table-wrap"><table><thead><tr><th>Language</th><th>Mode</th><th>Median</th><th>Bytes</th><th>Output</th></tr></thead><tbody>${modeRows}</tbody></table></div><details><summary>Package throughput samples</summary><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody>${measurementRows}</tbody></table></div></details></section></main>
 <footer class="footer"><a href="../../spec/runtime.html">Runtime specification</a><a href="../../spec/ast.html">AST specification</a><a href="../../operations/showcase.html">Showcase procedure</a></footer></body></html>\n`;
 
 const output = join(site, 'index.html');

@@ -517,7 +517,7 @@ function executionModesDiagram() {
     `  Source --> NativeCompile["${generated.requiredSupportLevel}<br/>compileNative"]`,
     `  NativeCompile --> NativeArtifact["${generated.input}"]`,
     '  NativeArtifact --> NativeLoad["loadNative<br/>load once"]',
-    '  NativeLoad --> NativeRender["bind assign + define<br/>call generated renderer"]',
+    '  NativeLoad --> NativeRender["bind assign + define<br/>call direct node renderer"]',
     '  ASTRender --> Bytes["same UTF-8 bytes"]',
     '  NativeRender --> Bytes',
     '',

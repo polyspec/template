@@ -23,6 +23,7 @@ import type {
 } from './generated/render_adapter.ts';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.ts';
 import { generatedTemplates } from './generated/native_templates.ts';
+import { renderGenerated } from './generated/native_direct.ts';
 
 function readJson(root: string, name: string): unknown {
   return parseJsonBytes(new Uint8Array(readFileSync(join(root, name))));
@@ -137,6 +138,7 @@ export class Adapter implements RenderAdapter {
   }
 
   render(request: Readonly<RenderRequest>): string {
+    if (process.env.SHOWCASE_EXECUTION_MODE === 'generated') return renderGenerated(this.root, request.target, request.assign, request.define, request.env);
     const options: { define: Record<string, DefineInput>; env?: Partial<Env> } = {
       define: engineDefines(request.define),
     };

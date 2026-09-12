@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { Engine, MapLoader, parseJsonBytes } from '../../../packages/template-ts/dist/index.mjs';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.mjs';
 import { generatedTemplates } from './generated/native_templates.mjs';
+import { renderGenerated } from './generated/native_direct.mjs';
 
 /** @typedef {Map<string, unknown>} JsonObject */
 /** @typedef {{ template: string, data?: JsonObject } | { html: string }} DefineEntry */
@@ -126,6 +127,7 @@ export class Adapter {
   }
 
   render(request) {
+    if (process.env.SHOWCASE_EXECUTION_MODE === 'generated') return renderGenerated(this.root, request.target, request.assign, request.define, request.env);
     const options = { define: engineDefines(request.define) };
     if (request.env !== undefined) options.env = request.env;
     return this.engine.render(request.target, request.assign, options);
