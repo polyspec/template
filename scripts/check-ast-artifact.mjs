@@ -14,6 +14,7 @@ mkdirSync(source);
 try {
   writeFileSync(join(source, 'layout.tpl'), '<h1>{= title}</h1>');
   const first = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'dev' });
+  assert.deepEqual(first.files['layout.tpl'].lines, [0]);
   assert.equal(first.schema, 3);
   assert.deepEqual(Object.keys(first.files), ['layout.tpl']);
   const manifestBytes = readFileSync(join(output, 'manifest.json'));

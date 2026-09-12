@@ -6,17 +6,30 @@
   "sourceDigest": "626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88",
-  "compilerDigest": "4cd265a4b8bd32b8ad8334be0e27f9db2c101a01c8c6cbc8959851034ed3879f",
+  "compilerDigest": "f283a297c867a98504ca91106067887a519b517954bfbfd111be24d860116d41",
   "files": {
     "content.tpl": {
       "path": "content.tpl.ast.json",
       "sourceDigest": "abb0db9b6110b5ca0624d76013aa126c9e66a1486543f52492524c2ce2a52323",
-      "artifactDigest": "2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf"
+      "artifactDigest": "2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf",
+      "lines": [
+        0,
+        41,
+        65,
+        76
+      ]
     },
     "layout.tpl": {
       "path": "layout.tpl.ast.json",
       "sourceDigest": "2e71cffcf5f4701914b2c4f024251f6aa6a836a13ad1292948f3636d2272af4a",
-      "artifactDigest": "57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a"
+      "artifactDigest": "57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a",
+      "lines": [
+        0,
+        7,
+        26,
+        38,
+        46
+      ]
     }
   }
 }

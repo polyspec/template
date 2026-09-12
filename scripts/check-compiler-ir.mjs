@@ -5,6 +5,7 @@ const span = [0, 0];
 const literal = (kind, value) => ({ type: 'Literal', kind, value, span });
 const variable = name => ({ type: 'Var', name, span });
 const graph = {
+  lines: new Map([['main.tpl', [0]], ['partial.tpl', [0]], ['card.tpl', [0]]]),
   templates: new Map([
     ['main.tpl', { type: 'Template', name: 'main.tpl', body: [
       { type: 'Text', value: 'begin', span },
@@ -46,6 +47,7 @@ const manifest = {
 };
 
 const program = lowerSourceGraph(graph, manifest);
+if (program.templates.get('main.tpl').lines[0] !== 0) throw new Error('compiler IR lost the source line index');
 const nodeOps = new Set();
 const exprOps = new Set();
 function visitExpr(expr) {

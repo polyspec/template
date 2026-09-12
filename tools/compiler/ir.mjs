@@ -15,15 +15,17 @@ export function loadSourceGraph(manifestPath) {
   }
   const base = dirname(absolute);
   const templates = new Map();
+  const lines = new Map();
   for (const [name, entry] of Object.entries(manifest.files)) {
-    if (!entry || typeof entry.path !== 'string' || typeof entry.artifactDigest !== 'string') throw new Error(`compiler: ${name} has no complete AST artifact entry`);
+    if (!entry || typeof entry.path !== 'string' || typeof entry.artifactDigest !== 'string' || !Array.isArray(entry.lines) || entry.lines[0] !== 0) throw new Error(`compiler: ${name} has no complete AST artifact entry`);
     const bytes = readFileSync(resolve(base, entry.path));
     if (hash(bytes) !== entry.artifactDigest) throw new Error(`compiler: AST artifact ${name} is corrupt`);
     const ast = JSON.parse(bytes.toString('utf8'));
     if (ast?.type !== 'Template' || ast.name !== name || !Array.isArray(ast.body)) throw new Error(`compiler: ${name} is not a canonical Template AST`);
     templates.set(name, ast);
+    lines.set(name, entry.lines);
   }
-  return { manifest, templates };
+  return { manifest, templates, lines };
 }
 
 function parseType(source) {
@@ -231,7 +233,7 @@ export function lowerSourceGraph(graph, manifest) {
 
   for (const [name, ast] of graph.templates) {
     const inputs = templateInputs.get(name);
-    templates.set(name, { name, inputs, body: lowerNodes(ast.body, name, inputs), span: ast.span ?? [0, 0] });
+    templates.set(name, { name, lines: graph.lines?.get(name) ?? [0], inputs, body: lowerNodes(ast.body, name, inputs), span: ast.span ?? [0, 0] });
   }
   const entry = manifest.entry;
   if (typeof entry !== 'string' || !templates.has(entry)) throw new Error('compiler: type manifest entry must name a source graph template');
