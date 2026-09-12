@@ -233,7 +233,7 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T7.1 | Define one compiler/runtime manifest, generated declarations, ownership and support-level diagrams; reject structural drift in TypeScript, Go, Rust and PHP | `make compiler-interface-check`; `make runtime-interface-check` | [ ] |
+| T7.1 | Define one compiler/runtime manifest, generated declarations, ownership and support-level diagrams; reject structural drift in TypeScript, Go, Rust and PHP | `make compiler-interface-check`; `make runtime-interface-check` | [x] |
 | T7.2 | Replace generated callbacks and showcase-only generation with one compiler pipeline and four host backends; remove compatibility options and fallback paths | package tests; compiler mutation tests | [ ] |
 | T7.3 | Support every specified node, expression, built-in and host function in generated execution | generated compiler tests | [ ] |
 | T7.4 | Run every one of the 211 cases through AST and generated execution in TypeScript, Go, Rust and PHP | `make conformance-all-modes` | [ ] |
