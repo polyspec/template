@@ -28,4 +28,4 @@ Every specification rule has one machine-checked evidence route. Canonical fixtu
 
 The short performance run is a correctness regression, not a stable speed score. It creates three fresh samples for every language-mode row, verifies output identity and validates all metric fields without replacing the committed 21-sample report.
 
-Before publication, `make release-check` requires a clean source worktree, creates a detached temporary worktree at `HEAD`, installs the locked JavaScript dependencies and browser, and runs the complete release matrix there. PHP test dependencies are installed by their package targets. The temporary checkout is removed whether the matrix succeeds or fails.
+Before publication, `make release-check` requires a clean source worktree, creates a detached temporary worktree at `HEAD`, installs the locked JavaScript dependencies and browser, and runs the complete release matrix there. The matrix prepares the locked PHP dependencies before its first contract check, and the extension test target prepares its own dependencies. The temporary checkout is removed whether the matrix succeeds or fails.

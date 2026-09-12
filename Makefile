@@ -200,7 +200,7 @@ benchmark-check: ## Verify committed benchmark structure and equal output
 benchmark-smoke: typed-generator ## Measure a fresh short equal-output sample without changing committed results
 	node scripts/check-benchmark-smoke.mjs
 
-release-test-matrix: ## Run all release layers in deterministic order
+release-test-matrix: build-php ## Run all release layers in deterministic order
 	@echo "[release 1/7] contracts, generated documentation and static analysis"
 	$(MAKE) docs-check rules-check runtime-interface-check compiler-interface-check lint
 	@echo "[release 2/7] lexer, parser, value, runtime and page-cache units"
