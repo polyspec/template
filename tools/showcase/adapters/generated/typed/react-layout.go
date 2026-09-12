@@ -13,6 +13,8 @@ type Assign struct {
 }
 type Input_content_tpl struct {  }
 type Input_layout_tpl struct {  }
+type Definition[T any] struct { HTML *string; Data *T }
+type Definitions struct { Content *Definition[Input_content_tpl]; Layout *Definition[Input_layout_tpl] }
 type OrderedEntry[K comparable, V any] struct { Key K; Value V }
 type OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }
 func NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }
@@ -27,24 +29,32 @@ func generatedUnary(op string, value any) any { if op == "!" { return !generated
 func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
 func generatedCall(name string, args []any) any { if name == "default" && len(args) == 2 { if generatedTruthy(args[0]) { return args[0] }; return args[1] }; panic("generated function is not linked: "+name) }
 func valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }
-func render_content_tpl(assign Assign, slots map[string]string, input Input_content_tpl) string { var out strings.Builder
+func render_content_tpl(assign Assign, definitions Definitions, input Input_content_tpl) string { var out strings.Builder
 
     out.WriteString("<section data-react-island id=\"counter\">\n<p>")
     fmt.Fprint(&out, valueOrZero(assign.Island_label))
     out.WriteString("</p>\n</section>\n")
  return out.String() }
-func render_layout_tpl(assign Assign, slots map[string]string, input Input_layout_tpl) string { var out strings.Builder
+func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder
 
     out.WriteString("<main>\n<h1>")
     fmt.Fprint(&out, valueOrZero(assign.Title))
     out.WriteString("</h1>\n")
-    out.WriteString(slots["content"])
+    { definition := definitions.Content
+    if definition == nil { panic("generated definition content is missing") }
+    if definition != nil && definition.HTML != nil { out.WriteString(*definition.HTML) } else {
+        input := Input_content_tpl{}
+        if definition != nil && definition.Data != nil { input = *definition.Data }
+
+        out.WriteString(render_content_tpl(assign, definitions, input))
+    }
+    }
     out.WriteString("</main>\n")
  return out.String() }
-func renderTemplate(target string, assign Assign, slots map[string]string) string { switch target {
-	case "content.tpl": return render_content_tpl(assign, slots, Input_content_tpl{})
-	case "layout.tpl": return render_layout_tpl(assign, slots, Input_layout_tpl{})
+func renderTemplate(target string, assign Assign, definitions Definitions) string { switch target {
+	case "content.tpl": return render_content_tpl(assign, definitions, Input_content_tpl{})
+	case "layout.tpl": return render_layout_tpl(assign, definitions, Input_layout_tpl{})
 	default: panic("generated template is missing or requires inputs: " + target)
 } }
-func Render(assign Assign, slots map[string]string) string { return renderTemplate("layout.tpl", assign, slots) }
+func Render(assign Assign, definitions Definitions) string { return renderTemplate("layout.tpl", assign, definitions) }
 var _ = fmt.Fprint
