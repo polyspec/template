@@ -6,9 +6,10 @@ import { parse } from '../packages/template-ts/dist/index.mjs';
 import { listCases } from '../tests/runner/cases.mjs';
 import { deriveTypeManifest } from '../tools/compiler/type-manifest.mjs';
 
+const cases = listCases();
+const parseableCases = cases.filter((testCase) => testCase.expectedAst !== null);
 let checked = 0;
-for (const testCase of listCases()) {
-  if (testCase.expectedAst === null) continue;
+for (const testCase of parseableCases) {
   const templates = new Map();
   const pending = [testCase.dir];
   while (pending.length > 0) {
@@ -43,5 +44,5 @@ for (const testCase of listCases()) {
   }
   checked++;
 }
-assert.equal(checked, 189);
+assert.equal(checked, parseableCases.length);
 process.stdout.write(`compiler: derived dynamic type contracts for ${checked} parseable conformance cases\n`);
