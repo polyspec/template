@@ -7,7 +7,7 @@ use crate::ast::Expr;
 use crate::error::TemplateError;
 use crate::expr::lexer::{ExpressionLexer, LexerOptions, TokenType};
 use crate::expr::parser::ExpressionParser;
-use crate::render::context::{Frame, ParsedTemplate, RenderContext, Scope};
+use crate::render::context::{Frame, RenderContext, Scope};
 use crate::render::engine::AstProgram;
 use crate::render::expressions::Evaluator;
 use crate::source::Source;
@@ -64,13 +64,6 @@ pub fn evaluate_expression(expr: &Expr, data: &serde_json::Value) -> Result<Valu
     let engine = AstProgram::new(Default::default());
     let root = bind_map(data).map_err(|error| TemplateError::without_position(error.code, "expression", error.message))?;
     let root = Rc::new(root);
-    let template = Rc::new(ParsedTemplate {
-        ast: crate::ast::Template {
-            name: "expression".to_string(),
-            body: Vec::new(),
-        },
-        lines: None,
-    });
     let mut context = RenderContext::new(
         &engine,
         Rc::clone(&root),
@@ -81,6 +74,10 @@ pub fn evaluate_expression(expr: &Expr, data: &serde_json::Value) -> Result<Valu
         "expression",
     );
     let mut scope = Scope::default();
-    let frame = Frame { template, context: root };
+    let frame = Frame {
+        name: "expression".to_string(),
+        lines: None,
+        context: root,
+    };
     Evaluator::new(&mut context).evaluate(expr, &frame, &mut scope)
 }

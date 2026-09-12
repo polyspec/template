@@ -14,6 +14,7 @@ use Polyspec\Template\Render\Context;
 use Polyspec\Template\Render\Frame;
 use Polyspec\Template\Render\Renderer;
 use Polyspec\Template\Render\RuntimeServices;
+use Polyspec\Template\Render\Scope;
 use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\BindError;
 use Polyspec\Template\Value\MapValue;
@@ -41,7 +42,7 @@ final class AstPreparedExecution implements PreparedExecution
         $context = new Context($this->engine, $this->rootData, $this->env, $this->targetName);
         $context->registry = $this->registry;
         $context->enter($this->targetName, null, null);
-        (new Renderer($context, $this->engine))->renderNodes($this->template['ast']['body'], new Frame($this->template, $this->rootData));
+        (new Renderer($context, $this->engine))->renderNodes($this->template['ast']['body'], new Frame($this->template['ast']['name'], $this->template['lines'], $this->rootData), new Scope());
 
         return $context->output();
     }

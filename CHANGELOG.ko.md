@@ -59,3 +59,4 @@
 - showcase adapter 계약을 compiler interface manifest에 병합했다. 계약 선언부, adapter 검사, Mermaid 생성, canonical artifact digest가 같은 설계 원본을 읽으며 interface gate는 중복 manifest가 다시 생기면 실패한다.
 - 네 runtime에서 `RuntimeServices`와 AST template loading을 분리했다. Render context는 limit과 host 함수 조회에만 의존하고 AST statement renderer가 template loading을 명시적으로 소유한다. Generated program이 AST program에 의존하지 않고 `RuntimeBindings`를 사용할 수 있도록 공통 manifest와 선언 검사가 이 경계를 강제한다.
 - Digest에 연결된 generated artifact manifest와 무결성 검사·원자 교체를 포함한 독립적인 `dev`, `true`, `false` 갱신 동작을 추가했다.
+- Render frame의 canonical AST 소유를 제거하고 TypeScript, Go, Rust, PHP의 `RenderFrame`과 `RenderScope` 필드·연산을 통일했다.

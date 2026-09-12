@@ -47,34 +47,42 @@ type LoopMeta struct {
 
 // Frame is one rendered template file (RT-11 to RT-14).
 type Frame struct {
-	Template *ParsedTemplate
-	Context  *value.OrderedMap
-	Locals   map[string]value.Value
-	Loops    map[string][]*LoopMeta
+	Name    string
+	Lines   errs.LineIndex
+	Context *value.OrderedMap
 }
 
 // NewFrame creates a frame with an empty local scope.
-func NewFrame(template *ParsedTemplate, context *value.OrderedMap) *Frame {
-	return &Frame{Template: template, Context: context, Locals: map[string]value.Value{}, Loops: map[string][]*LoopMeta{}}
+func NewFrame(name string, lines errs.LineIndex, context *value.OrderedMap) *Frame {
+	return &Frame{Name: name, Lines: lines, Context: context}
 }
 
-// Name returns the template name.
-func (f *Frame) Name() string { return f.Template.AST.Name }
-
 // Lookup implements RT-12.
-func (f *Frame) Lookup(name string) value.Value {
-	if v, ok := f.Locals[name]; ok {
+// Scope stores local variables and active loops shared by includes and isolated by blocks.
+type Scope struct {
+	Locals map[string]value.Value
+	Loops  map[string][]*LoopMeta
+}
+
+// NewScope creates an empty render scope.
+func NewScope() *Scope {
+	return &Scope{Locals: map[string]value.Value{}, Loops: map[string][]*LoopMeta{}}
+}
+
+// Lookup resolves a local before frame context data.
+func (s *Scope) Lookup(frame *Frame, name string) value.Value {
+	if v, ok := s.Locals[name]; ok {
 		return v
 	}
-	if v, ok := f.Context.Get(name); ok {
+	if v, ok := frame.Context.Get(name); ok {
 		return v
 	}
 	return nil
 }
 
 // LoopMeta returns the innermost active loop for a name.
-func (f *Frame) LoopMeta(name string) *LoopMeta {
-	stack := f.Loops[name]
+func (s *Scope) LoopMeta(name string) *LoopMeta {
+	stack := s.Loops[name]
 	if len(stack) == 0 {
 		return nil
 	}
@@ -110,11 +118,11 @@ func (c *Context) Fail(code errs.Code, frame *Frame, span *ast.Span, message str
 	if frame == nil || span == nil {
 		name := c.EntryName
 		if frame != nil {
-			name = frame.Name()
+			name = frame.Name
 		}
 		return errs.WithoutPosition(code, name, message)
 	}
-	return errs.At(code, frame.Name(), frame.Template.Lines, errs.Span{span[0], span[1]}, message)
+	return errs.At(code, frame.Name, frame.Lines, errs.Span{span[0], span[1]}, message)
 }
 
 // Write appends output and checks the size limit (RT-35).

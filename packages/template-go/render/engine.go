@@ -150,7 +150,7 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 	if !ok {
 		message := "template " + name + " does not exist"
 		if from != nil && span != nil {
-			return nil, errs.At(errs.LoadNotFound, from.Name(), from.Template.Lines, errs.Span{span[0], span[1]}, message)
+			return nil, errs.At(errs.LoadNotFound, from.Name, from.Lines, errs.Span{span[0], span[1]}, message)
 		}
 		return nil, errs.WithoutPosition(errs.LoadNotFound, name, message)
 	}
@@ -237,7 +237,7 @@ func (p *astPreparedExecution) render() (string, error) {
 	if err := context.Enter(p.targetName, nil, nil); err != nil {
 		return "", err
 	}
-	if err := NewRenderer(context, p.engine).RenderNodes(p.template.AST.Body, NewFrame(p.template, p.root)); err != nil {
+	if err := NewRenderer(context, p.engine).RenderNodes(p.template.AST.Body, NewFrame(p.template.AST.Name, p.template.Lines, p.root), NewScope()); err != nil {
 		return "", err
 	}
 	return context.Output(), nil

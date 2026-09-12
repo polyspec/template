@@ -2,7 +2,7 @@
 import type { Expr } from '../ast.js';
 import { Source } from '../source.js';
 import { AstProgramCore } from '../render/engine.js';
-import { Frame, RenderContext } from '../render/context.js';
+import { Frame, RenderContext, Scope } from '../render/context.js';
 import { Evaluator } from '../render/expressions.js';
 import { bindMap } from '../value/bind.js';
 import type { Value } from '../value/value.js';
@@ -43,6 +43,6 @@ export function evaluateExpression(expr: Expr, data: unknown): Value {
   const engine = new AstProgramCore();
   const root = bindMap(data ?? {});
   const context = new RenderContext(engine, root, { timezone: 'Z', now: 0 }, 'expression');
-  const frame = new Frame({ ast: { type: 'Template', name: 'expression', body: [] }, lines: null }, root);
-  return new Evaluator(context).evaluate(expr, frame);
+  const frame = new Frame('expression', null, root);
+  return new Evaluator(context).evaluate(expr, frame, new Scope());
 }

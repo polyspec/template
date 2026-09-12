@@ -179,13 +179,9 @@ impl AstProgram {
         let Some(loaded) = self.loader.load(name) else {
             let message = format!("template {name} does not exist");
             return Err(match (from, span) {
-                (Some(frame), Some(span)) => TemplateError::at(
-                    ErrorCode::E_LOAD_NOT_FOUND,
-                    frame.name(),
-                    frame.template.lines.as_ref(),
-                    span,
-                    message,
-                ),
+                (Some(frame), Some(span)) => {
+                    TemplateError::at(ErrorCode::E_LOAD_NOT_FOUND, &frame.name, frame.lines.as_ref(), span, message)
+                }
                 _ => TemplateError::without_position(ErrorCode::E_LOAD_NOT_FOUND, name, message),
             });
         };
@@ -312,7 +308,8 @@ impl AstPreparedExecution<'_> {
         context.registry = self.registry.clone();
         context.enter(&self.target_name, None, None)?;
         let frame = Frame {
-            template: Rc::clone(&self.template),
+            name: self.template.ast.name.clone(),
+            lines: self.template.lines.clone(),
             context: Rc::clone(&self.root),
         };
         let mut scope = Scope::default();

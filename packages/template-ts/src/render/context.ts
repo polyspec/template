@@ -39,20 +39,19 @@ export interface LoopMeta {
   size: number;
 }
 
-// One rendered template file: local scope, context data and active loops (RT-11 to RT-14).
+// One rendered template location and its context data.
 export class Frame {
+  constructor(readonly name: string, readonly lines: LineIndex | null, readonly context: MapValue) {}
+}
+
+// Local variables and active loops shared by an include and isolated by a block.
+export class Scope {
   readonly locals = new Map<string, Value>();
   readonly loops = new Map<string, LoopMeta[]>();
 
-  constructor(readonly template: ParsedTemplate, readonly context: MapValue) {}
-
-  get name(): string {
-    return this.template.ast.name;
-  }
-
-  lookup(name: string): Value {
+  lookup(frame: Frame, name: string): Value {
     if (this.locals.has(name)) return this.locals.get(name) as Value;
-    if (this.context.has(name)) return this.context.get(name) as Value;
+    if (frame.context.has(name)) return frame.context.get(name) as Value;
     return null;
   }
 
@@ -95,7 +94,7 @@ export class RenderContext {
 
   fail(code: ErrorCode, frame: Frame | null, span: Span | null, message: string): TemplateError {
     if (frame === null || span === null) return errorWithoutPosition(code, frame ? frame.name : this.entryName, message);
-    return errorAt(code, frame.name, frame.template.lines, span, message);
+    return errorAt(code, frame.name, frame.lines, span, message);
   }
 
   enter(name: string, frame: Frame | null, span: Span | null): void {

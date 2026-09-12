@@ -174,6 +174,25 @@
         "hostFunction"
       ],
       "invariant": "AST and generated programs expose the same resource limits and host function lookup without coupling render state to an AST loader."
+    },
+    "RenderFrame": {
+      "fields": [
+        "name",
+        "lines",
+        "context"
+      ],
+      "invariant": "Carries only runtime location and context data; it never owns a canonical AST."
+    },
+    "RenderScope": {
+      "fields": [
+        "locals",
+        "loops"
+      ],
+      "operations": [
+        "lookup",
+        "loopMeta"
+      ],
+      "invariant": "Includes share one scope and blocks create a new scope in both compiler modes."
     }
   },
   "components": {
@@ -424,6 +443,26 @@
           "returns": "HostFunction or missing"
         }
       ]
+    },
+    "RenderFrame": {
+      "kind": "concrete",
+      "fields": [
+        "name",
+        "lines",
+        "context"
+      ],
+      "operations": []
+    },
+    "RenderScope": {
+      "kind": "concrete",
+      "fields": [
+        "locals",
+        "loops"
+      ],
+      "operations": [
+        "lookup",
+        "loopMeta"
+      ]
     }
   },
   "operations": [
@@ -591,7 +630,20 @@
       "runtimeServiceOperationNames": {
         "limits": "limits",
         "hostFunction": "hostFunction"
-      }
+      },
+      "frameFields": [
+        "name",
+        "lines",
+        "context"
+      ],
+      "scopeFields": [
+        "locals",
+        "loops"
+      ],
+      "scopeOperations": [
+        "lookup",
+        "loopMeta"
+      ]
     },
     "go": {
       "backend": "GoBackend",
@@ -604,7 +656,20 @@
       "runtimeServiceOperationNames": {
         "limits": "Limits",
         "hostFunction": "HostFunction"
-      }
+      },
+      "frameFields": [
+        "Name",
+        "Lines",
+        "Context"
+      ],
+      "scopeFields": [
+        "Locals",
+        "Loops"
+      ],
+      "scopeOperations": [
+        "Lookup",
+        "LoopMeta"
+      ]
     },
     "rust": {
       "backend": "RustBackend",
@@ -628,7 +693,20 @@
       "runtimeServiceOperationNames": {
         "limits": "limits",
         "hostFunction": "host_function"
-      }
+      },
+      "frameFields": [
+        "name",
+        "lines",
+        "context"
+      ],
+      "scopeFields": [
+        "locals",
+        "loops"
+      ],
+      "scopeOperations": [
+        "lookup",
+        "loop_meta"
+      ]
     },
     "php": {
       "backend": "PhpBackend",
@@ -641,7 +719,20 @@
       "runtimeServiceOperationNames": {
         "limits": "limits",
         "hostFunction": "hostFunction"
-      }
+      },
+      "frameFields": [
+        "name",
+        "lines",
+        "context"
+      ],
+      "scopeFields": [
+        "locals",
+        "loops"
+      ],
+      "scopeOperations": [
+        "lookup",
+        "loopMeta"
+      ]
     }
   },
   "forbidden": [

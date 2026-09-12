@@ -18,6 +18,8 @@ try {
     ['missing RuntimeBindings operation', manifest => manifest.runtimeContract.RuntimeBindings.operations.pop()],
     ['changed RuntimeBindings parameter count', manifest => manifest.runtimeContract.RuntimeBindings.operations[1].parameters.pop()],
     ['missing RuntimeServices operation', manifest => manifest.runtimeContract.RuntimeServices.operations.pop()],
+    ['AST field added to RenderFrame', manifest => manifest.languages.typescript.frameFields.push('ast')],
+    ['missing RenderScope operation', manifest => manifest.languages.typescript.scopeOperations.pop()],
   ];
   for (const [name, mutate] of mutations) {
     const manifest = structuredClone(original);
@@ -50,4 +52,4 @@ try {
   rmSync(directory, { recursive: true, force: true });
 }
 
-process.stdout.write('compiler interface: 7 structural mutations rejected\n');
+process.stdout.write('compiler interface: 9 structural mutations rejected\n');
