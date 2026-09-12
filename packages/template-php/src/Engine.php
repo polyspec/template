@@ -209,6 +209,9 @@ final class Engine
      */
     public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender
     {
+        if ($this->compileMode === 'gen') {
+            throw new \LogicException('prepare is unavailable in generated compile mode; use render');
+        }
         $name = is_string($target) ? $target : (string) $target['name'];
         try {
             $rootData = $assign === null ? new MapValue() : Bind::map($assign);

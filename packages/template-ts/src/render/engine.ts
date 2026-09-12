@@ -137,6 +137,7 @@ export class EngineCore implements EngineServices {
 
   // Prepares a request for repeated rendering.
   prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender {
+    if (this.compileMode === 'gen') throw new Error('prepare is unavailable in generated compile mode; use render');
     const name = typeof target === 'string' ? target : target.name;
     let rootData: MapValue;
     let registry: Map<string, DefineEntry>;

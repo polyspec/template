@@ -35,7 +35,7 @@ PageCache.getOrSet(key, ttl, render)
 - **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다.
 - **RT-5** 엔진 옵션의 `functions`와 `register`는 함수 문서에 정의된 대로 호스트 함수를 추가한다.
 - **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다.
-- **RT-61** `prepare`는 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target template을 선택하고 해당 템플릿을 한 번 로드하거나 파싱한다. 바인딩된 요청 상태를 소유하고 엔진의 캐시된 템플릿을 참조하는 준비된 요청을 반환한다.
+- **RT-61** `ast` 모드에서 `prepare`는 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target template을 선택하고 해당 템플릿을 한 번 로드하거나 파싱한다. `gen` 모드에서는 생성 렌더러가 요청을 소유하므로 `prepare`를 사용할 수 없고 `render`가 진입점이다.
 - **RT-62** `PreparedRender.render`는 렌더마다 필요한 scope, output, 실행 상태만 만든다. 입력이 바뀌지 않은 반복 호출은 같은 UTF-8 바이트를 출력한다. `render`는 `prepare(...).render()`와 같으며 단일 호출 편의 연산으로 유지한다.
 - **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
 - **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 런타임에 갱신하지 않는다. `false`에서 산출물이 없거나 오래되면 오류다.
