@@ -1,6 +1,7 @@
 {
-  "schema": 1,
+  "schema": 2,
   "root": "Assign",
+  "entry": "layout.tpl",
   "fields": {
     "title": "string?",
     "heading": "string?",
@@ -10,8 +11,9 @@
     "page": "Page?"
   },
   "records": {
-    "Page": { "title": "string?" }
+    "Page": { "title": "string?" },
+    "Slot": { "template": "string?", "html": "string?" }
   },
   "defines": { "content": "Slot?", "layout": "Template" },
-  "recordsExtra": { "Slot": { "template": "string?", "html": "string?" } }
+  "functions": {}
 }
