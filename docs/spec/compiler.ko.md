@@ -24,6 +24,8 @@ compiler와 runtime의 단일 계약 원본은 [`tools/compiler/interface.json`]
 
 `TypeManifest`는 assign field, record field, definition target, template input, host-function signature를 선언한다. 한 request 값에서 type을 추론하지 않는다. 명시적인 `any` 선언은 별도 실행 mode를 만들지 않고 runtime value model을 사용한다.
 
+Typed IR은 모든 symbol, template path, definition target, function signature, input type을 해석하고 모든 node와 expression의 source span을 보존해 generated runtime 실패가 원본 template을 가리키게 한다. 변수 누락, 정적 타입에 없는 member, 선언하지 않은 definition, 잘못된 include path, 알 수 없는 함수 구현 종류, 호환되지 않는 block input은 compile 실패다. 명시적인 동적 `any`의 member, index, spread, loop는 IR에 남아 `RuntimeBindings`를 사용한다. Built-in과 host signature는 같은 call node를 사용하고 program load를 위해 구현 종류를 보존한다.
+
 모든 generated module은 논리 구조 `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest`, `GeneratedProgram`을 노출한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
 Generated expression은 truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검증, 동등성, 정렬, lookup, 반복 entry, 함수, limit, error를 target runtime의 `RuntimeBindings`로 처리한다. 네 runtime의 AST evaluator와 statement renderer는 이미 이 경계를 사용하며 실제 선언을 compiler manifest와 대조한다. Backend는 typed operand에서 data-model 규칙과 정확히 같은 경우에만 native operation을 생성할 수 있다.
