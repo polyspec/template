@@ -2,7 +2,7 @@ import {
   baseTarget, definitionDataName, emitExpression, emitNodes, exportedName,
   fieldName, functionName, goType, indent, inputName, optional,
   phpDefinitionDataField, phpField, phpInputField, phpType, quote,
-  rustType, templateBodies as buildTemplateBodies, tsField,
+  rustType, tsField,
 } from '../backend-support.mjs';
 
 export const language = 'php';
@@ -46,15 +46,11 @@ export function createTarget() {
   return target;
 }
 
-function moduleContext(program, manifest, target) {
+export function emitDeclarations(context) {
+  const { program, manifest, templateBodies } = context;
   const fields = manifest.fields ?? {};
   const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
   const phpRecords = Object.entries(records).map(([name, members]) => `final class ${name} { public function __construct(${Object.entries(members).map(([key, type]) => phpField(key, type)).join(', ')}) {} }`).join('\n');
-  return { program, fields, phpRecords, templateBodies: buildTemplateBodies(program, target) };
-}
-
-export function emitDeclarations(context) {
-  const { program, fields, phpRecords, templateBodies } = context;
   const inputTypes = templateBodies.map(template => `final class ${template.input} { public function __construct(${[...template.inputs].map(([name, type]) => phpInputField(name, type.source)).join(', ')}) {} }`).join('\n');
   const definitionDataTypes = templateBodies.map(template => `final class ${definitionDataName(template.name)} { public function __construct(${[...template.inputs].map(([name, type]) => phpDefinitionDataField(fieldName(name), type.source)).join(', ')}) {} }`).join('\n');
   const definitionsType = `final class Definition { public function __construct(public readonly ?string $html = null, public readonly mixed $data = null) {} }\nfinal class Definitions { public function __construct(${[...program.definitions].map(([name]) => `public readonly ?Definition $${fieldName(name)} = null`).join(', ')}) {} }`;
@@ -75,9 +71,4 @@ export function emitEntry(context) {
   const { program, templateBodies } = context;
   const dispatch = templateBodies.filter(template => template.inputs.size === 0).map(template => `        ${quote(template.name)} => ${template.function}($assign, $definitions, new ${template.input}()),`).join('\n');
   return `function render_template(string $target, Assign $assign, Definitions $definitions): string { return match ($target) {\n${dispatch}\n        default => throw new RuntimeException('generated template is missing or requires inputs: ' . $target),\n}; }\nfunction render(Assign $assign, Definitions $definitions): string { return render_template(${quote(program.entry)}, $assign, $definitions); }`;
-}
-
-export function emitProgram(program, manifest, target) {
-  const context = moduleContext(program, manifest, target);
-  return [emitDeclarations(context), emitRuntime(context), emitTemplates(context), emitEntry(context), ''].join('\n');
 }
