@@ -238,7 +238,7 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 	case ":?":
 		end, err = p.parseElseIf(c, bodyStart)
 	case ":":
-		if assignForm.MatchString(limit(text, bodyStart, 80)) {
+		if assignHead.MatchString(limit(text, bodyStart, 80)) {
 			end, err = p.parseAssignment(c, bodyStart)
 		} else {
 			end, err = p.parseElse(c, bodyStart)

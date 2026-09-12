@@ -42,6 +42,19 @@ func TestTagStartRule(t *testing.T) {
 	}
 }
 
+func TestAssignmentOperatorCaptureIsStable(t *testing.T) {
+	for _, operator := range []string{"=", "+=", "-=", "*=", "/=", "%=", "++", "--"} {
+		text := "{: value " + operator
+		if operator != "++" && operator != "--" {
+			text += " 2"
+		}
+		text += "}"
+		if _, err := parser.Parse(lexer.FromString("t.tpl", text), parser.DefaultDelimiters); err != nil {
+			t.Errorf("operator %q: %v", operator, err)
+		}
+	}
+}
+
 func TestDelimiters(t *testing.T) {
 	tree, err := parser.Parse(lexer.FromString("t.tpl", ";= a;"), parser.Delimiters{Open: ";", Close: ";"})
 	if err != nil || len(tree.Body) != 1 {
