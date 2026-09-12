@@ -286,6 +286,7 @@ impl<'a> TemplateParser<'a> {
                 frame.current = frame.bodies.len() - 1;
                 end
             }
+            Some(":") if crate::parser::scanner::assignment_form(bytes, body_start) => self.parse_assignment(&context, body_start)?,
             Some(":") => {
                 let Some(frame) = self.frames.last() else {
                     return Err(self.fail(
@@ -347,7 +348,7 @@ impl<'a> TemplateParser<'a> {
                 end
             }
             Some("%") => self.parse_directive(&context, body_start, first_tag)?,
-            None => self.parse_assignment(&context, body_start)?,
+            None => return Err(self.fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, body_start, body_start + 1, "unknown tag")),
             Some(_) => return Err(self.fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, body_start, body_start + 1, "unknown tag")),
         };
         if is_directive && !first_tag {

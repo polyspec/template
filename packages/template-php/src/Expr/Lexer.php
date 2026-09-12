@@ -24,11 +24,12 @@ final class Lexer
 
     private const EXPRESSION_CHARS = '()[],|?:=>.+-*/%!<&\'"';
 
-    private const POSTFIX_END = ['IDENT' => true, 'RPAREN' => true, 'RBRACKET' => true, 'DOT_IDENT' => true, 'DOT_INDEX' => true];
+    private const POSTFIX_END = ['IDENT' => true, 'NUMBER' => true, 'STRING' => true, 'NULL' => true, 'TRUE' => true, 'FALSE' => true, 'RPAREN' => true, 'RBRACKET' => true, 'DOT_IDENT' => true, 'DOT_INDEX' => true];
 
     private int $index;
     private ?Token $previous = null;
     private ?Token $lookahead = null;
+    private int $nestingDepth = 0;
     private readonly bool $closeIsExpressionChar;
 
     /**
@@ -66,6 +67,12 @@ final class Lexer
         $token = $this->peek();
         $this->lookahead = null;
         $this->previous = $token;
+        if ($token->type === 'LPAREN' || $token->type === 'LBRACKET') {
+            $this->nestingDepth++;
+        }
+        if ($token->type === 'RPAREN' || $token->type === 'RBRACKET') {
+            $this->nestingDepth--;
+        }
 
         return $token;
     }
@@ -181,7 +188,7 @@ final class Lexer
             return new Token('EOF', '', $start, $start);
         }
 
-        if ($this->close !== null && !$this->closeIsExpressionChar) {
+        if ($this->close !== null && (($this->previous !== null && isset(self::POSTFIX_END[$this->previous->type]) && $this->nestingDepth === 0) || !$this->closeIsExpressionChar)) {
             $sequence = str_repeat($this->close, $this->closeCount);
             if (substr($text, $start, strlen($sequence)) === $sequence) {
                 $this->index = $start + strlen($sequence);
@@ -260,7 +267,8 @@ final class Lexer
             }
         }
         $following = $text[$end] ?? '';
-        if ($end < $length && (self::isIdentPart($following) || $following === '.')) {
+        $closeAtEnd = $this->close !== null && $this->nestingDepth === 0 && substr($text, $end, strlen($this->close)) === $this->close;
+        if ($end < $length && (self::isIdentPart($following) || ($following === '.' && !$closeAtEnd))) {
             $cursor = $end + 1;
             while ($cursor < $length && (self::isIdentPart($text[$cursor]) || $text[$cursor] === '.')) {
                 $cursor++;

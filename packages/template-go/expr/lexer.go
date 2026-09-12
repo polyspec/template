@@ -36,7 +36,7 @@ var operators = []struct {
 
 const expressionChars = "()[],|?:=>.+-*/%!<&'\""
 
-var postfixEnd = map[TokenType]bool{"IDENT": true, "RPAREN": true, "RBRACKET": true, "DOT_IDENT": true, "DOT_INDEX": true}
+var postfixEnd = map[TokenType]bool{"IDENT": true, "NUMBER": true, "STRING": true, "NULL": true, "TRUE": true, "FALSE": true, "RPAREN": true, "RBRACKET": true, "DOT_IDENT": true, "DOT_INDEX": true}
 
 func isIdentStart(c byte) bool { return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c == '_' }
 func isDigit(c byte) bool      { return c >= '0' && c <= '9' }
@@ -52,12 +52,13 @@ type Options struct {
 
 // Lexer produces expression tokens.
 type Lexer struct {
-	source    *lexer.Source
-	options   Options
-	index     int
-	previous  *Token
-	lookahead *Token
-	closeExpr bool
+	source       *lexer.Source
+	options      Options
+	index        int
+	previous     *Token
+	lookahead    *Token
+	closeExpr    bool
+	nestingDepth int
 }
 
 // NewLexer creates a lexer starting at a byte offset.
@@ -90,6 +91,12 @@ func (l *Lexer) Next() (*Token, error) {
 	}
 	l.lookahead = nil
 	l.previous = tok
+	if tok.Type == "LPAREN" || tok.Type == "LBRACKET" {
+		l.nestingDepth++
+	}
+	if tok.Type == "RPAREN" || tok.Type == "RBRACKET" {
+		l.nestingDepth--
+	}
 	return tok, nil
 }
 
@@ -110,7 +117,7 @@ func (l *Lexer) read() (*Token, error) {
 	if start >= len(text) {
 		return &Token{Type: "EOF", Start: start, End: start}, nil
 	}
-	if l.options.Close != "" && !l.closeExpr {
+	if l.options.Close != "" && (l.previous != nil && postfixEnd[l.previous.Type] && l.nestingDepth == 0 || !l.closeExpr) {
 		sequence := strings.Repeat(l.options.Close, l.options.CloseCount)
 		if strings.HasPrefix(text[start:], sequence) {
 			l.index = start + len(sequence)
@@ -185,7 +192,8 @@ func (l *Lexer) readNumber(start int) (*Token, error) {
 			return nil, l.Error(errs.ParseInvalidNumber, start, cursor, fmt.Sprintf("invalid number %q", text[start:cursor]))
 		}
 	}
-	if end < len(text) && (isIdentPart(text[end]) || text[end] == '.') {
+	closeAtEnd := l.options.Close != "" && l.nestingDepth == 0 && strings.HasPrefix(text[end:], l.options.Close)
+	if end < len(text) && (isIdentPart(text[end]) || (text[end] == '.' && !closeAtEnd)) {
 		cursor := end + 1
 		for cursor < len(text) && (isIdentPart(text[cursor]) || text[cursor] == '.') {
 			cursor++

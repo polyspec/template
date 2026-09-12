@@ -67,7 +67,7 @@ func TestBlockStructureErrors(t *testing.T) {
 		"a {= b\nc\n":           errs.ParseUnterminatedTag,
 		"{= \"}\"} {= 'a}":      errs.ParseUnterminatedString,
 		"{* x":                  errs.ParseUnterminatedComment,
-		"{true = 1}":            errs.ParseReservedName,
+		"{:true = 1}":           errs.ParseReservedName,
 		"{+ notes}":             errs.ParseInvalidPath,
 		"{# a.tpl b.tpl}":       errs.ParseInvalidBlockTag,
 		"var a = \"{{= x}} ;\n": errs.ParseInvalidWrapper,

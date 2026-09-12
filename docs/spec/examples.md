@@ -14,7 +14,7 @@ The loader root contains `layout.tpl`, `parts/head.tpl`, `parts/footer.tpl`, `pr
 <!DOCTYPE html>
 <html lang="{= meta.lang}">
 <head>
-{og_image = meta.og_image ?? links.assets + '/og.png'}
+{:og_image = meta.og_image ?? links.assets + '/og.png'}
 <title>{= title | default(meta.site)}</title>
 {+ parts/head.tpl}
 </head>
@@ -49,7 +49,7 @@ $(function () { init({ debug: false }); });
 `product/list.tpl`:
 
 ```
-{total = length(products)}
+{:total = length(products)}
 <h1>{= category.name | default('All')} <small>{= total | number}</small></h1>
 {? total == 0}
 <p class="empty">No products.</p>
@@ -160,7 +160,7 @@ The output ends with a newline.
 
 | Source | Result | Rule applied |
 | --- | --- | --- |
-| `{og_image = ...}` on its own line | The line is removed. `og_image` is `https://cdn.example.com/og.png` because `meta.og_image` is `null` and `+` with a string operand concatenates. | standalone line removal, `??`, `+` |
+| `{:og_image = ...}` on its own line | The line is removed. `og_image` is `https://cdn.example.com/og.png` because `meta.og_image` is `null` and `+` with a string operand concatenates. | standalone line removal, `??`, `+` |
 | `{= title \| default(meta.site)}` | `MaxShop`, because `title` is `null` and `default` returns its second argument for a falsy first argument. | pipe, `default` |
 | `{+ parts/head.tpl}` on its own line | The line is removed and the output of `parts/head.tpl` takes its place. The partial reads the local `og_image` because an include shares the scope. | include |
 | `{? og_image}...{/}` with text on the same line | The line is kept. The condition is true. | standalone line removal applies only to lines without text |
@@ -170,7 +170,7 @@ The output ends with a newline.
 | `<main>{# content}</main>` | The line is kept. The block renders `product/list.tpl` with the root data. The block output ends with a newline, so `</main>` starts a new line. | block |
 | `{# parts/footer.tpl links year:date(now(), 'Y')}` | The line is removed. The footer receives `links` and `year`. | block with scope arguments |
 | `date(now(), 'Y')` | `2026`. `now()` is `1789084800`, which is 20707 days after 1970-01-01, that is 2026-09-11 00:00:00 UTC; in `+09:00` it is 2026-09-11 09:00:00. | `now`, `date` |
-| `{total = length(products)}` | `3`; the line is removed. | `length` |
+| `{:total = length(products)}` | `3`; the line is removed. | `length` |
 | `{= category.name \| default('All')}` | `All`, because `""` is falsy. | `default` |
 | `{? total == 0}` / `{:? total > 2}` / `{/}` | The three tag lines are removed. The second branch renders. | if, elseif |
 | `{@ product = slice(products, 0, 2)}` | The loop runs twice. `product.first_` is true in the first iteration and `product.last_` is true in the second. | loop, loop meta |

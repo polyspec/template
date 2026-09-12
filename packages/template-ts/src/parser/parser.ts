@@ -41,9 +41,10 @@ function syntaxToken(token: Token): SyntaxToken {
   return { start: token.start, end: token.end, kind };
 }
 
-function syntaxKind(sigil: string | null): SyntaxTag['kind'] {
+function syntaxKind(sigil: string | null, assignment = false): SyntaxTag['kind'] {
+  if (assignment) return 'assignment';
   switch (sigil) {
-    case null: return 'assignment';
+    case null: throw new Error('bare assignments are not accepted');
     case '*': return 'comment';
     case '=': return 'echo';
     case '@': return 'for';
@@ -60,7 +61,7 @@ function syntaxKind(sigil: string | null): SyntaxTag['kind'] {
 }
 
 const RESERVED = new Set(['true', 'false', 'null', 'in']);
-const ASSIGN_HEAD = /^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)/;
+const ASSIGN_HEAD = /^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=(?![=>]))/;
 const LOOP_HEAD = /^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/;
 
 interface TextPiece {
@@ -247,6 +248,10 @@ class TemplateParser {
         break;
       }
       case ':': {
+        if (ASSIGN_HEAD.test(text.slice(bodyStart))) {
+          end = this.parseAssignment(context, bodyStart);
+          break;
+        }
         const frame = this.frames[this.frames.length - 1];
         if (!frame) throw this.fail('E_PARSE_ELSE_OUTSIDE_BLOCK', context.start, context.start + 1, '"{:}" outside of a block');
         if (frame.hasElse) throw this.fail('E_PARSE_DUPLICATE_ELSE', context.start, context.start + 1, 'second "{:}" in the same block');
@@ -285,15 +290,15 @@ class TemplateParser {
         end = this.parseDirective(context, bodyStart, firstTag);
         break;
       case null:
-        end = this.parseAssignment(context, bodyStart);
-        break;
+        throw this.fail('E_PARSE_UNEXPECTED_TOKEN', bodyStart, bodyStart + 1, 'unknown tag');
       default:
         throw this.fail('E_PARSE_UNEXPECTED_TOKEN', bodyStart, bodyStart + 1, 'unknown tag');
     }
     if (isDirective && !firstTag) {
       throw this.fail('E_PARSE_INVALID_DIRECTIVE', context.start, context.start + 1, 'delimiter directive is not the first tag');
     }
-    this.tags.push({ start: context.start, end, echo, kind: syntaxKind(sigil) });
+    const assignment = sigil === ':' && ASSIGN_HEAD.test(text.slice(bodyStart));
+    this.tags.push({ start: context.start, end, echo, kind: syntaxKind(sigil, assignment) });
     return end;
   }
 

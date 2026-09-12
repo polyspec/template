@@ -41,8 +41,8 @@
 
 
 --- layout.tpl
-<span class="syntax-template syntax-assignment">{values = <span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">,</span> <span class="syntax-operator">...</span><span class="syntax-variable">numbers</span><span class="syntax-operator">]</span>}</span>
-<span class="syntax-template syntax-assignment">{merged = <span class="syntax-operator">[</span><span class="syntax-operator">...</span><span class="syntax-variable">lookup</span><span class="syntax-operator">,</span> <span class="syntax-string">&#39;z&#39;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&#39;Z&#39;</span><span class="syntax-operator">]</span>}</span>
+<span class="syntax-template syntax-assignment">{:values = <span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">,</span> <span class="syntax-operator">...</span><span class="syntax-variable">numbers</span><span class="syntax-operator">]</span>}</span>
+<span class="syntax-template syntax-assignment">{:merged = <span class="syntax-operator">[</span><span class="syntax-operator">...</span><span class="syntax-variable">lookup</span><span class="syntax-operator">,</span> <span class="syntax-string">&#39;z&#39;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&#39;Z&#39;</span><span class="syntax-operator">]</span>}</span>
 &lt;<span class="syntax-tag">section</span>&gt;
 &lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">page</span><span class="syntax-variable">.title</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;escaped&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">dangerous</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
@@ -4024,7 +4024,7 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
 
 
 --- layout.tpl
-<span class="syntax-template syntax-assignment">{layout_local = <span class="syntax-string">&#39;visible only in layout&#39;</span>}</span>
+<span class="syntax-template syntax-assignment">{:layout_local = <span class="syntax-string">&#39;visible only in layout&#39;</span>}</span>
 &lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;scope&quot;</span>&gt;
 <span class="syntax-template syntax-block">{# content title:page.title}</span>
 &lt;/<span class="syntax-tag">section</span>&gt;

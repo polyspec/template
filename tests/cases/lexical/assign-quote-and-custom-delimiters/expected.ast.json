@@ -3,59 +3,59 @@
   "name": "input.tpl",
   "body": [
     {
-      "type": "Set",
-      "name": "x",
-      "expr": {
-        "type": "Literal",
-        "kind": "number",
-        "value": 1,
-        "span": [
-          6,
-          7
-        ]
-      },
+      "type": "Text",
+      "value": "prefix",
       "span": [
         0,
-        8
+        6
       ]
     },
     {
-      "type": "Include",
-      "path": "part.tpl",
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "}{}{}",
+        "span": [
+          10,
+          17
+        ]
+      },
       "span": [
-        9,
-        21
+        6,
+        18
       ]
     },
     {
       "type": "Text",
-      "value": "<p>",
+      "value": "|",
       "span": [
-        22,
-        25
+        18,
+        19
       ]
     },
     {
       "type": "Echo",
       "expr": {
         "type": "Var",
-        "name": "y",
+        "name": "a",
         "span": [
-          28,
-          29
+          21,
+          22
         ]
       },
       "span": [
-        25,
-        30
+        19,
+        23
       ]
     },
     {
       "type": "Text",
-      "value": "</p>\n",
+      "value": "|suffix\n",
       "span": [
-        30,
-        35
+        23,
+        31
       ]
     }
   ]
