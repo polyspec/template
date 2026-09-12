@@ -125,8 +125,15 @@ func (e *Engine) Render(target any, assign any, options RenderOptions) (string, 
 	return e.program.Render(target, assign, options)
 }
 
+// AstProgram interprets canonical AST artifacts with the shared runtime semantics.
+type AstProgram struct{ *render.Engine }
+
 // NewAstProgram creates an AST program with the parser attached.
-func NewAstProgram(options Options) (*render.Engine, error) {
+func NewAstProgram(options Options) (*AstProgram, error) {
 	options.Parse = parseWithLines
-	return render.NewEngine(options, func() float64 { return float64(time.Now().Unix()) })
+	program, err := render.NewEngine(options, func() float64 { return float64(time.Now().Unix()) })
+	if err != nil {
+		return nil, err
+	}
+	return &AstProgram{Engine: program}, nil
 }

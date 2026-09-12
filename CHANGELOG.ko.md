@@ -49,3 +49,4 @@
 - Generated mode 상태를 in progress로 바로잡았다. AST runtime은 211개 적합성 case를 통과하지만 generated 실행은 showcase 시나리오 5개로 제한되고 typed compiler는 `default`만 받으며 별도 showcase generator가 주입 callback을 제공한다. 구현을 계속하기 전에 v1 compiler 경계, build-time artifact 갱신, 완전한 내부 검증 gate를 정의했다.
 - TypeScript, Go, Rust, PHP에서 `AstProgram`과 generated `Program` 구현을 위임형 `Engine` 뒤의 동등한 구현으로 구성했다. runtime engine의 compile mode 선택과 generated renderer callback을 제거하고 generated showcase artifact가 `Program`을 직접 구현하게 했다. 별도 generator를 제품 compiler로 교체하기 전까지 generated 적합성 범위는 showcase 시나리오 5개로 유지한다.
 - 파서가 승인한 태그 범위와 표현식 lexer token 범위를 반환하는 분석 출력을 추가했다. 정적 예제 사이트는 이 범위로 템플릿 문법을 하이라이트하고 compiled artifact와 generated source를 양방향 스크롤 영역에 표시한다.
+- 네 공개 runtime이 같은 `Engine`/`Program`/`AstProgram` 소유 구조를 제공하도록 구체적인 Go `AstProgram` 타입을 추가했다.
