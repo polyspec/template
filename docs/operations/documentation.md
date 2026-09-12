@@ -1,6 +1,6 @@
 # Documentation
 
-[한국어](documentation.ko.md).
+[한국어](/ko/operations/documentation).
 
 ## Document set
 

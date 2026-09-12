@@ -1,6 +1,6 @@
 # Lexical rules
 
-[한국어](lexical.ko.md).
+[한국어](/ko/spec/lexical).
 
 This document defines how a template source is divided into text, tags and comments, and which whitespace the division removes. Tag bodies are defined in `grammar.md`. Expression tokens are defined in `expressions.md`. Error objects and positions are defined in `errors.md`.
 

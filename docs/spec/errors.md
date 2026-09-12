@@ -1,6 +1,6 @@
 # Errors
 
-[한국어](errors.ko.md).
+[한국어](/ko/spec/errors).
 
 ## Error object
 

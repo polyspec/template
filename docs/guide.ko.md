@@ -2,7 +2,7 @@
 
 [English](guide.md).
 
-이 문서는 템플릿을 작성하는 방법과 렌더하는 방법을 설명한다. 모든 구현이 따르는 규칙은 [명세](index.ko.md)에 있다. 이 문서는 페이지를 작성하는 데 필요한 부분을 다룬다. 아래 예제의 출력은 모두 엔진이 실제로 만든 것이다.
+이 문서는 템플릿을 작성하는 방법과 렌더하는 방법을 설명한다. 모든 구현이 따르는 규칙은 [명세](/ko/)에 있다. 이 문서는 페이지를 작성하는 데 필요한 부분을 다룬다. 아래 예제의 출력은 모두 엔진이 실제로 만든 것이다.
 
 ## 템플릿
 
@@ -294,7 +294,7 @@ tag:  {= not a tag}
 | 값 | `str` `type` |
 | 시간 | `date` `now` |
 
-[함수 명세](spec/functions.ko.md)가 각 함수의 인자와 정확한 결과를 정의한다. `date`는 애플리케이션이 전달한 고정 오프셋을 쓰므로 같은 데이터는 어디서나 같은 출력을 만든다.
+[함수 명세](/ko/spec/functions)가 각 함수의 인자와 정확한 결과를 정의한다. `date`는 애플리케이션이 전달한 고정 오프셋을 쓰므로 같은 데이터는 어디서나 같은 출력을 만든다.
 
 애플리케이션은 자체 함수를 등록할 수 있다. 그 함수를 쓰는 템플릿은 그 함수가 등록된 곳에서만 렌더되므로, 템플릿을 렌더하는 모든 곳에 같은 이름을 등록한다.
 
@@ -335,11 +335,11 @@ options.define.insert("content".to_string(), DefineInput { template: Some("pages
 let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 ```
 
-전체 API는 각 패키지 문서에 있다: [TypeScript](../packages/template-ts/README.ko.md), [Go](../packages/template-go/README.ko.md), [Rust](../packages/template-rust/README.ko.md), [PHP](../packages/template-php/README.ko.md).
+전체 API는 각 패키지 문서에 있다: [TypeScript](https://github.com/polyspec/template/tree/main/packages/template-ts), [Go](https://github.com/polyspec/template/tree/main/packages/template-go), [Rust](https://github.com/polyspec/template/tree/main/packages/template-rust), [PHP](https://github.com/polyspec/template/tree/main/packages/template-php).
 
 ## 브라우저에서 렌더
 
-같은 템플릿을 TypeScript 패키지로 브라우저에서 렌더한다. 서버가 assign 데이터를 JSON으로 임베드하면 브라우저가 그것을 읽어 같은 템플릿 이름을 렌더한다. [브라우저 렌더링](operations/browser.ko.md)이 템플릿과 데이터를 전달하는 방법과 컴포넌트 프레임워크를 엔진 옆에 두는 방법을 설명한다.
+같은 템플릿을 TypeScript 패키지로 브라우저에서 렌더한다. 서버가 assign 데이터를 JSON으로 임베드하면 브라우저가 그것을 읽어 같은 템플릿 이름을 렌더한다. [브라우저 렌더링](/ko/operations/browser)이 템플릿과 데이터를 전달하는 방법과 컴포넌트 프레임워크를 엔진 옆에 두는 방법을 설명한다.
 
 React를 사용할 때는 서버가 만든 shell을 유지하고 표시 지점으로 지정한 island만 클라이언트가 소유하게 한다. 정적 `react-boundary` showcase에서 템플릿, assign 데이터, 출력, 호스트 소스를 함께 확인할 수 있다. 서버 HTML이 같은 React 컴포넌트 트리에서 나온 경우에만 `hydrateRoot`를 사용하고, 그 외에는 별도의 `createRoot` island로 마운트한다.
 
@@ -358,7 +358,7 @@ React를 사용할 때는 서버가 만든 shell을 유지하고 표시 지점�
 ERROR E_PARSE_UNCLOSED_BLOCK line 2 col 1
 ```
 
-[오류 명세](spec/errors.ko.md)가 모든 코드를 나열한다. 없는 변수는 오류가 아니고, 알 수 없는 함수, 잘못된 타입, 닫히지 않은 블록은 오류다.
+[오류 명세](/ko/spec/errors)가 모든 코드를 나열한다. 없는 변수는 오류가 아니고, 알 수 없는 함수, 잘못된 타입, 닫히지 않은 블록은 오류다.
 
 ## 이식성 있는 템플릿
 

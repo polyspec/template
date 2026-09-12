@@ -6,7 +6,7 @@
 
 ## 공통 입력
 
-`examples/site/scenarios/` 아래 각 디렉터리는 다음 입력을 가진다. 언어 중립적인 형태와 어댑터 규칙은 [언어 간 렌더 계약](../spec/runtime.ko.md#언어-간-렌더-계약)에 고정되어 있다.
+`examples/site/scenarios/` 아래 각 디렉터리는 다음 입력을 가진다. 언어 중립적인 형태와 어댑터 규칙은 [언어 간 렌더 계약](/ko/spec/runtime#언어-간-렌더-계약)에 고정되어 있다.
 
 | 입력 | 용도 |
 | --- | --- |
@@ -177,4 +177,4 @@ generated 모드에서는 호스트 언어 산출물 자체가 실행 가능한 
 
 `compiler-coverage` 시나리오는 텍스트만 다루는 제한된 generated backend가 검사를 통과하지 못하게 한다. 한 페이지에서 assignment, list·map spread, member·index 접근, 함수·단항·이항·삼항 식, 조건문, 반복문과 모든 loop metadata, local scope를 공유하는 include, if-block, definition data와 block scope를 실행한다. HTML escape 문자 다섯 개, `&&`와 `||`의 boolean 결과, 빈 list·map의 진릿값도 렌더된 HTML에 직접 노출한다. 계약 검사는 이 페이지를 모든 runtime의 AST와 generated 모드로 실행하고 반복 렌더와 실패 복구 뒤에도 같은 UTF-8 351바이트인지 확인한다.
 
-소비 애플리케이션 통합은 [실행 체크리스트](../plans/execution-checklist.ko.md)의 Wave 7에서 별도로 추적한다.
+소비 애플리케이션 통합은 [실행 체크리스트](/ko/plans/execution-checklist)의 Wave 7에서 별도로 추적한다.

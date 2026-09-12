@@ -1,6 +1,6 @@
 # Example site
 
-[한국어](showcase.ko.md).
+[한국어](/ko/operations/showcase).
 
 The [example site](../../examples/site/index.html) renders shared templates with mock data through TypeScript, Go, Rust and PHP. Each implementation loads the committed AST artifacts, passes variables as `assign`, registers the layout and its parts with `define`, and renders `layout`. Page complexity belongs in templates and mock data. Application controllers, authentication, DI and form generation are outside this example.
 

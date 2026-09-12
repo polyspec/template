@@ -1,6 +1,6 @@
 # Usage guide
 
-[한국어](guide.ko.md).
+[한국어](/ko/guide).
 
 This guide shows how to write templates and how to render them. The rules that every implementation follows are in the [specification](index.md); this document explains the parts you need to write a page. Every example below is the real output of the engine.
 
@@ -331,7 +331,7 @@ options.define.insert("content".to_string(), DefineInput { template: Some("pages
 let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 ```
 
-The package documents give the full API: [TypeScript](../packages/template-ts/README.md), [Go](../packages/template-go/README.md), [Rust](../packages/template-rust/README.md), [PHP](../packages/template-php/README.md).
+The package documents give the full API: [TypeScript](https://github.com/polyspec/template/tree/main/packages/template-ts), [Go](https://github.com/polyspec/template/tree/main/packages/template-go), [Rust](https://github.com/polyspec/template/tree/main/packages/template-rust), [PHP](https://github.com/polyspec/template/tree/main/packages/template-php).
 
 ## Render in a browser
 

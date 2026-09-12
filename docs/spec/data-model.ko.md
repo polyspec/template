@@ -2,7 +2,7 @@
 
 [English](data-model.md).
 
-이 문서는 템플릿이 다루는 값 타입, safe 문자열, 값을 출력 텍스트로 변환하는 규칙, 호스트 언어 값을 템플릿 값으로 변환하는 규칙을 정의한다. 연산자는 [표현식](expressions.ko.md)에 정의한다. 오류 코드는 [오류](errors.ko.md)에 정의한다. 규칙 번호는 `VAL-n`이다.
+이 문서는 템플릿이 다루는 값 타입, safe 문자열, 값을 출력 텍스트로 변환하는 규칙, 호스트 언어 값을 템플릿 값으로 변환하는 규칙을 정의한다. 연산자는 [표현식](/ko/spec/expressions)에 정의한다. 오류 코드는 [오류](/ko/spec/errors)에 정의한다. 규칙 번호는 `VAL-n`이다.
 
 ## 값 타입
 
@@ -29,7 +29,7 @@
 
 **VAL-6** safe 문자열은 safe 표시를 가진 string이다. 함수 `raw`와 `escape`는 safe 문자열을 반환한다. echo 태그는 safe 문자열을 이스케이프하지 않고 쓴다. 그 외 모든 위치에서 safe 문자열은 string으로 동작한다: 함수, 연산자, `==`, `in`은 그 텍스트를 읽고 표시를 무시하며, string을 반환하는 함수는 일반 string을 반환한다.
 
-**VAL-7** 호스트 바인딩은 safe 문자열을 생성하지 않는다. string을 반환하는 호스트 함수는 [함수](functions.ko.md)에 정의된 대로 일반 string을 반환한다.
+**VAL-7** 호스트 바인딩은 safe 문자열을 생성하지 않는다. string을 반환하는 호스트 함수는 [함수](/ko/spec/functions)에 정의된 대로 일반 string을 반환한다.
 
 ## 문자열화
 

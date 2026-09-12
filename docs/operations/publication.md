@@ -1,6 +1,6 @@
 # Publication
 
-[한국어](publication.ko.md).
+[한국어](/ko/operations/publication).
 
 No package has been published. This procedure describes how a consuming application uses the packages from a local checkout. Registry publication is recorded in `docs/features.md` when it happens.
 

@@ -1,6 +1,6 @@
 # Functions
 
-[한국어](functions.ko.md).
+[한국어](/ko/spec/functions).
 
 This document defines the built-in functions, the pipe form, the safe string rules and the host function registration contract. Value conversion rules (stringify, truthiness, to_number, equality) are defined in [data-model.md](data-model.md). Expression syntax is defined in [expressions.md](expressions.md). Error codes are defined in [errors.md](errors.md).
 

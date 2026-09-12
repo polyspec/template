@@ -1,6 +1,6 @@
 # Development
 
-[한국어](development.ko.md).
+[한국어](/ko/operations/development).
 
 ## Toolchain
 

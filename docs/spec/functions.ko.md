@@ -2,7 +2,7 @@
 
 [English](functions.md).
 
-이 문서는 내장 함수, 파이프 형식, safe 문자열 규칙, 호스트 함수 등록 계약을 정의한다. 값 변환 규칙(문자열화, 진릿값, to_number, 동등)은 [data-model.ko.md](data-model.ko.md)에 정의되어 있다. 표현식 문법은 [expressions.ko.md](expressions.ko.md)에 정의되어 있다. 오류 코드는 [errors.ko.md](errors.ko.md)에 정의되어 있다.
+이 문서는 내장 함수, 파이프 형식, safe 문자열 규칙, 호스트 함수 등록 계약을 정의한다. 값 변환 규칙(문자열화, 진릿값, to_number, 동등)은 [데이터 모델](/ko/spec/data-model)에 정의되어 있다. 표현식 문법은 [표현식](/ko/spec/expressions)에 정의되어 있다. 오류 코드는 [오류](/ko/spec/errors)에 정의되어 있다.
 
 ## 호출과 파이프
 
