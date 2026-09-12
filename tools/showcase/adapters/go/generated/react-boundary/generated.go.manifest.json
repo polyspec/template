@@ -3,10 +3,10 @@
   "mode": "gen",
   "target": "go",
   "entry": "layout.tpl",
-  "sourceDigest": "626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23",
+  "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "9421b75996dddda5d7d356a4bb4f4c3c9a9721c0be239042e27f636de5a7ee9d",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "a9a83e9aa25ce9011a283d243189ac68421332384df8a0c0a70b77649a6a831c",
   "files": {
     "generated.go": {
       "path": "generated.go",
