@@ -1,0 +1,991 @@
+{
+  "manifest_version": 1,
+  "contract_version": "0.0.1",
+  "source": "contracts/features.json",
+  "features": [
+    {
+      "id": "spec",
+      "title": "Template language specification",
+      "title_ko": "Template language specification",
+      "status": "implemented",
+      "description": "Define lexical, grammar, expression, data-model, function, runtime, AST, error and conformance behavior.",
+      "description_ko": "렉시컬, 문법, 표현식, 데이터 모델, 함수, 런타임, AST, 오류와 적합성 동작을 정의한다.",
+      "inputs": {
+        "type": "TemplateSource",
+        "fields": [
+          "UTF-8 source",
+          "delimiters",
+          "assign",
+          "define"
+        ]
+      },
+      "outputs": {
+        "type": "RenderedProgram",
+        "fields": [
+          "canonical AST",
+          "HTML bytes",
+          "structured error"
+        ]
+      },
+      "state": [
+        "read source graph",
+        "lex and parse",
+        "validate types",
+        "compile program",
+        "render request"
+      ],
+      "errors": [
+        {
+          "code": "E_PARSE_*",
+          "when": "source violates lexical or grammar rules"
+        },
+        {
+          "code": "E_RUNTIME_*",
+          "when": "rendering violates value or resource rules"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "tests/cases",
+        "tests/fixtures/expr/cases.json"
+      ],
+      "tests": [
+        "tests/runner/conformance.mjs",
+        "tests/runner/delimiter-matrix.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make conformance-all-modes"
+        },
+        {
+          "id": "check-2",
+          "command": "make delimiter-matrix"
+        }
+      ],
+      "docs": [
+        "docs/spec/lexical.md",
+        "docs/spec/grammar.md",
+        "docs/spec/expressions.md",
+        "docs/spec/data-model.md",
+        "docs/spec/functions.md",
+        "docs/spec/runtime.md",
+        "docs/spec/ast.md",
+        "docs/spec/errors.md",
+        "docs/spec/conformance.md"
+      ]
+    },
+    {
+      "id": "ast-schema",
+      "title": "Canonical AST schema",
+      "title_ko": "Canonical AST schema",
+      "status": "implemented",
+      "description": "Validate canonical AST artifacts and preserve node and expression spans.",
+      "description_ko": "Canonical AST artifact를 검증하고 node와 expression span을 보존한다.",
+      "inputs": {
+        "type": "CanonicalAST",
+        "fields": [
+          "node type",
+          "expression type",
+          "span"
+        ]
+      },
+      "outputs": {
+        "type": "ValidatedASTArtifact",
+        "fields": [
+          "schema-valid JSON",
+          "source spans",
+          "artifact digest"
+        ]
+      },
+      "state": [
+        "parse source",
+        "lower nodes",
+        "serialize artifact",
+        "validate schema",
+        "verify digest"
+      ],
+      "errors": [
+        {
+          "code": "E_SCHEMA",
+          "when": "AST shape or span is invalid"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "schema",
+        "tests/cases"
+      ],
+      "tests": [
+        "scripts/check-schema.mjs",
+        "scripts/check-ast-artifact.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make schema-check"
+        },
+        {
+          "id": "check-2",
+          "command": "node scripts/check-ast-artifact.mjs"
+        }
+      ],
+      "docs": [
+        "docs/spec/ast.md",
+        "docs/spec/conformance.md"
+      ]
+    },
+    {
+      "id": "conformance-suite",
+      "title": "Cross-language conformance suite",
+      "title_ko": "Cross-language conformance suite",
+      "status": "implemented",
+      "description": "Run the same canonical cases through every language and compile mode and compare exact output or structured diagnostics.",
+      "description_ko": "같은 canonical case를 모든 언어와 compile mode에서 실행하고 출력 또는 구조화 오류를 비교한다.",
+      "inputs": {
+        "type": "ConformanceCase",
+        "fields": [
+          "template files",
+          "assign",
+          "define",
+          "expected output or error",
+          "rules"
+        ]
+      },
+      "outputs": {
+        "type": "ConformanceResult",
+        "fields": [
+          "language",
+          "mode",
+          "bytes or diagnostic",
+          "digest"
+        ]
+      },
+      "state": [
+        "load case",
+        "compile program",
+        "bind request",
+        "render",
+        "compare result"
+      ],
+      "errors": [
+        {
+          "code": "CONFORMANCE_MISMATCH",
+          "when": "language or mode result differs"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "tests/cases",
+        "tests/fixtures/expr"
+      ],
+      "tests": [
+        "tests/runner/conformance.mjs",
+        "tests/runner/conformance-generated-ts.mjs",
+        "tests/runner/conformance-generated-go.mjs",
+        "tests/runner/conformance-generated-rust.mjs",
+        "tests/runner/conformance-generated-php.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make conformance-all-modes"
+        }
+      ],
+      "docs": [
+        "docs/spec/conformance.md",
+        "docs/operations/conformance.md"
+      ]
+    },
+    {
+      "id": "template-ts",
+      "title": "TypeScript runtime",
+      "title_ko": "TypeScript runtime",
+      "status": "implemented",
+      "description": "Provide the TypeScript lexer, parser, AST and generated renderers, runtime functions and CLI.",
+      "description_ko": "TypeScript lexer, parser, AST·generated renderer, runtime function과 CLI를 제공한다.",
+      "inputs": {
+        "type": "RenderRequest",
+        "fields": [
+          "target",
+          "assign",
+          "define",
+          "environment"
+        ]
+      },
+      "outputs": {
+        "type": "HTML",
+        "fields": [
+          "UTF-8 bytes",
+          "positioned error"
+        ]
+      },
+      "state": [
+        "load artifact",
+        "prepare request",
+        "render scope",
+        "write output",
+        "return or fail"
+      ],
+      "errors": [
+        {
+          "code": "TemplateError",
+          "when": "parse, binding or runtime contract fails"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "unsupported",
+        "rust": "unsupported",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "tests/cases"
+      ],
+      "tests": [
+        "packages/template-ts/tests",
+        "tests/runner/conformance.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-ts"
+        },
+        {
+          "id": "check-2",
+          "command": "node tests/runner/conformance.mjs --langs ts"
+        }
+      ],
+      "docs": [
+        "docs/spec/compiler.md",
+        "docs/spec/runtime.md"
+      ]
+    },
+    {
+      "id": "template-browser",
+      "title": "Browser ESM runtime",
+      "title_ko": "Browser ESM runtime",
+      "status": "implemented",
+      "description": "Build the TypeScript runtime as browser ESM and verify DOM-safe output structure.",
+      "description_ko": "TypeScript runtime을 browser ESM으로 빌드하고 DOM 안전 출력 구조를 검증한다.",
+      "inputs": {
+        "type": "BrowserRenderRequest",
+        "fields": [
+          "compiled module",
+          "assign",
+          "define"
+        ]
+      },
+      "outputs": {
+        "type": "DOMFragment",
+        "fields": [
+          "HTML structure",
+          "text and attributes"
+        ]
+      },
+      "state": [
+        "load ESM",
+        "construct request",
+        "render",
+        "inspect DOM"
+      ],
+      "errors": [
+        {
+          "code": "BrowserRenderError",
+          "when": "browser render or structure differs"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "unsupported",
+        "rust": "unsupported",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "tests/browser"
+      ],
+      "tests": [
+        "tests/browser/render.spec.ts"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-browser"
+        }
+      ],
+      "docs": [
+        "docs/operations/browser.md"
+      ]
+    },
+    {
+      "id": "template-go",
+      "title": "Go runtime",
+      "title_ko": "Go runtime",
+      "status": "implemented",
+      "description": "Provide Go parser, AST and generated runtime, functions, prepared render state and CLI.",
+      "description_ko": "Go parser, AST·generated runtime, function, prepared render state와 CLI를 제공한다.",
+      "inputs": {
+        "type": "RenderRequest",
+        "fields": [
+          "target",
+          "assign",
+          "define",
+          "environment"
+        ]
+      },
+      "outputs": {
+        "type": "HTML",
+        "fields": [
+          "UTF-8 bytes",
+          "error"
+        ]
+      },
+      "state": [
+        "load artifact",
+        "prepare request",
+        "render scope",
+        "write limited output",
+        "return or fail"
+      ],
+      "errors": [
+        {
+          "code": "error",
+          "when": "parse, binding or runtime contract fails"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "unsupported",
+        "rust": "unsupported",
+        "typescript": "unsupported"
+      },
+      "fixtures": [
+        "tests/cases"
+      ],
+      "tests": [
+        "packages/template-go/parser/parser_test.go",
+        "packages/template-go/conformance_test.go"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-go"
+        },
+        {
+          "id": "check-2",
+          "command": "node tests/runner/conformance.mjs --langs go"
+        }
+      ],
+      "docs": [
+        "docs/spec/compiler.md",
+        "docs/spec/runtime.md"
+      ]
+    },
+    {
+      "id": "template-rust",
+      "title": "Rust runtime",
+      "title_ko": "Rust runtime",
+      "status": "implemented",
+      "description": "Provide Rust parser, AST and generated runtime, functions and prepared render state.",
+      "description_ko": "Rust parser, AST·generated runtime, function과 prepared render state를 제공한다.",
+      "inputs": {
+        "type": "RenderRequest",
+        "fields": [
+          "target",
+          "assign",
+          "define",
+          "environment"
+        ]
+      },
+      "outputs": {
+        "type": "HTML",
+        "fields": [
+          "UTF-8 bytes",
+          "Result error"
+        ]
+      },
+      "state": [
+        "load artifact",
+        "prepare request",
+        "render scope",
+        "write limited output",
+        "return or fail"
+      ],
+      "errors": [
+        {
+          "code": "TemplateError",
+          "when": "parse, binding or runtime contract fails"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "unsupported",
+        "rust": "pass",
+        "typescript": "unsupported"
+      },
+      "fixtures": [
+        "tests/cases"
+      ],
+      "tests": [
+        "packages/template-rust/tests",
+        "packages/template-rust/src"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-rust"
+        },
+        {
+          "id": "check-2",
+          "command": "node tests/runner/conformance.mjs --langs rust"
+        }
+      ],
+      "docs": [
+        "docs/spec/compiler.md",
+        "docs/spec/runtime.md"
+      ]
+    },
+    {
+      "id": "template-php",
+      "title": "PHP runtime",
+      "title_ko": "PHP runtime",
+      "status": "implemented",
+      "description": "Provide PHP parser, AST and generated runtime, functions and CLI.",
+      "description_ko": "PHP parser, AST·generated runtime, function과 CLI를 제공한다.",
+      "inputs": {
+        "type": "RenderRequest",
+        "fields": [
+          "target",
+          "assign",
+          "define",
+          "environment"
+        ]
+      },
+      "outputs": {
+        "type": "HTML",
+        "fields": [
+          "UTF-8 bytes",
+          "TemplateError"
+        ]
+      },
+      "state": [
+        "load artifact",
+        "prepare request",
+        "render scope",
+        "write limited output",
+        "return or fail"
+      ],
+      "errors": [
+        {
+          "code": "TemplateError",
+          "when": "parse, binding or runtime contract fails"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "pass",
+        "rust": "unsupported",
+        "typescript": "unsupported"
+      },
+      "fixtures": [
+        "tests/cases"
+      ],
+      "tests": [
+        "packages/template-php/tests",
+        "packages/template-php/src"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-php"
+        },
+        {
+          "id": "check-2",
+          "command": "node tests/runner/conformance.mjs --langs php"
+        }
+      ],
+      "docs": [
+        "docs/spec/compiler.md",
+        "docs/spec/runtime.md"
+      ]
+    },
+    {
+      "id": "template-php-ext",
+      "title": "PHP native extension",
+      "title_ko": "PHP native extension",
+      "status": "implemented",
+      "description": "Expose the supported AST runtime through the compiled PHP extension boundary.",
+      "description_ko": "컴파일된 PHP extension 경계에서 지원하는 AST runtime을 제공한다.",
+      "inputs": {
+        "type": "PHPExtensionRequest",
+        "fields": [
+          "template",
+          "assign",
+          "define"
+        ]
+      },
+      "outputs": {
+        "type": "HTML",
+        "fields": [
+          "UTF-8 bytes",
+          "extension error"
+        ]
+      },
+      "state": [
+        "build extension",
+        "load package",
+        "execute AST program",
+        "return or fail"
+      ],
+      "errors": [
+        {
+          "code": "TemplateError",
+          "when": "extension execution fails"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "pass",
+        "rust": "unsupported",
+        "typescript": "unsupported"
+      },
+      "fixtures": [
+        "tests/cases"
+      ],
+      "tests": [
+        "packages/template-php-ext/tests",
+        "packages/template-php-ext/run-tests.sh"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-ext"
+        }
+      ],
+      "docs": [
+        "docs/operations/testing.md",
+        "docs/spec/runtime.md"
+      ]
+    },
+    {
+      "id": "performance-measurements",
+      "title": "Performance measurements",
+      "title_ko": "Performance measurements",
+      "status": "implemented",
+      "description": "Measure equal-output AST and generated compile, process, render, prepared render and RSS paths.",
+      "description_ko": "동일 출력 AST와 generated의 compile, process, render, prepared render와 RSS 경로를 측정한다.",
+      "inputs": {
+        "type": "BenchmarkWorkload",
+        "fields": [
+          "same source",
+          "same assign and define",
+          "iterations",
+          "mode"
+        ]
+      },
+      "outputs": {
+        "type": "BenchmarkRow",
+        "fields": [
+          "output digest",
+          "compile time",
+          "cold process time",
+          "render time",
+          "RSS"
+        ]
+      },
+      "state": [
+        "compile fresh artifact",
+        "verify equal bytes",
+        "measure cold path",
+        "measure render path",
+        "summarize samples"
+      ],
+      "errors": [
+        {
+          "code": "BENCHMARK_MISMATCH",
+          "when": "output bytes or workload differs"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "examples/site/data/mode-benchmark.json"
+      ],
+      "tests": [
+        "tools/showcase/benchmark-modes.mjs",
+        "scripts/check-benchmark-results.mjs",
+        "scripts/check-benchmark-smoke.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make benchmark-check"
+        },
+        {
+          "id": "check-2",
+          "command": "make benchmark-smoke"
+        }
+      ],
+      "docs": [
+        "docs/operations/benchmark.md"
+      ]
+    },
+    {
+      "id": "showcase",
+      "title": "Executable example site",
+      "title_ko": "Executable example site",
+      "status": "implemented",
+      "description": "Show assign, define, referenced templates, artifacts, generated sources, output and parser-backed highlighting in one static site.",
+      "description_ko": "하나의 정적 사이트에서 assign, define, 참조 template, artifact, generated source, output과 parser 기반 하이라이트를 보여준다.",
+      "inputs": {
+        "type": "ShowcaseScenario",
+        "fields": [
+          "template files",
+          "assign.json",
+          "define.json",
+          "compiled artifacts"
+        ]
+      },
+      "outputs": {
+        "type": "StaticHTML",
+        "fields": [
+          "input views",
+          "highlighted source",
+          "output HTML",
+          "hashes"
+        ]
+      },
+      "state": [
+        "compile scenario",
+        "run adapters",
+        "compare bytes",
+        "render static page",
+        "verify links"
+      ],
+      "errors": [
+        {
+          "code": "SHOWCASE_MISMATCH",
+          "when": "adapter or static output differs"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "examples/site/scenarios",
+        "examples/site/index.html"
+      ],
+      "tests": [
+        "tools/showcase/build.mjs",
+        "tools/showcase/build-site.mjs",
+        "scripts/check-showcase-contract.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make showcase-check"
+        },
+        {
+          "id": "check-2",
+          "command": "make docs-static-check"
+        }
+      ],
+      "docs": [
+        "docs/operations/showcase.md"
+      ]
+    },
+    {
+      "id": "generated-mode",
+      "title": "Generated compiler mode",
+      "title_ko": "Generated compiler mode",
+      "status": "implemented",
+      "description": "Lower canonical AST and typed IR into direct TypeScript, Go, Rust and PHP template functions.",
+      "description_ko": "Canonical AST와 typed IR을 직접 실행하는 TypeScript, Go, Rust, PHP template function으로 낮춘다.",
+      "inputs": {
+        "type": "CompileRequest",
+        "fields": [
+          "source graph",
+          "type manifest",
+          "target language",
+          "refresh policy"
+        ]
+      },
+      "outputs": {
+        "type": "GeneratedProgram",
+        "fields": [
+          "typed declarations",
+          "direct renderer",
+          "artifact manifest"
+        ]
+      },
+      "state": [
+        "load source graph",
+        "parse and lower",
+        "type check",
+        "emit source",
+        "host compile",
+        "load program"
+      ],
+      "errors": [
+        {
+          "code": "E_COMPILE",
+          "when": "node, type, function or target contract is unsupported"
+        },
+        {
+          "code": "E_ARTIFACT",
+          "when": "artifact is missing, corrupt or stale"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "examples/site/scenarios"
+      ],
+      "tests": [
+        "tools/compiler/compiler.mjs",
+        "scripts/check-typed-generator.mjs",
+        "tests/runner/conformance-generated-ts.mjs",
+        "tests/runner/conformance-generated-go.mjs",
+        "tests/runner/conformance-generated-rust.mjs",
+        "tests/runner/conformance-generated-php.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make typed-generator-compile-check"
+        },
+        {
+          "id": "check-2",
+          "command": "make conformance-all-modes"
+        }
+      ],
+      "docs": [
+        "docs/spec/compiler.md",
+        "docs/operations/showcase.md"
+      ]
+    },
+    {
+      "id": "docs-check",
+      "title": "Documentation and generated contract checks",
+      "title_ko": "Documentation and generated contract checks",
+      "status": "implemented",
+      "description": "Keep language-paired documents, generated Mermaid, schemas, public API coverage and benchmark tables synchronized.",
+      "description_ko": "언어별 문서 쌍, 생성 Mermaid, schema, 공개 API coverage와 benchmark table을 동기화한다.",
+      "inputs": {
+        "type": "RepositoryDocumentation",
+        "fields": [
+          "Markdown pairs",
+          "manifest",
+          "generated diagrams",
+          "links"
+        ]
+      },
+      "outputs": {
+        "type": "CheckedDocumentation",
+        "fields": [
+          "paired pages",
+          "resolved links",
+          "current generated files"
+        ]
+      },
+      "state": [
+        "load documents",
+        "check pairs and links",
+        "check generated files",
+        "check coverage",
+        "report failures"
+      ],
+      "errors": [
+        {
+          "code": "DOCS_STALE",
+          "when": "document pair, link or generated output differs"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "unsupported",
+        "rust": "unsupported",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "docs",
+        "tools/compiler/interface.json"
+      ],
+      "tests": [
+        "scripts/check-documents.mjs",
+        "scripts/check-doc-coverage.mjs",
+        "scripts/generate-compiler-interface.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make docs-check"
+        },
+        {
+          "id": "check-2",
+          "command": "make docs-verify-idempotent"
+        }
+      ],
+      "docs": [
+        "docs/operations/documentation.md",
+        "docs/spec/compiler.md"
+      ]
+    },
+    {
+      "id": "release-test-matrix",
+      "title": "Release verification matrix",
+      "title_ko": "Release verification matrix",
+      "status": "implemented",
+      "description": "Run contract, unit, compiler, conformance, mutation, consumer, presentation and performance gates in a fixed order.",
+      "description_ko": "계약, 단위, compiler, 적합성, mutation, consumer, 표시와 성능 gate를 고정 순서로 실행한다.",
+      "inputs": {
+        "type": "ReleaseCheckout",
+        "fields": [
+          "clean source",
+          "locked dependencies",
+          "all language toolchains"
+        ]
+      },
+      "outputs": {
+        "type": "ReleaseEvidence",
+        "fields": [
+          "pass/fail by layer",
+          "artifact integrity",
+          "consumer parity"
+        ]
+      },
+      "state": [
+        "check contracts",
+        "run units",
+        "compile artifacts",
+        "run conformance",
+        "run mutations",
+        "install consumers",
+        "build pages",
+        "run benchmark"
+      ],
+      "errors": [
+        {
+          "code": "RELEASE_FAILED",
+          "when": "any required gate fails"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "Makefile",
+        ".github/workflows/ci.yml"
+      ],
+      "tests": [
+        "scripts/check-clean-release.mjs",
+        "scripts/check-compiler-interface-mutations.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make release-test-matrix"
+        },
+        {
+          "id": "check-2",
+          "command": "make release-check"
+        }
+      ],
+      "docs": [
+        "docs/operations/testing.md",
+        "docs/operations/publication.md"
+      ]
+    },
+    {
+      "id": "dependency-policy",
+      "title": "Dependency policy",
+      "title_ko": "Dependency policy",
+      "status": "implemented",
+      "description": "Check supported runtime versions, locked dependency advisories and explicitly justified version exceptions.",
+      "description_ko": "지원 runtime version, lock 의존성 권고와 명시적으로 정당화한 version 예외를 검사한다.",
+      "inputs": {
+        "type": "DependencyGraph",
+        "fields": [
+          "package manifests",
+          "lockfiles",
+          "runtime constraints",
+          "exceptions"
+        ]
+      },
+      "outputs": {
+        "type": "DependencyReport",
+        "fields": [
+          "vulnerabilities",
+          "stale pins",
+          "policy result"
+        ]
+      },
+      "state": [
+        "read manifests",
+        "resolve lock metadata",
+        "check policy",
+        "audit advisories",
+        "reject unexplained exceptions"
+      ],
+      "errors": [
+        {
+          "code": "DEPENDENCY_POLICY_FAILED",
+          "when": "dependency is stale, vulnerable or unexplained"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "package-lock.json",
+        "packages/template-php/composer.lock",
+        "packages/template-php-ext/composer.lock"
+      ],
+      "tests": [
+        "scripts/check-dependency-policy.mjs",
+        "scripts/check-dependency-policy-mutation.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make dependency-audit"
+        }
+      ],
+      "docs": [
+        "docs/operations/dependencies.md"
+      ]
+    }
+  ]
+}

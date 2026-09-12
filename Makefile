@@ -4,7 +4,7 @@ export PATH := $(HOME)/.cargo/bin:$(PATH)
 CARGO ?= $(HOME)/.cargo/bin/cargo
 
 .DEFAULT_GOAL := help
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check \
+.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
 	conformance delimiter-matrix parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
@@ -52,7 +52,7 @@ help: ## List targets
 	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance delimiter-matrix ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check contract-check lint test-ts test-go test-rust test-php conformance delimiter-matrix ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -157,6 +157,12 @@ docs-check: ## Document checks
 	@test ! -f scripts/check-schema.mjs || node scripts/check-schema.mjs
 	@test ! -f scripts/check-doc-coverage.mjs || node scripts/check-doc-coverage.mjs
 	node scripts/update-benchmark-docs.mjs --check
+	node scripts/features/build.mjs --check
+	node scripts/features/check.mjs
+
+feature-check: ## Validate executable feature contracts and generated status pages
+	node scripts/features/build.mjs --check
+	node scripts/features/check.mjs
 
 runtime-interface-generate: ## Generate the runtime prepared-execution Mermaid diagrams
 	node scripts/generate-runtime-interface.mjs
@@ -216,7 +222,7 @@ benchmark-smoke: typed-generator ## Measure a fresh short equal-output sample wi
 
 release-test-matrix: build-php ## Run all release layers in deterministic order
 	@echo "[release 1/7] contracts, generated documentation and static analysis"
-	$(MAKE) docs-check rules-check dependency-audit runtime-interface-check compiler-interface-check lint
+	$(MAKE) docs-check rules-check feature-check dependency-audit runtime-interface-check compiler-interface-check lint
 	@echo "[release 2/7] lexer, parser, value, runtime and page-cache units"
 	$(MAKE) test-ts test-go test-rust test-php
 	@echo "[release 3/7] IR, generated source and host compiler checks"
