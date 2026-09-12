@@ -1,6 +1,6 @@
 <?php
-final class Page { public function __construct(public readonly string $title = '') {} }
-final class Slot { public function __construct(public readonly string $template = '', public readonly string $html = '') {} }
+final class Page { public function __construct(public readonly ?string $title = null) {} }
+final class Slot { public function __construct(public readonly ?string $template = null, public readonly ?string $html = null) {} }
 final class Assign { public function __construct(
 public readonly ?string $title = null,
 public readonly ?string $heading = null,
