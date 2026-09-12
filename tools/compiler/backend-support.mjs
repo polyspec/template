@@ -104,7 +104,7 @@ export function baseTarget(language) {
       set: (name, value, level) => indent(level, `$${fieldName(name)} = ${value};`),
     },
   };
-  return { ...targets[language] };
+  return { convert: value => value, ...targets[language] };
 }
 
 export function templateBodies(program, target) {
