@@ -39,7 +39,7 @@ export function emitExpression(node, target) {
   if (node.op === 'local') return target.local(fieldName(node.name), node.valueType.source);
   if (node.op === 'loop-meta') return target.loopMeta(node.loop, node.field);
   if (node.op === 'member') return target.member(emitExpression(node.object, target), fieldName(node.key), node.object.valueType, node);
-  if (node.op === 'index') return target.index(emitExpression(node.object, target), emitExpression(node.index, target), node.object.valueType);
+  if (node.op === 'index') return target.index(emitExpression(node.object, target), emitExpression(node.index, target), node.object.valueType, node);
   if (node.op === 'call') return target.call(node.name, node.args.map(item => emitExpression(item, target)), node);
   if (node.op === 'unary') return target.unary(node.operator, emitExpression(node.operand, target), node);
   if (node.op === 'binary') return target.binary(node.operator, emitExpression(node.left, target), emitExpression(node.right, target), node);

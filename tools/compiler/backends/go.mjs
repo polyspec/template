@@ -7,39 +7,91 @@ import {
 
 export const language = 'go';
 
-export function createTarget() {
+const goSpan = span => `ast.Span{${span.join(', ')}}`;
+const goLines = lines => `errs.LineIndex{${lines.join(', ')}}`;
+const goResult = node => goType(node.valueType.source);
+
+export function createTarget({ program }) {
   const target = baseTarget(language);
+  target.var = (name, type) => program.dynamicRoot ? `generatedMember[${goType(type)}](runtime, rootData, ${quote(name)})` : `${optional(type) ? 'valueOrZero(' : ''}assign.${exportedName(name)}${optional(type) ? ')' : ''}`;
+  target.member = (object, key, owner, node) => owner.kind === 'any' ? `generatedMember[${goResult(node)}](runtime, ${object}, ${quote(key)})` : `${object}.${exportedName(key)}`;
+  target.text = (value, level, node) => indent(level, `generatedWrite(context, ${quote(value)}, frame, ${goSpan(node.span)})`);
+  target.echo = (expression, level, node) => indent(level, `generatedWrite(context, generatedEscape(runtime, ${expression}, frame, ${goSpan(node.expr.span)}), frame, ${goSpan(node.span)})`);
   target.block = (node, n) => {
-    if (node.target === null) return indent(n, `{ definition := definitions.${exportedName(node.id)}\nif definition == nil || definition.HTML == nil { panic(${quote(`generated definition ${node.id} requires html`)}) }\nout.WriteString(*definition.HTML)\n}`);
+    if (node.target === null) return indent(n, `{ definition := definitions.${exportedName(node.id)}
+if definition == nil || definition.HTML == nil { panic(runtime.Error(frame, ${goSpan(node.span)}, errs.RuntimeBlockUndefined, ${quote(`define ${node.id} is not registered`)})) }
+generatedWrite(context, *definition.HTML, frame, ${goSpan(node.span)})
+}`);
     const defaults = node.inputs.filter(item => item.root).map(item => `${exportedName(item.name)}: ${emitExpression(item.root, target)}`).join(', ');
     const defined = node.inputs.map(item => `if definition.Data.${exportedName(item.name)} != nil { input.${exportedName(item.name)} = *definition.Data.${exportedName(item.name)} }`).join('\n');
     const scoped = node.inputs.filter(item => item.scope).map(item => `input.${exportedName(item.name)} = ${emitExpression(item.scope, target)}`).join('\n');
-    if (node.id === null) return indent(n, `{ input := ${inputName(node.target)}{${defaults}}\n${scoped}\nout.WriteString(${functionName(node.target)}(assign, definitions, input))\n}`);
-    const missing = node.path === null ? `if definition == nil { panic(${quote(`generated definition ${node.id} is missing`)}) }` : '';
-    return indent(n, `{ definition := definitions.${exportedName(node.id)}\n${missing}\nif definition != nil && definition.HTML != nil { out.WriteString(*definition.HTML) } else {\n    input := ${inputName(node.target)}{${defaults}}\n    if definition != nil && definition.Data != nil {\n${indent(2, defined)}\n    }\n${indent(1, scoped)}\n    out.WriteString(${functionName(node.target)}(assign, definitions, input))\n}\n}`);
+    const call = `${functionName(node.target)}(assign, definitions, input, context, runtime, rootData)`;
+    if (node.id === null) return indent(n, `{ input := ${inputName(node.target)}{${defaults}}
+${scoped}
+generatedEnter(context, ${quote(node.target)}, frame, ${goSpan(node.span)})
+func() { defer context.Leave(); ${call} }()
+}`);
+    const missing = node.path === null ? `if definition == nil { panic(runtime.Error(frame, ${goSpan(node.span)}, errs.RuntimeBlockUndefined, ${quote(`define ${node.id} is not registered`)})) }` : '';
+    return indent(n, `{ definition := definitions.${exportedName(node.id)}
+${missing}
+if definition != nil && definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ${goSpan(node.span)}) } else {
+    input := ${inputName(node.target)}{${defaults}}
+    if definition != nil && definition.Data != nil {
+${indent(2, defined)}
+    }
+${indent(1, scoped)}
+    generatedEnter(context, ${quote(node.target)}, frame, ${goSpan(node.span)})
+    func() { defer context.Leave(); ${call} }()
+}
+}`);
   };
-  target.ifBlock = (node, n) => indent(n, `if definitions.${exportedName(node.id)} != nil {\n${emitNodes(node.body, target, n + 1)}\n}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n}` : ''}`);
+  target.ifBlock = (node, n) => indent(n, `if definitions.${exportedName(node.id)} != nil {
+${emitNodes(node.body, target, n + 1)}
+}${node.otherwise ? ` else {
+${emitNodes(node.otherwise, target, n + 1)}
+}` : ''}`);
   target.loopMeta = (loop, field) => `${fieldName(loop)}_${field.replace(/_$/, '')}`;
-  target.index = (object, index, type) => type.kind === 'map' ? `generatedMapGet(${object}, ${index})` : `generatedListGet(${object}, int(${index}))`;
-  target.call = (name, args) => {
-    if (name !== 'default') throw new Error(`compiler: function ${name} reached the Go backend without support`);
-    return `generatedDefault(${args.join(', ')})`;
+  target.index = (object, index, _owner, node) => `generatedIndex[${goResult(node)}](runtime, ${object}, ${index})`;
+  target.call = (name, args, node) => `generatedCall[${goResult(node)}](runtime, ${quote(name)}, []value.Value{${args.map(item => `generatedValue(${item})`).join(', ')}}, frame, ${goSpan(node.span)})`;
+  target.unary = (operator, operand, node) => `generatedUnary[${goResult(node)}](runtime, ${quote(operator)}, ${operand}, frame, ${goSpan(node.span)})`;
+  target.binary = (operator, left, right, node) => {
+    if (operator === '&&') return `func() bool { left := ${left}; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, ${right}) }()`;
+    if (operator === '||') return `func() bool { left := ${left}; if generatedTruthy(runtime, left) { return true }; return generatedTruthy(runtime, ${right}) }()`;
+    if (operator === '??') return `func() ${goResult(node)} { left := ${left}; if generatedValue(left) != nil { return left }; return ${right} }()`;
+    return `generatedBinary[${goResult(node)}](runtime, ${quote(operator)}, ${left}, ${right}, frame, ${goSpan(node.span)})`;
   };
-  target.unary = (op, operand) => `generatedUnary(${quote(op)}, ${operand})`;
-  target.binary = (op, left, right) => `generatedBinary(${quote(op)}, ${left}, ${right})`;
-  target.ternary = (test, thenValue, elseValue) => `generatedTernary(generatedTruthy(${test}), ${thenValue}, ${elseValue})`;
+  target.ternary = (test, thenValue, elseValue, node) => `func() ${goResult(node)} { if generatedTruthy(runtime, ${test}) { return ${thenValue} }; return ${elseValue} }()`;
   target.list = (items, type) => `func() ${goType(type.source)} { result := ${goType(type.source)}{}; ${items.map(item => item.spread ? `result = append(result, ${item.value}...)` : `result = append(result, ${item.value})`).join('; ')}; return result }()`;
   target.map = (entries, type) => `func() ${goType(type.source)} { result := NewOrderedMap[${goType(type.key.source)}, ${goType(type.value.source)}](); ${entries.map(item => item.spread ? `for _, entry := range ${item.value}.Entries() { result.Set(entry.Key, entry.Value) }` : `result.Set(${item.value[0]}, ${item.value[1]})`).join('; ')}; return result }()`;
-  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'\t'.repeat(n)}${i ? '} else if' : 'if'} generatedTruthy(${emitExpression(b.test, target)}) {\n${emitNodes(b.body, target, n + 1, scope)}`).join('\n') + `${'\t'.repeat(n)}}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1, scope)}\n${'\t'.repeat(n)}}` : ''}`;
+  target.ifNode = (node, n, scope = []) => node.branches.map((branch, index) => `${'\t'.repeat(n)}${index ? '} else if' : 'if'} generatedTruthy(runtime, ${emitExpression(branch.test, target)}) {
+${emitNodes(branch.body, target, n + 1, scope)}`).join('\n') + `${'\t'.repeat(n)}}${node.otherwise ? ` else {
+${emitNodes(node.otherwise, target, n + 1, scope)}
+${'\t'.repeat(n)}}` : ''}`;
   target.forNode = (node, n) => {
     const name = fieldName(node.name);
     const iterable = emitExpression(node.iter, target);
     const isMap = node.iter.valueType.kind === 'map';
     const source = isMap ? `${iterable}.Entries()` : iterable;
     const binding = isMap ? `${name}_key, ${name}_value := entry.Key, entry.Value` : `${name}_key, ${name}_value := float64(${name}_index), entry`;
-    return indent(n, `{ entries := ${source}\nfor ${name}_index, entry := range entries {\n    ${binding}\n    _ = ${name}_key\n    ${name} := ${name}_value\n    ${name}_size := float64(len(entries))\n    ${name}_first := ${name}_index == 0\n    ${name}_last := ${name}_index + 1 == len(entries)\n${emitNodes(node.body, target, n + 1)}\n}${node.empty ? `\nif len(entries) == 0 {\n${emitNodes(node.empty, target, n + 1)}\n}` : ''}\n}`);
+    return indent(n, `{ entries := ${source}
+for ${name}_index, entry := range entries {
+    ${binding}
+    _ = ${name}_key
+    ${name} := ${name}_value
+    ${name}_size := float64(len(entries))
+    ${name}_first := ${name}_index == 0
+    ${name}_last := ${name}_index + 1 == len(entries)
+    context.Iterations++
+    generatedLimit(runtime, "iteration", context.Iterations, frame, ${goSpan(node.span)})
+${emitNodes(node.body, target, n + 1)}
+}${node.empty ? `
+if len(entries) == 0 {
+${emitNodes(node.empty, target, n + 1)}
+}` : ''}
+}`);
   };
-  target.include = (node, n) => indent(n, `out.WriteString(${functionName(node.target)}(assign, definitions, ${inputName(node.target)}{${node.inputs.map(item => `${exportedName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')}}))`);
+  target.include = (node, n) => indent(n, `generatedEnter(context, ${quote(node.target)}, frame, ${goSpan(node.span)})
+func() { defer context.Leave(); ${functionName(node.target)}(assign, definitions, ${inputName(node.target)}{${node.inputs.map(item => `${exportedName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')}}, context, runtime, rootData) }()`);
   return target;
 }
 
@@ -51,19 +103,41 @@ export function emitDeclarations(context) {
   const inputTypes = templateBodies.map(template => `type ${template.input} struct { ${[...template.inputs].map(([name, type]) => `${exportedName(name)} ${goType(type.source)} \`json:"${name}"\``).join('; ')} }`).join('\n');
   const definitionDataTypes = templateBodies.map(template => `type ${definitionDataName(template.name)} struct { ${[...template.inputs].map(([name, type]) => `${exportedName(name)} *${goType(type.source)} \`json:"${name}"\``).join('; ')} }`).join('\n');
   const definitionsType = `type Definition[T any] struct { HTML *string \`json:"html"\`; Data *T \`json:"data"\` }\ntype Definitions struct { ${[...program.definitions].map(([name, definition]) => `${exportedName(name)} *Definition[${definition.template ? definitionDataName(definition.template) : 'struct{}'}] \`json:"${name}"\``).join('; ')} }`;
-  return `// Generated.\npackage generated\nimport ("bytes"; "encoding/json"; "fmt"; "reflect"; "strings"; template "github.com/polyspec/template"; "github.com/polyspec/template/value")\n${goRecords}\ntype Assign struct {\n${Object.entries(fields).map(([name, type]) => `\t${exportedName(name)} ${goType(type)} \`json:"${name}"\``).join('\n')}\n}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}\ntype ArtifactManifest struct { Schema int; Mode string; Target string; Entry string; SourceDigest string; TypeDigest string; ContractDigest string; Files map[string]string }\ntype OrderedEntry[K comparable, V any] struct { Key K; Value V }\ntype OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }\nfunc NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }\nfunc (m *OrderedMap[K, V]) Set(key K, value V) { for index := range m.entries { if m.entries[index].Key == key { m.entries[index].Value = value; return } }; m.entries = append(m.entries, OrderedEntry[K, V]{key, value}) }\nfunc (m OrderedMap[K, V]) Get(key K) (V, bool) { for _, entry := range m.entries { if entry.Key == key { return entry.Value, true } }; var zero V; return zero, false }\nfunc (m OrderedMap[K, V]) Entries() []OrderedEntry[K, V] { return m.entries }\nfunc (m *OrderedMap[K, V]) UnmarshalJSON(data []byte) error { decoder := json.NewDecoder(bytes.NewReader(data)); token, err := decoder.Token(); if err != nil { return err }; if token != json.Delim('{') { return fmt.Errorf("generated ordered map must be an object") }; m.entries = nil; for decoder.More() { rawKey, err := decoder.Token(); if err != nil { return err }; keyText, ok := rawKey.(string); if !ok { return fmt.Errorf("generated ordered map key is not text") }; var key K; if err := json.Unmarshal([]byte(strconvQuote(keyText)), &key); err != nil { return err }; var item V; if err := decoder.Decode(&item); err != nil { return err }; m.Set(key, item) }; _, err = decoder.Token(); return err }\nfunc strconvQuote(value string) string { data, _ := json.Marshal(value); return string(data) }`;
+  const assignType = program.dynamicRoot ? 'type Assign struct{}' : `type Assign struct {\n${Object.entries(fields).map(([name, type]) => `\t${exportedName(name)} ${goType(type)} \`json:"${name}"\``).join('\n')}\n}`;
+  return `// Generated.\npackage generated\nimport ("bytes"; "encoding/json"; "fmt"; "time"; template "github.com/polyspec/template"; "github.com/polyspec/template/ast"; "github.com/polyspec/template/errs"; "github.com/polyspec/template/functions"; "github.com/polyspec/template/render"; "github.com/polyspec/template/value")\n${goRecords}\n${assignType}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}\ntype ArtifactManifest struct { Schema int; Mode string; Target string; Entry string; SourceDigest string; TypeDigest string; ContractDigest string; Files map[string]string }\ntype OrderedEntry[K comparable, V any] struct { Key K; Value V }\ntype OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }\nfunc NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }\nfunc (m *OrderedMap[K, V]) Set(key K, item V) { for index := range m.entries { if m.entries[index].Key == key { m.entries[index].Value = item; return } }; m.entries = append(m.entries, OrderedEntry[K, V]{key, item}) }\nfunc (m OrderedMap[K, V]) Get(key K) (V, bool) { for _, entry := range m.entries { if entry.Key == key { return entry.Value, true } }; var zero V; return zero, false }\nfunc (m OrderedMap[K, V]) Entries() []OrderedEntry[K, V] { return m.entries }\nfunc (m OrderedMap[K, V]) generatedValue() value.Value { result := value.NewOrderedMap(); for _, entry := range m.entries { result.Set(fmt.Sprint(entry.Key), generatedValue(entry.Value)) }; return result }\nfunc (m *OrderedMap[K, V]) UnmarshalJSON(data []byte) error { decoder := json.NewDecoder(bytes.NewReader(data)); token, err := decoder.Token(); if err != nil { return err }; if token != json.Delim('{') { return fmt.Errorf("generated ordered map must be an object") }; m.entries = nil; for decoder.More() { rawKey, err := decoder.Token(); if err != nil { return err }; keyText, ok := rawKey.(string); if !ok { return fmt.Errorf("generated ordered map key is not text") }; var key K; if err := json.Unmarshal([]byte(strconvQuote(keyText)), &key); err != nil { return err }; var item V; if err := decoder.Decode(&item); err != nil { return err }; m.Set(key, item) }; _, err = decoder.Token(); return err }\nfunc strconvQuote(input string) string { data, _ := json.Marshal(input); return string(data) }`;
 }
 
 export function emitRuntime() {
-  return `func generatedMapGet[K comparable, V any](value OrderedMap[K, V], key K) V { result, _ := value.Get(key); return result }\nfunc generatedListGet[T any](value []T, index int) T { if index >= 0 && index < len(value) { return value[index] }; var zero T; return zero }\nfunc generatedTernary[T any](test bool, yes, no T) T { if test { return yes }; return no }\nfunc generatedEscape(value any) string { if value == nil { return "" }; return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "\\\"", "&quot;", "'", "&#39;").Replace(fmt.Sprint(value)) }\nfunc generatedTruthy(value any) bool { if value == nil { return false }; reflected := reflect.ValueOf(value); switch reflected.Kind() { case reflect.Bool: return reflected.Bool(); case reflect.Float32, reflect.Float64: return reflected.Float() != 0; case reflect.String, reflect.Array, reflect.Slice, reflect.Map: return reflected.Len() != 0; case reflect.Struct: field := reflected.FieldByName("entries"); if field.IsValid() { return field.Len() != 0 } }; return true }\nfunc generatedUnary(op string, value any) any { if op == "!" { return !generatedTruthy(value) }; return -value.(float64) }\nfunc generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }\nfunc generatedDefault(value, fallback any) any { if generatedTruthy(value) { return value }; return fallback }\nfunc valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }\nfunc generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }\nfunc generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }`;
+  return `type generatedValueSource interface { generatedValue() value.Value }
+func generatedPanic(err error) { if err != nil { panic(err) } }
+func generatedValue(input any) value.Value { if source, ok := input.(generatedValueSource); ok { return source.generatedValue() }; result, err := value.Bind(input); generatedPanic(err); return result }
+func generatedResult[T any](input value.Value) T { if result, ok := input.(T); ok { return result }; var result T; generatedPanic(generatedDecode(input, &result)); return result }
+func generatedTruthy(runtime *render.RuntimeBindings, input any) bool { return runtime.Truthy(generatedValue(input)) }
+func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, input any, frame *render.Frame, span ast.Span) T { result, err := runtime.Unary(operator, generatedValue(input), frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
+func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
+func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &span)) }
+func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &span)) }
+func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
+func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
+func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
+func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: "Z", Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != "" { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }`;
 }
 
 export function emitTemplates(context) {
-  return context.templateBodies.map(template => `func ${template.function}(assign Assign, definitions Definitions, input ${template.input}) string { var out strings.Builder\n${[...template.inputs].map(([name]) => `${fieldName(name)} := input.${exportedName(name)}`).join('\n')}\n${template.body}\n return out.String() }`).join('\n');
+  return context.templateBodies.map(template => {
+    const typed = context.program.templates.get(template.name);
+    return `func ${template.function}(assign Assign, definitions Definitions, input ${template.input}, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) {\n\tframe := render.NewFrame(${quote(template.name)}, ${goLines(typed.lines)}, rootData)\n${[...template.inputs].map(([name]) => `${fieldName(name)} := input.${exportedName(name)}`).join('\n')}\n${template.body}\n}`;
+  }).join('\n');
 }
 
 export function emitEntry(context) {
-  const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `\tcase ${quote(template.name)}: return ${template.function}(assign, definitions, ${template.input}{})`).join('\n');
+  const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `\tcase ${quote(template.name)}: ${template.function}(assign, definitions, ${template.input}{}, context, runtime, rootData); return`).join('\n');
   const definitionCases = [...context.program.definitions].map(([id, definition]) => `\t\tcase ${quote(id)}:\n\t\t\tif input.HTML != nil { if ${definition.html ? 'false' : 'true'} || input.Template != "" || input.Data != nil { return Definitions{}, nil, fmt.Errorf("define.%s has an invalid html entry", id) }; plain[id] = map[string]any{"html": *input.HTML}; targets[id] = generatedTarget{html: input.HTML}; continue }\n\t\t\tif input.Template != ${quote(definition.template ?? '')} { return Definitions{}, nil, fmt.Errorf("define.%s has an invalid template", id) }; plain[id] = map[string]any{"data": generatedPlain(input.Data)}; targets[id] = generatedTarget{target: ${quote(definition.template ?? '')}}`).join('\n');
-  return `func RenderTemplate(target string, assign Assign, definitions Definitions) string { switch target {\n${dispatch}\n\tdefault: panic("generated template is missing or requires inputs: " + target)\n} }\nfunc Render(assign Assign, definitions Definitions) string { return RenderTemplate(${quote(context.program.entry)}, assign, definitions) }\ntype generatedTarget struct { target string; html *string }\nfunc generatedBindDefinitions(input map[string]template.DefineInput) (Definitions, map[string]generatedTarget, error) { plain := map[string]any{}; targets := map[string]generatedTarget{}; for id, input := range input { switch id {\n${definitionCases}\n\t\tdefault: return Definitions{}, nil, fmt.Errorf("define.%s is not declared", id)\n\t} }; var definitions Definitions; if err := generatedDecode(plain, &definitions); err != nil { return Definitions{}, nil, err }; return definitions, targets, nil }\ntype GeneratedProgram struct { Runtime *template.RuntimeEnvironment }\nfunc NewGeneratedProgram(options template.Options) (*GeneratedProgram, error) { runtime, err := template.NewRuntimeEnvironment(options.Limits, options.Functions); if err != nil { return nil, err }; return &GeneratedProgram{Runtime: runtime}, nil }\ntype generatedPrepared struct { target string; assign Assign; definitions Definitions; html *string }\nfunc (p *generatedPrepared) Render() (output string, err error) { if p.html != nil { return *p.html, nil }; defer func() { if failure := recover(); failure != nil { err = fmt.Errorf("%v", failure) } }(); return RenderTemplate(p.target, p.assign, p.definitions), nil }\nfunc (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) { name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }; var typedAssign Assign; if err := generatedDecode(assign, &typedAssign); err != nil { return nil, err }; definitions, targets, err := generatedBindDefinitions(options.Define); if err != nil { return nil, err }; resolved := targets[name]; targetName := name; if resolved.target != "" { targetName = resolved.target }; return &generatedPrepared{target: targetName, assign: typedAssign, definitions: definitions, html: resolved.html}, nil }\nfunc (p *GeneratedProgram) Render(target any, assign any, options template.RenderOptions) (string, error) { prepared, err := p.Prepare(target, assign, options); if err != nil { return "", err }; return prepared.Render() }\nvar _ template.Program = (*GeneratedProgram)(nil)\nvar _ = fmt.Fprint`;
+  const bindAssign = context.program.dynamicRoot ? '' : 'if err := generatedDecode(rootData, &typedAssign); err != nil { return nil, err }';
+  return `func renderTemplate(target string, assign Assign, definitions Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) { switch target {\n${dispatch}\n\tdefault: panic(context.Fail(errs.LoadNotFound, nil, nil, "template " + target + " does not exist"))\n} }\ntype generatedTarget struct { target string; html *string }\nfunc generatedBindDefinitions(input map[string]template.DefineInput) (Definitions, map[string]generatedTarget, error) { plain := map[string]any{}; targets := map[string]generatedTarget{}; for id, input := range input { switch id {\n${definitionCases}\n\t\tdefault: return Definitions{}, nil, fmt.Errorf("define.%s is not declared", id)\n\t} }; var definitions Definitions; if err := generatedDecode(plain, &definitions); err != nil { return Definitions{}, nil, err }; return definitions, targets, nil }\ntype GeneratedProgram struct { Runtime *template.RuntimeEnvironment }\nfunc NewGeneratedProgram(options template.Options) (*GeneratedProgram, error) { runtime, err := template.NewRuntimeEnvironment(options.Limits, options.Functions); if err != nil { return nil, err }; return &GeneratedProgram{Runtime: runtime}, nil }\ntype generatedPrepared struct { target string; assign Assign; definitions Definitions; rootData *value.OrderedMap; env functions.Env; runtime *template.RuntimeEnvironment; html *string }\nfunc (p *generatedPrepared) Render() (output string, err error) { defer func() { if failure := recover(); failure != nil { if failureError, ok := failure.(error); ok { err = failureError } else { panic(failure) } } }(); context := render.NewContext(p.runtime, p.rootData, p.env, p.target); runtime := render.NewRuntimeBindings(context); if err := context.Enter(p.target, nil, nil); err != nil { return "", err }; defer context.Leave(); if p.html != nil { if err := context.Write(*p.html, nil, nil); err != nil { return "", err } } else { renderTemplate(p.target, p.assign, p.definitions, context, runtime, p.rootData) }; return context.Output(), nil }\nfunc (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) { name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }; rootData, err := value.BindMap(assign); if err != nil { return nil, err }; var typedAssign Assign; ${bindAssign}; definitions, targets, err := generatedBindDefinitions(options.Define); if err != nil { return nil, err }; resolved := targets[name]; targetName := name; if resolved.target != "" { targetName = resolved.target }; return &generatedPrepared{target: targetName, assign: typedAssign, definitions: definitions, rootData: rootData, env: generatedEnv(options), runtime: p.Runtime, html: resolved.html}, nil }\nfunc (p *GeneratedProgram) Render(target any, assign any, options template.RenderOptions) (string, error) { prepared, err := p.Prepare(target, assign, options); if err != nil { return "", err }; return prepared.Render() }\nvar _ template.Program = (*GeneratedProgram)(nil)`;
 }

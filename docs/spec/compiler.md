@@ -38,6 +38,8 @@ The TypeScript backend passes its bound root, source-indexed frame, render conte
 
 The PHP backend follows the same execution boundary. Its generated template functions receive `Context`, `Frame`, `RuntimeBindings` and the bound root map, write through the context output limiter, and delegate value operations and function calls to the package runtime. Typed maps remain `MapValue` instances so generated lookup, truthiness, ordering and spread preserve the data model instead of inheriting PHP array key conversion.
 
+The Go backend emits typed template control flow while routing observable value operations through `render.RuntimeBindings`. Generated functions share `render.Context`, source-indexed frames and the render chain. Internal error propagation preserves the original structured template error, including its code and source position, and native typed values are bound to the canonical value model at the runtime boundary.
+
 Built-ins are known to the compiler. A referenced host function requires a manifest signature and a runtime implementation. Missing signatures fail before emission. Missing runtime implementations, arity errors and host failures use the same error fields as AST execution.
 
 ## Artifact refresh
