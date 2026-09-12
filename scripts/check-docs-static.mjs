@@ -23,15 +23,13 @@ for (const path of pages) {
   const name = relative(output, path);
   const html = readFileSync(path, 'utf8');
   const language = html.match(/<html\s+lang="([^"]+)"/)?.[1];
-  if (name === 'ko/index.html' || name.startsWith('ko/') || name.endsWith('.ko/index.html')) {
+  if (name === 'ko/index.html' || name.startsWith('ko/')) {
     korean += 1;
     if (language !== 'ko-KR') throw new Error(`${name}: expected html lang="ko-KR", received ${JSON.stringify(language)}`);
     if (!localeLink(html, 'spec/lexical') || !localeLink(html, 'operations/development')) {
       throw new Error(`${name}: Korean navigation does not remain in the Korean locale`);
     }
-    const englishRoute = name === 'ko/index.html' || name === 'index.ko/index.html'
-      ? '/'
-      : `/${name.replace(/^ko\//, '').replace(/\.ko\/index\.html$/, '').replace(/\.html$/, '')}`;
+    const englishRoute = name === 'ko/index.html' ? '/' : `/${name.replace(/^ko\//, '').replace(/\.html$/, '')}`;
     const englishLink = englishRoute === '/'
       ? /href="\/[^"/]*\/"/.test(html) || html.includes('href="/"')
       : new RegExp(`href="(?:/[^"/]+)?${englishRoute.replaceAll('/', '\\/')}"`).test(html);

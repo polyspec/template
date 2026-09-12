@@ -5,7 +5,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check \
-	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
+	conformance delimiter-matrix parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
 	bench benchmark-check benchmark-smoke dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean
@@ -52,7 +52,7 @@ help: ## List targets
 	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance delimiter-matrix ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -95,6 +95,9 @@ test-php: build-php ## PHP unit tests
 
 conformance: ## Cross-language conformance suite
 	node tests/runner/conformance.mjs
+
+delimiter-matrix: ## Exercise every valid delimiter pair in every language
+	node tests/runner/delimiter-matrix.mjs
 
 conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
 	node tests/runner/conformance-generated-ts.mjs
@@ -183,7 +186,6 @@ docs-verify-idempotent: ## Build the documentation site twice and compare
 
 docs-static-check: ## Build the documentation site as static files
 	npx vitepress build docs
-	node scripts/materialize-korean-routes.mjs
 	node scripts/check-docs-static.mjs
 
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
