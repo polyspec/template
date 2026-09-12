@@ -21,6 +21,51 @@ export class RuntimeBindings {
     return isTruthy(value);
   }
 
+  unary(operator: string, operand: Value, frame: Frame, span: Span): Value {
+    if (operator === '!') return !this.truthy(operand);
+    if (operator === '-') return this.finite(-this.number(operand, frame, span), frame, span);
+    throw this.error(frame, span, 'E_RUNTIME_TYPE', `unknown operator ${operator}`);
+  }
+
+  binary(operator: string, left: Value, right: Value, frame: Frame, span: Span): Value {
+    switch (operator) {
+      case '+':
+        if (Array.isArray(left) || left instanceof Map || Array.isArray(right) || right instanceof Map) {
+          throw this.error(frame, span, 'E_RUNTIME_STRINGIFY', 'a list or map cannot be converted to text');
+        }
+        if (isString(left) || isString(right)) return this.stringify(left, frame, span) + this.stringify(right, frame, span);
+        return this.finite(this.number(left, frame, span) + this.number(right, frame, span), frame, span);
+      case '-': return this.finite(this.number(left, frame, span) - this.number(right, frame, span), frame, span);
+      case '*': return this.finite(this.number(left, frame, span) * this.number(right, frame, span), frame, span);
+      case '/': {
+        const divisor = this.number(right, frame, span);
+        if (divisor === 0) throw this.error(frame, span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
+        return this.finite(this.number(left, frame, span) / divisor, frame, span);
+      }
+      case '%': {
+        const dividend = this.number(left, frame, span);
+        const divisor = this.number(right, frame, span);
+        if (!Number.isInteger(dividend) || !Number.isInteger(divisor)) throw this.error(frame, span, 'E_RUNTIME_TYPE', '% requires integer operands');
+        if (divisor === 0) throw this.error(frame, span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
+        return dividend % divisor;
+      }
+      case '==': return this.equal(left, right, false);
+      case '!=': return !this.equal(left, right, false);
+      case '===': return this.equal(left, right, true);
+      case '!==': return !this.equal(left, right, true);
+      case '<': case '>': case '<=': case '>=': {
+        const order = this.compare(left, right, frame, span);
+        return operator === '<' ? order < 0 : operator === '>' ? order > 0 : operator === '<=' ? order <= 0 : order >= 0;
+      }
+      case 'in':
+        if (Array.isArray(right)) return right.some(item => this.equal(item, left, false));
+        if (right instanceof Map) return right.has(this.stringify(left, frame, span));
+        if (isString(right)) return textOf(right).includes(this.stringify(left, frame, span));
+        throw this.error(frame, span, 'E_RUNTIME_TYPE', 'in requires a list, map or string on the right');
+      default: throw this.error(frame, span, 'E_RUNTIME_TYPE', `unknown operator ${operator}`);
+    }
+  }
+
   stringify(value: Value, frame: Frame, span: Span): string {
     try {
       return stringifyValue(value);

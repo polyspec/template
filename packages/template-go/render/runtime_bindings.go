@@ -6,6 +6,7 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/errs"
@@ -29,6 +30,143 @@ func NewRuntimeBindings(context *Context) *RuntimeBindings { return &RuntimeBind
 
 // Truthy applies template truthiness.
 func (r *RuntimeBindings) Truthy(input value.Value) bool { return value.IsTruthy(input) }
+
+// Unary applies one eager unary operator.
+func (r *RuntimeBindings) Unary(operator string, operand value.Value, frame *Frame, span ast.Span) (value.Value, error) {
+	if operator == "!" {
+		return !r.Truthy(operand), nil
+	}
+	if operator == "-" {
+		number, err := r.Number(operand, frame, span)
+		if err != nil {
+			return nil, err
+		}
+		return r.Finite(-number, frame, span)
+	}
+	return nil, r.Error(frame, span, errs.RuntimeType, "unknown operator "+operator)
+}
+
+// Binary applies one eager binary operator. Short-circuit selection remains generated control flow.
+func (r *RuntimeBindings) Binary(operator string, left, right value.Value, frame *Frame, span ast.Span) (value.Value, error) {
+	switch operator {
+	case "+":
+		if runtimeCollection(left) || runtimeCollection(right) {
+			return nil, r.Error(frame, span, errs.RuntimeStringify, "a list or map cannot be converted to text")
+		}
+		if value.IsString(left) || value.IsString(right) {
+			leftText, err := r.Stringify(left, frame, span)
+			if err != nil {
+				return nil, err
+			}
+			rightText, err := r.Stringify(right, frame, span)
+			if err != nil {
+				return nil, err
+			}
+			return leftText + rightText, nil
+		}
+		return runtimeArithmetic(r, left, right, frame, span, func(a, b float64) float64 { return a + b })
+	case "-":
+		return runtimeArithmetic(r, left, right, frame, span, func(a, b float64) float64 { return a - b })
+	case "*":
+		return runtimeArithmetic(r, left, right, frame, span, func(a, b float64) float64 { return a * b })
+	case "/":
+		divisor, err := r.Number(right, frame, span)
+		if err != nil {
+			return nil, err
+		}
+		if divisor == 0 {
+			return nil, r.Error(frame, span, errs.RuntimeDivZero, "division by zero")
+		}
+		dividend, err := r.Number(left, frame, span)
+		if err != nil {
+			return nil, err
+		}
+		return r.Finite(dividend/divisor, frame, span)
+	case "%":
+		dividend, err := r.Number(left, frame, span)
+		if err != nil {
+			return nil, err
+		}
+		divisor, err := r.Number(right, frame, span)
+		if err != nil {
+			return nil, err
+		}
+		if dividend != math.Trunc(dividend) || divisor != math.Trunc(divisor) {
+			return nil, r.Error(frame, span, errs.RuntimeType, "% requires integer operands")
+		}
+		if divisor == 0 {
+			return nil, r.Error(frame, span, errs.RuntimeDivZero, "division by zero")
+		}
+		return math.Mod(dividend, divisor), nil
+	case "==":
+		return r.Equal(left, right, false), nil
+	case "!=":
+		return !r.Equal(left, right, false), nil
+	case "===":
+		return r.Equal(left, right, true), nil
+	case "!==":
+		return !r.Equal(left, right, true), nil
+	case "<", ">", "<=", ">=":
+		order, err := r.Compare(left, right, frame, span)
+		if err != nil {
+			return nil, err
+		}
+		if operator == "<" {
+			return order < 0, nil
+		}
+		if operator == ">" {
+			return order > 0, nil
+		}
+		if operator == "<=" {
+			return order <= 0, nil
+		}
+		return order >= 0, nil
+	case "in":
+		switch collection := right.(type) {
+		case value.List:
+			for _, item := range collection {
+				if r.Equal(item, left, false) {
+					return true, nil
+				}
+			}
+			return false, nil
+		case *value.OrderedMap:
+			key, err := r.Stringify(left, frame, span)
+			if err != nil {
+				return nil, err
+			}
+			return collection.Has(key), nil
+		}
+		if text, ok := value.TextOf(right); ok {
+			needle, err := r.Stringify(left, frame, span)
+			if err != nil {
+				return nil, err
+			}
+			return strings.Contains(text, needle), nil
+		}
+		return nil, r.Error(frame, span, errs.RuntimeType, "in requires a list, map or string on the right")
+	default:
+		return nil, r.Error(frame, span, errs.RuntimeType, "unknown operator "+operator)
+	}
+}
+
+func runtimeArithmetic(r *RuntimeBindings, left, right value.Value, frame *Frame, span ast.Span, operation func(float64, float64) float64) (value.Value, error) {
+	a, err := r.Number(left, frame, span)
+	if err != nil {
+		return nil, err
+	}
+	b, err := r.Number(right, frame, span)
+	if err != nil {
+		return nil, err
+	}
+	return r.Finite(operation(a, b), frame, span)
+}
+
+func runtimeCollection(input value.Value) bool {
+	_, list := input.(value.List)
+	_, object := input.(*value.OrderedMap)
+	return list || object
+}
 
 // Stringify converts one template value to text at a source location.
 func (r *RuntimeBindings) Stringify(input value.Value, frame *Frame, span ast.Span) (string, error) {

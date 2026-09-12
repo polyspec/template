@@ -1,5 +1,6 @@
 //! Shared runtime value, function and error semantics for AST and generated programs.
 
+use crate::ast::{BinaryOp, UnaryOp};
 use crate::error::{ErrorCode, Span, TemplateError};
 use crate::escape::escape_html;
 use crate::functions::{FunctionContext, builtins, to_number};
@@ -24,6 +25,121 @@ impl RuntimeBindings {
     /// Applies template truthiness.
     pub fn truthy(&self, value: &Value) -> bool {
         value.is_truthy()
+    }
+
+    /// Applies one eager unary operator.
+    pub fn unary(
+        &self,
+        context: &RenderContext<'_>,
+        operator: UnaryOp,
+        operand: &Value,
+        frame: &Frame,
+        span: Span,
+    ) -> Result<Value, TemplateError> {
+        match operator {
+            UnaryOp::Not => Ok(Value::Bool(!self.truthy(operand))),
+            UnaryOp::Negate => {
+                let number = self.number(context, operand, frame, span)?;
+                self.finite(context, -number, frame, span)
+            }
+        }
+    }
+
+    /// Applies one eager binary operator. Short-circuit selection remains generated control flow.
+    pub fn binary(
+        &self,
+        context: &RenderContext<'_>,
+        operator: BinaryOp,
+        left: &Value,
+        right: &Value,
+        frame: &Frame,
+        span: Span,
+    ) -> Result<Value, TemplateError> {
+        match operator {
+            BinaryOp::Add => {
+                if matches!(left, Value::List(_) | Value::Map(_)) || matches!(right, Value::List(_) | Value::Map(_)) {
+                    return Err(self.error(
+                        context,
+                        frame,
+                        span,
+                        ErrorCode::E_RUNTIME_STRINGIFY,
+                        "a list or map cannot be converted to text",
+                    ));
+                }
+                if left.is_string() || right.is_string() {
+                    let mut text = self.stringify(context, left, frame, span)?;
+                    text.push_str(&self.stringify(context, right, frame, span)?);
+                    return Ok(Value::text(text));
+                }
+                let result = self.number(context, left, frame, span)? + self.number(context, right, frame, span)?;
+                self.finite(context, result, frame, span)
+            }
+            BinaryOp::Subtract => {
+                let result = self.number(context, left, frame, span)? - self.number(context, right, frame, span)?;
+                self.finite(context, result, frame, span)
+            }
+            BinaryOp::Multiply => {
+                let result = self.number(context, left, frame, span)? * self.number(context, right, frame, span)?;
+                self.finite(context, result, frame, span)
+            }
+            BinaryOp::Divide => {
+                let divisor = self.number(context, right, frame, span)?;
+                if divisor == 0.0 {
+                    return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_DIV_ZERO, "division by zero"));
+                }
+                let result = self.number(context, left, frame, span)? / divisor;
+                self.finite(context, result, frame, span)
+            }
+            BinaryOp::Remainder => {
+                let dividend = self.number(context, left, frame, span)?;
+                let divisor = self.number(context, right, frame, span)?;
+                if dividend.fract() != 0.0 || divisor.fract() != 0.0 {
+                    return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "% requires integer operands"));
+                }
+                if divisor == 0.0 {
+                    return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_DIV_ZERO, "division by zero"));
+                }
+                Ok(Value::Number(dividend % divisor))
+            }
+            BinaryOp::Equal => Ok(Value::Bool(self.equal(left, right, false))),
+            BinaryOp::NotEqual => Ok(Value::Bool(!self.equal(left, right, false))),
+            BinaryOp::StrictEqual => Ok(Value::Bool(self.equal(left, right, true))),
+            BinaryOp::StrictNotEqual => Ok(Value::Bool(!self.equal(left, right, true))),
+            BinaryOp::Less | BinaryOp::Greater | BinaryOp::LessEqual | BinaryOp::GreaterEqual => {
+                let order = self.compare(context, left, right, frame, span)?;
+                Ok(Value::Bool(match operator {
+                    BinaryOp::Less => order == Ordering::Less,
+                    BinaryOp::Greater => order == Ordering::Greater,
+                    BinaryOp::LessEqual => order != Ordering::Greater,
+                    _ => order != Ordering::Less,
+                }))
+            }
+            BinaryOp::In => match right {
+                Value::List(list) => Ok(Value::Bool(list.iter().any(|item| self.equal(item, left, false)))),
+                Value::Map(map) => {
+                    let key = self.stringify(context, left, frame, span)?;
+                    Ok(Value::Bool(map.contains_key(&key)))
+                }
+                value if value.is_string() => {
+                    let needle = self.stringify(context, left, frame, span)?;
+                    Ok(Value::Bool(value.as_text().unwrap_or("").contains(&needle)))
+                }
+                _ => Err(self.error(
+                    context,
+                    frame,
+                    span,
+                    ErrorCode::E_RUNTIME_TYPE,
+                    "in requires a list, map or string on the right",
+                )),
+            },
+            BinaryOp::And | BinaryOp::Or | BinaryOp::Coalesce => Err(self.error(
+                context,
+                frame,
+                span,
+                ErrorCode::E_RUNTIME_TYPE,
+                "short-circuit operator requires control flow",
+            )),
+        }
     }
 
     /// Converts one value to text at its source location.

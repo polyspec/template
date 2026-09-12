@@ -1,8 +1,6 @@
 package render
 
 import (
-	"math"
-
 	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/errs"
 	"github.com/polyspec/template/value"
@@ -94,14 +92,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		if n.Op == "!" {
-			return !e.runtime.Truthy(operand), nil
-		}
-		x, err := e.runtime.Number(operand, frame, n.Span)
-		if err != nil {
-			return nil, err
-		}
-		return e.runtime.Finite(-x, frame, n.Span)
+		return e.runtime.Unary(n.Op, operand, frame, n.Span)
 	case *ast.Binary:
 		return e.binary(n, frame)
 	case *ast.Ternary:
@@ -175,14 +166,6 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 	return nil, e.fail(frame, ast.SpanOf(expr), errs.RuntimeType, "unknown expression node")
 }
 
-func isCollection(v value.Value) bool {
-	switch v.(type) {
-	case value.List, *value.OrderedMap:
-		return true
-	}
-	return false
-}
-
 func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 	switch n.Op {
 	case "&&":
@@ -229,124 +212,5 @@ func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	span := n.Span
-	switch n.Op {
-	case "+":
-		if isCollection(left) || isCollection(right) {
-			return nil, e.fail(frame, span, errs.RuntimeStringify, "a list or map cannot be converted to text")
-		}
-		if value.IsString(left) || value.IsString(right) {
-			l, err := e.runtime.Stringify(left, frame, span)
-			if err != nil {
-				return nil, err
-			}
-			r, err := e.runtime.Stringify(right, frame, span)
-			if err != nil {
-				return nil, err
-			}
-			return l + r, nil
-		}
-		return e.arith(left, right, frame, span, func(a, b float64) float64 { return a + b })
-	case "-":
-		return e.arith(left, right, frame, span, func(a, b float64) float64 { return a - b })
-	case "*":
-		return e.arith(left, right, frame, span, func(a, b float64) float64 { return a * b })
-	case "/":
-		divisor, err := e.runtime.Number(right, frame, span)
-		if err != nil {
-			return nil, err
-		}
-		if divisor == 0 {
-			return nil, e.fail(frame, span, errs.RuntimeDivZero, "division by zero")
-		}
-		dividend, err := e.runtime.Number(left, frame, span)
-		if err != nil {
-			return nil, err
-		}
-		return e.runtime.Finite(dividend/divisor, frame, span)
-	case "%":
-		dividend, err := e.runtime.Number(left, frame, span)
-		if err != nil {
-			return nil, err
-		}
-		divisor, err := e.runtime.Number(right, frame, span)
-		if err != nil {
-			return nil, err
-		}
-		if dividend != math.Trunc(dividend) || divisor != math.Trunc(divisor) {
-			return nil, e.fail(frame, span, errs.RuntimeType, "% requires integer operands")
-		}
-		if divisor == 0 {
-			return nil, e.fail(frame, span, errs.RuntimeDivZero, "division by zero")
-		}
-		return math.Mod(dividend, divisor), nil
-	case "==":
-		return e.runtime.Equal(left, right, false), nil
-	case "!=":
-		return !e.runtime.Equal(left, right, false), nil
-	case "===":
-		return e.runtime.Equal(left, right, true), nil
-	case "!==":
-		return !e.runtime.Equal(left, right, true), nil
-	case "<", ">", "<=", ">=":
-		order, err := e.runtime.Compare(left, right, frame, span)
-		if err != nil {
-			return nil, err
-		}
-		switch n.Op {
-		case "<":
-			return order < 0, nil
-		case ">":
-			return order > 0, nil
-		case "<=":
-			return order <= 0, nil
-		}
-		return order >= 0, nil
-	case "in":
-		switch r := right.(type) {
-		case value.List:
-			for _, item := range r {
-				if e.runtime.Equal(item, left, false) {
-					return true, nil
-				}
-			}
-			return false, nil
-		case *value.OrderedMap:
-			key, err := e.runtime.Stringify(left, frame, span)
-			if err != nil {
-				return nil, err
-			}
-			return r.Has(key), nil
-		}
-		if text, ok := value.TextOf(right); ok {
-			needle, err := e.runtime.Stringify(left, frame, span)
-			if err != nil {
-				return nil, err
-			}
-			return contains(text, needle), nil
-		}
-		return nil, e.fail(frame, span, errs.RuntimeType, "in requires a list, map or string on the right")
-	}
-	return nil, e.fail(frame, span, errs.RuntimeType, "unknown operator "+n.Op)
-}
-
-func contains(text, needle string) bool {
-	for i := 0; i+len(needle) <= len(text); i++ {
-		if text[i:i+len(needle)] == needle {
-			return true
-		}
-	}
-	return false
-}
-
-func (e *Evaluator) arith(left, right value.Value, frame *Frame, span ast.Span, op func(a, b float64) float64) (value.Value, error) {
-	a, err := e.runtime.Number(left, frame, span)
-	if err != nil {
-		return nil, err
-	}
-	b, err := e.runtime.Number(right, frame, span)
-	if err != nil {
-		return nil, err
-	}
-	return e.runtime.Finite(op(a, b), frame, span)
+	return e.runtime.Binary(n.Op, left, right, frame, n.Span)
 }

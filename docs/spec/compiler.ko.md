@@ -32,7 +32,7 @@ Typed IR은 모든 symbol, template path, definition target, function signature,
 
 `RuntimeServices`는 두 program mode가 함께 사용하는 runtime interface다. 구체적인 `RuntimeEnvironment`가 자원 제한과 host 함수 registry를 소유하고 등록을 한 번 검증하며 이 interface를 구현한다. 각 `AstProgram`과 `GeneratedProgram`은 environment 하나를 소유한다. AST에만 필요한 template loading은 AST renderer에 속하며 environment나 generated 실행 상태에는 들어가지 않는다. `RuntimeBindings`가 `RuntimeServices`를 사용하므로 generated 코드는 AST loader나 interpreter에 의존하지 않고 같은 값·오류 의미를 사용한다.
 
-Generated expression은 truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검증, 동등성, 정렬, lookup, 반복 entry, 함수, limit, error를 target runtime의 `RuntimeBindings`로 처리한다. 네 runtime의 AST evaluator와 statement renderer는 이미 이 경계를 사용하며 실제 선언을 compiler manifest와 대조한다. Backend는 typed operand에서 data-model 규칙과 정확히 같은 경우에만 native operation을 생성할 수 있다.
+Generated expression은 unary와 eager binary 연산, truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검증, 동등성, 정렬, lookup, 반복 entry, 함수, limit, error를 target runtime의 `RuntimeBindings`로 처리한다. AST evaluator도 같은 unary와 binary 연산을 사용하며 evaluator와 generated 제어 흐름에는 `&&`, `||`, `??`에 필요한 lazy branch 선택만 남는다. 실제 선언은 compiler manifest와 대조한다. Backend는 typed operand에서 data-model 규칙과 정확히 같은 경우에만 native operation을 생성할 수 있다.
 
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 
