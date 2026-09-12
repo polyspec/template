@@ -1,0 +1,20 @@
+// Generated.
+use std::collections::HashMap;
+#[derive(Default)] pub struct Page { pub title: String }
+#[derive(Default)] pub struct Slot { pub template: String, pub html: String }
+#[derive(Default)] pub struct Assign {
+    pub title: String,
+    pub heading: String,
+    pub island_label: String,
+    pub root_label: String,
+    pub defined_label: String,
+    pub page: Page,
+}
+pub fn render(assign: &Assign, slots: &HashMap<String, String>) -> String { let mut out = String::new();
+    out.push_str("<main>\n<h1>");
+    out.push_str(&escape(&assign.title.to_string()));
+    out.push_str("</h1>\n");
+    out.push_str(slots.get("content").map(String::as_str).unwrap_or(""));
+    out.push_str("</main>\n");
+ out }
+fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }

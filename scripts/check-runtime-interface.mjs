@@ -15,6 +15,12 @@ const files = {
   typescript: ['packages/template-ts/src/render/engine.ts', /prepare\(target:/, /class PreparedRender[\s\S]*?render\(\)/],
   php: ['packages/template-php/src/Engine.php', /public function prepare\(/, /class PreparedRender[\s\S]*?public function render\(/],
 };
+const compilePatterns = {
+  rust: [/pub enum CompileMode/, /pub compile: CompileOptions/, /generated compile mode requires/],
+  go: [/type CompileMode string/, /Compile\s+CompileOptions/, /generated compile mode requires/],
+  typescript: [/export type CompileMode/, /compile\?: CompileOptions/, /generated compile mode requires/],
+  php: [/compileMode/, /\$options\['compile'\]/, /generated compile mode requires/],
+};
 const pageCaches = {
   rust: 'packages/template-rust/src/page_cache.rs',
   go: 'packages/template-go/cache/page_cache.go',
@@ -25,6 +31,7 @@ for (const [language, [relative, enginePattern, preparedPattern]] of Object.entr
   const source = readFileSync(resolve(root, relative), 'utf8');
   if (!enginePattern.test(source)) throw new Error(`${language}: missing Engine prepare operation`);
   if (!preparedPattern.test(source)) throw new Error(`${language}: missing PreparedRender render operation`);
+  for (const pattern of compilePatterns[language]) if (!pattern.test(source)) throw new Error(`${language}: compile.mode implementation is missing`);
   const mapping = manifest.languages[language];
   if (!mapping || !mapping.engine || !mapping.pageCache) throw new Error(`${language}: missing manifest mapping`);
   const pageCache = readFileSync(resolve(root, pageCaches[language]), 'utf8');

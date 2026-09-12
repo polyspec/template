@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "root": "Assign",
+  "fields": {
+    "title": "string?",
+    "heading": "string?",
+    "island_label": "string?",
+    "root_label": "string?",
+    "defined_label": "string?",
+    "page": "Page?"
+  },
+  "records": {
+    "Page": { "title": "string?" }
+  },
+  "defines": { "content": "Slot?", "layout": "Template" },
+  "recordsExtra": { "Slot": { "template": "string?", "html": "string?" } }
+}

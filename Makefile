@@ -6,7 +6,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
-	contract-generate contract-check showcase showcase-check showcase-compile \
+	contract-generate contract-check typed-generator typed-generator-check showcase showcase-check showcase-compile \
 	docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -159,8 +159,15 @@ showcase-check: build-ts ## Verify example-site parity, repeatability and browse
 	node tools/showcase/build-site.mjs --check
 	node scripts/check-showcase-html.mjs
 
-showcase-compile: build-ts ## Generate committed per-language AST artifacts
+	showcase-compile: build-ts ## Generate committed per-language AST artifacts
 	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
+
+typed-generator: ## Generate type-fixed host source from canonical AST
+	@mkdir -p tools/showcase/adapters/generated/typed
+	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --ast examples/site/scenarios/react-boundary/compiled/typescript/layout.tpl.ast.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
+
+typed-generator-check: ## Verify type-fixed generated source is reproducible
+	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --ast examples/site/scenarios/react-boundary/compiled/typescript/layout.tpl.ast.json --manifest tools/compiler/type-manifest.json --lang $$lang --output tools/showcase/adapters/generated/typed/react-layout.$$lang; done
 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target docs/.vitepress/dist docs/.vitepress/dist.first
