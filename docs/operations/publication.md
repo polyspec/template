@@ -41,7 +41,7 @@ Every package declares version `0.0.1`. The version changes together in every pa
 
 ## Documentation site
 
-The online documentation is a static VitePress site. The GitHub Pages workflow runs `make docs-check` and `make showcase-check`, builds `docs/.vitepress/dist` with `make docs-static-check`, copies the already generated showcase HTML and committed AST artifacts to `examples/site/`, and deploys that directory as the Pages artifact. The showcase does not ship a parser or renderer to the browser. It passes `VITEPRESS_BASE` for the repository path so links and assets work under `/<repository>/` without a server-side application.
+The online documentation is a static VitePress site. After every required CI job passes on `main`, the `pages` job builds `docs/.vitepress/dist` with `make docs-static-check`, copies the already generated showcase HTML and committed AST artifacts to `examples/site/`, and deploys that directory as the Pages artifact. The release job has already verified the documents and showcase, so publication does not repeat those gates. The showcase does not ship a parser or renderer to the browser. The build passes `VITEPRESS_BASE` for the repository path so links and assets work under `/<repository>/` without a server-side application.
 
 The documentation build discovers every `*.ko.md` translation pair and publishes it under `/ko/`. VitePress locale configuration supplies Korean navigation and `ko-KR` HTML metadata throughout that route tree. The static-site gate rejects suffix-style output routes, navigation that leaves the active locale, incorrect HTML language metadata and unresolved theme interpolation.
 
