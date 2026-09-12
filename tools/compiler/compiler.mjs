@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { loadSourceGraph, lowerSourceGraph } from './ir.mjs';
 import { templateBodies } from './backend-support.mjs';
+import { compileGeneratedArtifact } from './generated-artifact.mjs';
 import * as typescript from './backends/typescript.mjs';
 import * as go from './backends/go.mjs';
 import * as rust from './backends/rust.mjs';
@@ -24,34 +24,27 @@ export function compileSource(graphPath, manifestPath, language) {
   return [...backendOperations.map(operation => backend[operation](context)), ''].join('\n');
 }
 
-export function updateArtifact(output, source, check) {
-  if (check) {
-    if (!existsSync(output) || readFileSync(output, 'utf8') !== source) throw new Error(`compiler artifact is stale: ${output}`);
-    return;
-  }
-  mkdirSync(dirname(output), { recursive: true });
-  const temporary = `${output}.tmp-${process.pid}`;
-  try {
-    writeFileSync(temporary, source);
-    renameSync(temporary, output);
-  } finally {
-    rmSync(temporary, { force: true });
-  }
-}
-
 function main(args) {
   const value = name => { const index = args.indexOf(name); return index < 0 ? null : args[index + 1]; };
   const graph = value('--graph');
   const manifest = value('--manifest');
   const language = value('--lang');
   const output = value('--output');
+  const refresh = value('--refresh');
   const check = args.includes('--check');
-  if (!graph || !manifest || !language || !output) {
-    throw new Error('usage: compiler.mjs --graph MANIFEST --manifest FILE --lang ts|go|rust|php --output FILE [--check]');
+  if (!graph || !manifest || !language || !output || !refresh) {
+    throw new Error('usage: compiler.mjs --graph MANIFEST --manifest FILE --lang ts|go|rust|php --output FILE --refresh dev|true|false [--check]');
   }
-  const source = compileSource(graph, manifest, language);
-  updateArtifact(output, source, check);
-  process.stdout.write(`compiler ${language}: ${check ? 'checked' : 'generated'} ${output}\n`);
+  compileGeneratedArtifact({
+    graphPath: graph,
+    typeManifestPath: manifest,
+    target: language,
+    output,
+    refresh,
+    check,
+    compile: () => compileSource(graph, manifest, language),
+  });
+  process.stdout.write(`compiler ${language}: ${check ? 'checked' : refresh === 'false' ? 'loaded' : 'ready'} ${output}\n`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main(process.argv.slice(2));

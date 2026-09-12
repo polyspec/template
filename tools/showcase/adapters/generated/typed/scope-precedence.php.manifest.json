@@ -1,0 +1,15 @@
+{
+  "schema": 2,
+  "mode": "gen",
+  "target": "php",
+  "entry": "layout.tpl",
+  "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
+  "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
+  "contractDigest": "17278ce3a1e628fdebe22170f24aa2d105c3c41192c33198426907013f251bdc",
+  "files": {
+    "scope-precedence.php": {
+      "path": "scope-precedence.php",
+      "artifactDigest": "e14da70201be00afcca4dec7bdba2c8ad52f00adaade77933e5b25525746b4a1"
+    }
+  }
+}
