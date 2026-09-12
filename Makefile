@@ -186,7 +186,7 @@ typed-generator-check: build-ts ## Verify type-fixed generated source is reprodu
 	@for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/scope-precedence/compiled/ast/manifest.json --manifest examples/site/scenarios/scope-precedence/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/scope-precedence.$$lang; done
 	@for scenario in empty-state html-slot; do for lang in ts go rust php; do node tools/compiler/generate-typed.mjs --check --graph examples/site/scenarios/$$scenario/compiled/ast/manifest.json --manifest examples/site/scenarios/$$scenario/types.json --lang $$lang --output tools/showcase/adapters/generated/typed/$$scenario.$$lang; done; done
 
-compiler-ir-check: ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
+compiler-ir-check: build-ts ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
 	node scripts/check-ast-artifact.mjs
 	node scripts/check-compiler-ir.mjs
 

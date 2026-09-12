@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Program;
+use Polyspec\Template\Render\RuntimeBindings;
 
 /** Verifies public runtime declarations against the common compiler manifest. */
 final class CompilerInterfaceTest extends TestCase
@@ -42,5 +43,15 @@ final class CompilerInterfaceTest extends TestCase
         $ast = new \ReflectionClass(AstProgram::class);
         self::assertFalse($ast->isAbstract());
         self::assertTrue($ast->implementsInterface(Program::class));
+
+        $bindings = new \ReflectionClass(RuntimeBindings::class);
+        self::assertFalse($bindings->isAbstract());
+        self::assertSame(array_column($contract['RuntimeBindings']['operations'], 'name'), array_values(array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            array_filter($bindings->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
+        )));
+        foreach ($contract['RuntimeBindings']['operations'] as $operation) {
+            self::assertSame(count($operation['parameters']), $bindings->getMethod($operation['name'])->getNumberOfParameters());
+        }
     }
 }

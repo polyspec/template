@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Render;
 
-use Polyspec\Template\Escape;
 use Polyspec\Template\Loader\Path;
-use Polyspec\Template\Value\MapValue;
-use Polyspec\Template\Value\SafeString;
-use Polyspec\Template\Value\Value;
 
 /**
  * Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32).
@@ -45,16 +41,12 @@ final class Renderer
                 return;
             case 'Echo':
                 $value = $this->evaluator->evaluate($node['expr'], $frame);
-                if ($value instanceof SafeString) {
-                    $this->context->write($value->text);
-                } else {
-                    $this->context->write(Escape::html($this->evaluator->stringify($value, $frame, $node['expr']['span'])));
-                }
+                $this->context->write($this->evaluator->runtime->escape($value, $frame, $node['expr']['span']));
 
                 return;
             case 'If':
                 foreach ($node['branches'] as $branch) {
-                    if (Value::isTruthy($this->evaluator->evaluate($branch['test'], $frame))) {
+                    if ($this->evaluator->runtime->truthy($this->evaluator->evaluate($branch['test'], $frame))) {
                         $this->renderNodes($branch['body'], $frame);
 
                         return;
@@ -98,21 +90,7 @@ final class Renderer
     private function renderFor(array $node, Frame $frame): void
     {
         $iterable = $this->evaluator->evaluate($node['iter'], $frame);
-        if ($iterable === null) {
-            $entries = [];
-        } elseif (is_array($iterable)) {
-            $entries = [];
-            foreach ($iterable as $index => $value) {
-                $entries[] = [(float) $index, $value];
-            }
-        } elseif ($iterable instanceof MapValue) {
-            $entries = [];
-            foreach ($iterable->entries() as $key => $value) {
-                $entries[] = [$key, $value];
-            }
-        } else {
-            throw $this->context->fail('E_RUNTIME_TYPE', $frame, $node['span'], 'loop requires a list, a map or null');
-        }
+        $entries = $this->evaluator->runtime->entries($iterable, $frame, $node['span']);
         if ($entries === []) {
             if ($node['empty'] !== null) {
                 $this->renderNodes($node['empty'], $frame);
@@ -127,7 +105,8 @@ final class Renderer
         $size = count($entries);
         try {
             foreach ($entries as $index => [$key, $value]) {
-                $this->context->countIteration($frame, $node['span']);
+                $this->context->iterations++;
+                $this->evaluator->runtime->limit('iteration', $this->context->iterations, $frame, $node['span']);
                 $meta = ['index' => $index, 'key' => $key, 'value' => $value, 'first' => $index === 0, 'last' => $index === $size - 1, 'size' => $size];
                 $frame->loops[$name] = [...$stackBefore, $meta];
                 $frame->locals->set($name, $value);

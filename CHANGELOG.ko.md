@@ -52,3 +52,4 @@
 - 네 공개 runtime이 같은 `Engine`/`Program`/`AstProgram` 소유 구조를 제공하도록 구체적인 Go `AstProgram` 타입을 추가했다.
 - compiler manifest에 runtime 선언 계약을 추가했다. interface gate는 TypeScript, Go, Rust 선언을 각 언어 parser로, PHP 선언을 Reflection으로 추출한 뒤 연산, 인자 수, 소유 관계, AST program 구조를 manifest와 비교한다.
 - 중복된 showcase AST 디렉터리 네 벌을 시나리오별 canonical `compiled/ast` graph 하나로 교체했다. 제품 AST compiler는 source, type, contract digest를 기록하고 모든 파일 뒤에 manifest를 발행하며 실패한 빌드 뒤에도 이전 artifact를 보존하고 `false` 갱신 정책에서 템플릿 소스를 읽지 않고 배포 artifact를 검증한다.
+- TypeScript, Go, Rust, PHP의 truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검사, 동등성, 정렬, lookup, 반복 entry, 함수 호출, limit, 위치 오류를 `RuntimeBindings`로 통합했다. AST evaluator와 statement renderer가 이 경계를 사용하고 compiler interface gate가 runtime 연산 누락을 거부한다. TypeScript와 PHP의 표현식 깊이 검사는 고정값 대신 설정된 제한값을 사용한다.

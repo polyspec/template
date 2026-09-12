@@ -113,10 +113,4 @@ export class RenderContext {
     this.chain.pop();
   }
 
-  countIteration(frame: Frame, span: Span): void {
-    this.iterations++;
-    if (this.iterations > this.services.limits.iterations) {
-      throw this.fail('E_RUNTIME_LIMIT', frame, span, `loop iterations exceed ${this.services.limits.iterations}`);
-    }
-  }
 }

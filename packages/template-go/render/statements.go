@@ -5,9 +5,7 @@ import (
 
 	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
 	"github.com/polyspec/template/loader"
-	"github.com/polyspec/template/value"
 )
 
 // Renderer renders statement nodes (RT-11 to RT-32).
@@ -40,21 +38,18 @@ func (r *Renderer) renderNode(node ast.Node, frame *Frame) error {
 		if err != nil {
 			return err
 		}
-		if safe, ok := v.(value.SafeString); ok {
-			return r.context.Write(safe.Text, frame, &n.Span)
-		}
-		text, err := r.evaluator.stringify(v, frame, ast.SpanOf(n.Expr))
+		text, err := r.evaluator.runtime.Escape(v, frame, ast.SpanOf(n.Expr))
 		if err != nil {
 			return err
 		}
-		return r.context.Write(functions.EscapeHTML(text), frame, &n.Span)
+		return r.context.Write(text, frame, &n.Span)
 	case *ast.If:
 		for _, branch := range n.Branches {
 			test, err := r.evaluator.Evaluate(branch.Test, frame)
 			if err != nil {
 				return err
 			}
-			if value.IsTruthy(test) {
+			if r.evaluator.runtime.Truthy(test) {
 				return r.RenderNodes(branch.Body, frame)
 			}
 		}
@@ -92,20 +87,9 @@ func (r *Renderer) renderFor(n *ast.For, frame *Frame) error {
 	if err != nil {
 		return err
 	}
-	type entry struct{ key, value value.Value }
-	var entries []entry
-	switch it := iterable.(type) {
-	case nil:
-	case value.List:
-		for i, v := range it {
-			entries = append(entries, entry{float64(i), v})
-		}
-	case *value.OrderedMap:
-		for _, k := range it.Keys() {
-			entries = append(entries, entry{k, it.MustGet(k)})
-		}
-	default:
-		return r.context.Fail(errs.RuntimeType, frame, &n.Span, "loop requires a list, a map or null")
+	entries, err := r.evaluator.runtime.Entries(iterable, frame, n.Span)
+	if err != nil {
+		return err
 	}
 	if len(entries) == 0 {
 		if n.Empty != nil {
@@ -126,15 +110,16 @@ func (r *Renderer) renderFor(n *ast.For, frame *Frame) error {
 		}
 	}()
 	for i, item := range entries {
-		if err := r.context.CountIteration(frame, &n.Span); err != nil {
+		r.context.Iterations++
+		if err := r.evaluator.runtime.Limit("iteration", r.context.Iterations, frame, n.Span); err != nil {
 			return err
 		}
 		meta.Index = i
-		meta.Key = item.key
-		meta.Value = item.value
+		meta.Key = item.Key
+		meta.Value = item.Value
 		meta.First = i == 0
 		meta.Last = i == len(entries)-1
-		frame.Locals[n.Name] = item.value
+		frame.Locals[n.Name] = item.Value
 		if err := r.RenderNodes(n.Body, frame); err != nil {
 			return err
 		}

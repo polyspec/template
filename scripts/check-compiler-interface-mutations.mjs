@@ -15,6 +15,8 @@ try {
     ['missing Program operation', manifest => manifest.runtimeContract.Program.operations.pop()],
     ['changed Program parameter count', manifest => manifest.runtimeContract.Program.operations[0].parameters.pop()],
     ['changed Engine owner', manifest => { manifest.runtimeContract.Engine.owns = ['artifact']; }],
+    ['missing RuntimeBindings operation', manifest => manifest.runtimeContract.RuntimeBindings.operations.pop()],
+    ['changed RuntimeBindings parameter count', manifest => manifest.runtimeContract.RuntimeBindings.operations[1].parameters.pop()],
   ];
   for (const [name, mutate] of mutations) {
     const manifest = structuredClone(original);
@@ -33,4 +35,4 @@ try {
   rmSync(directory, { recursive: true, force: true });
 }
 
-process.stdout.write('compiler interface: 3 structural mutations rejected\n');
+process.stdout.write('compiler interface: 5 structural mutations rejected\n');

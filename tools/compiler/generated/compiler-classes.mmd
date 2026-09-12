@@ -76,6 +76,21 @@ classDiagram
   }
   class AstProgram
   class GeneratedProgram
+  class RuntimeBindings {
+    +truthy(value) bool
+    +stringify(value, frame, span) string or error
+    +escape(value, frame, span) string or error
+    +number(value, frame, span) number or error
+    +finite(number, frame, span) number or error
+    +equal(left, right, strict) bool
+    +compare(left, right, frame, span) ordering or error
+    +member(container, key) value
+    +index(container, key) value
+    +entries(value, frame, span) entries or error
+    +call(name, args, frame, span) value or error
+    +limit(kind, count, frame, span) void or error
+    +error(frame, span, code, message) error
+  }
   Program <|-- AstProgram
   Program <|-- GeneratedProgram
   Compiler --> TypedProgram
@@ -84,3 +99,5 @@ classDiagram
   ArtifactStore --> ArtifactManifest
   ArtifactStore --> Program
   Engine --> Program
+  AstProgram --> RuntimeBindings
+  GeneratedProgram --> RuntimeBindings

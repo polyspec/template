@@ -191,18 +191,4 @@ impl<'e> RenderContext<'e> {
     pub fn leave(&mut self) {
         self.chain.pop();
     }
-
-    /// Counts one loop iteration (RT-20).
-    pub fn count_iteration(&mut self, frame: &Frame, span: Span) -> Result<(), TemplateError> {
-        self.iterations += 1;
-        if self.iterations > self.engine.limits.iterations {
-            return Err(self.fail(
-                ErrorCode::E_RUNTIME_LIMIT,
-                Some(frame),
-                Some(span),
-                format!("loop iterations exceed {}", self.engine.limits.iterations),
-            ));
-        }
-        Ok(())
-    }
 }

@@ -1,8 +1,7 @@
 // Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32).
 import type { Block, For, If, IfBlock, Node, Span } from '../ast.js';
-import { escapeHtml } from '../escape.js';
 import { PathError, resolvePath } from '../loader.js';
-import { SafeString, type MapValue, type Value } from '../value/value.js';
+import { type MapValue, type Value } from '../value/value.js';
 import { Frame, type DefineEntry, type LoopMeta, type RenderContext } from './context.js';
 import { Evaluator } from './expressions.js';
 
@@ -25,8 +24,7 @@ export class Renderer {
         return;
       case 'Echo': {
         const value = this.evaluator.evaluate(node.expr, frame);
-        if (value instanceof SafeString) this.context.output.write(value.text);
-        else this.context.output.write(escapeHtml(this.evaluator.stringify(value, frame, node.expr.span)));
+        this.context.output.write(this.evaluator.runtime.escape(value, frame, node.expr.span));
         return;
       }
       case 'If':
@@ -52,7 +50,7 @@ export class Renderer {
 
   private renderIf(node: If, frame: Frame): void {
     for (const branch of node.branches) {
-      if (isTruthyValue(this.evaluator.evaluate(branch.test, frame))) {
+      if (this.evaluator.runtime.truthy(this.evaluator.evaluate(branch.test, frame))) {
         this.renderNodes(branch.body, frame);
         return;
       }
@@ -62,11 +60,7 @@ export class Renderer {
 
   private renderFor(node: For, frame: Frame): void {
     const iterable = this.evaluator.evaluate(node.iter, frame);
-    let entries: [Value, Value][];
-    if (iterable === null) entries = [];
-    else if (Array.isArray(iterable)) entries = iterable.map((value, index) => [index, value]);
-    else if (iterable instanceof Map) entries = [...iterable.entries()];
-    else throw this.context.fail('E_RUNTIME_TYPE', frame, node.span, 'loop requires a list, a map or null');
+    const entries = this.evaluator.runtime.entries(iterable, frame, node.span);
 
     if (entries.length === 0) {
       if (node.empty) this.renderNodes(node.empty, frame);
@@ -84,7 +78,8 @@ export class Renderer {
     try {
       for (let index = 0; index < entries.length; index++) {
         const [key, value] = entries[index] as [Value, Value];
-        this.context.countIteration(frame, node.span);
+        this.context.iterations++;
+        this.evaluator.runtime.limit('iteration', this.context.iterations, frame, node.span);
         meta.index = index;
         meta.key = key;
         meta.value = value;
@@ -170,14 +165,4 @@ export class Renderer {
     if (this.context.registry.has(node.id)) this.renderNodes(node.body, frame);
     else if (node.else) this.renderNodes(node.else, frame);
   }
-}
-
-function isTruthyValue(value: Value): boolean {
-  if (value === null || value === false) return false;
-  if (typeof value === 'number') return value !== 0;
-  if (typeof value === 'string') return value.length > 0;
-  if (value instanceof SafeString) return value.text.length > 0;
-  if (Array.isArray(value)) return value.length > 0;
-  if (value instanceof Map) return value.size > 0;
-  return true;
 }
