@@ -2,7 +2,7 @@
 import type { Span } from '../ast.js';
 import type { TemplateError } from '../errors.js';
 import { escapeHtml } from '../escape.js';
-import { FunctionError, toNumber, type FunctionContext } from '../functions/index.js';
+import { builtins, FunctionError, toNumber, type FunctionContext } from '../functions/index.js';
 import { BindError, bind } from '../value/bind.js';
 import { stringify as stringifyValue, StringifyError } from '../value/stringify.js';
 import {
@@ -87,7 +87,7 @@ export class RuntimeBindings {
 
   call(name: string, args: Value[], frame: Frame, span: Span): Value {
     const functionContext: FunctionContext = { env: this.context.env };
-    const builtin = this.context.services.builtins.get(name);
+    const builtin = builtins.get(name);
     if (builtin) {
       if (args.length < builtin.min || args.length > builtin.max) {
         const accepts = builtin.min === builtin.max ? builtin.min : `${builtin.min} to ${builtin.max}`;
@@ -100,7 +100,7 @@ export class RuntimeBindings {
         throw error;
       }
     }
-    const host = this.context.services.functions.get(name);
+    const host = this.context.services.hostFunction(name);
     if (!host) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${name} is not a function`);
     let result: unknown;
     try {
@@ -118,7 +118,8 @@ export class RuntimeBindings {
   }
 
   limit(kind: RuntimeLimit, count: number, frame: Frame, span: Span): void {
-    const maximum = kind === 'expression' ? this.context.services.limits.expressionDepth : this.context.services.limits.iterations;
+    const limits = this.context.services.limits();
+    const maximum = kind === 'expression' ? limits.expressionDepth : limits.iterations;
     if (count <= maximum) return;
     const message = kind === 'expression'
       ? `expression nesting exceeds ${maximum}`

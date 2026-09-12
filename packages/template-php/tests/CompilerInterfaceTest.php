@@ -9,6 +9,7 @@ use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Program;
 use Polyspec\Template\Render\RuntimeBindings;
+use Polyspec\Template\Render\RuntimeServices;
 
 /** Verifies public runtime declarations against the common compiler manifest. */
 final class CompilerInterfaceTest extends TestCase
@@ -52,6 +53,16 @@ final class CompilerInterfaceTest extends TestCase
         )));
         foreach ($contract['RuntimeBindings']['operations'] as $operation) {
             self::assertSame(count($operation['parameters']), $bindings->getMethod($operation['name'])->getNumberOfParameters());
+        }
+
+        $services = new \ReflectionClass(RuntimeServices::class);
+        self::assertTrue($services->isInterface());
+        self::assertSame(array_column($contract['RuntimeServices']['operations'], 'name'), array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            $services->getMethods(\ReflectionMethod::IS_PUBLIC),
+        ));
+        foreach ($contract['RuntimeServices']['operations'] as $operation) {
+            self::assertSame(count($operation['parameters']), $services->getMethod($operation['name'])->getNumberOfParameters());
         }
     }
 }

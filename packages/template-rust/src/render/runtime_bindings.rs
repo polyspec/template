@@ -182,7 +182,7 @@ impl RuntimeBindings {
             }
             return (builtin.call)(&args, &function_context).map_err(|error| self.error(context, frame, span, error.code, error.message));
         }
-        let Some(host) = context.engine.functions.get(name) else {
+        let Some(host) = context.services.host_function(name) else {
             return Err(self.error(
                 context,
                 frame,
@@ -205,10 +205,11 @@ impl RuntimeBindings {
 
     /// Checks expression and iteration limits.
     pub fn limit(&self, context: &RenderContext<'_>, kind: &str, count: usize, frame: &Frame, span: Span) -> Result<(), TemplateError> {
+        let limits = context.services.limits();
         let (maximum, message) = if kind == "expression" {
-            (context.engine.limits.expression_depth, "expression nesting exceeds")
+            (limits.expression_depth, "expression nesting exceeds")
         } else {
-            (context.engine.limits.iterations, "loop iterations exceed")
+            (limits.iterations, "loop iterations exceed")
         };
         if count > maximum {
             return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_LIMIT, format!("{message} {maximum}")));
