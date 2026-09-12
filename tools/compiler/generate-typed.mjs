@@ -60,7 +60,7 @@ function nodes(body, target, level = 1) {
   for (const node of body) {
     if (node.op === 'text') out.push(target.text(node.value, level));
     else if (node.op === 'echo') out.push(target.echo(expr(node.expr, target), level));
-    else if (node.op === 'block') out.push(target.block(node.id, level));
+    else if (node.op === 'block') out.push(target.block(node, level));
     else if (node.op === 'if-block') out.push(target.ifBlock(node, level));
     else if (node.op === 'set') out.push(target.set(node.name, expr(node.expr, target), level));
     else if (node.op === 'if') out.push(target.ifNode(node, level));
@@ -124,6 +124,8 @@ if (lang === 'go') target.ifBlock = (node, n, scope = []) => indent(n, `if _, ok
 if (lang === 'rust') target.ifBlock = (node, n, scope = []) => indent(n, `if slots.contains_key(${quote(node.id)}) {\n${nodes(node.body, target, n + 1, scope)}\n}`);
 if (lang === 'php') target.ifBlock = (node, n, scope = []) => indent(n, `if (isset($slots[${quote(node.id)}])) {\n${nodes(node.body, target, n + 1, scope)}\n}`);
 if (lang === 'ts') {
+  target.block = (node, n) => indent(n, `out += slots[${quote(node.id)}] ?? '';`);
+  target.ifBlock = (node, n) => indent(n, `if (slots[${quote(node.id)}] !== undefined) {\n${nodes(node.body, target, n + 1)}\n}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1)}\n}` : ''}`);
   target.loopMeta = (loop, field) => `${fieldName(loop)}_${field.replace(/_$/, '')}`;
   target.index = (object, index, type) => type.kind === 'map' ? `${object}?.get(${index})` : `${object}?.[${index}]`;
   target.call = (name, args) => name === 'default' ? `generatedDefault(${args.join(', ')})` : `generatedCall(${quote(name)}, [${args.join(', ')}])`;
@@ -143,6 +145,7 @@ if (lang === 'ts') {
   target.include = (node, n) => indent(n, `out += ${functionName(node.target)}(assign, slots, { ${node.inputs.map(item => `${fieldName(item.name)}: ${expr(item.value, target)}`).join(', ')} });`);
 }
 if (lang === 'go') {
+  target.block = (node, n) => indent(n, `out.WriteString(slots[${quote(node.id)}])`);
   target.loopMeta = (loop, field) => `${fieldName(loop)}_${field.replace(/_$/, '')}`;
   target.index = (object, index, type) => type.kind === 'map' ? `generatedMapGet(${object}, ${index})` : `generatedListGet(${object}, int(${index}))`;
   target.call = (name, args) => `generatedCall(${quote(name)}, []any{${args.join(', ')}})`;
@@ -163,6 +166,7 @@ if (lang === 'go') {
   target.include = (node, n) => indent(n, `out.WriteString(${functionName(node.target)}(assign, slots, ${inputName(node.target)}{${node.inputs.map(item => `${fieldName(item.name)[0].toUpperCase() + fieldName(item.name).slice(1)}: ${expr(item.value, target)}`).join(', ')}}))`);
 }
 if (lang === 'rust') {
+  target.block = (node, n) => indent(n, `out.push_str(slots.get(${quote(node.id)}).map(String::as_str).unwrap_or(""));`);
   target.loopMeta = (loop, field) => `${fieldName(loop)}_${field.replace(/_$/, '')}.clone()`;
   target.index = (object, index, type) => type.kind === 'map' ? `${object}.get(&${index}).cloned().unwrap_or_default()` : `${object}.get(${index} as usize).cloned().unwrap_or_default()`;
   target.call = (name, args) => name === 'default' ? `{ let value = ${args[0]}; if generated_truthy(&value) { value } else { ${args[1]} } }` : `generated_call(${quote(name)}, vec![${args.join(', ')}])`;
@@ -181,6 +185,7 @@ if (lang === 'rust') {
   target.include = (node, n) => indent(n, `out.push_str(&${functionName(node.target)}(assign, slots, ${inputName(node.target)} { ${node.inputs.map(item => `${fieldName(item.name)}: ${expr(item.value, target)}`).join(', ')} }));`);
 }
 if (lang === 'php') {
+  target.block = (node, n) => indent(n, `$out .= $slots[${quote(node.id)}] ?? '';`);
   target.loopMeta = (loop, field) => `$${fieldName(loop)}_${field.replace(/_$/, '')}`;
   target.index = (object, index) => `generated_index(${object}, ${index})`;
   target.call = (name, args) => `generated_call(${quote(name)}, [${args.join(', ')}])`;
