@@ -42,6 +42,12 @@ func generatedTemplate(name, scenario string, root *value.OrderedMap, define Def
 		case "layout.tpl": return generated_html_slot__layout_tpl(root, define, parent)
 		default: return "", fmt.Errorf("generated template is missing: %s", name)
 		}
+	case "react-boundary":
+		switch name {
+		case "content.tpl": return generated_react_boundary__content_tpl(root, define, parent)
+		case "layout.tpl": return generated_react_boundary__layout_tpl(root, define, parent)
+		default: return "", fmt.Errorf("generated template is missing: %s", name)
+		}
 	case "scope-precedence":
 		switch name {
 		case "content.tpl": return generated_scope_precedence__content_tpl(root, define, parent)
@@ -84,6 +90,31 @@ func generated_html_slot__layout_tpl(root *value.OrderedMap, define DefineRegist
 	if err != nil { return "", err }
 	out.WriteString(blockHTML)
 	out.WriteString("</section>\n")
+	return out.String(), nil
+}
+
+func generated_react_boundary__content_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString("<section data-react-island id=\"counter\">\n<p>")
+	if err := generatedEcho(&out, generatedLookup(ctx, root, "island_label")); err != nil { return "", err }
+	out.WriteString("</p>\n</section>\n")
+	return out.String(), nil
+}
+
+func generated_react_boundary__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString("<main>\n<h1>")
+	if err := generatedEcho(&out, generatedLookup(ctx, root, "title")); err != nil { return "", err }
+	out.WriteString("</h1>\n")
+	blockScope := map[string]value.Value{}
+	blockHTML, err := generatedBlock("content", "", "react-boundary", root, define, blockScope)
+	if err != nil { return "", err }
+	out.WriteString(blockHTML)
+	out.WriteString("</main>\n")
 	return out.String(), nil
 }
 

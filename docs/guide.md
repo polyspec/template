@@ -335,6 +335,8 @@ The package documents give the full API: [TypeScript](../packages/template-ts/RE
 
 The same templates render in a browser from the TypeScript package. The server embeds the assign data as JSON, and the browser reads it and renders the same template name. [Browser rendering](operations/browser.md) describes how to ship templates and data, and how to place a component framework next to the engine.
 
+For React, keep the server rendered shell and mount a client owned island at a marked element. The static `react-boundary` showcase contains the exact templates, assign data, output and host source. Use `hydrateRoot` only when the server HTML came from the same React component tree; otherwise use a separate `createRoot` island.
+
 ## Errors
 
 A mistake stops the render and reports a code and a position. This template

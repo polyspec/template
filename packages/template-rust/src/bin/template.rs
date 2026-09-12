@@ -122,6 +122,8 @@ fn main() {
         delimiters: options.delimiters.clone(),
         legacy_wrappers: options.legacy_wrappers,
         artifact_refresh: Default::default(),
+        compile_mode: Default::default(),
+        generated_renderer: None,
     });
     let assign = match &options.data {
         Some(path) => read_json(&root, path, &name),

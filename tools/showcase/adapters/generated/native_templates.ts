@@ -114,6 +114,100 @@ const generated = {
       ]
     }
   },
+  "react-boundary": {
+    "content.tpl": {
+      "type": "Template",
+      "name": "content.tpl",
+      "body": [
+        {
+          "type": "Text",
+          "value": "<section data-react-island id=\"counter\">\n<p>",
+          "span": [
+            0,
+            44
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "island_label",
+            "span": [
+              47,
+              59
+            ]
+          },
+          "span": [
+            44,
+            60
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "</p>\n</section>\n",
+          "span": [
+            60,
+            76
+          ]
+        }
+      ]
+    },
+    "layout.tpl": {
+      "type": "Template",
+      "name": "layout.tpl",
+      "body": [
+        {
+          "type": "Text",
+          "value": "<main>\n<h1>",
+          "span": [
+            0,
+            11
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "title",
+            "span": [
+              14,
+              19
+            ]
+          },
+          "span": [
+            11,
+            20
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "</h1>\n",
+          "span": [
+            20,
+            26
+          ]
+        },
+        {
+          "type": "Block",
+          "id": "content",
+          "path": null,
+          "scope": [],
+          "span": [
+            26,
+            37
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "</main>\n",
+          "span": [
+            38,
+            46
+          ]
+        }
+      ]
+    }
+  },
   "scope-precedence": {
     "content.tpl": {
       "type": "Template",

@@ -25,6 +25,17 @@ const (
 	ArtifactRefreshFalse ArtifactRefresh = "false"
 )
 
+// CompileMode selects AST interpretation or a pre-generated renderer.
+type CompileMode string
+
+const (
+	CompileModeAST CompileMode = "ast"
+	CompileModeGen CompileMode = "gen"
+)
+
+// GeneratedRenderer renders a request using generated host-language code.
+type GeneratedRenderer func(target any, assign any, options RenderOptions) (string, error)
+
 // Options configure an engine (RT-1, RT-6, RT-42).
 type Options struct {
 	Loader          loader.Loader
@@ -34,6 +45,8 @@ type Options struct {
 	LegacyWrappers  bool
 	Parse           ParseFunc
 	ArtifactRefresh ArtifactRefresh
+	CompileMode     CompileMode
+	GeneratedRender GeneratedRenderer
 }
 
 // DefineInput is a template definition given to Render (RT-24).
@@ -60,6 +73,8 @@ type Engine struct {
 	parse           ParseFunc
 	legacyWrappers  bool
 	artifactRefresh ArtifactRefresh
+	compileMode     CompileMode
+	generatedRender GeneratedRenderer
 	cache           map[string]cached
 	now             func() float64
 }
@@ -88,7 +103,14 @@ func NewEngine(options Options, now func() float64) (*Engine, error) {
 	if refresh != ArtifactRefreshDev && refresh != ArtifactRefreshTrue && refresh != ArtifactRefreshFalse {
 		return nil, fmt.Errorf("%q is not an artifact refresh policy", refresh)
 	}
-	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, legacyWrappers: options.LegacyWrappers, artifactRefresh: refresh, cache: map[string]cached{}, now: now}
+	mode := options.CompileMode
+	if mode == "" {
+		mode = CompileModeAST
+	}
+	if mode != CompileModeAST && mode != CompileModeGen {
+		return nil, fmt.Errorf("%q is not a compile mode", mode)
+	}
+	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, legacyWrappers: options.LegacyWrappers, artifactRefresh: refresh, compileMode: mode, generatedRender: options.GeneratedRender, cache: map[string]cached{}, now: now}
 	if e.loader == nil {
 		e.loader = loader.NewMapLoader(nil)
 	}
@@ -203,6 +225,12 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*Prepar
 
 // Render renders a template by name or AST (RT-3, RT-4).
 func (e *Engine) Render(target any, assign any, options RenderOptions) (string, error) {
+	if e.compileMode == CompileModeGen {
+		if e.generatedRender == nil {
+			return "", errors.New("generated compile mode requires GeneratedRender")
+		}
+		return e.generatedRender(target, assign, options)
+	}
 	prepared, err := e.Prepare(target, assign, options)
 	if err != nil {
 		return "", err

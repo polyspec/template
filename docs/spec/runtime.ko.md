@@ -21,6 +21,12 @@ ArtifactStore.loadOrRefresh(sourceGraph, refresh: dev | true | false) -> compile
 PageCache.get(key) -> string | miss
 PageCache.put(key, html, ttl: positive seconds | 0 | null)
 PageCache.getOrSet(key, ttl, render)
+
+`Engine`의 컴파일 방식과 산출물 갱신 정책은 서로 별개입니다.
+`compile.mode`가 `ast`이면 파싱된 AST를 해석하고, `gen`이면 언어별로
+주입한 생성 렌더러를 호출합니다. `gen`인데 생성 렌더러가 없으면 AST로
+조용히 대체하지 않고 오류가 납니다. `artifact_refresh`의 `dev`, `true`,
+`false`는 소스 산출물을 언제 갱신할지만 결정합니다.
 ```
 
 - **RT-2** `parse`는 다른 템플릿을 로드하지 않고 AST 문서에 정의된 AST를 생성한다. include와 block 태그는 렌더 중에 해석한다.

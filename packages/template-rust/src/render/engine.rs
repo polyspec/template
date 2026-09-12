@@ -27,6 +27,19 @@ pub enum ArtifactRefresh {
     False,
 }
 
+/// Selects AST interpretation or a pre-generated renderer.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CompileMode {
+    /// Interpret the parsed AST at render time.
+    #[default]
+    Ast,
+    /// Call the generated host-language renderer.
+    Gen,
+}
+
+/// A renderer produced by the source generator.
+pub type GeneratedRenderer = for<'a> fn(RenderTarget<'a>, &serde_json::Value, &RenderOptions) -> Result<String, String>;
+
 /// Engine options.
 #[derive(Default)]
 pub struct EngineOptions {
@@ -42,6 +55,10 @@ pub struct EngineOptions {
     pub legacy_wrappers: bool,
     /// Template artifact refresh policy.
     pub artifact_refresh: ArtifactRefresh,
+    /// Compilation mode.
+    pub compile_mode: CompileMode,
+    /// Generated renderer required by `CompileMode::Gen`.
+    pub generated_renderer: Option<GeneratedRenderer>,
 }
 
 /// A template definition given to `render` (RT-24).
@@ -86,6 +103,9 @@ pub struct Engine {
     pub legacy_wrappers: bool,
     /// Controls when loaded template artifacts are refreshed.
     pub artifact_refresh: ArtifactRefresh,
+    /// Compilation mode.
+    pub compile_mode: CompileMode,
+    generated_renderer: Option<GeneratedRenderer>,
     cache: RefCell<HashMap<String, (String, Rc<ParsedTemplate>)>>,
 }
 
@@ -114,6 +134,8 @@ impl Engine {
             delimiters,
             legacy_wrappers: options.legacy_wrappers,
             artifact_refresh: options.artifact_refresh,
+            compile_mode: options.compile_mode,
+            generated_renderer: options.generated_renderer,
             cache: RefCell::new(HashMap::new()),
         }
     }
@@ -220,6 +242,10 @@ impl Engine {
 
     /// Renders a template with data given as JSON.
     pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
+        if self.compile_mode == CompileMode::Gen {
+            let renderer = self.generated_renderer.ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", "generated compile mode requires generated_renderer"))?;
+            return renderer(target, assign, options).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message));
+        }
         self.prepare(target, assign, options)?.render()
     }
 }

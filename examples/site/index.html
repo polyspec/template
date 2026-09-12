@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Template execution lab</title><link rel="stylesheet" href="./styles.css"></head>
 <body><header class="hero"><p class="eyebrow">TEMPLATE · STATIC RENDER PROOF</p><h1>Template execution lab</h1><p class="lede">The shared source is parsed before this page is built. AST mode executes the committed nodes; generated mode lowers those same nodes into host-language renderers. Both modes use the same assign, define and output contract.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">PASS</strong></div><div class="status-card"><span>AST mode</span><strong class="pass">IMPLEMENTED</strong></div><div class="status-card"><span>Generated mode</span><strong class="pass">5 LANGUAGES</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
-<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
+<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
 <section class="panel"><div class="section-heading"><div><p class="eyebrow">02 · INPUT AND OUTPUT</p><h2>Small SSR situations</h2></div><p>Each card shows the exact assign data, define map, every template file, compiled artifact manifest and final HTML.</p></div><div class="scenario-list"><article class="scenario" id="empty-state">
   <header class="scenario-header"><div><h3>Empty definition branch</h3><p>An if-block checks whether a contents definition exists and renders a stable empty state when it does not.</p></div><div class="tags"><span class="tag">layout target</span><span class="tag">missing definition</span><span class="tag">empty state</span></div></header>
   <div class="scenario-meta">
@@ -349,6 +349,12 @@ function renderTemplate(name, root, define, env, parent, scenario) {
       case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
         default: throw new Error(&#39;generated template is missing: &#39; + name);
       }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
     case &quot;scope-precedence&quot;:
       switch (name) {
       case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
@@ -388,6 +394,27 @@ function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
   const blockScope = new Map();
   out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
   out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
   return out;
 }
 
@@ -476,6 +503,12 @@ function renderTemplate(name, root, define, env, parent, scenario) {
       case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
         default: throw new Error(&#39;generated template is missing: &#39; + name);
       }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
     case &quot;scope-precedence&quot;:
       switch (name) {
       case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
@@ -515,6 +548,27 @@ function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
   const blockScope = new Map();
   out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
   out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
   return out;
 }
 
@@ -591,6 +645,12 @@ func generatedTemplate(name, scenario string, root *value.OrderedMap, define Def
 		case &quot;layout.tpl&quot;: return generated_html_slot__layout_tpl(root, define, parent)
 		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
 		}
+	case &quot;react-boundary&quot;:
+		switch name {
+		case &quot;content.tpl&quot;: return generated_react_boundary__content_tpl(root, define, parent)
+		case &quot;layout.tpl&quot;: return generated_react_boundary__layout_tpl(root, define, parent)
+		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
+		}
 	case &quot;scope-precedence&quot;:
 		switch name {
 		case &quot;content.tpl&quot;: return generated_scope_precedence__content_tpl(root, define, parent)
@@ -633,6 +693,31 @@ func generated_html_slot__layout_tpl(root *value.OrderedMap, define DefineRegist
 	if err != nil { return &quot;&quot;, err }
 	out.WriteString(blockHTML)
 	out.WriteString(&quot;&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__content_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;island_label&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;title&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/h1&gt;\n&quot;)
+	blockScope := map[string]value.Value{}
+	blockHTML, err := generatedBlock(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, blockScope)
+	if err != nil { return &quot;&quot;, err }
+	out.WriteString(blockHTML)
+	out.WriteString(&quot;&lt;/main&gt;\n&quot;)
 	return out.String(), nil
 }
 
@@ -700,6 +785,11 @@ fn generated_template(name: &amp;str, scenario: &amp;str, root: &amp;Map&lt;Stri
             &quot;layout.tpl&quot; =&gt; generated_html_slot__layout_tpl(root, define, parent),
             _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
         },
+        &quot;react-boundary&quot; =&gt; match name {
+            &quot;content.tpl&quot; =&gt; generated_react_boundary__content_tpl(root, define, parent),
+            &quot;layout.tpl&quot; =&gt; generated_react_boundary__layout_tpl(root, define, parent),
+            _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
+        },
         &quot;scope-precedence&quot; =&gt; match name {
             &quot;content.tpl&quot; =&gt; generated_scope_precedence__content_tpl(root, define, parent),
             &quot;layout.tpl&quot; =&gt; generated_scope_precedence__layout_tpl(root, define, parent),
@@ -736,6 +826,27 @@ fn generated_html_slot__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: 
     let mut block_scope = Map::new();
     out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;html-slot&quot;, root, define, &amp;block_scope)?);
     out.push_str(&quot;&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__content_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;island_label&quot;))?;
+    out.push_str(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;title&quot;))?;
+    out.push_str(&quot;&lt;/h1&gt;\n&quot;);
+    let mut block_scope = Map::new();
+    out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, &amp;block_scope)?);
+    out.push_str(&quot;&lt;/main&gt;\n&quot;);
     Ok(out)
 }
 
@@ -791,6 +902,11 @@ function generated_template(string $name, string $scenario, MapValue $root, MapV
             &#39;layout.tpl&#39; =&gt; generated_html_slot__layout_tpl($root, $define, $parent),
             default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
         },
+        &#39;react-boundary&#39; =&gt; match ($name) {
+            &#39;content.tpl&#39; =&gt; generated_react_boundary__content_tpl($root, $define, $parent),
+            &#39;layout.tpl&#39; =&gt; generated_react_boundary__layout_tpl($root, $define, $parent),
+            default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
+        },
         &#39;scope-precedence&#39; =&gt; match ($name) {
             &#39;content.tpl&#39; =&gt; generated_scope_precedence__content_tpl($root, $define, $parent),
             &#39;layout.tpl&#39; =&gt; generated_scope_precedence__layout_tpl($root, $define, $parent),
@@ -823,6 +939,27 @@ function generated_html_slot__layout_tpl(MapValue $root, MapValue $define, MapVa
     $blockScope = new MapValue();
     $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;html-slot&#39;, $root, $define, $blockScope);
     $out .= &quot;&lt;/section&gt;\n&quot;;
+    return $out;
+}
+
+function generated_react_boundary__content_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;island_label&#39;));
+    $out .= &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+    return $out;
+}
+
+function generated_react_boundary__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;title&#39;));
+    $out .= &quot;&lt;/h1&gt;\n&quot;;
+    $blockScope = new MapValue();
+    $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;react-boundary&#39;, $root, $define, $blockScope);
+    $out .= &quot;&lt;/main&gt;\n&quot;;
     return $out;
 }
 
@@ -1218,6 +1355,12 @@ function renderTemplate(name, root, define, env, parent, scenario) {
       case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
         default: throw new Error(&#39;generated template is missing: &#39; + name);
       }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
     case &quot;scope-precedence&quot;:
       switch (name) {
       case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
@@ -1257,6 +1400,27 @@ function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
   const blockScope = new Map();
   out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
   out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
   return out;
 }
 
@@ -1345,6 +1509,12 @@ function renderTemplate(name, root, define, env, parent, scenario) {
       case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
         default: throw new Error(&#39;generated template is missing: &#39; + name);
       }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
     case &quot;scope-precedence&quot;:
       switch (name) {
       case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
@@ -1384,6 +1554,27 @@ function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
   const blockScope = new Map();
   out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
   out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
   return out;
 }
 
@@ -1460,6 +1651,12 @@ func generatedTemplate(name, scenario string, root *value.OrderedMap, define Def
 		case &quot;layout.tpl&quot;: return generated_html_slot__layout_tpl(root, define, parent)
 		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
 		}
+	case &quot;react-boundary&quot;:
+		switch name {
+		case &quot;content.tpl&quot;: return generated_react_boundary__content_tpl(root, define, parent)
+		case &quot;layout.tpl&quot;: return generated_react_boundary__layout_tpl(root, define, parent)
+		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
+		}
 	case &quot;scope-precedence&quot;:
 		switch name {
 		case &quot;content.tpl&quot;: return generated_scope_precedence__content_tpl(root, define, parent)
@@ -1502,6 +1699,31 @@ func generated_html_slot__layout_tpl(root *value.OrderedMap, define DefineRegist
 	if err != nil { return &quot;&quot;, err }
 	out.WriteString(blockHTML)
 	out.WriteString(&quot;&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__content_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;island_label&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;title&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/h1&gt;\n&quot;)
+	blockScope := map[string]value.Value{}
+	blockHTML, err := generatedBlock(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, blockScope)
+	if err != nil { return &quot;&quot;, err }
+	out.WriteString(blockHTML)
+	out.WriteString(&quot;&lt;/main&gt;\n&quot;)
 	return out.String(), nil
 }
 
@@ -1569,6 +1791,11 @@ fn generated_template(name: &amp;str, scenario: &amp;str, root: &amp;Map&lt;Stri
             &quot;layout.tpl&quot; =&gt; generated_html_slot__layout_tpl(root, define, parent),
             _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
         },
+        &quot;react-boundary&quot; =&gt; match name {
+            &quot;content.tpl&quot; =&gt; generated_react_boundary__content_tpl(root, define, parent),
+            &quot;layout.tpl&quot; =&gt; generated_react_boundary__layout_tpl(root, define, parent),
+            _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
+        },
         &quot;scope-precedence&quot; =&gt; match name {
             &quot;content.tpl&quot; =&gt; generated_scope_precedence__content_tpl(root, define, parent),
             &quot;layout.tpl&quot; =&gt; generated_scope_precedence__layout_tpl(root, define, parent),
@@ -1605,6 +1832,27 @@ fn generated_html_slot__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: 
     let mut block_scope = Map::new();
     out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;html-slot&quot;, root, define, &amp;block_scope)?);
     out.push_str(&quot;&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__content_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;island_label&quot;))?;
+    out.push_str(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;title&quot;))?;
+    out.push_str(&quot;&lt;/h1&gt;\n&quot;);
+    let mut block_scope = Map::new();
+    out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, &amp;block_scope)?);
+    out.push_str(&quot;&lt;/main&gt;\n&quot;);
     Ok(out)
 }
 
@@ -1660,6 +1908,11 @@ function generated_template(string $name, string $scenario, MapValue $root, MapV
             &#39;layout.tpl&#39; =&gt; generated_html_slot__layout_tpl($root, $define, $parent),
             default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
         },
+        &#39;react-boundary&#39; =&gt; match ($name) {
+            &#39;content.tpl&#39; =&gt; generated_react_boundary__content_tpl($root, $define, $parent),
+            &#39;layout.tpl&#39; =&gt; generated_react_boundary__layout_tpl($root, $define, $parent),
+            default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
+        },
         &#39;scope-precedence&#39; =&gt; match ($name) {
             &#39;content.tpl&#39; =&gt; generated_scope_precedence__content_tpl($root, $define, $parent),
             &#39;layout.tpl&#39; =&gt; generated_scope_precedence__layout_tpl($root, $define, $parent),
@@ -1695,6 +1948,27 @@ function generated_html_slot__layout_tpl(MapValue $root, MapValue $define, MapVa
     return $out;
 }
 
+function generated_react_boundary__content_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;island_label&#39;));
+    $out .= &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+    return $out;
+}
+
+function generated_react_boundary__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;title&#39;));
+    $out .= &quot;&lt;/h1&gt;\n&quot;;
+    $blockScope = new MapValue();
+    $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;react-boundary&#39;, $root, $define, $blockScope);
+    $out .= &quot;&lt;/main&gt;\n&quot;;
+    return $out;
+}
+
 function generated_scope_precedence__content_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
     $ctx = $parent-&gt;copy();
     $out = &#39;&#39;;
@@ -1726,6 +2000,1208 @@ function generated_scope_precedence__layout_tpl(MapValue $root, MapValue $define
 &lt;<span class="syntax-tag">h1</span>&gt;&amp;lt;server slot&amp;gt;&lt;/<span class="syntax-tag">h1</span>&gt;
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;server&quot;</span>&gt;pre-rendered &amp;amp; safe&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">section</span>&gt;
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+  </div>
+</article>
+<article class="scenario" id="react-boundary">
+  <header class="scenario-header"><div><h3>React island boundary</h3><p>The template engine owns the server HTML shell; a React root owns a marked island after the page arrives.</p></div><div class="tags"><span class="tag">SSR shell</span><span class="tag">React island</span><span class="tag">client boundary</span></div></header>
+  <div class="scenario-meta">
+  <section class="source"><p class="output-label">Inputs</p><details open><summary>assign</summary><pre>{
+  &quot;title&quot;: &quot;Server rendered shell&quot;,
+  &quot;island_label&quot;: &quot;Interactive island&quot;
+}</pre></details><details open><summary>define</summary><pre>{
+  &quot;layout&quot;: &quot;layout.tpl&quot;,
+  &quot;content&quot;: &quot;content.tpl&quot;
+}</pre></details><details open><summary>templates · parser ranges</summary><pre>--- content.tpl
+&lt;<span class="syntax-tag">section</span> data-react-island <span class="syntax-attr">id</span>=<span class="syntax-string">&quot;counter&quot;</span>&gt;
+&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= island_label}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;/<span class="syntax-tag">section</span>&gt;
+
+
+--- layout.tpl
+&lt;<span class="syntax-tag">main</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= title}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
+<span class="syntax-template syntax-block">{# content}</span>
+&lt;/<span class="syntax-tag">main</span>&gt;
+</pre></details><details open><summary>integration source</summary><pre>--- react-host.tsx
+import { createRoot } from &#39;react-dom/client&#39;;
+
+function Counter() {
+  return &lt;button onClick={() =&gt; alert(&#39;React owns this island&#39;)}&gt;Interactive island&lt;/button&gt;;
+}
+
+createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;);
+</pre></details><details open><summary>compiled artifacts</summary><pre>typescript/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;typescript&quot;,
+  &quot;scenario&quot;: &quot;react-boundary&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;abb0db9b6110b5ca0624d76013aa126c9e66a1486543f52492524c2ce2a52323&quot;,
+      &quot;artifactSha256&quot;: &quot;2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;2e71cffcf5f4701914b2c4f024251f6aa6a836a13ad1292948f3636d2272af4a&quot;,
+      &quot;artifactSha256&quot;: &quot;57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a&quot;
+    }
+  }
+}
+
+typescript/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        44
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;island_label&quot;,
+        &quot;span&quot;: [
+          47,
+          59
+        ]
+      },
+      &quot;span&quot;: [
+        44,
+        60
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        60,
+        76
+      ]
+    }
+  ]
+}
+
+
+typescript/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        11
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          14,
+          19
+        ]
+      },
+      &quot;span&quot;: [
+        11,
+        20
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        20,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        26,
+        37
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        38,
+        46
+      ]
+    }
+  ]
+}
+
+
+go/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;go&quot;,
+  &quot;scenario&quot;: &quot;react-boundary&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;abb0db9b6110b5ca0624d76013aa126c9e66a1486543f52492524c2ce2a52323&quot;,
+      &quot;artifactSha256&quot;: &quot;2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;2e71cffcf5f4701914b2c4f024251f6aa6a836a13ad1292948f3636d2272af4a&quot;,
+      &quot;artifactSha256&quot;: &quot;57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a&quot;
+    }
+  }
+}
+
+go/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        44
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;island_label&quot;,
+        &quot;span&quot;: [
+          47,
+          59
+        ]
+      },
+      &quot;span&quot;: [
+        44,
+        60
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        60,
+        76
+      ]
+    }
+  ]
+}
+
+
+go/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        11
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          14,
+          19
+        ]
+      },
+      &quot;span&quot;: [
+        11,
+        20
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        20,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        26,
+        37
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        38,
+        46
+      ]
+    }
+  ]
+}
+
+
+rust/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;rust&quot;,
+  &quot;scenario&quot;: &quot;react-boundary&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;abb0db9b6110b5ca0624d76013aa126c9e66a1486543f52492524c2ce2a52323&quot;,
+      &quot;artifactSha256&quot;: &quot;2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;2e71cffcf5f4701914b2c4f024251f6aa6a836a13ad1292948f3636d2272af4a&quot;,
+      &quot;artifactSha256&quot;: &quot;57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a&quot;
+    }
+  }
+}
+
+rust/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        44
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;island_label&quot;,
+        &quot;span&quot;: [
+          47,
+          59
+        ]
+      },
+      &quot;span&quot;: [
+        44,
+        60
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        60,
+        76
+      ]
+    }
+  ]
+}
+
+
+rust/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        11
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          14,
+          19
+        ]
+      },
+      &quot;span&quot;: [
+        11,
+        20
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        20,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        26,
+        37
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        38,
+        46
+      ]
+    }
+  ]
+}
+
+
+php/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;php&quot;,
+  &quot;scenario&quot;: &quot;react-boundary&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;abb0db9b6110b5ca0624d76013aa126c9e66a1486543f52492524c2ce2a52323&quot;,
+      &quot;artifactSha256&quot;: &quot;2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;2e71cffcf5f4701914b2c4f024251f6aa6a836a13ad1292948f3636d2272af4a&quot;,
+      &quot;artifactSha256&quot;: &quot;57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a&quot;
+    }
+  }
+}
+
+php/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        44
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;island_label&quot;,
+        &quot;span&quot;: [
+          47,
+          59
+        ]
+      },
+      &quot;span&quot;: [
+        44,
+        60
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        60,
+        76
+      ]
+    }
+  ]
+}
+
+
+php/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        11
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          14,
+          19
+        ]
+      },
+      &quot;span&quot;: [
+        11,
+        20
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        20,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        26,
+        37
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        38,
+        46
+      ]
+    }
+  ]
+}
+</pre></details><details open><summary>generated renderers</summary><pre>typescript/native_direct · AST nodes lowered to host source
+// @ts-nocheck
+// Generated by tools/showcase/generate-direct.mjs. Do not edit.
+function lookup(ctx, root, name) {
+  if (ctx.has(name)) return ctx.get(name);
+  return root.get(name);
+}
+function member(value, key) {
+  if (value instanceof Map) return value.get(key);
+  if (value !== null &amp;&amp; typeof value === &#39;object&#39;) return value[key];
+  return undefined;
+}
+function truthy(value) { return value !== null &amp;&amp; value !== undefined &amp;&amp; value !== false &amp;&amp; value !== &#39;&#39; &amp;&amp; value !== 0; }
+function escapeValue(value) {
+  if (value instanceof Map || Array.isArray(value)) throw new Error(&#39;generated renderer cannot stringify a collection&#39;);
+  return String(value ?? &#39;&#39;).replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;);
+}
+function entries(value) {
+  if (value instanceof Map) return [...value.entries()];
+  if (Array.isArray(value)) return value.map((item, index) =&gt; [index, item]);
+  if (value === null || value === undefined) return [];
+  throw new Error(&#39;generated renderer expected an iterable&#39;);
+}
+function call(name, args) {
+  if (name === &#39;default&#39;) return truthy(args[0]) ? args[0] : args[1];
+  throw new Error(&#39;unknown generated function: &#39; + name);
+}
+function unary(op, value) { return op === &#39;!&#39; ? !truthy(value) : -value; }
+function binary(op, left, right) {
+  if (op === &#39;&amp;&amp;&#39;) return truthy(left) &amp;&amp; right;
+  if (op === &#39;||&#39;) return truthy(left) ? left : right;
+  if (op === &#39;??&#39;) return left ?? right;
+  if (op === &#39;+&#39;) return typeof left === &#39;string&#39; || typeof right === &#39;string&#39; ? String(left) + String(right) : left + right;
+  return ({&#39;==&#39;: left == right, &#39;!=&#39;: left != right, &#39;===&#39;: left === right, &#39;!==&#39;: left !== right, &#39;&lt;&#39;: left &lt; right, &#39;&gt;&#39;: left &gt; right, &#39;&lt;=&#39;: left &lt;= right, &#39;&gt;=&#39;: left &gt;= right})[op];
+}
+function renderBlock(id, path, scenario, root, define, env, scope) {
+  const entry = define.get(id);
+  if (!entry) return &#39;&#39;;
+  if (entry.html !== undefined) return entry.html;
+  const target = entry.template ?? path;
+  const data = entry.data instanceof Map ? entry.data : new Map();
+  const context = new Map(root);
+  for (const [key, value] of data) context.set(key, value);
+  for (const [key, value] of scope) context.set(key, value);
+  return renderTemplate(target, root, define, env, context, scenario);
+}
+function renderTemplate(name, root, define, env, parent, scenario) {
+  switch (scenario) {
+    case &quot;empty-state&quot;:
+      switch (name) {
+      case &quot;layout.tpl&quot;: return render_empty_state__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    case &quot;html-slot&quot;:
+      switch (name) {
+      case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    case &quot;scope-precedence&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_scope_precedence__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    default: throw new Error(&#39;generated scenario is missing: &#39; + scenario);
+  }
+}
+export function renderGenerated(scenarioRoot, target, root, define, env) {
+  const entry = define.get(target);
+  const name = typeof entry === &#39;string&#39; ? entry : entry?.template ?? target;
+  const scenario = scenarioRoot.split(&#39;/&#39;).pop();
+  return renderTemplate(name, root, define, env, root, scenario);
+}
+
+function render_empty_state__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;;
+  if (define.has(&quot;content&quot;)) {
+    const blockScope = new Map();
+    out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  } else {
+    out += &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;;
+  }
+  out += &quot;&lt;/main&gt;\n&quot;;
+  return out;
+}
+
+function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;heading&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
+  return out;
+}
+
+function render_scope_precedence__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;article&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;root_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;defined_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;;
+  out += escapeValue(call(&quot;default&quot;, [lookup(ctx, root, &quot;layout_local&quot;), &quot;missing&quot;]));
+  out += &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;;
+  return out;
+}
+
+function render_scope_precedence__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  ctx.set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
+  out += &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;;
+  const blockScope = new Map();
+  blockScope.set(&quot;title&quot;, member(lookup(ctx, root, &quot;page&quot;), &quot;title&quot;));
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+
+javascript/native_direct · AST nodes lowered to host source
+// Generated by tools/showcase/generate-direct.mjs. Do not edit.
+function lookup(ctx, root, name) {
+  if (ctx.has(name)) return ctx.get(name);
+  return root.get(name);
+}
+function member(value, key) {
+  if (value instanceof Map) return value.get(key);
+  if (value !== null &amp;&amp; typeof value === &#39;object&#39;) return value[key];
+  return undefined;
+}
+function truthy(value) { return value !== null &amp;&amp; value !== undefined &amp;&amp; value !== false &amp;&amp; value !== &#39;&#39; &amp;&amp; value !== 0; }
+function escapeValue(value) {
+  if (value instanceof Map || Array.isArray(value)) throw new Error(&#39;generated renderer cannot stringify a collection&#39;);
+  return String(value ?? &#39;&#39;).replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;);
+}
+function entries(value) {
+  if (value instanceof Map) return [...value.entries()];
+  if (Array.isArray(value)) return value.map((item, index) =&gt; [index, item]);
+  if (value === null || value === undefined) return [];
+  throw new Error(&#39;generated renderer expected an iterable&#39;);
+}
+function call(name, args) {
+  if (name === &#39;default&#39;) return truthy(args[0]) ? args[0] : args[1];
+  throw new Error(&#39;unknown generated function: &#39; + name);
+}
+function unary(op, value) { return op === &#39;!&#39; ? !truthy(value) : -value; }
+function binary(op, left, right) {
+  if (op === &#39;&amp;&amp;&#39;) return truthy(left) &amp;&amp; right;
+  if (op === &#39;||&#39;) return truthy(left) ? left : right;
+  if (op === &#39;??&#39;) return left ?? right;
+  if (op === &#39;+&#39;) return typeof left === &#39;string&#39; || typeof right === &#39;string&#39; ? String(left) + String(right) : left + right;
+  return ({&#39;==&#39;: left == right, &#39;!=&#39;: left != right, &#39;===&#39;: left === right, &#39;!==&#39;: left !== right, &#39;&lt;&#39;: left &lt; right, &#39;&gt;&#39;: left &gt; right, &#39;&lt;=&#39;: left &lt;= right, &#39;&gt;=&#39;: left &gt;= right})[op];
+}
+function renderBlock(id, path, scenario, root, define, env, scope) {
+  const entry = define.get(id);
+  if (!entry) return &#39;&#39;;
+  if (entry.html !== undefined) return entry.html;
+  const target = entry.template ?? path;
+  const data = entry.data instanceof Map ? entry.data : new Map();
+  const context = new Map(root);
+  for (const [key, value] of data) context.set(key, value);
+  for (const [key, value] of scope) context.set(key, value);
+  return renderTemplate(target, root, define, env, context, scenario);
+}
+function renderTemplate(name, root, define, env, parent, scenario) {
+  switch (scenario) {
+    case &quot;empty-state&quot;:
+      switch (name) {
+      case &quot;layout.tpl&quot;: return render_empty_state__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    case &quot;html-slot&quot;:
+      switch (name) {
+      case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    case &quot;scope-precedence&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_scope_precedence__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
+    default: throw new Error(&#39;generated scenario is missing: &#39; + scenario);
+  }
+}
+export function renderGenerated(scenarioRoot, target, root, define, env) {
+  const entry = define.get(target);
+  const name = typeof entry === &#39;string&#39; ? entry : entry?.template ?? target;
+  const scenario = scenarioRoot.split(&#39;/&#39;).pop();
+  return renderTemplate(name, root, define, env, root, scenario);
+}
+
+function render_empty_state__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;;
+  if (define.has(&quot;content&quot;)) {
+    const blockScope = new Map();
+    out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  } else {
+    out += &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;;
+  }
+  out += &quot;&lt;/main&gt;\n&quot;;
+  return out;
+}
+
+function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;heading&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
+  return out;
+}
+
+function render_scope_precedence__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;article&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;root_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;defined_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;;
+  out += escapeValue(call(&quot;default&quot;, [lookup(ctx, root, &quot;layout_local&quot;), &quot;missing&quot;]));
+  out += &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;;
+  return out;
+}
+
+function render_scope_precedence__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  ctx.set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
+  out += &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;;
+  const blockScope = new Map();
+  blockScope.set(&quot;title&quot;, member(lookup(ctx, root, &quot;page&quot;), &quot;title&quot;));
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+
+go/native_direct · AST nodes lowered to host source
+// Generated by tools/showcase/generate-direct.mjs. Do not edit.
+package main
+
+import (
+	&quot;fmt&quot;
+	&quot;path/filepath&quot;
+	&quot;strings&quot;
+
+	&quot;github.com/polyspec/template/functions&quot;
+	&quot;github.com/polyspec/template/value&quot;
+)
+
+func generatedLookup(ctx map[string]value.Value, root *value.OrderedMap, name string) value.Value {
+	if item, ok := ctx[name]; ok { return item }
+	item, _ := root.Get(name)
+	return item
+}
+func generatedMember(item value.Value, key string) value.Value {
+	if object, ok := item.(*value.OrderedMap); ok { value, _ := object.Get(key); return value }
+	return nil
+}
+func generatedTruthy(item value.Value) bool { return value.IsTruthy(item) }
+func generatedEcho(out *strings.Builder, item value.Value) error {
+	text, err := value.Stringify(item); if err != nil { return err }; out.WriteString(functions.EscapeHTML(text)); return nil
+}
+func generatedDefault(args []value.Value) value.Value { if len(args) &gt; 1 &amp;&amp; value.IsTruthy(args[0]) { return args[0] }; if len(args) &gt; 1 { return args[1] }; return nil }
+func generatedCall(name string, args []value.Value) value.Value { if name == &quot;default&quot; { return generatedDefault(args) }; return nil }
+func generatedUnary(op string, item value.Value) value.Value { if op == &quot;!&quot; { return !value.IsTruthy(item) }; return nil }
+func generatedBinary(op string, left, right value.Value) value.Value { if op == &quot;&amp;&amp;&quot; { return value.IsTruthy(left) &amp;&amp; value.IsTruthy(right) }; if op == &quot;||&quot; { return value.IsTruthy(left) || value.IsTruthy(right) }; return nil }
+func generatedBlock(id, path, scenario string, root *value.OrderedMap, define DefineRegistry, scope map[string]value.Value) (string, error) {
+	entry, ok := define.Get(id); if !ok { return &quot;&quot;, nil }; typed, ok := entry.(DefineEntry); if !ok { return &quot;&quot;, fmt.Errorf(&quot;generated define %s has invalid type&quot;, id) }; if typed.HTML != nil { return *typed.HTML, nil }; target := path; if typed.Template != nil { target = *typed.Template }; context := map[string]value.Value{}; for _, key := range root.Keys() { item, _ := root.Get(key); context[key] = item }; if typed.Data != nil { for _, key := range typed.Data.Keys() { item, _ := typed.Data.Get(key); context[key] = item } }; for key, item := range scope { context[key] = item }; return generatedTemplate(target, scenario, root, define, context)
+}
+func generatedTemplate(name, scenario string, root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	switch scenario {
+	case &quot;empty-state&quot;:
+		switch name {
+		case &quot;layout.tpl&quot;: return generated_empty_state__layout_tpl(root, define, parent)
+		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
+		}
+	case &quot;html-slot&quot;:
+		switch name {
+		case &quot;layout.tpl&quot;: return generated_html_slot__layout_tpl(root, define, parent)
+		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
+		}
+	case &quot;react-boundary&quot;:
+		switch name {
+		case &quot;content.tpl&quot;: return generated_react_boundary__content_tpl(root, define, parent)
+		case &quot;layout.tpl&quot;: return generated_react_boundary__layout_tpl(root, define, parent)
+		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
+		}
+	case &quot;scope-precedence&quot;:
+		switch name {
+		case &quot;content.tpl&quot;: return generated_scope_precedence__content_tpl(root, define, parent)
+		case &quot;layout.tpl&quot;: return generated_scope_precedence__layout_tpl(root, define, parent)
+		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
+		}
+	default: return &quot;&quot;, fmt.Errorf(&quot;generated scenario is missing: %s&quot;, filepath.Base(scenario))
+	}
+}
+func generatedDirectRender(rootPath string, request RenderRequest) (string, error) {
+	entry, ok := request.Define.Get(request.Target); name := request.Target; if ok { if path, isPath := entry.(string); isPath { name = path } else if typed, isTyped := entry.(DefineEntry); isTyped &amp;&amp; typed.Template != nil { name = *typed.Template } }; return generatedTemplate(name, filepath.Base(rootPath), request.Assign, request.Define, map[string]value.Value{})
+}
+
+func generated_empty_state__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;)
+	if _, ok := define.Get(&quot;content&quot;); ok {
+		blockScope := map[string]value.Value{}
+		blockHTML, err := generatedBlock(&quot;content&quot;, &quot;&quot;, &quot;empty-state&quot;, root, define, blockScope)
+		if err != nil { return &quot;&quot;, err }
+		out.WriteString(blockHTML)
+	} else {
+		out.WriteString(&quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;)
+	}
+	out.WriteString(&quot;&lt;/main&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_html_slot__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;heading&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/h1&gt;\n&quot;)
+	blockScope := map[string]value.Value{}
+	blockHTML, err := generatedBlock(&quot;content&quot;, &quot;&quot;, &quot;html-slot&quot;, root, define, blockScope)
+	if err != nil { return &quot;&quot;, err }
+	out.WriteString(blockHTML)
+	out.WriteString(&quot;&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__content_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;island_label&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;title&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/h1&gt;\n&quot;)
+	blockScope := map[string]value.Value{}
+	blockHTML, err := generatedBlock(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, blockScope)
+	if err != nil { return &quot;&quot;, err }
+	out.WriteString(blockHTML)
+	out.WriteString(&quot;&lt;/main&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_scope_precedence__content_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;title&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;root_label&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;defined_label&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedCall(&quot;default&quot;, []value.Value{generatedLookup(ctx, root, &quot;layout_local&quot;), &quot;missing&quot;})); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_scope_precedence__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	ctx[&quot;layout_local&quot;] = &quot;visible only in layout&quot;
+	out.WriteString(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;)
+	blockScope := map[string]value.Value{}
+	blockScope[&quot;title&quot;] = generatedMember(generatedLookup(ctx, root, &quot;page&quot;), &quot;title&quot;)
+	blockHTML, err := generatedBlock(&quot;content&quot;, &quot;&quot;, &quot;scope-precedence&quot;, root, define, blockScope)
+	if err != nil { return &quot;&quot;, err }
+	out.WriteString(blockHTML)
+	out.WriteString(&quot;&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+
+rust/native_direct · AST nodes lowered to host source
+// Generated by tools/showcase/generate-direct.mjs. Do not edit.
+use crate::render_adapter::{DefineRegistry, RenderRequest};
+use serde_json::{Map, Value};
+use std::path::Path;
+
+fn generated_lookup(ctx: &amp;Map&lt;String, Value&gt;, root: &amp;Map&lt;String, Value&gt;, name: &amp;str) -&gt; Value { ctx.get(name).cloned().or_else(|| root.get(name).cloned()).unwrap_or(Value::Null) }
+fn generated_member(value: Value, key: &amp;str) -&gt; Value { value.as_object().and_then(|map| map.get(key)).cloned().unwrap_or(Value::Null) }
+fn generated_truthy(value: &amp;Value) -&gt; bool { match value { Value::Null =&gt; false, Value::Bool(value) =&gt; *value, Value::Number(value) =&gt; value.as_f64().unwrap_or(0.0) != 0.0, Value::String(value) =&gt; !value.is_empty(), Value::Array(value) =&gt; !value.is_empty(), Value::Object(value) =&gt; !value.is_empty() } }
+fn generated_string(value: Value) -&gt; Result&lt;String, String&gt; { match value { Value::Null =&gt; Ok(String::new()), Value::Bool(value) =&gt; Ok(value.to_string()), Value::Number(value) =&gt; Ok(value.to_string()), Value::String(value) =&gt; Ok(value), Value::Array(_) | Value::Object(_) =&gt; Err(&quot;a collection cannot be converted to text&quot;.to_string()) } }
+fn generated_escape(value: Value) -&gt; Result&lt;String, String&gt; { Ok(generated_string(value)?.replace(&#39;&amp;&#39;, &quot;&amp;amp;&quot;).replace(&#39;&lt;&#39;, &quot;&amp;lt;&quot;).replace(&#39;&gt;&#39;, &quot;&amp;gt;&quot;).replace(&#39;\&quot;&#39;, &quot;&amp;quot;&quot;).replace(&quot;&#39;&quot;, &quot;&amp;#39;&quot;)) }
+fn generated_echo(out: &amp;mut String, value: Value) -&gt; Result&lt;(), String&gt; { out.push_str(&amp;generated_escape(value)?); Ok(()) }
+fn generated_call(name: &amp;str, args: Vec&lt;Value&gt;) -&gt; Value { if name == &quot;default&quot; &amp;&amp; args.len() &gt; 1 { if generated_truthy(&amp;args[0]) { args[0].clone() } else { args[1].clone() } } else { Value::Null } }
+fn generated_block(id: &amp;str, path: &amp;str, scenario: &amp;str, root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, scope: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let Some(entry) = define.get(id) else { return Ok(String::new()) };
+    if let Some(html) = &amp;entry.html { return Ok(html.clone()) }
+    let target = entry.template.as_deref().unwrap_or(path);
+    let mut context = root.clone();
+    if let Some(data) = &amp;entry.data { context.extend(data.clone()) }
+    context.extend(scope.clone());
+    generated_template(target, scenario, root, define, &amp;context)
+}
+fn generated_template(name: &amp;str, scenario: &amp;str, root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    match scenario {
+        &quot;empty-state&quot; =&gt; match name {
+            &quot;layout.tpl&quot; =&gt; generated_empty_state__layout_tpl(root, define, parent),
+            _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
+        },
+        &quot;html-slot&quot; =&gt; match name {
+            &quot;layout.tpl&quot; =&gt; generated_html_slot__layout_tpl(root, define, parent),
+            _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
+        },
+        &quot;react-boundary&quot; =&gt; match name {
+            &quot;content.tpl&quot; =&gt; generated_react_boundary__content_tpl(root, define, parent),
+            &quot;layout.tpl&quot; =&gt; generated_react_boundary__layout_tpl(root, define, parent),
+            _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
+        },
+        &quot;scope-precedence&quot; =&gt; match name {
+            &quot;content.tpl&quot; =&gt; generated_scope_precedence__content_tpl(root, define, parent),
+            &quot;layout.tpl&quot; =&gt; generated_scope_precedence__layout_tpl(root, define, parent),
+            _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
+        },
+        _ =&gt; Err(format!(&quot;generated scenario is missing: {}&quot;, Path::new(scenario).file_name().and_then(|v| v.to_str()).unwrap_or(scenario))),
+    }
+}
+pub fn generated_direct_render(root_path: &amp;Path, request: &amp;RenderRequest) -&gt; Result&lt;String, String&gt; {
+    let name = request.define.get(&amp;request.target).and_then(|entry| entry.template.clone()).unwrap_or_else(|| request.target.clone());
+    generated_template(&amp;name, root_path.file_name().and_then(|v| v.to_str()).unwrap_or_default(), &amp;request.assign, &amp;request.define, &amp;Map::new())
+}
+
+fn generated_empty_state__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;);
+    if define.contains_key(&quot;content&quot;) {
+        let mut block_scope = Map::new();
+        out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;empty-state&quot;, root, define, &amp;block_scope)?);
+    } else {
+        out.push_str(&quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;);
+    }
+    out.push_str(&quot;&lt;/main&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_html_slot__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;heading&quot;))?;
+    out.push_str(&quot;&lt;/h1&gt;\n&quot;);
+    let mut block_scope = Map::new();
+    out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;html-slot&quot;, root, define, &amp;block_scope)?);
+    out.push_str(&quot;&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__content_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;island_label&quot;))?;
+    out.push_str(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;title&quot;))?;
+    out.push_str(&quot;&lt;/h1&gt;\n&quot;);
+    let mut block_scope = Map::new();
+    out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, &amp;block_scope)?);
+    out.push_str(&quot;&lt;/main&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_scope_precedence__content_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;title&quot;))?;
+    out.push_str(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;root_label&quot;))?;
+    out.push_str(&quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;defined_label&quot;))?;
+    out.push_str(&quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;);
+    generated_echo(&amp;mut out, generated_call(&quot;default&quot;, vec![generated_lookup(&amp;ctx, root, &quot;layout_local&quot;), Value::String(&quot;missing&quot;.to_string())]))?;
+    out.push_str(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_scope_precedence__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    ctx.insert(&quot;layout_local&quot;.to_string(), Value::String(&quot;visible only in layout&quot;.to_string()));
+    out.push_str(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
+    let mut block_scope = Map::new();
+    block_scope.insert(&quot;title&quot;.to_string(), generated_member(generated_lookup(&amp;ctx, root, &quot;page&quot;), &quot;title&quot;));
+    out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;scope-precedence&quot;, root, define, &amp;block_scope)?);
+    out.push_str(&quot;&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+
+php/native_direct · AST nodes lowered to host source
+&lt;?php
+
+declare(strict_types=1);
+
+use Polyspec\Template\Value\MapValue;
+use Polyspec\Template\Value\Json;
+use Polyspec\Template\TemplateError;
+
+function generated_lookup(MapValue $ctx, MapValue $root, string $name): mixed { return $ctx-&gt;has($name) ? $ctx-&gt;get($name) : $root-&gt;get($name); }
+function generated_member(mixed $value, string $key): mixed { return $value instanceof MapValue ? $value-&gt;get($key) : null; }
+function generated_truthy(mixed $value): bool { return $value !== null &amp;&amp; $value !== false &amp;&amp; $value !== &#39;&#39; &amp;&amp; $value !== 0; }
+function generated_escape(mixed $value): string { if ($value instanceof MapValue || is_array($value)) throw new RuntimeException(&#39;a collection cannot be converted to text&#39;); return htmlspecialchars((string) ($value ?? &#39;&#39;), ENT_QUOTES | ENT_SUBSTITUTE, &#39;UTF-8&#39;); }
+function generated_call(string $name, array $args): mixed { if ($name === &#39;default&#39;) return generated_truthy($args[0] ?? null) ? ($args[0] ?? null) : ($args[1] ?? null); return null; }
+function generated_block(string $id, string $path, string $scenario, MapValue $root, MapValue $define, MapValue $scope): string { $entry = $define-&gt;get($id); if (!$entry instanceof DefineEntry) return &#39;&#39;; if ($entry-&gt;html !== null) return $entry-&gt;html; $context = $root-&gt;copy(); if ($entry-&gt;data !== null) foreach ($entry-&gt;data-&gt;entries() as $key =&gt; $value) $context-&gt;set($key, $value); foreach ($scope-&gt;entries() as $key =&gt; $value) $context-&gt;set($key, $value); return generated_template($entry-&gt;template ?? $path, $scenario, $root, $define, $context); }
+function generated_template(string $name, string $scenario, MapValue $root, MapValue $define, MapValue $parent): string { return match ($scenario) {
+        &#39;empty-state&#39; =&gt; match ($name) {
+            &#39;layout.tpl&#39; =&gt; generated_empty_state__layout_tpl($root, $define, $parent),
+            default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
+        },
+        &#39;html-slot&#39; =&gt; match ($name) {
+            &#39;layout.tpl&#39; =&gt; generated_html_slot__layout_tpl($root, $define, $parent),
+            default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
+        },
+        &#39;react-boundary&#39; =&gt; match ($name) {
+            &#39;content.tpl&#39; =&gt; generated_react_boundary__content_tpl($root, $define, $parent),
+            &#39;layout.tpl&#39; =&gt; generated_react_boundary__layout_tpl($root, $define, $parent),
+            default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
+        },
+        &#39;scope-precedence&#39; =&gt; match ($name) {
+            &#39;content.tpl&#39; =&gt; generated_scope_precedence__content_tpl($root, $define, $parent),
+            &#39;layout.tpl&#39; =&gt; generated_scope_precedence__layout_tpl($root, $define, $parent),
+            default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
+        },
+        default =&gt; throw new RuntimeException(&#39;generated scenario is missing: &#39; . $scenario),
+    }; }
+function generatedDirectRender(string $rootPath, RenderRequest $request): string { $entry = $request-&gt;define-&gt;get($request-&gt;target); $name = $request-&gt;target; if ($entry instanceof DefineEntry &amp;&amp; $entry-&gt;template !== null) $name = $entry-&gt;template; return generated_template($name, basename($rootPath), $request-&gt;assign, $request-&gt;define, new MapValue()); }
+
+function generated_empty_state__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;;
+    if ($define-&gt;has(&#39;content&#39;)) {
+        $blockScope = new MapValue();
+        $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;empty-state&#39;, $root, $define, $blockScope);
+    } else {
+        $out .= &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;;
+    }
+    $out .= &quot;&lt;/main&gt;\n&quot;;
+    return $out;
+}
+
+function generated_html_slot__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;heading&#39;));
+    $out .= &quot;&lt;/h1&gt;\n&quot;;
+    $blockScope = new MapValue();
+    $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;html-slot&#39;, $root, $define, $blockScope);
+    $out .= &quot;&lt;/section&gt;\n&quot;;
+    return $out;
+}
+
+function generated_react_boundary__content_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;island_label&#39;));
+    $out .= &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+    return $out;
+}
+
+function generated_react_boundary__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;title&#39;));
+    $out .= &quot;&lt;/h1&gt;\n&quot;;
+    $blockScope = new MapValue();
+    $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;react-boundary&#39;, $root, $define, $blockScope);
+    $out .= &quot;&lt;/main&gt;\n&quot;;
+    return $out;
+}
+
+function generated_scope_precedence__content_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;article&gt;\n&lt;h1&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;title&#39;));
+    $out .= &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;root_label&#39;));
+    $out .= &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;defined_label&#39;));
+    $out .= &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;;
+    $out .= generated_escape(generated_call(&#39;default&#39;, [generated_lookup($ctx, $root, &#39;layout_local&#39;), &#39;missing&#39;]));
+    $out .= &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;;
+    return $out;
+}
+
+function generated_scope_precedence__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $ctx-&gt;set(&#39;layout_local&#39;, &#39;visible only in layout&#39;);
+    $out .= &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;;
+    $blockScope = new MapValue();
+    $blockScope-&gt;set(&#39;title&#39;, generated_member(generated_lookup($ctx, $root, &#39;page&#39;), &#39;title&#39;));
+    $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;scope-precedence&#39;, $root, $define, $blockScope);
+    $out .= &quot;&lt;/section&gt;\n&quot;;
+    return $out;
+}
+</pre></details></section>
+    <section class="output"><p class="output-label">Output · 124 bytes · 4c247742a44e…</p><pre>&lt;<span class="syntax-tag">main</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;Server rendered shell&lt;/<span class="syntax-tag">h1</span>&gt;
+&lt;<span class="syntax-tag">section</span> data-react-island <span class="syntax-attr">id</span>=<span class="syntax-string">&quot;counter&quot;</span>&gt;
+&lt;<span class="syntax-tag">p</span>&gt;Interactive island&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;/<span class="syntax-tag">section</span>&gt;
+&lt;/<span class="syntax-tag">main</span>&gt;
 </pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article>
@@ -2693,6 +4169,12 @@ function renderTemplate(name, root, define, env, parent, scenario) {
       case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
         default: throw new Error(&#39;generated template is missing: &#39; + name);
       }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
     case &quot;scope-precedence&quot;:
       switch (name) {
       case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
@@ -2732,6 +4214,27 @@ function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
   const blockScope = new Map();
   out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
   out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
   return out;
 }
 
@@ -2820,6 +4323,12 @@ function renderTemplate(name, root, define, env, parent, scenario) {
       case &quot;layout.tpl&quot;: return render_html_slot__layout_tpl(root, define, env, parent, scenario);
         default: throw new Error(&#39;generated template is missing: &#39; + name);
       }
+    case &quot;react-boundary&quot;:
+      switch (name) {
+      case &quot;content.tpl&quot;: return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case &quot;layout.tpl&quot;: return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error(&#39;generated template is missing: &#39; + name);
+      }
     case &quot;scope-precedence&quot;:
       switch (name) {
       case &quot;content.tpl&quot;: return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
@@ -2859,6 +4368,27 @@ function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
   const blockScope = new Map();
   out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
   out += &quot;&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;island_label&quot;));
+  out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = &#39;&#39;;
+  out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+  out += escapeValue(lookup(ctx, root, &quot;title&quot;));
+  out += &quot;&lt;/h1&gt;\n&quot;;
+  const blockScope = new Map();
+  out += renderBlock(&quot;content&quot;, null, scenario, root, define, env, blockScope);
+  out += &quot;&lt;/main&gt;\n&quot;;
   return out;
 }
 
@@ -2935,6 +4465,12 @@ func generatedTemplate(name, scenario string, root *value.OrderedMap, define Def
 		case &quot;layout.tpl&quot;: return generated_html_slot__layout_tpl(root, define, parent)
 		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
 		}
+	case &quot;react-boundary&quot;:
+		switch name {
+		case &quot;content.tpl&quot;: return generated_react_boundary__content_tpl(root, define, parent)
+		case &quot;layout.tpl&quot;: return generated_react_boundary__layout_tpl(root, define, parent)
+		default: return &quot;&quot;, fmt.Errorf(&quot;generated template is missing: %s&quot;, name)
+		}
 	case &quot;scope-precedence&quot;:
 		switch name {
 		case &quot;content.tpl&quot;: return generated_scope_precedence__content_tpl(root, define, parent)
@@ -2977,6 +4513,31 @@ func generated_html_slot__layout_tpl(root *value.OrderedMap, define DefineRegist
 	if err != nil { return &quot;&quot;, err }
 	out.WriteString(blockHTML)
 	out.WriteString(&quot;&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__content_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;island_label&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;)
+	return out.String(), nil
+}
+
+func generated_react_boundary__layout_tpl(root *value.OrderedMap, define DefineRegistry, parent map[string]value.Value) (string, error) {
+	ctx := map[string]value.Value{}
+	for key, item := range parent { ctx[key] = item }
+	var out strings.Builder
+	out.WriteString(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;)
+	if err := generatedEcho(&amp;out, generatedLookup(ctx, root, &quot;title&quot;)); err != nil { return &quot;&quot;, err }
+	out.WriteString(&quot;&lt;/h1&gt;\n&quot;)
+	blockScope := map[string]value.Value{}
+	blockHTML, err := generatedBlock(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, blockScope)
+	if err != nil { return &quot;&quot;, err }
+	out.WriteString(blockHTML)
+	out.WriteString(&quot;&lt;/main&gt;\n&quot;)
 	return out.String(), nil
 }
 
@@ -3044,6 +4605,11 @@ fn generated_template(name: &amp;str, scenario: &amp;str, root: &amp;Map&lt;Stri
             &quot;layout.tpl&quot; =&gt; generated_html_slot__layout_tpl(root, define, parent),
             _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
         },
+        &quot;react-boundary&quot; =&gt; match name {
+            &quot;content.tpl&quot; =&gt; generated_react_boundary__content_tpl(root, define, parent),
+            &quot;layout.tpl&quot; =&gt; generated_react_boundary__layout_tpl(root, define, parent),
+            _ =&gt; Err(format!(&quot;generated template is missing: {name}&quot;)),
+        },
         &quot;scope-precedence&quot; =&gt; match name {
             &quot;content.tpl&quot; =&gt; generated_scope_precedence__content_tpl(root, define, parent),
             &quot;layout.tpl&quot; =&gt; generated_scope_precedence__layout_tpl(root, define, parent),
@@ -3080,6 +4646,27 @@ fn generated_html_slot__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: 
     let mut block_scope = Map::new();
     out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;html-slot&quot;, root, define, &amp;block_scope)?);
     out.push_str(&quot;&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__content_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;island_label&quot;))?;
+    out.push_str(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
+    Ok(out)
+}
+
+fn generated_react_boundary__layout_tpl(root: &amp;Map&lt;String, Value&gt;, define: &amp;DefineRegistry, parent: &amp;Map&lt;String, Value&gt;) -&gt; Result&lt;String, String&gt; {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
+    generated_echo(&amp;mut out, generated_lookup(&amp;ctx, root, &quot;title&quot;))?;
+    out.push_str(&quot;&lt;/h1&gt;\n&quot;);
+    let mut block_scope = Map::new();
+    out.push_str(&amp;generated_block(&quot;content&quot;, &quot;&quot;, &quot;react-boundary&quot;, root, define, &amp;block_scope)?);
+    out.push_str(&quot;&lt;/main&gt;\n&quot;);
     Ok(out)
 }
 
@@ -3135,6 +4722,11 @@ function generated_template(string $name, string $scenario, MapValue $root, MapV
             &#39;layout.tpl&#39; =&gt; generated_html_slot__layout_tpl($root, $define, $parent),
             default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
         },
+        &#39;react-boundary&#39; =&gt; match ($name) {
+            &#39;content.tpl&#39; =&gt; generated_react_boundary__content_tpl($root, $define, $parent),
+            &#39;layout.tpl&#39; =&gt; generated_react_boundary__layout_tpl($root, $define, $parent),
+            default =&gt; throw new RuntimeException(&#39;generated template is missing: &#39; . $name),
+        },
         &#39;scope-precedence&#39; =&gt; match ($name) {
             &#39;content.tpl&#39; =&gt; generated_scope_precedence__content_tpl($root, $define, $parent),
             &#39;layout.tpl&#39; =&gt; generated_scope_precedence__layout_tpl($root, $define, $parent),
@@ -3167,6 +4759,27 @@ function generated_html_slot__layout_tpl(MapValue $root, MapValue $define, MapVa
     $blockScope = new MapValue();
     $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;html-slot&#39;, $root, $define, $blockScope);
     $out .= &quot;&lt;/section&gt;\n&quot;;
+    return $out;
+}
+
+function generated_react_boundary__content_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;island_label&#39;));
+    $out .= &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
+    return $out;
+}
+
+function generated_react_boundary__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent-&gt;copy();
+    $out = &#39;&#39;;
+    $out .= &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
+    $out .= generated_escape(generated_lookup($ctx, $root, &#39;title&#39;));
+    $out .= &quot;&lt;/h1&gt;\n&quot;;
+    $blockScope = new MapValue();
+    $out .= generated_block(&#39;content&#39;, &#39;&#39;, &#39;react-boundary&#39;, $root, $define, $blockScope);
+    $out .= &quot;&lt;/main&gt;\n&quot;;
     return $out;
 }
 

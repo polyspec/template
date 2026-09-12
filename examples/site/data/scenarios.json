@@ -60,6 +60,41 @@
       "expectedSha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09"
     },
     {
+      "id": "react-boundary",
+      "title": "React island boundary",
+      "description": "The template engine owns the server HTML shell; a React root owns a marked island after the page arrives.",
+      "focus": [
+        "SSR shell",
+        "React island",
+        "client boundary"
+      ],
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "templates": {
+        "content.tpl": "<section data-react-island id=\"counter\">\n<p>{= island_label}</p>\n</section>\n",
+        "layout.tpl": "<main>\n<h1>{= title}</h1>\n{# content}\n</main>\n"
+      },
+      "integrationFiles": [
+        {
+          "name": "react-host.tsx",
+          "source": "import { createRoot } from 'react-dom/client';\n\nfunction Counter() {\n  return <button onClick={() => alert('React owns this island')}>Interactive island</button>;\n}\n\ncreateRoot(document.getElementById('counter')!).render(<Counter />);\n"
+        }
+      ],
+      "assign": {
+        "title": "Server rendered shell",
+        "island_label": "Interactive island"
+      },
+      "define": {
+        "layout": "layout.tpl",
+        "content": "content.tpl"
+      },
+      "env": null,
+      "expectedHtml": "<main>\n<h1>Server rendered shell</h1>\n<section data-react-island id=\"counter\">\n<p>Interactive island</p>\n</section>\n</main>\n",
+      "expectedBytes": 124,
+      "expectedSha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003"
+    },
+    {
       "id": "scope-precedence",
       "title": "Scope precedence",
       "description": "A template definition receives root assign data, definition data and a scope argument, while a layout local stays isolated.",
