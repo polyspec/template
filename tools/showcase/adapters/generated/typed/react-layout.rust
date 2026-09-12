@@ -26,10 +26,10 @@ fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool {
     pub defined_label: Option<String>,
     pub page: Option<Page>,
 }
-#[derive(Clone, Default)] struct Input_content_tpl {  }
-#[derive(Clone, Default)] struct Input_layout_tpl {  }
-#[derive(Clone)] struct Definition<T> { html: Option<String>, data: Option<T> }
-#[derive(Clone, Default)] struct Definitions { content: Option<Definition<Input_content_tpl>>, layout: Option<Definition<Input_layout_tpl>> }
+#[derive(Clone, Default)] pub struct Input_content_tpl {  }
+#[derive(Clone, Default)] pub struct Input_layout_tpl {  }
+#[derive(Clone)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
+#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<Input_content_tpl>>, pub layout: Option<Definition<Input_layout_tpl>> }
 fn render_content_tpl(assign: &Assign, definitions: &Definitions, input: Input_content_tpl) -> String { let mut out = String::new();
 
     out.push_str("<section data-react-island id=\"counter\">\n<p>");
@@ -53,10 +53,10 @@ fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: Input_la
     }
     out.push_str("</main>\n");
  out }
-fn render_template(target: &str, assign: &Assign, definitions: &Definitions) -> String { match target {
+pub fn render_template(target: &str, assign: &Assign, definitions: &Definitions) -> String { match target {
         "content.tpl" => render_content_tpl(assign, definitions, Input_content_tpl::default()),
         "layout.tpl" => render_layout_tpl(assign, definitions, Input_layout_tpl::default()),
         _ => panic!("generated template is missing or requires inputs: {target}"),
 } }
-fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
+pub fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
 fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }

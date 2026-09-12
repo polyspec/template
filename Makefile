@@ -4,7 +4,7 @@ export PATH := $(HOME)/.cargo/bin:$(PATH)
 CARGO ?= $(HOME)/.cargo/bin/cargo
 
 .DEFAULT_GOAL := help
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-check \
+.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-check compiler-interface-generate compiler-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check showcase showcase-check showcase-compile \
 	docs-static-check clean
@@ -45,7 +45,7 @@ help: ## List targets
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
 
 lint: ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -119,6 +119,13 @@ docs-check: ## Document checks
 
 runtime-interface-check: ## Verify the prepared render interface in every runtime
 	node scripts/check-runtime-interface.mjs
+
+compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
+	node scripts/generate-compiler-interface.mjs
+
+compiler-interface-check: ## Verify the typed generated module structure in every language
+	node scripts/generate-compiler-interface.mjs --check
+	node scripts/check-compiler-interface.mjs
 
 docs: ## Build the documentation site
 	npx vitepress build docs

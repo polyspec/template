@@ -51,10 +51,10 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
     }
     out.WriteString("</main>\n")
  return out.String() }
-func renderTemplate(target string, assign Assign, definitions Definitions) string { switch target {
+func RenderTemplate(target string, assign Assign, definitions Definitions) string { switch target {
 	case "content.tpl": return render_content_tpl(assign, definitions, Input_content_tpl{})
 	case "layout.tpl": return render_layout_tpl(assign, definitions, Input_layout_tpl{})
 	default: panic("generated template is missing or requires inputs: " + target)
 } }
-func Render(assign Assign, definitions Definitions) string { return renderTemplate("layout.tpl", assign, definitions) }
+func Render(assign Assign, definitions Definitions) string { return RenderTemplate("layout.tpl", assign, definitions) }
 var _ = fmt.Fprint
