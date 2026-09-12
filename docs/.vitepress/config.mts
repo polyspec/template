@@ -133,6 +133,10 @@ export default defineConfig({
   cleanUrls: true,
   ignoreDeadLinks: true,
   lastUpdated: false,
+  transformHtml(code, id) {
+    if (!id.endsWith('.ko.html')) return;
+    return code.replace('<html lang="en-US"', '<html lang="ko-KR"');
+  },
   markdown: {
     languages: [ebnfLanguage],
   },
