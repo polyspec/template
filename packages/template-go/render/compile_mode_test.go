@@ -13,7 +13,9 @@ func TestGeneratedModeRequiresRenderer(t *testing.T) {
 }
 
 func TestGeneratedModeCallsRenderer(t *testing.T) {
-	e, err := NewEngine(Options{Compile: CompileOptions{Mode: CompileModeGen, Generated: func(any, any, RenderOptions) (string, error) { return "generated", nil }}}, nil)
+	e, err := NewEngine(Options{Compile: CompileOptions{Mode: CompileModeGen, Generated: func(any, any, RenderOptions) (*GeneratedPreparedRender, error) {
+		return &GeneratedPreparedRender{Render: func() (string, error) { return "generated", nil }}, nil
+	}}}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

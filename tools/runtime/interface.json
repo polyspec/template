@@ -4,6 +4,16 @@
   "purpose": "Keep compilation, compiled-artifact refresh and final-page caching as independent policies.",
   "types": {
     "CompileMode": ["ast", "gen"],
+    "Compile": {
+      "fields": ["mode", "generatedRenderer"],
+      "invariant": "mode selects exactly one artifact representation; generatedRenderer is required only for gen"
+    },
+    "PreparedRender": {
+      "operations": ["render"],
+      "invariant": "ast and gen prepared requests expose the same render operation and repeat semantics"
+    },
+    "AstArtifact": "canonical AST plus source version",
+    "GeneratedArtifact": "typed host-language renderer plus source version",
     "ArtifactRefresh": ["dev", "true", "false"],
     "PageCacheTTL": "positive seconds, 0 or null"
   },
@@ -24,7 +34,7 @@
     {
       "name": "compile",
       "owner": "Compiler",
-      "parameters": ["sourceGraph", "mode"],
+      "parameters": ["sourceGraph", "compile.mode"],
       "returns": "AST artifact or generated host-language artifact",
       "errors": ["lex, parse, code generation and compilation errors"]
     },
@@ -34,6 +44,13 @@
       "parameters": ["sourceGraph", "refresh"],
       "returns": "compiled artifact",
       "errors": ["stale or missing artifact, source and artifact mismatch"]
+    },
+    {
+      "name": "prepare",
+      "owner": "Engine",
+      "parameters": ["compiled artifact", "request"],
+      "returns": "PreparedRender",
+      "errors": ["binding, artifact and compilation errors"]
     },
     {
       "name": "render",
@@ -65,9 +82,9 @@
     }
   ],
   "languages": {
-    "rust": {"engine": "Engine", "pageCache": "PageCache"},
-    "go": {"engine": "Engine", "pageCache": "cache.PageCache"},
-    "typescript": {"engine": "Engine", "pageCache": "PageCache"},
-    "php": {"engine": "Engine", "pageCache": "PageCache"}
+    "rust": {"engine": "Engine", "compile": "CompileOptions", "prepared": "PreparedRender", "pageCache": "PageCache"},
+    "go": {"engine": "Engine", "compile": "CompileOptions", "prepared": "PreparedRender", "pageCache": "cache.PageCache"},
+    "typescript": {"engine": "Engine", "compile": "CompileOptions", "prepared": "PreparedRender", "pageCache": "PageCache"},
+    "php": {"engine": "Engine", "compile": "compile array", "prepared": "PreparedRender", "pageCache": "PageCache"}
   }
 }

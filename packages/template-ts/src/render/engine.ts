@@ -15,8 +15,10 @@ export type ParseFunction = (source: string | Uint8Array, name: string, delimite
 export type ArtifactRefresh = 'dev' | 'true' | 'false';
 /** Selects AST interpretation or a generated renderer. */
 export type CompileMode = 'ast' | 'gen';
-/** Renders a request with generated host-language code. */
-export type GeneratedRenderer = (target: string | Template, assign: unknown, options: RenderOptions) => string;
+/** A prepared request produced by generated host-language code. */
+export interface GeneratedPreparedRender { render(): string; }
+/** Prepares a request with generated host-language code. */
+export type GeneratedRenderer = (target: string | Template, assign: unknown, options: RenderOptions) => GeneratedPreparedRender;
 /** Compilation settings shared by the runtime contract. */
 export interface CompileOptions { mode?: CompileMode; generatedRenderer?: GeneratedRenderer; }
 
@@ -53,15 +55,18 @@ export class PreparedRender {
   // Creates a prepared request from engine-owned bound state.
   constructor(
     private readonly engine: EngineCore,
-    private readonly rootData: MapValue,
-    private readonly registry: Map<string, DefineEntry>,
-    private readonly env: Env,
+    private readonly rootData: MapValue | null,
+    private readonly registry: Map<string, DefineEntry> | null,
+    private readonly env: Env | null,
     private readonly targetName: string,
-    private readonly template: ParsedTemplate,
+    private readonly template: ParsedTemplate | null,
+    private readonly generated: GeneratedPreparedRender | null = null,
   ) {}
 
   // Renders the prepared request with fresh execution state.
   render(): string {
+    if (this.generated) return this.generated.render();
+    if (!this.rootData || !this.registry || !this.env || !this.template) throw new Error('prepared render is missing its AST state');
     const context = new RenderContext(this.engine, this.rootData, this.env, this.targetName);
     for (const [id, entry] of this.registry) context.registry.set(id, entry);
     context.enter(this.targetName, null, null);
@@ -137,7 +142,11 @@ export class EngineCore implements EngineServices {
 
   // Prepares a request for repeated rendering.
   prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender {
-    if (this.compileMode === 'gen') throw new Error('prepare is unavailable in generated compile mode; use render');
+    if (this.compileMode === 'gen') {
+      if (!this.generatedRenderer) throw new Error('generated compile mode requires generatedRenderer');
+      const name = typeof target === 'string' ? target : target.name;
+      return new PreparedRender(this, null, null, null, name, null, this.generatedRenderer(target, assign, options));
+    }
     const name = typeof target === 'string' ? target : target.name;
     let rootData: MapValue;
     let registry: Map<string, DefineEntry>;
@@ -161,10 +170,6 @@ export class EngineCore implements EngineServices {
   // Renders a template name or a parsed template and returns the complete output (RT-3). It
   // raises a TemplateError and returns no partial output when the render fails (RT-36).
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string {
-    if (this.compileMode === 'gen') {
-      if (!this.generatedRenderer) throw new Error('generated compile mode requires generatedRenderer');
-      return this.generatedRenderer(target, assign, options);
-    }
     return this.prepare(target, assign, options).render();
   }
 
