@@ -1,6 +1,6 @@
 # 렉시컬 규칙
 
-[English](lexical.md).
+[English](/spec/lexical).
 
 이 문서는 템플릿 소스를 텍스트, 태그, 주석으로 나누는 방법과 그 과정에서 제거하는 공백을 정의한다. 태그 본문은 `grammar.md`가 정의한다. 표현식 토큰은 `expressions.md`가 정의한다. 오류 객체와 위치는 `errors.md`가 정의한다.
 

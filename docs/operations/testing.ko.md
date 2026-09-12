@@ -1,6 +1,6 @@
 # 릴리스 테스트
 
-[English](testing.md).
+[English](/operations/testing).
 
 릴리스 gate는 다음 명령으로 실행한다.
 

@@ -1,6 +1,6 @@
 # 실행 체크리스트
 
-[English](execution-checklist.md).
+[English](/plans/execution-checklist).
 
 이 문서는 템플릿 엔진을 완성하기 위해 필요한 모든 작업을 나열한다: 명세, 적합성 스위트, TypeScript·Go·Rust·PHP 구현, PHP 확장, 브라우저 빌드, 벤치마크, 문서. 작업은 웨이브로 묶는다. 한 웨이브 안에서 `parallel` 표시가 있는 작업은 서로 독립이다. 웨이브는 명시된 의존 작업이 모두 완료된 뒤에만 시작한다.
 

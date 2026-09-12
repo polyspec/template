@@ -1,6 +1,6 @@
 # 런타임
 
-[English](runtime.md).
+[English](/spec/runtime).
 
 이 문서는 엔진 API, 템플릿 이름과 로딩, 스코프, 루프, include, 템플릿 define, block 태그, 출력, 제한, 오류 동작, 브라우저 렌더링, 산출물과 페이지 캐시를 정의한다. 값 규칙은 [데이터 모델](/ko/spec/data-model), 표현식 평가는 [표현식](/ko/spec/expressions), 함수는 [함수](/ko/spec/functions), AST는 [AST](/ko/spec/ast), 오류 코드는 [오류](/ko/spec/errors)에 정의되어 있다.
 

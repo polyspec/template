@@ -1,6 +1,6 @@
 # 오류
 
-[English](errors.md).
+[English](/spec/errors).
 
 ## 오류 객체
 

@@ -1,6 +1,6 @@
 # 예제 사이트
 
-[English](showcase.md).
+[English](/operations/showcase).
 
 [예제 사이트](../../examples/site/index.html)는 TypeScript, Go, Rust와 PHP로 커밋된 AST artifact를 사용해 공통 템플릿을 렌더한다. 각 구현은 artifact를 로드하고 변수를 `assign`으로 전달하고 레이아웃과 구성 요소를 `define`으로 등록한 뒤 `layout`을 렌더한다. 화면의 복잡성은 템플릿과 목업 데이터에 둔다. 애플리케이션 컨트롤러, 인증, DI, 폼 생성은 이 예제의 범위 밖이다.
 

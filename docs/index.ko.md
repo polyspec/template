@@ -1,6 +1,6 @@
 # 문서
 
-[English](index.md).
+[English](/).
 
 [사용법](/ko/guide)은 템플릿을 작성하고 렌더하는 방법을 설명한다.
 
