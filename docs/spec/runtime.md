@@ -150,7 +150,7 @@ The logical request has this JSON shape:
 The interface declares two execution modes:
 
 - **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the implemented cross-language mode.
-- **Generated mode** creates a host-language module before startup, embeds the canonical template representation in that module, loads it once, and calls the renderer for each request. The current implementation covers TypeScript, JavaScript, Go, Rust and PHP. The generated module still uses the package's AST renderer; direct node-to-host-code lowering remains a separate optimization and must preserve this contract.
+- **Generated mode** lowers each canonical AST node into a host-language renderer before startup, loads that renderer once, and calls it for each request. The current implementation covers TypeScript, JavaScript, Go, Rust and PHP. It does not parse or interpret template AST during a request; generated output must retain the AST mode's assign, define, error and idempotence contract.
 
 ```mermaid
 flowchart LR

@@ -269,6 +269,9 @@ func nativeDefines(defines DefineRegistry) map[string]template.DefineInput {
 }
 
 func (a *Adapter) Render(request RenderRequest) (string, error) {
+	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
+		return generatedDirectRender(a.root, request)
+	}
 	options := template.RenderOptions{Define: nativeDefines(request.Define)}
 	if request.Env != nil {
 		env := template.Env{Timezone: "Z", Now: float64(time.Now().Unix())}

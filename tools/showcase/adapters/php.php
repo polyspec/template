@@ -12,6 +12,7 @@ $root = dirname(__DIR__, 3);
 require $root . '/packages/template-php/vendor/autoload.php';
 require __DIR__ . '/generated/render_adapter.php';
 require __DIR__ . '/generated/native_templates.php';
+require __DIR__ . '/generated/native_direct.php';
 
 function readJson(string $root, string $name): mixed
 {
@@ -143,6 +144,7 @@ final class Adapter implements RenderAdapter
 
     public function render(RenderRequest $request): string
     {
+        if (getenv('SHOWCASE_EXECUTION_MODE') === 'generated') return generatedDirectRender($this->root, $request);
         $define = [];
         foreach ($request->define->entries() as $id => $entry) {
             if (!$entry instanceof DefineEntry) {
