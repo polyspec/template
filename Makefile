@@ -8,7 +8,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
-	bench benchmark-check benchmark-smoke release-test-matrix docs-static-check clean
+	bench benchmark-check benchmark-smoke release-test-matrix release-check docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -47,11 +47,12 @@ help: ## List targets
 	@echo "  consumer-check         Install package artifacts and compare AST/generated output"
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  release-test-matrix    Run every commercial release verification layer"
+	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
 	@echo "  clean                  Remove build outputs"
 
 check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
 
-lint: ## Lint every package
+lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
 	npm run lint
 	@test ! -d $(GO_DIR) || { out=$$(gofmt -l $(GO_DIR)); test -z "$$out" || { echo "$$out"; exit 1; }; }
@@ -121,6 +122,7 @@ ext: ## Build the PHP extension
 	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml
 
 test-ext: ext ## Test the PHP extension
+	cd $(EXT_DIR) && composer install --no-interaction --quiet
 	node tests/runner/conformance.mjs --langs php-ext
 	cd $(EXT_DIR) && ./run-tests.sh
 
@@ -217,6 +219,9 @@ release-test-matrix: ## Run all release layers in deterministic order
 	$(MAKE) consumer-check test-browser
 	@echo "[release 7/7] static presentation and fresh performance contract"
 	$(MAKE) showcase-check benchmark-smoke docs-verify-idempotent
+
+release-check: ## Install and run the release matrix in an isolated clean worktree
+	node scripts/check-clean-release.mjs
 
 showcase-check: build-ts ## Verify example-site parity, repeatability and browser output
 	$(MAKE) typed-generator-compile-check
