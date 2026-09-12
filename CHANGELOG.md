@@ -25,6 +25,10 @@
 - Verification: `make showcase` passed all 20 implementation-scenario comparisons and wrote 20 benchmark measurements; `make showcase-check` passed the browser proof.
 ### 2026-09-12
 
+- Separated compilation mode (`ast` or `gen`), compiled-artifact refresh (`dev`, `true` or `false`) and final HTML page-cache TTL (`null` or `0` means permanent) in the four runtimes. Added tests for artifact refresh and page-cache expiration.
+- Rebuilt the performance workspace so the implementation's AST row reparses on every render and its generated row calls generated host-language source. Measured rows now parse or compile on every measured render; every row must produce the same 323-byte HTML and SHA-256 before timing is recorded.
+- Verification: PHP 513 tests, TypeScript 652 tests, Go package tests and Rust package tests passed. The benchmark ran 50 iterations per row with zero output divergence; results are in the benchmark workspace.
+
 - Added the prepared render contract to the Rust, Go, TypeScript and PHP runtimes. `prepare` binds assign and define data and resolves the parsed target once; repeated `render` calls reuse that state. Updated benchmark drivers, runtime specification, feature status and the static showcase performance description.
 - Verification: Rust and Go package checks passed; TypeScript build and PHP syntax checks passed. Full cross-language verification and benchmark rerun remain required before this change is marked complete.
 

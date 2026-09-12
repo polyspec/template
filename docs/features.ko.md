@@ -13,7 +13,7 @@
 | template-rust | Rust 렉서, 파서, 렌더러, 준비된 렌더 상태, 함수, CLI | implemented | passed | not-deployed | [패키지](../packages/template-rust/README.ko.md) |
 | template-php | PHP 렉서, 파서, 렌더러, 함수, CLI | implemented | passed | not-deployed | [패키지](../packages/template-php/README.ko.md) |
 | template-php-ext | Rust 크레이트로 빌드하는 PHP 확장 | implemented | passed | not-deployed | [패키지](../packages/template-php-ext/README.ko.md) |
-| benchmarks | 고정 gen 비교 대상과 이 구현의 AST/gen 행을 포함한 전체 페이지 벤치마크 | implemented | passed | not-deployed | [벤치마크 절차](operations/benchmark.ko.md) |
+| benchmarks | 동일한 출력·측정 조건에서 이 구현의 AST와 생성 코드 행을 포함하는 전체 페이지 벤치마크 | implemented | passed | not-deployed | [벤치마크 절차](operations/benchmark.ko.md) |
 | showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·언어별 커밋 AST artifact·AST/생성 실행 모드 계약·지원 레벨 계약·정적 HTML 구조 검사·처리량 결과를 제공하는 예제 사이트 | implemented | passed | not-deployed | [예제 사이트](operations/showcase.ko.md) |
 | generated-mode | 정규 AST에서 직접 생성한 호스트 언어 렌더러와 일치성 검사(TypeScript·JavaScript·Go·Rust·PHP) | implemented | passed | not-deployed | [실행 모드](spec/runtime.ko.md#지원-레벨과-컴파일-artifact) |
 | docs-check | 문서 링크, 번역 쌍, 코드 블록, 상태 검사 | implemented | passed | not-deployed | [문서 절차](operations/documentation.ko.md) |

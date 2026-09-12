@@ -85,13 +85,15 @@ final class Engine
     /** @var array{0: string, 1: string} */
     public readonly array $delimiters;
     public readonly bool $legacyWrappers;
+    /** @var 'dev'|'true'|'false' */
+    public readonly string $artifactRefresh;
     /** @var array<string, callable> */
     private array $functions = [];
     /** @var array<string, array{version: string, template: array{ast: array<string, mixed>, lines: list<int>|null}}> */
     private array $cache = [];
 
     /**
-     * @param array{functions?: array<string, callable>, limits?: array<string, int>, delimiters?: string, legacy_wrappers?: bool} $options
+     * @param array{functions?: array<string, callable>, limits?: array<string, int>, delimiters?: string, legacy_wrappers?: bool, artifact_refresh?: 'dev'|'true'|'false'} $options
      */
     public function __construct(?LoaderInterface $loader = null, array $options = [])
     {
@@ -107,6 +109,10 @@ final class Engine
             $this->delimiters = ['{', '}'];
         }
         $this->legacyWrappers = ($options['legacy_wrappers'] ?? false) === true;
+        $this->artifactRefresh = (string) ($options['artifact_refresh'] ?? 'true');
+        if (!in_array($this->artifactRefresh, ['dev', 'true', 'false'], true)) {
+            throw new \InvalidArgumentException($this->artifactRefresh . ' is not an artifact refresh policy');
+        }
         foreach ($options['functions'] ?? [] as $name => $fn) {
             $this->register((string) $name, $fn);
         }
@@ -171,7 +177,7 @@ final class Engine
             throw TemplateError::withoutPosition('E_LOAD_NOT_FOUND', $name, $message);
         }
         $cached = $this->cache[$name] ?? null;
-        if ($cached !== null && $cached['version'] === $loaded['version']) {
+        if ($cached !== null && ($this->artifactRefresh === 'false' || ($this->artifactRefresh === 'true' && $cached['version'] === $loaded['version']))) {
             return $cached['template'];
         }
         if (isset($loaded['ast'])) {

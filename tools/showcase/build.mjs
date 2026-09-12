@@ -303,6 +303,7 @@ const results = {
     'Every language rendered each scenario twice with the same output.',
     'The TypeScript API rendered each scenario twice with the same output.',
     'Every scenario renders the layout definition with shared mock assign data; the page composition example keeps layout, contents, loop and conditional behavior visible in small source templates.',
+    'Compilation mode (ast or gen), artifact refresh (dev, true or false) and final page-cache TTL (positive, zero or null) are separate runtime decisions.',
   ],
   scenarios: resultScenarios,
   status: failures.length === 0 ? 'pass' : 'fail',

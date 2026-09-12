@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifest = JSON.parse(readFileSync(resolve(root, 'tools/runtime/interface.json'), 'utf8'));
-if (manifest.schema !== 1 || manifest.name !== 'PreparedRender') throw new Error('invalid runtime interface manifest');
-if (!Array.isArray(manifest.operations) || manifest.operations.map(item => item.name).join(',') !== 'prepare,render') {
-  throw new Error('runtime interface must declare prepare and render in order');
+if (manifest.schema !== 2 || manifest.name !== 'TemplateRuntime') throw new Error('invalid runtime interface manifest');
+if (!Array.isArray(manifest.operations) || manifest.operations.map(item => item.name).join(',') !== 'compile,loadOrRefresh,render,getPage,putPage') {
+	throw new Error('runtime interface must declare compilation, artifact and page-cache operations in order');
 }
 const files = {
   rust: ['packages/template-rust/src/render/engine.rs', /pub fn prepare</, /pub fn render/],
@@ -20,6 +20,6 @@ for (const [language, [relative, enginePattern, preparedPattern]] of Object.entr
   if (!enginePattern.test(source)) throw new Error(`${language}: missing Engine prepare operation`);
   if (!preparedPattern.test(source)) throw new Error(`${language}: missing PreparedRender render operation`);
   const mapping = manifest.languages[language];
-  if (!mapping || !mapping.engine || !mapping.prepared) throw new Error(`${language}: missing manifest mapping`);
+  if (!mapping || !mapping.engine || !mapping.pageCache) throw new Error(`${language}: missing manifest mapping`);
 }
 process.stdout.write('runtime interface: four language mappings passed\n');

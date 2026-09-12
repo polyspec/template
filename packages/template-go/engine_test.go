@@ -7,6 +7,7 @@ import (
 	template "github.com/polyspec/template"
 	"github.com/polyspec/template/errs"
 	"github.com/polyspec/template/functions"
+	"github.com/polyspec/template/render"
 )
 
 func TestEngineRender(t *testing.T) {
@@ -22,6 +23,34 @@ func TestEngineRender(t *testing.T) {
 	loader.Set("a.tpl", "2")
 	if out, _ := engine.Render("a.tpl", nil, template.RenderOptions{}); out != "2" {
 		t.Errorf("cache not refreshed: %q", out)
+	}
+}
+
+func TestArtifactRefreshPolicies(t *testing.T) {
+	devLoader := template.NewMapLoader(map[string]string{"a.tpl": "1"})
+	dev, err := template.NewEngine(template.Options{Loader: devLoader, ArtifactRefresh: render.ArtifactRefreshDev})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out, _ := dev.Render("a.tpl", nil, template.RenderOptions{}); out != "1" {
+		t.Fatalf("dev initial: %q", out)
+	}
+	devLoader.Set("a.tpl", "2")
+	if out, _ := dev.Render("a.tpl", nil, template.RenderOptions{}); out != "2" {
+		t.Fatalf("dev refresh: %q", out)
+	}
+
+	immutableLoader := template.NewMapLoader(map[string]string{"a.tpl": "1"})
+	immutable, err := template.NewEngine(template.Options{Loader: immutableLoader, ArtifactRefresh: render.ArtifactRefreshFalse})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out, _ := immutable.Render("a.tpl", nil, template.RenderOptions{}); out != "1" {
+		t.Fatalf("immutable initial: %q", out)
+	}
+	immutableLoader.Set("a.tpl", "2")
+	if out, _ := immutable.Render("a.tpl", nil, template.RenderOptions{}); out != "1" {
+		t.Fatalf("immutable changed: %q", out)
 	}
 }
 
