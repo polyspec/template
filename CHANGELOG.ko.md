@@ -43,3 +43,5 @@
 - 온라인 문서를 저장소 경로를 반영하는 정적 VitePress artifact로 구성하고 GitHub Pages 배포 workflow와 `make docs-static-check`을 추가했으며 발행 절차와 실행 체크리스트를 동기화했다.
 - 공개된 VitePress 테마의 보간 문자열 노출을 수정하고 문서 색인 항목을 실제 링크로 바꾸었으며 모든 `.ko` 경로에 한글 sidebar를 지정해 언어 전환 후에도 한글 메뉴가 유지되게 했다.
 - showcase 템플릿 등록을 식별자와 경로의 직접 대응으로 단순화하고 define 데이터나 완성된 HTML이 필요한 경우에만 객체를 유지했으며 예제 페이지에서 포털 assign JSON과 두 소스 템플릿을 기본으로 펼쳐 보이게 했다.
+
+- TypeScript·Go·Rust·PHP에 동일한 `PageCache.getOrSet` miss/hit 계약을 추가했다. hit에서는 render callback을 호출하지 않고 저장된 HTML을 반환하며, miss에서는 한 번 호출하고 결과를 저장한다. 재생성 가능한 산출물을 dangling command continuation 없이 제거하도록 `make clean`도 수정했다.

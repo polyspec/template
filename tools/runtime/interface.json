@@ -55,6 +55,13 @@
       "parameters": ["cacheKey", "html", "ttl"],
       "returns": "void",
       "errors": ["invalid TTL"]
+    },
+    {
+      "name": "getOrSet",
+      "owner": "PageCache",
+      "parameters": ["cacheKey", "ttl", "render"],
+      "returns": "HTML string",
+      "errors": ["render or invalid TTL"]
     }
   ],
   "languages": {

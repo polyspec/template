@@ -20,6 +20,7 @@ Compiler.compile(sourceGraph, mode: ast | gen) -> compiled artifact
 ArtifactStore.loadOrRefresh(sourceGraph, refresh: dev | true | false) -> compiled artifact
 PageCache.get(key) -> string | miss
 PageCache.put(key, html, ttl: positive seconds | 0 | null)
+PageCache.getOrSet(key, ttl, render)
 ```
 
 - **RT-2** `parse`는 다른 템플릿을 로드하지 않고 AST 문서에 정의된 AST를 생성한다. include와 block 태그는 렌더 중에 해석한다.
@@ -32,6 +33,7 @@ PageCache.put(key, html, ttl: positive seconds | 0 | null)
 - **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
 - **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 런타임에 갱신하지 않는다. `false`에서 산출물이 없거나 오래되면 오류다.
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
+- **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
 - **RT-63** 준비된 렌더 계약은 [`tools/runtime/interface.json`](../../tools/runtime/interface.json)에 선언한다. `scripts/check-runtime-interface.mjs`는 필요한 언어 매핑이나 연산이 하나라도 없으면 실패한다.
 - **RT-42** 엔진 옵션과 `parse`의 `delimiters`는 렉시컬 문서가 정의하는 대로 태그 구분자를 선택한다. 기본값은 `{}`다. 템플릿 파일의 구분자 지시문은 그 파일에 대해 옵션보다 우선한다.
 

@@ -163,4 +163,4 @@ showcase-compile: build-ts ## Generate committed per-language AST artifacts
 	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target docs/.vitepress/dist docs/.vitepress/dist.first \
+	rm -rf $(TS_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target docs/.vitepress/dist docs/.vitepress/dist.first

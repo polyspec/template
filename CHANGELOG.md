@@ -43,3 +43,5 @@
 - Configured the online documentation as a static VitePress artifact with a repository-aware base path, added a GitHub Pages deployment workflow and `make docs-static-check`, and synchronized the publication procedure and execution checklist.
 - Fixed the published VitePress theme interpolation, converted the document index entries into working links, and assigned a Korean sidebar to every `.ko` route so language navigation stays Korean.
 - Simplified showcase template registrations to direct identifier-to-path values, kept object entries only for definition data or finished HTML, and opened the portal's assign JSON and both source templates on the example page.
+
+- Added the same `PageCache.getOrSet` miss and hit contract to TypeScript, Go, Rust and PHP. A hit returns stored HTML without invoking the render callback; a miss invokes it once and stores the result. Fixed `make clean` so it removes rebuildable outputs without a dangling command continuation.
