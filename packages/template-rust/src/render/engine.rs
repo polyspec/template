@@ -77,8 +77,6 @@ pub struct EngineOptions {
     pub limits: Option<Limits>,
     /// Delimiters as a two-character string; `{}` when absent.
     pub delimiters: Option<String>,
-    /// Accept single-brace comment wrappers when enabled.
-    pub legacy_wrappers: bool,
     /// Template artifact refresh policy.
     pub artifact_refresh: ArtifactRefresh,
     /// Compilation mode.
@@ -124,8 +122,6 @@ pub struct Engine {
     pub limits: Limits,
     /// Delimiters.
     pub delimiters: Delimiters,
-    /// Whether legacy single-brace wrappers are normalized before parsing.
-    pub legacy_wrappers: bool,
     /// Controls when loaded template artifacts are refreshed.
     pub artifact_refresh: ArtifactRefresh,
     /// Compilation mode.
@@ -168,7 +164,6 @@ impl Engine {
             functions: options.functions,
             limits: options.limits.unwrap_or_default(),
             delimiters,
-            legacy_wrappers: options.legacy_wrappers,
             artifact_refresh: options.artifact_refresh,
             compile_mode: options.compile.mode,
             generated_renderer: options.compile.generated_renderer,
@@ -216,7 +211,7 @@ impl Engine {
             Loaded::Ast { ast, .. } => ParsedTemplate { ast, lines: None },
             Loaded::Source { bytes, .. } => {
                 let source = Source::from_bytes(name, &bytes)?;
-                let ast = parse_template(&source, self.delimiters, self.legacy_wrappers)?;
+                let ast = parse_template(&source, self.delimiters)?;
                 ParsedTemplate {
                     ast,
                     lines: Some(source.lines),

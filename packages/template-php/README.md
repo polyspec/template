@@ -43,8 +43,8 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 
 | Member | Description |
 | --- | --- |
-| `Engine::parse(string $source, string $name, array $options = [])` | Parses one template into its AST (nested arrays). `$options['delimiters']` selects the delimiters and `$options['legacy_wrappers']` enables single-brace comment wrappers. |
-| `new Engine(?LoaderInterface $loader = null, array $options = [])` | Creates an engine. Options: `functions`, `limits`, `delimiters`, `legacy_wrappers`. |
+| `Engine::parse(string $source, string $name, array $options = [])` | Parses one template into its AST (nested arrays). `$options['delimiters']` selects the delimiters. |
+| `new Engine(?LoaderInterface $loader = null, array $options = [])` | Creates an engine. Options: `functions`, `limits`, `delimiters`. |
 | `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | Renders a template name or a parsed template. `$assign` contains variables; options are `define` and `env`. |
 | `$engine->register(string $name, callable $fn)` | Registers a host function `fn(array $args, array $env): mixed`. |
 | `ArrayLoader`, `FilesystemLoader` | In-memory and filesystem loaders. |
@@ -60,8 +60,6 @@ php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] 
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
-Set `legacy_wrappers` or `--legacy-wrappers true` only for consuming applications that use single-brace comment wrappers; the default parser accepts the specification's doubled wrappers.
-
 ## Development
 
 ```sh

@@ -128,7 +128,6 @@ final class Engine
     public readonly array $limits;
     /** @var array{0: string, 1: string} */
     public readonly array $delimiters;
-    public readonly bool $legacyWrappers;
     /** @var 'dev'|'true'|'false' */
     public readonly string $artifactRefresh;
     /** @var 'ast'|'gen' */
@@ -141,7 +140,7 @@ final class Engine
     private array $cache = [];
 
     /**
-     * @param array{functions?: array<string, callable>, limits?: array<string, int>, delimiters?: string, legacy_wrappers?: bool, artifact_refresh?: 'dev'|'true'|'false', compile?: array{mode?: 'ast'|'gen', generated_renderer?: callable}} $options
+     * @param array{functions?: array<string, callable>, limits?: array<string, int>, delimiters?: string, artifact_refresh?: 'dev'|'true'|'false', compile?: array{mode?: 'ast'|'gen', generated_renderer?: callable}} $options
      */
     public function __construct(?LoaderInterface $loader = null, array $options = [])
     {
@@ -156,7 +155,6 @@ final class Engine
         } else {
             $this->delimiters = ['{', '}'];
         }
-        $this->legacyWrappers = ($options['legacy_wrappers'] ?? false) === true;
         $this->artifactRefresh = (string) ($options['artifact_refresh'] ?? 'true');
         if (!in_array($this->artifactRefresh, ['dev', 'true', 'false'], true)) {
             throw new \InvalidArgumentException($this->artifactRefresh . ' is not an artifact refresh policy');
@@ -175,7 +173,7 @@ final class Engine
     /**
      * RT-2: parses one template source without loading other templates.
      *
-     * @param array{delimiters?: string, legacy_wrappers?: bool} $options
+     * @param array{delimiters?: string} $options
      * @return array<string, mixed>
      */
     public static function parse(string $source, string $name, array $options = []): array
@@ -188,7 +186,7 @@ final class Engine
             }
         }
 
-        return Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1], ($options['legacy_wrappers'] ?? false) === true);
+        return Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]);
     }
 
     /**
@@ -238,7 +236,7 @@ final class Engine
             $template = ['ast' => $loaded['ast'], 'lines' => null];
         } else {
             $source = Source::fromBytes($name, $loaded['source'] ?? '');
-            $template = ['ast' => Parser::parse($source, $this->delimiters[0], $this->delimiters[1], $this->legacyWrappers), 'lines' => $source->lines];
+            $template = ['ast' => Parser::parse($source, $this->delimiters[0], $this->delimiters[1]), 'lines' => $source->lines];
         }
         $this->cache[$name] = ['version' => $loaded['version'], 'template' => $template];
 

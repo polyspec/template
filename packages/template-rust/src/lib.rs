@@ -37,8 +37,6 @@ use parser::scanner::{DEFAULT_DELIMITERS, parse_delimiters};
 pub struct ParseOptions {
     /// Delimiters as a two-character string; `{}` when absent.
     pub delimiters: Option<String>,
-    /// Accept single-brace comment wrappers when enabled.
-    pub legacy_wrappers: bool,
 }
 
 /// RT-2: parses one template source without loading other templates.
@@ -54,5 +52,5 @@ pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Templa
         None => DEFAULT_DELIMITERS,
     };
     let parsed = source::Source::from_bytes(name, source)?;
-    parser::parse_template(&parsed, delimiters, options.legacy_wrappers)
+    parser::parse_template(&parsed, delimiters)
 }

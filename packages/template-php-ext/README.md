@@ -42,8 +42,8 @@ try {
 
 | Member | Description |
 | --- | --- |
-| `new Engine(?string $root, array $options)` | Creates an engine. `$root` is the loader root directory. `$options` accepts `delimiters`, `limits` and `legacy_wrappers`. |
-| `Engine::parse(string $source, string $name, array $options): array` | Parses one template and returns the AST as nested arrays. `$options['legacy_wrappers']` enables single-brace comment wrappers. |
+| `new Engine(?string $root, array $options)` | Creates an engine. `$root` is the loader root directory. `$options` accepts `delimiters` and `limits`. |
+| `Engine::parse(string $source, string $name, array $options): array` | Parses one template and returns the AST as nested arrays. |
 | `Engine::parseToJson(string $source, string $name, array $options): string` | Parses one template and returns the AST as JSON text. |
 | `$engine->register(string $name, callable $function): void` | Registers a host function `fn(array $args, array $env): mixed`. |
 | `$engine->render(string $name, mixed $assign, array $options): string` | Renders a template with PHP assign data. `$options` accepts `define` and `env`. |
@@ -64,8 +64,6 @@ php -d extension=target/release/libpolyspec_template.dylib bin/template-ext.php 
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
-Set `legacy_wrappers` or `--legacy-wrappers true` only for consuming applications that use single-brace comment wrappers; the default parser accepts the specification's doubled wrappers.
-
 ## Test
 
 ```sh

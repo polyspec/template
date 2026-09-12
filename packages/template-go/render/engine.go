@@ -15,7 +15,7 @@ import (
 )
 
 // ParseFunc parses source text into a template; nil in a render-only engine.
-type ParseFunc func(source []byte, name string, delimiters parser.Delimiters, legacyWrappers bool) (*ParsedTemplate, error)
+type ParseFunc func(source []byte, name string, delimiters parser.Delimiters) (*ParsedTemplate, error)
 
 // ArtifactRefresh controls when compiled template artifacts are refreshed.
 type ArtifactRefresh string
@@ -61,7 +61,6 @@ type Options struct {
 	Functions       map[string]functions.HostFunction
 	Limits          *Limits
 	Delimiters      string
-	LegacyWrappers  bool
 	Parse           ParseFunc
 	ArtifactRefresh ArtifactRefresh
 	Compile         CompileOptions
@@ -89,7 +88,6 @@ type Engine struct {
 	limits          Limits
 	delimiters      parser.Delimiters
 	parse           ParseFunc
-	legacyWrappers  bool
 	artifactRefresh ArtifactRefresh
 	compileMode     CompileMode
 	generatedRender GeneratedRenderer
@@ -136,7 +134,7 @@ func NewEngine(options Options, now func() float64) (*Engine, error) {
 	if mode != CompileModeAST && mode != CompileModeGen {
 		return nil, fmt.Errorf("%q is not a compile mode", mode)
 	}
-	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, legacyWrappers: options.LegacyWrappers, artifactRefresh: refresh, compileMode: mode, generatedRender: options.Compile.Generated, cache: map[string]cached{}, now: now}
+	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, artifactRefresh: refresh, compileMode: mode, generatedRender: options.Compile.Generated, cache: map[string]cached{}, now: now}
 	if e.now == nil {
 		e.now = func() float64 { return float64(time.Now().Unix()) }
 	}
@@ -202,7 +200,7 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 		if e.parse == nil {
 			return nil, errors.New("this engine renders parsed templates only; the loader returned source text")
 		}
-		parsed, err := e.parse(loaded.Source, name, e.delimiters, e.legacyWrappers)
+		parsed, err := e.parse(loaded.Source, name, e.delimiters)
 		if err != nil {
 			return nil, err
 		}

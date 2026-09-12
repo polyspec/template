@@ -24,8 +24,8 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 
 | 항목 | 설명 |
 | --- | --- |
-| `parse(source, name, &ParseOptions)` | 템플릿 하나를 AST로 파싱한다. `source`는 UTF-8 바이트이며 `ParseOptions::legacy_wrappers`는 단일 중괄호 주석 래퍼를 활성화한다. |
-| `Engine::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자, `legacy_wrappers`를 가진 엔진을 생성한다. |
+| `parse(source, name, &ParseOptions)` | 선택적인 구분자로 UTF-8 템플릿 하나를 AST로 파싱한다. |
+| `Engine::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 엔진을 생성한다. |
 | `Engine::render(target, assign, &RenderOptions)` | 템플릿 이름 또는 파싱된 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 또는 HTML 항목을 제공한다. |
 | `Engine::register(name, function)` | 호스트 함수 `Fn(&[Value], &FunctionContext) -> Result<Value, String>`을 등록한다. |
 | `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. |
@@ -42,8 +42,6 @@ template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiter
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
-소비 애플리케이션이 단일 중괄호 주석 래퍼를 사용할 때만 `legacy_wrappers` 또는 `--legacy-wrappers true`를 설정한다. 기본 파서는 명세의 이중 중괄호 래퍼를 받는다.
-
 ## 개발
 
 ```sh

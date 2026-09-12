@@ -7,8 +7,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "empty-state",
@@ -18,8 +17,7 @@
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "seconds": 0.000017083,
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -29,8 +27,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -40,8 +37,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -51,8 +47,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "empty-state",
@@ -62,8 +57,7 @@
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "seconds": 0.000007167,
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -73,8 +67,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -84,8 +77,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -95,8 +87,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "empty-state",
@@ -106,8 +97,7 @@
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "seconds": 0.000009667,
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -117,8 +107,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -128,8 +117,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -139,8 +127,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "empty-state",
@@ -150,8 +137,7 @@
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "seconds": 0.000007834,
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -161,8 +147,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -172,8 +157,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -183,8 +167,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "empty-state",
@@ -194,8 +177,7 @@
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "seconds": 0.000007583,
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -205,8 +187,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -216,8 +197,7 @@
     "output_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "repeat_sha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -227,8 +207,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "html-slot",
@@ -238,8 +217,7 @@
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "seconds": 0.000010709,
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -249,8 +227,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -260,8 +237,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -271,8 +247,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "html-slot",
@@ -282,8 +257,7 @@
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "seconds": 0.000010209,
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -293,8 +267,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -304,8 +277,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -315,8 +287,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "html-slot",
@@ -326,8 +297,7 @@
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "seconds": 0.000010709,
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -337,8 +307,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -348,8 +317,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -359,8 +327,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "html-slot",
@@ -370,8 +337,7 @@
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "seconds": 0.00000925,
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -381,8 +347,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -392,8 +357,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -403,8 +367,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "html-slot",
@@ -414,8 +377,7 @@
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "seconds": 0.000010209,
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -425,8 +387,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -436,8 +397,7 @@
     "output_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "repeat_sha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -447,8 +407,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "scope-precedence",
@@ -458,8 +417,7 @@
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "seconds": 0.000029333,
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -469,8 +427,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -480,8 +437,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 1,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -491,8 +447,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "scope-precedence",
@@ -502,8 +457,7 @@
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "seconds": 0.000025209,
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -513,8 +467,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -524,8 +477,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 2,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -535,8 +487,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "scope-precedence",
@@ -546,8 +497,7 @@
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "seconds": 0.000024083,
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -557,8 +507,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -568,8 +517,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 3,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -579,8 +527,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "scope-precedence",
@@ -590,8 +537,7 @@
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "seconds": 0.000024667,
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -601,8 +547,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -612,8 +557,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 4,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "ts",
@@ -623,8 +567,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "fixture": "scope-precedence",
@@ -634,8 +577,7 @@
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "seconds": 0.000024584,
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "rust",
@@ -645,8 +587,7 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   },
   {
     "lang": "php",
@@ -656,7 +597,6 @@
     "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "repeat_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8",
     "sample": 5,
-    "target": "layout",
-    "legacy_wrappers": false
+    "target": "layout"
   }
 ]

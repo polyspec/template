@@ -1,7 +1,7 @@
 // Package entry: parser, engine, loaders, values and errors.
 import type { Template } from './ast.js';
 import { parseTemplate } from './parser/parser.js';
-import { DEFAULT_DELIMITERS, normalizeLegacyWrappers, parseDelimiters, type Delimiters } from './parser/scanner.js';
+import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from './parser/scanner.js';
 import { EngineCore, PreparedRender, type EngineOptions, type RenderOptions } from './render/engine.js';
 import type { ParsedTemplate } from './render/context.js';
 import { Source } from './source.js';
@@ -22,7 +22,6 @@ export { PageCache, type PageCacheTTL } from './page-cache.js';
 // What `parse` accepts besides the source and the name.
 export interface ParseOptions {
   delimiters?: string;
-  legacyWrappers?: boolean;
 }
 
 function delimitersOf(value: string | undefined): Delimiters {
@@ -34,13 +33,12 @@ function delimitersOf(value: string | undefined): Delimiters {
 
 // RT-2: parses one template source without loading other templates.
 export function parse(source: string | Uint8Array, name: string, options: ParseOptions = {}): Template {
-  return parseWithLines(source, name, delimitersOf(options.delimiters), options.legacyWrappers === true).ast;
+  return parseWithLines(source, name, delimitersOf(options.delimiters)).ast;
 }
 
-function parseWithLines(source: string | Uint8Array, name: string, delimiters: Delimiters, legacyWrappers = false): ParsedTemplate {
+function parseWithLines(source: string | Uint8Array, name: string, delimiters: Delimiters): ParsedTemplate {
   const parsed = typeof source === 'string' ? Source.fromText(name, source) : Source.fromBytes(name, source);
-  const effective = legacyWrappers ? Source.fromText(name, normalizeLegacyWrappers(parsed.text, delimiters)) : parsed;
-  return { ast: parseTemplate(effective, delimiters), lines: effective.lines };
+  return { ast: parseTemplate(parsed, delimiters), lines: parsed.lines };
 }
 
 // An engine that parses the sources its loader returns. The render-only entry point exports an

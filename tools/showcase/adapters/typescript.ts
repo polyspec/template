@@ -110,13 +110,10 @@ export class Adapter implements RenderAdapter {
 
   constructor(root: string) {
     this.root = root;
-    const metadata = objectValue(readJson(root, 'scenario.json'), 'scenario.json');
-    const legacyWrappers = metadata.has('legacyWrappers') ? booleanField(metadata, 'legacyWrappers') : false;
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
     const templates = generated ? new Map<string, Template>() : readArtifactTemplates(root, 'typescript');
     this.engine = new Engine({
       loader: new MapLoader(templates),
-      legacyWrappers,
       compile: generated ? {
         mode: 'gen',
         generatedRenderer: (request: GeneratedRequest) => ({

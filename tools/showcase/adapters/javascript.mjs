@@ -95,13 +95,10 @@ function engineDefines(define) {
 export class Adapter {
   constructor(root) {
     this.root = root;
-    const metadata = objectValue(readJson(root, 'scenario.json'), 'scenario.json');
-    const legacyWrappers = metadata.has('legacyWrappers') ? booleanField(metadata, 'legacyWrappers') : false;
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
     const templates = generated ? new Map() : readArtifactTemplates(root, 'typescript');
     this.engine = new Engine({
       loader: new MapLoader(templates),
-      legacyWrappers,
       compile: generated ? {
         mode: 'gen',
         generatedRenderer: request => ({

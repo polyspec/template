@@ -11,8 +11,8 @@ use crate::expr::lexer::LexerOptions;
 use crate::expr::parser::ExpressionParser;
 use crate::parser::block_tag::RawTagReader;
 use crate::parser::scanner::{
-    Delimiters, Wrapper, assign_operator_length, ident_length, is_horizontal_space, normalize_legacy_wrappers, parse_delimiters,
-    sigil_after, skip_horizontal_space, starts_tag, wrapped_tag_at,
+    Delimiters, Wrapper, assign_operator_length, ident_length, is_horizontal_space, parse_delimiters, sigil_after, skip_horizontal_space,
+    starts_tag, wrapped_tag_at,
 };
 use crate::parser::standalone::{Range, TagRange, standalone_ranges};
 use crate::source::Source;
@@ -50,14 +50,7 @@ struct TagContext {
 }
 
 /// Parses a source into a template AST.
-pub fn parse_template(source: &Source, delimiters: Delimiters, legacy_wrappers: bool) -> Result<Template, TemplateError> {
-    if legacy_wrappers {
-        let normalized = normalize_legacy_wrappers(source.bytes(), delimiters);
-        if normalized != source.bytes() {
-            let normalized_source = Source::from_bytes(&source.name, &normalized)?;
-            return TemplateParser::new(&normalized_source, delimiters).parse();
-        }
-    }
+pub fn parse_template(source: &Source, delimiters: Delimiters) -> Result<Template, TemplateError> {
     TemplateParser::new(source, delimiters).parse()
 }
 

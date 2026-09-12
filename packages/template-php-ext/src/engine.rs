@@ -23,8 +23,8 @@ pub struct NativeEngine {
 impl NativeEngine {
     /// Creates an engine. `root` is the loader root directory; without it no template name resolves.
     ///
-    /// `options` accepts `delimiters` as a two-character string, `legacy_wrappers` as a boolean
-    /// and `limits` as an array with the keys `iterations`, `depth`, `outputBytes` and
+    /// `options` accepts `delimiters` as a two-character string and `limits` as an array
+    /// with the keys `iterations`, `depth`, `outputBytes` and
     /// `expressionDepth`.
     pub fn __construct(root: Option<String>, options: Option<&ZendHashTable>) -> PhpResult<NativeEngine> {
         let mut engine_options = EngineOptions::default();
@@ -40,9 +40,6 @@ impl NativeEngine {
             }
             if let Some(limits) = options.get("limits").and_then(Zval::array) {
                 engine_options.limits = Some(read_limits(limits));
-            }
-            if options.get("legacy_wrappers").and_then(Zval::bool).unwrap_or(false) {
-                engine_options.legacy_wrappers = true;
             }
         }
         Ok(NativeEngine {
@@ -63,10 +60,6 @@ impl NativeEngine {
         let bytes = source_bytes(source);
         let parse_options = ParseOptions {
             delimiters: delimiters_of(options, &name)?,
-            legacy_wrappers: options
-                .and_then(|options| options.get("legacy_wrappers"))
-                .and_then(Zval::bool)
-                .unwrap_or(false),
         };
         let ast = core_parse(bytes, &name, &parse_options).map_err(|error| php_exception(&error))?;
         serde_json::to_string(&ast).map_err(|error| PhpException::default(format!("cannot write the AST: {error}")))

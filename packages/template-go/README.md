@@ -59,8 +59,8 @@ engine, _ := template.NewEngine(template.Options{Loader: template.NewFSLoader(su
 
 | Symbol | Description |
 | --- | --- |
-| `Parse(source, name, ParseOptions)` | Parses one template into its AST. `ParseOptions.LegacyWrappers` enables single-brace comment wrappers. |
-| `NewEngine(Options)` | Creates an engine with `Loader`, `Functions`, `Limits`, `Delimiters` and `LegacyWrappers`. |
+| `Parse(source, name, ParseOptions)` | Parses one template into its AST. `ParseOptions.Delimiters` selects the delimiter pair. |
+| `NewEngine(Options)` | Creates an engine with `Loader`, `Functions`, `Limits` and `Delimiters`. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | Renders a template to a string. `assign` contains variables and `Define` supplies template or HTML entries. |
 | `(*Engine).Register(name, fn)` | Registers a host function `func(args []Value, ctx functions.Context) (any, error)`. |
 | `NewMapLoader`, `NewFSLoader` | In-memory and `fs.FS` loaders. |
@@ -77,8 +77,6 @@ go build -o template ./cmd/template
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
-Set `LegacyWrappers` or `--legacy-wrappers true` only for consuming applications that use single-brace comment wrappers; the default parser accepts the specification's doubled wrappers.
-
 ## Development
 
 ```sh

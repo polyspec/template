@@ -67,42 +67,6 @@ export function wrappedTagAt(text: string, index: number, delimiters: Delimiters
   return null;
 }
 
-// consuming applications also use a single-brace tag inside a C-style or HTML
-// comment wrapper (`/*{= value}*/`). When enabled by the host, remove only those wrappers and
-// leave the contained tags for the normal parser. The default parser remains specification-only.
-export function normalizeLegacyWrappers(text: string, delimiters: Delimiters): string {
-  const wrappers = [
-    { opener: '/*', closer: '*/' },
-    { opener: '<!--', closer: '-->' },
-  ];
-  const active: string[] = [];
-  let output = '';
-  let index = 0;
-  while (index < text.length) {
-    const closer = active[active.length - 1];
-    if (closer !== undefined && text.startsWith(closer, index)) {
-      active.pop();
-      index += closer.length;
-      continue;
-    }
-    let opened = false;
-    for (const wrapper of wrappers) {
-      if (!text.startsWith(wrapper.opener, index)) continue;
-      const after = skipHorizontalSpace(text, index + wrapper.opener.length);
-      if (text[after] === delimiters.open && startsTag(text, after, delimiters)) {
-        active.push(wrapper.closer);
-        index += wrapper.opener.length;
-        opened = true;
-        break;
-      }
-    }
-    if (opened) continue;
-    output += text[index] as string;
-    index++;
-  }
-  return output;
-}
-
 // LEX-21: one ASCII character that is not a letter, a digit, `_`, `\`, a space or a control character.
 export function isDelimiterChar(char: string): boolean {
   if (char.length !== 1) return false;

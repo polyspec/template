@@ -54,7 +54,6 @@ function scenarios() {
 
 function parseArgs(language, scenarioDir, name, metadata) {
   const args = ['parse', name, '--root', scenarioDir];
-  if (metadata.legacyWrappers === true) args.push('--legacy-wrappers', 'true');
   return args;
 }
 

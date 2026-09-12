@@ -151,51 +151,6 @@ pub fn wrapped_tag_at(bytes: &[u8], index: usize, delimiters: Delimiters) -> Opt
     None
 }
 
-/// Removes single-brace C-style and HTML comment wrappers.
-pub fn normalize_legacy_wrappers(bytes: &[u8], delimiters: Delimiters) -> Vec<u8> {
-    let legacy = [
-        Wrapper {
-            opener: "/*",
-            closer: "*/",
-        },
-        Wrapper {
-            opener: "<!--",
-            closer: "-->",
-        },
-    ];
-    let mut active: Vec<&str> = Vec::new();
-    let mut output = Vec::with_capacity(bytes.len());
-    let mut index = 0;
-    while index < bytes.len() {
-        if let Some(&closer) = active.last()
-            && bytes[index..].starts_with(closer.as_bytes())
-        {
-            active.pop();
-            index += closer.len();
-            continue;
-        }
-        let mut opened = false;
-        for wrapper in legacy {
-            if !bytes[index..].starts_with(wrapper.opener.as_bytes()) {
-                continue;
-            }
-            let after = skip_horizontal_space(bytes, index + wrapper.opener.len());
-            if bytes.get(after) == Some(&delimiters.open) && starts_tag(bytes, after, delimiters) {
-                active.push(wrapper.closer);
-                index += wrapper.opener.len();
-                opened = true;
-                break;
-            }
-        }
-        if opened {
-            continue;
-        }
-        output.push(bytes[index]);
-        index += 1;
-    }
-    output
-}
-
 /// LEX-21: one ASCII character that is not a letter, a digit, `_`, `\`, a space or a control character.
 pub fn is_delimiter_char(byte: u8) -> bool {
     if byte <= 0x20 || byte >= 0x7f {

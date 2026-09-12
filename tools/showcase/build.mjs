@@ -100,7 +100,6 @@ function loadScenario(id) {
     id,
     dir,
     target: metadata.target,
-    legacyWrappers: metadata.legacyWrappers === true,
     title: metadata.title,
     description: metadata.description,
     focus: metadata.focus ?? [],
@@ -149,7 +148,6 @@ function renderArgs(scenario) {
   if (existsSync(join(scenario.dir, 'data.json'))) args.push('--data', 'data.json');
   if (existsSync(join(scenario.dir, 'define.json'))) args.push('--define', 'define.json');
   if (existsSync(join(scenario.dir, 'env.json'))) args.push('--env', 'env.json');
-  if (scenario.legacyWrappers) args.push('--legacy-wrappers', 'true');
   return args;
 }
 
@@ -203,7 +201,7 @@ const siteScenarios = [];
 
 for (const scenario of scenarios) {
   for (const failure of verifySourceSnapshot(scenario)) failures.push(`${scenario.id}: ${failure}`);
-  const apiEngine = new Engine({ loader: new MapLoader(compiledTemplates(scenario)), legacyWrappers: scenario.legacyWrappers });
+  const apiEngine = new Engine({ loader: new MapLoader(compiledTemplates(scenario)) });
   let apiFirst;
   let apiSecond;
   try {
@@ -264,7 +262,6 @@ for (const scenario of scenarios) {
     id: scenario.id,
     source: scenario.source,
     target: scenario.target,
-    legacyWrappers: scenario.legacyWrappers,
     bytes: expected.bytes,
     sha256: expected.sha256,
     api: {
@@ -283,7 +280,6 @@ for (const scenario of scenarios) {
     focus: scenario.focus,
     source: scenario.source,
     target: scenario.target,
-    legacyWrappers: scenario.legacyWrappers,
     templates: scenario.templates,
     integrationFiles: scenario.integrationFiles,
     assign: scenario.assign,

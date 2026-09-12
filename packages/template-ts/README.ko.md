@@ -51,8 +51,8 @@ const engine = new Engine({ loader: new MapLoader({ 'card.tpl': cardAst }) });
 
 | 내보내기 | 설명 |
 | --- | --- |
-| `parse(source, name, { delimiters, legacyWrappers })` | 템플릿 하나를 AST로 파싱한다. `source`는 문자열 또는 UTF-8 바이트다. |
-| `new Engine({ loader, functions, limits, delimiters, legacyWrappers })` | 엔진을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
+| `parse(source, name, { delimiters })` | 템플릿 하나를 AST로 파싱한다. `source`는 문자열 또는 UTF-8 바이트다. |
+| `new Engine({ loader, functions, limits, delimiters })` | 엔진을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
 | `engine.render(nameOrAst, assign, { define, env })` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 경로나 HTML 항목을 제공한다. |
 | `engine.register(name, fn)` | 호스트 함수 `(args, { env }) => value`를 등록한다. |
 | `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. |
@@ -68,8 +68,6 @@ node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR]
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
-소비 애플리케이션이 단일 중괄호 주석 래퍼를 사용할 때만 `legacyWrappers` 또는 `--legacy-wrappers true`를 설정한다. 기본 파서는 명세의 이중 중괄호 래퍼를 받는다.
-
 ## 개발
 
 ```sh

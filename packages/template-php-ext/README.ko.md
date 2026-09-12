@@ -42,8 +42,8 @@ try {
 
 | 멤버 | 설명 |
 | --- | --- |
-| `new Engine(?string $root, array $options)` | 엔진을 생성한다. `$root`는 로더 루트 디렉터리다. `$options`는 `delimiters`, `limits`, `legacy_wrappers`를 받는다. |
-| `Engine::parse(string $source, string $name, array $options): array` | 템플릿 하나를 파싱해 AST를 중첩 배열로 반환한다. `$options['legacy_wrappers']`가 단일 중괄호 주석 래퍼를 활성화한다. |
+| `new Engine(?string $root, array $options)` | 엔진을 생성한다. `$root`는 로더 루트 디렉터리다. `$options`는 `delimiters`와 `limits`를 받는다. |
+| `Engine::parse(string $source, string $name, array $options): array` | 템플릿 하나를 파싱해 AST를 중첩 배열로 반환한다. |
 | `Engine::parseToJson(string $source, string $name, array $options): string` | 템플릿 하나를 파싱해 AST를 JSON 텍스트로 반환한다. |
 | `$engine->register(string $name, callable $function): void` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. |
 | `$engine->render(string $name, mixed $assign, array $options): string` | PHP assign 데이터로 템플릿을 렌더한다. `$options`는 `define`과 `env`를 받는다. |
@@ -64,8 +64,6 @@ php -d extension=target/release/libpolyspec_template.dylib bin/template-ext.php 
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
-소비 애플리케이션이 단일 중괄호 주석 래퍼를 사용할 때만 `legacy_wrappers` 또는 `--legacy-wrappers true`를 설정한다. 기본 파서는 명세의 이중 중괄호 래퍼를 받는다.
-
 ## 테스트
 
 ```sh

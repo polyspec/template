@@ -111,16 +111,9 @@ final class Adapter implements RenderAdapter
 
     public function __construct(private readonly string $root)
     {
-        $metadata = objectValue(readJson($root, 'scenario.json'), 'scenario.json');
-        $legacyWrappers = false;
-        if ($metadata->has('legacyWrappers')) {
-            $value = $metadata->get('legacyWrappers');
-            if (!is_bool($value)) throw new RuntimeException('scenario.legacyWrappers must be a boolean');
-            $legacyWrappers = $value;
-        }
         $generated = getenv('SHOWCASE_EXECUTION_MODE') === 'generated';
         $loader = $generated ? new ArrayLoader() : artifactLoader($root, 'php');
-        $options = ['legacy_wrappers' => $legacyWrappers, 'compile' => ['mode' => $generated ? 'gen' : 'ast']];
+        $options = ['compile' => ['mode' => $generated ? 'gen' : 'ast']];
         if ($generated) {
             $options['compile']['generated_renderer'] = static function (GeneratedRequest $request) use ($root): GeneratedPreparedRender {
                 $define = new MapValue();

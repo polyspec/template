@@ -24,8 +24,8 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 
 | Item | Description |
 | --- | --- |
-| `parse(source, name, &ParseOptions)` | Parses one template into its AST. `source` is UTF-8 bytes; `ParseOptions::legacy_wrappers` enables single-brace comment wrappers. |
-| `Engine::new(EngineOptions)` | Creates an engine with a loader, host functions, limits, delimiters and `legacy_wrappers`. |
+| `parse(source, name, &ParseOptions)` | Parses one UTF-8 template into its AST with optional delimiters. |
+| `Engine::new(EngineOptions)` | Creates an engine with a loader, host functions, limits and delimiters. |
 | `Engine::render(target, assign, &RenderOptions)` | Renders a template name or a parsed template to a string. `assign` contains variables and `define` supplies template or HTML entries. |
 | `Engine::register(name, function)` | Registers a host function `Fn(&[Value], &FunctionContext) -> Result<Value, String>`. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. |
@@ -42,8 +42,6 @@ template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiter
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
-Set `legacy_wrappers` or `--legacy-wrappers true` only for consuming applications that use single-brace comment wrappers; the default parser accepts the specification's doubled wrappers.
-
 ## Development
 
 ```sh

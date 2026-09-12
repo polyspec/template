@@ -59,8 +59,8 @@ engine, _ := template.NewEngine(template.Options{Loader: template.NewFSLoader(su
 
 | 심볼 | 설명 |
 | --- | --- |
-| `Parse(source, name, ParseOptions)` | 템플릿 하나를 AST로 파싱한다. `ParseOptions.LegacyWrappers`는 단일 중괄호 주석 래퍼를 활성화한다. |
-| `NewEngine(Options)` | `Loader`, `Functions`, `Limits`, `Delimiters`, `LegacyWrappers`를 가진 엔진을 생성한다. |
+| `Parse(source, name, ParseOptions)` | 템플릿 하나를 AST로 파싱한다. `ParseOptions.Delimiters`는 구분자 쌍을 선택한다. |
+| `NewEngine(Options)` | `Loader`, `Functions`, `Limits`, `Delimiters`를 가진 엔진을 생성한다. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `Define`은 템플릿 또는 HTML 항목을 제공한다. |
 | `(*Engine).Register(name, fn)` | 호스트 함수 `func(args []Value, ctx functions.Context) (any, error)`를 등록한다. |
 | `NewMapLoader`, `NewFSLoader` | 메모리 로더와 `fs.FS` 로더. |
@@ -77,8 +77,6 @@ go build -o template ./cmd/template
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
-소비 애플리케이션이 단일 중괄호 주석 래퍼를 사용할 때만 `LegacyWrappers` 또는 `--legacy-wrappers true`를 설정한다. 기본 파서는 명세의 이중 중괄호 래퍼를 받는다.
-
 ## 개발
 
 ```sh

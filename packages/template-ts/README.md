@@ -51,8 +51,8 @@ const engine = new Engine({ loader: new MapLoader({ 'card.tpl': cardAst }) });
 
 | Export | Description |
 | --- | --- |
-| `parse(source, name, { delimiters, legacyWrappers })` | Parses one template into its AST. `source` is a string or UTF-8 bytes. |
-| `new Engine({ loader, functions, limits, delimiters, legacyWrappers })` | Creates an engine. `loader` defaults to an empty `MapLoader`. |
+| `parse(source, name, { delimiters })` | Parses one template into its AST. `source` is a string or UTF-8 bytes. |
+| `new Engine({ loader, functions, limits, delimiters })` | Creates an engine. `loader` defaults to an empty `MapLoader`. |
 | `engine.render(nameOrAst, assign, { define, env })` | Renders a template to a string. `assign` contains variables; `define` supplies template paths or HTML entries. |
 | `engine.register(name, fn)` | Registers a host function `(args, { env }) => value`. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. |
@@ -68,8 +68,6 @@ node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR]
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
-Set `legacyWrappers` or `--legacy-wrappers true` only when the consuming application uses single-brace comment wrappers; the default parser accepts the specification's doubled wrappers.
-
 ## Development
 
 ```sh
