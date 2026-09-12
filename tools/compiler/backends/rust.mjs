@@ -127,7 +127,8 @@ export function emitDeclarations(context) {
 }
 
 export function emitRuntime() {
-  return `#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
+  return `type GeneratedValue = JsonValue;
+#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
 #[derive(Clone, Default)] pub struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
 impl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } fn get(&self, key: &K) -> Option<&V> { self.entries.iter().find(|entry| &entry.key == key).map(|entry| &entry.value) } fn entries(&self) -> &Vec<OrderedEntry<K, V>> { &self.entries } }
 impl<K: Serialize, V: Serialize> Serialize for OrderedMap<K, V> { fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { let mut map = serializer.serialize_map(Some(self.entries.len()))?; for entry in &self.entries { map.serialize_entry(&entry.key, &entry.value)?; } map.end() } }
