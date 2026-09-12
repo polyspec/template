@@ -54,6 +54,8 @@ The program diagrams are generated from the single product manifest:
 ```mermaid
 <!--@include: ../../tools/runtime/generated/prepared-execution-classes.mmd-->
 ```
+
+The compiler manifest also fixes the public `Program`, `Engine`, `AstProgram` and generated-program declaration structure. The interface gate reads TypeScript through the compiler API, Go through `go/parser`, Rust through `syn` and PHP through Reflection. A missing or additional operation, changed argument count, changed owner or absent concrete AST program fails the build.
 - **RT-42** `delimiters` in the engine options and in `parse` selects the tag delimiters as defined in the lexical document. The default is `{}`. A delimiter directive in a template file overrides the option for that file.
 
 ## Cross-language render contract

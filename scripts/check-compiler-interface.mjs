@@ -1,10 +1,14 @@
 #!/usr/bin/env node
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const manifestPath = resolve(root, 'tools/compiler/interface.json');
+const manifestPath = process.env.TEMPLATE_INTERFACE_MANIFEST
+  ? resolve(process.env.TEMPLATE_INTERFACE_MANIFEST)
+  : resolve(root, 'tools/compiler/interface.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 if (manifest.schema !== 2 || manifest.name !== 'TemplateCompiler') throw new Error('invalid compiler interface manifest');
 if (existsSync(resolve(root, 'tools/runtime/interface.json'))) throw new Error('runtime contract must not duplicate the compiler manifest');
@@ -46,4 +50,44 @@ const requiredForbidden = [
 ];
 if (manifest.forbidden?.join('\n') !== requiredForbidden.join('\n')) throw new Error('forbidden architecture list differs');
 
-process.stdout.write('compiler interface: single product manifest structure passed\n');
+const runtime = manifest.runtimeContract;
+if (runtime?.Program?.operations?.map(item => item.name).join(',') !== 'prepare,render') throw new Error('Program runtime operations differ');
+if (runtime.Engine?.owns?.join(',') !== 'program' || runtime.Engine?.implements !== 'Program') throw new Error('Engine ownership differs');
+if (runtime.AstProgram?.implements !== 'Program' || runtime.GeneratedProgram?.implements !== 'Program') throw new Error('program implementation mapping differs');
+
+function declaration(source, kind, name) {
+  return source.statements.find(statement => statement.name?.text === name && statement.kind === kind);
+}
+
+const enginePath = resolve(root, 'packages/template-ts/src/render/engine.ts');
+const engineSource = ts.createSourceFile(enginePath, readFileSync(enginePath, 'utf8'), ts.ScriptTarget.Latest, true);
+const program = declaration(engineSource, ts.SyntaxKind.InterfaceDeclaration, 'Program');
+if (!program) throw new Error('typescript: Program interface is missing');
+const programMethods = program.members.filter(ts.isMethodSignature);
+for (const operation of runtime.Program.operations) {
+  const method = programMethods.find(item => item.name.getText(engineSource) === operation.name);
+  if (!method || method.parameters.length !== operation.parameters.length) throw new Error(`typescript: Program.${operation.name} signature differs`);
+}
+if (programMethods.length !== runtime.Program.operations.length) throw new Error('typescript: Program has undeclared operations');
+
+const engine = declaration(engineSource, ts.SyntaxKind.ClassDeclaration, 'Engine');
+if (!engine || !engine.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(engineSource) === 'Program'))) throw new Error('typescript: Engine does not implement Program');
+const constructor = engine.members.find(ts.isConstructorDeclaration);
+if (!constructor?.parameters.some(parameter => parameter.name.getText(engineSource) === 'program')) throw new Error('typescript: Engine does not own program');
+const engineMethods = engine.members.filter(ts.isMethodDeclaration).map(item => item.name.getText(engineSource));
+if (engineMethods.join(',') !== runtime.Engine.operations.join(',')) throw new Error('typescript: Engine operations differ');
+
+const indexPath = resolve(root, 'packages/template-ts/src/index.ts');
+const indexSource = ts.createSourceFile(indexPath, readFileSync(indexPath, 'utf8'), ts.ScriptTarget.Latest, true);
+const astProgram = declaration(indexSource, ts.SyntaxKind.ClassDeclaration, 'AstProgram');
+if (!astProgram?.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(indexSource) === 'AstProgramCore'))) throw new Error('typescript: AstProgram does not extend the AST Program implementation');
+
+function run(label, command, args, cwd) {
+  const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  if (result.error || result.status !== 0) throw new Error(`${label} failed:\n${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
+}
+run('go interface AST check', 'go', ['test', '-run', '^TestCompilerRuntimeInterface$', '.'], resolve(root, 'packages/template-go'));
+run('rust interface AST check', resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/template-rust'));
+run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/template-php'));
+
+process.stdout.write('compiler interface: manifest and TypeScript, Go, Rust, PHP runtime declarations passed\n');

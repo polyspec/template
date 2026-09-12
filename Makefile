@@ -130,6 +130,7 @@ compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 compiler-interface-check: ## Verify the typed generated module structure in every language
 	node scripts/generate-compiler-interface.mjs --check
 	node scripts/check-compiler-interface.mjs
+	node scripts/check-compiler-interface-mutations.mjs
 
 docs: ## Build the documentation site
 	npx vitepress build docs
