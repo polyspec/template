@@ -29,6 +29,6 @@ export function renderTemplate(target: string, assign: Assign, definitions: Defi
 export function render(assign: Assign, definitions: Definitions): string { return renderTemplate("layout.tpl", assign, definitions); }
 function stringify(value: unknown): string { if (value === null || value === undefined) return ''; if (typeof value === 'object') throw new Error('a collection cannot be converted to text'); return String(value); }
 function escape(value: string): string { return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
-function generatedDefault<T>(value: T, fallback: T): T { return value ? value : fallback; }
+function generatedTruthy(value: unknown): boolean { if (value === null || value === undefined || value === false || value === '' || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
+function generatedDefault<T>(value: T, fallback: T): T { return generatedTruthy(value) ? value : fallback; }
 function generatedIn(value: unknown, collection: unknown): boolean { if (Array.isArray(collection)) return collection.includes(value); if (collection instanceof Map) return collection.has(value); if (typeof collection === 'string') return collection.includes(String(value)); return false; }
-function generatedCall(name: string, _args: unknown[]): never { throw new Error('generated function is not linked: ' + name); }

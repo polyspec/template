@@ -53,7 +53,12 @@ export function lowerSourceGraph(graph, manifest) {
   if (manifest.schema !== 3) throw new Error('typed generator: type manifest schema must be 3');
   const records = new Map(Object.entries(manifest.records ?? {}).map(([name, fields]) => [name, new Map(Object.entries(fields).map(([field, type]) => [field, parseType(type)]))]));
   const root = new Map(Object.entries(manifest.fields ?? {}).map(([name, type]) => [name, parseType(type)]));
-  const functions = new Map(Object.entries(manifest.functions ?? {}).map(([name, signature]) => [name, { args: (signature.args ?? []).map(parseType), returns: parseType(signature.returns ?? 'any') }]));
+  const functions = new Map(Object.entries(manifest.functions ?? {}).map(([name, signature]) => {
+    if (signature?.implementation !== 'builtin' || name !== 'default') {
+      throw new Error(`typed generator: function ${name} is not supported by the generated-module level`);
+    }
+    return [name, { args: (signature.args ?? []).map(parseType), returns: parseType(signature.returns ?? 'any'), implementation: signature.implementation }];
+  }));
   const definitions = new Map(Object.entries(manifest.defines ?? {}).map(([name, definition]) => {
     if (!definition || typeof definition !== 'object' || Array.isArray(definition)) throw new Error(`typed generator: definition ${name} is invalid`);
     const template = definition.template ?? null;
@@ -116,7 +121,7 @@ export function lowerSourceGraph(graph, manifest) {
       case 'Binary': {
         const left = lowerExpr(node.left, scope, loops);
         const right = lowerExpr(node.right, scope, loops);
-        const boolean = ['==', '!=', '===', '!==', '<', '>', '<=', '>=', 'in'].includes(node.op);
+        const boolean = ['&&', '||', '==', '!=', '===', '!==', '<', '>', '<=', '>=', 'in'].includes(node.op);
         return { op: 'binary', operator: node.op, left, right, valueType: boolean ? parseType('boolean') : mergeType(left.valueType, right.valueType) };
       }
       case 'Ternary': {

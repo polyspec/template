@@ -4,6 +4,9 @@ final class Row { public function __construct(public readonly string $name) {} }
 final class Slot { public function __construct(public readonly ?string $template = null, public readonly ?string $html = null) {} }
 final class Assign { public function __construct(
 public readonly bool $flag,
+public readonly string $dangerous,
+public readonly array $empty_list,
+public readonly array $empty_map,
 public readonly Page $page,
 public readonly array $numbers,
 public readonly array $lookup,
@@ -18,13 +21,13 @@ final class DefinitionData_partial_tpl { public function __construct(public bool
 final class Definition { public function __construct(public readonly ?string $html = null, public readonly mixed $data = null) {} }
 final class Definitions { public function __construct(public readonly ?Definition $content = null, public readonly ?Definition $layout = null) {} }
 function generated_truthy(mixed $value): bool { return $value !== null && $value !== false && $value !== '' && $value !== 0 && $value !== []; }
-function generated_escape(mixed $value): string { if (is_bool($value)) $value = $value ? 'true' : 'false'; if (is_array($value) || is_object($value)) throw new RuntimeException('a collection cannot be converted to text'); return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
+function generated_escape(mixed $value): string { if (is_bool($value)) $value = $value ? 'true' : 'false'; if (is_array($value) || is_object($value)) throw new RuntimeException('a collection cannot be converted to text'); return str_replace('&#039;', '&#39;', htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')); }
 function generated_index(array $value, string|int|float $key): mixed { return $value[is_float($key) ? (int) $key : $key] ?? null; }
 function generated_entries(?array $value): array { $result = []; foreach ($value ?? [] as $key => $item) $result[] = [$key, $item]; return $result; }
 function generated_list(array $items): array { $result = []; foreach ($items as $item) { if ($item['spread']) array_push($result, ...$item['value']); else $result[] = $item['value']; } return $result; }
 function generated_map(array $items): array { $result = []; foreach ($items as $item) { if ($item['spread']) { foreach ($item['value'] as $key => $value) $result[$key] = $value; } else $result[$item['key']] = $item['value']; } return $result; }
 function generated_in(mixed $value, mixed $collection): bool { return is_array($collection) ? (array_is_list($collection) ? in_array($value, $collection, true) : array_key_exists((string) $value, $collection)) : (is_string($collection) && str_contains($collection, (string) $value)); }
-function generated_call(string $name, array $args): mixed { if ($name === 'default' && count($args) === 2) return generated_truthy($args[0]) ? $args[0] : $args[1]; throw new RuntimeException('generated function is not linked: ' . $name); }
+function generated_default(mixed $value, mixed $fallback): mixed { return generated_truthy($value) ? $value : $fallback; }
 function render_card_tpl(Assign $assign, Definitions $definitions, Input_card_tpl $input): string { $out = '';
 $label = $input->label;
     $out .= "<p class=\"card\">";
@@ -37,21 +40,31 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
     $merged = generated_map([['spread' => true, 'value' => $assign->lookup], ['spread' => false, 'key' => "z", 'value' => "Z"]]);
     $out .= "<section>\n<h1>";
     $out .= generated_escape($assign->page?->title);
-    $out .= "</h1>\n<p>";
+    $out .= "</h1>\n<p class=\"escaped\">";
+    $out .= generated_escape($assign->dangerous);
+    $out .= "</p>\n<p class=\"logical\">";
+    $out .= generated_escape((generated_truthy($assign->flag) && generated_truthy("x")));
+    $out .= "|";
+    $out .= generated_escape((generated_truthy(false) || generated_truthy(2)));
+    $out .= "</p>\n<p class=\"empty-truthiness\">";
+    $out .= generated_escape((generated_truthy($assign->empty_list) && generated_truthy($assign->flag)));
+    $out .= "|";
+    $out .= generated_escape((generated_truthy($assign->empty_map) && generated_truthy($assign->flag)));
+    $out .= "</p>\n<p>";
     $out .= generated_escape(generated_index($values, 1));
     $out .= "|";
     $out .= generated_escape(generated_index($merged, "z"));
     $out .= "</p>\n";
-    if (generated_truthy(($assign->flag && ($assign->page?->title == "Guide")))) {
+    if (generated_truthy((generated_truthy($assign->flag) && generated_truthy(($assign->page?->title == "Guide"))))) {
         $out .= "<strong>matched</strong>";    } else {
         $out .= "<strong>missed</strong>";
     }
     $out .= "\n<p>";
-    $out .= generated_escape(($assign->flag ? "yes" : "no"));
+    $out .= generated_escape((generated_truthy($assign->flag) ? "yes" : "no"));
     $out .= "|";
     $out .= generated_escape(((-1) + 3));
     $out .= "|";
-    $out .= generated_escape(generated_call("default", ["", "fallback"]));
+    $out .= generated_escape(generated_default("", "fallback"));
     $out .= "</p>\n<ul>\n";
     $row_entries = generated_entries($assign->rows);
     foreach ($row_entries as $row_index => [$row_key, $row_value]) {

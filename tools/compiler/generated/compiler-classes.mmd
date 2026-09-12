@@ -10,6 +10,26 @@ classDiagram
     +renderTemplate(target, Assign, Definitions) UTF-8 string
     +render(Assign, Definitions) UTF-8 string
   }
+  class SourceGraph {
+    +entry
+    +templates
+  }
+  class TypeManifest {
+    +entry
+    +fields
+    +records
+    +functions
+    +defines
+    +templates
+  }
+  class TypedProgram {
+    +entry
+    +fields
+    +records
+    +functions
+    +definitions
+    +templates
+  }
   class Definition~T~ {
     +html
     +data
@@ -17,9 +37,18 @@ classDiagram
   class DefinitionData~T~
   class Definitions
   class Input~T~
-  Compiler --> LanguageBackend : TypedProgram
+  class FunctionSignature {
+    +implementation
+    +args
+    +returns
+  }
+  SourceGraph --> Compiler : input
+  TypeManifest --> Compiler : input
+  Compiler --> TypedProgram : output
+  TypedProgram --> LanguageBackend : input
   LanguageBackend --> GeneratedModule : source
   GeneratedModule --> Definitions
   Definitions --> Definition~T~
   Definition~T~ --> DefinitionData~T~ : data
   DefinitionData~T~ --> Input~T~ : field types
+  TypeManifest --> FunctionSignature : functions

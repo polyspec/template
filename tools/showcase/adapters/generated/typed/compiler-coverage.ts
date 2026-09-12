@@ -11,6 +11,9 @@ export interface Slot {
 }
 export interface Assign {
   flag: boolean;
+  dangerous: string;
+  empty_list: Array<string>;
+  empty_map: Map<string, string>;
   page: Page;
   numbers: Array<number>;
   lookup: Map<string, string>;
@@ -34,17 +37,27 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     const merged = new Map([...assign.lookup, ["z", "Z"]]);
     out += "<section>\n<h1>";
     out += escape(stringify(assign.page?.title));
-    out += "</h1>\n<p>";
+    out += "</h1>\n<p class=\"escaped\">";
+    out += escape(stringify(assign.dangerous));
+    out += "</p>\n<p class=\"logical\">";
+    out += escape(stringify((generatedTruthy(assign.flag) && generatedTruthy("x"))));
+    out += "|";
+    out += escape(stringify((generatedTruthy(false) || generatedTruthy(2))));
+    out += "</p>\n<p class=\"empty-truthiness\">";
+    out += escape(stringify((generatedTruthy(assign.empty_list) && generatedTruthy(assign.flag))));
+    out += "|";
+    out += escape(stringify((generatedTruthy(assign.empty_map) && generatedTruthy(assign.flag))));
+    out += "</p>\n<p>";
     out += escape(stringify(values?.[1]));
     out += "|";
     out += escape(stringify(merged?.get("z")));
     out += "</p>\n";
-    if (Boolean((assign.flag && (assign.page?.title == "Guide")))) {
+    if (generatedTruthy((generatedTruthy(assign.flag) && generatedTruthy((assign.page?.title == "Guide"))))) {
         out += "<strong>matched</strong>";    } else {
         out += "<strong>missed</strong>";
     }
     out += "\n<p>";
-    out += escape(stringify((assign.flag ? "yes" : "no")));
+    out += escape(stringify((generatedTruthy(assign.flag) ? "yes" : "no")));
     out += "|";
     out += escape(stringify(((-1) + 3)));
     out += "|";
@@ -103,6 +116,6 @@ export function renderTemplate(target: string, assign: Assign, definitions: Defi
 export function render(assign: Assign, definitions: Definitions): string { return renderTemplate("layout.tpl", assign, definitions); }
 function stringify(value: unknown): string { if (value === null || value === undefined) return ''; if (typeof value === 'object') throw new Error('a collection cannot be converted to text'); return String(value); }
 function escape(value: string): string { return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
-function generatedDefault<T>(value: T, fallback: T): T { return value ? value : fallback; }
+function generatedTruthy(value: unknown): boolean { if (value === null || value === undefined || value === false || value === '' || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
+function generatedDefault<T>(value: T, fallback: T): T { return generatedTruthy(value) ? value : fallback; }
 function generatedIn(value: unknown, collection: unknown): boolean { if (Array.isArray(collection)) return collection.includes(value); if (collection instanceof Map) return collection.has(value); if (typeof collection === 'string') return collection.includes(String(value)); return false; }
-function generatedCall(name: string, _args: unknown[]): never { throw new Error('generated function is not linked: ' + name); }

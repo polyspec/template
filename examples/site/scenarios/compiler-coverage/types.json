@@ -4,6 +4,9 @@
   "entry": "layout.tpl",
   "fields": {
     "flag": "boolean",
+    "dangerous": "string",
+    "empty_list": "list<string>",
+    "empty_map": "map<string,string>",
     "page": "Page",
     "numbers": "list<number>",
     "lookup": "map<string,string>",
@@ -19,7 +22,7 @@
     "layout": { "template": "layout.tpl" }
   },
   "functions": {
-    "default": { "args": ["string", "string"], "returns": "string" }
+    "default": { "implementation": "builtin", "args": ["string", "string"], "returns": "string" }
   },
   "templates": {
     "partial.tpl": { "values": "list<number>" },

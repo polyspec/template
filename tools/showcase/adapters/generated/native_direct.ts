@@ -11,7 +11,7 @@ function member(value, key) {
   if (value !== null && typeof value === 'object') return value[key];
   return undefined;
 }
-function truthy(value) { return value !== null && value !== undefined && value !== false && value !== '' && value !== 0; }
+function truthy(value) { if (value === null || value === undefined || value === false || value === '' || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
 function escapeValue(value) {
   if (value instanceof Map || Array.isArray(value)) throw new Error('generated renderer cannot stringify a collection');
   return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
@@ -28,8 +28,8 @@ function call(name, args) {
 }
 function unary(op, value) { return op === '!' ? !truthy(value) : -value; }
 function binary(op, left, right) {
-  if (op === '&&') return truthy(left) && right;
-  if (op === '||') return truthy(left) ? left : right;
+  if (op === '&&') return truthy(left) && truthy(right);
+  if (op === '||') return truthy(left) || truthy(right);
   if (op === '??') return left ?? right;
   if (op === '+') return typeof left === 'string' || typeof right === 'string' ? String(left) + String(right) : left + right;
   return ({'==': left == right, '!=': left != right, '===': left === right, '!==': left !== right, '<': left < right, '>': left > right, '<=': left <= right, '>=': left >= right})[op];
@@ -102,7 +102,17 @@ function render_compiler_coverage__layout_tpl(root, define, env, parent, scenari
   ctx.set("merged", mapValue([{ spread: lookup(ctx, root, "lookup") }, { key: "z", value: "Z" }]));
   out += "<section>\n<h1>";
   out += escapeValue(member(lookup(ctx, root, "page"), "title"));
-  out += "</h1>\n<p>";
+  out += "</h1>\n<p class=\"escaped\">";
+  out += escapeValue(lookup(ctx, root, "dangerous"));
+  out += "</p>\n<p class=\"logical\">";
+  out += escapeValue(binary("&&", lookup(ctx, root, "flag"), "x"));
+  out += "|";
+  out += escapeValue(binary("||", false, 2));
+  out += "</p>\n<p class=\"empty-truthiness\">";
+  out += escapeValue(binary("&&", lookup(ctx, root, "empty_list"), lookup(ctx, root, "flag")));
+  out += "|";
+  out += escapeValue(binary("&&", lookup(ctx, root, "empty_map"), lookup(ctx, root, "flag")));
+  out += "</p>\n<p>";
   out += escapeValue(member(lookup(ctx, root, "values"), 1));
   out += "|";
   out += escapeValue(member(lookup(ctx, root, "merged"), "z"));
