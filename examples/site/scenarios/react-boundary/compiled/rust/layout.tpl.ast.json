@@ -1,0 +1,55 @@
+{
+  "type": "Template",
+  "name": "layout.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<main>\n<h1>",
+      "span": [
+        0,
+        11
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "title",
+        "span": [
+          14,
+          19
+        ]
+      },
+      "span": [
+        11,
+        20
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</h1>\n",
+      "span": [
+        20,
+        26
+      ]
+    },
+    {
+      "type": "Block",
+      "id": "content",
+      "path": null,
+      "scope": [],
+      "span": [
+        26,
+        37
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</main>\n",
+      "span": [
+        38,
+        46
+      ]
+    }
+  ]
+}

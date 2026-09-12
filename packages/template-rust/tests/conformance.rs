@@ -56,6 +56,8 @@ fn render_case(dir: &Path) -> Outcome {
         delimiters: delimiters_of(dir),
         legacy_wrappers: false,
         artifact_refresh: Default::default(),
+        compile_mode: Default::default(),
+        generated_renderer: None,
     });
     let assign = match read_json(&dir.join("data.json")) {
         None => serde_json::Value::Object(Default::default()),

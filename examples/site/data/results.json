@@ -113,6 +113,55 @@
       "status": "pass"
     },
     {
+      "id": "react-boundary",
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "bytes": 124,
+      "sha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+      "api": {
+        "bytes": 124,
+        "sha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+        "repeatSha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+        "repeatEqual": true
+      },
+      "renders": {
+        "ts": {
+          "bytes": 124,
+          "sha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatSha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "go": {
+          "bytes": 124,
+          "sha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatSha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "rust": {
+          "bytes": 124,
+          "sha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatSha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        },
+        "php": {
+          "bytes": 124,
+          "sha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatSha256": "4c247742a44e5b2fb3de8716001c1bd45e8d4cfd703aa983f593e99ec2350003",
+          "repeatEqual": true,
+          "expectedEqual": true,
+          "status": "pass"
+        }
+      },
+      "status": "pass"
+    },
+    {
       "id": "scope-precedence",
       "source": null,
       "target": "layout",

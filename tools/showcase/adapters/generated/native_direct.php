@@ -21,6 +21,11 @@ function generated_template(string $name, string $scenario, MapValue $root, MapV
             'layout.tpl' => generated_html_slot__layout_tpl($root, $define, $parent),
             default => throw new RuntimeException('generated template is missing: ' . $name),
         },
+        'react-boundary' => match ($name) {
+            'content.tpl' => generated_react_boundary__content_tpl($root, $define, $parent),
+            'layout.tpl' => generated_react_boundary__layout_tpl($root, $define, $parent),
+            default => throw new RuntimeException('generated template is missing: ' . $name),
+        },
         'scope-precedence' => match ($name) {
             'content.tpl' => generated_scope_precedence__content_tpl($root, $define, $parent),
             'layout.tpl' => generated_scope_precedence__layout_tpl($root, $define, $parent),
@@ -53,6 +58,27 @@ function generated_html_slot__layout_tpl(MapValue $root, MapValue $define, MapVa
     $blockScope = new MapValue();
     $out .= generated_block('content', '', 'html-slot', $root, $define, $blockScope);
     $out .= "</section>\n";
+    return $out;
+}
+
+function generated_react_boundary__content_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent->copy();
+    $out = '';
+    $out .= "<section data-react-island id=\"counter\">\n<p>";
+    $out .= generated_escape(generated_lookup($ctx, $root, 'island_label'));
+    $out .= "</p>\n</section>\n";
+    return $out;
+}
+
+function generated_react_boundary__layout_tpl(MapValue $root, MapValue $define, MapValue $parent): string {
+    $ctx = $parent->copy();
+    $out = '';
+    $out .= "<main>\n<h1>";
+    $out .= generated_escape(generated_lookup($ctx, $root, 'title'));
+    $out .= "</h1>\n";
+    $blockScope = new MapValue();
+    $out .= generated_block('content', '', 'react-boundary', $root, $define, $blockScope);
+    $out .= "</main>\n";
     return $out;
 }
 

@@ -55,6 +55,12 @@ function renderTemplate(name, root, define, env, parent, scenario) {
       case "layout.tpl": return render_html_slot__layout_tpl(root, define, env, parent, scenario);
         default: throw new Error('generated template is missing: ' + name);
       }
+    case "react-boundary":
+      switch (name) {
+      case "content.tpl": return render_react_boundary__content_tpl(root, define, env, parent, scenario);
+      case "layout.tpl": return render_react_boundary__layout_tpl(root, define, env, parent, scenario);
+        default: throw new Error('generated template is missing: ' + name);
+      }
     case "scope-precedence":
       switch (name) {
       case "content.tpl": return render_scope_precedence__content_tpl(root, define, env, parent, scenario);
@@ -94,6 +100,27 @@ function render_html_slot__layout_tpl(root, define, env, parent, scenario) {
   const blockScope = new Map();
   out += renderBlock("content", null, scenario, root, define, env, blockScope);
   out += "</section>\n";
+  return out;
+}
+
+function render_react_boundary__content_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = '';
+  out += "<section data-react-island id=\"counter\">\n<p>";
+  out += escapeValue(lookup(ctx, root, "island_label"));
+  out += "</p>\n</section>\n";
+  return out;
+}
+
+function render_react_boundary__layout_tpl(root, define, env, parent, scenario) {
+  let ctx = new Map(parent ?? root);
+  let out = '';
+  out += "<main>\n<h1>";
+  out += escapeValue(lookup(ctx, root, "title"));
+  out += "</h1>\n";
+  const blockScope = new Map();
+  out += renderBlock("content", null, scenario, root, define, env, blockScope);
+  out += "</main>\n";
   return out;
 }
 

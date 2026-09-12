@@ -339,6 +339,8 @@ let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 
 같은 템플릿을 TypeScript 패키지로 브라우저에서 렌더한다. 서버가 assign 데이터를 JSON으로 임베드하면 브라우저가 그것을 읽어 같은 템플릿 이름을 렌더한다. [브라우저 렌더링](operations/browser.ko.md)이 템플릿과 데이터를 전달하는 방법과 컴포넌트 프레임워크를 엔진 옆에 두는 방법을 설명한다.
 
+React를 사용할 때는 서버가 만든 shell을 유지하고 표시 지점으로 지정한 island만 클라이언트가 소유하게 한다. 정적 `react-boundary` showcase에서 템플릿, assign 데이터, 출력, 호스트 소스를 함께 확인할 수 있다. 서버 HTML이 같은 React 컴포넌트 트리에서 나온 경우에만 `hydrateRoot`를 사용하고, 그 외에는 별도의 `createRoot` island로 마운트한다.
+
 ## 오류
 
 잘못된 곳이 있으면 렌더를 멈추고 코드와 위치를 보고한다. 다음 템플릿은
