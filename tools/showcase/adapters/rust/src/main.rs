@@ -34,8 +34,8 @@ mod generated {
 }
 
 use polyspec_template::{
-    AstProgram, DefineInput, Engine, EngineOptions, Env, MapLoader, RenderOptions, RenderTarget,
-    RuntimeEnvironment,
+    AstProgram, DefineInput, Engine, EngineOptions, Env, MapLoader, PreparedRender, RenderOptions,
+    RenderTarget, RuntimeEnvironment,
 };
 use render_adapter::{
     DefineEntry, DefineRegistry, Environment, RenderAdapter, RenderRequest, RepeatResult, Scenario,
@@ -251,6 +251,38 @@ impl RenderAdapter for Adapter {
     }
 }
 
+impl Adapter {
+    fn prepare<'a>(&'a self, request: &RenderRequest) -> Result<PreparedRender<'a>, String> {
+        let mut options = RenderOptions::default();
+        for (id, entry) in &request.define {
+            options.define.insert(
+                id.clone(),
+                DefineInput {
+                    template: entry.template.clone(),
+                    data: entry.data.clone().map(Value::Object),
+                    html: entry.html.clone(),
+                },
+            );
+        }
+        if let Some(environment) = &request.env {
+            options.env = Some(Env {
+                timezone: environment
+                    .timezone
+                    .clone()
+                    .unwrap_or_else(|| "Z".to_string()),
+                now: environment.now.unwrap_or(0.0),
+            });
+        }
+        self.engine
+            .prepare(
+                RenderTarget::Name(&request.target),
+                &Value::Object(request.assign.clone()),
+                &options,
+            )
+            .map_err(|error| error.message)
+    }
+}
+
 fn digest(text: &str) -> String {
     format!("{:x}", Sha256::digest(text.as_bytes()))
 }
@@ -305,6 +337,52 @@ fn main() {
     let request = adapter
         .build_request(&scenario)
         .unwrap_or_else(|error| panic!("{error}"));
+    if let Ok(raw_iterations) = std::env::var("SHOWCASE_BENCH_ITERATIONS") {
+        let iterations: usize = raw_iterations
+            .parse()
+            .ok()
+            .filter(|value| *value > 0)
+            .unwrap_or_else(|| panic!("SHOWCASE_BENCH_ITERATIONS must be a positive integer"));
+        let warmup: usize = std::env::var("SHOWCASE_BENCH_WARMUP")
+            .unwrap_or_else(|_| "0".to_string())
+            .parse()
+            .unwrap_or_else(|_| panic!("SHOWCASE_BENCH_WARMUP must be a non-negative integer"));
+        for _ in 0..warmup {
+            adapter
+                .render(&request)
+                .unwrap_or_else(|error| panic!("{error}"));
+        }
+        let mut measured = String::new();
+        let started = std::time::Instant::now();
+        for _ in 0..iterations {
+            measured = adapter
+                .render(&request)
+                .unwrap_or_else(|error| panic!("{error}"));
+        }
+        let render_seconds = started.elapsed().as_secs_f64();
+        let repeated = adapter
+            .render(&request)
+            .unwrap_or_else(|error| panic!("{error}"));
+        let prepared = adapter
+            .prepare(&request)
+            .unwrap_or_else(|error| panic!("{error}"));
+        let mut prepared_output = String::new();
+        let prepared_started = std::time::Instant::now();
+        for _ in 0..iterations {
+            prepared_output = prepared.render().unwrap_or_else(|error| panic!("{error}"));
+        }
+        let prepared_render_seconds = prepared_started.elapsed().as_secs_f64();
+        println!(
+            "{}",
+            serde_json::json!({
+                "language": "rust", "iterations": iterations, "renderSeconds": render_seconds,
+                "preparedRenderSeconds": prepared_render_seconds,
+                "bytes": measured.len(), "outputSha256": digest(&measured),
+                "repeatSha256": digest(&repeated), "preparedSha256": digest(&prepared_output),
+            })
+        );
+        return;
+    }
     let repeated = adapter
         .render_twice(&request)
         .unwrap_or_else(|error| panic!("{error}"));

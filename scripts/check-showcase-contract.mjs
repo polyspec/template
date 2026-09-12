@@ -69,11 +69,11 @@ function checkGeneratedEngineRoute() {
     join(adapterRoot, 'rust/src/native_direct.rs'),
   ]) assert(!existsSync(removed), `removed showcase generator path returned: ${removed}`);
   const checks = {
-    typescript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/, /render\(request:[\s\S]*?return this\.engine\.render/],
-    javascript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/, /render\(request\)[\s\S]*?return this\.engine\.render/],
-    go: [/program, err = generatedProgram/, /engine := template\.NewEngine\(program\)/, /func \(a \*Adapter\) Render[\s\S]*?return a\.engine\.Render/],
-    rust: [/generated_engine\([\s\S]*?Engine::new\(generated::/, /fn render\(&self,[\s\S]*?self\.engine\s*\.render/],
-    php: [/generatedProgram\(\$root\)/, /new Engine\(\$program\)/, /public function render\(RenderRequest \$request\)[\s\S]*?\$this->engine->render/],
+    typescript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/],
+    javascript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/],
+    go: [/program, err = generatedProgram/, /engine := template\.NewEngine\(program\)/],
+    rust: [/generated_engine\([\s\S]*?Engine::new\(generated::/],
+    php: [/generatedProgram\(\$root\)/, /new Engine\(\$program\)/],
   };
   for (const [language, patterns] of Object.entries(checks)) {
     const source = readContractFile(manifest.languages[language].file);

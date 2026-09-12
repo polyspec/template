@@ -158,6 +158,14 @@ export class Adapter implements RenderAdapter {
     return this.engine.render(request.target, request.assign, options);
   }
 
+  prepare(request: Readonly<RenderRequest>) {
+    const options: { define: Record<string, DefineInput>; env?: Partial<Env> } = {
+      define: engineDefines(request.define),
+    };
+    if (request.env !== undefined) options.env = request.env;
+    return this.engine.prepare(request.target, request.assign, options);
+  }
+
   renderTwice(request: Readonly<RenderRequest>): RepeatResult {
     return { first: this.render(request), second: this.render(request) };
   }
@@ -187,8 +195,32 @@ function digest(value: string): { bytes: number; sha256: string } {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = process.argv[2];
   if (root === undefined) throw new Error('usage: node typescript.ts SCENARIO_DIR');
-  const adapter = assertRenderAdapter(new Adapter(root));
+  const adapter = new Adapter(root);
+  assertRenderAdapter(adapter);
   const request = assertRequestShape(adapter.buildRequest(adapter.loadScenario()));
+  const benchmarkIterations = Number(process.env.SHOWCASE_BENCH_ITERATIONS ?? 0);
+  if (benchmarkIterations > 0) {
+    const warmup = Number(process.env.SHOWCASE_BENCH_WARMUP ?? 0);
+    for (let index = 0; index < warmup; index += 1) adapter.render(request);
+    let output = '';
+    const started = process.hrtime.bigint();
+    for (let index = 0; index < benchmarkIterations; index += 1) output = adapter.render(request);
+    const renderSeconds = Number(process.hrtime.bigint() - started) / 1e9;
+    const measured = digest(output);
+    const repeated = digest(adapter.render(request));
+    const prepared = adapter.prepare(request);
+    let preparedOutput = '';
+    const preparedStarted = process.hrtime.bigint();
+    for (let index = 0; index < benchmarkIterations; index += 1) preparedOutput = prepared.render();
+    const preparedRenderSeconds = Number(process.hrtime.bigint() - preparedStarted) / 1e9;
+    const preparedMeasured = digest(preparedOutput);
+    process.stdout.write(JSON.stringify({
+      language: 'typescript', iterations: benchmarkIterations, renderSeconds, preparedRenderSeconds,
+      bytes: measured.bytes, outputSha256: measured.sha256, repeatSha256: repeated.sha256,
+      preparedSha256: preparedMeasured.sha256,
+    }) + '\n');
+    process.exit(0);
+  }
   const result = adapter.renderTwice(request);
   const requestBeforeFailure = JSON.stringify(plain(request));
   let failureObserved = false;
