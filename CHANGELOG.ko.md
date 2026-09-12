@@ -25,6 +25,8 @@
 - 검증: `make showcase`가 구현과 시나리오 20개 조합을 모두 비교하고 벤치마크 측정값 20개를 기록했다. `make showcase-check`가 브라우저 증명을 통과했다.
 ### 2026-09-12
 
+- Rust generated template 전체에 하나의 가변 render scope를 전달했다. Include는 호출자와 assign을 공유하고 block은 격리된 scope를 만들며 loop 변수는 이전 binding을 복원하고 typed template 경계는 공통 runtime 값 모델로 값을 변환한다.
+
 - 네 런타임에서 컴파일 방식(`ast` 또는 `gen`), 컴파일 artifact 갱신(`dev`, `true` 또는 `false`), 최종 HTML 페이지 캐시 TTL(`null` 또는 `0`은 영구)을 분리했다. artifact 갱신과 페이지 캐시 만료 테스트를 추가했다.
 - 별도 벤치마크 workspace를 다시 구성해 구현의 AST 행은 매 렌더마다 파싱하고 생성 코드 행은 생성된 호스트 언어 소스를 직접 호출하게 했다. 참조 행도 측정하는 모든 렌더마다 파싱 또는 컴파일하며, 측정 전에 모든 행이 동일한 323바이트 HTML과 SHA-256을 생성해야 한다.
 - 검증: PHP 513개, TypeScript 652개, Go 패키지 테스트, Rust 패키지 테스트가 통과했다. 행마다 50회 실행한 벤치마크에서 출력 불일치가 없었고 결과는 벤치마크 workspace에 기록했다.

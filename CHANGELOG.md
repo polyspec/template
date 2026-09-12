@@ -25,6 +25,8 @@
 - Verification: `make showcase` passed all 20 implementation-scenario comparisons and wrote 20 benchmark measurements; `make showcase-check` passed the browser proof.
 ### 2026-09-12
 
+- Passed one mutable render scope through generated Rust templates. Includes now share assignments with their caller, blocks create isolated scopes, loop variables restore the previous binding, and typed template boundaries convert values through the common runtime value model.
+
 - Separated compilation mode (`ast` or `gen`), compiled-artifact refresh (`dev`, `true` or `false`) and final HTML page-cache TTL (`null` or `0` means permanent) in the four runtimes. Added tests for artifact refresh and page-cache expiration.
 - Verified that AST measurement reparses on every render and generated measurement calls generated host-language source. Both paths must produce the same HTML and SHA-256 before timing is recorded.
 - Verification: PHP 513 tests, TypeScript 652 tests, Go package tests and Rust package tests passed with zero output divergence between the measured AST and generated paths.
