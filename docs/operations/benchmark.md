@@ -1,14 +1,11 @@
-# Benchmark procedure
+# Performance measurements
 
-The complete page benchmark lives in `project performance measurements`. Run it with:
+The example site records repeatable measurements for this implementation with:
 
 ```sh
-cd project performance measurements
-make bench-all
+make showcase
 ```
 
-The benchmark records compilation mode and compiled-artifact refresh separately. The implementation under test runs `ast` and `gen` with the same fixture and input. The uncached parse track uses `refresh=dev`, which parses the source on every call. The generated track uses generated host-language source built before timing. Final-page caching is disabled so business logic and rendered HTML caching do not hide template work.
+AST and generated modes use the same scenario source graph, assign data, definitions and expected HTML. Measurement starts only after output bytes, SHA-256 and repeated-render equality pass. Final-page caching is disabled.
 
-Measured adapters use the same output bytes, input data, iteration counts and validation. Dynamic adapters parse or compile on every measured render; static generated adapters record their build-time compilation separately. A result is written only after output bytes, SHA-256, HTML structure and the adapter's refresh policy pass.
-
-Primary measurements are cold page process time and maximum resident memory. Persistent render time, parse/compile counts, artifact build time, output size and hash are diagnostic measurements. The full report is written to `project-performance/results/all.md` and `all.json`.
+The site records per-scenario warm render measurements as diagnostic data. These values explain relative runtime cost inside one run; they are not cold process or end-to-end request measurements. Generated artifacts are built before render timing, while AST measurements use the committed parsed artifact.
