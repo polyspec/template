@@ -1,0 +1,104 @@
+// Generated.
+use std::collections::HashMap;
+#[derive(Clone, Default)] enum GeneratedValue { #[default] Null }
+#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
+#[derive(Clone, Default)] struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
+impl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } fn get(&self, key: &K) -> Option<&V> { self.entries.iter().find(|entry| &entry.key == key).map(|entry| &entry.value) } fn entries(&self) -> &Vec<OrderedEntry<K, V>> { &self.entries } }
+trait GeneratedTruthy { fn generated_truthy(&self) -> bool; }
+impl GeneratedTruthy for bool { fn generated_truthy(&self) -> bool { *self } }
+impl GeneratedTruthy for f64 { fn generated_truthy(&self) -> bool { *self != 0.0 } }
+impl GeneratedTruthy for String { fn generated_truthy(&self) -> bool { !self.is_empty() } }
+impl<T> GeneratedTruthy for Vec<T> { fn generated_truthy(&self) -> bool { !self.is_empty() } }
+impl<K, V> GeneratedTruthy for OrderedMap<K, V> { fn generated_truthy(&self) -> bool { !self.entries.is_empty() } }
+impl<T: GeneratedTruthy> GeneratedTruthy for Option<T> { fn generated_truthy(&self) -> bool { self.as_ref().is_some_and(GeneratedTruthy::generated_truthy) } }
+fn generated_truthy<T: GeneratedTruthy>(value: &T) -> bool { value.generated_truthy() }
+trait GeneratedContains<T> { fn generated_contains(&self, value: &T) -> bool; }
+impl<T: PartialEq> GeneratedContains<T> for Vec<T> { fn generated_contains(&self, value: &T) -> bool { self.contains(value) } }
+impl<K: PartialEq, V> GeneratedContains<K> for OrderedMap<K, V> { fn generated_contains(&self, value: &K) -> bool { self.get(value).is_some() } }
+impl GeneratedContains<String> for String { fn generated_contains(&self, value: &String) -> bool { self.contains(value) } }
+fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool { collection.generated_contains(value) }
+#[derive(Clone, Default)] pub struct Page { pub title: String }
+#[derive(Clone, Default)] pub struct Row { pub name: String }
+#[derive(Clone, Default)] pub struct Slot { pub template: Option<String>, pub html: Option<String> }
+#[derive(Clone, Default)] pub struct Assign {
+    pub flag: bool,
+    pub page: Page,
+    pub numbers: Vec<f64>,
+    pub lookup: OrderedMap<String, String>,
+    pub rows: Vec<Row>,
+}
+#[derive(Clone, Default)] struct Input_card_tpl { label: String }
+#[derive(Clone, Default)] struct Input_layout_tpl {  }
+#[derive(Clone, Default)] struct Input_partial_tpl { values: Vec<f64> }
+fn render_card_tpl(assign: &Assign, slots: &HashMap<String, String>, input: Input_card_tpl) -> String { let mut out = String::new();
+let label = input.label;
+    out.push_str("<p class=\"card\">");
+    out.push_str(&escape(&label.to_string()));
+    out.push_str("</p>\n");
+ out }
+fn render_layout_tpl(assign: &Assign, slots: &HashMap<String, String>, input: Input_layout_tpl) -> String { let mut out = String::new();
+
+    let values = { let mut result: Vec<f64> = Vec::new(); result.push(0f64); result.extend(assign.numbers.clone()); result };
+    let merged = { let mut result: OrderedMap<String, String> = OrderedMap::new(); for entry in assign.lookup.clone().entries() { result.set(entry.key.clone(), entry.value.clone()); } result.set("z".to_string(), "Z".to_string()); result };
+    out.push_str("<section>\n<h1>");
+    out.push_str(&escape(&assign.page.clone().title.to_string()));
+    out.push_str("</h1>\n<p>");
+    out.push_str(&escape(&values.get(1f64 as usize).cloned().unwrap_or_default().to_string()));
+    out.push_str("|");
+    out.push_str(&escape(&merged.get(&"z".to_string()).cloned().unwrap_or_default().to_string()));
+    out.push_str("</p>\n");
+    if generated_truthy(&(generated_truthy(&assign.flag.clone()) && generated_truthy(&(assign.page.clone().title == "Guide".to_string())))) {
+        out.push_str("<strong>matched</strong>");    } else {
+        out.push_str("<strong>missed</strong>");
+    }
+    out.push_str("\n<p>");
+    out.push_str(&escape(&if generated_truthy(&assign.flag.clone()) { "yes".to_string() } else { "no".to_string() }.to_string()));
+    out.push_str("|");
+    out.push_str(&escape(&((-1f64) + 3f64).to_string()));
+    out.push_str("|");
+    out.push_str(&escape(&{ let value = "".to_string(); if generated_truthy(&value) { value } else { "fallback".to_string() } }.to_string()));
+    out.push_str("</p>\n<ul>\n");
+    { let entries = assign.rows.clone().iter().cloned().enumerate().map(|(key, value)| (key as f64, value)).collect::<Vec<_>>();
+    for (row_index_raw, (row_key, row_value)) in entries.iter().cloned().enumerate() {
+        let row = row_value.clone();
+        let row_index = row_index_raw as f64;
+        let row_size = entries.len() as f64;
+        let row_first = row_index_raw == 0;
+        let row_last = row_index_raw + 1 == entries.len();
+            out.push_str("<li>");
+            out.push_str(&escape(&row_index.clone().to_string()));
+            out.push_str("/");
+            out.push_str(&escape(&row_size.clone().to_string()));
+            out.push_str(":");
+            out.push_str(&escape(&row.name.to_string()));
+            out.push_str(":");
+            out.push_str(&escape(&row_first.clone().to_string()));
+            out.push_str(":");
+            out.push_str(&escape(&row_last.clone().to_string()));
+            out.push_str("</li>\n");
+    }
+    if entries.is_empty() {
+            out.push_str("<li>empty</li>\n");
+    }
+    }
+    out.push_str("</ul>\n");
+    out.push_str(&render_partial_tpl(assign, slots, Input_partial_tpl { values: values }));
+    if slots.contains_key("content") {
+            out.push_str("<p>defined</p>");
+    }
+    out.push_str("\n");
+    out.push_str(slots.get("content").map(String::as_str).unwrap_or(""));
+    out.push_str("</section>\n");
+ out }
+fn render_partial_tpl(assign: &Assign, slots: &HashMap<String, String>, input: Input_partial_tpl) -> String { let mut out = String::new();
+let values = input.values;
+    out.push_str("<p class=\"included\">");
+    out.push_str(&escape(&values.get(2f64 as usize).cloned().unwrap_or_default().to_string()));
+    out.push_str("</p>\n");
+ out }
+fn render_template(target: &str, assign: &Assign, slots: &HashMap<String, String>) -> String { match target {
+        "layout.tpl" => render_layout_tpl(assign, slots, Input_layout_tpl::default()),
+        _ => panic!("generated template is missing or requires inputs: {target}"),
+} }
+pub fn render(assign: &Assign, slots: &HashMap<String, String>) -> String { render_template("layout.tpl", assign, slots) }
+fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }
