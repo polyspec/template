@@ -1,13 +1,19 @@
 // Generated.
-use polyspec_template::{ErrorCode, PreparedRender, Program, RenderOptions, RenderTarget, RuntimeEnvironment, TemplateError};
-use serde::{Deserialize, Deserializer};
-use serde::de::{MapAccess, Visitor};
+use polyspec_template::{ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RuntimeEnvironment, TemplateError, Value, bind, to_json_value};
+use polyspec_template::ast::{BinaryOp, UnaryOp};
+use polyspec_template::error::{LineIndex, Span};
+use polyspec_template::render::context::{Frame, RenderContext};
+use polyspec_template::render::runtime_bindings::RuntimeBindings;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::de::{DeserializeOwned, MapAccess, Visitor};
+use serde::ser::SerializeMap;
 use serde_json::{Map as JsonMap, Value as JsonValue};
 use std::collections::HashMap;
 use std::fmt;
-#[derive(Clone, Default, Deserialize)] pub struct Page { pub title: Option<String> }
-#[derive(Clone, Default, Deserialize)] pub struct Slot { pub template: Option<String>, pub html: Option<String> }
-#[derive(Clone, Default, Deserialize)] pub struct Assign {
+use std::rc::Rc;
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct Page { pub title: Option<String> }
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct Slot { pub template: Option<String>, pub html: Option<String> }
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct Assign {
     pub title: Option<String>,
     pub heading: Option<String>,
     pub island_label: Option<String>,
@@ -15,66 +21,61 @@ use std::fmt;
     pub defined_label: Option<String>,
     pub page: Option<Page>,
 }
-#[derive(Clone, Default, Deserialize)] pub struct Input_content_tpl {  }
-#[derive(Clone, Default, Deserialize)] pub struct Input_layout_tpl {  }
-#[derive(Clone, Default, Deserialize)] pub struct DefinitionData_content_tpl {  }
-#[derive(Clone, Default, Deserialize)] pub struct DefinitionData_layout_tpl {  }
-#[derive(Clone, Deserialize)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
-#[derive(Clone, Default, Deserialize)] pub struct Definitions { pub content: Option<Definition<DefinitionData_content_tpl>>, pub layout: Option<Definition<DefinitionData_layout_tpl>> }
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct InputContentTpl {  }
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct InputLayoutTpl {  }
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct DefinitionDataContentTpl {  }
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct DefinitionDataLayoutTpl {  }
+#[derive(Clone, Deserialize, Serialize)] pub struct Definition<T> { pub html: Option<String>, pub data: Option<T> }
+#[derive(Clone, Default, Deserialize, Serialize)] pub struct Definitions { pub content: Option<Definition<DefinitionDataContentTpl>>, pub layout: Option<Definition<DefinitionDataLayoutTpl>> }
 pub struct ArtifactManifest { pub schema: u32, pub mode: String, pub target: String, pub entry: String, pub source_digest: String, pub type_digest: String, pub contract_digest: String, pub files: HashMap<String, String> }
-type GeneratedValue = JsonValue;
 #[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
-#[derive(Clone, Default)] struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
+#[derive(Clone, Default)] pub struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
 impl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } fn get(&self, key: &K) -> Option<&V> { self.entries.iter().find(|entry| &entry.key == key).map(|entry| &entry.value) } fn entries(&self) -> &Vec<OrderedEntry<K, V>> { &self.entries } }
+impl<K: Serialize, V: Serialize> Serialize for OrderedMap<K, V> { fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { let mut map = serializer.serialize_map(Some(self.entries.len()))?; for entry in &self.entries { map.serialize_entry(&entry.key, &entry.value)?; } map.end() } }
 struct OrderedMapVisitor<K, V>(std::marker::PhantomData<(K, V)>);
 impl<'de, K, V> Visitor<'de> for OrderedMapVisitor<K, V> where K: Deserialize<'de> + PartialEq, V: Deserialize<'de> { type Value = OrderedMap<K, V>; fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result { formatter.write_str("an ordered object") } fn visit_map<A: MapAccess<'de>>(self, mut access: A) -> Result<Self::Value, A::Error> { let mut result = OrderedMap::new(); while let Some((key, value)) = access.next_entry()? { result.set(key, value); } Ok(result) } }
 impl<'de, K, V> Deserialize<'de> for OrderedMap<K, V> where K: Deserialize<'de> + PartialEq, V: Deserialize<'de> { fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { deserializer.deserialize_map(OrderedMapVisitor(std::marker::PhantomData)) } }
-trait GeneratedTruthy { fn generated_truthy(&self) -> bool; }
-impl GeneratedTruthy for bool { fn generated_truthy(&self) -> bool { *self } }
-impl GeneratedTruthy for f64 { fn generated_truthy(&self) -> bool { *self != 0.0 } }
-impl GeneratedTruthy for String { fn generated_truthy(&self) -> bool { !self.is_empty() } }
-impl<T> GeneratedTruthy for Vec<T> { fn generated_truthy(&self) -> bool { !self.is_empty() } }
-impl<K, V> GeneratedTruthy for OrderedMap<K, V> { fn generated_truthy(&self) -> bool { !self.entries.is_empty() } }
-impl GeneratedTruthy for GeneratedValue { fn generated_truthy(&self) -> bool { match self { JsonValue::Null => false, JsonValue::Bool(value) => *value, JsonValue::Number(value) => value.as_f64().is_some_and(|value| value != 0.0), JsonValue::String(value) => !value.is_empty(), JsonValue::Array(value) => !value.is_empty(), JsonValue::Object(value) => !value.is_empty() } } }
-impl<T: GeneratedTruthy> GeneratedTruthy for Option<T> { fn generated_truthy(&self) -> bool { self.as_ref().is_some_and(GeneratedTruthy::generated_truthy) } }
-fn generated_truthy<T: GeneratedTruthy>(value: &T) -> bool { value.generated_truthy() }
-trait GeneratedContains<T> { fn generated_contains(&self, value: &T) -> bool; }
-impl<T: PartialEq> GeneratedContains<T> for Vec<T> { fn generated_contains(&self, value: &T) -> bool { self.contains(value) } }
-impl<K: PartialEq, V> GeneratedContains<K> for OrderedMap<K, V> { fn generated_contains(&self, value: &K) -> bool { self.get(value).is_some() } }
-impl GeneratedContains<String> for String { fn generated_contains(&self, value: &String) -> bool { self.contains(value) } }
-fn generated_in<T, C: GeneratedContains<T>>(value: &T, collection: &C) -> bool { collection.generated_contains(value) }
-fn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;").replace('\'', "&#39;") }
-fn render_content_tpl(assign: &Assign, definitions: &Definitions, input: Input_content_tpl) -> String { let mut out = String::new();
+fn generated_conversion_error(message: impl Into<String>) -> TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message) }
+fn generated_value<T: Serialize>(input: &T) -> Result<Value, TemplateError> { let json = serde_json::to_value(input).map_err(|error| generated_conversion_error(error.to_string()))?; bind(&json).map_err(|error| generated_conversion_error(error.message)) }
+fn generated_result<T: DeserializeOwned>(input: &Value) -> Result<T, TemplateError> { serde_json::from_value(to_json_value(input)).map_err(|error| generated_conversion_error(error.to_string())) }
+fn generated_truthy<T: Serialize>(runtime: &RuntimeBindings, input: &T) -> Result<bool, TemplateError> { Ok(runtime.truthy(&generated_value(input)?)) }
+fn generated_unary<T: DeserializeOwned, V: Serialize>(runtime: &RuntimeBindings, context: &RenderContext<'_>, operator: UnaryOp, input: &V, frame: &Frame, span: Span) -> Result<T, TemplateError> { let result = runtime.unary(context, operator, &generated_value(input)?, frame, span)?; generated_result(&result) }
+fn generated_binary<T: DeserializeOwned, L: Serialize, R: Serialize>(runtime: &RuntimeBindings, context: &RenderContext<'_>, operator: BinaryOp, left: &L, right: &R, frame: &Frame, span: Span) -> Result<T, TemplateError> { let result = runtime.binary(context, operator, &generated_value(left)?, &generated_value(right)?, frame, span)?; generated_result(&result) }
+fn generated_member<T: DeserializeOwned, V: Serialize>(runtime: &RuntimeBindings, input: &V, key: &str) -> Result<T, TemplateError> { generated_result(&runtime.member(&generated_value(input)?, key)) }
+fn generated_index<T: DeserializeOwned, V: Serialize, K: Serialize>(runtime: &RuntimeBindings, input: &V, key: &K) -> Result<T, TemplateError> { generated_result(&runtime.index(&generated_value(input)?, &generated_value(key)?)) }
+fn generated_call<T: DeserializeOwned>(runtime: &RuntimeBindings, context: &RenderContext<'_>, name: &str, args: Vec<Value>, frame: &Frame, span: Span) -> Result<T, TemplateError> { let result = runtime.call(context, name, args, frame, span)?; generated_result(&result) }
+fn generated_escape<T: Serialize>(runtime: &RuntimeBindings, context: &RenderContext<'_>, input: &T, frame: &Frame, span: Span) -> Result<String, TemplateError> { runtime.escape(context, &generated_value(input)?, frame, span) }
+fn render_content_tpl(assign: &Assign, definitions: &Definitions, input: InputContentTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime); let frame = Frame { name: "content.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 41, 65, 76])), context: Rc::clone(root_data) };
 
-    out.push_str("<section data-react-island id=\"counter\">\n<p>");
-    out.push_str(&escape(&assign.island_label.clone().unwrap_or_default().to_string()));
-    out.push_str("</p>\n</section>\n");
- out }
-fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: Input_layout_tpl) -> String { let mut out = String::new();
+    context.write("<section data-react-island id=\"counter\">\n<p>", &frame, [0, 44])?;
+    let escaped = generated_escape(runtime, context, &assign.island_label.clone().unwrap_or_default(), &frame, [47, 59])?; context.write(&escaped, &frame, [44, 60])?;
+    context.write("</p>\n</section>\n", &frame, [60, 76])?;
+ Ok(()) }
+fn render_layout_tpl(assign: &Assign, definitions: &Definitions, input: InputLayoutTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime); let frame = Frame { name: "layout.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 7, 26, 38, 46])), context: Rc::clone(root_data) };
 
-    out.push_str("<main>\n<h1>");
-    out.push_str(&escape(&assign.title.clone().unwrap_or_default().to_string()));
-    out.push_str("</h1>\n");
+    context.write("<main>\n<h1>", &frame, [0, 11])?;
+    let escaped = generated_escape(runtime, context, &assign.title.clone().unwrap_or_default(), &frame, [14, 19])?; context.write(&escaped, &frame, [11, 20])?;
+    context.write("</h1>\n", &frame, [20, 26])?;
     { let definition = definitions.content.as_ref();
-    if definition.is_none() { panic!("generated definition content is missing"); }
-    if let Some(html) = definition.and_then(|value| value.html.as_ref()) { out.push_str(html); } else {
-        let mut input = Input_content_tpl::default();
+    if definition.is_none() { return Err(runtime.error(context, &frame, [26, 37], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, "define content is not registered")); }
+    if let Some(html) = definition.and_then(|value| value.html.as_ref()) { context.write(html, &frame, [26, 37])?; } else {
+        let input = InputContentTpl::default();
 
-        if let Some(data) = definition.and_then(|value| value.data.as_ref()) {
 
-        }
 
-        out.push_str(&render_content_tpl(assign, definitions, input));
+        context.enter("content.tpl", Some(&frame), Some([26, 37]))?;
+        let rendered = render_content_tpl(assign, definitions, input, context, runtime, root_data);
+        context.leave();
+        rendered?;
     }
     }
-    out.push_str("</main>\n");
- out }
-pub fn render_template(target: &str, assign: &Assign, definitions: &Definitions) -> String { match target {
-        "content.tpl" => render_content_tpl(assign, definitions, Input_content_tpl::default()),
-        "layout.tpl" => render_layout_tpl(assign, definitions, Input_layout_tpl::default()),
-        _ => panic!("generated template is missing or requires inputs: {target}"),
+    context.write("</main>\n", &frame, [38, 46])?;
+ Ok(()) }
+fn render_template(target: &str, assign: &Assign, definitions: &Definitions, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>) -> Result<(), TemplateError> { match target {
+        "content.tpl" => render_content_tpl(assign, definitions, InputContentTpl::default(), context, runtime, root_data),
+        "layout.tpl" => render_layout_tpl(assign, definitions, InputLayoutTpl::default(), context, runtime, root_data),
+        _ => Err(context.fail(ErrorCode::E_LOAD_NOT_FOUND, None, None, format!("template {target} does not exist"))),
 } }
-pub fn render(assign: &Assign, definitions: &Definitions) -> String { render_template("layout.tpl", assign, definitions) }
 fn generated_error(template: &str, message: String) -> TemplateError { TemplateError::without_position(ErrorCode::E_DATA_UNSUPPORTED_TYPE, template, message) }
 struct GeneratedTarget { target: Option<String>, html: Option<String> }
 fn generated_bind_definitions(name: &str, input: &HashMap<String, polyspec_template::DefineInput>) -> Result<(Definitions, HashMap<String, GeneratedTarget>), TemplateError> { let mut plain = JsonMap::new(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {
@@ -84,4 +85,4 @@ fn generated_bind_definitions(name: &str, input: &HashMap<String, polyspec_templ
         } } let definitions = serde_json::from_value(JsonValue::Object(plain)).map_err(|error| generated_error(name, error.to_string()))?; Ok((definitions, targets)) }
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }
 impl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -> GeneratedProgram { GeneratedProgram { runtime } } }
-impl Program for GeneratedProgram { fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'static>, TemplateError> { let RenderTarget::Name(name) = target else { return Err(generated_error("layout.tpl", "generated target must be a template name".to_string())); }; let typed_assign: Assign = serde_json::from_value(assign.clone()).map_err(|error| generated_error(name, error.to_string()))?; let (definitions, targets) = generated_bind_definitions(name, &options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); Ok(PreparedRender::new(move || { if let Some(html) = &html { return Ok(html.clone()); } std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| render_template(&target_name, &typed_assign, &definitions))).map_err(|failure| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &target_name, failure.downcast_ref::<String>().cloned().or_else(|| failure.downcast_ref::<&str>().map(|value| value.to_string())).unwrap_or_else(|| "generated render failed".to_string()))) })) } fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> { self.prepare(target, assign, options)?.render() } }
+impl Program for GeneratedProgram { fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, TemplateError> { let RenderTarget::Name(name) = target else { return Err(generated_error("layout.tpl", "generated target must be a template name".to_string())); }; let typed_assign: Assign = serde_json::from_value(assign.clone()).map_err(|error| generated_error(name, error.to_string()))?; let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); let (definitions, targets) = generated_bind_definitions(name, &options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: "Z".to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(move || { let mut context = RenderContext::new(&self.runtime, Rc::clone(&root_data), env.clone(), &target_name); let runtime = RuntimeBindings::new(); context.enter(&target_name, None, None)?; let result = if let Some(html) = &html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&root_data) }; context.write(html, &frame, [0, 0]) } else { render_template(&target_name, &typed_assign, &definitions, &mut context, &runtime, &root_data) }; context.leave(); result?; Ok(context.output) })) } fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> { self.prepare(target, assign, options)?.render() } }

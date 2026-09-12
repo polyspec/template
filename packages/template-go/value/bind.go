@@ -125,9 +125,7 @@ func Bind(input any) (Value, error) {
 		if rv.IsNil() {
 			return nil, nil
 		}
-		if rv.Elem().Kind() == reflect.Struct {
-			return bindStruct(rv.Elem())
-		}
+		return Bind(rv.Elem().Interface())
 	}
 	return nil, bindError(errs.DataUnsupportedType, "a %s value has no binding", rv.Kind())
 }
