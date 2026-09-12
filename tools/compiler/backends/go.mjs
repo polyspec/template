@@ -13,7 +13,9 @@ const goResult = node => goType(node.valueType.source);
 
 export function createTarget({ program }) {
   const target = baseTarget(language);
-  target.var = (name, type) => program.dynamicRoot ? `generatedMember[${goType(type)}](runtime, rootData, ${quote(name)})` : `${optional(type) ? 'valueOrZero(' : ''}assign.${exportedName(name)}${optional(type) ? ')' : ''}`;
+  target.var = (name, type, node) => program.dynamicRoot ? node.scope ? `generatedResult[${goType(type)}](scope.Lookup(frame, ${quote(name)}))` : `generatedMember[${goType(type)}](runtime, rootData, ${quote(name)})` : `${optional(type) ? 'valueOrZero(' : ''}assign.${exportedName(name)}${optional(type) ? ')' : ''}`;
+  target.local = (name, type) => `generatedResult[${goType(type)}](scope.Lookup(frame, ${quote(name)}))`;
+  target.set = (name, value, level) => indent(level, `scope.Locals[${quote(name)}] = generatedValue(${value})`);
   target.member = (object, key, owner, node) => owner.kind === 'any' ? `generatedMember[${goResult(node)}](runtime, ${object}, ${quote(key)})` : `${object}.${exportedName(key)}`;
   target.text = (value, level, node) => indent(level, `generatedWrite(context, ${quote(value)}, frame, ${goSpan(node.span)})`);
   target.echo = (expression, level, node) => indent(level, `generatedWrite(context, generatedEscape(runtime, ${expression}, frame, ${goSpan(node.expr.span)}), frame, ${goSpan(node.span)})`);
@@ -25,9 +27,10 @@ generatedWrite(context, *definition.HTML, frame, ${goSpan(node.span)})
     const defaults = node.inputs.filter(item => item.root).map(item => `${exportedName(item.name)}: ${emitExpression(item.root, target)}`).join(', ');
     const defined = node.inputs.map(item => `if definition.Data.${exportedName(item.name)} != nil { input.${exportedName(item.name)} = *definition.Data.${exportedName(item.name)} }`).join('\n');
     const scoped = node.inputs.filter(item => item.scope).map(item => `input.${exportedName(item.name)} = ${emitExpression(item.scope, target)}`).join('\n');
-    const call = `${functionName(node.target)}(assign, definitions, input, context, runtime, rootData)`;
+    const call = `${functionName(node.target)}(assign, definitions, input, context, runtime, rootData, blockScope)`;
     if (node.id === null) return indent(n, `{ input := ${inputName(node.target)}{${defaults}}
 ${scoped}
+blockScope := render.NewScope()
 generatedEnter(context, ${quote(node.target)}, frame, ${goSpan(node.span)})
 func() { defer context.Leave(); ${call} }()
 }`);
@@ -40,6 +43,7 @@ if definition != nil && definition.HTML != nil { generatedWrite(context, *defini
 ${indent(2, defined)}
     }
 ${indent(1, scoped)}
+    blockScope := render.NewScope()
     generatedEnter(context, ${quote(node.target)}, frame, ${goSpan(node.span)})
     func() { defer context.Leave(); ${call} }()
 }
@@ -74,24 +78,26 @@ ${'\t'.repeat(n)}}` : ''}`;
     const source = isMap ? `${iterable}.Entries()` : iterable;
     const binding = isMap ? `${name}_key, ${name}_value := entry.Key, entry.Value` : `${name}_key, ${name}_value := float64(${name}_index), entry`;
     return indent(n, `{ entries := ${source}
+previous, hadPrevious := scope.Locals[${quote(node.name)}]
 for ${name}_index, entry := range entries {
     ${binding}
     _ = ${name}_key
-    ${name} := ${name}_value
+    scope.Locals[${quote(node.name)}] = generatedValue(${name}_value)
     ${name}_size := float64(len(entries))
     ${name}_first := ${name}_index == 0
     ${name}_last := ${name}_index + 1 == len(entries)
     context.Iterations++
     generatedLimit(runtime, "iteration", context.Iterations, frame, ${goSpan(node.span)})
 ${emitNodes(node.body, target, n + 1)}
-}${node.empty ? `
+}
+if hadPrevious { scope.Locals[${quote(node.name)}] = previous } else { delete(scope.Locals, ${quote(node.name)}) }${node.empty ? `
 if len(entries) == 0 {
 ${emitNodes(node.empty, target, n + 1)}
 }` : ''}
 }`);
   };
   target.include = (node, n) => indent(n, `generatedEnter(context, ${quote(node.target)}, frame, ${goSpan(node.span)})
-func() { defer context.Leave(); ${functionName(node.target)}(assign, definitions, ${inputName(node.target)}{${node.inputs.map(item => `${exportedName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')}}, context, runtime, rootData) }()`);
+func() { defer context.Leave(); ${functionName(node.target)}(assign, definitions, ${inputName(node.target)}{${node.inputs.map(item => `${exportedName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')}}, context, runtime, rootData, scope) }()`);
   return target;
 }
 
@@ -131,13 +137,13 @@ func generatedEnv(options template.RenderOptions) functions.Env { env := functio
 export function emitTemplates(context) {
   return context.templateBodies.map(template => {
     const typed = context.program.templates.get(template.name);
-    return `func ${template.function}(assign Assign, definitions Definitions, input ${template.input}, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) {\n\tframe := render.NewFrame(${quote(template.name)}, ${goLines(typed.lines)}, rootData)\n${[...template.inputs].map(([name]) => `${fieldName(name)} := input.${exportedName(name)}`).join('\n')}\n${template.body}\n}`;
+    return `func ${template.function}(assign Assign, definitions Definitions, input ${template.input}, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {\n\tframe := render.NewFrame(${quote(template.name)}, ${goLines(typed.lines)}, rootData)\n${[...template.inputs].map(([name]) => `scope.Locals[${quote(name)}] = generatedValue(input.${exportedName(name)})`).join('\n')}\n${template.body}\n}`;
   }).join('\n');
 }
 
 export function emitEntry(context) {
-  const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `\tcase ${quote(template.name)}: ${template.function}(assign, definitions, ${template.input}{}, context, runtime, rootData); return`).join('\n');
+  const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `\tcase ${quote(template.name)}: ${template.function}(assign, definitions, ${template.input}{}, context, runtime, rootData, scope); return`).join('\n');
   const definitionCases = [...context.program.definitions].map(([id, definition]) => `\t\tcase ${quote(id)}:\n\t\t\tif input.HTML != nil { if ${definition.html ? 'false' : 'true'} || input.Template != "" || input.Data != nil { return Definitions{}, nil, fmt.Errorf("define.%s has an invalid html entry", id) }; plain[id] = map[string]any{"html": *input.HTML}; targets[id] = generatedTarget{html: input.HTML}; continue }\n\t\t\tif input.Template != ${quote(definition.template ?? '')} { return Definitions{}, nil, fmt.Errorf("define.%s has an invalid template", id) }; plain[id] = map[string]any{"data": generatedPlain(input.Data)}; targets[id] = generatedTarget{target: ${quote(definition.template ?? '')}}`).join('\n');
   const bindAssign = context.program.dynamicRoot ? '' : 'if err := generatedDecode(rootData, &typedAssign); err != nil { return nil, err }';
-  return `func renderTemplate(target string, assign Assign, definitions Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) { switch target {\n${dispatch}\n\tdefault: panic(context.Fail(errs.LoadNotFound, nil, nil, "template " + target + " does not exist"))\n} }\ntype generatedTarget struct { target string; html *string }\nfunc generatedBindDefinitions(input map[string]template.DefineInput) (Definitions, map[string]generatedTarget, error) { plain := map[string]any{}; targets := map[string]generatedTarget{}; for id, input := range input { switch id {\n${definitionCases}\n\t\tdefault: return Definitions{}, nil, fmt.Errorf("define.%s is not declared", id)\n\t} }; var definitions Definitions; if err := generatedDecode(plain, &definitions); err != nil { return Definitions{}, nil, err }; return definitions, targets, nil }\ntype GeneratedProgram struct { Runtime *template.RuntimeEnvironment }\nfunc NewGeneratedProgram(options template.Options) (*GeneratedProgram, error) { runtime, err := template.NewRuntimeEnvironment(options.Limits, options.Functions); if err != nil { return nil, err }; return &GeneratedProgram{Runtime: runtime}, nil }\ntype generatedPrepared struct { target string; assign Assign; definitions Definitions; rootData *value.OrderedMap; env functions.Env; runtime *template.RuntimeEnvironment; html *string }\nfunc (p *generatedPrepared) Render() (output string, err error) { defer func() { if failure := recover(); failure != nil { if failureError, ok := failure.(error); ok { err = failureError } else { panic(failure) } } }(); context := render.NewContext(p.runtime, p.rootData, p.env, p.target); runtime := render.NewRuntimeBindings(context); if err := context.Enter(p.target, nil, nil); err != nil { return "", err }; defer context.Leave(); if p.html != nil { if err := context.Write(*p.html, nil, nil); err != nil { return "", err } } else { renderTemplate(p.target, p.assign, p.definitions, context, runtime, p.rootData) }; return context.Output(), nil }\nfunc (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) { name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }; rootData, err := value.BindMap(assign); if err != nil { return nil, err }; var typedAssign Assign; ${bindAssign}; definitions, targets, err := generatedBindDefinitions(options.Define); if err != nil { return nil, err }; resolved := targets[name]; targetName := name; if resolved.target != "" { targetName = resolved.target }; return &generatedPrepared{target: targetName, assign: typedAssign, definitions: definitions, rootData: rootData, env: generatedEnv(options), runtime: p.Runtime, html: resolved.html}, nil }\nfunc (p *GeneratedProgram) Render(target any, assign any, options template.RenderOptions) (string, error) { prepared, err := p.Prepare(target, assign, options); if err != nil { return "", err }; return prepared.Render() }\nvar _ template.Program = (*GeneratedProgram)(nil)`;
+  return `func renderTemplate(target string, assign Assign, definitions Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) { switch target {\n${dispatch}\n\tdefault: panic(context.Fail(errs.LoadNotFound, nil, nil, "template " + target + " does not exist"))\n} }\ntype generatedTarget struct { target string; html *string }\nfunc generatedBindDefinitions(input map[string]template.DefineInput) (Definitions, map[string]generatedTarget, error) { _ = input; plain := map[string]any{}; targets := map[string]generatedTarget{}; for id, input := range input { _ = input; switch id {\n${definitionCases}\n\t\tdefault: return Definitions{}, nil, fmt.Errorf("define.%s is not declared", id)\n\t} }; var definitions Definitions; if err := generatedDecode(plain, &definitions); err != nil { return Definitions{}, nil, err }; return definitions, targets, nil }\ntype GeneratedProgram struct { Runtime *template.RuntimeEnvironment }\nfunc NewGeneratedProgram(options template.Options) (*GeneratedProgram, error) { runtime, err := template.NewRuntimeEnvironment(options.Limits, options.Functions); if err != nil { return nil, err }; return &GeneratedProgram{Runtime: runtime}, nil }\ntype generatedPrepared struct { target string; assign Assign; definitions Definitions; rootData *value.OrderedMap; env functions.Env; runtime *template.RuntimeEnvironment; html *string }\nfunc (p *generatedPrepared) Render() (output string, err error) { defer func() { if failure := recover(); failure != nil { if failureError, ok := failure.(error); ok { err = failureError } else { panic(failure) } } }(); context := render.NewContext(p.runtime, p.rootData, p.env, p.target); runtime := render.NewRuntimeBindings(context); scope := render.NewScope(); if err := context.Enter(p.target, nil, nil); err != nil { return "", err }; defer context.Leave(); if p.html != nil { if err := context.Write(*p.html, nil, nil); err != nil { return "", err } } else { renderTemplate(p.target, p.assign, p.definitions, context, runtime, p.rootData, scope) }; return context.Output(), nil }\nfunc (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) { name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }; rootData, err := value.BindMap(assign); if err != nil { return nil, err }; var typedAssign Assign; ${bindAssign}; definitions, targets, err := generatedBindDefinitions(options.Define); if err != nil { return nil, err }; resolved := targets[name]; targetName := name; if resolved.target != "" { targetName = resolved.target }; return &generatedPrepared{target: targetName, assign: typedAssign, definitions: definitions, rootData: rootData, env: generatedEnv(options), runtime: p.Runtime, html: resolved.html}, nil }\nfunc (p *GeneratedProgram) Render(target any, assign any, options template.RenderOptions) (string, error) { prepared, err := p.Prepare(target, assign, options); if err != nil { return "", err }; return prepared.Render() }\nvar _ template.Program = (*GeneratedProgram)(nil)`;
 }
