@@ -177,9 +177,9 @@ flowchart LR
   ASTArtifact --> Store["ArtifactStore.loadOrRefresh(refresh)"]
   GenArtifact --> Store
   Store --> Prepared["Engine.prepare(request)"]
-  Prepared --> Normalized["정규화된 요청<br/>assign + define + env"]
-  Normalized --> ASTRender["PreparedRender.render<br/>AST 해석"]
-  Normalized --> GenRender["PreparedRender.render<br/>생성 코드 호출"]
+  Prepared --> Normalized["normalized request<br/>assign + define + env"]
+  Normalized --> ASTRender["PreparedRender.render<br/>interpret AST"]
+  Normalized --> GenRender["PreparedRender.render<br/>call generated code"]
   ASTRender --> Bytes["same UTF-8 bytes"]
   GenRender --> Bytes
 ```
