@@ -61,7 +61,7 @@ function syntaxKind(sigil: string | null, assignment = false): SyntaxTag['kind']
 }
 
 const RESERVED = new Set(['true', 'false', 'null', 'in']);
-const ASSIGN_HEAD = /^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=(?![=>]))/;
+const ASSIGN_HEAD = /^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=(?![=>]))/;
 const LOOP_HEAD = /^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/;
 
 interface TextPiece {
@@ -195,7 +195,7 @@ class TemplateParser {
   private parseTag(context: TagContext): number {
     const text = this.text;
     const sigil = sigilAfter(text, context.open);
-    const bodyStart = sigil === null ? context.open + 1 : skipHorizontalSpace(text, context.open + 1) + sigil.length;
+    const bodyStart = sigil === null ? context.open + 1 : skipHorizontalSpace(text, skipHorizontalSpace(text, context.open + 1) + sigil.length);
     const isDirective = sigil === '%';
     const firstTag = !this.sawTag;
     this.sawTag = true;

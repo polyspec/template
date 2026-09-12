@@ -184,7 +184,7 @@ impl<'a> TemplateParser<'a> {
         let sigil = sigil_after(bytes, context.open);
         let body_start = match sigil {
             None => context.open + 1,
-            Some(sigil) => skip_horizontal_space(bytes, context.open + 1) + sigil.len(),
+            Some(sigil) => skip_horizontal_space(bytes, skip_horizontal_space(bytes, context.open + 1) + sigil.len()),
         };
         let is_directive = sigil == Some("%");
         let first_tag = !self.saw_tag;
@@ -467,7 +467,6 @@ impl<'a> TemplateParser<'a> {
 
     fn parse_assignment(&mut self, context: &TagContext, body_start: usize) -> Result<usize, TemplateError> {
         let bytes = self.bytes();
-        let body_start = skip_horizontal_space(bytes, body_start);
         let name_length = ident_length(bytes, body_start);
         let operator_start = skip_horizontal_space(bytes, body_start + name_length);
         let operator_length = assign_operator_length(bytes, operator_start);
