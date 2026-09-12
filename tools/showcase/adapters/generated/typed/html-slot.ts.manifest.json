@@ -6,7 +6,7 @@
   "sourceDigest": "6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
   "contractDigest": "d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88",
-  "compilerDigest": "ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef",
+  "compilerDigest": "e797e7c29c69b25585e82f1df30bb8eedc651c3f0cf2eaf00a3008b72d968998",
   "files": {
     "html-slot.ts": {
       "path": "html-slot.ts",

@@ -64,3 +64,4 @@
 - 제품 compiler가 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram` 구현을 생성하게 했다. Package 단위 통합 검사는 현재 시나리오 5개를 모두 이 program으로 compile하고 실행해 바이트가 같은 HTML을 요구한다.
 - Schema 3 AST와 generated artifact manifest에 compiler 구현 digest를 추가했다. `true` 갱신 정책은 parser나 backend 변경 뒤 artifact를 다시 만들고 `false`는 source, type, contract 또는 compiler 입력을 읽지 않고 배포 파일을 검증한다.
 - Showcase 전용 renderer generator를 제품 compiler artifact로 교체했다. TypeScript, JavaScript, Go, Rust, PHP adapter는 시나리오별 `GeneratedProgram`을 선택하고 Go artifact는 분리된 package를 사용하며 JavaScript 배포 artifact는 TypeScript backend 출력에서 compile한다.
+- Compiler IR에 명시적인 동적 root type 계약을 추가했다. 동적 root는 선언되지 않은 입력 이름을 optional runtime value로 받으면서 선언된 template input, record, definition, function signature는 유지하고, 고정 `Assign` root는 선언되지 않은 field를 계속 거부한다.

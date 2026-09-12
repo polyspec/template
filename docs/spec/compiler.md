@@ -22,7 +22,7 @@ Each backend is a separate `LanguageBackend` implementation. A backend emits dec
 
 ## Public structures
 
-`TypeManifest` declares assign fields, record fields, definition targets, template inputs and host-function signatures. Types are never inferred from one request value. An explicit `any` declaration uses the runtime value model without creating another execution mode.
+`TypeManifest.root` is either `Assign` or `any`. `Assign` declares fixed root fields. `any` declares a map-shaped dynamic root whose unknown members have type `any?`; it is used when the input contract is intentionally dynamic. Record fields, definition targets, template inputs and host-function signatures remain explicit in both forms. Types are never inferred from one request value. An `any` field or parameter uses the runtime value model without creating another execution mode, and it does not disable field checks when the root is `Assign`.
 
 The typed IR resolves every symbol, template path, definition target, function signature and input type. It preserves the source span on every node and expression so generated runtime failures point to the original template. A missing variable, unknown statically typed member, undeclared definition, invalid include path, unknown function implementation kind or incompatible block input fails compilation. Explicit dynamic `any` member, index, spread and loop operations remain in the IR and use `RuntimeBindings`. Built-in and host signatures use the same call node and preserve their implementation kind for program loading.
 
