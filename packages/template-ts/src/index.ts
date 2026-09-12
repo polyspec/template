@@ -14,6 +14,7 @@ export { parseJson, parseJsonBytes, JsonSyntaxError } from './value/json.js';
 export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';
 export type { ArtifactRefresh, EngineOptions, Program, RenderOptions, DefineInput } from './render/engine.js';
 export { Engine } from './render/engine.js';
+export { RuntimeEnvironment } from './render/runtime-environment.js';
 export type { Limits } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';
 export type { Delimiters } from './parser/scanner.js';

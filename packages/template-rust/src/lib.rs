@@ -26,6 +26,7 @@ pub use render::engine::{
     ArtifactRefresh, AstProgram, DefineInput, Engine, EngineOptions, PreparedRender, Program, RenderOptions, RenderTarget,
     defines_from_json, env_from_json,
 };
+pub use render::runtime_environment::RuntimeEnvironment;
 pub use value::bind::{BindError, bind, to_json_value};
 pub use value::json::{parse_json, parse_json_bytes};
 pub use value::{OrderedMap, Value};

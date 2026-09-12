@@ -34,9 +34,10 @@ classDiagram
     +put(cacheKey, html, ttl) void
     +getOrSet(cacheKey, ttl, render) UTF-8 string
   }
-  class RuntimeServices {
+  class RuntimeEnvironment {
     +limits
     +hostFunctions
+    +register(name, function) void or error
     +limits() Limits
     +hostFunction(name) HostFunction or missing
   }
@@ -97,6 +98,10 @@ classDiagram
     +limit(kind, count, frame, span) void or error
     +error(frame, span, code, message) error
   }
+  class RuntimeServices {
+    +limits() Limits
+    +hostFunction(name) HostFunction or missing
+  }
   Program <|-- AstProgram
   Program <|-- GeneratedProgram
   Compiler --> TypedProgram
@@ -105,5 +110,8 @@ classDiagram
   ArtifactStore --> ArtifactManifest
   ArtifactStore --> Program
   Engine --> Program
+  RuntimeServices <|.. RuntimeEnvironment
+  AstProgram --> RuntimeEnvironment
+  GeneratedProgram --> RuntimeEnvironment
   AstProgram --> RuntimeBindings
   GeneratedProgram --> RuntimeBindings

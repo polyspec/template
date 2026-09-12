@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Polyspec\Template;
 
-use Polyspec\Template\Functions\Registry;
 use Polyspec\Template\Loader\ArrayLoader;
 use Polyspec\Template\Loader\LoaderInterface;
 use Polyspec\Template\Loader\Path;
@@ -13,6 +12,7 @@ use Polyspec\Template\Parser\Scanner;
 use Polyspec\Template\Render\Context;
 use Polyspec\Template\Render\Frame;
 use Polyspec\Template\Render\Renderer;
+use Polyspec\Template\Render\RuntimeEnvironment;
 use Polyspec\Template\Render\RuntimeServices;
 use Polyspec\Template\Render\Scope;
 use Polyspec\Template\Value\Bind;
@@ -51,22 +51,12 @@ final class AstPreparedExecution implements PreparedExecution
 /** AstProgram: template loading, caching, function registration and rendering. */
 final class AstProgram implements Program, RuntimeServices
 {
-    public const DEFAULT_LIMITS = [
-        'iterations' => 1000000,
-        'depth' => 32,
-        'outputBytes' => 16 * 1024 * 1024,
-        'expressionDepth' => 64,
-    ];
-
     public readonly LoaderInterface $loader;
-    /** @var array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} */
-    public readonly array $limits;
+    public readonly RuntimeEnvironment $runtime;
     /** @var array{0: string, 1: string} */
     public readonly array $delimiters;
     /** @var 'dev'|'true'|'false' */
     public readonly string $artifactRefresh;
-    /** @var array<string, callable> */
-    private array $functions = [];
     /** @var array<string, array{version: string, template: array{ast: array<string, mixed>, lines: list<int>|null}}> */
     private array $cache = [];
 
@@ -76,7 +66,7 @@ final class AstProgram implements Program, RuntimeServices
     public function __construct(?LoaderInterface $loader = null, array $options = [])
     {
         $this->loader = $loader ?? new ArrayLoader();
-        $this->limits = array_merge(self::DEFAULT_LIMITS, $options['limits'] ?? []);
+        $this->runtime = new RuntimeEnvironment($options['limits'] ?? [], $options['functions'] ?? []);
         if (isset($options['delimiters'])) {
             $delimiters = Scanner::parseDelimiters($options['delimiters']);
             if ($delimiters === null) {
@@ -89,9 +79,6 @@ final class AstProgram implements Program, RuntimeServices
         $this->artifactRefresh = (string) ($options['artifact_refresh'] ?? 'true');
         if (!in_array($this->artifactRefresh, ['dev', 'true', 'false'], true)) {
             throw new \InvalidArgumentException($this->artifactRefresh . ' is not an artifact refresh policy');
-        }
-        foreach ($options['functions'] ?? [] as $name => $fn) {
-            $this->register((string) $name, $fn);
         }
     }
 
@@ -119,13 +106,7 @@ final class AstProgram implements Program, RuntimeServices
      */
     public function register(string $name, callable $fn): void
     {
-        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name) !== 1) {
-            throw new \InvalidArgumentException(json_encode($name) . ' is not an identifier');
-        }
-        if (Registry::isBuiltin($name)) {
-            throw new \InvalidArgumentException("{$name} is a built-in function");
-        }
-        $this->functions[$name] = $fn;
+        $this->runtime->register($name, $fn);
     }
 
     /**
@@ -133,13 +114,13 @@ final class AstProgram implements Program, RuntimeServices
      */
     public function hostFunction(string $name): ?callable
     {
-        return $this->functions[$name] ?? null;
+        return $this->runtime->hostFunction($name);
     }
 
     /** @return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} */
     public function limits(): array
     {
-        return $this->limits;
+        return $this->runtime->limits();
     }
 
     /**

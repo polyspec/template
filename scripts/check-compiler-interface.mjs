@@ -18,7 +18,7 @@ if (manifest.showcaseAdapter?.name !== 'RenderAdapter' || manifest.showcaseAdapt
 const requiredTypes = [
   'CompileMode', 'ArtifactRefresh', 'SourceGraph', 'TypeManifest', 'TypedProgram',
   'ArtifactManifest', 'RenderRequest', 'Program', 'AstProgram', 'GeneratedProgram',
-  'RuntimeBindings', 'RuntimeServices', 'FunctionSignature', 'DefinitionData<T>', 'Definition<T>',
+  'RuntimeBindings', 'RuntimeServices', 'RuntimeEnvironment', 'FunctionSignature', 'DefinitionData<T>', 'Definition<T>',
   'Definitions', 'Input<T>', 'RenderFrame', 'RenderScope',
 ];
 for (const name of requiredTypes) if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
@@ -28,7 +28,7 @@ const expectedOperations = {
   LanguageBackend: ['emitDeclarations', 'emitRuntime', 'emitTemplates', 'emitEntry'],
   ArtifactStore: ['load', 'regenerate', 'loadOrRefresh'],
   Program: ['prepare', 'render'],
-  RuntimeServices: ['limits', 'hostFunction'],
+  RuntimeEnvironment: ['register', 'limits', 'hostFunction'],
   PageCache: ['get', 'put', 'getOrSet'],
 };
 for (const [owner, names] of Object.entries(expectedOperations)) {
@@ -67,6 +67,8 @@ for (const language of core.languages) {
   for (const operation of manifest.types.RuntimeServices.operations) {
     if (!mapping.runtimeServiceOperationNames?.[operation]) throw new Error(`${language}: RuntimeServices.${operation} name mapping is missing`);
   }
+  if (mapping.runtimeEnvironmentFields?.length !== manifest.types.RuntimeEnvironment.fields.length) throw new Error(`${language}: RuntimeEnvironment field mapping is incomplete`);
+  if (mapping.runtimeEnvironmentOperations?.length !== manifest.types.RuntimeEnvironment.operations.length) throw new Error(`${language}: RuntimeEnvironment operation mapping is incomplete`);
 }
 const rustContextOperations = ['stringify', 'escape', 'number', 'finite', 'compare', 'entries', 'call', 'limit', 'error'];
 if (manifest.languages.rust.runtimeBindingsExplicitContext?.join(',') !== rustContextOperations.join(',')) {
@@ -84,10 +86,15 @@ const runtime = manifest.runtimeContract;
 if (runtime?.Program?.operations?.map(item => item.name).join(',') !== 'prepare,render') throw new Error('Program runtime operations differ');
 if (runtime.Engine?.owns?.join(',') !== 'program' || runtime.Engine?.implements !== 'Program') throw new Error('Engine ownership differs');
 if (runtime.AstProgram?.implements !== 'Program' || runtime.GeneratedProgram?.implements !== 'Program') throw new Error('program implementation mapping differs');
+if (runtime.AstProgram?.owns?.join(',') !== 'runtime') throw new Error('AstProgram runtime ownership differs');
 const runtimeBindingOperations = manifest.types.RuntimeBindings.operations;
 if (runtime.RuntimeBindings?.operations?.map(item => item.name).join(',') !== runtimeBindingOperations.join(',')) throw new Error('RuntimeBindings operations differ');
 const runtimeServiceOperations = manifest.types.RuntimeServices.operations;
 if (runtime.RuntimeServices?.operations?.map(item => item.name).join(',') !== runtimeServiceOperations.join(',')) throw new Error('RuntimeServices operations differ');
+const runtimeEnvironmentOperations = manifest.types.RuntimeEnvironment.operations;
+if (runtime.RuntimeEnvironment?.implements !== 'RuntimeServices') throw new Error('RuntimeEnvironment implementation differs');
+if (runtime.RuntimeEnvironment?.fields?.join(',') !== manifest.types.RuntimeEnvironment.fields.join(',')) throw new Error('RuntimeEnvironment fields differ');
+if (runtime.RuntimeEnvironment?.operations?.map(item => item.name).join(',') !== runtimeEnvironmentOperations.join(',')) throw new Error('RuntimeEnvironment operations differ');
 if (runtime.RenderFrame?.fields?.join(',') !== manifest.types.RenderFrame.fields.join(',')) throw new Error('RenderFrame fields differ');
 if (runtime.RenderScope?.fields?.join(',') !== manifest.types.RenderScope.fields.join(',')) throw new Error('RenderScope fields differ');
 if (runtime.RenderScope?.operations?.join(',') !== manifest.types.RenderScope.operations.join(',')) throw new Error('RenderScope operations differ');
@@ -118,6 +125,21 @@ const indexPath = resolve(root, 'packages/template-ts/src/index.ts');
 const indexSource = ts.createSourceFile(indexPath, readFileSync(indexPath, 'utf8'), ts.ScriptTarget.Latest, true);
 const astProgram = declaration(indexSource, ts.SyntaxKind.ClassDeclaration, 'AstProgram');
 if (!astProgram?.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(indexSource) === 'AstProgramCore'))) throw new Error('typescript: AstProgram does not extend the AST Program implementation');
+const astProgramCore = declaration(engineSource, ts.SyntaxKind.ClassDeclaration, 'AstProgramCore');
+if (!astProgramCore?.members.some(member => ts.isPropertyDeclaration(member) && member.name.getText(engineSource) === 'runtime')) throw new Error('typescript: AstProgram does not own RuntimeEnvironment');
+
+const runtimeEnvironmentPath = resolve(root, 'packages/template-ts/src/render/runtime-environment.ts');
+const runtimeEnvironmentSource = ts.createSourceFile(runtimeEnvironmentPath, readFileSync(runtimeEnvironmentPath, 'utf8'), ts.ScriptTarget.Latest, true);
+const runtimeEnvironment = declaration(runtimeEnvironmentSource, ts.SyntaxKind.ClassDeclaration, 'RuntimeEnvironment');
+if (!runtimeEnvironment?.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(runtimeEnvironmentSource) === 'RuntimeServices'))) throw new Error('typescript: RuntimeEnvironment does not implement RuntimeServices');
+const runtimeEnvironmentFields = runtimeEnvironment.members.filter(ts.isPropertyDeclaration).map(item => item.name.getText(runtimeEnvironmentSource));
+const runtimeEnvironmentMethods = runtimeEnvironment.members.filter(ts.isMethodDeclaration).map(item => item.name.getText(runtimeEnvironmentSource));
+if (runtimeEnvironmentFields.join(',') !== manifest.languages.typescript.runtimeEnvironmentFields.join(',')) throw new Error('typescript: RuntimeEnvironment fields differ');
+if (runtimeEnvironmentMethods.join(',') !== manifest.languages.typescript.runtimeEnvironmentOperations.join(',')) throw new Error('typescript: RuntimeEnvironment operations differ');
+for (const operation of runtime.RuntimeEnvironment.operations) {
+  const method = runtimeEnvironment.members.filter(ts.isMethodDeclaration).find(item => item.name.getText(runtimeEnvironmentSource) === operation.name);
+  if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeEnvironment.${operation.name} signature differs`);
+}
 
 const bindingsPath = resolve(root, 'packages/template-ts/src/render/runtime-bindings.ts');
 const bindingsSource = ts.createSourceFile(bindingsPath, readFileSync(bindingsPath, 'utf8'), ts.ScriptTarget.Latest, true);

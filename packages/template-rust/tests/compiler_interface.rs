@@ -27,6 +27,10 @@ struct RustMapping {
     scope_fields: Vec<String>,
     #[serde(rename = "scopeOperations")]
     scope_operations: Vec<String>,
+    #[serde(rename = "runtimeEnvironmentFields")]
+    runtime_environment_fields: Vec<String>,
+    #[serde(rename = "runtimeEnvironmentOperations")]
+    runtime_environment_operations: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -46,6 +50,8 @@ struct RuntimeContract {
     runtime_bindings: BindingsContract,
     #[serde(rename = "RuntimeServices")]
     runtime_services: BindingsContract,
+    #[serde(rename = "RuntimeEnvironment")]
+    runtime_environment: RuntimeEnvironmentContract,
 }
 
 #[derive(Deserialize)]
@@ -61,6 +67,12 @@ struct EngineContract {
 
 #[derive(Deserialize)]
 struct BindingsContract {
+    operations: Vec<Operation>,
+}
+
+#[derive(Deserialize)]
+struct RuntimeEnvironmentContract {
+    fields: Vec<String>,
     operations: Vec<Operation>,
 }
 
@@ -132,11 +144,22 @@ fn runtime_declarations_match_manifest() {
         })
         .collect();
     assert_eq!(operations, manifest.runtime_contract.engine.operations);
+    let ast_program = source
+        .items
+        .iter()
+        .find_map(|item| match item {
+            Item::Struct(item) if item.ident == "AstProgram" => Some(item),
+            _ => None,
+        })
+        .expect("AstProgram struct is missing");
+    let Fields::Named(ast_fields) = &ast_program.fields else {
+        panic!("AstProgram fields are not named")
+    };
     assert!(
-        source
-            .items
+        ast_fields
+            .named
             .iter()
-            .any(|item| matches!(item, Item::Struct(item) if item.ident == "AstProgram"))
+            .any(|field| field.ident.as_ref().is_some_and(|name| name == "runtime"))
     );
 
     let bindings_source = syn::parse_file(&fs::read_to_string("src/render/runtime_bindings.rs").unwrap()).unwrap();
@@ -245,4 +268,58 @@ fn runtime_declarations_match_manifest() {
         })
         .collect();
     assert_eq!(scope_operations, manifest.languages.rust.scope_operations);
+
+    let runtime_source = syn::parse_file(&fs::read_to_string("src/render/runtime_environment.rs").unwrap()).unwrap();
+    let runtime_environment = runtime_source
+        .items
+        .iter()
+        .find_map(|item| match item {
+            Item::Struct(item) if item.ident == "RuntimeEnvironment" => Some(item),
+            _ => None,
+        })
+        .expect("RuntimeEnvironment struct is missing");
+    let Fields::Named(runtime_fields) = &runtime_environment.fields else {
+        panic!("RuntimeEnvironment fields are not named")
+    };
+    let actual_fields: Vec<_> = runtime_fields
+        .named
+        .iter()
+        .map(|field| field.ident.as_ref().unwrap().to_string())
+        .collect();
+    assert_eq!(actual_fields, manifest.languages.rust.runtime_environment_fields);
+    assert_eq!(
+        manifest.runtime_contract.runtime_environment.fields,
+        vec!["limits", "hostFunctions"]
+    );
+
+    let mut actual_operations = Vec::new();
+    for item in &runtime_source.items {
+        let Item::Impl(implementation) = item else {
+            continue;
+        };
+        let syn::Type::Path(path) = implementation.self_ty.as_ref() else {
+            continue;
+        };
+        if !path.path.is_ident("RuntimeEnvironment") {
+            continue;
+        }
+        for item in &implementation.items {
+            if let ImplItem::Fn(method) = item
+                && method.sig.ident != "new"
+            {
+                actual_operations.push((method.sig.ident.to_string(), method.sig.inputs.len() - 1));
+            }
+        }
+    }
+    assert_eq!(
+        actual_operations.len(),
+        manifest.runtime_contract.runtime_environment.operations.len()
+    );
+    for (index, operation) in manifest.runtime_contract.runtime_environment.operations.iter().enumerate() {
+        assert_eq!(
+            actual_operations[index].0,
+            manifest.languages.rust.runtime_environment_operations[index]
+        );
+        assert_eq!(actual_operations[index].1, operation.parameters.len());
+    }
 }

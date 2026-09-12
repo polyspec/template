@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "d56094099ab339567839a4e18a937de73b5696f18cb7f3272bf0de6a0422cf57",
+  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
   "files": {
     "scope-precedence.rust": {
       "path": "scope-precedence.rust",
