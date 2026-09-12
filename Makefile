@@ -258,7 +258,7 @@ compiler-ir-check: build-ts ## Verify canonical AST coverage and type/scope reje
 	node scripts/check-compiler-ir.mjs
 	node scripts/check-conformance-type-manifest.mjs
 
-typed-generator-compile-check: compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
+typed-generator-compile-check: build-php compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs

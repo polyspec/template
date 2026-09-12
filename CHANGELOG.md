@@ -1,6 +1,7 @@
 # Changelog
 
 - Resolved Composer lockfiles against the declared PHP 8.2 minimum and added a policy gate that rejects stale or mismatched platform resolution.
+- Made the generated-program compile gate install its declared PHP runtime dependency, so the standalone showcase and documentation publication checks run from a clean checkout.
 
 [한국어](CHANGELOG.ko.md).
 
