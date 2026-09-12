@@ -12,7 +12,7 @@ It executes seven layers in order and stops at the first failure.
 
 | Layer | Scope | Failure evidence |
 | --- | --- | --- |
-| Contracts | Manifest-generated declarations and Mermaid, document pairs, schemas, public API documentation, format and static analysis | Structural drift, stale generated files, undocumented API or invalid source |
+| Contracts | Manifest-generated declarations and Mermaid, document pairs, schemas, public API documentation, locked dependency advisories, format and static analysis | Structural drift, stale generated files, known dependency vulnerability, undocumented API or invalid source |
 | Units | Lexer, parser, data model, functions, runtime, limits, artifact refresh and page cache in every core package | The smallest package and test identify the defect |
 | Compiler | Canonical AST lifecycle, typed IR rejection, four generated backends and host compiler checks | The rejected IR node, stale artifact or target compiler diagnostic |
 | Conformance | 211 canonical cases through four AST and four generated programs, plus the PHP extension support level | Exact language, mode, case and output or structured diagnostic difference |

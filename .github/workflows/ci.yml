@@ -102,6 +102,9 @@ jobs:
 
   php:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.5']
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -110,9 +113,10 @@ jobs:
           cache: npm
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: ${{ matrix.php }}
           tools: composer:v2
       - run: npm ci
       - run: make test-php
       - run: make build-ts
       - run: node tests/runner/conformance.mjs --langs ts,php
+      - run: make test-ext
