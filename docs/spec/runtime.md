@@ -60,7 +60,7 @@ The compiler manifest also fixes the public `Program`, `Engine`, `AstProgram` an
 
 ## Cross-language render contract
 
-The executable showcase has one source of truth for its adapter boundary: the [interface manifest](../../tools/showcase/adapters/interface.json). It declares the types, field order, nullability, required fields, ownership, constructor, operations, errors, preconditions, state transitions and language name mappings. Native types express that contract in each language; they do not redefine it.
+The executable showcase adapter boundary is part of the shared [compiler interface manifest](../../tools/compiler/interface.json). It declares the types, field order, nullability, required fields, ownership, constructor, operations, errors, preconditions, state transitions and language name mappings. Native types express that contract in each language; they do not redefine it.
 
 ```mermaid
 flowchart LR
