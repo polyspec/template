@@ -12,7 +12,17 @@ use Polyspec\Template\Value\MapValue;
 $root = dirname(__DIR__, 3);
 require $root . '/packages/template-php/vendor/autoload.php';
 require __DIR__ . '/generated/render_adapter.php';
-require __DIR__ . '/generated/native_direct.php';
+
+function generatedProgram(string $scenarioRoot): GeneratedProgram
+{
+    $scenario = basename($scenarioRoot);
+    if (!in_array($scenario, ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'], true)) {
+        throw new RuntimeException('generated program is missing for scenario ' . $scenario);
+    }
+    require __DIR__ . '/generated/typed/' . $scenario . '.php';
+
+    return new GeneratedProgram();
+}
 
 function readJson(string $root, string $name): mixed
 {
@@ -112,7 +122,7 @@ final class Adapter implements RenderAdapter
     {
         $generated = getenv('SHOWCASE_EXECUTION_MODE') === 'generated';
         $program = $generated
-            ? new GeneratedProgram($root)
+            ? generatedProgram($root)
             : new AstProgram(artifactLoader($root));
         $this->engine = new Engine($program);
     }

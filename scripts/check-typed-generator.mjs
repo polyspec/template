@@ -10,6 +10,12 @@ const scenarioRoot = resolve(root, 'examples/site/scenarios');
 const temporary = mkdtempSync(join(root, '.tmp-generated-program-'));
 const scenarios = ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'];
 
+function generatedSource(id, language) {
+  if (language === 'go') return join(root, 'tools/showcase/adapters/go/generated', id, 'generated.go');
+  const extension = language === 'rust' ? 'rust' : language;
+  return join(generated, `${id}.${extension}`);
+}
+
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd ?? root,
@@ -47,7 +53,7 @@ function target(id) {
 }
 
 function checkTypeScript() {
-  const sources = scenarios.map(id => join(generated, `${id}.ts`));
+  const sources = scenarios.map(id => generatedSource(id, 'ts'));
   run('npx', ['tsc', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', ...sources]);
   const output = join(temporary, 'typescript');
   mkdirSync(output);
@@ -67,7 +73,7 @@ function checkGo() {
     const directory = join(root, 'packages/template-go', `.generated-check-${id}`);
     mkdirSync(directory);
     try {
-      copyFileSync(join(generated, `${id}.go`), join(directory, 'generated.go'));
+      copyFileSync(generatedSource(id, 'go'), join(directory, 'generated.go'));
       writeFileSync(join(directory, 'generated_test.go'), `package generated
 import (
   "encoding/json"
@@ -107,7 +113,7 @@ func TestGeneratedProgram(t *testing.T) {
 function checkRust() {
   const test = join(root, 'packages/template-rust/tests/generated_program_check.rs');
   const modules = scenarios.map((id, index) => `mod generated_${index} {
-    include!(${JSON.stringify(join(generated, `${id}.rust`))});
+    include!(${JSON.stringify(generatedSource(id, 'rust'))});
     pub fn execute(target: &str, assign: serde_json::Value, options: polyspec_template::RenderOptions) -> String {
         use polyspec_template::Program;
         let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
@@ -144,7 +150,7 @@ fn generated_${index}_matches() {
 function checkPhp() {
   const autoload = join(root, 'packages/template-php/vendor/autoload.php');
   for (const id of scenarios) {
-    const probe = `require ${JSON.stringify(autoload)}; require ${JSON.stringify(join(generated, `${id}.php`))}; $assign = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'data.json'))})); $defineValue = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'define.json'))})); $define = []; foreach ($defineValue->entries() as $name => $entry) $define[$name] = $entry; $options = ['define' => $define]; ${fixtureExists(id, 'env.json') ? `$options['env'] = json_decode(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}), true, flags: JSON_THROW_ON_ERROR);` : ''} $actual = (new GeneratedProgram())->render(${JSON.stringify(target(id))}, $assign, $options); if ($actual !== ${JSON.stringify(expected(id))}) throw new RuntimeException(${JSON.stringify(`${id}: PHP GeneratedProgram output differs`)});`;
+    const probe = `require ${JSON.stringify(autoload)}; require ${JSON.stringify(generatedSource(id, 'php'))}; $assign = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'data.json'))})); $defineValue = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'define.json'))})); $define = []; foreach ($defineValue->entries() as $name => $entry) $define[$name] = $entry; $options = ['define' => $define]; ${fixtureExists(id, 'env.json') ? `$options['env'] = json_decode(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}), true, flags: JSON_THROW_ON_ERROR);` : ''} $actual = (new GeneratedProgram())->render(${JSON.stringify(target(id))}, $assign, $options); if ($actual !== ${JSON.stringify(expected(id))}) throw new RuntimeException(${JSON.stringify(`${id}: PHP GeneratedProgram output differs`)});`;
     run('php', ['-l', join(generated, `${id}.php`)]);
     run('php', ['-r', probe]);
   }

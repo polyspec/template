@@ -1,11 +1,26 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { AstProgram, Engine, MapLoader, parseJsonBytes } from '../../../packages/template-ts/dist/index.mjs';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.mjs';
-import { GeneratedProgram } from './generated/native_direct.mjs';
+import { GeneratedProgram as CompilerCoverageProgram } from './generated/javascript/compiler-coverage.js';
+import { GeneratedProgram as EmptyStateProgram } from './generated/javascript/empty-state.js';
+import { GeneratedProgram as HtmlSlotProgram } from './generated/javascript/html-slot.js';
+import { GeneratedProgram as ReactBoundaryProgram } from './generated/javascript/react-boundary.js';
+import { GeneratedProgram as ScopePrecedenceProgram } from './generated/javascript/scope-precedence.js';
+
+function generatedProgram(root) {
+  switch (basename(root)) {
+    case 'compiler-coverage': return new CompilerCoverageProgram();
+    case 'empty-state': return new EmptyStateProgram();
+    case 'html-slot': return new HtmlSlotProgram();
+    case 'react-boundary': return new ReactBoundaryProgram();
+    case 'scope-precedence': return new ScopePrecedenceProgram();
+    default: throw new Error(`generated program is missing for scenario ${basename(root)}`);
+  }
+}
 
 /** @typedef {Map<string, unknown>} JsonObject */
 /** @typedef {{ template: string, data?: JsonObject } | { html: string }} DefineEntry */
@@ -97,7 +112,7 @@ export class Adapter {
     this.root = root;
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
     this.engine = new Engine(generated
-      ? new GeneratedProgram(root)
+      ? generatedProgram(root)
       : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root)) }));
   }
 

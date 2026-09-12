@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "b67ea646ebcbd314a6bfb5c0488b6d5caaa0e237073ba1f9252a01369d492b35",
-  "compilerDigest": "447f9e7375712f96fbdb53f6adac12b666b5d513af5d67b74927538d21acfdd1",
+  "contractDigest": "d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88",
+  "compilerDigest": "ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef",
   "files": {
     "scope-precedence.ts": {
       "path": "scope-precedence.ts",

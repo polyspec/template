@@ -13,6 +13,11 @@ import (
 	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/loader"
 	"github.com/polyspec/template/value"
+	compilercoverage "showcase-adapter-go/generated/compiler-coverage"
+	emptystate "showcase-adapter-go/generated/empty-state"
+	htmlslot "showcase-adapter-go/generated/html-slot"
+	reactboundary "showcase-adapter-go/generated/react-boundary"
+	scopeprecedence "showcase-adapter-go/generated/scope-precedence"
 )
 
 type Adapter struct {
@@ -25,7 +30,11 @@ var _ RenderAdapter = (*Adapter)(nil)
 func NewAdapter(root string) (*Adapter, error) {
 	var program template.Program
 	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
-		program = &GeneratedProgram{Root: root}
+		var err error
+		program, err = generatedProgram(filepath.Base(root))
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		templateLoader, err := artifactLoader(root)
 		if err != nil {
@@ -38,6 +47,24 @@ func NewAdapter(root string) (*Adapter, error) {
 	}
 	engine := template.NewEngine(program)
 	return &Adapter{root: root, engine: engine}, nil
+}
+
+func generatedProgram(scenario string) (template.Program, error) {
+	options := template.Options{}
+	switch scenario {
+	case "compiler-coverage":
+		return compilercoverage.NewGeneratedProgram(options)
+	case "empty-state":
+		return emptystate.NewGeneratedProgram(options)
+	case "html-slot":
+		return htmlslot.NewGeneratedProgram(options)
+	case "react-boundary":
+		return reactboundary.NewGeneratedProgram(options)
+	case "scope-precedence":
+		return scopeprecedence.NewGeneratedProgram(options)
+	default:
+		return nil, fmt.Errorf("generated program is missing for scenario %s", scenario)
+	}
 }
 
 func artifactLoader(root string) (*loader.MapLoader, error) {
