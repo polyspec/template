@@ -4,6 +4,8 @@
 declare(strict_types=1);
 
 use Polyspec\Template\Engine;
+use Polyspec\Template\GeneratedPreparedRender;
+use Polyspec\Template\GeneratedRequest;
 use Polyspec\Template\Loader\ArrayLoader;
 use Polyspec\Template\Value\Json;
 use Polyspec\Template\Value\MapValue;
@@ -117,8 +119,21 @@ final class Adapter implements RenderAdapter
             if (!is_bool($value)) throw new RuntimeException('scenario.legacyWrappers must be a boolean');
             $legacyWrappers = $value;
         }
-        $loader = getenv('SHOWCASE_EXECUTION_MODE') === 'generated' ? generatedArtifactLoader($root) : artifactLoader($root, 'php');
-        $this->engine = new Engine($loader, ['legacy_wrappers' => $legacyWrappers]);
+        $generated = getenv('SHOWCASE_EXECUTION_MODE') === 'generated';
+        $loader = $generated ? generatedArtifactLoader($root) : artifactLoader($root, 'php');
+        $options = ['legacy_wrappers' => $legacyWrappers, 'compile' => ['mode' => $generated ? 'gen' : 'ast']];
+        if ($generated) {
+            $options['compile']['generated_renderer'] = static function (GeneratedRequest $request) use ($root): GeneratedPreparedRender {
+                $define = new MapValue();
+                foreach ($request->registry as $id => $entry) {
+                    if (isset($entry['html'])) $define->set($id, new DefineEntry(null, null, $entry['html']));
+                    else $define->set($id, new DefineEntry($entry['template'], $entry['data'], null));
+                }
+                $renderRequest = new RenderRequest($request->targetName, $request->rootData, $define, new Environment($request->env['timezone'], $request->env['now']));
+                return new GeneratedPreparedRender(static fn (): string => generatedDirectRender($root, $renderRequest));
+            };
+        }
+        $this->engine = new Engine($loader, $options);
     }
 
     public function loadScenario(): Scenario
@@ -144,7 +159,6 @@ final class Adapter implements RenderAdapter
 
     public function render(RenderRequest $request): string
     {
-        if (getenv('SHOWCASE_EXECUTION_MODE') === 'generated') return generatedDirectRender($this->root, $request);
         $define = [];
         foreach ($request->define->entries() as $id => $entry) {
             if (!$entry instanceof DefineEntry) {

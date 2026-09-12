@@ -37,6 +37,23 @@ func NewAdapter(root string) (*Adapter, error) {
 	engine, err := template.NewEngine(template.Options{
 		Loader:         loader,
 		LegacyWrappers: legacyWrappers,
+		Compile: func() template.CompileOptions {
+			if os.Getenv("SHOWCASE_EXECUTION_MODE") != "generated" {
+				return template.CompileOptions{Mode: template.CompileModeAST}
+			}
+			return template.CompileOptions{Mode: template.CompileModeGen, Generated: func(request template.GeneratedRequest) (*template.GeneratedPreparedRender, error) {
+				generatedRequest := RenderRequest{Target: request.TargetName, Assign: request.Root, Define: value.NewOrderedMap(), Env: &Environment{Timezone: &request.Env.Timezone, Now: &request.Env.Now}}
+				for id, entry := range request.Registry {
+					if entry.HTML != nil {
+						generatedRequest.Define.Set(id, DefineEntry{HTML: entry.HTML})
+						continue
+					}
+					templateName := entry.Template
+					generatedRequest.Define.Set(id, DefineEntry{Template: &templateName, Data: entry.Data})
+				}
+				return &template.GeneratedPreparedRender{Render: func() (string, error) { return generatedDirectRender(root, generatedRequest) }}, nil
+			}}
+		}(),
 	})
 	if err != nil {
 		return nil, err
@@ -269,9 +286,6 @@ func nativeDefines(defines DefineRegistry) map[string]template.DefineInput {
 }
 
 func (a *Adapter) Render(request RenderRequest) (string, error) {
-	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
-		return generatedDirectRender(a.root, request)
-	}
 	options := template.RenderOptions{Define: nativeDefines(request.Define)}
 	if request.Env != nil {
 		env := template.Env{Timezone: "Z", Now: float64(time.Now().Unix())}
