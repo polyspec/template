@@ -18,6 +18,7 @@ prepared.render() -> string
 Loader.load(name) -> { source | ast, version }
 Compiler.compile(sourceGraph, mode: ast | gen) -> compiled artifact
 ArtifactStore.loadOrRefresh(sourceGraph, refresh: dev | true | false) -> compiled artifact
+Engine.prepare(compiled artifact, request) -> PreparedRender
 PageCache.get(key) -> string | miss
 PageCache.put(key, html, ttl: positive seconds | 0 | null)
 PageCache.getOrSet(key, ttl, render)
@@ -156,9 +157,9 @@ sequenceDiagram
 
 ## 지원 레벨과 컴파일 artifact
 
-- **RT-54** 인터페이스 manifest는 지원 레벨을 선언한다. `core-runtime`은 `register`와 `render`를 제공하고, `source-compiler`는 `parse`와 정규 AST 직렬화를 제공하며, `artifact-runtime`은 원본을 파싱하지 않고 정규 AST artifact를 로드한다. `native-source-backend`는 선택적인 호스트 언어 소스 생성 backend다.
+- **RT-54** 인터페이스 manifest는 하나의 compiler와 두 모드를 선언한다. `ast`는 `AstArtifact`, `gen`은 타입 고정 `GeneratedArtifact`를 반환한다. 두 artifact는 같은 artifact store와 prepared render 계약을 거친다.
 - **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다.
-- **RT-56** production 지원 구현은 `core-runtime`, `source-compiler`, `artifact-runtime`을 제공한다. 생성된 호스트 언어 소스는 선택적인 `native-source-backend` 기능이며 언어 간 공통 artifact 형식이 아니다.
+- **RT-56** production 지원 구현은 `core-runtime`, `source-compiler`, `artifact-runtime`과 두 compiler 모드를 모두 제공한다. 생성된 호스트 언어 소스는 같은 compiler 계약이 선택하는 `gen` artifact다.
 - **RT-57** 컴파일 artifact는 정규 AST와 schema 버전, 언어, 시나리오, 원본 SHA-256, artifact SHA-256, 템플릿 artifact 경로를 가진 manifest를 포함한다. artifact는 서비스 시작 전에 생성되고 프로세스에 한 번 로드된다.
 - **RT-58** 컴파일 모드는 세 가지다. `dev`는 항상 artifact를 재생성하고, `changed`는 원본 해시가 바뀐 artifact만 재생성하며, `off`는 기존 artifact만 읽고 누락·오래됨·잘못된 형식이면 실패한다.
 - **RT-59** 요청 경로에서는 파싱, 원본 파일 탐색, artifact 생성이 실행되지 않는다. 같은 artifact에 같은 assign, define, environment를 적용하면 같은 출력 바이트를 만들고 request를 변경하지 않는다.
@@ -170,16 +171,16 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  Source[".tpl source"] --> ASTCompile["source-compiler<br/>parse + encodeArtifact"]
-  ASTCompile --> ASTArtifact["canonical AST artifact"]
-  ASTArtifact --> ASTLoad["artifact-runtime<br/>load once"]
-  ASTLoad --> ASTRender["bind assign + define<br/>interpret AST"]
-  Source --> NativeCompile["native-source-backend<br/>compileNative"]
-  NativeCompile --> NativeArtifact["generated host-language source"]
-  NativeArtifact --> NativeLoad["loadNative<br/>load once"]
-  NativeLoad --> NativeRender["bind assign + define<br/>call generated renderer"]
+  Source[".tpl source"] --> Compiler["Compiler.compile(sourceGraph, compile.mode)"]
+  Compiler --> ASTArtifact["AstArtifact"]
+  Compiler --> GenArtifact["GeneratedArtifact<br/>typed host source"]
+  ASTArtifact --> Store["ArtifactStore.loadOrRefresh(refresh)"]
+  GenArtifact --> Store
+  Store --> Prepared["Engine.prepare(request)"]
+  Prepared --> ASTRender["PreparedRender.render<br/>interpret AST"]
+  Prepared --> GenRender["PreparedRender.render<br/>call generated code"]
   ASTRender --> Bytes["same UTF-8 bytes"]
-  NativeRender --> Bytes
+  GenRender --> Bytes
 ```
 생성과 검증 명령은 다음과 같다.
 

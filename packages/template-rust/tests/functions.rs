@@ -86,6 +86,23 @@ fn engine_renders_and_registers_functions() {
     assert_eq!(html, "<b>&lt;</b> 4 [a]");
 }
 
+fn generated_render(_: RenderTarget<'_>, _: &serde_json::Value, _: &RenderOptions) -> Result<polyspec_template::render::engine::GeneratedPreparedRender, String> {
+    Ok(polyspec_template::render::engine::GeneratedPreparedRender { render: Box::new(|| Ok("generated".to_string())) })
+}
+
+#[test]
+fn generated_mode_uses_the_same_prepared_render_contract() {
+    let engine = Engine::new(EngineOptions {
+        compile: polyspec_template::CompileOptions {
+            mode: polyspec_template::CompileMode::Gen,
+            generated_renderer: Some(generated_render),
+        },
+        ..Default::default()
+    });
+    assert_eq!(engine.render(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default()).unwrap(), "generated");
+    assert_eq!(engine.prepare(RenderTarget::Name("ignored"), &serde_json::json!({}), &RenderOptions::default()).unwrap().render().unwrap(), "generated");
+}
+
 #[test]
 fn engine_reports_host_failures_and_limits() {
     let mut loader = MapLoader::new();

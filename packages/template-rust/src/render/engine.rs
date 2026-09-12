@@ -37,8 +37,14 @@ pub enum CompileMode {
     Gen,
 }
 
-/// A renderer produced by the source generator.
-pub type GeneratedRenderer = for<'a> fn(RenderTarget<'a>, &serde_json::Value, &RenderOptions) -> Result<String, String>;
+/// A prepared renderer produced by the source generator.
+pub struct GeneratedPreparedRender {
+    /// Renders the already prepared request.
+    pub render: Box<dyn Fn() -> Result<String, String>>,
+}
+
+/// Prepares a request with generated host-language code.
+pub type GeneratedRenderer = for<'a> fn(RenderTarget<'a>, &serde_json::Value, &RenderOptions) -> Result<GeneratedPreparedRender, String>;
 
 /// Compilation settings shared by the runtime implementations.
 #[derive(Default)]
@@ -126,6 +132,7 @@ pub struct PreparedRender<'e> {
     env: Env,
     target_name: String,
     template: Rc<ParsedTemplate>,
+    generated: Option<GeneratedPreparedRender>,
 }
 
 impl Engine {
@@ -208,7 +215,9 @@ impl Engine {
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
         if self.compile_mode == CompileMode::Gen {
-            return Err(TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", "prepare is unavailable in generated compile mode; use render"));
+            let renderer = self.generated_renderer.ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", "generated compile mode requires generated_renderer"))?;
+            let generated = renderer(target, assign, options).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message))?;
+            return Ok(PreparedRender { engine: self, root: Rc::new(OrderedMap::new()), registry: HashMap::new(), env: Env { timezone: "Z".to_string(), now: 0.0 }, target_name: "generated".to_string(), template: Rc::new(ParsedTemplate { ast: Template { name: "generated".to_string(), body: vec![] }, lines: None }), generated: Some(generated) });
         }
         let name = match target {
             RenderTarget::Name(name) => name.to_owned(),
@@ -248,14 +257,14 @@ impl Engine {
             env,
             target_name,
             template,
+            generated: None,
         })
     }
 
     /// Renders a template with data given as JSON.
     pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
         if self.compile_mode == CompileMode::Gen {
-            let renderer = self.generated_renderer.ok_or_else(|| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", "generated compile mode requires generated_renderer"))?;
-            return renderer(target, assign, options).map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message));
+            return self.prepare(target, assign, options)?.render();
         }
         self.prepare(target, assign, options)?.render()
     }
@@ -264,6 +273,9 @@ impl Engine {
 impl PreparedRender<'_> {
     /// Renders the prepared request.
     pub fn render(&self) -> Result<String, TemplateError> {
+        if let Some(generated) = &self.generated {
+            return (generated.render)().map_err(|message| TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message));
+        }
         let mut context = RenderContext::new(self.engine, Rc::clone(&self.root), self.env.clone(), &self.target_name);
         context.registry = self.registry.clone();
         context.enter(&self.target_name, None, None)?;

@@ -18,6 +18,7 @@ prepared.render() -> string
 Loader.load(name) -> { source | ast, version }
 Compiler.compile(sourceGraph, mode: ast | gen) -> compiled artifact
 ArtifactStore.loadOrRefresh(sourceGraph, refresh: dev | true | false) -> compiled artifact
+Engine.prepare(compiled artifact, request) -> PreparedRender
 PageCache.get(key) -> string | miss
 PageCache.put(key, html, ttl: positive seconds | 0 | null)
 PageCache.getOrSet(key, ttl, render)
@@ -157,9 +158,9 @@ The logical request has this JSON shape:
 
 ## Support levels and compiled artifacts
 
-- **RT-54** The interface manifest declares support levels. `core-runtime` provides `register` and `render`; `source-compiler` provides `parse` and canonical AST serialization; `artifact-runtime` loads canonical AST artifacts without parsing source; `native-source-backend` is an optional host-language code-generation backend.
+- **RT-54** The interface manifest declares one compiler with two modes. `ast` returns an `AstArtifact`; `gen` returns a typed `GeneratedArtifact`. Both artifacts go through the same artifact store and prepared render contract.
 - **RT-55** An implementation declares its supported levels in the manifest. Implementations declaring the same level expose the same logical types and operations, with language-specific spelling recorded only in the mapping. An unsupported operation is absent from that level; it is not an empty method or a runtime fallback.
-- **RT-56** Supported production implementations provide `core-runtime`, `source-compiler` and `artifact-runtime`. A generated host-language source is an optional `native-source-backend` capability and is not the cross-language artifact format.
+- **RT-56** Supported production implementations provide `core-runtime`, `source-compiler`, `artifact-runtime` and both compiler modes. A generated host-language source is the `gen` artifact selected by the same compiler contract.
 - **RT-57** A compiled artifact contains the canonical AST and a manifest containing its schema version, language, scenario, source SHA-256, artifact SHA-256 and template artifact paths. The artifact is generated before service startup and is loaded once into the process.
 - **RT-58** Compilation has three modes: `dev` always regenerates artifacts, `changed` regenerates artifacts whose source hash changed, and `off` reads only existing artifacts and fails when an artifact is missing, stale or invalid.
 - **RT-59** Parsing, source file discovery and artifact generation do not occur in the request path. Rendering the same artifact with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
@@ -171,16 +172,16 @@ The interface declares two execution modes:
 
 ```mermaid
 flowchart LR
-  Source[".tpl source"] --> ASTCompile["source-compiler<br/>parse + encodeArtifact"]
-  ASTCompile --> ASTArtifact["canonical AST artifact"]
-  ASTArtifact --> ASTLoad["artifact-runtime<br/>load once"]
-  ASTLoad --> ASTRender["bind assign + define<br/>interpret AST"]
-  Source --> NativeCompile["native-source-backend<br/>compileNative"]
-  NativeCompile --> NativeArtifact["generated host-language source"]
-  NativeArtifact --> NativeLoad["loadNative<br/>load once"]
-  NativeLoad --> NativeRender["bind assign + define<br/>call generated renderer"]
+  Source[".tpl source"] --> Compiler["Compiler.compile(sourceGraph, compile.mode)"]
+  Compiler --> ASTArtifact["AstArtifact"]
+  Compiler --> GenArtifact["GeneratedArtifact<br/>typed host source"]
+  ASTArtifact --> Store["ArtifactStore.loadOrRefresh(refresh)"]
+  GenArtifact --> Store
+  Store --> Prepared["Engine.prepare(request)"]
+  Prepared --> ASTRender["PreparedRender.render<br/>interpret AST"]
+  Prepared --> GenRender["PreparedRender.render<br/>call generated code"]
   ASTRender --> Bytes["same UTF-8 bytes"]
-  NativeRender --> Bytes
+  GenRender --> Bytes
 ```
 
 The generation and verification commands are:

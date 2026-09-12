@@ -3,7 +3,9 @@ import { Engine } from '../src/index.js';
 
 describe('compile mode', () => {
   it('uses the supplied generated renderer without falling back to AST', () => {
-    const engine = new Engine({ compile: { mode: 'gen', generatedRenderer: () => '<generated>' } });
+    const engine = new Engine({ compile: { mode: 'gen', generatedRenderer: () => ({ render: () => '<generated>' }) } });
+    const prepared = engine.prepare('ignored', {});
+    expect(prepared.render()).toBe('<generated>');
     expect(engine.render('ignored', {})).toBe('<generated>');
   });
 

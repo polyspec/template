@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifest = JSON.parse(readFileSync(resolve(root, 'tools/runtime/interface.json'), 'utf8'));
 if (manifest.schema !== 2 || manifest.name !== 'TemplateRuntime') throw new Error('invalid runtime interface manifest');
-if (!Array.isArray(manifest.operations) || manifest.operations.map(item => item.name).join(',') !== 'compile,loadOrRefresh,render,getPage,putPage,getOrSet') {
-	throw new Error('runtime interface must declare compilation, artifact and page-cache operations in order');
+if (!Array.isArray(manifest.operations) || manifest.operations.map(item => item.name).join(',') !== 'compile,loadOrRefresh,prepare,render,getPage,putPage,getOrSet') {
+	throw new Error('runtime interface must declare compilation, artifact, prepared-render and page-cache operations in order');
 }
 const files = {
   rust: ['packages/template-rust/src/render/engine.rs', /pub fn prepare</, /pub fn render/],
@@ -33,7 +33,7 @@ for (const [language, [relative, enginePattern, preparedPattern]] of Object.entr
   if (!preparedPattern.test(source)) throw new Error(`${language}: missing PreparedRender render operation`);
   for (const pattern of compilePatterns[language]) if (!pattern.test(source)) throw new Error(`${language}: compile.mode implementation is missing`);
   const mapping = manifest.languages[language];
-  if (!mapping || !mapping.engine || !mapping.pageCache) throw new Error(`${language}: missing manifest mapping`);
+  if (!mapping || !mapping.engine || !mapping.compile || !mapping.prepared || !mapping.pageCache) throw new Error(`${language}: missing manifest mapping`);
   const pageCache = readFileSync(resolve(root, pageCaches[language]), 'utf8');
   if (!/getOrSet|GetOrSet|get_or_set/.test(pageCache)) throw new Error(`${language}: missing PageCache getOrSet operation`);
 }

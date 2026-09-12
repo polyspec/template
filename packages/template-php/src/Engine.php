@@ -17,9 +17,20 @@ use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\BindError;
 use Polyspec\Template\Value\MapValue;
 
-/**
- * Engine: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
- */
+/** Prepared request produced by generated host-language code. */
+final class GeneratedPreparedRender
+{
+    /** Creates a generated prepared request. */
+    public function __construct(private readonly \Closure $renderer) {}
+
+    /** Renders the prepared generated request. */
+    public function render(): string
+    {
+        return ($this->renderer)();
+    }
+}
+
+/** Engine: template loading, caching, function registration and rendering. */
 final class PreparedRender
 {
     /** Creates a prepared request. */
@@ -33,12 +44,16 @@ final class PreparedRender
         private readonly string $targetName,
         /** @var array{ast: array<string, mixed>, lines: list<int>|null} */
         private readonly array $template,
+        private readonly ?GeneratedPreparedRender $generated = null,
     ) {
     }
 
     /** Renders the prepared request. */
     public function render(): string
     {
+        if ($this->generated !== null) {
+            return $this->generated->render();
+        }
         return $this->engine->renderPrepared($this);
     }
 
@@ -210,7 +225,15 @@ final class Engine
     public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender
     {
         if ($this->compileMode === 'gen') {
-            throw new \LogicException('prepare is unavailable in generated compile mode; use render');
+            if ($this->generatedRenderer === null) {
+                throw new \LogicException('generated compile mode requires generated_renderer');
+            }
+            $generated = ($this->generatedRenderer)($target, $assign, $options);
+            if (!$generated instanceof GeneratedPreparedRender) {
+                throw new \LogicException('generated_renderer must return GeneratedPreparedRender');
+            }
+            $name = is_string($target) ? $target : (string) ($target['name'] ?? 'generated');
+            return new PreparedRender($this, new MapValue(), [], ['timezone' => 'Z', 'now' => 0.0], $name, ['ast' => ['type' => 'Template', 'name' => $name, 'body' => []], 'lines' => null], $generated);
         }
         $name = is_string($target) ? $target : (string) $target['name'];
         try {
@@ -247,12 +270,6 @@ final class Engine
      */
     public function render(string|array $target, mixed $assign = [], array $options = []): string
     {
-        if ($this->compileMode === 'gen') {
-            if ($this->generatedRenderer === null) {
-                throw new \LogicException('generated compile mode requires generated_renderer');
-            }
-            return ($this->generatedRenderer)($target, $assign, $options);
-        }
         return $this->prepare($target, $assign, $options)->render();
     }
 
