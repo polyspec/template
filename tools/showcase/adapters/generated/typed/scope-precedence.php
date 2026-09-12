@@ -5,8 +5,12 @@ declare(strict_types=1);
 use Polyspec\Template\PreparedExecution;
 use Polyspec\Template\PreparedRender;
 use Polyspec\Template\Program;
+use Polyspec\Template\Render\Context;
+use Polyspec\Template\Render\Frame;
+use Polyspec\Template\Render\RuntimeBindings;
 use Polyspec\Template\Render\RuntimeEnvironment;
 use Polyspec\Template\Value\Bind;
+use Polyspec\Template\Value\BindError;
 use Polyspec\Template\Value\MapValue;
 final class Page { public function __construct(public readonly string $title) {} }
 final class Assign { public function __construct(
@@ -25,44 +29,42 @@ const GENERATED_RECORDS_SCHEMA = 'eyJQYWdlIjp7InRpdGxlIjp7ImtpbmQiOiJzdHJpbmciLC
 const GENERATED_ASSIGN_SCHEMA = 'eyJwYWdlIjp7ImtpbmQiOiJyZWNvcmQiLCJuYW1lIjoiUGFnZSIsIm9wdGlvbmFsIjpmYWxzZX0sInJvb3RfbGFiZWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjpmYWxzZX0sImRlZmluZWRfbGFiZWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjpmYWxzZX19';
 const GENERATED_DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6ImNvbnRlbnQudHBsIiwiaHRtbCI6dHJ1ZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YV9jb250ZW50X3RwbCIsImlucHV0Ijp7InRpdGxlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9LCJyb290X2xhYmVsIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9LCJkZWZpbmVkX2xhYmVsIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9LCJsYXlvdXRfbG9jYWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjp0cnVlfX19LCJsYXlvdXQiOnsiZmllbGQiOiJsYXlvdXQiLCJ0YXJnZXQiOiJsYXlvdXQudHBsIiwiaHRtbCI6ZmFsc2UsImNsYXNzIjoiRGVmaW5pdGlvbkRhdGFfbGF5b3V0X3RwbCIsImlucHV0Ijp7fX19';
 function generated_schema(string $encoded): array { static $schemas = []; return $schemas[$encoded] ??= json_decode(base64_decode($encoded, true), true, flags: JSON_THROW_ON_ERROR); }
-function generated_bind_type(mixed $value, array $type, string $path): mixed { if ($value === null) { if (($type['optional'] ?? false) || $type['kind'] === 'null' || $type['kind'] === 'any') return null; throw new InvalidArgumentException($path . ' is required'); } if ($type['kind'] === 'any') return $value; if (in_array($type['kind'], ['string', 'number', 'boolean'], true)) { $valid = $type['kind'] === 'string' ? is_string($value) : ($type['kind'] === 'number' ? (is_float($value) || is_int($value)) : is_bool($value)); if (!$valid) throw new InvalidArgumentException($path . ' has an invalid type'); return $type['kind'] === 'number' ? (float) $value : $value; } if ($type['kind'] === 'list') { if (!is_array($value)) throw new InvalidArgumentException($path . ' is not a list'); return array_map(fn ($item, $index) => generated_bind_type($item, $type['item'], $path . '[' . $index . ']'), $value, array_keys($value)); } if ($type['kind'] === 'map') { if (!$value instanceof MapValue) throw new InvalidArgumentException($path . ' is not a map'); $result = []; foreach ($value->entries() as $key => $item) $result[generated_bind_type($key, $type['key'], $path . '.key')] = generated_bind_type($item, $type['value'], $path . '.' . $key); return $result; } if ($type['kind'] === 'record') { $records = generated_schema(GENERATED_RECORDS_SCHEMA); return generated_bind_record($value, $records[$type['name']], $type['name'], $path); } throw new InvalidArgumentException($path . ' has an unknown generated type'); }
+function generated_bind_type(mixed $value, array $type, string $path): mixed { if ($value === null) { if (($type['optional'] ?? false) || $type['kind'] === 'null' || $type['kind'] === 'any') return null; throw new InvalidArgumentException($path . ' is required'); } if ($type['kind'] === 'any') return $value; if (in_array($type['kind'], ['string', 'number', 'boolean'], true)) { $valid = $type['kind'] === 'string' ? is_string($value) : ($type['kind'] === 'number' ? (is_float($value) || is_int($value)) : is_bool($value)); if (!$valid) throw new InvalidArgumentException($path . ' has an invalid type'); return $type['kind'] === 'number' ? (float) $value : $value; } if ($type['kind'] === 'list') { if (!is_array($value)) throw new InvalidArgumentException($path . ' is not a list'); return array_map(fn ($item, $index) => generated_bind_type($item, $type['item'], $path . '[' . $index . ']'), $value, array_keys($value)); } if ($type['kind'] === 'map') { if (!$value instanceof MapValue) throw new InvalidArgumentException($path . ' is not a map'); $result = new MapValue(); foreach ($value->entries() as $key => $item) $result->set((string) generated_bind_type($key, $type['key'], $path . '.key'), generated_bind_type($item, $type['value'], $path . '.' . $key)); return $result; } if ($type['kind'] === 'record') { $records = generated_schema(GENERATED_RECORDS_SCHEMA); return generated_bind_record($value, $records[$type['name']], $type['name'], $path); } throw new InvalidArgumentException($path . ' has an unknown generated type'); }
 function generated_bind_record(mixed $value, array $fields, string $class, string $path): object { if (!$value instanceof MapValue) throw new InvalidArgumentException($path . ' is not an object'); $arguments = []; foreach ($fields as $name => $type) { if (!$value->has($name)) { if (!($type['optional'] ?? false)) throw new InvalidArgumentException($path . '.' . $name . ' is required'); continue; } $arguments[$name] = generated_bind_type($value->get($name), $type, $path . '.' . $name); } return new $class(...$arguments); }
-function generated_bind_assign(mixed $value): Assign { return generated_bind_record(Bind::map($value), generated_schema(GENERATED_ASSIGN_SCHEMA), Assign::class, 'assign'); }
+function generated_bind_assign(mixed $value): array { $root = Bind::map($value); return [generated_bind_record($root, generated_schema(GENERATED_ASSIGN_SCHEMA), Assign::class, 'assign'), $root]; }
 function generated_bind_definitions(array $input): array { $value = Bind::map($input); $arguments = []; $targets = []; $specs = generated_schema(GENERATED_DEFINITION_SCHEMA); foreach ($value->entries() as $id => $raw) { $spec = $specs[$id] ?? null; if ($spec === null) throw new InvalidArgumentException('define.' . $id . ' is not declared'); if (is_string($raw)) { if ($spec['target'] === null || $raw !== $spec['target']) throw new InvalidArgumentException('define.' . $id . ' has an invalid template'); $arguments[$spec['field']] = new Definition(); $targets[$id] = ['target' => $spec['target']]; continue; } if (!$raw instanceof MapValue) throw new InvalidArgumentException('define.' . $id . ' is not an object'); $template = $raw->get('template'); $html = $raw->get('html'); $data = $raw->get('data'); if (is_string($html)) { if (!$spec['html'] || $raw->has('template') || $raw->has('data')) throw new InvalidArgumentException('define.' . $id . ' has an invalid html entry'); $arguments[$spec['field']] = new Definition(html: $html); $targets[$id] = ['target' => null, 'html' => $html]; continue; } if (!is_string($template) || $spec['target'] === null || $template !== $spec['target']) throw new InvalidArgumentException('define.' . $id . ' has an invalid template'); $boundData = null; if ($raw->has('data')) { if ($data === []) $data = new MapValue(); if (!$data instanceof MapValue) throw new InvalidArgumentException('define.' . $id . '.data is not an object'); $values = []; foreach ($spec['input'] as $name => $type) { if ($data->has($name)) { $values['has_' . $name] = true; $values[$name] = generated_bind_type($data->get($name), $type, 'define.' . $id . '.data.' . $name); } } $class = $spec['class']; $boundData = new $class(...$values); } $arguments[$spec['field']] = new Definition(data: $boundData); $targets[$id] = ['target' => $spec['target']]; } return [new Definitions(...$arguments), $targets]; }
-function generated_truthy(mixed $value): bool { return $value !== null && $value !== false && $value !== '' && $value !== 0 && $value !== []; }
-function generated_escape(mixed $value): string { if (is_bool($value)) $value = $value ? 'true' : 'false'; if (is_array($value) || is_object($value)) throw new RuntimeException('a collection cannot be converted to text'); return str_replace('&#039;', '&#39;', htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')); }
-function generated_index(array $value, string|int|float $key): mixed { return $value[is_float($key) ? (int) $key : $key] ?? null; }
-function generated_entries(?array $value): array { $result = []; foreach ($value ?? [] as $key => $item) $result[] = [$key, $item]; return $result; }
 function generated_list(array $items): array { $result = []; foreach ($items as $item) { if ($item['spread']) array_push($result, ...$item['value']); else $result[] = $item['value']; } return $result; }
-function generated_map(array $items): array { $result = []; foreach ($items as $item) { if ($item['spread']) { foreach ($item['value'] as $key => $value) $result[$key] = $value; } else $result[$item['key']] = $item['value']; } return $result; }
-function generated_in(mixed $value, mixed $collection): bool { return is_array($collection) ? (array_is_list($collection) ? in_array($value, $collection, true) : array_key_exists((string) $value, $collection)) : (is_string($collection) && str_contains($collection, (string) $value)); }
-function generated_default(mixed $value, mixed $fallback): mixed { return generated_truthy($value) ? $value : $fallback; }
-function render_content_tpl(Assign $assign, Definitions $definitions, Input_content_tpl $input): string { $out = '';
-$title = $input->title;
-$root_label = $input->root_label;
-$defined_label = $input->defined_label;
-$layout_local = $input->layout_local;
-    $out .= "<article>\n<h1>";
-    $out .= generated_escape($title);
-    $out .= "</h1>\n<p class=\"root\">";
-    $out .= generated_escape($root_label);
-    $out .= "</p>\n<p class=\"defined\">";
-    $out .= generated_escape($defined_label);
-    $out .= "</p>\n<p class=\"local\">";
-    $out .= generated_escape(generated_default($layout_local, "missing"));
-    $out .= "</p>\n</article>\n";
- return $out; }
-function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input): string { $out = '';
+function generated_map(array $items): MapValue { $result = new MapValue(); foreach ($items as $item) { if ($item['spread']) { foreach ($item['value']->entries() as $key => $value) $result->set($key, $value); } else $result->set((string) $item['key'], $item['value']); } return $result; }
+function generated_env(mixed $input): array { if ($input === null) $input = []; if (!is_array($input)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env is not an object'); $timezone = $input['timezone'] ?? 'Z'; $now = $input['now'] ?? (float) time(); if (!is_string($timezone)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string'); if (!is_int($now) && !is_float($now)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number'); return ['timezone' => $timezone, 'now' => (float) $now]; }
+
+function render_content_tpl(Assign $assign, Definitions $definitions, Input_content_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData): void {
+    $frame = new Frame("content.tpl", [0,10,29,64,105,164,175], $rootData);
+    $title = $input->title;
+    $root_label = $input->root_label;
+    $defined_label = $input->defined_label;
+    $layout_local = $input->layout_local;
+    $context->at($frame, [0,14]); $context->write("<article>\n<h1>");
+    $context->at($frame, [14,23]); $context->write($runtime->escape($title, $frame, [17,22]));
+    $context->at($frame, [23,45]); $context->write("</h1>\n<p class=\"root\">");
+    $context->at($frame, [45,59]); $context->write($runtime->escape($root_label, $frame, [48,58]));
+    $context->at($frame, [59,83]); $context->write("</p>\n<p class=\"defined\">");
+    $context->at($frame, [83,100]); $context->write($runtime->escape($defined_label, $frame, [86,99]));
+    $context->at($frame, [100,122]); $context->write("</p>\n<p class=\"local\">");
+    $context->at($frame, [122,159]); $context->write($runtime->escape($runtime->call("default", [$layout_local, "missing"], $frame, [125,158]), $frame, [125,158]));
+    $context->at($frame, [159,175]); $context->write("</p>\n</article>\n");
+}
+function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData): void {
+    $frame = new Frame("layout.tpl", [0,42,66,95,106], $rootData);
 
     $layout_local = "visible only in layout";
-    $out .= "<section class=\"scope\">\n";
+    $context->at($frame, [42,66]); $context->write("<section class=\"scope\">\n");
     $definition = $definitions->content;
-    if ($definition === null) throw new RuntimeException("generated definition content is missing");
+    if ($definition === null) throw $runtime->error($frame, [66,94], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
     if ($definition?->html !== null) {
-        $out .= $definition->html;
+        $context->at($frame, [66,94]); $context->write($definition->html);
     } else {
-        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_content_tpl)) throw new RuntimeException("generated definition content data has an invalid type");
-        $input = new Input_content_tpl(title: ($definition?->data !== null && $definition->data->has_title ? $definition->data->title : throw new RuntimeException("generated input content.tpl.title is missing")), root_label: $assign->root_label, defined_label: $assign->defined_label, layout_local: null);
+        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_content_tpl)) throw $runtime->error($frame, [66,94], 'E_RUNTIME_TYPE', "generated definition content data has an invalid type");
+        $input = new Input_content_tpl(title: ($definition?->data !== null && $definition->data->has_title ? $definition->data->title : throw $runtime->error($frame, [66,94], 'E_RUNTIME_TYPE', "generated input content.tpl.title is missing")), root_label: $assign->root_label, defined_label: $assign->defined_label, layout_local: null);
         if ($definition?->data !== null) {
             if ($definition->data->has_title) $input->title = $definition->data->title;
             if ($definition->data->has_root_label) $input->root_label = $definition->data->root_label;
@@ -70,14 +72,14 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
             if ($definition->data->has_layout_local) $input->layout_local = $definition->data->layout_local;
         }
         $input->title = $assign->page?->title;
-        $out .= render_content_tpl($assign, $definitions, $input);
+        $context->enter("content.tpl", $frame, [66,94]);
+        try { render_content_tpl($assign, $definitions, $input, $context, $runtime, $rootData); } finally { $context->leave(); }
     }
-    $out .= "</section>\n";
- return $out; }
-function render_template(string $target, Assign $assign, Definitions $definitions): string { return match ($target) {
-        "layout.tpl" => render_layout_tpl($assign, $definitions, new Input_layout_tpl()),
-        default => throw new RuntimeException('generated template is missing or requires inputs: ' . $target),
-}; }
-function render(Assign $assign, Definitions $definitions): string { return render_template("layout.tpl", $assign, $definitions); }
-final class GeneratedExecution implements PreparedExecution { public function __construct(private readonly string $target, private readonly Assign $assign, private readonly Definitions $definitions, private readonly ?string $html) {} public function render(): string { return $this->html ?? render_template($this->target, $this->assign, $this->definitions); } }
-final class GeneratedProgram implements Program { public readonly RuntimeEnvironment $runtime; public function __construct(?RuntimeEnvironment $runtime = null) { $this->runtime = $runtime ?? new RuntimeEnvironment(); } public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender { if (!is_string($target)) throw new InvalidArgumentException('generated target must be a template name'); $typedAssign = generated_bind_assign($assign); [$definitions, $targets] = generated_bind_definitions($options['define'] ?? []); $resolved = $targets[$target] ?? null; $targetName = $resolved['target'] ?? $target; $html = $resolved['html'] ?? null; return new PreparedRender(new GeneratedExecution($targetName, $typedAssign, $definitions, $html)); } public function render(string|array $target, mixed $assign = [], array $options = []): string { return $this->prepare($target, $assign, $options)->render(); } }
+    $context->at($frame, [95,106]); $context->write("</section>\n");
+}
+function render_template(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData): void { switch ($target) {
+        case "layout.tpl": render_layout_tpl($assign, $definitions, new Input_layout_tpl(), $context, $runtime, $rootData); return;
+        default: throw $context->fail('E_LOAD_NOT_FOUND', null, null, 'template ' . $target . ' does not exist');
+} }
+final class GeneratedExecution implements PreparedExecution { public function __construct(private readonly string $target, private readonly Assign $assign, private readonly Definitions $definitions, private readonly MapValue $rootData, private readonly array $env, private readonly RuntimeEnvironment $services, private readonly ?string $html) {} public function render(): string { $context = new Context($this->services, $this->rootData, $this->env, $this->target); $runtime = new RuntimeBindings($context); $context->enter($this->target, null, null); try { if ($this->html !== null) $context->write($this->html); else render_template($this->target, $this->assign, $this->definitions, $context, $runtime, $this->rootData); return $context->output(); } finally { $context->leave(); } } }
+final class GeneratedProgram implements Program { public readonly RuntimeEnvironment $runtime; public function __construct(?RuntimeEnvironment $runtime = null) { $this->runtime = $runtime ?? new RuntimeEnvironment(); } public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender { if (!is_string($target)) throw new InvalidArgumentException('generated target must be a template name'); [$typedAssign, $rootData] = generated_bind_assign($assign); [$definitions, $targets] = generated_bind_definitions($options['define'] ?? []); $resolved = $targets[$target] ?? null; $targetName = $resolved['target'] ?? $target; $html = $resolved['html'] ?? null; return new PreparedRender(new GeneratedExecution($targetName, $typedAssign, $definitions, $rootData, generated_env($options['env'] ?? []), $this->runtime, $html)); } public function render(string|array $target, mixed $assign = [], array $options = []): string { return $this->prepare($target, $assign, $options)->render(); } }

@@ -26,7 +26,7 @@ function genericType(type, scalar, list, map) {
 export const tsType = type => genericType(type, scalarTypes.ts, item => `Array<${item}>`, (key, value) => `Map<${key}, ${value}>`);
 export const goType = type => (optional(type) ? '*' : '') + genericType(type, scalarTypes.go, item => `[]${item}`, (key, value) => `OrderedMap[${key}, ${value}]`);
 export const rustType = type => `${optional(type) ? 'Option<' : ''}${genericType(type, scalarTypes.rust, item => `Vec<${item}>`, (key, value) => `OrderedMap<${key}, ${value}>`)}${optional(type) ? '>' : ''}`;
-export const phpType = type => genericType(type, scalarTypes.php, () => 'array', () => 'array');
+export const phpType = type => genericType(type, scalarTypes.php, () => 'array', () => 'MapValue');
 export const tsField = (name, type) => `${name}${optional(type) ? '?' : ''}: ${tsType(type)};`;
 export const phpField = (name, type) => `public readonly ${optional(type) ? '?' : ''}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
 export const phpInputField = (name, type) => `public ${optional(type) ? '?' : ''}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
