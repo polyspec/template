@@ -222,7 +222,7 @@ release-test-matrix: build-php ## Run all release layers in deterministic order
 	@echo "[release 3/7] IR, generated source and host compiler checks"
 	$(MAKE) typed-generator-compile-check
 	@echo "[release 4/7] complete AST/generated conformance and extension support"
-	$(MAKE) conformance-all-modes test-ext
+	$(MAKE) ext conformance-all-modes test-ext
 	@echo "[release 5/7] positioned errors, recovery and mutation rejection"
 	node scripts/check-compiler-interface-mutations.mjs
 	node scripts/check-ast-artifact.mjs
