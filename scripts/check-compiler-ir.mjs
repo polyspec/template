@@ -113,6 +113,7 @@ const dynamicRootExpr = dynamicRootProgram.templates.get('main.tpl').body.at(-1)
 if (dynamicRootExpr?.op !== 'root' || dynamicRootExpr.valueType.source !== 'any?') {
   throw new Error('compiler IR did not lower an undeclared dynamic root value as optional any');
 }
+if (dynamicRootExpr.scope !== true) throw new Error('compiler IR did not mark a dynamic variable as scope-aware');
 
 const htmlDefinition = structuredClone(manifest);
 htmlDefinition.defines.content = { optional: true, html: true };

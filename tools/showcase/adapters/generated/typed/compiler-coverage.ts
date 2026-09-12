@@ -1,5 +1,5 @@
 // Generated.
-import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from '@polyspec/template';
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from '@polyspec/template';
 export interface Page {
   title: string;
 }
@@ -37,20 +37,20 @@ function generatedBindRecord(value: unknown, fields: Record<string, GeneratedTyp
 function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record<string, GeneratedType>, 'assign') as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map<string, { target: string | null; html?: string }> };
 function generatedBindDefinitions(input: RenderOptions['define']): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, 'define'); const definitions: Record<string, unknown> = {}; const targets = new Map<string, { target: string | null; html?: string }>(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record<string, { field: string; target: string | null; html: boolean; input: Record<string, GeneratedType> }>)[id]; if (spec === undefined) throw new Error('define.' + id + ' is not declared'); if (typeof raw === 'string') { if (spec.target === null || raw !== spec.target) throw new Error('define.' + id + ' has an invalid template'); definitions[spec.field] = { template: spec.target }; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, 'define.' + id); const template = entry.get('template'); const html = entry.get('html'); const data = entry.get('data'); if (typeof html === 'string') { if (!spec.html || template !== undefined || data !== undefined) throw new Error('define.' + id + ' has an invalid html entry'); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== 'string' || spec.target === null || template !== spec.target) throw new Error('define.' + id + ' has an invalid template'); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, 'define.' + id + '.data', true); definitions[spec.field] = { template: spec.target, data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
-function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_card_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_card_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame("card.tpl", [0,30], rootData);
-  const label = input.label;
+  scope.locals.set("label", input.label as unknown as Value);
     context.at(frame, [0,16]); context.output.write("<p class=\"card\">");
-    context.at(frame, [16,25]); context.output.write(runtime.escape(label as unknown as Value, frame, [19,24]));
+    context.at(frame, [16,25]); context.output.write(runtime.escape(scope.lookup(frame, "label") as unknown as string as unknown as Value, frame, [19,24]));
     context.at(frame, [25,30]); context.output.write("</p>\n");
 }
-function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame("layout.tpl", [0,27,62,72,96,133,187,264,301,388,459,464,479,559,563,578,582,588,604,651,680,691], rootData);
 
-    const values = [0, ...(runtime.listSpread(assign.numbers as unknown as Value, frame, [17,24]) as unknown as Array<number>)];
-    const merged = new Map([...(runtime.mapSpread(assign.lookup as unknown as Value, frame, [41,47]) as unknown as Map<string, string>), [runtime.stringify("z" as unknown as Value, frame, [49,52]), "Z"]]);
+    scope.locals.set("values", [0, ...(runtime.listSpread(assign.numbers as unknown as Value, frame, [14,24]) as unknown as Array<number>)] as unknown as Value);
+    scope.locals.set("merged", new Map([...(runtime.mapSpread(assign.lookup as unknown as Value, frame, [38,47]) as unknown as Map<string, string>), [runtime.stringify("z" as unknown as Value, frame, [49,52]), "Z"]]) as unknown as Value);
     context.at(frame, [62,76]); context.output.write("<section>\n<h1>");
-    context.at(frame, [76,90]); context.output.write(runtime.escape(assign.page?.title as unknown as Value, frame, [79,89]));
+    context.at(frame, [76,90]); context.output.write(runtime.escape((assign.page)?.title as unknown as Value, frame, [79,89]));
     context.at(frame, [90,115]); context.output.write("</h1>\n<p class=\"escaped\">");
     context.at(frame, [115,128]); context.output.write(runtime.escape(assign.dangerous as unknown as Value, frame, [118,127]));
     context.at(frame, [128,152]); context.output.write("</p>\n<p class=\"logical\">");
@@ -62,11 +62,11 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     context.at(frame, [237,238]); context.output.write("|");
     context.at(frame, [238,259]); context.output.write(runtime.escape((() => { const left = assign.empty_map; return runtime.truthy(left as unknown as Value) ? runtime.truthy(assign.flag as unknown as Value) : false; })() as unknown as Value, frame, [241,258]));
     context.at(frame, [259,267]); context.output.write("</p>\n<p>");
-    context.at(frame, [267,280]); context.output.write(runtime.escape(runtime.index(values as unknown as Value, 1 as unknown as Value) as unknown as Value, frame, [270,279]));
+    context.at(frame, [267,280]); context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "values") as unknown as Array<number> as unknown as Value, 1 as unknown as Value) as unknown as Value, frame, [270,279]));
     context.at(frame, [280,281]); context.output.write("|");
-    context.at(frame, [281,296]); context.output.write(runtime.escape(runtime.index(merged as unknown as Value, "z" as unknown as Value) as unknown as Value, frame, [284,295]));
+    context.at(frame, [281,296]); context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "merged") as unknown as Map<string, string> as unknown as Value, "z" as unknown as Value) as unknown as Value, frame, [284,295]));
     context.at(frame, [296,301]); context.output.write("</p>\n");
-    if (runtime.truthy((() => { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(runtime.binary("==", assign.page?.title as unknown as Value, "Guide" as unknown as Value, frame, [312,333]) as unknown as Value) : false; })() as unknown as Value)) {
+    if (runtime.truthy((() => { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(runtime.binary("==", (assign.page)?.title as unknown as Value, "Guide" as unknown as Value, frame, [312,333]) as unknown as Value) : false; })() as unknown as Value)) {
         context.at(frame, [334,358]); context.output.write("<strong>matched</strong>");    } else {
         context.at(frame, [361,384]); context.output.write("<strong>missed</strong>");
     }
@@ -78,9 +78,11 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     context.at(frame, [426,454]); context.output.write(runtime.escape(runtime.call("default", ["", "fallback"] as unknown as Value[], frame, [429,453]) as unknown as Value, frame, [429,453]));
     context.at(frame, [454,464]); context.output.write("</p>\n<ul>\n");
     { const row_entries = runtime.entries(assign.rows as unknown as Value, frame, [464,581]);
+    const row_had = scope.locals.has("row"); const row_previous = scope.locals.get("row");
+    try {
     for (let row_index = 0; row_index < row_entries.length; row_index += 1) {
         const [row_key, row_value] = row_entries[row_index]!;
-        const row = row_value as unknown as Row;
+        scope.locals.set("row", row_value);
         const row_size = row_entries.length;
         const row_first = row_index === 0;
         const row_last = row_index + 1 === row_entries.length;
@@ -91,20 +93,21 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
             context.at(frame, [497,498]); context.output.write("/");
             context.at(frame, [498,511]); context.output.write(runtime.escape(row_size as unknown as Value, frame, [501,510]));
             context.at(frame, [511,512]); context.output.write(":");
-            context.at(frame, [512,524]); context.output.write(runtime.escape(row?.name as unknown as Value, frame, [515,523]));
+            context.at(frame, [512,524]); context.output.write(runtime.escape((scope.lookup(frame, "row") as unknown as Row)?.name as unknown as Value, frame, [515,523]));
             context.at(frame, [524,525]); context.output.write(":");
             context.at(frame, [525,539]); context.output.write(runtime.escape(row_first as unknown as Value, frame, [528,538]));
             context.at(frame, [539,540]); context.output.write(":");
             context.at(frame, [540,553]); context.output.write(runtime.escape(row_last as unknown as Value, frame, [543,552]));
             context.at(frame, [553,559]); context.output.write("</li>\n");
     }
+    } finally { if (row_had) scope.locals.set("row", row_previous as Value); else scope.locals.delete("row"); }
     if (row_entries.length === 0) {
             context.at(frame, [563,578]); context.output.write("<li>empty</li>\n");
     }
     }
     context.at(frame, [582,588]); context.output.write("</ul>\n");
     context.enter("partial.tpl", frame, [588,603]);
-    try { render_partial_tpl(assign, definitions, { values: values }, context, runtime, rootData); } finally { context.leave(); }
+    try { render_partial_tpl(assign, definitions, { values: scope.lookup(frame, "values") as unknown as Array<number> }, context, runtime, rootData, scope); } finally { context.leave(); }
     if (definitions.content !== undefined) {
             context.at(frame, [616,630]); context.output.write("<p>defined</p>");
     } else {
@@ -114,20 +117,20 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     { let definition = definitions.content;
     if (definition === undefined) throw runtime.error(frame, [651,679], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
     if (definition?.html !== undefined) { context.at(frame, [651,679]); context.output.write(definition.html); }
-    else { const input = Object.assign({  }, definition?.data ?? {}, { label: assign.page?.title }) as Input_card_tpl; context.enter("card.tpl", frame, [651,679]); try { render_card_tpl(assign, definitions, input, context, runtime, rootData); } finally { context.leave(); } }
+    else { const input = Object.assign({  }, definition?.data ?? {}, { label: (assign.page)?.title }) as Input_card_tpl; const blockScope = new Scope(); context.enter("card.tpl", frame, [651,679]); try { render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope); } finally { context.leave(); } }
     }
     context.at(frame, [680,691]); context.output.write("</section>\n");
 }
-function render_partial_tpl(assign: Assign, definitions: Definitions, input: Input_partial_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+function render_partial_tpl(assign: Assign, definitions: Definitions, input: Input_partial_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame("partial.tpl", [0,38], rootData);
-  const values = input.values;
+  scope.locals.set("values", input.values as unknown as Value);
     context.at(frame, [0,20]); context.output.write("<p class=\"included\">");
-    context.at(frame, [20,33]); context.output.write(runtime.escape(runtime.index(values as unknown as Value, 2 as unknown as Value) as unknown as Value, frame, [23,32]));
+    context.at(frame, [20,33]); context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "values") as unknown as Array<number> as unknown as Value, 2 as unknown as Value) as unknown as Value, frame, [23,32]));
     context.at(frame, [33,38]); context.output.write("</p>\n");
 }
-function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   switch (target) {
-    case "layout.tpl": render_layout_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    case "layout.tpl": render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope); return;
     default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');
   }
 }
@@ -136,6 +139,6 @@ class GeneratedPreparedRender implements PreparedRender { private readonly execu
 export class GeneratedProgram implements Program {
   readonly runtime: RuntimeEnvironment;
   constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }
-  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== 'string') throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() => registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root); return context.output.toString(); } finally { context.leave(); } }); }
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== 'string') throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() => registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope); return context.output.toString(); } finally { context.leave(); } }); }
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }
 }

@@ -1,5 +1,5 @@
 // Generated.
-import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from '@polyspec/template';
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, bind, bindMap } from '@polyspec/template';
 const generatedRecords = {};
 const generatedAssign = { "heading": { "kind": "string", "optional": false } };
 const generatedDefinitionSpecs = { "content": { "field": "content", "target": null, "html": true, "input": {} }, "layout": { "field": "layout", "target": "layout.tpl", "html": false, "input": {} } };
@@ -66,7 +66,7 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
     const frame = new Frame("layout.tpl", [0, 25, 46, 58, 69], rootData);
     context.at(frame, [0, 29]);
     context.output.write("<section class=\"notice\">\n<h1>");
@@ -84,10 +84,10 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
     context.at(frame, [58, 69]);
     context.output.write("</section>\n");
 }
-function renderTemplate(target, assign, definitions, context, runtime, rootData) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
     switch (target) {
         case "layout.tpl":
-            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
             return;
         default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');
     }
@@ -105,8 +105,8 @@ export class GeneratedProgram {
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== 'string')
         throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
-        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope);
         return context.output.toString();
     }
     finally {

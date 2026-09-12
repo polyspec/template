@@ -1,5 +1,5 @@
 // Generated.
-import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from '@polyspec/template';
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from '@polyspec/template';
 export interface Page {
   title: string;
 }
@@ -24,37 +24,37 @@ function generatedBindRecord(value: unknown, fields: Record<string, GeneratedTyp
 function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record<string, GeneratedType>, 'assign') as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map<string, { target: string | null; html?: string }> };
 function generatedBindDefinitions(input: RenderOptions['define']): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, 'define'); const definitions: Record<string, unknown> = {}; const targets = new Map<string, { target: string | null; html?: string }>(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record<string, { field: string; target: string | null; html: boolean; input: Record<string, GeneratedType> }>)[id]; if (spec === undefined) throw new Error('define.' + id + ' is not declared'); if (typeof raw === 'string') { if (spec.target === null || raw !== spec.target) throw new Error('define.' + id + ' has an invalid template'); definitions[spec.field] = { template: spec.target }; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, 'define.' + id); const template = entry.get('template'); const html = entry.get('html'); const data = entry.get('data'); if (typeof html === 'string') { if (!spec.html || template !== undefined || data !== undefined) throw new Error('define.' + id + ' has an invalid html entry'); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== 'string' || spec.target === null || template !== spec.target) throw new Error('define.' + id + ' has an invalid template'); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, 'define.' + id + '.data', true); definitions[spec.field] = { template: spec.target, data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
-function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame("content.tpl", [0,10,29,64,105,164,175], rootData);
-  const title = input.title;
-  const root_label = input.root_label;
-  const defined_label = input.defined_label;
-  const layout_local = input.layout_local ?? null;
+  scope.locals.set("title", input.title as unknown as Value);
+  scope.locals.set("root_label", input.root_label as unknown as Value);
+  scope.locals.set("defined_label", input.defined_label as unknown as Value);
+  scope.locals.set("layout_local", input.layout_local ?? null as unknown as Value);
     context.at(frame, [0,14]); context.output.write("<article>\n<h1>");
-    context.at(frame, [14,23]); context.output.write(runtime.escape(title as unknown as Value, frame, [17,22]));
+    context.at(frame, [14,23]); context.output.write(runtime.escape(scope.lookup(frame, "title") as unknown as string as unknown as Value, frame, [17,22]));
     context.at(frame, [23,45]); context.output.write("</h1>\n<p class=\"root\">");
-    context.at(frame, [45,59]); context.output.write(runtime.escape(root_label as unknown as Value, frame, [48,58]));
+    context.at(frame, [45,59]); context.output.write(runtime.escape(scope.lookup(frame, "root_label") as unknown as string as unknown as Value, frame, [48,58]));
     context.at(frame, [59,83]); context.output.write("</p>\n<p class=\"defined\">");
-    context.at(frame, [83,100]); context.output.write(runtime.escape(defined_label as unknown as Value, frame, [86,99]));
+    context.at(frame, [83,100]); context.output.write(runtime.escape(scope.lookup(frame, "defined_label") as unknown as string as unknown as Value, frame, [86,99]));
     context.at(frame, [100,122]); context.output.write("</p>\n<p class=\"local\">");
-    context.at(frame, [122,159]); context.output.write(runtime.escape(runtime.call("default", [layout_local, "missing"] as unknown as Value[], frame, [125,158]) as unknown as Value, frame, [125,158]));
+    context.at(frame, [122,159]); context.output.write(runtime.escape(runtime.call("default", [scope.lookup(frame, "layout_local") as unknown as string, "missing"] as unknown as Value[], frame, [125,158]) as unknown as Value, frame, [125,158]));
     context.at(frame, [159,175]); context.output.write("</p>\n</article>\n");
 }
-function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame("layout.tpl", [0,42,66,95,106], rootData);
 
-    const layout_local = "visible only in layout";
+    scope.locals.set("layout_local", "visible only in layout" as unknown as Value);
     context.at(frame, [42,66]); context.output.write("<section class=\"scope\">\n");
     { let definition = definitions.content;
     if (definition === undefined) throw runtime.error(frame, [66,94], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
     if (definition?.html !== undefined) { context.at(frame, [66,94]); context.output.write(definition.html); }
-    else { const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: assign.page?.title }) as Input_content_tpl; context.enter("content.tpl", frame, [66,94]); try { render_content_tpl(assign, definitions, input, context, runtime, rootData); } finally { context.leave(); } }
+    else { const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: (assign.page)?.title }) as Input_content_tpl; const blockScope = new Scope(); context.enter("content.tpl", frame, [66,94]); try { render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope); } finally { context.leave(); } }
     }
     context.at(frame, [95,106]); context.output.write("</section>\n");
 }
-function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   switch (target) {
-    case "layout.tpl": render_layout_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    case "layout.tpl": render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope); return;
     default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');
   }
 }
@@ -63,6 +63,6 @@ class GeneratedPreparedRender implements PreparedRender { private readonly execu
 export class GeneratedProgram implements Program {
   readonly runtime: RuntimeEnvironment;
   constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }
-  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== 'string') throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() => registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root); return context.output.toString(); } finally { context.leave(); } }); }
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== 'string') throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() => registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope); return context.output.toString(); } finally { context.leave(); } }); }
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }
 }
