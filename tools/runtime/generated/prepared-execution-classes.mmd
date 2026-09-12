@@ -1,0 +1,23 @@
+classDiagram
+  class PreparedRender {
+    +execution
+    +render()
+  }
+  class PreparedExecution
+  <<sum>> PreparedExecution
+  class AstPreparedExecution {
+    +engine
+    +rootData
+    +registry
+    +env
+    +targetName
+    +template
+    +render()
+  }
+  class GeneratedPreparedExecution {
+    +generated
+    +render()
+  }
+  PreparedRender *-- PreparedExecution : execution
+  PreparedExecution <|-- AstPreparedExecution
+  PreparedExecution <|-- GeneratedPreparedExecution

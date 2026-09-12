@@ -4,7 +4,7 @@ export PATH := $(HOME)/.cargo/bin:$(PATH)
 CARGO ?= $(HOME)/.cargo/bin/cargo
 
 .DEFAULT_GOAL := help
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-check compiler-interface-generate compiler-interface-check \
+.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check \
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check showcase showcase-check showcase-compile \
 	docs-static-check clean
@@ -117,7 +117,11 @@ docs-check: ## Document checks
 	@test ! -f scripts/check-schema.mjs || node scripts/check-schema.mjs
 	@test ! -f scripts/check-doc-coverage.mjs || node scripts/check-doc-coverage.mjs
 
+runtime-interface-generate: ## Generate the runtime prepared-execution Mermaid diagrams
+	node scripts/generate-runtime-interface.mjs
+
 runtime-interface-check: ## Verify the prepared render interface in every runtime
+	node scripts/generate-runtime-interface.mjs --check
 	node scripts/check-runtime-interface.mjs
 
 compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
