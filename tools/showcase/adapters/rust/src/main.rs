@@ -25,7 +25,7 @@ impl Adapter {
             Engine::new(native_direct::GeneratedProgram { root: root.clone() })
         } else {
             Engine::new(AstProgram::new(EngineOptions {
-                loader: Some(Box::new(artifact_loader(&root, "rust")?)),
+                loader: Some(Box::new(artifact_loader(&root)?)),
                 ..Default::default()
             }))
         };
@@ -93,20 +93,21 @@ impl Adapter {
     }
 }
 
-fn artifact_loader(root: &Path, language: &str) -> Result<MapLoader, String> {
+fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
     #[derive(Deserialize)]
-    struct Entry { artifact: String }
+    struct Entry { path: String }
     #[derive(Deserialize)]
-    struct Manifest { templates: std::collections::BTreeMap<String, Entry> }
-    let manifest_bytes = std::fs::read(root.join("compiled").join(language).join("manifest.json"))
-        .map_err(|error| format!("compiled {language} manifest: {error}"))?;
+    struct Manifest { files: std::collections::BTreeMap<String, Entry> }
+    let base = root.join("compiled").join("ast");
+    let manifest_bytes = std::fs::read(base.join("manifest.json"))
+        .map_err(|error| format!("compiled AST manifest: {error}"))?;
     let manifest: Manifest = serde_json::from_slice(&manifest_bytes)
-        .map_err(|error| format!("compiled {language} manifest: {error}"))?;
+        .map_err(|error| format!("compiled AST manifest: {error}"))?;
     let mut loader = MapLoader::new();
-    for (name, entry) in manifest.templates {
-        let path = root.join("compiled").join(language).join(entry.artifact);
-        let bytes = std::fs::read(&path).map_err(|error| format!("compiled {language}/{name}: {error}"))?;
-        let ast = serde_json::from_slice(&bytes).map_err(|error| format!("compiled {language}/{name}: {error}"))?;
+    for (name, entry) in manifest.files {
+        let path = base.join(entry.path);
+        let bytes = std::fs::read(&path).map_err(|error| format!("compiled AST/{name}: {error}"))?;
+        let ast = serde_json::from_slice(&bytes).map_err(|error| format!("compiled AST/{name}: {error}"))?;
         loader.set_ast(&name, ast);
     }
     Ok(loader)

@@ -18,12 +18,12 @@ function readJson(root, name) {
   return parseJsonBytes(new Uint8Array(readFileSync(join(root, name))));
 }
 
-function readArtifactTemplates(root, language) {
-  const artifactRoot = join(root, 'compiled', language);
+function readArtifactTemplates(root) {
+  const artifactRoot = join(root, 'compiled', 'ast');
   const manifest = JSON.parse(readFileSync(join(artifactRoot, 'manifest.json'), 'utf8'));
   const templates = new Map();
-  for (const [name, entry] of Object.entries(manifest.templates)) {
-    templates.set(name, JSON.parse(readFileSync(join(artifactRoot, entry.artifact), 'utf8')));
+  for (const [name, entry] of Object.entries(manifest.files)) {
+    templates.set(name, JSON.parse(readFileSync(join(artifactRoot, entry.path), 'utf8')));
   }
   return templates;
 }
@@ -98,7 +98,7 @@ export class Adapter {
     const generated = process.env.SHOWCASE_EXECUTION_MODE === 'generated';
     this.engine = new Engine(generated
       ? new GeneratedProgram(root)
-      : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root, 'typescript')) }));
+      : new AstProgram({ loader: new MapLoader(readArtifactTemplates(root)) }));
   }
 
   loadScenario() {
