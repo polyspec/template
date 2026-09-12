@@ -45,12 +45,64 @@ function visitNodes(nodes, template, state) {
   }
 }
 
+function expressionVariables(expression, locals, output) {
+  if (!expression || typeof expression !== 'object') return;
+  if (expression.type === 'Var' && !locals.has(expression.name)) output.add(expression.name);
+  for (const [name, value] of Object.entries(expression)) {
+    if (name === 'span' || name === 'type' || name === 'name') continue;
+    if (Array.isArray(value)) value.forEach(item => expressionVariables(item, locals, output));
+    else expressionVariables(value, locals, output);
+  }
+}
+
+function templateRequirements(nodes, template, required, includes, inherited = new Set()) {
+  const locals = new Set(inherited);
+  for (const node of nodes) {
+    if (node.expr) expressionVariables(node.expr, locals, required);
+    if (node.iter) expressionVariables(node.iter, locals, required);
+    if (Array.isArray(node.scope)) node.scope.forEach(item => expressionVariables(item.expr, locals, required));
+    if (node.type === 'Set') locals.add(node.name);
+    if (node.type === 'Include') includes.add(resolveTemplate(template, node.path));
+    if (node.type === 'For') {
+      templateRequirements(node.body, template, required, includes, new Set(locals).add(node.name));
+      if (Array.isArray(node.empty)) templateRequirements(node.empty, template, required, includes, locals);
+    } else {
+      if (Array.isArray(node.body)) templateRequirements(node.body, template, required, includes, locals);
+      if (Array.isArray(node.else)) templateRequirements(node.else, template, required, includes, locals);
+    }
+    if (Array.isArray(node.branches)) for (const branch of node.branches) {
+      expressionVariables(branch.test, locals, required);
+      templateRequirements(branch.body, template, required, includes, locals);
+    }
+  }
+}
+
 /** Derives a dynamic input contract from parsed source and request definitions. */
 export function deriveTypeManifest(templates, define = {}) {
   const state = { defines: {}, templates: {}, functions: new Set() };
+  const requirements = new Map();
+  const includes = new Map();
   for (const [name, ast] of templates) {
     state.templates[name] ??= {};
     visitNodes(ast.body, name, state);
+    const required = new Set();
+    const dependencies = new Set();
+    templateRequirements(ast.body, name, required, dependencies);
+    requirements.set(name, required);
+    includes.set(name, dependencies);
+  }
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [name, dependencies] of includes) for (const dependency of dependencies) {
+      for (const field of requirements.get(dependency) ?? []) if (!requirements.get(name).has(field)) {
+        requirements.get(name).add(field);
+        changed = true;
+      }
+    }
+  }
+  for (const [name, fields] of requirements) if (name !== 'input.tpl') {
+    for (const field of fields) state.templates[name][field] ??= 'any';
   }
   for (const [id, input] of Object.entries(define)) {
     if (typeof input === 'string') state.defines[id] = { template: input, optional: true };

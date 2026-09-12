@@ -271,6 +271,28 @@ impl RuntimeBindings {
         }
     }
 
+    /// Validates and expands one list spread operand.
+    pub fn list_spread(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<Vec<Value>, TemplateError> {
+        match value {
+            Value::List(list) => Ok(list.to_vec()),
+            _ => Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "spread in a list requires a list")),
+        }
+    }
+
+    /// Validates and expands one map spread operand.
+    pub fn map_spread(
+        &self,
+        context: &RenderContext<'_>,
+        value: &Value,
+        frame: &Frame,
+        span: Span,
+    ) -> Result<crate::value::OrderedMap, TemplateError> {
+        match value {
+            Value::Map(map) => Ok((**map).clone()),
+            _ => Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "spread in a map requires a map")),
+        }
+    }
+
     /// Invokes a built-in or host function and binds its result.
     pub fn call(
         &self,

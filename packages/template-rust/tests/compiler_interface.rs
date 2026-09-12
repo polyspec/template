@@ -1,5 +1,6 @@
 // Compiler runtime interface declaration checks.
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::fs;
 use syn::{Fields, ImplItem, Item, TraitItem};
 
@@ -19,6 +20,8 @@ struct Languages {
 struct RustMapping {
     #[serde(rename = "runtimeBindingsExplicitContext")]
     runtime_bindings_explicit_context: Vec<String>,
+    #[serde(rename = "runtimeBindingOperationNames")]
+    runtime_binding_operation_names: HashMap<String, String>,
     #[serde(rename = "runtimeServiceOperationNames")]
     runtime_service_operation_names: RuntimeServiceOperationNames,
     #[serde(rename = "frameFields")]
@@ -187,7 +190,15 @@ fn runtime_declarations_match_manifest() {
         .runtime_bindings
         .operations
         .iter()
-        .map(|operation| operation.name.clone())
+        .map(|operation| {
+            manifest
+                .languages
+                .rust
+                .runtime_binding_operation_names
+                .get(&operation.name)
+                .cloned()
+                .unwrap_or_else(|| operation.name.clone())
+        })
         .collect();
     assert_eq!(operations, expected);
     for operation in &manifest.runtime_contract.runtime_bindings.operations {
@@ -195,7 +206,17 @@ fn runtime_declarations_match_manifest() {
             .items
             .iter()
             .find_map(|item| match item {
-                ImplItem::Fn(method) if method.sig.ident == operation.name => Some(method),
+                ImplItem::Fn(method)
+                    if method.sig.ident
+                        == manifest
+                            .languages
+                            .rust
+                            .runtime_binding_operation_names
+                            .get(&operation.name)
+                            .unwrap_or(&operation.name) =>
+                {
+                    Some(method)
+                }
                 _ => None,
             })
             .unwrap();

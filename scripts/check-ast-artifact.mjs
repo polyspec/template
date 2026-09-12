@@ -41,13 +41,19 @@ try {
   const customUnchanged = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true', delimiters: '[]' });
   assert.deepEqual(readFileSync(join(output, 'manifest.json')), customBytes);
 
+  writeFileSync(join(source, 'layout.tpl'), "[[+ 'notes']]");
+  writeFileSync(join(source, 'notes'), 'extensionless');
+  const dependency = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'dev', delimiters: '[]' });
+  assert.deepEqual(Object.keys(dependency.files), ['layout.tpl', 'notes']);
+  const dependencyBytes = readFileSync(join(output, 'manifest.json'));
+
   writeFileSync(join(source, 'layout.tpl'), '{? broken}');
   assert.throws(() => compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true' }));
-  assert.deepEqual(readFileSync(join(output, 'manifest.json')), customBytes);
+  assert.deepEqual(readFileSync(join(output, 'manifest.json')), dependencyBytes);
 
   rmSync(source, { recursive: true });
-  assert.equal(compileAst({ root: source, output, entry: 'ignored.tpl', refresh: 'false' }).sourceDigest, custom.sourceDigest);
-  writeFileSync(join(output, custom.files['layout.tpl'].path), 'corrupt');
+  assert.equal(compileAst({ root: source, output, entry: 'ignored.tpl', refresh: 'false' }).sourceDigest, dependency.sourceDigest);
+  writeFileSync(join(output, dependency.files['layout.tpl'].path), 'corrupt');
   assert.throws(() => compileAst({ root: source, output, entry: 'ignored.tpl', refresh: 'false' }), /corrupt/);
 } finally {
   rmSync(directory, { recursive: true, force: true });

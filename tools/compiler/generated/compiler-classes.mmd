@@ -100,6 +100,8 @@ classDiagram
     +member(container, key) value
     +index(container, key) value
     +entries(value, frame, span) entries or error
+    +listSpread(value, frame, span) list or error
+    +mapSpread(value, frame, span) map or error
     +call(name, args, frame, span) value or error
     +limit(kind, count, frame, span) void or error
     +error(frame, span, code, message) error

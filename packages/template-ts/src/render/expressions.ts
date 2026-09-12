@@ -61,9 +61,7 @@ export class Evaluator {
         const list: Value[] = [];
         for (const item of expr.items) {
           if (item.type === 'Spread') {
-            const spread = this.evaluate(item.expr, frame);
-            if (!Array.isArray(spread)) throw this.runtime.error(frame, item.span, 'E_RUNTIME_TYPE', 'spread in a list requires a list');
-            list.push(...spread);
+            list.push(...this.runtime.listSpread(this.evaluate(item.expr, frame), frame, item.span));
           } else {
             list.push(this.evaluate(item, frame));
           }
@@ -74,9 +72,7 @@ export class Evaluator {
         const map: MapValue = new Map();
         for (const entry of expr.entries) {
           if ('type' in entry) {
-            const spread = this.evaluate(entry.expr, frame);
-            if (!(spread instanceof Map)) throw this.runtime.error(frame, entry.span, 'E_RUNTIME_TYPE', 'spread in a map requires a map');
-            for (const [key, value] of spread) map.set(key, value);
+            for (const [key, value] of this.runtime.mapSpread(this.evaluate(entry.expr, frame), frame, entry.span)) map.set(key, value);
           } else {
             const key = this.runtime.stringify(this.evaluate(entry.key, frame), frame, entry.key.span);
             map.set(key, this.evaluate(entry.value, frame));

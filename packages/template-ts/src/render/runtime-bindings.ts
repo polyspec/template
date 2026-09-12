@@ -143,6 +143,18 @@ export class RuntimeBindings {
     throw this.error(frame, span, 'E_RUNTIME_TYPE', 'loop requires a list, a map or null');
   }
 
+  /** Validates and expands one list spread operand. */
+  listSpread(value: Value, frame: Frame, span: Span): Value[] {
+    if (!Array.isArray(value)) throw this.error(frame, span, 'E_RUNTIME_TYPE', 'spread in a list requires a list');
+    return value;
+  }
+
+  /** Validates and expands one map spread operand. */
+  mapSpread(value: Value, frame: Frame, span: Span): Map<string, Value> {
+    if (!(value instanceof Map)) throw this.error(frame, span, 'E_RUNTIME_TYPE', 'spread in a map requires a map');
+    return value;
+  }
+
   /** Calls a built-in or registered host function with shared arity and binding behavior. */
   call(name: string, args: Value[], frame: Frame, span: Span): Value {
     const functionContext: FunctionContext = { env: this.context.env };
