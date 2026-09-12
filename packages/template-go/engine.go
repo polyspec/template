@@ -38,6 +38,12 @@ type HostFunction = functions.HostFunction
 // Limits are the resource limits.
 type Limits = render.Limits
 
+// RuntimeEnvironment owns host functions and limits for both compiler modes.
+type RuntimeEnvironment = render.RuntimeEnvironment
+
+// NewRuntimeEnvironment creates runtime services shared by AST and generated programs.
+var NewRuntimeEnvironment = render.NewRuntimeEnvironment
+
 // Options configure an engine.
 type Options = render.Options
 

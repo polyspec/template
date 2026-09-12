@@ -13,9 +13,11 @@ import (
 type runtimeManifest struct {
 	Languages struct {
 		Go struct {
-			FrameFields     []string `json:"frameFields"`
-			ScopeFields     []string `json:"scopeFields"`
-			ScopeOperations []string `json:"scopeOperations"`
+			FrameFields                  []string `json:"frameFields"`
+			ScopeFields                  []string `json:"scopeFields"`
+			ScopeOperations              []string `json:"scopeOperations"`
+			RuntimeEnvironmentFields     []string `json:"runtimeEnvironmentFields"`
+			RuntimeEnvironmentOperations []string `json:"runtimeEnvironmentOperations"`
 		} `json:"go"`
 	} `json:"languages"`
 	RuntimeContract struct {
@@ -41,6 +43,13 @@ type runtimeManifest struct {
 				Parameters []string `json:"parameters"`
 			} `json:"operations"`
 		} `json:"RuntimeServices"`
+		RuntimeEnvironment struct {
+			Fields     []string `json:"fields"`
+			Operations []struct {
+				Name       string   `json:"name"`
+				Parameters []string `json:"parameters"`
+			} `json:"operations"`
+		} `json:"RuntimeEnvironment"`
 	} `json:"runtimeContract"`
 }
 
@@ -108,6 +117,26 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 	}
 	if _, ok := types["AstProgram"].Type.(*ast.StructType); !ok {
 		t.Fatal("AstProgram is not a concrete struct")
+	}
+	astEngineFile, err := parser.ParseFile(token.NewFileSet(), "render/engine.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var astEngine *ast.StructType
+	for _, declaration := range astEngineFile.Decls {
+		general, ok := declaration.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+		for _, spec := range general.Specs {
+			named, ok := spec.(*ast.TypeSpec)
+			if ok && named.Name.Name == "Engine" {
+				astEngine, _ = named.Type.(*ast.StructType)
+			}
+		}
+	}
+	if astEngine == nil || !hasField(astEngine, "runtime") {
+		t.Fatal("AstProgram does not own RuntimeEnvironment")
 	}
 	bindingsFile, err := parser.ParseFile(token.NewFileSet(), "render/runtime_bindings.go", nil, 0)
 	if err != nil {
@@ -188,6 +217,42 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 			t.Fatalf("RuntimeServices.%s signature differs", operation.Name)
 		}
 	}
+	runtimeFile, err := parser.ParseFile(token.NewFileSet(), "render/runtime_environment.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var runtimeEnvironment *ast.StructType
+	runtimeMethods := []*ast.FuncDecl{}
+	for _, declaration := range runtimeFile.Decls {
+		if function, ok := declaration.(*ast.FuncDecl); ok && function.Recv != nil && receiverName(function.Recv.List[0].Type) == "RuntimeEnvironment" {
+			runtimeMethods = append(runtimeMethods, function)
+		}
+		general, ok := declaration.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+		for _, spec := range general.Specs {
+			named, ok := spec.(*ast.TypeSpec)
+			if ok && named.Name.Name == "RuntimeEnvironment" {
+				runtimeEnvironment, _ = named.Type.(*ast.StructType)
+			}
+		}
+	}
+	if runtimeEnvironment == nil {
+		t.Fatal("RuntimeEnvironment is not a struct")
+	}
+	runtimeFields := fieldNames(runtimeEnvironment)
+	if !equalNames(runtimeFields, manifest.Languages.Go.RuntimeEnvironmentFields) {
+		t.Fatalf("RuntimeEnvironment fields differ: %v", runtimeFields)
+	}
+	if len(runtimeMethods) != len(manifest.RuntimeContract.RuntimeEnvironment.Operations) {
+		t.Fatal("RuntimeEnvironment operation count differs")
+	}
+	for index, operation := range manifest.RuntimeContract.RuntimeEnvironment.Operations {
+		if runtimeMethods[index].Name.Name != manifest.Languages.Go.RuntimeEnvironmentOperations[index] || fieldCount(runtimeMethods[index].Type.Params) != len(operation.Parameters) {
+			t.Fatalf("RuntimeEnvironment.%s differs", operation.Name)
+		}
+	}
 }
 
 func receiverName(expression ast.Expr) string {
@@ -207,6 +272,25 @@ func fieldCount(fields *ast.FieldList) int {
 		}
 	}
 	return count
+}
+
+func fieldNames(structure *ast.StructType) []string {
+	names := []string{}
+	for _, field := range structure.Fields.List {
+		for _, name := range field.Names {
+			names = append(names, name.Name)
+		}
+	}
+	return names
+}
+
+func hasField(structure *ast.StructType, expected string) bool {
+	for _, name := range fieldNames(structure) {
+		if name == expected {
+			return true
+		}
+	}
+	return false
 }
 
 func exported(name string) string { return string(name[0]-'a'+'A') + name[1:] }

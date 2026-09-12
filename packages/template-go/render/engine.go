@@ -3,7 +3,6 @@ package render
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"time"
 
 	"github.com/polyspec/template/ast"
@@ -49,13 +48,10 @@ type RenderOptions struct {
 	Env    *functions.Env
 }
 
-var identifier = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
-
 // Engine loads, caches and renders templates.
 type Engine struct {
 	loader          loader.Loader
-	functions       map[string]functions.HostFunction
-	limits          Limits
+	runtime         *RuntimeEnvironment
 	delimiters      parser.Delimiters
 	parse           ParseFunc
 	artifactRefresh ArtifactRefresh
@@ -98,15 +94,16 @@ func NewEngine(options Options, now func() float64) (*Engine, error) {
 	if refresh != ArtifactRefreshDev && refresh != ArtifactRefreshTrue && refresh != ArtifactRefreshFalse {
 		return nil, fmt.Errorf("%q is not an artifact refresh policy", refresh)
 	}
-	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, artifactRefresh: refresh, cache: map[string]cached{}, now: now}
+	runtime, err := NewRuntimeEnvironment(options.Limits, options.Functions)
+	if err != nil {
+		return nil, err
+	}
+	e := &Engine{loader: options.Loader, runtime: runtime, delimiters: parser.DefaultDelimiters, parse: options.Parse, artifactRefresh: refresh, cache: map[string]cached{}, now: now}
 	if e.now == nil {
 		e.now = func() float64 { return float64(time.Now().Unix()) }
 	}
 	if e.loader == nil {
 		e.loader = loader.NewMapLoader(nil)
-	}
-	if options.Limits != nil {
-		e.limits = *options.Limits
 	}
 	if options.Delimiters != "" {
 		d, ok := parser.ParseDelimiters(options.Delimiters)
@@ -115,34 +112,21 @@ func NewEngine(options Options, now func() float64) (*Engine, error) {
 		}
 		e.delimiters = d
 	}
-	for name, fn := range options.Functions {
-		if err := e.Register(name, fn); err != nil {
-			return nil, err
-		}
-	}
 	return e, nil
 }
 
 // Register adds a host function (FUN-43, FUN-44).
 func (e *Engine) Register(name string, fn functions.HostFunction) error {
-	if !identifier.MatchString(name) {
-		return fmt.Errorf("%q is not an identifier", name)
-	}
-	if _, ok := functions.Builtins[name]; ok {
-		return fmt.Errorf("%s is a built-in function", name)
-	}
-	e.functions[name] = fn
-	return nil
+	return e.runtime.Register(name, fn)
 }
 
 // HostFunction returns one registered host function.
 func (e *Engine) HostFunction(name string) (functions.HostFunction, bool) {
-	function, ok := e.functions[name]
-	return function, ok
+	return e.runtime.HostFunction(name)
 }
 
 // Limits implements RuntimeServices.
-func (e *Engine) Limits() Limits { return e.limits }
+func (e *Engine) Limits() Limits { return e.runtime.Limits() }
 
 // LoadTemplate loads an AST template (RT-9, RT-40).
 func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*ParsedTemplate, error) {

@@ -26,6 +26,8 @@ const flow = [
   '  GeneratedProgram --> Program',
   '  RuntimeBindings["RuntimeBindings"] --> AstProgram',
   '  RuntimeBindings --> GeneratedProgram',
+  '  RuntimeEnvironment["RuntimeEnvironment"] --> AstProgram',
+  '  RuntimeEnvironment --> GeneratedProgram',
   '',
 ].join('\n');
 
@@ -50,6 +52,9 @@ classes.push(
   '  class RuntimeBindings {',
   ...manifest.runtimeContract.RuntimeBindings.operations.map(signature).map(line => `    ${line}`),
   '  }',
+  '  class RuntimeServices {',
+  ...manifest.runtimeContract.RuntimeServices.operations.map(signature).map(line => `    ${line}`),
+  '  }',
   '  Program <|-- AstProgram',
   '  Program <|-- GeneratedProgram',
   '  Compiler --> TypedProgram',
@@ -58,6 +63,9 @@ classes.push(
   '  ArtifactStore --> ArtifactManifest',
   '  ArtifactStore --> Program',
   '  Engine --> Program',
+  '  RuntimeServices <|.. RuntimeEnvironment',
+  '  AstProgram --> RuntimeEnvironment',
+  '  GeneratedProgram --> RuntimeEnvironment',
   '  AstProgram --> RuntimeBindings',
   '  GeneratedProgram --> RuntimeBindings',
   ''

@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "d56094099ab339567839a4e18a937de73b5696f18cb7f3272bf0de6a0422cf57",
+  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
   "files": {
     "empty-state.php": {
       "path": "empty-state.php",

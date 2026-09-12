@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
-  "contractDigest": "d56094099ab339567839a4e18a937de73b5696f18cb7f3272bf0de6a0422cf57",
+  "contractDigest": "e592b94dcab1556cfee3a278fd1620af52631e89199146a3384098f5e65983e8",
   "files": {
     "compiler-coverage.rust": {
       "path": "compiler-coverage.rust",
