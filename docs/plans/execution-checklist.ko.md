@@ -237,7 +237,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T7.2 | generated callback과 showcase 전용 생성을 하나의 compiler pipeline과 네 host backend로 교체하고 호환 옵션과 fallback 경로 제거 | package test; compiler mutation test | [ ] |
 | T7.3 | 모든 명세 node, expression, 내장 함수와 host 함수를 generated 실행에서 지원 | generated compiler test | [ ] |
 | T7.4 | 211개 케이스 전체를 TypeScript·Go·Rust·PHP의 AST와 generated 실행으로 검증 | `make conformance-all-modes` | [ ] |
-| T7.5 | build 경계 artifact 갱신 검증: `dev`는 항상 재생성, `true`는 digest 변경 시 재생성, `false`는 source를 읽지 않음 | artifact lifecycle test | [ ] |
+| T7.5 | build 경계 artifact 갱신 검증: `dev`는 항상 재생성, `true`는 digest 변경 시 재생성, `false`는 source를 읽지 않음 | artifact lifecycle test | [x] |
 | T7.6 | npm·Go·Cargo·Composer artifact를 격리한 임시 프로젝트에 설치하고 같은 assign/define page 렌더 | `make consumer-check` | [ ] |
 | T7.7 | production artifact로 parser 기반 showcase 구문 강조, 크기 제한 artifact/source 보기와 React island 예제 생성 | `make showcase-check` | [ ] |
 | T7.8 | production artifact를 사용해 출력이 같은 AST/generated 성능 측정 재실행 | `make bench`; `make showcase` | [ ] |
