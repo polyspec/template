@@ -6,7 +6,7 @@
   "sourceDigest": "0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
   "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "27635aeff469c08c0fec4ca610ef6bc5503a6d1ddd9d6588e92a17e980b95e54",
+  "compilerDigest": "5b8af1423388996f5813ef749ac29cb55187d43b6bc61c68c05e915a04814496",
   "files": {
     "empty-state.php": {
       "path": "empty-state.php",

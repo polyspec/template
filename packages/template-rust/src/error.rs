@@ -101,6 +101,13 @@ pub struct LineIndex {
 }
 
 impl LineIndex {
+    /// Restores a verified line index stored in a compiled artifact.
+    pub fn from_starts(starts: Vec<usize>) -> LineIndex {
+        assert!(starts.first() == Some(&0), "a line index must start at byte zero");
+        assert!(starts.windows(2).all(|pair| pair[0] < pair[1]), "line starts must increase");
+        LineIndex { starts }
+    }
+
     /// Builds the line index of a byte sequence.
     pub fn of(bytes: &[u8]) -> LineIndex {
         let mut starts = vec![0];

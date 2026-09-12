@@ -101,5 +101,13 @@ func TestBind(t *testing.T) {
 	if _, err := value.Bind(int64(1) << 60); err == nil {
 		t.Error("large integer accepted")
 	}
+	number := 3
+	if bound, err := value.Bind(&number); err != nil || bound != float64(3) {
+		t.Fatalf("scalar pointer binding: value=%v error=%v", bound, err)
+	}
+	var absent *string
+	if bound, err := value.Bind(absent); err != nil || bound != nil {
+		t.Fatalf("nil pointer binding: value=%v error=%v", bound, err)
+	}
 	_ = item{}.skip
 }

@@ -45,6 +45,7 @@ function typeSource(type, optional = type.optional) {
 }
 
 function required(type) { return { ...type, optional: false, source: typeSource(type, false) }; }
+function nullable(type) { return { ...type, optional: true, source: typeSource(type, true) }; }
 function sameType(left, right) { return typeSource(required(left)) === typeSource(required(right)); }
 function mergeType(left, right) { return sameType(left, right) ? { ...required(left), optional: left.optional || right.optional } : parseType('any'); }
 
@@ -111,7 +112,7 @@ export function lowerSourceGraph(graph, manifest) {
         if (owner.kind !== 'record') throw new Error(`compiler: member ${node.key} requires a record or any, got ${typeSource(object.valueType)}`);
         const valueType = records.get(owner.name)?.get(node.key);
         if (!valueType) throw new Error(`compiler: ${owner.name}.${node.key} is missing from the type manifest`);
-        return { op: 'member', object, key: node.key, valueType: { ...valueType, optional: valueType.optional || object.valueType.optional }, span: node.span };
+        return { op: 'member', object, key: node.key, valueType: object.valueType.optional ? nullable(valueType) : valueType, span: node.span };
       }
       case 'Index': {
         const object = lowerExpr(node.object, scope, loops);
@@ -119,7 +120,7 @@ export function lowerSourceGraph(graph, manifest) {
         const owner = required(object.valueType);
         const valueType = owner.kind === 'list' ? owner.item : owner.kind === 'map' ? owner.value : owner.kind === 'any' ? parseType('any') : null;
         if (!valueType) throw new Error(`compiler: index requires a list, map or any, got ${typeSource(object.valueType)}`);
-        return { op: 'index', object, index, valueType: { ...valueType, optional: true }, span: node.span };
+        return { op: 'index', object, index, valueType: nullable(valueType), span: node.span };
       }
       case 'Call': {
         const signature = functions.get(node.name);

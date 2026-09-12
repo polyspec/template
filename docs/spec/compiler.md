@@ -40,6 +40,8 @@ The PHP backend follows the same execution boundary. Its generated template func
 
 The Go backend emits typed template control flow while routing observable value operations through `render.RuntimeBindings`. Generated functions share `render.Context`, source-indexed frames and the render chain. Internal error propagation preserves the original structured template error, including its code and source position, and native typed values are bound to the canonical value model at the runtime boundary.
 
+The Rust backend likewise returns `Result` directly from generated template functions and delegates value operations to `RuntimeBindings`. It reconstructs `LineIndex` from verified artifact data, writes through `RenderContext`, and propagates structured errors without panic conversion. Serialization at the typed boundary converts generated records and collections to and from the canonical `Value` model.
+
 Built-ins are known to the compiler. A referenced host function requires a manifest signature and a runtime implementation. Missing signatures fail before emission. Missing runtime implementations, arity errors and host failures use the same error fields as AST execution.
 
 ## Artifact refresh
