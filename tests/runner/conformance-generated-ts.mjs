@@ -54,8 +54,9 @@ function parsedTemplates(testCase) {
 const pending = [];
 const failures = [];
 let passed = 0;
+const cases = listCases();
 try {
-  for (const testCase of listCases()) {
+  for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');
     try {
       const define = testCase.hasDefine ? JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8')) : {};
@@ -104,11 +105,11 @@ try {
       else passed++;
     }
   }
-  assert.equal(passed + failures.length, 211);
+  assert.equal(passed + failures.length, cases.length);
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
 for (const failure of failures) process.stderr.write(`${failure}\n`);
-process.stdout.write(`${passed}/211 TypeScript generated conformance cases passed\n`);
+process.stdout.write(`${passed}/${cases.length} TypeScript generated conformance cases passed\n`);
 process.exit(failures.length === 0 ? 0 : 1);
