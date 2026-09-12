@@ -19,6 +19,9 @@
         "test": "./run-tests.sh"
     },
     "config": {
+        "platform": {
+            "php": "8.2.0"
+        },
         "sort-packages": true
     }
 }

@@ -1,5 +1,7 @@
 # Changelog
 
+- Resolved Composer lockfiles against the declared PHP 8.2 minimum and added a policy gate that rejects stale or mismatched platform resolution.
+
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
