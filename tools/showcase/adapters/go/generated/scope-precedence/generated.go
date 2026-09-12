@@ -62,13 +62,13 @@ scope.Locals["layout_local"] = generatedValue(input.Layout_local)
     generatedWrite(context, "</p>\n</article>\n", frame, ast.Span{159, 175})
 }
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
-	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 42, 66, 95, 106}, rootData)
+	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 44, 68, 97, 108}, rootData)
 
     scope.Locals["layout_local"] = generatedValue("visible only in layout")
-    generatedWrite(context, "<section class=\"scope\">\n", frame, ast.Span{42, 66})
+    generatedWrite(context, "<section class=\"scope\">\n", frame, ast.Span{44, 68})
     { definition := definitions.Content
-    if definition == nil { panic(runtime.Error(frame, ast.Span{66, 94}, errs.RuntimeBlockUndefined, "define content is not registered")) }
-    if definition != nil && definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{66, 94}) } else {
+    if definition == nil { panic(runtime.Error(frame, ast.Span{68, 96}, errs.RuntimeBlockUndefined, "define content is not registered")) }
+    if definition != nil && definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{68, 96}) } else {
         input := Input_content_tpl{Root_label: assign.Root_label, Defined_label: assign.Defined_label}
         if definition != nil && definition.Data != nil {
             if definition.Data.Title != nil { input.Title = *definition.Data.Title }
@@ -78,11 +78,11 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
         }
         input.Title = assign.Page.Title
         blockScope := render.NewScope()
-        generatedEnter(context, "content.tpl", frame, ast.Span{66, 94})
+        generatedEnter(context, "content.tpl", frame, ast.Span{68, 96})
         func() { defer context.Leave(); render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope) }()
     }
     }
-    generatedWrite(context, "</section>\n", frame, ast.Span{95, 106})
+    generatedWrite(context, "</section>\n", frame, ast.Span{97, 108})
 }
 func renderTemplate(target string, assign Assign, definitions *Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) { switch target {
 	case "layout.tpl": render_layout_tpl(assign, definitions, Input_layout_tpl{}, context, runtime, rootData, scope); return
