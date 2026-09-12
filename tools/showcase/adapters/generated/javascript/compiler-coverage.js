@@ -45,7 +45,7 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     if (typeof raw === 'string') {
         if (spec.target === null || raw !== spec.target)
             throw new Error('define.' + id + ' has an invalid template');
-        definitions[spec.field] = {};
+        definitions[spec.field] = { template: spec.target };
         targets.set(id, { target: spec.target });
         continue;
     }
@@ -63,7 +63,7 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     if (typeof template !== 'string' || spec.target === null || template !== spec.target)
         throw new Error('define.' + id + ' has an invalid template');
     const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, 'define.' + id + '.data', true);
-    definitions[spec.field] = { data: boundData };
+    definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
 function render_card_tpl(assign, definitions, input, context, runtime, rootData) {
@@ -78,8 +78,8 @@ function render_card_tpl(assign, definitions, input, context, runtime, rootData)
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
     const frame = new Frame("layout.tpl", [0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691], rootData);
-    const values = [0, ...assign.numbers];
-    const merged = new Map([...assign.lookup, ["z", "Z"]]);
+    const values = [0, ...runtime.listSpread(assign.numbers, frame, [17, 24])];
+    const merged = new Map([...runtime.mapSpread(assign.lookup, frame, [41, 47]), [runtime.stringify("z", frame, [49, 52]), "Z"]]);
     context.at(frame, [62, 76]);
     context.output.write("<section>\n<h1>");
     context.at(frame, [76, 90]);
@@ -194,7 +194,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
     context.at(frame, [650, 651]);
     context.output.write("\n");
     {
-        const definition = definitions.content;
+        let definition = definitions.content;
         if (definition === undefined)
             throw runtime.error(frame, [651, 679], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
         if (definition?.html !== undefined) {

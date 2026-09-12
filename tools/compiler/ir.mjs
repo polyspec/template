@@ -47,6 +47,7 @@ function typeSource(type, optional = type.optional) {
 function required(type) { return { ...type, optional: false, source: typeSource(type, false) }; }
 function nullable(type) { return { ...type, optional: true, source: typeSource(type, true) }; }
 function sameType(left, right) { return typeSource(required(left)) === typeSource(required(right)); }
+function acceptsType(actual, expected) { return required(expected).kind === 'any' || sameType(actual, expected); }
 function mergeType(left, right) { return sameType(left, right) ? { ...required(left), optional: left.optional || right.optional } : parseType('any'); }
 
 function resolveTemplate(from, path) {
@@ -199,7 +200,7 @@ export function lowerSourceGraph(graph, manifest) {
           if (!graph.templates.has(target)) throw new Error(`compiler: included template ${target} is missing from the source graph`);
           const inputs = [...templateInputs.get(target)].map(([name, valueType]) => {
             const value = lowerExpr({ type: 'Var', name, span: node.span }, scope, loops);
-            if (!sameType(value.valueType, valueType) || value.valueType.optional && !valueType.optional) {
+            if (!acceptsType(value.valueType, valueType) || value.valueType.optional && !valueType.optional) {
               throw new Error(`compiler: include ${target} input ${name} requires ${typeSource(valueType)}, got ${typeSource(value.valueType)}`);
             }
             return { name, value, valueType };
@@ -222,7 +223,7 @@ export function lowerSourceGraph(graph, manifest) {
             name,
             valueType,
             scope: blockScope.get(name) ?? null,
-            root: root.has(name) || dynamicRoot ? lowerExpr({ type: 'Var', name, span: node.span }, scope, loops) : null,
+            root: root.has(name) || dynamicRoot ? { op: 'root', name, valueType: root.get(name) ?? parseType('any?'), span: node.span } : null,
           }));
           return { op: 'block', id: node.id, path, target, definition, inputs, span: node.span };
         }

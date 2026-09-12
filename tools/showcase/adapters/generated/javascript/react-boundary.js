@@ -45,7 +45,7 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     if (typeof raw === 'string') {
         if (spec.target === null || raw !== spec.target)
             throw new Error('define.' + id + ' has an invalid template');
-        definitions[spec.field] = {};
+        definitions[spec.field] = { template: spec.target };
         targets.set(id, { target: spec.target });
         continue;
     }
@@ -63,7 +63,7 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     if (typeof template !== 'string' || spec.target === null || template !== spec.target)
         throw new Error('define.' + id + ' has an invalid template');
     const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, 'define.' + id + '.data', true);
-    definitions[spec.field] = { data: boundData };
+    definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
 function render_content_tpl(assign, definitions, input, context, runtime, rootData) {
@@ -84,7 +84,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
     context.at(frame, [20, 26]);
     context.output.write("</h1>\n");
     {
-        const definition = definitions.content;
+        let definition = definitions.content;
         if (definition === undefined)
             throw runtime.error(frame, [26, 37], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
         if (definition?.html !== undefined) {

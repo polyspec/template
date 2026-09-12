@@ -277,6 +277,22 @@ func (r *RuntimeBindings) Entries(input value.Value, frame *Frame, span ast.Span
 	}
 }
 
+// ListSpread validates and expands one list spread operand.
+func (r *RuntimeBindings) ListSpread(input value.Value, frame *Frame, span ast.Span) (value.List, error) {
+	if list, ok := input.(value.List); ok {
+		return list, nil
+	}
+	return nil, r.Error(frame, span, errs.RuntimeType, "spread in a list requires a list")
+}
+
+// MapSpread validates and expands one map spread operand.
+func (r *RuntimeBindings) MapSpread(input value.Value, frame *Frame, span ast.Span) (*value.OrderedMap, error) {
+	if object, ok := input.(*value.OrderedMap); ok {
+		return object, nil
+	}
+	return nil, r.Error(frame, span, errs.RuntimeType, "spread in a map requires a map")
+}
+
 // Call invokes a built-in or host function and binds its result.
 func (r *RuntimeBindings) Call(name string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
 	functionContext := functions.Context{Env: r.context.Env}

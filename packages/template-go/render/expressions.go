@@ -115,9 +115,9 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 				if err != nil {
 					return nil, err
 				}
-				inner, ok := v.(value.List)
-				if !ok {
-					return nil, e.fail(frame, spread.Span, errs.RuntimeType, "spread in a list requires a list")
+				inner, err := e.runtime.ListSpread(v, frame, spread.Span)
+				if err != nil {
+					return nil, err
 				}
 				list = append(list, inner...)
 				continue
@@ -137,9 +137,9 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 				if err != nil {
 					return nil, err
 				}
-				inner, ok := v.(*value.OrderedMap)
-				if !ok {
-					return nil, e.fail(frame, spread.Span, errs.RuntimeType, "spread in a map requires a map")
+				inner, err := e.runtime.MapSpread(v, frame, spread.Span)
+				if err != nil {
+					return nil, err
 				}
 				for _, k := range inner.Keys() {
 					m.Set(k, inner.MustGet(k))

@@ -70,7 +70,7 @@ for (const language of core.languages) {
   if (mapping.runtimeEnvironmentFields?.length !== manifest.types.RuntimeEnvironment.fields.length) throw new Error(`${language}: RuntimeEnvironment field mapping is incomplete`);
   if (mapping.runtimeEnvironmentOperations?.length !== manifest.types.RuntimeEnvironment.operations.length) throw new Error(`${language}: RuntimeEnvironment operation mapping is incomplete`);
 }
-const rustContextOperations = ['unary', 'binary', 'stringify', 'escape', 'number', 'finite', 'compare', 'entries', 'call', 'limit', 'error'];
+const rustContextOperations = ['unary', 'binary', 'stringify', 'escape', 'number', 'finite', 'compare', 'entries', 'listSpread', 'mapSpread', 'call', 'limit', 'error'];
 if (manifest.languages.rust.runtimeBindingsExplicitContext?.join(',') !== rustContextOperations.join(',')) {
   throw new Error('rust RuntimeBindings context mapping differs');
 }
