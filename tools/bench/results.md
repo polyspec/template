@@ -1,6 +1,6 @@
 # Benchmark results
 
-Renders per second and microseconds per render, measured with 5,000 renders per fixture and implementation after 500 unmeasured renders.
+Renders per second and microseconds per render, measured with 50,000 renders per fixture and implementation after 5,000 unmeasured renders.
 
 Absolute times depend on the machine, the toolchain versions and the load during the run. Only the ratios within one run are comparable. The run fails when two implementations produce different output for a fixture.
 
@@ -20,8 +20,8 @@ Regenerate this file with `make bench`.
 
 | Fixture     | ts ops/s | ts µs | go ops/s | go µs | rust ops/s | rust µs | php ops/s | php µs |
 | ----------- | -------- | ----- | -------- | ----- | ---------- | ------- | --------- | ------ |
-| composition | 17,276   | 57.9  | 51,661   | 19.4  | 54,266     | 18.4    | 10,469    | 95.5   |
-| expression  | 9,044    | 110.6 | 9,220    | 108.5 | 10,657     | 93.8    | 1,076     | 929.5  |
-| functions   | 5,212    | 191.9 | 6,018    | 166.2 | 5,582      | 179.1   | 1,188     | 841.6  |
-| loop        | 5,559    | 179.9 | 7,104    | 140.8 | 7,382      | 135.5   | 977       | 1023.9 |
-| text        | 152,616  | 6.6   | 585,409  | 1.7   | 677,105    | 1.5     | 121,192   | 8.3    |
+| composition | 17,325   | 57.7  | 52,780   | 18.9  | 57,881     | 17.3    | 9,913     | 100.9  |
+| expression  | 9,487    | 105.4 | 9,245    | 108.2 | 10,443     | 95.8    | 1,070     | 935.0  |
+| functions   | 5,122    | 195.2 | 5,929    | 168.7 | 5,616      | 178.1   | 1,186     | 843.3  |
+| loop        | 5,680    | 176.1 | 7,242    | 138.1 | 7,504      | 133.3   | 957       | 1045.3 |
+| text        | 159,507  | 6.3   | 606,765  | 1.6   | 716,772    | 1.4     | 120,068   | 8.3    |
