@@ -74,23 +74,55 @@
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;4cd265a4b8bd32b8ad8334be0e27f9db2c101a01c8c6cbc8959851034ed3879f&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;26eb0476afb1d0d9aab445dc939ec966ca48ff55da41d08b0f3090af9f10af2d&quot;,
   &quot;files&quot;: {
     &quot;card.tpl&quot;: {
       &quot;path&quot;: &quot;card.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;d299dda7918a928780ca472de4e9ae7a7e4f75367f9086362e90b17f358318bc&quot;,
-      &quot;artifactDigest&quot;: &quot;c71d671a4b4be7fd23026955da5afbc49165a7f728c84c63ed270412eed1de82&quot;
+      &quot;artifactDigest&quot;: &quot;c71d671a4b4be7fd23026955da5afbc49165a7f728c84c63ed270412eed1de82&quot;,
+      &quot;lines&quot;: [
+        0,
+        30
+      ]
     },
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;10ea1819adb17d5e7f2108ca111e33df72ecef80a8be1cc1db3dac7aaad77bb0&quot;,
-      &quot;artifactDigest&quot;: &quot;b8cc29842a6d727c2989151be4939864beceb76c294acd1a422f81af108cc932&quot;
+      &quot;artifactDigest&quot;: &quot;b8cc29842a6d727c2989151be4939864beceb76c294acd1a422f81af108cc932&quot;,
+      &quot;lines&quot;: [
+        0,
+        27,
+        62,
+        72,
+        96,
+        133,
+        187,
+        264,
+        301,
+        388,
+        459,
+        464,
+        479,
+        559,
+        563,
+        578,
+        582,
+        588,
+        604,
+        651,
+        680,
+        691
+      ]
     },
     &quot;partial.tpl&quot;: {
       &quot;path&quot;: &quot;partial.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;12756a90a2a53d5fe389cce876f6ce983af348dc3353acfe1ec92174feec491b&quot;,
-      &quot;artifactDigest&quot;: &quot;a232b8b0a382fbc97ddd38206a523765618e333af953f276376c71713b0d264c&quot;
+      &quot;artifactDigest&quot;: &quot;a232b8b0a382fbc97ddd38206a523765618e333af953f276376c71713b0d264c&quot;,
+      &quot;lines&quot;: [
+        0,
+        38
+      ]
     }
   }
 }
@@ -1083,18 +1115,18 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;fcd0e1b10b1292ec95f7ce189bbad3e74ba93423fbb02f10b09297d89af1d8c6&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;ff01f6b90b2018dd19054f0d0cb146320220002e6a73f70400cdad43e83af2ec&quot;
+      &quot;artifactDigest&quot;: &quot;58876911f3ab17ed11f3cc8d590bfdc65123a6a1782e8d95932b22be9c56768c&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind, type PreparedRender, type Program, type RenderOptions, type Template } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from &#39;@polyspec/template&#39;;
 export interface Page {
   title: string;
 }
@@ -1127,110 +1159,111 @@ const generatedRecords = {&quot;Page&quot;:{&quot;title&quot;:{&quot;kind&quot;:
 const generatedAssign = {&quot;flag&quot;:{&quot;kind&quot;:&quot;boolean&quot;,&quot;optional&quot;:false},&quot;dangerous&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;empty_list&quot;:{&quot;kind&quot;:&quot;list&quot;,&quot;item&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;optional&quot;:false},&quot;empty_map&quot;:{&quot;kind&quot;:&quot;map&quot;,&quot;key&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;value&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;optional&quot;:false},&quot;page&quot;:{&quot;kind&quot;:&quot;record&quot;,&quot;name&quot;:&quot;Page&quot;,&quot;optional&quot;:false},&quot;numbers&quot;:{&quot;kind&quot;:&quot;list&quot;,&quot;item&quot;:{&quot;kind&quot;:&quot;number&quot;,&quot;optional&quot;:false},&quot;optional&quot;:false},&quot;lookup&quot;:{&quot;kind&quot;:&quot;map&quot;,&quot;key&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;value&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;optional&quot;:false},&quot;rows&quot;:{&quot;kind&quot;:&quot;list&quot;,&quot;item&quot;:{&quot;kind&quot;:&quot;record&quot;,&quot;name&quot;:&quot;Row&quot;,&quot;optional&quot;:false},&quot;optional&quot;:false}} as const;
 const generatedDefinitionSpecs = {&quot;content&quot;:{&quot;field&quot;:&quot;content&quot;,&quot;target&quot;:&quot;card.tpl&quot;,&quot;html&quot;:true,&quot;input&quot;:{&quot;label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false}}},&quot;layout&quot;:{&quot;field&quot;:&quot;layout&quot;,&quot;target&quot;:&quot;layout.tpl&quot;,&quot;html&quot;:false,&quot;input&quot;:{}}} as const;
 function generatedObject(value: unknown, path: string): Map&lt;string, unknown&gt; { if (value instanceof Map) return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return undefined; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
-function generatedBindAssign(value: unknown): Assign { const bound = bind(value); return generatedBindRecord(bound, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign; }
+function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return null; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
+function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); if (!partial) result[name] = null; continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
+function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map&lt;string, { target: string | null; html?: string }&gt; };
 function generatedBindDefinitions(input: RenderOptions[&#39;define&#39;]): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions: Record&lt;string, unknown&gt; = {}; const targets = new Map&lt;string, { target: string | null; html?: string }&gt;(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record&lt;string, { field: string; target: string | null; html: boolean; input: Record&lt;string, GeneratedType&gt; }&gt;)[id]; if (spec === undefined) throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;); if (typeof raw === &#39;string&#39;) { if (spec.target === null || raw !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); definitions[spec.field] = {}; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, &#39;define.&#39; + id); const template = entry.get(&#39;template&#39;); const html = entry.get(&#39;html&#39;); const data = entry.get(&#39;data&#39;); if (typeof html === &#39;string&#39;) { if (!spec.html || template !== undefined || data !== undefined) throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true); definitions[spec.field] = { data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
-function stringify(value: unknown): string { if (value === null || value === undefined) return &#39;&#39;; if (typeof value === &#39;object&#39;) throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value: string): string { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value: unknown): boolean { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
-function generatedDefault&lt;T&gt;(value: T, fallback: T): T { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value: unknown, collection: unknown): boolean { if (Array.isArray(collection)) return collection.includes(value); if (collection instanceof Map) return collection.has(value); if (typeof collection === &#39;string&#39;) return collection.includes(String(value)); return false; }
-function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_card_tpl): string { let out = &#39;&#39;;
+function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_card_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;card.tpl&quot;, [0,30], rootData);
   const label = input.label;
-    out += &quot;&lt;p class=\&quot;card\&quot;&gt;&quot;;
-    out += escape(stringify(label));
-    out += &quot;&lt;/p&gt;\n&quot;;
-  return out; }
-function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl): string { let out = &#39;&#39;;
+    context.at(frame, [0,16]); context.output.write(&quot;&lt;p class=\&quot;card\&quot;&gt;&quot;);
+    context.at(frame, [16,25]); context.output.write(runtime.escape(label as unknown as Value, frame, [19,24]));
+    context.at(frame, [25,30]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
+}
+function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;layout.tpl&quot;, [0,27,62,72,96,133,187,264,301,388,459,464,479,559,563,578,582,588,604,651,680,691], rootData);
 
     const values = [0, ...assign.numbers];
     const merged = new Map([...assign.lookup, [&quot;z&quot;, &quot;Z&quot;]]);
-    out += &quot;&lt;section&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(assign.page?.title));
-    out += &quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;;
-    out += escape(stringify(assign.dangerous));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;;
-    out += escape(stringify((generatedTruthy(assign.flag) &amp;&amp; generatedTruthy(&quot;x&quot;))));
-    out += &quot;|&quot;;
-    out += escape(stringify((generatedTruthy(false) || generatedTruthy(2))));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;;
-    out += escape(stringify((generatedTruthy(assign.empty_list) &amp;&amp; generatedTruthy(assign.flag))));
-    out += &quot;|&quot;;
-    out += escape(stringify((generatedTruthy(assign.empty_map) &amp;&amp; generatedTruthy(assign.flag))));
-    out += &quot;&lt;/p&gt;\n&lt;p&gt;&quot;;
-    out += escape(stringify(values?.[1]));
-    out += &quot;|&quot;;
-    out += escape(stringify(merged?.get(&quot;z&quot;)));
-    out += &quot;&lt;/p&gt;\n&quot;;
-    if (generatedTruthy((generatedTruthy(assign.flag) &amp;&amp; generatedTruthy((assign.page?.title == &quot;Guide&quot;))))) {
-        out += &quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;;    } else {
-        out += &quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;;
+    context.at(frame, [62,76]); context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [76,90]); context.output.write(runtime.escape(assign.page?.title as unknown as Value, frame, [79,89]));
+    context.at(frame, [90,115]); context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
+    context.at(frame, [115,128]); context.output.write(runtime.escape(assign.dangerous as unknown as Value, frame, [118,127]));
+    context.at(frame, [128,152]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
+    context.at(frame, [152,167]); context.output.write(runtime.escape((() =&gt; { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(&quot;x&quot; as unknown as Value) : false; })() as unknown as Value, frame, [155,166]));
+    context.at(frame, [167,168]); context.output.write(&quot;|&quot;);
+    context.at(frame, [168,182]); context.output.write(runtime.escape((() =&gt; { const left = false; return runtime.truthy(left as unknown as Value) ? true : runtime.truthy(2 as unknown as Value); })() as unknown as Value, frame, [171,181]));
+    context.at(frame, [182,215]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
+    context.at(frame, [215,237]); context.output.write(runtime.escape((() =&gt; { const left = assign.empty_list; return runtime.truthy(left as unknown as Value) ? runtime.truthy(assign.flag as unknown as Value) : false; })() as unknown as Value, frame, [218,236]));
+    context.at(frame, [237,238]); context.output.write(&quot;|&quot;);
+    context.at(frame, [238,259]); context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left as unknown as Value) ? runtime.truthy(assign.flag as unknown as Value) : false; })() as unknown as Value, frame, [241,258]));
+    context.at(frame, [259,267]); context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
+    context.at(frame, [267,280]); context.output.write(runtime.escape(runtime.index(values as unknown as Value, 1 as unknown as Value) as unknown as Value, frame, [270,279]));
+    context.at(frame, [280,281]); context.output.write(&quot;|&quot;);
+    context.at(frame, [281,296]); context.output.write(runtime.escape(runtime.index(merged as unknown as Value, &quot;z&quot; as unknown as Value) as unknown as Value, frame, [284,295]));
+    context.at(frame, [296,301]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
+    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(runtime.binary(&quot;==&quot;, assign.page?.title as unknown as Value, &quot;Guide&quot; as unknown as Value, frame, [312,333]) as unknown as Value) : false; })() as unknown as Value)) {
+        context.at(frame, [334,358]); context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);    } else {
+        context.at(frame, [361,384]); context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
     }
-    out += &quot;\n&lt;p&gt;&quot;;
-    out += escape(stringify((generatedTruthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;)));
-    out += &quot;|&quot;;
-    out += escape(stringify(((-1) + 3)));
-    out += &quot;|&quot;;
-    out += escape(stringify(generatedDefault(&quot;&quot;, &quot;fallback&quot;)));
-    out += &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;;
-    { const row_entries = (assign.rows ?? []).map((value, key) =&gt; [key, value] as const);
+    context.at(frame, [387,391]); context.output.write(&quot;\n&lt;p&gt;&quot;);
+    context.at(frame, [391,414]); context.output.write(runtime.escape((runtime.truthy(assign.flag as unknown as Value) ? &quot;yes&quot; : &quot;no&quot;) as unknown as Value, frame, [394,413]));
+    context.at(frame, [414,415]); context.output.write(&quot;|&quot;);
+    context.at(frame, [415,425]); context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1 as unknown as Value, frame, [418,420]) as unknown as Value, 3 as unknown as Value, frame, [418,424]) as unknown as Value, frame, [418,424]));
+    context.at(frame, [425,426]); context.output.write(&quot;|&quot;);
+    context.at(frame, [426,454]); context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;] as unknown as Value[], frame, [429,453]) as unknown as Value, frame, [429,453]));
+    context.at(frame, [454,464]); context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
+    { const row_entries = runtime.entries(assign.rows as unknown as Value, frame, [464,581]);
     for (let row_index = 0; row_index &lt; row_entries.length; row_index += 1) {
         const [row_key, row_value] = row_entries[row_index]!;
-        const row = row_value;
+        const row = row_value as unknown as Row;
         const row_size = row_entries.length;
         const row_first = row_index === 0;
         const row_last = row_index + 1 === row_entries.length;
-            out += &quot;&lt;li&gt;&quot;;
-            out += escape(stringify(row_index));
-            out += &quot;/&quot;;
-            out += escape(stringify(row_size));
-            out += &quot;:&quot;;
-            out += escape(stringify(row?.name));
-            out += &quot;:&quot;;
-            out += escape(stringify(row_first));
-            out += &quot;:&quot;;
-            out += escape(stringify(row_last));
-            out += &quot;&lt;/li&gt;\n&quot;;
+        context.iterations += 1;
+        runtime.limit(&#39;iteration&#39;, context.iterations, frame, [464,581]);
+            context.at(frame, [479,483]); context.output.write(&quot;&lt;li&gt;&quot;);
+            context.at(frame, [483,497]); context.output.write(runtime.escape(row_index as unknown as Value, frame, [486,496]));
+            context.at(frame, [497,498]); context.output.write(&quot;/&quot;);
+            context.at(frame, [498,511]); context.output.write(runtime.escape(row_size as unknown as Value, frame, [501,510]));
+            context.at(frame, [511,512]); context.output.write(&quot;:&quot;);
+            context.at(frame, [512,524]); context.output.write(runtime.escape(row?.name as unknown as Value, frame, [515,523]));
+            context.at(frame, [524,525]); context.output.write(&quot;:&quot;);
+            context.at(frame, [525,539]); context.output.write(runtime.escape(row_first as unknown as Value, frame, [528,538]));
+            context.at(frame, [539,540]); context.output.write(&quot;:&quot;);
+            context.at(frame, [540,553]); context.output.write(runtime.escape(row_last as unknown as Value, frame, [543,552]));
+            context.at(frame, [553,559]); context.output.write(&quot;&lt;/li&gt;\n&quot;);
     }
     if (row_entries.length === 0) {
-            out += &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;;
+            context.at(frame, [563,578]); context.output.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
     }
     }
-    out += &quot;&lt;/ul&gt;\n&quot;;
-    out += render_partial_tpl(assign, definitions, { values: values });
+    context.at(frame, [582,588]); context.output.write(&quot;&lt;/ul&gt;\n&quot;);
+    context.enter(&quot;partial.tpl&quot;, frame, [588,603]);
+    try { render_partial_tpl(assign, definitions, { values: values }, context, runtime, rootData); } finally { context.leave(); }
     if (definitions.content !== undefined) {
-            out += &quot;&lt;p&gt;defined&lt;/p&gt;&quot;;
+            context.at(frame, [616,630]); context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
     } else {
-            out += &quot;&lt;p&gt;missing&lt;/p&gt;&quot;;
+            context.at(frame, [633,647]); context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
     }
-    out += &quot;\n&quot;;
+    context.at(frame, [650,651]); context.output.write(&quot;\n&quot;);
     { const definition = definitions.content;
-    if (definition === undefined) throw new Error(&quot;generated definition content is missing&quot;);
-    if (definition?.html !== undefined) out += definition.html;
-    else { const input = Object.assign({  }, definition?.data ?? {}, { label: assign.page?.title }) as Input_card_tpl; out += render_card_tpl(assign, definitions, input); }
+    if (definition === undefined) throw runtime.error(frame, [651,679], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    if (definition?.html !== undefined) { context.at(frame, [651,679]); context.output.write(definition.html); }
+    else { const input = Object.assign({  }, definition?.data ?? {}, { label: assign.page?.title }) as Input_card_tpl; context.enter(&quot;card.tpl&quot;, frame, [651,679]); try { render_card_tpl(assign, definitions, input, context, runtime, rootData); } finally { context.leave(); } }
     }
-    out += &quot;&lt;/section&gt;\n&quot;;
-  return out; }
-function render_partial_tpl(assign: Assign, definitions: Definitions, input: Input_partial_tpl): string { let out = &#39;&#39;;
+    context.at(frame, [680,691]); context.output.write(&quot;&lt;/section&gt;\n&quot;);
+}
+function render_partial_tpl(assign: Assign, definitions: Definitions, input: Input_partial_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;partial.tpl&quot;, [0,38], rootData);
   const values = input.values;
-    out += &quot;&lt;p class=\&quot;included\&quot;&gt;&quot;;
-    out += escape(stringify(values?.[2]));
-    out += &quot;&lt;/p&gt;\n&quot;;
-  return out; }
-export function renderTemplate(target: string, assign: Assign, definitions: Definitions): string {
+    context.at(frame, [0,20]); context.output.write(&quot;&lt;p class=\&quot;included\&quot;&gt;&quot;);
+    context.at(frame, [20,33]); context.output.write(runtime.escape(runtime.index(values as unknown as Value, 2 as unknown as Value) as unknown as Value, frame, [23,32]));
+    context.at(frame, [33,38]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
+}
+function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
   switch (target) {
-    case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-    default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+    case &quot;layout.tpl&quot;: render_layout_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
   }
 }
-export function render(assign: Assign, definitions: Definitions): string { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input: RenderOptions[&#39;env&#39;]): { timezone: string; now: number } { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;) throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;) throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender implements PreparedRender { private readonly execute: () =&gt; string; constructor(execute: () =&gt; string) { this.execute = execute; } render(): string { return this.execute(); } }
 export class GeneratedProgram implements Program {
   readonly runtime: RuntimeEnvironment;
   constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }
-  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root); return context.output.toString(); } finally { context.leave(); } }); }
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }
 }
 
@@ -1243,18 +1276,18 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dc1284fb71be4b78c7bea96e417e3fd847250eb3e8013bcd15e6c68484995d20&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;80daaf3c00838faf42bc20dd2dda47cd879fe999398a3c1f1f25af1bcc744143&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
-      &quot;artifactDigest&quot;: &quot;754d772c6c2d4521a0fa57f45406ffed3ad943a713cf947412ad63aa4f8d9759&quot;
+      &quot;artifactDigest&quot;: &quot;24598f14cef67bbccac43587a1ffdb6b6c0fa6f19a4cce91c96596b6c3a498a2&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from &#39;@polyspec/template&#39;;
 const generatedRecords = { &quot;Page&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } }, &quot;Row&quot;: { &quot;name&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } }, &quot;Slot&quot;: { &quot;template&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;html&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } } };
 const generatedAssign = { &quot;flag&quot;: { &quot;kind&quot;: &quot;boolean&quot;, &quot;optional&quot;: false }, &quot;dangerous&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;empty_list&quot;: { &quot;kind&quot;: &quot;list&quot;, &quot;item&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;empty_map&quot;: { &quot;kind&quot;: &quot;map&quot;, &quot;key&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;value&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;page&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Page&quot;, &quot;optional&quot;: false }, &quot;numbers&quot;: { &quot;kind&quot;: &quot;list&quot;, &quot;item&quot;: { &quot;kind&quot;: &quot;number&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;lookup&quot;: { &quot;kind&quot;: &quot;map&quot;, &quot;key&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;value&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;rows&quot;: { &quot;kind&quot;: &quot;list&quot;, &quot;item&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Row&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: &quot;card.tpl&quot;, &quot;html&quot;: true, &quot;input&quot;: { &quot;label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } } }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
@@ -1262,7 +1295,7 @@ function generatedObject(value, path) { if (value instanceof Map)
     return value; throw new Error(path + &#39; is not an object&#39;); }
 function generatedBindType(value, type, path) { if (value === null || value === undefined) {
     if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return undefined;
+        return null;
     throw new Error(path + &#39; is required&#39;);
 } if (type.kind === &#39;any&#39;)
     return value; if (type.kind === &#39;null&#39;) {
@@ -1286,11 +1319,13 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     if (!object.has(name)) {
         if (!partial &amp;&amp; !type.optional)
             throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
+        if (!partial)
+            result[name] = null;
         continue;
     }
     result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
 } return result; }
-function generatedBindAssign(value) { const bound = bind(value); return generatedBindRecord(bound, generatedAssign, &#39;assign&#39;); }
+function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
 function generatedBindDefinitions(input) { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions = {}; const targets = new Map(); for (const [id, raw] of object) {
     const spec = generatedDefinitionSpecs[id];
     if (spec === undefined)
@@ -1319,123 +1354,176 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function stringify(value) { if (value === null || value === undefined)
-    return &#39;&#39;; if (typeof value === &#39;object&#39;)
-    throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value) { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value) { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0)
-    return false; if (Array.isArray(value))
-    return value.length !== 0; if (value instanceof Map)
-    return value.size !== 0; return true; }
-function generatedDefault(value, fallback) { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value, collection) { if (Array.isArray(collection))
-    return collection.includes(value); if (collection instanceof Map)
-    return collection.has(value); if (typeof collection === &#39;string&#39;)
-    return collection.includes(String(value)); return false; }
-function render_card_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
+function render_card_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;card.tpl&quot;, [0, 30], rootData);
     const label = input.label;
-    out += &quot;&lt;p class=\&quot;card\&quot;&gt;&quot;;
-    out += escape(stringify(label));
-    out += &quot;&lt;/p&gt;\n&quot;;
-    return out;
+    context.at(frame, [0, 16]);
+    context.output.write(&quot;&lt;p class=\&quot;card\&quot;&gt;&quot;);
+    context.at(frame, [16, 25]);
+    context.output.write(runtime.escape(label, frame, [19, 24]));
+    context.at(frame, [25, 30]);
+    context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
-function render_layout_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;layout.tpl&quot;, [0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691], rootData);
     const values = [0, ...assign.numbers];
     const merged = new Map([...assign.lookup, [&quot;z&quot;, &quot;Z&quot;]]);
-    out += &quot;&lt;section&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(assign.page?.title));
-    out += &quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;;
-    out += escape(stringify(assign.dangerous));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;;
-    out += escape(stringify((generatedTruthy(assign.flag) &amp;&amp; generatedTruthy(&quot;x&quot;))));
-    out += &quot;|&quot;;
-    out += escape(stringify((generatedTruthy(false) || generatedTruthy(2))));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;;
-    out += escape(stringify((generatedTruthy(assign.empty_list) &amp;&amp; generatedTruthy(assign.flag))));
-    out += &quot;|&quot;;
-    out += escape(stringify((generatedTruthy(assign.empty_map) &amp;&amp; generatedTruthy(assign.flag))));
-    out += &quot;&lt;/p&gt;\n&lt;p&gt;&quot;;
-    out += escape(stringify(values?.[1]));
-    out += &quot;|&quot;;
-    out += escape(stringify(merged?.get(&quot;z&quot;)));
-    out += &quot;&lt;/p&gt;\n&quot;;
-    if (generatedTruthy((generatedTruthy(assign.flag) &amp;&amp; generatedTruthy((assign.page?.title == &quot;Guide&quot;))))) {
-        out += &quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;;
+    context.at(frame, [62, 76]);
+    context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [76, 90]);
+    context.output.write(runtime.escape(assign.page?.title, frame, [79, 89]));
+    context.at(frame, [90, 115]);
+    context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
+    context.at(frame, [115, 128]);
+    context.output.write(runtime.escape(assign.dangerous, frame, [118, 127]));
+    context.at(frame, [128, 152]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
+    context.at(frame, [152, 167]);
+    context.output.write(runtime.escape((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(&quot;x&quot;) : false; })(), frame, [155, 166]));
+    context.at(frame, [167, 168]);
+    context.output.write(&quot;|&quot;);
+    context.at(frame, [168, 182]);
+    context.output.write(runtime.escape((() =&gt; { const left = false; return runtime.truthy(left) ? true : runtime.truthy(2); })(), frame, [171, 181]));
+    context.at(frame, [182, 215]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
+    context.at(frame, [215, 237]);
+    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_list; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [218, 236]));
+    context.at(frame, [237, 238]);
+    context.output.write(&quot;|&quot;);
+    context.at(frame, [238, 259]);
+    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [241, 258]));
+    context.at(frame, [259, 267]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
+    context.at(frame, [267, 280]);
+    context.output.write(runtime.escape(runtime.index(values, 1), frame, [270, 279]));
+    context.at(frame, [280, 281]);
+    context.output.write(&quot;|&quot;);
+    context.at(frame, [281, 296]);
+    context.output.write(runtime.escape(runtime.index(merged, &quot;z&quot;), frame, [284, 295]));
+    context.at(frame, [296, 301]);
+    context.output.write(&quot;&lt;/p&gt;\n&quot;);
+    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(runtime.binary(&quot;==&quot;, assign.page?.title, &quot;Guide&quot;, frame, [312, 333])) : false; })())) {
+        context.at(frame, [334, 358]);
+        context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);
     }
     else {
-        out += &quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;;
+        context.at(frame, [361, 384]);
+        context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
     }
-    out += &quot;\n&lt;p&gt;&quot;;
-    out += escape(stringify((generatedTruthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;)));
-    out += &quot;|&quot;;
-    out += escape(stringify(((-1) + 3)));
-    out += &quot;|&quot;;
-    out += escape(stringify(generatedDefault(&quot;&quot;, &quot;fallback&quot;)));
-    out += &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;;
+    context.at(frame, [387, 391]);
+    context.output.write(&quot;\n&lt;p&gt;&quot;);
+    context.at(frame, [391, 414]);
+    context.output.write(runtime.escape((runtime.truthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;), frame, [394, 413]));
+    context.at(frame, [414, 415]);
+    context.output.write(&quot;|&quot;);
+    context.at(frame, [415, 425]);
+    context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1, frame, [418, 420]), 3, frame, [418, 424]), frame, [418, 424]));
+    context.at(frame, [425, 426]);
+    context.output.write(&quot;|&quot;);
+    context.at(frame, [426, 454]);
+    context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [429, 453]), frame, [429, 453]));
+    context.at(frame, [454, 464]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
     {
-        const row_entries = (assign.rows ?? []).map((value, key) =&gt; [key, value]);
+        const row_entries = runtime.entries(assign.rows, frame, [464, 581]);
         for (let row_index = 0; row_index &lt; row_entries.length; row_index += 1) {
             const [row_key, row_value] = row_entries[row_index];
             const row = row_value;
             const row_size = row_entries.length;
             const row_first = row_index === 0;
             const row_last = row_index + 1 === row_entries.length;
-            out += &quot;&lt;li&gt;&quot;;
-            out += escape(stringify(row_index));
-            out += &quot;/&quot;;
-            out += escape(stringify(row_size));
-            out += &quot;:&quot;;
-            out += escape(stringify(row?.name));
-            out += &quot;:&quot;;
-            out += escape(stringify(row_first));
-            out += &quot;:&quot;;
-            out += escape(stringify(row_last));
-            out += &quot;&lt;/li&gt;\n&quot;;
+            context.iterations += 1;
+            runtime.limit(&#39;iteration&#39;, context.iterations, frame, [464, 581]);
+            context.at(frame, [479, 483]);
+            context.output.write(&quot;&lt;li&gt;&quot;);
+            context.at(frame, [483, 497]);
+            context.output.write(runtime.escape(row_index, frame, [486, 496]));
+            context.at(frame, [497, 498]);
+            context.output.write(&quot;/&quot;);
+            context.at(frame, [498, 511]);
+            context.output.write(runtime.escape(row_size, frame, [501, 510]));
+            context.at(frame, [511, 512]);
+            context.output.write(&quot;:&quot;);
+            context.at(frame, [512, 524]);
+            context.output.write(runtime.escape(row?.name, frame, [515, 523]));
+            context.at(frame, [524, 525]);
+            context.output.write(&quot;:&quot;);
+            context.at(frame, [525, 539]);
+            context.output.write(runtime.escape(row_first, frame, [528, 538]));
+            context.at(frame, [539, 540]);
+            context.output.write(&quot;:&quot;);
+            context.at(frame, [540, 553]);
+            context.output.write(runtime.escape(row_last, frame, [543, 552]));
+            context.at(frame, [553, 559]);
+            context.output.write(&quot;&lt;/li&gt;\n&quot;);
         }
         if (row_entries.length === 0) {
-            out += &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;;
+            context.at(frame, [563, 578]);
+            context.output.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
         }
     }
-    out += &quot;&lt;/ul&gt;\n&quot;;
-    out += render_partial_tpl(assign, definitions, { values: values });
+    context.at(frame, [582, 588]);
+    context.output.write(&quot;&lt;/ul&gt;\n&quot;);
+    context.enter(&quot;partial.tpl&quot;, frame, [588, 603]);
+    try {
+        render_partial_tpl(assign, definitions, { values: values }, context, runtime, rootData);
+    }
+    finally {
+        context.leave();
+    }
     if (definitions.content !== undefined) {
-        out += &quot;&lt;p&gt;defined&lt;/p&gt;&quot;;
+        context.at(frame, [616, 630]);
+        context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
     }
     else {
-        out += &quot;&lt;p&gt;missing&lt;/p&gt;&quot;;
+        context.at(frame, [633, 647]);
+        context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
     }
-    out += &quot;\n&quot;;
+    context.at(frame, [650, 651]);
+    context.output.write(&quot;\n&quot;);
     {
         const definition = definitions.content;
         if (definition === undefined)
-            throw new Error(&quot;generated definition content is missing&quot;);
-        if (definition?.html !== undefined)
-            out += definition.html;
+            throw runtime.error(frame, [651, 679], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+        if (definition?.html !== undefined) {
+            context.at(frame, [651, 679]);
+            context.output.write(definition.html);
+        }
         else {
             const input = Object.assign({}, definition?.data ?? {}, { label: assign.page?.title });
-            out += render_card_tpl(assign, definitions, input);
+            context.enter(&quot;card.tpl&quot;, frame, [651, 679]);
+            try {
+                render_card_tpl(assign, definitions, input, context, runtime, rootData);
+            }
+            finally {
+                context.leave();
+            }
         }
     }
-    out += &quot;&lt;/section&gt;\n&quot;;
-    return out;
+    context.at(frame, [680, 691]);
+    context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
-function render_partial_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
+function render_partial_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;partial.tpl&quot;, [0, 38], rootData);
     const values = input.values;
-    out += &quot;&lt;p class=\&quot;included\&quot;&gt;&quot;;
-    out += escape(stringify(values?.[2]));
-    out += &quot;&lt;/p&gt;\n&quot;;
-    return out;
+    context.at(frame, [0, 20]);
+    context.output.write(&quot;&lt;p class=\&quot;included\&quot;&gt;&quot;);
+    context.at(frame, [20, 33]);
+    context.output.write(runtime.escape(runtime.index(values, 2), frame, [23, 32]));
+    context.at(frame, [33, 38]);
+    context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
-export function renderTemplate(target, assign, definitions) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData) {
     switch (target) {
-        case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-        default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+        case &quot;layout.tpl&quot;:
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
     }
 }
-export function render(assign, definitions) { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
+    throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
+    throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender {
     execute;
     constructor(execute) { this.execute = execute; }
@@ -1445,8 +1533,14 @@ export class GeneratedProgram {
     runtime;
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+        throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
+        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return context.output.toString();
+    }
+    finally {
+        context.leave();
+    } }); }
     render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
 }
 
@@ -1459,8 +1553,8 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dbdebd1e4fa59081c3c132128e19f8e4bd0345b196de2af0c606115f4e49e165&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;267d6f840887dbbc69f9ae4840aff727346ec4df7c6b652d27423156d39aa5a8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -1637,8 +1731,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;bebab5402b13076edd04ad28cc04983c8db5688052a7e2fcff27ba7a9cfd9e72&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;4e585ea48b38402662b48af04474ce3a977ae3ce998b8ae97aef36221958e5c4&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.rust&quot;,
@@ -1812,8 +1906,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;8caaa8c73f1c7095305141f3f5ed59beda64796ab6cc009a2cac0a34072d2c28&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;685c2bb5431537874b4d306fdda9ceecd85dab036197d777058da554925bc885&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.php&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.php&quot;,
@@ -2008,13 +2102,23 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;4cd265a4b8bd32b8ad8334be0e27f9db2c101a01c8c6cbc8959851034ed3879f&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;26eb0476afb1d0d9aab445dc939ec966ca48ff55da41d08b0f3090af9f10af2d&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;8c95f1682dd85b85cd8c18e4e37e651b8285bb45d1af72ff1e8305fc92db03f9&quot;,
-      &quot;artifactDigest&quot;: &quot;6f9042defd3c83fc80d70fc2f10f1654117e050286a735a8d558530f05adc237&quot;
+      &quot;artifactDigest&quot;: &quot;6f9042defd3c83fc80d70fc2f10f1654117e050286a735a8d558530f05adc237&quot;,
+      &quot;lines&quot;: [
+        0,
+        26,
+        39,
+        51,
+        55,
+        99,
+        103,
+        111
+      ]
     }
   }
 }
@@ -2080,18 +2184,18 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;fcd0e1b10b1292ec95f7ce189bbad3e74ba93423fbb02f10b09297d89af1d8c6&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
       &quot;path&quot;: &quot;empty-state.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;631396130736652dd1edd09ca6732458127bf7be1fd35d92c6f68b5e2aa3c2c7&quot;
+      &quot;artifactDigest&quot;: &quot;54c0b8bc73a687e069f69510f22ac508cca78bfbf4dd6598f83f7dda26c1ffbd&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind, type PreparedRender, type Program, type RenderOptions, type Template } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from &#39;@polyspec/template&#39;;
 
 export interface Assign {
   page: string;
@@ -2106,41 +2210,37 @@ const generatedRecords = {} as const;
 const generatedAssign = {&quot;page&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false}} as const;
 const generatedDefinitionSpecs = {&quot;content&quot;:{&quot;field&quot;:&quot;content&quot;,&quot;target&quot;:null,&quot;html&quot;:true,&quot;input&quot;:{}},&quot;layout&quot;:{&quot;field&quot;:&quot;layout&quot;,&quot;target&quot;:&quot;layout.tpl&quot;,&quot;html&quot;:false,&quot;input&quot;:{}}} as const;
 function generatedObject(value: unknown, path: string): Map&lt;string, unknown&gt; { if (value instanceof Map) return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return undefined; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
-function generatedBindAssign(value: unknown): Assign { const bound = bind(value); return generatedBindRecord(bound, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign; }
+function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return null; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
+function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); if (!partial) result[name] = null; continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
+function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map&lt;string, { target: string | null; html?: string }&gt; };
 function generatedBindDefinitions(input: RenderOptions[&#39;define&#39;]): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions: Record&lt;string, unknown&gt; = {}; const targets = new Map&lt;string, { target: string | null; html?: string }&gt;(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record&lt;string, { field: string; target: string | null; html: boolean; input: Record&lt;string, GeneratedType&gt; }&gt;)[id]; if (spec === undefined) throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;); if (typeof raw === &#39;string&#39;) { if (spec.target === null || raw !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); definitions[spec.field] = {}; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, &#39;define.&#39; + id); const template = entry.get(&#39;template&#39;); const html = entry.get(&#39;html&#39;); const data = entry.get(&#39;data&#39;); if (typeof html === &#39;string&#39;) { if (!spec.html || template !== undefined || data !== undefined) throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true); definitions[spec.field] = { data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
-function stringify(value: unknown): string { if (value === null || value === undefined) return &#39;&#39;; if (typeof value === &#39;object&#39;) throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value: string): string { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value: unknown): boolean { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
-function generatedDefault&lt;T&gt;(value: T, fallback: T): T { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value: unknown, collection: unknown): boolean { if (Array.isArray(collection)) return collection.includes(value); if (collection instanceof Map) return collection.has(value); if (typeof collection === &#39;string&#39;) return collection.includes(String(value)); return false; }
-function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl): string { let out = &#39;&#39;;
+function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;layout.tpl&quot;, [0,26,39,51,55,99,103,111], rootData);
 
-    out += &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;;
+    context.at(frame, [0,26]); context.output.write(&quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;);
     if (definitions.content !== undefined) {
             { const definition = definitions.content;
-            if (definition?.html === undefined) throw new Error(&quot;generated definition content requires html&quot;);
-            out += definition.html;
+            if (definition?.html === undefined) throw runtime.error(frame, [39,50], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+            context.at(frame, [39,50]); context.output.write(definition.html);
             }
     } else {
-            out += &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;;
+            context.at(frame, [55,99]); context.output.write(&quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;);
     }
-    out += &quot;&lt;/main&gt;\n&quot;;
-  return out; }
-export function renderTemplate(target: string, assign: Assign, definitions: Definitions): string {
+    context.at(frame, [103,111]); context.output.write(&quot;&lt;/main&gt;\n&quot;);
+}
+function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
   switch (target) {
-    case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-    default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+    case &quot;layout.tpl&quot;: render_layout_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
   }
 }
-export function render(assign: Assign, definitions: Definitions): string { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input: RenderOptions[&#39;env&#39;]): { timezone: string; now: number } { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;) throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;) throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender implements PreparedRender { private readonly execute: () =&gt; string; constructor(execute: () =&gt; string) { this.execute = execute; } render(): string { return this.execute(); } }
 export class GeneratedProgram implements Program {
   readonly runtime: RuntimeEnvironment;
   constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }
-  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root); return context.output.toString(); } finally { context.leave(); } }); }
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }
 }
 
@@ -2153,18 +2253,18 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dc1284fb71be4b78c7bea96e417e3fd847250eb3e8013bcd15e6c68484995d20&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;80daaf3c00838faf42bc20dd2dda47cd879fe999398a3c1f1f25af1bcc744143&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
       &quot;path&quot;: &quot;empty-state.js&quot;,
-      &quot;artifactDigest&quot;: &quot;8db16f42bb00c9213b78b4c5cad34778d75f779b7ba9780d86de51232805a53f&quot;
+      &quot;artifactDigest&quot;: &quot;d1a5e33118f8786a6f3922edf4de9e7ab339f428fcf83c71243b182f7675c264&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from &#39;@polyspec/template&#39;;
 const generatedRecords = {};
 const generatedAssign = { &quot;page&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: null, &quot;html&quot;: true, &quot;input&quot;: {} }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
@@ -2172,7 +2272,7 @@ function generatedObject(value, path) { if (value instanceof Map)
     return value; throw new Error(path + &#39; is not an object&#39;); }
 function generatedBindType(value, type, path) { if (value === null || value === undefined) {
     if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return undefined;
+        return null;
     throw new Error(path + &#39; is required&#39;);
 } if (type.kind === &#39;any&#39;)
     return value; if (type.kind === &#39;null&#39;) {
@@ -2196,11 +2296,13 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     if (!object.has(name)) {
         if (!partial &amp;&amp; !type.optional)
             throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
+        if (!partial)
+            result[name] = null;
         continue;
     }
     result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
 } return result; }
-function generatedBindAssign(value) { const bound = bind(value); return generatedBindRecord(bound, generatedAssign, &#39;assign&#39;); }
+function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
 function generatedBindDefinitions(input) { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions = {}; const targets = new Map(); for (const [id, raw] of object) {
     const spec = generatedDefinitionSpecs[id];
     if (spec === undefined)
@@ -2229,43 +2331,37 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function stringify(value) { if (value === null || value === undefined)
-    return &#39;&#39;; if (typeof value === &#39;object&#39;)
-    throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value) { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value) { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0)
-    return false; if (Array.isArray(value))
-    return value.length !== 0; if (value instanceof Map)
-    return value.size !== 0; return true; }
-function generatedDefault(value, fallback) { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value, collection) { if (Array.isArray(collection))
-    return collection.includes(value); if (collection instanceof Map)
-    return collection.has(value); if (typeof collection === &#39;string&#39;)
-    return collection.includes(String(value)); return false; }
-function render_layout_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
-    out += &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;;
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;layout.tpl&quot;, [0, 26, 39, 51, 55, 99, 103, 111], rootData);
+    context.at(frame, [0, 26]);
+    context.output.write(&quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;);
     if (definitions.content !== undefined) {
         {
             const definition = definitions.content;
             if (definition?.html === undefined)
-                throw new Error(&quot;generated definition content requires html&quot;);
-            out += definition.html;
+                throw runtime.error(frame, [39, 50], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+            context.at(frame, [39, 50]);
+            context.output.write(definition.html);
         }
     }
     else {
-        out += &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;;
+        context.at(frame, [55, 99]);
+        context.output.write(&quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;);
     }
-    out += &quot;&lt;/main&gt;\n&quot;;
-    return out;
+    context.at(frame, [103, 111]);
+    context.output.write(&quot;&lt;/main&gt;\n&quot;);
 }
-export function renderTemplate(target, assign, definitions) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData) {
     switch (target) {
-        case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-        default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+        case &quot;layout.tpl&quot;:
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
     }
 }
-export function render(assign, definitions) { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
+    throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
+    throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender {
     execute;
     constructor(execute) { this.execute = execute; }
@@ -2275,8 +2371,14 @@ export class GeneratedProgram {
     runtime;
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+        throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
+        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return context.output.toString();
+    }
+    finally {
+        context.leave();
+    } }); }
     render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
 }
 
@@ -2289,8 +2391,8 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dbdebd1e4fa59081c3c132128e19f8e4bd0345b196de2af0c606115f4e49e165&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;267d6f840887dbbc69f9ae4840aff727346ec4df7c6b652d27423156d39aa5a8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -2376,8 +2478,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;bebab5402b13076edd04ad28cc04983c8db5688052a7e2fcff27ba7a9cfd9e72&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;4e585ea48b38402662b48af04474ce3a977ae3ce998b8ae97aef36221958e5c4&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
       &quot;path&quot;: &quot;empty-state.rust&quot;,
@@ -2462,8 +2564,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;8caaa8c73f1c7095305141f3f5ed59beda64796ab6cc009a2cac0a34072d2c28&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;685c2bb5431537874b4d306fdda9ceecd85dab036197d777058da554925bc885&quot;,
   &quot;files&quot;: {
     &quot;empty-state.php&quot;: {
       &quot;path&quot;: &quot;empty-state.php&quot;,
@@ -2556,13 +2658,20 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;4cd265a4b8bd32b8ad8334be0e27f9db2c101a01c8c6cbc8959851034ed3879f&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;26eb0476afb1d0d9aab445dc939ec966ca48ff55da41d08b0f3090af9f10af2d&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;43c54e2a5d18fbbc57a1ecdc73deb95dcaa74ffd9dc6732971be84d015d79263&quot;,
-      &quot;artifactDigest&quot;: &quot;b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689&quot;
+      &quot;artifactDigest&quot;: &quot;b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689&quot;,
+      &quot;lines&quot;: [
+        0,
+        25,
+        46,
+        58,
+        69
+      ]
     }
   }
 }
@@ -2631,18 +2740,18 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;fcd0e1b10b1292ec95f7ce189bbad3e74ba93423fbb02f10b09297d89af1d8c6&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
       &quot;path&quot;: &quot;html-slot.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;0b3e4cce0891aefd6127a59f810f797de5e3083bdc8e789c9cc23e497362f05b&quot;
+      &quot;artifactDigest&quot;: &quot;b13a78e4580bdab765e433d40db1f1c9d3a93dd3c634d4545b38c73e45dc19cb&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind, type PreparedRender, type Program, type RenderOptions, type Template } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from &#39;@polyspec/template&#39;;
 
 export interface Assign {
   heading: string;
@@ -2657,39 +2766,35 @@ const generatedRecords = {} as const;
 const generatedAssign = {&quot;heading&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false}} as const;
 const generatedDefinitionSpecs = {&quot;content&quot;:{&quot;field&quot;:&quot;content&quot;,&quot;target&quot;:null,&quot;html&quot;:true,&quot;input&quot;:{}},&quot;layout&quot;:{&quot;field&quot;:&quot;layout&quot;,&quot;target&quot;:&quot;layout.tpl&quot;,&quot;html&quot;:false,&quot;input&quot;:{}}} as const;
 function generatedObject(value: unknown, path: string): Map&lt;string, unknown&gt; { if (value instanceof Map) return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return undefined; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
-function generatedBindAssign(value: unknown): Assign { const bound = bind(value); return generatedBindRecord(bound, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign; }
+function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return null; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
+function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); if (!partial) result[name] = null; continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
+function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map&lt;string, { target: string | null; html?: string }&gt; };
 function generatedBindDefinitions(input: RenderOptions[&#39;define&#39;]): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions: Record&lt;string, unknown&gt; = {}; const targets = new Map&lt;string, { target: string | null; html?: string }&gt;(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record&lt;string, { field: string; target: string | null; html: boolean; input: Record&lt;string, GeneratedType&gt; }&gt;)[id]; if (spec === undefined) throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;); if (typeof raw === &#39;string&#39;) { if (spec.target === null || raw !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); definitions[spec.field] = {}; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, &#39;define.&#39; + id); const template = entry.get(&#39;template&#39;); const html = entry.get(&#39;html&#39;); const data = entry.get(&#39;data&#39;); if (typeof html === &#39;string&#39;) { if (!spec.html || template !== undefined || data !== undefined) throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true); definitions[spec.field] = { data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
-function stringify(value: unknown): string { if (value === null || value === undefined) return &#39;&#39;; if (typeof value === &#39;object&#39;) throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value: string): string { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value: unknown): boolean { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
-function generatedDefault&lt;T&gt;(value: T, fallback: T): T { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value: unknown, collection: unknown): boolean { if (Array.isArray(collection)) return collection.includes(value); if (collection instanceof Map) return collection.has(value); if (typeof collection === &#39;string&#39;) return collection.includes(String(value)); return false; }
-function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl): string { let out = &#39;&#39;;
+function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;layout.tpl&quot;, [0,25,46,58,69], rootData);
 
-    out += &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(assign.heading));
-    out += &quot;&lt;/h1&gt;\n&quot;;
+    context.at(frame, [0,29]); context.output.write(&quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [29,40]); context.output.write(runtime.escape(assign.heading as unknown as Value, frame, [32,39]));
+    context.at(frame, [40,46]); context.output.write(&quot;&lt;/h1&gt;\n&quot;);
     { const definition = definitions.content;
-    if (definition?.html === undefined) throw new Error(&quot;generated definition content requires html&quot;);
-    out += definition.html;
+    if (definition?.html === undefined) throw runtime.error(frame, [46,57], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    context.at(frame, [46,57]); context.output.write(definition.html);
     }
-    out += &quot;&lt;/section&gt;\n&quot;;
-  return out; }
-export function renderTemplate(target: string, assign: Assign, definitions: Definitions): string {
+    context.at(frame, [58,69]); context.output.write(&quot;&lt;/section&gt;\n&quot;);
+}
+function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
   switch (target) {
-    case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-    default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+    case &quot;layout.tpl&quot;: render_layout_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
   }
 }
-export function render(assign: Assign, definitions: Definitions): string { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input: RenderOptions[&#39;env&#39;]): { timezone: string; now: number } { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;) throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;) throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender implements PreparedRender { private readonly execute: () =&gt; string; constructor(execute: () =&gt; string) { this.execute = execute; } render(): string { return this.execute(); } }
 export class GeneratedProgram implements Program {
   readonly runtime: RuntimeEnvironment;
   constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }
-  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root); return context.output.toString(); } finally { context.leave(); } }); }
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }
 }
 
@@ -2702,18 +2807,18 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dc1284fb71be4b78c7bea96e417e3fd847250eb3e8013bcd15e6c68484995d20&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;80daaf3c00838faf42bc20dd2dda47cd879fe999398a3c1f1f25af1bcc744143&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
       &quot;path&quot;: &quot;html-slot.js&quot;,
-      &quot;artifactDigest&quot;: &quot;efadc79be86f193718705a602d0a9f4808cb7c5a63b7990ff8c83af1f7b2ec40&quot;
+      &quot;artifactDigest&quot;: &quot;2faab97f53f5ad408c841bf178c19ef9e88572ff556d2faa2cb7f2271c81575c&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from &#39;@polyspec/template&#39;;
 const generatedRecords = {};
 const generatedAssign = { &quot;heading&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: null, &quot;html&quot;: true, &quot;input&quot;: {} }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
@@ -2721,7 +2826,7 @@ function generatedObject(value, path) { if (value instanceof Map)
     return value; throw new Error(path + &#39; is not an object&#39;); }
 function generatedBindType(value, type, path) { if (value === null || value === undefined) {
     if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return undefined;
+        return null;
     throw new Error(path + &#39; is required&#39;);
 } if (type.kind === &#39;any&#39;)
     return value; if (type.kind === &#39;null&#39;) {
@@ -2745,11 +2850,13 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     if (!object.has(name)) {
         if (!partial &amp;&amp; !type.optional)
             throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
+        if (!partial)
+            result[name] = null;
         continue;
     }
     result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
 } return result; }
-function generatedBindAssign(value) { const bound = bind(value); return generatedBindRecord(bound, generatedAssign, &#39;assign&#39;); }
+function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
 function generatedBindDefinitions(input) { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions = {}; const targets = new Map(); for (const [id, raw] of object) {
     const spec = generatedDefinitionSpecs[id];
     if (spec === undefined)
@@ -2778,40 +2885,35 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function stringify(value) { if (value === null || value === undefined)
-    return &#39;&#39;; if (typeof value === &#39;object&#39;)
-    throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value) { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value) { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0)
-    return false; if (Array.isArray(value))
-    return value.length !== 0; if (value instanceof Map)
-    return value.size !== 0; return true; }
-function generatedDefault(value, fallback) { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value, collection) { if (Array.isArray(collection))
-    return collection.includes(value); if (collection instanceof Map)
-    return collection.has(value); if (typeof collection === &#39;string&#39;)
-    return collection.includes(String(value)); return false; }
-function render_layout_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
-    out += &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(assign.heading));
-    out += &quot;&lt;/h1&gt;\n&quot;;
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;layout.tpl&quot;, [0, 25, 46, 58, 69], rootData);
+    context.at(frame, [0, 29]);
+    context.output.write(&quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [29, 40]);
+    context.output.write(runtime.escape(assign.heading, frame, [32, 39]));
+    context.at(frame, [40, 46]);
+    context.output.write(&quot;&lt;/h1&gt;\n&quot;);
     {
         const definition = definitions.content;
         if (definition?.html === undefined)
-            throw new Error(&quot;generated definition content requires html&quot;);
-        out += definition.html;
+            throw runtime.error(frame, [46, 57], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+        context.at(frame, [46, 57]);
+        context.output.write(definition.html);
     }
-    out += &quot;&lt;/section&gt;\n&quot;;
-    return out;
+    context.at(frame, [58, 69]);
+    context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
-export function renderTemplate(target, assign, definitions) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData) {
     switch (target) {
-        case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-        default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+        case &quot;layout.tpl&quot;:
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
     }
 }
-export function render(assign, definitions) { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
+    throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
+    throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender {
     execute;
     constructor(execute) { this.execute = execute; }
@@ -2821,8 +2923,14 @@ export class GeneratedProgram {
     runtime;
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+        throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
+        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return context.output.toString();
+    }
+    finally {
+        context.leave();
+    } }); }
     render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
 }
 
@@ -2835,8 +2943,8 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dbdebd1e4fa59081c3c132128e19f8e4bd0345b196de2af0c606115f4e49e165&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;267d6f840887dbbc69f9ae4840aff727346ec4df7c6b652d27423156d39aa5a8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -2920,8 +3028,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;bebab5402b13076edd04ad28cc04983c8db5688052a7e2fcff27ba7a9cfd9e72&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;4e585ea48b38402662b48af04474ce3a977ae3ce998b8ae97aef36221958e5c4&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
       &quot;path&quot;: &quot;html-slot.rust&quot;,
@@ -3004,8 +3112,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;6da16602863cd41d870540351c5a58d1df31bf2bd1770a5ca5e21a5da228801a&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;8caaa8c73f1c7095305141f3f5ed59beda64796ab6cc009a2cac0a34072d2c28&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;685c2bb5431537874b4d306fdda9ceecd85dab036197d777058da554925bc885&quot;,
   &quot;files&quot;: {
     &quot;html-slot.php&quot;: {
       &quot;path&quot;: &quot;html-slot.php&quot;,
@@ -3110,18 +3218,31 @@ createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;4cd265a4b8bd32b8ad8334be0e27f9db2c101a01c8c6cbc8959851034ed3879f&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;26eb0476afb1d0d9aab445dc939ec966ca48ff55da41d08b0f3090af9f10af2d&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;abb0db9b6110b5ca0624d76013aa126c9e66a1486543f52492524c2ce2a52323&quot;,
-      &quot;artifactDigest&quot;: &quot;2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf&quot;
+      &quot;artifactDigest&quot;: &quot;2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf&quot;,
+      &quot;lines&quot;: [
+        0,
+        41,
+        65,
+        76
+      ]
     },
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;2e71cffcf5f4701914b2c4f024251f6aa6a836a13ad1292948f3636d2272af4a&quot;,
-      &quot;artifactDigest&quot;: &quot;57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a&quot;
+      &quot;artifactDigest&quot;: &quot;57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a&quot;,
+      &quot;lines&quot;: [
+        0,
+        7,
+        26,
+        38,
+        46
+      ]
     }
   }
 }
@@ -3230,18 +3351,18 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;fcd0e1b10b1292ec95f7ce189bbad3e74ba93423fbb02f10b09297d89af1d8c6&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
       &quot;path&quot;: &quot;react-boundary.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;ffd8fdd01ec192c794821364f0f7071beaba141480ef427da8e6e5e6980ef4fe&quot;
+      &quot;artifactDigest&quot;: &quot;253f0140885a635e2220b923edc32bae6b6117f2c48e9e043ade30ac01a1067a&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind, type PreparedRender, type Program, type RenderOptions, type Template } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from &#39;@polyspec/template&#39;;
 export interface Page {
   title?: string;
 }
@@ -3268,47 +3389,44 @@ const generatedRecords = {&quot;Page&quot;:{&quot;title&quot;:{&quot;kind&quot;:
 const generatedAssign = {&quot;title&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:true},&quot;heading&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:true},&quot;island_label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:true},&quot;root_label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:true},&quot;defined_label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:true},&quot;page&quot;:{&quot;kind&quot;:&quot;record&quot;,&quot;name&quot;:&quot;Page&quot;,&quot;optional&quot;:true}} as const;
 const generatedDefinitionSpecs = {&quot;content&quot;:{&quot;field&quot;:&quot;content&quot;,&quot;target&quot;:&quot;content.tpl&quot;,&quot;html&quot;:true,&quot;input&quot;:{}},&quot;layout&quot;:{&quot;field&quot;:&quot;layout&quot;,&quot;target&quot;:&quot;layout.tpl&quot;,&quot;html&quot;:false,&quot;input&quot;:{}}} as const;
 function generatedObject(value: unknown, path: string): Map&lt;string, unknown&gt; { if (value instanceof Map) return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return undefined; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
-function generatedBindAssign(value: unknown): Assign { const bound = bind(value); return generatedBindRecord(bound, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign; }
+function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return null; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
+function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); if (!partial) result[name] = null; continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
+function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map&lt;string, { target: string | null; html?: string }&gt; };
 function generatedBindDefinitions(input: RenderOptions[&#39;define&#39;]): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions: Record&lt;string, unknown&gt; = {}; const targets = new Map&lt;string, { target: string | null; html?: string }&gt;(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record&lt;string, { field: string; target: string | null; html: boolean; input: Record&lt;string, GeneratedType&gt; }&gt;)[id]; if (spec === undefined) throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;); if (typeof raw === &#39;string&#39;) { if (spec.target === null || raw !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); definitions[spec.field] = {}; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, &#39;define.&#39; + id); const template = entry.get(&#39;template&#39;); const html = entry.get(&#39;html&#39;); const data = entry.get(&#39;data&#39;); if (typeof html === &#39;string&#39;) { if (!spec.html || template !== undefined || data !== undefined) throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true); definitions[spec.field] = { data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
-function stringify(value: unknown): string { if (value === null || value === undefined) return &#39;&#39;; if (typeof value === &#39;object&#39;) throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value: string): string { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value: unknown): boolean { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
-function generatedDefault&lt;T&gt;(value: T, fallback: T): T { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value: unknown, collection: unknown): boolean { if (Array.isArray(collection)) return collection.includes(value); if (collection instanceof Map) return collection.has(value); if (typeof collection === &#39;string&#39;) return collection.includes(String(value)); return false; }
-function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl): string { let out = &#39;&#39;;
+function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;content.tpl&quot;, [0,41,65,76], rootData);
 
-    out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
-    out += escape(stringify(assign.island_label));
-    out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
-  return out; }
-function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl): string { let out = &#39;&#39;;
+    context.at(frame, [0,44]); context.output.write(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;);
+    context.at(frame, [44,60]); context.output.write(runtime.escape(assign.island_label as unknown as Value, frame, [47,59]));
+    context.at(frame, [60,76]); context.output.write(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
+}
+function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;layout.tpl&quot;, [0,7,26,38,46], rootData);
 
-    out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(assign.title));
-    out += &quot;&lt;/h1&gt;\n&quot;;
+    context.at(frame, [0,11]); context.output.write(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [11,20]); context.output.write(runtime.escape(assign.title as unknown as Value, frame, [14,19]));
+    context.at(frame, [20,26]); context.output.write(&quot;&lt;/h1&gt;\n&quot;);
     { const definition = definitions.content;
-    if (definition === undefined) throw new Error(&quot;generated definition content is missing&quot;);
-    if (definition?.html !== undefined) out += definition.html;
-    else { const input = Object.assign({  }, definition?.data ?? {}, {  }) as Input_content_tpl; out += render_content_tpl(assign, definitions, input); }
+    if (definition === undefined) throw runtime.error(frame, [26,37], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    if (definition?.html !== undefined) { context.at(frame, [26,37]); context.output.write(definition.html); }
+    else { const input = Object.assign({  }, definition?.data ?? {}, {  }) as Input_content_tpl; context.enter(&quot;content.tpl&quot;, frame, [26,37]); try { render_content_tpl(assign, definitions, input, context, runtime, rootData); } finally { context.leave(); } }
     }
-    out += &quot;&lt;/main&gt;\n&quot;;
-  return out; }
-export function renderTemplate(target: string, assign: Assign, definitions: Definitions): string {
+    context.at(frame, [38,46]); context.output.write(&quot;&lt;/main&gt;\n&quot;);
+}
+function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
   switch (target) {
-    case &quot;content.tpl&quot;: return render_content_tpl(assign, definitions, {});
-    case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-    default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+    case &quot;content.tpl&quot;: render_content_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    case &quot;layout.tpl&quot;: render_layout_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
   }
 }
-export function render(assign: Assign, definitions: Definitions): string { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input: RenderOptions[&#39;env&#39;]): { timezone: string; now: number } { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;) throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;) throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender implements PreparedRender { private readonly execute: () =&gt; string; constructor(execute: () =&gt; string) { this.execute = execute; } render(): string { return this.execute(); } }
 export class GeneratedProgram implements Program {
   readonly runtime: RuntimeEnvironment;
   constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }
-  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root); return context.output.toString(); } finally { context.leave(); } }); }
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }
 }
 
@@ -3321,18 +3439,18 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dc1284fb71be4b78c7bea96e417e3fd847250eb3e8013bcd15e6c68484995d20&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;80daaf3c00838faf42bc20dd2dda47cd879fe999398a3c1f1f25af1bcc744143&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
       &quot;path&quot;: &quot;react-boundary.js&quot;,
-      &quot;artifactDigest&quot;: &quot;e9bedfd0dbbf27eaf1b0cf21ef2a601feccdc89a4ee86c6d3ceb317127270f7d&quot;
+      &quot;artifactDigest&quot;: &quot;693195b40ed81960fefbc62eba3e1ab2fe11088f64b63e603ae703f8c1abd07b&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from &#39;@polyspec/template&#39;;
 const generatedRecords = { &quot;Page&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } }, &quot;Slot&quot;: { &quot;template&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;html&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } } };
 const generatedAssign = { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;heading&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;island_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;root_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;defined_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;page&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Page&quot;, &quot;optional&quot;: true } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: &quot;content.tpl&quot;, &quot;html&quot;: true, &quot;input&quot;: {} }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
@@ -3340,7 +3458,7 @@ function generatedObject(value, path) { if (value instanceof Map)
     return value; throw new Error(path + &#39; is not an object&#39;); }
 function generatedBindType(value, type, path) { if (value === null || value === undefined) {
     if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return undefined;
+        return null;
     throw new Error(path + &#39; is required&#39;);
 } if (type.kind === &#39;any&#39;)
     return value; if (type.kind === &#39;null&#39;) {
@@ -3364,11 +3482,13 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     if (!object.has(name)) {
         if (!partial &amp;&amp; !type.optional)
             throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
+        if (!partial)
+            result[name] = null;
         continue;
     }
     result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
 } return result; }
-function generatedBindAssign(value) { const bound = bind(value); return generatedBindRecord(bound, generatedAssign, &#39;assign&#39;); }
+function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
 function generatedBindDefinitions(input) { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions = {}; const targets = new Map(); for (const [id, raw] of object) {
     const spec = generatedDefinitionSpecs[id];
     if (spec === undefined)
@@ -3397,53 +3517,59 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function stringify(value) { if (value === null || value === undefined)
-    return &#39;&#39;; if (typeof value === &#39;object&#39;)
-    throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value) { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value) { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0)
-    return false; if (Array.isArray(value))
-    return value.length !== 0; if (value instanceof Map)
-    return value.size !== 0; return true; }
-function generatedDefault(value, fallback) { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value, collection) { if (Array.isArray(collection))
-    return collection.includes(value); if (collection instanceof Map)
-    return collection.has(value); if (typeof collection === &#39;string&#39;)
-    return collection.includes(String(value)); return false; }
-function render_content_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
-    out += &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;;
-    out += escape(stringify(assign.island_label));
-    out += &quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;;
-    return out;
+function render_content_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;content.tpl&quot;, [0, 41, 65, 76], rootData);
+    context.at(frame, [0, 44]);
+    context.output.write(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;);
+    context.at(frame, [44, 60]);
+    context.output.write(runtime.escape(assign.island_label, frame, [47, 59]));
+    context.at(frame, [60, 76]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
 }
-function render_layout_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
-    out += &quot;&lt;main&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(assign.title));
-    out += &quot;&lt;/h1&gt;\n&quot;;
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;layout.tpl&quot;, [0, 7, 26, 38, 46], rootData);
+    context.at(frame, [0, 11]);
+    context.output.write(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [11, 20]);
+    context.output.write(runtime.escape(assign.title, frame, [14, 19]));
+    context.at(frame, [20, 26]);
+    context.output.write(&quot;&lt;/h1&gt;\n&quot;);
     {
         const definition = definitions.content;
         if (definition === undefined)
-            throw new Error(&quot;generated definition content is missing&quot;);
-        if (definition?.html !== undefined)
-            out += definition.html;
+            throw runtime.error(frame, [26, 37], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+        if (definition?.html !== undefined) {
+            context.at(frame, [26, 37]);
+            context.output.write(definition.html);
+        }
         else {
             const input = Object.assign({}, definition?.data ?? {}, {});
-            out += render_content_tpl(assign, definitions, input);
+            context.enter(&quot;content.tpl&quot;, frame, [26, 37]);
+            try {
+                render_content_tpl(assign, definitions, input, context, runtime, rootData);
+            }
+            finally {
+                context.leave();
+            }
         }
     }
-    out += &quot;&lt;/main&gt;\n&quot;;
-    return out;
+    context.at(frame, [38, 46]);
+    context.output.write(&quot;&lt;/main&gt;\n&quot;);
 }
-export function renderTemplate(target, assign, definitions) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData) {
     switch (target) {
-        case &quot;content.tpl&quot;: return render_content_tpl(assign, definitions, {});
-        case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-        default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+        case &quot;content.tpl&quot;:
+            render_content_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        case &quot;layout.tpl&quot;:
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
     }
 }
-export function render(assign, definitions) { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
+    throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
+    throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender {
     execute;
     constructor(execute) { this.execute = execute; }
@@ -3453,8 +3579,14 @@ export class GeneratedProgram {
     runtime;
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+        throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
+        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return context.output.toString();
+    }
+    finally {
+        context.leave();
+    } }); }
     render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
 }
 
@@ -3467,8 +3599,8 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dbdebd1e4fa59081c3c132128e19f8e4bd0345b196de2af0c606115f4e49e165&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;267d6f840887dbbc69f9ae4840aff727346ec4df7c6b652d27423156d39aa5a8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -3574,8 +3706,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;bebab5402b13076edd04ad28cc04983c8db5688052a7e2fcff27ba7a9cfd9e72&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;4e585ea48b38402662b48af04474ce3a977ae3ce998b8ae97aef36221958e5c4&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
       &quot;path&quot;: &quot;react-boundary.rust&quot;,
@@ -3681,8 +3813,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;626a893aef899d365bd47ef12f10f702170c5b6158becbf139491523bf918d23&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;8caaa8c73f1c7095305141f3f5ed59beda64796ab6cc009a2cac0a34072d2c28&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;685c2bb5431537874b4d306fdda9ceecd85dab036197d777058da554925bc885&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.php&quot;: {
       &quot;path&quot;: &quot;react-boundary.php&quot;,
@@ -3818,18 +3950,34 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;4cd265a4b8bd32b8ad8334be0e27f9db2c101a01c8c6cbc8959851034ed3879f&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;26eb0476afb1d0d9aab445dc939ec966ca48ff55da41d08b0f3090af9f10af2d&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;c79abf1a243053bd7c145f39700c8d00b06a5d23eb222ae4d445e7e6102f6b7d&quot;,
-      &quot;artifactDigest&quot;: &quot;b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd&quot;
+      &quot;artifactDigest&quot;: &quot;b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd&quot;,
+      &quot;lines&quot;: [
+        0,
+        10,
+        29,
+        64,
+        105,
+        164,
+        175
+      ]
     },
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
       &quot;sourceDigest&quot;: &quot;8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06&quot;,
-      &quot;artifactDigest&quot;: &quot;3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c&quot;
+      &quot;artifactDigest&quot;: &quot;3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c&quot;,
+      &quot;lines&quot;: [
+        0,
+        42,
+        66,
+        95,
+        106
+      ]
     }
   }
 }
@@ -4040,18 +4188,18 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;ae5113a78852f937232944f136b632a89232288378d21ed9448ac198267d7eef&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;fcd0e1b10b1292ec95f7ce189bbad3e74ba93423fbb02f10b09297d89af1d8c6&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
       &quot;path&quot;: &quot;scope-precedence.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;4dfa4fa450024e4d8ae2720c95578e02726f320f25b51ce48c588d2b709f0010&quot;
+      &quot;artifactDigest&quot;: &quot;758044de6b9c78e657fc1ddb679d27829268a747034da9c06a2df809ab866410&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind, type PreparedRender, type Program, type RenderOptions, type Template } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap, type MapValue, type PreparedRender, type Program, type RenderOptions, type Template, type Value } from &#39;@polyspec/template&#39;;
 export interface Page {
   title: string;
 }
@@ -4071,54 +4219,51 @@ const generatedRecords = {&quot;Page&quot;:{&quot;title&quot;:{&quot;kind&quot;:
 const generatedAssign = {&quot;page&quot;:{&quot;kind&quot;:&quot;record&quot;,&quot;name&quot;:&quot;Page&quot;,&quot;optional&quot;:false},&quot;root_label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;defined_label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false}} as const;
 const generatedDefinitionSpecs = {&quot;content&quot;:{&quot;field&quot;:&quot;content&quot;,&quot;target&quot;:&quot;content.tpl&quot;,&quot;html&quot;:true,&quot;input&quot;:{&quot;title&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;root_label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;defined_label&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:false},&quot;layout_local&quot;:{&quot;kind&quot;:&quot;string&quot;,&quot;optional&quot;:true}}},&quot;layout&quot;:{&quot;field&quot;:&quot;layout&quot;,&quot;target&quot;:&quot;layout.tpl&quot;,&quot;html&quot;:false,&quot;input&quot;:{}}} as const;
 function generatedObject(value: unknown, path: string): Map&lt;string, unknown&gt; { if (value instanceof Map) return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return undefined; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
-function generatedBindAssign(value: unknown): Assign { const bound = bind(value); return generatedBindRecord(bound, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign; }
+function generatedBindType(value: unknown, type: GeneratedType, path: string): unknown { if (value === null || value === undefined) { if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;) return null; throw new Error(path + &#39; is required&#39;); } if (type.kind === &#39;any&#39;) return value; if (type.kind === &#39;null&#39;) { if (value !== null) throw new Error(path + &#39; is not null&#39;); return null; } if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) { if (typeof value !== type.kind) throw new Error(path + &#39; is not a &#39; + type.kind); return value; } if (type.kind === &#39;list&#39;) { if (!Array.isArray(value)) throw new Error(path + &#39; is not a list&#39;); return value.map((item, index) =&gt; generatedBindType(item, type.item as GeneratedType, path + &#39;[&#39; + index + &#39;]&#39;)); } if (type.kind === &#39;map&#39;) { const object = generatedObject(value, path); return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key as GeneratedType, path + &#39;.key&#39;), generatedBindType(item, type.value as GeneratedType, path + &#39;.&#39; + key)])); } if (type.kind === &#39;record&#39;) return generatedBindRecord(value, generatedRecords[type.name as keyof typeof generatedRecords] as Record&lt;string, GeneratedType&gt;, path); throw new Error(path + &#39; has an unknown generated type&#39;); }
+function generatedBindRecord(value: unknown, fields: Record&lt;string, GeneratedType&gt;, path: string, partial = false): Record&lt;string, unknown&gt; { const object = generatedObject(value, path); const result: Record&lt;string, unknown&gt; = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial &amp;&amp; !type.optional) throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;); if (!partial) result[name] = null; continue; } result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name); } return result; }
+function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record&lt;string, GeneratedType&gt;, &#39;assign&#39;) as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map&lt;string, { target: string | null; html?: string }&gt; };
 function generatedBindDefinitions(input: RenderOptions[&#39;define&#39;]): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions: Record&lt;string, unknown&gt; = {}; const targets = new Map&lt;string, { target: string | null; html?: string }&gt;(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record&lt;string, { field: string; target: string | null; html: boolean; input: Record&lt;string, GeneratedType&gt; }&gt;)[id]; if (spec === undefined) throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;); if (typeof raw === &#39;string&#39;) { if (spec.target === null || raw !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); definitions[spec.field] = {}; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, &#39;define.&#39; + id); const template = entry.get(&#39;template&#39;); const html = entry.get(&#39;html&#39;); const data = entry.get(&#39;data&#39;); if (typeof html === &#39;string&#39;) { if (!spec.html || template !== undefined || data !== undefined) throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target) throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true); definitions[spec.field] = { data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
-function stringify(value: unknown): string { if (value === null || value === undefined) return &#39;&#39;; if (typeof value === &#39;object&#39;) throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value: string): string { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value: unknown): boolean { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0) return false; if (Array.isArray(value)) return value.length !== 0; if (value instanceof Map) return value.size !== 0; return true; }
-function generatedDefault&lt;T&gt;(value: T, fallback: T): T { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value: unknown, collection: unknown): boolean { if (Array.isArray(collection)) return collection.includes(value); if (collection instanceof Map) return collection.has(value); if (typeof collection === &#39;string&#39;) return collection.includes(String(value)); return false; }
-function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl): string { let out = &#39;&#39;;
+function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;content.tpl&quot;, [0,10,29,64,105,164,175], rootData);
   const title = input.title;
   const root_label = input.root_label;
   const defined_label = input.defined_label;
-  const layout_local = input.layout_local;
-    out += &quot;&lt;article&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(title));
-    out += &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;;
-    out += escape(stringify(root_label));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;;
-    out += escape(stringify(defined_label));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;;
-    out += escape(stringify(generatedDefault(layout_local, &quot;missing&quot;)));
-    out += &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;;
-  return out; }
-function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl): string { let out = &#39;&#39;;
+  const layout_local = input.layout_local ?? null;
+    context.at(frame, [0,14]); context.output.write(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [14,23]); context.output.write(runtime.escape(title as unknown as Value, frame, [17,22]));
+    context.at(frame, [23,45]); context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;);
+    context.at(frame, [45,59]); context.output.write(runtime.escape(root_label as unknown as Value, frame, [48,58]));
+    context.at(frame, [59,83]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;);
+    context.at(frame, [83,100]); context.output.write(runtime.escape(defined_label as unknown as Value, frame, [86,99]));
+    context.at(frame, [100,122]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;);
+    context.at(frame, [122,159]); context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [layout_local, &quot;missing&quot;] as unknown as Value[], frame, [125,158]) as unknown as Value, frame, [125,158]));
+    context.at(frame, [159,175]); context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
+}
+function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
+  const frame = new Frame(&quot;layout.tpl&quot;, [0,42,66,95,106], rootData);
 
     const layout_local = &quot;visible only in layout&quot;;
-    out += &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;;
+    context.at(frame, [42,66]); context.output.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
     { const definition = definitions.content;
-    if (definition === undefined) throw new Error(&quot;generated definition content is missing&quot;);
-    if (definition?.html !== undefined) out += definition.html;
-    else { const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: assign.page?.title }) as Input_content_tpl; out += render_content_tpl(assign, definitions, input); }
+    if (definition === undefined) throw runtime.error(frame, [66,94], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    if (definition?.html !== undefined) { context.at(frame, [66,94]); context.output.write(definition.html); }
+    else { const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: assign.page?.title }) as Input_content_tpl; context.enter(&quot;content.tpl&quot;, frame, [66,94]); try { render_content_tpl(assign, definitions, input, context, runtime, rootData); } finally { context.leave(); } }
     }
-    out += &quot;&lt;/section&gt;\n&quot;;
-  return out; }
-export function renderTemplate(target: string, assign: Assign, definitions: Definitions): string {
+    context.at(frame, [95,106]); context.output.write(&quot;&lt;/section&gt;\n&quot;);
+}
+function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
   switch (target) {
-    case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-    default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+    case &quot;layout.tpl&quot;: render_layout_tpl(assign, definitions, {}, context, runtime, rootData); return;
+    default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
   }
 }
-export function render(assign: Assign, definitions: Definitions): string { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input: RenderOptions[&#39;env&#39;]): { timezone: string; now: number } { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;) throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;) throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender implements PreparedRender { private readonly execute: () =&gt; string; constructor(execute: () =&gt; string) { this.execute = execute; } render(): string { return this.execute(); } }
 export class GeneratedProgram implements Program {
   readonly runtime: RuntimeEnvironment;
   constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }
-  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== &#39;string&#39;) throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(() =&gt; registered.html as string); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root); return context.output.toString(); } finally { context.leave(); } }); }
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }
 }
 
@@ -4131,18 +4276,18 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dc1284fb71be4b78c7bea96e417e3fd847250eb3e8013bcd15e6c68484995d20&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;80daaf3c00838faf42bc20dd2dda47cd879fe999398a3c1f1f25af1bcc744143&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
-      &quot;artifactDigest&quot;: &quot;4f1fd50b41fbdbe6cc511d91a4ef863a18bf805d763c53887bb17e3ae8a36b84&quot;
+      &quot;artifactDigest&quot;: &quot;6b2966ca785c48b9b232d1270b500858b496317a242284d31b7a68d0b9e244a6&quot;
     }
   }
 }
 
 // Generated.
-import { RuntimeEnvironment, bind } from &#39;@polyspec/template&#39;;
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from &#39;@polyspec/template&#39;;
 const generatedRecords = { &quot;Page&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } } };
 const generatedAssign = { &quot;page&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Page&quot;, &quot;optional&quot;: false }, &quot;root_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;defined_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: &quot;content.tpl&quot;, &quot;html&quot;: true, &quot;input&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;root_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;defined_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;layout_local&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } } }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
@@ -4150,7 +4295,7 @@ function generatedObject(value, path) { if (value instanceof Map)
     return value; throw new Error(path + &#39; is not an object&#39;); }
 function generatedBindType(value, type, path) { if (value === null || value === undefined) {
     if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return undefined;
+        return null;
     throw new Error(path + &#39; is required&#39;);
 } if (type.kind === &#39;any&#39;)
     return value; if (type.kind === &#39;null&#39;) {
@@ -4174,11 +4319,13 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     if (!object.has(name)) {
         if (!partial &amp;&amp; !type.optional)
             throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
+        if (!partial)
+            result[name] = null;
         continue;
     }
     result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
 } return result; }
-function generatedBindAssign(value) { const bound = bind(value); return generatedBindRecord(bound, generatedAssign, &#39;assign&#39;); }
+function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
 function generatedBindDefinitions(input) { const value = bind(input ?? {}); const object = generatedObject(value, &#39;define&#39;); const definitions = {}; const targets = new Map(); for (const [id, raw] of object) {
     const spec = generatedDefinitionSpecs[id];
     if (spec === undefined)
@@ -4207,61 +4354,69 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function stringify(value) { if (value === null || value === undefined)
-    return &#39;&#39;; if (typeof value === &#39;object&#39;)
-    throw new Error(&#39;a collection cannot be converted to text&#39;); return String(value); }
-function escape(value) { return value.replaceAll(&#39;&amp;&#39;, &#39;&amp;amp;&#39;).replaceAll(&#39;&lt;&#39;, &#39;&amp;lt;&#39;).replaceAll(&#39;&gt;&#39;, &#39;&amp;gt;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&amp;quot;&#39;).replaceAll(&quot;&#39;&quot;, &#39;&amp;#39;&#39;); }
-function generatedTruthy(value) { if (value === null || value === undefined || value === false || value === &#39;&#39; || value === 0)
-    return false; if (Array.isArray(value))
-    return value.length !== 0; if (value instanceof Map)
-    return value.size !== 0; return true; }
-function generatedDefault(value, fallback) { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value, collection) { if (Array.isArray(collection))
-    return collection.includes(value); if (collection instanceof Map)
-    return collection.has(value); if (typeof collection === &#39;string&#39;)
-    return collection.includes(String(value)); return false; }
-function render_content_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
+function render_content_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;content.tpl&quot;, [0, 10, 29, 64, 105, 164, 175], rootData);
     const title = input.title;
     const root_label = input.root_label;
     const defined_label = input.defined_label;
-    const layout_local = input.layout_local;
-    out += &quot;&lt;article&gt;\n&lt;h1&gt;&quot;;
-    out += escape(stringify(title));
-    out += &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;;
-    out += escape(stringify(root_label));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;;
-    out += escape(stringify(defined_label));
-    out += &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;;
-    out += escape(stringify(generatedDefault(layout_local, &quot;missing&quot;)));
-    out += &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;;
-    return out;
+    const layout_local = input.layout_local ?? null;
+    context.at(frame, [0, 14]);
+    context.output.write(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [14, 23]);
+    context.output.write(runtime.escape(title, frame, [17, 22]));
+    context.at(frame, [23, 45]);
+    context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;);
+    context.at(frame, [45, 59]);
+    context.output.write(runtime.escape(root_label, frame, [48, 58]));
+    context.at(frame, [59, 83]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;);
+    context.at(frame, [83, 100]);
+    context.output.write(runtime.escape(defined_label, frame, [86, 99]));
+    context.at(frame, [100, 122]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;);
+    context.at(frame, [122, 159]);
+    context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [layout_local, &quot;missing&quot;], frame, [125, 158]), frame, [125, 158]));
+    context.at(frame, [159, 175]);
+    context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
 }
-function render_layout_tpl(assign, definitions, input) {
-    let out = &#39;&#39;;
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame(&quot;layout.tpl&quot;, [0, 42, 66, 95, 106], rootData);
     const layout_local = &quot;visible only in layout&quot;;
-    out += &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;;
+    context.at(frame, [42, 66]);
+    context.output.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
     {
         const definition = definitions.content;
         if (definition === undefined)
-            throw new Error(&quot;generated definition content is missing&quot;);
-        if (definition?.html !== undefined)
-            out += definition.html;
+            throw runtime.error(frame, [66, 94], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+        if (definition?.html !== undefined) {
+            context.at(frame, [66, 94]);
+            context.output.write(definition.html);
+        }
         else {
             const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: assign.page?.title });
-            out += render_content_tpl(assign, definitions, input);
+            context.enter(&quot;content.tpl&quot;, frame, [66, 94]);
+            try {
+                render_content_tpl(assign, definitions, input, context, runtime, rootData);
+            }
+            finally {
+                context.leave();
+            }
         }
     }
-    out += &quot;&lt;/section&gt;\n&quot;;
-    return out;
+    context.at(frame, [95, 106]);
+    context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
-export function renderTemplate(target, assign, definitions) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData) {
     switch (target) {
-        case &quot;layout.tpl&quot;: return render_layout_tpl(assign, definitions, {});
-        default: throw new Error(&#39;generated template is missing or requires inputs: &#39; + target);
+        case &quot;layout.tpl&quot;:
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
     }
 }
-export function render(assign, definitions) { return renderTemplate(&quot;layout.tpl&quot;, assign, definitions); }
+function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
+    throw new Error(&#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
+    throw new Error(&#39;env.now is not a number&#39;); return { timezone, now }; }
 class GeneratedPreparedRender {
     execute;
     constructor(execute) { this.execute = execute; }
@@ -4271,8 +4426,14 @@ export class GeneratedProgram {
     runtime;
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() =&gt; renderTemplate(targetName, typedAssign, bound.definitions)); }
+        throw new Error(&#39;generated target must be a template name&#39;); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
+        return new GeneratedPreparedRender(() =&gt; registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return context.output.toString();
+    }
+    finally {
+        context.leave();
+    } }); }
     render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
 }
 
@@ -4285,8 +4446,8 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;dbdebd1e4fa59081c3c132128e19f8e4bd0345b196de2af0c606115f4e49e165&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;267d6f840887dbbc69f9ae4840aff727346ec4df7c6b652d27423156d39aa5a8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -4399,8 +4560,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;bebab5402b13076edd04ad28cc04983c8db5688052a7e2fcff27ba7a9cfd9e72&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;4e585ea48b38402662b48af04474ce3a977ae3ce998b8ae97aef36221958e5c4&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
       &quot;path&quot;: &quot;scope-precedence.rust&quot;,
@@ -4513,8 +4674,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;d2d03cc801053533c0a103e13be8553612ce9c9a0ee270f97e218188d23e8a88&quot;,
-  &quot;compilerDigest&quot;: &quot;8caaa8c73f1c7095305141f3f5ed59beda64796ab6cc009a2cac0a34072d2c28&quot;,
+  &quot;contractDigest&quot;: &quot;0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d&quot;,
+  &quot;compilerDigest&quot;: &quot;685c2bb5431537874b4d306fdda9ceecd85dab036197d777058da554925bc885&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.php&quot;: {
       &quot;path&quot;: &quot;scope-precedence.php&quot;,

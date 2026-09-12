@@ -41,6 +41,7 @@ export interface LoopMeta {
 
 // One rendered template location and its context data.
 export class Frame {
+  /** Creates one source-position and data frame for AST or generated execution. */
   constructor(readonly name: string, readonly lines: LineIndex | null, readonly context: MapValue) {}
 }
 
@@ -66,6 +67,7 @@ export interface RuntimeServices {
   hostFunction(name: string): HostFunction | undefined;
 }
 
+/** Owns the mutable state and bounded output of one AST or generated render. */
 export class RenderContext {
   readonly output: Output;
   readonly registry = new Map<string, DefineEntry>();
@@ -74,6 +76,7 @@ export class RenderContext {
   private currentSpan: Span = [0, 0];
   private currentFrame: Frame | null = null;
 
+  /** Creates isolated render state using shared runtime services and bound root data. */
   constructor(
     readonly services: RuntimeServices,
     readonly rootData: MapValue,
@@ -92,11 +95,13 @@ export class RenderContext {
     this.currentSpan = span;
   }
 
+  /** Creates a template error at a frame span, or an entry error without a position. */
   fail(code: ErrorCode, frame: Frame | null, span: Span | null, message: string): TemplateError {
     if (frame === null || span === null) return errorWithoutPosition(code, frame ? frame.name : this.entryName, message);
     return errorAt(code, frame.name, frame.lines, span, message);
   }
 
+  /** Enters a template while enforcing cycle and nesting-depth limits. */
   enter(name: string, frame: Frame | null, span: Span | null): void {
     if (this.chain.includes(name)) throw this.fail('E_LOAD_CYCLE', frame, span, `${name} is already being rendered`);
     const limits = this.services.limits();
@@ -106,6 +111,7 @@ export class RenderContext {
     this.chain.push(name);
   }
 
+  /** Leaves the current template after a direct include or block call. */
   leave(): void {
     this.chain.pop();
   }

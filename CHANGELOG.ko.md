@@ -67,3 +67,4 @@
 - Compiler IR에 명시적인 동적 root type 계약을 추가했다. 동적 root는 선언되지 않은 입력 이름을 optional runtime value로 받으면서 선언된 template input, record, definition, function signature는 유지하고, 고정 `Assign` root는 선언되지 않은 field를 계속 거부한다.
 - Generated runtime 오류가 template source를 읽지 않고 정확한 원본 위치를 유지할 수 있도록 각 template의 source line byte index를 canonical artifact와 typed IR에 보존했다.
 - 네 runtime의 unary와 eager binary 값 의미를 공통 `RuntimeBindings` 계약으로 옮겼다. AST evaluator에는 단축 평가 제어 흐름만 남기고 실제 연산을 위임해 generated backend가 산술·비교·membership 의미를 다시 정의하지 못하게 했다.
+- TypeScript generated program을 package의 `RenderContext`와 `RuntimeBindings`에 연결했다. 직접 template 함수가 공통 값 연산, 함수 호출, source 위치, render chain, 반복 제한, UTF-8 output 제한을 사용하며 생성 검사가 중복 의미 helper를 거부한다.

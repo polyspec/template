@@ -38,7 +38,7 @@ export function emitExpression(node, target) {
   if (node.op === 'root') return target.var(fieldName(node.name), node.valueType.source);
   if (node.op === 'local') return target.local(fieldName(node.name), node.valueType.source);
   if (node.op === 'loop-meta') return target.loopMeta(node.loop, node.field);
-  if (node.op === 'member') return target.member(emitExpression(node.object, target), fieldName(node.key));
+  if (node.op === 'member') return target.member(emitExpression(node.object, target), fieldName(node.key), node.object.valueType, node);
   if (node.op === 'index') return target.index(emitExpression(node.object, target), emitExpression(node.index, target), node.object.valueType);
   if (node.op === 'call') return target.call(node.name, node.args.map(item => emitExpression(item, target)), node);
   if (node.op === 'unary') return target.unary(node.operator, emitExpression(node.operand, target), node);
@@ -68,7 +68,7 @@ export function emitNodes(body, target, level = 1) {
 export function baseTarget(language) {
   const targets = {
     ts: {
-      literal: value => value === null ? 'undefined' : typeof value === 'string' ? quote(value) : String(value),
+      literal: value => value === null ? 'null' : typeof value === 'string' ? quote(value) : String(value),
       var: name => `assign.${name}`,
       local: name => name,
       member: (object, key) => `${object}?.${key}`,

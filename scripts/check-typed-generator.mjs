@@ -3,6 +3,7 @@
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import assert from 'node:assert/strict';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const generated = resolve(root, 'tools/showcase/adapters/generated/typed');
@@ -54,17 +55,25 @@ function target(id) {
 
 function checkTypeScript() {
   const sources = scenarios.map(id => generatedSource(id, 'ts'));
+  const coverageSource = readFileSync(sources[0], 'utf8');
+  assert.match(coverageSource, /new RuntimeBindings\(context\)/);
+  assert.match(coverageSource, /runtime\.binary\(/);
+  assert.match(coverageSource, /runtime\.call\(/);
+  for (const duplicate of ['generatedTruthy', 'generatedDefault', 'generatedIn', 'function stringify(', 'function escape(']) {
+    assert.equal(coverageSource.includes(duplicate), false, `TypeScript generated source duplicates runtime semantics: ${duplicate}`);
+  }
   run('npx', ['tsc', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', ...sources]);
   const output = join(temporary, 'typescript');
   mkdirSync(output);
   run('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output, ...sources]);
-  const imports = scenarios.map((id, index) => `import { GeneratedProgram as Program${index} } from './${id}.js';`).join('\n');
+  const imports = `import { RuntimeEnvironment } from '@polyspec/template';\n` + scenarios.map((id, index) => `import { GeneratedProgram as Program${index} } from './${id}.js';`).join('\n');
   const cases = scenarios.map((id, index) => `{
     const actual = new Program${index}().render(${JSON.stringify(target(id))}, ${fixture(id, 'data.json')}, { define: ${fixture(id, 'define.json')}${fixtureExists(id, 'env.json') ? `, env: ${fixture(id, 'env.json')}` : ''} });
     if (actual !== ${JSON.stringify(expected(id))}) throw new Error(${JSON.stringify(`${id}: TypeScript GeneratedProgram output differs`)});
   }`).join('\n');
   const runner = join(output, 'check.mjs');
-  writeFileSync(runner, `${imports}\n${cases}\n`);
+  const limit = `{ let failed = false; try { new Program0(new RuntimeEnvironment({ outputBytes: 1 })).render(${JSON.stringify(target(scenarios[0]))}, ${fixture(scenarios[0], 'data.json')}, { define: ${fixture(scenarios[0], 'define.json')} }); } catch (error) { failed = error?.code === 'E_RUNTIME_LIMIT' && error?.line > 0 && error?.col > 0; } if (!failed) throw new Error('TypeScript generated output limit did not preserve a positioned template error'); }`;
+  writeFileSync(runner, `${imports}\n${cases}\n${limit}\n`);
   run(process.execPath, [runner]);
 }
 
