@@ -4,6 +4,7 @@
 - Made the generated-program compile gate install its declared PHP runtime dependency, so the standalone showcase and documentation publication checks run from a clean checkout.
 - Published every Korean documentation pair under the `/ko/` locale with Korean navigation and `ko-KR` HTML metadata, and added a static-site regression gate for locale routing and unresolved theme interpolation.
 - Updated the Pages configure, artifact upload and deployment actions to their current stable majors.
+- Disabled the Go dependency cache in CI because the package has no external modules or checksum file, avoiding an invalid root-module probe.
 
 [한국어](CHANGELOG.ko.md).
 
