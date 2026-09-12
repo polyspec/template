@@ -1,114 +1,69 @@
 {
-  "schema": 1,
-  "name": "TypedTemplateCompiler",
-  "purpose": "Define one typed compiler structure that every generated language module must expose.",
+  "schema": 2,
+  "name": "TemplateCompiler",
+  "purpose": "Define one compiler, artifact and program contract followed by every core language.",
+  "supportLevels": {
+    "core": {"languages": ["typescript", "go", "rust", "php"], "compileModes": ["ast", "gen"], "conformanceCases": 211},
+    "extension": {"languages": ["php-extension"], "compileModes": ["ast"]},
+    "browser": {"languages": ["javascript-esm"], "source": "typescript", "compileModes": ["ast", "gen"]}
+  },
   "types": {
-    "SourceGraph": {
-      "fields": ["entry", "templates"],
-      "invariant": "Every template is a canonical AST artifact reachable from the graph root."
+    "CompileMode": {"variants": ["ast", "gen"], "invariant": "Selects the compiled program representation only."},
+    "ArtifactRefresh": {"variants": ["dev", "true", "false"], "invariant": "Controls build artifact regeneration independently of compile mode."},
+    "SourceGraph": {"fields": ["entry", "templates"], "invariant": "Contains normalized UTF-8 sources before parsing and is never read by a deployed false-refresh program."},
+    "TypeManifest": {"fields": ["entry", "fields", "records", "functions", "defines", "templates"], "invariant": "Types, host function signatures and fixed definition targets are explicit compiler inputs."},
+    "TypedProgram": {"fields": ["entry", "fields", "records", "functions", "definitions", "templates"], "invariant": "All symbols, paths, expression types, function calls and block inputs are resolved before artifact emission."},
+    "ArtifactManifest": {"fields": ["schema", "mode", "target", "entry", "sourceDigest", "typeDigest", "contractDigest", "files"], "invariant": "Digests bind the artifact to its complete sources, types and compiler contract."},
+    "RenderRequest": {"fields": ["target", "assign", "define", "env"], "invariant": "assign is root data and define is the template registry; both modes receive the same normalized values."},
+    "Program": {"operations": ["prepare", "render"], "invariant": "AstProgram and GeneratedProgram are disjoint peer implementations with identical observable behavior."},
+    "AstProgram": {"fields": ["artifact", "runtimeBindings"], "operation": "Interpret a precompiled canonical AST without parsing during render."},
+    "GeneratedProgram": {"fields": ["artifact", "runtimeBindings"], "operation": "Call generated template functions directly without retaining a parser or AST interpreter."},
+    "RuntimeBindings": {
+      "operations": ["truthy", "stringify", "escape", "number", "equal", "compare", "member", "index", "entries", "call", "limit", "error"],
+      "invariant": "AST evaluation and generated code share the same language-specific value and error semantics."
     },
-    "TypeManifest": {
-      "fields": ["entry", "fields", "records", "functions", "defines", "templates"],
-      "invariant": "Types and fixed definition targets are explicit compiler inputs and are never inferred from one request value."
-    },
-    "FunctionSignature": {
-      "fields": ["implementation", "args", "returns"],
-      "invariant": "The generated-module level accepts only explicitly supported built-ins; unsupported built-ins and host functions fail before source emission."
-    },
-    "TypedProgram": {
-      "fields": ["entry", "fields", "records", "functions", "definitions", "templates"],
-      "invariant": "All symbols, paths, expression types and block inputs are resolved before a language backend runs."
-    },
-    "DefinitionData<T>": {
-      "fields": "one presence-preserving optional field for every Input<T> field",
-      "invariant": "An absent field does not overwrite assign; a present nullable field can explicitly carry null."
-    },
-    "Definition<T>": {
-      "fields": ["html", "data"],
-      "invariant": "html bypasses template execution; data has the fixed DefinitionData<T> type of the declared target template."
-    },
-    "Definitions": {
-      "fields": "one optional Definition<T> field for every declared define key",
-      "invariant": "Generated code cannot select a template target absent from the type manifest."
-    },
-    "Input<T>": {
-      "fields": "the fields declared for template T",
-      "invariant": "Block input precedence is assign, definition.data, block scope."
-    },
-    "GeneratedModule": {
-      "types": ["Assign", "DefinitionData<T>", "Definition<T>", "Definitions", "Input<T>"],
-      "operations": ["renderTemplate", "render"],
-      "invariant": "A block invokes its generated child function directly; callers do not supply a pre-rendered string slot."
-    }
+    "FunctionSignature": {"fields": ["implementation", "args", "returns"], "invariant": "Built-in and host signatures are checked before artifact emission; implementations are resolved at program load."},
+    "DefinitionData<T>": {"fields": "one presence-preserving optional field for every Input<T> field", "invariant": "An absent field does not overwrite assign; a present nullable field carries null."},
+    "Definition<T>": {"fields": ["html", "data"], "invariant": "html bypasses template execution; data has the fixed DefinitionData<T> type of the declared target."},
+    "Definitions": {"fields": "one optional Definition<T> field for every declared define key", "invariant": "Generated code cannot select a target absent from the manifest."},
+    "Input<T>": {"fields": "the fields declared for template T", "invariant": "Block input precedence is assign, definition.data, then block scope."}
+  },
+  "components": {
+    "Compiler": {"owns": ["sourceGraph", "typeManifest", "typedProgram"], "operations": ["loadSourceGraph", "parseSourceGraph", "lowerSourceGraph", "emitArtifact"]},
+    "LanguageBackend": {"owns": ["target"], "operations": ["emitDeclarations", "emitRuntime", "emitTemplates", "emitEntry"]},
+    "ArtifactStore": {"owns": ["artifactManifest", "files"], "operations": ["load", "regenerate", "loadOrRefresh"]},
+    "Engine": {"owns": ["program"], "operations": ["prepare", "render"]},
+    "PageCache": {"owns": ["html", "ttl"], "operations": ["get", "put", "getOrSet"]}
   },
   "operations": [
-    {
-      "name": "loadSourceGraph",
-      "owner": "Compiler",
-      "parameters": ["source graph manifest"],
-      "returns": "SourceGraph"
-    },
-    {
-      "name": "lowerSourceGraph",
-      "owner": "Compiler",
-      "parameters": ["SourceGraph", "TypeManifest"],
-      "returns": "TypedProgram"
-    },
-    {
-      "name": "emit",
-      "owner": "LanguageBackend",
-      "parameters": ["TypedProgram"],
-      "returns": "GeneratedModule source"
-    },
-    {
-      "name": "renderTemplate",
-      "owner": "GeneratedModule",
-      "parameters": ["target", "Assign", "Definitions"],
-      "returns": "UTF-8 string"
-    },
-    {
-      "name": "render",
-      "owner": "GeneratedModule",
-      "parameters": ["Assign", "Definitions"],
-      "returns": "UTF-8 string"
-    }
+    {"name": "loadSourceGraph", "owner": "Compiler", "parameters": ["source manifest"], "returns": "SourceGraph"},
+    {"name": "parseSourceGraph", "owner": "Compiler", "parameters": ["SourceGraph"], "returns": "canonical AST graph"},
+    {"name": "lowerSourceGraph", "owner": "Compiler", "parameters": ["canonical AST graph", "TypeManifest"], "returns": "TypedProgram"},
+    {"name": "emitArtifact", "owner": "Compiler", "parameters": ["TypedProgram", "CompileMode", "LanguageBackend"], "returns": "ArtifactManifest and files"},
+    {"name": "emitDeclarations", "owner": "LanguageBackend", "parameters": ["TypedProgram"], "returns": "host declarations"},
+    {"name": "emitRuntime", "owner": "LanguageBackend", "parameters": ["TypedProgram"], "returns": "host runtime bindings"},
+    {"name": "emitTemplates", "owner": "LanguageBackend", "parameters": ["TypedProgram"], "returns": "host template functions"},
+    {"name": "emitEntry", "owner": "LanguageBackend", "parameters": ["TypedProgram"], "returns": "host program entry"},
+    {"name": "load", "owner": "ArtifactStore", "parameters": ["ArtifactManifest"], "returns": "Program"},
+    {"name": "regenerate", "owner": "ArtifactStore", "parameters": ["CompileMode", "LanguageBackend"], "returns": "ArtifactManifest"},
+    {"name": "loadOrRefresh", "owner": "ArtifactStore", "parameters": ["CompileMode", "ArtifactRefresh"], "returns": "Program"},
+    {"name": "prepare", "owner": "Program", "parameters": ["RenderRequest"], "returns": "PreparedRender"},
+    {"name": "render", "owner": "Program", "parameters": ["RenderRequest"], "returns": "UTF-8 string"},
+    {"name": "get", "owner": "PageCache", "parameters": ["cacheKey"], "returns": "UTF-8 string or miss"},
+    {"name": "put", "owner": "PageCache", "parameters": ["cacheKey", "html", "ttl"], "returns": "void"},
+    {"name": "getOrSet", "owner": "PageCache", "parameters": ["cacheKey", "ttl", "render"], "returns": "UTF-8 string"}
   ],
   "languages": {
-    "typescript": {
-      "assign": "Assign",
-      "definition": "Definition<T>",
-      "definitionData": "DefinitionData<T>",
-      "definitions": "Definitions",
-      "input": "Input_<template>",
-      "renderTemplate": "renderTemplate",
-      "render": "render"
-    },
-    "go": {
-      "assign": "Assign",
-      "definition": "Definition[T]",
-      "definitionData": "DefinitionData_<template>",
-      "definitions": "Definitions",
-      "input": "Input_<template>",
-      "renderTemplate": "RenderTemplate",
-      "render": "Render"
-    },
-    "rust": {
-      "assign": "Assign",
-      "definition": "Definition<T>",
-      "definitionData": "DefinitionData_<template>",
-      "definitions": "Definitions",
-      "input": "Input_<template>",
-      "renderTemplate": "render_template",
-      "render": "render"
-    },
-    "php": {
-      "assign": "Assign",
-      "definition": "Definition",
-      "definitionData": "DefinitionData_<template>",
-      "definitions": "Definitions",
-      "input": "Input_<template>",
-      "renderTemplate": "render_template",
-      "render": "render"
-    }
-  }
+    "typescript": {"backend": "TypeScriptBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "TemplateError"},
+    "go": {"backend": "GoBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "error"},
+    "rust": {"backend": "RustBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "Result"},
+    "php": {"backend": "PhpBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "TemplateError"}
+  },
+  "forbidden": [
+    "generated renderer callback",
+    "AST fallback from generated mode",
+    "showcase-specific compiler",
+    "legacy wrapper compatibility",
+    "parsing or code generation during render"
+  ]
 }
