@@ -183,7 +183,7 @@ docs-verify-idempotent: ## Build the documentation site twice and compare
 
 docs-static-check: ## Build the documentation site as static files
 	npx vitepress build docs
-	test -s docs/.vitepress/dist/index.html
+	node scripts/check-docs-static.mjs
 
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
 	node scripts/generate-showcase-contract.mjs
