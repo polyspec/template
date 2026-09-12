@@ -223,7 +223,7 @@ T6.2를 완료했다. `scripts/check-doc-coverage.mjs`는 `make doc-coverage`와
 
 T6.7은 공통 레이아웃, 중첩 파셜과 반복문, define 데이터와 scope 우선순위, HTML 슬롯, 없는 define을 다룬다. RT-43–RT-53에 따라 모든 시나리오는 모든 구현에서 같은 JSON 형태의 assign과 직접 경로 대응 define 레지스트리를 사용하며 모든 렌더는 `layout` target에서 시작한다. 어댑터 타입, 필드, 연산과 상태 전이는 `tools/compiler/interface.json`에 선언하고 생성기가 언어별 선언부와 Mermaid 원본을 만든다. `make contract-check`가 매핑된 구현과 실패 후 복구를 검증한다. 포털 레이아웃과 콘텐츠는 원본 스냅샷 바이트를 유지한다. `make showcase`가 5개 구현의 원시 출력과 반복 렌더 해시를 비교하고 AST program과 제품 compiler artifact를 대조하며 HTML·JSON·동일 조건 모드 벤치마크 결과물을 쓴다. `make showcase-check`가 결과물과 정적 HTML 페이지를 검증한다. 예제는 애플리케이션 컨트롤러나 서비스에 의존하지 않는다.
 
-T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext`가 PHP 확장을 빌드하고 적합성 211건 중 211건과 확장 테스트 236개를 통과했다. `make showcase`가 출력 동일성과 반복 렌더 검사를 통과했다. 기능 상태와 변경 기록에 이 결과를 기록했다.
+T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext`가 PHP 확장을 빌드하고 적합성 216건 중 216건과 확장 테스트 236개를 통과했다. `make showcase`가 출력 동일성과 반복 렌더 검사를 통과했다. 기능 상태와 변경 기록에 이 결과를 기록했다.
 
 종료 기준: `make check`, `make showcase-check`, `make docs-verify-idempotent` 통과.
 
@@ -236,7 +236,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T7.1 | compiler/runtime manifest 하나, 생성 선언부, 소유 관계와 지원 수준 도표를 정의하고 TypeScript·Go·Rust·PHP 구조 이탈을 거부 | `make compiler-interface-check`; `make runtime-interface-check` | [x] |
 | T7.2 | generated callback과 showcase 전용 생성을 하나의 compiler pipeline과 네 host backend로 교체하고 호환 옵션과 fallback 경로 제거 | package test; compiler mutation test | [x] |
 | T7.3 | 모든 명세 node, expression, 내장 함수와 host 함수를 generated 실행에서 지원 | generated compiler test | [x] |
-| T7.4 | 211개 케이스 전체를 TypeScript·Go·Rust·PHP의 AST와 generated 실행으로 검증 | `make conformance-all-modes` | [x] |
+| T7.4 | 216개 케이스 전체를 TypeScript·Go·Rust·PHP의 AST와 generated 실행으로 검증 | `make conformance-all-modes` | [x] |
 | T7.5 | build 경계 artifact 갱신 검증: `dev`는 항상 재생성, `true`는 digest 변경 시 재생성, `false`는 source를 읽지 않음 | artifact lifecycle test | [x] |
 | T7.6 | npm·Go·Cargo·Composer artifact를 격리한 임시 프로젝트에 설치하고 같은 assign/define page 렌더 | `make consumer-check` | [x] |
 | T7.7 | production artifact로 parser 기반 showcase 구문 강조, 크기 제한 artifact/source 보기와 React island 예제 생성 | `make showcase-check` | [x] |
@@ -264,7 +264,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 - Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.
-- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 mode·언어·케이스 조합 1,688개를 모두 통과하고 generated 실행에서 AST로 fallback하지 않음.
+- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 mode·언어·케이스 조합 1,728개를 모두 통과하고 generated 실행에서 AST로 fallback하지 않음.
 - `make release-test-matrix`가 단위, generated source compile, 적합성, 위치 오류와 실패 복구, mutation 거부, 격리 소비, browser DOM 출력, 성능 동일성의 각 release 계층을 독립적으로 증명.
 - 깨끗한 checkout에서 `make consumer-check`, `make showcase-check`, `make docs-verify-idempotent`, `make release-check` 통과.
 - `docs/features.md`와 `docs/features.ko.md`가 모든 행에 동일한 상태 필드와 근거 링크를 가짐.
