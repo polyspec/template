@@ -48,6 +48,7 @@ const program = lowerSourceGraph(graph, manifest);
 const nodeOps = new Set();
 const exprOps = new Set();
 function visitExpr(expr) {
+  if (!Array.isArray(expr.span) || expr.span.length !== 2) throw new Error(`compiler IR expression ${expr.op} lost its source span`);
   exprOps.add(expr.op);
   for (const value of Object.values(expr)) {
     if (value?.op) visitExpr(value);
@@ -60,6 +61,7 @@ function visitExpr(expr) {
 }
 function visitNodes(nodes) {
   for (const node of nodes) {
+    if (!Array.isArray(node.span) || node.span.length !== 2) throw new Error(`compiler IR node ${node.op} lost its source span`);
     nodeOps.add(node.op);
     if (node.expr) visitExpr(node.expr);
     if (node.iter) visitExpr(node.iter);
@@ -87,13 +89,24 @@ try {
   if (!String(error).includes('undeclared')) throw error;
 }
 
+const hostFunction = structuredClone(manifest);
+hostFunction.functions.default.implementation = 'host';
+const hostProgram = lowerSourceGraph(graph, hostFunction);
+if (hostProgram.functions.get('default').implementation !== 'host') throw new Error('compiler IR did not preserve a host function signature');
+
+const dynamic = structuredClone(manifest);
+dynamic.fields.page = 'any';
+dynamic.fields.lookup = 'any';
+dynamic.fields.rows = 'any';
+lowerSourceGraph(graph, dynamic);
+
 const unsupportedFunction = structuredClone(manifest);
-unsupportedFunction.functions.custom = { implementation: 'host', args: ['string'], returns: 'string' };
+unsupportedFunction.functions.custom = { implementation: 'remote', args: ['string'], returns: 'string' };
 try {
   lowerSourceGraph(graph, unsupportedFunction);
-  throw new Error('compiler IR accepted a function outside the generated-module support level');
+  throw new Error('compiler IR accepted an unknown function implementation');
 } catch (error) {
-  if (!String(error).includes('generated-module level')) throw error;
+  if (!String(error).includes('builtin or host')) throw error;
 }
 
-process.stdout.write('compiler IR: all node and expression variants lowered; invalid symbols rejected\n');
+process.stdout.write('compiler IR: all variants and source spans lowered; dynamic values and host signatures accepted; invalid declarations rejected\n');
