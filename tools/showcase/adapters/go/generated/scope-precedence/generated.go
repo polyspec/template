@@ -1,6 +1,6 @@
 // Generated.
 package generated
-import ("bytes"; "encoding/json"; "fmt"; "reflect"; "strings"; template "github.com/polyspec/template"; "github.com/polyspec/template/value")
+import ("bytes"; "encoding/json"; "fmt"; "time"; template "github.com/polyspec/template"; "github.com/polyspec/template/ast"; "github.com/polyspec/template/errs"; "github.com/polyspec/template/functions"; "github.com/polyspec/template/render"; "github.com/polyspec/template/value")
 type Page struct { Title string `json:"title"` }
 type Assign struct {
 	Page Page `json:"page"`
@@ -17,45 +17,55 @@ type ArtifactManifest struct { Schema int; Mode string; Target string; Entry str
 type OrderedEntry[K comparable, V any] struct { Key K; Value V }
 type OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }
 func NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }
-func (m *OrderedMap[K, V]) Set(key K, value V) { for index := range m.entries { if m.entries[index].Key == key { m.entries[index].Value = value; return } }; m.entries = append(m.entries, OrderedEntry[K, V]{key, value}) }
+func (m *OrderedMap[K, V]) Set(key K, item V) { for index := range m.entries { if m.entries[index].Key == key { m.entries[index].Value = item; return } }; m.entries = append(m.entries, OrderedEntry[K, V]{key, item}) }
 func (m OrderedMap[K, V]) Get(key K) (V, bool) { for _, entry := range m.entries { if entry.Key == key { return entry.Value, true } }; var zero V; return zero, false }
 func (m OrderedMap[K, V]) Entries() []OrderedEntry[K, V] { return m.entries }
+func (m OrderedMap[K, V]) generatedValue() value.Value { result := value.NewOrderedMap(); for _, entry := range m.entries { result.Set(fmt.Sprint(entry.Key), generatedValue(entry.Value)) }; return result }
 func (m *OrderedMap[K, V]) UnmarshalJSON(data []byte) error { decoder := json.NewDecoder(bytes.NewReader(data)); token, err := decoder.Token(); if err != nil { return err }; if token != json.Delim('{') { return fmt.Errorf("generated ordered map must be an object") }; m.entries = nil; for decoder.More() { rawKey, err := decoder.Token(); if err != nil { return err }; keyText, ok := rawKey.(string); if !ok { return fmt.Errorf("generated ordered map key is not text") }; var key K; if err := json.Unmarshal([]byte(strconvQuote(keyText)), &key); err != nil { return err }; var item V; if err := decoder.Decode(&item); err != nil { return err }; m.Set(key, item) }; _, err = decoder.Token(); return err }
-func strconvQuote(value string) string { data, _ := json.Marshal(value); return string(data) }
-func generatedMapGet[K comparable, V any](value OrderedMap[K, V], key K) V { result, _ := value.Get(key); return result }
-func generatedListGet[T any](value []T, index int) T { if index >= 0 && index < len(value) { return value[index] }; var zero T; return zero }
-func generatedTernary[T any](test bool, yes, no T) T { if test { return yes }; return no }
-func generatedEscape(value any) string { if value == nil { return "" }; return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "\"", "&quot;", "'", "&#39;").Replace(fmt.Sprint(value)) }
-func generatedTruthy(value any) bool { if value == nil { return false }; reflected := reflect.ValueOf(value); switch reflected.Kind() { case reflect.Bool: return reflected.Bool(); case reflect.Float32, reflect.Float64: return reflected.Float() != 0; case reflect.String, reflect.Array, reflect.Slice, reflect.Map: return reflected.Len() != 0; case reflect.Struct: field := reflected.FieldByName("entries"); if field.IsValid() { return field.Len() != 0 } }; return true }
-func generatedUnary(op string, value any) any { if op == "!" { return !generatedTruthy(value) }; return -value.(float64) }
-func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
-func generatedDefault(value, fallback any) any { if generatedTruthy(value) { return value }; return fallback }
-func valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }
+func strconvQuote(input string) string { data, _ := json.Marshal(input); return string(data) }
+type generatedValueSource interface { generatedValue() value.Value }
+func generatedPanic(err error) { if err != nil { panic(err) } }
+func generatedValue(input any) value.Value { if source, ok := input.(generatedValueSource); ok { return source.generatedValue() }; result, err := value.Bind(input); generatedPanic(err); return result }
+func generatedResult[T any](input value.Value) T { if result, ok := input.(T); ok { return result }; var result T; generatedPanic(generatedDecode(input, &result)); return result }
+func generatedTruthy(runtime *render.RuntimeBindings, input any) bool { return runtime.Truthy(generatedValue(input)) }
+func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, input any, frame *render.Frame, span ast.Span) T { result, err := runtime.Unary(operator, generatedValue(input), frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
+func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
+func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &span)) }
+func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &span)) }
+func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
+func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
-func render_content_tpl(assign Assign, definitions Definitions, input Input_content_tpl) string { var out strings.Builder
+func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: "Z", Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != "" { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
+func render_content_tpl(assign Assign, definitions Definitions, input Input_content_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) {
+	frame := render.NewFrame("content.tpl", errs.LineIndex{0, 10, 29, 64, 105, 164, 175}, rootData)
 title := input.Title
 root_label := input.Root_label
 defined_label := input.Defined_label
 layout_local := input.Layout_local
-    out.WriteString("<article>\n<h1>")
-    out.WriteString(generatedEscape(title))
-    out.WriteString("</h1>\n<p class=\"root\">")
-    out.WriteString(generatedEscape(root_label))
-    out.WriteString("</p>\n<p class=\"defined\">")
-    out.WriteString(generatedEscape(defined_label))
-    out.WriteString("</p>\n<p class=\"local\">")
-    out.WriteString(generatedEscape(generatedDefault(valueOrZero(layout_local), "missing")))
-    out.WriteString("</p>\n</article>\n")
- return out.String() }
-func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl) string { var out strings.Builder
+    generatedWrite(context, "<article>\n<h1>", frame, ast.Span{0, 14})
+    generatedWrite(context, generatedEscape(runtime, title, frame, ast.Span{17, 22}), frame, ast.Span{14, 23})
+    generatedWrite(context, "</h1>\n<p class=\"root\">", frame, ast.Span{23, 45})
+    generatedWrite(context, generatedEscape(runtime, root_label, frame, ast.Span{48, 58}), frame, ast.Span{45, 59})
+    generatedWrite(context, "</p>\n<p class=\"defined\">", frame, ast.Span{59, 83})
+    generatedWrite(context, generatedEscape(runtime, defined_label, frame, ast.Span{86, 99}), frame, ast.Span{83, 100})
+    generatedWrite(context, "</p>\n<p class=\"local\">", frame, ast.Span{100, 122})
+    generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(valueOrZero(layout_local)), generatedValue("missing")}, frame, ast.Span{125, 158}), frame, ast.Span{125, 158}), frame, ast.Span{122, 159})
+    generatedWrite(context, "</p>\n</article>\n", frame, ast.Span{159, 175})
+}
+func render_layout_tpl(assign Assign, definitions Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) {
+	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 42, 66, 95, 106}, rootData)
 
     layout_local := "visible only in layout"
     _ = layout_local
-    out.WriteString("<section class=\"scope\">\n")
+    generatedWrite(context, "<section class=\"scope\">\n", frame, ast.Span{42, 66})
     { definition := definitions.Content
-    if definition == nil { panic("generated definition content is missing") }
-    if definition != nil && definition.HTML != nil { out.WriteString(*definition.HTML) } else {
+    if definition == nil { panic(runtime.Error(frame, ast.Span{66, 94}, errs.RuntimeBlockUndefined, "define content is not registered")) }
+    if definition != nil && definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{66, 94}) } else {
         input := Input_content_tpl{Root_label: assign.Root_label, Defined_label: assign.Defined_label}
         if definition != nil && definition.Data != nil {
             if definition.Data.Title != nil { input.Title = *definition.Data.Title }
@@ -64,16 +74,16 @@ func render_layout_tpl(assign Assign, definitions Definitions, input Input_layou
             if definition.Data.Layout_local != nil { input.Layout_local = *definition.Data.Layout_local }
         }
         input.Title = assign.Page.Title
-        out.WriteString(render_content_tpl(assign, definitions, input))
+        generatedEnter(context, "content.tpl", frame, ast.Span{66, 94})
+        func() { defer context.Leave(); render_content_tpl(assign, definitions, input, context, runtime, rootData) }()
     }
     }
-    out.WriteString("</section>\n")
- return out.String() }
-func RenderTemplate(target string, assign Assign, definitions Definitions) string { switch target {
-	case "layout.tpl": return render_layout_tpl(assign, definitions, Input_layout_tpl{})
-	default: panic("generated template is missing or requires inputs: " + target)
+    generatedWrite(context, "</section>\n", frame, ast.Span{95, 106})
+}
+func renderTemplate(target string, assign Assign, definitions Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap) { switch target {
+	case "layout.tpl": render_layout_tpl(assign, definitions, Input_layout_tpl{}, context, runtime, rootData); return
+	default: panic(context.Fail(errs.LoadNotFound, nil, nil, "template " + target + " does not exist"))
 } }
-func Render(assign Assign, definitions Definitions) string { return RenderTemplate("layout.tpl", assign, definitions) }
 type generatedTarget struct { target string; html *string }
 func generatedBindDefinitions(input map[string]template.DefineInput) (Definitions, map[string]generatedTarget, error) { plain := map[string]any{}; targets := map[string]generatedTarget{}; for id, input := range input { switch id {
 		case "content":
@@ -86,9 +96,8 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (Definition
 	} }; var definitions Definitions; if err := generatedDecode(plain, &definitions); err != nil { return Definitions{}, nil, err }; return definitions, targets, nil }
 type GeneratedProgram struct { Runtime *template.RuntimeEnvironment }
 func NewGeneratedProgram(options template.Options) (*GeneratedProgram, error) { runtime, err := template.NewRuntimeEnvironment(options.Limits, options.Functions); if err != nil { return nil, err }; return &GeneratedProgram{Runtime: runtime}, nil }
-type generatedPrepared struct { target string; assign Assign; definitions Definitions; html *string }
-func (p *generatedPrepared) Render() (output string, err error) { if p.html != nil { return *p.html, nil }; defer func() { if failure := recover(); failure != nil { err = fmt.Errorf("%v", failure) } }(); return RenderTemplate(p.target, p.assign, p.definitions), nil }
-func (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) { name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }; var typedAssign Assign; if err := generatedDecode(assign, &typedAssign); err != nil { return nil, err }; definitions, targets, err := generatedBindDefinitions(options.Define); if err != nil { return nil, err }; resolved := targets[name]; targetName := name; if resolved.target != "" { targetName = resolved.target }; return &generatedPrepared{target: targetName, assign: typedAssign, definitions: definitions, html: resolved.html}, nil }
+type generatedPrepared struct { target string; assign Assign; definitions Definitions; rootData *value.OrderedMap; env functions.Env; runtime *template.RuntimeEnvironment; html *string }
+func (p *generatedPrepared) Render() (output string, err error) { defer func() { if failure := recover(); failure != nil { if failureError, ok := failure.(error); ok { err = failureError } else { panic(failure) } } }(); context := render.NewContext(p.runtime, p.rootData, p.env, p.target); runtime := render.NewRuntimeBindings(context); if err := context.Enter(p.target, nil, nil); err != nil { return "", err }; defer context.Leave(); if p.html != nil { if err := context.Write(*p.html, nil, nil); err != nil { return "", err } } else { renderTemplate(p.target, p.assign, p.definitions, context, runtime, p.rootData) }; return context.Output(), nil }
+func (p *GeneratedProgram) Prepare(target any, assign any, options template.RenderOptions) (template.Prepared, error) { name, ok := target.(string); if !ok { return nil, fmt.Errorf("generated target must be a template name") }; rootData, err := value.BindMap(assign); if err != nil { return nil, err }; var typedAssign Assign; if err := generatedDecode(rootData, &typedAssign); err != nil { return nil, err }; definitions, targets, err := generatedBindDefinitions(options.Define); if err != nil { return nil, err }; resolved := targets[name]; targetName := name; if resolved.target != "" { targetName = resolved.target }; return &generatedPrepared{target: targetName, assign: typedAssign, definitions: definitions, rootData: rootData, env: generatedEnv(options), runtime: p.Runtime, html: resolved.html}, nil }
 func (p *GeneratedProgram) Render(target any, assign any, options template.RenderOptions) (string, error) { prepared, err := p.Prepare(target, assign, options); if err != nil { return "", err }; return prepared.Render() }
 var _ template.Program = (*GeneratedProgram)(nil)
-var _ = fmt.Fprint

@@ -78,6 +78,13 @@ function checkTypeScript() {
 }
 
 function checkGo() {
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'go'), 'utf8');
+  assert.match(coverageSource, /render\.NewRuntimeBindings\(context\)/);
+  assert.match(coverageSource, /runtime\.Binary\(/);
+  assert.match(coverageSource, /runtime\.Call\(/);
+  for (const duplicate of ['"reflect"', 'generatedDefault(', 'generatedMapGet(', 'generatedListGet(', 'fmt.Sprint(left)', 'fmt.Sprint(right)']) {
+    assert.equal(coverageSource.includes(duplicate), false, `Go generated source duplicates runtime semantics: ${duplicate}`);
+  }
   for (const id of scenarios) {
     const directory = join(root, 'packages/template-go', `.generated-check-${id}`);
     mkdirSync(directory);
@@ -86,6 +93,7 @@ function checkGo() {
       writeFileSync(join(directory, 'generated_test.go'), `package generated
 import (
   "encoding/json"
+  "errors"
   "os"
   "testing"
   template "github.com/polyspec/template"
@@ -110,6 +118,10 @@ func TestGeneratedProgram(t *testing.T) {
   program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }
   actual, err := program.Render(${JSON.stringify(target(id))}, assign, options); if err != nil { t.Fatal(err) }
   if actual != ${JSON.stringify(expected(id))} { t.Fatalf("generated output differs: %q", actual) }
+  ${id === scenarios[0] ? `limited, err := NewGeneratedProgram(template.Options{Limits: &template.Limits{Iterations: 1000000, Depth: 32, OutputBytes: 1, ExpressionDepth: 64}}); if err != nil { t.Fatal(err) }
+  _, err = limited.Render(${JSON.stringify(target(id))}, assign, options)
+  var templateError *template.Error
+  if !errors.As(err, &templateError) || templateError.Code != "E_RUNTIME_LIMIT" || templateError.Line < 1 || templateError.Col < 1 { t.Fatalf("generated output limit lost positioned error: %#v", err) }` : '_ = errors.As'}
 }
 `);
       run('go', ['test', '.'], { cwd: directory });
