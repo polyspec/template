@@ -59,6 +59,7 @@ export function bind(input: unknown): Value {
   throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'object has no binding');
 }
 
+/** Binds a host value and requires the result to be a string-keyed template map. */
 export function bindMap(input: unknown): MapValue {
   const value = bind(input);
   if (!(value instanceof Map)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'assign is not a map');

@@ -1,5 +1,5 @@
 // Generated.
-import { RuntimeEnvironment, bind } from '@polyspec/template';
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from '@polyspec/template';
 const generatedRecords = { "Page": { "title": { "kind": "string", "optional": true } }, "Slot": { "template": { "kind": "string", "optional": true }, "html": { "kind": "string", "optional": true } } };
 const generatedAssign = { "title": { "kind": "string", "optional": true }, "heading": { "kind": "string", "optional": true }, "island_label": { "kind": "string", "optional": true }, "root_label": { "kind": "string", "optional": true }, "defined_label": { "kind": "string", "optional": true }, "page": { "kind": "record", "name": "Page", "optional": true } };
 const generatedDefinitionSpecs = { "content": { "field": "content", "target": "content.tpl", "html": true, "input": {} }, "layout": { "field": "layout", "target": "layout.tpl", "html": false, "input": {} } };
@@ -7,7 +7,7 @@ function generatedObject(value, path) { if (value instanceof Map)
     return value; throw new Error(path + ' is not an object'); }
 function generatedBindType(value, type, path) { if (value === null || value === undefined) {
     if (type.optional || type.kind === 'null' || type.kind === 'any')
-        return undefined;
+        return null;
     throw new Error(path + ' is required');
 } if (type.kind === 'any')
     return value; if (type.kind === 'null') {
@@ -31,11 +31,13 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     if (!object.has(name)) {
         if (!partial && !type.optional)
             throw new Error(path + '.' + name + ' is required');
+        if (!partial)
+            result[name] = null;
         continue;
     }
     result[name] = generatedBindType(object.get(name), type, path + '.' + name);
 } return result; }
-function generatedBindAssign(value) { const bound = bind(value); return generatedBindRecord(bound, generatedAssign, 'assign'); }
+function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, 'assign'), root }; }
 function generatedBindDefinitions(input) { const value = bind(input ?? {}); const object = generatedObject(value, 'define'); const definitions = {}; const targets = new Map(); for (const [id, raw] of object) {
     const spec = generatedDefinitionSpecs[id];
     if (spec === undefined)
@@ -64,53 +66,59 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function stringify(value) { if (value === null || value === undefined)
-    return ''; if (typeof value === 'object')
-    throw new Error('a collection cannot be converted to text'); return String(value); }
-function escape(value) { return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
-function generatedTruthy(value) { if (value === null || value === undefined || value === false || value === '' || value === 0)
-    return false; if (Array.isArray(value))
-    return value.length !== 0; if (value instanceof Map)
-    return value.size !== 0; return true; }
-function generatedDefault(value, fallback) { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value, collection) { if (Array.isArray(collection))
-    return collection.includes(value); if (collection instanceof Map)
-    return collection.has(value); if (typeof collection === 'string')
-    return collection.includes(String(value)); return false; }
-function render_content_tpl(assign, definitions, input) {
-    let out = '';
-    out += "<section data-react-island id=\"counter\">\n<p>";
-    out += escape(stringify(assign.island_label));
-    out += "</p>\n</section>\n";
-    return out;
+function render_content_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame("content.tpl", [0, 41, 65, 76], rootData);
+    context.at(frame, [0, 44]);
+    context.output.write("<section data-react-island id=\"counter\">\n<p>");
+    context.at(frame, [44, 60]);
+    context.output.write(runtime.escape(assign.island_label, frame, [47, 59]));
+    context.at(frame, [60, 76]);
+    context.output.write("</p>\n</section>\n");
 }
-function render_layout_tpl(assign, definitions, input) {
-    let out = '';
-    out += "<main>\n<h1>";
-    out += escape(stringify(assign.title));
-    out += "</h1>\n";
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame("layout.tpl", [0, 7, 26, 38, 46], rootData);
+    context.at(frame, [0, 11]);
+    context.output.write("<main>\n<h1>");
+    context.at(frame, [11, 20]);
+    context.output.write(runtime.escape(assign.title, frame, [14, 19]));
+    context.at(frame, [20, 26]);
+    context.output.write("</h1>\n");
     {
         const definition = definitions.content;
         if (definition === undefined)
-            throw new Error("generated definition content is missing");
-        if (definition?.html !== undefined)
-            out += definition.html;
+            throw runtime.error(frame, [26, 37], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
+        if (definition?.html !== undefined) {
+            context.at(frame, [26, 37]);
+            context.output.write(definition.html);
+        }
         else {
             const input = Object.assign({}, definition?.data ?? {}, {});
-            out += render_content_tpl(assign, definitions, input);
+            context.enter("content.tpl", frame, [26, 37]);
+            try {
+                render_content_tpl(assign, definitions, input, context, runtime, rootData);
+            }
+            finally {
+                context.leave();
+            }
         }
     }
-    out += "</main>\n";
-    return out;
+    context.at(frame, [38, 46]);
+    context.output.write("</main>\n");
 }
-export function renderTemplate(target, assign, definitions) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData) {
     switch (target) {
-        case "content.tpl": return render_content_tpl(assign, definitions, {});
-        case "layout.tpl": return render_layout_tpl(assign, definitions, {});
-        default: throw new Error('generated template is missing or requires inputs: ' + target);
+        case "content.tpl":
+            render_content_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        case "layout.tpl":
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');
     }
 }
-export function render(assign, definitions) { return renderTemplate("layout.tpl", assign, definitions); }
+function generatedEnv(input) { const timezone = input?.timezone ?? 'Z'; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== 'string')
+    throw new Error('env.timezone is not a string'); if (typeof now !== 'number')
+    throw new Error('env.now is not a number'); return { timezone, now }; }
 class GeneratedPreparedRender {
     execute;
     constructor(execute) { this.execute = execute; }
@@ -120,7 +128,13 @@ export class GeneratedProgram {
     runtime;
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== 'string')
-        throw new Error('generated target must be a template name'); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() => renderTemplate(targetName, typedAssign, bound.definitions)); }
+        throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
+        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return context.output.toString();
+    }
+    finally {
+        context.leave();
+    } }); }
     render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
 }

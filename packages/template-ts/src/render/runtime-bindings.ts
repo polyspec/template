@@ -15,18 +15,22 @@ export type RuntimeLimit = 'expression' | 'iteration';
 
 /** One implementation of the observable value semantics used by both compiler modes. */
 export class RuntimeBindings {
+  /** Binds observable value semantics to one render context. */
   constructor(private readonly context: RenderContext) {}
 
+  /** Applies template truthiness. */
   truthy(value: Value): boolean {
     return isTruthy(value);
   }
 
+  /** Applies an eager unary operator at its source span. */
   unary(operator: string, operand: Value, frame: Frame, span: Span): Value {
     if (operator === '!') return !this.truthy(operand);
     if (operator === '-') return this.finite(-this.number(operand, frame, span), frame, span);
     throw this.error(frame, span, 'E_RUNTIME_TYPE', `unknown operator ${operator}`);
   }
 
+  /** Applies an eager binary operator at its source span. */
   binary(operator: string, left: Value, right: Value, frame: Frame, span: Span): Value {
     switch (operator) {
       case '+':
@@ -66,6 +70,7 @@ export class RuntimeBindings {
     }
   }
 
+  /** Converts a template scalar to text and reports collection failures at the source span. */
   stringify(value: Value, frame: Frame, span: Span): string {
     try {
       return stringifyValue(value);
@@ -75,10 +80,12 @@ export class RuntimeBindings {
     }
   }
 
+  /** Escapes an echo value while preserving explicitly safe text. */
   escape(value: Value, frame: Frame, span: Span): string {
     return value instanceof SafeString ? value.text : escapeHtml(this.stringify(value, frame, span));
   }
 
+  /** Converts a template value to a number using the common numeric rules. */
   number(value: Value, frame: Frame, span: Span): number {
     try {
       return toNumber(value);
@@ -88,25 +95,30 @@ export class RuntimeBindings {
     }
   }
 
+  /** Rejects a non-finite arithmetic result. */
   finite(value: number, frame: Frame, span: Span): number {
     if (!Number.isFinite(value)) throw this.error(frame, span, 'E_RUNTIME_TYPE', 'arithmetic result is not finite');
     return value;
   }
 
+  /** Applies loose or strict template equality. */
   equal(left: Value, right: Value, strict: boolean): boolean {
     return strict ? strictEquals(left, right) : looseEquals(left, right);
   }
 
+  /** Orders two compatible template values or reports a positioned comparison error. */
   compare(left: Value, right: Value, frame: Frame, span: Span): number {
     const order = compareValues(left, right);
     if (order === null) throw this.error(frame, span, 'E_RUNTIME_COMPARE', `${typeOf(left)} and ${typeOf(right)} have no order`);
     return order;
   }
 
+  /** Reads a fixed member from a template collection. */
   member(container: Value, key: string): Value {
     return this.index(container, key);
   }
 
+  /** Reads a dynamic list position or map key. */
   index(container: Value, key: Value): Value {
     if (container instanceof Map) {
       if (isString(key)) return container.get(textOf(key)) ?? null;
@@ -123,6 +135,7 @@ export class RuntimeBindings {
     return null;
   }
 
+  /** Converts a nullable list or map into ordered loop entries. */
   entries(value: Value, frame: Frame, span: Span): [Value, Value][] {
     if (value === null) return [];
     if (Array.isArray(value)) return value.map((item, index) => [index, item]);
@@ -130,6 +143,7 @@ export class RuntimeBindings {
     throw this.error(frame, span, 'E_RUNTIME_TYPE', 'loop requires a list, a map or null');
   }
 
+  /** Calls a built-in or registered host function with shared arity and binding behavior. */
   call(name: string, args: Value[], frame: Frame, span: Span): Value {
     const functionContext: FunctionContext = { env: this.context.env };
     const builtin = builtins.get(name);
@@ -162,6 +176,7 @@ export class RuntimeBindings {
     }
   }
 
+  /** Enforces an expression-depth or loop-iteration limit. */
   limit(kind: RuntimeLimit, count: number, frame: Frame, span: Span): void {
     const limits = this.context.services.limits();
     const maximum = kind === 'expression' ? limits.expressionDepth : limits.iterations;
@@ -172,6 +187,7 @@ export class RuntimeBindings {
     throw this.error(frame, span, 'E_RUNTIME_LIMIT', message);
   }
 
+  /** Creates one positioned runtime error through the active render context. */
   error(frame: Frame, span: Span, code: TemplateError['code'], message: string): TemplateError {
     return this.context.fail(code, frame, span, message);
   }

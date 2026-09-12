@@ -20,7 +20,7 @@ export function compileSource(graphPath, manifestPath, language) {
   for (const operation of backendOperations) if (typeof backend[operation] !== 'function') throw new Error(`compiler: backend ${language} does not implement ${operation}`);
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   const program = lowerSourceGraph(loadSourceGraph(graphPath), manifest);
-  const target = backend.createTarget();
+  const target = backend.createTarget({ program, manifest });
   const context = { program, manifest, target, templateBodies: templateBodies(program, target) };
   return [...backendOperations.map(operation => backend[operation](context)), ''].join('\n');
 }
