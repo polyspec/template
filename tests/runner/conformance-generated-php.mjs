@@ -95,7 +95,7 @@ try {
       if (difference) failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); else passed++;
     }
   }
-  if (process.argv[2] === undefined) assert.equal(passed + failures.length, 211);
+  if (process.argv[2] === undefined) assert.equal(passed + failures.length, cases.length);
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
