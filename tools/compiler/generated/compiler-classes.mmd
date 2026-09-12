@@ -71,8 +71,8 @@ classDiagram
     +env
   }
   class Program {
-    +prepare(RenderRequest) PreparedRender
-    +render(RenderRequest) UTF-8 string
+    +prepare(target, assign, options) PreparedRender or error
+    +render(target, assign, options) UTF-8 string or error
   }
   class AstProgram
   class GeneratedProgram

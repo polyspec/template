@@ -50,3 +50,4 @@
 - TypeScript, Go, Rust, PHP에서 `AstProgram`과 generated `Program` 구현을 위임형 `Engine` 뒤의 동등한 구현으로 구성했다. runtime engine의 compile mode 선택과 generated renderer callback을 제거하고 generated showcase artifact가 `Program`을 직접 구현하게 했다. 별도 generator를 제품 compiler로 교체하기 전까지 generated 적합성 범위는 showcase 시나리오 5개로 유지한다.
 - 파서가 승인한 태그 범위와 표현식 lexer token 범위를 반환하는 분석 출력을 추가했다. 정적 예제 사이트는 이 범위로 템플릿 문법을 하이라이트하고 compiled artifact와 generated source를 양방향 스크롤 영역에 표시한다.
 - 네 공개 runtime이 같은 `Engine`/`Program`/`AstProgram` 소유 구조를 제공하도록 구체적인 Go `AstProgram` 타입을 추가했다.
+- compiler manifest에 runtime 선언 계약을 추가했다. interface gate는 TypeScript, Go, Rust 선언을 각 언어 parser로, PHP 선언을 Reflection으로 추출한 뒤 연산, 인자 수, 소유 관계, AST program 구조를 manifest와 비교한다.

@@ -43,8 +43,7 @@ for (const name of ['SourceGraph', 'TypeManifest', 'TypedProgram', 'ArtifactMani
 }
 classes.push(
   '  class Program {',
-  '    +prepare(RenderRequest) PreparedRender',
-  '    +render(RenderRequest) UTF-8 string',
+  ...manifest.runtimeContract.Program.operations.map(item => `    +${item.name}(${item.parameters.join(', ')}) ${item.returns}`),
   '  }',
   '  class AstProgram',
   '  class GeneratedProgram',
