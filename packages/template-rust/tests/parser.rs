@@ -34,7 +34,6 @@ fn javascript_and_css_braces_stay_text() {
 fn delimiters_come_from_the_option_and_the_directive() {
     let options = ParseOptions {
         delimiters: Some(";;".to_string()),
-        legacy_wrappers: false,
     };
     assert_eq!(parse(b";= a;", "t.tpl", &options).expect("parse").body.len(), 1);
     assert_eq!(kinds("{% delimiter [] }\n[= a[0]]\n"), vec!["Echo", "Text"]);

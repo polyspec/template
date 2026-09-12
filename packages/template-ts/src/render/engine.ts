@@ -9,7 +9,7 @@ import type { MapValue, Value } from '../value/value.js';
 import { DEFAULT_LIMITS, Frame, RenderContext, type DefineEntry, type EngineServices, type Limits, type ParsedTemplate } from './context.js';
 import { Renderer } from './statements.js';
 
-export type ParseFunction = (source: string | Uint8Array, name: string, delimiters: Delimiters, legacyWrappers?: boolean) => ParsedTemplate;
+export type ParseFunction = (source: string | Uint8Array, name: string, delimiters: Delimiters) => ParsedTemplate;
 
 // Controls when a compiled template artifact is refreshed.
 export type ArtifactRefresh = 'dev' | 'true' | 'false';
@@ -36,7 +36,6 @@ export interface EngineOptions {
   functions?: Record<string, HostFunction>;
   limits?: Partial<Limits>;
   delimiters?: string;
-  legacyWrappers?: boolean;
   // Parser used for sources returned by the loader; absent in the render-only build.
   parse?: ParseFunction;
   // dev parses on every load, true refreshes when the loader version changes,
@@ -103,7 +102,6 @@ export class EngineCore implements EngineServices {
   readonly limits: Limits;
   readonly delimiters: Delimiters;
   private readonly parseFunction: ParseFunction | null;
-  private readonly legacyWrappers: boolean;
   readonly artifactRefresh: ArtifactRefresh;
   readonly compileMode: CompileMode;
   private readonly generatedRenderer: GeneratedRenderer | null;
@@ -114,7 +112,6 @@ export class EngineCore implements EngineServices {
     this.loader = options.loader ?? new MapLoader();
     this.limits = { ...DEFAULT_LIMITS, ...options.limits };
     this.parseFunction = options.parse ?? null;
-    this.legacyWrappers = options.legacyWrappers === true;
     this.artifactRefresh = options.artifactRefresh ?? 'true';
     this.compileMode = options.compile?.mode ?? 'ast';
     if (this.compileMode !== 'ast' && this.compileMode !== 'gen') throw new Error(`${this.compileMode} is not a compile mode`);
@@ -153,7 +150,7 @@ export class EngineCore implements EngineServices {
       template = { ast: loaded.ast, lines: null };
     } else {
       if (!this.parseFunction) throw new Error('this build renders parsed templates only; the loader returned source text');
-      template = this.parseFunction(loaded.source, name, this.delimiters, this.legacyWrappers);
+      template = this.parseFunction(loaded.source, name, this.delimiters);
     }
     this.cache.set(name, { version: loaded.version, template });
     return template;

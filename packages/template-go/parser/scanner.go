@@ -92,42 +92,6 @@ func wrappedTagAt(text string, index int, d Delimiters) *Wrapper {
 	return nil
 }
 
-// normalizeLegacyWrappers removes single-brace C-style and HTML comment wrappers.
-func normalizeLegacyWrappers(text string, d Delimiters) string {
-	legacy := []Wrapper{{Opener: "/*", Closer: "*/"}, {Opener: "<!--", Closer: "-->"}}
-	active := []string{}
-	var output strings.Builder
-	for index := 0; index < len(text); {
-		if len(active) > 0 {
-			closer := active[len(active)-1]
-			if strings.HasPrefix(text[index:], closer) {
-				active = active[:len(active)-1]
-				index += len(closer)
-				continue
-			}
-		}
-		opened := false
-		for _, wrapper := range legacy {
-			if !strings.HasPrefix(text[index:], wrapper.Opener) {
-				continue
-			}
-			after := skipHorizontalSpace(text, index+len(wrapper.Opener))
-			if after < len(text) && text[after] == d.Open[0] && startsTag(text, after, d) {
-				active = append(active, wrapper.Closer)
-				index += len(wrapper.Opener)
-				opened = true
-				break
-			}
-		}
-		if opened {
-			continue
-		}
-		output.WriteByte(text[index])
-		index++
-	}
-	return output.String()
-}
-
 // IsDelimiterChar implements LEX-21.
 func IsDelimiterChar(c byte) bool {
 	if c <= 0x20 || c >= 0x7f {

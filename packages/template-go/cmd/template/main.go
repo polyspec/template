@@ -89,7 +89,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		if err != nil {
 			return usage(err.Error())
 		}
-		tree, err := template.Parse(source, name, template.ParseOptions{Delimiters: options["delimiters"], LegacyWrappers: options["legacy-wrappers"] == "true"})
+		tree, err := template.Parse(source, name, template.ParseOptions{Delimiters: options["delimiters"]})
 		if err != nil {
 			return fail(err)
 		}
@@ -101,7 +101,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
-	engine, err := template.NewEngine(template.Options{Loader: template.NewFSLoader(os.DirFS(root)), Delimiters: options["delimiters"], LegacyWrappers: options["legacy-wrappers"] == "true"})
+	engine, err := template.NewEngine(template.Options{Loader: template.NewFSLoader(os.DirFS(root)), Delimiters: options["delimiters"]})
 	if err != nil {
 		return fail(err)
 	}

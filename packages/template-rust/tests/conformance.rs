@@ -54,7 +54,6 @@ fn render_case(dir: &Path) -> Outcome {
         functions: Default::default(),
         limits: None,
         delimiters: delimiters_of(dir),
-        legacy_wrappers: false,
         artifact_refresh: Default::default(),
         compile: Default::default(),
     });
@@ -89,7 +88,6 @@ fn every_case_matches_its_expected_files() {
                 "input.tpl",
                 &ParseOptions {
                     delimiters: delimiters_of(dir),
-                    legacy_wrappers: false,
                 },
             ) {
                 Ok(ast) => {

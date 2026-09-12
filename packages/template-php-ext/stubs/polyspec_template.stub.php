@@ -46,14 +46,14 @@ final class Engine
 {
     /**
      * @param string|null $root Loader root directory; without it no template name resolves.
-     * @param array{delimiters?: string, legacy_wrappers?: bool, limits?: array{iterations?: int, depth?: int, outputBytes?: int, expressionDepth?: int}} $options
+     * @param array{delimiters?: string, limits?: array{iterations?: int, depth?: int, outputBytes?: int, expressionDepth?: int}} $options
      */
     public function __construct(?string $root = null, array $options = []) {}
 
     /**
      * Parses one template source and returns the AST as nested arrays.
      *
-     * @param array{delimiters?: string, legacy_wrappers?: bool} $options
+     * @param array{delimiters?: string} $options
      * @return array<string, mixed>
      */
     public static function parse(string $source, string $name, array $options = []): array {}
@@ -61,7 +61,7 @@ final class Engine
     /**
      * Parses one template source and returns the AST as JSON text.
      *
-     * @param array{delimiters?: string, legacy_wrappers?: bool} $options
+     * @param array{delimiters?: string} $options
      */
     public static function parseToJson(string $source, string $name, array $options = []): string {}
 

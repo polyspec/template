@@ -56,21 +56,11 @@ fn generated_render_request(request: polyspec_template::GeneratedRequest) -> Ren
 impl Adapter {
     fn new(root: impl AsRef<Path>) -> Result<Adapter, String> {
         let root = root.as_ref().to_path_buf();
-        let scenario = std::fs::read(root.join("scenario.json"))
-            .map_err(|error| format!("scenario.json: {error}"))?;
-        let metadata: Value =
-            serde_json::from_slice(&scenario).map_err(|error| format!("scenario.json: {error}"))?;
-        let legacy_wrappers = match metadata.get("legacyWrappers") {
-            None => false,
-            Some(Value::Bool(value)) => *value,
-            Some(_) => return Err("scenario.legacyWrappers must be a boolean".to_string()),
-        };
         let generated = std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated");
         let loader = if generated { MapLoader::new() } else { artifact_loader(&root, "rust")? };
         let generated_root = root.clone();
         let engine = Engine::new(EngineOptions {
             loader: Some(Box::new(loader)),
-            legacy_wrappers,
             compile: if generated { CompileOptions {
                 mode: CompileMode::Gen,
                 generated_renderer: Some(Box::new(move |request| {

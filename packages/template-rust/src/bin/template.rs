@@ -1,6 +1,6 @@
 //! Command line interface (CNF-4).
-//!   parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]
-//!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]
+//!   parse FILE [--root DIR] [--delimiters OC]
+//!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 
 use polyspec_template::{
     BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json, env_from_json, parse,
@@ -10,8 +10,8 @@ use std::process::exit;
 
 fn usage(message: &str) -> ! {
     eprintln!("{message}");
-    eprintln!("usage: template parse FILE [--root DIR] [--delimiters OC] [--legacy-wrappers true]");
-    eprintln!("       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] [--legacy-wrappers true]");
+    eprintln!("usage: template parse FILE [--root DIR] [--delimiters OC]");
+    eprintln!("       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]");
     exit(1);
 }
 
@@ -21,7 +21,6 @@ struct Options {
     env: Option<String>,
     root: Option<String>,
     delimiters: Option<String>,
-    legacy_wrappers: bool,
 }
 
 fn fail(error: TemplateError) -> ! {
@@ -57,7 +56,6 @@ fn main() {
         env: None,
         root: None,
         delimiters: None,
-        legacy_wrappers: false,
     };
     let mut index = 2;
     while index < args.len() {
@@ -71,7 +69,6 @@ fn main() {
             "--env" => options.env = Some(value.clone()),
             "--root" => options.root = Some(value.clone()),
             "--delimiters" => options.delimiters = Some(value.clone()),
-            "--legacy-wrappers" => options.legacy_wrappers = value == "true",
             _ => usage(&format!("unknown option {flag}")),
         }
         index += 2;
@@ -106,7 +103,6 @@ fn main() {
             &name,
             &ParseOptions {
                 delimiters: options.delimiters.clone(),
-                legacy_wrappers: options.legacy_wrappers,
             },
         ) {
             Ok(ast) => print!("{}", serde_json::to_string(&ast).unwrap_or_default()),
@@ -120,7 +116,6 @@ fn main() {
         functions: Default::default(),
         limits: None,
         delimiters: options.delimiters.clone(),
-        legacy_wrappers: options.legacy_wrappers,
         artifact_refresh: Default::default(),
         compile: Default::default(),
     });

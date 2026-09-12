@@ -43,15 +43,8 @@ final class Parser
     /**
      * @return array<string, mixed>
      */
-    public static function parse(Source $source, string $open = '{', string $close = '}', bool $legacyWrappers = false): array
+    public static function parse(Source $source, string $open = '{', string $close = '}'): array
     {
-        if ($legacyWrappers) {
-            $normalized = Scanner::normalizeLegacyWrappers($source->text, $open, $close);
-            if ($normalized !== $source->text) {
-                $source = Source::fromBytes($source->name, $normalized);
-            }
-        }
-
         return (new self($source, $open, $close))->run();
     }
 
