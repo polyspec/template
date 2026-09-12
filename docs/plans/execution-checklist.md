@@ -23,7 +23,7 @@ W0 foundation ──► W1 specification (parallel docs) ──► W1.11 spec re
                                           W2 conformance assets (parallel)
                                                         │
                                                         ▼
-                                          W3 TypeScript implementation (sequential core, parallel leaves)
+                                          W3 TypeScript (sequential core, parallel leaves)
                                                         │
                        ┌────────────────────────────────┼────────────────────────────────┐
                        ▼                                ▼                                ▼
@@ -78,7 +78,7 @@ Exit criteria: all ten document pairs exist; `make docs-check` passes; `schema/a
 
 ## Wave 2 — Conformance assets (parallel)
 
-Dependencies: T1.11. All tasks are `parallel`. Fixture ASTs are written by hand for at least the cases marked `AST by hand`; the remaining `expected.ast.json` files are produced by the TypeScript implementation in T3.13 and reviewed before commit.
+Dependencies: T1.11. All tasks are `parallel`. Fixture ASTs are written by hand for at least the cases marked `AST by hand`; the remaining `expected.ast.json` files are produced by T3.13 and reviewed before commit.
 
 | ID | Task | Deliverables | Verification | Done |
 | --- | --- | --- | --- | --- |
@@ -211,7 +211,7 @@ Dependencies: T4.X.2. Tasks T6.1–T6.5 and T6.7 are `parallel`; T6.6 follows th
 
 | ID | Task | Deliverables | Verification | Done |
 | --- | --- | --- | --- | --- |
-| T6.1 | Benchmarks | `project performance measurements`, per-language adapters and complete-page results; output equality check before timing | `cd project performance measurements && make bench-all` | [x] |
+| T6.1 | Performance measurements | Per-language AST and generated measurements; output equality check before timing | `make showcase` | [x] |
 | T6.2 | Documentation coverage checker | `scripts/check-doc-coverage.mjs` (exported symbols documented in four packages), run by `make doc-coverage` | `make doc-coverage` | [x] |
 | T6.3 | Documentation site | `docs/.vitepress/config.mts`, static GitHub Pages workflow, generated API docs excluded from git | `make docs-static-check`; `make docs-verify-idempotent` | [x] |
 | T6.4 | CI workflow | `.github/workflows/ci.yml` invoking existing Makefile targets only | workflow file lint | [x] |
@@ -223,9 +223,9 @@ T6.2 is complete. `scripts/check-doc-coverage.mjs` runs from `make doc-coverage`
 
 T6.7 covers shared layouts, nested partials and loops, define data and scope precedence, an HTML slot and a missing definition. It follows RT-43–RT-53: every scenario uses the same JSON-shaped assign and direct path-based define registry for every implementation, and every render starts from the `layout` target. The adapter types, fields, operations and state transitions are declared in `tools/showcase/adapters/interface.json`; the generator writes language declarations and Mermaid sources, and `make contract-check` verifies the mapped implementations and failure recovery. `make showcase` compares raw output and repeated-render hashes across five implementations, compares AST and direct generated renderers, and writes HTML, JSON and same-condition mode benchmark artifacts. `make showcase-check` verifies the artifacts and static HTML page. The example has no application controller or service dependency.
 
-T6.6 is complete. On 2026-09-11, `make check` passed; `make test-ext` built the PHP extension and passed 211 of 211 conformance cases and 236 extension tests; `cd project performance measurements && make bench-all` passed its output equality and repeatability checks and wrote the benchmark results. The feature status and changelog record these results.
+T6.6 is complete. On 2026-09-11, `make check` passed; `make test-ext` built the PHP extension and passed 211 of 211 conformance cases and 236 extension tests; `make showcase` passed output equality and repeatability checks. The feature status and changelog record these results.
 
-Exit criteria: `make check`, `cd project performance measurements && make bench-all`, `make showcase-check`, `make docs-verify-idempotent` pass.
+Exit criteria: `make check`, `make showcase-check`, and `make docs-verify-idempotent` pass.
 
 ## Wave 7 — Consumer integration (parallel, separate repositories)
 
