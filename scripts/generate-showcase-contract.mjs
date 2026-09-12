@@ -26,6 +26,15 @@ if (!Array.isArray(manifest.constructor.errors) || !Array.isArray(manifest.const
 if (!manifest.types || !manifest.operations || !manifest.languages || !manifest.supportLevels) {
   fail('types, operations, supportLevels and languages are required');
 }
+if (!manifest.executionModes?.ast || !manifest.executionModes?.generated) {
+  fail('executionModes.ast and executionModes.generated are required');
+}
+for (const [name, mode] of Object.entries(manifest.executionModes)) {
+  if (!mode.description || !mode.input || !Array.isArray(mode.requestPath) || !mode.requiredSupportLevel || !mode.status) {
+    fail(`execution mode ${name} is incomplete`);
+  }
+  if (!manifest.supportLevels[mode.requiredSupportLevel]) fail(`execution mode ${name} uses unknown support level`);
+}
 
 const supportLevelNames = Object.keys(manifest.supportLevels);
 if (!supportLevelNames.length) fail('supportLevels must not be empty');
@@ -496,6 +505,25 @@ function supportDiagram() {
   return lines.join('\n') + '\n';
 }
 
+function executionModesDiagram() {
+  const ast = manifest.executionModes.ast;
+  const generated = manifest.executionModes.generated;
+  return [
+    'flowchart LR',
+    '  Source[".tpl source"] --> ASTCompile["source-compiler<br/>parse + encodeArtifact"]',
+    `  ASTCompile --> ASTArtifact["${ast.input}"]`,
+    '  ASTArtifact --> ASTLoad["artifact-runtime<br/>load once"]',
+    '  ASTLoad --> ASTRender["bind assign + define<br/>interpret AST"]',
+    `  Source --> NativeCompile["${generated.requiredSupportLevel}<br/>compileNative"]`,
+    `  NativeCompile --> NativeArtifact["${generated.input}"]`,
+    '  NativeArtifact --> NativeLoad["loadNative<br/>load once"]',
+    '  NativeLoad --> NativeRender["bind assign + define<br/>call generated renderer"]',
+    '  ASTRender --> Bytes["same UTF-8 bytes"]',
+    '  NativeRender --> Bytes',
+    '',
+  ].join('\n');
+}
+
 const outputs = new Map([
   ['generated/render_adapter.ts', tsDeclarations()],
   ['generated/render_adapter.mjs', javascriptDeclarations()],
@@ -507,6 +535,7 @@ const outputs = new Map([
   ['generated/render-state.mmd', stateDiagram()],
   ['generated/render-sequence.mmd', sequenceDiagram()],
   ['generated/support-levels.mmd', supportDiagram()],
+  ['generated/execution-modes.mmd', executionModesDiagram()],
 ]);
 
 for (const [relativePath, content] of outputs) {

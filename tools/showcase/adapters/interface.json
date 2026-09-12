@@ -20,6 +20,22 @@
       "operations": ["compileNative", "loadNative"]
     }
   },
+  "executionModes": {
+    "ast": {
+      "description": "Load the canonical AST artifact once and interpret it for each render.",
+      "input": "canonical AST artifact",
+      "requestPath": ["loadArtifact", "bind assign and define", "render AST"],
+      "requiredSupportLevel": "artifact-runtime",
+      "status": "implemented"
+    },
+    "generated": {
+      "description": "Generate host-language source before startup and call the generated renderer at runtime.",
+      "input": "generated host-language source",
+      "requestPath": ["compileNative", "loadNative", "bind assign and define", "call generated renderer"],
+      "requiredSupportLevel": "native-source-backend",
+      "status": "contract-defined"
+    }
+  },
   "constructor": {
     "parameters": [
       {

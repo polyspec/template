@@ -14,7 +14,8 @@
 | template-php | PHP 렉서, 파서, 렌더러, 함수, CLI | implemented | passed | not-deployed | [패키지](../packages/template-php/README.ko.md) |
 | template-php-ext | Rust 크레이트로 빌드하는 PHP 확장 | implemented | passed | not-deployed | [패키지](../packages/template-php-ext/README.ko.md) |
 | benchmarks | 출력 동일성과 반복 렌더 검사를 포함한 4개 구현의 처리량 비교 | implemented | passed | not-deployed | [벤치마크 결과](../tools/bench/results.md) |
-| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·언어별 커밋 AST artifact·지원 레벨 계약·정적 HTML 구조 검사·처리량 결과를 제공하는 예제 사이트 | implemented | passed | not-deployed | [예제 사이트](operations/showcase.ko.md) |
+| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·언어별 커밋 AST artifact·AST/생성 실행 모드 계약·지원 레벨 계약·정적 HTML 구조 검사·처리량 결과를 제공하는 예제 사이트 | implemented | passed | not-deployed | [예제 사이트](operations/showcase.ko.md) |
+| generated-mode | 호스트 언어 소스 생성 계약과 생성 렌더러의 일치성 검사 | in-progress | pending | not-deployed | [실행 모드](spec/runtime.ko.md#지원-레벨과-컴파일-artifact) |
 | docs-check | 문서 링크, 번역 쌍, 코드 블록, 상태 검사 | implemented | passed | not-deployed | [문서 절차](operations/documentation.ko.md) |
 
 2026-09-12 검증: `make docs-check`가 문서 쌍 30개로 통과했다. `node scripts/check-schema.mjs`가 AST 파일 189개와 표현식 AST 53개를 검증했다. 문서 커버리지가 문서화된 공개 심볼과 파일 250개를 보고했다. `make check`가 lint, 네 패키지 단위 테스트, 5개 구현의 211개 케이스에 대한 적합성 1055건 중 1055건을 통과했다. `make test-browser`가 Chromium에서 통과했다. `make test-ext`가 PHP 확장을 빌드하고 적합성 211건 중 211건과 확장 테스트 236개를 통과했다. `make bench BENCH_ITERS=3000 BENCH_WARMUP=300`가 출력 동일성과 반복 렌더 검사를 통과하고 벤치마크 표를 기록했다.
