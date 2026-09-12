@@ -3,10 +3,10 @@
   "mode": "gen",
   "target": "js",
   "entry": "layout.tpl",
-  "sourceDigest": "aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce",
+  "sourceDigest": "0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "1ad1f41e80246d2bdca2599b5734051368bd38453685a8f490a7cdc6f9364181",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "e8f3912eeb271de4c83fe121c616ec892610f9f63ecf2ace1f41c8d4e5b1758f",
   "files": {
     "compiler-coverage.js": {
       "path": "compiler-coverage.js",

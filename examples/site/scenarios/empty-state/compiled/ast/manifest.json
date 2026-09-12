@@ -3,10 +3,11 @@
   "mode": "ast",
   "target": "canonical",
   "entry": "layout.tpl",
-  "sourceDigest": "0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69",
+  "delimiters": null,
+  "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "37734abc25859a72e6fc6a0d99eed63e873e08492655f472905f059cf89d6a6d",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "570f4a00601c5811243062d3dba402204f6bf43bfbf2c6db76d0b1210222b844",
   "files": {
     "layout.tpl": {
       "path": "layout.tpl.ast.json",

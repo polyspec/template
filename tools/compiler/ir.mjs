@@ -215,7 +215,9 @@ export function lowerSourceGraph(graph, manifest) {
           if (target === null && !definition?.html) throw new Error(`compiler: block ${node.id ?? '<anonymous>'} has no generated target`);
           const targetInputs = target === null ? new Map() : templateInputs.get(target);
           const blockScope = new Map(node.scope.map(item => [item.name, lowerExpr(item.expr, scope, loops)]));
-          for (const name of blockScope.keys()) if (!targetInputs.has(name)) throw new Error(`compiler: block input ${name} is not declared by ${target}`);
+          // An HTML definition is already rendered content. Its call-site scope is
+          // intentionally ignored because there is no target template to receive it.
+          if (target !== null) for (const name of blockScope.keys()) if (!targetInputs.has(name)) throw new Error(`compiler: block input ${name} is not declared by ${target}`);
           const inputs = [...targetInputs].map(([name, valueType]) => ({
             name,
             valueType,

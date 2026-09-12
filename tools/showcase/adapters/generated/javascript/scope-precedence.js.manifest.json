@@ -3,10 +3,10 @@
   "mode": "gen",
   "target": "js",
   "entry": "layout.tpl",
-  "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
+  "sourceDigest": "612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "1ad1f41e80246d2bdca2599b5734051368bd38453685a8f490a7cdc6f9364181",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "e8f3912eeb271de4c83fe121c616ec892610f9f63ecf2ace1f41c8d4e5b1758f",
   "files": {
     "scope-precedence.js": {
       "path": "scope-precedence.js",

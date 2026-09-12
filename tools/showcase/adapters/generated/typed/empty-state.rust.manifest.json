@@ -3,10 +3,10 @@
   "mode": "gen",
   "target": "rust",
   "entry": "layout.tpl",
-  "sourceDigest": "0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69",
+  "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "0b6d13807a65bb69a1ca4cb22ef9b3164bf7ce39af9fe5996d3b06f2c7165dd2",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "dc69341a55448c2101b6d7b45586a98c0fa69f62213f6ff5fe309542b958584e",
   "files": {
     "empty-state.rust": {
       "path": "empty-state.rust",
