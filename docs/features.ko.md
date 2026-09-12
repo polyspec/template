@@ -14,8 +14,8 @@
 | template-php | PHP 렉서, 파서, 렌더러, 함수, CLI | implemented | passed | not-deployed | [패키지](../packages/template-php/README.ko.md) |
 | template-php-ext | Rust 크레이트로 빌드하는 PHP 확장 | implemented | passed | not-deployed | [패키지](../packages/template-php-ext/README.ko.md) |
 | performance-measurements | 출력 동일성 검증 뒤 기록하는 시나리오별 AST와 generated 측정값 | in-progress | pending | not-deployed | [성능 측정](operations/benchmark.ko.md) |
-| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·하나의 커밋 canonical AST graph·parser 기반 구문 강조·크기가 제한된 artifact 보기·처리량 결과를 제공하는 예제 사이트 | in-progress | pending | not-deployed | [예제 사이트](operations/showcase.ko.md) |
-| generated-mode | 정규 AST에서 직접 생성한 TypeScript·Go·Rust·PHP 호스트 언어 렌더러 | in-progress | pending | not-deployed | [compiler 계약](spec/compiler.ko.md) |
+| showcase | 공통 템플릿·목업 JSON assign·직접 경로 대응 define 레지스트리·하나의 커밋 canonical AST graph·parser 기반 구문 강조·크기가 제한된 artifact 보기·처리량 결과를 제공하는 예제 사이트 | implemented | passed | not-deployed | [예제 사이트](operations/showcase.ko.md) |
+| generated-mode | 정규 AST에서 직접 생성한 TypeScript·Go·Rust·PHP 호스트 언어 렌더러 | implemented | passed | not-deployed | [compiler 계약](spec/compiler.ko.md) |
 | docs-check | 문서 링크, 번역 쌍, 코드 블록, 상태 검사 | implemented | passed | not-deployed | [문서 절차](operations/documentation.ko.md) |
 
 2026-09-12 검증: `make docs-check`가 문서 쌍 30개로 통과했다. `node scripts/check-schema.mjs`가 AST 파일 189개와 표현식 AST 53개를 검증했다. 문서 커버리지가 문서화된 공개 심볼과 파일 250개를 보고했다. `make check`가 lint, 네 패키지 단위 테스트, 5개 구현의 211개 케이스에 대한 적합성 1055건 중 1055건을 통과했다. `make test-browser`가 Chromium에서 통과했다. `make test-ext`가 PHP 확장을 빌드하고 적합성 211건 중 211건과 확장 테스트 236개를 통과했다.

@@ -14,8 +14,8 @@
 | template-php | PHP lexer, parser, renderer, functions and CLI | implemented | passed | not-deployed | [Package](../packages/template-php/README.md) |
 | template-php-ext | PHP extension built from the Rust crate | implemented | passed | not-deployed | [Package](../packages/template-php-ext/README.md) |
 | performance-measurements | Per-scenario AST and generated measurements after output parity verification | in-progress | pending | not-deployed | [Performance measurements](operations/benchmark.md) |
-| showcase | Shared templates, mock JSON assign data, direct path-based define registries, one committed canonical AST graph, parser-backed syntax highlighting, bounded artifact views and throughput artifacts | in-progress | pending | not-deployed | [Example site](operations/showcase.md) |
-| generated-mode | Host-language renderers lowered from canonical AST for TypeScript, Go, Rust and PHP | in-progress | pending | not-deployed | [Compiler contract](spec/compiler.md) |
+| showcase | Shared templates, mock JSON assign data, direct path-based define registries, one committed canonical AST graph, parser-backed syntax highlighting, bounded artifact views and throughput artifacts | implemented | passed | not-deployed | [Example site](operations/showcase.md) |
+| generated-mode | Host-language renderers lowered from canonical AST for TypeScript, Go, Rust and PHP | implemented | passed | not-deployed | [Compiler contract](spec/compiler.md) |
 | docs-check | Document links, translation pairs, code blocks and status checks | implemented | passed | not-deployed | [Documentation procedure](operations/documentation.md) |
 
 Verification on 2026-09-12: `make docs-check` passed with 30 document pairs; `node scripts/check-schema.mjs` validated 189 AST files and 53 expression ASTs; documentation coverage reported 250 documented public symbols and files; `make check` passed lint, the four package unit suites and 1055 of 1055 conformance checks over 211 cases and five implementations; `make test-browser` passed in Chromium; `make test-ext` built the PHP extension and passed 211 of 211 conformance cases and 236 extension tests.

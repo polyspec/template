@@ -30,6 +30,7 @@
 - PHP generated 전체 적합성 검사를 추가했다. Canonical case 211개가 모두 예상 진단 또는 정확한 HTML로 compile·render되며 source block 등록, 중첩 loop metadata, spread 오류, 일반 텍스트의 달러 기호가 공통 runtime 규칙을 사용한다.
 - Go generated 전체 적합성 검사를 추가했다. Canonical case 211개가 모두 예상 진단 또는 정확한 HTML로 compile·render되며 generated definition 등록, include scope 공유, 중첩 loop metadata, 동적 spread, 잘못된 UTF-8 입력이 공통 runtime 규칙을 사용한다. 네 backend의 generated loop는 반복 불변값인 size와 마지막 index를 반복 전에 한 번 계산한다.
 - Rust generated 전체 적합성 검사와 `conformance-all-modes` release 명령을 추가했다. Rust generated expression은 safe string, 동적 spread, 조건 분기, 중첩 loop metadata에서 runtime `Value` 모델을 유지하고 typed 변환은 assign, definition, template input 경계에서만 수행한다. 이 명령은 TypeScript, Go, Rust, PHP의 AST/generated cell 1,688개 전체를 통과한다.
+- 완성된 제품 compiler artifact로 정적 showcase를 다시 생성했다. 정적 HTML 검사가 parser 기반 template token, output HTML 하이라이트, compiled/generated source의 크기가 제한된 양방향 스크롤, 모든 입력·template 보기와 React island 경계를 통과한다.
 
 - 네 런타임에서 컴파일 방식(`ast` 또는 `gen`), 컴파일 artifact 갱신(`dev`, `true` 또는 `false`), 최종 HTML 페이지 캐시 TTL(`null` 또는 `0`은 영구)을 분리했다. artifact 갱신과 페이지 캐시 만료 테스트를 추가했다.
 - 별도 벤치마크 workspace를 다시 구성해 구현의 AST 행은 매 렌더마다 파싱하고 생성 코드 행은 생성된 호스트 언어 소스를 직접 호출하게 했다. 참조 행도 측정하는 모든 렌더마다 파싱 또는 컴파일하며, 측정 전에 모든 행이 동일한 323바이트 HTML과 SHA-256을 생성해야 한다.
