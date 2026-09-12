@@ -57,6 +57,15 @@
       "status": "implemented"
     }
   },
+  "artifactRefresh": {
+    "dev": "Refresh the selected compiled artifact on every call.",
+    "true": "Reuse the artifact until its source version changes.",
+    "false": "Use the deployed artifact without runtime refresh."
+  },
+  "pageCache": {
+    "ttl": "Positive seconds expire; 0 and null mean forever.",
+    "hit": "Returns final HTML before business logic and template rendering."
+  },
   "constructor": {
     "parameters": [
       {

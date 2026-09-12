@@ -16,14 +16,24 @@ import (
 // ParseFunc parses source text into a template; nil in a render-only engine.
 type ParseFunc func(source []byte, name string, delimiters parser.Delimiters, legacyWrappers bool) (*ParsedTemplate, error)
 
+// ArtifactRefresh controls when compiled template artifacts are refreshed.
+type ArtifactRefresh string
+
+const (
+	ArtifactRefreshDev   ArtifactRefresh = "dev"
+	ArtifactRefreshTrue  ArtifactRefresh = "true"
+	ArtifactRefreshFalse ArtifactRefresh = "false"
+)
+
 // Options configure an engine (RT-1, RT-6, RT-42).
 type Options struct {
-	Loader         loader.Loader
-	Functions      map[string]functions.HostFunction
-	Limits         *Limits
-	Delimiters     string
-	LegacyWrappers bool
-	Parse          ParseFunc
+	Loader          loader.Loader
+	Functions       map[string]functions.HostFunction
+	Limits          *Limits
+	Delimiters      string
+	LegacyWrappers  bool
+	Parse           ParseFunc
+	ArtifactRefresh ArtifactRefresh
 }
 
 // DefineInput is a template definition given to Render (RT-24).
@@ -43,14 +53,15 @@ var identifier = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 
 // Engine loads, caches and renders templates.
 type Engine struct {
-	loader         loader.Loader
-	functions      map[string]functions.HostFunction
-	limits         Limits
-	delimiters     parser.Delimiters
-	parse          ParseFunc
-	legacyWrappers bool
-	cache          map[string]cached
-	now            func() float64
+	loader          loader.Loader
+	functions       map[string]functions.HostFunction
+	limits          Limits
+	delimiters      parser.Delimiters
+	parse           ParseFunc
+	legacyWrappers  bool
+	artifactRefresh ArtifactRefresh
+	cache           map[string]cached
+	now             func() float64
 }
 
 // PreparedRender stores bound request state for repeated renders.
@@ -70,7 +81,14 @@ type cached struct {
 
 // NewEngine creates an engine.
 func NewEngine(options Options, now func() float64) (*Engine, error) {
-	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, legacyWrappers: options.LegacyWrappers, cache: map[string]cached{}, now: now}
+	refresh := options.ArtifactRefresh
+	if refresh == "" {
+		refresh = ArtifactRefreshTrue
+	}
+	if refresh != ArtifactRefreshDev && refresh != ArtifactRefreshTrue && refresh != ArtifactRefreshFalse {
+		return nil, fmt.Errorf("%q is not an artifact refresh policy", refresh)
+	}
+	e := &Engine{loader: options.Loader, functions: map[string]functions.HostFunction{}, limits: DefaultLimits, delimiters: parser.DefaultDelimiters, parse: options.Parse, legacyWrappers: options.LegacyWrappers, artifactRefresh: refresh, cache: map[string]cached{}, now: now}
 	if e.loader == nil {
 		e.loader = loader.NewMapLoader(nil)
 	}
@@ -123,7 +141,7 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 		}
 		return nil, errs.WithoutPosition(errs.LoadNotFound, name, message)
 	}
-	if c, ok := e.cache[name]; ok && c.version == loaded.Version {
+	if c, ok := e.cache[name]; ok && (e.artifactRefresh == ArtifactRefreshFalse || (e.artifactRefresh == ArtifactRefreshTrue && c.version == loaded.Version)) {
 		return c.template, nil
 	}
 	var template *ParsedTemplate

@@ -48,4 +48,18 @@ describe('Engine', () => {
     loader.set('a.tpl', '2');
     expect(engine.render('a.tpl', {})).toBe('2');
   });
+
+  it('supports development and immutable artifact refresh policies', () => {
+    const devLoader = new MapLoader({ 'a.tpl': '1' });
+    const dev = new Engine({ loader: devLoader, artifactRefresh: 'dev' });
+    expect(dev.render('a.tpl', {})).toBe('1');
+    devLoader.set('a.tpl', '2');
+    expect(dev.render('a.tpl', {})).toBe('2');
+
+    const immutableLoader = new MapLoader({ 'a.tpl': '1' });
+    const immutable = new Engine({ loader: immutableLoader, artifactRefresh: 'false' });
+    expect(immutable.render('a.tpl', {})).toBe('1');
+    immutableLoader.set('a.tpl', '2');
+    expect(immutable.render('a.tpl', {})).toBe('1');
+  });
 });

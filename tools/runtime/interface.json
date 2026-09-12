@@ -1,34 +1,66 @@
 {
-  "schema": 1,
-  "name": "PreparedRender",
-  "purpose": "Reuse bound request state and the parsed target across renders.",
-  "state": {
-    "engine": "owns loader, parser, function registry, limits and template cache",
-    "prepared": "owns bound assign, define registry, environment and target reference",
-    "render": "creates fresh scope, output and execution state for every call"
+  "schema": 2,
+  "name": "TemplateRuntime",
+  "purpose": "Keep compilation, compiled-artifact refresh and final-page caching as independent policies.",
+  "types": {
+    "CompileMode": ["ast", "gen"],
+    "ArtifactRefresh": ["dev", "true", "false"],
+    "PageCacheTTL": "positive seconds, 0 or null"
+  },
+  "semantics": {
+    "ast": "Compile source to AST and interpret the AST.",
+    "gen": "Compile source to host-language renderer code and call the generated renderer.",
+    "dev": "Refresh the selected compiled artifact on every call.",
+    "true": "Reuse the compiled artifact until its source version changes.",
+    "false": "Use the deployed compiled artifact without runtime refresh.",
+    "page_cache": "Stores the final HTML produced from template, define and assign inputs; a hit bypasses business logic and template rendering.",
+    "page_cache_ttl": "A positive value expires after that many seconds; 0 and null mean forever."
+  },
+  "request": {
+    "fields": ["target", "assign", "define", "env"],
+    "invariant": "assign is root data and define is the template registry; they are not interchangeable."
   },
   "operations": [
     {
-      "name": "prepare",
-      "owner": "Engine",
-      "parameters": ["target", "assign", "options"],
-      "returns": "PreparedRender",
-      "errors": ["template, bind and define errors"],
-      "mutates": "engine template cache only"
+      "name": "compile",
+      "owner": "Compiler",
+      "parameters": ["sourceGraph", "mode"],
+      "returns": "AST artifact or generated host-language artifact",
+      "errors": ["lex, parse, code generation and compilation errors"]
+    },
+    {
+      "name": "loadOrRefresh",
+      "owner": "ArtifactStore",
+      "parameters": ["sourceGraph", "refresh"],
+      "returns": "compiled artifact",
+      "errors": ["stale or missing artifact, source and artifact mismatch"]
     },
     {
       "name": "render",
-      "owner": "PreparedRender",
-      "parameters": [],
-      "returns": "string",
-      "errors": ["runtime and limit errors"],
-      "mutates": "per-render state only"
+      "owner": "Renderer",
+      "parameters": ["compiled artifact", "request"],
+      "returns": "HTML string",
+      "errors": ["runtime and limit errors"]
+    },
+    {
+      "name": "getPage",
+      "owner": "PageCache",
+      "parameters": ["cacheKey"],
+      "returns": "HTML string or miss",
+      "errors": []
+    },
+    {
+      "name": "putPage",
+      "owner": "PageCache",
+      "parameters": ["cacheKey", "html", "ttl"],
+      "returns": "void",
+      "errors": ["invalid TTL"]
     }
   ],
   "languages": {
-    "rust": {"engine": "Engine::prepare", "prepared": "PreparedRender::render"},
-    "go": {"engine": "Engine.Prepare", "prepared": "PreparedRender.Render"},
-    "typescript": {"engine": "EngineCore.prepare", "prepared": "PreparedRender.render"},
-    "php": {"engine": "Engine::prepare", "prepared": "PreparedRender::render"}
+    "rust": {"engine": "Engine", "pageCache": "PageCache"},
+    "go": {"engine": "Engine", "pageCache": "cache.PageCache"},
+    "typescript": {"engine": "Engine", "pageCache": "PageCache"},
+    "php": {"engine": "Engine", "pageCache": "PageCache"}
   }
 }

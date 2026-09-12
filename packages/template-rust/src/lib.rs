@@ -11,6 +11,7 @@ pub mod escape;
 pub mod expr;
 pub mod functions;
 pub mod loader;
+pub mod page_cache;
 pub mod parser;
 pub mod render;
 pub mod source;
@@ -22,7 +23,7 @@ pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{Limits, ParsedTemplate};
 pub use render::engine::{
-    DefineInput, Engine, EngineOptions, PreparedRender, RenderOptions, RenderTarget, defines_from_json, env_from_json,
+    ArtifactRefresh, DefineInput, Engine, EngineOptions, PreparedRender, RenderOptions, RenderTarget, defines_from_json, env_from_json,
 };
 pub use value::bind::{BindError, bind, to_json_value};
 pub use value::json::{parse_json, parse_json_bytes};
