@@ -181,6 +181,7 @@ compiler-ir-check: build-ts ## Verify canonical AST coverage and type/scope reje
 	node scripts/check-ast-artifact.mjs
 	node scripts/check-generated-artifact.mjs
 	node scripts/check-compiler-ir.mjs
+	node scripts/check-conformance-type-manifest.mjs
 
 typed-generator-compile-check: compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
