@@ -91,7 +91,11 @@ const common = {
   },
 }[lang];
 // Bind `this`-free targets to the shared target so nested AST generation is recursive.
-const target = { ...common, ifBlock: node => common.ifBlock(node, 1) };
+const target = { ...common };
+if (lang === 'ts') target.ifBlock = (node, n) => indent(n, `if (slots[${quote(node.id)}] !== undefined) {\n${nodes(node.body, target, n + 1)}\n${'    '.repeat(n)}}`);
+if (lang === 'go') target.ifBlock = (node, n) => indent(n, `if _, ok := slots[${quote(node.id)}]; ok {\n${nodes(node.body, target, n + 1)}\n}`);
+if (lang === 'rust') target.ifBlock = (node, n) => indent(n, `if slots.contains_key(${quote(node.id)}) {\n${nodes(node.body, target, n + 1)}\n}`);
+if (lang === 'php') target.ifBlock = (node, n) => indent(n, `if (isset($slots[${quote(node.id)}])) {\n${nodes(node.body, target, n + 1)}\n}`);
 const body = nodes(ast.body, target, 1);
 const records = manifest.records ?? {};
 let source;

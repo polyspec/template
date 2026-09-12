@@ -190,6 +190,9 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 
 // Prepare binds request data and resolves the target template once.
 func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*PreparedRender, error) {
+	if e.compileMode == CompileModeGen {
+		return nil, errors.New("Prepare is unavailable in generated compile mode; use Render")
+	}
 	var name string
 	var template *ParsedTemplate
 	switch t := target.(type) {
