@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const path = process.argv[2] ?? join(root, 'examples/site/data/mode-benchmark.json');
@@ -28,11 +28,13 @@ export function validateBenchmark(result) {
   if (typeof hash !== 'string' || hash.length !== 64 || !Number.isInteger(bytes) || bytes < 1) throw new Error('benchmark output identity is invalid');
 }
 
-const result = JSON.parse(readFileSync(path, 'utf8'));
-validateBenchmark(result);
-const mutation = structuredClone(result);
-mutation.results[0].output_sha256 = '0'.repeat(64);
-let rejected = false;
-try { validateBenchmark(mutation); } catch { rejected = true; }
-if (!rejected) throw new Error('benchmark mutation was not rejected');
-process.stdout.write(`benchmark: ${result.results.length} equal-output rows and mutation rejection passed\n`);
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const result = JSON.parse(readFileSync(path, 'utf8'));
+  validateBenchmark(result);
+  const mutation = structuredClone(result);
+  mutation.results[0].output_sha256 = '0'.repeat(64);
+  let rejected = false;
+  try { validateBenchmark(mutation); } catch { rejected = true; }
+  if (!rejected) throw new Error('benchmark mutation was not rejected');
+  process.stdout.write(`benchmark: ${result.results.length} equal-output rows and mutation rejection passed\n`);
+}

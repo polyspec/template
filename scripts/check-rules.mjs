@@ -42,10 +42,30 @@ if (existsSync(casesDir)) {
   }
 }
 
-const uncovered = [...defined].filter(rule => !covered.has(rule)).sort();
+const evidencePath = join(root, 'tests', 'rule-evidence.json');
+const evidence = JSON.parse(readFileSync(evidencePath, 'utf8'));
+if (evidence.schema !== 1 || !Array.isArray(evidence.groups)) errors.push('rule-evidence.json has an invalid schema');
+const evidenced = new Map();
+for (const group of evidence.groups ?? []) {
+  if (typeof group.name !== 'string' || typeof group.verification !== 'string' || !Array.isArray(group.rules) || !group.rules.length || !Array.isArray(group.files) || !group.files.length) {
+    errors.push('rule-evidence.json contains an incomplete group');
+    continue;
+  }
+  for (const file of group.files) if (!existsSync(join(root, file))) errors.push(`${group.name}: evidence file is missing: ${file}`);
+  for (const rule of group.rules) {
+    if (!defined.has(rule)) errors.push(`${group.name}: unknown evidence rule ${rule}`);
+    if (evidenced.has(rule)) errors.push(`${rule}: duplicated non-fixture evidence`);
+    evidenced.set(rule, group.name);
+  }
+}
+
+const uncovered = [...defined].filter(rule => !covered.has(rule) && !evidenced.has(rule)).sort();
 if (errors.length) {
   for (const error of errors) process.stderr.write(`[rules] ${error}\n`);
   process.exitCode = 1;
 }
-process.stdout.write(`[rules] ${defined.size} rules defined, ${covered.size} covered by ${caseCount} cases, ${uncovered.length} uncovered\n`);
-if (uncovered.length) process.stdout.write(`[rules] uncovered: ${uncovered.join(' ')}\n`);
+process.stdout.write(`[rules] ${defined.size} rules defined, ${covered.size} covered by ${caseCount} cases, ${evidenced.size} covered by non-fixture gates, ${uncovered.length} uncovered\n`);
+if (uncovered.length) {
+  process.stderr.write(`[rules] uncovered: ${uncovered.join(' ')}\n`);
+  process.exitCode = 1;
+}
