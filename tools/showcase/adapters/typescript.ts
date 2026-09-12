@@ -22,6 +22,7 @@ import type {
   Scenario,
 } from './generated/render_adapter.ts';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.ts';
+import { generatedTemplates } from './generated/native_templates.ts';
 
 function readJson(root: string, name: string): unknown {
   return parseJsonBytes(new Uint8Array(readFileSync(join(root, name))));
@@ -110,7 +111,10 @@ export class Adapter implements RenderAdapter {
     this.root = root;
     const metadata = objectValue(readJson(root, 'scenario.json'), 'scenario.json');
     const legacyWrappers = metadata.has('legacyWrappers') ? booleanField(metadata, 'legacyWrappers') : false;
-    this.engine = new Engine({ loader: new MapLoader(readArtifactTemplates(root, 'typescript')), legacyWrappers });
+    const templates = process.env.SHOWCASE_EXECUTION_MODE === 'generated'
+      ? generatedTemplates(root)
+      : readArtifactTemplates(root, 'typescript');
+    this.engine = new Engine({ loader: new MapLoader(templates), legacyWrappers });
   }
 
   loadScenario(): Scenario {

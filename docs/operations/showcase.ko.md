@@ -38,7 +38,7 @@ make contract-check
 
 `contract-check`는 TypeScript·Go·Rust 선언을 컴파일하고, PHP를 `ReflectionClass`로 검사하고, JavaScript assertion helper를 검사하고, 다섯 시나리오에서 다섯 어댑터를 실행한다. 각 실행에서 요청 형태, UTF-8 출력 해시, 반복 렌더, 잘못된 target 오류와 복구를 검사한다. manifest는 `core-runtime`, `source-compiler`, `artifact-runtime`도 선언하며 같은 지원 레벨의 구현은 같은 논리 연산을 제공해야 한다. `make showcase`는 이 게이트 전에 artifact를 생성하고 `make showcase-check`는 커밋된 artifact만 로드한다.
 
-같은 파일을 각 구현의 기존 CLI에 전달한다. 실행 파일만 다르고, 모든 시나리오는 `--data data.json --define define.json`과 함께 `layout` target을 렌더한다. showcase adapter는 언어별 artifact loader를 사용하고 일반 CLI는 개발용 source 경로로 유지한다. runtime 렌더 호출은 다음과 같다.
+같은 파일을 각 구현의 기존 CLI에 전달한다. 실행 파일만 다르고, 모든 시나리오는 `--data data.json --define define.json`과 함께 `layout` target을 렌더한다. showcase adapter는 언어별 artifact loader를 사용하고 일반 CLI는 개발용 source 경로로 유지한다. `SHOWCASE_EXECUTION_MODE=generated`를 지정하면 생성 모드를 실행한다. 빌드 단계에서 모든 showcase 시나리오의 정규 템플릿을 담은 호스트 언어 소스 모듈을 만들며, 계약 검사는 두 모드에서 모든 시나리오를 실행해 출력 바이트·반복 렌더·잘못된 target 뒤의 복구를 비교한다. runtime 렌더 호출은 다음과 같다.
 
 ```js
 engine.render('layout', assign, { define });

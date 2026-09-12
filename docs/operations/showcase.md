@@ -44,6 +44,8 @@ The same files go to each implementation's existing CLI. Only the executable dif
 engine.render('layout', assign, { define });
 ```
 
+Set `SHOWCASE_EXECUTION_MODE=generated` to run generated mode. The build step creates one host-language source module containing the canonical templates for all showcase scenarios. The contract checker runs every scenario in both modes and compares output bytes, repeated renders and recovery after an invalid target.
+
 ## The same request in four languages
 
 The four API examples below read the same scenario directory. They do not construct different business objects in each language: `data.json` is the assign object and `define.json` is the same identifier-to-path registry for every adapter. A definition object is reserved for per-definition data or finished HTML. The `scope-precedence` scenario is used because it contains a layout, a nested template definition and definition data.

@@ -12,15 +12,16 @@ const scenariosRoot = join(root, 'examples', 'site', 'scenarios');
 const manifest = JSON.parse(readFileSync(join(adapterRoot, 'interface.json'), 'utf8'));
 const operationNames = manifest.operations.map(operation => operation.name);
 const languageNames = ['typescript', 'javascript', 'go', 'rust', 'php'];
-const requiredSupportLevels = ['core-runtime', 'source-compiler', 'artifact-runtime'];
+const requiredSupportLevels = ['core-runtime', 'source-compiler', 'artifact-runtime', 'native-source-backend'];
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function run(label, command, args, cwd = root) {
+function run(label, command, args, cwd = root, extraEnv = {}) {
   const result = spawnSync(command, args, {
     cwd,
+    env: { ...process.env, ...extraEnv },
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,
   });
@@ -104,17 +105,18 @@ function parseRuntimeOutput(language, stdout) {
   }
 }
 
-function runtimeCommand(language, scenarioPath) {
+function runtimeCommand(language, scenarioPath, mode = 'ast') {
   const definition = manifest.languages[language];
   const source = join(adapterRoot, definition.file);
-  if (language === 'typescript') return [process.execPath, ['--experimental-strip-types', source, scenarioPath], root];
-  if (language === 'javascript') return [process.execPath, [source, scenarioPath], root];
-  if (language === 'go') return ['go', ['run', '.', scenarioPath], join(adapterRoot, 'go')];
+  const env = mode === 'generated' ? { SHOWCASE_EXECUTION_MODE: 'generated' } : {};
+  if (language === 'typescript') return [process.execPath, ['--experimental-strip-types', source, scenarioPath], root, env];
+  if (language === 'javascript') return [process.execPath, [source, scenarioPath], root, env];
+  if (language === 'go') return ['go', ['run', '.', scenarioPath], join(adapterRoot, 'go'), env];
   if (language === 'rust') {
     const cargo = join(process.env.HOME ?? '', '.cargo', 'bin', 'cargo');
-    return [existsSync(cargo) ? cargo : 'cargo', ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root];
+    return [existsSync(cargo) ? cargo : 'cargo', ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root, env];
   }
-  return ['php', [source, scenarioPath], root];
+  return ['php', [source, scenarioPath], root, env];
 }
 
 function checkStaticImplementation(language) {
@@ -187,9 +189,9 @@ function checkPhpReflection() {
   run('PHP ReflectionClass', 'php', ['-r', probe, '--', root]);
 }
 
-function checkRuntime(language, scenarioPath, request, expectedHtml) {
-  const [command, args, cwd] = runtimeCommand(language, scenarioPath);
-  const payload = parseRuntimeOutput(language, run(`${language} runtime`, command, args, cwd));
+function checkRuntime(language, scenarioPath, request, expectedHtml, mode = 'ast') {
+  const [command, args, cwd, env] = runtimeCommand(language, scenarioPath, mode);
+  const payload = parseRuntimeOutput(language, run(`${language} ${mode} runtime`, command, args, cwd, env));
   const expectedDigest = digest(Buffer.from(expectedHtml, 'utf8'));
   assert(payload.language === language, `${language} reports language ${payload.language}`);
   assert(payload.type === manifest.concreteType, `${language} reports type ${payload.type}`);
@@ -206,6 +208,7 @@ function checkRuntime(language, scenarioPath, request, expectedHtml) {
 async function main() {
   checkSupportLevels();
   run('manifest generator', process.execPath, ['scripts/generate-showcase-contract.mjs', '--check']);
+  run('generated source generator', process.execPath, ['tools/showcase/generate-native.mjs', '--check']);
   for (const language of languageNames) checkStaticImplementation(language);
 
   run('TypeScript declarations', 'npx', ['--no-install', 'tsc', '--noEmit', '-p', 'tools/showcase/adapters/tsconfig.json']);
@@ -230,10 +233,13 @@ async function main() {
     assert(existsSync(expectedPath), `${scenarioId}: expected.html is missing`);
     const request = expectedRequest(scenarioPath);
     const expectedHtml = readFileSync(expectedPath, 'utf8');
-    for (const language of languageNames) checkRuntime(language, scenarioPath, request, expectedHtml);
+    for (const language of languageNames) {
+      checkRuntime(language, scenarioPath, request, expectedHtml);
+      checkRuntime(language, scenarioPath, request, expectedHtml, 'generated');
+    }
     process.stdout.write(`[contract] ${scenarioId} passed across ${languageNames.length} languages\n`);
   }
-  process.stdout.write(`[contract] manifest, generated declarations, reflection, state recovery and ${scenarioIds.length} scenarios passed\n`);
+  process.stdout.write(`[contract] manifest, generated declarations, AST/generated mode parity, reflection, state recovery and ${scenarioIds.length} scenarios passed\n`);
 }
 
 main().catch(error => {

@@ -21,7 +21,9 @@ pub use error::{ErrorCode, TemplateError};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{Limits, ParsedTemplate};
-pub use render::engine::{DefineInput, Engine, EngineOptions, PreparedRender, RenderOptions, RenderTarget, defines_from_json, env_from_json};
+pub use render::engine::{
+    DefineInput, Engine, EngineOptions, PreparedRender, RenderOptions, RenderTarget, defines_from_json, env_from_json,
+};
 pub use value::bind::{BindError, bind, to_json_value};
 pub use value::json::{parse_json, parse_json_bytes};
 pub use value::{OrderedMap, Value};

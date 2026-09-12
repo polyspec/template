@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import { Engine, MapLoader, parseJsonBytes } from '../../../packages/template-ts/dist/index.mjs';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.mjs';
+import { generatedTemplates } from './generated/native_templates.mjs';
 
 /** @typedef {Map<string, unknown>} JsonObject */
 /** @typedef {{ template: string, data?: JsonObject } | { html: string }} DefineEntry */
@@ -96,7 +97,10 @@ export class Adapter {
     this.root = root;
     const metadata = objectValue(readJson(root, 'scenario.json'), 'scenario.json');
     const legacyWrappers = metadata.has('legacyWrappers') ? booleanField(metadata, 'legacyWrappers') : false;
-    this.engine = new Engine({ loader: new MapLoader(readArtifactTemplates(root, 'typescript')), legacyWrappers });
+    const templates = process.env.SHOWCASE_EXECUTION_MODE === 'generated'
+      ? generatedTemplates(root)
+      : readArtifactTemplates(root, 'typescript');
+    this.engine = new Engine({ loader: new MapLoader(templates), legacyWrappers });
   }
 
   loadScenario() {
