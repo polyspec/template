@@ -2,7 +2,7 @@
 
 - Resolved Composer lockfiles against the declared PHP 8.2 minimum and added a policy gate that rejects stale or mismatched platform resolution.
 - Made the generated-program compile gate install its declared PHP runtime dependency, so the standalone showcase and documentation publication checks run from a clean checkout.
-- Marked every generated Korean documentation page with the `ko-KR` HTML language and added a static-site regression gate for locale metadata and unresolved theme interpolation.
+- Published every Korean documentation pair under the `/ko/` locale with Korean navigation and `ko-KR` HTML metadata, and added a static-site regression gate for locale routing and unresolved theme interpolation.
 - Updated the Pages configure, artifact upload and deployment actions to their current stable majors.
 
 [한국어](CHANGELOG.ko.md).
