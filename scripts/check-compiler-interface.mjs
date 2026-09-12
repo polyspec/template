@@ -16,6 +16,18 @@ if (existsSync(resolve(root, 'tools/runtime/interface.json'))) throw new Error('
 if (existsSync(resolve(root, 'tools/showcase/adapters/interface.json'))) throw new Error('showcase contract must not duplicate the compiler manifest');
 if (manifest.showcaseAdapter?.name !== 'RenderAdapter' || manifest.showcaseAdapter?.schema !== 3) throw new Error('showcase adapter contract is missing');
 
+const evidence = manifest.evidence;
+if (!Array.isArray(evidence?.readingOrder) || evidence.readingOrder[0] !== 'tools/compiler/interface.json' ||
+    !evidence.readingOrder.every(path => existsSync(resolve(root, path)))) {
+  throw new Error('compiler interface reading order is incomplete');
+}
+if (typeof evidence.fixtures !== 'string' || !existsSync(resolve(root, evidence.fixtures)) ||
+    !Array.isArray(evidence.examples) || !evidence.examples.every(path => existsSync(resolve(root, path))) ||
+    !Array.isArray(evidence.generatedEvidence) || !evidence.generatedEvidence.every(path => existsSync(resolve(root, path))) ||
+    !Array.isArray(evidence.verificationCommands) || evidence.verificationCommands.length < 1) {
+  throw new Error('compiler interface evidence links are incomplete');
+}
+
 const requiredTypes = [
   'CompileMode', 'ArtifactRefresh', 'SourceGraph', 'TypeManifest', 'TypedProgram',
   'ArtifactManifest', 'RenderRequest', 'Program', 'AstProgram', 'GeneratedProgram',
