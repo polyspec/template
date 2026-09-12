@@ -34,6 +34,8 @@ Every generated module exposes the logical structures `Assign`, `DefinitionData<
 
 Generated expressions use the target runtime's `RuntimeBindings` for unary and eager binary operations, truthiness, string conversion, escaping, numeric conversion, finite-result validation, equality, ordering, lookup, iteration entries, functions, limits and errors. AST evaluators use the same unary and binary operations; evaluators and generated control flow retain only the lazy branch selection required by `&&`, `||` and `??`. The declaration is extracted and checked against the compiler manifest. A backend may emit a native operation only when the typed operands make that operation exactly equivalent to the data-model rules.
 
+The TypeScript backend passes its bound root, source-indexed frame, render context and runtime bindings into direct template functions. Those functions write to the context output builder, so generated execution uses the same UTF-8 output limit and positioned error as AST execution. Includes and blocks call generated template functions directly while entering and leaving the shared render chain.
+
 Built-ins are known to the compiler. A referenced host function requires a manifest signature and a runtime implementation. Missing signatures fail before emission. Missing runtime implementations, arity errors and host failures use the same error fields as AST execution.
 
 ## Artifact refresh

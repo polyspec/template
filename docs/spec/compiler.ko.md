@@ -34,6 +34,8 @@ Typed IR은 모든 symbol, template path, definition target, function signature,
 
 Generated expression은 unary와 eager binary 연산, truthiness, 문자열 변환, escaping, 숫자 변환, 유한 산술 결과 검증, 동등성, 정렬, lookup, 반복 entry, 함수, limit, error를 target runtime의 `RuntimeBindings`로 처리한다. AST evaluator도 같은 unary와 binary 연산을 사용하며 evaluator와 generated 제어 흐름에는 `&&`, `||`, `??`에 필요한 lazy branch 선택만 남는다. 실제 선언은 compiler manifest와 대조한다. Backend는 typed operand에서 data-model 규칙과 정확히 같은 경우에만 native operation을 생성할 수 있다.
 
+TypeScript backend는 bind한 root, source line index가 있는 frame, render context, runtime bindings를 직접 template 함수에 전달한다. 이 함수들은 context output builder에 기록하므로 generated 실행도 AST 실행과 같은 UTF-8 output 제한과 위치 오류를 사용한다. Include와 block은 공통 render chain에 enter·leave하면서 generated template 함수를 직접 호출한다.
+
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 
 ## Artifact 갱신

@@ -1,5 +1,5 @@
 // Generated.
-import { RuntimeEnvironment, bind } from '@polyspec/template';
+import { Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, bind, bindMap } from '@polyspec/template';
 const generatedRecords = { "Page": { "title": { "kind": "string", "optional": false } } };
 const generatedAssign = { "page": { "kind": "record", "name": "Page", "optional": false }, "root_label": { "kind": "string", "optional": false }, "defined_label": { "kind": "string", "optional": false } };
 const generatedDefinitionSpecs = { "content": { "field": "content", "target": "content.tpl", "html": true, "input": { "title": { "kind": "string", "optional": false }, "root_label": { "kind": "string", "optional": false }, "defined_label": { "kind": "string", "optional": false }, "layout_local": { "kind": "string", "optional": true } } }, "layout": { "field": "layout", "target": "layout.tpl", "html": false, "input": {} } };
@@ -7,7 +7,7 @@ function generatedObject(value, path) { if (value instanceof Map)
     return value; throw new Error(path + ' is not an object'); }
 function generatedBindType(value, type, path) { if (value === null || value === undefined) {
     if (type.optional || type.kind === 'null' || type.kind === 'any')
-        return undefined;
+        return null;
     throw new Error(path + ' is required');
 } if (type.kind === 'any')
     return value; if (type.kind === 'null') {
@@ -31,11 +31,13 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     if (!object.has(name)) {
         if (!partial && !type.optional)
             throw new Error(path + '.' + name + ' is required');
+        if (!partial)
+            result[name] = null;
         continue;
     }
     result[name] = generatedBindType(object.get(name), type, path + '.' + name);
 } return result; }
-function generatedBindAssign(value) { const bound = bind(value); return generatedBindRecord(bound, generatedAssign, 'assign'); }
+function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, 'assign'), root }; }
 function generatedBindDefinitions(input) { const value = bind(input ?? {}); const object = generatedObject(value, 'define'); const definitions = {}; const targets = new Map(); for (const [id, raw] of object) {
     const spec = generatedDefinitionSpecs[id];
     if (spec === undefined)
@@ -64,61 +66,69 @@ function generatedBindDefinitions(input) { const value = bind(input ?? {}); cons
     definitions[spec.field] = { data: boundData };
     targets.set(id, { target: spec.target });
 } return { definitions: definitions, targets }; }
-function stringify(value) { if (value === null || value === undefined)
-    return ''; if (typeof value === 'object')
-    throw new Error('a collection cannot be converted to text'); return String(value); }
-function escape(value) { return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
-function generatedTruthy(value) { if (value === null || value === undefined || value === false || value === '' || value === 0)
-    return false; if (Array.isArray(value))
-    return value.length !== 0; if (value instanceof Map)
-    return value.size !== 0; return true; }
-function generatedDefault(value, fallback) { return generatedTruthy(value) ? value : fallback; }
-function generatedIn(value, collection) { if (Array.isArray(collection))
-    return collection.includes(value); if (collection instanceof Map)
-    return collection.has(value); if (typeof collection === 'string')
-    return collection.includes(String(value)); return false; }
-function render_content_tpl(assign, definitions, input) {
-    let out = '';
+function render_content_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame("content.tpl", [0, 10, 29, 64, 105, 164, 175], rootData);
     const title = input.title;
     const root_label = input.root_label;
     const defined_label = input.defined_label;
-    const layout_local = input.layout_local;
-    out += "<article>\n<h1>";
-    out += escape(stringify(title));
-    out += "</h1>\n<p class=\"root\">";
-    out += escape(stringify(root_label));
-    out += "</p>\n<p class=\"defined\">";
-    out += escape(stringify(defined_label));
-    out += "</p>\n<p class=\"local\">";
-    out += escape(stringify(generatedDefault(layout_local, "missing")));
-    out += "</p>\n</article>\n";
-    return out;
+    const layout_local = input.layout_local ?? null;
+    context.at(frame, [0, 14]);
+    context.output.write("<article>\n<h1>");
+    context.at(frame, [14, 23]);
+    context.output.write(runtime.escape(title, frame, [17, 22]));
+    context.at(frame, [23, 45]);
+    context.output.write("</h1>\n<p class=\"root\">");
+    context.at(frame, [45, 59]);
+    context.output.write(runtime.escape(root_label, frame, [48, 58]));
+    context.at(frame, [59, 83]);
+    context.output.write("</p>\n<p class=\"defined\">");
+    context.at(frame, [83, 100]);
+    context.output.write(runtime.escape(defined_label, frame, [86, 99]));
+    context.at(frame, [100, 122]);
+    context.output.write("</p>\n<p class=\"local\">");
+    context.at(frame, [122, 159]);
+    context.output.write(runtime.escape(runtime.call("default", [layout_local, "missing"], frame, [125, 158]), frame, [125, 158]));
+    context.at(frame, [159, 175]);
+    context.output.write("</p>\n</article>\n");
 }
-function render_layout_tpl(assign, definitions, input) {
-    let out = '';
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData) {
+    const frame = new Frame("layout.tpl", [0, 42, 66, 95, 106], rootData);
     const layout_local = "visible only in layout";
-    out += "<section class=\"scope\">\n";
+    context.at(frame, [42, 66]);
+    context.output.write("<section class=\"scope\">\n");
     {
         const definition = definitions.content;
         if (definition === undefined)
-            throw new Error("generated definition content is missing");
-        if (definition?.html !== undefined)
-            out += definition.html;
+            throw runtime.error(frame, [66, 94], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
+        if (definition?.html !== undefined) {
+            context.at(frame, [66, 94]);
+            context.output.write(definition.html);
+        }
         else {
             const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: assign.page?.title });
-            out += render_content_tpl(assign, definitions, input);
+            context.enter("content.tpl", frame, [66, 94]);
+            try {
+                render_content_tpl(assign, definitions, input, context, runtime, rootData);
+            }
+            finally {
+                context.leave();
+            }
         }
     }
-    out += "</section>\n";
-    return out;
+    context.at(frame, [95, 106]);
+    context.output.write("</section>\n");
 }
-export function renderTemplate(target, assign, definitions) {
+function renderTemplate(target, assign, definitions, context, runtime, rootData) {
     switch (target) {
-        case "layout.tpl": return render_layout_tpl(assign, definitions, {});
-        default: throw new Error('generated template is missing or requires inputs: ' + target);
+        case "layout.tpl":
+            render_layout_tpl(assign, definitions, {}, context, runtime, rootData);
+            return;
+        default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');
     }
 }
-export function render(assign, definitions) { return renderTemplate("layout.tpl", assign, definitions); }
+function generatedEnv(input) { const timezone = input?.timezone ?? 'Z'; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== 'string')
+    throw new Error('env.timezone is not a string'); if (typeof now !== 'number')
+    throw new Error('env.now is not a number'); return { timezone, now }; }
 class GeneratedPreparedRender {
     execute;
     constructor(execute) { this.execute = execute; }
@@ -128,7 +138,13 @@ export class GeneratedProgram {
     runtime;
     constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
     prepare(target, assign, options = {}) { if (typeof target !== 'string')
-        throw new Error('generated target must be a template name'); const typedAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(() => renderTemplate(targetName, typedAssign, bound.definitions)); }
+        throw new Error('generated target must be a template name'); const boundAssign = generatedBindAssign(assign); const bound = generatedBindDefinitions(options.define); const registered = bound.targets.get(target); if (registered?.html !== undefined)
+        return new GeneratedPreparedRender(() => registered.html); const targetName = registered?.target ?? target; const env = generatedEnv(options.env); return new GeneratedPreparedRender(() => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); context.enter(targetName, null, null); try {
+        renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root);
+        return context.output.toString();
+    }
+    finally {
+        context.leave();
+    } }); }
     render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
 }
