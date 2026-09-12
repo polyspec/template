@@ -50,11 +50,17 @@ function resolveTemplate(from, path) {
 }
 
 export function lowerSourceGraph(graph, manifest) {
-  if (manifest.schema !== 2) throw new Error('typed generator: type manifest schema must be 2');
+  if (manifest.schema !== 3) throw new Error('typed generator: type manifest schema must be 3');
   const records = new Map(Object.entries(manifest.records ?? {}).map(([name, fields]) => [name, new Map(Object.entries(fields).map(([field, type]) => [field, parseType(type)]))]));
   const root = new Map(Object.entries(manifest.fields ?? {}).map(([name, type]) => [name, parseType(type)]));
   const functions = new Map(Object.entries(manifest.functions ?? {}).map(([name, signature]) => [name, { args: (signature.args ?? []).map(parseType), returns: parseType(signature.returns ?? 'any') }]));
-  const definitions = new Map(Object.entries(manifest.defines ?? {}).map(([name, type]) => [name, parseType(type)]));
+  const definitions = new Map(Object.entries(manifest.defines ?? {}).map(([name, definition]) => {
+    if (!definition || typeof definition !== 'object' || Array.isArray(definition)) throw new Error(`typed generator: definition ${name} is invalid`);
+    const template = definition.template ?? null;
+    if (template !== null && (typeof template !== 'string' || !graph.templates.has(template))) throw new Error(`typed generator: definition ${name} names an unknown template`);
+    if (template === null && definition.html !== true) throw new Error(`typed generator: definition ${name} needs a template or html support`);
+    return [name, { template, optional: definition.optional === true, html: definition.html === true }];
+  }));
   const templateInputs = new Map(Object.entries(manifest.templates ?? {}).map(([name, fields]) => {
     if (!graph.templates.has(name) || !fields || typeof fields !== 'object' || Array.isArray(fields)) {
       throw new Error(`typed generator: template input declaration ${name} is invalid`);
@@ -185,7 +191,19 @@ export function lowerSourceGraph(graph, manifest) {
           if (node.id !== null && !definitions.has(node.id)) throw new Error(`typed generator: definition ${node.id} is missing from the type manifest`);
           const path = node.path === null ? null : resolveTemplate(templateName, node.path);
           if (path !== null && !graph.templates.has(path)) throw new Error(`typed generator: block template ${path} is missing from the source graph`);
-          return { op: 'block', id: node.id, path, scope: node.scope.map(item => ({ name: item.name, expr: lowerExpr(item.expr, scope, loops) })) };
+          const definition = node.id === null ? null : definitions.get(node.id);
+          const target = path ?? definition?.template ?? null;
+          if (target === null && !definition?.html) throw new Error(`typed generator: block ${node.id ?? '<anonymous>'} has no generated target`);
+          const targetInputs = target === null ? new Map() : templateInputs.get(target);
+          const blockScope = new Map(node.scope.map(item => [item.name, lowerExpr(item.expr, scope, loops)]));
+          for (const name of blockScope.keys()) if (!targetInputs.has(name)) throw new Error(`typed generator: block input ${name} is not declared by ${target}`);
+          const inputs = [...targetInputs].map(([name, valueType]) => ({
+            name,
+            valueType,
+            scope: blockScope.get(name) ?? null,
+            root: root.has(name) ? lowerExpr({ type: 'Var', name }, scope, loops) : null,
+          }));
+          return { op: 'block', id: node.id, path, target, definition, inputs };
         }
         case 'IfBlock': {
           if (!definitions.has(node.id)) throw new Error(`typed generator: definition ${node.id} is missing from the type manifest`);

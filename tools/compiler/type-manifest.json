@@ -1,5 +1,5 @@
 {
-  "schema": 2,
+  "schema": 3,
   "root": "Assign",
   "entry": "layout.tpl",
   "fields": {
@@ -14,6 +14,9 @@
     "Page": { "title": "string?" },
     "Slot": { "template": "string?", "html": "string?" }
   },
-  "defines": { "content": "Slot?", "layout": "Template" },
+  "defines": {
+    "content": { "template": "content.tpl", "optional": true, "html": true },
+    "layout": { "template": "layout.tpl" }
+  },
   "functions": {}
 }
