@@ -27,6 +27,15 @@ export class PageCache {
     this.entries.set(key, { html, expiresAt: ttl === null || ttl === 0 ? null : this.now() + ttl });
   }
 
+  /** Returns a cached page or renders and stores it exactly once on a miss. */
+  getOrSet(key: string, ttl: PageCacheTTL, render: () => string): string {
+    const cached = this.get(key);
+    if (cached !== null) return cached;
+    const html = render();
+    this.set(key, html, ttl);
+    return html;
+  }
+
   /** Removes one page. */
   delete(key: string): void { this.entries.delete(key); }
 

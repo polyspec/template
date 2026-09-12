@@ -54,5 +54,13 @@ func (c *PageCache) Set(key, html string, ttl *time.Duration) error {
 	return nil
 }
 
+// GetOrSet returns a cached page or renders and stores it on a miss.
+func (c *PageCache) GetOrSet(key string, ttl *time.Duration, render func() (string, error)) (string, error) {
+	if html, ok := c.Get(key); ok { return html, nil }
+	html, err := render(); if err != nil { return "", err }
+	if err := c.Set(key, html, ttl); err != nil { return "", err }
+	return html, nil
+}
+
 func (c *PageCache) Delete(key string) { c.mu.Lock(); delete(c.mapEntries, key); c.mu.Unlock() }
 func (c *PageCache) Clear()            { c.mu.Lock(); clear(c.mapEntries); c.mu.Unlock() }
