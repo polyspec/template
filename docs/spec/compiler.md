@@ -64,7 +64,7 @@ Generated files are completed in a temporary location and replaced atomically. A
 
 ## Implementation status
 
-The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly. TypeScript, Go and PHP generated programs pass the complete conformance suite. Generated execution remains partial until Rust passes the same suite.
+The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly. All four generated programs pass the complete 211-case conformance suite. Together with the four AST implementations, `make conformance-all-modes` verifies all 1,688 core mode-language-case cells without generated-to-AST fallback.
 
 Generated artifacts use the same refresh boundary as canonical AST artifacts. `dev` always emits a fresh source file and manifest, `true` verifies source, type, contract and compiler digests before deciding whether to rebuild, and `false` reads and verifies only the deployed generated source and its manifest. Source and manifest replacements are atomic, with the manifest committed last.
 

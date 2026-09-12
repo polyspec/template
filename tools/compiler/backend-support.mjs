@@ -37,7 +37,7 @@ export function emitExpression(node, target) {
   if (node.op === 'literal') return target.literal(node.value, node.valueType);
   if (node.op === 'root') return target.var(fieldName(node.name), node.valueType.source, node);
   if (node.op === 'local') return target.local(fieldName(node.name), node.valueType.source);
-  if (node.op === 'loop-meta') return target.loopMeta(node.loop, node.field);
+  if (node.op === 'loop-meta') return target.loopMeta(node.loop, node.field, node);
   if (node.op === 'member') return target.member(emitExpression(node.object, target), fieldName(node.key), node.object.valueType, node);
   if (node.op === 'index') return target.index(emitExpression(node.object, target), emitExpression(node.index, target), node.object.valueType, node);
   if (node.op === 'call') return target.call(node.name, node.args.map(item => emitExpression(item, target)), node);
