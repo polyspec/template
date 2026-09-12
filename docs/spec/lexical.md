@@ -18,7 +18,7 @@ This document defines how a template source is divided into text, tags and comme
 
 **LEX-5** A tag starts at a `{` in the sigil form: `{`, then zero or more horizontal whitespace characters (space U+0020 or tab U+0009), then a sigil. The sigils are `=`, `@`, `?#`, `?`, `:?`, `:`, `/`, `+`, `#`, `*` and `%`. A sigil is matched by its longest form: `?#` is matched before `?`, and `:?` is matched before `:`. Two sigils require more context: `/` starts a tag only when it is followed by horizontal whitespace and the close delimiter, and `@` starts a tag only when it is followed by horizontal whitespace, an identifier, horizontal whitespace and `=`. A `{` whose `/` or `@` lacks that context is text.
 
-**LEX-6** A tag starts at a `{` in the assignment form: `{`, then immediately an identifier (`[A-Za-z_][A-Za-z0-9_]*`), then zero or more horizontal whitespace characters, then an assignment operator. The assignment operators are `=` not followed by `=` or `>`, `+=`, `-=`, `*=`, `/=`, `%=`, `++` and `--`. No whitespace is allowed between `{` and the identifier. A reserved word (`true`, `false`, `null`, `in`) matches the identifier pattern, so the tag starts; `grammar.md` then rejects the assignment.
+**LEX-6** A tag starts in the assignment form only when `{` is followed by `:` and an identifier (`[A-Za-z_][A-Za-z0-9_]*`), with optional horizontal whitespace after `:`. The identifier is followed by zero or more horizontal whitespace characters and an assignment operator. The assignment operators are `=` not followed by `=` or `>`, `+=`, `-=`, `*=`, `/=`, `%=`, `++` and `--`. A reserved word (`true`, `false`, `null`, `in`) matches the identifier pattern, so the tag starts; `grammar.md` then rejects the assignment. A brace followed directly by an identifier is text, including `{a = 1}`.
 
 **LEX-7** A `{` that satisfies neither LEX-5 nor LEX-6 is text. A line terminator between `{` and the sigil prevents the sigil form. The following braces are text:
 
@@ -53,9 +53,9 @@ The following braces start a tag:
 {# footer.tpl year}
 {?# contents}
 {* note *}
-{count = 0}
-{count += 1}
-{count++}
+{:count = 0}
+{:count += 1}
+{:count++}
 ```
 
 The following braces start a tag whose body is an error. A `\{` escape (LEX-9) keeps them as text:
@@ -95,7 +95,7 @@ multi-line
 *}
 ```
 
-**LEX-11** Every other tag ends at the first `}` that is outside a string literal of the tag body and that the tag body grammar of `grammar.md` does not accept at that position. With the default delimiters no grammar rule accepts `}`, so the tag ends at the first `}` outside a string literal. With a close delimiter that the grammar uses, for example `]`, a `]` that closes an open `[` belongs to the body and the next `]` ends the tag: `[= a[0]]` is one echo tag. A string literal starts at `'` or `"` and ends at the same unescaped quote character; the escape rules of string literals are defined in `expressions.md`. A tag whose body reaches the end of the source without a closing `}` is rejected with `E_PARSE_UNTERMINATED_TAG`. A string literal that reaches the end of the source is rejected with `E_PARSE_UNTERMINATED_STRING`.
+**LEX-11** Every other tag ends at the first close delimiter that is outside a string literal, is at expression nesting depth zero, and is accepted as the tag boundary by the body grammar. With the default delimiters no grammar rule accepts `}`, so the tag ends at the first `}` outside a string literal. With a close delimiter that the grammar uses, for example `]`, a `]` that closes an open `[` belongs to the body and the next `]` ends the tag: `[= a[0]]` is one echo tag. A string literal starts at `'` or `"` and ends at the same unescaped quote character; the escape rules of string literals are defined in `expressions.md`. A tag whose body reaches the end of the source without a closing `}` is rejected with `E_PARSE_UNTERMINATED_TAG`. A string literal that reaches the end of the source is rejected with `E_PARSE_UNTERMINATED_STRING`.
 
 ```
 {= "}"}
@@ -220,7 +220,7 @@ The first line is text: the first `{` is followed by `{`, and the second `{` is 
 
 **LEX-20** The open delimiter and the close delimiter are the characters `{` and `}` unless an engine option or a directive selects other characters. Every rule in this document and in `grammar.md` that names `{` applies to the open delimiter, and every rule that names `}` applies to the close delimiter. The doubled forms of LEX-17 are the open delimiter written twice and the close delimiter written twice. The escape of LEX-9 is `\` followed by the open delimiter.
 
-**LEX-21** A delimiter is one ASCII character that is not a letter, a digit, `_`, `\`, a space or a control character. The open delimiter and the close delimiter may be the same character. A close delimiter that the expression grammar uses as an operator or bracket ends a tag only where LEX-11 selects it; an operator that equals the close delimiter cannot be written inside a tag of that file, because LEX-11 ends the tag at its first occurrence that the grammar does not accept.
+**LEX-21** A delimiter is one ASCII character that is not a letter, a digit, `_`, `\`, a space or a control character. The open delimiter and the close delimiter may be the same character. A close delimiter that the expression grammar uses as an operator or bracket is a tag boundary at expression nesting depth zero after a complete expression; inside a string literal or nested bracket it remains part of the expression. This makes every valid delimiter pair usable while preserving expression structure.
 
 **LEX-22** The engine option `delimiters` selects the delimiters for every template the engine parses. Its value is a string of two characters: the open delimiter followed by the close delimiter. The default is `{}`.
 

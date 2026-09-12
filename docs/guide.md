@@ -6,7 +6,7 @@ This guide shows how to write templates and how to render them. The rules that e
 
 ## A template
 
-A template is text with tags. A tag starts with `{` followed by one of the symbols `= @ ? :? : / + # ?# *`, or with `{` followed by a name and an assignment. Any other `{` is text.
+A template is text with tags. A tag starts with `{` followed by one of the symbols `= @ ? :? : / + # ?# *`, or with `{:` followed by an identifier and an assignment. Any other `{` is text.
 
 ```
 <h1>{= title}</h1>
@@ -104,9 +104,9 @@ A data field named `index_` is still reachable as `item['index_']`.
 ## Variables
 
 ```
-{total = 0}
+{:total = 0}
 {@ row = rows}
-{total += row.price}
+{:total += row.price}
 {/}
 {= total | number}
 ```
@@ -117,7 +117,7 @@ with `{"rows": [{"price": 1200}, {"price": 800}]}` renders
 2,000
 ```
 
-`{name = expression}` writes a variable of the current file. `+=`, `-=`, `*=`, `/=`, `%=`, `++` and `--` also work. A variable hides a field of the assign data with the same name.
+`{:name = expression}` writes a variable of the current file. `+=`, `-=`, `*=`, `/=`, `%=`, `++` and `--` also work. A variable hides a field of the assign data with the same name.
 
 ## Expressions
 
@@ -175,7 +175,7 @@ url:  <a href="/q?s=a%20b%26c">go</a>
 `{+ path}` inserts another file at that point and shares the variables of the current file.
 
 ```
-{x = 1}
+{:x = 1}
 {+ parts/head.tpl}
 body
 ```

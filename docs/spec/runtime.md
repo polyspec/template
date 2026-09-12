@@ -227,7 +227,7 @@ flowchart TB
 
 - **RT-11** Each rendered template file has one local scope. Blocks inside a file (`{? }`, `{@ }`) do not create scopes.
 - **RT-12** A variable is looked up in the local scope first, then in the context data. The context data of the root template is `assign`. The context data of a block is defined in RT-26. A name found in neither is `null`.
-- **RT-13** An assignment `{x = e}` writes `x` to the local scope. A local variable shadows a context data entry with the same name. Assignment never modifies context data.
+- **RT-13** An assignment `{:x = e}` writes `x` to the local scope. A local variable shadows a context data entry with the same name. Assignment never modifies context data.
 - **RT-14** Loop metas (`x.index_` and the others) are resolved from the loops that are active for the name `x`. A loop meta for a name that is not an active loop variable fails with `E_RUNTIME_UNKNOWN_LOOP`.
 
 ## Loop

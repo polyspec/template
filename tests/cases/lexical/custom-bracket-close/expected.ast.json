@@ -1,0 +1,54 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "}{}{}",
+        "span": [
+          4,
+          11
+        ]
+      },
+      "span": [
+        0,
+        12
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        12,
+        13
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          15,
+          16
+        ]
+      },
+      "span": [
+        13,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        17,
+        18
+      ]
+    }
+  ]
+}

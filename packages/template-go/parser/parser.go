@@ -238,7 +238,11 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 	case ":?":
 		end, err = p.parseElseIf(c, bodyStart)
 	case ":":
-		end, err = p.parseElse(c, bodyStart)
+		if assignForm.MatchString(limit(text, bodyStart, 80)) {
+			end, err = p.parseAssignment(c, bodyStart)
+		} else {
+			end, err = p.parseElse(c, bodyStart)
+		}
 	case "/":
 		end, err = p.parseClose(c, bodyStart)
 	case "+":
@@ -248,7 +252,7 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 	case "%":
 		end, err = p.parseDirective(c, bodyStart, firstTag)
 	case "":
-		end, err = p.parseAssignment(c, bodyStart)
+		err = p.fail(errs.ParseUnexpectedToken, bodyStart, bodyStart+1, "unknown tag")
 	default:
 		err = p.fail(errs.ParseUnexpectedToken, bodyStart, bodyStart+1, "unknown tag")
 	}

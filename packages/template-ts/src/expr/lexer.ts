@@ -33,7 +33,7 @@ const OPERATORS: [string, TokenType][] = [
 // Characters that start an expression token; a close delimiter among them is lexed as its token.
 const EXPRESSION_CHARS = new Set('()[],|?:=>.+-*/%!<&\'"'.split(''));
 
-const POSTFIX_END: ReadonlySet<TokenType> = new Set(['IDENT', 'RPAREN', 'RBRACKET', 'DOT_IDENT', 'DOT_INDEX']);
+const POSTFIX_END: ReadonlySet<TokenType> = new Set(['IDENT', 'NUMBER', 'STRING', 'NULL', 'TRUE', 'FALSE', 'RPAREN', 'RBRACKET', 'DOT_IDENT', 'DOT_INDEX']);
 
 function isIdentStart(code: number): boolean {
   return (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a) || code === 0x5f;
@@ -106,7 +106,7 @@ export class ExpressionLexer {
   private index: number;
   private previous: Token | null = null;
   private lookahead: Token | null = null;
-  private readonly closeIsExpressionChar: boolean;
+  private nestingDepth = 0;
   /** Tokens consumed by the parser, including the closing delimiter. */
   readonly consumed: Token[] = [];
 
@@ -117,7 +117,6 @@ export class ExpressionLexer {
     private readonly template: string,
   ) {
     this.index = start;
-    this.closeIsExpressionChar = options.close !== null && EXPRESSION_CHARS.has(options.close);
   }
 
   get position(): number {
@@ -137,6 +136,8 @@ export class ExpressionLexer {
     const token = this.peek();
     this.lookahead = null;
     this.previous = token;
+    if (token.type === 'LPAREN' || token.type === 'LBRACKET') this.nestingDepth++;
+    if (token.type === 'RPAREN' || token.type === 'RBRACKET') this.nestingDepth--;
     this.consumed.push(token);
     return token;
   }
@@ -153,7 +154,7 @@ export class ExpressionLexer {
     if (start >= text.length) return { type: 'EOF', value: '', start, end: start };
 
     const close = this.options.close;
-    if (close !== null && !this.closeIsExpressionChar) {
+    if (close !== null && ((this.previous !== null && POSTFIX_END.has(this.previous.type) && this.nestingDepth === 0) || !EXPRESSION_CHARS.has(close))) {
       const sequence = close.repeat(this.options.closeCount);
       if (text.startsWith(sequence, start)) {
         this.index = start + sequence.length;
@@ -203,7 +204,8 @@ export class ExpressionLexer {
       }
     }
     const following = text.charCodeAt(end);
-    if (end < text.length && (isIdentPart(following) || following === 0x2e)) {
+    const closeAtEnd = this.options.close !== null && this.nestingDepth === 0 && text.startsWith(this.options.close, end);
+    if (end < text.length && (isIdentPart(following) || (following === 0x2e && !closeAtEnd))) {
       let cursor = end + 1;
       while (cursor < text.length && (isIdentPart(text.charCodeAt(cursor)) || text[cursor] === '.')) cursor++;
       throw this.error('E_PARSE_INVALID_NUMBER', start, cursor, `invalid number ${JSON.stringify(text.slice(start, cursor))}`);

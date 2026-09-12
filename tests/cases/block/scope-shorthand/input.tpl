@@ -1,2 +1,2 @@
-{item = 'X'}
+{:item = 'X'}
 {# card.tpl item}

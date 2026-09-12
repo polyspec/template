@@ -1,4 +1,4 @@
-{item = 'x'}
+{:item = 'x'}
 {@ item = items}
 {= item}
 {/}

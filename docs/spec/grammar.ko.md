@@ -10,9 +10,9 @@
 
 ```ebnf
 template   = { text | tag | wrapped | comment } ;
-tag        = "{" HWS sigil_body HWS "}" | "{" assign HWS "}" ;
+tag        = "{" HWS sigil_body HWS "}" | "{" ":" HWS assign HWS "}" ;
 wrapped    = wrap_open HWS "{{" HWS sigil_body HWS "}}" HWS wrap_close
-           | wrap_open HWS "{{" assign HWS "}}" HWS wrap_close ;
+           | wrap_open HWS "{{" ":" HWS assign HWS "}}" HWS wrap_close ;
 comment    = "{" HWS "*" { any } "*}" ;
 wrap_open  = '"' | "'" | "/*" | "<!--" ;
 wrap_close = '"' | "'" | "*/" | "-->" ;
@@ -63,7 +63,7 @@ DELIMS     = DELIM DELIM ;
 
 **GRM-4** 경로는 태그를 포함한 템플릿의 디렉터리를 기준으로 해석한다. `/`로 시작하는 경로는 로더 루트를 기준으로 해석한다. 세그먼트 `.`과 `..`은 정규화한다. 정규화 결과가 로더 루트를 벗어나는 경로는 `E_LOAD_OUTSIDE_ROOT`로 거부한다. 해석은 `runtime.md`가 정의한다.
 
-**GRM-5** 기호 형태에서 기호와 본문 첫 토큰 사이의 공백은 선택이다. 대입 형태에서 식별자는 `lexical.md`가 정의하는 대로 공백 없이 `{` 바로 뒤에 온다.
+**GRM-5** 기호 형태에서 기호와 본문 첫 토큰 사이의 공백은 선택이다. 대입 형태에서는 `{` 뒤에 `:`가 오고, 그 뒤의 선택적 수평 공백 다음에 식별자가 온다. 자세한 내용은 `lexical.md`에 정의한다.
 
 ## 3. Echo
 
@@ -165,24 +165,24 @@ other
 
 ## 10. 대입
 
-**GRM-17** 대입 태그는 식별자 뒤에 `=`와 표현식 하나, 또는 `+=`, `-=`, `*=`, `/=`, `%=` 중 하나와 표현식 하나, 또는 `++`나 `--`가 온다. 예약어를 식별자로 쓰면 `E_PARSE_RESERVED_NAME`으로 거부한다. 각 형태는 다음 대입과 같다:
+**GRM-17** 대입 태그는 `:` 뒤에 식별자가 오고, 그 뒤에 `=`와 표현식 하나, 또는 `+=`, `-=`, `*=`, `/=`, `%=` 중 하나와 표현식 하나, 또는 `++`나 `--`가 온다. 예약어를 식별자로 쓰면 `E_PARSE_RESERVED_NAME`으로 거부한다. 각 형태는 다음 대입과 같다:
 
 ```
-{n += e}   is   {n = n + e}
-{n -= e}   is   {n = n - e}
-{n *= e}   is   {n = n * e}
-{n /= e}   is   {n = n / e}
-{n %= e}   is   {n = n % e}
-{n++}      is   {n = n + 1}
-{n--}      is   {n = n - 1}
+{:n += e}   is   {:n = n + e}
+{:n -= e}   is   {:n = n - e}
+{:n *= e}   is   {:n = n * e}
+{:n /= e}   is   {:n = n / e}
+{:n %= e}   is   {:n = n % e}
+{:n++}      is   {:n = n + 1}
+{:n--}      is   {:n = n - 1}
 ```
 
 AST는 `ast.md`가 정의하는 대로 전개된 형태만 포함한다.
 
 ```
-{total = 0}
-{total += item.price}
-{i++}
+{:total = 0}
+{:total += item.price}
+{:i++}
 ```
 
 ## 11. 지시문

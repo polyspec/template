@@ -1,0 +1,62 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "prefix",
+      "span": [
+        0,
+        6
+      ]
+    },
+    {
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "}{}{}",
+        "span": [
+          10,
+          17
+        ]
+      },
+      "span": [
+        6,
+        18
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        18,
+        19
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          21,
+          22
+        ]
+      },
+      "span": [
+        19,
+        23
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|suffix\n",
+      "span": [
+        23,
+        31
+      ]
+    }
+  ]
+}
