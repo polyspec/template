@@ -1,6 +1,9 @@
 package render
 
-import "testing"
+import (
+	"github.com/polyspec/template/loader"
+	"testing"
+)
 
 func TestGeneratedModeRequiresRenderer(t *testing.T) {
 	e, err := NewEngine(Options{Compile: CompileOptions{Mode: CompileModeGen}}, nil)
@@ -13,7 +16,7 @@ func TestGeneratedModeRequiresRenderer(t *testing.T) {
 }
 
 func TestGeneratedModeCallsRenderer(t *testing.T) {
-	e, err := NewEngine(Options{Compile: CompileOptions{Mode: CompileModeGen, Generated: func(any, any, RenderOptions) (*GeneratedPreparedRender, error) {
+	e, err := NewEngine(Options{Loader: loader.NewMapLoader(map[string]string{"ignored": ""}), Compile: CompileOptions{Mode: CompileModeGen, Generated: func(request GeneratedRequest) (*GeneratedPreparedRender, error) {
 		return &GeneratedPreparedRender{Render: func() (string, error) { return "generated", nil }}, nil
 	}}}, nil)
 	if err != nil {

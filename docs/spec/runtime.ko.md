@@ -36,9 +36,9 @@ PageCache.getOrSet(key, ttl, render)
 - **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다.
 - **RT-5** 엔진 옵션의 `functions`와 `register`는 함수 문서에 정의된 대로 호스트 함수를 추가한다.
 - **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다.
-- **RT-61** `ast` 모드에서 `prepare`는 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target template을 선택하고 해당 템플릿을 한 번 로드하거나 파싱한다. `gen` 모드에서는 생성 렌더러가 요청을 소유하므로 `prepare`를 사용할 수 없고 `render`가 진입점이다.
+- **RT-61** `ast`와 `gen` 모두 `prepare`가 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target template을 선택하고 선택한 컴파일 산출물을 한 번 로드한다. `ast`의 준비 요청은 AST를 저장하고 `gen`의 준비 요청은 생성된 준비 렌더러를 저장한다. 두 모드 모두 동일한 `PreparedRender.render` 연산을 제공한다.
 - **RT-62** `PreparedRender.render`는 렌더마다 필요한 scope, output, 실행 상태만 만든다. 입력이 바뀌지 않은 반복 호출은 같은 UTF-8 바이트를 출력한다. `render`는 `prepare(...).render()`와 같으며 단일 호출 편의 연산으로 유지한다.
-- **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
+- **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 생성 렌더러도 AST renderer와 동일한 정규화 요청(`target`, 바인딩된 `assign`, 바인딩된 `define`, 해석된 `env`)을 받는다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
 - **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 런타임에 갱신하지 않는다. `false`에서 산출물이 없거나 오래되면 오류다.
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
@@ -161,7 +161,7 @@ sequenceDiagram
 - **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다.
 - **RT-56** production 지원 구현은 `core-runtime`, `source-compiler`, `artifact-runtime`과 두 compiler 모드를 모두 제공한다. 생성된 호스트 언어 소스는 같은 compiler 계약이 선택하는 `gen` artifact다.
 - **RT-57** 컴파일 artifact는 정규 AST와 schema 버전, 언어, 시나리오, 원본 SHA-256, artifact SHA-256, 템플릿 artifact 경로를 가진 manifest를 포함한다. artifact는 서비스 시작 전에 생성되고 프로세스에 한 번 로드된다.
-- **RT-58** 컴파일 모드는 세 가지다. `dev`는 항상 artifact를 재생성하고, `changed`는 원본 해시가 바뀐 artifact만 재생성하며, `off`는 기존 artifact만 읽고 누락·오래됨·잘못된 형식이면 실패한다.
+- **RT-58** 산출물 갱신에는 세 정책이 있다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 배포된 산출물만 읽고 누락·오래됨이면 실패한다. 이 정책은 `compile.mode`가 산출물 표현을 선택한 뒤 독립적으로 적용된다.
 - **RT-59** 요청 경로에서는 파싱, 원본 파일 탐색, artifact 생성이 실행되지 않는다. 같은 artifact에 같은 assign, define, environment를 적용하면 같은 출력 바이트를 만들고 request를 변경하지 않는다.
 
 인터페이스는 두 실행 모드를 선언한다.
@@ -177,8 +177,9 @@ flowchart LR
   ASTArtifact --> Store["ArtifactStore.loadOrRefresh(refresh)"]
   GenArtifact --> Store
   Store --> Prepared["Engine.prepare(request)"]
-  Prepared --> ASTRender["PreparedRender.render<br/>interpret AST"]
-  Prepared --> GenRender["PreparedRender.render<br/>call generated code"]
+  Prepared --> Normalized["정규화된 요청<br/>assign + define + env"]
+  Normalized --> ASTRender["PreparedRender.render<br/>AST 해석"]
+  Normalized --> GenRender["PreparedRender.render<br/>생성 코드 호출"]
   ASTRender --> Bytes["same UTF-8 bytes"]
   GenRender --> Bytes
 ```

@@ -17,8 +17,16 @@ export type ArtifactRefresh = 'dev' | 'true' | 'false';
 export type CompileMode = 'ast' | 'gen';
 /** A prepared request produced by generated host-language code. */
 export interface GeneratedPreparedRender { render(): string; }
-/** Prepares a request with generated host-language code. */
-export type GeneratedRenderer = (target: string | Template, assign: unknown, options: RenderOptions) => GeneratedPreparedRender;
+/** The normalized request shared by AST and generated renderers. */
+export interface GeneratedRequest {
+  target: string | Template;
+  targetName: string;
+  rootData: MapValue;
+  registry: Map<string, DefineEntry>;
+  env: Env;
+}
+/** Prepares a normalized request with generated host-language code. */
+export type GeneratedRenderer = (request: GeneratedRequest) => GeneratedPreparedRender;
 /** Compilation settings shared by the runtime contract. */
 export interface CompileOptions { mode?: CompileMode; generatedRenderer?: GeneratedRenderer; }
 
@@ -142,11 +150,6 @@ export class EngineCore implements EngineServices {
 
   // Prepares a request for repeated rendering.
   prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender {
-    if (this.compileMode === 'gen') {
-      if (!this.generatedRenderer) throw new Error('generated compile mode requires generatedRenderer');
-      const name = typeof target === 'string' ? target : target.name;
-      return new PreparedRender(this, null, null, null, name, null, this.generatedRenderer(target, assign, options));
-    }
     const name = typeof target === 'string' ? target : target.name;
     let rootData: MapValue;
     let registry: Map<string, DefineEntry>;
@@ -163,7 +166,12 @@ export class EngineCore implements EngineServices {
     }
     const targetEntry = typeof target === 'string' ? registry.get(target) : undefined;
     const targetName = targetEntry && 'template' in targetEntry ? targetEntry.template : name;
-    const template: ParsedTemplate = typeof target === 'string' ? this.loadTemplate(targetName, null, null) : { ast: target, lines: null };
+    const template: ParsedTemplate | null = this.compileMode === 'gen' ? null : (typeof target === 'string' ? this.loadTemplate(targetName, null, null) : { ast: target, lines: null });
+    if (this.compileMode === 'gen') {
+      if (!this.generatedRenderer) throw new Error('generated compile mode requires generatedRenderer');
+      return new PreparedRender(this, rootData, registry, env, targetName, template,
+        this.generatedRenderer({ target, targetName, rootData, registry, env }));
+    }
     return new PreparedRender(this, rootData, registry, env, targetName, template);
   }
 
