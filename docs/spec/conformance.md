@@ -1,6 +1,6 @@
 # Conformance
 
-[한국어](conformance.ko.md).
+[한국어](/ko/spec/conformance).
 
 Conformance is verified by fixture cases that every implementation renders through a command line interface with one contract, and by expression fixtures that every implementation loads in its own tests.
 

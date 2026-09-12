@@ -1,18 +1,18 @@
 # Feature status
 
-[한국어](features.ko.md). Contracts are defined in the [specification](index.md). Verification and deployment are recorded separately. `pending` is not a passing result.
+[한국어](/ko/features). Contracts are defined in the [specification](index.md). Verification and deployment are recorded separately. `pending` is not a passing result.
 
 | ID | Feature | Implementation | Verification | Deployment | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | spec | Lexical, grammar, expression, data model, function, runtime, AST, error and conformance specification | implemented | passed | not-deployed | [Specification](index.md) |
-| ast-schema | JSON Schema for the AST and the schema checker | implemented | passed | not-deployed | [Schema](../schema/README.md) |
+| ast-schema | JSON Schema for the AST and the schema checker | implemented | passed | not-deployed | [Schema](https://github.com/polyspec/template/tree/main/schema) |
 | conformance-suite | Fixture cases, expression fixtures, conformance runner and parity runner | implemented | passed | not-deployed | [Conformance](spec/conformance.md) |
-| template-ts | TypeScript lexer, parser, renderer, functions and CLI | implemented | passed | not-deployed | [Package](../packages/template-ts/README.md) |
+| template-ts | TypeScript lexer, parser, renderer, functions and CLI | implemented | passed | not-deployed | [Package](https://github.com/polyspec/template/tree/main/packages/template-ts) |
 | template-browser | Browser build of the TypeScript package and browser rendering test | implemented | passed | not-deployed | [Browser test](../tests/browser/render.spec.ts) |
-| template-go | Go lexer, parser, renderer, prepared render state, functions and CLI | implemented | passed | not-deployed | [Package](../packages/template-go/README.md) |
-| template-rust | Rust lexer, parser, renderer, prepared render state, functions and CLI | implemented | passed | not-deployed | [Package](../packages/template-rust/README.md) |
-| template-php | PHP lexer, parser, renderer, functions and CLI | implemented | passed | not-deployed | [Package](../packages/template-php/README.md) |
-| template-php-ext | PHP extension built from the Rust crate | implemented | passed | not-deployed | [Package](../packages/template-php-ext/README.md) |
+| template-go | Go lexer, parser, renderer, prepared render state, functions and CLI | implemented | passed | not-deployed | [Package](https://github.com/polyspec/template/tree/main/packages/template-go) |
+| template-rust | Rust lexer, parser, renderer, prepared render state, functions and CLI | implemented | passed | not-deployed | [Package](https://github.com/polyspec/template/tree/main/packages/template-rust) |
+| template-php | PHP lexer, parser, renderer, functions and CLI | implemented | passed | not-deployed | [Package](https://github.com/polyspec/template/tree/main/packages/template-php) |
+| template-php-ext | PHP extension built from the Rust crate | implemented | passed | not-deployed | [Package](https://github.com/polyspec/template/tree/main/packages/template-php-ext) |
 | performance-measurements | Equal-output AST and generated compile, process, render and RSS measurements | implemented | passed | not-deployed | [Performance measurements](operations/benchmark.md) |
 | showcase | Shared templates, mock JSON assign data, direct path-based define registries, one committed canonical AST graph, parser-backed syntax highlighting, bounded artifact views and throughput artifacts | implemented | passed | not-deployed | [Example site](operations/showcase.md) |
 | generated-mode | Host-language renderers lowered from canonical AST for TypeScript, Go, Rust and PHP | implemented | passed | not-deployed | [Compiler contract](spec/compiler.md) |

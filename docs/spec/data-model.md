@@ -1,6 +1,6 @@
 # Data model
 
-[한국어](data-model.ko.md).
+[한국어](/ko/spec/data-model).
 
 This document defines the value types that templates operate on, the safe string, the conversion of values to output text, and the conversion of host language values into template values. Operators are defined in [Expressions](expressions.md). Error codes are defined in [Errors](errors.md). Rules are numbered `VAL-n`.
 

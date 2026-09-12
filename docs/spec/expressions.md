@@ -1,6 +1,6 @@
 # Expressions
 
-[한국어](expressions.ko.md).
+[한국어](/ko/spec/expressions).
 
 This document defines the expression language used inside tags: tokens, grammar, precedence, evaluation of every operator, path lookup, loop meta access, truthiness, equality and ordering. Value types, stringification and host binding are defined in [Data model](data-model.md). Functions are defined in [Functions](functions.md). Error codes are defined in [Errors](errors.md). Rules are numbered `EXP-n`.
 

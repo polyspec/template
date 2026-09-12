@@ -1,6 +1,6 @@
 # Conformance
 
-[한국어](conformance.ko.md).
+[한국어](/ko/operations/conformance).
 
 The conformance suite verifies that every implementation produces the same AST, the same output and the same error fields for the cases in `tests/cases/`. The contract is in the [conformance specification](../spec/conformance.md).
 

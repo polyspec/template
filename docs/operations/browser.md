@@ -1,6 +1,6 @@
 # Browser rendering
 
-[한국어](browser.ko.md).
+[한국어](/ko/operations/browser).
 
 The TypeScript package renders in a browser with the same engine that runs on a server. The browser test verifies that the browser build produces the expected output for the fixture cases.
 

@@ -1,6 +1,6 @@
 # Documents
 
-[한국어](index.ko.md).
+[한국어](/ko/).
 
 [Usage guide](guide.md) shows how to write and render a template.
 

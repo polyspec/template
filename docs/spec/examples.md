@@ -1,6 +1,6 @@
 # Examples
 
-[한국어](examples.ko.md).
+[한국어](/ko/spec/examples).
 
 This document shows one complete page: a layout, an included partial, a template definition with scope arguments, a list definition with a loop and a card definition. The expected output is derived by applying the lexical, grammar, expression, function and runtime rules to the files below.
 

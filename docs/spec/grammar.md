@@ -1,6 +1,6 @@
 # Tag grammar
 
-[한국어](grammar.ko.md).
+[한국어](/ko/spec/grammar).
 
 This document defines the body of every tag and the structure of blocks. Tag boundaries are defined in `lexical.md`. Expressions are defined in `expressions.md`. The evaluation of each tag is defined in `runtime.md`. AST nodes are defined in `ast.md`.
 
