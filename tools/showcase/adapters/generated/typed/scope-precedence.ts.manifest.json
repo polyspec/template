@@ -3,10 +3,10 @@
   "mode": "gen",
   "target": "ts",
   "entry": "layout.tpl",
-  "sourceDigest": "0674f8fd0ac3673533e75503a02bb01c3ddc367b6105443105d07c882c676471",
+  "sourceDigest": "612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "0bdcebbf2a75fe061b403e4c79844ed3e5c944c04d82065dc29cf1d4f2583e7a",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "b0e032f6d8186c86897dd32d227b086707b08a83e8bd2cedf205b8395fb93def",
   "files": {
     "scope-precedence.ts": {
       "path": "scope-precedence.ts",

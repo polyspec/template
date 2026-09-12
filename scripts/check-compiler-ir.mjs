@@ -114,6 +114,14 @@ if (dynamicRootExpr?.op !== 'root' || dynamicRootExpr.valueType.source !== 'any?
   throw new Error('compiler IR did not lower an undeclared dynamic root value as optional any');
 }
 
+const htmlDefinition = structuredClone(manifest);
+htmlDefinition.defines.content = { optional: true, html: true };
+const htmlGraph = structuredClone(graph);
+htmlGraph.templates.get('main.tpl').body = [{ type: 'Block', id: 'content', path: null, scope: [{ name: 'ignored', expr: variable('fallback') }], span }];
+const htmlProgram = lowerSourceGraph(htmlGraph, htmlDefinition);
+const htmlBlock = htmlProgram.templates.get('main.tpl').body[0];
+if (htmlBlock.target !== null || htmlBlock.inputs.length !== 0) throw new Error('compiler IR passed scope data to an HTML definition');
+
 const invalidRoot = structuredClone(manifest);
 invalidRoot.root = 'DynamicAssign';
 try {

@@ -46,7 +46,7 @@ function verify(output, contractDigest) {
 }
 
 /** Compiles one source directory into a canonical AST graph outside request handling. */
-export function compileAst({ root, output, entry, refresh = 'true', typeManifest = null }) {
+export function compileAst({ root, output, entry, refresh = 'true', typeManifest = null, delimiters = null }) {
   root = resolve(root);
   output = resolve(output);
   if (refresh === 'false') return verify(output, null);
@@ -57,12 +57,16 @@ export function compileAst({ root, output, entry, refresh = 'true', typeManifest
   if (names.length === 0) throw new Error(`source graph has no .tpl files: ${root}`);
   if (!names.includes(entry)) throw new Error(`source graph entry is missing: ${entry}`);
   const sources = Object.fromEntries(names.map(name => [name, readFileSync(join(root, name))]));
-  const sourceDigest = hash(Buffer.concat(names.flatMap(name => [Buffer.from(name + '\0'), sources[name], Buffer.from('\0')])));
+  if (delimiters !== null && typeof delimiters !== 'string') throw new Error('AST artifact delimiters must be a string or null');
+  const sourceDigest = hash(Buffer.concat([
+    Buffer.from(`delimiters\0${delimiters ?? ''}\0`),
+    ...names.flatMap(name => [Buffer.from(name + '\0'), sources[name], Buffer.from('\0')]),
+  ]));
   const typeDigest = typeManifest && existsSync(typeManifest) ? hash(readFileSync(typeManifest)) : hash(Buffer.alloc(0));
   if (refresh === 'true' && existsSync(join(output, 'manifest.json'))) {
     try {
       const current = verify(output, null);
-      if (current.contractDigest === contractDigest && current.compilerDigest === compilerDigest && current.sourceDigest === sourceDigest && current.typeDigest === typeDigest && current.entry === entry) return current;
+      if (current.contractDigest === contractDigest && current.compilerDigest === compilerDigest && current.sourceDigest === sourceDigest && current.typeDigest === typeDigest && current.entry === entry && (current.delimiters ?? null) === delimiters) return current;
     } catch {
       // A changed or damaged artifact is rebuilt under the true refresh policy.
     }
@@ -73,13 +77,13 @@ export function compileAst({ root, output, entry, refresh = 'true', typeManifest
   try {
     const files = {};
     for (const name of names) {
-      const ast = json(parse(sources[name], name));
+      const ast = json(parse(sources[name], name, delimiters === null ? {} : { delimiters }));
       const path = `${name}.ast.json`;
       mkdirSync(dirname(join(temporary, path)), { recursive: true });
       writeFileSync(join(temporary, path), ast);
       files[name] = { path: posix.normalize(path), sourceDigest: hash(sources[name]), artifactDigest: hash(ast), lines: lineIndex(sources[name]) };
     }
-    const manifest = { schema: 3, mode: 'ast', target: 'canonical', entry, sourceDigest, typeDigest, contractDigest, compilerDigest, files };
+    const manifest = { schema: 3, mode: 'ast', target: 'canonical', entry, delimiters, sourceDigest, typeDigest, contractDigest, compilerDigest, files };
     writeFileSync(join(temporary, 'manifest.json'), json(manifest));
     mkdirSync(output, { recursive: true });
     for (const file of Object.values(files)) {

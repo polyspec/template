@@ -3,10 +3,10 @@
   "mode": "gen",
   "target": "ts",
   "entry": "layout.tpl",
-  "sourceDigest": "aba83927570bd90bc6e8712f6be2ac81882248dfe7a918e52f30abae2cf0dcce",
+  "sourceDigest": "0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "0bdcebbf2a75fe061b403e4c79844ed3e5c944c04d82065dc29cf1d4f2583e7a",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "b0e032f6d8186c86897dd32d227b086707b08a83e8bd2cedf205b8395fb93def",
   "files": {
     "compiler-coverage.ts": {
       "path": "compiler-coverage.ts",

@@ -3,10 +3,10 @@
   "mode": "gen",
   "target": "js",
   "entry": "layout.tpl",
-  "sourceDigest": "0ba5180c17355db0abbe55f6559fc4257ec3d685bc96b74bf702f437b1e7ef69",
+  "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "0594d515cb9d57f7bc26ff964eca298c5d1241d4933d721059f2fdec2f81127d",
-  "compilerDigest": "1ad1f41e80246d2bdca2599b5734051368bd38453685a8f490a7cdc6f9364181",
+  "contractDigest": "860509651e4ee2e94f98fde92ee3a9f6e5507ed8e590bee7aba855ef034ed53e",
+  "compilerDigest": "e8f3912eeb271de4c83fe121c616ec892610f9f63ecf2ace1f41c8d4e5b1758f",
   "files": {
     "empty-state.js": {
       "path": "empty-state.js",
