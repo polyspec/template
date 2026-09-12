@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	template "github.com/polyspec/template"
@@ -273,6 +274,14 @@ func nativeDefines(defines DefineRegistry) map[string]template.DefineInput {
 }
 
 func (a *Adapter) Render(request RenderRequest) (string, error) {
+	prepared, err := a.Prepare(request)
+	if err != nil {
+		return "", err
+	}
+	return prepared.Render()
+}
+
+func (a *Adapter) Prepare(request RenderRequest) (template.Prepared, error) {
 	options := template.RenderOptions{Define: nativeDefines(request.Define)}
 	if request.Env != nil {
 		env := template.Env{Timezone: "Z", Now: float64(time.Now().Unix())}
@@ -284,7 +293,7 @@ func (a *Adapter) Render(request RenderRequest) (string, error) {
 		}
 		options.Env = &env
 	}
-	return a.engine.Render(request.Target, request.Assign, options)
+	return a.engine.Prepare(request.Target, request.Assign, options)
 }
 
 func (a *Adapter) RenderTwice(request RenderRequest) (RepeatResult, error) {
@@ -397,6 +406,63 @@ func main() {
 	request, err := adapter.BuildRequest(scenario)
 	if err != nil {
 		panic(err)
+	}
+	if rawIterations := os.Getenv("SHOWCASE_BENCH_ITERATIONS"); rawIterations != "" {
+		iterations, err := strconv.Atoi(rawIterations)
+		if err != nil || iterations <= 0 {
+			panic("SHOWCASE_BENCH_ITERATIONS must be a positive integer")
+		}
+		warmup := 0
+		if rawWarmup := os.Getenv("SHOWCASE_BENCH_WARMUP"); rawWarmup != "" {
+			warmup, err = strconv.Atoi(rawWarmup)
+			if err != nil || warmup < 0 {
+				panic("SHOWCASE_BENCH_WARMUP must be a non-negative integer")
+			}
+		}
+		for index := 0; index < warmup; index++ {
+			if _, err := adapter.Render(request); err != nil {
+				panic(err)
+			}
+		}
+		var measured string
+		started := time.Now()
+		for index := 0; index < iterations; index++ {
+			measured, err = adapter.Render(request)
+			if err != nil {
+				panic(err)
+			}
+		}
+		renderSeconds := time.Since(started).Seconds()
+		repeated, err := adapter.Render(request)
+		if err != nil {
+			panic(err)
+		}
+		measuredHash := sha256.Sum256([]byte(measured))
+		repeatedHash := sha256.Sum256([]byte(repeated))
+		prepared, err := adapter.Prepare(request)
+		if err != nil {
+			panic(err)
+		}
+		var preparedOutput string
+		preparedStarted := time.Now()
+		for index := 0; index < iterations; index++ {
+			preparedOutput, err = prepared.Render()
+			if err != nil {
+				panic(err)
+			}
+		}
+		preparedSeconds := time.Since(preparedStarted).Seconds()
+		preparedHash := sha256.Sum256([]byte(preparedOutput))
+		encoded, err := json.Marshal(map[string]any{
+			"language": "go", "iterations": iterations, "renderSeconds": renderSeconds, "preparedRenderSeconds": preparedSeconds,
+			"bytes": len([]byte(measured)), "outputSha256": hex.EncodeToString(measuredHash[:]),
+			"repeatSha256": hex.EncodeToString(repeatedHash[:]), "preparedSha256": hex.EncodeToString(preparedHash[:]),
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(encoded))
+		return
 	}
 	repeated, err := adapter.RenderTwice(request)
 	if err != nil {
