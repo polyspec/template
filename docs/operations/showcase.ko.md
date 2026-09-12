@@ -16,18 +16,12 @@
 | `env.json` (선택) | 재현 가능한 출력을 위한 고정 시각과 시간대 |
 | `compiled/<language>/` | 빌드 시 생성한 AST artifact와 원본·artifact 해시 |
 
-예를 들어 `scope-precedence` 시나리오는 레이아웃을 경로로 등록하고 콘텐츠 템플릿을 정의 데이터와 함께 등록한다.
+예를 들어 `react-boundary` 시나리오는 두 템플릿을 등록한다.
 
 ```json
 {
   "layout": "layout.tpl",
-  "content": {
-    "template": "content.tpl",
-    "data": {
-      "title": "from define data",
-      "defined_label": "definition data"
-    }
-  }
+  "content": "content.tpl"
 }
 ```
 
@@ -171,3 +165,5 @@ make showcase-check
 ```
 
 이 명령은 커밋된 HTML·JSON·AST artifact를 새 artifact-only 렌더 결과와 비교하고 HTML 구조 parser로 페이지를 검사한다. 페이지에는 목업 assign 데이터, define 레지스트리, 템플릿, artifact와 HTML 출력이 표시된다. runtime parser, renderer와 브라우저 검증 단계는 실행하지 않는다.
+
+타입 고정 생성기는 `make typed-generator`로 실행한다. 정본 AST와 명시적 타입 manifest를 받아 assign 필드를 선언한 PHP·Go·Rust·TypeScript 소스를 만든다. `make typed-generator-check`는 산출물 재현성을 확인한다. 임의의 JSON만으로는 정적 타입을 안전하게 추론할 수 없으므로 manifest가 필요하다.

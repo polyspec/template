@@ -40,6 +40,15 @@ pub enum CompileMode {
 /// A renderer produced by the source generator.
 pub type GeneratedRenderer = for<'a> fn(RenderTarget<'a>, &serde_json::Value, &RenderOptions) -> Result<String, String>;
 
+/// Compilation settings shared by the runtime implementations.
+#[derive(Default)]
+pub struct CompileOptions {
+    /// AST interpretation or generated renderer.
+    pub mode: CompileMode,
+    /// Renderer produced by the source generator.
+    pub generated_renderer: Option<GeneratedRenderer>,
+}
+
 /// Engine options.
 #[derive(Default)]
 pub struct EngineOptions {
@@ -56,9 +65,8 @@ pub struct EngineOptions {
     /// Template artifact refresh policy.
     pub artifact_refresh: ArtifactRefresh,
     /// Compilation mode.
-    pub compile_mode: CompileMode,
-    /// Generated renderer required by `CompileMode::Gen`.
-    pub generated_renderer: Option<GeneratedRenderer>,
+    /// Compilation settings.
+    pub compile: CompileOptions,
 }
 
 /// A template definition given to `render` (RT-24).
@@ -134,8 +142,8 @@ impl Engine {
             delimiters,
             legacy_wrappers: options.legacy_wrappers,
             artifact_refresh: options.artifact_refresh,
-            compile_mode: options.compile_mode,
-            generated_renderer: options.generated_renderer,
+            compile_mode: options.compile.mode,
+            generated_renderer: options.compile.generated_renderer,
             cache: RefCell::new(HashMap::new()),
         }
     }
