@@ -93,6 +93,8 @@ fn generated_compiler_coverage__layout_tpl(root: &Map<String, Value>, define: &D
     generated_echo_full(&mut out, generated_ternary(generated_lookup(&ctx, root, "flag"), Value::String("yes".to_string()), Value::String("no".to_string())))?;
     out.push_str("|");
     generated_echo_full(&mut out, generated_binary_full("+", generated_unary_full("-", serde_json::json!(1)), serde_json::json!(3)))?;
+    out.push_str("|");
+    generated_echo_full(&mut out, generated_call("default", vec![Value::String("".to_string()), Value::String("fallback".to_string())]))?;
     out.push_str("</p>\n<ul>\n");
     {
         let loop_entries = generated_entries(generated_lookup(&ctx, root, "rows"))?;

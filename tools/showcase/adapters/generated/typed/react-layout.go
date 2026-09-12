@@ -11,13 +11,30 @@ type Assign struct {
 	Defined_label *string
 	Page *Page
 }
+type Input_content_tpl struct {  }
+type Input_layout_tpl struct {  }
+type OrderedEntry[K comparable, V any] struct { Key K; Value V }
+type OrderedMap[K comparable, V any] struct { entries []OrderedEntry[K, V] }
+func NewOrderedMap[K comparable, V any]() OrderedMap[K, V] { return OrderedMap[K, V]{} }
+func (m *OrderedMap[K, V]) Set(key K, value V) { for index := range m.entries { if m.entries[index].Key == key { m.entries[index].Value = value; return } }; m.entries = append(m.entries, OrderedEntry[K, V]{key, value}) }
+func (m OrderedMap[K, V]) Get(key K) (V, bool) { for _, entry := range m.entries { if entry.Key == key { return entry.Value, true } }; var zero V; return zero, false }
+func (m OrderedMap[K, V]) Entries() []OrderedEntry[K, V] { return m.entries }
+func generatedMapGet[K comparable, V any](value OrderedMap[K, V], key K) V { result, _ := value.Get(key); return result }
+func generatedListGet[T any](value []T, index int) T { if index >= 0 && index < len(value) { return value[index] }; var zero T; return zero }
+func generatedTernary[T any](test bool, yes, no T) T { if test { return yes }; return no }
+func generatedTruthy(value any) bool { switch value := value.(type) { case nil: return false; case bool: return value; case float64: return value != 0; case string: return value != ""; default: return true } }
+func generatedUnary(op string, value any) any { if op == "!" { return !generatedTruthy(value) }; return -value.(float64) }
+func generatedBinary(op string, left, right any) any { switch op { case "&&": return generatedTruthy(left) && generatedTruthy(right); case "||": return generatedTruthy(left) || generatedTruthy(right); case "??": if left != nil { return left }; return right; case "==", "===": return fmt.Sprint(left) == fmt.Sprint(right); case "!=", "!==": return fmt.Sprint(left) != fmt.Sprint(right); case "+": if _, ok := left.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; if _, ok := right.(string); ok { return fmt.Sprint(left)+fmt.Sprint(right) }; return left.(float64)+right.(float64); case "-": return left.(float64)-right.(float64); case "*": return left.(float64)*right.(float64); case "/": return left.(float64)/right.(float64); case "%": return float64(int64(left.(float64))%int64(right.(float64))); case "<": return fmt.Sprint(left) < fmt.Sprint(right); case ">": return fmt.Sprint(left) > fmt.Sprint(right); case "<=": return fmt.Sprint(left) <= fmt.Sprint(right); case ">=": return fmt.Sprint(left) >= fmt.Sprint(right) }; panic("unsupported generated operator: "+op) }
+func generatedCall(name string, args []any) any { if name == "default" && len(args) == 2 { if generatedTruthy(args[0]) { return args[0] }; return args[1] }; panic("generated function is not linked: "+name) }
 func valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }
-func render_content_tpl(assign Assign, slots map[string]string) string { var out strings.Builder
+func render_content_tpl(assign Assign, slots map[string]string, input Input_content_tpl) string { var out strings.Builder
+
     out.WriteString("<section data-react-island id=\"counter\">\n<p>")
     fmt.Fprint(&out, valueOrZero(assign.Island_label))
     out.WriteString("</p>\n</section>\n")
  return out.String() }
-func render_layout_tpl(assign Assign, slots map[string]string) string { var out strings.Builder
+func render_layout_tpl(assign Assign, slots map[string]string, input Input_layout_tpl) string { var out strings.Builder
+
     out.WriteString("<main>\n<h1>")
     fmt.Fprint(&out, valueOrZero(assign.Title))
     out.WriteString("</h1>\n")
@@ -25,9 +42,9 @@ func render_layout_tpl(assign Assign, slots map[string]string) string { var out 
     out.WriteString("</main>\n")
  return out.String() }
 func renderTemplate(target string, assign Assign, slots map[string]string) string { switch target {
-	case "content.tpl": return render_content_tpl(assign, slots)
-	case "layout.tpl": return render_layout_tpl(assign, slots)
-	default: panic("generated template is missing: " + target)
+	case "content.tpl": return render_content_tpl(assign, slots, Input_content_tpl{})
+	case "layout.tpl": return render_layout_tpl(assign, slots, Input_layout_tpl{})
+	default: panic("generated template is missing or requires inputs: " + target)
 } }
 func Render(assign Assign, slots map[string]string) string { return renderTemplate("layout.tpl", assign, slots) }
 var _ = fmt.Fprint

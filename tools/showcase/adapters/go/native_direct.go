@@ -111,6 +111,8 @@ func generated_compiler_coverage__layout_tpl(root *value.OrderedMap, define Defi
 	if err := generatedEcho(&out, generatedTernary(generatedLookup(ctx, root, "flag"), "yes", "no")); err != nil { return "", err }
 	out.WriteString("|")
 	if err := generatedEcho(&out, generatedBinaryFull("+", generatedUnaryFull("-", float64(1)), float64(3))); err != nil { return "", err }
+	out.WriteString("|")
+	if err := generatedEcho(&out, generatedCall("default", []value.Value{"", "fallback"})); err != nil { return "", err }
 	out.WriteString("</p>\n<ul>\n")
 	{
 		loopEntries, err := generatedEntries(generatedLookup(ctx, root, "rows"))

@@ -115,6 +115,8 @@ function render_compiler_coverage__layout_tpl(root, define, env, parent, scenari
   out += escapeValue(truthy(lookup(ctx, root, "flag")) ? "yes" : "no");
   out += "|";
   out += escapeValue(binary("+", unary("-", 1), 3));
+  out += "|";
+  out += escapeValue(call("default", ["", "fallback"]));
   out += "</p>\n<ul>\n";
   { const loopEntries = entries(lookup(ctx, root, "rows"));
   for (let loopIndex = 0; loopIndex < loopEntries.length; loopIndex += 1) {
