@@ -2,32 +2,32 @@ flowchart TB
   core_runtime["core-runtime<br/>render"]
   source_compiler["source-compiler<br/>parse, encodeArtifact"]
   artifact_runtime["artifact-runtime<br/>loadArtifact, render"]
-  native_source_backend["native-source-backend<br/>compileNative, loadNative"]
+  generated_compiler["generated-compiler<br/>compileNative, loadNative"]
   source_compiler --> artifact_runtime
   artifact_runtime --> core_runtime
   native_source_backend --> artifact_runtime
-  typescript["typescript: core-runtime, source-compiler, artifact-runtime, native-source-backend"]
+  typescript["typescript: core-runtime, source-compiler, artifact-runtime, generated-compiler"]
   typescript --> core_runtime
   typescript --> source_compiler
   typescript --> artifact_runtime
-  typescript --> native_source_backend
-  javascript["javascript: core-runtime, source-compiler, artifact-runtime, native-source-backend"]
+  typescript --> generated_compiler
+  javascript["javascript: core-runtime, source-compiler, artifact-runtime, generated-compiler"]
   javascript --> core_runtime
   javascript --> source_compiler
   javascript --> artifact_runtime
-  javascript --> native_source_backend
-  go["go: core-runtime, source-compiler, artifact-runtime, native-source-backend"]
+  javascript --> generated_compiler
+  go["go: core-runtime, source-compiler, artifact-runtime, generated-compiler"]
   go --> core_runtime
   go --> source_compiler
   go --> artifact_runtime
-  go --> native_source_backend
-  rust["rust: core-runtime, source-compiler, artifact-runtime, native-source-backend"]
+  go --> generated_compiler
+  rust["rust: core-runtime, source-compiler, artifact-runtime, generated-compiler"]
   rust --> core_runtime
   rust --> source_compiler
   rust --> artifact_runtime
-  rust --> native_source_backend
-  php["php: core-runtime, source-compiler, artifact-runtime, native-source-backend"]
+  rust --> generated_compiler
+  php["php: core-runtime, source-compiler, artifact-runtime, generated-compiler"]
   php --> core_runtime
   php --> source_compiler
   php --> artifact_runtime
-  php --> native_source_backend
+  php --> generated_compiler
