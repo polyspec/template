@@ -1,6 +1,21 @@
 import { defineConfig } from 'vitepress';
+import { readdirSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const base = process.env.VITEPRESS_BASE ?? '/';
+
+const englishNav = [
+  { text: 'Specification', link: '/spec/lexical' },
+  { text: 'Feature status', link: '/features' },
+  { text: 'Operations', link: '/operations/development' },
+];
+
+const koreanNav = [
+  { text: '명세', link: '/ko/spec/lexical' },
+  { text: '기능 상태', link: '/ko/features' },
+  { text: '절차', link: '/ko/operations/development' },
+];
 
 const ebnfLanguage = {
   name: 'EBNF',
@@ -60,66 +75,58 @@ const koreanSidebar = [
   {
     text: '명세',
     items: [
-      { text: '렉시컬 규칙', link: '/spec/lexical.ko' },
-      { text: '태그 문법', link: '/spec/grammar.ko' },
-      { text: '표현식', link: '/spec/expressions.ko' },
-      { text: '데이터 모델', link: '/spec/data-model.ko' },
-      { text: '함수', link: '/spec/functions.ko' },
-      { text: '런타임', link: '/spec/runtime.ko' },
-      { text: '타입 고정 컴파일러', link: '/spec/compiler.ko' },
-      { text: 'AST', link: '/spec/ast.ko' },
-      { text: '오류', link: '/spec/errors.ko' },
-      { text: '적합성', link: '/spec/conformance.ko' },
-      { text: '예제', link: '/spec/examples.ko' },
+      { text: '렉시컬 규칙', link: '/ko/spec/lexical' },
+      { text: '태그 문법', link: '/ko/spec/grammar' },
+      { text: '표현식', link: '/ko/spec/expressions' },
+      { text: '데이터 모델', link: '/ko/spec/data-model' },
+      { text: '함수', link: '/ko/spec/functions' },
+      { text: '런타임', link: '/ko/spec/runtime' },
+      { text: '타입 고정 컴파일러', link: '/ko/spec/compiler' },
+      { text: 'AST', link: '/ko/spec/ast' },
+      { text: '오류', link: '/ko/spec/errors' },
+      { text: '적합성', link: '/ko/spec/conformance' },
+      { text: '예제', link: '/ko/spec/examples' },
     ],
   },
   {
     text: '절차',
     items: [
-      { text: '개발', link: '/operations/development.ko' },
-      { text: '적합성 절차', link: '/operations/conformance.ko' },
-      { text: '릴리스 테스트', link: '/operations/testing.ko' },
-      { text: '의존성', link: '/operations/dependencies.ko' },
-      { text: '브라우저 렌더링', link: '/operations/browser.ko' },
-      { text: '예제 사이트', link: '/operations/showcase.ko' },
-      { text: '발행', link: '/operations/publication.ko' },
-      { text: '문서 절차', link: '/operations/documentation.ko' },
+      { text: '개발', link: '/ko/operations/development' },
+      { text: '적합성 절차', link: '/ko/operations/conformance' },
+      { text: '릴리스 테스트', link: '/ko/operations/testing' },
+      { text: '의존성', link: '/ko/operations/dependencies' },
+      { text: '브라우저 렌더링', link: '/ko/operations/browser' },
+      { text: '예제 사이트', link: '/ko/operations/showcase' },
+      { text: '발행', link: '/ko/operations/publication' },
+      { text: '문서 절차', link: '/ko/operations/documentation' },
     ],
   },
   {
     text: '상태',
     items: [
-      { text: '기능 상태', link: '/features.ko' },
-      { text: '실행 체크리스트', link: '/plans/execution-checklist.ko' },
+      { text: '기능 상태', link: '/ko/features' },
+      { text: '실행 체크리스트', link: '/ko/plans/execution-checklist' },
     ],
   },
 ];
 
-const koreanRoutes = [
-  '/index.ko',
-  '/guide.ko',
-  '/features.ko',
-  '/spec/lexical.ko',
-  '/spec/grammar.ko',
-  '/spec/expressions.ko',
-  '/spec/data-model.ko',
-  '/spec/functions.ko',
-  '/spec/runtime.ko',
-  '/spec/compiler.ko',
-  '/spec/ast.ko',
-  '/spec/errors.ko',
-  '/spec/conformance.ko',
-  '/spec/examples.ko',
-  '/operations/development.ko',
-  '/operations/conformance.ko',
-  '/operations/testing.ko',
-  '/operations/dependencies.ko',
-  '/operations/browser.ko',
-  '/operations/showcase.ko',
-  '/operations/publication.ko',
-  '/operations/documentation.ko',
-  '/plans/execution-checklist.ko',
-];
+const docsRoot = fileURLToPath(new URL('..', import.meta.url));
+
+function koreanDocuments(directory = docsRoot): string[] {
+  const documents: string[] = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.name === '.vitepress') continue;
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) documents.push(...koreanDocuments(path));
+    else if (entry.name.endsWith('.ko.md')) documents.push(relative(docsRoot, path).split(sep).join('/'));
+  }
+  return documents;
+}
+
+const rewrites = Object.fromEntries(koreanDocuments().map((source) => {
+  const destination = source === 'index.ko.md' ? 'ko/index.md' : `ko/${source.replace(/\.ko\.md$/, '.md')}`;
+  return [source, destination];
+}));
 
 // The site renders the Markdown documents of docs/ plus the top-level README and CHANGELOG.
 // Relative links to files outside docs/ resolve on the file system; scripts/check-documents.mjs
@@ -131,25 +138,24 @@ export default defineConfig({
   srcDir: '.',
   outDir: '.vitepress/dist',
   cleanUrls: true,
+  rewrites,
   ignoreDeadLinks: true,
   lastUpdated: false,
-  transformHtml(code, id) {
-    if (!id.endsWith('.ko.html')) return;
-    return code.replace('<html lang="en-US"', '<html lang="ko-KR"');
+  locales: {
+    root: {
+      label: 'English',
+      lang: 'en-US',
+      link: '/',
+      themeConfig: { nav: englishNav, sidebar: englishSidebar },
+    },
+    ko: {
+      label: '한국어',
+      lang: 'ko-KR',
+      link: '/ko/',
+      themeConfig: { nav: koreanNav, sidebar: koreanSidebar },
+    },
   },
   markdown: {
     languages: [ebnfLanguage],
-  },
-  themeConfig: {
-    nav: [
-      { text: 'Specification', link: '/spec/lexical' },
-      { text: 'Feature status', link: '/features' },
-      { text: 'Operations', link: '/operations/development' },
-      { text: '한국어', link: '/index.ko' },
-    ],
-    sidebar: {
-      '/': englishSidebar,
-      ...Object.fromEntries(koreanRoutes.map((route) => [route, koreanSidebar])),
-    },
   },
 });
