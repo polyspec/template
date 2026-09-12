@@ -28,6 +28,9 @@ func NewAdapter(root string) (*Adapter, error) {
 		return nil, err
 	}
 	loader, err := artifactLoader(root, "go")
+	if os.Getenv("SHOWCASE_EXECUTION_MODE") == "generated" {
+		loader, err = generatedArtifactLoader(root, "go")
+	}
 	if err != nil {
 		return nil, err
 	}

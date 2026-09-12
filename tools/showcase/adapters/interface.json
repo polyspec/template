@@ -5,35 +5,55 @@
   "supportLevels": {
     "core-runtime": {
       "description": "Renders an already loaded template with assign and define data.",
-      "operations": ["render"]
+      "operations": [
+        "render"
+      ]
     },
     "source-compiler": {
       "description": "Parses source templates and produces the canonical AST artifact.",
-      "operations": ["parse", "encodeArtifact"]
+      "operations": [
+        "parse",
+        "encodeArtifact"
+      ]
     },
     "artifact-runtime": {
       "description": "Loads canonical AST artifacts without parsing source templates.",
-      "operations": ["loadArtifact", "render"]
+      "operations": [
+        "loadArtifact",
+        "render"
+      ]
     },
     "native-source-backend": {
       "description": "Optional backend that emits executable source for one host language.",
-      "operations": ["compileNative", "loadNative"]
+      "operations": [
+        "compileNative",
+        "loadNative"
+      ]
     }
   },
   "executionModes": {
     "ast": {
       "description": "Load the canonical AST artifact once and interpret it for each render.",
       "input": "canonical AST artifact",
-      "requestPath": ["loadArtifact", "bind assign and define", "render AST"],
+      "requestPath": [
+        "loadArtifact",
+        "bind assign and define",
+        "render AST"
+      ],
       "requiredSupportLevel": "artifact-runtime",
       "status": "implemented"
     },
     "generated": {
       "description": "Generate host-language source before startup and call the generated renderer at runtime.",
       "input": "generated host-language source",
-      "requestPath": ["compileNative", "loadNative", "bind assign and define", "call generated renderer"],
+      "requestPath": [
+        "compileNative",
+        "loadNative",
+        "bind assign and define",
+        "call generated renderer"
+      ],
       "requiredSupportLevel": "native-source-backend",
-      "status": "contract-defined"
+      "status": "implemented"
     }
   },
   "constructor": {
@@ -380,7 +400,12 @@
   },
   "languages": {
     "typescript": {
-      "supportLevels": ["core-runtime", "source-compiler", "artifact-runtime"],
+      "supportLevels": [
+        "core-runtime",
+        "source-compiler",
+        "artifact-runtime",
+        "native-source-backend"
+      ],
       "file": "typescript.ts",
       "generated": "generated/render_adapter.ts",
       "type": "Adapter",
@@ -394,7 +419,12 @@
       "checker": "tsc"
     },
     "javascript": {
-      "supportLevels": ["core-runtime", "source-compiler", "artifact-runtime"],
+      "supportLevels": [
+        "core-runtime",
+        "source-compiler",
+        "artifact-runtime",
+        "native-source-backend"
+      ],
       "file": "javascript.mjs",
       "generated": "generated/render_adapter.mjs",
       "type": "Adapter",
@@ -408,7 +438,12 @@
       "checker": "runtime"
     },
     "go": {
-      "supportLevels": ["core-runtime", "source-compiler", "artifact-runtime"],
+      "supportLevels": [
+        "core-runtime",
+        "source-compiler",
+        "artifact-runtime",
+        "native-source-backend"
+      ],
       "file": "go/main.go",
       "generated": "go/render_adapter.go",
       "type": "Adapter",
@@ -422,7 +457,12 @@
       "checker": "go build"
     },
     "rust": {
-      "supportLevels": ["core-runtime", "source-compiler", "artifact-runtime"],
+      "supportLevels": [
+        "core-runtime",
+        "source-compiler",
+        "artifact-runtime",
+        "native-source-backend"
+      ],
       "file": "rust/src/main.rs",
       "generated": "rust/src/render_adapter.rs",
       "type": "Adapter",
@@ -436,7 +476,12 @@
       "checker": "cargo check"
     },
     "php": {
-      "supportLevels": ["core-runtime", "source-compiler", "artifact-runtime"],
+      "supportLevels": [
+        "core-runtime",
+        "source-compiler",
+        "artifact-runtime",
+        "native-source-backend"
+      ],
       "file": "php.php",
       "generated": "generated/render_adapter.php",
       "type": "Adapter",

@@ -33,7 +33,8 @@ final class PreparedRender
         private readonly string $targetName,
         /** @var array{ast: array<string, mixed>, lines: list<int>|null} */
         private readonly array $template,
-    ) {}
+    ) {
+    }
 
     /** Renders the prepared request. */
     public function render(): string
@@ -42,15 +43,30 @@ final class PreparedRender
     }
 
     /** Returns the bound root data. */
-    public function rootData(): MapValue { return $this->rootData; }
+    public function rootData(): MapValue
+    {
+        return $this->rootData;
+    }
     /** Returns the bound definition registry. */
-    public function registry(): array { return $this->registry; }
+    public function registry(): array
+    {
+        return $this->registry;
+    }
     /** Returns the resolved environment. */
-    public function env(): array { return $this->env; }
+    public function env(): array
+    {
+        return $this->env;
+    }
     /** Returns the resolved target name. */
-    public function targetName(): string { return $this->targetName; }
+    public function targetName(): string
+    {
+        return $this->targetName;
+    }
     /** Returns the cached parsed template. */
-    public function template(): array { return $this->template; }
+    public function template(): array
+    {
+        return $this->template;
+    }
 }
 
 /** Engine: template loading, caching, function registration and rendering. */

@@ -156,6 +156,7 @@ bench-ts bench-php bench-go bench-rust bench-php-ext: ## Throughput of one imple
 
 showcase: build-ts ## Build the executable example site and its result artifacts
 	node tools/showcase/compile.mjs --mode changed --langs $(SHOWCASE_LANGS)
+	node tools/showcase/generate-native.mjs
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
 	node tools/bench/run.mjs --langs $(SHOWCASE_LANGS) --fixtures-dir examples/site/scenarios \
@@ -165,6 +166,7 @@ showcase: build-ts ## Build the executable example site and its result artifacts
 
 showcase-check: build-ts ## Verify example-site parity, repeatability and browser output
 	node tools/showcase/compile.mjs --mode off --langs $(SHOWCASE_LANGS)
+	node tools/showcase/generate-native.mjs --check
 	node tools/showcase/build.mjs --check --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
 	node tools/showcase/build-site.mjs --check
