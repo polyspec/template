@@ -36,6 +36,8 @@ Generated expressions use the target runtime's `RuntimeBindings` for unary and e
 
 The TypeScript backend passes its bound root, source-indexed frame, render context and runtime bindings into direct template functions. Those functions write to the context output builder, so generated execution uses the same UTF-8 output limit and positioned error as AST execution. Includes and blocks call generated template functions directly while entering and leaving the shared render chain.
 
+The PHP backend follows the same execution boundary. Its generated template functions receive `Context`, `Frame`, `RuntimeBindings` and the bound root map, write through the context output limiter, and delegate value operations and function calls to the package runtime. Typed maps remain `MapValue` instances so generated lookup, truthiness, ordering and spread preserve the data model instead of inheriting PHP array key conversion.
+
 Built-ins are known to the compiler. A referenced host function requires a manifest signature and a runtime implementation. Missing signatures fail before emission. Missing runtime implementations, arity errors and host failures use the same error fields as AST execution.
 
 ## Artifact refresh
