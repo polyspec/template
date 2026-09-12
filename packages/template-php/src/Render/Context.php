@@ -92,14 +92,4 @@ final class Context
         array_pop($this->chain);
     }
 
-    /**
-     * @param array{0: int, 1: int} $span
-     */
-    public function countIteration(Frame $frame, array $span): void
-    {
-        $this->iterations++;
-        if ($this->iterations > $this->engine->limits['iterations']) {
-            throw $this->fail('E_RUNTIME_LIMIT', $frame, $span, 'loop iterations exceed ' . $this->engine->limits['iterations']);
-        }
-    }
 }

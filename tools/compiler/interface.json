@@ -19,7 +19,7 @@
     "AstProgram": {"fields": ["artifact", "runtimeBindings"], "operation": "Interpret a precompiled canonical AST without parsing during render."},
     "GeneratedProgram": {"fields": ["artifact", "runtimeBindings"], "operation": "Call generated template functions directly without retaining a parser or AST interpreter."},
     "RuntimeBindings": {
-      "operations": ["truthy", "stringify", "escape", "number", "equal", "compare", "member", "index", "entries", "call", "limit", "error"],
+      "operations": ["truthy", "stringify", "escape", "number", "finite", "equal", "compare", "member", "index", "entries", "call", "limit", "error"],
       "invariant": "AST evaluation and generated code share the same language-specific value and error semantics."
     },
     "FunctionSignature": {"fields": ["implementation", "args", "returns"], "invariant": "Built-in and host signatures are checked before artifact emission; implementations are resolved at program load."},
@@ -45,7 +45,25 @@
     },
     "Engine": {"kind": "concrete", "owns": ["program"], "implements": "Program", "operations": ["prepare", "render"]},
     "AstProgram": {"kind": "concrete", "implements": "Program"},
-    "GeneratedProgram": {"kind": "generated-concrete", "implements": "Program"}
+    "GeneratedProgram": {"kind": "generated-concrete", "implements": "Program"},
+    "RuntimeBindings": {
+      "kind": "concrete",
+      "operations": [
+        {"name": "truthy", "parameters": ["value"], "returns": "bool"},
+        {"name": "stringify", "parameters": ["value", "frame", "span"], "returns": "string or error"},
+        {"name": "escape", "parameters": ["value", "frame", "span"], "returns": "string or error"},
+        {"name": "number", "parameters": ["value", "frame", "span"], "returns": "number or error"},
+        {"name": "finite", "parameters": ["number", "frame", "span"], "returns": "number or error"},
+        {"name": "equal", "parameters": ["left", "right", "strict"], "returns": "bool"},
+        {"name": "compare", "parameters": ["left", "right", "frame", "span"], "returns": "ordering or error"},
+        {"name": "member", "parameters": ["container", "key"], "returns": "value"},
+        {"name": "index", "parameters": ["container", "key"], "returns": "value"},
+        {"name": "entries", "parameters": ["value", "frame", "span"], "returns": "entries or error"},
+        {"name": "call", "parameters": ["name", "args", "frame", "span"], "returns": "value or error"},
+        {"name": "limit", "parameters": ["kind", "count", "frame", "span"], "returns": "void or error"},
+        {"name": "error", "parameters": ["frame", "span", "code", "message"], "returns": "error"}
+      ]
+    }
   },
   "operations": [
     {"name": "loadSourceGraph", "owner": "Compiler", "parameters": ["source manifest"], "returns": "SourceGraph"},
@@ -68,7 +86,12 @@
   "languages": {
     "typescript": {"backend": "TypeScriptBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "TemplateError"},
     "go": {"backend": "GoBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "error"},
-    "rust": {"backend": "RustBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "Result"},
+    "rust": {
+      "backend": "RustBackend",
+      "program": ["AstProgram", "GeneratedProgram"],
+      "error": "Result",
+      "runtimeBindingsExplicitContext": ["stringify", "escape", "number", "finite", "compare", "entries", "call", "limit", "error"]
+    },
     "php": {"backend": "PhpBackend", "program": ["AstProgram", "GeneratedProgram"], "error": "TemplateError"}
   },
   "forbidden": [

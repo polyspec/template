@@ -42,6 +42,10 @@ for (const language of core.languages) {
     throw new Error(`${language}: compiler mapping is incomplete`);
   }
 }
+const rustContextOperations = ['stringify', 'escape', 'number', 'finite', 'compare', 'entries', 'call', 'limit', 'error'];
+if (manifest.languages.rust.runtimeBindingsExplicitContext?.join(',') !== rustContextOperations.join(',')) {
+  throw new Error('rust RuntimeBindings context mapping differs');
+}
 
 const requiredForbidden = [
   'generated renderer callback', 'AST fallback from generated mode',
@@ -54,6 +58,8 @@ const runtime = manifest.runtimeContract;
 if (runtime?.Program?.operations?.map(item => item.name).join(',') !== 'prepare,render') throw new Error('Program runtime operations differ');
 if (runtime.Engine?.owns?.join(',') !== 'program' || runtime.Engine?.implements !== 'Program') throw new Error('Engine ownership differs');
 if (runtime.AstProgram?.implements !== 'Program' || runtime.GeneratedProgram?.implements !== 'Program') throw new Error('program implementation mapping differs');
+const runtimeBindingOperations = manifest.types.RuntimeBindings.operations;
+if (runtime.RuntimeBindings?.operations?.map(item => item.name).join(',') !== runtimeBindingOperations.join(',')) throw new Error('RuntimeBindings operations differ');
 
 function declaration(source, kind, name) {
   return source.statements.find(statement => statement.name?.text === name && statement.kind === kind);
@@ -81,6 +87,16 @@ const indexPath = resolve(root, 'packages/template-ts/src/index.ts');
 const indexSource = ts.createSourceFile(indexPath, readFileSync(indexPath, 'utf8'), ts.ScriptTarget.Latest, true);
 const astProgram = declaration(indexSource, ts.SyntaxKind.ClassDeclaration, 'AstProgram');
 if (!astProgram?.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(indexSource) === 'AstProgramCore'))) throw new Error('typescript: AstProgram does not extend the AST Program implementation');
+
+const bindingsPath = resolve(root, 'packages/template-ts/src/render/runtime-bindings.ts');
+const bindingsSource = ts.createSourceFile(bindingsPath, readFileSync(bindingsPath, 'utf8'), ts.ScriptTarget.Latest, true);
+const bindings = declaration(bindingsSource, ts.SyntaxKind.ClassDeclaration, 'RuntimeBindings');
+const bindingMethods = bindings?.members.filter(ts.isMethodDeclaration);
+if (bindingMethods?.map(item => item.name.getText(bindingsSource)).join(',') !== runtimeBindingOperations.join(',')) throw new Error(`typescript: RuntimeBindings operations differ`);
+for (const operation of runtime.RuntimeBindings.operations) {
+  const method = bindingMethods?.find(item => item.name.getText(bindingsSource) === operation.name);
+  if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeBindings.${operation.name} signature differs`);
+}
 
 function run(label, command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });

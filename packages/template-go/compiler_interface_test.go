@@ -22,6 +22,12 @@ type runtimeManifest struct {
 			Owns       []string `json:"owns"`
 			Operations []string `json:"operations"`
 		} `json:"Engine"`
+		RuntimeBindings struct {
+			Operations []struct {
+				Name       string   `json:"name"`
+				Parameters []string `json:"parameters"`
+			} `json:"operations"`
+		} `json:"RuntimeBindings"`
 	} `json:"runtimeContract"`
 }
 
@@ -89,6 +95,31 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 	}
 	if _, ok := types["AstProgram"].Type.(*ast.StructType); !ok {
 		t.Fatal("AstProgram is not a concrete struct")
+	}
+	bindingsFile, err := parser.ParseFile(token.NewFileSet(), "render/runtime_bindings.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var bindingMethods []*ast.FuncDecl
+	for _, declaration := range bindingsFile.Decls {
+		function, ok := declaration.(*ast.FuncDecl)
+		if ok && function.Recv != nil && receiverName(function.Recv.List[0].Type) == "RuntimeBindings" {
+			bindingMethods = append(bindingMethods, function)
+		}
+	}
+	if len(bindingMethods) == 0 || bindingMethods[0].Name.Name != "Truthy" {
+		t.Fatal("RuntimeBindings declaration is missing")
+	}
+	for index, operation := range manifest.RuntimeContract.RuntimeBindings.Operations {
+		if index >= len(bindingMethods) || bindingMethods[index].Name.Name != exported(operation.Name) {
+			t.Fatalf("RuntimeBindings.%s differs", operation.Name)
+		}
+		if fieldCount(bindingMethods[index].Type.Params) != len(operation.Parameters) {
+			t.Fatalf("RuntimeBindings.%s signature differs", operation.Name)
+		}
+	}
+	if len(bindingMethods) != len(manifest.RuntimeContract.RuntimeBindings.Operations) {
+		t.Fatal("RuntimeBindings operation count differs")
 	}
 }
 

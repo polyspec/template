@@ -47,6 +47,9 @@ classes.push(
   '  }',
   '  class AstProgram',
   '  class GeneratedProgram',
+  '  class RuntimeBindings {',
+  ...manifest.runtimeContract.RuntimeBindings.operations.map(signature).map(line => `    ${line}`),
+  '  }',
   '  Program <|-- AstProgram',
   '  Program <|-- GeneratedProgram',
   '  Compiler --> TypedProgram',
@@ -55,6 +58,8 @@ classes.push(
   '  ArtifactStore --> ArtifactManifest',
   '  ArtifactStore --> Program',
   '  Engine --> Program',
+  '  AstProgram --> RuntimeBindings',
+  '  GeneratedProgram --> RuntimeBindings',
   ''
 );
 
