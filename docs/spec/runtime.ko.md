@@ -42,7 +42,7 @@ PageCache.getOrSet(key, ttl, render)
 - **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 런타임에 갱신하지 않는다. `false`에서 산출물이 없거나 오래되면 오류다.
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
-- **RT-63** 준비된 렌더 계약은 [`tools/runtime/interface.json`](../../tools/runtime/interface.json)에 선언한다. `scripts/check-runtime-interface.mjs`는 필요한 언어 매핑이나 연산이 하나라도 없으면 실패한다.
+- **RT-67** 준비된 렌더 계약은 [`tools/runtime/interface.json`](../../tools/runtime/interface.json)에 선언한다. `scripts/check-runtime-interface.mjs`는 필요한 언어 매핑이나 연산이 하나라도 없으면 실패한다.
 - **RT-42** 엔진 옵션과 `parse`의 `delimiters`는 렉시컬 문서가 정의하는 대로 태그 구분자를 선택한다. 기본값은 `{}`다. 템플릿 파일의 구분자 지시문은 그 파일에 대해 옵션보다 우선한다.
 
 ## 언어 간 렌더 계약
@@ -163,6 +163,7 @@ sequenceDiagram
 - **RT-57** 컴파일 artifact는 정규 AST와 schema 버전, 언어, 시나리오, 원본 SHA-256, artifact SHA-256, 템플릿 artifact 경로를 가진 manifest를 포함한다. artifact는 서비스 시작 전에 생성되고 프로세스에 한 번 로드된다.
 - **RT-58** 산출물 갱신에는 세 정책이 있다. `dev`는 호출마다 갱신하고, `true`는 원본 version 변경 뒤 갱신하며, `false`는 배포된 산출물만 읽고 누락·오래됨이면 실패한다. 이 정책은 `compile.mode`가 산출물 표현을 선택한 뒤 독립적으로 적용된다.
 - **RT-59** 요청 경로에서는 파싱, 원본 파일 탐색, artifact 생성이 실행되지 않는다. 같은 artifact에 같은 assign, define, environment를 적용하면 같은 출력 바이트를 만들고 request를 변경하지 않는다.
+- **RT-68** 타입 고정 generated artifact는 assign, definitions와 template input을 선언한다. 생성된 block은 root assign, definition data, block scope 순서로 입력을 적용한 뒤 대상 template 함수를 직접 호출한다. 미리 렌더한 문자열 slot은 generated template target이 아니다.
 
 인터페이스는 두 실행 모드를 선언한다.
 
