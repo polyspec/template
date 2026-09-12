@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "language": "typescript",
+  "scenario": "react-boundary",
+  "templates": {
+    "content.tpl": {
+      "artifact": "content.tpl.ast.json",
+      "sourceSha256": "abb0db9b6110b5ca0624d76013aa126c9e66a1486543f52492524c2ce2a52323",
+      "artifactSha256": "2646d777b32d902c2a6c470db93674f1a9758ad9e831a8ccbf72c9b77d3e8dbf"
+    },
+    "layout.tpl": {
+      "artifact": "layout.tpl.ast.json",
+      "sourceSha256": "2e71cffcf5f4701914b2c4f024251f6aa6a836a13ad1292948f3636d2272af4a",
+      "artifactSha256": "57c2f7935e69640a545fd21438d5fb423667d1e408bc374bd4275dd474779f0a"
+    }
+  }
+}

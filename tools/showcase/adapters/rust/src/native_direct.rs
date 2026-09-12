@@ -29,6 +29,11 @@ fn generated_template(name: &str, scenario: &str, root: &Map<String, Value>, def
             "layout.tpl" => generated_html_slot__layout_tpl(root, define, parent),
             _ => Err(format!("generated template is missing: {name}")),
         },
+        "react-boundary" => match name {
+            "content.tpl" => generated_react_boundary__content_tpl(root, define, parent),
+            "layout.tpl" => generated_react_boundary__layout_tpl(root, define, parent),
+            _ => Err(format!("generated template is missing: {name}")),
+        },
         "scope-precedence" => match name {
             "content.tpl" => generated_scope_precedence__content_tpl(root, define, parent),
             "layout.tpl" => generated_scope_precedence__layout_tpl(root, define, parent),
@@ -65,6 +70,27 @@ fn generated_html_slot__layout_tpl(root: &Map<String, Value>, define: &DefineReg
     let mut block_scope = Map::new();
     out.push_str(&generated_block("content", "", "html-slot", root, define, &block_scope)?);
     out.push_str("</section>\n");
+    Ok(out)
+}
+
+fn generated_react_boundary__content_tpl(root: &Map<String, Value>, define: &DefineRegistry, parent: &Map<String, Value>) -> Result<String, String> {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str("<section data-react-island id=\"counter\">\n<p>");
+    generated_echo(&mut out, generated_lookup(&ctx, root, "island_label"))?;
+    out.push_str("</p>\n</section>\n");
+    Ok(out)
+}
+
+fn generated_react_boundary__layout_tpl(root: &Map<String, Value>, define: &DefineRegistry, parent: &Map<String, Value>) -> Result<String, String> {
+    let mut ctx = parent.clone();
+    let mut out = String::new();
+    out.push_str("<main>\n<h1>");
+    generated_echo(&mut out, generated_lookup(&ctx, root, "title"))?;
+    out.push_str("</h1>\n");
+    let mut block_scope = Map::new();
+    out.push_str(&generated_block("content", "", "react-boundary", root, define, &block_scope)?);
+    out.push_str("</main>\n");
     Ok(out)
 }
 

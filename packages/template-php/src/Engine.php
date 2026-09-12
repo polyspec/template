@@ -87,13 +87,17 @@ final class Engine
     public readonly bool $legacyWrappers;
     /** @var 'dev'|'true'|'false' */
     public readonly string $artifactRefresh;
+    /** @var 'ast'|'gen' */
+    public readonly string $compileMode;
+    /** @var callable|null */
+    private $generatedRenderer;
     /** @var array<string, callable> */
     private array $functions = [];
     /** @var array<string, array{version: string, template: array{ast: array<string, mixed>, lines: list<int>|null}}> */
     private array $cache = [];
 
     /**
-     * @param array{functions?: array<string, callable>, limits?: array<string, int>, delimiters?: string, legacy_wrappers?: bool, artifact_refresh?: 'dev'|'true'|'false'} $options
+     * @param array{functions?: array<string, callable>, limits?: array<string, int>, delimiters?: string, legacy_wrappers?: bool, artifact_refresh?: 'dev'|'true'|'false', compile_mode?: 'ast'|'gen', generated_renderer?: callable} $options
      */
     public function __construct(?LoaderInterface $loader = null, array $options = [])
     {
@@ -113,6 +117,11 @@ final class Engine
         if (!in_array($this->artifactRefresh, ['dev', 'true', 'false'], true)) {
             throw new \InvalidArgumentException($this->artifactRefresh . ' is not an artifact refresh policy');
         }
+        $this->compileMode = (string) ($options['compile_mode'] ?? 'ast');
+        if (!in_array($this->compileMode, ['ast', 'gen'], true)) {
+            throw new \InvalidArgumentException($this->compileMode . ' is not a compile mode');
+        }
+        $this->generatedRenderer = $options['generated_renderer'] ?? null;
         foreach ($options['functions'] ?? [] as $name => $fn) {
             $this->register((string) $name, $fn);
         }
@@ -234,6 +243,12 @@ final class Engine
      */
     public function render(string|array $target, mixed $assign = [], array $options = []): string
     {
+        if ($this->compileMode === 'gen') {
+            if ($this->generatedRenderer === null) {
+                throw new \LogicException('generated compile mode requires generated_renderer');
+            }
+            return ($this->generatedRenderer)($target, $assign, $options);
+        }
         return $this->prepare($target, $assign, $options)->render();
     }
 

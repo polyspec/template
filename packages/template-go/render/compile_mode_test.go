@@ -1,0 +1,24 @@
+package render
+
+import "testing"
+
+func TestGeneratedModeRequiresRenderer(t *testing.T) {
+	e, err := NewEngine(Options{CompileMode: CompileModeGen}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.Render("ignored", nil, RenderOptions{}); err == nil {
+		t.Fatal("expected missing generated renderer error")
+	}
+}
+
+func TestGeneratedModeCallsRenderer(t *testing.T) {
+	e, err := NewEngine(Options{CompileMode: CompileModeGen, GeneratedRender: func(any, any, RenderOptions) (string, error) { return "generated", nil }}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := e.Render("ignored", nil, RenderOptions{})
+	if err != nil || got != "generated" {
+		t.Fatalf("got %q, %v", got, err)
+	}
+}

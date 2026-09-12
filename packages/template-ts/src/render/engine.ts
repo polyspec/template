@@ -13,6 +13,8 @@ export type ParseFunction = (source: string | Uint8Array, name: string, delimite
 
 // Controls when a compiled template artifact is refreshed.
 export type ArtifactRefresh = 'dev' | 'true' | 'false';
+export type CompileMode = 'ast' | 'gen';
+export type GeneratedRenderer = (target: string | Template, assign: unknown, options: RenderOptions) => string;
 
 // What an engine is created with (RT-1, RT-5, RT-6, RT-42). Every field has a default.
 export interface EngineOptions {
@@ -26,6 +28,8 @@ export interface EngineOptions {
   // dev parses on every load, true refreshes when the loader version changes,
   // false keeps the first loaded artifact for the lifetime of the engine.
   artifactRefresh?: ArtifactRefresh;
+  compileMode?: CompileMode;
+  generatedRenderer?: GeneratedRenderer;
 }
 
 // One template definition: a path, a definition entry, or ready HTML (RT-24).
@@ -74,6 +78,8 @@ export class EngineCore implements EngineServices {
   private readonly parseFunction: ParseFunction | null;
   private readonly legacyWrappers: boolean;
   readonly artifactRefresh: ArtifactRefresh;
+  readonly compileMode: CompileMode;
+  private readonly generatedRenderer: GeneratedRenderer | null;
   private readonly cache = new Map<string, { version: string; template: ParsedTemplate }>();
 
   // Creates an engine. An unknown delimiter pair raises an error here, before any render.
@@ -83,6 +89,9 @@ export class EngineCore implements EngineServices {
     this.parseFunction = options.parse ?? null;
     this.legacyWrappers = options.legacyWrappers === true;
     this.artifactRefresh = options.artifactRefresh ?? 'true';
+    this.compileMode = options.compileMode ?? 'ast';
+    if (this.compileMode !== 'ast' && this.compileMode !== 'gen') throw new Error(`${this.compileMode} is not a compile mode`);
+    this.generatedRenderer = options.generatedRenderer ?? null;
     if (options.delimiters !== undefined) {
       const delimiters = parseDelimiters(options.delimiters);
       if (delimiters === null) throw new Error(`${JSON.stringify(options.delimiters)} is not a delimiter pair`);
@@ -148,6 +157,10 @@ export class EngineCore implements EngineServices {
   // Renders a template name or a parsed template and returns the complete output (RT-3). It
   // raises a TemplateError and returns no partial output when the render fails (RT-36).
   render(target: string | Template, assign: unknown, options: RenderOptions = {}): string {
+    if (this.compileMode === 'gen') {
+      if (!this.generatedRenderer) throw new Error('generated compile mode requires generatedRenderer');
+      return this.generatedRenderer(target, assign, options);
+    }
     return this.prepare(target, assign, options).render();
   }
 
