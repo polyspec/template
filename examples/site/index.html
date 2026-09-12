@@ -41,8 +41,8 @@
 
 
 --- layout.tpl
-<span class="syntax-template syntax-assignment">{:values = <span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">,</span> <span class="syntax-operator">...</span><span class="syntax-variable">numbers</span><span class="syntax-operator">]</span>}</span>
-<span class="syntax-template syntax-assignment">{:merged = <span class="syntax-operator">[</span><span class="syntax-operator">...</span><span class="syntax-variable">lookup</span><span class="syntax-operator">,</span> <span class="syntax-string">&#39;z&#39;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&#39;Z&#39;</span><span class="syntax-operator">]</span>}</span>
+<span class="syntax-template syntax-assignment">{: values = <span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">,</span> <span class="syntax-operator">...</span><span class="syntax-variable">numbers</span><span class="syntax-operator">]</span>}</span>
+<span class="syntax-template syntax-assignment">{: merged = <span class="syntax-operator">[</span><span class="syntax-operator">...</span><span class="syntax-variable">lookup</span><span class="syntax-operator">,</span> <span class="syntax-string">&#39;z&#39;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&#39;Z&#39;</span><span class="syntax-operator">]</span>}</span>
 &lt;<span class="syntax-tag">section</span>&gt;
 &lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">page</span><span class="syntax-variable">.title</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;escaped&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">dangerous</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
@@ -73,10 +73,10 @@
   &quot;target&quot;: &quot;canonical&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;delimiters&quot;: null,
-  &quot;sourceDigest&quot;: &quot;0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6&quot;,
+  &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
-  &quot;compilerDigest&quot;: &quot;e8b0fa74c9fc2e3b40c857cd2505c7c2c5eeb54267911cdc5ad8bdd0537d0f5e&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
+  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
   &quot;files&quot;: {
     &quot;card.tpl&quot;: {
       &quot;path&quot;: &quot;card.tpl.ast.json&quot;,
@@ -89,31 +89,31 @@
     },
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
-      &quot;sourceDigest&quot;: &quot;10ea1819adb17d5e7f2108ca111e33df72ecef80a8be1cc1db3dac7aaad77bb0&quot;,
-      &quot;artifactDigest&quot;: &quot;b8cc29842a6d727c2989151be4939864beceb76c294acd1a422f81af108cc932&quot;,
+      &quot;sourceDigest&quot;: &quot;1ba56a9e17866570e7f4c48301edecc53a4151e0659a2bf2820db0c014c1836b&quot;,
+      &quot;artifactDigest&quot;: &quot;fb4a47375393735f51fa1583f69c9690dba9d798754185c2cfdfea264c3672ef&quot;,
       &quot;lines&quot;: [
         0,
-        27,
-        62,
-        72,
-        96,
-        133,
-        187,
-        264,
-        301,
-        388,
-        459,
-        464,
-        479,
-        559,
+        29,
+        66,
+        76,
+        100,
+        137,
+        191,
+        268,
+        305,
+        392,
+        463,
+        468,
+        483,
         563,
-        578,
+        567,
         582,
-        588,
-        604,
-        651,
-        680,
-        691
+        586,
+        592,
+        608,
+        655,
+        684,
+        695
       ]
     },
     &quot;partial.tpl&quot;: {
@@ -184,8 +184,8 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;kind&quot;: &quot;number&quot;,
             &quot;value&quot;: 0,
             &quot;span&quot;: [
-              11,
-              12
+              13,
+              14
             ]
           },
           {
@@ -194,24 +194,24 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;numbers&quot;,
               &quot;span&quot;: [
-                17,
-                24
+                19,
+                26
               ]
             },
             &quot;span&quot;: [
-              14,
-              24
+              16,
+              26
             ]
           }
         ],
         &quot;span&quot;: [
-          10,
-          25
+          12,
+          27
         ]
       },
       &quot;span&quot;: [
         0,
-        26
+        28
       ]
     },
     {
@@ -226,13 +226,13 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;lookup&quot;,
               &quot;span&quot;: [
-                41,
-                47
+                45,
+                51
               ]
             },
             &quot;span&quot;: [
-              38,
-              47
+              42,
+              51
             ]
           },
           {
@@ -241,8 +241,8 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;kind&quot;: &quot;string&quot;,
               &quot;value&quot;: &quot;z&quot;,
               &quot;span&quot;: [
-                49,
-                52
+                53,
+                56
               ]
             },
             &quot;value&quot;: {
@@ -250,28 +250,28 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;kind&quot;: &quot;string&quot;,
               &quot;value&quot;: &quot;Z&quot;,
               &quot;span&quot;: [
-                56,
-                59
+                60,
+                63
               ]
             }
           }
         ],
         &quot;span&quot;: [
-          37,
-          60
+          41,
+          64
         ]
       },
       &quot;span&quot;: [
-        27,
-        61
+        29,
+        65
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;section&gt;\n&lt;h1&gt;&quot;,
       &quot;span&quot;: [
-        62,
-        76
+        66,
+        80
       ]
     },
     {
@@ -282,27 +282,27 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;page&quot;,
           &quot;span&quot;: [
-            79,
-            83
+            83,
+            87
           ]
         },
         &quot;key&quot;: &quot;title&quot;,
         &quot;span&quot;: [
-          79,
-          89
+          83,
+          93
         ]
       },
       &quot;span&quot;: [
-        76,
-        90
+        80,
+        94
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;,
       &quot;span&quot;: [
-        90,
-        115
+        94,
+        119
       ]
     },
     {
@@ -311,21 +311,21 @@ ast/layout.tpl.ast.json · layout.tpl
         &quot;type&quot;: &quot;Var&quot;,
         &quot;name&quot;: &quot;dangerous&quot;,
         &quot;span&quot;: [
-          118,
-          127
+          122,
+          131
         ]
       },
       &quot;span&quot;: [
-        115,
-        128
+        119,
+        132
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;,
       &quot;span&quot;: [
-        128,
-        152
+        132,
+        156
       ]
     },
     {
@@ -337,8 +337,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;flag&quot;,
           &quot;span&quot;: [
-            155,
-            159
+            159,
+            163
           ]
         },
         &quot;right&quot;: {
@@ -346,26 +346,26 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;string&quot;,
           &quot;value&quot;: &quot;x&quot;,
           &quot;span&quot;: [
-            163,
-            166
+            167,
+            170
           ]
         },
         &quot;span&quot;: [
-          155,
-          166
+          159,
+          170
         ]
       },
       &quot;span&quot;: [
-        152,
-        167
+        156,
+        171
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
-        167,
-        168
+        171,
+        172
       ]
     },
     {
@@ -378,8 +378,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;bool&quot;,
           &quot;value&quot;: false,
           &quot;span&quot;: [
-            171,
-            176
+            175,
+            180
           ]
         },
         &quot;right&quot;: {
@@ -387,26 +387,26 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;number&quot;,
           &quot;value&quot;: 2,
           &quot;span&quot;: [
-            180,
-            181
+            184,
+            185
           ]
         },
         &quot;span&quot;: [
-          171,
-          181
+          175,
+          185
         ]
       },
       &quot;span&quot;: [
-        168,
-        182
+        172,
+        186
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;,
       &quot;span&quot;: [
-        182,
-        215
+        186,
+        219
       ]
     },
     {
@@ -418,34 +418,34 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;empty_list&quot;,
           &quot;span&quot;: [
-            218,
-            228
+            222,
+            232
           ]
         },
         &quot;right&quot;: {
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;flag&quot;,
           &quot;span&quot;: [
-            232,
-            236
+            236,
+            240
           ]
         },
         &quot;span&quot;: [
-          218,
-          236
+          222,
+          240
         ]
       },
       &quot;span&quot;: [
-        215,
-        237
+        219,
+        241
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
-        237,
-        238
+        241,
+        242
       ]
     },
     {
@@ -457,34 +457,34 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;empty_map&quot;,
           &quot;span&quot;: [
-            241,
-            250
+            245,
+            254
           ]
         },
         &quot;right&quot;: {
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;flag&quot;,
           &quot;span&quot;: [
-            254,
-            258
+            258,
+            262
           ]
         },
         &quot;span&quot;: [
-          241,
-          258
+          245,
+          262
         ]
       },
       &quot;span&quot;: [
-        238,
-        259
+        242,
+        263
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p&gt;&quot;,
       &quot;span&quot;: [
-        259,
-        267
+        263,
+        271
       ]
     },
     {
@@ -495,8 +495,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;values&quot;,
           &quot;span&quot;: [
-            270,
-            276
+            274,
+            280
           ]
         },
         &quot;index&quot;: {
@@ -504,26 +504,26 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;number&quot;,
           &quot;value&quot;: 1,
           &quot;span&quot;: [
-            277,
-            278
+            281,
+            282
           ]
         },
         &quot;span&quot;: [
-          270,
-          279
+          274,
+          283
         ]
       },
       &quot;span&quot;: [
-        267,
-        280
+        271,
+        284
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
-        280,
-        281
+        284,
+        285
       ]
     },
     {
@@ -534,8 +534,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;merged&quot;,
           &quot;span&quot;: [
-            284,
-            290
+            288,
+            294
           ]
         },
         &quot;index&quot;: {
@@ -543,26 +543,26 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;string&quot;,
           &quot;value&quot;: &quot;z&quot;,
           &quot;span&quot;: [
-            291,
-            294
+            295,
+            298
           ]
         },
         &quot;span&quot;: [
-          284,
-          295
+          288,
+          299
         ]
       },
       &quot;span&quot;: [
-        281,
-        296
+        285,
+        300
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/p&gt;\n&quot;,
       &quot;span&quot;: [
-        296,
-        301
+        300,
+        305
       ]
     },
     {
@@ -576,8 +576,8 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;flag&quot;,
               &quot;span&quot;: [
-                304,
-                308
+                308,
+                312
               ]
             },
             &quot;right&quot;: {
@@ -589,14 +589,14 @@ ast/layout.tpl.ast.json · layout.tpl
                   &quot;type&quot;: &quot;Var&quot;,
                   &quot;name&quot;: &quot;page&quot;,
                   &quot;span&quot;: [
-                    312,
-                    316
+                    316,
+                    320
                   ]
                 },
                 &quot;key&quot;: &quot;title&quot;,
                 &quot;span&quot;: [
-                  312,
-                  322
+                  316,
+                  326
                 ]
               },
               &quot;right&quot;: {
@@ -604,18 +604,18 @@ ast/layout.tpl.ast.json · layout.tpl
                 &quot;kind&quot;: &quot;string&quot;,
                 &quot;value&quot;: &quot;Guide&quot;,
                 &quot;span&quot;: [
-                  326,
-                  333
+                  330,
+                  337
                 ]
               },
               &quot;span&quot;: [
-                312,
-                333
+                316,
+                337
               ]
             },
             &quot;span&quot;: [
-              304,
-              333
+              308,
+              337
             ]
           },
           &quot;body&quot;: [
@@ -623,14 +623,14 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Text&quot;,
               &quot;value&quot;: &quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;,
               &quot;span&quot;: [
-                334,
-                358
+                338,
+                362
               ]
             }
           ],
           &quot;span&quot;: [
-            301,
-            334
+            305,
+            338
           ]
         }
       ],
@@ -639,22 +639,22 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;,
           &quot;span&quot;: [
-            361,
-            384
+            365,
+            388
           ]
         }
       ],
       &quot;span&quot;: [
-        301,
-        387
+        305,
+        391
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;\n&lt;p&gt;&quot;,
       &quot;span&quot;: [
-        387,
-        391
+        391,
+        395
       ]
     },
     {
@@ -665,8 +665,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Var&quot;,
           &quot;name&quot;: &quot;flag&quot;,
           &quot;span&quot;: [
-            394,
-            398
+            398,
+            402
           ]
         },
         &quot;then&quot;: {
@@ -674,8 +674,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;string&quot;,
           &quot;value&quot;: &quot;yes&quot;,
           &quot;span&quot;: [
-            401,
-            406
+            405,
+            410
           ]
         },
         &quot;else&quot;: {
@@ -683,26 +683,26 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;string&quot;,
           &quot;value&quot;: &quot;no&quot;,
           &quot;span&quot;: [
-            409,
-            413
+            413,
+            417
           ]
         },
         &quot;span&quot;: [
-          394,
-          413
+          398,
+          417
         ]
       },
       &quot;span&quot;: [
-        391,
-        414
+        395,
+        418
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
-        414,
-        415
+        418,
+        419
       ]
     },
     {
@@ -718,13 +718,13 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;kind&quot;: &quot;number&quot;,
             &quot;value&quot;: 1,
             &quot;span&quot;: [
-              419,
-              420
+              423,
+              424
             ]
           },
           &quot;span&quot;: [
-            418,
-            420
+            422,
+            424
           ]
         },
         &quot;right&quot;: {
@@ -732,26 +732,26 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;kind&quot;: &quot;number&quot;,
           &quot;value&quot;: 3,
           &quot;span&quot;: [
-            423,
-            424
+            427,
+            428
           ]
         },
         &quot;span&quot;: [
-          418,
-          424
+          422,
+          428
         ]
       },
       &quot;span&quot;: [
-        415,
-        425
+        419,
+        429
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;|&quot;,
       &quot;span&quot;: [
-        425,
-        426
+        429,
+        430
       ]
     },
     {
@@ -765,8 +765,8 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;kind&quot;: &quot;string&quot;,
             &quot;value&quot;: &quot;&quot;,
             &quot;span&quot;: [
-              429,
-              431
+              433,
+              435
             ]
           },
           {
@@ -774,27 +774,27 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;kind&quot;: &quot;string&quot;,
             &quot;value&quot;: &quot;fallback&quot;,
             &quot;span&quot;: [
-              442,
-              452
+              446,
+              456
             ]
           }
         ],
         &quot;span&quot;: [
-          429,
-          453
+          433,
+          457
         ]
       },
       &quot;span&quot;: [
-        426,
-        454
+        430,
+        458
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;,
       &quot;span&quot;: [
-        454,
-        464
+        458,
+        468
       ]
     },
     {
@@ -804,8 +804,8 @@ ast/layout.tpl.ast.json · layout.tpl
         &quot;type&quot;: &quot;Var&quot;,
         &quot;name&quot;: &quot;rows&quot;,
         &quot;span&quot;: [
-          473,
-          477
+          477,
+          481
         ]
       },
       &quot;body&quot;: [
@@ -813,8 +813,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;&quot;,
           &quot;span&quot;: [
-            479,
-            483
+            483,
+            487
           ]
         },
         {
@@ -824,21 +824,21 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;index_&quot;,
             &quot;span&quot;: [
-              486,
-              496
+              490,
+              500
             ]
           },
           &quot;span&quot;: [
-            483,
-            497
+            487,
+            501
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;/&quot;,
           &quot;span&quot;: [
-            497,
-            498
+            501,
+            502
           ]
         },
         {
@@ -848,21 +848,21 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;size_&quot;,
             &quot;span&quot;: [
-              501,
-              510
+              505,
+              514
             ]
           },
           &quot;span&quot;: [
-            498,
-            511
+            502,
+            515
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            511,
-            512
+            515,
+            516
           ]
         },
         {
@@ -873,27 +873,27 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;row&quot;,
               &quot;span&quot;: [
-                515,
-                518
+                519,
+                522
               ]
             },
             &quot;key&quot;: &quot;name&quot;,
             &quot;span&quot;: [
-              515,
-              523
+              519,
+              527
             ]
           },
           &quot;span&quot;: [
-            512,
-            524
+            516,
+            528
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            524,
-            525
+            528,
+            529
           ]
         },
         {
@@ -903,21 +903,21 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;first_&quot;,
             &quot;span&quot;: [
-              528,
-              538
+              532,
+              542
             ]
           },
           &quot;span&quot;: [
-            525,
-            539
+            529,
+            543
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;:&quot;,
           &quot;span&quot;: [
-            539,
-            540
+            543,
+            544
           ]
         },
         {
@@ -927,21 +927,21 @@ ast/layout.tpl.ast.json · layout.tpl
             &quot;loop&quot;: &quot;row&quot;,
             &quot;field&quot;: &quot;last_&quot;,
             &quot;span&quot;: [
-              543,
-              552
+              547,
+              556
             ]
           },
           &quot;span&quot;: [
-            540,
-            553
+            544,
+            557
           ]
         },
         {
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            553,
-            559
+            557,
+            563
           ]
         }
       ],
@@ -950,30 +950,30 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;,
           &quot;span&quot;: [
-            563,
-            578
+            567,
+            582
           ]
         }
       ],
       &quot;span&quot;: [
-        464,
-        581
+        468,
+        585
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/ul&gt;\n&quot;,
       &quot;span&quot;: [
-        582,
-        588
+        586,
+        592
       ]
     },
     {
       &quot;type&quot;: &quot;Include&quot;,
       &quot;path&quot;: &quot;partial.tpl&quot;,
       &quot;span&quot;: [
-        588,
-        603
+        592,
+        607
       ]
     },
     {
@@ -984,8 +984,8 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;defined&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            616,
-            630
+            620,
+            634
           ]
         }
       ],
@@ -994,22 +994,22 @@ ast/layout.tpl.ast.json · layout.tpl
           &quot;type&quot;: &quot;Text&quot;,
           &quot;value&quot;: &quot;&lt;p&gt;missing&lt;/p&gt;&quot;,
           &quot;span&quot;: [
-            633,
-            647
+            637,
+            651
           ]
         }
       ],
       &quot;span&quot;: [
-        604,
-        650
+        608,
+        654
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;\n&quot;,
       &quot;span&quot;: [
-        650,
-        651
+        654,
+        655
       ]
     },
     {
@@ -1025,29 +1025,29 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;page&quot;,
               &quot;span&quot;: [
-                668,
-                672
+                672,
+                676
               ]
             },
             &quot;key&quot;: &quot;title&quot;,
             &quot;span&quot;: [
-              668,
-              678
+              672,
+              682
             ]
           }
         }
       ],
       &quot;span&quot;: [
-        651,
-        679
+        655,
+        683
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
       &quot;span&quot;: [
-        680,
-        691
+        684,
+        695
       ]
     }
   ]
@@ -1114,14 +1114,14 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;ts&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6&quot;,
+  &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;dd70fd560670999b3385f1b873b5926548eec7828cb93d4c7f6080c5c4e0c379&quot;
+      &quot;artifactDigest&quot;: &quot;06fe068e230904ebb635443076aa0cd93a27faa15e04f6745468a99ed1dab3c3&quot;
     }
   }
 }
@@ -1173,39 +1173,39 @@ function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_
     context.at(frame, [25,30]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
 function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
-  const frame = new Frame(&quot;layout.tpl&quot;, [0,27,62,72,96,133,187,264,301,388,459,464,479,559,563,578,582,588,604,651,680,691], rootData);
+  const frame = new Frame(&quot;layout.tpl&quot;, [0,29,66,76,100,137,191,268,305,392,463,468,483,563,567,582,586,592,608,655,684,695], rootData);
 
-    scope.locals.set(&quot;values&quot;, [0, ...(runtime.listSpread(assign.numbers as unknown as Value, frame, [14,24]) as unknown as Array&lt;number&gt;)] as unknown as Value);
-    scope.locals.set(&quot;merged&quot;, new Map([...(runtime.mapSpread(assign.lookup as unknown as Value, frame, [38,47]) as unknown as Map&lt;string, string&gt;), [runtime.stringify(&quot;z&quot; as unknown as Value, frame, [49,52]), &quot;Z&quot;]]) as unknown as Value);
-    context.at(frame, [62,76]); context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
-    context.at(frame, [76,90]); context.output.write(runtime.escape((assign.page)?.title as unknown as Value, frame, [79,89]));
-    context.at(frame, [90,115]); context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
-    context.at(frame, [115,128]); context.output.write(runtime.escape(assign.dangerous as unknown as Value, frame, [118,127]));
-    context.at(frame, [128,152]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
-    context.at(frame, [152,167]); context.output.write(runtime.escape((() =&gt; { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(&quot;x&quot; as unknown as Value) : false; })() as unknown as Value, frame, [155,166]));
-    context.at(frame, [167,168]); context.output.write(&quot;|&quot;);
-    context.at(frame, [168,182]); context.output.write(runtime.escape((() =&gt; { const left = false; return runtime.truthy(left as unknown as Value) ? true : runtime.truthy(2 as unknown as Value); })() as unknown as Value, frame, [171,181]));
-    context.at(frame, [182,215]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
-    context.at(frame, [215,237]); context.output.write(runtime.escape((() =&gt; { const left = assign.empty_list; return runtime.truthy(left as unknown as Value) ? runtime.truthy(assign.flag as unknown as Value) : false; })() as unknown as Value, frame, [218,236]));
-    context.at(frame, [237,238]); context.output.write(&quot;|&quot;);
-    context.at(frame, [238,259]); context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left as unknown as Value) ? runtime.truthy(assign.flag as unknown as Value) : false; })() as unknown as Value, frame, [241,258]));
-    context.at(frame, [259,267]); context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
-    context.at(frame, [267,280]); context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;) as unknown as Array&lt;number&gt; as unknown as Value, 1 as unknown as Value) as unknown as Value, frame, [270,279]));
-    context.at(frame, [280,281]); context.output.write(&quot;|&quot;);
-    context.at(frame, [281,296]); context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;merged&quot;) as unknown as Map&lt;string, string&gt; as unknown as Value, &quot;z&quot; as unknown as Value) as unknown as Value, frame, [284,295]));
-    context.at(frame, [296,301]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
-    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(runtime.binary(&quot;==&quot;, (assign.page)?.title as unknown as Value, &quot;Guide&quot; as unknown as Value, frame, [312,333]) as unknown as Value) : false; })() as unknown as Value)) {
-        context.at(frame, [334,358]); context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);    } else {
-        context.at(frame, [361,384]); context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
+    scope.locals.set(&quot;values&quot;, [0, ...(runtime.listSpread(assign.numbers as unknown as Value, frame, [16,26]) as unknown as Array&lt;number&gt;)] as unknown as Value);
+    scope.locals.set(&quot;merged&quot;, new Map([...(runtime.mapSpread(assign.lookup as unknown as Value, frame, [42,51]) as unknown as Map&lt;string, string&gt;), [runtime.stringify(&quot;z&quot; as unknown as Value, frame, [53,56]), &quot;Z&quot;]]) as unknown as Value);
+    context.at(frame, [66,80]); context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
+    context.at(frame, [80,94]); context.output.write(runtime.escape((assign.page)?.title as unknown as Value, frame, [83,93]));
+    context.at(frame, [94,119]); context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
+    context.at(frame, [119,132]); context.output.write(runtime.escape(assign.dangerous as unknown as Value, frame, [122,131]));
+    context.at(frame, [132,156]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
+    context.at(frame, [156,171]); context.output.write(runtime.escape((() =&gt; { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(&quot;x&quot; as unknown as Value) : false; })() as unknown as Value, frame, [159,170]));
+    context.at(frame, [171,172]); context.output.write(&quot;|&quot;);
+    context.at(frame, [172,186]); context.output.write(runtime.escape((() =&gt; { const left = false; return runtime.truthy(left as unknown as Value) ? true : runtime.truthy(2 as unknown as Value); })() as unknown as Value, frame, [175,185]));
+    context.at(frame, [186,219]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
+    context.at(frame, [219,241]); context.output.write(runtime.escape((() =&gt; { const left = assign.empty_list; return runtime.truthy(left as unknown as Value) ? runtime.truthy(assign.flag as unknown as Value) : false; })() as unknown as Value, frame, [222,240]));
+    context.at(frame, [241,242]); context.output.write(&quot;|&quot;);
+    context.at(frame, [242,263]); context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left as unknown as Value) ? runtime.truthy(assign.flag as unknown as Value) : false; })() as unknown as Value, frame, [245,262]));
+    context.at(frame, [263,271]); context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
+    context.at(frame, [271,284]); context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;) as unknown as Array&lt;number&gt; as unknown as Value, 1 as unknown as Value) as unknown as Value, frame, [274,283]));
+    context.at(frame, [284,285]); context.output.write(&quot;|&quot;);
+    context.at(frame, [285,300]); context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;merged&quot;) as unknown as Map&lt;string, string&gt; as unknown as Value, &quot;z&quot; as unknown as Value) as unknown as Value, frame, [288,299]));
+    context.at(frame, [300,305]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
+    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left as unknown as Value) ? runtime.truthy(runtime.binary(&quot;==&quot;, (assign.page)?.title as unknown as Value, &quot;Guide&quot; as unknown as Value, frame, [316,337]) as unknown as Value) : false; })() as unknown as Value)) {
+        context.at(frame, [338,362]); context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);    } else {
+        context.at(frame, [365,388]); context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
     }
-    context.at(frame, [387,391]); context.output.write(&quot;\n&lt;p&gt;&quot;);
-    context.at(frame, [391,414]); context.output.write(runtime.escape((runtime.truthy(assign.flag as unknown as Value) ? &quot;yes&quot; : &quot;no&quot;) as unknown as Value, frame, [394,413]));
-    context.at(frame, [414,415]); context.output.write(&quot;|&quot;);
-    context.at(frame, [415,425]); context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1 as unknown as Value, frame, [418,420]) as unknown as Value, 3 as unknown as Value, frame, [418,424]) as unknown as Value, frame, [418,424]));
-    context.at(frame, [425,426]); context.output.write(&quot;|&quot;);
-    context.at(frame, [426,454]); context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;] as unknown as Value[], frame, [429,453]) as unknown as Value, frame, [429,453]));
-    context.at(frame, [454,464]); context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
-    { const row_entries = runtime.entries(assign.rows as unknown as Value, frame, [464,581]);
+    context.at(frame, [391,395]); context.output.write(&quot;\n&lt;p&gt;&quot;);
+    context.at(frame, [395,418]); context.output.write(runtime.escape((runtime.truthy(assign.flag as unknown as Value) ? &quot;yes&quot; : &quot;no&quot;) as unknown as Value, frame, [398,417]));
+    context.at(frame, [418,419]); context.output.write(&quot;|&quot;);
+    context.at(frame, [419,429]); context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1 as unknown as Value, frame, [422,424]) as unknown as Value, 3 as unknown as Value, frame, [422,428]) as unknown as Value, frame, [422,428]));
+    context.at(frame, [429,430]); context.output.write(&quot;|&quot;);
+    context.at(frame, [430,458]); context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;] as unknown as Value[], frame, [433,457]) as unknown as Value, frame, [433,457]));
+    context.at(frame, [458,468]); context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
+    { const row_entries = runtime.entries(assign.rows as unknown as Value, frame, [468,585]);
     const row_size = row_entries.length; const row_last_index = row_size - 1;
     const row_had = scope.locals.has(&quot;row&quot;); const row_previous = scope.locals.get(&quot;row&quot;);
     try {
@@ -1215,39 +1215,39 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
         const row_first = row_index === 0;
         const row_last = row_index === row_last_index;
         context.iterations += 1;
-        runtime.limit(&#39;iteration&#39;, context.iterations, frame, [464,581]);
-            context.at(frame, [479,483]); context.output.write(&quot;&lt;li&gt;&quot;);
-            context.at(frame, [483,497]); context.output.write(runtime.escape(row_index as unknown as Value, frame, [486,496]));
-            context.at(frame, [497,498]); context.output.write(&quot;/&quot;);
-            context.at(frame, [498,511]); context.output.write(runtime.escape(row_size as unknown as Value, frame, [501,510]));
-            context.at(frame, [511,512]); context.output.write(&quot;:&quot;);
-            context.at(frame, [512,524]); context.output.write(runtime.escape((scope.lookup(frame, &quot;row&quot;) as unknown as Row)?.name as unknown as Value, frame, [515,523]));
-            context.at(frame, [524,525]); context.output.write(&quot;:&quot;);
-            context.at(frame, [525,539]); context.output.write(runtime.escape(row_first as unknown as Value, frame, [528,538]));
-            context.at(frame, [539,540]); context.output.write(&quot;:&quot;);
-            context.at(frame, [540,553]); context.output.write(runtime.escape(row_last as unknown as Value, frame, [543,552]));
-            context.at(frame, [553,559]); context.output.write(&quot;&lt;/li&gt;\n&quot;);
+        runtime.limit(&#39;iteration&#39;, context.iterations, frame, [468,585]);
+            context.at(frame, [483,487]); context.output.write(&quot;&lt;li&gt;&quot;);
+            context.at(frame, [487,501]); context.output.write(runtime.escape(row_index as unknown as Value, frame, [490,500]));
+            context.at(frame, [501,502]); context.output.write(&quot;/&quot;);
+            context.at(frame, [502,515]); context.output.write(runtime.escape(row_size as unknown as Value, frame, [505,514]));
+            context.at(frame, [515,516]); context.output.write(&quot;:&quot;);
+            context.at(frame, [516,528]); context.output.write(runtime.escape((scope.lookup(frame, &quot;row&quot;) as unknown as Row)?.name as unknown as Value, frame, [519,527]));
+            context.at(frame, [528,529]); context.output.write(&quot;:&quot;);
+            context.at(frame, [529,543]); context.output.write(runtime.escape(row_first as unknown as Value, frame, [532,542]));
+            context.at(frame, [543,544]); context.output.write(&quot;:&quot;);
+            context.at(frame, [544,557]); context.output.write(runtime.escape(row_last as unknown as Value, frame, [547,556]));
+            context.at(frame, [557,563]); context.output.write(&quot;&lt;/li&gt;\n&quot;);
     }
     } finally { if (row_had) scope.locals.set(&quot;row&quot;, row_previous as Value); else scope.locals.delete(&quot;row&quot;); }
     if (row_size === 0) {
-            context.at(frame, [563,578]); context.output.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
+            context.at(frame, [567,582]); context.output.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
     }
     }
-    context.at(frame, [582,588]); context.output.write(&quot;&lt;/ul&gt;\n&quot;);
-    context.enter(&quot;partial.tpl&quot;, frame, [588,603]);
+    context.at(frame, [586,592]); context.output.write(&quot;&lt;/ul&gt;\n&quot;);
+    context.enter(&quot;partial.tpl&quot;, frame, [592,607]);
     try { render_partial_tpl(assign, definitions, { values: scope.lookup(frame, &quot;values&quot;) as unknown as Array&lt;number&gt; }, context, runtime, rootData, scope); } finally { context.leave(); }
     if (definitions.content !== undefined) {
-            context.at(frame, [616,630]); context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
+            context.at(frame, [620,634]); context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
     } else {
-            context.at(frame, [633,647]); context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
+            context.at(frame, [637,651]); context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
     }
-    context.at(frame, [650,651]); context.output.write(&quot;\n&quot;);
+    context.at(frame, [654,655]); context.output.write(&quot;\n&quot;);
     { let definition = definitions.content;
-    if (definition === undefined) throw runtime.error(frame, [651,679], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-    if (definition?.html !== undefined) { context.at(frame, [651,679]); context.output.write(definition.html); }
-    else { const input = Object.assign({  }, definition?.data ?? {}, { label: (assign.page)?.title }) as Input_card_tpl; const blockScope = new Scope(); context.enter(&quot;card.tpl&quot;, frame, [651,679]); try { render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope); } finally { context.leave(); } }
+    if (definition === undefined) throw runtime.error(frame, [655,683], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    if (definition?.html !== undefined) { context.at(frame, [655,683]); context.output.write(definition.html); }
+    else { const input = Object.assign({  }, definition?.data ?? {}, { label: (assign.page)?.title }) as Input_card_tpl; const blockScope = new Scope(); context.enter(&quot;card.tpl&quot;, frame, [655,683]); try { render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope); } finally { context.leave(); } }
     }
-    context.at(frame, [680,691]); context.output.write(&quot;&lt;/section&gt;\n&quot;);
+    context.at(frame, [684,695]); context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
 function render_partial_tpl(assign: Assign, definitions: Definitions, input: Input_partial_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame(&quot;partial.tpl&quot;, [0,38], rootData);
@@ -1278,14 +1278,14 @@ javascript · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;js&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6&quot;,
+  &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
-      &quot;artifactDigest&quot;: &quot;13d3ec1f9dd8aca3f07e886a02e1b4567e37b7add06587bc35d90a3ede591de1&quot;
+      &quot;artifactDigest&quot;: &quot;50a522242d50ea73e2e9d6f842fcbd58aa80ed774071f4ea9c7387040e71bcb8&quot;
     }
   }
 }
@@ -1369,67 +1369,67 @@ function render_card_tpl(assign, definitions, input, context, runtime, rootData,
     context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;layout.tpl&quot;, [0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691], rootData);
-    scope.locals.set(&quot;values&quot;, [0, ...runtime.listSpread(assign.numbers, frame, [14, 24])]);
-    scope.locals.set(&quot;merged&quot;, new Map([...runtime.mapSpread(assign.lookup, frame, [38, 47]), [runtime.stringify(&quot;z&quot;, frame, [49, 52]), &quot;Z&quot;]]));
-    context.at(frame, [62, 76]);
+    const frame = new Frame(&quot;layout.tpl&quot;, [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], rootData);
+    scope.locals.set(&quot;values&quot;, [0, ...runtime.listSpread(assign.numbers, frame, [16, 26])]);
+    scope.locals.set(&quot;merged&quot;, new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify(&quot;z&quot;, frame, [53, 56]), &quot;Z&quot;]]));
+    context.at(frame, [66, 80]);
     context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
-    context.at(frame, [76, 90]);
-    context.output.write(runtime.escape((assign.page)?.title, frame, [79, 89]));
-    context.at(frame, [90, 115]);
+    context.at(frame, [80, 94]);
+    context.output.write(runtime.escape((assign.page)?.title, frame, [83, 93]));
+    context.at(frame, [94, 119]);
     context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
-    context.at(frame, [115, 128]);
-    context.output.write(runtime.escape(assign.dangerous, frame, [118, 127]));
-    context.at(frame, [128, 152]);
+    context.at(frame, [119, 132]);
+    context.output.write(runtime.escape(assign.dangerous, frame, [122, 131]));
+    context.at(frame, [132, 156]);
     context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
-    context.at(frame, [152, 167]);
-    context.output.write(runtime.escape((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(&quot;x&quot;) : false; })(), frame, [155, 166]));
-    context.at(frame, [167, 168]);
+    context.at(frame, [156, 171]);
+    context.output.write(runtime.escape((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(&quot;x&quot;) : false; })(), frame, [159, 170]));
+    context.at(frame, [171, 172]);
     context.output.write(&quot;|&quot;);
-    context.at(frame, [168, 182]);
-    context.output.write(runtime.escape((() =&gt; { const left = false; return runtime.truthy(left) ? true : runtime.truthy(2); })(), frame, [171, 181]));
-    context.at(frame, [182, 215]);
+    context.at(frame, [172, 186]);
+    context.output.write(runtime.escape((() =&gt; { const left = false; return runtime.truthy(left) ? true : runtime.truthy(2); })(), frame, [175, 185]));
+    context.at(frame, [186, 219]);
     context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
-    context.at(frame, [215, 237]);
-    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_list; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [218, 236]));
-    context.at(frame, [237, 238]);
+    context.at(frame, [219, 241]);
+    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_list; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [222, 240]));
+    context.at(frame, [241, 242]);
     context.output.write(&quot;|&quot;);
-    context.at(frame, [238, 259]);
-    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [241, 258]));
-    context.at(frame, [259, 267]);
+    context.at(frame, [242, 263]);
+    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [245, 262]));
+    context.at(frame, [263, 271]);
     context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
-    context.at(frame, [267, 280]);
-    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;), 1), frame, [270, 279]));
-    context.at(frame, [280, 281]);
+    context.at(frame, [271, 284]);
+    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;), 1), frame, [274, 283]));
+    context.at(frame, [284, 285]);
     context.output.write(&quot;|&quot;);
-    context.at(frame, [281, 296]);
-    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;merged&quot;), &quot;z&quot;), frame, [284, 295]));
-    context.at(frame, [296, 301]);
+    context.at(frame, [285, 300]);
+    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;merged&quot;), &quot;z&quot;), frame, [288, 299]));
+    context.at(frame, [300, 305]);
     context.output.write(&quot;&lt;/p&gt;\n&quot;);
-    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(runtime.binary(&quot;==&quot;, (assign.page)?.title, &quot;Guide&quot;, frame, [312, 333])) : false; })())) {
-        context.at(frame, [334, 358]);
+    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(runtime.binary(&quot;==&quot;, (assign.page)?.title, &quot;Guide&quot;, frame, [316, 337])) : false; })())) {
+        context.at(frame, [338, 362]);
         context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);
     }
     else {
-        context.at(frame, [361, 384]);
+        context.at(frame, [365, 388]);
         context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
     }
-    context.at(frame, [387, 391]);
+    context.at(frame, [391, 395]);
     context.output.write(&quot;\n&lt;p&gt;&quot;);
-    context.at(frame, [391, 414]);
-    context.output.write(runtime.escape((runtime.truthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;), frame, [394, 413]));
-    context.at(frame, [414, 415]);
+    context.at(frame, [395, 418]);
+    context.output.write(runtime.escape((runtime.truthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;), frame, [398, 417]));
+    context.at(frame, [418, 419]);
     context.output.write(&quot;|&quot;);
-    context.at(frame, [415, 425]);
-    context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1, frame, [418, 420]), 3, frame, [418, 424]), frame, [418, 424]));
-    context.at(frame, [425, 426]);
+    context.at(frame, [419, 429]);
+    context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1, frame, [422, 424]), 3, frame, [422, 428]), frame, [422, 428]));
+    context.at(frame, [429, 430]);
     context.output.write(&quot;|&quot;);
-    context.at(frame, [426, 454]);
-    context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [429, 453]), frame, [429, 453]));
-    context.at(frame, [454, 464]);
+    context.at(frame, [430, 458]);
+    context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [433, 457]), frame, [433, 457]));
+    context.at(frame, [458, 468]);
     context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
     {
-        const row_entries = runtime.entries(assign.rows, frame, [464, 581]);
+        const row_entries = runtime.entries(assign.rows, frame, [468, 585]);
         const row_size = row_entries.length;
         const row_last_index = row_size - 1;
         const row_had = scope.locals.has(&quot;row&quot;);
@@ -1441,28 +1441,28 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
                 const row_first = row_index === 0;
                 const row_last = row_index === row_last_index;
                 context.iterations += 1;
-                runtime.limit(&#39;iteration&#39;, context.iterations, frame, [464, 581]);
-                context.at(frame, [479, 483]);
+                runtime.limit(&#39;iteration&#39;, context.iterations, frame, [468, 585]);
+                context.at(frame, [483, 487]);
                 context.output.write(&quot;&lt;li&gt;&quot;);
-                context.at(frame, [483, 497]);
-                context.output.write(runtime.escape(row_index, frame, [486, 496]));
-                context.at(frame, [497, 498]);
+                context.at(frame, [487, 501]);
+                context.output.write(runtime.escape(row_index, frame, [490, 500]));
+                context.at(frame, [501, 502]);
                 context.output.write(&quot;/&quot;);
-                context.at(frame, [498, 511]);
-                context.output.write(runtime.escape(row_size, frame, [501, 510]));
-                context.at(frame, [511, 512]);
+                context.at(frame, [502, 515]);
+                context.output.write(runtime.escape(row_size, frame, [505, 514]));
+                context.at(frame, [515, 516]);
                 context.output.write(&quot;:&quot;);
-                context.at(frame, [512, 524]);
-                context.output.write(runtime.escape(scope.lookup(frame, &quot;row&quot;)?.name, frame, [515, 523]));
-                context.at(frame, [524, 525]);
+                context.at(frame, [516, 528]);
+                context.output.write(runtime.escape(scope.lookup(frame, &quot;row&quot;)?.name, frame, [519, 527]));
+                context.at(frame, [528, 529]);
                 context.output.write(&quot;:&quot;);
-                context.at(frame, [525, 539]);
-                context.output.write(runtime.escape(row_first, frame, [528, 538]));
-                context.at(frame, [539, 540]);
+                context.at(frame, [529, 543]);
+                context.output.write(runtime.escape(row_first, frame, [532, 542]));
+                context.at(frame, [543, 544]);
                 context.output.write(&quot;:&quot;);
-                context.at(frame, [540, 553]);
-                context.output.write(runtime.escape(row_last, frame, [543, 552]));
-                context.at(frame, [553, 559]);
+                context.at(frame, [544, 557]);
+                context.output.write(runtime.escape(row_last, frame, [547, 556]));
+                context.at(frame, [557, 563]);
                 context.output.write(&quot;&lt;/li&gt;\n&quot;);
             }
         }
@@ -1473,13 +1473,13 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
                 scope.locals.delete(&quot;row&quot;);
         }
         if (row_size === 0) {
-            context.at(frame, [563, 578]);
+            context.at(frame, [567, 582]);
             context.output.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
         }
     }
-    context.at(frame, [582, 588]);
+    context.at(frame, [586, 592]);
     context.output.write(&quot;&lt;/ul&gt;\n&quot;);
-    context.enter(&quot;partial.tpl&quot;, frame, [588, 603]);
+    context.enter(&quot;partial.tpl&quot;, frame, [592, 607]);
     try {
         render_partial_tpl(assign, definitions, { values: scope.lookup(frame, &quot;values&quot;) }, context, runtime, rootData, scope);
     }
@@ -1487,27 +1487,27 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
         context.leave();
     }
     if (definitions.content !== undefined) {
-        context.at(frame, [616, 630]);
+        context.at(frame, [620, 634]);
         context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
     }
     else {
-        context.at(frame, [633, 647]);
+        context.at(frame, [637, 651]);
         context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
     }
-    context.at(frame, [650, 651]);
+    context.at(frame, [654, 655]);
     context.output.write(&quot;\n&quot;);
     {
         let definition = definitions.content;
         if (definition === undefined)
-            throw runtime.error(frame, [651, 679], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+            throw runtime.error(frame, [655, 683], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
         if (definition?.html !== undefined) {
-            context.at(frame, [651, 679]);
+            context.at(frame, [655, 683]);
             context.output.write(definition.html);
         }
         else {
             const input = Object.assign({}, definition?.data ?? {}, { label: (assign.page)?.title });
             const blockScope = new Scope();
-            context.enter(&quot;card.tpl&quot;, frame, [651, 679]);
+            context.enter(&quot;card.tpl&quot;, frame, [655, 683]);
             try {
                 render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
             }
@@ -1516,7 +1516,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
             }
         }
     }
-    context.at(frame, [680, 691]);
+    context.at(frame, [684, 695]);
     context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
 function render_partial_tpl(assign, definitions, input, context, runtime, rootData, scope) {
@@ -1567,14 +1567,14 @@ go · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;go&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6&quot;,
+  &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;c2272ea71f6b1c5cdc92bc3a3afb46c62636064a6dcdc152e5a16677587315b4&quot;
+      &quot;artifactDigest&quot;: &quot;2b108db876870504ffe24ff56df8daded7b1337a65adf64767425adc257872ef&quot;
     }
   }
 }
@@ -1643,39 +1643,39 @@ scope.Locals[&quot;label&quot;] = generatedValue(input.Label)
     generatedWrite(context, &quot;&lt;/p&gt;\n&quot;, frame, ast.Span{25, 30})
 }
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
-	frame := render.NewFrame(&quot;layout.tpl&quot;, errs.LineIndex{0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691}, rootData)
+	frame := render.NewFrame(&quot;layout.tpl&quot;, errs.LineIndex{0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695}, rootData)
 
-    scope.Locals[&quot;values&quot;] = generatedValue(func() []float64 { result := []float64{}; result = append(result, float64(0)); result = append(result, generatedListSpread[float64](runtime, assign.Numbers, frame, ast.Span{14, 24})...); return result }())
-    scope.Locals[&quot;merged&quot;] = generatedValue(func() OrderedMap[string, string] { result := NewOrderedMap[string, string](); for _, entry := range generatedMapSpread[string, string](runtime, assign.Lookup, frame, ast.Span{38, 47}).Entries() { result.Set(entry.Key, entry.Value) }; result.Set(&quot;z&quot;, &quot;Z&quot;); return result }())
-    generatedWrite(context, &quot;&lt;section&gt;\n&lt;h1&gt;&quot;, frame, ast.Span{62, 76})
-    generatedWrite(context, generatedEscape(runtime, assign.Page.Title, frame, ast.Span{79, 89}), frame, ast.Span{76, 90})
-    generatedWrite(context, &quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;, frame, ast.Span{90, 115})
-    generatedWrite(context, generatedEscape(runtime, assign.Dangerous, frame, ast.Span{118, 127}), frame, ast.Span{115, 128})
-    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;, frame, ast.Span{128, 152})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, &quot;x&quot;) }(), frame, ast.Span{155, 166}), frame, ast.Span{152, 167})
-    generatedWrite(context, &quot;|&quot;, frame, ast.Span{167, 168})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := false; if generatedTruthy(runtime, left) { return true }; return generatedTruthy(runtime, float64(2)) }(), frame, ast.Span{171, 181}), frame, ast.Span{168, 182})
-    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;, frame, ast.Span{182, 215})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_list; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{218, 236}), frame, ast.Span{215, 237})
-    generatedWrite(context, &quot;|&quot;, frame, ast.Span{237, 238})
-    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_map; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{241, 258}), frame, ast.Span{238, 259})
-    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;p&gt;&quot;, frame, ast.Span{259, 267})
-    generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, &quot;values&quot;)), float64(1)), frame, ast.Span{270, 279}), frame, ast.Span{267, 280})
-    generatedWrite(context, &quot;|&quot;, frame, ast.Span{280, 281})
-    generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, generatedResult[OrderedMap[string, string]](scope.Lookup(frame, &quot;merged&quot;)), &quot;z&quot;), frame, ast.Span{284, 295}), frame, ast.Span{281, 296})
-    generatedWrite(context, &quot;&lt;/p&gt;\n&quot;, frame, ast.Span{296, 301})
-	if generatedTruthy(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, generatedBinary[bool](runtime, &quot;==&quot;, assign.Page.Title, &quot;Guide&quot;, frame, ast.Span{312, 333})) }()) {
-        generatedWrite(context, &quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;, frame, ast.Span{334, 358})	} else {
-        generatedWrite(context, &quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;, frame, ast.Span{361, 384})
+    scope.Locals[&quot;values&quot;] = generatedValue(func() []float64 { result := []float64{}; result = append(result, float64(0)); result = append(result, generatedListSpread[float64](runtime, assign.Numbers, frame, ast.Span{16, 26})...); return result }())
+    scope.Locals[&quot;merged&quot;] = generatedValue(func() OrderedMap[string, string] { result := NewOrderedMap[string, string](); for _, entry := range generatedMapSpread[string, string](runtime, assign.Lookup, frame, ast.Span{42, 51}).Entries() { result.Set(entry.Key, entry.Value) }; result.Set(&quot;z&quot;, &quot;Z&quot;); return result }())
+    generatedWrite(context, &quot;&lt;section&gt;\n&lt;h1&gt;&quot;, frame, ast.Span{66, 80})
+    generatedWrite(context, generatedEscape(runtime, assign.Page.Title, frame, ast.Span{83, 93}), frame, ast.Span{80, 94})
+    generatedWrite(context, &quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;, frame, ast.Span{94, 119})
+    generatedWrite(context, generatedEscape(runtime, assign.Dangerous, frame, ast.Span{122, 131}), frame, ast.Span{119, 132})
+    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;, frame, ast.Span{132, 156})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, &quot;x&quot;) }(), frame, ast.Span{159, 170}), frame, ast.Span{156, 171})
+    generatedWrite(context, &quot;|&quot;, frame, ast.Span{171, 172})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := false; if generatedTruthy(runtime, left) { return true }; return generatedTruthy(runtime, float64(2)) }(), frame, ast.Span{175, 185}), frame, ast.Span{172, 186})
+    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;, frame, ast.Span{186, 219})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_list; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{222, 240}), frame, ast.Span{219, 241})
+    generatedWrite(context, &quot;|&quot;, frame, ast.Span{241, 242})
+    generatedWrite(context, generatedEscape(runtime, func() bool { left := assign.Empty_map; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, assign.Flag) }(), frame, ast.Span{245, 262}), frame, ast.Span{242, 263})
+    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;p&gt;&quot;, frame, ast.Span{263, 271})
+    generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, &quot;values&quot;)), float64(1)), frame, ast.Span{274, 283}), frame, ast.Span{271, 284})
+    generatedWrite(context, &quot;|&quot;, frame, ast.Span{284, 285})
+    generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, generatedResult[OrderedMap[string, string]](scope.Lookup(frame, &quot;merged&quot;)), &quot;z&quot;), frame, ast.Span{288, 299}), frame, ast.Span{285, 300})
+    generatedWrite(context, &quot;&lt;/p&gt;\n&quot;, frame, ast.Span{300, 305})
+	if generatedTruthy(runtime, func() bool { left := assign.Flag; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, generatedBinary[bool](runtime, &quot;==&quot;, assign.Page.Title, &quot;Guide&quot;, frame, ast.Span{316, 337})) }()) {
+        generatedWrite(context, &quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;, frame, ast.Span{338, 362})	} else {
+        generatedWrite(context, &quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;, frame, ast.Span{365, 388})
 	}
-    generatedWrite(context, &quot;\n&lt;p&gt;&quot;, frame, ast.Span{387, 391})
-    generatedWrite(context, generatedEscape(runtime, func() string { if generatedTruthy(runtime, assign.Flag) { return &quot;yes&quot; }; return &quot;no&quot; }(), frame, ast.Span{394, 413}), frame, ast.Span{391, 414})
-    generatedWrite(context, &quot;|&quot;, frame, ast.Span{414, 415})
-    generatedWrite(context, generatedEscape(runtime, generatedBinary[float64](runtime, &quot;+&quot;, generatedUnary[float64](runtime, &quot;-&quot;, float64(1), frame, ast.Span{418, 420}), float64(3), frame, ast.Span{418, 424}), frame, ast.Span{418, 424}), frame, ast.Span{415, 425})
-    generatedWrite(context, &quot;|&quot;, frame, ast.Span{425, 426})
-    generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, &quot;default&quot;, []value.Value{generatedValue(&quot;&quot;), generatedValue(&quot;fallback&quot;)}, frame, ast.Span{429, 453}), frame, ast.Span{429, 453}), frame, ast.Span{426, 454})
-    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;, frame, ast.Span{454, 464})
-    { entries := generatedEntries(runtime, assign.Rows, frame, ast.Span{464, 581})
+    generatedWrite(context, &quot;\n&lt;p&gt;&quot;, frame, ast.Span{391, 395})
+    generatedWrite(context, generatedEscape(runtime, func() string { if generatedTruthy(runtime, assign.Flag) { return &quot;yes&quot; }; return &quot;no&quot; }(), frame, ast.Span{398, 417}), frame, ast.Span{395, 418})
+    generatedWrite(context, &quot;|&quot;, frame, ast.Span{418, 419})
+    generatedWrite(context, generatedEscape(runtime, generatedBinary[float64](runtime, &quot;+&quot;, generatedUnary[float64](runtime, &quot;-&quot;, float64(1), frame, ast.Span{422, 424}), float64(3), frame, ast.Span{422, 428}), frame, ast.Span{422, 428}), frame, ast.Span{419, 429})
+    generatedWrite(context, &quot;|&quot;, frame, ast.Span{429, 430})
+    generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, &quot;default&quot;, []value.Value{generatedValue(&quot;&quot;), generatedValue(&quot;fallback&quot;)}, frame, ast.Span{433, 457}), frame, ast.Span{433, 457}), frame, ast.Span{430, 458})
+    generatedWrite(context, &quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;, frame, ast.Span{458, 468})
+    { entries := generatedEntries(runtime, assign.Rows, frame, ast.Span{468, 585})
     entriesSize := len(entries)
     lastIndex := entriesSize - 1
     previous, hadPrevious := scope.Locals[&quot;row&quot;]
@@ -1684,48 +1684,48 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
         scope.Locals[&quot;row&quot;] = row_value
         scope.Loops[&quot;row&quot;] = append(scope.Loops[&quot;row&quot;], &amp;render.LoopMeta{Index: row_index, Key: row_key, Value: row_value, Size: entriesSize, First: row_index == 0, Last: row_index == lastIndex})
         context.Iterations++
-        generatedLimit(runtime, &quot;iteration&quot;, context.Iterations, frame, ast.Span{464, 581})
-            generatedWrite(context, &quot;&lt;li&gt;&quot;, frame, ast.Span{479, 483})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).Index, frame, ast.Span{486, 496}), frame, ast.Span{483, 497})
-            generatedWrite(context, &quot;/&quot;, frame, ast.Span{497, 498})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).Size, frame, ast.Span{501, 510}), frame, ast.Span{498, 511})
-            generatedWrite(context, &quot;:&quot;, frame, ast.Span{511, 512})
-            generatedWrite(context, generatedEscape(runtime, generatedResult[Row](scope.Lookup(frame, &quot;row&quot;)).Name, frame, ast.Span{515, 523}), frame, ast.Span{512, 524})
-            generatedWrite(context, &quot;:&quot;, frame, ast.Span{524, 525})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).First, frame, ast.Span{528, 538}), frame, ast.Span{525, 539})
-            generatedWrite(context, &quot;:&quot;, frame, ast.Span{539, 540})
-            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).Last, frame, ast.Span{543, 552}), frame, ast.Span{540, 553})
-            generatedWrite(context, &quot;&lt;/li&gt;\n&quot;, frame, ast.Span{553, 559})
+        generatedLimit(runtime, &quot;iteration&quot;, context.Iterations, frame, ast.Span{468, 585})
+            generatedWrite(context, &quot;&lt;li&gt;&quot;, frame, ast.Span{483, 487})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).Index, frame, ast.Span{490, 500}), frame, ast.Span{487, 501})
+            generatedWrite(context, &quot;/&quot;, frame, ast.Span{501, 502})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).Size, frame, ast.Span{505, 514}), frame, ast.Span{502, 515})
+            generatedWrite(context, &quot;:&quot;, frame, ast.Span{515, 516})
+            generatedWrite(context, generatedEscape(runtime, generatedResult[Row](scope.Lookup(frame, &quot;row&quot;)).Name, frame, ast.Span{519, 527}), frame, ast.Span{516, 528})
+            generatedWrite(context, &quot;:&quot;, frame, ast.Span{528, 529})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).First, frame, ast.Span{532, 542}), frame, ast.Span{529, 543})
+            generatedWrite(context, &quot;:&quot;, frame, ast.Span{543, 544})
+            generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).Last, frame, ast.Span{547, 556}), frame, ast.Span{544, 557})
+            generatedWrite(context, &quot;&lt;/li&gt;\n&quot;, frame, ast.Span{557, 563})
         scope.Loops[&quot;row&quot;] = scope.Loops[&quot;row&quot;][:len(scope.Loops[&quot;row&quot;])-1]
     }
     if hadPrevious { scope.Locals[&quot;row&quot;] = previous } else { delete(scope.Locals, &quot;row&quot;) }
     if entriesSize == 0 {
-            generatedWrite(context, &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;, frame, ast.Span{563, 578})
+            generatedWrite(context, &quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;, frame, ast.Span{567, 582})
     }
     }
-    generatedWrite(context, &quot;&lt;/ul&gt;\n&quot;, frame, ast.Span{582, 588})
-    generatedEnter(context, &quot;partial.tpl&quot;, frame, ast.Span{588, 603})
+    generatedWrite(context, &quot;&lt;/ul&gt;\n&quot;, frame, ast.Span{586, 592})
+    generatedEnter(context, &quot;partial.tpl&quot;, frame, ast.Span{592, 607})
     func() { defer context.Leave(); render_partial_tpl(assign, definitions, Input_partial_tpl{Values: generatedResult[[]float64](scope.Lookup(frame, &quot;values&quot;))}, context, runtime, rootData, scope) }()
     if definitions.Content != nil {
-            generatedWrite(context, &quot;&lt;p&gt;defined&lt;/p&gt;&quot;, frame, ast.Span{616, 630})
+            generatedWrite(context, &quot;&lt;p&gt;defined&lt;/p&gt;&quot;, frame, ast.Span{620, 634})
     } else {
-            generatedWrite(context, &quot;&lt;p&gt;missing&lt;/p&gt;&quot;, frame, ast.Span{633, 647})
+            generatedWrite(context, &quot;&lt;p&gt;missing&lt;/p&gt;&quot;, frame, ast.Span{637, 651})
     }
-    generatedWrite(context, &quot;\n&quot;, frame, ast.Span{650, 651})
+    generatedWrite(context, &quot;\n&quot;, frame, ast.Span{654, 655})
     { definition := definitions.Content
-    if definition == nil { panic(runtime.Error(frame, ast.Span{651, 679}, errs.RuntimeBlockUndefined, &quot;define content is not registered&quot;)) }
-    if definition != nil &amp;&amp; definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{651, 679}) } else {
+    if definition == nil { panic(runtime.Error(frame, ast.Span{655, 683}, errs.RuntimeBlockUndefined, &quot;define content is not registered&quot;)) }
+    if definition != nil &amp;&amp; definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{655, 683}) } else {
         input := Input_card_tpl{}
         if definition != nil &amp;&amp; definition.Data != nil {
             if definition.Data.Label != nil { input.Label = *definition.Data.Label }
         }
         input.Label = assign.Page.Title
         blockScope := render.NewScope()
-        generatedEnter(context, &quot;card.tpl&quot;, frame, ast.Span{651, 679})
+        generatedEnter(context, &quot;card.tpl&quot;, frame, ast.Span{655, 683})
         func() { defer context.Leave(); render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope) }()
     }
     }
-    generatedWrite(context, &quot;&lt;/section&gt;\n&quot;, frame, ast.Span{680, 691})
+    generatedWrite(context, &quot;&lt;/section&gt;\n&quot;, frame, ast.Span{684, 695})
 }
 func render_partial_tpl(assign Assign, definitions *Definitions, input Input_partial_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame(&quot;partial.tpl&quot;, errs.LineIndex{0, 38}, rootData)
@@ -1763,14 +1763,14 @@ rust · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;rust&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6&quot;,
+  &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.rust&quot;,
-      &quot;artifactDigest&quot;: &quot;7755055d2535d32246625a44cd350ec8b3e9932810ce5f40b10b304be2a5aee5&quot;
+      &quot;artifactDigest&quot;: &quot;34a927c8c554b0eaaa15218651698c5f7e2f7f9288adc0398a5f7bd4fbaa774e&quot;
     }
   }
 }
@@ -1827,39 +1827,39 @@ scope.locals.insert(&quot;label&quot;.to_string(), generated_value(&amp;input.la
     let escaped = runtime.escape(context, &amp;scope.lookup(&amp;frame, &quot;label&quot;), &amp;frame, [19, 24])?; context.write(&amp;escaped, &amp;frame, [16, 25])?;
     context.write(&quot;&lt;/p&gt;\n&quot;, &amp;frame, [25, 30])?;
  Ok(()) }
-fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputLayoutTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;layout.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 27, 62, 72, 96, 133, 187, 264, 301, 388, 459, 464, 479, 559, 563, 578, 582, 588, 604, 651, 680, 691])), context: Rc::clone(root_data) };
+fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputLayoutTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;layout.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695])), context: Rc::clone(root_data) };
 
-    scope.locals.insert(&quot;values&quot;.to_string(), { let mut result = Vec::new(); result.push(Value::Number(0f64)); result.extend(runtime.list_spread(context, &amp;generated_value(&amp;assign.numbers)?, &amp;frame, [14, 24])?); Value::list(result) });
-    scope.locals.insert(&quot;merged&quot;.to_string(), { let mut result = RuntimeOrderedMap::new(); for (key, value) in runtime.map_spread(context, &amp;generated_value(&amp;assign.lookup)?, &amp;frame, [38, 47])?.iter() { result.insert(key.clone(), value.clone()); } result.insert(runtime.stringify(context, &amp;Value::text(&quot;z&quot;), &amp;frame, [49, 52])?, Value::text(&quot;Z&quot;)); Value::map(result) });
-    context.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;, &amp;frame, [62, 76])?;
-    let escaped = runtime.escape(context, &amp;runtime.member(&amp;generated_value(&amp;assign.page)?, &quot;title&quot;), &amp;frame, [79, 89])?; context.write(&amp;escaped, &amp;frame, [76, 90])?;
-    context.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;, &amp;frame, [90, 115])?;
-    let escaped = runtime.escape(context, &amp;generated_value(&amp;assign.dangerous)?, &amp;frame, [118, 127])?; context.write(&amp;escaped, &amp;frame, [115, 128])?;
-    context.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;, &amp;frame, [128, 152])?;
-    let escaped = runtime.escape(context, &amp;{ let left = generated_value(&amp;assign.flag)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;Value::text(&quot;x&quot;)) }) }, &amp;frame, [155, 166])?; context.write(&amp;escaped, &amp;frame, [152, 167])?;
-    context.write(&quot;|&quot;, &amp;frame, [167, 168])?;
-    let escaped = runtime.escape(context, &amp;{ let left = Value::Bool(false); Value::Bool(if runtime.truthy(&amp;left) { true } else { runtime.truthy(&amp;Value::Number(2f64)) }) }, &amp;frame, [171, 181])?; context.write(&amp;escaped, &amp;frame, [168, 182])?;
-    context.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;, &amp;frame, [182, 215])?;
-    let escaped = runtime.escape(context, &amp;{ let left = generated_value(&amp;assign.empty_list)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;generated_value(&amp;assign.flag)?) }) }, &amp;frame, [218, 236])?; context.write(&amp;escaped, &amp;frame, [215, 237])?;
-    context.write(&quot;|&quot;, &amp;frame, [237, 238])?;
-    let escaped = runtime.escape(context, &amp;{ let left = generated_value(&amp;assign.empty_map)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;generated_value(&amp;assign.flag)?) }) }, &amp;frame, [241, 258])?; context.write(&amp;escaped, &amp;frame, [238, 259])?;
-    context.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;, &amp;frame, [259, 267])?;
-    let escaped = runtime.escape(context, &amp;runtime.index(&amp;scope.lookup(&amp;frame, &quot;values&quot;), &amp;Value::Number(1f64)), &amp;frame, [270, 279])?; context.write(&amp;escaped, &amp;frame, [267, 280])?;
-    context.write(&quot;|&quot;, &amp;frame, [280, 281])?;
-    let escaped = runtime.escape(context, &amp;runtime.index(&amp;scope.lookup(&amp;frame, &quot;merged&quot;), &amp;Value::text(&quot;z&quot;)), &amp;frame, [284, 295])?; context.write(&amp;escaped, &amp;frame, [281, 296])?;
-    context.write(&quot;&lt;/p&gt;\n&quot;, &amp;frame, [296, 301])?;
-    if runtime.truthy(&amp;{ let left = generated_value(&amp;assign.flag)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;runtime.binary(context, polyspec_template::ast::BinaryOp::Equal, &amp;runtime.member(&amp;generated_value(&amp;assign.page)?, &quot;title&quot;), &amp;Value::text(&quot;Guide&quot;), &amp;frame, [312, 333])?) }) }) {
-        context.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;, &amp;frame, [334, 358])?;    } else {
-        context.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;, &amp;frame, [361, 384])?;
+    scope.locals.insert(&quot;values&quot;.to_string(), { let mut result = Vec::new(); result.push(Value::Number(0f64)); result.extend(runtime.list_spread(context, &amp;generated_value(&amp;assign.numbers)?, &amp;frame, [16, 26])?); Value::list(result) });
+    scope.locals.insert(&quot;merged&quot;.to_string(), { let mut result = RuntimeOrderedMap::new(); for (key, value) in runtime.map_spread(context, &amp;generated_value(&amp;assign.lookup)?, &amp;frame, [42, 51])?.iter() { result.insert(key.clone(), value.clone()); } result.insert(runtime.stringify(context, &amp;Value::text(&quot;z&quot;), &amp;frame, [53, 56])?, Value::text(&quot;Z&quot;)); Value::map(result) });
+    context.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;, &amp;frame, [66, 80])?;
+    let escaped = runtime.escape(context, &amp;runtime.member(&amp;generated_value(&amp;assign.page)?, &quot;title&quot;), &amp;frame, [83, 93])?; context.write(&amp;escaped, &amp;frame, [80, 94])?;
+    context.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;, &amp;frame, [94, 119])?;
+    let escaped = runtime.escape(context, &amp;generated_value(&amp;assign.dangerous)?, &amp;frame, [122, 131])?; context.write(&amp;escaped, &amp;frame, [119, 132])?;
+    context.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;, &amp;frame, [132, 156])?;
+    let escaped = runtime.escape(context, &amp;{ let left = generated_value(&amp;assign.flag)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;Value::text(&quot;x&quot;)) }) }, &amp;frame, [159, 170])?; context.write(&amp;escaped, &amp;frame, [156, 171])?;
+    context.write(&quot;|&quot;, &amp;frame, [171, 172])?;
+    let escaped = runtime.escape(context, &amp;{ let left = Value::Bool(false); Value::Bool(if runtime.truthy(&amp;left) { true } else { runtime.truthy(&amp;Value::Number(2f64)) }) }, &amp;frame, [175, 185])?; context.write(&amp;escaped, &amp;frame, [172, 186])?;
+    context.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;, &amp;frame, [186, 219])?;
+    let escaped = runtime.escape(context, &amp;{ let left = generated_value(&amp;assign.empty_list)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;generated_value(&amp;assign.flag)?) }) }, &amp;frame, [222, 240])?; context.write(&amp;escaped, &amp;frame, [219, 241])?;
+    context.write(&quot;|&quot;, &amp;frame, [241, 242])?;
+    let escaped = runtime.escape(context, &amp;{ let left = generated_value(&amp;assign.empty_map)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;generated_value(&amp;assign.flag)?) }) }, &amp;frame, [245, 262])?; context.write(&amp;escaped, &amp;frame, [242, 263])?;
+    context.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;, &amp;frame, [263, 271])?;
+    let escaped = runtime.escape(context, &amp;runtime.index(&amp;scope.lookup(&amp;frame, &quot;values&quot;), &amp;Value::Number(1f64)), &amp;frame, [274, 283])?; context.write(&amp;escaped, &amp;frame, [271, 284])?;
+    context.write(&quot;|&quot;, &amp;frame, [284, 285])?;
+    let escaped = runtime.escape(context, &amp;runtime.index(&amp;scope.lookup(&amp;frame, &quot;merged&quot;), &amp;Value::text(&quot;z&quot;)), &amp;frame, [288, 299])?; context.write(&amp;escaped, &amp;frame, [285, 300])?;
+    context.write(&quot;&lt;/p&gt;\n&quot;, &amp;frame, [300, 305])?;
+    if runtime.truthy(&amp;{ let left = generated_value(&amp;assign.flag)?; Value::Bool(if !runtime.truthy(&amp;left) { false } else { runtime.truthy(&amp;runtime.binary(context, polyspec_template::ast::BinaryOp::Equal, &amp;runtime.member(&amp;generated_value(&amp;assign.page)?, &quot;title&quot;), &amp;Value::text(&quot;Guide&quot;), &amp;frame, [316, 337])?) }) }) {
+        context.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;, &amp;frame, [338, 362])?;    } else {
+        context.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;, &amp;frame, [365, 388])?;
     }
-    context.write(&quot;\n&lt;p&gt;&quot;, &amp;frame, [387, 391])?;
-    let escaped = runtime.escape(context, &amp;if runtime.truthy(&amp;generated_value(&amp;assign.flag)?) { Value::text(&quot;yes&quot;) } else { Value::text(&quot;no&quot;) }, &amp;frame, [394, 413])?; context.write(&amp;escaped, &amp;frame, [391, 414])?;
-    context.write(&quot;|&quot;, &amp;frame, [414, 415])?;
-    let escaped = runtime.escape(context, &amp;runtime.binary(context, polyspec_template::ast::BinaryOp::Add, &amp;runtime.unary(context, polyspec_template::ast::UnaryOp::Negate, &amp;Value::Number(1f64), &amp;frame, [418, 420])?, &amp;Value::Number(3f64), &amp;frame, [418, 424])?, &amp;frame, [418, 424])?; context.write(&amp;escaped, &amp;frame, [415, 425])?;
-    context.write(&quot;|&quot;, &amp;frame, [425, 426])?;
-    let escaped = runtime.escape(context, &amp;runtime.call(context, &quot;default&quot;, vec![Value::text(&quot;&quot;), Value::text(&quot;fallback&quot;)], &amp;frame, [429, 453])?, &amp;frame, [429, 453])?; context.write(&amp;escaped, &amp;frame, [426, 454])?;
-    context.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;, &amp;frame, [454, 464])?;
-    { let entries = runtime.entries(context, &amp;generated_value(&amp;assign.rows)?, &amp;frame, [464, 581])?;
+    context.write(&quot;\n&lt;p&gt;&quot;, &amp;frame, [391, 395])?;
+    let escaped = runtime.escape(context, &amp;if runtime.truthy(&amp;generated_value(&amp;assign.flag)?) { Value::text(&quot;yes&quot;) } else { Value::text(&quot;no&quot;) }, &amp;frame, [398, 417])?; context.write(&amp;escaped, &amp;frame, [395, 418])?;
+    context.write(&quot;|&quot;, &amp;frame, [418, 419])?;
+    let escaped = runtime.escape(context, &amp;runtime.binary(context, polyspec_template::ast::BinaryOp::Add, &amp;runtime.unary(context, polyspec_template::ast::UnaryOp::Negate, &amp;Value::Number(1f64), &amp;frame, [422, 424])?, &amp;Value::Number(3f64), &amp;frame, [422, 428])?, &amp;frame, [422, 428])?; context.write(&amp;escaped, &amp;frame, [419, 429])?;
+    context.write(&quot;|&quot;, &amp;frame, [429, 430])?;
+    let escaped = runtime.escape(context, &amp;runtime.call(context, &quot;default&quot;, vec![Value::text(&quot;&quot;), Value::text(&quot;fallback&quot;)], &amp;frame, [433, 457])?, &amp;frame, [433, 457])?; context.write(&amp;escaped, &amp;frame, [430, 458])?;
+    context.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;, &amp;frame, [458, 468])?;
+    { let entries = runtime.entries(context, &amp;generated_value(&amp;assign.rows)?, &amp;frame, [468, 585])?;
     let row_size = entries.len();
     let row_last_index = entries.len().saturating_sub(1);
     let row_previous = scope.locals.get(&quot;row&quot;).cloned();
@@ -1867,40 +1867,40 @@ fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, inp
         scope.locals.insert(&quot;row&quot;.to_string(), row_value.clone());
         scope.loops.entry(&quot;row&quot;.to_string()).or_default().push(polyspec_template::render::context::LoopMeta { index: row_index_raw, key: row_key, value: row_value, first: row_index_raw == 0, last: row_index_raw == row_last_index, size: row_size });
         context.iterations += 1;
-        runtime.limit(context, &quot;iteration&quot;, context.iterations, &amp;frame, [464, 581])?;
-            context.write(&quot;&lt;li&gt;&quot;, &amp;frame, [479, 483])?;
-            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [486, 496], &quot;row&quot;, &quot;index_&quot;)?, &amp;frame, [486, 496])?; context.write(&amp;escaped, &amp;frame, [483, 497])?;
-            context.write(&quot;/&quot;, &amp;frame, [497, 498])?;
-            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [501, 510], &quot;row&quot;, &quot;size_&quot;)?, &amp;frame, [501, 510])?; context.write(&amp;escaped, &amp;frame, [498, 511])?;
-            context.write(&quot;:&quot;, &amp;frame, [511, 512])?;
-            let escaped = runtime.escape(context, &amp;runtime.member(&amp;scope.lookup(&amp;frame, &quot;row&quot;), &quot;name&quot;), &amp;frame, [515, 523])?; context.write(&amp;escaped, &amp;frame, [512, 524])?;
-            context.write(&quot;:&quot;, &amp;frame, [524, 525])?;
-            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [528, 538], &quot;row&quot;, &quot;first_&quot;)?, &amp;frame, [528, 538])?; context.write(&amp;escaped, &amp;frame, [525, 539])?;
-            context.write(&quot;:&quot;, &amp;frame, [539, 540])?;
-            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [543, 552], &quot;row&quot;, &quot;last_&quot;)?, &amp;frame, [543, 552])?; context.write(&amp;escaped, &amp;frame, [540, 553])?;
-            context.write(&quot;&lt;/li&gt;\n&quot;, &amp;frame, [553, 559])?;
+        runtime.limit(context, &quot;iteration&quot;, context.iterations, &amp;frame, [468, 585])?;
+            context.write(&quot;&lt;li&gt;&quot;, &amp;frame, [483, 487])?;
+            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [490, 500], &quot;row&quot;, &quot;index_&quot;)?, &amp;frame, [490, 500])?; context.write(&amp;escaped, &amp;frame, [487, 501])?;
+            context.write(&quot;/&quot;, &amp;frame, [501, 502])?;
+            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [505, 514], &quot;row&quot;, &quot;size_&quot;)?, &amp;frame, [505, 514])?; context.write(&amp;escaped, &amp;frame, [502, 515])?;
+            context.write(&quot;:&quot;, &amp;frame, [515, 516])?;
+            let escaped = runtime.escape(context, &amp;runtime.member(&amp;scope.lookup(&amp;frame, &quot;row&quot;), &quot;name&quot;), &amp;frame, [519, 527])?; context.write(&amp;escaped, &amp;frame, [516, 528])?;
+            context.write(&quot;:&quot;, &amp;frame, [528, 529])?;
+            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [532, 542], &quot;row&quot;, &quot;first_&quot;)?, &amp;frame, [532, 542])?; context.write(&amp;escaped, &amp;frame, [529, 543])?;
+            context.write(&quot;:&quot;, &amp;frame, [543, 544])?;
+            let escaped = runtime.escape(context, &amp;generated_loop_meta(runtime, context, scope, &amp;frame, [547, 556], &quot;row&quot;, &quot;last_&quot;)?, &amp;frame, [547, 556])?; context.write(&amp;escaped, &amp;frame, [544, 557])?;
+            context.write(&quot;&lt;/li&gt;\n&quot;, &amp;frame, [557, 563])?;
         scope.loops.get_mut(&quot;row&quot;).expect(&quot;generated loop stack&quot;).pop();
     }
     if scope.loops.get(&quot;row&quot;).is_some_and(Vec::is_empty) { scope.loops.remove(&quot;row&quot;); }
     if let Some(previous) = row_previous { scope.locals.insert(&quot;row&quot;.to_string(), previous); } else { scope.locals.remove(&quot;row&quot;); }
     if entries.is_empty() {
-            context.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;, &amp;frame, [563, 578])?;
+            context.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;, &amp;frame, [567, 582])?;
     }
     }
-    context.write(&quot;&lt;/ul&gt;\n&quot;, &amp;frame, [582, 588])?;
-    context.enter(&quot;partial.tpl&quot;, Some(&amp;frame), Some([588, 603]))?;
+    context.write(&quot;&lt;/ul&gt;\n&quot;, &amp;frame, [586, 592])?;
+    context.enter(&quot;partial.tpl&quot;, Some(&amp;frame), Some([592, 607]))?;
     let rendered = render_partial_tpl(assign, definitions, InputPartialTpl { values: generated_result::&lt;Vec&lt;f64&gt;&gt;(&amp;scope.lookup(&amp;frame, &quot;values&quot;))? }, context, runtime, root_data, scope);
     context.leave();
     rendered?;
     if definitions.content.is_some() {
-            context.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;, &amp;frame, [616, 630])?;
+            context.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;, &amp;frame, [620, 634])?;
     } else {
-            context.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;, &amp;frame, [633, 647])?;
+            context.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;, &amp;frame, [637, 651])?;
     }
-    context.write(&quot;\n&quot;, &amp;frame, [650, 651])?;
-    { if definitions.content.is_none() { return Err(runtime.error(context, &amp;frame, [651, 679], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, &quot;define content is not registered&quot;)); }
+    context.write(&quot;\n&quot;, &amp;frame, [654, 655])?;
+    { if definitions.content.is_none() { return Err(runtime.error(context, &amp;frame, [655, 683], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, &quot;define content is not registered&quot;)); }
     let definition = definitions.content.clone();
-    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &amp;frame, [651, 679])?; } else {
+    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &amp;frame, [655, 683])?; } else {
         let mut input = InputCardTpl::default();
 
         if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) {
@@ -1908,13 +1908,13 @@ fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, inp
         }
         input.label = generated_result::&lt;String&gt;(&amp;runtime.member(&amp;generated_value(&amp;assign.page)?, &quot;title&quot;))?;
         let mut block_scope = Scope::default();
-        context.enter(&quot;card.tpl&quot;, Some(&amp;frame), Some([651, 679]))?;
+        context.enter(&quot;card.tpl&quot;, Some(&amp;frame), Some([655, 683]))?;
         let rendered = render_card_tpl(assign, definitions, input, context, runtime, root_data, &amp;mut block_scope);
         context.leave();
         rendered?;
     }
     }
-    context.write(&quot;&lt;/section&gt;\n&quot;, &amp;frame, [680, 691])?;
+    context.write(&quot;&lt;/section&gt;\n&quot;, &amp;frame, [684, 695])?;
  Ok(()) }
 fn render_partial_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputPartialTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;partial.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 38])), context: Rc::clone(root_data) };
 scope.locals.insert(&quot;values&quot;.to_string(), generated_value(&amp;input.values)?);
@@ -1944,14 +1944,14 @@ php · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;php&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;0287048ed8149afa40fa4a9f41f0b47da440b142ddc8c9fc30658381609348c6&quot;,
+  &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.php&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.php&quot;,
-      &quot;artifactDigest&quot;: &quot;e8fe25c2c855ccfd2818658b1246eccad497f26a6f8838f79fd771b3bb3c5246&quot;
+      &quot;artifactDigest&quot;: &quot;49fc7d6b9181ca7e910bb8c341de1bc868c3c3f5350ec01d4f8ec13dbab9e0b2&quot;
     }
   }
 }
@@ -2013,39 +2013,39 @@ function render_card_tpl(Assign $assign, Definitions $definitions, Input_card_tp
     $context-&gt;at($frame, [25,30]); $context-&gt;write(&quot;&lt;/p&gt;\n&quot;);
 }
 function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
-    $frame = new Frame(&quot;layout.tpl&quot;, [0,27,62,72,96,133,187,264,301,388,459,464,479,559,563,578,582,588,604,651,680,691], $rootData);
+    $frame = new Frame(&quot;layout.tpl&quot;, [0,29,66,76,100,137,191,268,305,392,463,468,483,563,567,582,586,592,608,655,684,695], $rootData);
 
-    $scope-&gt;locals-&gt;set(&quot;values&quot;, generated_list([[&#39;spread&#39; =&gt; false, &#39;value&#39; =&gt; 0], [&#39;spread&#39; =&gt; true, &#39;value&#39; =&gt; $runtime-&gt;listSpread($assign-&gt;numbers, $frame, [14,24])]]));
-    $scope-&gt;locals-&gt;set(&quot;merged&quot;, generated_map([[&#39;spread&#39; =&gt; true, &#39;value&#39; =&gt; $runtime-&gt;mapSpread($assign-&gt;lookup, $frame, [38,47])], [&#39;spread&#39; =&gt; false, &#39;key&#39; =&gt; &quot;z&quot;, &#39;value&#39; =&gt; &quot;Z&quot;]]));
-    $context-&gt;at($frame, [62,76]); $context-&gt;write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
-    $context-&gt;at($frame, [76,90]); $context-&gt;write($runtime-&gt;escape($assign-&gt;page?-&gt;title, $frame, [79,89]));
-    $context-&gt;at($frame, [90,115]); $context-&gt;write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
-    $context-&gt;at($frame, [115,128]); $context-&gt;write($runtime-&gt;escape($assign-&gt;dangerous, $frame, [118,127]));
-    $context-&gt;at($frame, [128,152]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
-    $context-&gt;at($frame, [152,167]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;flag) &amp;&amp; $runtime-&gt;truthy(&quot;x&quot;)), $frame, [155,166]));
-    $context-&gt;at($frame, [167,168]); $context-&gt;write(&quot;|&quot;);
-    $context-&gt;at($frame, [168,182]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy(false) || $runtime-&gt;truthy(2)), $frame, [171,181]));
-    $context-&gt;at($frame, [182,215]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
-    $context-&gt;at($frame, [215,237]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;empty_list) &amp;&amp; $runtime-&gt;truthy($assign-&gt;flag)), $frame, [218,236]));
-    $context-&gt;at($frame, [237,238]); $context-&gt;write(&quot;|&quot;);
-    $context-&gt;at($frame, [238,259]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;empty_map) &amp;&amp; $runtime-&gt;truthy($assign-&gt;flag)), $frame, [241,258]));
-    $context-&gt;at($frame, [259,267]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
-    $context-&gt;at($frame, [267,280]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;index($scope-&gt;lookup($frame, &quot;values&quot;), 1), $frame, [270,279]));
-    $context-&gt;at($frame, [280,281]); $context-&gt;write(&quot;|&quot;);
-    $context-&gt;at($frame, [281,296]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;index($scope-&gt;lookup($frame, &quot;merged&quot;), &quot;z&quot;), $frame, [284,295]));
-    $context-&gt;at($frame, [296,301]); $context-&gt;write(&quot;&lt;/p&gt;\n&quot;);
-    if ($runtime-&gt;truthy(($runtime-&gt;truthy($assign-&gt;flag) &amp;&amp; $runtime-&gt;truthy($runtime-&gt;binary(&quot;==&quot;, $assign-&gt;page?-&gt;title, &quot;Guide&quot;, $frame, [312,333]))))) {
-        $context-&gt;at($frame, [334,358]); $context-&gt;write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);    } else {
-        $context-&gt;at($frame, [361,384]); $context-&gt;write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
+    $scope-&gt;locals-&gt;set(&quot;values&quot;, generated_list([[&#39;spread&#39; =&gt; false, &#39;value&#39; =&gt; 0], [&#39;spread&#39; =&gt; true, &#39;value&#39; =&gt; $runtime-&gt;listSpread($assign-&gt;numbers, $frame, [16,26])]]));
+    $scope-&gt;locals-&gt;set(&quot;merged&quot;, generated_map([[&#39;spread&#39; =&gt; true, &#39;value&#39; =&gt; $runtime-&gt;mapSpread($assign-&gt;lookup, $frame, [42,51])], [&#39;spread&#39; =&gt; false, &#39;key&#39; =&gt; &quot;z&quot;, &#39;value&#39; =&gt; &quot;Z&quot;]]));
+    $context-&gt;at($frame, [66,80]); $context-&gt;write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
+    $context-&gt;at($frame, [80,94]); $context-&gt;write($runtime-&gt;escape($assign-&gt;page?-&gt;title, $frame, [83,93]));
+    $context-&gt;at($frame, [94,119]); $context-&gt;write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
+    $context-&gt;at($frame, [119,132]); $context-&gt;write($runtime-&gt;escape($assign-&gt;dangerous, $frame, [122,131]));
+    $context-&gt;at($frame, [132,156]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
+    $context-&gt;at($frame, [156,171]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;flag) &amp;&amp; $runtime-&gt;truthy(&quot;x&quot;)), $frame, [159,170]));
+    $context-&gt;at($frame, [171,172]); $context-&gt;write(&quot;|&quot;);
+    $context-&gt;at($frame, [172,186]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy(false) || $runtime-&gt;truthy(2)), $frame, [175,185]));
+    $context-&gt;at($frame, [186,219]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
+    $context-&gt;at($frame, [219,241]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;empty_list) &amp;&amp; $runtime-&gt;truthy($assign-&gt;flag)), $frame, [222,240]));
+    $context-&gt;at($frame, [241,242]); $context-&gt;write(&quot;|&quot;);
+    $context-&gt;at($frame, [242,263]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;empty_map) &amp;&amp; $runtime-&gt;truthy($assign-&gt;flag)), $frame, [245,262]));
+    $context-&gt;at($frame, [263,271]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
+    $context-&gt;at($frame, [271,284]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;index($scope-&gt;lookup($frame, &quot;values&quot;), 1), $frame, [274,283]));
+    $context-&gt;at($frame, [284,285]); $context-&gt;write(&quot;|&quot;);
+    $context-&gt;at($frame, [285,300]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;index($scope-&gt;lookup($frame, &quot;merged&quot;), &quot;z&quot;), $frame, [288,299]));
+    $context-&gt;at($frame, [300,305]); $context-&gt;write(&quot;&lt;/p&gt;\n&quot;);
+    if ($runtime-&gt;truthy(($runtime-&gt;truthy($assign-&gt;flag) &amp;&amp; $runtime-&gt;truthy($runtime-&gt;binary(&quot;==&quot;, $assign-&gt;page?-&gt;title, &quot;Guide&quot;, $frame, [316,337]))))) {
+        $context-&gt;at($frame, [338,362]); $context-&gt;write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);    } else {
+        $context-&gt;at($frame, [365,388]); $context-&gt;write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
     }
-    $context-&gt;at($frame, [387,391]); $context-&gt;write(&quot;\n&lt;p&gt;&quot;);
-    $context-&gt;at($frame, [391,414]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;flag) ? &quot;yes&quot; : &quot;no&quot;), $frame, [394,413]));
-    $context-&gt;at($frame, [414,415]); $context-&gt;write(&quot;|&quot;);
-    $context-&gt;at($frame, [415,425]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;binary(&quot;+&quot;, $runtime-&gt;unary(&quot;-&quot;, 1, $frame, [418,420]), 3, $frame, [418,424]), $frame, [418,424]));
-    $context-&gt;at($frame, [425,426]); $context-&gt;write(&quot;|&quot;);
-    $context-&gt;at($frame, [426,454]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], $frame, [429,453]), $frame, [429,453]));
-    $context-&gt;at($frame, [454,464]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
-    $row_entries = $runtime-&gt;entries($assign-&gt;rows, $frame, [464,581]);
+    $context-&gt;at($frame, [391,395]); $context-&gt;write(&quot;\n&lt;p&gt;&quot;);
+    $context-&gt;at($frame, [395,418]); $context-&gt;write($runtime-&gt;escape(($runtime-&gt;truthy($assign-&gt;flag) ? &quot;yes&quot; : &quot;no&quot;), $frame, [398,417]));
+    $context-&gt;at($frame, [418,419]); $context-&gt;write(&quot;|&quot;);
+    $context-&gt;at($frame, [419,429]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;binary(&quot;+&quot;, $runtime-&gt;unary(&quot;-&quot;, 1, $frame, [422,424]), 3, $frame, [422,428]), $frame, [422,428]));
+    $context-&gt;at($frame, [429,430]); $context-&gt;write(&quot;|&quot;);
+    $context-&gt;at($frame, [430,458]); $context-&gt;write($runtime-&gt;escape($runtime-&gt;call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], $frame, [433,457]), $frame, [433,457]));
+    $context-&gt;at($frame, [458,468]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
+    $row_entries = $runtime-&gt;entries($assign-&gt;rows, $frame, [468,585]);
     $row_size = count($row_entries);
     $row_last_index = $row_size - 1;
     $row_had = $scope-&gt;locals-&gt;has(&quot;row&quot;);
@@ -2056,51 +2056,51 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
         $row_stack[] = [&#39;index_&#39; =&gt; (float) $row_index, &#39;size_&#39; =&gt; (float) $row_size, &#39;first_&#39; =&gt; $row_index === 0, &#39;last_&#39; =&gt; $row_index === $row_last_index, &#39;key_&#39; =&gt; $row_key, &#39;value_&#39; =&gt; $row_value];
         $scope-&gt;loops[&quot;row&quot;] = $row_stack;
         $context-&gt;iterations++;
-        $runtime-&gt;limit(&#39;iteration&#39;, $context-&gt;iterations, $frame, [464,581]);
-            $context-&gt;at($frame, [479,483]); $context-&gt;write(&quot;&lt;li&gt;&quot;);
-            $context-&gt;at($frame, [483,497]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;index_&quot;], $frame, [486,496]));
-            $context-&gt;at($frame, [497,498]); $context-&gt;write(&quot;/&quot;);
-            $context-&gt;at($frame, [498,511]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;size_&quot;], $frame, [501,510]));
-            $context-&gt;at($frame, [511,512]); $context-&gt;write(&quot;:&quot;);
-            $context-&gt;at($frame, [512,524]); $context-&gt;write($runtime-&gt;escape($scope-&gt;lookup($frame, &quot;row&quot;)?-&gt;name, $frame, [515,523]));
-            $context-&gt;at($frame, [524,525]); $context-&gt;write(&quot;:&quot;);
-            $context-&gt;at($frame, [525,539]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;first_&quot;], $frame, [528,538]));
-            $context-&gt;at($frame, [539,540]); $context-&gt;write(&quot;:&quot;);
-            $context-&gt;at($frame, [540,553]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;last_&quot;], $frame, [543,552]));
-            $context-&gt;at($frame, [553,559]); $context-&gt;write(&quot;&lt;/li&gt;\n&quot;);
+        $runtime-&gt;limit(&#39;iteration&#39;, $context-&gt;iterations, $frame, [468,585]);
+            $context-&gt;at($frame, [483,487]); $context-&gt;write(&quot;&lt;li&gt;&quot;);
+            $context-&gt;at($frame, [487,501]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;index_&quot;], $frame, [490,500]));
+            $context-&gt;at($frame, [501,502]); $context-&gt;write(&quot;/&quot;);
+            $context-&gt;at($frame, [502,515]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;size_&quot;], $frame, [505,514]));
+            $context-&gt;at($frame, [515,516]); $context-&gt;write(&quot;:&quot;);
+            $context-&gt;at($frame, [516,528]); $context-&gt;write($runtime-&gt;escape($scope-&gt;lookup($frame, &quot;row&quot;)?-&gt;name, $frame, [519,527]));
+            $context-&gt;at($frame, [528,529]); $context-&gt;write(&quot;:&quot;);
+            $context-&gt;at($frame, [529,543]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;first_&quot;], $frame, [532,542]));
+            $context-&gt;at($frame, [543,544]); $context-&gt;write(&quot;:&quot;);
+            $context-&gt;at($frame, [544,557]); $context-&gt;write($runtime-&gt;escape($scope-&gt;loopMeta(&quot;row&quot;)[&quot;last_&quot;], $frame, [547,556]));
+            $context-&gt;at($frame, [557,563]); $context-&gt;write(&quot;&lt;/li&gt;\n&quot;);
         $row_stack = $scope-&gt;loops[&quot;row&quot;];
         array_pop($row_stack);
         if ($row_stack === []) unset($scope-&gt;loops[&quot;row&quot;]); else $scope-&gt;loops[&quot;row&quot;] = $row_stack;
     }
     if ($row_had) $scope-&gt;locals-&gt;set(&quot;row&quot;, $row_previous); else $scope-&gt;locals-&gt;remove(&quot;row&quot;);
     if ($row_size === 0) {
-            $context-&gt;at($frame, [563,578]); $context-&gt;write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
+            $context-&gt;at($frame, [567,582]); $context-&gt;write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
     }
-    $context-&gt;at($frame, [582,588]); $context-&gt;write(&quot;&lt;/ul&gt;\n&quot;);
-    $context-&gt;enter(&quot;partial.tpl&quot;, $frame, [588,603]);
+    $context-&gt;at($frame, [586,592]); $context-&gt;write(&quot;&lt;/ul&gt;\n&quot;);
+    $context-&gt;enter(&quot;partial.tpl&quot;, $frame, [592,607]);
     try { render_partial_tpl($assign, $definitions, new Input_partial_tpl(values: $scope-&gt;lookup($frame, &quot;values&quot;)), $context, $runtime, $rootData, $scope); } finally { $context-&gt;leave(); }
     if ($definitions-&gt;content !== null) {
-            $context-&gt;at($frame, [616,630]); $context-&gt;write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
+            $context-&gt;at($frame, [620,634]); $context-&gt;write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
     } else {
-            $context-&gt;at($frame, [633,647]); $context-&gt;write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
+            $context-&gt;at($frame, [637,651]); $context-&gt;write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
     }
-    $context-&gt;at($frame, [650,651]); $context-&gt;write(&quot;\n&quot;);
+    $context-&gt;at($frame, [654,655]); $context-&gt;write(&quot;\n&quot;);
     $definition = $definitions-&gt;content;
-    if ($definition === null) throw $runtime-&gt;error($frame, [651,679], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    if ($definition === null) throw $runtime-&gt;error($frame, [655,683], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
     if ($definition?-&gt;html !== null) {
-        $context-&gt;at($frame, [651,679]); $context-&gt;write($definition-&gt;html);
+        $context-&gt;at($frame, [655,683]); $context-&gt;write($definition-&gt;html);
     } else {
-        if ($definition?-&gt;data !== null &amp;&amp; !($definition-&gt;data instanceof DefinitionData_card_tpl)) throw $runtime-&gt;error($frame, [651,679], &#39;E_RUNTIME_TYPE&#39;, &quot;generated definition content data has an invalid type&quot;);
-        $input = new Input_card_tpl(label: ($definition?-&gt;data !== null &amp;&amp; $definition-&gt;data-&gt;has_label ? $definition-&gt;data-&gt;label : throw $runtime-&gt;error($frame, [651,679], &#39;E_RUNTIME_TYPE&#39;, &quot;generated input card.tpl.label is missing&quot;)));
+        if ($definition?-&gt;data !== null &amp;&amp; !($definition-&gt;data instanceof DefinitionData_card_tpl)) throw $runtime-&gt;error($frame, [655,683], &#39;E_RUNTIME_TYPE&#39;, &quot;generated definition content data has an invalid type&quot;);
+        $input = new Input_card_tpl(label: ($definition?-&gt;data !== null &amp;&amp; $definition-&gt;data-&gt;has_label ? $definition-&gt;data-&gt;label : throw $runtime-&gt;error($frame, [655,683], &#39;E_RUNTIME_TYPE&#39;, &quot;generated input card.tpl.label is missing&quot;)));
         if ($definition?-&gt;data !== null) {
             if ($definition-&gt;data-&gt;has_label) $input-&gt;label = $definition-&gt;data-&gt;label;
         }
         $input-&gt;label = $assign-&gt;page?-&gt;title;
         $blockScope = new Scope();
-        $context-&gt;enter(&quot;card.tpl&quot;, $frame, [651,679]);
+        $context-&gt;enter(&quot;card.tpl&quot;, $frame, [655,683]);
         try { render_card_tpl($assign, $definitions, $input, $context, $runtime, $rootData, $blockScope); } finally { $context-&gt;leave(); }
     }
-    $context-&gt;at($frame, [680,691]); $context-&gt;write(&quot;&lt;/section&gt;\n&quot;);
+    $context-&gt;at($frame, [684,695]); $context-&gt;write(&quot;&lt;/section&gt;\n&quot;);
 }
 function render_partial_tpl(Assign $assign, Definitions $definitions, Input_partial_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
     $frame = new Frame(&quot;partial.tpl&quot;, [0,38], $rootData);
@@ -2159,8 +2159,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
-  &quot;compilerDigest&quot;: &quot;e8b0fa74c9fc2e3b40c857cd2505c7c2c5eeb54267911cdc5ad8bdd0537d0f5e&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
+  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2241,7 +2241,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
@@ -2310,7 +2310,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
@@ -2448,7 +2448,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -2546,7 +2546,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
@@ -2626,7 +2626,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
   &quot;files&quot;: {
     &quot;empty-state.php&quot;: {
@@ -2722,8 +2722,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
-  &quot;compilerDigest&quot;: &quot;e8b0fa74c9fc2e3b40c857cd2505c7c2c5eeb54267911cdc5ad8bdd0537d0f5e&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
+  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2804,7 +2804,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
@@ -2871,7 +2871,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
@@ -3007,7 +3007,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -3103,7 +3103,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
@@ -3181,7 +3181,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
   &quot;files&quot;: {
     &quot;html-slot.php&quot;: {
@@ -3289,8 +3289,8 @@ createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
-  &quot;compilerDigest&quot;: &quot;e8b0fa74c9fc2e3b40c857cd2505c7c2c5eeb54267911cdc5ad8bdd0537d0f5e&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
+  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -3422,7 +3422,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
@@ -3510,7 +3510,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
@@ -3671,7 +3671,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -3792,7 +3792,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
@@ -3895,7 +3895,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.php&quot;: {
@@ -4024,7 +4024,7 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
 
 
 --- layout.tpl
-<span class="syntax-template syntax-assignment">{:layout_local = <span class="syntax-string">&#39;visible only in layout&#39;</span>}</span>
+<span class="syntax-template syntax-assignment">{: layout_local = <span class="syntax-string">&#39;visible only in layout&#39;</span>}</span>
 &lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;scope&quot;</span>&gt;
 <span class="syntax-template syntax-block">{# content title:page.title}</span>
 &lt;/<span class="syntax-tag">section</span>&gt;
@@ -4035,10 +4035,10 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;target&quot;: &quot;canonical&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;delimiters&quot;: null,
-  &quot;sourceDigest&quot;: &quot;612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722&quot;,
+  &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
-  &quot;compilerDigest&quot;: &quot;e8b0fa74c9fc2e3b40c857cd2505c7c2c5eeb54267911cdc5ad8bdd0537d0f5e&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
+  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -4056,14 +4056,14 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
     },
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
-      &quot;sourceDigest&quot;: &quot;8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06&quot;,
-      &quot;artifactDigest&quot;: &quot;3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c&quot;,
+      &quot;sourceDigest&quot;: &quot;8b9462afffb5aa9d81c6d17412eb9f828016bc33298cdb15eaa66eaa1d0b9431&quot;,
+      &quot;artifactDigest&quot;: &quot;d2b3dad690424e3615e082aa4459d1d90467f792e114a0d922fd0585f83ea2b8&quot;,
       &quot;lines&quot;: [
         0,
-        42,
-        66,
-        95,
-        106
+        44,
+        68,
+        97,
+        108
       ]
     }
   }
@@ -4210,21 +4210,21 @@ ast/layout.tpl.ast.json · layout.tpl
         &quot;kind&quot;: &quot;string&quot;,
         &quot;value&quot;: &quot;visible only in layout&quot;,
         &quot;span&quot;: [
-          16,
-          40
+          18,
+          42
         ]
       },
       &quot;span&quot;: [
         0,
-        41
+        43
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;,
       &quot;span&quot;: [
-        42,
-        66
+        44,
+        68
       ]
     },
     {
@@ -4240,29 +4240,29 @@ ast/layout.tpl.ast.json · layout.tpl
               &quot;type&quot;: &quot;Var&quot;,
               &quot;name&quot;: &quot;page&quot;,
               &quot;span&quot;: [
-                83,
-                87
+                85,
+                89
               ]
             },
             &quot;key&quot;: &quot;title&quot;,
             &quot;span&quot;: [
-              83,
-              93
+              85,
+              95
             ]
           }
         }
       ],
       &quot;span&quot;: [
-        66,
-        94
+        68,
+        96
       ]
     },
     {
       &quot;type&quot;: &quot;Text&quot;,
       &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
       &quot;span&quot;: [
-        95,
-        106
+        97,
+        108
       ]
     }
   ]
@@ -4273,14 +4273,14 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;ts&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722&quot;,
+  &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
       &quot;path&quot;: &quot;scope-precedence.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;acea3cec0cdc6eb01a98bbe873a5380e08efe2b3874274f762f53fb3e3fc6f2b&quot;
+      &quot;artifactDigest&quot;: &quot;57557d849b63d7a154069c42996ffe572c415a1dd3aa950cbe558cd7eb611cdb&quot;
     }
   }
 }
@@ -4328,16 +4328,16 @@ function render_content_tpl(assign: Assign, definitions: Definitions, input: Inp
     context.at(frame, [159,175]); context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
 }
 function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
-  const frame = new Frame(&quot;layout.tpl&quot;, [0,42,66,95,106], rootData);
+  const frame = new Frame(&quot;layout.tpl&quot;, [0,44,68,97,108], rootData);
 
     scope.locals.set(&quot;layout_local&quot;, &quot;visible only in layout&quot; as unknown as Value);
-    context.at(frame, [42,66]); context.output.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
+    context.at(frame, [44,68]); context.output.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
     { let definition = definitions.content;
-    if (definition === undefined) throw runtime.error(frame, [66,94], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-    if (definition?.html !== undefined) { context.at(frame, [66,94]); context.output.write(definition.html); }
-    else { const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: (assign.page)?.title }) as Input_content_tpl; const blockScope = new Scope(); context.enter(&quot;content.tpl&quot;, frame, [66,94]); try { render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope); } finally { context.leave(); } }
+    if (definition === undefined) throw runtime.error(frame, [68,96], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    if (definition?.html !== undefined) { context.at(frame, [68,96]); context.output.write(definition.html); }
+    else { const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: (assign.page)?.title }) as Input_content_tpl; const blockScope = new Scope(); context.enter(&quot;content.tpl&quot;, frame, [68,96]); try { render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope); } finally { context.leave(); } }
     }
-    context.at(frame, [95,106]); context.output.write(&quot;&lt;/section&gt;\n&quot;);
+    context.at(frame, [97,108]); context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
 function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   switch (target) {
@@ -4361,14 +4361,14 @@ javascript · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;js&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722&quot;,
+  &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
-      &quot;artifactDigest&quot;: &quot;c835a36dbb46a3dff08d96284fc799d2f6b13f0446a3b8683f2682fd28bc1247&quot;
+      &quot;artifactDigest&quot;: &quot;7f5afbec18459a1dc6860ed898836d8408462f81959adf7b3f313fee22c4ab49&quot;
     }
   }
 }
@@ -4467,22 +4467,22 @@ function render_content_tpl(assign, definitions, input, context, runtime, rootDa
     context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;layout.tpl&quot;, [0, 42, 66, 95, 106], rootData);
+    const frame = new Frame(&quot;layout.tpl&quot;, [0, 44, 68, 97, 108], rootData);
     scope.locals.set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
-    context.at(frame, [42, 66]);
+    context.at(frame, [44, 68]);
     context.output.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
     {
         let definition = definitions.content;
         if (definition === undefined)
-            throw runtime.error(frame, [66, 94], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+            throw runtime.error(frame, [68, 96], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
         if (definition?.html !== undefined) {
-            context.at(frame, [66, 94]);
+            context.at(frame, [68, 96]);
             context.output.write(definition.html);
         }
         else {
             const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: (assign.page)?.title });
             const blockScope = new Scope();
-            context.enter(&quot;content.tpl&quot;, frame, [66, 94]);
+            context.enter(&quot;content.tpl&quot;, frame, [68, 96]);
             try {
                 render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
             }
@@ -4491,7 +4491,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
             }
         }
     }
-    context.at(frame, [95, 106]);
+    context.at(frame, [97, 108]);
     context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
 function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
@@ -4532,14 +4532,14 @@ go · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;go&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722&quot;,
+  &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;67a9668a5ad2ea600d697240b07139ea2e5d9f9aba47961485bb7419454eeac0&quot;
+      &quot;artifactDigest&quot;: &quot;001817bc8897d880ef1163c0cd6c7fe37cf6cfeb2666ae2c7fe6cfba2d1860ae&quot;
     }
   }
 }
@@ -4608,13 +4608,13 @@ scope.Locals[&quot;layout_local&quot;] = generatedValue(input.Layout_local)
     generatedWrite(context, &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;, frame, ast.Span{159, 175})
 }
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
-	frame := render.NewFrame(&quot;layout.tpl&quot;, errs.LineIndex{0, 42, 66, 95, 106}, rootData)
+	frame := render.NewFrame(&quot;layout.tpl&quot;, errs.LineIndex{0, 44, 68, 97, 108}, rootData)
 
     scope.Locals[&quot;layout_local&quot;] = generatedValue(&quot;visible only in layout&quot;)
-    generatedWrite(context, &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;, frame, ast.Span{42, 66})
+    generatedWrite(context, &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;, frame, ast.Span{44, 68})
     { definition := definitions.Content
-    if definition == nil { panic(runtime.Error(frame, ast.Span{66, 94}, errs.RuntimeBlockUndefined, &quot;define content is not registered&quot;)) }
-    if definition != nil &amp;&amp; definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{66, 94}) } else {
+    if definition == nil { panic(runtime.Error(frame, ast.Span{68, 96}, errs.RuntimeBlockUndefined, &quot;define content is not registered&quot;)) }
+    if definition != nil &amp;&amp; definition.HTML != nil { generatedWrite(context, *definition.HTML, frame, ast.Span{68, 96}) } else {
         input := Input_content_tpl{Root_label: assign.Root_label, Defined_label: assign.Defined_label}
         if definition != nil &amp;&amp; definition.Data != nil {
             if definition.Data.Title != nil { input.Title = *definition.Data.Title }
@@ -4624,11 +4624,11 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
         }
         input.Title = assign.Page.Title
         blockScope := render.NewScope()
-        generatedEnter(context, &quot;content.tpl&quot;, frame, ast.Span{66, 94})
+        generatedEnter(context, &quot;content.tpl&quot;, frame, ast.Span{68, 96})
         func() { defer context.Leave(); render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope) }()
     }
     }
-    generatedWrite(context, &quot;&lt;/section&gt;\n&quot;, frame, ast.Span{95, 106})
+    generatedWrite(context, &quot;&lt;/section&gt;\n&quot;, frame, ast.Span{97, 108})
 }
 func renderTemplate(target string, assign Assign, definitions *Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) { switch target {
 	case &quot;layout.tpl&quot;: render_layout_tpl(assign, definitions, Input_layout_tpl{}, context, runtime, rootData, scope); return
@@ -4659,14 +4659,14 @@ rust · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;rust&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722&quot;,
+  &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
       &quot;path&quot;: &quot;scope-precedence.rust&quot;,
-      &quot;artifactDigest&quot;: &quot;284b6b2edde0340ae5e27774d5862f71a8ea039d6c59858b64b40a47dd67182a&quot;
+      &quot;artifactDigest&quot;: &quot;87c2a8eac3f9117391b0b10f76cd1080addedd5f93da98b841ebb521c4d04bb2&quot;
     }
   }
 }
@@ -4723,13 +4723,13 @@ scope.locals.insert(&quot;layout_local&quot;.to_string(), generated_value(&amp;i
     let escaped = runtime.escape(context, &amp;runtime.call(context, &quot;default&quot;, vec![scope.lookup(&amp;frame, &quot;layout_local&quot;), Value::text(&quot;missing&quot;)], &amp;frame, [125, 158])?, &amp;frame, [125, 158])?; context.write(&amp;escaped, &amp;frame, [122, 159])?;
     context.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;, &amp;frame, [159, 175])?;
  Ok(()) }
-fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputLayoutTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;layout.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 42, 66, 95, 106])), context: Rc::clone(root_data) };
+fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputLayoutTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;layout.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 44, 68, 97, 108])), context: Rc::clone(root_data) };
 
     scope.locals.insert(&quot;layout_local&quot;.to_string(), Value::text(&quot;visible only in layout&quot;));
-    context.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;, &amp;frame, [42, 66])?;
-    { if definitions.content.is_none() { return Err(runtime.error(context, &amp;frame, [66, 94], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, &quot;define content is not registered&quot;)); }
+    context.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;, &amp;frame, [44, 68])?;
+    { if definitions.content.is_none() { return Err(runtime.error(context, &amp;frame, [68, 96], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, &quot;define content is not registered&quot;)); }
     let definition = definitions.content.clone();
-    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &amp;frame, [66, 94])?; } else {
+    if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &amp;frame, [68, 96])?; } else {
         let mut input = InputContentTpl::default();
         input.root_label = generated_result::&lt;String&gt;(&amp;generated_value(&amp;assign.root_label)?)?;
         input.defined_label = generated_result::&lt;String&gt;(&amp;generated_value(&amp;assign.defined_label)?)?;
@@ -4741,13 +4741,13 @@ fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, inp
         }
         input.title = generated_result::&lt;String&gt;(&amp;runtime.member(&amp;generated_value(&amp;assign.page)?, &quot;title&quot;))?;
         let mut block_scope = Scope::default();
-        context.enter(&quot;content.tpl&quot;, Some(&amp;frame), Some([66, 94]))?;
+        context.enter(&quot;content.tpl&quot;, Some(&amp;frame), Some([68, 96]))?;
         let rendered = render_content_tpl(assign, definitions, input, context, runtime, root_data, &amp;mut block_scope);
         context.leave();
         rendered?;
     }
     }
-    context.write(&quot;&lt;/section&gt;\n&quot;, &amp;frame, [95, 106])?;
+    context.write(&quot;&lt;/section&gt;\n&quot;, &amp;frame, [97, 108])?;
  Ok(()) }
 fn render_template(target: &amp;str, assign: &amp;Assign, definitions: &amp;mut Definitions, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { match target {
         &quot;layout.tpl&quot; =&gt; render_layout_tpl(assign, definitions, InputLayoutTpl::default(), context, runtime, root_data, scope),
@@ -4771,14 +4771,14 @@ php · product generated program
   &quot;mode&quot;: &quot;gen&quot;,
   &quot;target&quot;: &quot;php&quot;,
   &quot;entry&quot;: &quot;layout.tpl&quot;,
-  &quot;sourceDigest&quot;: &quot;612da1c24d0762c1ff19290baf7938c824aa63c2fd6d725b2ca1c1c215c7f722&quot;,
+  &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;737246f786af671e9649542814b4469deaa861928367e95440bef908e66d58ea&quot;,
+  &quot;contractDigest&quot;: &quot;bf86ff98c78233ba2fce9c93613074002777ee9f5a79b1a3da932dcf8efb0d83&quot;,
   &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.php&quot;: {
       &quot;path&quot;: &quot;scope-precedence.php&quot;,
-      &quot;artifactDigest&quot;: &quot;be73d4e5d9990980b89327bf832350087a9bd3f21a855e6a5f844ca41e74aa0d&quot;
+      &quot;artifactDigest&quot;: &quot;ef857983d5b5e2f0121f334a2d2c343d22f6e770ced8996c711a71a70c0107b6&quot;
     }
   }
 }
@@ -4840,17 +4840,17 @@ function render_content_tpl(Assign $assign, Definitions $definitions, Input_cont
     $context-&gt;at($frame, [159,175]); $context-&gt;write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
 }
 function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
-    $frame = new Frame(&quot;layout.tpl&quot;, [0,42,66,95,106], $rootData);
+    $frame = new Frame(&quot;layout.tpl&quot;, [0,44,68,97,108], $rootData);
 
     $scope-&gt;locals-&gt;set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
-    $context-&gt;at($frame, [42,66]); $context-&gt;write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
+    $context-&gt;at($frame, [44,68]); $context-&gt;write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
     $definition = $definitions-&gt;content;
-    if ($definition === null) throw $runtime-&gt;error($frame, [66,94], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+    if ($definition === null) throw $runtime-&gt;error($frame, [68,96], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
     if ($definition?-&gt;html !== null) {
-        $context-&gt;at($frame, [66,94]); $context-&gt;write($definition-&gt;html);
+        $context-&gt;at($frame, [68,96]); $context-&gt;write($definition-&gt;html);
     } else {
-        if ($definition?-&gt;data !== null &amp;&amp; !($definition-&gt;data instanceof DefinitionData_content_tpl)) throw $runtime-&gt;error($frame, [66,94], &#39;E_RUNTIME_TYPE&#39;, &quot;generated definition content data has an invalid type&quot;);
-        $input = new Input_content_tpl(title: ($definition?-&gt;data !== null &amp;&amp; $definition-&gt;data-&gt;has_title ? $definition-&gt;data-&gt;title : throw $runtime-&gt;error($frame, [66,94], &#39;E_RUNTIME_TYPE&#39;, &quot;generated input content.tpl.title is missing&quot;)), root_label: $assign-&gt;root_label, defined_label: $assign-&gt;defined_label, layout_local: null);
+        if ($definition?-&gt;data !== null &amp;&amp; !($definition-&gt;data instanceof DefinitionData_content_tpl)) throw $runtime-&gt;error($frame, [68,96], &#39;E_RUNTIME_TYPE&#39;, &quot;generated definition content data has an invalid type&quot;);
+        $input = new Input_content_tpl(title: ($definition?-&gt;data !== null &amp;&amp; $definition-&gt;data-&gt;has_title ? $definition-&gt;data-&gt;title : throw $runtime-&gt;error($frame, [68,96], &#39;E_RUNTIME_TYPE&#39;, &quot;generated input content.tpl.title is missing&quot;)), root_label: $assign-&gt;root_label, defined_label: $assign-&gt;defined_label, layout_local: null);
         if ($definition?-&gt;data !== null) {
             if ($definition-&gt;data-&gt;has_title) $input-&gt;title = $definition-&gt;data-&gt;title;
             if ($definition-&gt;data-&gt;has_root_label) $input-&gt;root_label = $definition-&gt;data-&gt;root_label;
@@ -4859,10 +4859,10 @@ function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layou
         }
         $input-&gt;title = $assign-&gt;page?-&gt;title;
         $blockScope = new Scope();
-        $context-&gt;enter(&quot;content.tpl&quot;, $frame, [66,94]);
+        $context-&gt;enter(&quot;content.tpl&quot;, $frame, [68,96]);
         try { render_content_tpl($assign, $definitions, $input, $context, $runtime, $rootData, $blockScope); } finally { $context-&gt;leave(); }
     }
-    $context-&gt;at($frame, [95,106]); $context-&gt;write(&quot;&lt;/section&gt;\n&quot;);
+    $context-&gt;at($frame, [97,108]); $context-&gt;write(&quot;&lt;/section&gt;\n&quot;);
 }
 function render_template(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void { switch ($target) {
         case &quot;layout.tpl&quot;: render_layout_tpl($assign, $definitions, new Input_layout_tpl(), $context, $runtime, $rootData, $scope); return;
