@@ -24,7 +24,7 @@ export interface Input_card_tpl { label: string; }
 export interface Input_layout_tpl {  }
 export interface Input_partial_tpl { values: Array<number>; }
 export type DefinitionData<T> = Partial<T>;
-export interface Definition<T> { html?: string; data?: DefinitionData<T>; }
+export interface Definition<T> { template?: string; html?: string; data?: DefinitionData<T>; }
 export interface Definitions { content?: Definition<Input_card_tpl>; layout?: Definition<Input_layout_tpl>; }
 export interface ArtifactManifest { schema: number; mode: 'gen'; target: 'ts'; entry: string; sourceDigest: string; typeDigest: string; contractDigest: string; files: Record<string, string>; }
 type GeneratedType = { kind: string; optional?: boolean; item?: GeneratedType; key?: GeneratedType; value?: GeneratedType; name?: string };
@@ -36,7 +36,7 @@ function generatedBindType(value: unknown, type: GeneratedType, path: string): u
 function generatedBindRecord(value: unknown, fields: Record<string, GeneratedType>, path: string, partial = false): Record<string, unknown> { const object = generatedObject(value, path); const result: Record<string, unknown> = {}; for (const [name, type] of Object.entries(fields)) { if (!object.has(name)) { if (!partial && !type.optional) throw new Error(path + '.' + name + ' is required'); if (!partial) result[name] = null; continue; } result[name] = generatedBindType(object.get(name), type, path + '.' + name); } return result; }
 function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign as Record<string, GeneratedType>, 'assign') as unknown as Assign, root }; }
 type GeneratedBoundDefinitions = { definitions: Definitions; targets: Map<string, { target: string | null; html?: string }> };
-function generatedBindDefinitions(input: RenderOptions['define']): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, 'define'); const definitions: Record<string, unknown> = {}; const targets = new Map<string, { target: string | null; html?: string }>(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record<string, { field: string; target: string | null; html: boolean; input: Record<string, GeneratedType> }>)[id]; if (spec === undefined) throw new Error('define.' + id + ' is not declared'); if (typeof raw === 'string') { if (spec.target === null || raw !== spec.target) throw new Error('define.' + id + ' has an invalid template'); definitions[spec.field] = {}; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, 'define.' + id); const template = entry.get('template'); const html = entry.get('html'); const data = entry.get('data'); if (typeof html === 'string') { if (!spec.html || template !== undefined || data !== undefined) throw new Error('define.' + id + ' has an invalid html entry'); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== 'string' || spec.target === null || template !== spec.target) throw new Error('define.' + id + ' has an invalid template'); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, 'define.' + id + '.data', true); definitions[spec.field] = { data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
+function generatedBindDefinitions(input: RenderOptions['define']): GeneratedBoundDefinitions { const value = bind(input ?? {}); const object = generatedObject(value, 'define'); const definitions: Record<string, unknown> = {}; const targets = new Map<string, { target: string | null; html?: string }>(); for (const [id, raw] of object) { const spec = (generatedDefinitionSpecs as Record<string, { field: string; target: string | null; html: boolean; input: Record<string, GeneratedType> }>)[id]; if (spec === undefined) throw new Error('define.' + id + ' is not declared'); if (typeof raw === 'string') { if (spec.target === null || raw !== spec.target) throw new Error('define.' + id + ' has an invalid template'); definitions[spec.field] = { template: spec.target }; targets.set(id, { target: spec.target }); continue; } const entry = generatedObject(raw, 'define.' + id); const template = entry.get('template'); const html = entry.get('html'); const data = entry.get('data'); if (typeof html === 'string') { if (!spec.html || template !== undefined || data !== undefined) throw new Error('define.' + id + ' has an invalid html entry'); definitions[spec.field] = { html }; targets.set(id, { target: null, html }); continue; } if (typeof template !== 'string' || spec.target === null || template !== spec.target) throw new Error('define.' + id + ' has an invalid template'); const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, 'define.' + id + '.data', true); definitions[spec.field] = { template: spec.target, data: boundData }; targets.set(id, { target: spec.target }); } return { definitions: definitions as Definitions, targets }; }
 function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_card_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
   const frame = new Frame("card.tpl", [0,30], rootData);
   const label = input.label;
@@ -47,8 +47,8 @@ function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_
 function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue): void {
   const frame = new Frame("layout.tpl", [0,27,62,72,96,133,187,264,301,388,459,464,479,559,563,578,582,588,604,651,680,691], rootData);
 
-    const values = [0, ...assign.numbers];
-    const merged = new Map([...assign.lookup, ["z", "Z"]]);
+    const values = [0, ...(runtime.listSpread(assign.numbers as unknown as Value, frame, [17,24]) as unknown as Array<number>)];
+    const merged = new Map([...(runtime.mapSpread(assign.lookup as unknown as Value, frame, [41,47]) as unknown as Map<string, string>), [runtime.stringify("z" as unknown as Value, frame, [49,52]), "Z"]]);
     context.at(frame, [62,76]); context.output.write("<section>\n<h1>");
     context.at(frame, [76,90]); context.output.write(runtime.escape(assign.page?.title as unknown as Value, frame, [79,89]));
     context.at(frame, [90,115]); context.output.write("</h1>\n<p class=\"escaped\">");
@@ -111,7 +111,7 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
             context.at(frame, [633,647]); context.output.write("<p>missing</p>");
     }
     context.at(frame, [650,651]); context.output.write("\n");
-    { const definition = definitions.content;
+    { let definition = definitions.content;
     if (definition === undefined) throw runtime.error(frame, [651,679], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
     if (definition?.html !== undefined) { context.at(frame, [651,679]); context.output.write(definition.html); }
     else { const input = Object.assign({  }, definition?.data ?? {}, { label: assign.page?.title }) as Input_card_tpl; context.enter("card.tpl", frame, [651,679]); try { render_card_tpl(assign, definitions, input, context, runtime, rootData); } finally { context.leave(); } }

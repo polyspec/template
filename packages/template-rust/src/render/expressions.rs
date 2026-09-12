@@ -110,10 +110,8 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                 let mut list = Vec::new();
                 for item in items {
                     if let Expr::Spread { expr, span } = item {
-                        match self.evaluate(expr, frame, scope)? {
-                            Value::List(values) => list.extend(values.iter().cloned()),
-                            _ => return Err(self.fail(frame, *span, ErrorCode::E_RUNTIME_TYPE, "spread in a list requires a list")),
-                        }
+                        let value = self.evaluate(expr, frame, scope)?;
+                        list.extend(self.runtime.list_spread(self.context, &value, frame, *span)?);
                     } else {
                         list.push(self.evaluate(item, frame, scope)?);
                     }
@@ -130,13 +128,9 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                                 Expr::Spread { expr, .. } => expr,
                                 other => other,
                             };
-                            match self.evaluate(inner, frame, scope)? {
-                                Value::Map(values) => {
-                                    for (key, value) in values.iter() {
-                                        map.insert(key.clone(), value.clone());
-                                    }
-                                }
-                                _ => return Err(self.fail(frame, span, ErrorCode::E_RUNTIME_TYPE, "spread in a map requires a map")),
+                            let value = self.evaluate(inner, frame, scope)?;
+                            for (key, value) in self.runtime.map_spread(self.context, &value, frame, span)?.iter() {
+                                map.insert(key.clone(), value.clone());
                             }
                         }
                         MapEntry::Entry { key, value } => {

@@ -20,6 +20,8 @@ One source graph and one explicit type manifest are lowered to one typed program
 
 The compile request carries the initial delimiter pair. The canonical artifact manifest records that value, and the source digest binds it together with every template byte. Changing only the delimiter pair therefore invalidates the AST and every generated artifact derived from it.
 
+The source compiler starts from `.tpl` files and follows every static include and block path. A referenced template may use any filename extension; once discovered, its bytes, AST and line index become part of the same source graph. Dynamic conformance manifests derive the free inputs of included templates and propagate them through nested include edges so caller locals are bound explicitly.
+
 The canonical artifact manifest stores every template's source-line start byte offsets with its digest entry. Generated programs combine this line index with preserved node and expression spans to report the original line and column without reading template source at runtime.
 
 Each backend is a separate `LanguageBackend` implementation. A backend emits declarations and direct template control flow through a structured code writer. It does not contain scenario names, fixed request data, expected output or an interpreter for serialized AST nodes.

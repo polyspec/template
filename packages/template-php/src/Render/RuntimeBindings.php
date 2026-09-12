@@ -224,6 +224,26 @@ final class RuntimeBindings
         throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'loop requires a list, a map or null');
     }
 
+    /** @param array{0: int, 1: int} $span */
+    public function listSpread(mixed $value, Frame $frame, array $span): array
+    {
+        if (!is_array($value)) {
+            throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'spread in a list requires a list');
+        }
+
+        return $value;
+    }
+
+    /** @param array{0: int, 1: int} $span */
+    public function mapSpread(mixed $value, Frame $frame, array $span): MapValue
+    {
+        if (!$value instanceof MapValue) {
+            throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'spread in a map requires a map');
+        }
+
+        return $value;
+    }
+
     /**
      * @param list<mixed> $args
      * @param array{0: int, 1: int} $span

@@ -35,6 +35,12 @@ for (const testCase of listCases()) {
     assert.equal(typeof definition.optional, 'boolean');
     assert.ok(typeof definition.template === 'string' || definition.html === true);
   }
+  if (testCase.id === 'include/shares-locals') {
+    assert.equal(manifest.templates['part.tpl'].x, 'any');
+  }
+  if (testCase.id === 'include/include-in-loop') {
+    assert.equal(manifest.templates['li.tpl'].item, 'any');
+  }
   checked++;
 }
 assert.equal(checked, 189);

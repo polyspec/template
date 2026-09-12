@@ -141,6 +141,8 @@
         "member",
         "index",
         "entries",
+        "listSpread",
+        "mapSpread",
         "call",
         "limit",
         "error"
@@ -437,6 +439,24 @@
             "span"
           ],
           "returns": "entries or error"
+        },
+        {
+          "name": "listSpread",
+          "parameters": [
+            "value",
+            "frame",
+            "span"
+          ],
+          "returns": "list or error"
+        },
+        {
+          "name": "mapSpread",
+          "parameters": [
+            "value",
+            "frame",
+            "span"
+          ],
+          "returns": "map or error"
         },
         {
           "name": "call",
@@ -787,10 +807,16 @@
         "finite",
         "compare",
         "entries",
+        "listSpread",
+        "mapSpread",
         "call",
         "limit",
         "error"
       ],
+      "runtimeBindingOperationNames": {
+        "listSpread": "list_spread",
+        "mapSpread": "map_spread"
+      },
       "runtimeServices": "RuntimeServices",
       "runtimeServiceOperationNames": {
         "limits": "limits",

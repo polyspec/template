@@ -104,10 +104,7 @@ final class Evaluator
                 $list = [];
                 foreach ($expr['items'] as $item) {
                     if ($item['type'] === 'Spread') {
-                        $spread = $this->evaluate($item['expr'], $frame);
-                        if (!is_array($spread)) {
-                            throw $this->fail($frame, $item['span'], 'E_RUNTIME_TYPE', 'spread in a list requires a list');
-                        }
+                        $spread = $this->runtime->listSpread($this->evaluate($item['expr'], $frame), $frame, $item['span']);
                         foreach ($spread as $element) {
                             $list[] = $element;
                         }
@@ -121,10 +118,7 @@ final class Evaluator
                 $map = new MapValue();
                 foreach ($expr['entries'] as $entry) {
                     if (isset($entry['type'])) {
-                        $spread = $this->evaluate($entry['expr'], $frame);
-                        if (!$spread instanceof MapValue) {
-                            throw $this->fail($frame, $entry['span'], 'E_RUNTIME_TYPE', 'spread in a map requires a map');
-                        }
+                        $spread = $this->runtime->mapSpread($this->evaluate($entry['expr'], $frame), $frame, $entry['span']);
                         foreach ($spread->entries() as $key => $value) {
                             $map->set($key, $value);
                         }

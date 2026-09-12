@@ -20,6 +20,8 @@ compiler와 runtime의 단일 계약 원본은 [`tools/compiler/interface.json`]
 
 Compile request는 최초 delimiter 쌍을 전달한다. Canonical artifact manifest는 이 값을 기록하고 source digest는 모든 template byte와 함께 delimiter를 결합한다. 따라서 delimiter만 바뀌어도 AST와 여기서 파생한 모든 generated artifact가 무효화된다.
 
+Source compiler는 `.tpl` 파일에서 시작해 모든 정적 include와 block 경로를 따라간다. 참조된 template은 어떤 확장자도 사용할 수 있으며, 발견된 파일의 byte·AST·line index는 같은 source graph에 포함된다. 동적 conformance manifest는 include 대상의 자유 입력을 도출하고 중첩 include 경로로 전파해 호출자 local을 명시적으로 결합한다.
+
 Canonical artifact manifest는 각 template의 digest 항목과 함께 source 각 줄의 시작 byte offset을 기록한다. Generated program은 이 line index와 보존된 node·expression span을 조합해 runtime에 template source를 읽지 않고 원본 line과 column을 보고한다.
 
 각 backend는 별도 `LanguageBackend` 구현이다. Backend는 구조화한 code writer를 통해 선언부와 직접적인 template 제어 흐름을 생성한다. Scenario 이름, 고정 request data, 예상 output 또는 직렬화한 AST node interpreter를 포함하지 않는다.

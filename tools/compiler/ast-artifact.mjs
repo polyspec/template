@@ -1,6 +1,6 @@
 // Builds and verifies one canonical AST artifact graph.
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
@@ -24,6 +24,25 @@ function sourceNames(root, directory = root) {
     if (entry.isDirectory()) names.push(...sourceNames(root, path));
     else if (entry.isFile() && entry.name.endsWith('.tpl')) names.push(relative(root, path).split('\\').join('/'));
   }
+  return names;
+}
+
+function referencedTemplates(ast, from) {
+  const names = [];
+  const visit = nodes => {
+    for (const node of nodes) {
+      const path = node.type === 'Include' ? node.path : node.type === 'Block' ? node.path : null;
+      if (path !== null) {
+        const name = posix.normalize(path.startsWith('/') ? path.slice(1) : posix.join(posix.dirname(from), path));
+        if (name !== '..' && !name.startsWith('../')) names.push(name);
+      }
+      if (Array.isArray(node.body)) visit(node.body);
+      if (Array.isArray(node.else)) visit(node.else);
+      if (Array.isArray(node.empty)) visit(node.empty);
+      if (Array.isArray(node.branches)) for (const branch of node.branches) visit(branch.body);
+    }
+  };
+  visit(ast.body);
   return names;
 }
 
@@ -53,11 +72,24 @@ export function compileAst({ root, output, entry, refresh = 'true', typeManifest
   const contractDigest = hash(readFileSync(contractPath));
   const compilerDigest = astCompilerDigest();
   if (refresh !== 'dev' && refresh !== 'true') throw new Error(`${refresh} is not an artifact refresh policy`);
+  if (delimiters !== null && typeof delimiters !== 'string') throw new Error('AST artifact delimiters must be a string or null');
   const names = sourceNames(root);
   if (names.length === 0) throw new Error(`source graph has no .tpl files: ${root}`);
   if (!names.includes(entry)) throw new Error(`source graph entry is missing: ${entry}`);
   const sources = Object.fromEntries(names.map(name => [name, readFileSync(join(root, name))]));
-  if (delimiters !== null && typeof delimiters !== 'string') throw new Error('AST artifact delimiters must be a string or null');
+  const asts = {};
+  for (let index = 0; index < names.length; index++) {
+    const name = names[index];
+    const ast = parse(sources[name], name, delimiters === null ? {} : { delimiters });
+    asts[name] = ast;
+    for (const dependency of referencedTemplates(ast, name)) {
+      const path = join(root, dependency);
+      if (sources[dependency] !== undefined || !existsSync(path) || !statSync(path).isFile()) continue;
+      names.push(dependency);
+      sources[dependency] = readFileSync(path);
+    }
+  }
+  names.sort((left, right) => left.localeCompare(right));
   const sourceDigest = hash(Buffer.concat([
     Buffer.from(`delimiters\0${delimiters ?? ''}\0`),
     ...names.flatMap(name => [Buffer.from(name + '\0'), sources[name], Buffer.from('\0')]),
@@ -77,7 +109,7 @@ export function compileAst({ root, output, entry, refresh = 'true', typeManifest
   try {
     const files = {};
     for (const name of names) {
-      const ast = json(parse(sources[name], name, delimiters === null ? {} : { delimiters }));
+      const ast = json(asts[name]);
       const path = `${name}.ast.json`;
       mkdirSync(dirname(join(temporary, path)), { recursive: true });
       writeFileSync(join(temporary, path), ast);
