@@ -14,9 +14,9 @@ export interface Assign {
   defined_label?: string;
   page?: Page;
 }
-interface Input_content_tpl {  }
-interface Input_layout_tpl {  }
-interface Definition<T> { html?: string; data?: Partial<T>; }
+export interface Input_content_tpl {  }
+export interface Input_layout_tpl {  }
+export interface Definition<T> { html?: string; data?: Partial<T>; }
 export interface Definitions { content?: Definition<Input_content_tpl>; layout?: Definition<Input_layout_tpl>; }
 function render_content_tpl(assign: Assign, definitions: Definitions, input: Input_content_tpl): string { let out = '';
 

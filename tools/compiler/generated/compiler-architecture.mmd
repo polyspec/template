@@ -1,0 +1,9 @@
+flowchart LR
+  SourceGraph["SourceGraph<br/>entry + templates"] --> Lower["Compiler.lowerSourceGraph"]
+  TypeManifest["TypeManifest<br/>entry + fields + records + functions + defines + templates"] --> Lower
+  Lower --> TypedProgram["TypedProgram<br/>entry + fields + records + functions + definitions + templates"]
+  TypedProgram --> Emit["LanguageBackend.emit"]
+  Emit --> GeneratedModule["GeneratedModule<br/>Assign + Definition<T> + Definitions + Input<T>"]
+  GeneratedModule --> Render["render(Assign, Definitions)"]
+  Render --> Block["generated block function"]
+  Block --> Child["generated child template function"]

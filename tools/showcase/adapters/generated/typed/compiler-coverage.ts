@@ -16,10 +16,10 @@ export interface Assign {
   lookup: Map<string, string>;
   rows: Array<Row>;
 }
-interface Input_card_tpl { label: string; }
-interface Input_layout_tpl {  }
-interface Input_partial_tpl { values: Array<number>; }
-interface Definition<T> { html?: string; data?: Partial<T>; }
+export interface Input_card_tpl { label: string; }
+export interface Input_layout_tpl {  }
+export interface Input_partial_tpl { values: Array<number>; }
+export interface Definition<T> { html?: string; data?: Partial<T>; }
 export interface Definitions { content?: Definition<Input_card_tpl>; layout?: Definition<Input_layout_tpl>; }
 function render_card_tpl(assign: Assign, definitions: Definitions, input: Input_card_tpl): string { let out = '';
   const label = input.label;
