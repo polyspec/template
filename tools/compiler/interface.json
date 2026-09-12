@@ -35,6 +35,18 @@
     "Engine": {"owns": ["program"], "operations": ["prepare", "render"]},
     "PageCache": {"owns": ["html", "ttl"], "operations": ["get", "put", "getOrSet"]}
   },
+  "runtimeContract": {
+    "Program": {
+      "kind": "interface",
+      "operations": [
+        {"name": "prepare", "parameters": ["target", "assign", "options"], "returns": "PreparedRender or error"},
+        {"name": "render", "parameters": ["target", "assign", "options"], "returns": "UTF-8 string or error"}
+      ]
+    },
+    "Engine": {"kind": "concrete", "owns": ["program"], "implements": "Program", "operations": ["prepare", "render"]},
+    "AstProgram": {"kind": "concrete", "implements": "Program"},
+    "GeneratedProgram": {"kind": "generated-concrete", "implements": "Program"}
+  },
   "operations": [
     {"name": "loadSourceGraph", "owner": "Compiler", "parameters": ["source manifest"], "returns": "SourceGraph"},
     {"name": "parseSourceGraph", "owner": "Compiler", "parameters": ["SourceGraph"], "returns": "canonical AST graph"},
