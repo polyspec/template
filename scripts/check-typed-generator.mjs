@@ -158,8 +158,16 @@ fn generated_${index}_matches() {
 
 function checkPhp() {
   const autoload = join(root, 'packages/template-php/vendor/autoload.php');
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'php'), 'utf8');
+  assert.match(coverageSource, /new RuntimeBindings\(\$context\)/);
+  assert.match(coverageSource, /\$runtime->binary\(/);
+  assert.match(coverageSource, /\$runtime->call\(/);
+  for (const duplicate of ['generated_truthy', 'generated_default', 'generated_in', 'generated_escape', 'generated_index', 'generated_entries']) {
+    assert.equal(coverageSource.includes(duplicate), false, `PHP generated source duplicates runtime semantics: ${duplicate}`);
+  }
   for (const id of scenarios) {
-    const probe = `require ${JSON.stringify(autoload)}; require ${JSON.stringify(generatedSource(id, 'php'))}; $assign = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'data.json'))})); $defineValue = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'define.json'))})); $define = []; foreach ($defineValue->entries() as $name => $entry) $define[$name] = $entry; $options = ['define' => $define]; ${fixtureExists(id, 'env.json') ? `$options['env'] = json_decode(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}), true, flags: JSON_THROW_ON_ERROR);` : ''} $actual = (new GeneratedProgram())->render(${JSON.stringify(target(id))}, $assign, $options); if ($actual !== ${JSON.stringify(expected(id))}) throw new RuntimeException(${JSON.stringify(`${id}: PHP GeneratedProgram output differs`)});`;
+    const limit = id === scenarios[0] ? ` $limited = new GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment(['outputBytes' => 1])); $failed = false; try { $limited->render(${JSON.stringify(target(id))}, $assign, $options); } catch (Polyspec\\Template\\TemplateError $error) { $failed = $error->errorCode === 'E_RUNTIME_LIMIT' && $error->errorLine > 0 && $error->errorCol > 0; } if (!$failed) throw new RuntimeException('PHP generated output limit did not preserve a positioned template error');` : '';
+    const probe = `require ${JSON.stringify(autoload)}; require ${JSON.stringify(generatedSource(id, 'php'))}; $assign = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'data.json'))})); $defineValue = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'define.json'))})); $define = []; foreach ($defineValue->entries() as $name => $entry) $define[$name] = $entry; $options = ['define' => $define]; ${fixtureExists(id, 'env.json') ? `$options['env'] = json_decode(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}), true, flags: JSON_THROW_ON_ERROR);` : ''} $actual = (new GeneratedProgram())->render(${JSON.stringify(target(id))}, $assign, $options); if ($actual !== ${JSON.stringify(expected(id))}) throw new RuntimeException(${JSON.stringify(`${id}: PHP GeneratedProgram output differs`)});${limit}`;
     run('php', ['-l', join(generated, `${id}.php`)]);
     run('php', ['-r', probe]);
   }

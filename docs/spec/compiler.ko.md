@@ -36,6 +36,8 @@ Generated expression은 unary와 eager binary 연산, truthiness, 문자열 변�
 
 TypeScript backend는 bind한 root, source line index가 있는 frame, render context, runtime bindings를 직접 template 함수에 전달한다. 이 함수들은 context output builder에 기록하므로 generated 실행도 AST 실행과 같은 UTF-8 output 제한과 위치 오류를 사용한다. Include와 block은 공통 render chain에 enter·leave하면서 generated template 함수를 직접 호출한다.
 
+PHP backend도 같은 실행 경계를 따른다. 생성된 template 함수는 `Context`, `Frame`, `RuntimeBindings`와 bind한 root map을 받고 context output limiter를 통해 출력하며 값 연산과 함수 호출을 package runtime에 위임한다. Typed map은 `MapValue`로 유지하므로 generated lookup, truthiness, ordering, spread가 PHP 배열의 key 변환에 영향을 받지 않고 data model을 보존한다.
+
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 
 ## Artifact 갱신
