@@ -1,6 +1,6 @@
 // Package entry: parser, engine, loaders, values and errors.
 import type { Template } from './ast.js';
-import { parseTemplate } from './parser/parser.js';
+import { analyzeTemplate, parseTemplate, type SyntaxTag, type SyntaxToken } from './parser/parser.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from './parser/scanner.js';
 import { AstProgramCore, type EngineOptions, type RenderOptions } from './render/engine.js';
 import type { ParsedTemplate } from './render/context.js';
@@ -35,6 +35,12 @@ function delimitersOf(value: string | undefined): Delimiters {
 // RT-2: parses one template source without loading other templates.
 export function parse(source: string | Uint8Array, name: string, options: ParseOptions = {}): Template {
   return parseWithLines(source, name, delimitersOf(options.delimiters)).ast;
+}
+
+/** Parses a template once and returns its AST with exact parser-owned tag ranges. */
+export function analyze(source: string | Uint8Array, name: string, options: ParseOptions = {}): { ast: Template; tags: readonly SyntaxTag[]; tokens: readonly SyntaxToken[] } {
+  const parsed = typeof source === 'string' ? Source.fromText(name, source) : Source.fromBytes(name, source);
+  return analyzeTemplate(parsed, delimitersOf(options.delimiters));
 }
 
 function parseWithLines(source: string | Uint8Array, name: string, delimiters: Delimiters): ParsedTemplate {

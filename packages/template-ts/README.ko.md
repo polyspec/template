@@ -53,6 +53,7 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | 내보내기 | 설명 |
 | --- | --- |
 | `parse(source, name, { delimiters })` | 템플릿 하나를 AST로 파싱한다. `source`는 문자열 또는 UTF-8 바이트다. |
+| `analyze(source, name, { delimiters })` | 한 번 파싱해 AST, 파서 태그 범위, 소비한 표현식 token 범위를 반환한다. |
 | `new AstProgram({ loader, functions, limits, delimiters })` | AST program을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
 | `new Engine(program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `engine.render(nameOrAst, assign, { define, env })` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 경로나 HTML 항목을 제공한다. |
