@@ -13,7 +13,7 @@
 | template-rust | Rust lexer, parser, renderer, prepared render state, functions and CLI | implemented | passed | not-deployed | [Package](../packages/template-rust/README.md) |
 | template-php | PHP lexer, parser, renderer, functions and CLI | implemented | passed | not-deployed | [Package](../packages/template-php/README.md) |
 | template-php-ext | PHP extension built from the Rust crate | implemented | passed | not-deployed | [Package](../packages/template-php-ext/README.md) |
-| performance-measurements | Per-scenario AST and generated measurements after output parity verification | in-progress | pending | not-deployed | [Performance measurements](operations/benchmark.md) |
+| performance-measurements | Equal-output AST and generated compile, process, render and RSS measurements | implemented | passed | not-deployed | [Performance measurements](operations/benchmark.md) |
 | showcase | Shared templates, mock JSON assign data, direct path-based define registries, one committed canonical AST graph, parser-backed syntax highlighting, bounded artifact views and throughput artifacts | implemented | passed | not-deployed | [Example site](operations/showcase.md) |
 | generated-mode | Host-language renderers lowered from canonical AST for TypeScript, Go, Rust and PHP | implemented | passed | not-deployed | [Compiler contract](spec/compiler.md) |
 | docs-check | Document links, translation pairs, code blocks and status checks | implemented | passed | not-deployed | [Documentation procedure](operations/documentation.md) |

@@ -6,6 +6,7 @@ declare(strict_types=1);
 use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\ArrayLoader;
+use Polyspec\Template\PreparedRender;
 use Polyspec\Template\Value\Json;
 use Polyspec\Template\Value\MapValue;
 
@@ -150,6 +151,12 @@ final class Adapter implements RenderAdapter
 
     public function render(RenderRequest $request): string
     {
+
+        return $this->prepare($request)->render();
+    }
+
+    private function prepare(RenderRequest $request): PreparedRender
+    {
         $define = [];
         foreach ($request->define->entries() as $id => $entry) {
             if (!$entry instanceof DefineEntry) {
@@ -169,7 +176,7 @@ final class Adapter implements RenderAdapter
             if ($request->env->now !== null) $options['env']['now'] = $request->env->now;
         }
 
-        return $this->engine->render($request->target, $request->assign, $options);
+        return $this->engine->prepare($request->target, $request->assign, $options);
     }
 
     public function renderTwice(RenderRequest $request): RepeatResult
@@ -239,6 +246,34 @@ if (PHP_SAPI === 'cli' && realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === __FILE
     }
     $adapter = new Adapter($argv[1]);
     $request = $adapter->buildRequest($adapter->loadScenario());
+    $benchmarkIterations = (int) (getenv('SHOWCASE_BENCH_ITERATIONS') ?: 0);
+    if ($benchmarkIterations > 0) {
+        $warmup = (int) (getenv('SHOWCASE_BENCH_WARMUP') ?: 0);
+        for ($index = 0; $index < $warmup; $index++) $adapter->render($request);
+        $measured = '';
+        $started = hrtime(true);
+        for ($index = 0; $index < $benchmarkIterations; $index++) $measured = $adapter->render($request);
+        $renderSeconds = (hrtime(true) - $started) / 1e9;
+        $output = digest($measured);
+        $repeat = digest($adapter->render($request));
+        $prepare = Closure::bind(
+            static fn (Adapter $adapter, RenderRequest $request): PreparedRender => $adapter->prepare($request),
+            null,
+            Adapter::class,
+        );
+        $prepared = $prepare($adapter, $request);
+        $preparedOutput = '';
+        $preparedStarted = hrtime(true);
+        for ($index = 0; $index < $benchmarkIterations; $index++) $preparedOutput = $prepared->render();
+        $preparedRenderSeconds = (hrtime(true) - $preparedStarted) / 1e9;
+        echo json_encode([
+            'language' => 'php', 'iterations' => $benchmarkIterations, 'renderSeconds' => $renderSeconds,
+            'preparedRenderSeconds' => $preparedRenderSeconds,
+            'bytes' => $output['bytes'], 'outputSha256' => $output['sha256'],
+            'repeatSha256' => $repeat['sha256'], 'preparedSha256' => digest($preparedOutput)['sha256'],
+        ], JSON_UNESCAPED_SLASHES) . PHP_EOL;
+        exit(0);
+    }
     $repeated = $adapter->renderTwice($request);
     $invalid = new RenderRequest('__contract_missing_target__', $request->assign, $request->define, $request->env);
     $beforeFailure = json_encode(requestJson($request), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

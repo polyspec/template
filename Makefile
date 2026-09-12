@@ -8,7 +8,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
-	docs-static-check clean
+	bench benchmark-check docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -45,6 +45,7 @@ help: ## List targets
 	@echo "  showcase-compile       Generate committed canonical AST artifacts"
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
 	@echo "  consumer-check         Install package artifacts and compare AST/generated output"
+	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  clean                  Remove build outputs"
 
 check: docs-check rules-check runtime-interface-check compiler-interface-check contract-check lint test-ts test-go test-rust test-php conformance ## Full check
@@ -135,6 +136,7 @@ docs-check: ## Document checks
 	node scripts/check-documents.mjs
 	@test ! -f scripts/check-schema.mjs || node scripts/check-schema.mjs
 	@test ! -f scripts/check-doc-coverage.mjs || node scripts/check-doc-coverage.mjs
+	node scripts/update-benchmark-docs.mjs --check
 
 runtime-interface-generate: ## Generate the runtime prepared-execution Mermaid diagrams
 	node scripts/generate-runtime-interface.mjs
@@ -176,7 +178,18 @@ showcase: typed-generator ## Build the executable example site and its result ar
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
 	node tools/showcase/benchmark-modes.mjs > examples/site/data/mode-benchmark.json
+	node scripts/check-benchmark-results.mjs
+	node scripts/update-benchmark-docs.mjs
 	node tools/showcase/build-site.mjs
+
+bench: typed-generator ## Measure production AST and generated artifacts
+	node tools/showcase/benchmark-modes.mjs > examples/site/data/mode-benchmark.json
+	node scripts/check-benchmark-results.mjs
+	node scripts/update-benchmark-docs.mjs
+
+benchmark-check: ## Verify committed benchmark structure and equal output
+	node scripts/check-benchmark-results.mjs
+	node scripts/update-benchmark-docs.mjs --check
 
 showcase-check: build-ts ## Verify example-site parity, repeatability and browser output
 	$(MAKE) typed-generator-compile-check
