@@ -46,3 +46,4 @@
 
 - TypeScript·Go·Rust·PHP에 동일한 `PageCache.getOrSet` miss/hit 계약을 추가했다. hit에서는 render callback을 호출하지 않고 저장된 HTML을 반환하며, miss에서는 한 번 호출하고 결과를 저장한다. 재생성 가능한 산출물을 dangling command continuation 없이 제거하도록 `make clean`도 수정했다.
 - TypeScript·Go·Rust·PHP 생성 소스의 동등성을 강화했다. HTML escape 문자 다섯 개를 동일하게 처리하고 논리 연산자는 항상 boolean을 반환하며 빈 list와 map은 공통 진릿값 규칙을 따르게 했다. 지원하지 않는 generated 함수는 런타임 stub으로 남기지 않고 공통 IR에서 실패한다. 빌드 순서는 `tpl`에서 AST, typed host source로 이어지도록 강제하고 compiler 계약 도표에 source, manifest, typed program, 함수 signature를 포함했다.
+- Generated mode 상태를 in progress로 바로잡았다. AST runtime은 211개 적합성 case를 통과하지만 generated 실행은 showcase 시나리오 5개로 제한되고 typed compiler는 `default`만 받으며 별도 showcase generator가 주입 callback을 제공한다. 구현을 계속하기 전에 v1 compiler 경계, build-time artifact 갱신, 완전한 내부 검증 gate를 정의했다.
