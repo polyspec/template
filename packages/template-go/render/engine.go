@@ -33,8 +33,11 @@ const (
 	CompileModeGen CompileMode = "gen"
 )
 
-// GeneratedRenderer renders a request using generated host-language code.
-type GeneratedRenderer func(target any, assign any, options RenderOptions) (string, error)
+// GeneratedPreparedRender is a prepared request produced by generated code.
+type GeneratedPreparedRender struct{ Render func() (string, error) }
+
+// GeneratedRenderer prepares a request using generated host-language code.
+type GeneratedRenderer func(target any, assign any, options RenderOptions) (*GeneratedPreparedRender, error)
 
 // CompileOptions configures compilation mode and its generated renderer.
 type CompileOptions struct {
@@ -92,6 +95,7 @@ type PreparedRender struct {
 	env        functions.Env
 	targetName string
 	template   *ParsedTemplate
+	generated  *GeneratedPreparedRender
 }
 
 type cached struct {
@@ -191,7 +195,14 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 // Prepare binds request data and resolves the target template once.
 func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*PreparedRender, error) {
 	if e.compileMode == CompileModeGen {
-		return nil, errors.New("Prepare is unavailable in generated compile mode; use Render")
+		if e.generatedRender == nil {
+			return nil, errors.New("generated compile mode requires GeneratedRender")
+		}
+		generated, err := e.generatedRender(target, assign, options)
+		if err != nil {
+			return nil, err
+		}
+		return &PreparedRender{engine: e, generated: generated}, nil
 	}
 	var name string
 	var template *ParsedTemplate
@@ -233,12 +244,6 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (*Prepar
 
 // Render renders a template by name or AST (RT-3, RT-4).
 func (e *Engine) Render(target any, assign any, options RenderOptions) (string, error) {
-	if e.compileMode == CompileModeGen {
-		if e.generatedRender == nil {
-			return "", errors.New("generated compile mode requires GeneratedRender")
-		}
-		return e.generatedRender(target, assign, options)
-	}
 	prepared, err := e.Prepare(target, assign, options)
 	if err != nil {
 		return "", err
@@ -248,6 +253,12 @@ func (e *Engine) Render(target any, assign any, options RenderOptions) (string, 
 
 // Render renders the prepared request.
 func (p *PreparedRender) Render() (string, error) {
+	if p.generated != nil {
+		if p.generated.Render == nil {
+			return "", errors.New("generated prepared render has no Render function")
+		}
+		return p.generated.Render()
+	}
 	context := NewContext(p.engine, p.root, p.env, p.targetName)
 	for id, entry := range p.registry {
 		context.Registry[id] = entry
