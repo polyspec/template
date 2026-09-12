@@ -2,7 +2,7 @@
 // Builds immutable package artifacts and verifies AST/generated consumption outside the workspace.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -58,6 +58,7 @@ assert.equal(ast, expected); assert.equal(generated, expected); assert.equal(ast
 function checkGo() {
   const version = 'v0.0.1';
   const module = 'github.com/polyspec/template';
+  const goVersion = run('go', ['env', 'GOVERSION']).trim().replace(/^go/, '');
   const proxy = join(temporary, 'go-proxy');
   const endpoint = join(proxy, 'github.com/polyspec/template/@v');
   const zipRoot = join(temporary, 'go-zip', `${module}@${version}`);
@@ -78,13 +79,13 @@ function checkGo() {
   mkdirSync(join(directory, 'generated'), { recursive: true });
   stageScenario(directory);
   cpSync(join(root, 'tools/showcase/adapters/go/generated/scope-precedence/generated.go'), join(directory, 'generated/generated.go'));
-  writeFileSync(join(directory, 'go.mod'), `module consumer\n\ngo 1.27.1\n\nrequire ${module} ${version}\n`);
+  writeFileSync(join(directory, 'go.mod'), `module consumer\n\ngo ${goVersion}\n\nrequire ${module} ${version}\n`);
   writeFileSync(join(directory, 'main.go'), `package main
 import ("encoding/json"; "fmt"; "os"; template "github.com/polyspec/template"; "consumer/generated")
 func definitions(data []byte) map[string]template.DefineInput { var raw map[string]json.RawMessage; if err:=json.Unmarshal(data,&raw);err!=nil{panic(err)}; out:=map[string]template.DefineInput{}; for name,value:=range raw { var path string; if json.Unmarshal(value,&path)==nil { out[name]=template.DefineInput{Template:path}; continue }; var entry struct{Template string \`json:"template"\`;Data any \`json:"data"\`;HTML *string \`json:"html"\`}; if err:=json.Unmarshal(value,&entry);err!=nil{panic(err)}; out[name]=template.DefineInput{Template:entry.Template,Data:entry.Data,HTML:entry.HTML} }; return out }
 func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(data);if err!=nil{panic(err)}; defineBytes,_:=os.ReadFile("define.json"); options:=template.RenderOptions{Define:definitions(defineBytes)}; expected,_:=os.ReadFile("expected.html"); astProgram,err:=template.NewAstProgram(template.Options{Loader:template.NewFSLoader(os.DirFS("templates"))});if err!=nil{panic(err)}; ast,err:=astProgram.Render("layout",assign,options);if err!=nil{panic(err)}; generatedProgram,err:=generated.NewGeneratedProgram(template.Options{});if err!=nil{panic(err)}; direct,err:=generatedProgram.Render("layout",assign,options);if err!=nil{panic(err)}; if ast!=string(expected)||direct!=string(expected)||ast!=direct{panic("consumer output differs")};fmt.Print("ok")}
 `);
-  const environment = { GOPROXY: `file://${proxy}`, GOSUMDB: 'off' };
+  const environment = { GOPROXY: `file://${proxy}`, GOSUMDB: 'off', GOMODCACHE: join(temporary, 'go-module-cache'), GOTOOLCHAIN: 'local' };
   run('go', ['mod', 'tidy'], { cwd: directory, env: environment });
   run('go', ['run', '-mod=readonly', '.'], { cwd: directory, env: environment });
 }
@@ -137,5 +138,7 @@ try {
   assert.equal(Buffer.byteLength(expected), 177);
   process.stdout.write('package consumers: TypeScript, Go, Rust and PHP AST/generated output passed\n');
 } finally {
-  rmSync(temporary, { recursive: true, force: true });
+  const cleanup = `${temporary}.cleanup-${process.pid}`;
+  try { renameSync(temporary, cleanup); } catch { /* the command may have failed before creating the directory */ }
+  try { rmSync(cleanup, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 }); } catch { /* cleanup must not replace the consumer result */ }
 }
