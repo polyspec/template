@@ -64,11 +64,12 @@ Generated files are completed in a temporary location and replaced atomically. A
 
 ## Implementation status
 
-The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly in TypeScript, JavaScript, Go, Rust and PHP. Generated execution remains partial because the typed compiler accepts only the `default` built-in and has not passed the complete conformance suite.
+The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly. TypeScript and PHP generated programs pass the complete conformance suite. Generated execution remains partial until Go and Rust pass the same suite.
 
 Generated artifacts use the same refresh boundary as canonical AST artifacts. `dev` always emits a fresh source file and manifest, `true` verifies source, type, contract and compiler digests before deciding whether to rebuild, and `false` reads and verifies only the deployed generated source and its manifest. Source and manifest replacements are atomic, with the manifest committed last.
 
 `make conformance-generated-ts` builds a fresh generated TypeScript program for every one of the 211 canonical cases. It compares compile diagnostics, input-binding diagnostics, runtime diagnostics and successful UTF-8 output with the same expected artifacts used by AST execution.
+`make conformance-generated-php` performs the same proof with a separately generated and syntax-checked PHP source file for every case.
 
 Both program modes use the same execution-state split. `RenderFrame` owns only `name`, `lines` and `context`; it cannot retain an AST. `RenderScope` owns `locals` and `loops`, exposes `lookup` and `loopMeta`, is shared by includes and is replaced for each block render. The interface gate checks these fields and operations in all four languages.
 
