@@ -34,6 +34,7 @@ const graph = {
 };
 const manifest = {
   schema: 3,
+  root: 'Assign',
   entry: 'main.tpl',
   fields: {
     flag: 'boolean', fallback: 'string', page: 'Page?', lookup: 'map<string,string>', numbers: 'list<number>', rows: 'list<Row>',
@@ -100,6 +101,26 @@ dynamic.fields.lookup = 'any';
 dynamic.fields.rows = 'any';
 lowerSourceGraph(graph, dynamic);
 
+const dynamicRoot = structuredClone(manifest);
+dynamicRoot.root = 'any';
+const dynamicRootGraph = structuredClone(graph);
+dynamicRootGraph.templates.get('main.tpl').body.push({ type: 'Echo', expr: variable('undeclared_dynamic'), span });
+const dynamicRootProgram = lowerSourceGraph(dynamicRootGraph, dynamicRoot);
+if (!dynamicRootProgram.dynamicRoot) throw new Error('compiler IR lost the dynamic root contract');
+const dynamicRootExpr = dynamicRootProgram.templates.get('main.tpl').body.at(-1)?.expr;
+if (dynamicRootExpr?.op !== 'root' || dynamicRootExpr.valueType.source !== 'any?') {
+  throw new Error('compiler IR did not lower an undeclared dynamic root value as optional any');
+}
+
+const invalidRoot = structuredClone(manifest);
+invalidRoot.root = 'DynamicAssign';
+try {
+  lowerSourceGraph(graph, invalidRoot);
+  throw new Error('compiler IR accepted an unknown root contract');
+} catch (error) {
+  if (!String(error).includes('Assign or any')) throw error;
+}
+
 const unsupportedFunction = structuredClone(manifest);
 unsupportedFunction.functions.custom = { implementation: 'remote', args: ['string'], returns: 'string' };
 try {
@@ -109,4 +130,4 @@ try {
   if (!String(error).includes('builtin or host')) throw error;
 }
 
-process.stdout.write('compiler IR: all variants and source spans lowered; dynamic values and host signatures accepted; invalid declarations rejected\n');
+process.stdout.write('compiler IR: all variants and source spans lowered; typed and dynamic roots plus host signatures accepted; invalid declarations rejected\n');

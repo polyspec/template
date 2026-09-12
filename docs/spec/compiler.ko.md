@@ -22,7 +22,7 @@ compiler와 runtime의 단일 계약 원본은 [`tools/compiler/interface.json`]
 
 ## 공개 구조
 
-`TypeManifest`는 assign field, record field, definition target, template input, host-function signature를 선언한다. 한 request 값에서 type을 추론하지 않는다. 명시적인 `any` 선언은 별도 실행 mode를 만들지 않고 runtime value model을 사용한다.
+`TypeManifest.root`는 `Assign` 또는 `any`다. `Assign`은 고정된 root field를 선언한다. `any`는 입력 계약이 의도적으로 동적일 때 알 수 없는 member를 `any?`로 취급하는 map 형태 root를 선언한다. 두 형태 모두 record field, definition target, template input, host-function signature는 명시한다. 한 request 값에서 type을 추론하지 않는다. 개별 field나 parameter의 `any`는 별도 실행 mode를 만들지 않고 runtime value model을 사용하며, root가 `Assign`일 때 field 검사를 끄지 않는다.
 
 Typed IR은 모든 symbol, template path, definition target, function signature, input type을 해석하고 모든 node와 expression의 source span을 보존해 generated runtime 실패가 원본 template을 가리키게 한다. 변수 누락, 정적 타입에 없는 member, 선언하지 않은 definition, 잘못된 include path, 알 수 없는 함수 구현 종류, 호환되지 않는 block input은 compile 실패다. 명시적인 동적 `any`의 member, index, spread, loop는 IR에 남아 `RuntimeBindings`를 사용한다. Built-in과 host signature는 같은 call node를 사용하고 program load를 위해 구현 종류를 보존한다.
 
