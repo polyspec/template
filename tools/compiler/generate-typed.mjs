@@ -21,6 +21,7 @@ const program = lowerSourceGraph(graph, manifest);
 const fields = manifest.fields ?? {};
 const quote = s => JSON.stringify(s);
 const fieldName = name => name.replace(/[^A-Za-z0-9_]/g, '_');
+const functionName = name => `render_${fieldName(name)}`;
 const typeName = type => type.replace(/\?$/, '');
 const optional = type => type.endsWith('?');
 const tsType = type => ({ string: 'string', number: 'number', boolean: 'boolean', Page: 'Page', Slot: 'Slot', Template: 'string' }[typeName(type)] ?? typeName(type));
@@ -124,7 +125,7 @@ if (lang === 'ts') {
   target.map = entries => `new Map([${entries.map(item => item.spread ? `...${item.value}` : `[${item.value[0]}, ${item.value[1]}]`).join(', ')}])`;
   target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} else if' : 'if'} (Boolean(${expr(b.test, target, scope)})) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `for (const ${fieldName(node.name)} of (${expr(node.iter, target, scope)} ?? [])) {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'    '.repeat(n)}}${node.empty ? `\nif (!(${expr(node.iter, target, scope)}?.length)) {\n${nodes(node.empty, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`);
-  target.include = (path, n) => indent(n, `out += include(${quote(path)});`);
+  target.include = (path, n) => indent(n, `out += renderTemplate(${quote(path)}, assign, slots);`);
 }
 if (lang === 'go') {
   target.loopMeta = (loop, field) => `loopMeta[${quote(`${loop}.${field}`)}]`;
@@ -137,7 +138,7 @@ if (lang === 'go') {
   target.map = entries => `map[any]any{${entries.filter(item => !item.spread).map(item => `${item.value[0]}: ${item.value[1]}`).join(', ')}}`;
   target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'\t'.repeat(n)}${i ? '} else if' : 'if'} generatedTruthy(${expr(b.test, target, scope)}) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'\t'.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'\t'.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `for _, ${fieldName(node.name)} := range ${expr(node.iter, target, scope)} {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'\t'.repeat(n)}}`);
-  target.include = (path, n) => indent(n, `out.WriteString(include(${quote(path)}))`);
+  target.include = (path, n) => indent(n, `out.WriteString(renderTemplate(${quote(path)}, assign, slots))`);
 }
 if (lang === 'rust') {
   target.loopMeta = (loop, field) => `loop_meta.get(${quote(`${loop}.${field}`)})`;
@@ -150,7 +151,7 @@ if (lang === 'rust') {
   target.map = entries => `HashMap::from([${entries.filter(item => !item.spread).map(item => `(${item.value[0]}, ${item.value[1]})`).join(', ')}])`;
   target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} else if' : 'if'} generated_truthy(&${expr(b.test, target, scope)}) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `for ${fieldName(node.name)} in generated_entries(&${expr(node.iter, target, scope)}) {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'    '.repeat(n)}}`);
-  target.include = (path, n) => indent(n, `out.push_str(&include(${quote(path)}));`);
+  target.include = (path, n) => indent(n, `out.push_str(&render_template(${quote(path)}, assign, slots));`);
 }
 if (lang === 'php') {
   target.loopMeta = (loop, field) => `$loopMeta[${quote(`${loop}.${field}`)}]`;
@@ -163,19 +164,32 @@ if (lang === 'php') {
   target.map = entries => `[${entries.filter(item => !item.spread).map(item => `${item.value[0]} => ${item.value[1]}`).join(', ')}]`;
   target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} elseif' : 'if'} (generated_truthy(${expr(b.test, target, scope)})) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `foreach (generated_entries(${expr(node.iter, target, scope)}) as ${fieldName(node.name)}) {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'    '.repeat(n)}}`);
-  target.include = (path, n) => indent(n, `$out .= include_template(${quote(path)});`);
+  target.include = (path, n) => indent(n, `$out .= render_template(${quote(path)}, $assign, $slots);`);
 }
-const body = nodes(program.templates.get(program.entry).body, target, 1);
+const templateBodies = [...program.templates.values()].map(template => ({ name: template.name, function: functionName(template.name), body: nodes(template.body, target, 1) }));
 const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
 const tsRecords = Object.entries(records).map(([name, members]) => `export interface ${name} {\n${Object.entries(members).map(([key, type]) => `  ${tsField(key, type)}`).join('\n')}\n}`).join('\n');
 const goRecords = Object.entries(records).map(([name, members]) => `type ${name} struct { ${Object.entries(members).map(([key, type]) => `${key[0].toUpperCase() + key.slice(1)} ${goType(type)}`).join('; ')} }`).join('\n');
 const rustRecords = Object.entries(records).map(([name, members]) => `#[derive(Default)] pub struct ${name} { ${Object.entries(members).map(([key, type]) => `pub ${key}: ${rustType(type)}`).join(', ')} }`).join('\n');
 const phpRecords = Object.entries(records).map(([name, members]) => `final class ${name} { public function __construct(${Object.entries(members).map(([key, type]) => phpField(key, type)).join(', ')}) {} }`).join('\n');
 let source;
-if (lang === 'ts') source = `// Generated.\n${tsRecords}\nexport interface Assign {\n${Object.entries(fields).map(([n, t]) => `  ${tsField(n, t)}`).join('\n')}\n}\nexport function render(assign: Assign, slots: Record<string, string>): string { let out = '';\n${body}\n  return out; }\nfunction escape(value: string): string { return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }\n`;
-else if (lang === 'go') source = `// Generated.\npackage generated\nimport ("fmt"; "strings")\n${goRecords}\ntype Assign struct {\n${Object.entries(fields).map(([n, t]) => `\t${n[0].toUpperCase() + n.slice(1)} ${goType(t)}`).join('\n')}\n}\nfunc valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }\nfunc Render(assign Assign, slots map[string]string) string { var out strings.Builder\n${body}\n return out.String() }\nvar _ = fmt.Fprint\n`;
-else if (lang === 'rust') source = `// Generated.\nuse std::collections::HashMap;\n${rustRecords}\n#[derive(Default)] pub struct Assign {\n${Object.entries(fields).map(([n, t]) => `    pub ${n}: ${rustType(t)},`).join('\n')}\n}\npub fn render(assign: &Assign, slots: &HashMap<String, String>) -> String { let mut out = String::new();\n${body}\n out }\nfn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }\n`;
-else source = `<?php\n${phpRecords}\nfinal class Assign { public function __construct(\n${Object.entries(fields).map(([n, t]) => phpField(n, t)).join(',\n')}\n) {} }\nfunction render(Assign $assign, array $slots): string { $out = '';\n${body}\n return $out; }\n`;
+if (lang === 'ts') {
+  const functions = templateBodies.map(template => `function ${template.function}(assign: Assign, slots: Record<string, string>): string { let out = '';\n${template.body}\n  return out; }`).join('\n');
+  const dispatch = templateBodies.map(template => `    case ${quote(template.name)}: return ${template.function}(assign, slots);`).join('\n');
+  source = `// Generated.\n${tsRecords}\nexport interface Assign {\n${Object.entries(fields).map(([n, t]) => `  ${tsField(n, t)}`).join('\n')}\n}\n${functions}\nexport function renderTemplate(target: string, assign: Assign, slots: Record<string, string>): string {\n  switch (target) {\n${dispatch}\n    default: throw new Error('generated template is missing: ' + target);\n  }\n}\nexport function render(assign: Assign, slots: Record<string, string>): string { return renderTemplate(${quote(program.entry)}, assign, slots); }\nfunction escape(value: string): string { return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }\n`;
+} else if (lang === 'go') {
+  const functions = templateBodies.map(template => `func ${template.function}(assign Assign, slots map[string]string) string { var out strings.Builder\n${template.body}\n return out.String() }`).join('\n');
+  const dispatch = templateBodies.map(template => `\tcase ${quote(template.name)}: return ${template.function}(assign, slots)`).join('\n');
+  source = `// Generated.\npackage generated\nimport ("fmt"; "strings")\n${goRecords}\ntype Assign struct {\n${Object.entries(fields).map(([n, t]) => `\t${n[0].toUpperCase() + n.slice(1)} ${goType(t)}`).join('\n')}\n}\nfunc valueOrZero[T any](value *T) T { if value == nil { var zero T; return zero }; return *value }\n${functions}\nfunc renderTemplate(target string, assign Assign, slots map[string]string) string { switch target {\n${dispatch}\n\tdefault: panic("generated template is missing: " + target)\n} }\nfunc Render(assign Assign, slots map[string]string) string { return renderTemplate(${quote(program.entry)}, assign, slots) }\nvar _ = fmt.Fprint\n`;
+} else if (lang === 'rust') {
+  const functions = templateBodies.map(template => `fn ${template.function}(assign: &Assign, slots: &HashMap<String, String>) -> String { let mut out = String::new();\n${template.body}\n out }`).join('\n');
+  const dispatch = templateBodies.map(template => `        ${quote(template.name)} => ${template.function}(assign, slots),`).join('\n');
+  source = `// Generated.\nuse std::collections::HashMap;\n${rustRecords}\n#[derive(Default)] pub struct Assign {\n${Object.entries(fields).map(([n, t]) => `    pub ${n}: ${rustType(t)},`).join('\n')}\n}\n${functions}\nfn render_template(target: &str, assign: &Assign, slots: &HashMap<String, String>) -> String { match target {\n${dispatch}\n        _ => panic!("generated template is missing: {target}"),\n} }\npub fn render(assign: &Assign, slots: &HashMap<String, String>) -> String { render_template(${quote(program.entry)}, assign, slots) }\nfn escape(value: &str) -> String { value.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;") }\n`;
+} else {
+  const functions = templateBodies.map(template => `function ${template.function}(Assign $assign, array $slots): string { $out = '';\n${template.body}\n return $out; }`).join('\n');
+  const dispatch = templateBodies.map(template => `        ${quote(template.name)} => ${template.function}($assign, $slots),`).join('\n');
+  source = `<?php\n${phpRecords}\nfinal class Assign { public function __construct(\n${Object.entries(fields).map(([n, t]) => phpField(n, t)).join(',\n')}\n) {} }\n${functions}\nfunction render_template(string $target, Assign $assign, array $slots): string { return match ($target) {\n${dispatch}\n        default => throw new RuntimeException('generated template is missing: ' . $target),\n}; }\nfunction render(Assign $assign, array $slots): string { return render_template(${quote(program.entry)}, $assign, $slots); }\n`;
+}
 mkdirSync(dirname(output), { recursive: true });
 if (check) {
   if (!existsSync(output) || readFileSync(output, 'utf8') !== source) throw new Error(`typed generator output is stale: ${output}`);
