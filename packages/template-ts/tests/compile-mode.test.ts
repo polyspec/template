@@ -3,12 +3,12 @@ import { Engine } from '../src/index.js';
 
 describe('compile mode', () => {
   it('uses the supplied generated renderer without falling back to AST', () => {
-    const engine = new Engine({ compileMode: 'gen', generatedRenderer: () => '<generated>' });
+    const engine = new Engine({ compile: { mode: 'gen', generatedRenderer: () => '<generated>' } });
     expect(engine.render('ignored', {})).toBe('<generated>');
   });
 
   it('fails when generated mode has no generated renderer', () => {
-    const engine = new Engine({ compileMode: 'gen' });
+    const engine = new Engine({ compile: { mode: 'gen' } });
     expect(() => engine.render('ignored', {})).toThrow('requires generatedRenderer');
   });
 });

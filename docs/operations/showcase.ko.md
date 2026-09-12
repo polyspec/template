@@ -166,4 +166,6 @@ make showcase-check
 
 이 명령은 커밋된 HTML·JSON·AST artifact를 새 artifact-only 렌더 결과와 비교하고 HTML 구조 parser로 페이지를 검사한다. 페이지에는 목업 assign 데이터, define 레지스트리, 템플릿, artifact와 HTML 출력이 표시된다. runtime parser, renderer와 브라우저 검증 단계는 실행하지 않는다.
 
+타입 고정 생성기는 `make typed-generator`로 실행한다. 정본 AST와 명시적 타입 manifest를 받아 assign 필드를 선언한 PHP·Go·Rust·TypeScript 소스를 만든다. `make typed-generator-check`는 산출물 재현성을 확인한다. 임의의 JSON만으로는 정적 타입을 안전하게 추론할 수 없으므로 manifest가 필요하다.
+
 소비 애플리케이션 통합은 [실행 체크리스트](../plans/execution-checklist.ko.md)의 Wave 7에서 별도로 추적한다.

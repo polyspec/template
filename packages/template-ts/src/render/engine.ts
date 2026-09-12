@@ -13,8 +13,12 @@ export type ParseFunction = (source: string | Uint8Array, name: string, delimite
 
 // Controls when a compiled template artifact is refreshed.
 export type ArtifactRefresh = 'dev' | 'true' | 'false';
+/** Selects AST interpretation or a generated renderer. */
 export type CompileMode = 'ast' | 'gen';
+/** Renders a request with generated host-language code. */
 export type GeneratedRenderer = (target: string | Template, assign: unknown, options: RenderOptions) => string;
+/** Compilation settings shared by the runtime contract. */
+export interface CompileOptions { mode?: CompileMode; generatedRenderer?: GeneratedRenderer; }
 
 // What an engine is created with (RT-1, RT-5, RT-6, RT-42). Every field has a default.
 export interface EngineOptions {
@@ -28,8 +32,7 @@ export interface EngineOptions {
   // dev parses on every load, true refreshes when the loader version changes,
   // false keeps the first loaded artifact for the lifetime of the engine.
   artifactRefresh?: ArtifactRefresh;
-  compileMode?: CompileMode;
-  generatedRenderer?: GeneratedRenderer;
+  compile?: CompileOptions;
 }
 
 // One template definition: a path, a definition entry, or ready HTML (RT-24).
@@ -89,9 +92,9 @@ export class EngineCore implements EngineServices {
     this.parseFunction = options.parse ?? null;
     this.legacyWrappers = options.legacyWrappers === true;
     this.artifactRefresh = options.artifactRefresh ?? 'true';
-    this.compileMode = options.compileMode ?? 'ast';
+    this.compileMode = options.compile?.mode ?? 'ast';
     if (this.compileMode !== 'ast' && this.compileMode !== 'gen') throw new Error(`${this.compileMode} is not a compile mode`);
-    this.generatedRenderer = options.generatedRenderer ?? null;
+    this.generatedRenderer = options.compile?.generatedRenderer ?? null;
     if (options.delimiters !== undefined) {
       const delimiters = parseDelimiters(options.delimiters);
       if (delimiters === null) throw new Error(`${JSON.stringify(options.delimiters)} is not a delimiter pair`);

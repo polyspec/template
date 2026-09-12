@@ -167,3 +167,5 @@ make showcase-check
 ```
 
 This compares the committed HTML, JSON and AST artifacts with fresh artifact-only renders, then validates the generated page with an HTML structure parser. The page exposes the mock assign data, define registry, templates, artifacts and HTML output. It contains no runtime parser, renderer or browser verification step.
+
+The type-fixed generator runs with `make typed-generator`. It accepts a canonical AST and an explicit type manifest, then emits PHP, Go, Rust and TypeScript source with declared assign fields. `make typed-generator-check` verifies reproducibility. A manifest is required because arbitrary JSON does not contain enough information to infer static types safely.
