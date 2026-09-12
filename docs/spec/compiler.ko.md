@@ -49,3 +49,5 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 AST compiler와 runtime은 구현됐다. Generated 실행은 partial이다. 현재 showcase 시나리오 5개로만 검증했고 typed compiler는 `default` 내장 함수만 받으며 별도 showcase generator를 사용한다. 이 경로는 이 계약을 만족하지 않으므로 generated compiler를 완성하면서 제거한다.
 
 Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
+
+두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 네 언어의 필드와 연산을 검사한다.

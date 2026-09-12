@@ -15,12 +15,14 @@ use Polyspec\Template\Value\Value;
 final class Evaluator
 {
     private int $depth = 0;
+    private Scope $scope;
 
     public readonly RuntimeBindings $runtime;
 
     public function __construct(private readonly Context $context)
     {
         $this->runtime = new RuntimeBindings($context);
+        $this->scope = new Scope();
     }
 
     /**
@@ -34,8 +36,11 @@ final class Evaluator
     /**
      * @param array<string, mixed> $expr
      */
-    public function evaluate(array $expr, Frame $frame): mixed
+    public function evaluate(array $expr, Frame $frame, ?Scope $scope = null): mixed
     {
+        if ($scope !== null) {
+            $this->scope = $scope;
+        }
         $this->depth++;
         try {
             $this->runtime->limit('expression', $this->depth, $frame, $expr['span']);
@@ -59,9 +64,9 @@ final class Evaluator
             case 'Literal':
                 return $expr['value'];
             case 'Var':
-                return $frame->lookup($expr['name']);
+                return $this->scope->lookup($frame, $expr['name']);
             case 'LoopMeta':
-                $meta = $frame->loopMeta($expr['loop']);
+                $meta = $this->scope->loopMeta($expr['loop']);
                 if ($meta === null) {
                     throw $this->fail($frame, $expr['span'], 'E_RUNTIME_UNKNOWN_LOOP', $expr['loop'] . ' is not an active loop variable');
                 }

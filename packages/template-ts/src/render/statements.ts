@@ -2,7 +2,7 @@
 import type { Block, For, If, IfBlock, Node, Span } from '../ast.js';
 import { PathError, resolvePath } from '../loader.js';
 import { type MapValue, type Value } from '../value/value.js';
-import { Frame, type DefineEntry, type LoopMeta, type RenderContext } from './context.js';
+import { Frame, Scope, type DefineEntry, type LoopMeta, type RenderContext } from './context.js';
 import { Evaluator } from './expressions.js';
 import type { AstProgramCore } from './engine.js';
 
@@ -13,66 +13,66 @@ export class Renderer {
     this.evaluator = new Evaluator(context);
   }
 
-  renderNodes(nodes: Node[], frame: Frame): void {
-    for (const node of nodes) this.renderNode(node, frame);
+  renderNodes(nodes: Node[], frame: Frame, scope: Scope): void {
+    for (const node of nodes) this.renderNode(node, frame, scope);
   }
 
-  private renderNode(node: Node, frame: Frame): void {
+  private renderNode(node: Node, frame: Frame, scope: Scope): void {
     this.context.at(frame, node.span);
     switch (node.type) {
       case 'Text':
         this.context.output.write(node.value);
         return;
       case 'Echo': {
-        const value = this.evaluator.evaluate(node.expr, frame);
+        const value = this.evaluator.evaluate(node.expr, frame, scope);
         this.context.output.write(this.evaluator.runtime.escape(value, frame, node.expr.span));
         return;
       }
       case 'If':
-        this.renderIf(node, frame);
+        this.renderIf(node, frame, scope);
         return;
       case 'For':
-        this.renderFor(node, frame);
+        this.renderFor(node, frame, scope);
         return;
       case 'Set':
-        frame.locals.set(node.name, this.evaluator.evaluate(node.expr, frame));
+        scope.locals.set(node.name, this.evaluator.evaluate(node.expr, frame, scope));
         return;
       case 'Include':
-        this.renderInclude(node.path, node.span, frame);
+        this.renderInclude(node.path, node.span, frame, scope);
         return;
       case 'Block':
-        this.renderBlock(node, frame);
+        this.renderBlock(node, frame, scope);
         return;
       case 'IfBlock':
-        this.renderIfBlock(node, frame);
+        this.renderIfBlock(node, frame, scope);
         return;
     }
   }
 
-  private renderIf(node: If, frame: Frame): void {
+  private renderIf(node: If, frame: Frame, scope: Scope): void {
     for (const branch of node.branches) {
-      if (this.evaluator.runtime.truthy(this.evaluator.evaluate(branch.test, frame))) {
-        this.renderNodes(branch.body, frame);
+      if (this.evaluator.runtime.truthy(this.evaluator.evaluate(branch.test, frame, scope))) {
+        this.renderNodes(branch.body, frame, scope);
         return;
       }
     }
-    if (node.else) this.renderNodes(node.else, frame);
+    if (node.else) this.renderNodes(node.else, frame, scope);
   }
 
-  private renderFor(node: For, frame: Frame): void {
-    const iterable = this.evaluator.evaluate(node.iter, frame);
+  private renderFor(node: For, frame: Frame, scope: Scope): void {
+    const iterable = this.evaluator.evaluate(node.iter, frame, scope);
     const entries = this.evaluator.runtime.entries(iterable, frame, node.span);
 
     if (entries.length === 0) {
-      if (node.empty) this.renderNodes(node.empty, frame);
+      if (node.empty) this.renderNodes(node.empty, frame, scope);
       return;
     }
-    const hadLocal = frame.locals.has(node.name);
-    const previous = frame.locals.get(node.name);
-    let stack = frame.loops.get(node.name);
+    const hadLocal = scope.locals.has(node.name);
+    const previous = scope.locals.get(node.name);
+    let stack = scope.loops.get(node.name);
     if (!stack) {
       stack = [];
-      frame.loops.set(node.name, stack);
+      scope.loops.set(node.name, stack);
     }
     const meta: LoopMeta = { index: 0, key: null, value: null, first: true, last: false, size: entries.length };
     stack.push(meta);
@@ -86,13 +86,13 @@ export class Renderer {
         meta.value = value;
         meta.first = index === 0;
         meta.last = index === entries.length - 1;
-        frame.locals.set(node.name, value);
-        this.renderNodes(node.body, frame);
+        scope.locals.set(node.name, value);
+        this.renderNodes(node.body, frame, scope);
       }
     } finally {
       stack.pop();
-      if (hadLocal) frame.locals.set(node.name, previous as Value);
-      else frame.locals.delete(node.name);
+      if (hadLocal) scope.locals.set(node.name, previous as Value);
+      else scope.locals.delete(node.name);
     }
   }
 
@@ -105,24 +105,19 @@ export class Renderer {
     }
   }
 
-  private renderInclude(path: string, span: Span, frame: Frame): void {
+  private renderInclude(path: string, span: Span, frame: Frame, scope: Scope): void {
     const name = this.resolve(path, frame, span);
     const template = this.program.loadTemplate(name, frame, span);
     this.context.enter(name, frame, span);
     try {
-      const included = new Frame(template, frame.context);
-      // RT-21: the included template shares the local scope and the loops of the including template.
-      const shared = Object.create(included, {
-        locals: { value: frame.locals },
-        loops: { value: frame.loops },
-      }) as Frame;
-      this.renderNodes(template.ast.body, shared);
+      const included = new Frame(template.ast.name, template.lines, frame.context);
+      this.renderNodes(template.ast.body, included, scope);
     } finally {
       this.context.leave();
     }
   }
 
-  private renderBlock(node: Block, frame: Frame): void {
+  private renderBlock(node: Block, frame: Frame, scope: Scope): void {
     const registry = this.context.registry;
     let entry: DefineEntry;
     if (node.id !== null && node.path === null) {
@@ -152,18 +147,18 @@ export class Renderer {
     }
     const data: MapValue = new Map(this.context.rootData);
     if (entry.data) for (const [key, value] of entry.data) data.set(key, value);
-    for (const item of node.scope) data.set(item.name, this.evaluator.evaluate(item.expr, frame));
+    for (const item of node.scope) data.set(item.name, this.evaluator.evaluate(item.expr, frame, scope));
     const template = this.program.loadTemplate(entry.template, frame, node.span);
     this.context.enter(entry.template, frame, node.span);
     try {
-      this.renderNodes(template.ast.body, new Frame(template, data));
+      this.renderNodes(template.ast.body, new Frame(template.ast.name, template.lines, data), new Scope());
     } finally {
       this.context.leave();
     }
   }
 
-  private renderIfBlock(node: IfBlock, frame: Frame): void {
-    if (this.context.registry.has(node.id)) this.renderNodes(node.body, frame);
-    else if (node.else) this.renderNodes(node.else, frame);
+  private renderIfBlock(node: IfBlock, frame: Frame, scope: Scope): void {
+    if (this.context.registry.has(node.id)) this.renderNodes(node.body, frame, scope);
+    else if (node.else) this.renderNodes(node.else, frame, scope);
   }
 }

@@ -13,11 +13,18 @@ type Evaluator struct {
 	context *Context
 	runtime *RuntimeBindings
 	depth   int
+	scope   *Scope
 }
 
 // NewEvaluator creates an evaluator.
 func NewEvaluator(context *Context) *Evaluator {
-	return &Evaluator{context: context, runtime: NewRuntimeBindings(context)}
+	return &Evaluator{context: context, runtime: NewRuntimeBindings(context), scope: NewScope()}
+}
+
+// EvaluateIn evaluates with an explicit local and loop scope.
+func (e *Evaluator) EvaluateIn(expr ast.Expr, frame *Frame, scope *Scope) (value.Value, error) {
+	e.scope = scope
+	return e.Evaluate(expr, frame)
 }
 
 func (e *Evaluator) fail(frame *Frame, span ast.Span, code errs.Code, message string) error {
@@ -35,9 +42,9 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 	case *ast.Literal:
 		return n.Value, nil
 	case *ast.Var:
-		return frame.Lookup(n.Name), nil
+		return e.scope.Lookup(frame, n.Name), nil
 	case *ast.LoopMeta:
-		meta := frame.LoopMeta(n.Loop)
+		meta := e.scope.LoopMeta(n.Loop)
 		if meta == nil {
 			return nil, e.fail(frame, n.Span, errs.RuntimeUnknownLoop, n.Loop+" is not an active loop variable")
 		}

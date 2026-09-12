@@ -151,8 +151,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
     }
 
     fn resolve(&self, path: &str, frame: &Frame, span: Span) -> Result<String, TemplateError> {
-        resolve_path(frame.name(), path)
-            .map_err(|error| self.context.fail(ErrorCode::E_LOAD_OUTSIDE_ROOT, Some(frame), Some(span), error.0))
+        resolve_path(&frame.name, path).map_err(|error| self.context.fail(ErrorCode::E_LOAD_OUTSIDE_ROOT, Some(frame), Some(span), error.0))
     }
 
     fn render_include(&mut self, path: &str, span: Span, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
@@ -160,7 +159,8 @@ impl<'c, 'e> Renderer<'c, 'e> {
         let template = self.program.load_template(&name, Some(frame), Some(span))?;
         self.context.enter(&name, Some(frame), Some(span))?;
         let included = Frame {
-            template: Rc::clone(&template),
+            name: template.ast.name.clone(),
+            lines: template.lines.clone(),
             context: Rc::clone(&frame.context),
         };
         let result = self.render_nodes(&template.ast.body, &included, scope);
@@ -246,7 +246,8 @@ impl<'c, 'e> Renderer<'c, 'e> {
         let template = self.program.load_template(&template_name, Some(frame), Some(span))?;
         self.context.enter(&template_name, Some(frame), Some(span))?;
         let block_frame = Frame {
-            template: Rc::clone(&template),
+            name: template.ast.name.clone(),
+            lines: template.lines.clone(),
             context: Rc::new(data),
         };
         let mut block_scope = Scope::default();

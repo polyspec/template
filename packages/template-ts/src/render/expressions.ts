@@ -3,15 +3,17 @@ import type { Binary, Expr } from '../ast.js';
 import {
   isString, textOf, type MapValue, type Value,
 } from '../value/value.js';
-import type { Frame, RenderContext } from './context.js';
+import { Scope, type Frame, type RenderContext } from './context.js';
 import { RuntimeBindings } from './runtime-bindings.js';
 
 export class Evaluator {
   private depth = 0;
+  private scope = new Scope();
 
   constructor(context: RenderContext, readonly runtime = new RuntimeBindings(context)) {}
 
-  evaluate(expr: Expr, frame: Frame): Value {
+  evaluate(expr: Expr, frame: Frame, scope?: Scope): Value {
+    if (scope) this.scope = scope;
     this.depth++;
     this.runtime.limit('expression', this.depth, frame, expr.span);
     try {
@@ -26,9 +28,9 @@ export class Evaluator {
       case 'Literal':
         return expr.value;
       case 'Var':
-        return frame.lookup(expr.name);
+        return this.scope.lookup(frame, expr.name);
       case 'LoopMeta': {
-        const meta = frame.loopMeta(expr.loop);
+        const meta = this.scope.loopMeta(expr.loop);
         if (!meta) throw this.runtime.error(frame, expr.span, 'E_RUNTIME_UNKNOWN_LOOP', `${expr.loop} is not an active loop variable`);
         switch (expr.field) {
           case 'index_': return meta.index;

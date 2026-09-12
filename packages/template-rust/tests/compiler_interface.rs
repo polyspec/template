@@ -21,6 +21,12 @@ struct RustMapping {
     runtime_bindings_explicit_context: Vec<String>,
     #[serde(rename = "runtimeServiceOperationNames")]
     runtime_service_operation_names: RuntimeServiceOperationNames,
+    #[serde(rename = "frameFields")]
+    frame_fields: Vec<String>,
+    #[serde(rename = "scopeFields")]
+    scope_fields: Vec<String>,
+    #[serde(rename = "scopeOperations")]
+    scope_operations: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -201,4 +207,42 @@ fn runtime_declarations_match_manifest() {
         assert_eq!(method.sig.ident, expected);
         assert_eq!(method.sig.inputs.len() - 1, operation.parameters.len());
     }
+    for (name, expected) in [
+        ("Frame", &manifest.languages.rust.frame_fields),
+        ("Scope", &manifest.languages.rust.scope_fields),
+    ] {
+        let structure = context_source
+            .items
+            .iter()
+            .find_map(|item| match item {
+                Item::Struct(item) if item.ident == name => Some(item),
+                _ => None,
+            })
+            .unwrap();
+        let Fields::Named(fields) = &structure.fields else {
+            panic!("{name} fields are not named")
+        };
+        let actual: Vec<_> = fields.named.iter().map(|field| field.ident.as_ref().unwrap().to_string()).collect();
+        assert_eq!(&actual, expected);
+    }
+    let scope_impl = context_source
+        .items
+        .iter()
+        .find_map(|item| match item {
+            Item::Impl(item) => match item.self_ty.as_ref() {
+                syn::Type::Path(path) if path.path.is_ident("Scope") => Some(item),
+                _ => None,
+            },
+            _ => None,
+        })
+        .unwrap();
+    let scope_operations: Vec<_> = scope_impl
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            ImplItem::Fn(method) => Some(method.sig.ident.to_string()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(scope_operations, manifest.languages.rust.scope_operations);
 }

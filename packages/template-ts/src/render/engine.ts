@@ -6,7 +6,7 @@ import { MapLoader, resolvePath, type Loader, type LoadResult, PathError } from 
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from '../parser/scanner.js';
 import { BindError, bind, bindMap } from '../value/bind.js';
 import type { MapValue, Value } from '../value/value.js';
-import { DEFAULT_LIMITS, Frame, RenderContext, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
+import { DEFAULT_LIMITS, Frame, RenderContext, Scope, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
 import { Renderer } from './statements.js';
 
 export type ParseFunction = (source: string | Uint8Array, name: string, delimiters: Delimiters) => ParsedTemplate;
@@ -54,7 +54,7 @@ class AstPreparedExecution {
     const context = new RenderContext(this.engine, this.rootData, this.env, this.targetName);
     for (const [id, entry] of this.registry) context.registry.set(id, entry);
     context.enter(this.targetName, null, null);
-    new Renderer(context, this.engine).renderNodes(this.template.ast.body, new Frame(this.template, this.rootData));
+    new Renderer(context, this.engine).renderNodes(this.template.ast.body, new Frame(this.template.ast.name, this.template.lines, this.rootData), new Scope());
     return context.output.toString();
   }
 }
@@ -142,7 +142,7 @@ export class AstProgramCore implements RuntimeServices, Program {
     if (loaded === null) {
       const template = from ? from.name : name;
       const message = `template ${name} does not exist`;
-      if (from && span) throw errorAt('E_LOAD_NOT_FOUND', template, from.template.lines, span, message);
+      if (from && span) throw errorAt('E_LOAD_NOT_FOUND', template, from.lines, span, message);
       throw new TemplateError({ code: 'E_LOAD_NOT_FOUND', template: name, line: 0, col: 0, offset: 0, end: 0, message });
     }
     const cached = this.cache.get(name);
