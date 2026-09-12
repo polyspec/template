@@ -18,7 +18,7 @@ function run(command, args, options = {}) {
 }
 
 try {
-  run(process.execPath, [resolve(root, 'tools/compiler/generate-typed.mjs'), '--check', '--ast', resolve(root, 'examples/site/scenarios/react-boundary/compiled/typescript/layout.tpl.ast.json'), '--manifest', resolve(root, 'tools/compiler/type-manifest.json'), '--lang', 'ts', '--output', resolve(generated, 'react-layout.ts')]);
+  run(process.execPath, [resolve(root, 'tools/compiler/generate-typed.mjs'), '--check', '--graph', resolve(root, 'examples/site/scenarios/react-boundary/compiled/typescript/manifest.json'), '--manifest', resolve(root, 'tools/compiler/type-manifest.json'), '--lang', 'ts', '--output', resolve(generated, 'react-layout.ts')]);
   run('npx', ['tsc', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', resolve(generated, 'react-layout.ts')]);
   copyFileSync(resolve(generated, 'react-layout.go'), resolve(temporary, 'generated.go'));
   run('go', ['test', '.'], { cwd: temporary, env: { GO111MODULE: 'off' } });

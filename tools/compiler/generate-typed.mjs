@@ -3,19 +3,21 @@
 // The manifest is part of the input: arbitrary JSON cannot become statically typed by inference alone.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { loadSourceGraph, lowerSourceGraph } from './ir.mjs';
 
 const args = process.argv.slice(2);
 const value = name => { const i = args.indexOf(name); return i < 0 ? null : args[i + 1]; };
-const astPath = value('--ast');
+const graphPath = value('--graph');
 const manifestPath = value('--manifest');
 const lang = value('--lang');
 const output = value('--output');
 const check = args.includes('--check');
-if (!astPath || !manifestPath || !lang || !output || !['ts', 'go', 'rust', 'php'].includes(lang)) {
-  throw new Error('usage: generate-typed.mjs --ast FILE --manifest FILE --lang ts|go|rust|php --output FILE');
+if (!graphPath || !manifestPath || !lang || !output || !['ts', 'go', 'rust', 'php'].includes(lang)) {
+  throw new Error('usage: generate-typed.mjs --graph MANIFEST --manifest FILE --lang ts|go|rust|php --output FILE');
 }
-const ast = JSON.parse(readFileSync(astPath, 'utf8'));
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+const graph = loadSourceGraph(graphPath);
+const program = lowerSourceGraph(graph, manifest);
 const fields = manifest.fields ?? {};
 const quote = s => JSON.stringify(s);
 const fieldName = name => name.replace(/[^A-Za-z0-9_]/g, '_');
@@ -28,39 +30,33 @@ const phpType = type => ({ string: 'string', number: 'float', boolean: 'bool', P
 const tsField = (name, type) => `${name}${optional(type) ? '?' : ''}: ${tsType(type)};`;
 const phpField = (name, type) => `public readonly ${optional(type) ? '?' : ''}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
 
-const localTypes = manifest.locals ?? {};
-function lookupType(name, scope = []) { return scope.includes(name) ? (localTypes[name] ?? manifest.loops?.[name] ?? 'unknown?') : (fields[name] ?? 'unknown?'); }
-function expr(node, target, scope = []) {
-  if (node.type === 'Literal') return target.literal(node.value);
-  if (node.type === 'Var') {
-    const type = lookupType(node.name, scope);
-    if (typeName(type) === 'unknown') throw new Error(`typed generator: ${node.name} is missing from the type manifest`);
-    return scope.includes(node.name) ? target.local(fieldName(node.name), type) : target.var(fieldName(node.name), type);
-  }
-  if (node.type === 'LoopMeta') return target.loopMeta(node.loop, node.field);
-  if (node.type === 'Member') return target.member(expr(node.object, target, scope), fieldName(node.key));
-  if (node.type === 'Index') return target.index(expr(node.object, target, scope), expr(node.index, target, scope));
-  if (node.type === 'Call') return target.call(node.name, node.args.map(item => expr(item, target, scope)));
-  if (node.type === 'Unary') return target.unary(node.op, expr(node.operand, target, scope));
-  if (node.type === 'Binary') return target.binary(node.op, expr(node.left, target, scope), expr(node.right, target, scope));
-  if (node.type === 'Ternary') return target.ternary(expr(node.test, target, scope), node.then === null ? target.literal(null) : expr(node.then, target, scope), expr(node.else, target, scope));
-  if (node.type === 'List') return target.list(node.items.map(item => item.type === 'Spread' ? { spread: true, value: expr(item.expr, target, scope) } : { spread: false, value: expr(item, target, scope) }));
-  if (node.type === 'Map') return target.map(node.entries.map(item => item.type === 'Spread' ? { spread: true, value: expr(item.expr, target, scope) } : { spread: false, value: [expr(item.key, target, scope), expr(item.value, target, scope)] }));
-  throw new Error(`typed generator: unsupported expression ${node.type}`);
+function expr(node, target) {
+  if (node.op === 'literal') return target.literal(node.value);
+  if (node.op === 'root') return target.var(fieldName(node.name), node.valueType.source);
+  if (node.op === 'local') return target.local(fieldName(node.name), node.valueType.source);
+  if (node.op === 'loop-meta') return target.loopMeta(node.loop, node.field);
+  if (node.op === 'member') return target.member(expr(node.object, target), fieldName(node.key));
+  if (node.op === 'index') return target.index(expr(node.object, target), expr(node.index, target));
+  if (node.op === 'call') return target.call(node.name, node.args.map(item => expr(item, target)));
+  if (node.op === 'unary') return target.unary(node.operator, expr(node.operand, target));
+  if (node.op === 'binary') return target.binary(node.operator, expr(node.left, target), expr(node.right, target));
+  if (node.op === 'ternary') return target.ternary(expr(node.test, target), expr(node.then, target), expr(node.otherwise, target));
+  if (node.op === 'list') return target.list(node.items.map(item => ({ spread: item.spread, value: expr(item.value, target) })));
+  if (node.op === 'map') return target.map(node.entries.map(item => item.spread ? { spread: true, value: expr(item.value, target) } : { spread: false, value: [expr(item.key, target), expr(item.value, target)] }));
+  throw new Error(`typed generator: unsupported IR expression ${node.op}`);
 }
-function nodes(body, target, level = 1, scope = []) {
+function nodes(body, target, level = 1) {
   const out = [];
-  const activeScope = [...scope];
   for (const node of body) {
-    if (node.type === 'Text') out.push(target.text(node.value, level));
-    else if (node.type === 'Echo') out.push(target.echo(expr(node.expr, target, activeScope), level));
-    else if (node.type === 'Block') out.push(target.block(node.id, level));
-    else if (node.type === 'IfBlock') out.push(target.ifBlock(node, level, activeScope));
-    else if (node.type === 'Set') { out.push(target.set(node.name, expr(node.expr, target, activeScope), level)); activeScope.push(node.name); }
-    else if (node.type === 'If') out.push(target.ifNode(node, level, activeScope));
-    else if (node.type === 'For') out.push(target.forNode(node, level, activeScope));
-    else if (node.type === 'Include') out.push(target.include(node.path, level));
-    else throw new Error(`typed generator: unsupported node ${node.type}`);
+    if (node.op === 'text') out.push(target.text(node.value, level));
+    else if (node.op === 'echo') out.push(target.echo(expr(node.expr, target), level));
+    else if (node.op === 'block') out.push(target.block(node.id, level));
+    else if (node.op === 'if-block') out.push(target.ifBlock(node, level));
+    else if (node.op === 'set') out.push(target.set(node.name, expr(node.expr, target), level));
+    else if (node.op === 'if') out.push(target.ifNode(node, level));
+    else if (node.op === 'for') out.push(target.forNode(node, level));
+    else if (node.op === 'include') out.push(target.include(node.target, level));
+    else throw new Error(`typed generator: unsupported IR node ${node.op}`);
   }
   return out.join('\n');
 }
@@ -117,32 +113,6 @@ if (lang === 'ts') target.ifBlock = (node, n, scope = []) => indent(n, `if (slot
 if (lang === 'go') target.ifBlock = (node, n, scope = []) => indent(n, `if _, ok := slots[${quote(node.id)}]; ok {\n${nodes(node.body, target, n + 1, scope)}\n}`);
 if (lang === 'rust') target.ifBlock = (node, n, scope = []) => indent(n, `if slots.contains_key(${quote(node.id)}) {\n${nodes(node.body, target, n + 1, scope)}\n}`);
 if (lang === 'php') target.ifBlock = (node, n, scope = []) => indent(n, `if (isset($slots[${quote(node.id)}])) {\n${nodes(node.body, target, n + 1, scope)}\n}`);
-const nodeKinds = new Set(['Text', 'Echo', 'If', 'For', 'Set', 'Include', 'Block', 'IfBlock']);
-const exprKinds = new Set(['Literal', 'Var', 'LoopMeta', 'Member', 'Index', 'Call', 'Unary', 'Binary', 'Ternary', 'List', 'Map']);
-function validateExpr(value) {
-  if (!value || typeof value !== 'object' || !exprKinds.has(value.type)) throw new Error(`typed generator: invalid expression ${value?.type ?? typeof value}`);
-  if (value.type === 'Member') validateExpr(value.object);
-  if (value.type === 'Index') { validateExpr(value.object); validateExpr(value.index); }
-  if (value.type === 'Call') value.args.forEach(validateExpr);
-  if (value.type === 'Unary') validateExpr(value.operand);
-  if (value.type === 'Binary') { validateExpr(value.left); validateExpr(value.right); }
-  if (value.type === 'Ternary') { validateExpr(value.test); if (value.then) validateExpr(value.then); validateExpr(value.else); }
-  if (value.type === 'List') value.items.forEach(item => validateExpr(item.type === 'Spread' ? item.expr : item));
-  if (value.type === 'Map') value.entries.forEach(item => item.type === 'Spread' ? validateExpr(item.expr) : (validateExpr(item.key), validateExpr(item.value)));
-}
-function validateNodes(body) {
-  if (!Array.isArray(body)) throw new Error('typed generator: node body must be an array');
-  for (const node of body) {
-    if (!node || !nodeKinds.has(node.type)) throw new Error(`typed generator: invalid node ${node?.type ?? typeof node}`);
-    if (node.type === 'Echo' || node.type === 'Set') validateExpr(node.expr);
-    if (node.type === 'If') { node.branches.forEach(branch => { validateExpr(branch.test); validateNodes(branch.body); }); if (node.else) validateNodes(node.else); }
-    if (node.type === 'For') { validateExpr(node.iter); validateNodes(node.body); if (node.empty) validateNodes(node.empty); }
-    if (node.type === 'Block') node.scope?.forEach(item => validateExpr(item.expr));
-    if (node.type === 'IfBlock') { validateNodes(node.body); if (node.else) validateNodes(node.else); }
-  }
-}
-if (ast?.type !== 'Template' || !Array.isArray(ast.body)) throw new Error('typed generator: input must be a canonical Template AST');
-validateNodes(ast.body);
 if (lang === 'ts') {
   target.loopMeta = (loop, field) => `loops[${quote(`${loop}.${field}`)}]`;
   target.index = (object, index) => `${object}?.[${index}]`;
@@ -152,7 +122,7 @@ if (lang === 'ts') {
   target.ternary = (test, thenValue, elseValue) => `(${test} ? ${thenValue} : ${elseValue})`;
   target.list = items => `[${items.map(item => item.spread ? `...${item.value}` : item.value).join(', ')}]`;
   target.map = entries => `new Map([${entries.map(item => item.spread ? `...${item.value}` : `[${item.value[0]}, ${item.value[1]}]`).join(', ')}])`;
-  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} else if' : 'if'} (Boolean(${expr(b.test, target, scope)})) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.else ? ` else {\n${nodes(node.else, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
+  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} else if' : 'if'} (Boolean(${expr(b.test, target, scope)})) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `for (const ${fieldName(node.name)} of (${expr(node.iter, target, scope)} ?? [])) {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'    '.repeat(n)}}${node.empty ? `\nif (!(${expr(node.iter, target, scope)}?.length)) {\n${nodes(node.empty, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`);
   target.include = (path, n) => indent(n, `out += include(${quote(path)});`);
 }
@@ -165,7 +135,7 @@ if (lang === 'go') {
   target.ternary = (test, thenValue, elseValue) => `generatedTruthy(${test}) ? ${thenValue} : ${elseValue}`;
   target.list = items => `[]any{${items.filter(item => !item.spread).map(item => item.value).join(', ')}}`;
   target.map = entries => `map[any]any{${entries.filter(item => !item.spread).map(item => `${item.value[0]}: ${item.value[1]}`).join(', ')}}`;
-  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'\t'.repeat(n)}${i ? '} else if' : 'if'} generatedTruthy(${expr(b.test, target, scope)}) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'\t'.repeat(n)}}${node.else ? ` else {\n${nodes(node.else, target, n + 1, scope)}\n${'\t'.repeat(n)}}` : ''}`;
+  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'\t'.repeat(n)}${i ? '} else if' : 'if'} generatedTruthy(${expr(b.test, target, scope)}) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'\t'.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'\t'.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `for _, ${fieldName(node.name)} := range ${expr(node.iter, target, scope)} {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'\t'.repeat(n)}}`);
   target.include = (path, n) => indent(n, `out.WriteString(include(${quote(path)}))`);
 }
@@ -178,7 +148,7 @@ if (lang === 'rust') {
   target.ternary = (test, thenValue, elseValue) => `if generated_truthy(&${test}) { ${thenValue} } else { ${elseValue} }`;
   target.list = items => `vec![${items.filter(item => !item.spread).map(item => item.value).join(', ')}]`;
   target.map = entries => `HashMap::from([${entries.filter(item => !item.spread).map(item => `(${item.value[0]}, ${item.value[1]})`).join(', ')}])`;
-  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} else if' : 'if'} generated_truthy(&${expr(b.test, target, scope)}) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.else ? ` else {\n${nodes(node.else, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
+  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} else if' : 'if'} generated_truthy(&${expr(b.test, target, scope)}) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `for ${fieldName(node.name)} in generated_entries(&${expr(node.iter, target, scope)}) {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'    '.repeat(n)}}`);
   target.include = (path, n) => indent(n, `out.push_str(&include(${quote(path)}));`);
 }
@@ -191,11 +161,11 @@ if (lang === 'php') {
   target.ternary = (test, thenValue, elseValue) => `(${test} ? ${thenValue} : ${elseValue})`;
   target.list = items => `[${items.filter(item => !item.spread).map(item => item.value).join(', ')}]`;
   target.map = entries => `[${entries.filter(item => !item.spread).map(item => `${item.value[0]} => ${item.value[1]}`).join(', ')}]`;
-  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} elseif' : 'if'} (generated_truthy(${expr(b.test, target, scope)})) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.else ? ` else {\n${nodes(node.else, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
+  target.ifNode = (node, n, scope = []) => node.branches.map((b, i) => `${'    '.repeat(n)}${i ? '} elseif' : 'if'} (generated_truthy(${expr(b.test, target, scope)})) {\n${nodes(b.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${nodes(node.otherwise, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
   target.forNode = (node, n, scope = []) => indent(n, `foreach (generated_entries(${expr(node.iter, target, scope)}) as ${fieldName(node.name)}) {\n${nodes(node.body, target, n + 1, [...scope, node.name])}\n${'    '.repeat(n)}}`);
   target.include = (path, n) => indent(n, `$out .= include_template(${quote(path)});`);
 }
-const body = nodes(ast.body, target, 1);
+const body = nodes(program.templates.get(program.entry).body, target, 1);
 const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
 const tsRecords = Object.entries(records).map(([name, members]) => `export interface ${name} {\n${Object.entries(members).map(([key, type]) => `  ${tsField(key, type)}`).join('\n')}\n}`).join('\n');
 const goRecords = Object.entries(records).map(([name, members]) => `type ${name} struct { ${Object.entries(members).map(([key, type]) => `${key[0].toUpperCase() + key.slice(1)} ${goType(type)}`).join('; ')} }`).join('\n');
