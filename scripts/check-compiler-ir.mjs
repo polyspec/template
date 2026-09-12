@@ -40,7 +40,7 @@ const manifest = {
   },
   records: { Page: { title: 'string?' }, Row: { name: 'string' }, Slot: { template: 'string?', html: 'string?' } },
   defines: { content: { template: 'card.tpl', optional: true, html: true } },
-  functions: { default: { args: ['any', 'any'], returns: 'any' } },
+  functions: { default: { implementation: 'builtin', args: ['any', 'any'], returns: 'any' } },
   templates: { 'partial.tpl': { local: 'string' }, 'card.tpl': { label: 'string' } },
 };
 
@@ -85,6 +85,15 @@ try {
   throw new Error('compiler IR accepted an undeclared variable');
 } catch (error) {
   if (!String(error).includes('undeclared')) throw error;
+}
+
+const unsupportedFunction = structuredClone(manifest);
+unsupportedFunction.functions.custom = { implementation: 'host', args: ['string'], returns: 'string' };
+try {
+  lowerSourceGraph(graph, unsupportedFunction);
+  throw new Error('compiler IR accepted a function outside the generated-module support level');
+} catch (error) {
+  if (!String(error).includes('generated-module level')) throw error;
 }
 
 process.stdout.write('compiler IR: all node and expression variants lowered; invalid symbols rejected\n');

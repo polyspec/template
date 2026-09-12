@@ -11,6 +11,10 @@
       "fields": ["entry", "fields", "records", "functions", "defines", "templates"],
       "invariant": "Types and fixed definition targets are explicit compiler inputs and are never inferred from one request value."
     },
+    "FunctionSignature": {
+      "fields": ["implementation", "args", "returns"],
+      "invariant": "The generated-module level accepts only explicitly supported built-ins; unsupported built-ins and host functions fail before source emission."
+    },
     "TypedProgram": {
       "fields": ["entry", "fields", "records", "functions", "definitions", "templates"],
       "invariant": "All symbols, paths, expression types and block inputs are resolved before a language backend runs."

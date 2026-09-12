@@ -1,5 +1,8 @@
 {
   "flag": true,
+  "dangerous": "&<>\"'",
+  "empty_list": [],
+  "empty_map": {},
   "page": { "title": "Guide" },
   "numbers": [10, 20],
   "lookup": { "x": "X" },

@@ -79,7 +79,17 @@ fn generated_compiler_coverage__layout_tpl(root: &Map<String, Value>, define: &D
     ctx.insert("merged".to_string(), generated_map(vec![GeneratedCollectionItem { key: Value::Null, value: generated_lookup(&ctx, root, "lookup"), spread: true }, GeneratedCollectionItem { key: Value::String("z".to_string()), value: Value::String("Z".to_string()), spread: false }]));
     out.push_str("<section>\n<h1>");
     generated_echo_full(&mut out, generated_member(generated_lookup(&ctx, root, "page"), "title"))?;
-    out.push_str("</h1>\n<p>");
+    out.push_str("</h1>\n<p class=\"escaped\">");
+    generated_echo_full(&mut out, generated_lookup(&ctx, root, "dangerous"))?;
+    out.push_str("</p>\n<p class=\"logical\">");
+    generated_echo_full(&mut out, generated_binary_full("&&", generated_lookup(&ctx, root, "flag"), Value::String("x".to_string())))?;
+    out.push_str("|");
+    generated_echo_full(&mut out, generated_binary_full("||", serde_json::json!(false), serde_json::json!(2)))?;
+    out.push_str("</p>\n<p class=\"empty-truthiness\">");
+    generated_echo_full(&mut out, generated_binary_full("&&", generated_lookup(&ctx, root, "empty_list"), generated_lookup(&ctx, root, "flag")))?;
+    out.push_str("|");
+    generated_echo_full(&mut out, generated_binary_full("&&", generated_lookup(&ctx, root, "empty_map"), generated_lookup(&ctx, root, "flag")))?;
+    out.push_str("</p>\n<p>");
     generated_echo_full(&mut out, generated_index(generated_lookup(&ctx, root, "values"), serde_json::json!(1)))?;
     out.push_str("|");
     generated_echo_full(&mut out, generated_index(generated_lookup(&ctx, root, "merged"), Value::String("z".to_string())))?;
