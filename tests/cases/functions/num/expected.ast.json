@@ -1,0 +1,176 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "num",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "12",
+            "span": [
+              7,
+              11
+            ]
+          }
+        ],
+        "span": [
+          3,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        13,
+        14
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "num",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": " 3.5 ",
+            "span": [
+              21,
+              28
+            ]
+          }
+        ],
+        "span": [
+          17,
+          29
+        ]
+      },
+      "span": [
+        14,
+        30
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        30,
+        31
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "num",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "bool",
+            "value": true,
+            "span": [
+              38,
+              42
+            ]
+          }
+        ],
+        "span": [
+          34,
+          43
+        ]
+      },
+      "span": [
+        31,
+        44
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        44,
+        45
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "num",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "null",
+            "value": null,
+            "span": [
+              52,
+              56
+            ]
+          }
+        ],
+        "span": [
+          48,
+          57
+        ]
+      },
+      "span": [
+        45,
+        58
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        58,
+        59
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "num",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "1e2",
+            "span": [
+              66,
+              71
+            ]
+          }
+        ],
+        "span": [
+          62,
+          72
+        ]
+      },
+      "span": [
+        59,
+        73
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        73,
+        74
+      ]
+    }
+  ]
+}

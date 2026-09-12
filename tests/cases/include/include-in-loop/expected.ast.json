@@ -1,0 +1,49 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<ul>\n",
+      "span": [
+        0,
+        5
+      ]
+    },
+    {
+      "type": "For",
+      "name": "item",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          15,
+          20
+        ]
+      },
+      "body": [
+        {
+          "type": "Include",
+          "path": "li.tpl",
+          "span": [
+            22,
+            32
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        5,
+        36
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</ul>\n",
+      "span": [
+        37,
+        43
+      ]
+    }
+  ]
+}

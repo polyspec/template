@@ -1,0 +1,65 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<span>",
+      "span": [
+        0,
+        6
+      ]
+    },
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Var",
+            "name": "on",
+            "span": [
+              9,
+              11
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "on",
+              "span": [
+                12,
+                14
+              ]
+            }
+          ],
+          "span": [
+            6,
+            12
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "off",
+          "span": [
+            17,
+            20
+          ]
+        }
+      ],
+      "span": [
+        6,
+        23
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</span>\n",
+      "span": [
+        23,
+        31
+      ]
+    }
+  ]
+}

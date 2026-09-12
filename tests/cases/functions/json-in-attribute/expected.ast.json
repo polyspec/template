@@ -1,0 +1,123 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<div id=\"app\" data-state=\"",
+      "span": [
+        0,
+        26
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "json",
+        "args": [
+          {
+            "type": "Var",
+            "name": "state",
+            "span": [
+              34,
+              39
+            ]
+          }
+        ],
+        "span": [
+          29,
+          40
+        ]
+      },
+      "span": [
+        26,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\"></div>\n<div id=\"app2\" data-state='",
+      "span": [
+        41,
+        77
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "json",
+        "args": [
+          {
+            "type": "Var",
+            "name": "state",
+            "span": [
+              85,
+              90
+            ]
+          }
+        ],
+        "span": [
+          80,
+          91
+        ]
+      },
+      "span": [
+        77,
+        92
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "'></div>\n<script type=\"application/json\">",
+      "span": [
+        92,
+        133
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "state",
+                "span": [
+                  141,
+                  146
+                ]
+              }
+            ],
+            "span": [
+              136,
+              147
+            ]
+          }
+        ],
+        "span": [
+          136,
+          153
+        ]
+      },
+      "span": [
+        133,
+        154
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</script>\n",
+      "span": [
+        154,
+        164
+      ]
+    }
+  ]
+}

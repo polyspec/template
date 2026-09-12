@@ -1,0 +1,6 @@
+{
+  "code": "E_PARSE_ELSEIF_NOT_IN_IF",
+  "template": "input.tpl",
+  "line": 2,
+  "col": 1
+}

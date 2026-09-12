@@ -1,0 +1,208 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "sort",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      13,
+                      14
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  15
+                ]
+              }
+            ],
+            "span": [
+              3,
+              16
+            ]
+          }
+        ],
+        "span": [
+          3,
+          22
+        ]
+      },
+      "span": [
+        0,
+        23
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        23,
+        24
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "sort",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "s",
+                    "span": [
+                      37,
+                      38
+                    ]
+                  }
+                ],
+                "span": [
+                  32,
+                  39
+                ]
+              }
+            ],
+            "span": [
+              27,
+              40
+            ]
+          }
+        ],
+        "span": [
+          27,
+          46
+        ]
+      },
+      "span": [
+        24,
+        47
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        47,
+        48
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "l",
+                "span": [
+                  56,
+                  57
+                ]
+              }
+            ],
+            "span": [
+              51,
+              58
+            ]
+          }
+        ],
+        "span": [
+          51,
+          64
+        ]
+      },
+      "span": [
+        48,
+        65
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        65,
+        66
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "sort",
+                "args": [
+                  {
+                    "type": "List",
+                    "items": [],
+                    "span": [
+                      79,
+                      81
+                    ]
+                  }
+                ],
+                "span": [
+                  74,
+                  82
+                ]
+              }
+            ],
+            "span": [
+              69,
+              83
+            ]
+          }
+        ],
+        "span": [
+          69,
+          89
+        ]
+      },
+      "span": [
+        66,
+        90
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        90,
+        91
+      ]
+    }
+  ]
+}

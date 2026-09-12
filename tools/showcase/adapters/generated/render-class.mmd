@@ -1,0 +1,40 @@
+classDiagram
+    class Adapter {
+        +path root
+        +Engine engine
+        +Adapter(root) Adapter
+        +loadScenario() Scenario
+        +buildRequest(Scenario) RenderRequest
+        +render(RenderRequest) string
+        +renderTwice(RenderRequest) RepeatResult
+    }
+    class Scenario {
+        +string target
+        +JsonObject assign
+        +DefineRegistry define
+        +Environment? env
+    }
+    class RenderRequest {
+        +string target
+        +JsonObject assign
+        +DefineRegistry define
+        +Environment? env
+    }
+    class Environment {
+        +string? timezone
+        +number? now
+    }
+    class RepeatResult {
+        +string first
+        +string second
+    }
+    class DefineEntry {
+        +string template
+        +JsonObject data
+        +string html
+    }
+    Adapter *-- Scenario : loads
+    Scenario *-- RenderRequest : buildRequest transfers fields
+    RenderRequest *-- DefineEntry : owns define entries
+    RenderRequest o-- Environment : optional
+    DefineEntry --> DefineEntry : template data is ordered object

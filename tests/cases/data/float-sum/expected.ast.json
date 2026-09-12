@@ -1,0 +1,146 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 0.1,
+          "span": [
+            3,
+            6
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 0.2,
+          "span": [
+            9,
+            12
+          ]
+        },
+        "span": [
+          3,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        13,
+        14
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Binary",
+          "op": "+",
+          "left": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 0.1,
+            "span": [
+              17,
+              20
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 0.2,
+            "span": [
+              23,
+              26
+            ]
+          },
+          "span": [
+            17,
+            26
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 0.3,
+          "span": [
+            30,
+            33
+          ]
+        },
+        "span": [
+          17,
+          33
+        ]
+      },
+      "span": [
+        14,
+        34
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        34,
+        35
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "*",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1.1,
+          "span": [
+            38,
+            41
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 3,
+          "span": [
+            44,
+            45
+          ]
+        },
+        "span": [
+          38,
+          45
+        ]
+      },
+      "span": [
+        35,
+        46
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        46,
+        47
+      ]
+    }
+  ]
+}

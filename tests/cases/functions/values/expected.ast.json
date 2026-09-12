@@ -1,0 +1,112 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "values",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "m",
+                    "span": [
+                      15,
+                      16
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  17
+                ]
+              }
+            ],
+            "span": [
+              3,
+              18
+            ]
+          }
+        ],
+        "span": [
+          3,
+          24
+        ]
+      },
+      "span": [
+        0,
+        25
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        25,
+        26
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "values",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      41,
+                      42
+                    ]
+                  }
+                ],
+                "span": [
+                  34,
+                  43
+                ]
+              }
+            ],
+            "span": [
+              29,
+              44
+            ]
+          }
+        ],
+        "span": [
+          29,
+          50
+        ]
+      },
+      "span": [
+        26,
+        51
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        51,
+        52
+      ]
+    }
+  ]
+}

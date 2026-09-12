@@ -1,0 +1,305 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2.675,
+            "span": [
+              10,
+              15
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              17,
+              18
+            ]
+          }
+        ],
+        "span": [
+          3,
+          19
+        ]
+      },
+      "span": [
+        0,
+        20
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        20,
+        21
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1.005,
+            "span": [
+              31,
+              36
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              38,
+              39
+            ]
+          }
+        ],
+        "span": [
+          24,
+          40
+        ]
+      },
+      "span": [
+        21,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        41,
+        42
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Unary",
+            "op": "-",
+            "operand": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 2.5,
+              "span": [
+                53,
+                56
+              ]
+            },
+            "span": [
+              52,
+              56
+            ]
+          }
+        ],
+        "span": [
+          45,
+          57
+        ]
+      },
+      "span": [
+        42,
+        58
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        58,
+        59
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Unary",
+            "op": "-",
+            "operand": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 0.001,
+              "span": [
+                70,
+                75
+              ]
+            },
+            "span": [
+              69,
+              75
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              77,
+              78
+            ]
+          }
+        ],
+        "span": [
+          62,
+          79
+        ]
+      },
+      "span": [
+        59,
+        80
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        80,
+        81
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1234567.891,
+            "span": [
+              91,
+              102
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              104,
+              105
+            ]
+          }
+        ],
+        "span": [
+          84,
+          106
+        ]
+      },
+      "span": [
+        81,
+        107
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        107,
+        108
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 0.5,
+            "span": [
+              118,
+              121
+            ]
+          }
+        ],
+        "span": [
+          111,
+          122
+        ]
+      },
+      "span": [
+        108,
+        123
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        123,
+        124
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1.45,
+            "span": [
+              134,
+              138
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              140,
+              141
+            ]
+          }
+        ],
+        "span": [
+          127,
+          142
+        ]
+      },
+      "span": [
+        124,
+        143
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        143,
+        144
+      ]
+    }
+  ]
+}

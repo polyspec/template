@@ -1,0 +1,178 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Call",
+            "name": "now",
+            "args": [],
+            "span": [
+              8,
+              13
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d H:i:s",
+            "span": [
+              15,
+              28
+            ]
+          }
+        ],
+        "span": [
+          3,
+          29
+        ]
+      },
+      "span": [
+        0,
+        30
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        30,
+        31
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 0,
+            "span": [
+              39,
+              40
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d H:i:s P",
+            "span": [
+              42,
+              57
+            ]
+          }
+        ],
+        "span": [
+          34,
+          58
+        ]
+      },
+      "span": [
+        31,
+        59
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        59,
+        60
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2026-01-02",
+            "span": [
+              68,
+              80
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d H:i",
+            "span": [
+              82,
+              93
+            ]
+          }
+        ],
+        "span": [
+          63,
+          94
+        ]
+      },
+      "span": [
+        60,
+        95
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        95,
+        96
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "null",
+            "value": null,
+            "span": [
+              104,
+              108
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y",
+            "span": [
+              110,
+              113
+            ]
+          }
+        ],
+        "span": [
+          99,
+          114
+        ]
+      },
+      "span": [
+        96,
+        115
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "[end]\n",
+      "span": [
+        115,
+        121
+      ]
+    }
+  ]
+}

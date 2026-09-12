@@ -1,0 +1,59 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "item",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          10,
+          15
+        ]
+      },
+      "body": [
+        {
+          "type": "Block",
+          "id": null,
+          "path": "card.tpl",
+          "scope": [
+            {
+              "name": "item",
+              "expr": {
+                "type": "Var",
+                "name": "item",
+                "span": [
+                  29,
+                  33
+                ]
+              }
+            },
+            {
+              "name": "no",
+              "expr": {
+                "type": "LoopMeta",
+                "loop": "item",
+                "field": "index_",
+                "span": [
+                  37,
+                  48
+                ]
+              }
+            }
+          ],
+          "span": [
+            17,
+            49
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        53
+      ]
+    }
+  ]
+}

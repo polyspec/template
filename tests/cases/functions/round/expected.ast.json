@@ -1,0 +1,245 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "round",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2.5,
+            "span": [
+              9,
+              12
+            ]
+          }
+        ],
+        "span": [
+          3,
+          13
+        ]
+      },
+      "span": [
+        0,
+        14
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        14,
+        15
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "round",
+        "args": [
+          {
+            "type": "Unary",
+            "op": "-",
+            "operand": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 2.5,
+              "span": [
+                25,
+                28
+              ]
+            },
+            "span": [
+              24,
+              28
+            ]
+          }
+        ],
+        "span": [
+          18,
+          29
+        ]
+      },
+      "span": [
+        15,
+        30
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        30,
+        31
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "round",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2.675,
+            "span": [
+              40,
+              45
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              47,
+              48
+            ]
+          }
+        ],
+        "span": [
+          34,
+          49
+        ]
+      },
+      "span": [
+        31,
+        50
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        50,
+        51
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "round",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1.005,
+            "span": [
+              60,
+              65
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              67,
+              68
+            ]
+          }
+        ],
+        "span": [
+          54,
+          69
+        ]
+      },
+      "span": [
+        51,
+        70
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        70,
+        71
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "round",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 3.14159,
+            "span": [
+              80,
+              87
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 3,
+            "span": [
+              89,
+              90
+            ]
+          }
+        ],
+        "span": [
+          74,
+          91
+        ]
+      },
+      "span": [
+        71,
+        92
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        92,
+        93
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "round",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 7,
+            "span": [
+              102,
+              103
+            ]
+          }
+        ],
+        "span": [
+          96,
+          104
+        ]
+      },
+      "span": [
+        93,
+        105
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        105,
+        106
+      ]
+    }
+  ]
+}

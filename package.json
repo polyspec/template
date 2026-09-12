@@ -1,0 +1,43 @@
+{
+  "name": "@polyspec/template-workspace",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Template language with one specification and TypeScript, Go, Rust and PHP implementations",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @polyspec/template",
+    "lint": "eslint packages/template-ts/src",
+    "typecheck": "npm run typecheck -w @polyspec/template",
+    "test": "node tests/runner/conformance.mjs",
+    "test:browser": "playwright test",
+    "docs:check": "node scripts/check-documents.mjs",
+    "schema:check": "node scripts/check-schema.mjs",
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:coverage": "node scripts/check-doc-coverage.mjs",
+    "bench": "node tools/bench/run.mjs"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=26"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "eslint": "^10.5.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.0",
+    "vitepress": "^1.6.4"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.21.5": true,
+    "fsevents@2.3.3": true
+  }
+}

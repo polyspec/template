@@ -1,0 +1,6 @@
+{
+  "name": "scope-precedence",
+  "description": "A definition with data and scope arguments, including isolation of layout locals.",
+  "measurements": 5,
+  "target": "layout"
+}

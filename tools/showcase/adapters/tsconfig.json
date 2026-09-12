@@ -1,0 +1,14 @@
+{
+  "extends": "../../../packages/template-ts/tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  },
+  "include": [
+    "typescript.ts",
+    "generated/render_adapter.ts"
+  ]
+}

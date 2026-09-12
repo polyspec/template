@@ -1,0 +1,185 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "%",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 7,
+          "span": [
+            3,
+            4
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 3,
+          "span": [
+            7,
+            8
+          ]
+        },
+        "span": [
+          3,
+          8
+        ]
+      },
+      "span": [
+        0,
+        9
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        9,
+        10
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "%",
+        "left": {
+          "type": "Unary",
+          "op": "-",
+          "operand": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 7,
+            "span": [
+              14,
+              15
+            ]
+          },
+          "span": [
+            13,
+            15
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 3,
+          "span": [
+            18,
+            19
+          ]
+        },
+        "span": [
+          13,
+          19
+        ]
+      },
+      "span": [
+        10,
+        20
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        20,
+        21
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "%",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 7,
+          "span": [
+            24,
+            25
+          ]
+        },
+        "right": {
+          "type": "Unary",
+          "op": "-",
+          "operand": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 3,
+            "span": [
+              29,
+              30
+            ]
+          },
+          "span": [
+            28,
+            30
+          ]
+        },
+        "span": [
+          24,
+          30
+        ]
+      },
+      "span": [
+        21,
+        31
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        31,
+        32
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "%",
+        "left": {
+          "type": "Var",
+          "name": "s",
+          "span": [
+            35,
+            36
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2,
+          "span": [
+            39,
+            40
+          ]
+        },
+        "span": [
+          35,
+          40
+        ]
+      },
+      "span": [
+        32,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        41,
+        42
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "ends_with",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "hello",
+            "span": [
+              13,
+              20
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "lo",
+            "span": [
+              22,
+              26
+            ]
+          }
+        ],
+        "span": [
+          3,
+          27
+        ]
+      },
+      "span": [
+        0,
+        28
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        28,
+        29
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "ends_with",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "hello",
+            "span": [
+              42,
+              49
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "he",
+            "span": [
+              51,
+              55
+            ]
+          }
+        ],
+        "span": [
+          32,
+          56
+        ]
+      },
+      "span": [
+        29,
+        57
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        57,
+        58
+      ]
+    }
+  ]
+}

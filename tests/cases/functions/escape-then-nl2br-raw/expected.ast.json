@@ -1,0 +1,59 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "nl2br",
+            "args": [
+              {
+                "type": "Call",
+                "name": "escape",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "text",
+                    "span": [
+                      3,
+                      7
+                    ]
+                  }
+                ],
+                "span": [
+                  3,
+                  16
+                ]
+              }
+            ],
+            "span": [
+              3,
+              24
+            ]
+          }
+        ],
+        "span": [
+          3,
+          30
+        ]
+      },
+      "span": [
+        0,
+        31
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        31,
+        32
+      ]
+    }
+  ]
+}

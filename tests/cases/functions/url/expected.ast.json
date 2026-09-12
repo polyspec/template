@@ -1,0 +1,117 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "url",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              7,
+              8
+            ]
+          }
+        ],
+        "span": [
+          3,
+          9
+        ]
+      },
+      "span": [
+        0,
+        10
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        10,
+        11
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "url",
+            "args": [
+              {
+                "type": "Literal",
+                "kind": "string",
+                "value": "x",
+                "span": [
+                  18,
+                  21
+                ]
+              }
+            ],
+            "span": [
+              14,
+              22
+            ]
+          }
+        ],
+        "span": [
+          14,
+          28
+        ]
+      },
+      "span": [
+        11,
+        29
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        29,
+        30
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "url",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 123,
+            "span": [
+              37,
+              40
+            ]
+          }
+        ],
+        "span": [
+          33,
+          41
+        ]
+      },
+      "span": [
+        30,
+        42
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        42,
+        43
+      ]
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "url",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "a b/c?d=1&e=2",
+            "span": [
+              7,
+              22
+            ]
+          }
+        ],
+        "span": [
+          3,
+          23
+        ]
+      },
+      "span": [
+        0,
+        24
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        24,
+        25
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "url",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "é~-_.",
+            "span": [
+              32,
+              40
+            ]
+          }
+        ],
+        "span": [
+          28,
+          41
+        ]
+      },
+      "span": [
+        25,
+        42
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        42,
+        43
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "url",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "%",
+            "span": [
+              50,
+              53
+            ]
+          }
+        ],
+        "span": [
+          46,
+          54
+        ]
+      },
+      "span": [
+        43,
+        55
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        55,
+        56
+      ]
+    }
+  ]
+}

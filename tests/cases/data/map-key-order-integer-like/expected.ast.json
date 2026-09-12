@@ -1,0 +1,184 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "v",
+      "iter": {
+        "type": "Var",
+        "name": "m",
+        "span": [
+          7,
+          8
+        ]
+      },
+      "body": [
+        {
+          "type": "Text",
+          "value": "[",
+          "span": [
+            9,
+            10
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "v",
+            "field": "key_",
+            "span": [
+              13,
+              19
+            ]
+          },
+          "span": [
+            10,
+            20
+          ]
+        },
+        {
+          "type": "Text",
+          "value": ":",
+          "span": [
+            20,
+            21
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "v",
+            "span": [
+              24,
+              25
+            ]
+          },
+          "span": [
+            21,
+            26
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "]",
+          "span": [
+            26,
+            27
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        30
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        30,
+        31
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "m",
+                "span": [
+                  39,
+                  40
+                ]
+              }
+            ],
+            "span": [
+              34,
+              41
+            ]
+          }
+        ],
+        "span": [
+          34,
+          47
+        ]
+      },
+      "span": [
+        31,
+        48
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        48,
+        49
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "keys",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "m",
+                    "span": [
+                      62,
+                      63
+                    ]
+                  }
+                ],
+                "span": [
+                  57,
+                  64
+                ]
+              }
+            ],
+            "span": [
+              52,
+              65
+            ]
+          }
+        ],
+        "span": [
+          52,
+          71
+        ]
+      },
+      "span": [
+        49,
+        72
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        72,
+        73
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "empty-state",
+  "description": "A layout target whose if-block selects a missing-definition branch.",
+  "measurements": 5,
+  "target": "layout"
+}

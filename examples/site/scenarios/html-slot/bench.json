@@ -1,0 +1,6 @@
+{
+  "name": "html-slot",
+  "description": "A layout target with a pre-rendered HTML definition and escaped assigned text.",
+  "measurements": 5,
+  "target": "layout"
+}

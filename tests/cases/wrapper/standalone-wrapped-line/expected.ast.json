@@ -1,0 +1,72 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<ul>\n",
+      "span": [
+        0,
+        5
+      ]
+    },
+    {
+      "type": "For",
+      "name": "i",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          18,
+          23
+        ]
+      },
+      "body": [
+        {
+          "type": "Text",
+          "value": "<li>",
+          "span": [
+            30,
+            34
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "i",
+            "span": [
+              37,
+              38
+            ]
+          },
+          "span": [
+            34,
+            39
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "</li>\n",
+          "span": [
+            39,
+            45
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        5,
+        59
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</ul>\n",
+      "span": [
+        60,
+        66
+      ]
+    }
+  ]
+}

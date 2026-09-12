@@ -1,0 +1,4 @@
+{
+  "name": "composition",
+  "description": "A layout with an include, template definitions, a nested definition and scope arguments."
+}

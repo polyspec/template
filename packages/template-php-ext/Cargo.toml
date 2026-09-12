@@ -1,0 +1,20 @@
+[package]
+name = "polyspec-template-php"
+version = "0.0.1"
+edition = "2024"
+description = "PHP extension that renders templates with the Rust implementation"
+license = "MIT"
+publish = false
+
+[lib]
+name = "polyspec_template"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+ext-php-rs = "0.15.15"
+polyspec-template = { path = "../template-rust" }
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+
+[profile.release]
+debug = false

@@ -1,0 +1,41 @@
+# Changelog
+
+[한국어](CHANGELOG.ko.md).
+
+## Unreleased
+
+### 2026-09-11
+
+- Created the repository with the development rules, the top-level documents, the Makefile, the document checker and the execution checklist.
+- Verification: `make docs-check` passed. No package exists yet; `make check` is not run.
+- Added the specification: lexical rules, tag grammar, expressions, data model, functions, runtime, AST with JSON Schema, errors, conformance and a complete example. Reviewed the documents together: loop meta nodes accept further accessors, `{:?}` inside a loop or if-block reports `E_PARSE_ELSEIF_NOT_IN_IF`, wrapped tags (`"{{= x}}"`, `/* {{= x}} */`, `<!-- {{# id}} -->`) and configurable delimiters (engine option and `{% delimiter ;;}` directive) were added, and the tag end is defined by grammar acceptance of the close delimiter.
+- Added the conformance runner, the parity runner, the language drivers and the schema checker.
+- Verification: `make docs-check` passed with 19 document pairs; `node scripts/check-schema.mjs` passed with zero fixtures.
+- Added the TypeScript implementation `@polyspec/template`: source, expression lexer and parser, template parser with standalone lines, wrapped tags and delimiter directive, value model with order-preserving JSON parser, built-in functions, renderer with block registry and limits, map and filesystem loaders, render-only entry, CLI, unit tests and the browser test. Generated the remaining `expected.ast.json` files with the TypeScript parser and validated them against the schema.
+- Refined the tag start rule: `/` starts a tag only before the close delimiter and `@` only before `name =`; `{/* */}`, `{/re/}` and `{ @media }` are text. Defined the positions of operator errors as the start of the failing expression, made `+` with a list or map operand `E_RUNTIME_STRINGIFY`, and limited the integer range check to integer literals and integer-typed host values.
+- Added the Go implementation `github.com/polyspec/template` and the Rust crate `polyspec-template` with the same module split, unit tests, conformance and expression fixture tests and CLIs. Serialized integer-valued number literals as JSON integers in the Rust AST output. Replaced `cargo` with the `CARGO` variable in the Makefile because GNU Make 3.81 does not apply the exported PATH to directly executed commands.
+- Added the PHP implementation `polyspec/template` with the same module split, unit tests, conformance and expression fixture tests and the CLI. `vendor/bin/phpunit` passed 506 tests; `node tests/runner/conformance.mjs --langs ts,php` passed 418 of 418; `node tests/runner/parity.mjs --langs ts,php` reported no divergence.
+- Verification of the four implementations: `node tests/runner/conformance.mjs` passed 836 of 836 checks over 209 cases; `node tests/runner/parity.mjs` reported no divergence across ts, go, rust and php.
+- Verification: `npm test -w @polyspec/template -- --run` passed 471 tests; `node tests/runner/conformance.mjs --langs ts` passed 209 of 209 cases; `make test-browser` passed; `npm run lint` and `npm run typecheck -w @polyspec/template` passed; `make docs-check` passed with 21 document pairs.
+- Optimized the Rust implementation by sharing list and map storage across cloned values, borrowing unchanged text during HTML escaping, preallocating bound maps, borrowing the function environment and using typed AST operators. Updated the PHP extension conversions for shared values.
+- Verification: `make doc-coverage` passed; `make check` passed lint, the four package unit suites and 1050 of 1050 conformance checks over 210 cases and five implementations; `make test-ext` built the PHP extension and passed 210 of 210 conformance cases and 235 extension tests; `make bench BENCH_ITERS=3000 BENCH_WARMUP=300` passed its output equality check and wrote the benchmark results.
+- Separated assigned variables from template definitions in the render APIs. Renamed the host registry, fixture file and CLI option from `blocks` to `define`, accepted string template paths, and allowed a target ID such as `layout` to resolve through its template definition. Updated all implementations, browser and benchmark drivers, fixtures and documentation.
+- Verification: `npm test -w @polyspec/template -- --run` passed 650 tests; `vendor/bin/phpunit` passed 510 tests; `node tests/runner/conformance.mjs --langs ts,go,rust,php` passed 844 of 844 checks over 211 cases; `make test-browser` passed; `make test-ext` passed 211 of 211 conformance cases and 236 extension tests; `make docs-check` passed with 29 document pairs.
+- Added an executable example site with four application situations: a controller-style layout page, define data and scope precedence, a pre-rendered HTML slot and an empty definition branch. The site records the rendered HTML, cross-language hashes, repeatability checks and per-scenario throughput for ts, go, rust, php and php-ext.
+- Verification: `make showcase` passed all 20 implementation-scenario comparisons and wrote 20 benchmark measurements; `make showcase-check` passed the browser proof.
+### 2026-09-12
+
+- Added the prepared render contract to the Rust, Go, TypeScript and PHP runtimes. `prepare` binds assign and define data and resolves the parsed target once; repeated `render` calls reuse that state. Updated benchmark drivers, runtime specification, feature status and the static showcase performance description.
+- Verification: Rust and Go package checks passed; TypeScript build and PHP syntax checks passed. Full cross-language verification and benchmark rerun remain required before this change is marked complete.
+
+
+- Added `tools/consumer/php-path-check.mjs` and `tools/consumer/php-runner.php` for a real Composer path dependency check: a temporary consumer installs `polyspec/template` without a symlink, loads it through Composer, and renders the platform snapshot through `FilesystemLoader`.
+
+- Simplified every example to shared templates, mock assign data, a define registry and the `layout` render target. Removed the PHP controller oracle, authentication/DI/YAML fixtures, temporary Composer consumer scripts and external checkout lookup. Kept the full portal template bytes and source hashes; the site now exposes templates and mock inputs. Reopened T7.3 because template examples do not complete consuming application integration. Relabeled benchmark P95 as the percentile of sample means.
+- Verification after simplification: `make showcase` passed 25 implementation-scenario pairs and recorded 125 benchmark samples. All output bytes and hashes matched the previous artifacts. `make showcase-check` passed raw output comparisons and the browser test for shared mock inputs and templates; `make docs-check` passed 30 document pairs.
+- Defined the cross-language render contract in RT-43–RT-48 with Mermaid diagrams, a JSON request shape and adapter rules. Standardized every showcase `define.json` entry on the object form, added build-time contract validation, and updated the Go, Rust, TypeScript and JavaScript examples to read the same scenario inputs.
+- Made `tools/showcase/adapters/interface.json` the source for adapter types, fields, ownership, operations, errors and state transitions. Added generated declarations and Mermaid diagrams, compile/reflection/runtime contract checks for TypeScript, JavaScript, Go, Rust and PHP, and a failure-recovery proof over every showcase scenario.
+- Verification: `make check`, `make showcase`, `make showcase-check` and `make docs-check` passed; the contract gate covered 1055 of 1055 conformance checks over 211 cases and all 25 showcase implementation-scenario pairs.
+- Configured the online documentation as a static VitePress artifact with a repository-aware base path, added a GitHub Pages deployment workflow and `make docs-static-check`, and synchronized the publication procedure and execution checklist.
+- Fixed the published VitePress theme interpolation, converted the document index entries into working links, and assigned a Korean sidebar to every `.ko` route so language navigation stays Korean.
+- Simplified showcase template registrations to direct identifier-to-path values, kept object entries only for definition data or finished HTML, and opened the portal's assign JSON and both source templates on the example page.

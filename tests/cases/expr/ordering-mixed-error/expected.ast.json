@@ -1,0 +1,47 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "<",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 10,
+          "span": [
+            3,
+            5
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "9",
+          "span": [
+            8,
+            11
+          ]
+        },
+        "span": [
+          3,
+          11
+        ]
+      },
+      "span": [
+        0,
+        12
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        12,
+        13
+      ]
+    }
+  ]
+}

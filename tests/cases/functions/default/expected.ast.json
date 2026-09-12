@@ -1,0 +1,296 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "default",
+        "args": [
+          {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              11,
+              12
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "x",
+            "span": [
+              14,
+              17
+            ]
+          }
+        ],
+        "span": [
+          3,
+          18
+        ]
+      },
+      "span": [
+        0,
+        19
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        19,
+        20
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "default",
+        "args": [
+          {
+            "type": "Var",
+            "name": "b",
+            "span": [
+              31,
+              32
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "x",
+            "span": [
+              34,
+              37
+            ]
+          }
+        ],
+        "span": [
+          23,
+          38
+        ]
+      },
+      "span": [
+        20,
+        39
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        39,
+        40
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "default",
+        "args": [
+          {
+            "type": "Var",
+            "name": "c",
+            "span": [
+              51,
+              52
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "x",
+            "span": [
+              54,
+              57
+            ]
+          }
+        ],
+        "span": [
+          43,
+          58
+        ]
+      },
+      "span": [
+        40,
+        59
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        59,
+        60
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "default",
+        "args": [
+          {
+            "type": "Var",
+            "name": "d",
+            "span": [
+              71,
+              72
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "x",
+            "span": [
+              74,
+              77
+            ]
+          }
+        ],
+        "span": [
+          63,
+          78
+        ]
+      },
+      "span": [
+        60,
+        79
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        79,
+        80
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "default",
+        "args": [
+          {
+            "type": "Var",
+            "name": "e",
+            "span": [
+              91,
+              92
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "x",
+            "span": [
+              94,
+              97
+            ]
+          }
+        ],
+        "span": [
+          83,
+          98
+        ]
+      },
+      "span": [
+        80,
+        99
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        99,
+        100
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "??",
+        "left": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            103,
+            104
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "y",
+          "span": [
+            108,
+            111
+          ]
+        },
+        "span": [
+          103,
+          111
+        ]
+      },
+      "span": [
+        100,
+        112
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n[",
+      "span": [
+        112,
+        114
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "??",
+        "left": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            117,
+            118
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "y",
+          "span": [
+            122,
+            125
+          ]
+        },
+        "span": [
+          117,
+          125
+        ]
+      },
+      "span": [
+        114,
+        126
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "]\n",
+      "span": [
+        126,
+        128
+      ]
+    }
+  ]
+}

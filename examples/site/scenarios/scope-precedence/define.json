@@ -1,0 +1,10 @@
+{
+  "layout": "layout.tpl",
+  "content": {
+    "template": "content.tpl",
+    "data": {
+      "title": "from define data",
+      "defined_label": "definition data"
+    }
+  }
+}
