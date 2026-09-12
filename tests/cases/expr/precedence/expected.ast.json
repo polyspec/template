@@ -1,0 +1,104 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Binary",
+          "op": "==",
+          "left": {
+            "type": "Binary",
+            "op": "+",
+            "left": {
+              "type": "Var",
+              "name": "a",
+              "span": [
+                3,
+                4
+              ]
+            },
+            "right": {
+              "type": "Binary",
+              "op": "*",
+              "left": {
+                "type": "Literal",
+                "kind": "number",
+                "value": 2,
+                "span": [
+                  7,
+                  8
+                ]
+              },
+              "right": {
+                "type": "Literal",
+                "kind": "number",
+                "value": 3,
+                "span": [
+                  11,
+                  12
+                ]
+              },
+              "span": [
+                7,
+                12
+              ]
+            },
+            "span": [
+              3,
+              12
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 8,
+            "span": [
+              16,
+              17
+            ]
+          },
+          "span": [
+            3,
+            17
+          ]
+        },
+        "right": {
+          "type": "Unary",
+          "op": "!",
+          "operand": {
+            "type": "Var",
+            "name": "b",
+            "span": [
+              22,
+              23
+            ]
+          },
+          "span": [
+            21,
+            23
+          ]
+        },
+        "span": [
+          3,
+          23
+        ]
+      },
+      "span": [
+        0,
+        24
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        24,
+        25
+      ]
+    }
+  ]
+}

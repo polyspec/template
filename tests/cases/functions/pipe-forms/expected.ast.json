@@ -1,0 +1,126 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "upper",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "a",
+            "span": [
+              3,
+              6
+            ]
+          }
+        ],
+        "span": [
+          3,
+          14
+        ]
+      },
+      "span": [
+        0,
+        15
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        15,
+        16
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "slice",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "abc",
+            "span": [
+              19,
+              24
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              33,
+              34
+            ]
+          }
+        ],
+        "span": [
+          19,
+          35
+        ]
+      },
+      "span": [
+        16,
+        36
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        36,
+        37
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "number",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 3,
+            "span": [
+              40,
+              41
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              51,
+              52
+            ]
+          }
+        ],
+        "span": [
+          40,
+          53
+        ]
+      },
+      "span": [
+        37,
+        54
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        54,
+        55
+      ]
+    }
+  ]
+}

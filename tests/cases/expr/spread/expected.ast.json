@@ -1,0 +1,154 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "List",
+                "items": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 0,
+                    "span": [
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "type": "Spread",
+                    "expr": {
+                      "type": "Var",
+                      "name": "items",
+                      "span": [
+                        15,
+                        20
+                      ]
+                    },
+                    "span": [
+                      12,
+                      20
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 30,
+                    "span": [
+                      22,
+                      24
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  25
+                ]
+              }
+            ],
+            "span": [
+              3,
+              26
+            ]
+          }
+        ],
+        "span": [
+          3,
+          32
+        ]
+      },
+      "span": [
+        0,
+        33
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Map",
+                "entries": [
+                  {
+                    "type": "Spread",
+                    "expr": {
+                      "type": "Var",
+                      "name": "m",
+                      "span": [
+                        45,
+                        46
+                      ]
+                    },
+                    "span": [
+                      42,
+                      46
+                    ]
+                  },
+                  {
+                    "key": {
+                      "type": "Literal",
+                      "kind": "string",
+                      "value": "z",
+                      "span": [
+                        48,
+                        51
+                      ]
+                    },
+                    "value": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 0,
+                      "span": [
+                        55,
+                        56
+                      ]
+                    }
+                  }
+                ],
+                "span": [
+                  41,
+                  57
+                ]
+              }
+            ],
+            "span": [
+              36,
+              58
+            ]
+          }
+        ],
+        "span": [
+          36,
+          64
+        ]
+      },
+      "span": [
+        33,
+        65
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        65,
+        66
+      ]
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "[",
+      "span": [
+        0,
+        1
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "trim",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              9,
+              10
+            ]
+          }
+        ],
+        "span": [
+          4,
+          11
+        ]
+      },
+      "span": [
+        1,
+        12
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "]\n[",
+      "span": [
+        12,
+        15
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "trim",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "xxaxx",
+            "span": [
+              23,
+              30
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "x",
+            "span": [
+              32,
+              35
+            ]
+          }
+        ],
+        "span": [
+          18,
+          36
+        ]
+      },
+      "span": [
+        15,
+        37
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "]\n[",
+      "span": [
+        37,
+        40
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "trim",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              48,
+              49
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": " ",
+            "span": [
+              51,
+              54
+            ]
+          }
+        ],
+        "span": [
+          43,
+          55
+        ]
+      },
+      "span": [
+        40,
+        56
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "]\n",
+      "span": [
+        56,
+        58
+      ]
+    }
+  ]
+}

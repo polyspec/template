@@ -1,0 +1,93 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "reverse",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      16,
+                      17
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  18
+                ]
+              }
+            ],
+            "span": [
+              3,
+              19
+            ]
+          }
+        ],
+        "span": [
+          3,
+          25
+        ]
+      },
+      "span": [
+        0,
+        26
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        26,
+        27
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "reverse",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "ab😀",
+            "span": [
+              38,
+              46
+            ]
+          }
+        ],
+        "span": [
+          30,
+          47
+        ]
+      },
+      "span": [
+        27,
+        48
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        48,
+        49
+      ]
+    }
+  ]
+}

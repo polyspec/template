@@ -1,0 +1,14 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p>ab</p>\n<p>c</p>\n",
+      "span": [
+        0,
+        46
+      ]
+    }
+  ]
+}

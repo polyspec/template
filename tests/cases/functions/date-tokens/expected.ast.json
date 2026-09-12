@@ -1,0 +1,92 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Call",
+            "name": "now",
+            "args": [],
+            "span": [
+              8,
+              13
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y y m n d j H G i s D l N w M F U P",
+            "span": [
+              15,
+              52
+            ]
+          }
+        ],
+        "span": [
+          3,
+          53
+        ]
+      },
+      "span": [
+        0,
+        54
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        54,
+        55
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Call",
+            "name": "now",
+            "args": [],
+            "span": [
+              63,
+              68
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "\\Y=Y",
+            "span": [
+              70,
+              77
+            ]
+          }
+        ],
+        "span": [
+          58,
+          78
+        ]
+      },
+      "span": [
+        55,
+        79
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        79,
+        80
+      ]
+    }
+  ]
+}

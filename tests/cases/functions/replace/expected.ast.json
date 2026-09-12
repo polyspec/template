@@ -1,0 +1,159 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "replace",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              11,
+              12
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": ".",
+            "span": [
+              14,
+              17
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "-",
+            "span": [
+              19,
+              22
+            ]
+          }
+        ],
+        "span": [
+          3,
+          23
+        ]
+      },
+      "span": [
+        0,
+        24
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        24,
+        25
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "replace",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              36,
+              37
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "",
+            "span": [
+              39,
+              41
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "x",
+            "span": [
+              43,
+              46
+            ]
+          }
+        ],
+        "span": [
+          28,
+          47
+        ]
+      },
+      "span": [
+        25,
+        48
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        48,
+        49
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "replace",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              60,
+              61
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "b",
+            "span": [
+              63,
+              66
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "",
+            "span": [
+              68,
+              70
+            ]
+          }
+        ],
+        "span": [
+          52,
+          71
+        ]
+      },
+      "span": [
+        49,
+        72
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        72,
+        73
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "v",
+      "iter": {
+        "type": "Var",
+        "name": "m",
+        "span": [
+          7,
+          8
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "v",
+            "field": "key_",
+            "span": [
+              13,
+              19
+            ]
+          },
+          "span": [
+            10,
+            20
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "=",
+          "span": [
+            20,
+            21
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "v",
+            "span": [
+              24,
+              25
+            ]
+          },
+          "span": [
+            21,
+            26
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "\n",
+          "span": [
+            26,
+            27
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        30
+      ]
+    }
+  ]
+}

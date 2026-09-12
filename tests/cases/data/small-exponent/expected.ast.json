@@ -1,0 +1,126 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1e-7,
+        "span": [
+          3,
+          7
+        ]
+      },
+      "span": [
+        0,
+        8
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        8,
+        9
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1.5e-7,
+        "span": [
+          12,
+          18
+        ]
+      },
+      "span": [
+        9,
+        19
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        19,
+        20
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 0.000001,
+        "span": [
+          23,
+          31
+        ]
+      },
+      "span": [
+        20,
+        32
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        32,
+        33
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 0.000001,
+        "span": [
+          36,
+          40
+        ]
+      },
+      "span": [
+        33,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        41,
+        42
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1.23e-7,
+        "span": [
+          45,
+          51
+        ]
+      },
+      "span": [
+        42,
+        52
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        52,
+        53
+      ]
+    }
+  ]
+}

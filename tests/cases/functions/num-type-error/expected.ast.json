@@ -1,0 +1,40 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "num",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "abc",
+            "span": [
+              7,
+              12
+            ]
+          }
+        ],
+        "span": [
+          3,
+          13
+        ]
+      },
+      "span": [
+        0,
+        14
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        14,
+        15
+      ]
+    }
+  ]
+}

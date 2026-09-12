@@ -1,0 +1,69 @@
+{
+  "type": "Template",
+  "name": "layout.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "layout_local",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "visible only in layout",
+        "span": [
+          16,
+          40
+        ]
+      },
+      "span": [
+        0,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "<section class=\"scope\">\n",
+      "span": [
+        42,
+        66
+      ]
+    },
+    {
+      "type": "Block",
+      "id": "content",
+      "path": null,
+      "scope": [
+        {
+          "name": "title",
+          "expr": {
+            "type": "Member",
+            "object": {
+              "type": "Var",
+              "name": "page",
+              "span": [
+                83,
+                87
+              ]
+            },
+            "key": "title",
+            "span": [
+              83,
+              93
+            ]
+          }
+        }
+      ],
+      "span": [
+        66,
+        94
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</section>\n",
+      "span": [
+        95,
+        106
+      ]
+    }
+  ]
+}

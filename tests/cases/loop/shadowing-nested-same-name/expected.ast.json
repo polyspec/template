@@ -1,0 +1,138 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "v",
+      "iter": {
+        "type": "Var",
+        "name": "outer",
+        "span": [
+          7,
+          12
+        ]
+      },
+      "body": [
+        {
+          "type": "For",
+          "name": "v",
+          "iter": {
+            "type": "Member",
+            "object": {
+              "type": "Var",
+              "name": "v",
+              "span": [
+                21,
+                22
+              ]
+            },
+            "key": "items",
+            "span": [
+              21,
+              28
+            ]
+          },
+          "body": [
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "Var",
+                "name": "v",
+                "span": [
+                  33,
+                  34
+                ]
+              },
+              "span": [
+                30,
+                35
+              ]
+            },
+            {
+              "type": "Text",
+              "value": "\n",
+              "span": [
+                35,
+                36
+              ]
+            }
+          ],
+          "empty": null,
+          "span": [
+            14,
+            39
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "[",
+          "span": [
+            40,
+            41
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "LoopMeta",
+            "loop": "v",
+            "field": "index_",
+            "span": [
+              44,
+              52
+            ]
+          },
+          "span": [
+            41,
+            53
+          ]
+        },
+        {
+          "type": "Text",
+          "value": ":",
+          "span": [
+            53,
+            54
+          ]
+        },
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Member",
+            "object": {
+              "type": "Var",
+              "name": "v",
+              "span": [
+                57,
+                58
+              ]
+            },
+            "key": "n",
+            "span": [
+              57,
+              60
+            ]
+          },
+          "span": [
+            54,
+            61
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "]\n",
+          "span": [
+            61,
+            63
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        66
+      ]
+    }
+  ]
+}

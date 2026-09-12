@@ -1,0 +1,122 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "😀",
+          "span": [
+            3,
+            9
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "😀",
+          "span": [
+            13,
+            27
+          ]
+        },
+        "span": [
+          3,
+          27
+        ]
+      },
+      "span": [
+        0,
+        28
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        28,
+        29
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "length",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "😀",
+            "span": [
+              39,
+              53
+            ]
+          }
+        ],
+        "span": [
+          32,
+          54
+        ]
+      },
+      "span": [
+        29,
+        55
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        55,
+        56
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "==",
+        "left": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "é",
+          "span": [
+            59,
+            63
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "é",
+          "span": [
+            67,
+            75
+          ]
+        },
+        "span": [
+          59,
+          75
+        ]
+      },
+      "span": [
+        56,
+        76
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        76,
+        77
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p>",
+      "span": [
+        21,
+        24
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "x",
+        "span": [
+          27,
+          28
+        ]
+      },
+      "span": [
+        24,
+        29
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>\n",
+      "span": [
+        29,
+        34
+      ]
+    }
+  ]
+}

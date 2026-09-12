@@ -1,0 +1,1 @@
+{+ /parts/head.tpl}

@@ -1,0 +1,22 @@
+[package]
+name = "polyspec-template"
+version = "0.0.1"
+edition = "2024"
+description = "Template language implementation: lexer, parser, renderer, functions and CLI"
+license = "MIT"
+publish = false
+
+[lib]
+name = "polyspec_template"
+path = "src/lib.rs"
+
+[[bin]]
+name = "template"
+path = "src/bin/template.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+
+[profile.release]
+debug = false

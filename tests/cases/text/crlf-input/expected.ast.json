@@ -1,0 +1,71 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p>",
+      "span": [
+        0,
+        3
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          6,
+          7
+        ]
+      },
+      "span": [
+        3,
+        8
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>\r\n",
+      "span": [
+        8,
+        14
+      ]
+    },
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              17,
+              18
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "yes\r\n",
+              "span": [
+                21,
+                26
+              ]
+            }
+          ],
+          "span": [
+            14,
+            19
+          ]
+        }
+      ],
+      "else": null,
+      "span": [
+        14,
+        29
+      ]
+    }
+  ]
+}

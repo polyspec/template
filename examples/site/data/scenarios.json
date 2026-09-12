@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "generatedFrom": "examples/site/scenarios",
+  "scenarios": [
+    {
+      "id": "empty-state",
+      "title": "Empty definition branch",
+      "description": "An if-block checks whether a contents definition exists and renders a stable empty state when it does not.",
+      "focus": [
+        "layout target",
+        "missing definition",
+        "empty state"
+      ],
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "templates": {
+        "layout.tpl": "<main class=\"empty-page\">\n{?# content}\n{# content}\n{:}\n<p class=\"empty\">No content definition.</p>\n{/}\n</main>\n"
+      },
+      "integrationFiles": [],
+      "assign": {
+        "page": "empty"
+      },
+      "define": {
+        "layout": "layout.tpl"
+      },
+      "env": null,
+      "expectedHtml": "<main class=\"empty-page\">\n<p class=\"empty\">No content definition.</p>\n</main>\n",
+      "expectedBytes": 78,
+      "expectedSha256": "d98cc268d4c448c49248babeb53c17ca44c88e044dbe17d29e43ff6022ae3145"
+    },
+    {
+      "id": "html-slot",
+      "title": "Pre-rendered HTML slot",
+      "description": "The layout is selected by define while a server-produced HTML fragment is passed as a define entry.",
+      "focus": [
+        "layout target",
+        "assign data",
+        "HTML define"
+      ],
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "templates": {
+        "layout.tpl": "<section class=\"notice\">\n<h1>{= heading}</h1>\n{# content}\n</section>\n"
+      },
+      "integrationFiles": [],
+      "assign": {
+        "heading": "<server slot>"
+      },
+      "define": {
+        "layout": "layout.tpl",
+        "content": {
+          "html": "<p class=\"server\">pre-rendered &amp; safe</p>\n"
+        }
+      },
+      "env": null,
+      "expectedHtml": "<section class=\"notice\">\n<h1>&lt;server slot&gt;</h1>\n<p class=\"server\">pre-rendered &amp; safe</p>\n</section>\n",
+      "expectedBytes": 111,
+      "expectedSha256": "b1fc22f8d29cd6bfa69a7df91e9f558c8d0dd9c435ace704f8e250cc3b29bd09"
+    },
+    {
+      "id": "scope-precedence",
+      "title": "Scope precedence",
+      "description": "A template definition receives root assign data, definition data and a scope argument, while a layout local stays isolated.",
+      "focus": [
+        "assign data",
+        "define data",
+        "scope precedence",
+        "local isolation"
+      ],
+      "source": null,
+      "target": "layout",
+      "legacyWrappers": false,
+      "templates": {
+        "content.tpl": "<article>\n<h1>{= title}</h1>\n<p class=\"root\">{= root_label}</p>\n<p class=\"defined\">{= defined_label}</p>\n<p class=\"local\">{= layout_local | default('missing')}</p>\n</article>\n",
+        "layout.tpl": "{layout_local = 'visible only in layout'}\n<section class=\"scope\">\n{# content title:page.title}\n</section>\n"
+      },
+      "integrationFiles": [],
+      "assign": {
+        "page": {
+          "title": "from assign"
+        },
+        "root_label": "root assign",
+        "defined_label": "root value that is replaced"
+      },
+      "define": {
+        "layout": "layout.tpl",
+        "content": {
+          "template": "content.tpl",
+          "data": {
+            "title": "from define data",
+            "defined_label": "definition data"
+          }
+        }
+      },
+      "env": null,
+      "expectedHtml": "<section class=\"scope\">\n<article>\n<h1>from assign</h1>\n<p class=\"root\">root assign</p>\n<p class=\"defined\">definition data</p>\n<p class=\"local\">missing</p>\n</article>\n</section>\n",
+      "expectedBytes": 177,
+      "expectedSha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
+    }
+  ]
+}

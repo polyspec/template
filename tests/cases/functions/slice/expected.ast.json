@@ -1,0 +1,490 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "slice",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      14,
+                      15
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      17,
+                      18
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 2,
+                    "span": [
+                      20,
+                      21
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  22
+                ]
+              }
+            ],
+            "span": [
+              3,
+              23
+            ]
+          }
+        ],
+        "span": [
+          3,
+          29
+        ]
+      },
+      "span": [
+        0,
+        30
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        30,
+        31
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "slice",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      45,
+                      46
+                    ]
+                  },
+                  {
+                    "type": "Unary",
+                    "op": "-",
+                    "operand": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 2,
+                      "span": [
+                        49,
+                        50
+                      ]
+                    },
+                    "span": [
+                      48,
+                      50
+                    ]
+                  }
+                ],
+                "span": [
+                  39,
+                  51
+                ]
+              }
+            ],
+            "span": [
+              34,
+              52
+            ]
+          }
+        ],
+        "span": [
+          34,
+          58
+        ]
+      },
+      "span": [
+        31,
+        59
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        59,
+        60
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "slice",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      74,
+                      75
+                    ]
+                  },
+                  {
+                    "type": "Unary",
+                    "op": "-",
+                    "operand": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 10,
+                      "span": [
+                        78,
+                        80
+                      ]
+                    },
+                    "span": [
+                      77,
+                      80
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 2,
+                    "span": [
+                      82,
+                      83
+                    ]
+                  }
+                ],
+                "span": [
+                  68,
+                  84
+                ]
+              }
+            ],
+            "span": [
+              63,
+              85
+            ]
+          }
+        ],
+        "span": [
+          63,
+          91
+        ]
+      },
+      "span": [
+        60,
+        92
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        92,
+        93
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "slice",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      107,
+                      108
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 10,
+                    "span": [
+                      110,
+                      112
+                    ]
+                  }
+                ],
+                "span": [
+                  101,
+                  113
+                ]
+              }
+            ],
+            "span": [
+              96,
+              114
+            ]
+          }
+        ],
+        "span": [
+          96,
+          120
+        ]
+      },
+      "span": [
+        93,
+        121
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        121,
+        122
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "slice",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      136,
+                      137
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      139,
+                      140
+                    ]
+                  },
+                  {
+                    "type": "Unary",
+                    "op": "-",
+                    "operand": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 1,
+                      "span": [
+                        143,
+                        144
+                      ]
+                    },
+                    "span": [
+                      142,
+                      144
+                    ]
+                  }
+                ],
+                "span": [
+                  130,
+                  145
+                ]
+              }
+            ],
+            "span": [
+              125,
+              146
+            ]
+          }
+        ],
+        "span": [
+          125,
+          152
+        ]
+      },
+      "span": [
+        122,
+        153
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        153,
+        154
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "slice",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "héllo",
+            "span": [
+              163,
+              171
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              173,
+              174
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 3,
+            "span": [
+              176,
+              177
+            ]
+          }
+        ],
+        "span": [
+          157,
+          178
+        ]
+      },
+      "span": [
+        154,
+        179
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        179,
+        180
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "slice",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "l",
+                    "span": [
+                      194,
+                      195
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1.9,
+                    "span": [
+                      197,
+                      200
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1.9,
+                    "span": [
+                      202,
+                      205
+                    ]
+                  }
+                ],
+                "span": [
+                  188,
+                  206
+                ]
+              }
+            ],
+            "span": [
+              183,
+              207
+            ]
+          }
+        ],
+        "span": [
+          183,
+          213
+        ]
+      },
+      "span": [
+        180,
+        214
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        214,
+        215
+      ]
+    }
+  ]
+}

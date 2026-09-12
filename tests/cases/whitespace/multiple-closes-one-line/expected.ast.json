@@ -1,0 +1,82 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "a",
+      "iter": {
+        "type": "Var",
+        "name": "xs",
+        "span": [
+          7,
+          9
+        ]
+      },
+      "body": [
+        {
+          "type": "For",
+          "name": "b",
+          "iter": {
+            "type": "Var",
+            "name": "ys",
+            "span": [
+              17,
+              19
+            ]
+          },
+          "body": [
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "Var",
+                "name": "a",
+                "span": [
+                  24,
+                  25
+                ]
+              },
+              "span": [
+                21,
+                26
+              ]
+            },
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "Var",
+                "name": "b",
+                "span": [
+                  29,
+                  30
+                ]
+              },
+              "span": [
+                26,
+                31
+              ]
+            },
+            {
+              "type": "Text",
+              "value": "\n",
+              "span": [
+                31,
+                32
+              ]
+            }
+          ],
+          "empty": null,
+          "span": [
+            10,
+            35
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        38
+      ]
+    }
+  ]
+}

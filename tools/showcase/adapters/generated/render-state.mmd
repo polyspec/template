@@ -1,0 +1,8 @@
+stateDiagram-v2
+    [*] --> ready : constructor
+    ready --> scenario-loaded : loadScenario
+    scenario-loaded --> request-built : buildRequest
+    request-built --> rendered : render
+    request-built --> rendered : renderTwice
+    failed --> request-built : recover after render error
+    failed --> request-built : recover after renderTwice error

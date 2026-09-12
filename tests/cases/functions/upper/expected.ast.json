@@ -1,0 +1,72 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "upper",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              9,
+              10
+            ]
+          }
+        ],
+        "span": [
+          3,
+          11
+        ]
+      },
+      "span": [
+        0,
+        12
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        12,
+        13
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "upper",
+        "args": [
+          {
+            "type": "Var",
+            "name": "s",
+            "span": [
+              16,
+              17
+            ]
+          }
+        ],
+        "span": [
+          16,
+          25
+        ]
+      },
+      "span": [
+        13,
+        26
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        26,
+        27
+      ]
+    }
+  ]
+}

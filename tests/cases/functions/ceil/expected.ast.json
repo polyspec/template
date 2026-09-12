@@ -1,0 +1,116 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "ceil",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1.1,
+            "span": [
+              8,
+              11
+            ]
+          }
+        ],
+        "span": [
+          3,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        13,
+        14
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "ceil",
+        "args": [
+          {
+            "type": "Unary",
+            "op": "-",
+            "operand": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1.9,
+              "span": [
+                23,
+                26
+              ]
+            },
+            "span": [
+              22,
+              26
+            ]
+          }
+        ],
+        "span": [
+          17,
+          27
+        ]
+      },
+      "span": [
+        14,
+        28
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        28,
+        29
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "ceil",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              37,
+              38
+            ]
+          }
+        ],
+        "span": [
+          32,
+          39
+        ]
+      },
+      "span": [
+        29,
+        40
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        40,
+        41
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Block",
+      "id": null,
+      "path": "sub/list.tpl",
+      "scope": [],
+      "span": [
+        0,
+        16
+      ]
+    }
+  ]
+}

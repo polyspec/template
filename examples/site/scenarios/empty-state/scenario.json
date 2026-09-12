@@ -1,0 +1,10 @@
+{
+  "title": "Empty definition branch",
+  "description": "An if-block checks whether a contents definition exists and renders a stable empty state when it does not.",
+  "focus": [
+    "layout target",
+    "missing definition",
+    "empty state"
+  ],
+  "target": "layout"
+}

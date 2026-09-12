@@ -1,0 +1,54 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "then": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "y",
+          "span": [
+            7,
+            10
+          ]
+        },
+        "else": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "n",
+          "span": [
+            13,
+            16
+          ]
+        },
+        "span": [
+          3,
+          16
+        ]
+      },
+      "span": [
+        0,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        17,
+        18
+      ]
+    }
+  ]
+}

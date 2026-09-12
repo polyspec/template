@@ -1,0 +1,84 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              3,
+              4
+            ]
+          },
+          "body": [
+            {
+              "type": "If",
+              "branches": [
+                {
+                  "test": {
+                    "type": "Var",
+                    "name": "b",
+                    "span": [
+                      9,
+                      10
+                    ]
+                  },
+                  "body": [
+                    {
+                      "type": "Text",
+                      "value": "ab\n",
+                      "span": [
+                        12,
+                        15
+                      ]
+                    }
+                  ],
+                  "span": [
+                    6,
+                    11
+                  ]
+                }
+              ],
+              "else": [
+                {
+                  "type": "Text",
+                  "value": "a\n",
+                  "span": [
+                    19,
+                    21
+                  ]
+                }
+              ],
+              "span": [
+                6,
+                24
+              ]
+            }
+          ],
+          "span": [
+            0,
+            5
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "none\n",
+          "span": [
+            29,
+            34
+          ]
+        }
+      ],
+      "span": [
+        0,
+        37
+      ]
+    }
+  ]
+}

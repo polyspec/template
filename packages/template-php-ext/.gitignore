@@ -1,0 +1,2 @@
+# The phpunit result cache is local state.
+.phpunit.result.cache

@@ -1,0 +1,68 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "json",
+        "args": [
+          {
+            "type": "Call",
+            "name": "sort",
+            "args": [
+              {
+                "type": "List",
+                "items": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      9,
+                      10
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "string",
+                    "value": "a",
+                    "span": [
+                      12,
+                      15
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  16
+                ]
+              }
+            ],
+            "span": [
+              3,
+              17
+            ]
+          }
+        ],
+        "span": [
+          3,
+          24
+        ]
+      },
+      "span": [
+        0,
+        25
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        25,
+        26
+      ]
+    }
+  ]
+}

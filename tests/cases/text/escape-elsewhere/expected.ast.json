@@ -1,0 +1,14 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "\\{ a }\nvar re = /\\{\\d+\\}/;\n",
+      "span": [
+        0,
+        27
+      ]
+    }
+  ]
+}

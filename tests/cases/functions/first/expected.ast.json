@@ -1,0 +1,159 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "first",
+        "args": [
+          {
+            "type": "Var",
+            "name": "l",
+            "span": [
+              9,
+              10
+            ]
+          }
+        ],
+        "span": [
+          3,
+          11
+        ]
+      },
+      "span": [
+        0,
+        12
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        12,
+        13
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "first",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "héllo",
+            "span": [
+              22,
+              30
+            ]
+          }
+        ],
+        "span": [
+          16,
+          31
+        ]
+      },
+      "span": [
+        13,
+        32
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n[",
+      "span": [
+        32,
+        34
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "first",
+        "args": [
+          {
+            "type": "List",
+            "items": [],
+            "span": [
+              43,
+              45
+            ]
+          }
+        ],
+        "span": [
+          37,
+          46
+        ]
+      },
+      "span": [
+        34,
+        47
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "]\n",
+      "span": [
+        47,
+        49
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "first",
+                "args": [
+                  {
+                    "type": "List",
+                    "items": [],
+                    "span": [
+                      63,
+                      65
+                    ]
+                  }
+                ],
+                "span": [
+                  57,
+                  66
+                ]
+              }
+            ],
+            "span": [
+              52,
+              67
+            ]
+          }
+        ],
+        "span": [
+          52,
+          73
+        ]
+      },
+      "span": [
+        49,
+        74
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        74,
+        75
+      ]
+    }
+  ]
+}

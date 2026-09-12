@@ -1,0 +1,14 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Include",
+      "path": "a.tpl",
+      "span": [
+        0,
+        9
+      ]
+    }
+  ]
+}

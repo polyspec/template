@@ -1,0 +1,139 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Binary",
+            "op": "==",
+            "left": {
+              "type": "Var",
+              "name": "level",
+              "span": [
+                3,
+                8
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                12,
+                13
+              ]
+            },
+            "span": [
+              3,
+              13
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "one\n",
+              "span": [
+                15,
+                19
+              ]
+            }
+          ],
+          "span": [
+            0,
+            14
+          ]
+        },
+        {
+          "test": {
+            "type": "Binary",
+            "op": "==",
+            "left": {
+              "type": "Var",
+              "name": "level",
+              "span": [
+                23,
+                28
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 2,
+              "span": [
+                32,
+                33
+              ]
+            },
+            "span": [
+              23,
+              33
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "two\n",
+              "span": [
+                35,
+                39
+              ]
+            }
+          ],
+          "span": [
+            19,
+            34
+          ]
+        },
+        {
+          "test": {
+            "type": "Binary",
+            "op": "==",
+            "left": {
+              "type": "Var",
+              "name": "level",
+              "span": [
+                43,
+                48
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 3,
+              "span": [
+                52,
+                53
+              ]
+            },
+            "span": [
+              43,
+              53
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "three\n",
+              "span": [
+                55,
+                61
+              ]
+            }
+          ],
+          "span": [
+            39,
+            54
+          ]
+        }
+      ],
+      "else": null,
+      "span": [
+        0,
+        64
+      ]
+    }
+  ]
+}

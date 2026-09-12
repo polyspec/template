@@ -1,0 +1,24 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p>\n",
+      "span": [
+        0,
+        4
+      ]
+    },
+    {
+      "type": "Block",
+      "id": "nothing",
+      "path": null,
+      "scope": [],
+      "span": [
+        4,
+        15
+      ]
+    }
+  ]
+}

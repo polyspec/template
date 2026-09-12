@@ -1,0 +1,12 @@
+[package]
+name = "showcase-adapter-rust"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+polyspec-template = { path = "../../../../packages/template-rust" }
+indexmap = { version = "2", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+sha2 = "0.10"

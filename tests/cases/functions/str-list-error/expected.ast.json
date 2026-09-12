@@ -1,0 +1,49 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "str",
+        "args": [
+          {
+            "type": "List",
+            "items": [
+              {
+                "type": "Literal",
+                "kind": "number",
+                "value": 1,
+                "span": [
+                  8,
+                  9
+                ]
+              }
+            ],
+            "span": [
+              7,
+              10
+            ]
+          }
+        ],
+        "span": [
+          3,
+          11
+        ]
+      },
+      "span": [
+        0,
+        12
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        12,
+        13
+      ]
+    }
+  ]
+}

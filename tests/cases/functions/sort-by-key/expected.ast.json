@@ -1,0 +1,254 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "sort",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "objs",
+                    "span": [
+                      13,
+                      17
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "string",
+                    "value": "p",
+                    "span": [
+                      19,
+                      22
+                    ]
+                  }
+                ],
+                "span": [
+                  8,
+                  23
+                ]
+              }
+            ],
+            "span": [
+              3,
+              24
+            ]
+          }
+        ],
+        "span": [
+          3,
+          30
+        ]
+      },
+      "span": [
+        0,
+        31
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        31,
+        32
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "sort",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "objs",
+                    "span": [
+                      45,
+                      49
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "string",
+                    "value": "n",
+                    "span": [
+                      51,
+                      54
+                    ]
+                  }
+                ],
+                "span": [
+                  40,
+                  55
+                ]
+              }
+            ],
+            "span": [
+              35,
+              56
+            ]
+          }
+        ],
+        "span": [
+          35,
+          62
+        ]
+      },
+      "span": [
+        32,
+        63
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        63,
+        64
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "sort",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "nested",
+                    "span": [
+                      77,
+                      83
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "string",
+                    "value": "u.name",
+                    "span": [
+                      85,
+                      93
+                    ]
+                  }
+                ],
+                "span": [
+                  72,
+                  94
+                ]
+              }
+            ],
+            "span": [
+              67,
+              95
+            ]
+          }
+        ],
+        "span": [
+          67,
+          101
+        ]
+      },
+      "span": [
+        64,
+        102
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        102,
+        103
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Call",
+                "name": "sort",
+                "args": [
+                  {
+                    "type": "Var",
+                    "name": "stable",
+                    "span": [
+                      116,
+                      122
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "string",
+                    "value": "k",
+                    "span": [
+                      124,
+                      127
+                    ]
+                  }
+                ],
+                "span": [
+                  111,
+                  128
+                ]
+              }
+            ],
+            "span": [
+              106,
+              129
+            ]
+          }
+        ],
+        "span": [
+          106,
+          135
+        ]
+      },
+      "span": [
+        103,
+        136
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        136,
+        137
+      ]
+    }
+  ]
+}

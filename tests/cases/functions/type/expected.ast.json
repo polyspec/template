@@ -1,0 +1,252 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "type",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "null",
+            "value": null,
+            "span": [
+              8,
+              12
+            ]
+          }
+        ],
+        "span": [
+          3,
+          13
+        ]
+      },
+      "span": [
+        0,
+        14
+      ]
+    },
+    {
+      "type": "Text",
+      "value": " ",
+      "span": [
+        14,
+        15
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "type",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "bool",
+            "value": true,
+            "span": [
+              23,
+              27
+            ]
+          }
+        ],
+        "span": [
+          18,
+          28
+        ]
+      },
+      "span": [
+        15,
+        29
+      ]
+    },
+    {
+      "type": "Text",
+      "value": " ",
+      "span": [
+        29,
+        30
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "type",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              38,
+              39
+            ]
+          }
+        ],
+        "span": [
+          33,
+          40
+        ]
+      },
+      "span": [
+        30,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": " ",
+      "span": [
+        41,
+        42
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "type",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "s",
+            "span": [
+              50,
+              53
+            ]
+          }
+        ],
+        "span": [
+          45,
+          54
+        ]
+      },
+      "span": [
+        42,
+        55
+      ]
+    },
+    {
+      "type": "Text",
+      "value": " ",
+      "span": [
+        55,
+        56
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "type",
+        "args": [
+          {
+            "type": "Var",
+            "name": "l",
+            "span": [
+              64,
+              65
+            ]
+          }
+        ],
+        "span": [
+          59,
+          66
+        ]
+      },
+      "span": [
+        56,
+        67
+      ]
+    },
+    {
+      "type": "Text",
+      "value": " ",
+      "span": [
+        67,
+        68
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "type",
+        "args": [
+          {
+            "type": "Var",
+            "name": "m",
+            "span": [
+              76,
+              77
+            ]
+          }
+        ],
+        "span": [
+          71,
+          78
+        ]
+      },
+      "span": [
+        68,
+        79
+      ]
+    },
+    {
+      "type": "Text",
+      "value": " ",
+      "span": [
+        79,
+        80
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "type",
+        "args": [
+          {
+            "type": "Call",
+            "name": "raw",
+            "args": [
+              {
+                "type": "Literal",
+                "kind": "string",
+                "value": "x",
+                "span": [
+                  92,
+                  95
+                ]
+              }
+            ],
+            "span": [
+              88,
+              96
+            ]
+          }
+        ],
+        "span": [
+          83,
+          97
+        ]
+      },
+      "span": [
+        80,
+        98
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        98,
+        99
+      ]
+    }
+  ]
+}

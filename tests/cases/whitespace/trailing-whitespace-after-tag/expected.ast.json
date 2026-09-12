@@ -1,0 +1,48 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              3,
+              4
+            ]
+          },
+          "body": [
+            {
+              "type": "Text",
+              "value": "yes\n",
+              "span": [
+                9,
+                13
+              ]
+            }
+          ],
+          "span": [
+            0,
+            5
+          ]
+        }
+      ],
+      "else": null,
+      "span": [
+        0,
+        16
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "end\n",
+      "span": [
+        18,
+        22
+      ]
+    }
+  ]
+}

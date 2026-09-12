@@ -1,0 +1,1529 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Template artifact lab</title><link rel="stylesheet" href="./styles.css"></head>
+<body><header class="hero"><p class="eyebrow">POLYSPEC TEMPLATE · STATIC ARTIFACT PROOF</p><h1>Template artifact lab</h1><p class="lede">Every implementation reads a build-time AST artifact and renders the same assign and define input. The page itself is already complete HTML; it does not parse templates in the browser.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">PASS</strong></div><div class="status-card"><span>Artifact mode</span><strong class="pass">OFF</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
+<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from compiled AST</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
+<section class="panel"><div class="section-heading"><div><p class="eyebrow">02 · INPUT AND OUTPUT</p><h2>Small SSR situations</h2></div><p>Each card shows the exact assign data, define map, every template file, compiled artifact manifest and final HTML.</p></div><div class="scenario-list"><article class="scenario" id="empty-state">
+  <header class="scenario-header"><div><h3>Empty definition branch</h3><p>An if-block checks whether a contents definition exists and renders a stable empty state when it does not.</p></div><div class="tags"><span class="tag">layout target</span><span class="tag">missing definition</span><span class="tag">empty state</span></div></header>
+  <div class="scenario-meta">
+    <section class="source"><p class="output-label">Inputs</p><details open><summary>assign</summary><pre>{
+  &quot;page&quot;: &quot;empty&quot;
+}</pre></details><details open><summary>define</summary><pre>{
+  &quot;layout&quot;: &quot;layout.tpl&quot;
+}</pre></details><details open><summary>templates · parser ranges</summary><pre>--- layout.tpl
+&lt;<span class="syntax-tag">main</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty-page&quot;</span>&gt;
+<span class="syntax-template syntax-ifblock">{?# content}</span>
+<span class="syntax-template syntax-block">{# content}</span>
+<span class="syntax-template syntax-ifblock">{:}</span>
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty&quot;</span>&gt;No content definition.&lt;/<span class="syntax-tag">p</span>&gt;
+<span class="syntax-template syntax-ifblock">{/}</span>
+&lt;/<span class="syntax-tag">main</span>&gt;
+</pre></details><details open><summary>compiled artifacts</summary><pre>typescript/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;typescript&quot;,
+  &quot;scenario&quot;: &quot;empty-state&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8c95f1682dd85b85cd8c18e4e37e651b8285bb45d1af72ff1e8305fc92db03f9&quot;,
+      &quot;artifactSha256&quot;: &quot;6f9042defd3c83fc80d70fc2f10f1654117e050286a735a8d558530f05adc237&quot;
+    }
+  }
+}
+
+typescript/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        0,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;IfBlock&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;body&quot;: [
+        {
+          &quot;type&quot;: &quot;Block&quot;,
+          &quot;id&quot;: &quot;content&quot;,
+          &quot;path&quot;: null,
+          &quot;scope&quot;: [],
+          &quot;span&quot;: [
+            39,
+            50
+          ]
+        }
+      ],
+      &quot;else&quot;: [
+        {
+          &quot;type&quot;: &quot;Text&quot;,
+          &quot;value&quot;: &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;,
+          &quot;span&quot;: [
+            55,
+            99
+          ]
+        }
+      ],
+      &quot;span&quot;: [
+        26,
+        102
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        103,
+        111
+      ]
+    }
+  ]
+}
+
+
+go/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;go&quot;,
+  &quot;scenario&quot;: &quot;empty-state&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8c95f1682dd85b85cd8c18e4e37e651b8285bb45d1af72ff1e8305fc92db03f9&quot;,
+      &quot;artifactSha256&quot;: &quot;6f9042defd3c83fc80d70fc2f10f1654117e050286a735a8d558530f05adc237&quot;
+    }
+  }
+}
+
+go/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        0,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;IfBlock&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;body&quot;: [
+        {
+          &quot;type&quot;: &quot;Block&quot;,
+          &quot;id&quot;: &quot;content&quot;,
+          &quot;path&quot;: null,
+          &quot;scope&quot;: [],
+          &quot;span&quot;: [
+            39,
+            50
+          ]
+        }
+      ],
+      &quot;else&quot;: [
+        {
+          &quot;type&quot;: &quot;Text&quot;,
+          &quot;value&quot;: &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;,
+          &quot;span&quot;: [
+            55,
+            99
+          ]
+        }
+      ],
+      &quot;span&quot;: [
+        26,
+        102
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        103,
+        111
+      ]
+    }
+  ]
+}
+
+
+rust/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;rust&quot;,
+  &quot;scenario&quot;: &quot;empty-state&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8c95f1682dd85b85cd8c18e4e37e651b8285bb45d1af72ff1e8305fc92db03f9&quot;,
+      &quot;artifactSha256&quot;: &quot;6f9042defd3c83fc80d70fc2f10f1654117e050286a735a8d558530f05adc237&quot;
+    }
+  }
+}
+
+rust/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        0,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;IfBlock&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;body&quot;: [
+        {
+          &quot;type&quot;: &quot;Block&quot;,
+          &quot;id&quot;: &quot;content&quot;,
+          &quot;path&quot;: null,
+          &quot;scope&quot;: [],
+          &quot;span&quot;: [
+            39,
+            50
+          ]
+        }
+      ],
+      &quot;else&quot;: [
+        {
+          &quot;type&quot;: &quot;Text&quot;,
+          &quot;value&quot;: &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;,
+          &quot;span&quot;: [
+            55,
+            99
+          ]
+        }
+      ],
+      &quot;span&quot;: [
+        26,
+        102
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        103,
+        111
+      ]
+    }
+  ]
+}
+
+
+php/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;php&quot;,
+  &quot;scenario&quot;: &quot;empty-state&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8c95f1682dd85b85cd8c18e4e37e651b8285bb45d1af72ff1e8305fc92db03f9&quot;,
+      &quot;artifactSha256&quot;: &quot;6f9042defd3c83fc80d70fc2f10f1654117e050286a735a8d558530f05adc237&quot;
+    }
+  }
+}
+
+php/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        0,
+        26
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;IfBlock&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;body&quot;: [
+        {
+          &quot;type&quot;: &quot;Block&quot;,
+          &quot;id&quot;: &quot;content&quot;,
+          &quot;path&quot;: null,
+          &quot;scope&quot;: [],
+          &quot;span&quot;: [
+            39,
+            50
+          ]
+        }
+      ],
+      &quot;else&quot;: [
+        {
+          &quot;type&quot;: &quot;Text&quot;,
+          &quot;value&quot;: &quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;,
+          &quot;span&quot;: [
+            55,
+            99
+          ]
+        }
+      ],
+      &quot;span&quot;: [
+        26,
+        102
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/main&gt;\n&quot;,
+      &quot;span&quot;: [
+        103,
+        111
+      ]
+    }
+  ]
+}
+</pre></details></section>
+    <section class="output"><p class="output-label">Output · 78 bytes · d98cc268d4c4…</p><pre>&lt;<span class="syntax-tag">main</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty-page&quot;</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty&quot;</span>&gt;No content definition.&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;/<span class="syntax-tag">main</span>&gt;
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+  </div>
+</article>
+<article class="scenario" id="html-slot">
+  <header class="scenario-header"><div><h3>Pre-rendered HTML slot</h3><p>The layout is selected by define while a server-produced HTML fragment is passed as a define entry.</p></div><div class="tags"><span class="tag">layout target</span><span class="tag">assign data</span><span class="tag">HTML define</span></div></header>
+  <div class="scenario-meta">
+    <section class="source"><p class="output-label">Inputs</p><details open><summary>assign</summary><pre>{
+  &quot;heading&quot;: &quot;&lt;server slot&gt;&quot;
+}</pre></details><details open><summary>define</summary><pre>{
+  &quot;layout&quot;: &quot;layout.tpl&quot;,
+  &quot;content&quot;: {
+    &quot;html&quot;: &quot;&lt;p class=\&quot;server\&quot;&gt;pre-rendered &amp;amp; safe&lt;/p&gt;\n&quot;
+  }
+}</pre></details><details open><summary>templates · parser ranges</summary><pre>--- layout.tpl
+&lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;notice&quot;</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= heading}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
+<span class="syntax-template syntax-block">{# content}</span>
+&lt;/<span class="syntax-tag">section</span>&gt;
+</pre></details><details open><summary>compiled artifacts</summary><pre>typescript/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;typescript&quot;,
+  &quot;scenario&quot;: &quot;html-slot&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;43c54e2a5d18fbbc57a1ecdc73deb95dcaa74ffd9dc6732971be84d015d79263&quot;,
+      &quot;artifactSha256&quot;: &quot;b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689&quot;
+    }
+  }
+}
+
+typescript/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        29
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;heading&quot;,
+        &quot;span&quot;: [
+          32,
+          39
+        ]
+      },
+      &quot;span&quot;: [
+        29,
+        40
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        40,
+        46
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        46,
+        57
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        58,
+        69
+      ]
+    }
+  ]
+}
+
+
+go/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;go&quot;,
+  &quot;scenario&quot;: &quot;html-slot&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;43c54e2a5d18fbbc57a1ecdc73deb95dcaa74ffd9dc6732971be84d015d79263&quot;,
+      &quot;artifactSha256&quot;: &quot;b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689&quot;
+    }
+  }
+}
+
+go/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        29
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;heading&quot;,
+        &quot;span&quot;: [
+          32,
+          39
+        ]
+      },
+      &quot;span&quot;: [
+        29,
+        40
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        40,
+        46
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        46,
+        57
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        58,
+        69
+      ]
+    }
+  ]
+}
+
+
+rust/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;rust&quot;,
+  &quot;scenario&quot;: &quot;html-slot&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;43c54e2a5d18fbbc57a1ecdc73deb95dcaa74ffd9dc6732971be84d015d79263&quot;,
+      &quot;artifactSha256&quot;: &quot;b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689&quot;
+    }
+  }
+}
+
+rust/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        29
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;heading&quot;,
+        &quot;span&quot;: [
+          32,
+          39
+        ]
+      },
+      &quot;span&quot;: [
+        29,
+        40
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        40,
+        46
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        46,
+        57
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        58,
+        69
+      ]
+    }
+  ]
+}
+
+
+php/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;php&quot;,
+  &quot;scenario&quot;: &quot;html-slot&quot;,
+  &quot;templates&quot;: {
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;43c54e2a5d18fbbc57a1ecdc73deb95dcaa74ffd9dc6732971be84d015d79263&quot;,
+      &quot;artifactSha256&quot;: &quot;b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689&quot;
+    }
+  }
+}
+
+php/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        29
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;heading&quot;,
+        &quot;span&quot;: [
+          32,
+          39
+        ]
+      },
+      &quot;span&quot;: [
+        29,
+        40
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&quot;,
+      &quot;span&quot;: [
+        40,
+        46
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [],
+      &quot;span&quot;: [
+        46,
+        57
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        58,
+        69
+      ]
+    }
+  ]
+}
+</pre></details></section>
+    <section class="output"><p class="output-label">Output · 111 bytes · b1fc22f8d29c…</p><pre>&lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;notice&quot;</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;&amp;lt;server slot&amp;gt;&lt;/<span class="syntax-tag">h1</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;server&quot;</span>&gt;pre-rendered &amp;amp; safe&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;/<span class="syntax-tag">section</span>&gt;
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+  </div>
+</article>
+<article class="scenario" id="scope-precedence">
+  <header class="scenario-header"><div><h3>Scope precedence</h3><p>A template definition receives root assign data, definition data and a scope argument, while a layout local stays isolated.</p></div><div class="tags"><span class="tag">assign data</span><span class="tag">define data</span><span class="tag">scope precedence</span><span class="tag">local isolation</span></div></header>
+  <div class="scenario-meta">
+    <section class="source"><p class="output-label">Inputs</p><details open><summary>assign</summary><pre>{
+  &quot;page&quot;: {
+    &quot;title&quot;: &quot;from assign&quot;
+  },
+  &quot;root_label&quot;: &quot;root assign&quot;,
+  &quot;defined_label&quot;: &quot;root value that is replaced&quot;
+}</pre></details><details open><summary>define</summary><pre>{
+  &quot;layout&quot;: &quot;layout.tpl&quot;,
+  &quot;content&quot;: {
+    &quot;template&quot;: &quot;content.tpl&quot;,
+    &quot;data&quot;: {
+      &quot;title&quot;: &quot;from define data&quot;,
+      &quot;defined_label&quot;: &quot;definition data&quot;
+    }
+  }
+}</pre></details><details open><summary>templates · parser ranges</summary><pre>--- content.tpl
+&lt;<span class="syntax-tag">article</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= title}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;root&quot;</span>&gt;<span class="syntax-template syntax-echo">{= root_label}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;defined&quot;</span>&gt;<span class="syntax-template syntax-echo">{= defined_label}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;local&quot;</span>&gt;<span class="syntax-template syntax-echo">{= layout_local | default(&#39;missing&#39;)}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;/<span class="syntax-tag">article</span>&gt;
+
+
+--- layout.tpl
+<span class="syntax-template syntax-set">{layout_local = &#39;visible only in layout&#39;}</span>
+&lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;scope&quot;</span>&gt;
+<span class="syntax-template syntax-block">{# content title:page.title}</span>
+&lt;/<span class="syntax-tag">section</span>&gt;
+</pre></details><details open><summary>compiled artifacts</summary><pre>typescript/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;typescript&quot;,
+  &quot;scenario&quot;: &quot;scope-precedence&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;c79abf1a243053bd7c145f39700c8d00b06a5d23eb222ae4d445e7e6102f6b7d&quot;,
+      &quot;artifactSha256&quot;: &quot;b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06&quot;,
+      &quot;artifactSha256&quot;: &quot;3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c&quot;
+    }
+  }
+}
+
+typescript/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;article&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        14
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          17,
+          22
+        ]
+      },
+      &quot;span&quot;: [
+        14,
+        23
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        23,
+        45
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;root_label&quot;,
+        &quot;span&quot;: [
+          48,
+          58
+        ]
+      },
+      &quot;span&quot;: [
+        45,
+        59
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        59,
+        83
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;defined_label&quot;,
+        &quot;span&quot;: [
+          86,
+          99
+        ]
+      },
+      &quot;span&quot;: [
+        83,
+        100
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        100,
+        122
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Var&quot;,
+            &quot;name&quot;: &quot;layout_local&quot;,
+            &quot;span&quot;: [
+              125,
+              137
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;missing&quot;,
+            &quot;span&quot;: [
+              148,
+              157
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          125,
+          158
+        ]
+      },
+      &quot;span&quot;: [
+        122,
+        159
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;,
+      &quot;span&quot;: [
+        159,
+        175
+      ]
+    }
+  ]
+}
+
+
+typescript/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Set&quot;,
+      &quot;name&quot;: &quot;layout_local&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Literal&quot;,
+        &quot;kind&quot;: &quot;string&quot;,
+        &quot;value&quot;: &quot;visible only in layout&quot;,
+        &quot;span&quot;: [
+          16,
+          40
+        ]
+      },
+      &quot;span&quot;: [
+        0,
+        41
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        42,
+        66
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [
+        {
+          &quot;name&quot;: &quot;title&quot;,
+          &quot;expr&quot;: {
+            &quot;type&quot;: &quot;Member&quot;,
+            &quot;object&quot;: {
+              &quot;type&quot;: &quot;Var&quot;,
+              &quot;name&quot;: &quot;page&quot;,
+              &quot;span&quot;: [
+                83,
+                87
+              ]
+            },
+            &quot;key&quot;: &quot;title&quot;,
+            &quot;span&quot;: [
+              83,
+              93
+            ]
+          }
+        }
+      ],
+      &quot;span&quot;: [
+        66,
+        94
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        95,
+        106
+      ]
+    }
+  ]
+}
+
+
+go/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;go&quot;,
+  &quot;scenario&quot;: &quot;scope-precedence&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;c79abf1a243053bd7c145f39700c8d00b06a5d23eb222ae4d445e7e6102f6b7d&quot;,
+      &quot;artifactSha256&quot;: &quot;b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06&quot;,
+      &quot;artifactSha256&quot;: &quot;3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c&quot;
+    }
+  }
+}
+
+go/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;article&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        14
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          17,
+          22
+        ]
+      },
+      &quot;span&quot;: [
+        14,
+        23
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        23,
+        45
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;root_label&quot;,
+        &quot;span&quot;: [
+          48,
+          58
+        ]
+      },
+      &quot;span&quot;: [
+        45,
+        59
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        59,
+        83
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;defined_label&quot;,
+        &quot;span&quot;: [
+          86,
+          99
+        ]
+      },
+      &quot;span&quot;: [
+        83,
+        100
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        100,
+        122
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Var&quot;,
+            &quot;name&quot;: &quot;layout_local&quot;,
+            &quot;span&quot;: [
+              125,
+              137
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;missing&quot;,
+            &quot;span&quot;: [
+              148,
+              157
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          125,
+          158
+        ]
+      },
+      &quot;span&quot;: [
+        122,
+        159
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;,
+      &quot;span&quot;: [
+        159,
+        175
+      ]
+    }
+  ]
+}
+
+
+go/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Set&quot;,
+      &quot;name&quot;: &quot;layout_local&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Literal&quot;,
+        &quot;kind&quot;: &quot;string&quot;,
+        &quot;value&quot;: &quot;visible only in layout&quot;,
+        &quot;span&quot;: [
+          16,
+          40
+        ]
+      },
+      &quot;span&quot;: [
+        0,
+        41
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        42,
+        66
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [
+        {
+          &quot;name&quot;: &quot;title&quot;,
+          &quot;expr&quot;: {
+            &quot;type&quot;: &quot;Member&quot;,
+            &quot;object&quot;: {
+              &quot;type&quot;: &quot;Var&quot;,
+              &quot;name&quot;: &quot;page&quot;,
+              &quot;span&quot;: [
+                83,
+                87
+              ]
+            },
+            &quot;key&quot;: &quot;title&quot;,
+            &quot;span&quot;: [
+              83,
+              93
+            ]
+          }
+        }
+      ],
+      &quot;span&quot;: [
+        66,
+        94
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        95,
+        106
+      ]
+    }
+  ]
+}
+
+
+rust/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;rust&quot;,
+  &quot;scenario&quot;: &quot;scope-precedence&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;c79abf1a243053bd7c145f39700c8d00b06a5d23eb222ae4d445e7e6102f6b7d&quot;,
+      &quot;artifactSha256&quot;: &quot;b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06&quot;,
+      &quot;artifactSha256&quot;: &quot;3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c&quot;
+    }
+  }
+}
+
+rust/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;article&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        14
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          17,
+          22
+        ]
+      },
+      &quot;span&quot;: [
+        14,
+        23
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        23,
+        45
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;root_label&quot;,
+        &quot;span&quot;: [
+          48,
+          58
+        ]
+      },
+      &quot;span&quot;: [
+        45,
+        59
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        59,
+        83
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;defined_label&quot;,
+        &quot;span&quot;: [
+          86,
+          99
+        ]
+      },
+      &quot;span&quot;: [
+        83,
+        100
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        100,
+        122
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Var&quot;,
+            &quot;name&quot;: &quot;layout_local&quot;,
+            &quot;span&quot;: [
+              125,
+              137
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;missing&quot;,
+            &quot;span&quot;: [
+              148,
+              157
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          125,
+          158
+        ]
+      },
+      &quot;span&quot;: [
+        122,
+        159
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;,
+      &quot;span&quot;: [
+        159,
+        175
+      ]
+    }
+  ]
+}
+
+
+rust/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Set&quot;,
+      &quot;name&quot;: &quot;layout_local&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Literal&quot;,
+        &quot;kind&quot;: &quot;string&quot;,
+        &quot;value&quot;: &quot;visible only in layout&quot;,
+        &quot;span&quot;: [
+          16,
+          40
+        ]
+      },
+      &quot;span&quot;: [
+        0,
+        41
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        42,
+        66
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [
+        {
+          &quot;name&quot;: &quot;title&quot;,
+          &quot;expr&quot;: {
+            &quot;type&quot;: &quot;Member&quot;,
+            &quot;object&quot;: {
+              &quot;type&quot;: &quot;Var&quot;,
+              &quot;name&quot;: &quot;page&quot;,
+              &quot;span&quot;: [
+                83,
+                87
+              ]
+            },
+            &quot;key&quot;: &quot;title&quot;,
+            &quot;span&quot;: [
+              83,
+              93
+            ]
+          }
+        }
+      ],
+      &quot;span&quot;: [
+        66,
+        94
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        95,
+        106
+      ]
+    }
+  ]
+}
+
+
+php/manifest.json
+{
+  &quot;schema&quot;: 1,
+  &quot;language&quot;: &quot;php&quot;,
+  &quot;scenario&quot;: &quot;scope-precedence&quot;,
+  &quot;templates&quot;: {
+    &quot;content.tpl&quot;: {
+      &quot;artifact&quot;: &quot;content.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;c79abf1a243053bd7c145f39700c8d00b06a5d23eb222ae4d445e7e6102f6b7d&quot;,
+      &quot;artifactSha256&quot;: &quot;b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd&quot;
+    },
+    &quot;layout.tpl&quot;: {
+      &quot;artifact&quot;: &quot;layout.tpl.ast.json&quot;,
+      &quot;sourceSha256&quot;: &quot;8b42735f673d4f53bf09107e5875a312f7fe549aba9dc067be014d673eb19b06&quot;,
+      &quot;artifactSha256&quot;: &quot;3e02f1f1975e7e0a60726b1b46c6a0a7ab19f462a51b14d56361a09175b6ef7c&quot;
+    }
+  }
+}
+
+php/content.tpl.ast.json · content.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;content.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;article&gt;\n&lt;h1&gt;&quot;,
+      &quot;span&quot;: [
+        0,
+        14
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;title&quot;,
+        &quot;span&quot;: [
+          17,
+          22
+        ]
+      },
+      &quot;span&quot;: [
+        14,
+        23
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        23,
+        45
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;root_label&quot;,
+        &quot;span&quot;: [
+          48,
+          58
+        ]
+      },
+      &quot;span&quot;: [
+        45,
+        59
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        59,
+        83
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Var&quot;,
+        &quot;name&quot;: &quot;defined_label&quot;,
+        &quot;span&quot;: [
+          86,
+          99
+        ]
+      },
+      &quot;span&quot;: [
+        83,
+        100
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;,
+      &quot;span&quot;: [
+        100,
+        122
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Echo&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Call&quot;,
+        &quot;name&quot;: &quot;default&quot;,
+        &quot;args&quot;: [
+          {
+            &quot;type&quot;: &quot;Var&quot;,
+            &quot;name&quot;: &quot;layout_local&quot;,
+            &quot;span&quot;: [
+              125,
+              137
+            ]
+          },
+          {
+            &quot;type&quot;: &quot;Literal&quot;,
+            &quot;kind&quot;: &quot;string&quot;,
+            &quot;value&quot;: &quot;missing&quot;,
+            &quot;span&quot;: [
+              148,
+              157
+            ]
+          }
+        ],
+        &quot;span&quot;: [
+          125,
+          158
+        ]
+      },
+      &quot;span&quot;: [
+        122,
+        159
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;,
+      &quot;span&quot;: [
+        159,
+        175
+      ]
+    }
+  ]
+}
+
+
+php/layout.tpl.ast.json · layout.tpl
+{
+  &quot;type&quot;: &quot;Template&quot;,
+  &quot;name&quot;: &quot;layout.tpl&quot;,
+  &quot;body&quot;: [
+    {
+      &quot;type&quot;: &quot;Set&quot;,
+      &quot;name&quot;: &quot;layout_local&quot;,
+      &quot;expr&quot;: {
+        &quot;type&quot;: &quot;Literal&quot;,
+        &quot;kind&quot;: &quot;string&quot;,
+        &quot;value&quot;: &quot;visible only in layout&quot;,
+        &quot;span&quot;: [
+          16,
+          40
+        ]
+      },
+      &quot;span&quot;: [
+        0,
+        41
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;,
+      &quot;span&quot;: [
+        42,
+        66
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Block&quot;,
+      &quot;id&quot;: &quot;content&quot;,
+      &quot;path&quot;: null,
+      &quot;scope&quot;: [
+        {
+          &quot;name&quot;: &quot;title&quot;,
+          &quot;expr&quot;: {
+            &quot;type&quot;: &quot;Member&quot;,
+            &quot;object&quot;: {
+              &quot;type&quot;: &quot;Var&quot;,
+              &quot;name&quot;: &quot;page&quot;,
+              &quot;span&quot;: [
+                83,
+                87
+              ]
+            },
+            &quot;key&quot;: &quot;title&quot;,
+            &quot;span&quot;: [
+              83,
+              93
+            ]
+          }
+        }
+      ],
+      &quot;span&quot;: [
+        66,
+        94
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;Text&quot;,
+      &quot;value&quot;: &quot;&lt;/section&gt;\n&quot;,
+      &quot;span&quot;: [
+        95,
+        106
+      ]
+    }
+  ]
+}
+</pre></details></section>
+    <section class="output"><p class="output-label">Output · 177 bytes · 7b160d439d3d…</p><pre>&lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;scope&quot;</span>&gt;
+&lt;<span class="syntax-tag">article</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;from assign&lt;/<span class="syntax-tag">h1</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;root&quot;</span>&gt;root assign&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;defined&quot;</span>&gt;definition data&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;local&quot;</span>&gt;missing&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;/<span class="syntax-tag">article</span>&gt;
+&lt;/<span class="syntax-tag">section</span>&gt;
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+  </div>
+</article></div></section>
+<section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · PERFORMANCE</p><h2>Measured separately</h2></div><p>Compilation and artifact loading are build or process-start work. Runtime implementations prepare bound requests once and reuse their parsed artifact; the benchmark table records render measurements separately.</p></div><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr></tbody></table></div></section></main>
+<footer class="footer"><a href="../../spec/runtime.html">Runtime specification</a><a href="../../spec/ast.html">AST specification</a><a href="../../operations/showcase.html">Showcase procedure</a></footer></body></html>

@@ -1,0 +1,202 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Unary",
+        "op": "-",
+        "operand": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            4,
+            5
+          ]
+        },
+        "span": [
+          3,
+          5
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        6,
+        7
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Unary",
+        "op": "!",
+        "operand": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            11,
+            12
+          ]
+        },
+        "span": [
+          10,
+          12
+        ]
+      },
+      "span": [
+        7,
+        13
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        13,
+        14
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Unary",
+        "op": "!",
+        "operand": {
+          "type": "Unary",
+          "op": "!",
+          "operand": {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              19,
+              20
+            ]
+          },
+          "span": [
+            18,
+            20
+          ]
+        },
+        "span": [
+          17,
+          20
+        ]
+      },
+      "span": [
+        14,
+        21
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        21,
+        22
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Unary",
+        "op": "!",
+        "operand": {
+          "type": "Var",
+          "name": "t",
+          "span": [
+            26,
+            27
+          ]
+        },
+        "span": [
+          25,
+          27
+        ]
+      },
+      "span": [
+        22,
+        28
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        28,
+        29
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Unary",
+        "op": "-",
+        "operand": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "3",
+          "span": [
+            33,
+            36
+          ]
+        },
+        "span": [
+          32,
+          36
+        ]
+      },
+      "span": [
+        29,
+        37
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        37,
+        38
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Unary",
+        "op": "!",
+        "operand": {
+          "type": "Literal",
+          "kind": "null",
+          "value": null,
+          "span": [
+            42,
+            46
+          ]
+        },
+        "span": [
+          41,
+          46
+        ]
+      },
+      "span": [
+        38,
+        47
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        47,
+        48
+      ]
+    }
+  ]
+}

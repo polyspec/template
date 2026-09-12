@@ -1,0 +1,11 @@
+{
+  "title": "Scope precedence",
+  "description": "A template definition receives root assign data, definition data and a scope argument, while a layout local stays isolated.",
+  "focus": [
+    "assign data",
+    "define data",
+    "scope precedence",
+    "local isolation"
+  ],
+  "target": "layout"
+}
