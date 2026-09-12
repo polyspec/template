@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { analyze } from '../../packages/template-ts/dist/index.mjs';
 import { root } from '../../tests/runner/drivers.mjs';
 
 const site = join(root, 'examples', 'site');
@@ -27,47 +27,34 @@ function highlightEscapedHtml(escaped) {
     });
 }
 
-function rangesOf(ast) {
-  const ranges = [];
-  const visit = nodes => {
-    for (const node of nodes) {
-      if (node.type !== 'Text') ranges.push({ start: node.span[0], end: node.span[1], type: node.type.toLowerCase() });
-      if (node.body) visit(node.body);
-      if (node.branches) for (const branch of node.branches) visit(branch.body);
-      if (node.else) visit(node.else);
-      if (node.empty) visit(node.empty);
-    }
-  };
-  visit(ast.body);
-  return ranges;
-}
-
 function highlightTemplate(source, name) {
-  const ranges = rangesOf(parse(source, name));
-  let marked = escapeHtml(source);
-  const placeholders = [];
-  const tags = [...source.matchAll(/\{\{?[\s\S]*?\}\}?/g)];
-  for (let index = tags.length - 1; index >= 0; index--) {
-    const match = tags[index];
-    const raw = match[0];
-    const escapedRaw = escapeHtml(raw);
-    const placeholder = `___TEMPLATE_TAG_${index}___`;
-    const offset = escapeHtml(source.slice(0, match.index)).length;
-    marked = marked.slice(0, offset) + placeholder + marked.slice(offset + escapedRaw.length);
-    const range = ranges.filter(item => item.start <= match.index && item.end >= match.index + raw.length)
-      .sort((a, b) => (a.end - a.start) - (b.end - b.start))[0];
-    placeholders[index] = `<span class="syntax-template syntax-${range?.type ?? 'tag'}">${escapedRaw}</span>`;
+  const analysis = analyze(source, name);
+  let highlighted = '';
+  let cursor = 0;
+  for (const tag of analysis.tags) {
+    highlighted += highlightEscapedHtml(escapeHtml(source.slice(cursor, tag.start)));
+    let tagHtml = '';
+    let tagCursor = tag.start;
+    for (const token of analysis.tokens.filter(item => item.start >= tag.start && item.end <= tag.end)) {
+      tagHtml += escapeHtml(source.slice(tagCursor, token.start));
+      tagHtml += `<span class="syntax-${token.kind}">${escapeHtml(source.slice(token.start, token.end))}</span>`;
+      tagCursor = token.end;
+    }
+    tagHtml += escapeHtml(source.slice(tagCursor, tag.end));
+    highlighted += `<span class="syntax-template syntax-${tag.kind}">${tagHtml}</span>`;
+    cursor = tag.end;
   }
-  return highlightEscapedHtml(marked).replace(/___TEMPLATE_TAG_(\d+)___/g, (_, index) => placeholders[Number(index)]);
+  return highlighted + highlightEscapedHtml(escapeHtml(source.slice(cursor)));
 }
 
 function digest(text) {
   return `${Buffer.byteLength(text, 'utf8')} bytes · ${createHash('sha256').update(text, 'utf8').digest('hex').slice(0, 12)}…`;
 }
 
-function code(label, value, highlighted = false) {
+function code(label, value, highlighted = false, scrollable = false) {
   const content = highlighted ? value : escapeHtml(value);
-  return `<details open><summary>${escapeHtml(label)}</summary><pre>${content}</pre></details>`;
+  const classes = [highlighted ? 'template-files' : '', scrollable ? 'long-code' : ''].filter(Boolean).join(' ');
+  return `<details open><summary>${escapeHtml(label)}</summary><pre${classes ? ` class="${classes}"` : ''}>${content}</pre></details>`;
 }
 
 function generatedFunctions(source, scenarioId) {
@@ -120,7 +107,7 @@ function scenarioCard(scenario, result) {
   return `<article class="scenario" id="${escapeHtml(scenario.id)}">
   <header class="scenario-header"><div><h3>${escapeHtml(scenario.title)}</h3><p>${escapeHtml(scenario.description)}</p></div><div class="tags">${scenario.focus.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div></header>
   <div class="scenario-meta">
-  <section class="source"><p class="output-label">Inputs</p>${code('assign', JSON.stringify(scenario.assign, null, 2))}${code('define', JSON.stringify(scenario.define, null, 2))}${code('templates · parser ranges', templateSource, true)}${scenario.integrationFiles?.length ? code('integration source', integrationSource, true) : ''}${code('compiled artifacts', artifactText)}${code('generated renderers', generatedSource)}</section>
+  <section class="source"><p class="output-label">Inputs</p>${code('assign', JSON.stringify(scenario.assign, null, 2))}${code('define', JSON.stringify(scenario.define, null, 2))}${code('templates · parser ranges', templateSource, true)}${scenario.integrationFiles?.length ? code('integration source', integrationSource, true) : ''}${code('compiled artifacts', artifactText, false, true)}${code('generated renderers', generatedSource, false, true)}</section>
     <section class="output"><p class="output-label">Output · ${escapeHtml(digest(scenario.expectedHtml))}</p><pre>${highlightEscapedHtml(escapeHtml(scenario.expectedHtml))}</pre><table><thead><tr><th>Implementation</th>${results.languages.map(language => `<th>${escapeHtml(language)}</th>`).join('')}</tr></thead><tbody><tr><td>artifact render</td>${proofCells}</tr></tbody></table></section>
   </div>
 </article>`;
