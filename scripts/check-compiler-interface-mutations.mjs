@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Proves that structural compiler-interface drift is rejected.
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,8 +31,22 @@ try {
     });
     if (result.status === 0) throw new Error(`${name} was accepted`);
   }
+  const backendDirectory = join(directory, 'backends');
+  mkdirSync(backendDirectory);
+  for (const filename of ['typescript.mjs', 'go.mjs', 'rust.mjs', 'php.mjs']) {
+    copyFileSync(resolve(root, 'tools/compiler/backends', filename), join(backendDirectory, filename));
+  }
+  const rustBackend = join(backendDirectory, 'rust.mjs');
+  writeFileSync(rustBackend, readFileSync(rustBackend, 'utf8').replace('export function emitEntry', 'function emitEntry'));
+  const backendResult = spawnSync(process.execPath, ['scripts/check-compiler-interface.mjs'], {
+    cwd: root,
+    env: { ...process.env, TEMPLATE_BACKEND_DIRECTORY: backendDirectory },
+    encoding: 'utf8',
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  if (backendResult.status === 0) throw new Error('missing backend operation was accepted');
 } finally {
   rmSync(directory, { recursive: true, force: true });
 }
 
-process.stdout.write('compiler interface: 5 structural mutations rejected\n');
+process.stdout.write('compiler interface: 6 structural mutations rejected\n');
