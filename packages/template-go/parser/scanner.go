@@ -63,7 +63,7 @@ func limit(text string, from, count int) string {
 func startsTag(text string, open int, d Delimiters) bool {
 	sigil := sigilAfter(text, open)
 	if sigil == "" {
-		return assignForm.MatchString(limit(text, open+1, 80))
+		return false
 	}
 	after := skipHorizontalSpace(text, open+1) + len(sigil)
 	switch sigil {

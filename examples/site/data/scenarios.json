@@ -16,7 +16,7 @@
       "target": "layout",
       "templates": {
         "card.tpl": "<p class=\"card\">{= label}</p>\n",
-        "layout.tpl": "{values = [0, ...numbers]}\n{merged = [...lookup, 'z' => 'Z']}\n<section>\n<h1>{= page.title}</h1>\n<p class=\"escaped\">{= dangerous}</p>\n<p class=\"logical\">{= flag && 'x'}|{= false || 2}</p>\n<p class=\"empty-truthiness\">{= empty_list && flag}|{= empty_map && flag}</p>\n<p>{= values[1]}|{= merged['z']}</p>\n{? flag && page.title == 'Guide'}<strong>matched</strong>{:}<strong>missed</strong>{/}\n<p>{= flag ? 'yes' : 'no'}|{= -1 + 3}|{= '' | default('fallback')}</p>\n<ul>\n{@ row = rows}\n<li>{= row.index_}/{= row.size_}:{= row.name}:{= row.first_}:{= row.last_}</li>\n{:}\n<li>empty</li>\n{/}\n</ul>\n{+ partial.tpl}\n{?# content}<p>defined</p>{:}<p>missing</p>{/}\n{# content label:page.title}\n</section>\n",
+        "layout.tpl": "{:values = [0, ...numbers]}\n{:merged = [...lookup, 'z' => 'Z']}\n<section>\n<h1>{= page.title}</h1>\n<p class=\"escaped\">{= dangerous}</p>\n<p class=\"logical\">{= flag && 'x'}|{= false || 2}</p>\n<p class=\"empty-truthiness\">{= empty_list && flag}|{= empty_map && flag}</p>\n<p>{= values[1]}|{= merged['z']}</p>\n{? flag && page.title == 'Guide'}<strong>matched</strong>{:}<strong>missed</strong>{/}\n<p>{= flag ? 'yes' : 'no'}|{= -1 + 3}|{= '' | default('fallback')}</p>\n<ul>\n{@ row = rows}\n<li>{= row.index_}/{= row.size_}:{= row.name}:{= row.first_}:{= row.last_}</li>\n{:}\n<li>empty</li>\n{/}\n</ul>\n{+ partial.tpl}\n{?# content}<p>defined</p>{:}<p>missing</p>{/}\n{# content label:page.title}\n</section>\n",
         "partial.tpl": "<p class=\"included\">{= values[2]}</p>\n"
       },
       "integrationFiles": [],
@@ -161,7 +161,7 @@
       "target": "layout",
       "templates": {
         "content.tpl": "<article>\n<h1>{= title}</h1>\n<p class=\"root\">{= root_label}</p>\n<p class=\"defined\">{= defined_label}</p>\n<p class=\"local\">{= layout_local | default('missing')}</p>\n</article>\n",
-        "layout.tpl": "{layout_local = 'visible only in layout'}\n<section class=\"scope\">\n{# content title:page.title}\n</section>\n"
+        "layout.tpl": "{:layout_local = 'visible only in layout'}\n<section class=\"scope\">\n{# content title:page.title}\n</section>\n"
       },
       "integrationFiles": [],
       "assign": {

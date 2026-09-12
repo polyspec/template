@@ -123,7 +123,7 @@ pub fn sigil_after(bytes: &[u8], open: usize) -> Option<&'static str> {
 /// delimiter, and `@` only before `name =`.
 pub fn starts_tag(bytes: &[u8], open: usize, delimiters: Delimiters) -> bool {
     let Some(sigil) = sigil_after(bytes, open) else {
-        return assignment_form(bytes, open + 1);
+        return false;
     };
     let after = skip_horizontal_space(bytes, open + 1) + sigil.len();
     match sigil {

@@ -1,0 +1,4 @@
+{
+  "stage": 1,
+  "rules": ["LEX-6", "LEX-11", "LEX-20", "LEX-21"]
+}

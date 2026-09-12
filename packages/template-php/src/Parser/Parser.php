@@ -18,7 +18,7 @@ use Polyspec\Template\TemplateError;
 final class Parser
 {
     private const RESERVED = ['true' => true, 'false' => true, 'null' => true, 'in' => true];
-    private const ASSIGN_HEAD = '/^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=)/';
+    private const ASSIGN_HEAD = '/^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
     private const LOOP_HEAD = '/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/';
 
     private string $open;
@@ -202,6 +202,10 @@ final class Parser
                 $this->frames[$frameIndex]['items'] = [];
                 break;
             case ':':
+                if (preg_match(self::ASSIGN_HEAD, substr($text, $bodyStart, 80)) === 1) {
+                    $end = $this->parseAssignment($start, $open, $closeCount, $wrapper, $bodyStart);
+                    break;
+                }
                 $frameIndex = count($this->frames) - 1;
                 if ($frameIndex < 0) {
                     throw $this->fail('E_PARSE_ELSE_OUTSIDE_BLOCK', $start, $start + 1, '"{:}" outside of a block');
@@ -240,8 +244,7 @@ final class Parser
                 $end = $this->parseDirective($start, $open, $closeCount, $wrapper, $bodyStart, $firstTag);
                 break;
             case null:
-                $end = $this->parseAssignment($start, $open, $closeCount, $wrapper, $bodyStart);
-                break;
+                throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $bodyStart, $bodyStart + 1, 'unknown tag');
             default:
                 throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $bodyStart, $bodyStart + 1, 'unknown tag');
         }

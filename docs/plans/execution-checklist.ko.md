@@ -62,7 +62,7 @@ W0 foundation ──► W1 specification (parallel docs) ──► W1.11 spec re
 
 | ID | 작업 | 산출물 | 내용 | 검증 | 완료 |
 | --- | --- | --- | --- | --- | --- |
-| T1.1 | 렉시컬 명세 | `docs/spec/lexical.md`(.ko) | UTF-8과 BOM 처리; 줄 구분자; 태그 시작 규칙(`{` 뒤에 수평 공백과 기호, 또는 `{` 뒤에 식별자와 대입 연산자); 그 외는 텍스트; 태그가 시작될 자리에서만 소비되는 이스케이프 `\{`; 주석 `{* *}`; 문자열 리터럴 밖 첫 `}`에서 태그 종료; echo 이외 태그의 standalone 줄 제거 규칙; 텍스트로 남는 JavaScript와 CSS 중괄호 예시 | `make docs-check` | [x] |
+| T1.1 | 렉시컬 명세 | `docs/spec/lexical.md`(.ko) | UTF-8과 BOM 처리; 줄 구분자; 태그 시작 규칙(`{` 뒤에 수평 공백과 기호, 또는 `{:` 뒤에 식별자와 대입 연산자); 그 외는 텍스트; 태그가 시작될 자리에서만 소비되는 이스케이프 `\{`; 주석 `{* *}`; 문자열 리터럴 밖·표현식 깊이 0의 닫는 구분자로 태그 종료; echo 이외 태그의 standalone 줄 제거 규칙; 텍스트로 남는 JavaScript와 CSS 중괄호 예시 | `make docs-check`, `node tests/runner/delimiter-matrix.mjs` | [x] |
 | T1.2 | 태그 문법 | `docs/spec/grammar.md`(.ko) | echo, loop, if, elseif, else, close, include, block, if-block, 대입의 EBNF; 블록 중첩과 닫기 규칙; 루프 안 `{:}`는 빈 분기; 규칙별 오류 조건; bare 경로와 따옴표 경로 토큰 정의; 블록 태그 토큰 순서(선택 id, 선택 경로, `name` 또는 `name:postfix` 형태의 scope 항목) | `make docs-check` | [x] |
 | T1.3 | 표현식 명세 | `docs/spec/expressions.md`(.ko) | 토큰 표; EBNF; 우선순위 표(파이프, 삼항과 엘비스, 말미 축약을 포함한 병합, or, and, 동등, 비교와 `in`, 덧셈, 곱셈, 단항, postfix); 경로 접근과 조회 규칙; 전용 노드로 해석되는 루프 메타 `name.index_ key_ value_ last_ first_ size_`; `+` 규칙(한쪽이 문자열이면 결합, 아니면 숫자 덧셈); 그 외 산술은 숫자 전용; 동등, 엄격 동등, 순서, 진릿값; `=>`와 spread를 포함한 list·map 리터럴 | `make docs-check` | [x] |
 | T1.4 | 데이터 모델 | `docs/spec/data-model.md`(.ko) | 값 타입; 안전 정수 범위를 가진 IEEE 754 double 숫자; 문자열→숫자 변환 문법; ECMAScript `Number::toString`과 동일한 숫자→문자열 규칙과 언어별 구성 방법; bool과 null 출력; 순서 있는 map; JSON, JavaScript, PHP, Go, Rust 바인딩 표; 거부 코드 | `make docs-check` | [x] |

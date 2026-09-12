@@ -4,58 +4,50 @@
   "body": [
     {
       "type": "Set",
-      "name": "x",
+      "name": "a",
       "expr": {
         "type": "Literal",
-        "kind": "number",
-        "value": 1,
+        "kind": "string",
+        "value": "2;;22",
         "span": [
-          6,
-          7
+          4,
+          11
         ]
       },
       "span": [
         0,
-        8
-      ]
-    },
-    {
-      "type": "Include",
-      "path": "part.tpl",
-      "span": [
-        9,
-        21
+        12
       ]
     },
     {
       "type": "Text",
-      "value": "<p>",
+      "value": "|",
       "span": [
-        22,
-        25
+        12,
+        13
       ]
     },
     {
       "type": "Echo",
       "expr": {
         "type": "Var",
-        "name": "y",
+        "name": "a",
         "span": [
-          28,
-          29
+          15,
+          16
         ]
       },
       "span": [
-        25,
-        30
+        13,
+        17
       ]
     },
     {
       "type": "Text",
-      "value": "</p>\n",
+      "value": "\n",
       "span": [
-        30,
-        35
+        17,
+        18
       ]
     }
   ]

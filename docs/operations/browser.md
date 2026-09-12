@@ -24,4 +24,4 @@ make test-browser
 - The template renders the document and the static regions and leaves container elements for the framework to mount into.
 - The framework renders its own regions on the server and in the browser; the template inserts a server-rendered result through a definition entry with `html`.
 
-The tag start rule keeps framework syntax as text: `{{ msg }}`, `{cond && x}`, `{/* comment */}` and `{ a: 1 }` are not tags. A `{` immediately followed by an identifier and an assignment operator, such as `{a = 1}`, is a tag; write `\{a = 1}` to keep it as text.
+The tag start rule keeps framework syntax as text: `{{ msg }}`, `{cond && x}`, `{/* comment */}` and `{ a: 1 }` are not tags. Assignments require the `:` sigil, such as `{:a = 1}`; `{a = 1}` remains text.

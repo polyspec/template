@@ -23,7 +23,6 @@ export const WRAPPERS: readonly Wrapper[] = [
   { opener: '<!--', closer: '-->' },
 ];
 
-const ASSIGN_FORM = /^[A-Za-z_][A-Za-z0-9_]*[ \t]*(\+\+|--|[-+*/%]=|=(?![=>]))/;
 const LOOP_FORM = /^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/;
 
 export function isHorizontalSpace(code: number): boolean {
@@ -48,7 +47,7 @@ export function sigilAfter(text: string, open: number): Sigil | null {
 // The sigil `/` starts a tag only before the close delimiter, and `@` only before `name =`.
 export function startsTag(text: string, open: number, delimiters: Delimiters): boolean {
   const sigil = sigilAfter(text, open);
-  if (sigil === null) return ASSIGN_FORM.test(text.slice(open + 1, open + 80));
+  if (sigil === null) return false;
   const after = skipHorizontalSpace(text, open + 1) + sigil.length;
   if (sigil === '/') return text[skipHorizontalSpace(text, after)] === delimiters.close;
   if (sigil === '@') return LOOP_FORM.test(text.slice(after, after + 80));

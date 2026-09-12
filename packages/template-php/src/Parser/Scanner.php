@@ -14,7 +14,6 @@ final class Scanner
     /** @var list<array{0: string, 1: string}> opener and closer */
     public const WRAPPERS = [['"', '"'], ["'", "'"], ['/*', '*/'], ['<!--', '-->']];
 
-    private const ASSIGN_FORM = '/^[A-Za-z_][A-Za-z0-9_]*[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
     private const LOOP_FORM = '/^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/';
 
     public static function skipHorizontalSpace(string $text, int $index): int
@@ -54,7 +53,7 @@ final class Scanner
     {
         $sigil = self::sigilAfter($text, $open);
         if ($sigil === null) {
-            return preg_match(self::ASSIGN_FORM, substr($text, $open + 1, 80)) === 1;
+            return false;
         }
         $after = self::skipHorizontalSpace($text, $open + 1) + strlen($sigil);
         if ($sigil === '/') {
