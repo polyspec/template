@@ -98,6 +98,8 @@ classDiagram
     +equal(left, right, strict) bool
     +compare(left, right, frame, span) ordering or error
     +member(container, key) value
+    +memberCall(container, method, args, frame, span) value or error
+    +classCall(className, method, args, frame, span) value or error
     +index(container, key) value
     +entries(value, frame, span) entries or error
     +listSpread(value, frame, span) list or error
@@ -109,6 +111,7 @@ classDiagram
   class RuntimeServices {
     +limits() Limits
     +hostFunction(name) HostFunction or missing
+    +classFunction(className, method) HostFunction or missing
   }
   Program <|-- AstProgram
   Program <|-- GeneratedProgram

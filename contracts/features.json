@@ -720,7 +720,7 @@
       "id": "generated-mode",
       "title": "Generated compiler mode",
       "title_ko": "Generated compiler mode",
-      "status": "implemented",
+      "status": "partial",
       "description": "Lower canonical AST and typed IR into direct TypeScript, Go, Rust and PHP template functions.",
       "description_ko": "Canonical AST와 typed IR을 직접 실행하는 TypeScript, Go, Rust, PHP template function으로 낮춘다.",
       "inputs": {
@@ -759,10 +759,10 @@
         }
       ],
       "clients": {
-        "go": "pass",
-        "php": "pass",
-        "rust": "pass",
-        "typescript": "pass"
+        "go": "partial",
+        "php": "partial",
+        "rust": "partial",
+        "typescript": "partial"
       },
       "fixtures": [
         "examples/site/scenarios"
@@ -1118,7 +1118,7 @@
       "title": "Assigned object and class function calls",
       "title_ko": "Assigned object and class function calls",
       "status": "partial",
-      "description": "Parse member calls on assigned instances and logical class calls with shared canonical AST nodes.",
+      "description": "Parse and execute member calls on assigned instances and logical class calls with shared canonical AST nodes.",
       "description_ko": "assign 인스턴스의 멤버 호출과 논리 클래스 호출을 공통 canonical AST 노드로 파싱한다.",
       "inputs": {
         "type": "TemplateExpression",
@@ -1160,7 +1160,11 @@
       "tests": [
         "packages/template-ts/tests/expr/fixtures.test.ts",
         "packages/template-go/expr/fixtures_test.go",
-        "packages/template-rust/tests/expr_fixtures.rs"
+        "packages/template-rust/tests/expr_fixtures.rs",
+        "packages/template-ts/tests/program.test.ts",
+        "packages/template-go/render/object_calls_test.go",
+        "packages/template-rust/tests/object_calls.rs",
+        "packages/template-php/tests/ObjectCallsTest.php"
       ],
       "verification": [
         {

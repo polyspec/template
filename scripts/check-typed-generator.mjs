@@ -21,7 +21,7 @@ function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd ?? root,
     encoding: 'utf8',
-    env: { ...process.env, ...options.env },
+    env: { GOCACHE: '/tmp/template-go-cache', ...process.env, ...options.env },
     maxBuffer: 32 * 1024 * 1024,
   });
   if (result.error || result.status !== 0) {

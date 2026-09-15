@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Template execution lab</title><link rel="stylesheet" href="./styles.css"></head>
 <body><header class="hero"><p class="eyebrow">TEMPLATE · STATIC RENDER PROOF</p><h1>Template execution lab</h1><p class="lede">The shared source is parsed before this page is built. AST mode executes the committed nodes; generated mode lowers those same nodes into host-language renderers. Both modes use the same assign, define and output contract.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">PASS</strong></div><div class="status-card"><span>AST mode</span><strong class="pass">IMPLEMENTED</strong></div><div class="status-card"><span>Generated mode</span><strong class="pass">5 LANGUAGES</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
-<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>351</td><td>f9e5af2122de…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
+<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · NATIVE VALUES</p><h2>Assign keeps the application instance</h2></div><p>Applications pass their own class instance through assign. The template reads a public field, calls the instance method and calls a separately registered logical class function.</p></div><div class="native-proof"><details open><summary>template</summary><pre class="template-files">&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.label</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.status_label</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;ready&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">Order</span><span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-variable">suffix</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;!&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
+</pre></details><details open><summary>application assign</summary><pre>class Order { public label = &#39;Order 12&#39;; public status_label(prefix) { return prefix + &#39;:12&#39;; } }
+const assign = { order: new Order() };</pre></details><p class="output-label">Rendered output · 64 bytes · 5f94e0e9fe74…</p><pre>&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;Order 12&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;ready:12&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;done!&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
+</pre></div></section><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>351</td><td>f9e5af2122de…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
 <section class="panel"><div class="section-heading"><div><p class="eyebrow">02 · INPUT AND OUTPUT</p><h2>Small SSR situations</h2></div><p>Each card shows the exact assign data, define map, every template file, compiled artifact manifest and final HTML.</p></div><div class="scenario-list"><article class="scenario" id="compiler-coverage">
   <header class="scenario-header"><div><h3>Generated compiler coverage</h3><p>One readable page executes every canonical statement and expression family through AST and generated modes.</p></div><div class="tags"><span class="tag">expressions</span><span class="tag">loops and loop metadata</span><span class="tag">include scope</span><span class="tag">define and block scope</span></div></header>
   <div class="scenario-meta">
@@ -75,8 +78,8 @@
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;a96e11d777643b93f5f2d4de836568cfb9f8037a3d9f9918c7514de5ab047601&quot;,
   &quot;files&quot;: {
     &quot;card.tpl&quot;: {
       &quot;path&quot;: &quot;card.tpl.ast.json&quot;,
@@ -1116,8 +1119,8 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;3749284e0c2815b4baf2fd9e67b62b38a4d6a2b869d6b17aaa2be662999394b3&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.ts&quot;,
@@ -1280,8 +1283,8 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;91feab7319152276478c0a922d26df87bb5562f5c5e54fa84c448039dd0cce3b&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
@@ -1569,12 +1572,12 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;7bcdf7f9c8c2db5586d7e59b9c38cff7b6bf233fe6d987fa5b57c9c12f0a40c7&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;2b108db876870504ffe24ff56df8daded7b1337a65adf64767425adc257872ef&quot;
+      &quot;artifactDigest&quot;: &quot;fc4ae8b8bb919543437ea9359b8e9cf16b9ac4cad42b353ac59d2d7e51b08534&quot;
     }
   }
 }
@@ -1622,6 +1625,8 @@ func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, inp
 func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
 func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedMemberCall[T any](runtime *render.RuntimeBindings, input value.Value, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.MemberCall(input, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedClassCall[T any](runtime *render.RuntimeBindings, className, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.ClassCall(className, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
 func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry { result, err := runtime.Entries(generatedValue(input), frame, span); generatedPanic(err); return result }
@@ -1765,8 +1770,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;1b317b301f6ed5e8a03d3304241348d428500b36a23a2b7884a549aa5ade3813&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.rust&quot;,
@@ -1946,8 +1951,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;515fccc99c21751771843e3f17dfbf978576ec2e696ed7bde72d803184be9366&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.php&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.php&quot;,
@@ -2159,8 +2164,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;a96e11d777643b93f5f2d4de836568cfb9f8037a3d9f9918c7514de5ab047601&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2241,8 +2246,8 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;3749284e0c2815b4baf2fd9e67b62b38a4d6a2b869d6b17aaa2be662999394b3&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
       &quot;path&quot;: &quot;empty-state.ts&quot;,
@@ -2310,8 +2315,8 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;91feab7319152276478c0a922d26df87bb5562f5c5e54fa84c448039dd0cce3b&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
       &quot;path&quot;: &quot;empty-state.js&quot;,
@@ -2448,12 +2453,12 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;7bcdf7f9c8c2db5586d7e59b9c38cff7b6bf233fe6d987fa5b57c9c12f0a40c7&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;f56bf0eb03c98b02fb5c92bdc0e8cd7d3209012e553460912db6cb17b2aa0018&quot;
+      &quot;artifactDigest&quot;: &quot;15099db0ad1dee766b25fad575315c4e6339883b43eb8f9c513e9ae183966030&quot;
     }
   }
 }
@@ -2488,6 +2493,8 @@ func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, inp
 func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
 func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedMemberCall[T any](runtime *render.RuntimeBindings, input value.Value, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.MemberCall(input, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedClassCall[T any](runtime *render.RuntimeBindings, className, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.ClassCall(className, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
 func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry { result, err := runtime.Entries(generatedValue(input), frame, span); generatedPanic(err); return result }
@@ -2546,8 +2553,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;1b317b301f6ed5e8a03d3304241348d428500b36a23a2b7884a549aa5ade3813&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
       &quot;path&quot;: &quot;empty-state.rust&quot;,
@@ -2626,8 +2633,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;515fccc99c21751771843e3f17dfbf978576ec2e696ed7bde72d803184be9366&quot;,
   &quot;files&quot;: {
     &quot;empty-state.php&quot;: {
       &quot;path&quot;: &quot;empty-state.php&quot;,
@@ -2722,8 +2729,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;a96e11d777643b93f5f2d4de836568cfb9f8037a3d9f9918c7514de5ab047601&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2804,8 +2811,8 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;3749284e0c2815b4baf2fd9e67b62b38a4d6a2b869d6b17aaa2be662999394b3&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
       &quot;path&quot;: &quot;html-slot.ts&quot;,
@@ -2871,8 +2878,8 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;91feab7319152276478c0a922d26df87bb5562f5c5e54fa84c448039dd0cce3b&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
       &quot;path&quot;: &quot;html-slot.js&quot;,
@@ -3007,12 +3014,12 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;7bcdf7f9c8c2db5586d7e59b9c38cff7b6bf233fe6d987fa5b57c9c12f0a40c7&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;d3373640d741f4e06114e382bbfd89a6617acfb457eb4697fd39d1e6663b1b92&quot;
+      &quot;artifactDigest&quot;: &quot;929433fbfef39f5824783046aad7dcccf60823c155ee937df237141fb825211b&quot;
     }
   }
 }
@@ -3047,6 +3054,8 @@ func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, inp
 func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
 func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedMemberCall[T any](runtime *render.RuntimeBindings, input value.Value, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.MemberCall(input, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedClassCall[T any](runtime *render.RuntimeBindings, className, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.ClassCall(className, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
 func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry { result, err := runtime.Entries(generatedValue(input), frame, span); generatedPanic(err); return result }
@@ -3103,8 +3112,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;1b317b301f6ed5e8a03d3304241348d428500b36a23a2b7884a549aa5ade3813&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
       &quot;path&quot;: &quot;html-slot.rust&quot;,
@@ -3181,8 +3190,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;515fccc99c21751771843e3f17dfbf978576ec2e696ed7bde72d803184be9366&quot;,
   &quot;files&quot;: {
     &quot;html-slot.php&quot;: {
       &quot;path&quot;: &quot;html-slot.php&quot;,
@@ -3289,8 +3298,8 @@ createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;a96e11d777643b93f5f2d4de836568cfb9f8037a3d9f9918c7514de5ab047601&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -3422,8 +3431,8 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;3749284e0c2815b4baf2fd9e67b62b38a4d6a2b869d6b17aaa2be662999394b3&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
       &quot;path&quot;: &quot;react-boundary.ts&quot;,
@@ -3510,8 +3519,8 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;91feab7319152276478c0a922d26df87bb5562f5c5e54fa84c448039dd0cce3b&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
       &quot;path&quot;: &quot;react-boundary.js&quot;,
@@ -3671,12 +3680,12 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;7bcdf7f9c8c2db5586d7e59b9c38cff7b6bf233fe6d987fa5b57c9c12f0a40c7&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;8d8eae45faf976c0342ca4b0ba41469d0d56504c1bb9a1960012a4c136cf68bd&quot;
+      &quot;artifactDigest&quot;: &quot;4eaa5af9989a08c3c8763ba5e01f5584485d549cb566a22532edd581cc7e97c5&quot;
     }
   }
 }
@@ -3719,6 +3728,8 @@ func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, inp
 func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
 func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedMemberCall[T any](runtime *render.RuntimeBindings, input value.Value, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.MemberCall(input, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedClassCall[T any](runtime *render.RuntimeBindings, className, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.ClassCall(className, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
 func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry { result, err := runtime.Entries(generatedValue(input), frame, span); generatedPanic(err); return result }
@@ -3792,8 +3803,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;1b317b301f6ed5e8a03d3304241348d428500b36a23a2b7884a549aa5ade3813&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
       &quot;path&quot;: &quot;react-boundary.rust&quot;,
@@ -3895,8 +3906,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;515fccc99c21751771843e3f17dfbf978576ec2e696ed7bde72d803184be9366&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.php&quot;: {
       &quot;path&quot;: &quot;react-boundary.php&quot;,
@@ -4037,8 +4048,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;7d76a6c8783be14978e290f2af781b5b3d50679a5788614660f5c72c6a7c6b29&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;a96e11d777643b93f5f2d4de836568cfb9f8037a3d9f9918c7514de5ab047601&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -4275,8 +4286,8 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;30b0a6a96431fe79e0acfdb00259d0dc369d357bdcd0b63f8a49b60507eb4555&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;3749284e0c2815b4baf2fd9e67b62b38a4d6a2b869d6b17aaa2be662999394b3&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
       &quot;path&quot;: &quot;scope-precedence.ts&quot;,
@@ -4363,8 +4374,8 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;91feab7319152276478c0a922d26df87bb5562f5c5e54fa84c448039dd0cce3b&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
@@ -4534,12 +4545,12 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;647b66b2ed736824e9a8706a9dd59f7f39b52d0039d8c35ab815b6fa412f20e8&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;7bcdf7f9c8c2db5586d7e59b9c38cff7b6bf233fe6d987fa5b57c9c12f0a40c7&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;001817bc8897d880ef1163c0cd6c7fe37cf6cfeb2666ae2c7fe6cfba2d1860ae&quot;
+      &quot;artifactDigest&quot;: &quot;644ae949f0f4a00f88de438f90ee282984e3dd13a9d0812db4e6ea33e64bf785&quot;
     }
   }
 }
@@ -4578,6 +4589,8 @@ func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, inp
 func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
 func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedMemberCall[T any](runtime *render.RuntimeBindings, input value.Value, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.MemberCall(input, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedClassCall[T any](runtime *render.RuntimeBindings, className, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.ClassCall(className, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
 func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry { result, err := runtime.Entries(generatedValue(input), frame, span); generatedPanic(err); return result }
@@ -4661,8 +4674,8 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;1b317b301f6ed5e8a03d3304241348d428500b36a23a2b7884a549aa5ade3813&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
       &quot;path&quot;: &quot;scope-precedence.rust&quot;,
@@ -4773,8 +4786,8 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7&quot;,
-  &quot;compilerDigest&quot;: &quot;9ccb3de1e05f8adae3cbca1af0fa296616d56cdd06b7884d31d816c15f3f7edf&quot;,
+  &quot;contractDigest&quot;: &quot;2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac&quot;,
+  &quot;compilerDigest&quot;: &quot;515fccc99c21751771843e3f17dfbf978576ec2e696ed7bde72d803184be9366&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.php&quot;: {
       &quot;path&quot;: &quot;scope-precedence.php&quot;,
@@ -4882,5 +4895,5 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
 </pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article></div></section>
-<section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · PERFORMANCE</p><h2>Same request, two execution modes</h2></div><p>Independent samples use production artifacts with the page cache disabled. Cold includes process startup and loading. Full render includes request binding; prepared render reuses one normalized request. Every row must match the same UTF-8 bytes before it is recorded.</p></div><div class="table-wrap"><table><thead><tr><th>Language</th><th>Mode</th><th>Cold median</th><th>Full render</th><th>Prepared render</th><th>RSS median</th><th>Bytes</th><th>Output</th></tr></thead><tbody><tr><td>typescript</td><td>ast</td><td>90.25 ms</td><td>0.0062 ms</td><td>0.0019 ms</td><td>92.47 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>typescript</td><td>generated</td><td>94.16 ms</td><td>0.0063 ms</td><td>0.0010 ms</td><td>90.55 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>ast</td><td>5.21 ms</td><td>0.0026 ms</td><td>0.0014 ms</td><td>10.70 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>generated</td><td>5.53 ms</td><td>0.0054 ms</td><td>0.0010 ms</td><td>10.84 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>ast</td><td>4.70 ms</td><td>0.0047 ms</td><td>0.0023 ms</td><td>2.78 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>generated</td><td>4.39 ms</td><td>0.0047 ms</td><td>0.0019 ms</td><td>2.52 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>ast</td><td>66.16 ms</td><td>0.0146 ms</td><td>0.0090 ms</td><td>28.05 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>generated</td><td>63.28 ms</td><td>0.0134 ms</td><td>0.0042 ms</td><td>27.98 MiB</td><td>177</td><td>7b160d439d3d…</td></tr></tbody></table></div><details><summary>Package throughput samples</summary><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr></tbody></table></div></details></section></main>
+<section class="panel"><div class="section-heading"><div><p class="eyebrow">04 · PERFORMANCE</p><h2>Same request, two execution modes</h2></div><p>Independent samples use production artifacts with the page cache disabled. Cold includes process startup and loading. Full render includes request binding; prepared render reuses one normalized request. Every row must match the same UTF-8 bytes before it is recorded.</p></div><div class="table-wrap"><table><thead><tr><th>Language</th><th>Mode</th><th>Cold median</th><th>Full render</th><th>Prepared render</th><th>RSS median</th><th>Bytes</th><th>Output</th></tr></thead><tbody><tr><td>typescript</td><td>ast</td><td>90.25 ms</td><td>0.0062 ms</td><td>0.0019 ms</td><td>92.47 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>typescript</td><td>generated</td><td>94.16 ms</td><td>0.0063 ms</td><td>0.0010 ms</td><td>90.55 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>ast</td><td>5.21 ms</td><td>0.0026 ms</td><td>0.0014 ms</td><td>10.70 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>generated</td><td>5.53 ms</td><td>0.0054 ms</td><td>0.0010 ms</td><td>10.84 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>ast</td><td>4.70 ms</td><td>0.0047 ms</td><td>0.0023 ms</td><td>2.78 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>generated</td><td>4.39 ms</td><td>0.0047 ms</td><td>0.0019 ms</td><td>2.52 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>ast</td><td>66.16 ms</td><td>0.0146 ms</td><td>0.0090 ms</td><td>28.05 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>generated</td><td>63.28 ms</td><td>0.0134 ms</td><td>0.0042 ms</td><td>27.98 MiB</td><td>177</td><td>7b160d439d3d…</td></tr></tbody></table></div><details><summary>Package throughput samples</summary><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr></tbody></table></div></details></section></main>
 <footer class="footer"><a href="../../spec/runtime.html">Runtime specification</a><a href="../../spec/ast.html">AST specification</a><a href="../../operations/showcase.html">Showcase procedure</a></footer></body></html>

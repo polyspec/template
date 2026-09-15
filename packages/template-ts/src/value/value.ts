@@ -10,6 +10,7 @@ export class SafeString {
 
 /** A native assigned object whose public members and methods are visible to templates. */
 export class NativeObject {
+  /** Retains one application instance for template member access. */
   constructor(readonly target: object) {}
 }
 

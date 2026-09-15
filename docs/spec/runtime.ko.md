@@ -166,6 +166,7 @@ sequenceDiagram
 - **RT-51** 언어 문법은 각 언어의 관례를 따를 수 있다(`NewAdapter`, `Adapter::new`, `__construct`는 생성자 이름이다). manifest 매핑을 통해 concrete type, 생성자 인자, 메서드 순서, 인자 타입, 반환 타입과 요청 필드는 동일하게 유지한다.
 - **RT-52** [계약 검사기](../../scripts/check-showcase-contract.mjs)는 소스 선언, TypeScript 컴파일, Go 인터페이스 대입과 포맷, Rust trait 컴파일, PHP 문법과 `ReflectionClass`, 생성된 런타임 assertion, 모든 showcase 시나리오에 대한 다섯 어댑터 실행을 검사한다.
 - **RT-53** 상태 증명은 `constructor -> loadScenario -> buildRequest -> renderTwice`를 실행하고, 잘못된 target 오류를 관찰하고, 원래 요청을 다시 렌더한 뒤 첫 번째·두 번째·복구 UTF-8 해시를 비교한다. 오류와 복구 과정에서 요청은 바뀌지 않는다.
+- **RT-60** Native application instance는 `assign`에 직접 넣을 수 있다. Runtime은 원본 instance를 유지하고 member lookup으로 public field를 노출하며 `object.method(args...)`로 public instance method를 호출한다. 논리 class function은 `Class::method`로 등록하고 `Class::method(args...)`로 호출한다.
 
 ## 지원 레벨과 컴파일 artifact
 
@@ -181,6 +182,8 @@ sequenceDiagram
 
 - **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 완성된 cross-language mode다.
 - **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 네 core runtime 모두 generated 적합성 case 216개를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
+
+Native object 호출은 AST runtime에 구현됐다. Generated backend는 해당 runtime operation을 생성하지만, 전체 mode matrix와 패키지 소비 검증이 통과하기 전까지 generated object-call 지원은 partial이다.
 
 ```mermaid
 flowchart LR

@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7",
-  "compilerDigest": "14e1e1a0ff8d03696d17abd15e784dbd927d113d6b6082671b9db2f667b34610",
+  "contractDigest": "2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac",
+  "compilerDigest": "91feab7319152276478c0a922d26df87bb5562f5c5e54fa84c448039dd0cce3b",
   "files": {
     "empty-state.js": {
       "path": "empty-state.js",

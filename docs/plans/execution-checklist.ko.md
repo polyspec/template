@@ -251,12 +251,12 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
-| T8.1 | 애플리케이션 클래스를 복제하지 않는 공통 object value 경계를 추가 | 네 언어 value·binding 테스트 | [ ] |
-| T8.2 | assign native 인스턴스에서 선언된 public 필드와 멤버 메서드를 조회 | 멤버 조회 테스트 | [ ] |
-| T8.3 | 같은 registry 계약으로 선언된 논리 클래스 함수를 조회 | 클래스 호출 테스트 | [ ] |
+| T8.1 | 애플리케이션 클래스를 복제하지 않는 공통 object value 경계를 추가 | 네 언어 value·binding 테스트 | [x] |
+| T8.2 | assign native 인스턴스에서 선언된 public 필드와 멤버 메서드를 조회 | 멤버 조회 테스트 | [x] |
+| T8.3 | 같은 registry 계약으로 선언된 논리 클래스 함수를 조회 | 클래스 호출 테스트 | [x] |
 | T8.4 | AST와 generated 프로그램에서 멤버·클래스 호출을 실행 | AST/generated 일치 테스트 | [ ] |
 | T8.5 | 네 언어에서 출력, arity, type, unknown-member와 throw 오류 동작을 검증 | 전체 호출 적합성 matrix | [ ] |
-| T8.6 | object 호출 선언과 생성 Mermaid 인터페이스 도표를 추가 | interface 검사 | [ ] |
+| T8.6 | object 호출 선언과 생성 Mermaid 인터페이스 도표를 추가 | interface 검사 | [x] |
 | T8.7 | native 인스턴스 assign, 필드 조회, 멤버 호출과 클래스 호출 결과를 보여주는 showcase 페이지 추가 | `make showcase-check`; 정적 HTML 검사 | [ ] |
 | T8.8 | 명세, 기능 상태, changelog, Pages 산출물과 완료 근거 동기화 | `make check`; `make docs-verify-idempotent`; Pages URL 검사 | [ ] |
 

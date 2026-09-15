@@ -167,6 +167,7 @@ The logical request has this JSON shape:
 - **RT-51** Language syntax may follow local conventions (`NewAdapter`, `Adapter::new` and `__construct` are constructor names), while the concrete type, constructor parameter, method order, argument types, return types and request fields remain the same through the manifest mappings.
 - **RT-52** [The contract checker](../../scripts/check-showcase-contract.mjs) checks source declarations, TypeScript compilation, Go interface assignment and formatting, Rust trait compilation, PHP syntax and `ReflectionClass`, generated runtime assertions, and all five adapters on every showcase scenario.
 - **RT-53** The state proof performs `constructor -> loadScenario -> buildRequest -> renderTwice`, observes an invalid-target error, renders the original request again, and compares first, second and recovered UTF-8 hashes. The request remains unchanged across the failure and recovery path.
+- **RT-60** Native application instances may be placed directly in `assign`. The runtime retains the original instance, exposes public fields through member lookup and invokes public instance methods through `object.method(args...)`. Logical class functions are registered under `Class::method` and invoked through `Class::method(args...)`.
 
 ## Support levels and compiled artifacts
 
@@ -182,6 +183,8 @@ The interface declares two execution modes:
 
 - **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the complete cross-language mode.
 - **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust or PHP renderer before startup, loads or links that renderer once, and calls it for each request. All four core runtimes pass the 216-case generated conformance suite. Generated execution does not parse or interpret template AST during a request.
+
+Native object calls are implemented in the AST runtimes. Generated backends emit the corresponding runtime operation, but generated object-call conformance and packed consumer verification remain partial until the complete mode matrix passes.
 
 ```mermaid
 flowchart LR

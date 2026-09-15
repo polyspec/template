@@ -104,7 +104,8 @@
 | `Array` | list |
 | string 키의 `Map` | 삽입 순서의 map |
 | 일반 객체 | 플랫폼의 프로퍼티 열거 순서의 map. 정수 형태의 키는 오름차순으로 먼저 열거되므로, 그런 키를 가진 JSON 객체는 파싱된 객체가 아니라 JSON 텍스트에서 바인딩해야 한다 |
-| `Date`, 함수, 클래스 인스턴스, symbol, string이 아닌 키를 가진 `Map` | E_DATA_UNSUPPORTED_TYPE |
+| `Date`, 함수, symbol, string이 아닌 키를 가진 `Map` | E_DATA_UNSUPPORTED_TYPE |
+| 클래스 인스턴스 | object. 원본 인스턴스를 유지하고 public member만 노출 |
 
 **VAL-14** PHP.
 
@@ -118,7 +119,8 @@
 | `array_is_list()`가 true인 `array` | list |
 | 그 외 `array` | map. 각 키를 string으로 변환. 정수 키 `1`은 키 `"1"`이 된다 |
 | `stdClass`, `JsonSerializable`을 구현한 객체 | 객체 프로퍼티 또는 `jsonSerialize()`로부터의 map |
-| 그 외 객체, 리소스 | E_DATA_UNSUPPORTED_TYPE |
+| 그 외 객체 | object. 원본 인스턴스를 유지하고 public property와 method만 노출 |
+| 리소스 | E_DATA_UNSUPPORTED_TYPE |
 
 **VAL-15** Go.
 
@@ -132,7 +134,7 @@
 | 슬라이스 | list |
 | 패키지가 제공하는 삽입 순서 map 타입 | 삽입 순서의 map |
 | `map[string]T` | 키를 바이트 순으로 정렬한 map |
-| 구조체 | 선언 순서의 export된 필드마다 한 항목을 가진 map. 키는 `json` 태그 이름 또는 필드 이름 |
+| 구조체 값 또는 포인터 | object. 원본 값을 유지하고 export된 field와 method를 노출 |
 | 그 외 | E_DATA_UNSUPPORTED_TYPE |
 
 **VAL-16** Rust.
@@ -149,6 +151,8 @@
 **VAL-17** 모든 호스트에서 map 키는 string이다. string이 아닌 키를 가진 호스트 map은 위 표가 변환을 정의한 경우에만 변환되며 그 외에는 E_DATA_UNSUPPORTED_TYPE이다.
 
 **VAL-18** 바인딩은 호스트의 의미를 복사하지 않는다. 객체 참조, 리소스 핸들, 함수는 값에 저장되지 않는다. 렌더링은 값을 읽기만 하며 호스트 데이터에 쓰지 않는다.
+
+**VAL-19** Native object는 template의 불투명한 값이다. Member lookup은 public field/property를 읽고 member call은 원본 인스턴스의 public method를 호출한다. 없는 method는 E_RUNTIME_UNKNOWN_FUNCTION이다. Native object는 truthy이며 stringify·반복·spread할 수 없다.
 
 ## 예시
 

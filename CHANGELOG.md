@@ -1,5 +1,7 @@
 # Changelog
 
+- Implemented native assign object binding and logical class function calls in the four AST runtimes. Added the shared runtime contract, Red/Green tests and generated backend call emission; generated object-call conformance and consumer verification remain partial.
+
 - Resolved Composer lockfiles against the declared PHP 8.2 minimum and added a policy gate that rejects stale or mismatched platform resolution.
 - Made the generated-program compile gate install its declared PHP runtime dependency, so the standalone showcase and documentation publication checks run from a clean checkout.
 - Published every Korean documentation pair under the `/ko/` locale with Korean navigation and `ko-KR` HTML metadata, and added a static-site regression gate for locale routing and unresolved theme interpolation.

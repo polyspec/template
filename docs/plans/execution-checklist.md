@@ -251,12 +251,12 @@ Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T8.1 | Add the common object value boundary without copying application classes | four-language value and binding tests | [ ] |
-| T8.2 | Resolve declared public fields and instance methods from assigned native instances | member lookup tests | [ ] |
-| T8.3 | Resolve declared logical class functions through the same registry contract | class-call tests | [ ] |
+| T8.1 | Add the common object value boundary without copying application classes | four-language value and binding tests | [x] |
+| T8.2 | Resolve declared public fields and instance methods from assigned native instances | member lookup tests | [x] |
+| T8.3 | Resolve declared logical class functions through the same registry contract | class-call tests | [x] |
 | T8.4 | Execute member and class calls in AST and generated programs | AST/generated parity tests | [ ] |
 | T8.5 | Verify output, arity, type, unknown-member and thrown-error behavior across all four languages | full call conformance matrix | [ ] |
-| T8.6 | Add object-call declarations and generated Mermaid interface diagrams | interface check | [ ] |
+| T8.6 | Add object-call declarations and generated Mermaid interface diagrams | interface check | [x] |
 | T8.7 | Add a showcase page with native instance assign, field access, member call and class call output | `make showcase-check`; static HTML checks | [ ] |
 | T8.8 | Synchronize specifications, feature status, changelog, Pages artifacts and completion evidence | `make check`; `make docs-verify-idempotent`; Pages URL checks | [ ] |
 

@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 )
 
-// Value is one of nil, bool, float64, string, SafeString, List or *OrderedMap.
+// Value is a template scalar, collection, safe string or retained application object.
 type Value = any
 
 // List is an ordered sequence of values.
