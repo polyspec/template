@@ -12,9 +12,29 @@
       "minArgs": 1,
       "maxArgs": 1,
       "returns": "string"
+    },
+    "Order::fail": {
+      "implementation": "host",
+      "args": ["string"],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "string"
+    },
+    "Order::missing": {
+      "implementation": "host",
+      "args": ["string"],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "string"
     }
   },
   "templates": {
-    "input.tpl": {}
+    "input.tpl": {},
+    "unknown-member.tpl": {},
+    "unknown-class.tpl": {},
+    "throw-member.tpl": {},
+    "throw-class.tpl": {},
+    "member-type.tpl": {},
+    "member-arity.tpl": {}
   }
 }

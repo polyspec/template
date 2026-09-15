@@ -10,15 +10,15 @@ impl TemplateObject for Order {
         (key == "total").then_some(Value::Number(self.total))
     }
 
-    fn call(&self, method: &str, args: &[Value]) -> Result<Value, String> {
+    fn call(&self, method: &str, args: &[Value]) -> Option<Result<Value, String>> {
         if method != "status_label" {
-            return Err(format!("{method} is not public"));
+            return None;
         }
         let prefix = args
             .first()
             .and_then(Value::as_text)
-            .ok_or_else(|| "prefix is required".to_string())?;
-        Ok(Value::text(format!("{prefix}:{}", self.total)))
+            .ok_or_else(|| "prefix is required".to_string());
+        Some(prefix.map(|prefix| Value::text(format!("{prefix}:{}", self.total))))
     }
 }
 

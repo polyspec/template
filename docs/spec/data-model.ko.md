@@ -150,9 +150,9 @@
 
 **VAL-17** 모든 호스트에서 map 키는 string이다. string이 아닌 키를 가진 호스트 map은 위 표가 변환을 정의한 경우에만 변환되며 그 외에는 E_DATA_UNSUPPORTED_TYPE이다.
 
-**VAL-18** 바인딩은 호스트의 의미를 복사하지 않는다. 객체 참조, 리소스 핸들, 함수는 값에 저장되지 않는다. 렌더링은 값을 읽기만 하며 호스트 데이터에 쓰지 않는다.
+**VAL-18** 바인딩은 할당된 native object 참조를 복사하지 않고 유지한다. 리소스 핸들과 함수는 template 값으로 저장하지 않는다. 렌더링은 값을 읽기만 하며 호스트 데이터에 쓰지 않는다.
 
-**VAL-19** Native object는 template의 불투명한 값이다. Member lookup은 public field/property를 읽고 member call은 원본 인스턴스의 public method를 호출한다. 없는 method는 E_RUNTIME_UNKNOWN_FUNCTION이다. Native object는 truthy이며 stringify·반복·spread할 수 없다.
+**VAL-19** Native object는 template의 불투명한 값이다. Member lookup은 public field/property를 읽고 member call은 원본 인스턴스의 public method를 호출한다. public member나 method가 없으면 E_RUNTIME_UNKNOWN_FUNCTION이고, 선언된 method가 인자를 거부하거나 오류를 발생시키면 E_RUNTIME_HOST_FUNCTION이다. Native object는 truthy이며 stringify·반복·spread할 수 없다.
 
 ## 예시
 

@@ -234,15 +234,23 @@ impl RuntimeBindings {
                 format!("{method} is not a function"),
             ));
         };
-        object.call(method, &args).map_err(|message| {
-            self.error(
+        match object.call(method, &args) {
+            None => Err(self.error(
+                context,
+                frame,
+                span,
+                ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
+                format!("{method} is not a function"),
+            )),
+            Some(Ok(value)) => Ok(value),
+            Some(Err(message)) => Err(self.error(
                 context,
                 frame,
                 span,
                 ErrorCode::E_RUNTIME_HOST_FUNCTION,
                 format!("{method} failed: {message}"),
-            )
-        })
+            )),
+        }
     }
 
     /// Calls a registered logical class function.
