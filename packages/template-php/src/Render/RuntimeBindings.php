@@ -197,9 +197,14 @@ final class RuntimeBindings
     public function classCall(string $className, string $method, array $args, Frame $frame, array $span): mixed
     {
         $function = $this->context->services->classFunction($className, $method);
-        if ($function === null) throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$className}::{$method} is not a function");
-        try { return Bind::value($function($args, $this->context->env)); }
-        catch (\Throwable $error) { throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$className}::{$method} failed: {$error->getMessage()}"); }
+        if ($function === null) {
+            throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$className}::{$method} is not a function");
+        }
+        try {
+            return Bind::value($function($args, $this->context->env));
+        } catch (\Throwable $error) {
+            throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$className}::{$method} failed: {$error->getMessage()}");
+        }
     }
 
     public function index(mixed $container, mixed $key): mixed
