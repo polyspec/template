@@ -13,8 +13,8 @@ use std::rc::Rc;
 pub trait TemplateObject: fmt::Debug {
     /// Reads one public member. Missing members return `None`.
     fn member(&self, key: &str) -> Option<Value>;
-    /// Calls one public instance method.
-    fn call(&self, method: &str, args: &[Value]) -> Result<Value, String>;
+    /// Calls one public instance method. `None` means that the method is not public.
+    fn call(&self, method: &str, args: &[Value]) -> Option<Result<Value, String>>;
 }
 
 /// An insertion-ordered map with string keys.

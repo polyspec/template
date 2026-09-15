@@ -2,6 +2,7 @@
 
 - Implemented native assign object binding and logical class function calls in the four AST runtimes. Added the shared runtime contract, Red/Green tests and generated backend call emission.
 - Passed the complete 216-case generated conformance matrix in TypeScript, Go, Rust and PHP, and added a four-language generated native object/class-call execution check.
+- Completed the native call matrix for output, missing members, missing class functions, argument failures and thrown errors across all four generated backends.
 
 - Resolved Composer lockfiles against the declared PHP 8.2 minimum and added a policy gate that rejects stale or mismatched platform resolution.
 - Made the generated-program compile gate install its declared PHP runtime dependency, so the standalone showcase and documentation publication checks run from a clean checkout.
