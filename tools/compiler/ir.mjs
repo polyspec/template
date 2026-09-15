@@ -85,7 +85,13 @@ export function lowerSourceGraph(graph, manifest) {
     if (!signature || !['builtin', 'host'].includes(signature.implementation)) {
       throw new Error(`compiler: function ${name} must declare builtin or host implementation`);
     }
-    return [name, { args: (signature.args ?? []).map(parseType), returns: parseType(signature.returns ?? 'any'), implementation: signature.implementation }];
+    return [name, {
+      args: (signature.args ?? []).map(parseType),
+      minArgs: signature.minArgs ?? (signature.args ?? []).length,
+      maxArgs: signature.maxArgs ?? (signature.args ?? []).length,
+      returns: parseType(signature.returns ?? 'any'),
+      implementation: signature.implementation,
+    }];
   }));
   const definitions = new Map(Object.entries(manifest.defines ?? {}).map(([name, definition]) => {
     if (!definition || typeof definition !== 'object' || Array.isArray(definition)) throw new Error(`compiler: definition ${name} is invalid`);
@@ -143,7 +149,12 @@ export function lowerSourceGraph(graph, manifest) {
         const signature = functions.get(node.name);
         if (!signature) throw new Error(`compiler: function ${node.name} is missing from the type manifest`);
         const args = node.args.map(value => lowerExpr(value, scope, loops));
-        if (signature.args.length && signature.args.length !== args.length) throw new Error(`compiler: function ${node.name} expects ${signature.args.length} arguments`);
+        const minArgs = signature.minArgs ?? signature.args.length;
+        const maxArgs = signature.maxArgs ?? signature.args.length;
+        if (args.length < minArgs || (maxArgs !== -1 && args.length > maxArgs)) {
+          const range = minArgs === maxArgs ? `${minArgs}` : `${minArgs}-${maxArgs === -1 ? '∞' : maxArgs}`;
+          throw new Error(`compiler: function ${node.name} expects ${range} arguments`);
+        }
         return { op: 'call', name: node.name, implementation: signature.implementation, args, valueType: signature.returns, span: node.span };
       }
       case 'Unary': return { op: 'unary', operator: node.op, operand: lowerExpr(node.operand, scope, loops), valueType: parseType(node.op === '!' ? 'boolean' : 'number'), span: node.span };
