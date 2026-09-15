@@ -373,8 +373,16 @@ func nativeCall(container value.Value, method string, args []value.Value) (value
 	if len(outputs) == 0 {
 		return nil, true, nil
 	}
-	if len(outputs) > 1 && !outputs[len(outputs)-1].IsNil() {
-		return nil, true, outputs[len(outputs)-1].Interface().(error)
+	if len(outputs) > 1 {
+		last := outputs[len(outputs)-1]
+		errorType := reflect.TypeOf((*error)(nil)).Elem()
+		if !last.Type().Implements(errorType) {
+			return nil, true, fmt.Errorf("%s has unsupported multiple return values", method)
+		}
+		nilable := last.Kind() == reflect.Chan || last.Kind() == reflect.Func || last.Kind() == reflect.Interface || last.Kind() == reflect.Map || last.Kind() == reflect.Pointer || last.Kind() == reflect.Slice
+		if !nilable || !last.IsNil() {
+			return nil, true, last.Interface().(error)
+		}
 	}
 	return nativeValue(outputs[0]), true, nil
 }

@@ -15,7 +15,7 @@ The executable source is [contracts/features.json](../contracts/features.json). 
 | template-php-ext | PHP native extension | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [Evidence](operations/testing) |
 | performance-measurements | Performance measurements | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](operations/benchmark) |
 | showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](operations/showcase) |
-| generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/compiler) |
+| generated-mode | Generated compiler mode | partial | go: partial<br>php: partial<br>rust: partial<br>typescript: partial | [Evidence](spec/compiler) |
 | docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [Evidence](operations/documentation) |
 | release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](operations/testing) |
 | template-function-inventory | Template function inventory | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [Evidence](operations/template-functions) |
