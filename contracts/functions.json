@@ -3,12 +3,9 @@
   "contractVersion": "0.0.1",
   "syntax": {
     "call": "identifier(args...)",
-    "rejected": [
-      "qualified",
-      "static",
-      "instance",
-      "constructor"
-    ]
+    "memberCall": "object.method(args...)",
+    "classCall": "Class::function(args...)",
+    "rejected": ["qualified namespace call", "constructor", "undeclared member"]
   },
   "canonical": [
     {
