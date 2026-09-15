@@ -1112,6 +1112,66 @@
         "docs/spec/functions.md",
         "docs/operations/template-functions.md"
       ]
+    },
+    {
+      "id": "object-and-class-calls",
+      "title": "Assigned object and class function calls",
+      "title_ko": "Assigned object and class function calls",
+      "status": "partial",
+      "description": "Parse member calls on assigned instances and logical class calls with shared canonical AST nodes.",
+      "description_ko": "assign 인스턴스의 멤버 호출과 논리 클래스 호출을 공통 canonical AST 노드로 파싱한다.",
+      "inputs": {
+        "type": "TemplateExpression",
+        "fields": [
+          "assigned object",
+          "member method",
+          "class function",
+          "arguments"
+        ]
+      },
+      "outputs": {
+        "type": "CallExpression",
+        "fields": [
+          "MemberCall or ClassCall",
+          "source span"
+        ]
+      },
+      "state": [
+        "lex expression",
+        "parse call node",
+        "decode canonical AST",
+        "execute declared call"
+      ],
+      "errors": [
+        {
+          "code": "E_RUNTIME_UNKNOWN_FUNCTION",
+          "when": "the parsed call has no executable declaration"
+        }
+      ],
+      "clients": {
+        "go": "partial",
+        "php": "partial",
+        "rust": "partial",
+        "typescript": "partial"
+      },
+      "fixtures": [
+        "tests/fixtures/expr/cases.json"
+      ],
+      "tests": [
+        "packages/template-ts/tests/expr/fixtures.test.ts",
+        "packages/template-go/expr/fixtures_test.go",
+        "packages/template-rust/tests/expr_fixtures.rs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-ts test-go test-rust"
+        }
+      ],
+      "docs": [
+        "docs/spec/ast.md",
+        "docs/spec/expressions.md"
+      ]
     }
   ]
 }

@@ -82,6 +82,18 @@ final class Ast
         return ['type' => 'Member', 'object' => $object, 'key' => $key, 'span' => [$start, $end]];
     }
 
+    /** @param array<string, mixed> $object @param list<array<string, mixed>> $args */
+    public static function memberCall(array $object, string $method, array $args, int $start, int $end): array
+    {
+        return ['type' => 'MemberCall', 'object' => $object, 'method' => $method, 'args' => $args, 'span' => [$start, $end]];
+    }
+
+    /** @param list<array<string, mixed>> $args */
+    public static function classCall(string $className, string $method, array $args, int $start, int $end): array
+    {
+        return ['type' => 'ClassCall', 'className' => $className, 'method' => $method, 'args' => $args, 'span' => [$start, $end]];
+    }
+
     /**
      * @param array<string, mixed> $object
      * @param array<string, mixed> $index

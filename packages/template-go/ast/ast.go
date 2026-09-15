@@ -135,6 +135,24 @@ type Member struct {
 	Span   Span   `json:"span"`
 }
 
+// MemberCall invokes a method on an assigned object.
+type MemberCall struct {
+	Type   string `json:"type"`
+	Object Expr   `json:"object"`
+	Method string `json:"method"`
+	Args   []Expr `json:"args"`
+	Span   Span   `json:"span"`
+}
+
+// ClassCall invokes a declared logical class function.
+type ClassCall struct {
+	Type      string `json:"type"`
+	ClassName string `json:"className"`
+	Method    string `json:"method"`
+	Args      []Expr `json:"args"`
+	Span      Span   `json:"span"`
+}
+
 // Index node.
 type Index struct {
 	Type   string `json:"type"`
@@ -208,6 +226,8 @@ func (*Literal) expr()  {}
 func (*Var) expr()      {}
 func (*LoopMeta) expr() {}
 func (*Member) expr()   {}
+func (*MemberCall) expr() {}
+func (*ClassCall) expr() {}
 func (*Index) expr()    {}
 func (*Call) expr()     {}
 func (*Unary) expr()    {}
@@ -229,6 +249,10 @@ func SpanOf(e Expr) Span {
 	case *LoopMeta:
 		return n.Span
 	case *Member:
+		return n.Span
+	case *MemberCall:
+		return n.Span
+	case *ClassCall:
 		return n.Span
 	case *Index:
 		return n.Span
