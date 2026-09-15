@@ -11,6 +11,7 @@
 
 ## Unreleased
 
+- Extended the function contract with `object.method(args...)` and `Class::function(args...)` syntax and opened Wave 8 for native instance binding and execution. The parser and AST support these nodes; runtime execution remains partial.
 - Added `MemberCall` and `ClassCall` nodes and aligned TypeScript, Go, Rust and PHP expression parsers on `object.method(args...)` and `Class::function(args...)`. Runtime object binding and execution remain partial until the next implementation stage.
 - Added a machine-readable template function contract covering 37 canonical functions, exact arity ranges, four-language AST/generated registry parity and classification of 225 observed call forms. Fixed compiler IR arity validation so zero-argument and variadic functions are checked during lowering.
 

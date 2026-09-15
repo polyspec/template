@@ -245,6 +245,21 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T7.10 | 상용 release test pyramid 강제: lexer/parser/IR/runtime 단위 검사, generated source compile 검사, 전체 mode matrix, 위치 오류와 실패 복구 회귀, mutation 거부, 격리 package·browser 소비, 출력 동일 성능 회귀 | `make release-test-matrix` | [x] |
 | T7.11 | 깨끗한 checkout의 release gate 통과와 정적 사이트 배포 | `make release-check`; CI와 Pages 성공 | [x] |
 
+## Wave 8 — assign 인스턴스와 클래스 함수 실행
+
+의존: T7.1과 canonical AST parser 변경. 모든 런타임과 생성 프로그램에서 native 인스턴스를 assign으로 전달하고 같은 멤버·클래스 호출을 실행하기 전까지 이 wave는 완료되지 않는다.
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T8.1 | 애플리케이션 클래스를 복제하지 않는 공통 object value 경계를 추가 | 네 언어 value·binding 테스트 | [ ] |
+| T8.2 | assign native 인스턴스에서 선언된 public 필드와 멤버 메서드를 조회 | 멤버 조회 테스트 | [ ] |
+| T8.3 | 같은 registry 계약으로 선언된 논리 클래스 함수를 조회 | 클래스 호출 테스트 | [ ] |
+| T8.4 | AST와 generated 프로그램에서 멤버·클래스 호출을 실행 | AST/generated 일치 테스트 | [ ] |
+| T8.5 | 네 언어에서 출력, arity, type, unknown-member와 throw 오류 동작을 검증 | 전체 호출 적합성 matrix | [ ] |
+| T8.6 | object 호출 선언과 생성 Mermaid 인터페이스 도표를 추가 | interface 검사 | [ ] |
+| T8.7 | native 인스턴스 assign, 필드 조회, 멤버 호출과 클래스 호출 결과를 보여주는 showcase 페이지 추가 | `make showcase-check`; 정적 HTML 검사 | [ ] |
+| T8.8 | 명세, 기능 상태, changelog, Pages 산출물과 완료 근거 동기화 | `make check`; `make docs-verify-idempotent`; Pages URL 검사 | [ ] |
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -257,10 +272,11 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | W5 | 없음 | T5.1 → T5.6 |
 | W6 | T6.1–T6.5, T6.7 | T6.6은 모두 끝난 뒤 |
 | W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler 계약과 구현 뒤에 증명과 발행 수행 |
+| W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime 지원 뒤에 일치 검증과 발행 수행 |
 
 ## 완료 정의
 
-- W0–W7의 모든 작업이 `done`.
+- W0–W8의 모든 작업이 `done`.
 - Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.

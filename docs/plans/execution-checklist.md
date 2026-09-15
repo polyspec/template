@@ -245,6 +245,21 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 | T7.10 | Enforce the commercial release test pyramid: lexer/parser/IR/runtime units, generated-source compile tests, full mode matrix, positioned errors and recovery regressions, mutation rejection, isolated package and browser consumption, and equal-output performance regressions | `make release-test-matrix` | [x] |
 | T7.11 | Pass the clean-checkout release gate and deploy the static site | `make release-check`; CI and Pages success | [x] |
 
+## Wave 8 — Assigned object and class function execution
+
+Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete until native instances can be assigned and the same member and class calls execute in every runtime and generated program.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T8.1 | Add the common object value boundary without copying application classes | four-language value and binding tests | [ ] |
+| T8.2 | Resolve declared public fields and instance methods from assigned native instances | member lookup tests | [ ] |
+| T8.3 | Resolve declared logical class functions through the same registry contract | class-call tests | [ ] |
+| T8.4 | Execute member and class calls in AST and generated programs | AST/generated parity tests | [ ] |
+| T8.5 | Verify output, arity, type, unknown-member and thrown-error behavior across all four languages | full call conformance matrix | [ ] |
+| T8.6 | Add object-call declarations and generated Mermaid interface diagrams | interface check | [ ] |
+| T8.7 | Add a showcase page with native instance assign, field access, member call and class call output | `make showcase-check`; static HTML checks | [ ] |
+| T8.8 | Synchronize specifications, feature status, changelog, Pages artifacts and completion evidence | `make check`; `make docs-verify-idempotent`; Pages URL checks | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -257,10 +272,11 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 | W5 | none | T5.1 → T5.6 |
 | W6 | T6.1–T6.5, T6.7 | T6.6 after all |
 | W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler contract and implementation precede proof and publication |
+| W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime support precedes parity and publication |
 
 ## Definition of done
 
-- Every task in W0–W7 is `done`.
+- Every task in W0–W8 is `done`.
 - `make check` passes on a clean checkout with Node 26.8.1, Go 1.27.1, Rust 1.98.1 and PHP 8.5.
 - `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
 - `make test-browser` passes.

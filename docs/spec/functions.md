@@ -8,7 +8,7 @@ This document defines the built-in functions, the pipe form, the safe string rul
 
 The machine-readable source for the function contract is [`contracts/functions.json`](../../contracts/functions.json). It defines the only portable call surface as `identifier(args...)`, the minimum and maximum argument counts, and support in TypeScript, Go, Rust and PHP for both AST and generated programs. The four registries are checked against this manifest by `make function-contract-check`.
 
-The inventory of an existing template tree is evidence for migration planning, not an additional runtime API. A direct call that has an exact canonical mapping can be rewritten to that canonical name. An application helper requires an explicitly registered host function with the manifest signature. Qualified, static, instance and constructor calls are rejected by the template grammar; they belong in assign data or an explicit host boundary. No alias or runtime fallback is created for these cases.
+The inventory of an existing template tree is evidence for migration planning, not an additional runtime API. A direct call that has an exact canonical mapping can be rewritten to that canonical name. An application function is exposed through the declared function contract, an assigned object exposes its declared `object.method(args...)` surface, and a declared logical class exposes `Class::function(args...)`. Native classes are not duplicated; only their template-visible members are checked. Qualified namespace calls and constructors remain invalid.
 
 ## Calls and pipes
 
