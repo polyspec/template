@@ -26,6 +26,8 @@ pub trait RuntimeServices {
     fn limits(&self) -> Limits;
     /// Host function registered under a name.
     fn host_function(&self, name: &str) -> Option<&HostFunction>;
+    /// Returns a logical class function registered under `Class::method`.
+    fn class_function(&self, class_name: &str, method: &str) -> Option<&HostFunction>;
 }
 
 impl Default for Limits {

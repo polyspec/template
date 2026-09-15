@@ -11,13 +11,14 @@ var identifier = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 
 // RuntimeEnvironment owns host functions and limits for AST and generated programs.
 type RuntimeEnvironment struct {
-	limits        Limits
-	hostFunctions map[string]functions.HostFunction
+	limits         Limits
+	hostFunctions  map[string]functions.HostFunction
+	classFunctions map[string]functions.HostFunction
 }
 
 // NewRuntimeEnvironment validates and creates shared runtime services.
 func NewRuntimeEnvironment(limits *Limits, hostFunctions map[string]functions.HostFunction) (*RuntimeEnvironment, error) {
-	runtime := &RuntimeEnvironment{limits: DefaultLimits, hostFunctions: map[string]functions.HostFunction{}}
+	runtime := &RuntimeEnvironment{limits: DefaultLimits, hostFunctions: map[string]functions.HostFunction{}, classFunctions: map[string]functions.HostFunction{}}
 	if limits != nil {
 		runtime.limits = *limits
 	}
@@ -47,5 +48,20 @@ func (r *RuntimeEnvironment) Limits() Limits { return r.limits }
 // HostFunction returns one registered host function.
 func (r *RuntimeEnvironment) HostFunction(name string) (functions.HostFunction, bool) {
 	function, ok := r.hostFunctions[name]
+	return function, ok
+}
+
+// RegisterClass adds a logical class function.
+func (r *RuntimeEnvironment) RegisterClass(className, method string, function functions.HostFunction) error {
+	if !identifier.MatchString(className) || !identifier.MatchString(method) {
+		return fmt.Errorf("class function names must be identifiers")
+	}
+	r.classFunctions[className+"::"+method] = function
+	return nil
+}
+
+// ClassFunction returns one logical class function.
+func (r *RuntimeEnvironment) ClassFunction(className, method string) (functions.HostFunction, bool) {
+	function, ok := r.classFunctions[className+"::"+method]
 	return function, ok
 }

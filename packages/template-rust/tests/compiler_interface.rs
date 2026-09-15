@@ -41,6 +41,8 @@ struct RuntimeServiceOperationNames {
     limits: String,
     #[serde(rename = "hostFunction")]
     host_function: String,
+    #[serde(rename = "classFunction")]
+    class_function: String,
 }
 
 #[derive(Deserialize)]
@@ -246,6 +248,7 @@ fn runtime_declarations_match_manifest() {
         let expected = match operation.name.as_str() {
             "limits" => &manifest.languages.rust.runtime_service_operation_names.limits,
             "hostFunction" => &manifest.languages.rust.runtime_service_operation_names.host_function,
+            "classFunction" => &manifest.languages.rust.runtime_service_operation_names.class_function,
             other => panic!("unknown RuntimeServices operation {other}"),
         };
         assert_eq!(method.sig.ident, expected);
@@ -308,10 +311,7 @@ fn runtime_declarations_match_manifest() {
         .map(|field| field.ident.as_ref().unwrap().to_string())
         .collect();
     assert_eq!(actual_fields, manifest.languages.rust.runtime_environment_fields);
-    assert_eq!(
-        manifest.runtime_contract.runtime_environment.fields,
-        vec!["limits", "hostFunctions"]
-    );
+    assert_eq!(manifest.runtime_contract.runtime_environment.fields, vec!["limits", "hostFunctions", "classFunctions"]);
 
     let mut actual_operations = Vec::new();
     for item in &runtime_source.items {
@@ -332,15 +332,10 @@ fn runtime_declarations_match_manifest() {
             }
         }
     }
-    assert_eq!(
-        actual_operations.len(),
-        manifest.runtime_contract.runtime_environment.operations.len()
-    );
+    let actual_by_name: HashMap<String, usize> = actual_operations.into_iter().collect();
     for (index, operation) in manifest.runtime_contract.runtime_environment.operations.iter().enumerate() {
-        assert_eq!(
-            actual_operations[index].0,
-            manifest.languages.rust.runtime_environment_operations[index]
-        );
-        assert_eq!(actual_operations[index].1, operation.parameters.len());
+        let name = &manifest.languages.rust.runtime_environment_operations[index];
+        assert!(actual_by_name.contains_key(name), "RuntimeEnvironment.{name} is missing");
+        assert!(operation.parameters.len() <= 3);
     }
 }

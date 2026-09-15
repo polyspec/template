@@ -54,6 +54,8 @@ export function createTarget({ program }) {
   target.ifBlock = (node, n) => indent(n, `if (definitions.${fieldName(node.id)} !== undefined) {\n${emitNodes(node.body, target, n + 1)}\n}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n}` : ''}`);
   target.loopMeta = (loop, field) => `${fieldName(loop)}_${field.replace(/_$/, '')}`;
   target.index = (object, index) => `runtime.index(${object} as unknown as Value, ${index} as unknown as Value)`;
+  target.memberCall = (object, method, args, node) => `runtime.memberCall(${object} as unknown as Value, ${quote(method)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`;
+  target.classCall = (className, method, args, node) => `runtime.classCall(${quote(className)}, ${quote(method)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`;
   target.call = (name, args, node) => `runtime.call(${quote(name)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`;
   target.unary = (operator, operand, node) => `runtime.unary(${quote(operator)}, ${operand} as unknown as Value, frame, ${quote(node.span)})`;
   target.binary = (operator, left, right, node) => {

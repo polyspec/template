@@ -1,6 +1,6 @@
 // Host binding of JavaScript values (VAL-13) and safe integer checks (VAL-2, VAL-3).
 import { MAX_SAFE } from './number.js';
-import { SafeString, type MapValue, type Value } from './value.js';
+import { NativeObject, SafeString, type MapValue, type Value } from './value.js';
 
 export type BindErrorCode = 'E_DATA_NUMBER_RANGE' | 'E_DATA_NUMBER_NOT_FINITE' | 'E_DATA_UNSUPPORTED_TYPE' | 'E_DATA_INVALID_UTF8';
 
@@ -56,7 +56,7 @@ export function bind(input: unknown): Value {
     for (const key of Object.keys(input as object)) map.set(key, bind((input as Record<string, unknown>)[key]));
     return map;
   }
-  throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'object has no binding');
+  return new NativeObject(input);
 }
 
 /** Binds a host value and requires the result to be a string-keyed template map. */

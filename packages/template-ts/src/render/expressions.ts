@@ -43,8 +43,9 @@ export class Evaluator {
       case 'Member':
         return this.runtime.member(this.evaluate(expr.object, frame), expr.key);
       case 'MemberCall':
+        return this.runtime.memberCall(this.evaluate(expr.object, frame), expr.method, expr.args.map(arg => this.evaluate(arg, frame)), frame, expr.span);
       case 'ClassCall':
-        throw this.runtime.error(frame, expr.span, 'E_RUNTIME_UNKNOWN_FUNCTION', 'object and class function calls are not implemented');
+        return this.runtime.classCall(expr.className, expr.method, expr.args.map(arg => this.evaluate(arg, frame)), frame, expr.span);
       case 'Index':
         return this.runtime.index(this.evaluate(expr.object, frame), this.evaluate(expr.index, frame));
       case 'Call':

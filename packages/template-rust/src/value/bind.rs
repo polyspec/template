@@ -74,6 +74,9 @@ pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
     }
 }
 
+/// Accepts a native root map while retaining native object values.
+pub fn bind_values(input: OrderedMap) -> OrderedMap { input }
+
 /// Converts a template value into a `serde_json::Value`; safe strings become plain strings.
 pub fn to_json_value(value: &Value) -> serde_json::Value {
     match value {
@@ -85,5 +88,6 @@ pub fn to_json_value(value: &Value) -> serde_json::Value {
         Value::Str(text) | Value::Safe(text) => serde_json::Value::String(text.to_string()),
         Value::List(list) => serde_json::Value::Array(list.iter().map(to_json_value).collect()),
         Value::Map(map) => serde_json::Value::Object(map.iter().map(|(key, value)| (key.clone(), to_json_value(value))).collect()),
+        Value::Object(_) => serde_json::Value::Null,
     }
 }

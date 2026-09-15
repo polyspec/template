@@ -94,9 +94,8 @@ func TestBind(t *testing.T) {
 	if keys := m.Keys(); keys[0] != "a" || keys[1] != "b" {
 		t.Errorf("map keys sorted by byte order: %v", keys)
 	}
-	inner := m.MustGet("a").(*value.OrderedMap)
-	if keys := inner.Keys(); len(keys) != 2 || keys[0] != "name" || keys[1] != "Price" {
-		t.Errorf("struct fields: %v", keys)
+	if _, ok := m.MustGet("a").(item); !ok {
+		t.Errorf("struct identity was not preserved: %T", m.MustGet("a"))
 	}
 	if _, err := value.Bind(int64(1) << 60); err == nil {
 		t.Error("large integer accepted")

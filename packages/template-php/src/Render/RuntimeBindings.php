@@ -166,7 +166,40 @@ final class RuntimeBindings
 
     public function member(mixed $container, string $key): mixed
     {
+        if (is_object($container) && !$container instanceof MapValue) {
+            $reflection = new \ReflectionClass($container);
+            if (!$reflection->hasProperty($key) || !$reflection->getProperty($key)->isPublic()) {
+                return null;
+            }
+            return Bind::value($reflection->getProperty($key)->getValue($container));
+        }
         return $this->index($container, $key);
+    }
+
+    /** Calls a public method on the original assigned object. */
+    public function memberCall(mixed $container, string $method, array $args, Frame $frame, array $span): mixed
+    {
+        if (!is_object($container) || $container instanceof MapValue) {
+            throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$method} is not a function");
+        }
+        $reflection = new \ReflectionClass($container);
+        if (!$reflection->hasMethod($method) || !$reflection->getMethod($method)->isPublic()) {
+            throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$method} is not a function");
+        }
+        try {
+            return Bind::value($reflection->getMethod($method)->invokeArgs($container, $args));
+        } catch (\Throwable $error) {
+            throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$method} failed: {$error->getMessage()}");
+        }
+    }
+
+    /** Calls a registered logical class function. */
+    public function classCall(string $className, string $method, array $args, Frame $frame, array $span): mixed
+    {
+        $function = $this->context->services->classFunction($className, $method);
+        if ($function === null) throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$className}::{$method} is not a function");
+        try { return Bind::value($function($args, $this->context->env)); }
+        catch (\Throwable $error) { throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$className}::{$method} failed: {$error->getMessage()}"); }
     }
 
     public function index(mixed $container, mixed $key): mixed

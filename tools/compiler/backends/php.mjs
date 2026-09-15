@@ -64,6 +64,8 @@ export function createTarget({ program }) {
   target.ifBlock = (node, n) => indent(n, `if ($definitions->${fieldName(node.id)} !== null) {\n${emitNodes(node.body, target, n + 1)}\n}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n}` : ''}`);
   target.loopMeta = (loop, field) => `$scope->loopMeta(${phpLiteral(loop)})[${phpLiteral(field)}]`;
   target.index = (object, index) => `$runtime->index(${object}, ${index})`;
+  target.memberCall = (object, method, args, node) => `$runtime->memberCall(${object}, ${phpLiteral(method)}, [${args.join(', ')}], $frame, ${phpLiteral(node.span)})`;
+  target.classCall = (className, method, args, node) => `$runtime->classCall(${phpLiteral(className)}, ${phpLiteral(method)}, [${args.join(', ')}], $frame, ${phpLiteral(node.span)})`;
   target.call = (name, args, node) => `$runtime->call(${phpLiteral(name)}, [${args.join(', ')}], $frame, ${phpLiteral(node.span)})`;
   target.unary = (operator, operand, node) => `$runtime->unary(${phpLiteral(operator)}, ${operand}, $frame, ${phpLiteral(node.span)})`;
   target.binary = (operator, left, right, node) => {

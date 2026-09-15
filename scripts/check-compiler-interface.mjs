@@ -83,7 +83,7 @@ for (const language of core.languages) {
   if (mapping.runtimeEnvironmentFields?.length !== manifest.types.RuntimeEnvironment.fields.length) throw new Error(`${language}: RuntimeEnvironment field mapping is incomplete`);
   if (mapping.runtimeEnvironmentOperations?.length !== manifest.types.RuntimeEnvironment.operations.length) throw new Error(`${language}: RuntimeEnvironment operation mapping is incomplete`);
 }
-const rustContextOperations = ['unary', 'binary', 'stringify', 'escape', 'number', 'finite', 'compare', 'entries', 'listSpread', 'mapSpread', 'call', 'limit', 'error'];
+const rustContextOperations = ['unary', 'binary', 'stringify', 'escape', 'number', 'finite', 'compare', 'memberCall', 'classCall', 'entries', 'listSpread', 'mapSpread', 'call', 'limit', 'error'];
 if (manifest.languages.rust.runtimeBindingsExplicitContext?.join(',') !== rustContextOperations.join(',')) {
   throw new Error('rust RuntimeBindings context mapping differs');
 }
@@ -185,7 +185,7 @@ if (scopeFields?.join(',') !== manifest.languages.typescript.scopeFields.join(',
 if (scopeOperations?.join(',') !== manifest.languages.typescript.scopeOperations.join(',')) throw new Error('typescript: RenderScope operations differ');
 
 function run(label, command, args, cwd) {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, env: { ...process.env, GOCACHE: process.env.GOCACHE ?? '/tmp/template-go-cache' } });
   if (result.error || result.status !== 0) throw new Error(`${label} failed:\n${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
 }
 run('go interface AST check', 'go', ['test', '-run', '^TestCompilerRuntimeInterface$', '.'], resolve(root, 'packages/template-go'));
