@@ -11,6 +11,8 @@
 
 ## Unreleased
 
+- Added a machine-readable template function contract covering 37 canonical functions, exact arity ranges, four-language AST/generated registry parity and classification of 225 observed call forms. Fixed compiler IR arity validation so zero-argument and variadic functions are checked during lowering.
+
 ### 2026-09-11
 
 - Created the repository with the development rules, the top-level documents, the Makefile, the document checker and the execution checklist.

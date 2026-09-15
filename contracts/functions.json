@@ -1,0 +1,2521 @@
+{
+  "schema": 1,
+  "contractVersion": "0.0.1",
+  "syntax": {
+    "call": "identifier(args...)",
+    "rejected": [
+      "qualified",
+      "static",
+      "instance",
+      "constructor"
+    ]
+  },
+  "canonical": [
+    {
+      "name": "escape",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "raw",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "json",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "url",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "nl2br",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "str",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "type",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "upper",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "lower",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "trim",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "replace",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "split",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "truncate",
+      "minArgs": 2,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "contains",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "starts_with",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "ends_with",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "length",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "keys",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "values",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "first",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "last",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "reverse",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "slice",
+      "minArgs": 2,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "sort",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "join",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "range",
+      "minArgs": 2,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "default",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "number",
+      "minArgs": 1,
+      "maxArgs": 4,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "round",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "floor",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "ceil",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "abs",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "min",
+      "minArgs": 1,
+      "maxArgs": -1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "max",
+      "minArgs": 1,
+      "maxArgs": -1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "num",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "date",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "now",
+      "minArgs": 0,
+      "maxArgs": 0,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    }
+  ],
+  "observed": [
+    {
+      "name": "__",
+      "category": "direct",
+      "count": 133,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "addslashes",
+      "category": "direct",
+      "count": 3,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "array",
+      "category": "direct",
+      "count": 1,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "array_fill",
+      "category": "direct",
+      "count": 1,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "array_keys",
+      "category": "direct",
+      "count": 1,
+      "status": "rewrite",
+      "target": "keys"
+    },
+    {
+      "name": "array_pop",
+      "category": "direct",
+      "count": 76,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "array_rand",
+      "category": "direct",
+      "count": 2,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "array_reverse",
+      "category": "direct",
+      "count": 2,
+      "status": "rewrite",
+      "target": "reverse"
+    },
+    {
+      "name": "array_sum",
+      "category": "direct",
+      "count": 10,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "array_values",
+      "category": "direct",
+      "count": 8,
+      "status": "rewrite",
+      "target": "values"
+    },
+    {
+      "name": "base64_encode",
+      "category": "direct",
+      "count": 2,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "ceil",
+      "category": "direct",
+      "count": 2,
+      "status": "canonical",
+      "target": "ceil"
+    },
+    {
+      "name": "count",
+      "category": "direct",
+      "count": 214,
+      "status": "rewrite",
+      "target": "length"
+    },
+    {
+      "name": "current",
+      "category": "direct",
+      "count": 8,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "date",
+      "category": "direct",
+      "count": 111,
+      "status": "canonical",
+      "target": "date"
+    },
+    {
+      "name": "explode",
+      "category": "direct",
+      "count": 18,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "get_additional_name",
+      "category": "direct",
+      "count": 9,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "get_name",
+      "category": "direct",
+      "count": 9,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "get_option_name",
+      "category": "direct",
+      "count": 9,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "get_order_status",
+      "category": "direct",
+      "count": 1,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "get_order_status_by_id",
+      "category": "direct",
+      "count": 1,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "implode",
+      "category": "direct",
+      "count": 25,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "in_array",
+      "category": "direct",
+      "count": 58,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "is_array",
+      "category": "direct",
+      "count": 15,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "is_numeric",
+      "category": "direct",
+      "count": 5,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "isset",
+      "category": "direct",
+      "count": 25,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "json_encode",
+      "category": "direct",
+      "count": 642,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "ltrim",
+      "category": "direct",
+      "count": 3,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "min",
+      "category": "direct",
+      "count": 11,
+      "status": "canonical",
+      "target": "min"
+    },
+    {
+      "name": "mt_rand",
+      "category": "direct",
+      "count": 8,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "nl2br",
+      "category": "direct",
+      "count": 44,
+      "status": "canonical",
+      "target": "nl2br"
+    },
+    {
+      "name": "order_status",
+      "category": "direct",
+      "count": 276,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "pr",
+      "category": "direct",
+      "count": 20,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "print_r",
+      "category": "direct",
+      "count": 4,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "prx",
+      "category": "direct",
+      "count": 2,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "rand",
+      "category": "direct",
+      "count": 18,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "range",
+      "category": "direct",
+      "count": 128,
+      "status": "canonical",
+      "target": "range"
+    },
+    {
+      "name": "rawurldecode",
+      "category": "direct",
+      "count": 15,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "rawurlencode",
+      "category": "direct",
+      "count": 30,
+      "status": "rewrite",
+      "target": "url"
+    },
+    {
+      "name": "round",
+      "category": "direct",
+      "count": 19,
+      "status": "canonical",
+      "target": "round"
+    },
+    {
+      "name": "rtrim",
+      "category": "direct",
+      "count": 6,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "sha1",
+      "category": "direct",
+      "count": 20,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "shuffleArray",
+      "category": "direct",
+      "count": 8,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "status_style",
+      "category": "direct",
+      "count": 2,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "str_pad",
+      "category": "direct",
+      "count": 2,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "str_replace",
+      "category": "direct",
+      "count": 52,
+      "status": "rewrite",
+      "target": "replace"
+    },
+    {
+      "name": "strlen",
+      "category": "direct",
+      "count": 1,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "strpos",
+      "category": "direct",
+      "count": 21,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "strtolower",
+      "category": "direct",
+      "count": 4,
+      "status": "rewrite",
+      "target": "lower"
+    },
+    {
+      "name": "strtotime",
+      "category": "direct",
+      "count": 84,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "strtoupper",
+      "category": "direct",
+      "count": 1,
+      "status": "rewrite",
+      "target": "upper"
+    },
+    {
+      "name": "strtr",
+      "category": "direct",
+      "count": 48,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "substr",
+      "category": "direct",
+      "count": 107,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "time",
+      "category": "direct",
+      "count": 72,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "trim",
+      "category": "direct",
+      "count": 38,
+      "status": "canonical",
+      "target": "trim"
+    },
+    {
+      "name": "ucfirst",
+      "category": "direct",
+      "count": 6,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "uniqid",
+      "category": "direct",
+      "count": 60,
+      "status": "context-bound",
+      "target": null
+    },
+    {
+      "name": "chunk",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "count",
+      "category": "instance",
+      "count": 1,
+      "status": "rewrite",
+      "target": "length"
+    },
+    {
+      "name": "description",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "format",
+      "category": "instance",
+      "count": 78,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getCreatedTs",
+      "category": "instance",
+      "count": 17,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getEndTs",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getExpiredTs",
+      "category": "instance",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getExpireTs",
+      "category": "instance",
+      "count": 7,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getInsertType",
+      "category": "instance",
+      "count": 14,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getIp",
+      "category": "instance",
+      "count": 18,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getIsClose",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getIsDelete",
+      "category": "instance",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getIsExpire",
+      "category": "instance",
+      "count": 7,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getIsSystem",
+      "category": "instance",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getPosts",
+      "category": "instance",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getShortDescription",
+      "category": "instance",
+      "count": 17,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getStartTs",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getStatusColor",
+      "category": "instance",
+      "count": 9,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getStatusMessage",
+      "category": "instance",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getType",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getUseCookie",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getuserModel",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getUsername",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "getUuid",
+      "category": "instance",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "isEnd",
+      "category": "instance",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "isWriteMission",
+      "category": "instance",
+      "count": 18,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "isWriteRecruit",
+      "category": "instance",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "label",
+      "category": "instance",
+      "count": 74,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "modify",
+      "category": "instance",
+      "count": 18,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "name",
+      "category": "instance",
+      "count": 116,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "reverse",
+      "category": "instance",
+      "count": 1,
+      "status": "canonical",
+      "target": "reverse"
+    },
+    {
+      "name": "value",
+      "category": "instance",
+      "count": 85,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "xshow",
+      "category": "instance",
+      "count": 32,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\abs",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\array_unique",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\count",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\DateTime",
+      "category": "qualified",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\_getbool",
+      "category": "qualified",
+      "count": 26,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\add_https",
+      "category": "qualified",
+      "count": 10,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\add_josa",
+      "category": "qualified",
+      "count": 33,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\add_slash",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\add_string",
+      "category": "qualified",
+      "count": 46,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\adjust_path",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\append_string",
+      "category": "qualified",
+      "count": 25,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr\\first",
+      "category": "qualified",
+      "count": 8,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr\\key_sort",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr\\last",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\bprint",
+      "category": "qualified",
+      "count": 10,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\build_qs_return_url",
+      "category": "qualified",
+      "count": 32,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\build_qsa_return_url",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\calculate_discount_rate",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\camelize",
+      "category": "qualified",
+      "count": 3,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\check_zipcode",
+      "category": "qualified",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\circle_distance",
+      "category": "qualified",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\clean_tags",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\close_style_tag",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\closetag",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\cprint",
+      "category": "qualified",
+      "count": 310,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\cprint_tags",
+      "category": "qualified",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\decimal",
+      "category": "qualified",
+      "count": 24,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\decrypt",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt\\adjust",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt\\day_ago",
+      "category": "qualified",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt\\display_dday_message",
+      "category": "qualified",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt\\format",
+      "category": "qualified",
+      "count": 176,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt\\get_time_ago",
+      "category": "qualified",
+      "count": 7,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt\\getClosestNextEvent",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt\\getTimeRemaining",
+      "category": "qualified",
+      "count": 3,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\encrypt",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\Encrypt",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\eprint",
+      "category": "qualified",
+      "count": 78,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\ffc",
+      "category": "qualified",
+      "count": 18,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\format_large_number",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\format_mobile",
+      "category": "qualified",
+      "count": 102,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\genRandomString",
+      "category": "qualified",
+      "count": 9,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\get_age_group",
+      "category": "qualified",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\get_level",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\get_percent",
+      "category": "qualified",
+      "count": 3,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\get_qsa_return_or_current_url",
+      "category": "qualified",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\highlight_keyword",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\http_build_query",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\hx_target",
+      "category": "qualified",
+      "count": 10,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\image_type",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\int2uuid",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\is_bluetools",
+      "category": "qualified",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\keyword_highlight",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\lang",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\makekey",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\mask_format",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\maskFirstChar",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\nc",
+      "category": "qualified",
+      "count": 69,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\nf",
+      "category": "qualified",
+      "count": 1317,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\nl2br",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\number_format",
+      "category": "qualified",
+      "count": 628,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\open_style_tag",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\opentag",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\parser_reseponce_json_message",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\qsa",
+      "category": "qualified",
+      "count": 197,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\random_uuid",
+      "category": "qualified",
+      "count": 27,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\readable_size",
+      "category": "qualified",
+      "count": 7,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\limepie\\referral_limit",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\safe_input_value",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\seqtokey",
+      "category": "qualified",
+      "count": 8,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\shield",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\splitSeparator",
+      "category": "qualified",
+      "count": 58,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\star_item_percentage",
+      "category": "qualified",
+      "count": 35,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\str_replace_placeholder",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\str_to_array",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\uniqid",
+      "category": "qualified",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\uuid",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\wrap_space_em",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\nf",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\rawurlencode",
+      "category": "qualified",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\str_replace",
+      "category": "qualified",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\substr",
+      "category": "qualified",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\ucfirst",
+      "category": "qualified",
+      "count": 10,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::cleanup",
+      "category": "static",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::first",
+      "category": "static",
+      "count": 23,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::getIsDisplay",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::key_sort",
+      "category": "static",
+      "count": 3,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::ksort",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::last",
+      "category": "static",
+      "count": 13,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::replace",
+      "category": "static",
+      "count": 13,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::reverse",
+      "category": "static",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\arr::to_html",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\Bcmath::comp",
+      "category": "static",
+      "count": 48,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\Bcmath::sub",
+      "category": "static",
+      "count": 7,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\Display::getPopover",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::adjust",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::day_ago",
+      "category": "static",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::dday",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::dday_count",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::display_dday_message",
+      "category": "static",
+      "count": 19,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::format",
+      "category": "static",
+      "count": 272,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::format_range",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::get_diff6",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::get_relative_time",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::get_start_end",
+      "category": "static",
+      "count": 15,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::get_time_ago",
+      "category": "static",
+      "count": 23,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::getDayOfWeek",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::getTimeRemaining",
+      "category": "static",
+      "count": 4,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::in_range",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::inside",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\dt::is_date_greater",
+      "category": "static",
+      "count": 3,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Limepie\\SimpleCode::encode",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Caniid::css",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Caniid::js",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Common::css",
+      "category": "static",
+      "count": 3,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Common::js",
+      "category": "static",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Control::css",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Control::js",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Hae::css",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Hae::files",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Asset\\Hae::js",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\CampaignStatus::getStatusAndColor",
+      "category": "static",
+      "count": 5,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\Coin::krw2sol",
+      "category": "static",
+      "count": 6,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\Section::load",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\ServiceLevel::level",
+      "category": "static",
+      "count": 7,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\ServiceLevel::next",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\Thumb::url",
+      "category": "static",
+      "count": 162,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\Tmpl\\Domain::remove",
+      "category": "static",
+      "count": 7,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Helper\\Tmpl\\Noti::count",
+      "category": "static",
+      "count": 1,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Module\\Max\\Board\\Plugin\\GetList::customer",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Module\\Max\\Board\\Plugin\\GetList::notice",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Module\\Max\\Shop\\Plugin\\GetCategory::list",
+      "category": "static",
+      "count": 3,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Module\\Max\\Shop\\Plugin\\GetCompany::list",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Module\\Max\\Shop\\Status\\Order::labels",
+      "category": "static",
+      "count": 9,
+      "status": "rejected",
+      "target": null
+    },
+    {
+      "name": "\\Resource\\Module\\Max\\Tpl\\Plugin\\GetSmartig::list",
+      "category": "static",
+      "count": 2,
+      "status": "rejected",
+      "target": null
+    }
+  ],
+  "summary": {
+    "callCount": 7192,
+    "uniqueSymbols": 225
+  }
+}

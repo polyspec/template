@@ -4,6 +4,12 @@
 
 This document defines the built-in functions, the pipe form, the safe string rules and the host function registration contract. Value conversion rules (stringify, truthiness, to_number, equality) are defined in [data-model.md](data-model.md). Expression syntax is defined in [expressions.md](expressions.md). Error codes are defined in [errors.md](errors.md).
 
+## Canonical contract
+
+The machine-readable source for the function contract is [`contracts/functions.json`](../../contracts/functions.json). It defines the only portable call surface as `identifier(args...)`, the minimum and maximum argument counts, and support in TypeScript, Go, Rust and PHP for both AST and generated programs. The four registries are checked against this manifest by `make function-contract-check`.
+
+The inventory of an existing template tree is evidence for migration planning, not an additional runtime API. A direct call that has an exact canonical mapping can be rewritten to that canonical name. An application helper requires an explicitly registered host function with the manifest signature. Qualified, static, instance and constructor calls are rejected by the template grammar; they belong in assign data or an explicit host boundary. No alias or runtime fallback is created for these cases.
+
 ## Calls and pipes
 
 - **FUN-1** A function call is `name(arg, ...)`. The pipe form `a | name(b, ...)` is equivalent to `name(a, b, ...)`. A pipe without parentheses `a | name` is equivalent to `name(a)`.

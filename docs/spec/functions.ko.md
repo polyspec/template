@@ -4,6 +4,12 @@
 
 이 문서는 내장 함수, 파이프 형식, safe 문자열 규칙, 호스트 함수 등록 계약을 정의한다. 값 변환 규칙(문자열화, 진릿값, to_number, 동등)은 [데이터 모델](/ko/spec/data-model)에 정의되어 있다. 표현식 문법은 [표현식](/ko/spec/expressions)에 정의되어 있다. 오류 코드는 [오류](/ko/spec/errors)에 정의되어 있다.
 
+## 정본 계약
+
+함수 계약의 기계 판독 가능한 원본은 [`contracts/functions.json`](../../contracts/functions.json)이다. 이 파일은 이식 가능한 호출 표면을 `identifier(args...)`로 제한하고, 최소·최대 인자 수와 TypeScript·Go·Rust·PHP의 AST·생성 프로그램 지원 여부를 정의한다. 네 언어의 레지스트리는 `make function-contract-check`로 이 manifest와 대조한다.
+
+기존 템플릿 트리의 인벤토리는 마이그레이션 계획을 세우기 위한 근거이며 별도의 런타임 API가 아니다. 정확한 공통 의미가 있는 직접 호출은 canonical 이름으로 고쳐 쓸 수 있다. 애플리케이션 헬퍼를 호출하려면 manifest의 signature를 가진 host function을 명시적으로 등록해야 한다. qualified·static·instance·constructor 호출은 템플릿 문법에서 거부하며 assign 데이터나 명시적인 host 경계로 옮긴다. 이 경우 별칭이나 런타임 폴백을 만들지 않는다.
+
 ## 호출과 파이프
 
 - **FUN-1** 함수 호출은 `name(arg, ...)`이다. 파이프 형식 `a | name(b, ...)`은 `name(a, b, ...)`과 같다. 괄호 없는 파이프 `a | name`은 `name(a)`과 같다.

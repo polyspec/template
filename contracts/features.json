@@ -1051,6 +1051,67 @@
       "docs": [
         "docs/operations/dependencies.md"
       ]
+    },
+    {
+      "id": "template-function-contract",
+      "title": "Canonical template function contract",
+      "title_ko": "Canonical template function contract",
+      "status": "partial",
+      "description": "Define the portable function surface, four-language registry parity and an inventory classification for existing template calls.",
+      "description_ko": "이식 가능한 함수 표면, 네 언어 레지스트리 일치와 기존 템플릿 호출 분류를 정의한다.",
+      "inputs": {
+        "type": "FunctionContract",
+        "fields": [
+          "canonical function names",
+          "argument ranges",
+          "language support",
+          "observed call categories"
+        ]
+      },
+      "outputs": {
+        "type": "ContractCheck",
+        "fields": [
+          "registry parity",
+          "arity diagnostics",
+          "migration classification"
+        ]
+      },
+      "state": [
+        "load contract",
+        "inspect registries",
+        "validate arity",
+        "classify observed calls"
+      ],
+      "errors": [
+        {
+          "code": "E_CONTRACT_*",
+          "when": "a registry or observed call classification violates the contract"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "contracts/functions.json",
+        "tests/fixtures/function-inventory/source.tpl"
+      ],
+      "tests": [
+        "scripts/check-function-contract.mjs",
+        "tests/runner/function-contract.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make function-contract-check"
+        }
+      ],
+      "docs": [
+        "docs/spec/functions.md",
+        "docs/operations/template-functions.md"
+      ]
     }
   ]
 }
