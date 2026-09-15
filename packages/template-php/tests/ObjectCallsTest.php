@@ -14,9 +14,12 @@ final class ObjectCallsTest extends TestCase
     public function testAssignedObjectRetainsPublicFieldsAndMethods(): void
     {
         $program = new AstProgram(new ArrayLoader(['page.tpl' => '{= order.total}|{= order.status_label("ready")}']));
-        $order = new class {
+        $order = new class () {
             public float $total = 12.0;
-            public function status_label(string $prefix): string { return $prefix . ':' . (int) $this->total; }
+            public function status_label(string $prefix): string
+            {
+                return $prefix . ':' . (int) $this->total;
+            }
         };
 
         self::assertSame('12|ready:12', (new Engine($program))->render('page.tpl', ['order' => $order]));

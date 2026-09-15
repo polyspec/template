@@ -44,6 +44,12 @@
       "files": ["scripts/check-ast-artifact.mjs", "scripts/check-generated-artifact.mjs", "scripts/check-compiler-ir.mjs", "scripts/check-typed-generator.mjs", "scripts/check-generated-native-calls.mjs"]
     },
     {
+      "name": "native-object-call-contract",
+      "rules": ["VAL-19"],
+      "verification": "make generated-native-check",
+      "files": ["scripts/check-generated-native-calls.mjs", "tests/fixtures/native-object/input.tpl"]
+    },
+    {
       "name": "host-value-binding",
       "rules": ["VAL-1", "VAL-7", "VAL-11", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18"],
       "verification": "make test-ts test-go test-rust test-php test-ext",
