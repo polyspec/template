@@ -21,6 +21,6 @@ The executable source is [contracts/features.json](../contracts/features.json). 
 | template-function-inventory | Template function inventory | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [Evidence](operations/template-functions) |
 | dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](operations/dependencies) |
 | template-function-contract | Canonical template function contract | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/functions) |
-| object-and-class-calls | Assigned object and class function calls | partial | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/ast) |
+| object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/ast) |
 
 Run `make feature-check` to validate every contract and referenced path. An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
