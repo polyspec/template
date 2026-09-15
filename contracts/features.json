@@ -926,6 +926,71 @@
       ]
     },
     {
+      "id": "template-function-inventory",
+      "title": "Template function inventory",
+      "title_ko": "Template function inventory",
+      "status": "implemented",
+      "description": "Inventory function-shaped calls in an explicitly supplied tracked template source tree and distinguish portable, context-bound and non-function call forms before registration.",
+      "description_ko": "명시적으로 전달한 추적 template source tree의 함수 형태 호출을 inventory하고 portable, context-bound와 비함수 호출 형태를 등록 전에 구분한다.",
+      "inputs": {
+        "type": "TemplateSourceTree",
+        "fields": [
+          "explicit git root",
+          "tracked .tpl files"
+        ]
+      },
+      "outputs": {
+        "type": "TemplateFunctionInventory",
+        "fields": [
+          "call category",
+          "unique symbol",
+          "source location"
+        ]
+      },
+      "state": [
+        "read tracked template paths",
+        "skip raw PHP and comments",
+        "separate raw JavaScript and CSS",
+        "scan template tag calls",
+        "sort unique symbols"
+      ],
+      "errors": [
+        {
+          "code": "INVENTORY_INPUT_REQUIRED",
+          "when": "the external source root is not supplied"
+        },
+        {
+          "code": "INVENTORY_ROOT_INVALID",
+          "when": "the supplied root is missing or is not a git tree"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "unsupported",
+        "rust": "unsupported",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "tests/fixtures/function-inventory/source.tpl"
+      ],
+      "tests": [
+        "tests/runner/function-inventory.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "node tests/runner/function-inventory.mjs"
+        },
+        {
+          "id": "check-2",
+          "command": "make template-function-inventory TEMPLATE_APP_ROOT=/path/to/template-source"
+        }
+      ],
+      "docs": [
+        "docs/operations/template-functions.md"
+      ]
+    },
+    {
       "id": "dependency-policy",
       "title": "Dependency policy",
       "title_ko": "Dependency policy",

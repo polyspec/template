@@ -8,7 +8,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance delimiter-matrix parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
-	bench benchmark-check benchmark-smoke dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean
+	bench benchmark-check benchmark-smoke template-function-inventory dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -219,6 +219,10 @@ benchmark-check: ## Verify committed benchmark structure and equal output
 
 benchmark-smoke: typed-generator ## Measure a fresh short equal-output sample without changing committed results
 	node scripts/check-benchmark-smoke.mjs
+
+template-function-inventory: ## Inventory function-shaped calls in an explicit external template tree
+	@test -n "$(TEMPLATE_APP_ROOT)" || { echo "TEMPLATE_APP_ROOT is required"; exit 1; }
+	node scripts/inventory-template-functions.mjs --root "$(TEMPLATE_APP_ROOT)"
 
 release-test-matrix: build-php ## Run all release layers in deterministic order
 	@echo "[release 1/7] contracts, generated documentation and static analysis"
