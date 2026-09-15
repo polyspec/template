@@ -258,7 +258,7 @@ Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete
 | T8.5 | Verify output, arity, type, unknown-member and thrown-error behavior across all four languages | `make generated-native-check`; full native call matrix | [x] |
 | T8.6 | Add object-call declarations and generated Mermaid interface diagrams | interface check | [x] |
 | T8.7 | Add a showcase page with native instance assign, field access, member call and class call output | `make showcase-check`; static HTML checks | [x] |
-| T8.8 | Synchronize specifications, feature status, changelog, Pages artifacts and completion evidence | `make check`; `make docs-verify-idempotent`; Pages URL checks | [ ] |
+| T8.8 | Synchronize specifications, feature status, changelog, Pages artifacts and completion evidence | `make check`; `make docs-verify-idempotent`; `make docs-static-check` | [x] |
 
 ## Parallelism summary
 

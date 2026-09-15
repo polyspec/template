@@ -258,7 +258,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T8.5 | 네 언어에서 출력, arity, type, unknown-member와 throw 오류 동작을 검증 | `make generated-native-check`; 전체 native 호출 matrix | [x] |
 | T8.6 | object 호출 선언과 생성 Mermaid 인터페이스 도표를 추가 | interface 검사 | [x] |
 | T8.7 | native 인스턴스 assign, 필드 조회, 멤버 호출과 클래스 호출 결과를 보여주는 showcase 페이지 추가 | `make showcase-check`; 정적 HTML 검사 | [x] |
-| T8.8 | 명세, 기능 상태, changelog, Pages 산출물과 완료 근거 동기화 | `make check`; `make docs-verify-idempotent`; Pages URL 검사 | [ ] |
+| T8.8 | 명세, 기능 상태, changelog, Pages 산출물과 완료 근거 동기화 | `make check`; `make docs-verify-idempotent`; `make docs-static-check` | [x] |
 
 ## 병렬성 요약
 
