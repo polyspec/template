@@ -33,6 +33,8 @@ The span of a tag written as a wrapped tag runs from the wrapper opener to the e
 | `Var` | `name` | |
 | `LoopMeta` | `loop`, `field` | `field` is one of `index_`, `key_`, `value_`, `last_`, `first_`, `size_` |
 | `Member` | `object`, `key` | `key` is a string; `a.0` has key `"0"` |
+| `MemberCall` | `object`, `method`, `args` | Calls a declared method on an assigned object |
+| `ClassCall` | `className`, `method`, `args` | Calls a declared logical class function |
 | `Index` | `object`, `index` | `index` is an expression |
 | `Call` | `name`, `args` | `args` is a list of expressions |
 | `Unary` | `op`, `operand` | `op` is `!` or `-` |

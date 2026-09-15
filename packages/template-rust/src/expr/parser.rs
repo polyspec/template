@@ -407,7 +407,21 @@ impl<'a> ExpressionParser<'a> {
         let mut node = if first.kind == TokenType::Ident {
             self.next_token()?;
             let after = self.peek()?;
-            if after.kind == TokenType::LParen && (!adjacent_only || after.start == first.end) {
+            if after.kind == TokenType::Colon {
+                self.next_token()?;
+                self.expect(TokenType::Colon)?;
+                let method = self.expect(TokenType::Ident)?;
+                self.expect(TokenType::LParen)?;
+                let mut args = Vec::new();
+                self.parse_arguments(&mut args)?;
+                let close = self.expect(TokenType::RParen)?;
+                Expr::ClassCall {
+                    class_name: first.value,
+                    method: method.value,
+                    args,
+                    span: self.span(start, close.end),
+                }
+            } else if after.kind == TokenType::LParen && (!adjacent_only || after.start == first.end) {
                 self.next_token()?;
                 let mut args = Vec::new();
                 self.parse_arguments(&mut args)?;
@@ -442,11 +456,17 @@ impl<'a> ExpressionParser<'a> {
             match token.kind {
                 TokenType::DotIdent | TokenType::DotIndex => {
                     self.next_token()?;
-                    node = Expr::Member {
-                        object: Box::new(node),
-                        key: token.value[1..].to_string(),
-                        span: self.span(start, token.end),
-                    };
+                    let method = token.value[1..].to_string();
+                    let next = self.peek()?.clone();
+                    if next.kind == TokenType::LParen && (!adjacent_only || next.start == token.end) {
+                        self.next_token()?;
+                        let mut args = Vec::new();
+                        self.parse_arguments(&mut args)?;
+                        let close = self.expect(TokenType::RParen)?;
+                        node = Expr::MemberCall { object: Box::new(node), method, args, span: self.span(start, close.end) };
+                    } else {
+                        node = Expr::Member { object: Box::new(node), key: method, span: self.span(start, token.end) };
+                    }
                 }
                 TokenType::LBracket => {
                     self.next_token()?;

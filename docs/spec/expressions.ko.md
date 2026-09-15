@@ -44,8 +44,9 @@ comparison     = additive [ ( "<" | ">" | "<=" | ">=" | IN ) additive ] ;
 additive       = multiplicative { ( "+" | "-" ) multiplicative } ;
 multiplicative = unary { ( "*" | "/" | "%" ) unary } ;
 unary          = ( "!" | "-" ) unary | postfix ;
-postfix        = ( call | primary ) { DOT_IDENT | DOT_INDEX | "[" expression "]" } ;
+postfix        = ( call | primary ) { DOT_IDENT [ "(" [ args ] ")" ] | "[" expression "]" } ;
 call           = IDENT "(" [ args ] ")" ;
+class-call     = IDENT "::" IDENT "(" [ args ] ")" ;
 args           = expression { "," expression } [ "," ] ;
 primary        = "null" | "true" | "false" | NUMBER | STRING | IDENT
                | "(" expression ")" | bracket ;
@@ -73,7 +74,7 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 
 **EXP-10** 결합이 `없음`인 연산자는 괄호 없이 연쇄할 수 없다. `a == b == c`와 `a < b < c`는 두 번째 연산자에서 E_PARSE_UNEXPECTED_TOKEN이다.
 
-**EXP-11** 호출은 bare IDENT에만 적용된다. `f(x)`는 함수 `f`의 호출이다. `a.f(x)`, `(f)(x)`, `f(x)(y)`는 식별자가 아닌 것 뒤의 `(` 위치에서 E_PARSE_UNEXPECTED_TOKEN이다. 호출 뒤에 postfix 접근자가 올 수 있다: `f(x).name`과 `f(x)[0]`은 호출 결과에 조회를 적용한다.
+**EXP-11** 독립 호출 `f(x)`는 이름으로 함수를 호출한다. 멤버 호출 `a.f(x)`는 assign 인스턴스 `a`에 선언된 메서드를 호출한다. 클래스 호출 `Order::f(x)`는 선언된 논리 클래스 함수를 호출한다. `(f)(x)`와 `f(x)(y)`는 계속 E_PARSE_UNEXPECTED_TOKEN이다. 파서는 `MemberCall`과 `ClassCall`을 생성하며, 실행하려면 해당 객체 메서드나 클래스 함수가 선언되어 있어야 한다.
 
 **EXP-12** 파이프 단계 `left | f(a, b)`는 호출 `f(left, a, b)`와 같다. `left | f`는 `f(left)`와 같다. 파이프는 좌결합이다: `a | f | g(b)`는 `g(f(a), b)`이다. 파서는 호출 노드를 생성하며 파이프 노드는 존재하지 않는다.
 
