@@ -80,8 +80,11 @@ final class Evaluator
             case 'Member':
                 return $this->runtime->member($this->evaluate($expr['object'], $frame), $expr['key']);
             case 'MemberCall':
+                $args = array_map(fn (array $arg): mixed => $this->evaluate($arg, $frame), $expr['args']);
+                return $this->runtime->memberCall($this->evaluate($expr['object'], $frame), $expr['method'], $args, $frame, $expr['span']);
             case 'ClassCall':
-                throw $this->runtime->error($frame, $expr['span'], 'E_RUNTIME_UNKNOWN_FUNCTION', 'object and class function calls are not implemented');
+                $args = array_map(fn (array $arg): mixed => $this->evaluate($arg, $frame), $expr['args']);
+                return $this->runtime->classCall($expr['className'], $expr['method'], $args, $frame, $expr['span']);
             case 'Index':
                 return $this->runtime->index($this->evaluate($expr['object'], $frame), $this->evaluate($expr['index'], $frame));
             case 'Call':

@@ -209,7 +209,20 @@ impl RuntimeBindings {
 
     /// Reads a fixed member name.
     pub fn member(&self, container: &Value, key: &str) -> Value {
+        if let Value::Object(object) = container { return object.member(key).unwrap_or(Value::Null); }
         self.index(container, &Value::text(key))
+    }
+
+    /// Calls a public method on the original assigned object.
+    pub fn member_call(&self, context: &RenderContext<'_>, container: &Value, method: &str, args: Vec<Value>, frame: &Frame, span: Span) -> Result<Value, TemplateError> {
+        let Value::Object(object) = container else { return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, format!("{method} is not a function"))); };
+        object.call(method, &args).map_err(|message| self.error(context, frame, span, ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("{method} failed: {message}")))
+    }
+
+    /// Calls a registered logical class function.
+    pub fn class_call(&self, context: &RenderContext<'_>, class_name: &str, method: &str, args: Vec<Value>, frame: &Frame, span: Span) -> Result<Value, TemplateError> {
+        let Some(function) = context.services.class_function(class_name, method) else { return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, format!("{class_name}::{method} is not a function"))); };
+        function(&args, &FunctionContext { env: &context.env }).map_err(|message| self.error(context, frame, span, ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("{class_name}::{method} failed: {message}")))
     }
 
     /// Reads a dynamic list or map key.

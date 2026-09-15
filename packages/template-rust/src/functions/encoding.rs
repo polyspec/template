@@ -45,6 +45,7 @@ pub fn to_json(value: &Value) -> String {
                 .collect();
             format!("{{{}}}", parts.join(","))
         }
+        Value::Object(_) => "null".to_string(),
     }
 }
 

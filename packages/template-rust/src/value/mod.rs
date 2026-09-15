@@ -7,6 +7,15 @@ pub mod number;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::fmt;
+
+/// Native application object exposed to a template without copying its state.
+pub trait TemplateObject: fmt::Debug {
+    /// Reads one public member. Missing members return `None`.
+    fn member(&self, key: &str) -> Option<Value>;
+    /// Calls one public instance method.
+    fn call(&self, method: &str, args: &[Value]) -> Result<Value, String>;
+}
 
 /// An insertion-ordered map with string keys.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -102,7 +111,7 @@ impl FromIterator<(String, Value)> for OrderedMap {
 ///
 /// A list and a map are reference counted, so cloning a value never copies a collection.
 /// Values are immutable once built; a function that changes a collection builds a new one.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub enum Value {
     /// The null value.
     Null,
@@ -118,6 +127,23 @@ pub enum Value {
     List(Rc<Vec<Value>>),
     /// An ordered map.
     Map(Rc<OrderedMap>),
+    /// A native application object.
+    Object(Rc<dyn TemplateObject>),
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Value::Null, Value::Null) => true,
+            (Value::Bool(a), Value::Bool(b)) => a == b,
+            (Value::Number(a), Value::Number(b)) => a == b,
+            (Value::Str(a), Value::Str(b)) | (Value::Safe(a), Value::Safe(b)) => a == b,
+            (Value::List(a), Value::List(b)) => a == b,
+            (Value::Map(a), Value::Map(b)) => a == b,
+            (Value::Object(a), Value::Object(b)) => Rc::ptr_eq(a, b),
+            _ => false,
+        }
+    }
 }
 
 /// Value type names of `type()`.
@@ -135,6 +161,8 @@ pub enum ValueType {
     List,
     /// map
     Map,
+    /// object
+    Object,
 }
 
 impl ValueType {
@@ -147,6 +175,7 @@ impl ValueType {
             ValueType::String => "string",
             ValueType::List => "list",
             ValueType::Map => "map",
+            ValueType::Object => "object",
         }
     }
 }
@@ -172,6 +201,11 @@ impl Value {
         Value::Map(Rc::new(entries))
     }
 
+    /// Creates a value that retains the original application object.
+    pub fn object(object: impl TemplateObject + 'static) -> Value {
+        Value::Object(Rc::new(object))
+    }
+
     /// The type of the value.
     pub fn value_type(&self) -> ValueType {
         match self {
@@ -181,6 +215,7 @@ impl Value {
             Value::Str(_) | Value::Safe(_) => ValueType::String,
             Value::List(_) => ValueType::List,
             Value::Map(_) => ValueType::Map,
+            Value::Object(_) => ValueType::Object,
         }
     }
 
@@ -206,6 +241,7 @@ impl Value {
             Value::Str(text) | Value::Safe(text) => !text.is_empty(),
             Value::List(list) => !list.is_empty(),
             Value::Map(map) => !map.is_empty(),
+            Value::Object(_) => true,
         }
     }
 }
@@ -328,6 +364,6 @@ pub fn stringify(value: &Value) -> Result<String, StringifyError> {
         Value::Bool(false) => Ok("false".to_string()),
         Value::Number(n) => Ok(number::number_to_string(*n)),
         Value::Str(text) | Value::Safe(text) => Ok(text.to_string()),
-        Value::List(_) | Value::Map(_) => Err(StringifyError),
+        Value::List(_) | Value::Map(_) | Value::Object(_) => Err(StringifyError),
     }
 }

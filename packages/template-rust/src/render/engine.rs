@@ -163,6 +163,11 @@ impl AstProgram {
         self.runtime.register(name, function)
     }
 
+    /// Registers one logical class function used by `Class::method(...)`.
+    pub fn register_class(&mut self, class_name: &str, method: &str, function: HostFunction) -> Result<(), String> {
+        self.runtime.register_class(class_name, method, function)
+    }
+
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
     pub fn load_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Rc<ParsedTemplate>, TemplateError> {
         let Some(loaded) = self.loader.load(name) else {
@@ -252,6 +257,16 @@ impl AstProgram {
     pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
         self.prepare(target, assign, options)?.render()
     }
+
+    /// Renders a native value map while retaining assigned application objects.
+    pub fn render_values(&self, target: RenderTarget<'_>, assign: OrderedMap, options: &RenderOptions) -> Result<String, TemplateError> {
+        let name = match target { RenderTarget::Name(name) => name.to_owned(), RenderTarget::Ast(ast) => ast.name.clone() };
+        let registry = bind_defines(&options.define).map_err(|error| TemplateError::without_position(error.code, &name, error.message))?;
+        let env = options.env.clone().unwrap_or_else(|| Env { timezone: "Z".to_string(), now: 0.0 });
+        let target_name = match target { RenderTarget::Name(name) => match registry.get(name) { Some(DefineEntry::Template { template, .. }) => template.clone(), _ => name.to_string() }, RenderTarget::Ast(ast) => ast.name.clone() };
+        let template = match target { RenderTarget::Name(_) => self.load_template(&target_name, None, None)?, RenderTarget::Ast(ast) => Rc::new(ParsedTemplate { ast: ast.clone(), lines: None }) };
+        AstPreparedExecution { engine: self, root: Rc::new(assign), registry, env, target_name, template }.render()
+    }
 }
 
 impl Program for AstProgram {
@@ -276,6 +291,10 @@ impl RuntimeServices for AstProgram {
 
     fn host_function(&self, name: &str) -> Option<&HostFunction> {
         self.runtime.host_function(name)
+    }
+
+    fn class_function(&self, class_name: &str, method: &str) -> Option<&HostFunction> {
+        self.runtime.class_function(class_name, method)
     }
 }
 

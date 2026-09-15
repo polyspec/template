@@ -77,6 +77,8 @@ ${emitNodes(node.otherwise, target, n + 1)}
 }` : ''}`);
   target.loopMeta = (loop, field, node) => `generated_loop_meta(runtime, context, scope, &frame, ${rustSpan(node.span)}, ${quote(loop)}, ${quote(field)})?`;
   target.index = (object, index) => `runtime.index(&${object}, &${index})`;
+  target.memberCall = (object, method, args, node) => `runtime.member_call(context, &${object}, ${quote(method)}, vec![${args.join(', ')}], &frame, ${rustSpan(node.span)})?`;
+  target.classCall = (className, method, args, node) => `runtime.class_call(context, ${quote(className)}, ${quote(method)}, vec![${args.join(', ')}], &frame, ${rustSpan(node.span)})?`;
   target.call = (name, args, node) => `runtime.call(context, ${quote(name)}, vec![${args.join(', ')}], &frame, ${rustSpan(node.span)})?`;
   target.unary = (operator, operand, node) => `runtime.unary(context, ${unaryVariant[operator]}, &${operand}, &frame, ${rustSpan(node.span)})?`;
   target.binary = (operator, left, right, node) => {

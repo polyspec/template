@@ -109,12 +109,24 @@ final class AstProgram implements Program, RuntimeServices
         $this->runtime->register($name, $fn);
     }
 
+    /** Registers one logical class function used by `Class::method(...)`. */
+    public function registerClass(string $className, string $method, callable $fn): void
+    {
+        $this->runtime->registerClass($className, $method, $fn);
+    }
+
     /**
      * Returns the function registered under a name, or null when no host registered it.
      */
     public function hostFunction(string $name): ?callable
     {
         return $this->runtime->hostFunction($name);
+    }
+
+    /** Returns one logical class function. */
+    public function classFunction(string $className, string $method): ?callable
+    {
+        return $this->runtime->classFunction($className, $method);
     }
 
     /** @return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} */

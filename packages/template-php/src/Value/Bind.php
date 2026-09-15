@@ -74,7 +74,8 @@ final class Bind
             return $map;
         }
 
-        throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'value of type ' . get_debug_type($input) . ' has no binding');
+        // Preserve application objects so public fields and methods remain available to templates.
+        return $input;
     }
 
     public static function map(mixed $input): MapValue

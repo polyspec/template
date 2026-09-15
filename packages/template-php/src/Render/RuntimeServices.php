@@ -12,4 +12,7 @@ interface RuntimeServices
 
     /** Returns the host function registered under a name. */
     public function hostFunction(string $name): ?callable;
+
+    /** Returns one registered logical class function. */
+    public function classFunction(string $className, string $method): ?callable;
 }

@@ -1,12 +1,12 @@
 // Shared runtime value, function and error semantics for AST and generated programs.
 import type { Span } from '../ast.js';
-import type { TemplateError } from '../errors.js';
+import { TemplateError } from '../errors.js';
 import { escapeHtml } from '../escape.js';
 import { builtins, FunctionError, toNumber, type FunctionContext } from '../functions/index.js';
 import { BindError, bind } from '../value/bind.js';
 import { stringify as stringifyValue, StringifyError } from '../value/stringify.js';
 import {
-  SafeString, compareValues, isString, isTruthy, looseEquals, strictEquals, textOf, typeOf,
+  NativeObject, SafeString, compareValues, isString, isTruthy, looseEquals, strictEquals, textOf, typeOf,
   type Value,
 } from '../value/value.js';
 import type { Frame, RenderContext } from './context.js';
@@ -115,7 +115,39 @@ export class RuntimeBindings {
 
   /** Reads a fixed member from a template collection. */
   member(container: Value, key: string): Value {
+    if (container instanceof NativeObject) {
+      const target = container.target as Record<string, unknown>;
+      if (!(key in target)) return null;
+      return bind(target[key]);
+    }
     return this.index(container, key);
+  }
+
+  /** Calls a public method on an assigned native object. */
+  memberCall(container: Value, method: string, args: Value[], frame: Frame, span: Span): Value {
+    if (!(container instanceof NativeObject)) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${method} is not a function`);
+    const target = container.target as Record<string, unknown>;
+    const candidate = target[method];
+    if (typeof candidate !== 'function') throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${method} is not a function`);
+    try {
+      return bind(Reflect.apply(candidate, container.target, args));
+    } catch (error) {
+      if (error instanceof TemplateError) throw error;
+      const message = error instanceof Error ? error.message : String(error);
+      throw this.error(frame, span, 'E_RUNTIME_HOST_FUNCTION', `${method} failed: ${message}`);
+    }
+  }
+
+  /** Calls a registered logical class function. */
+  classCall(className: string, method: string, args: Value[], frame: Frame, span: Span): Value {
+    const fn = this.context.services.classFunction(className, method);
+    if (!fn) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${className}::${method} is not a function`);
+    try {
+      return bind(fn(args, { env: this.context.env }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw this.error(frame, span, 'E_RUNTIME_HOST_FUNCTION', `${className}::${method} failed: ${message}`);
+    }
   }
 
   /** Reads a dynamic list position or map key. */
@@ -132,6 +164,7 @@ export class RuntimeBindings {
       if (position === null || position < 0 || position >= container.length) return null;
       return container[position] as Value;
     }
+    if (container instanceof NativeObject && isString(key)) return this.member(container, textOf(key));
     return null;
   }
 

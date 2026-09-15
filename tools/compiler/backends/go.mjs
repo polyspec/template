@@ -59,6 +59,8 @@ ${emitNodes(node.otherwise, target, n + 1)}
 }` : ''}`);
   target.loopMeta = (loop, field) => `generatedLoopMeta(scope, ${quote(loop)}).${exportedName(field.replace(/_$/, ''))}`;
   target.index = (object, index, _owner, node) => `generatedIndex[${goResult(node)}](runtime, ${object}, ${index})`;
+  target.memberCall = (object, method, args, node) => `generatedMemberCall[${goResult(node)}](runtime, generatedValue(${object}), ${quote(method)}, []value.Value{${args.map(item => `generatedValue(${item})`).join(', ')}}, frame, ${goSpan(node.span)})`;
+  target.classCall = (className, method, args, node) => `generatedClassCall[${goResult(node)}](runtime, ${quote(className)}, ${quote(method)}, []value.Value{${args.map(item => `generatedValue(${item})`).join(', ')}}, frame, ${goSpan(node.span)})`;
   target.call = (name, args, node) => `generatedCall[${goResult(node)}](runtime, ${quote(name)}, []value.Value{${args.map(item => `generatedValue(${item})`).join(', ')}}, frame, ${goSpan(node.span)})`;
   target.unary = (operator, operand, node) => `generatedUnary[${goResult(node)}](runtime, ${quote(operator)}, ${operand}, frame, ${goSpan(node.span)})`;
   target.binary = (operator, left, right, node) => {
@@ -123,6 +125,8 @@ func generatedUnary[T any](runtime *render.RuntimeBindings, operator string, inp
 func generatedBinary[T any](runtime *render.RuntimeBindings, operator string, left, right any, frame *render.Frame, span ast.Span) T { result, err := runtime.Binary(operator, generatedValue(left), generatedValue(right), frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedMember[T any](runtime *render.RuntimeBindings, input any, key string) T { return generatedResult[T](runtime.Member(generatedValue(input), key)) }
 func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any) T { return generatedResult[T](runtime.Index(generatedValue(input), generatedValue(key))) }
+func generatedMemberCall[T any](runtime *render.RuntimeBindings, input value.Value, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.MemberCall(input, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
+func generatedClassCall[T any](runtime *render.RuntimeBindings, className, method string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.ClassCall(className, method, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedCall[T any](runtime *render.RuntimeBindings, name string, args []value.Value, frame *render.Frame, span ast.Span) T { result, err := runtime.Call(name, args, frame, span); generatedPanic(err); return generatedResult[T](result) }
 func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) string { result, err := runtime.Escape(generatedValue(input), frame, span); generatedPanic(err); return result }
 func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry { result, err := runtime.Entries(generatedValue(input), frame, span); generatedPanic(err); return result }

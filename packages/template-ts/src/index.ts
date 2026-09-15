@@ -8,7 +8,7 @@ import { Source } from './source.js';
 
 export type { Template, Node, Expr, Span } from './ast.js';
 export { TemplateError, type ErrorCode, type ErrorObject } from './errors.js';
-export { SafeString, type Value, type MapValue, type ListValue } from './value/value.js';
+export { NativeObject, SafeString, type Value, type MapValue, type ListValue } from './value/value.js';
 export { bind, bindMap, BindError } from './value/bind.js';
 export { parseJson, parseJsonBytes, JsonSyntaxError } from './value/json.js';
 export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';

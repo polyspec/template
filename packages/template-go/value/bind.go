@@ -120,10 +120,14 @@ func Bind(input any) (Value, error) {
 		}
 		return out, nil
 	case reflect.Struct:
-		return bindStruct(rv)
+		// Keep application structs as native objects so their methods and identity remain available.
+		return input, nil
 	case reflect.Pointer:
 		if rv.IsNil() {
 			return nil, nil
+		}
+		if rv.Elem().Kind() == reflect.Struct {
+			return input, nil
 		}
 		return Bind(rv.Elem().Interface())
 	}

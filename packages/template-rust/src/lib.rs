@@ -29,7 +29,7 @@ pub use render::engine::{
 pub use render::runtime_environment::RuntimeEnvironment;
 pub use value::bind::{BindError, bind, to_json_value};
 pub use value::json::{parse_json, parse_json_bytes};
-pub use value::{OrderedMap, Value};
+pub use value::{OrderedMap, TemplateObject, Value};
 
 use parser::scanner::{DEFAULT_DELIMITERS, parse_delimiters};
 

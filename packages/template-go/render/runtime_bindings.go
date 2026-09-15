@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -229,7 +230,43 @@ func (r *RuntimeBindings) Compare(left, right value.Value, frame *Frame, span as
 
 // Member reads a fixed member name.
 func (r *RuntimeBindings) Member(container value.Value, key string) value.Value {
+	if result, ok := nativeMember(container, key); ok {
+		return result
+	}
 	return r.Index(container, key)
+}
+
+// MemberCall invokes a public method on the original assigned Go value.
+func (r *RuntimeBindings) MemberCall(container value.Value, method string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
+	result, ok, err := nativeCall(container, method, args)
+	if err != nil {
+		return nil, r.Error(frame, span, errs.RuntimeHostFunction, method+" failed: "+err.Error())
+	}
+	if !ok {
+		return nil, r.Error(frame, span, errs.RuntimeUnknownFunction, method+" is not a function")
+	}
+	bound, err := value.Bind(result)
+	if err != nil {
+		var bindError *value.BindError
+		if errors.As(err, &bindError) {
+			return nil, r.Error(frame, span, bindError.Code, bindError.Message)
+		}
+		return nil, err
+	}
+	return bound, nil
+}
+
+// ClassCall invokes a registered logical class function.
+func (r *RuntimeBindings) ClassCall(className, method string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
+	fn, ok := r.context.Services.ClassFunction(className, method)
+	if !ok {
+		return nil, r.Error(frame, span, errs.RuntimeUnknownFunction, className+"::"+method+" is not a function")
+	}
+	result, err := fn(args, functions.Context{Env: r.context.Env})
+	if err != nil {
+		return nil, r.Error(frame, span, errs.RuntimeHostFunction, className+"::"+method+" failed: "+err.Error())
+	}
+	return value.Bind(result)
 }
 
 // Index reads a dynamic list or map key.
@@ -254,6 +291,92 @@ func (r *RuntimeBindings) Index(container, key value.Value) value.Value {
 		}
 	}
 	return nil
+}
+
+func nativeValue(v reflect.Value) value.Value {
+	if !v.IsValid() {
+		return nil
+	}
+	if v.Kind() == reflect.Interface && !v.IsNil() {
+		return nativeValue(v.Elem())
+	}
+	return v.Interface()
+}
+
+func nativeMember(container value.Value, key string) (value.Value, bool) {
+	rv := reflect.ValueOf(container)
+	if !rv.IsValid() {
+		return nil, false
+	}
+	for rv.Kind() == reflect.Pointer {
+		if rv.IsNil() {
+			return nil, false
+		}
+		rv = rv.Elem()
+	}
+	if rv.Kind() != reflect.Struct {
+		return nil, false
+	}
+	typeOf := rv.Type()
+	for index := 0; index < typeOf.NumField(); index++ {
+		metadata := typeOf.Field(index)
+		jsonName := strings.Split(metadata.Tag.Get("json"), ",")[0]
+		if metadata.Name != key && !strings.EqualFold(metadata.Name, key) && (jsonName == "" || jsonName != key) {
+			continue
+		}
+		field := rv.Field(index)
+		if field.CanInterface() {
+			bound, err := value.Bind(nativeValue(field))
+			if err == nil {
+				return bound, true
+			}
+		}
+	}
+	return nil, false
+}
+
+func nativeMethodName(method string) string {
+	parts := strings.Split(method, "_")
+	for index := range parts {
+		if parts[index] != "" {
+			parts[index] = strings.ToUpper(parts[index][:1]) + parts[index][1:]
+		}
+	}
+	return strings.Join(parts, "")
+}
+
+func nativeCall(container value.Value, method string, args []value.Value) (value.Value, bool, error) {
+	rv := reflect.ValueOf(container)
+	if !rv.IsValid() {
+		return nil, false, nil
+	}
+	candidate := rv.MethodByName(method)
+	if !candidate.IsValid() {
+		candidate = rv.MethodByName(nativeMethodName(method))
+	}
+	if !candidate.IsValid() {
+		return nil, false, nil
+	}
+	t := candidate.Type()
+	if t.NumIn() != len(args) {
+		return nil, true, fmt.Errorf("%s accepts %d arguments, got %d", method, t.NumIn(), len(args))
+	}
+	inputs := make([]reflect.Value, len(args))
+	for i, arg := range args {
+		input := reflect.ValueOf(arg)
+		if !input.IsValid() || !input.Type().AssignableTo(t.In(i)) {
+			return nil, true, fmt.Errorf("argument %d has incompatible type", i)
+		}
+		inputs[i] = input
+	}
+	outputs := candidate.Call(inputs)
+	if len(outputs) == 0 {
+		return nil, true, nil
+	}
+	if len(outputs) > 1 && !outputs[len(outputs)-1].IsNil() {
+		return nil, true, outputs[len(outputs)-1].Interface().(error)
+	}
+	return nativeValue(outputs[0]), true, nil
 }
 
 // Entries normalizes a loop operand.
