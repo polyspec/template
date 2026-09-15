@@ -362,6 +362,14 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 			return nil, err
 		}
 		switch {
+		case after.Type == "COLON":
+			p.Next()
+			if _, err := p.Expect("COLON"); err != nil { return nil, err }
+			method, err := p.Expect("IDENT"); if err != nil { return nil, err }
+			if _, err := p.Expect("LPAREN"); err != nil { return nil, err }
+			args, err := p.parseArguments(nil); if err != nil { return nil, err }
+			close, err := p.Expect("RPAREN"); if err != nil { return nil, err }
+			node = &ast.ClassCall{Type: "ClassCall", ClassName: first.Value, Method: method.Value, Args: args, Span: p.span(start, close.End)}
 		case after.Type == "LPAREN" && (!adjacentOnly || after.Start == first.End):
 			p.Next()
 			args, err := p.parseArguments(nil)
@@ -396,7 +404,12 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 		switch tok.Type {
 		case "DOT_IDENT", "DOT_INDEX":
 			p.Next()
-			node = &ast.Member{Type: "Member", Object: node, Key: tok.Value[1:], Span: p.span(start, tok.End)}
+			method := tok.Value[1:]
+			next, peekErr := p.Peek(); if peekErr != nil { return nil, peekErr }
+			if next.Type == "LPAREN" && (!adjacentOnly || next.Start == tok.End) {
+				p.Next(); args, err := p.parseArguments(nil); if err != nil { return nil, err }; close, err := p.Expect("RPAREN"); if err != nil { return nil, err }
+				node = &ast.MemberCall{Type: "MemberCall", Object: node, Method: method, Args: args, Span: p.span(start, close.End)}
+			} else { node = &ast.Member{Type: "Member", Object: node, Key: method, Span: p.span(start, tok.End)} }
 		case "LBRACKET":
 			p.Next()
 			index, err := p.ParseExpression()

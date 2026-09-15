@@ -44,8 +44,9 @@ comparison     = additive [ ( "<" | ">" | "<=" | ">=" | IN ) additive ] ;
 additive       = multiplicative { ( "+" | "-" ) multiplicative } ;
 multiplicative = unary { ( "*" | "/" | "%" ) unary } ;
 unary          = ( "!" | "-" ) unary | postfix ;
-postfix        = ( call | primary ) { DOT_IDENT | DOT_INDEX | "[" expression "]" } ;
+postfix        = ( call | primary ) { DOT_IDENT [ "(" [ args ] ")" ] | "[" expression "]" } ;
 call           = IDENT "(" [ args ] ")" ;
+class-call     = IDENT "::" IDENT "(" [ args ] ")" ;
 args           = expression { "," expression } [ "," ] ;
 primary        = "null" | "true" | "false" | NUMBER | STRING | IDENT
                | "(" expression ")" | bracket ;
@@ -73,7 +74,7 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 
 **EXP-10** An operator with associativity `none` cannot be chained without parentheses. `a == b == c` and `a < b < c` are E_PARSE_UNEXPECTED_TOKEN at the second operator.
 
-**EXP-11** A call applies only to a bare IDENT. `f(x)` is a call of the function `f`. `a.f(x)`, `(f)(x)` and `f(x)(y)` are E_PARSE_UNEXPECTED_TOKEN at the `(` that follows the non-identifier. Postfix accessors may follow a call: `f(x).name` and `f(x)[0]` apply lookup to the call result.
+**EXP-11** A standalone call `f(x)` calls a function by name. A member call `a.f(x)` calls a declared method on the assigned object `a`. A class call `Order::f(x)` calls a declared logical class function. `(f)(x)` and `f(x)(y)` remain E_PARSE_UNEXPECTED_TOKEN. The parser emits `MemberCall` and `ClassCall`; execution requires the corresponding declared object method or class function.
 
 **EXP-12** A pipe step `left | f(a, b)` is equivalent to the call `f(left, a, b)`; `left | f` is equivalent to `f(left)`. The pipe is left-associative: `a | f | g(b)` is `g(f(a), b)`. The parser produces the call node; no pipe node exists.
 

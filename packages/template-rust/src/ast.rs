@@ -308,6 +308,19 @@ pub enum Expr {
         key: String,
         span: Span,
     },
+    MemberCall {
+        object: Box<Expr>,
+        method: String,
+        args: Vec<Expr>,
+        span: Span,
+    },
+    ClassCall {
+        #[serde(rename = "className")]
+        class_name: String,
+        method: String,
+        args: Vec<Expr>,
+        span: Span,
+    },
     Index {
         object: Box<Expr>,
         index: Box<Expr>,
@@ -357,6 +370,8 @@ impl Expr {
             | Expr::Var { span, .. }
             | Expr::LoopMeta { span, .. }
             | Expr::Member { span, .. }
+            | Expr::MemberCall { span, .. }
+            | Expr::ClassCall { span, .. }
             | Expr::Index { span, .. }
             | Expr::Call { span, .. }
             | Expr::Unary { span, .. }

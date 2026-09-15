@@ -3519,9 +3519,117 @@
     "error": "E_PARSE_UNTERMINATED_STRING"
   },
   {
-    "name": "error-method-call",
+    "name": "member-method-call",
     "expr": "a.f(x)",
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "DOT_IDENT",
+        "value": ".f"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "x"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "MemberCall",
+      "object": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "method": "f",
+      "args": [
+        {
+          "type": "Var",
+          "name": "x",
+          "span": [
+            4,
+            5
+          ]
+        }
+      ],
+      "span": [
+        0,
+        6
+      ]
+    }
+  },
+  {
+    "name": "class-function-call",
+    "expr": "Order::status_label(x)",
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "Order"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "IDENT",
+        "value": "status_label"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "x"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "ClassCall",
+      "className": "Order",
+      "method": "status_label",
+      "args": [
+        {
+          "type": "Var",
+          "name": "x",
+          "span": [
+            20,
+            21
+          ]
+        }
+      ],
+      "span": [
+        0,
+        22
+      ]
+    }
   },
   {
     "name": "error-call-result-call",

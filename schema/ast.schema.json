@@ -165,6 +165,8 @@
         { "$ref": "#/definitions/Var" },
         { "$ref": "#/definitions/LoopMeta" },
         { "$ref": "#/definitions/Member" },
+        { "$ref": "#/definitions/MemberCall" },
+        { "$ref": "#/definitions/ClassCall" },
         { "$ref": "#/definitions/Index" },
         { "$ref": "#/definitions/Call" },
         { "$ref": "#/definitions/Unary" },
@@ -231,6 +233,30 @@
         "type": { "const": "Index" },
         "object": { "$ref": "#/definitions/Expr" },
         "index": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "MemberCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "object", "method", "args", "span"],
+      "properties": {
+        "type": { "const": "MemberCall" },
+        "object": { "$ref": "#/definitions/Expr" },
+        "method": { "$ref": "#/definitions/Identifier" },
+        "args": { "type": "array", "items": { "$ref": "#/definitions/Expr" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "ClassCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "className", "method", "args", "span"],
+      "properties": {
+        "type": { "const": "ClassCall" },
+        "className": { "$ref": "#/definitions/Identifier" },
+        "method": { "$ref": "#/definitions/Identifier" },
+        "args": { "type": "array", "items": { "$ref": "#/definitions/Expr" } },
         "span": { "$ref": "#/definitions/Span" }
       }
     },

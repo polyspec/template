@@ -336,7 +336,16 @@ final class Parser
         if ($first->type === 'IDENT') {
             $this->next();
             $after = $this->peek();
-            if ($after->type === 'LPAREN' && (!$adjacentOnly || $after->start === $first->end)) {
+            if ($after->type === 'COLON') {
+                $this->next();
+                $this->expect('COLON');
+                $method = $this->expect('IDENT');
+                $this->expect('LPAREN');
+                $args = [];
+                $this->parseArguments($args);
+                $close = $this->expect('RPAREN');
+                $node = Ast::classCall($first->value, $method->value, $args, $start, $close->end);
+            } elseif ($after->type === 'LPAREN' && (!$adjacentOnly || $after->start === $first->end)) {
                 $this->next();
                 $args = [];
                 $this->parseArguments($args);
@@ -358,7 +367,17 @@ final class Parser
             }
             if ($token->type === 'DOT_IDENT' || $token->type === 'DOT_INDEX') {
                 $this->next();
-                $node = Ast::member($node, substr($token->value, 1), $start, $token->end);
+                $method = substr($token->value, 1);
+                $next = $this->peek();
+                if ($next->type === 'LPAREN' && (!$adjacentOnly || $next->start === $token->end)) {
+                    $this->next();
+                    $args = [];
+                    $this->parseArguments($args);
+                    $close = $this->expect('RPAREN');
+                    $node = Ast::memberCall($node, $method, $args, $start, $close->end);
+                } else {
+                    $node = Ast::member($node, $method, $start, $token->end);
+                }
             } elseif ($token->type === 'LBRACKET') {
                 $this->next();
                 $index = $this->parseExpression();

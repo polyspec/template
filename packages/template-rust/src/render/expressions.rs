@@ -70,6 +70,9 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                 let container = self.evaluate(object, frame, scope)?;
                 Ok(self.runtime.member(&container, key))
             }
+            Expr::MemberCall { span, .. } | Expr::ClassCall { span, .. } => {
+                Err(self.fail(frame, *span, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, "object and class function calls are not implemented"))
+            }
             Expr::Index { object, index, .. } => {
                 let container = self.evaluate(object, frame, scope)?;
                 let key = self.evaluate(index, frame, scope)?;

@@ -25,7 +25,7 @@ export interface Block { type: 'Block'; id: string | null; path: string | null; 
 export interface IfBlock { type: 'IfBlock'; id: string; body: Node[]; else: Node[] | null; span: Span }
 
 // An expression node of a tag. The `type` field selects the member (AST-4).
-export type Expr = Literal | Var | LoopMeta | Member | Index | Call | Unary | Binary | Ternary | List | MapLiteral;
+export type Expr = Literal | Var | LoopMeta | Member | MemberCall | ClassCall | Index | Call | Unary | Binary | Ternary | List | MapLiteral;
 
 export type LiteralKind = 'null' | 'bool' | 'number' | 'string';
 export interface Literal { type: 'Literal'; kind: LiteralKind; value: null | boolean | number | string; span: Span }
@@ -33,6 +33,8 @@ export interface Var { type: 'Var'; name: string; span: Span }
 export type LoopMetaField = 'index_' | 'key_' | 'value_' | 'last_' | 'first_' | 'size_';
 export interface LoopMeta { type: 'LoopMeta'; loop: string; field: LoopMetaField; span: Span }
 export interface Member { type: 'Member'; object: Expr; key: string; span: Span }
+export interface MemberCall { type: 'MemberCall'; object: Expr; method: string; args: Expr[]; span: Span }
+export interface ClassCall { type: 'ClassCall'; className: string; method: string; args: Expr[]; span: Span }
 export interface Index { type: 'Index'; object: Expr; index: Expr; span: Span }
 export interface Call { type: 'Call'; name: string; args: Expr[]; span: Span }
 export type UnaryOp = '!' | '-';

@@ -33,6 +33,8 @@ AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 �
 | `Var` | `name` | |
 | `LoopMeta` | `loop`, `field` | `field`는 `index_`, `key_`, `value_`, `last_`, `first_`, `size_` 중 하나 |
 | `Member` | `object`, `key` | `key`는 문자열; `a.0`의 key는 `"0"` |
+| `MemberCall` | `object`, `method`, `args` | assign 인스턴스에 선언된 메서드를 호출한다 |
+| `ClassCall` | `className`, `method`, `args` | 선언된 논리 클래스 함수를 호출한다 |
 | `Index` | `object`, `index` | `index`는 표현식 |
 | `Call` | `name`, `args` | `args`는 표현식 목록 |
 | `Unary` | `op`, `operand` | `op`는 `!` 또는 `-` |

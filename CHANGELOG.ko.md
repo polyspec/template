@@ -11,6 +11,7 @@
 
 ## 미발행
 
+- `MemberCall`과 `ClassCall` 노드를 추가하고 TypeScript·Go·Rust·PHP 표현식 파서가 `object.method(args...)`와 `Class::function(args...)`를 같은 형태로 생성하게 했다. 실제 객체 바인딩과 실행은 다음 구현 단계까지 partial 상태다.
 - 37개 canonical 함수의 인자 범위, 네 언어 AST·생성 레지스트리 일치와 225개 기존 호출 형태의 분류를 담은 기계 판독 함수 계약을 추가했다. 컴파일러 IR이 0개 인자 함수와 가변 인자 함수의 호출 개수를 lowering 단계에서 검사하도록 수정했다.
 
 ### 2026-09-11

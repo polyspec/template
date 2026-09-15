@@ -249,7 +249,16 @@ export class ExpressionParser {
     if (first.type === 'IDENT') {
       this.next();
       const after = this.peek();
-      if (after.type === 'LPAREN' && (!adjacentOnly || after.start === first.end)) {
+      if (after.type === 'COLON') {
+        this.next();
+        this.expect('COLON');
+        const method = this.expect('IDENT');
+        this.expect('LPAREN');
+        const args: Expr[] = [];
+        this.parseArguments(args);
+        const close = this.expect('RPAREN');
+        node = { type: 'ClassCall', className: first.value, method: method.value, args, span: this.span(start, close.end) };
+      } else if (after.type === 'LPAREN' && (!adjacentOnly || after.start === first.end)) {
         this.next();
         const args: Expr[] = [];
         this.parseArguments(args);
@@ -271,7 +280,16 @@ export class ExpressionParser {
       if (adjacentOnly && token.start !== this.end) break;
       if (token.type === 'DOT_IDENT' || token.type === 'DOT_INDEX') {
         this.next();
-        node = { type: 'Member', object: node, key: token.value.slice(1), span: this.span(start, token.end) };
+        const method = token.value.slice(1);
+        if (this.peek().type === 'LPAREN' && (!adjacentOnly || this.peek().start === token.end)) {
+          this.next();
+          const args: Expr[] = [];
+          this.parseArguments(args);
+          const close = this.expect('RPAREN');
+          node = { type: 'MemberCall', object: node, method, args, span: this.span(start, close.end) };
+        } else {
+          node = { type: 'Member', object: node, key: method, span: this.span(start, token.end) };
+        }
       } else if (token.type === 'LBRACKET') {
         this.next();
         const index = this.parseExpression();
