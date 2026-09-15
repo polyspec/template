@@ -104,7 +104,8 @@ This document defines the value types that templates operate on, the safe string
 | `Array` | list |
 | `Map` with string keys | map, in insertion order |
 | plain object | map, in property enumeration order of the platform; integer-like keys enumerate first in ascending order, so a JSON object with such keys must be bound from JSON text, not from a parsed object |
-| `Date`, function, class instance, symbol, `Map` with a non-string key | E_DATA_UNSUPPORTED_TYPE |
+| `Date`, function, symbol, `Map` with a non-string key | E_DATA_UNSUPPORTED_TYPE |
+| class instance | object; the original instance is retained and only its public members are visible |
 
 **VAL-14** PHP.
 
@@ -118,7 +119,8 @@ This document defines the value types that templates operate on, the safe string
 | `array` for which `array_is_list()` is true | list |
 | other `array` | map; each key is converted to a string; an integer key `1` becomes the key `"1"` |
 | `stdClass`, object implementing `JsonSerializable` | map, from the object properties or from `jsonSerialize()` |
-| other object, resource | E_DATA_UNSUPPORTED_TYPE |
+| other object | object; the original instance is retained and only public properties and methods are visible |
+| resource | E_DATA_UNSUPPORTED_TYPE |
 
 **VAL-15** Go.
 
@@ -132,7 +134,7 @@ This document defines the value types that templates operate on, the safe string
 | slice | list |
 | the insertion-ordered map type provided by the package | map, in insertion order |
 | `map[string]T` | map with the keys sorted by byte order |
-| struct | map with one entry per exported field in declaration order, keyed by the `json` tag name or the field name |
+| struct value or pointer | object; the original value is retained and exported fields and methods are visible |
 | other | E_DATA_UNSUPPORTED_TYPE |
 
 **VAL-16** Rust.
@@ -149,6 +151,8 @@ This document defines the value types that templates operate on, the safe string
 **VAL-17** Map keys are strings in every host. A host map whose key is not a string is converted only where a table above defines the conversion; otherwise it is E_DATA_UNSUPPORTED_TYPE.
 
 **VAL-18** Binding does not copy semantics from the host: an object reference, a resource handle or a function is never stored in a value. Rendering reads values and never writes back to host data.
+
+**VAL-19** A native object is an opaque template value. Member lookup reads public fields or properties, and member calls invoke public methods on the original instance. Missing methods are E_RUNTIME_UNKNOWN_FUNCTION. A native object is truthy and cannot be stringified, iterated or spread.
 
 ## Examples
 

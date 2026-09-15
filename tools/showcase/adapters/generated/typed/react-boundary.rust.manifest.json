@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "c6771256fe73e93e84c45f2ed9771a1c232b3cd55d7fd096f93fd1458c3a2ce7",
-  "compilerDigest": "d90409df5d5ed97147b3ce6b71ce545af1f97be5873093f4c6e5a8c779fcce1b",
+  "contractDigest": "2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac",
+  "compilerDigest": "1b317b301f6ed5e8a03d3304241348d428500b36a23a2b7884a549aa5ade3813",
   "files": {
     "react-boundary.rust": {
       "path": "react-boundary.rust",
