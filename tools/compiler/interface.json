@@ -170,6 +170,8 @@
         "equal",
         "compare",
         "member",
+        "memberCall",
+        "classCall",
         "index",
         "entries",
         "listSpread",
@@ -210,19 +212,23 @@
     "RuntimeServices": {
       "operations": [
         "limits",
-        "hostFunction"
+        "hostFunction",
+        "classFunction"
       ],
-      "invariant": "AST and generated programs expose the same resource limits and host function lookup without coupling render state to an AST loader."
+      "invariant": "AST and generated programs expose the same resource limits and function lookup without coupling render state to an AST loader."
     },
     "RuntimeEnvironment": {
       "fields": [
         "limits",
-        "hostFunctions"
+        "hostFunctions",
+        "classFunctions"
       ],
       "operations": [
         "register",
         "limits",
-        "hostFunction"
+        "hostFunction",
+        "registerClass",
+        "classFunction"
       ],
       "invariant": "One concrete environment owns limits and host functions and serves both AST and generated programs."
     },
@@ -455,6 +461,16 @@
           "returns": "value"
         },
         {
+          "name": "memberCall",
+          "parameters": ["container", "method", "args", "frame", "span"],
+          "returns": "value or error"
+        },
+        {
+          "name": "classCall",
+          "parameters": ["className", "method", "args", "frame", "span"],
+          "returns": "value or error"
+        },
+        {
           "name": "index",
           "parameters": [
             "container",
@@ -535,6 +551,14 @@
             "name"
           ],
           "returns": "HostFunction or missing"
+        },
+        {
+          "name": "classFunction",
+          "parameters": [
+            "className",
+            "method"
+          ],
+          "returns": "HostFunction or missing"
         }
       ]
     },
@@ -543,7 +567,8 @@
       "implements": "RuntimeServices",
       "fields": [
         "limits",
-        "hostFunctions"
+        "hostFunctions",
+        "classFunctions"
       ],
       "operations": [
         {
@@ -563,6 +588,23 @@
           "name": "hostFunction",
           "parameters": [
             "name"
+          ],
+          "returns": "HostFunction or missing"
+        },
+        {
+          "name": "registerClass",
+          "parameters": [
+            "className",
+            "method",
+            "function"
+          ],
+          "returns": "void or error"
+        },
+        {
+          "name": "classFunction",
+          "parameters": [
+            "className",
+            "method"
           ],
           "returns": "HostFunction or missing"
         }
@@ -762,16 +804,20 @@
       "runtimeServices": "RuntimeServices",
       "runtimeServiceOperationNames": {
         "limits": "limits",
-        "hostFunction": "hostFunction"
+        "hostFunction": "hostFunction",
+        "classFunction": "classFunction"
       },
       "runtimeEnvironmentFields": [
         "runtimeLimits",
-        "hostFunctions"
+        "hostFunctions",
+        "classFunctions"
       ],
       "runtimeEnvironmentOperations": [
         "register",
         "limits",
-        "hostFunction"
+        "hostFunction",
+        "registerClass",
+        "classFunction"
       ],
       "frameFields": [
         "name",
@@ -797,16 +843,20 @@
       "runtimeServices": "RuntimeServices",
       "runtimeServiceOperationNames": {
         "limits": "Limits",
-        "hostFunction": "HostFunction"
+        "hostFunction": "HostFunction",
+        "classFunction": "ClassFunction"
       },
       "runtimeEnvironmentFields": [
         "limits",
-        "hostFunctions"
+        "hostFunctions",
+        "classFunctions"
       ],
       "runtimeEnvironmentOperations": [
         "Register",
         "Limits",
-        "HostFunction"
+        "HostFunction",
+        "RegisterClass",
+        "ClassFunction"
       ],
       "frameFields": [
         "Name",
@@ -837,6 +887,8 @@
         "number",
         "finite",
         "compare",
+        "memberCall",
+        "classCall",
         "entries",
         "listSpread",
         "mapSpread",
@@ -845,22 +897,28 @@
         "error"
       ],
       "runtimeBindingOperationNames": {
+        "memberCall": "member_call",
+        "classCall": "class_call",
         "listSpread": "list_spread",
         "mapSpread": "map_spread"
       },
       "runtimeServices": "RuntimeServices",
       "runtimeServiceOperationNames": {
         "limits": "limits",
-        "hostFunction": "host_function"
+        "hostFunction": "host_function",
+        "classFunction": "class_function"
       },
       "runtimeEnvironmentFields": [
         "limits",
-        "host_functions"
+        "host_functions",
+        "class_functions"
       ],
       "runtimeEnvironmentOperations": [
         "register",
         "limits",
-        "host_function"
+        "host_function",
+        "register_class",
+        "class_function"
       ],
       "frameFields": [
         "name",
@@ -886,16 +944,20 @@
       "runtimeServices": "RuntimeServices",
       "runtimeServiceOperationNames": {
         "limits": "limits",
-        "hostFunction": "hostFunction"
+        "hostFunction": "hostFunction",
+        "classFunction": "classFunction"
       },
       "runtimeEnvironmentFields": [
         "limits",
-        "hostFunctions"
+        "hostFunctions",
+        "classFunctions"
       ],
       "runtimeEnvironmentOperations": [
         "register",
         "limits",
-        "hostFunction"
+        "hostFunction",
+        "registerClass",
+        "classFunction"
       ],
       "frameFields": [
         "name",

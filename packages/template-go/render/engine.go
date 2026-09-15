@@ -120,9 +120,19 @@ func (e *Engine) Register(name string, fn functions.HostFunction) error {
 	return e.runtime.Register(name, fn)
 }
 
+// RegisterClass adds a logical class function used by Class::method(...).
+func (e *Engine) RegisterClass(className, method string, fn functions.HostFunction) error {
+	return e.runtime.RegisterClass(className, method, fn)
+}
+
 // HostFunction returns one registered host function.
 func (e *Engine) HostFunction(name string) (functions.HostFunction, bool) {
 	return e.runtime.HostFunction(name)
+}
+
+// ClassFunction returns one registered logical class function.
+func (e *Engine) ClassFunction(className, method string) (functions.HostFunction, bool) {
+	return e.runtime.ClassFunction(className, method)
 }
 
 // Limits implements RuntimeServices.

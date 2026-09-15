@@ -21,6 +21,8 @@ final class RuntimeEnvironment implements RuntimeServices
 
     /** @var array<string, callable> */
     private array $hostFunctions = [];
+    /** @var array<string, callable> */
+    private array $classFunctions = [];
 
     /**
      * @param array<string, int> $limits
@@ -56,5 +58,20 @@ final class RuntimeEnvironment implements RuntimeServices
     public function hostFunction(string $name): ?callable
     {
         return $this->hostFunctions[$name] ?? null;
+    }
+
+    /** Registers one logical class function used by `Class::method(...)`. */
+    public function registerClass(string $className, string $method, callable $function): void
+    {
+        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $className) !== 1 || preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $method) !== 1) {
+            throw new \InvalidArgumentException('class function names must be identifiers');
+        }
+        $this->classFunctions[$className.'::'.$method] = $function;
+    }
+
+    /** Returns one logical class function. */
+    public function classFunction(string $className, string $method): ?callable
+    {
+        return $this->classFunctions[$className.'::'.$method] ?? null;
     }
 }

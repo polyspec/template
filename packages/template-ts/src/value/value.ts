@@ -8,14 +8,19 @@ export class SafeString {
   constructor(readonly text: string) {}
 }
 
+/** A native assigned object whose public members and methods are visible to templates. */
+export class NativeObject {
+  constructor(readonly target: object) {}
+}
+
 // An ordered sequence of values (VAL-1).
 export type ListValue = Value[];
 // An ordered sequence of entries with string keys. Iteration follows insertion order (VAL-4).
 export type MapValue = Map<string, Value>;
 // A value that a template operates on (VAL-1).
-export type Value = null | boolean | number | string | SafeString | ListValue | MapValue;
+export type Value = null | boolean | number | string | SafeString | ListValue | MapValue | NativeObject;
 
-export type ValueType = 'null' | 'bool' | 'number' | 'string' | 'list' | 'map';
+export type ValueType = 'null' | 'bool' | 'number' | 'string' | 'list' | 'map' | 'object';
 
 export function typeOf(value: Value): ValueType {
   if (value === null) return 'null';
@@ -23,6 +28,7 @@ export function typeOf(value: Value): ValueType {
   if (typeof value === 'number') return 'number';
   if (typeof value === 'string' || value instanceof SafeString) return 'string';
   if (Array.isArray(value)) return 'list';
+  if (value instanceof NativeObject) return 'object';
   return 'map';
 }
 
@@ -70,7 +76,8 @@ export function isTruthy(value: Value): boolean {
   if (value instanceof SafeString) return value.text.length > 0;
   if (Array.isArray(value)) return value.length > 0;
   if (typeof value === 'boolean') return value;
-  return value.size > 0;
+  if (value instanceof NativeObject) return true;
+  return value instanceof Map ? value.size > 0 : true;
 }
 
 const numberGrammar = /^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?$/;
@@ -140,6 +147,8 @@ function sameTypeEquals(a: Value, b: Value, type: ValueType): boolean {
       }
       return true;
     }
+    case 'object':
+      return a === b;
   }
 }
 

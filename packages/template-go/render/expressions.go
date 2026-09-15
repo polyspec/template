@@ -67,8 +67,29 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			return nil, err
 		}
 		return e.runtime.Member(object, n.Key), nil
-	case *ast.MemberCall, *ast.ClassCall:
-		return nil, e.fail(frame, ast.SpanOf(expr), errs.RuntimeUnknownFunction, "object and class function calls are not implemented")
+	case *ast.MemberCall:
+		object, err := e.Evaluate(n.Object, frame)
+		if err != nil {
+			return nil, err
+		}
+		args := make([]value.Value, len(n.Args))
+		for i, arg := range n.Args {
+			args[i], err = e.Evaluate(arg, frame)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return e.runtime.MemberCall(object, n.Method, args, frame, n.Span)
+	case *ast.ClassCall:
+		args := make([]value.Value, len(n.Args))
+		for i, arg := range n.Args {
+			v, err := e.Evaluate(arg, frame)
+			if err != nil {
+				return nil, err
+			}
+			args[i] = v
+		}
+		return e.runtime.ClassCall(n.ClassName, n.Method, args, frame, n.Span)
 	case *ast.Index:
 		object, err := e.Evaluate(n.Object, frame)
 		if err != nil {

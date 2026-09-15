@@ -19,6 +19,7 @@ export type ArtifactRefresh = 'dev' | 'true' | 'false';
 export interface EngineOptions {
   loader?: Loader;
   functions?: Record<string, HostFunction>;
+  classFunctions?: Record<string, HostFunction>;
   limits?: Partial<Limits>;
   delimiters?: string;
   // Parser used for sources returned by the loader; absent in the render-only build.
@@ -106,6 +107,11 @@ export class AstProgramCore implements RuntimeServices, Program {
   constructor(options: EngineOptions = {}) {
     this.loader = options.loader ?? new MapLoader();
     this.runtime = new RuntimeEnvironment(options.limits, options.functions);
+    for (const [name, fn] of Object.entries(options.classFunctions ?? {})) {
+      const separator = name.indexOf('::');
+      if (separator <= 0 || separator === name.length - 2) throw new Error(`${JSON.stringify(name)} is not a class function name`);
+      this.runtime.registerClass(name.slice(0, separator), name.slice(separator + 2), fn);
+    }
     this.parseFunction = options.parse ?? null;
     this.artifactRefresh = options.artifactRefresh ?? 'true';
     if (options.delimiters !== undefined) {
@@ -122,9 +128,19 @@ export class AstProgramCore implements RuntimeServices, Program {
     this.runtime.register(name, fn);
   }
 
+  /** Registers one logical class function used by `Class::method(...)`. */
+  registerClass(className: string, method: string, fn: HostFunction): void {
+    this.runtime.registerClass(className, method, fn);
+  }
+
   /** Returns the host function registered under a name. */
   hostFunction(name: string): HostFunction | undefined {
     return this.runtime.hostFunction(name);
+  }
+
+  /** Returns one logical class function. */
+  classFunction(className: string, method: string): HostFunction | undefined {
+    return this.runtime.classFunction(className, method);
   }
 
   /** Returns the active resource limits. */

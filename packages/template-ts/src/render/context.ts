@@ -67,6 +67,7 @@ export class Scope {
 export interface RuntimeServices {
   limits(): Limits;
   hostFunction(name: string): HostFunction | undefined;
+  classFunction(className: string, method: string): HostFunction | undefined;
 }
 
 /** Owns the mutable state and bounded output of one AST or generated render. */

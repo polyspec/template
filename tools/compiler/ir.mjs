@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, posix, resolve } from 'node:path';
 
 const nodeKinds = new Set(['Text', 'Echo', 'If', 'For', 'Set', 'Include', 'Block', 'IfBlock']);
-const exprKinds = new Set(['Literal', 'Var', 'LoopMeta', 'Member', 'Index', 'Call', 'Unary', 'Binary', 'Ternary', 'List', 'Map']);
+const exprKinds = new Set(['Literal', 'Var', 'LoopMeta', 'Member', 'MemberCall', 'ClassCall', 'Index', 'Call', 'Unary', 'Binary', 'Ternary', 'List', 'Map']);
 const scalarTypes = new Set(['null', 'boolean', 'number', 'string', 'any']);
 const hash = value => createHash('sha256').update(value).digest('hex');
 
@@ -144,6 +144,19 @@ export function lowerSourceGraph(graph, manifest) {
         const valueType = owner.kind === 'list' ? owner.item : owner.kind === 'map' ? owner.value : owner.kind === 'any' ? parseType('any') : null;
         if (!valueType) throw new Error(`compiler: index requires a list, map or any, got ${typeSource(object.valueType)}`);
         return { op: 'index', object, index, valueType: nullable(valueType), span: node.span };
+      }
+      case 'MemberCall': {
+        const object = lowerExpr(node.object, scope, loops);
+        if (required(object.valueType).kind !== 'any') throw new Error(`compiler: member call ${node.method} requires an any object`);
+        const args = node.args.map(value => lowerExpr(value, scope, loops));
+        return { op: 'member-call', object, method: node.method, args, valueType: parseType('any'), span: node.span };
+      }
+      case 'ClassCall': {
+        const signature = functions.get(`${node.className}::${node.method}`);
+        if (!signature) throw new Error(`compiler: class function ${node.className}::${node.method} is missing from the type manifest`);
+        const args = node.args.map(value => lowerExpr(value, scope, loops));
+        if (args.length < signature.minArgs || (signature.maxArgs !== -1 && args.length > signature.maxArgs)) throw new Error(`compiler: class function ${node.className}::${node.method} expects ${signature.minArgs}-${signature.maxArgs} arguments`);
+        return { op: 'class-call', className: node.className, method: node.method, args, valueType: signature.returns, span: node.span };
       }
       case 'Call': {
         const signature = functions.get(node.name);

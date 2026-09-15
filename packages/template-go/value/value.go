@@ -31,6 +31,7 @@ const (
 	TypeString Type = "string"
 	TypeList   Type = "list"
 	TypeMap    Type = "map"
+	TypeObject Type = "object"
 )
 
 // TypeOf returns the type name of a value.
@@ -48,6 +49,9 @@ func TypeOf(v Value) Type {
 		return TypeList
 	case *OrderedMap:
 		return TypeMap
+	}
+	if v != nil {
+		return TypeObject
 	}
 	return TypeNull
 }
@@ -100,7 +104,7 @@ func IsTruthy(v Value) bool {
 	case *OrderedMap:
 		return x.Len() > 0
 	}
-	return false
+	return v != nil
 }
 
 var numberGrammar = regexp.MustCompile(`^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?$`)

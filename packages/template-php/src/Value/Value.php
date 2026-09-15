@@ -31,6 +31,9 @@ final class Value
         if (is_array($value)) {
             return 'list';
         }
+        if (is_object($value) && !$value instanceof MapValue) {
+            return 'object';
+        }
 
         return 'map';
     }

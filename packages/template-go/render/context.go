@@ -93,6 +93,7 @@ func (s *Scope) LoopMeta(name string) *LoopMeta {
 type RuntimeServices interface {
 	Limits() Limits
 	HostFunction(name string) (functions.HostFunction, bool)
+	ClassFunction(className, method string) (functions.HostFunction, bool)
 }
 
 // Context is the state of one render.
