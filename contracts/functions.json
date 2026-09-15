@@ -1,0 +1,940 @@
+{
+  "schema": 1,
+  "contractVersion": "0.0.1",
+  "syntax": {
+    "call": "identifier(args...)",
+    "rejected": [
+      "qualified",
+      "static",
+      "instance",
+      "constructor"
+    ]
+  },
+  "canonical": [
+    {
+      "name": "escape",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "raw",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "json",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "url",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "nl2br",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "str",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "type",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "upper",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "lower",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "trim",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "replace",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "split",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "truncate",
+      "minArgs": 2,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "contains",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "starts_with",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "ends_with",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "length",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "keys",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "values",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "first",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "last",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "reverse",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "slice",
+      "minArgs": 2,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "sort",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "join",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "range",
+      "minArgs": 2,
+      "maxArgs": 3,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "default",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "number",
+      "minArgs": 1,
+      "maxArgs": 4,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "round",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "floor",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "ceil",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "abs",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "min",
+      "minArgs": 1,
+      "maxArgs": -1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "max",
+      "minArgs": 1,
+      "maxArgs": -1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "num",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "date",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    },
+    {
+      "name": "now",
+      "minArgs": 0,
+      "maxArgs": 0,
+      "returns": "any",
+      "effects": "pure",
+      "support": {
+        "typescript": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "go": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "rust": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "php": {
+          "ast": "pass",
+          "gen": "pass"
+        }
+      }
+    }
+  ]
+}
