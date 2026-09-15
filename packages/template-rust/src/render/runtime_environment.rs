@@ -26,8 +26,13 @@ impl RuntimeEnvironment {
 
     /// Registers one logical class function.
     pub fn register_class(&mut self, class_name: &str, method: &str, function: HostFunction) -> Result<(), String> {
-        let valid = |name: &str| name.bytes().next().is_some_and(|byte| byte.is_ascii_alphabetic() || byte == b'_') && name.bytes().all(|byte| byte.is_ascii_alphanumeric() || byte == b'_');
-        if !valid(class_name) || !valid(method) { return Err("class function names must be identifiers".to_string()); }
+        let valid = |name: &str| {
+            name.bytes().next().is_some_and(|byte| byte.is_ascii_alphabetic() || byte == b'_')
+                && name.bytes().all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+        };
+        if !valid(class_name) || !valid(method) {
+            return Err("class function names must be identifiers".to_string());
+        }
         self.class_functions.insert(format!("{class_name}::{method}"), function);
         Ok(())
     }

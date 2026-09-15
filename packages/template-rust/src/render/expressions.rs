@@ -70,13 +70,29 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                 let container = self.evaluate(object, frame, scope)?;
                 Ok(self.runtime.member(&container, key))
             }
-            Expr::MemberCall { object, method, args, span } => {
+            Expr::MemberCall {
+                object,
+                method,
+                args,
+                span,
+            } => {
                 let object = self.evaluate(object, frame, scope)?;
-                let values = args.iter().map(|arg| self.evaluate(arg, frame, scope)).collect::<Result<Vec<_>, _>>()?;
+                let values = args
+                    .iter()
+                    .map(|arg| self.evaluate(arg, frame, scope))
+                    .collect::<Result<Vec<_>, _>>()?;
                 self.runtime.member_call(self.context, &object, method, values, frame, *span)
             }
-            Expr::ClassCall { class_name, method, args, span } => {
-                let values = args.iter().map(|arg| self.evaluate(arg, frame, scope)).collect::<Result<Vec<_>, _>>()?;
+            Expr::ClassCall {
+                class_name,
+                method,
+                args,
+                span,
+            } => {
+                let values = args
+                    .iter()
+                    .map(|arg| self.evaluate(arg, frame, scope))
+                    .collect::<Result<Vec<_>, _>>()?;
                 self.runtime.class_call(self.context, class_name, method, values, frame, *span)
             }
             Expr::Index { object, index, .. } => {

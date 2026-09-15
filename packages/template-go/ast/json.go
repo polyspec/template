@@ -311,21 +311,48 @@ func decodeExpr(data []byte) (Expr, error) {
 		var objectRaw json.RawMessage
 		var method string
 		var argsRaw []json.RawMessage
-		if err := required(fields, "object", &objectRaw); err != nil { return nil, err }
-		if err := required(fields, "method", &method); err != nil { return nil, err }
-		if err := required(fields, "args", &argsRaw); err != nil { return nil, err }
-		objectExpr, err := decodeExpr(objectRaw); if err != nil { return nil, err }
+		if err := required(fields, "object", &objectRaw); err != nil {
+			return nil, err
+		}
+		if err := required(fields, "method", &method); err != nil {
+			return nil, err
+		}
+		if err := required(fields, "args", &argsRaw); err != nil {
+			return nil, err
+		}
+		objectExpr, err := decodeExpr(objectRaw)
+		if err != nil {
+			return nil, err
+		}
 		args := make([]Expr, 0, len(argsRaw))
-		for _, raw := range argsRaw { item, e := decodeExpr(raw); if e != nil { return nil, e }; args = append(args, item) }
+		for _, raw := range argsRaw {
+			item, e := decodeExpr(raw)
+			if e != nil {
+				return nil, e
+			}
+			args = append(args, item)
+		}
 		return &MemberCall{Type: typ, Object: objectExpr, Method: method, Args: args, Span: span}, nil
 	case "ClassCall":
 		var className, method string
 		var argsRaw []json.RawMessage
-		if err := required(fields, "className", &className); err != nil { return nil, err }
-		if err := required(fields, "method", &method); err != nil { return nil, err }
-		if err := required(fields, "args", &argsRaw); err != nil { return nil, err }
+		if err := required(fields, "className", &className); err != nil {
+			return nil, err
+		}
+		if err := required(fields, "method", &method); err != nil {
+			return nil, err
+		}
+		if err := required(fields, "args", &argsRaw); err != nil {
+			return nil, err
+		}
 		args := make([]Expr, 0, len(argsRaw))
-		for _, raw := range argsRaw { item, e := decodeExpr(raw); if e != nil { return nil, e }; args = append(args, item) }
+		for _, raw := range argsRaw {
+			item, e := decodeExpr(raw)
+			if e != nil {
+				return nil, e
+			}
+			args = append(args, item)
+		}
 		return &ClassCall{Type: typ, ClassName: className, Method: method, Args: args, Span: span}, nil
 	case "Index":
 		var objectRaw, indexRaw json.RawMessage

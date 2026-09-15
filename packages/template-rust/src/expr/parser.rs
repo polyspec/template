@@ -463,9 +463,18 @@ impl<'a> ExpressionParser<'a> {
                         let mut args = Vec::new();
                         self.parse_arguments(&mut args)?;
                         let close = self.expect(TokenType::RParen)?;
-                        node = Expr::MemberCall { object: Box::new(node), method, args, span: self.span(start, close.end) };
+                        node = Expr::MemberCall {
+                            object: Box::new(node),
+                            method,
+                            args,
+                            span: self.span(start, close.end),
+                        };
                     } else {
-                        node = Expr::Member { object: Box::new(node), key: method, span: self.span(start, token.end) };
+                        node = Expr::Member {
+                            object: Box::new(node),
+                            key: method,
+                            span: self.span(start, token.end),
+                        };
                     }
                 }
                 TokenType::LBracket => {

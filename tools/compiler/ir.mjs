@@ -91,6 +91,7 @@ export function lowerSourceGraph(graph, manifest) {
       maxArgs: signature.maxArgs ?? (signature.args ?? []).length,
       returns: parseType(signature.returns ?? 'any'),
       implementation: signature.implementation,
+      runtimeArity: signature.runtimeArity === true,
     }];
   }));
   const definitions = new Map(Object.entries(manifest.defines ?? {}).map(([name, definition]) => {
@@ -155,7 +156,7 @@ export function lowerSourceGraph(graph, manifest) {
         const signature = functions.get(`${node.className}::${node.method}`);
         if (!signature) throw new Error(`compiler: class function ${node.className}::${node.method} is missing from the type manifest`);
         const args = node.args.map(value => lowerExpr(value, scope, loops));
-        if (args.length < signature.minArgs || (signature.maxArgs !== -1 && args.length > signature.maxArgs)) throw new Error(`compiler: class function ${node.className}::${node.method} expects ${signature.minArgs}-${signature.maxArgs} arguments`);
+        if (!signature.runtimeArity && (args.length < signature.minArgs || (signature.maxArgs !== -1 && args.length > signature.maxArgs))) throw new Error(`compiler: class function ${node.className}::${node.method} expects ${signature.minArgs}-${signature.maxArgs} arguments`);
         return { op: 'class-call', className: node.className, method: node.method, args, valueType: signature.returns, span: node.span };
       }
       case 'Call': {
@@ -164,7 +165,7 @@ export function lowerSourceGraph(graph, manifest) {
         const args = node.args.map(value => lowerExpr(value, scope, loops));
         const minArgs = signature.minArgs ?? signature.args.length;
         const maxArgs = signature.maxArgs ?? signature.args.length;
-        if (args.length < minArgs || (maxArgs !== -1 && args.length > maxArgs)) {
+        if (!signature.runtimeArity && (args.length < minArgs || (maxArgs !== -1 && args.length > maxArgs))) {
           const range = minArgs === maxArgs ? `${minArgs}` : `${minArgs}-${maxArgs === -1 ? '∞' : maxArgs}`;
           throw new Error(`compiler: function ${node.name} expects ${range} arguments`);
         }

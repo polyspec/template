@@ -25,6 +25,7 @@
     "verificationCommands": [
       "make compiler-interface-check",
       "make conformance-all-modes",
+      "make generated-native-check",
       "make release-test-matrix"
     ],
     "generatedEvidence": [

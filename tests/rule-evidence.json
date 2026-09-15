@@ -41,7 +41,7 @@
       "name": "compiler-artifact-contract",
       "rules": ["RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69"],
       "verification": "make typed-generator-compile-check",
-      "files": ["scripts/check-ast-artifact.mjs", "scripts/check-generated-artifact.mjs", "scripts/check-compiler-ir.mjs", "scripts/check-typed-generator.mjs"]
+      "files": ["scripts/check-ast-artifact.mjs", "scripts/check-generated-artifact.mjs", "scripts/check-compiler-ir.mjs", "scripts/check-typed-generator.mjs", "scripts/check-generated-native-calls.mjs"]
     },
     {
       "name": "host-value-binding",

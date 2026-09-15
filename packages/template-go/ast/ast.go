@@ -222,19 +222,19 @@ type Map struct {
 	Span    Span   `json:"span"`
 }
 
-func (*Literal) expr()  {}
-func (*Var) expr()      {}
-func (*LoopMeta) expr() {}
-func (*Member) expr()   {}
+func (*Literal) expr()    {}
+func (*Var) expr()        {}
+func (*LoopMeta) expr()   {}
+func (*Member) expr()     {}
 func (*MemberCall) expr() {}
-func (*ClassCall) expr() {}
-func (*Index) expr()    {}
-func (*Call) expr()     {}
-func (*Unary) expr()    {}
-func (*Binary) expr()   {}
-func (*Ternary) expr()  {}
-func (*List) expr()     {}
-func (*Map) expr()      {}
+func (*ClassCall) expr()  {}
+func (*Index) expr()      {}
+func (*Call) expr()       {}
+func (*Unary) expr()      {}
+func (*Binary) expr()     {}
+func (*Ternary) expr()    {}
+func (*List) expr()       {}
+func (*Map) expr()        {}
 
 // LoopMetaFields are the fields of EXP-21.
 var LoopMetaFields = map[string]bool{"index_": true, "key_": true, "value_": true, "last_": true, "first_": true, "size_": true}
