@@ -76,7 +76,7 @@ Generated artifacts use the same refresh boundary as canonical AST artifacts. `d
 
 `make conformance-generated-ts` builds a fresh generated TypeScript program for every canonical case. It compares compile diagnostics, input-binding diagnostics, runtime diagnostics and successful UTF-8 output with the same expected artifacts used by AST execution.
 `make conformance-generated-php` performs the same proof with a separately generated and syntax-checked PHP source file for every case.
-`make generated-native-check` compiles one dynamic-root program through every backend and executes an application object assignment, public field read, instance method call and registered class function call.
+`make generated-native-check` compiles one dynamic-root program through every backend and executes an application object assignment, public field read, instance method call and registered class function call. The same matrix checks missing public members, missing registered class functions, native method and class-function failures, wrong native argument types and wrong native argument counts. Every backend must return the same error code at the same call span.
 
 Both program modes use the same execution-state split. `RenderFrame` owns only `name`, `lines` and `context`; it cannot retain an AST. `RenderScope` owns `locals` and `loops`, exposes `lookup` and `loopMeta`, is shared by includes and is replaced for each block render. The interface gate checks these fields and operations in all four languages.
 

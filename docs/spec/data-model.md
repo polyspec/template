@@ -150,9 +150,9 @@ This document defines the value types that templates operate on, the safe string
 
 **VAL-17** Map keys are strings in every host. A host map whose key is not a string is converted only where a table above defines the conversion; otherwise it is E_DATA_UNSUPPORTED_TYPE.
 
-**VAL-18** Binding does not copy semantics from the host: an object reference, a resource handle or a function is never stored in a value. Rendering reads values and never writes back to host data.
+**VAL-18** Binding preserves an assigned native object reference without copying it. Resource handles and functions are not stored as template values. Rendering reads values and never writes back to host data.
 
-**VAL-19** A native object is an opaque template value. Member lookup reads public fields or properties, and member calls invoke public methods on the original instance. Missing methods are E_RUNTIME_UNKNOWN_FUNCTION. A native object is truthy and cannot be stringified, iterated or spread.
+**VAL-19** A native object is an opaque template value. Member lookup reads public fields or properties, and member calls invoke public methods on the original instance. A missing public member or method is E_RUNTIME_UNKNOWN_FUNCTION; a declared method that rejects arguments or raises an error is E_RUNTIME_HOST_FUNCTION. A native object is truthy and cannot be stringified, iterated or spread.
 
 ## Examples
 

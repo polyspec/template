@@ -76,7 +76,7 @@ Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용�
 
 `make conformance-generated-ts`는 canonical case 각각에 대해 새로운 generated TypeScript program을 만든다. Compile 진단, 입력 binding 진단, runtime 진단, 성공한 UTF-8 출력을 AST 실행과 같은 expected artifact에 대조한다.
 `make conformance-generated-php`는 각 case마다 별도로 생성하고 문법 검사한 PHP 소스로 같은 내용을 증명한다.
-`make generated-native-check`는 모든 backend로 dynamic-root program 하나를 compile하고 application object assign, public field read, instance method call, 등록된 class function call을 실행한다.
+`make generated-native-check`는 모든 backend로 dynamic-root program 하나를 compile하고 application object assign, public field read, instance method call, 등록된 class function call을 실행한다. 같은 matrix에서 public member 누락, 등록되지 않은 class function, native method와 class function의 실패, native 인자의 잘못된 타입과 개수도 검사한다. 모든 backend는 같은 호출 위치에서 같은 오류 코드를 반환해야 한다.
 
 두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 네 언어의 필드와 연산을 검사한다.
 

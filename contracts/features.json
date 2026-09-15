@@ -1057,7 +1057,7 @@
       "id": "template-function-contract",
       "title": "Canonical template function contract",
       "title_ko": "Canonical template function contract",
-      "status": "partial",
+  "status": "implemented",
       "description": "Define the portable function surface, four-language registry parity and an inventory classification for existing template calls.",
       "description_ko": "이식 가능한 함수 표면, 네 언어 레지스트리 일치와 기존 템플릿 호출 분류를 정의한다.",
       "inputs": {
@@ -1144,19 +1144,24 @@
         "execute declared call"
       ],
       "errors": [
-        {
-          "code": "E_RUNTIME_UNKNOWN_FUNCTION",
-          "when": "the parsed call has no executable declaration"
-        }
+    {
+      "code": "E_RUNTIME_UNKNOWN_FUNCTION",
+      "when": "the parsed call has no executable declaration or public member"
+    },
+    {
+      "code": "E_RUNTIME_HOST_FUNCTION",
+      "when": "a declared native method or class function rejects its arguments or raises an error"
+    }
       ],
       "clients": {
-        "go": "partial",
-        "php": "partial",
-        "rust": "partial",
-        "typescript": "partial"
+    "go": "pass",
+    "php": "pass",
+    "rust": "pass",
+    "typescript": "pass"
       },
       "fixtures": [
-        "tests/fixtures/expr/cases.json"
+    "tests/fixtures/expr/cases.json",
+    "tests/fixtures/native-object"
       ],
       "tests": [
         "packages/template-ts/tests/expr/fixtures.test.ts",
