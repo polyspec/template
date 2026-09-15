@@ -1,7 +1,7 @@
 // escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
 import { escapeHtml } from '../escape.js';
 import { numberToString } from '../value/number.js';
-import { SafeString, typeOf, type Value } from '../value/value.js';
+import { NativeObject, SafeString, typeOf, type Value } from '../value/value.js';
 import { argString, safe, stringifyArg, type BuiltIn } from './helpers.js';
 
 function jsonString(text: string): string {
@@ -35,6 +35,7 @@ export function toJson(value: Value): string {
   if (typeof value === 'number') return numberToString(value);
   if (typeof value === 'string') return jsonString(value);
   if (value instanceof SafeString) return jsonString(value.text);
+  if (value instanceof NativeObject) return 'null';
   if (Array.isArray(value)) return '[' + value.map(toJson).join(',') + ']';
   const parts: string[] = [];
   for (const [key, entry] of value) parts.push(jsonString(key) + ':' + toJson(entry));

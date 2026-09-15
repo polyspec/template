@@ -75,7 +75,9 @@ pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
 }
 
 /// Accepts a native root map while retaining native object values.
-pub fn bind_values(input: OrderedMap) -> OrderedMap { input }
+pub fn bind_values(input: OrderedMap) -> OrderedMap {
+    input
+}
 
 /// Converts a template value into a `serde_json::Value`; safe strings become plain strings.
 pub fn to_json_value(value: &Value) -> serde_json::Value {

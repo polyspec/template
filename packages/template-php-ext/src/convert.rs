@@ -114,6 +114,7 @@ pub fn value_to_php(value: &Value) -> Result<Zval, String> {
             }
             into_zval(table)?
         }
+        Value::Object(_) => return Err("native template objects cannot cross the PHP extension boundary".to_string()),
     };
     Ok(result)
 }

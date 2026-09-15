@@ -1,4 +1,11 @@
 import { posix } from 'node:path';
+import { readFileSync } from 'node:fs';
+
+const functionContracts = new Map(
+  JSON.parse(readFileSync(new URL('../../contracts/functions.json', import.meta.url), 'utf8'))
+    .canonical
+    .map(signature => [signature.name, signature]),
+);
 
 function resolveTemplate(from, target) {
   const joined = target.startsWith('/') ? target.slice(1) : posix.join(posix.dirname(from), target);
@@ -119,6 +126,18 @@ export function deriveTypeManifest(templates, define = {}) {
   for (const definition of Object.values(state.defines)) {
     if (definition.template === undefined && definition.html !== true) definition.html = true;
   }
+  const functions = Object.fromEntries([...state.functions].sort().map(name => {
+    const contract = functionContracts.get(name);
+    if (!contract) return [name, { implementation: 'builtin', args: [], minArgs: 0, maxArgs: -1, returns: 'any', runtimeArity: true }];
+    return [name, {
+      implementation: 'builtin',
+      args: [],
+      minArgs: contract.minArgs,
+      maxArgs: contract.maxArgs,
+      returns: contract.returns ?? 'any',
+      runtimeArity: true,
+    }];
+  }));
   return {
     schema: 3,
     root: 'any',
@@ -126,7 +145,7 @@ export function deriveTypeManifest(templates, define = {}) {
     fields: {},
     records: {},
     defines: state.defines,
-    functions: Object.fromEntries([...state.functions].sort().map(name => [name, { implementation: 'builtin', args: [], returns: 'any' }])),
+    functions,
     templates: state.templates,
   };
 }

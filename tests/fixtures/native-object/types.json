@@ -1,0 +1,20 @@
+{
+  "schema": 3,
+  "root": "any",
+  "entry": "input.tpl",
+  "fields": {},
+  "records": {},
+  "defines": {},
+  "functions": {
+    "Order::suffix": {
+      "implementation": "host",
+      "args": ["string"],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "string"
+    }
+  },
+  "templates": {
+    "input.tpl": {}
+  }
+}

@@ -5,12 +5,12 @@
   "entry": "layout.tpl",
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "2515ef7a97b1dfa502b00778f41316ea777e768b12c9c5db72cff7834bc8a2ac",
-  "compilerDigest": "1b317b301f6ed5e8a03d3304241348d428500b36a23a2b7884a549aa5ade3813",
+  "contractDigest": "e4b1c90806361c6576251e292b84c5be340e5237226dd4a7a5a8adda6229c7ec",
+  "compilerDigest": "1859a3b0938d47e8914e606578a5e90ae373d38e3ea0fe4ca1b2be72aec1d1c3",
   "files": {
     "react-boundary.rust": {
       "path": "react-boundary.rust",
-      "artifactDigest": "2e135d14c4b0fa9dd6f438ab68b19422429703fde1372351d58b5d745bac87e6"
+      "artifactDigest": "a478e4e110e9132f9d3b0e94faef88b0cc05f066db8eaec0e5f9997153df4d42"
     }
   }
 }
