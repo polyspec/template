@@ -260,7 +260,10 @@ impl AstProgram {
 
     /// Renders a native value map while retaining assigned application objects.
     pub fn render_values(&self, target: RenderTarget<'_>, assign: OrderedMap, options: &RenderOptions) -> Result<String, TemplateError> {
-        let name = match target { RenderTarget::Name(name) => name.to_owned(), RenderTarget::Ast(ast) => ast.name.clone() };
+        let name = match target {
+            RenderTarget::Name(name) => name.to_owned(),
+            RenderTarget::Ast(ast) => ast.name.clone(),
+        };
         let registry = bind_defines(&options.define).map_err(|error| TemplateError::without_position(error.code, &name, error.message))?;
         let env = options.env.clone().unwrap_or_else(|| Env {
             timezone: "Z".to_string(),
@@ -269,9 +272,29 @@ impl AstProgram {
                 .map(|d| d.as_secs() as f64)
                 .unwrap_or(0.0),
         });
-        let target_name = match target { RenderTarget::Name(name) => match registry.get(name) { Some(DefineEntry::Template { template, .. }) => template.clone(), _ => name.to_string() }, RenderTarget::Ast(ast) => ast.name.clone() };
-        let template = match target { RenderTarget::Name(_) => self.load_template(&target_name, None, None)?, RenderTarget::Ast(ast) => Rc::new(ParsedTemplate { ast: ast.clone(), lines: None }) };
-        AstPreparedExecution { engine: self, root: Rc::new(assign), registry, env, target_name, template }.render()
+        let target_name = match target {
+            RenderTarget::Name(name) => match registry.get(name) {
+                Some(DefineEntry::Template { template, .. }) => template.clone(),
+                _ => name.to_string(),
+            },
+            RenderTarget::Ast(ast) => ast.name.clone(),
+        };
+        let template = match target {
+            RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
+            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
+                ast: ast.clone(),
+                lines: None,
+            }),
+        };
+        AstPreparedExecution {
+            engine: self,
+            root: Rc::new(assign),
+            registry,
+            env,
+            target_name,
+            template,
+        }
+        .render()
     }
 }
 

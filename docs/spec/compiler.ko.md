@@ -36,6 +36,8 @@ Typed IR은 모든 symbol, template path, definition target, function signature,
 
 동적 source graph는 parse된 template과 요청 definition schema에서 생성한 type manifest를 사용한다. 이 manifest는 참조한 함수, definition target과 block input을 선언하되 root value를 `any`로 유지하며 sample JSON에서 정적 host type을 추측하지 않는다. 적합성 gate는 host 언어 artifact를 컴파일하기 전에 parse 가능한 모든 fixture의 이 도출 과정을 검사한다.
 
+도출한 manifest는 알고 있는 각 내장 함수의 선언된 `minArgs`와 `maxArgs`를 복사한다. 동적 conformance source는 잘못된 호출이 AST 실행과 같은 위치의 `E_RUNTIME_ARITY`를 내도록 arity 검사를 runtime에 남기며, 명시적인 정적 manifest는 lowering 중에 그 호출을 거부할 수 있다. 알 수 없는 함수는 열린 arity 호출로 남아 runtime registry에 도달하고, 구현이 없으면 일반 runtime 오류를 낸다.
+
 모든 generated module은 논리 구조 `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest`, `GeneratedProgram`을 노출한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
 네 generated backend 모두 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 네 core 언어와 canonical case 216개 전체에서 완료되었다.
@@ -68,12 +70,13 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 
 ## 구현 상태
 
-AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 showcase는 이 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성하지만 그 operation을 포함한 전체 generated 적합성 matrix는 아직 다시 실행되지 않았으므로 generated 지원은 partial이다.
+AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 showcase는 이 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. TypeScript, Go, Rust, PHP에서 216개 전체 generated matrix가 통과하며, 별도의 generated native-call fixture가 네 언어에서 같은 assign object field, instance method, class function 결과를 출력한다.
 
 Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract·compiler digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 
 `make conformance-generated-ts`는 canonical case 각각에 대해 새로운 generated TypeScript program을 만든다. Compile 진단, 입력 binding 진단, runtime 진단, 성공한 UTF-8 출력을 AST 실행과 같은 expected artifact에 대조한다.
 `make conformance-generated-php`는 각 case마다 별도로 생성하고 문법 검사한 PHP 소스로 같은 내용을 증명한다.
+`make generated-native-check`는 모든 backend로 dynamic-root program 하나를 compile하고 application object assign, public field read, instance method call, 등록된 class function call을 실행한다.
 
 두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 네 언어의 필드와 연산을 검사한다.
 

@@ -36,6 +36,8 @@ The typed IR resolves every symbol, template path, definition target, function s
 
 Dynamic source graphs use a generated type manifest derived from parsed templates and the request definition schema. It declares referenced functions, definition targets and block inputs while keeping root values as `any`; it does not infer static host types from sample JSON. The conformance gate checks this derivation for every parseable fixture before compiling host-language artifacts.
 
+The derived manifest copies each known built-in's declared `minArgs` and `maxArgs`. Dynamic conformance sources retain arity checking at runtime so an invalid call produces the same positioned `E_RUNTIME_ARITY` as AST execution; an explicit static manifest may reject that call during lowering. An unknown function remains an open-arity call and reaches the runtime registry, where the missing implementation produces the normal runtime error.
+
 Every generated module exposes the logical structures `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest` and `GeneratedProgram`. A generated program implements the same `Program.prepare(RenderRequest)` and `Program.render(RenderRequest)` operations as an AST program. Template-specific functions are private and invoke each other directly for include and block targets.
 
 All four generated backends pass the runtime `RenderScope` to generated template functions. An include passes the same scope so assignments remain visible to its caller. A block creates a fresh scope and seeds it only from root data, definition data and explicit block arguments. Loop bindings are installed temporarily and restored after the loop. Each generated loop materializes its entries and computes the size and final index once before iteration; each iteration installs the current index, key, value, first and last metadata in the scope. Root-only block fallback is represented separately in the IR from a normal scope-aware dynamic lookup. The generated support level is complete for the four core languages and all 216 canonical cases.
@@ -68,12 +70,13 @@ Generated files are completed in a temporary location and replaced atomically. A
 
 ## Implementation status
 
-The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly. The generated backends emit native object and class-call operations, but the complete generated conformance matrix has not yet been rerun for those operations, so generated support remains partial.
+The AST compiler and runtimes are implemented. The product compiler emits concrete `GeneratedProgram` implementations for TypeScript, Go, Rust and PHP, and the showcase executes those artifacts directly. The generated backends emit native object and class-call operations. The complete 216-case generated matrix passes in TypeScript, Go, Rust and PHP, and a separate generated native-call fixture renders the same assigned object field, instance method and class function in all four languages.
 
 Generated artifacts use the same refresh boundary as canonical AST artifacts. `dev` always emits a fresh source file and manifest, `true` verifies source, type, contract and compiler digests before deciding whether to rebuild, and `false` reads and verifies only the deployed generated source and its manifest. Source and manifest replacements are atomic, with the manifest committed last.
 
 `make conformance-generated-ts` builds a fresh generated TypeScript program for every canonical case. It compares compile diagnostics, input-binding diagnostics, runtime diagnostics and successful UTF-8 output with the same expected artifacts used by AST execution.
 `make conformance-generated-php` performs the same proof with a separately generated and syntax-checked PHP source file for every case.
+`make generated-native-check` compiles one dynamic-root program through every backend and executes an application object assignment, public field read, instance method call and registered class function call.
 
 Both program modes use the same execution-state split. `RenderFrame` owns only `name`, `lines` and `context`; it cannot retain an AST. `RenderScope` owns `locals` and `loops`, exposes `lookup` and `loopMeta`, is shared by includes and is replaced for each block render. The interface gate checks these fields and operations in all four languages.
 

@@ -6,7 +6,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
 	conformance delimiter-matrix parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
-	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes \
+	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean
 
@@ -52,7 +52,7 @@ help: ## List targets
 	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check contract-check function-contract-check lint test-ts test-go test-rust test-php conformance delimiter-matrix ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check contract-check function-contract-check lint test-ts test-go test-rust test-php conformance delimiter-matrix generated-native-check ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -261,6 +261,9 @@ showcase-check: build-ts ## Verify example-site parity, repeatability and browse
 
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
 	node tools/showcase/compile.mjs --refresh true
+
+generated-native-check: build-ts ## Execute generated member and class calls with native values in every core language
+	node scripts/check-generated-native-calls.mjs
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
 	node tools/showcase/compile-generated.mjs --refresh true

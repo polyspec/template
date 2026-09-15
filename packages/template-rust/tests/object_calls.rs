@@ -1,7 +1,9 @@
-use polyspec_template::{parse, AstProgram, EngineOptions, OrderedMap, ParseOptions, RenderOptions, RenderTarget, TemplateObject, Value};
+use polyspec_template::{AstProgram, EngineOptions, OrderedMap, ParseOptions, RenderOptions, RenderTarget, TemplateObject, Value, parse};
 
 #[derive(Debug)]
-struct Order { total: f64 }
+struct Order {
+    total: f64,
+}
 
 impl TemplateObject for Order {
     fn member(&self, key: &str) -> Option<Value> {
@@ -9,18 +11,30 @@ impl TemplateObject for Order {
     }
 
     fn call(&self, method: &str, args: &[Value]) -> Result<Value, String> {
-        if method != "status_label" { return Err(format!("{method} is not public")); }
-        let prefix = args.first().and_then(Value::as_text).ok_or_else(|| "prefix is required".to_string())?;
+        if method != "status_label" {
+            return Err(format!("{method} is not public"));
+        }
+        let prefix = args
+            .first()
+            .and_then(Value::as_text)
+            .ok_or_else(|| "prefix is required".to_string())?;
         Ok(Value::text(format!("{prefix}:{}", self.total)))
     }
 }
 
 #[test]
 fn native_instance_member_and_method_are_rendered_without_copying() {
-    let template = parse(b"{= order.total}|{= order.status_label(\"ready\")}", "page.tpl", &ParseOptions::default()).unwrap();
+    let template = parse(
+        b"{= order.total}|{= order.status_label(\"ready\")}",
+        "page.tpl",
+        &ParseOptions::default(),
+    )
+    .unwrap();
     let mut root = OrderedMap::new();
     root.insert("order".to_string(), Value::object(Order { total: 12.0 }));
     let program = AstProgram::new(EngineOptions::default());
-    let result = program.render_values(RenderTarget::Ast(&template), root, &RenderOptions::default()).unwrap();
+    let result = program
+        .render_values(RenderTarget::Ast(&template), root, &RenderOptions::default())
+        .unwrap();
     assert_eq!(result, "12|ready:12");
 }

@@ -311,7 +311,10 @@ fn runtime_declarations_match_manifest() {
         .map(|field| field.ident.as_ref().unwrap().to_string())
         .collect();
     assert_eq!(actual_fields, manifest.languages.rust.runtime_environment_fields);
-    assert_eq!(manifest.runtime_contract.runtime_environment.fields, vec!["limits", "hostFunctions", "classFunctions"]);
+    assert_eq!(
+        manifest.runtime_contract.runtime_environment.fields,
+        vec!["limits", "hostFunctions", "classFunctions"]
+    );
 
     let mut actual_operations = Vec::new();
     for item in &runtime_source.items {

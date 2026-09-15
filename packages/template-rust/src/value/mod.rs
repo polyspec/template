@@ -6,8 +6,8 @@ pub mod number;
 
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::rc::Rc;
 use std::fmt;
+use std::rc::Rc;
 
 /// Native application object exposed to a template without copying its state.
 pub trait TemplateObject: fmt::Debug {

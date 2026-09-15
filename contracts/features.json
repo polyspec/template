@@ -720,7 +720,7 @@
       "id": "generated-mode",
       "title": "Generated compiler mode",
       "title_ko": "Generated compiler mode",
-      "status": "partial",
+      "status": "implemented",
       "description": "Lower canonical AST and typed IR into direct TypeScript, Go, Rust and PHP template functions.",
       "description_ko": "Canonical AST와 typed IR을 직접 실행하는 TypeScript, Go, Rust, PHP template function으로 낮춘다.",
       "inputs": {
@@ -759,10 +759,10 @@
         }
       ],
       "clients": {
-        "go": "partial",
-        "php": "partial",
-        "rust": "partial",
-        "typescript": "partial"
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
       },
       "fixtures": [
         "examples/site/scenarios"
@@ -773,7 +773,8 @@
         "tests/runner/conformance-generated-ts.mjs",
         "tests/runner/conformance-generated-go.mjs",
         "tests/runner/conformance-generated-rust.mjs",
-        "tests/runner/conformance-generated-php.mjs"
+        "tests/runner/conformance-generated-php.mjs",
+        "scripts/check-generated-native-calls.mjs"
       ],
       "verification": [
         {
@@ -1164,12 +1165,13 @@
         "packages/template-ts/tests/program.test.ts",
         "packages/template-go/render/object_calls_test.go",
         "packages/template-rust/tests/object_calls.rs",
-        "packages/template-php/tests/ObjectCallsTest.php"
+        "packages/template-php/tests/ObjectCallsTest.php",
+        "scripts/check-generated-native-calls.mjs"
       ],
       "verification": [
         {
           "id": "check-1",
-          "command": "make test-ts test-go test-rust"
+          "command": "make generated-native-check"
         }
       ],
       "docs": [
