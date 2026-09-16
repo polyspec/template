@@ -22,6 +22,8 @@ It executes seven layers in order and stops at the first failure.
 
 The complete mode matrix contains 1,728 core cells: 216 cases × two compiler modes × four languages. Success cases compare exact UTF-8 bytes. Failure cases compare the error code, message, template name and source position. Generated execution is also checked for parser, AST interpreter and fallback references before its host source is accepted.
 
+The language test matrix is declared in `contracts/features.json`. Its semantic features must declare pass support for TypeScript, Go, Rust and PHP, and its required checks must cover both `ast` and `gen`. `make language-test-matrix` rejects a missing feature, language declaration or test path; `make conformance-all-modes`, `make function-contract-check` and `make generated-native-check` provide the executable coverage.
+
 Mutation tests are required evidence. They damage an interface operation, an artifact digest or an output hash and require the corresponding validator to fail. A validator that accepts its mutation fails the release gate.
 
 Every specification rule has one machine-checked evidence route. Canonical fixtures directly cover executable language behavior. Rules about schemas, host binding, public runtime structure, compiler artifacts and publication boundaries are listed in `tests/rule-evidence.json` with their verification command and concrete test files. An unknown rule, missing evidence file, duplicate non-fixture assignment or rule with no route fails `make rules-check`.

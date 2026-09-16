@@ -26,7 +26,7 @@
 
 **EXP-5** DOT_IDENT와 DOT_INDEX는 `.`이 왼쪽으로는 postfix 체인을 끝낼 수 있는 토큰(IDENT, `)`, `]`, DOT_IDENT, DOT_INDEX)에, 오른쪽으로는 식별자 또는 숫자에 공백 없이 바로 붙어 있을 때만 생성된다. 그 외 위치에서 숫자가 뒤따르는 `.`은 E_PARSE_INVALID_NUMBER(EXP-2)이고, 숫자가 뒤따르지 않는 `.`은 E_PARSE_UNEXPECTED_TOKEN이다. `a.0.b`는 IDENT `a`, DOT_INDEX `.0`, DOT_IDENT `.b`로 렉싱된다.
 
-**EXP-6** 다음은 언어에 포함되지 않으며 등장하면 E_PARSE_UNEXPECTED_TOKEN이다: 값에 대한 메서드 호출, `->`, `::`, `\`, `new`, 타입 캐스트, `$`, 비트 연산자 `& ^ ~ << >>`, `{` `}` 맵 리터럴.
+**EXP-6** 다음은 언어에 포함되지 않으며 등장하면 E_PARSE_UNEXPECTED_TOKEN이다: `->`, `\`, `new`, 타입 캐스트, `$`, 비트 연산자 `& ^ ~ << >>`, `{` `}` 맵 리터럴. 멤버 호출은 EXP-7과 EXP-11에 정의한 `.name(...)`을 사용하고 논리 클래스 호출은 `Class::name(...)`을 사용한다.
 
 ## 문법
 

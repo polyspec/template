@@ -22,6 +22,8 @@ make release-test-matrix
 
 전체 mode matrix는 canonical case 216개 × compiler mode 두 개 × 언어 네 개로 core cell 1,728개를 갖는다. 성공 case는 정확한 UTF-8 바이트를 비교한다. 실패 case는 오류 code, message, template 이름, source 위치를 비교한다. Generated 실행은 host source를 승인하기 전에 parser, AST interpreter, fallback 참조가 없는지도 검사한다.
 
+언어 테스트 매트릭스는 `contracts/features.json`에 선언한다. 매트릭스의 의미 기능은 TypeScript, Go, Rust, PHP의 pass 지원을 선언해야 하며 `ast`와 `gen`을 모두 검사해야 한다. `make language-test-matrix`는 기능·언어 선언 또는 테스트 경로가 빠지면 실패한다. `make conformance-all-modes`, `make function-contract-check`, `make generated-native-check`가 실행 가능한 적용 범위를 제공한다.
+
 Mutation test는 필수 근거다. Interface operation, artifact digest, output hash를 손상시키고 해당 validator가 반드시 실패하게 한다. Validator가 mutation을 받으면 release gate가 실패한다.
 
 모든 명세 규칙은 기계적으로 검사되는 근거 경로 하나를 갖는다. 실행 가능한 언어 동작은 canonical fixture가 직접 검증한다. Schema, host binding, 공개 runtime 구조, compiler artifact, 발행 경계에 관한 규칙은 `tests/rule-evidence.json`에 검증 명령과 구체적인 test file을 기록한다. 알 수 없는 규칙, 없는 근거 file, 중복된 비-fixture 배정, 근거 경로가 없는 규칙이 있으면 `make rules-check`가 실패한다.
