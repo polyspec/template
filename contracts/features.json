@@ -2,6 +2,23 @@
   "manifest_version": 1,
   "contract_version": "0.0.1",
   "source": "contracts/features.json",
+  "verification_matrix": {
+    "languages": ["typescript", "go", "rust", "php"],
+    "modes": ["ast", "gen"],
+    "semantic_features": [
+      "spec",
+      "ast-schema",
+      "conformance-suite",
+      "generated-mode",
+      "template-function-contract",
+      "object-and-class-calls"
+    ],
+    "commands": [
+      "make conformance-all-modes",
+      "make function-contract-check",
+      "make generated-native-check"
+    ]
+  },
   "features": [
     {
       "id": "spec",
@@ -199,12 +216,18 @@
         "tests/runner/conformance-generated-ts.mjs",
         "tests/runner/conformance-generated-go.mjs",
         "tests/runner/conformance-generated-rust.mjs",
-        "tests/runner/conformance-generated-php.mjs"
+        "tests/runner/conformance-generated-php.mjs",
+        "scripts/check-language-test-matrix.mjs",
+        "scripts/check-language-test-matrix-mutations.mjs"
       ],
       "verification": [
         {
           "id": "check-1",
           "command": "make conformance-all-modes"
+        },
+        {
+          "id": "check-2",
+          "command": "make language-test-matrix"
         }
       ],
       "docs": [
