@@ -15,6 +15,8 @@
 
 ## Unreleased
 
+- Added a manifest-declared language test matrix that requires equal semantic coverage for TypeScript, Go, Rust and PHP in both AST and generated modes. Added mutation checks for missing language support, test paths and compiler modes, and included the matrix in the default check.
+- Corrected the expression and guide documents to describe the implemented member-call and logical class-call syntax. The documents no longer state that method calls are unavailable or that generated native calls are partial.
 - Extended the function contract with `object.method(args...)` and `Class::function(args...)` syntax and opened Wave 8 for native instance binding and execution. The parser and AST support these nodes; runtime execution remains partial.
 - Added `MemberCall` and `ClassCall` nodes and aligned TypeScript, Go, Rust and PHP expression parsers on `object.method(args...)` and `Class::function(args...)`. Runtime object binding and execution remain partial until the next implementation stage.
 - Added a machine-readable template function contract covering 37 canonical functions, exact arity ranges, four-language AST/generated registry parity and classification of 225 observed call forms. Fixed compiler IR arity validation so zero-argument and variadic functions are checked during lowering.

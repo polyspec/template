@@ -146,7 +146,7 @@ KIM 1,234.57 a, b
 - Pipes: `value | name(argument)` is the function call `name(value, argument)`. Pipes read left to right and bind last, so `a ?? 'n/a' | upper` applies `upper` to the whole left side.
 - Literals: `null true false`, numbers, `'text'` or `"text"`, a list `[1, 2]`, a map `['k' => 1]`, and `...` to spread one into another.
 
-Templates call functions only from the built-in set and from functions the application registers. There are no method calls and no access to the host language.
+Templates call functions only from the built-in set and from functions the application registers. Assigned objects may expose declared public fields and methods, and declared logical class functions may be called with `Class::name(...)`; undeclared host members remain inaccessible.
 
 ## Escaping and embedding
 

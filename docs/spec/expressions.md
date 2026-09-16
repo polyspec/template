@@ -26,7 +26,7 @@ This document defines the expression language used inside tags: tokens, grammar,
 
 **EXP-5** DOT_IDENT and DOT_INDEX are produced only when the `.` is immediately adjacent, with no whitespace on either side, to a token that can end a postfix chain on its left (IDENT, `)`, `]`, DOT_IDENT, DOT_INDEX) and to the identifier or digits on its right. A `.` in any other position that is followed by a digit is E_PARSE_INVALID_NUMBER (EXP-2); a `.` in any other position not followed by a digit is E_PARSE_UNEXPECTED_TOKEN. `a.0.b` lexes as IDENT `a`, DOT_INDEX `.0`, DOT_IDENT `.b`.
 
-**EXP-6** The following are not part of the language and are E_PARSE_UNEXPECTED_TOKEN when they appear: method calls on values, `->`, `::`, `\`, `new`, type casts, `$`, the bitwise operators `& ^ ~ << >>`, and a `{` `}` map literal.
+**EXP-6** The following are not part of the language and are E_PARSE_UNEXPECTED_TOKEN when they appear: `->`, `\`, `new`, type casts, `$`, the bitwise operators `& ^ ~ << >>`, and a `{` `}` map literal. Member calls use `.name(...)` and logical class calls use `Class::name(...)` as defined by EXP-7 and EXP-11.
 
 ## Grammar
 

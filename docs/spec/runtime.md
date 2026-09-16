@@ -184,7 +184,7 @@ The interface declares two execution modes:
 - **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the complete cross-language mode.
 - **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust or PHP renderer before startup, loads or links that renderer once, and calls it for each request. All four core runtimes pass the 216-case generated conformance suite. Generated execution does not parse or interpret template AST during a request.
 
-Native object calls are implemented in the AST runtimes. Generated backends emit the corresponding runtime operation, but generated object-call conformance and packed consumer verification remain partial until the complete mode matrix passes.
+Native object calls are implemented in the AST and generated runtimes. The complete mode matrix and packed consumer verification exercise the same assigned object field, instance method and class function behavior in TypeScript, Go, Rust and PHP.
 
 ```mermaid
 flowchart LR

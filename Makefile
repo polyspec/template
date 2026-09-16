@@ -7,7 +7,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
 	conformance delimiter-matrix parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
-	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile \
+	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check consumer-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -52,7 +52,7 @@ help: ## List targets
 	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check contract-check function-contract-check lint test-ts test-go test-rust test-php conformance delimiter-matrix generated-native-check ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -227,6 +227,10 @@ template-function-inventory: ## Inventory function-shaped calls in an explicit e
 function-contract-check: ## Check the canonical function contract against all language registries
 	node scripts/check-function-contract.mjs
 	node tests/runner/function-contract.mjs
+
+language-test-matrix: ## Verify the manifest requires equal semantic test coverage
+	node scripts/check-language-test-matrix.mjs
+	node scripts/check-language-test-matrix-mutations.mjs
 
 release-test-matrix: build-php ## Run all release layers in deterministic order
 	@echo "[release 1/7] contracts, generated documentation and static analysis"

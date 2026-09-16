@@ -183,7 +183,7 @@ sequenceDiagram
 - **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 완성된 cross-language mode다.
 - **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 네 core runtime 모두 generated 적합성 case 216개를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
 
-Native object 호출은 AST runtime에 구현됐다. Generated backend는 해당 runtime operation을 생성하지만, 전체 mode matrix와 패키지 소비 검증이 통과하기 전까지 generated object-call 지원은 partial이다.
+Native object 호출은 AST와 generated runtime에 구현됐다. 전체 mode matrix와 패키지 소비 검증은 TypeScript, Go, Rust, PHP에서 같은 assign 객체 필드, 인스턴스 메서드와 클래스 함수 동작을 실행한다.
 
 ```mermaid
 flowchart LR
