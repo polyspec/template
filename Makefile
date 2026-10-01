@@ -141,10 +141,10 @@ vscode-package: build-vscode ## Build the .vsix
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
 
-conformance: ## Cross-language conformance suite
+conformance: build-ts build-go build-rust build-php ext ## Cross-language conformance suite (builds every implementation first)
 	node tests/runner/conformance.mjs
 
-delimiter-matrix: ## Exercise every valid delimiter pair in every language
+delimiter-matrix: build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
 	node tests/runner/delimiter-matrix.mjs
 
 conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
@@ -164,7 +164,7 @@ conformance-all-modes: conformance conformance-generated-ts conformance-generate
 install-check: typed-generator ## Install immutable package artifacts in isolated install projects
 	node scripts/check-package-installs.mjs
 
-parity: ## Cross-language output comparison
+parity: build-ts build-go build-rust build-php ## Cross-language output comparison
 	node tests/runner/parity.mjs
 
 test-browser: build-ts ## Browser rendering test
