@@ -21,12 +21,15 @@ pub fn escape_html(text: &str) -> Cow<'_, str> {
         return Cow::Borrowed(text);
     };
     let mut result = String::with_capacity(text.len() + 16);
-    result.push_str(&text[..first]);
+    // The replaced bytes are ASCII, so every slice between them starts and ends on a character boundary.
+    let mut start = 0;
     for (offset, &byte) in bytes.iter().enumerate().skip(first) {
-        match replacement(byte) {
-            Some(entity) => result.push_str(entity),
-            None => result.push_str(&text[offset..offset + 1]),
+        if let Some(entity) = replacement(byte) {
+            result.push_str(&text[start..offset]);
+            result.push_str(entity);
+            start = offset + 1;
         }
     }
+    result.push_str(&text[start..]);
     Cow::Owned(result)
 }
