@@ -11,6 +11,7 @@ use Polyspec\Template\Functions\Registry;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\BindError;
+use Polyspec\Template\Value\HostArgument;
 use Polyspec\Template\Value\MapValue;
 use Polyspec\Template\Value\Number;
 use Polyspec\Template\Value\SafeString;
@@ -190,8 +191,9 @@ final class RuntimeBindings
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$method} is not a function");
         }
         $target = $reflection->getMethod($method);
+        $arguments = HostArgument::list($args);
 
-        return $this->hostResult($method, static fn (): mixed => $target->invokeArgs($target->isStatic() ? null : $container, $args), $frame, $span);
+        return $this->hostResult($method, static fn (): mixed => $target->invokeArgs($target->isStatic() ? null : $container, $arguments), $frame, $span);
     }
 
     /**
@@ -207,8 +209,9 @@ final class RuntimeBindings
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$className}::{$method} is not a function");
         }
         $env = $this->context->env;
+        $arguments = HostArgument::list($args);
 
-        return $this->hostResult("{$className}::{$method}", static fn (): mixed => $function($args, $env), $frame, $span);
+        return $this->hostResult("{$className}::{$method}", static fn (): mixed => $function($arguments, $env), $frame, $span);
     }
 
     /**
@@ -338,8 +341,9 @@ final class RuntimeBindings
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$name} is not a function");
         }
         $env = $this->context->env;
+        $arguments = HostArgument::list($args);
 
-        return $this->hostResult($name, static fn (): mixed => $host($args, $env), $frame, $span);
+        return $this->hostResult($name, static fn (): mixed => $host($arguments, $env), $frame, $span);
     }
 
     /**

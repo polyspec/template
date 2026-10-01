@@ -1,6 +1,6 @@
 //! The PHP engine class (RT-1 to RT-6).
 
-use crate::convert::{php_to_map, php_to_value, value_to_php};
+use crate::convert::{array_key, php_to_map, php_to_value, value_to_php};
 use crate::error::{boundary, php_exception};
 use ext_php_rs::convert::IntoZval;
 use ext_php_rs::error::Error as ExtError;
@@ -62,7 +62,9 @@ impl NativeEngine {
     pub fn register_class(&mut self, class_name: String, method: String, function: &Zval) -> PhpResult<()> {
         boundary("", || {
             let host = host_function(function)?;
-            self.engine.register_class(&class_name, &method, host).map_err(PhpException::default)
+            self.engine
+                .register_class(&class_name, &method, host)
+                .map_err(PhpException::default)
         })
     }
 
@@ -227,7 +229,8 @@ fn read_limits(table: &ZendHashTable) -> Limits {
     limits
 }
 
-/// Reads JSON text under VAL-2, VAL-12 and VAL-20; a syntax error is `E_DATA_UNSUPPORTED_TYPE`.
+/// Reads JSON text under VAL-2, VAL-12 and VAL-20; text that is not one JSON document is
+/// `E_DATA_INVALID_JSON`.
 fn read_json_text(text: &str, template: &str) -> PhpResult<serde_json::Value> {
     read_json(text).map_err(|error| php_exception(&bind_failure(template, error)))
 }
@@ -235,7 +238,9 @@ fn read_json_text(text: &str, template: &str) -> PhpResult<serde_json::Value> {
 fn host_function(function: &Zval) -> PhpResult<polyspec_template::HostFunction> {
     let callable =
         ZendCallable::new_owned(function.shallow_clone()).map_err(|_| PhpException::default("argument is not callable".to_string()))?;
-    Ok(Box::new(move |args: &[Value], context: &FunctionContext<'_>| call_php(&callable, args, context)))
+    Ok(Box::new(move |args: &[Value], context: &FunctionContext<'_>| {
+        call_php(&callable, args, context)
+    }))
 }
 
 /// Calls a PHP callable with the argument list and the environment (FUN-43, FUN-46). A native
@@ -290,7 +295,9 @@ fn json_to_php(value: &serde_json::Value) -> Result<Zval, String> {
         serde_json::Value::Object(entries) => {
             let mut table = ZendHashTable::new();
             for (key, item) in entries {
-                table.insert(key.as_str(), json_to_php(item)?).map_err(|error| error.to_string())?;
+                table
+                    .insert(array_key(key), json_to_php(item)?)
+                    .map_err(|error| error.to_string())?;
             }
             into_zval(table)?
         }

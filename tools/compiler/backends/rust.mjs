@@ -27,6 +27,8 @@ export function createTarget({ program }) {
   target.literal = value => value === null ? 'Value::Null' : typeof value === 'string' ? `Value::text(${rustString(value)})` : typeof value === 'number' ? `Value::Number(${value}f64)` : `Value::Bool(${value})`;
   target.var = (name, _type, node) => program.dynamicRoot ? node.scope ? `scope.lookup(&frame, ${rustString(name)})` : `runtime.member(context, &Value::Map(Rc::clone(root_data)), ${rustString(name)}, &frame, ${rustSpan(node.span)})?` : `generated_value(&assign.${name})?`;
   target.local = name => `scope.lookup(&frame, ${rustString(name)})`;
+  // Generated Rust reads every typed value as a canonical Value, so a value needs no conversion.
+  target.toValue = value => value;
   target.member = (object, key, _owner, node) => `runtime.member(context, &${object}, ${rustString(key)}, &frame, ${rustSpan(node.span)})?`;
   target.set = (name, value, level) => indent(level, `scope.locals.insert(${rustString(name)}.to_string(), ${value});`);
   target.text = (value, level, node) => indent(level, `context.write(${rustString(value)}, &frame, ${rustSpan(node.span)})?;`);
@@ -88,7 +90,8 @@ ${emitNodes(node.otherwise, target, n + 1)}
     return `runtime.binary(context, ${binaryVariant[operator]}, &${left}, &${right}, &frame, ${rustSpan(node.span)})?`;
   };
   target.ternary = (test, thenValue, elseValue) => `if runtime.truthy(&${test}) { ${thenValue} } else { ${elseValue} }`;
-  target.list = (items, _type, node) => `{ let mut result = Vec::new(); ${items.map(item => item.spread ? `result.extend(runtime.list_spread(context, &${item.value}, &frame, ${rustSpan(item.span)})?);` : `result.push(${item.value});`).join(' ')} runtime.depth(context, Value::list(result), &frame, ${rustSpan(node.span)})? }`;
+  // An empty list literal binds no mutable vector, so the generated module compiles without warnings.
+  target.list = (items, _type, node) => items.length === 0 ? `runtime.depth(context, Value::list(Vec::new()), &frame, ${rustSpan(node.span)})?` : `{ let mut result = Vec::new(); ${items.map(item => item.spread ? `result.extend(runtime.list_spread(context, &${item.value}, &frame, ${rustSpan(item.span)})?);` : `result.push(${item.value});`).join(' ')} runtime.depth(context, Value::list(result), &frame, ${rustSpan(node.span)})? }`;
   target.map = (entries, _type, node) => `{ let mut result = RuntimeOrderedMap::new(); ${entries.map(item => item.spread ? `for (key, value) in runtime.map_spread(context, &${item.value}, &frame, ${rustSpan(item.span)})?.iter() { result.insert(key.clone(), value.clone()); }` : `result.insert(runtime.stringify(context, &${item.value[0]}, &frame, ${rustSpan(item.node.key.span)})?, ${item.value[1]});`).join(' ')} runtime.depth(context, Value::map(result), &frame, ${rustSpan(node.span)})? }`;
   target.ifNode = (node, n, scope = []) => node.branches.map((branch, index) => `${'    '.repeat(n)}${index ? '} else if' : 'if'} runtime.truthy(&${emitExpression(branch.test, target)}) {
 ${emitNodes(branch.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {

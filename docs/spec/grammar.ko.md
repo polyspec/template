@@ -10,9 +10,9 @@
 
 ```ebnf
 template   = { text | tag | wrapped | comment } ;
-tag        = "{" HWS sigil_body HWS "}" | "{" ":" HWS assign HWS "}" ;
+tag        = "{" HWS sigil_body HWS "}" | "{" HWS ":" HWS assign HWS "}" ;
 wrapped    = wrap_open HWS "{{" HWS sigil_body HWS "}}" HWS wrap_close
-           | wrap_open HWS "{{" ":" HWS assign HWS "}}" HWS wrap_close ;
+           | wrap_open HWS "{{" HWS ":" HWS assign HWS "}}" HWS wrap_close ;
 comment    = "{" HWS "*" { any } "*}" ;
 wrap_open  = '"' | "'" | "/*" | "<!--" ;
 wrap_close = '"' | "'" | "*/" | "-->" ;
@@ -63,7 +63,7 @@ DELIMS     = DELIM DELIM ;
 
 **GRM-4** 경로는 태그를 포함한 템플릿의 디렉터리를 기준으로 해석한다. `/`로 시작하는 경로는 로더 루트를 기준으로 해석한다. 세그먼트 `.`과 `..`은 정규화한다. 정규화 결과가 로더 루트를 벗어나는 경로는 `E_LOAD_OUTSIDE_ROOT`로 거부한다. 해석은 `runtime.md`가 정의한다.
 
-**GRM-5** 기호 형태에서 기호와 본문 첫 토큰 사이의 공백은 선택이다. 대입 형태에서는 `{` 뒤에 `:`가 오고, 그 뒤의 선택적 수평 공백 다음에 식별자가 온다. 자세한 내용은 `lexical.md`에 정의한다.
+**GRM-5** 기호 형태에서 기호와 본문 첫 토큰 사이의 공백은 선택이다. 대입 형태에서는 `{` 뒤의 선택적 수평 공백 다음에 `:`가 오고, 그 뒤의 선택적 수평 공백 다음에 식별자가 온다. 자세한 내용은 `lexical.md`에 정의한다. `{:x = 1}`, `{ :x = 1}`, `{: x = 1}`은 같은 대입이다.
 
 ## 3. Echo
 

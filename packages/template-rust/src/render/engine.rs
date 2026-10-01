@@ -171,14 +171,19 @@ impl AstProgram {
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
     pub fn load_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Rc<ParsedTemplate>, TemplateError> {
-        let Some(loaded) = self.loader.load(name) else {
-            let message = format!("template {name} does not exist");
-            return Err(match (from, span) {
-                (Some(frame), Some(span)) => {
-                    TemplateError::at(ErrorCode::E_LOAD_NOT_FOUND, &frame.name, frame.lines.as_ref(), span, message)
-                }
-                _ => TemplateError::without_position(ErrorCode::E_LOAD_NOT_FOUND, name, message),
-            });
+        let fail = |code: ErrorCode, message: String| match (from, span) {
+            (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
+            _ => TemplateError::without_position(code, name, message),
+        };
+        let loaded = match self.loader.load(name) {
+            Ok(Some(loaded)) => loaded,
+            Ok(None) => return Err(fail(ErrorCode::E_LOAD_NOT_FOUND, format!("template {name} does not exist"))),
+            Err(message) => {
+                return Err(fail(
+                    ErrorCode::E_LOAD_FAILED,
+                    format!("template {name} cannot be loaded: {message}"),
+                ));
+            }
         };
         if let Some((version, template)) = self.cache.borrow().get(name)
             && (self.artifact_refresh == ArtifactRefresh::False

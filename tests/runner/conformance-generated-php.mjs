@@ -7,7 +7,7 @@ import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, listCases } from './cases.mjs';
+import { firstDifference, listCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
 const temporary = mkdtempSync(join(root, '.generated-conformance-php-'));
@@ -51,7 +51,7 @@ try {
     $assign = $argv[3] === '' ? [] : Json::parse(file_get_contents($argv[3]));
     $define = $argv[4] === '' ? [] : plain(Json::parse(file_get_contents($argv[4])));
     $options = ['define' => $define];
-    if ($argv[5] !== '') $options['env'] = json_decode(file_get_contents($argv[5]), true, flags: JSON_THROW_ON_ERROR);
+    if ($argv[5] !== '') $options['env'] = plain(Json::parse(file_get_contents($argv[5])));
     $html = (new \\${namespace}\\GeneratedProgram())->render('input.tpl', $assign, $options);
     echo json_encode(['html' => base64_encode($html)], JSON_THROW_ON_ERROR);
 } catch (TemplateError $error) {
@@ -70,8 +70,7 @@ try {
   for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');
     try {
-      const define = testCase.hasDefine ? JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8')) : {};
-      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), define);
+      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(temporary, `${id}.types.json`);
       const graphPath = join(temporary, `${id}.ast`);
       const sourcePath = join(sources, `${id}.php`);

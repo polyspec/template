@@ -144,13 +144,18 @@ func (e *Engine) Limits() Limits { return e.runtime.Limits() }
 
 // LoadTemplate loads an AST template (RT-9, RT-40).
 func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*ParsedTemplate, error) {
-	loaded, ok := e.loader.Load(name)
-	if !ok {
-		message := "template " + name + " does not exist"
+	fail := func(code errs.Code, message string) error {
 		if from != nil && span != nil {
-			return nil, errs.At(errs.LoadNotFound, from.Name, from.Lines, errs.Span{span[0], span[1]}, message)
+			return errs.At(code, from.Name, from.Lines, errs.Span{span[0], span[1]}, message)
 		}
-		return nil, errs.WithoutPosition(errs.LoadNotFound, name, message)
+		return errs.WithoutPosition(code, name, message)
+	}
+	loaded, ok, err := e.loader.Load(name)
+	if err != nil {
+		return nil, fail(errs.LoadFailed, "template "+name+" cannot be loaded: "+err.Error())
+	}
+	if !ok {
+		return nil, fail(errs.LoadNotFound, "template "+name+" does not exist")
 	}
 	if c, ok := e.cache[name]; ok && (e.artifactRefresh == ArtifactRefreshFalse || (e.artifactRefresh == ArtifactRefreshTrue && c.version == loaded.Version)) {
 		return c.template, nil

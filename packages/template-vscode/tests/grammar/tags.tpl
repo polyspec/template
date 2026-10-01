@@ -47,6 +47,14 @@
 {*      ^^ meta.template.assignment.polyspec-template keyword.operator.assignment.polyspec-template
 {*                      ^ meta.template.assignment.polyspec-template variable.other.assignment.polyspec-template
 {*                       ^^ meta.template.assignment.polyspec-template keyword.operator.assignment.polyspec-template
+{ :total = 0}{@row=rows}
+{* <- meta.template.assignment.polyspec-template punctuation.definition.tag.begin.polyspec-template
+{*^ meta.template.assignment.polyspec-template keyword.control.assignment.polyspec-template
+{* ^^^^^ meta.template.assignment.polyspec-template variable.other.assignment.polyspec-template
+{*       ^ meta.template.assignment.polyspec-template keyword.operator.assignment.polyspec-template
+{*            ^ meta.template.loop.polyspec-template keyword.control.loop.polyspec-template
+{*             ^^^ meta.template.loop.polyspec-template variable.other.loop.polyspec-template
+{*                ^ meta.template.loop.polyspec-template keyword.operator.assignment.polyspec-template
 {+ parts/head.tpl}{+ 'a b.tpl'}
 {* <- meta.template.include.polyspec-template punctuation.definition.tag.begin.polyspec-template
 {*<~- meta.template.include.polyspec-template keyword.control.include.polyspec-template

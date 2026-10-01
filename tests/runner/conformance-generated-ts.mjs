@@ -10,7 +10,7 @@ import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse, parseJsonBytes } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, listCases } from './cases.mjs';
+import { firstDifference, listCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
 const temporary = mkdtempSync(join(root, '.generated-conformance-ts-'));
@@ -59,8 +59,7 @@ try {
   for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');
     try {
-      const define = testCase.hasDefine ? JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8')) : {};
-      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), define);
+      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(temporary, `${id}.types.json`);
       const graphPath = join(temporary, `${id}.ast`);
       const sourcePath = join(sources, `${id}.ts`);

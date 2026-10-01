@@ -23,6 +23,8 @@
 | `expected.html` | 둘 중 하나 | 정확한 렌더 출력. |
 | `expected.error.json` | 둘 중 하나 | 기대 오류의 `{"code", "template", "line", "col"}`. |
 
+**CNF-15** `scripts/check-schema.mjs`는 모든 케이스 디렉터리에서 `expected.ast.json`이 있는지 검사한다. 케이스에 `expected.ast.json`이 없고 그 `expected.error.json`이 `template`이 `input.tpl`인 `E_LEX_*` 또는 `E_PARSE_*` 코드를 지정하지 않으면 실패하고, `expected.error.json`이 그런 오류를 지정하는데 `expected.ast.json`이 있어도 실패한다. `make schema-check`와 `make docs-check`가 이를 실행하므로 AST 파일이 없으면 `make check`가 실패한다. 이유: CNF-9는 모든 케이스의 파싱 결과를 비교하며, AST 파일이 없는 케이스는 그렇지 않으면 그 비교 없이 통과한다.
+
 **CNF-3** `scripts/check-rules.mjs`는 `docs/spec/*.md`에 정의된 모든 규칙 식별자와 `case.json` 파일에 나열된 모든 식별자를 수집한다. 어떤 문서도 정의하지 않은 규칙을 `case.json`이 지정하면 실패하고, 어떤 케이스도 다루지 않는 규칙을 보고한다. `make check`가 이를 실행한다.
 
 ## 명령줄 계약
@@ -36,7 +38,7 @@
 | 두 하위 명령 모두, 템플릿 오류 | stderr에 오류 JSON. | 2 |
 | 두 하위 명령 모두, 사용 오류 | stderr에 메시지. | 1 |
 
-`--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
+`--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. 읽을 수 없는 파일은 사용 오류다. 내용이 하나의 JSON 문서가 아닌 파일은 ERR-5의 위치를 가진 템플릿 오류 `E_DATA_INVALID_JSON`이다(VAL-12). 이 파일의 다른 데이터 오류도 같은 위치에서 해당 `E_DATA_*` 코드를 가진 템플릿 오류다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
 
 **CNF-5** 구현별 명령:
 

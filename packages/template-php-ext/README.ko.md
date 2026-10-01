@@ -53,7 +53,7 @@ try {
 
 접근자는 `\Exception`이 final로 선언한 `getCode()`, `getLine()`, `getFile()`을 피한다. `getMessage()`는 명세의 메시지를 반환한다.
 
-`render`와 `renderJson`은 명세의 바인딩 규칙을 적용한다. 크기가 2^53 − 1보다 큰 숫자는 정수든 실수든 `E_DATA_NUMBER_RANGE`이고(VAL-2), 유효한 UTF-8이 아닌 배열 키나 프로퍼티 이름은 `E_DATA_INVALID_UTF8`, closure와 리소스는 `E_DATA_UNSUPPORTED_TYPE`, 순환 구조를 포함해 64단계보다 깊게 중첩된 list와 map은 `E_DATA_DEPTH`이다(VAL-20). 호스트 함수, class 함수, method에 넘긴 native object는 원본 PHP 객체로 도착한다(VAL-18). 호출자의 class scope와 무관하게 public 프로퍼티와 method만 보이며(VAL-19), `__get`과 `__call`은 참조하지 않는다. 확장의 모든 method는 Rust panic을 PHP 프로세스 중단 대신 `E_INTERNAL`로 보고한다(ERR-13).
+`render`와 `renderJson`은 명세의 바인딩 규칙을 적용한다. 크기가 2^53 − 1보다 큰 숫자는 정수든 실수든 `E_DATA_NUMBER_RANGE`이고(VAL-2), 유효한 UTF-8이 아닌 배열 키나 프로퍼티 이름은 `E_DATA_INVALID_UTF8`, closure와 리소스는 `E_DATA_UNSUPPORTED_TYPE`, 순환 구조를 포함해 64단계보다 깊게 중첩된 list와 map은 `E_DATA_DEPTH`이다(VAL-20). 호스트 함수, class 함수, method는 PHP AST 런타임과 같은 인자를 받는다(VAL-21). number는 `float`, safe 문자열은 `string`, list는 list 배열, map은 10진 정수 키가 정수 키가 되는 항목 순서의 배열, native object는 원본 PHP 객체다(VAL-18). 두 native object는 같은 PHP 객체일 때 같다(EXP-39). 하나의 JSON 문서가 아닌 JSON 텍스트는 `E_DATA_INVALID_JSON`이고, 존재하지만 읽을 수 없는 템플릿 파일은 `E_LOAD_FAILED`이다. 호출자의 class scope와 무관하게 public 프로퍼티와 method만 보이며(VAL-19), `__get`과 `__call`은 참조하지 않는다. 확장의 모든 method는 Rust panic을 PHP 프로세스 중단 대신 `E_INTERNAL`로 보고한다(ERR-13).
 
 `stubs/polyspec_template.stub.php`는 정적 분석용 시그니처를 담으며 런타임에 로드되지 않는다.
 

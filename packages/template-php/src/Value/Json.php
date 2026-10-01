@@ -39,9 +39,12 @@ final class Json
         return $value;
     }
 
+    /**
+     * VAL-12: text that is not one JSON document is E_DATA_INVALID_JSON.
+     */
     private function fail(string $message): never
     {
-        throw new JsonSyntaxError("{$message} at offset {$this->index}", $this->index);
+        throw new BindError('E_DATA_INVALID_JSON', "{$message} at offset {$this->index}");
     }
 
     private function skipWhitespace(): void

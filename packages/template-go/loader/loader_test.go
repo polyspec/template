@@ -28,17 +28,20 @@ func TestResolvePath(t *testing.T) {
 
 func TestLoaders(t *testing.T) {
 	m := loader.NewMapLoader(map[string]string{"a.tpl": "x"})
-	if r, ok := m.Load("a.tpl"); !ok || string(r.Source) != "x" || r.Version == "" {
+	if r, ok, err := m.Load("a.tpl"); !ok || err != nil || string(r.Source) != "x" || r.Version == "" {
 		t.Error("map loader")
 	}
-	if _, ok := m.Load("b.tpl"); ok {
+	if _, ok, err := m.Load("b.tpl"); ok || err != nil {
 		t.Error("missing name found")
 	}
 	fs := loader.NewFSLoader(fstest.MapFS{"d/a.tpl": {Data: []byte("y")}})
-	if r, ok := fs.Load("d/a.tpl"); !ok || string(r.Source) != "y" {
+	if r, ok, err := fs.Load("d/a.tpl"); !ok || err != nil || string(r.Source) != "y" {
 		t.Error("fs loader")
 	}
-	if _, ok := fs.Load("../a.tpl"); ok {
+	if _, ok, err := fs.Load("../a.tpl"); ok || err != nil {
 		t.Error("invalid path loaded")
+	}
+	if _, ok, err := fs.Load("d"); ok || err != nil {
+		t.Error("directory loaded")
 	}
 }

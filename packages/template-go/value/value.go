@@ -189,6 +189,8 @@ func sameTypeEquals(a, b Value, t Type) bool {
 			}
 		}
 		return true
+	case TypeObject:
+		return sameObject(a, b)
 	}
 	return false
 }

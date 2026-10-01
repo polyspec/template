@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parse } from '../packages/template-ts/dist/index.mjs';
-import { listCases } from '../tests/runner/cases.mjs';
+import { listCases, typeDefinitions } from '../tests/runner/cases.mjs';
 import { deriveTypeManifest } from '../tools/compiler/type-manifest.mjs';
 
 const cases = listCases();
@@ -27,8 +27,7 @@ for (const testCase of parseableCases) {
       }
     }
   }
-  const define = testCase.hasDefine ? JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8')) : {};
-  const manifest = deriveTypeManifest(templates, define);
+  const manifest = deriveTypeManifest(templates, typeDefinitions(testCase));
   assert.equal(manifest.schema, 3);
   assert.equal(manifest.root, 'any');
   assert.equal(manifest.entry, 'input.tpl');

@@ -3,16 +3,6 @@ import { firstInvalidUtf8, utf8Decoder } from '../escape.js';
 import { BindError, checkLevel, checkNumber, checkText } from './bind.js';
 import { type MapValue, type Value } from './value.js';
 
-// The error that the JSON parser raises for text that is not JSON. It carries the byte offset of
-// the character that ended the parse.
-export class JsonSyntaxError extends Error {
-  // Creates a syntax error at a byte offset of the JSON text.
-  constructor(message: string, readonly offset: number) {
-    super(message);
-    this.name = 'JsonSyntaxError';
-  }
-}
-
 // Parses JSON bytes. Invalid UTF-8 is reported as a BindError with code E_DATA_INVALID_UTF8.
 export function parseJsonBytes(bytes: Uint8Array): Value {
   const invalid = firstInvalidUtf8(bytes);
@@ -21,8 +11,8 @@ export function parseJsonBytes(bytes: Uint8Array): Value {
 }
 
 // Parses JSON text into a value. Object keys keep their document order. A number outside the
-// binding range, an unpaired surrogate and nesting deeper than the limit raise a BindError at the
-// first occurrence in document order (VAL-2, VAL-12, VAL-20).
+// binding range, an unpaired surrogate, nesting deeper than the limit and text that is not one JSON
+// document raise a BindError at the first occurrence in document order (VAL-2, VAL-12, VAL-20).
 export function parseJson(text: string): Value {
   checkText(text);
   const parser = new JsonParser(text);
@@ -38,8 +28,9 @@ class JsonParser {
 
   constructor(private readonly text: string) {}
 
+  // VAL-12: text that is not one JSON document is E_DATA_INVALID_JSON.
   fail(message: string): never {
-    throw new JsonSyntaxError(`${message} at offset ${this.index}`, this.index);
+    throw new BindError('E_DATA_INVALID_JSON', `${message} at offset ${this.index}`);
   }
 
   skipWhitespace(): void {

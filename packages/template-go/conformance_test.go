@@ -97,17 +97,25 @@ func renderCase(c conformanceCase) (string, error) {
 	}
 	engine := template.NewEngine(program)
 	var assign value.Value = value.NewOrderedMap()
+	// VAL-12: every JSON file of a case is data; its data errors have the position of ERR-5.
+	parseData := func(text []byte) (value.Value, error) {
+		parsed, err := value.ParseJSON(text)
+		var be *value.BindError
+		if errors.As(err, &be) {
+			return nil, errs.WithoutPosition(be.Code, "input.tpl", be.Message)
+		}
+		return parsed, err
+	}
 	if dataBytes := readIf(filepath.Join(c.dir, "data.json")); dataBytes != nil {
-		if assign, err = value.ParseJSON(dataBytes); err != nil {
-			var be *value.BindError
-			if errors.As(err, &be) {
-				return "", errs.WithoutPosition(be.Code, "input.tpl", be.Message)
-			}
+		if assign, err = parseData(dataBytes); err != nil {
 			return "", err
 		}
 	}
 	renderOptions := template.RenderOptions{}
 	if defineBytes := readIf(filepath.Join(c.dir, "define.json")); defineBytes != nil {
+		if _, err := parseData(defineBytes); err != nil {
+			return "", err
+		}
 		var define map[string]json.RawMessage
 		if err := json.Unmarshal(defineBytes, &define); err != nil {
 			return "", err
@@ -131,6 +139,9 @@ func renderCase(c conformanceCase) (string, error) {
 		}
 	}
 	if envBytes := readIf(filepath.Join(c.dir, "env.json")); envBytes != nil {
+		if _, err := parseData(envBytes); err != nil {
+			return "", err
+		}
 		env := &template.Env{Timezone: "Z"}
 		var raw struct {
 			Timezone string  `json:"timezone"`

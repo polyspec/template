@@ -1,0 +1,1 @@
+{= describe(null, true, 1.5, 'a', raw('r'), [1, raw('s'), [null]], ['b' => 1, '2' => [true], 'm' => []], order)}|{= order.describe(null, true, 1.5, 'a', raw('r'), [1, raw('s'), [null]], ['b' => 1, '2' => [true], 'm' => []], order)}|{= Order::describe(null, true, 1.5, 'a', raw('r'), [1, raw('s'), [null]], ['b' => 1, '2' => [true], 'm' => []], order)}

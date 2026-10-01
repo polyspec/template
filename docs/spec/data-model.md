@@ -79,7 +79,7 @@ This document defines the value types that templates operate on, the safe string
 
 ## Host binding
 
-**VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-20 apply in every host.
+**VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host.
 
 **VAL-12** JSON text is the reference form of assign data. Every implementation accepts JSON text and produces the same values. Each implementation parses JSON text with a parser that preserves document order and applies the number rule of VAL-2 and the depth limit of VAL-20; the TypeScript implementation provides this parser in the package and does not use `JSON.parse` for assign data.
 
@@ -93,6 +93,8 @@ This document defines the value types that templates operate on, the safe string
 | object | map, in document order; a key follows the string row; a duplicate key replaces the earlier value and keeps the earlier position |
 
 Arrays and objects that nest deeper than the limit of VAL-20 are E_DATA_DEPTH. The parser fails at the first array or object that exceeds the limit, before it reads the rest of the text.
+
+A text that is not one JSON document is E_DATA_INVALID_JSON: a syntax error, an empty text, and a text with anything other than whitespace after the document. The parser reports the first violation in document order, so a depth or number error before a syntax error is reported with its own code. The rule applies to every JSON text that an implementation accepts as data: assign data, template definitions and the environment, including the files of the command line interface (CNF-4) and the JSON methods of the PHP extension. Reason: JSON text is the reference form of data, so a malformed document is a data error of the same input and is reported with the data error object of ERR-5 in every implementation, not with an implementation-specific exception.
 
 **VAL-13** TypeScript and JavaScript.
 
@@ -159,7 +161,7 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 
 **VAL-17** Map keys are strings in every host. A host map whose key is not a string is converted only where a table above defines the conversion; otherwise it is E_DATA_UNSUPPORTED_TYPE. A key is checked like a string value: a key that is not valid UTF-8, or in TypeScript a key that is not well-formed UTF-16, is E_DATA_INVALID_UTF8.
 
-**VAL-18** Binding preserves an assigned native object reference without copying it. A native object that a template passes as an argument to a host function, a logical class function or an instance method, directly or inside a list or map argument, arrives as the original host object: the same PHP object, the same JavaScript instance, the same Go value, and in Rust the same `TemplateObject`, which the host recovers with `Value::downcast_object`. Resource handles and functions, including PHP closures, are not template values; binding rejects them with E_DATA_UNSUPPORTED_TYPE. Rendering reads values and never writes back to host data.
+**VAL-18** Binding preserves an assigned native object reference without copying it. A native object that a template passes as an argument to a host function, a logical class function or an instance method, directly or inside a list or map argument, arrives as the original host object: the same PHP object, the same JavaScript instance, the same Go value, and in Rust the same `TemplateObject`, which the host recovers with `Value::downcast_object`. VAL-21 defines the form of every other argument value. Resource handles and functions, including PHP closures, are not template values; binding rejects them with E_DATA_UNSUPPORTED_TYPE. Rendering reads values and never writes back to host data.
 
 **VAL-19** A native object is an opaque template value. It is truthy and cannot be stringified, iterated or spread.
 
@@ -178,6 +180,25 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 
 - Binding a value whose depth is greater than 64 fails with E_DATA_DEPTH. Binding stops at the 65th level and does not read deeper parts of the value. A cyclic host structure, such as a JavaScript object, a Go map or slice, or a PHP object or array that contains itself, has no finite depth and fails with E_DATA_DEPTH through the same limit, without a separate cycle check. In PHP each call of `jsonSerialize()` also counts as one level, so an object whose `jsonSerialize()` returns the object itself fails with E_DATA_DEPTH.
 - A list or map literal whose value would have a depth greater than 64 fails with E_RUNTIME_LIMIT at the literal. List and map literals are the only template operations that build a value deeper than their operands; a function returns a value no deeper than its arguments, and a host function result is bound.
+
+## Host arguments
+
+**VAL-21** A host function, a logical class function and an instance method receive every argument as a host value of the following form. The form is the same in the AST program and in every generated program, and it applies to the elements of a list and to the values of a map at every depth.
+
+| Template value | TypeScript | PHP | Go | Rust |
+| --- | --- | --- | --- | --- |
+| null | `null` | `null` | `nil` | `Value::Null` |
+| bool | `boolean` | `bool` | `bool` | `Value::Bool` |
+| number | `number` | `float` | `float64` | `Value::Number` |
+| string, safe string | `string` | `string` | `string` | `Value::Str` |
+| list | `Array` | `array` for which `array_is_list()` is true | `value.List` (`[]any`) | `Value::List` |
+| map | `Map` with string keys, in entry order | `array` with the entries in entry order | `*value.OrderedMap`, in entry order | `Value::Map`, in entry order |
+| native object | the original instance | the original object | the original value | the same `TemplateObject` |
+
+- A safe string arrives as a plain string. The safe mark exists only inside a render (VAL-6, VAL-7); a host function whose result must be written without escaping returns text, and the template applies `raw` (FUN-48).
+- A list or a map arrives as a new host value that the host owns. A change that the host makes to a received list or map changes no template value: a later read of the same template value in the render returns the value it had before the call. A native object is not copied (VAL-18).
+- In PHP, a map arrives as an array, so the key conversion of PHP arrays applies: a key that is the decimal text of an integer in the PHP integer range, without a sign `+`, without leading zeros and other than `-0`, becomes an integer key. A PHP array cannot distinguish an empty map from an empty list, or a map whose keys are `"0"` to `"n-1"` in that order from a list; such a map arrives as that array, and binding the array again (VAL-14) produces a list. The PHP AST program and the PHP extension produce the same arrays.
+- Reason: every host receives plain values of its own language that its binding table (VAL-13 to VAL-16) accepts, so host code needs no implementation class to read an argument and can return an argument without converting it. An internal representation, such as a safe string wrapper or the PHP class `MapValue`, never reaches host code, and the two PHP implementations pass the same values.
 
 ## Examples
 

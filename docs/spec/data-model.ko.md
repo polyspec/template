@@ -79,7 +79,7 @@
 
 ## 호스트 바인딩
 
-**VAL-11** 호스트 바인딩은 호스트 언어의 값을 템플릿 값으로 변환한다. 바인딩은 assign 데이터, 템플릿 define 데이터, 호스트가 계산한 scope 인자, 호스트 함수·논리 class 함수·instance method의 반환값, 템플릿이 읽는 native object member의 값에 적용된다(VAL-19). VAL-12부터 VAL-16의 변환 표는 허용되는 입력의 전체 집합이며 그 외 입력은 E_DATA_UNSUPPORTED_TYPE이다. VAL-17부터 VAL-20은 모든 호스트에 적용된다.
+**VAL-11** 호스트 바인딩은 호스트 언어의 값을 템플릿 값으로 변환한다. 바인딩은 assign 데이터, 템플릿 define 데이터, 호스트가 계산한 scope 인자, 호스트 함수·논리 class 함수·instance method의 반환값, 템플릿이 읽는 native object member의 값에 적용된다(VAL-19). VAL-12부터 VAL-16의 변환 표는 허용되는 입력의 전체 집합이며 그 외 입력은 E_DATA_UNSUPPORTED_TYPE이다. VAL-17부터 VAL-21은 모든 호스트에 적용된다.
 
 **VAL-12** JSON 텍스트는 assign 데이터의 기준 형태다. 모든 구현은 JSON 텍스트를 받아 같은 값을 생성한다. 각 구현은 문서 순서를 보존하고 VAL-2의 숫자 규칙과 VAL-20의 깊이 제한을 적용하는 파서로 JSON 텍스트를 파싱한다. TypeScript 구현은 이 파서를 패키지에 제공하며 assign 데이터에 `JSON.parse`를 사용하지 않는다.
 
@@ -93,6 +93,8 @@
 | 객체 | 문서 순서의 map. 키는 문자열 행을 따른다. 중복 키는 이전 값을 대체하고 이전 위치를 유지 |
 
 VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 파서는 제한을 넘는 첫 배열 또는 객체에서 나머지 텍스트를 읽기 전에 실패한다.
+
+하나의 JSON 문서가 아닌 텍스트는 E_DATA_INVALID_JSON이다. 문법 오류, 빈 텍스트, 문서 뒤에 공백이 아닌 내용이 있는 텍스트가 이에 해당한다. 파서는 문서 순서에서 첫 위반을 보고하므로 문법 오류보다 앞에 있는 깊이 오류나 숫자 오류는 그 오류 코드로 보고된다. 이 규칙은 구현이 데이터로 받는 모든 JSON 텍스트, 즉 assign 데이터, 템플릿 정의와 환경에 적용되며 명령줄 인터페이스의 파일(CNF-4)과 PHP 확장의 JSON 메서드도 포함한다. 이유: JSON 텍스트는 데이터의 기준 형태이므로 잘못된 문서는 같은 입력의 데이터 오류다. 따라서 모든 구현은 구현마다 다른 예외가 아니라 ERR-5의 데이터 오류 객체로 이를 보고한다.
 
 **VAL-13** TypeScript와 JavaScript.
 
@@ -159,7 +161,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 
 **VAL-17** 모든 호스트에서 map 키는 string이다. string이 아닌 키를 가진 호스트 map은 위 표가 변환을 정의한 경우에만 변환되며 그 외에는 E_DATA_UNSUPPORTED_TYPE이다. 키는 string 값과 같이 검사한다. 유효한 UTF-8이 아닌 키, TypeScript에서는 올바른 형식의 UTF-16이 아닌 키는 E_DATA_INVALID_UTF8이다.
 
-**VAL-18** 바인딩은 할당된 native object 참조를 복사하지 않고 유지한다. 템플릿이 호스트 함수, 논리 class 함수 또는 instance method에 인자로 넘긴 native object는 직접 넘기든 list나 map 인자 안에 넣어 넘기든 원본 호스트 객체로 도착한다. 같은 PHP 객체, 같은 JavaScript 인스턴스, 같은 Go 값이며, Rust에서는 같은 `TemplateObject`이고 호스트는 `Value::downcast_object`로 이를 되찾는다. 리소스 핸들과 함수는 PHP closure를 포함해 템플릿 값이 아니며 바인딩은 이를 E_DATA_UNSUPPORTED_TYPE으로 거부한다. 렌더링은 값을 읽기만 하며 호스트 데이터에 쓰지 않는다.
+**VAL-18** 바인딩은 할당된 native object 참조를 복사하지 않고 유지한다. 템플릿이 호스트 함수, 논리 class 함수 또는 instance method에 인자로 넘긴 native object는 직접 넘기든 list나 map 인자 안에 넣어 넘기든 원본 호스트 객체로 도착한다. 같은 PHP 객체, 같은 JavaScript 인스턴스, 같은 Go 값이며, Rust에서는 같은 `TemplateObject`이고 호스트는 `Value::downcast_object`로 이를 되찾는다. 그 밖의 인자 값의 형태는 VAL-21이 정의한다. 리소스 핸들과 함수는 PHP closure를 포함해 템플릿 값이 아니며 바인딩은 이를 E_DATA_UNSUPPORTED_TYPE으로 거부한다. 렌더링은 값을 읽기만 하며 호스트 데이터에 쓰지 않는다.
 
 **VAL-19** Native object는 템플릿의 불투명한 값이다. Truthy이며 stringify·반복·spread할 수 없다.
 
@@ -178,6 +180,25 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 
 - 깊이가 64보다 큰 값을 바인딩하면 E_DATA_DEPTH로 실패한다. 바인딩은 65번째 단계에서 멈추고 값의 더 깊은 부분을 읽지 않는다. 자기 자신을 포함하는 JavaScript 객체, Go map이나 슬라이스, PHP 객체나 배열 같은 순환 호스트 구조는 유한한 깊이가 없으므로 별도의 순환 검사 없이 같은 제한에 의해 E_DATA_DEPTH로 실패한다. PHP에서는 `jsonSerialize()` 호출 한 번도 한 단계로 센다. 따라서 `jsonSerialize()`가 객체 자신을 반환하는 객체는 E_DATA_DEPTH로 실패한다.
 - 값의 깊이가 64보다 커지는 list 또는 map literal은 그 literal 위치에서 E_RUNTIME_LIMIT로 실패한다. list와 map literal은 피연산자보다 깊은 값을 만드는 유일한 템플릿 연산이다. 함수는 인자보다 깊지 않은 값을 반환하며 호스트 함수의 결과는 바인딩한다.
+
+## 호스트 인자
+
+**VAL-21** 호스트 함수, 논리 class 함수와 instance method는 모든 인자를 다음 형태의 호스트 값으로 받는다. 형태는 AST program과 모든 generated program에서 같으며, 모든 깊이의 list 원소와 map 값에도 적용된다.
+
+| 템플릿 값 | TypeScript | PHP | Go | Rust |
+| --- | --- | --- | --- | --- |
+| null | `null` | `null` | `nil` | `Value::Null` |
+| bool | `boolean` | `bool` | `bool` | `Value::Bool` |
+| number | `number` | `float` | `float64` | `Value::Number` |
+| string, safe string | `string` | `string` | `string` | `Value::Str` |
+| list | `Array` | `array_is_list()`가 참인 `array` | `value.List` (`[]any`) | `Value::List` |
+| map | 문자열 키의 `Map`, 항목 순서 | 항목 순서대로 항목을 담은 `array` | `*value.OrderedMap`, 항목 순서 | `Value::Map`, 항목 순서 |
+| native object | 원본 인스턴스 | 원본 객체 | 원본 값 | 같은 `TemplateObject` |
+
+- safe 문자열은 일반 문자열로 도착한다. safe 표시는 렌더 안에서만 존재한다(VAL-6, VAL-7). 결과를 escape 없이 출력해야 하는 호스트 함수는 텍스트를 반환하고 템플릿이 `raw`를 적용한다(FUN-48).
+- list와 map은 호스트가 소유하는 새 호스트 값으로 도착한다. 호스트가 받은 list나 map을 바꿔도 어떤 템플릿 값도 바뀌지 않는다. 렌더 안에서 같은 템플릿 값을 나중에 읽으면 호출 전의 값을 반환한다. native object는 복사하지 않는다(VAL-18).
+- PHP에서 map은 배열로 도착하므로 PHP 배열의 키 변환이 적용된다. PHP 정수 범위 안의 정수를 나타내는 10진 텍스트이고 `+` 부호와 선행 0이 없으며 `-0`이 아닌 키는 정수 키가 된다. PHP 배열은 빈 map과 빈 list를 구별하지 못하고, 키가 차례대로 `"0"`부터 `"n-1"`인 map과 list도 구별하지 못한다. 그런 map은 그 배열로 도착하며 그 배열을 다시 바인딩하면(VAL-14) list가 된다. PHP AST program과 PHP 확장은 같은 배열을 만든다.
+- 이유: 모든 호스트가 자기 언어의 일반 값, 즉 자기 바인딩 표(VAL-13~VAL-16)가 받는 값을 받는다. 따라서 호스트 코드는 인자를 읽기 위해 구현 클래스가 필요 없고 인자를 변환 없이 반환할 수 있다. safe 문자열 wrapper나 PHP 클래스 `MapValue` 같은 내부 표현은 호스트 코드에 도달하지 않으며 두 PHP 구현은 같은 값을 넘긴다.
 
 
 ## 예시

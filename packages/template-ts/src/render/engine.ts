@@ -151,13 +151,18 @@ export class AstProgramCore implements RuntimeServices, Program {
 
   // RT-9, RT-40: loads a template by name through the loader and caches it by version.
   loadTemplate(name: string, from: Frame | null, span: Span | null): ParsedTemplate {
-    const loaded: LoadResult | null = this.loader.load(name);
-    if (loaded === null) {
-      const template = from ? from.name : name;
-      const message = `template ${name} does not exist`;
-      if (from && span) throw errorAt('E_LOAD_NOT_FOUND', template, from.lines, span, message);
-      throw new TemplateError({ code: 'E_LOAD_NOT_FOUND', template: name, line: 0, col: 0, offset: 0, end: 0, message });
+    const fail = (code: 'E_LOAD_NOT_FOUND' | 'E_LOAD_FAILED', message: string): TemplateError => {
+      if (from && span) return errorAt(code, from.name, from.lines, span, message);
+      return new TemplateError({ code, template: name, line: 0, col: 0, offset: 0, end: 0, message });
+    };
+    let loaded: LoadResult | null;
+    try {
+      loaded = this.loader.load(name);
+    } catch (error) {
+      // RT-9: every exception of the loader is a load failure of the requested name.
+      throw fail('E_LOAD_FAILED', `template ${name} cannot be loaded: ${error instanceof Error ? error.message : String(error)}`);
     }
+    if (loaded === null) throw fail('E_LOAD_NOT_FOUND', `template ${name} does not exist`);
     const cached = this.cache.get(name);
     if (this.artifactRefresh === 'false' && cached) return cached.template;
     if (this.artifactRefresh === 'true' && cached && cached.version === loaded.version) return cached.template;

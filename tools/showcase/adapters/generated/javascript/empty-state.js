@@ -27,6 +27,15 @@ function generatedBindType(value, type, path) { if (value === null || value === 
     return new Map([...object].map(([key, item]) => [generatedBindType(key, type.key, path + '.key'), generatedBindType(item, type.value, path + '.' + key)]));
 } if (type.kind === 'record')
     return generatedBindRecord(value, generatedRecords[type.name], path); throw new Error(path + ' has an unknown generated type'); }
+function generatedToValue(value, type) { if (value === null || value === undefined)
+    return null; if (type.kind === 'record') {
+    if (value instanceof Map)
+        return value;
+    const fields = generatedRecords[type.name];
+    return new Map(Object.entries(fields).map(([name, field]) => [name, generatedToValue(value[name], field)]));
+} if (type.kind === 'list')
+    return value.map(item => generatedToValue(item, type.item)); if (type.kind === 'map')
+    return new Map([...value].map(([key, item]) => [key, generatedToValue(item, type.value)])); return value; }
 function generatedBindRecord(value, fields, path, partial = false) { const object = generatedObject(value, path); const result = {}; for (const [name, type] of Object.entries(fields)) {
     if (!object.has(name)) {
         if (!partial && !type.optional)

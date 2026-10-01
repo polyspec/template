@@ -42,7 +42,7 @@ Local 변수는 직선 코드에서 마지막 assignment의 type을 가진다. B
 
 모든 generated module은 논리 구조 `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest`, `GeneratedProgram`을 노출한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
-네 generated backend 모두 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 네 core 언어와 canonical case 235개 전체에서 완료되었다.
+네 generated backend 모두 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 네 core 언어와 canonical case 244개 전체에서 완료되었다.
 
 `RuntimeServices`는 두 program mode가 함께 사용하는 runtime interface다. 구체적인 `RuntimeEnvironment`가 자원 제한, 등록 함수, 논리 class function을 소유하고 등록을 한 번 검증하며 이 interface를 구현한다. 각 `AstProgram`과 `GeneratedProgram`은 environment 하나를 소유한다. AST에만 필요한 template loading은 AST renderer에 속하며 environment나 generated 실행 상태에는 들어가지 않는다. `RuntimeBindings`가 `RuntimeServices`를 사용하므로 generated 코드는 AST loader나 interpreter에 의존하지 않고 같은 값·오류 의미를 사용한다.
 
@@ -62,6 +62,8 @@ Rust backend도 생성된 template 함수에서 `Result`를 직접 반환하고 
 
 Rust generated source module은 `polyspec-template`, `derive` feature를 켠 `serde`, `preserve_order`와 `arbitrary_precision` feature를 켠 `serde_json`에 직접 의존한다. 이는 generated module의 compile-time 의존성이므로 host crate가 직접 선언해야 한다. 격리 Cargo 설치 프로젝트는 압축을 푼 `.crate` package를 대상으로 generated module을 compile해 이 경계를 강제한다.
 
+record를 담은 typed 값은 모든 runtime 연산에 canonical 값으로 도달한다. 함수, class 함수, method의 인자, `&&`, `||`, `??`를 제외한 연산자의 피연산자, echo의 식이 이에 해당한다. record는 선언 순서의 선언된 필드로 된 map이 되고, record의 list나 map은 모든 깊이에서 그런 map의 list나 map이 된다. 따라서 모든 backend에서 host 함수는 VAL-21 형태를 받고 연산자는 EXP-34를 적용한다. Typed member 접근과 loop는 typed record를 유지한다. 이유: AST program은 같은 데이터에 map을 넘긴다. Go backend는 record를 native object로 넘겼고, TypeScript와 PHP backend에서는 record를 함수에 넘기는 렌더가 `E_INTERNAL`로 실패했다. `make generated-native-check`는 `tests/fixtures/typed-values`를 typed manifest로 모든 backend에서 컴파일하고 출력을 AST program과 비교한다.
+
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 
 ## Artifact 갱신
@@ -76,7 +78,7 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 
 ## 구현 상태
 
-AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 showcase는 이 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. TypeScript, Go, Rust, PHP에서 235개 전체 generated matrix가 통과하며, 별도의 generated native-call fixture가 네 언어에서 같은 assign object field, instance method, class function 결과를 출력한다.
+AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 showcase는 이 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. TypeScript, Go, Rust, PHP에서 244개 전체 generated matrix가 통과하며, 별도의 generated native-call fixture가 네 언어에서 같은 assign object field, instance method, class function 결과를 출력하며, AST program과 같은 호스트 인자(VAL-21)와 native object 동등성(EXP-39)을 가진다.
 
 Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract·compiler digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 

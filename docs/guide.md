@@ -292,7 +292,7 @@ Write `\{` where a real tag would start but you want the text. A file may also c
 
 The [function specification](spec/functions.md) gives the arguments and the exact result of each one. `date` uses the fixed offset of `env.timezone`, so the same data gives the same output everywhere.
 
-A host can register its own functions. A template that uses one renders only where that function is registered, so register the same names in every place that renders the template.
+`register` adds a function to the built-in set. A template that uses one renders only where that function is registered, so register the same names in every place that renders the template. A registered function receives plain values of its language: a safe string arrives as a string, a list or map as a new list or map that the function may change without changing the template, and an assigned object as the original object ([VAL-21](spec/data-model.md)). Two assigned objects are equal in a template only when they are the same object ([EXP-39](spec/expressions.md)).
 
 ## Render a template
 

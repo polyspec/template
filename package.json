@@ -31,9 +31,9 @@
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "esbuild": "0.27.2",
-    "eslint": "^10.5.0",
+    "eslint": "^10.11.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0",
+    "typescript-eslint": "^8.71.0",
     "vitepress": "^1.6.4"
   },
   "allowScripts": {

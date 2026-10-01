@@ -1,0 +1,1 @@
+{= order == order}|{= order === same}|{= order == other}|{= order != other}|{= order !== same}|{= pick(order) == order}|{= [order] == [same]}|{= ['k' => order] == ['k' => other]}|{= order in [other, same]}|{= contains([other], order)}|{= order == 'order'}|{= order == null}

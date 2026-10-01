@@ -44,4 +44,8 @@ func TestUsageErrors(t *testing.T) {
 	if status := run([]string{"render", "x.tpl", "--unknown", "1"}, &stdout, &stderr); status != 1 {
 		t.Errorf("status %d", status)
 	}
+	// CNF-4: a data file that cannot be read is a usage error.
+	if status := run([]string{"render", filepath.Join(casesDir, "echo", "path", "input.tpl"), "--data", "missing.json"}, &stdout, &stderr); status != 1 {
+		t.Errorf("missing data file status %d", status)
+	}
 }

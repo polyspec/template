@@ -150,7 +150,7 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 
 ## 동등과 순서
 
-**EXP-34** 두 피연산자의 타입이 같은 `a == b`: 두 number는 수치로 비교한다. 두 string은 코드포인트 열로 비교한다. 두 boolean과 두 `null`은 동일성으로 비교한다. 두 list는 길이가 같고 같은 인덱스의 모든 원소 쌍이 `==`를 만족할 때 같다. 두 map은 키 집합이 같고 같은 키의 모든 값이 `==`를 만족할 때 같으며 항목 순서와 무관하다.
+**EXP-34** 두 피연산자의 타입이 같은 `a == b`: 두 number는 수치로 비교한다. 두 string은 코드포인트 열로 비교한다. 두 boolean과 두 `null`은 동일성으로 비교한다. 두 list는 길이가 같고 같은 인덱스의 모든 원소 쌍이 `==`를 만족할 때 같다. 두 map은 키 집합이 같고 같은 키의 모든 값이 `==`를 만족할 때 같으며 항목 순서와 무관하다. 두 native object는 EXP-39로 비교한다.
 
 **EXP-35** number와 string의 `a == b`: string이 EXP-23의 변환 문법을 만족하면 수치로 비교하고, 아니면 결과는 `false`이다. 그 외 서로 다른 타입의 모든 쌍은 `false`이다. `null`은 `null`과만 같다.
 
@@ -158,7 +158,18 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 
 **EXP-37** `a === b`는 두 피연산자의 타입이 같고 EXP-34가 성립할 때만 `true`이다. number와 string은 엄격 동등이 될 수 없다. `a !== b`는 `a === b`의 부정이다.
 
-**EXP-38** `<`, `>`, `<=`, `>=`는 두 number를 수치로, 두 string을 코드포인트 열로 비교한다. 그 외 타입 쌍은 E_RUNTIME_COMPARE이다.
+**EXP-38** `<`, `>`, `<=`, `>=`는 두 number를 수치로, 두 string을 코드포인트 열로 비교한다. 두 native object와, native object와 다른 값의 쌍을 포함해 그 외 타입 쌍은 E_RUNTIME_COMPARE이다.
+
+**EXP-39** 두 native object(VAL-19)는 같은 호스트 객체일 때 `==`와 `===`에서 같고 그렇지 않으면 같지 않다. `!=`와 `!==`는 그 부정이다. 비교는 member를 읽지 않고 호스트 코드를 호출하지 않는다. 같은 호스트 객체는 호스트마다 다음과 같이 정의한다.
+
+| 호스트 | 같은 호스트 객체 |
+| --- | --- |
+| TypeScript | 같은 인스턴스(`===`) |
+| PHP | PHP AST program과 PHP 확장 모두에서 같은 객체(`===`) |
+| Go | 유지한 두 값이 Go `==`로 같다. pointer는 같은 주소를 가리키는 pointer와 같은 객체다. struct 값은 동일성이 없으므로 필드가 Go `==`로 같은 같은 타입의 struct 값과 같은 객체다. 동적 내용을 비교할 수 없는 값은 어떤 값과도 같은 객체가 아니다 |
+| Rust | 두 값이 같은 `TemplateObject::identity`를 보고한다. 기본 identity는 `TemplateObject`의 주소이며 PHP 확장은 PHP 객체의 주소를 보고한다 |
+
+native object를 담은 list나 map은 원소를 이 규칙으로 비교하며(EXP-34) `in`(EXP-32)과 `contains`도 같다. 이유: 동일성은 모든 호스트가 호스트 코드를 실행하지 않고 임의의 객체에 대해 정의하는 유일한 동등성이며, 템플릿은 객체의 상태 전체를 비교할 수 없다. 인자를 그대로 반환하는 호스트 함수의 결과처럼 같은 호스트 객체를 다시 바인딩한 값은 처음 값과 같다.
 
 ## 예시
 

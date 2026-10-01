@@ -46,6 +46,19 @@ function loadCase(id, dir) {
   };
 }
 
+// The template definitions of a case for type derivation. A define.json that is not JSON text is
+// a data error of the render (VAL-12): the render step of every runner reports it as
+// E_DATA_INVALID_JSON, and type derivation uses no definitions.
+export function typeDefinitions(testCase) {
+  if (!testCase.hasDefine) return {};
+  try {
+    return JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8'));
+  } catch (error) {
+    if (error instanceof SyntaxError) return {};
+    throw error;
+  }
+}
+
 export function renderArgs(testCase) {
   const args = ['render', testCase.input, '--root', testCase.dir];
   if (testCase.hasData) args.push('--data', 'data.json');

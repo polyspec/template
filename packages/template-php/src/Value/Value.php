@@ -182,6 +182,9 @@ final class Value
                 }
 
                 return true;
+            case 'object':
+                // EXP-39: two native objects are equal when they are the same object.
+                return $a === $b;
             default:
                 /** @var MapValue $a */
                 /** @var MapValue $b */

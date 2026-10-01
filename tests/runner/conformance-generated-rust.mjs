@@ -8,7 +8,7 @@ import { rustString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, listCases } from './cases.mjs';
+import { firstDifference, listCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
 const crate = join(root, 'packages/template-rust');
@@ -49,8 +49,7 @@ try {
       const index = runnable.length;
       const directory = join(temporary, `case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`);
       mkdirSync(directory);
-      const define = testCase.hasDefine ? JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8')) : {};
-      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), define);
+      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(directory, 'types.json');
       const graphPath = join(directory, 'ast');
       const sourcePath = join(directory, 'generated.rs');

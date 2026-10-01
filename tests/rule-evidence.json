@@ -3,9 +3,9 @@
   "groups": [
     {
       "name": "serialized-ast-schema",
-      "rules": ["AST-8"],
+      "rules": ["AST-8", "CNF-15"],
       "verification": "make schema-check",
-      "files": ["scripts/check-schema.mjs"]
+      "files": ["scripts/check-schema.mjs", "scripts/conformance-case-files.mjs", "scripts/check-schema-mutations.mjs"]
     },
     {
       "name": "conformance-protocol",
@@ -60,6 +60,12 @@
       "rules": ["VAL-1", "VAL-7", "VAL-11", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18"],
       "verification": "make test-ts test-go test-rust test-php test-ext",
       "files": ["packages/template-ts/tests/value/value.test.ts", "packages/template-go/value/value_test.go", "packages/template-rust/tests/value.rs", "packages/template-php/tests/Value/ValueTest.php", "packages/template-php-ext/tests/EngineTest.php"]
+    },
+    {
+      "name": "host-arguments-and-native-equality",
+      "rules": ["VAL-21", "EXP-39"],
+      "verification": "make test-ts test-go test-rust test-php test-ext generated-native-check",
+      "files": ["tests/fixtures/native-object/host-values.json", "packages/template-ts/tests/render/host-values.test.ts", "packages/template-go/host_values_test.go", "packages/template-rust/tests/host_values.rs", "packages/template-php/tests/Value/HostValuesTest.php", "packages/template-php-ext/tests/HostValuesTest.php", "scripts/check-generated-native-calls.mjs", "tests/fixtures/typed-values/input.tpl", "scripts/check-generated-typed-values.mjs"]
     }
   ]
 }

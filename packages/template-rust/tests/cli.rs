@@ -34,4 +34,12 @@ fn render_prints_html_and_errors_exit_with_status_2() {
 fn usage_errors_exit_with_status_1() {
     assert_eq!(run(&["parse"]).status.code(), Some(1));
     assert_eq!(run(&["render", "x.tpl", "--unknown", "1"]).status.code(), Some(1));
+    // CNF-4: a data file that cannot be read is a usage error.
+    let file = repo_root().join("tests/cases/echo/path/input.tpl");
+    assert_eq!(
+        run(&["render", file.to_str().expect("path"), "--data", "missing.json"])
+            .status
+            .code(),
+        Some(1)
+    );
 }

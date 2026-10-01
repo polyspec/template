@@ -18,6 +18,7 @@ GO_DIR   := packages/template-go
 RUST_DIR := packages/template-rust
 PHP_DIR  := packages/template-php
 EXT_DIR  := packages/template-php-ext
+SHOWCASE_RUST := tools/showcase/adapters/rust
 FORMAT_DIR := packages/template-format
 VSCODE_DIR := packages/template-vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
@@ -30,7 +31,7 @@ endef
 help: ## List targets
 	@echo "Targets:"
 	@echo "  check                  docs-check, lint, unit tests of every package, formatter and extension tests, conformance"
-	@echo "  lint                   eslint, gofmt, cargo fmt --check, pint --test"
+	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  conformance            Cross-language conformance suite (tests/runner/conformance.mjs)"
@@ -73,6 +74,9 @@ lint: build-php ## Lint every package
 	npm run lint
 	@test ! -d $(GO_DIR) || { out=$$(gofmt -l $(GO_DIR)); test -z "$$out" || { echo "$$out"; exit 1; }; }
 	@test ! -d $(RUST_DIR) || $(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
+	@test ! -d $(EXT_DIR) || $(CARGO) fmt --manifest-path $(EXT_DIR)/Cargo.toml --check
+	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
+	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
 	@test ! -d $(PHP_DIR) || $(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
 
 build-ts: ## Build the TypeScript package
@@ -175,6 +179,7 @@ ext: ## Build the PHP extension
 	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml
 
 test-ext: ext ## Test the PHP extension
+	$(CARGO) clippy --locked --release --manifest-path $(EXT_DIR)/Cargo.toml -- -D warnings
 	cd $(EXT_DIR) && composer install --no-interaction --quiet
 	node tests/runner/conformance.mjs --langs php-ext
 	cd $(EXT_DIR) && ./run-tests.sh
@@ -196,13 +201,15 @@ doc-coverage: ## Check that public symbols carry documentation comments
 
 schema-check: ## Validate the AST schema and fixtures
 	node scripts/check-schema.mjs
+	node scripts/check-schema-mutations.mjs
 
 docs-check: ## Document checks
 	node scripts/generate-runtime-interface.mjs --check
 	node scripts/generate-compiler-interface.mjs --check
 	node scripts/generate-showcase-contract.mjs --check
 	node scripts/check-documents.mjs
-	@test ! -f scripts/check-schema.mjs || node scripts/check-schema.mjs
+	node scripts/check-schema.mjs
+	node scripts/check-schema-mutations.mjs
 	@test ! -f scripts/check-doc-coverage.mjs || node scripts/check-doc-coverage.mjs
 	node scripts/update-benchmark-docs.mjs --check
 	node scripts/features/build.mjs --check
@@ -314,8 +321,9 @@ showcase-check: build-ts ## Verify example-site parity, repeatability and browse
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
 	node tools/showcase/compile.mjs --refresh true
 
-generated-native-check: build-ts ## Execute generated member and class calls with native values in every core language
+generated-native-check: build-ts ## Execute generated member and class calls with native and typed values in every core language
 	node scripts/check-generated-native-calls.mjs
+	node scripts/check-generated-typed-values.mjs
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
 	node tools/showcase/compile-generated.mjs --refresh true

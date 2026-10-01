@@ -21,7 +21,8 @@ final class FilesystemLoader implements LoaderInterface
     }
 
     /**
-     * Returns the file of a name, or null when the name does not exist or leaves the directory.
+     * Returns the file of a name, or null when no regular file exists for the name or the name
+     * leaves the directory. A regular file that cannot be read is a failure (RT-10).
      *
      * @return array{source: string, version: string}|null
      */
@@ -35,9 +36,9 @@ final class FilesystemLoader implements LoaderInterface
         if ($real === false || !str_starts_with($real, $this->root . DIRECTORY_SEPARATOR)) {
             return null;
         }
-        $bytes = file_get_contents($path);
+        $bytes = is_readable($path) ? file_get_contents($path) : false;
         if ($bytes === false) {
-            return null;
+            throw new \RuntimeException("{$name} cannot be read");
         }
         $stats = stat($path);
 

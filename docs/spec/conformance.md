@@ -23,6 +23,8 @@ Conformance is verified by fixture cases that every implementation renders throu
 | `expected.html` | one of the two | The exact render output. |
 | `expected.error.json` | one of the two | `{"code", "template", "line", "col"}` of the expected error. |
 
+**CNF-15** `scripts/check-schema.mjs` checks the presence of `expected.ast.json` in every case directory. It fails when a case has no `expected.ast.json` and its `expected.error.json` does not name an `E_LEX_*` or `E_PARSE_*` code with `template` equal to `input.tpl`, and when a case has an `expected.ast.json` although its `expected.error.json` names such an error. `make schema-check` and `make docs-check` run it, so `make check` fails for a missing AST file. Reason: CNF-9 compares the parse result of every case, and a case without its AST file would otherwise pass without that comparison.
+
 **CNF-3** `scripts/check-rules.mjs` collects every rule identifier defined in `docs/spec/*.md` and every identifier listed in `case.json` files. It fails when a `case.json` names a rule that no document defines, and it reports the rules that no case covers. `make check` runs it.
 
 ## Command line contract
@@ -36,7 +38,7 @@ Conformance is verified by fixture cases that every implementation renders throu
 | either subcommand, template error | The error JSON on stderr. | 2 |
 | either subcommand, usage error | A message on stderr. | 1 |
 
-`--root` defaults to the directory of `FILE`. The template name passed to the parser and used in errors is `FILE` relative to the root. `--data`, `--define` and `--env` name JSON files with the content of CNF-2. `--delimiters` is the two-character value of the engine option `delimiters`; the runner passes the value of `options.json`. Output is UTF-8. The command does not add a trailing newline.
+`--root` defaults to the directory of `FILE`. The template name passed to the parser and used in errors is `FILE` relative to the root. `--data`, `--define` and `--env` name JSON files with the content of CNF-2. A file that cannot be read is a usage error. A file whose content is not one JSON document is a template error `E_DATA_INVALID_JSON` with the position of ERR-5 (VAL-12); every other data error of these files is a template error with its `E_DATA_*` code at the same position. `--delimiters` is the two-character value of the engine option `delimiters`; the runner passes the value of `options.json`. Output is UTF-8. The command does not add a trailing newline.
 
 **CNF-5** Commands per implementation:
 

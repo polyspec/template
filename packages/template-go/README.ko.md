@@ -65,9 +65,9 @@ engine := template.NewEngine(program)
 | `NewAstProgram(Options)` | `Loader`, `Functions`, `Limits`, `Delimiters`를 가진 AST program을 생성한다. |
 | `NewEngine(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `Define`은 템플릿 또는 HTML 항목을 제공한다. |
-| `(*render.Engine).Register(name, fn)` | AST program에 호스트 함수를 등록한다. |
-| `NewMapLoader`, `NewFSLoader` | 메모리 로더와 `fs.FS` 로더. |
-| `ParseJSON` | assign 데이터용 순서 보존 JSON 디코더. |
+| `(*render.Engine).Register(name, fn)` | AST program에 호스트 함수를 등록한다. 인자는 VAL-21 형태다. safe 문자열은 `string`, list는 새 `value.List`, map은 새 `*value.OrderedMap`, native object는 원본 값이다. |
+| `NewMapLoader`, `NewFSLoader` | 메모리 로더와 `fs.FS` 로더. `Loader.Load(name)`은 `(LoadResult, ok, error)`를 반환한다. nil이 아닌 오류는 렌더를 `E_LOAD_FAILED`로 실패시키며, `fs.FS` 로더는 읽을 수 없는 일반 파일에 대해 오류를 반환한다. |
+| `ParseJSON` | assign 데이터용 순서 보존 JSON 디코더. 하나의 JSON 문서가 아닌 텍스트는 `E_DATA_INVALID_JSON`이다. |
 | `Error` | `Code`, `Template`, `Line`, `Col`, `Offset`, `End`, `Message`를 가진 오류. |
 | `SafeString` | echo 태그가 이스케이프 없이 쓰는 문자열. |
 

@@ -1,0 +1,174 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "For",
+      "name": "item",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          9,
+          14
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "item",
+            "span": [
+              18,
+              22
+            ]
+          },
+          "span": [
+            15,
+            23
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        0,
+        26
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        26,
+        27
+      ]
+    },
+    {
+      "type": "For",
+      "name": "item",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          34,
+          39
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "item",
+            "span": [
+              43,
+              47
+            ]
+          },
+          "span": [
+            40,
+            48
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        27,
+        51
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        51,
+        52
+      ]
+    },
+    {
+      "type": "For",
+      "name": "item",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          60,
+          65
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "item",
+            "span": [
+              69,
+              73
+            ]
+          },
+          "span": [
+            66,
+            74
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        52,
+        77
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        77,
+        78
+      ]
+    },
+    {
+      "type": "For",
+      "name": "item",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          88,
+          93
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "item",
+            "span": [
+              97,
+              101
+            ]
+          },
+          "span": [
+            94,
+            102
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        78,
+        105
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        105,
+        106
+      ]
+    }
+  ]
+}

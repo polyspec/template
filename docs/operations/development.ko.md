@@ -22,7 +22,7 @@ make help
 make check
 ```
 
-`make check`는 `docs-check`, `lint`, `test-ts`, `test-format`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance`를 실행한다. 패키지가 아직 없는 타겟은 `not implemented`를 출력하고 상태 1로 종료한다.
+`make check`는 `docs-check`, `lint`, `test-ts`, `test-format`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance`를 실행한다. 패키지가 아직 없는 타겟은 `not implemented`를 출력하고 상태 1로 종료한다. `lint`는 ESLint, gofmt, Rust 크레이트·PHP 확장·Rust showcase adapter의 `cargo fmt --check`를 실행하고, Rust showcase adapter를 경고를 오류로 처리해 컴파일하며, Pint를 실행한다. `test-rust`와 `test-ext`는 Rust 크레이트와 PHP 확장에 경고를 오류로 처리하는 clippy를 실행한다.
 
 언어별 명령:
 

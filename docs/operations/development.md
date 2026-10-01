@@ -22,7 +22,7 @@ make help
 make check
 ```
 
-`make check` runs `docs-check`, `lint`, `test-ts`, `test-format`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php` and `conformance`. A target whose package does not exist yet prints `not implemented` and exits with status 1.
+`make check` runs `docs-check`, `lint`, `test-ts`, `test-format`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php` and `conformance`. A target whose package does not exist yet prints `not implemented` and exits with status 1. `lint` runs ESLint, gofmt, `cargo fmt --check` for the Rust crate, the PHP extension and the Rust showcase adapter, compiles the Rust showcase adapter with warnings as errors and runs Pint. `test-rust` and `test-ext` run clippy with warnings as errors on the Rust crate and on the PHP extension.
 
 Single-language commands:
 

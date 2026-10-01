@@ -34,8 +34,15 @@ const root = resolve(options.root ?? dirname(filePath));
 const name = relative(root, filePath).split('\\').join('/');
 if (name.startsWith('..')) usage('FILE is outside of --root');
 
+// CNF-4: a file that cannot be read is a usage error; its content is data (VAL-12).
 function readJson(path) {
-  return parseJsonBytes(new Uint8Array(readFileSync(resolve(root, path))));
+  let bytes;
+  try {
+    bytes = readFileSync(resolve(root, path));
+  } catch {
+    usage(`cannot read ${path}`);
+  }
+  return parseJsonBytes(new Uint8Array(bytes));
 }
 
 function fail(error) {
@@ -56,7 +63,12 @@ try {
   const engineOptions = { loader: new FsLoader(root) };
   if (options.delimiters !== null) engineOptions.delimiters = options.delimiters;
   if (command === 'parse') {
-    const source = new Uint8Array(readFileSync(filePath));
+    let source;
+    try {
+      source = new Uint8Array(readFileSync(filePath));
+    } catch {
+      usage(`cannot read ${file}`);
+    }
     const parseOptions = {};
     if (options.delimiters !== null) parseOptions.delimiters = options.delimiters;
     const ast = parse(source, name, parseOptions);

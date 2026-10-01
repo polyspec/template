@@ -2,6 +2,10 @@
 import { describe, expect, it } from 'vitest';
 import { AstProgram, MapLoader, parse, parseJson, TemplateError, type ErrorCode, type Template } from '../../src/index.js';
 import { bind, BindError } from '../../src/value/bind.js';
+import { FsLoader } from '../../src/node/index.js';
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 function code(run: () => unknown): string {
   try {
@@ -157,8 +161,52 @@ describe('internal boundary', () => {
     const broken = new AstProgram({ loader: { load: () => ({ ast: {} as Template, version: '1' }) } });
     const error = failure(() => broken.render('page.tpl', {}));
     expect([error.code, error.template, error.line] as [ErrorCode, string, number]).toEqual(['E_INTERNAL', 'page.tpl', 0]);
-    const failing = new AstProgram({ loader: { load: () => { throw new Error('loader failed'); } } });
-    expect(() => failing.render('page.tpl', {})).toThrow('loader failed');
     expect(code(() => parse('{= 1}', 'p.tpl'))).toBe('OK');
+  });
+});
+
+describe('loader failures', () => {
+  const throwing = (failing: string) => new AstProgram({
+    loader: {
+      load: (name: string) => {
+        if (name === failing) throw new Error(`cannot read ${name}`);
+        return { source: name === 'page.tpl' ? 'a\n{+ part.tpl}' : 'part', version: '1' };
+      },
+    },
+  });
+
+  it('reports a throwing loader as E_LOAD_FAILED at the entry template (RT-9, ERR-6)', () => {
+    const error = failure(() => throwing('page.tpl').render('page.tpl', {}));
+    expect([error.code, error.template, error.line, error.col]).toEqual(['E_LOAD_FAILED', 'page.tpl', 0, 0]);
+    expect(error.message).toContain('cannot read page.tpl');
+  });
+
+  it('reports a throwing loader as E_LOAD_FAILED at the include tag (RT-9, ERR-9)', () => {
+    const error = failure(() => throwing('part.tpl').render('page.tpl', {}));
+    expect([error.code, error.template, error.line, error.col]).toEqual(['E_LOAD_FAILED', 'page.tpl', 2, 1]);
+    expect(error.message).toContain('cannot read part.tpl');
+  });
+
+  it('reports an unreadable regular file as E_LOAD_FAILED and a directory as E_LOAD_NOT_FOUND (RT-10)', () => {
+    const root = mkdtempSync(join(tmpdir(), 'template-loader-'));
+    try {
+      writeFileSync(join(root, 'locked.tpl'), 'x');
+      chmodSync(join(root, 'locked.tpl'), 0o000);
+      mkdirSync(join(root, 'folder.tpl'));
+      const files = new AstProgram({ loader: new FsLoader(root) });
+      expect(code(() => files.render('locked.tpl', {}))).toBe('E_LOAD_FAILED');
+      expect(code(() => files.render('folder.tpl', {}))).toBe('E_LOAD_NOT_FOUND');
+      expect(code(() => files.render('missing.tpl', {}))).toBe('E_LOAD_NOT_FOUND');
+    } finally {
+      chmodSync(join(root, 'locked.tpl'), 0o600);
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('JSON text', () => {
+  it('reports text that is not one JSON document as E_DATA_INVALID_JSON (VAL-12)', () => {
+    for (const text of ['', ' ', '{', '{"a": }', '[1,]', '{"a": 1} x', 'nul', '"a', '01']) expect(code(() => parseJson(text))).toBe('E_DATA_INVALID_JSON');
+    expect(code(() => parseJson('{"a": 1e19, "b": }'))).toBe('E_DATA_NUMBER_RANGE');
   });
 });

@@ -14,7 +14,7 @@
 
 **ERR-5** 렌더링 시작 전 assign 데이터, template define 데이터 또는 환경을 바인딩하는 동안 발생한 오류는 `template`이 진입 템플릿 이름이고 `line` 0, `col` 0, `offset` 0, `end` 0이다. 렌더링 중 값을 바인딩하는 동안 발생한 오류는 그 값을 만든 표현식을 가리킨다. 호스트 함수, 논리 class 함수, instance method의 결과이면 호출을, native object의 member이면 lookup 표현식을 가리킨다(VAL-19).
 
-**ERR-6** 로더가 제공하지 않는 진입 템플릿의 오류는 `code`가 `E_LOAD_NOT_FOUND`이고 `template`이 요청한 이름이며 `line` 0, `col` 0이다.
+**ERR-6** 로더가 제공하지 않는 진입 템플릿의 오류는 `code`가 `E_LOAD_NOT_FOUND`이고 `template`이 요청한 이름이며 `line` 0, `col` 0이다. 로딩에 실패한 진입 템플릿의 오류(`E_LOAD_FAILED`)도 `template`, `line`, `col`이 같다.
 
 ## 코드
 
@@ -53,6 +53,7 @@
 | `E_LOAD_NOT_FOUND` | 로더에 해석된 이름의 템플릿이 없다. | include 또는 block 태그; 진입 템플릿은 ERR-6. |
 | `E_LOAD_CYCLE` | include 또는 block이 같은 체인에서 이미 렌더링 중인 템플릿을 렌더한다. | include 또는 block 태그. |
 | `E_LOAD_OUTSIDE_ROOT` | 해석된 경로가 로더 루트를 벗어난다. | include 또는 block 태그. |
+| `E_LOAD_FAILED` | 로더가 해석된 이름에 대해 실패를 보고한다(RT-9). TypeScript나 PHP 로더가 예외를 던지거나, Go나 Rust 로더가 오류를 반환하거나, 파일시스템 로더가 존재하는 일반 파일을 읽지 못한 경우다(RT-10). | include 또는 block 태그; 진입 템플릿은 ERR-6. |
 
 **ERR-10** 데이터 오류:
 
@@ -63,6 +64,7 @@
 | `E_DATA_INVALID_UTF8` | 문자열 또는 map 키가 유효한 유니코드 텍스트가 아니다(VAL-12~VAL-17). | ERR-5. |
 | `E_DATA_UNSUPPORTED_TYPE` | 값의 타입에 바인딩이 없다. | ERR-5. |
 | `E_DATA_DEPTH` | list와 map이 바인딩 깊이 제한보다 깊게 중첩된다. 순환하는 호스트 구조를 포함한다(VAL-20). | ERR-5. |
+| `E_DATA_INVALID_JSON` | assign 데이터, 템플릿 정의 또는 환경의 JSON 텍스트가 하나의 JSON 문서가 아니다(VAL-12). | ERR-5. |
 
 **ERR-11** 런타임 오류:
 
@@ -87,7 +89,7 @@
 | --- | --- | --- |
 | `E_INTERNAL` | 이 명세가 정의하지 않은 방식으로 구현이 실패했다. 엔진이 실행하는 Rust 또는 Go 코드의 panic, 또는 TypeScript와 PHP에서 언어 런타임이 프로그래밍 결함에 대해 발생시킨 오류다. | ERR-5. `parse`에서는 `parse`에 전달한 템플릿 이름. |
 
-**ERR-13** 어떤 구현도 호스트 프로세스를 종료시키지 않으며, panic이나 언어 런타임 오류가 구현의 공개 `parse`, `prepare`, `render` operation 밖으로 나가지 않는다. Generated program과 PHP 확장의 operation도 같다. 이런 실패는 모두 호스트에 `E_INTERNAL`로 보고한다. 언어 런타임 오류는 JavaScript 엔진이 발생시키는 `Error`의 내장 하위 클래스(`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`)와 PHP `Error` 계층의 클래스다. 엔진이 호출하는 호스트 코드(등록된 함수, 논리 class 함수, instance method, member accessor, `jsonSerialize()`)가 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고하면 이 경계에 도달하기 전에 `E_RUNTIME_HOST_FUNCTION`이 된다. Go나 Rust의 그런 호스트 코드가 일으킨 panic은 내부 오류다. 그 밖의 예외는 바뀌지 않고 호스트에 전달된다. 예를 들어 파싱이나 렌더링을 시작하기 전에 API가 발생시키는 인자 오류, 즉 잘못된 delimiter 옵션이나 generated program의 선언 타입과 맞지 않는 요청이다.
+**ERR-13** 어떤 구현도 호스트 프로세스를 종료시키지 않으며, panic이나 언어 런타임 오류가 구현의 공개 `parse`, `prepare`, `render` operation 밖으로 나가지 않는다. Generated program과 PHP 확장의 operation도 같다. 이런 실패는 모두 호스트에 `E_INTERNAL`로 보고한다. 언어 런타임 오류는 JavaScript 엔진이 발생시키는 `Error`의 내장 하위 클래스(`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`)와 PHP `Error` 계층의 클래스다. 엔진이 호출하는 호스트 코드(등록된 함수, 논리 class 함수, instance method, member accessor, `jsonSerialize()`)가 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고하면 이 경계에 도달하기 전에 `E_RUNTIME_HOST_FUNCTION`이 된다. 같은 방식으로 실패를 보고하는 로더는 `E_LOAD_FAILED`로 실패한다(RT-9). Go나 Rust의 그런 호스트 코드가 일으킨 panic은 내부 오류다. 그 밖의 예외는 바뀌지 않고 호스트에 전달된다. 예를 들어 파싱이나 렌더링을 시작하기 전에 API가 발생시키는 인자 오류, 즉 잘못된 delimiter 옵션이나 generated program의 선언 타입과 맞지 않는 요청이다.
 
 ## 예제
 

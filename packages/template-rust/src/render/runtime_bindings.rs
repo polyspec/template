@@ -238,7 +238,7 @@ impl RuntimeBindings {
                 format!("{method} is not a function"),
             ));
         };
-        match object.call(method, &args) {
+        match object.call(method, &host_arguments(&args)) {
             None => Err(self.error(
                 context,
                 frame,
@@ -269,7 +269,7 @@ impl RuntimeBindings {
                 format!("{class_name}::{method} is not a function"),
             ));
         };
-        let result = function(&args, &FunctionContext { env: &context.env });
+        let result = function(&host_arguments(&args), &FunctionContext { env: &context.env });
         host_result(self, context, &format!("{class_name}::{method}"), result, frame, span)
     }
 
@@ -431,7 +431,7 @@ impl RuntimeBindings {
                 format!("{name} is not a function"),
             ));
         };
-        let result = host(&args, &function_context);
+        let result = host(&host_arguments(&args), &function_context);
         host_result(self, context, name, result, frame, span)
     }
 
@@ -487,4 +487,9 @@ fn host_result(
 
 fn is_index_text(text: &str) -> bool {
     text == "0" || (text.starts_with(|character: char| ('1'..='9').contains(&character)) && text.bytes().all(|byte| byte.is_ascii_digit()))
+}
+
+/// VAL-21: the arguments that host code receives.
+fn host_arguments(args: &[Value]) -> Vec<Value> {
+    args.iter().map(Value::host_argument).collect()
 }
