@@ -236,7 +236,7 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 | T7.1 | Define one compiler/runtime manifest, generated declarations, ownership and support-level diagrams; reject structural drift in TypeScript, Go, Rust and PHP | `make compiler-interface-check`; `make runtime-interface-check` | [x] |
 | T7.2 | Replace generated callbacks and showcase-only generation with one compiler pipeline and four host backends; remove compatibility options and fallback paths | package tests; compiler mutation tests | [x] |
 | T7.3 | Support every specified node, expression, built-in and host function in generated execution | generated compiler tests | [x] |
-| T7.4 | Run every one of the 216 cases through AST and generated execution in TypeScript, Go, Rust and PHP | `make conformance-all-modes` | [x] |
+| T7.4 | Run every canonical case (216 when the task was done, 244 on 2026-10-02) through AST and generated execution in TypeScript, Go, Rust and PHP | `make conformance-all-modes` | [x] |
 | T7.5 | Verify artifact refresh at the build boundary: `dev` always rebuilds, `true` rebuilds on digest change, `false` reads no source | artifact lifecycle tests | [x] |
 | T7.6 | Install npm, Go, Cargo and Composer artifacts in isolated temporary projects and render the same assign/define page | `make install-check` | [x] |
 | T7.7 | Generate parser-backed showcase highlighting, bounded artifact/source views and the React island example from production artifacts | `make showcase-check` | [x] |
@@ -280,7 +280,7 @@ Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete
 - `make check` passes on a clean checkout with Node 26.8.1, Go 1.27.1, Rust 1.98.1 and PHP 8.5.
 - `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
 - `make test-browser` passes.
-- `make conformance-all-modes` passes all 1,728 TypeScript, Go, Rust and PHP mode-language-case cells without a fallback from generated execution to AST execution.
+- `make conformance-all-modes` passes every TypeScript, Go, Rust and PHP mode-language-case cell (two modes × four languages × every canonical case: 1,952 cells with the 244 cases of 2026-10-02) without a fallback from generated execution to AST execution.
 - `make release-test-matrix` proves each release layer independently: units, generated-source compilation, conformance, positioned errors and failure recovery, mutation rejection, isolated install projects, browser DOM output and performance parity.
 - `make install-check`, `make showcase-check`, `make docs-verify-idempotent` and `make release-check` pass in a clean checkout.
 - `docs/features.md` and `docs/features.ko.md` carry identical status fields with evidence links for every row.

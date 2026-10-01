@@ -236,7 +236,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T7.1 | compiler/runtime manifest 하나, 생성 선언부, 소유 관계와 지원 수준 도표를 정의하고 TypeScript·Go·Rust·PHP 구조 이탈을 거부 | `make compiler-interface-check`; `make runtime-interface-check` | [x] |
 | T7.2 | generated callback과 showcase 전용 생성을 하나의 compiler pipeline과 네 host backend로 교체하고 호환 옵션과 fallback 경로 제거 | package test; compiler mutation test | [x] |
 | T7.3 | 모든 명세 node, expression, 내장 함수와 host 함수를 generated 실행에서 지원 | generated compiler test | [x] |
-| T7.4 | 216개 케이스 전체를 TypeScript·Go·Rust·PHP의 AST와 generated 실행으로 검증 | `make conformance-all-modes` | [x] |
+| T7.4 | 모든 정규 케이스(작업 완료 시 216개, 2026-10-02에 244개)를 TypeScript·Go·Rust·PHP의 AST와 generated 실행으로 검증 | `make conformance-all-modes` | [x] |
 | T7.5 | build 경계 artifact 갱신 검증: `dev`는 항상 재생성, `true`는 digest 변경 시 재생성, `false`는 source를 읽지 않음 | artifact lifecycle test | [x] |
 | T7.6 | npm·Go·Cargo·Composer artifact를 격리한 임시 프로젝트에 설치하고 같은 assign/define page 렌더 | `make install-check` | [x] |
 | T7.7 | production artifact로 parser 기반 showcase 구문 강조, 크기 제한 artifact/source 보기와 React island 예제 생성 | `make showcase-check` | [x] |
@@ -280,7 +280,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 - Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.
-- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 mode·언어·케이스 조합 1,728개를 모두 통과하고 generated 실행에서 AST로 fallback하지 않음.
+- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 모든 mode·언어·케이스 조합(mode 두 개 × 언어 네 개 × 모든 정규 케이스. 2026-10-02의 244개 케이스로 1,952개)을 통과하고 generated 실행에서 AST로 fallback하지 않음.
 - `make release-test-matrix`가 단위, generated source compile, 적합성, 위치 오류와 실패 복구, mutation 거부, 격리 설치, browser DOM 출력, 성능 동일성의 각 release 계층을 독립적으로 증명.
 - 깨끗한 checkout에서 `make install-check`, `make showcase-check`, `make docs-verify-idempotent`, `make release-check` 통과.
 - `docs/features.md`와 `docs/features.ko.md`가 모든 행에 동일한 상태 필드와 근거 링크를 가짐.

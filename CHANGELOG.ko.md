@@ -1,5 +1,12 @@
 # 변경 기록
 
+- 타입이 있는 generated Go 값의 변환을 런타임으로 옮겼다. `value.Convert`는 `value.Source`의 template 값을 반환하고, generated record와 타입 있는 map이 이를 구현한다. generated Go 소스는 더 이상 `reflect`를 import하지 않는다. `typed-generator-compile-check`가 이를 금지한다. slice 안의 record, nil record, native object를 값 테스트로 고정했다.
+- PHP 설치 프로젝트에서 namespace가 붙은 generated class를 생성하게 했다. 필수 PHP namespace 때문에 namespace 없는 클래스에 접근할 수 없었다.
+- 브라우저 테스트 케이스의 정의와 환경을 명령줄 프로그램과 같이 template JSON 파서로 읽어, 잘못된 JSON 환경 케이스가 브라우저에서 `E_DATA_INVALID_JSON`을 보고하게 했다.
+- `typed-generator-compile-check`의 Rust와 PHP 실행기가 현재 호스트 형식으로 정의를 넘기게 했다. Rust 실행기는 `defines_from_json`으로 정의를 읽고, PHP 실행기는 각 항목을 배열로 넘기며 namespace가 붙은 generated class를 생성한다.
+- 현재 generated 소스로 `examples/site/index.html`을 다시 만들었다. 저장된 성능 측정 결과는 바꾸지 않았다. 부하 평균 20~30에서 새로 잰 값은 코드의 성능을 나타내지 않기 때문이다.
+- `typed-generator-compile-check`, `install-check`, `test-browser`, `showcase-check`를 `make check`에 추가했다. 위의 결함들은 `make check`를 통과하고 릴리스 매트릭스에서 실패했다.
+
 - 네 AST runtime에서 native assign object binding과 논리 class function 호출을 구현했다. 공통 runtime contract, Red/Green 테스트, generated backend 호출 생성을 추가했다.
 - TypeScript, Go, Rust, PHP에서 216개 전체 generated conformance matrix를 통과시키고 네 언어 generated native object/class-call 실행 검사를 추가했다.
 - 네 언어 generated backend에서 출력, member 누락, class function 누락, 인자 실패와 throw 오류를 native 호출 matrix로 완료했다.

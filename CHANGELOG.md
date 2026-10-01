@@ -1,5 +1,12 @@
 # Changelog
 
+- Moved the conversion of typed generated Go values into the runtime: `value.Convert` returns the template value of a `value.Source`, and generated records and typed maps implement it. Generated Go source no longer imports `reflect`, which `typed-generator-compile-check` forbids; a value test pins a record inside a slice, a nil record and a native object.
+- Created the namespaced generated class in the PHP install project; the required PHP namespace had made the class without a namespace unreachable.
+- Read the definitions and the environment of browser test cases with the template JSON parser, as the command line programs read them, so that an invalid JSON environment case reports `E_DATA_INVALID_JSON` in the browser.
+- Made the Rust and PHP runners of `typed-generator-compile-check` pass definitions in the current host form: the Rust runner reads them with `defines_from_json`, and the PHP runner passes each entry as an array and creates the namespaced generated class.
+- Rebuilt `examples/site/index.html` from the current generated sources. The stored benchmark results are unchanged, because a new measurement under a load average of 20 to 30 would not describe the code.
+- Added `typed-generator-compile-check`, `install-check`, `test-browser` and `showcase-check` to `make check`; the defects above passed `make check` and failed the release matrix.
+
 - Implemented native assign object binding and logical class function calls in the four AST runtimes. Added the shared runtime contract, Red/Green tests and generated backend call emission.
 - Passed the complete 216-case generated conformance matrix in TypeScript, Go, Rust and PHP, and added a four-language generated native object/class-call execution check.
 - Completed the native call matrix for output, missing members, missing class functions, argument failures and thrown errors across all four generated backends.
