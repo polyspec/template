@@ -1,7 +1,7 @@
 //! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
 use crate::ast::Template;
-use crate::error::{ErrorCode, Span, TemplateError};
+use crate::error::{ErrorCode, Span, TemplateError, internal_boundary};
 use crate::functions::{Env, HostFunction};
 use crate::loader::{Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
@@ -10,8 +10,8 @@ use crate::render::context::{DefineEntry, Frame, Limits, ParsedTemplate, RenderC
 use crate::render::runtime_environment::RuntimeEnvironment;
 use crate::render::statements::Renderer;
 use crate::source::Source;
-use crate::value::OrderedMap;
-use crate::value::bind::{BindError, bind, bind_map};
+use crate::value::bind::{BindError, bind, bind_map, bind_value, bind_values};
+use crate::value::{OrderedMap, Value};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -48,8 +48,8 @@ pub struct EngineOptions {
 pub struct DefineInput {
     /// Root-relative template path.
     pub template: Option<String>,
-    /// Entry data.
-    pub data: Option<serde_json::Value>,
+    /// Entry data; it is bound like assign data, so it may hold native objects (VAL-11, VAL-16).
+    pub data: Option<Value>,
     /// Pre-rendered HTML.
     pub html: Option<String>,
 }
@@ -130,6 +130,7 @@ pub struct AstProgram {
 /// A render request with data, definitions and the target template prepared once.
 /// Reusing it avoids rebinding JSON and rebuilding the definition registry for every render.
 pub struct PreparedRender<'e> {
+    name: String,
     render: Box<dyn Fn() -> Result<String, TemplateError> + 'e>,
 }
 
@@ -213,6 +214,16 @@ impl AstProgram {
             RenderTarget::Name(name) => name.to_owned(),
             RenderTarget::Ast(ast) => ast.name.clone(),
         };
+        internal_boundary(&name, || self.prepare_bound(&name, target, assign, options))
+    }
+
+    fn prepare_bound<'e>(
+        &'e self,
+        name: &str,
+        target: RenderTarget<'_>,
+        assign: &serde_json::Value,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'e>, TemplateError> {
         let bound = (|| -> Result<(OrderedMap, HashMap<String, DefineEntry>, Env), BindError> {
             let root = bind_map(assign)?;
             let registry = bind_defines(&options.define)?;
@@ -225,7 +236,7 @@ impl AstProgram {
             });
             Ok((root, registry, env))
         })();
-        let (root, registry, env) = bound.map_err(|error| TemplateError::without_position(error.code, &name, error.message))?;
+        let (root, registry, env) = bound.map_err(|error| TemplateError::without_position(error.code, name, error.message))?;
         let target_name = match target {
             RenderTarget::Name(name) => match registry.get(name) {
                 Some(DefineEntry::Template { template, .. }) => template.clone(),
@@ -248,9 +259,7 @@ impl AstProgram {
             target_name,
             template,
         };
-        Ok(PreparedRender {
-            render: Box::new(move || execution.render()),
-        })
+        Ok(PreparedRender::new(name, move || execution.render()))
     }
 
     /// Renders a template with data given as JSON.
@@ -258,13 +267,26 @@ impl AstProgram {
         self.prepare(target, assign, options)?.render()
     }
 
-    /// Renders a native value map while retaining assigned native objects.
+    /// Renders a native value map while retaining assigned native objects. The map is bound
+    /// under VAL-16: numbers, depth and safe strings are checked like every other host value.
     pub fn render_values(&self, target: RenderTarget<'_>, assign: OrderedMap, options: &RenderOptions) -> Result<String, TemplateError> {
         let name = match target {
             RenderTarget::Name(name) => name.to_owned(),
             RenderTarget::Ast(ast) => ast.name.clone(),
         };
-        let registry = bind_defines(&options.define).map_err(|error| TemplateError::without_position(error.code, &name, error.message))?;
+        internal_boundary(&name, || self.render_bound_values(&name, target, &assign, options))
+    }
+
+    fn render_bound_values(
+        &self,
+        name: &str,
+        target: RenderTarget<'_>,
+        assign: &OrderedMap,
+        options: &RenderOptions,
+    ) -> Result<String, TemplateError> {
+        let bind_failure = |error: BindError| TemplateError::without_position(error.code, name, error.message);
+        let assign = bind_values(assign).map_err(bind_failure)?;
+        let registry = bind_defines(&options.define).map_err(bind_failure)?;
         let env = options.env.clone().unwrap_or_else(|| Env {
             timezone: "Z".to_string(),
             now: std::time::SystemTime::now()
@@ -328,14 +350,17 @@ impl RuntimeServices for AstProgram {
 }
 
 impl<'e> PreparedRender<'e> {
-    /// Creates a prepared operation from compiled program state.
-    pub fn new(render: impl Fn() -> Result<String, TemplateError> + 'e) -> PreparedRender<'e> {
-        PreparedRender { render: Box::new(render) }
+    /// Creates a prepared operation for the entry template `name` from compiled program state.
+    pub fn new(name: &str, render: impl Fn() -> Result<String, TemplateError> + 'e) -> PreparedRender<'e> {
+        PreparedRender {
+            name: name.to_string(),
+            render: Box::new(render),
+        }
     }
 
-    /// Renders the prepared request.
+    /// Renders the prepared request. A panic during the render is `E_INTERNAL` (ERR-13).
     pub fn render(&self) -> Result<String, TemplateError> {
-        (self.render)()
+        internal_boundary(&self.name, || (self.render)())
     }
 }
 
@@ -367,8 +392,8 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
             })?;
             let data = match &input.data {
                 None => None,
-                Some(value) => match bind(value)? {
-                    crate::value::Value::Map(map) => Some(map),
+                Some(value) => match bind_value(value)? {
+                    Value::Map(map) => Some(map),
                     _ => {
                         return Err(BindError {
                             code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
@@ -388,7 +413,8 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
     Ok(registry)
 }
 
-/// Parses template definitions from a JSON object of the `define.json` form (CNF-2).
+/// Parses template definitions from a JSON object of the `define.json` form (CNF-2). The data of
+/// an entry is bound as its own value (VAL-11, VAL-20).
 pub fn defines_from_json(value: &serde_json::Value) -> Result<HashMap<String, DefineInput>, BindError> {
     let Some(object) = value.as_object() else {
         return Err(BindError {
@@ -419,7 +445,7 @@ pub fn defines_from_json(value: &serde_json::Value) -> Result<HashMap<String, De
             id.clone(),
             DefineInput {
                 template: fields.get("template").and_then(|v| v.as_str()).map(str::to_string),
-                data: fields.get("data").cloned(),
+                data: fields.get("data").map(bind).transpose()?,
                 html: fields.get("html").and_then(|v| v.as_str()).map(str::to_string),
             },
         );

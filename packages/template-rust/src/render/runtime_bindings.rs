@@ -5,8 +5,8 @@ use crate::error::{ErrorCode, Span, TemplateError};
 use crate::escape::escape_html;
 use crate::functions::{FunctionContext, builtins, to_number};
 use crate::render::context::{Frame, RenderContext};
-use crate::value::bind::{bind, to_json_value};
-use crate::value::{Value, compare_values, loose_equals, strict_equals, stringify};
+use crate::value::bind::bind_value;
+use crate::value::{HostError, MAX_DEPTH, Value, compare_values, loose_equals, strict_equals, stringify};
 use std::cmp::Ordering;
 
 /// One iterable key and value pair.
@@ -207,15 +207,19 @@ impl RuntimeBindings {
         })
     }
 
-    /// Reads a fixed member name.
-    pub fn member(&self, container: &Value, key: &str) -> Value {
-        if let Value::Object(object) = container {
-            return object.member(key).unwrap_or(Value::Null);
-        }
-        self.index(container, &Value::text(key))
+    /// Reads a fixed member name (EXP-18, VAL-19).
+    pub fn member(
+        &self,
+        context: &RenderContext<'_>,
+        container: &Value,
+        key: &str,
+        frame: &Frame,
+        span: Span,
+    ) -> Result<Value, TemplateError> {
+        self.index(context, container, &Value::text(key), frame, span)
     }
 
-    /// Calls a public method on the original assigned object.
+    /// Calls a public method on the original assigned object and binds its result (VAL-19).
     pub fn member_call(
         &self,
         context: &RenderContext<'_>,
@@ -242,18 +246,11 @@ impl RuntimeBindings {
                 ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
                 format!("{method} is not a function"),
             )),
-            Some(Ok(value)) => Ok(value),
-            Some(Err(message)) => Err(self.error(
-                context,
-                frame,
-                span,
-                ErrorCode::E_RUNTIME_HOST_FUNCTION,
-                format!("{method} failed: {message}"),
-            )),
+            Some(result) => host_result(self, context, method, result, frame, span),
         }
     }
 
-    /// Calls a registered logical class function.
+    /// Calls a registered logical class function and binds its result.
     pub fn class_call(
         &self,
         context: &RenderContext<'_>,
@@ -272,33 +269,33 @@ impl RuntimeBindings {
                 format!("{class_name}::{method} is not a function"),
             ));
         };
-        function(&args, &FunctionContext { env: &context.env }).map_err(|message| {
-            self.error(
-                context,
-                frame,
-                span,
-                ErrorCode::E_RUNTIME_HOST_FUNCTION,
-                format!("{class_name}::{method} failed: {message}"),
-            )
-        })
+        let result = function(&args, &FunctionContext { env: &context.env });
+        host_result(self, context, &format!("{class_name}::{method}"), result, frame, span)
     }
 
-    /// Reads a dynamic list or map key.
-    pub fn index(&self, container: &Value, key: &Value) -> Value {
+    /// Reads a dynamic list or map key, or a public field of a native object (EXP-19, VAL-19).
+    pub fn index(
+        &self,
+        context: &RenderContext<'_>,
+        container: &Value,
+        key: &Value,
+        frame: &Frame,
+        span: Span,
+    ) -> Result<Value, TemplateError> {
         match container {
             Value::Map(map) => {
                 if let Some(text) = key.as_text() {
-                    return map.get(text).cloned().unwrap_or(Value::Null);
+                    return Ok(map.get(text).cloned().unwrap_or(Value::Null));
                 }
                 if let Value::Number(number) = key
                     && number.fract() == 0.0
                 {
-                    return map
+                    return Ok(map
                         .get(&crate::value::number::number_to_string(*number))
                         .cloned()
-                        .unwrap_or(Value::Null);
+                        .unwrap_or(Value::Null));
                 }
-                Value::Null
+                Ok(Value::Null)
             }
             Value::List(list) => {
                 let position: Option<i64> = match key {
@@ -307,12 +304,46 @@ impl RuntimeBindings {
                         .as_text()
                         .and_then(|text| if is_index_text(text) { text.parse().ok() } else { None }),
                 };
-                match position {
+                Ok(match position {
                     Some(position) if position >= 0 && (position as usize) < list.len() => list[position as usize].clone(),
                     _ => Value::Null,
+                })
+            }
+            Value::Object(object) => {
+                let Some(name) = key.as_text() else {
+                    return Ok(Value::Null);
+                };
+                match object
+                    .member(name)
+                    .and_then(|value| value.map(|value| bind_value(&value)).transpose().map_err(HostError::Data))
+                {
+                    Ok(value) => Ok(value.unwrap_or(Value::Null)),
+                    Err(HostError::Data(error)) => Err(self.error(context, frame, span, error.code, error.message)),
+                    Err(HostError::Failed(message)) => Err(self.error(
+                        context,
+                        frame,
+                        span,
+                        ErrorCode::E_RUNTIME_HOST_FUNCTION,
+                        format!("{name} failed: {message}"),
+                    )),
                 }
             }
-            _ => Value::Null,
+            _ => Ok(Value::Null),
+        }
+    }
+
+    /// Checks the depth of a value that a list or map literal built (VAL-20).
+    pub fn depth(&self, context: &RenderContext<'_>, value: Value, frame: &Frame, span: Span) -> Result<Value, TemplateError> {
+        if value.depth_within(MAX_DEPTH) {
+            Ok(value)
+        } else {
+            Err(self.error(
+                context,
+                frame,
+                span,
+                ErrorCode::E_RUNTIME_LIMIT,
+                format!("a list or map literal nests deeper than {MAX_DEPTH} levels"),
+            ))
         }
     }
 
@@ -400,16 +431,8 @@ impl RuntimeBindings {
                 format!("{name} is not a function"),
             ));
         };
-        match host(&args, &function_context) {
-            Ok(value) => bind(&to_json_value(&value)).map_err(|error| self.error(context, frame, span, error.code, error.message)),
-            Err(message) => Err(self.error(
-                context,
-                frame,
-                span,
-                ErrorCode::E_RUNTIME_HOST_FUNCTION,
-                format!("{name} failed: {message}"),
-            )),
-        }
+        let result = host(&args, &function_context);
+        host_result(self, context, name, result, frame, span)
     }
 
     /// Checks expression and iteration limits.
@@ -436,6 +459,29 @@ impl RuntimeBindings {
         message: impl Into<String>,
     ) -> TemplateError {
         context.fail(code, Some(frame), Some(span), message)
+    }
+}
+
+/// Binds the result of host code (VAL-11, FUN-45, FUN-46): a failure is E_RUNTIME_HOST_FUNCTION and
+/// a value that cannot be bound fails with its data code, both at the call.
+fn host_result(
+    bindings: &RuntimeBindings,
+    context: &RenderContext<'_>,
+    name: &str,
+    result: Result<Value, HostError>,
+    frame: &Frame,
+    span: Span,
+) -> Result<Value, TemplateError> {
+    match result.and_then(|value| bind_value(&value).map_err(HostError::Data)) {
+        Ok(value) => Ok(value),
+        Err(HostError::Data(error)) => Err(bindings.error(context, frame, span, error.code, error.message)),
+        Err(HostError::Failed(message)) => Err(bindings.error(
+            context,
+            frame,
+            span,
+            ErrorCode::E_RUNTIME_HOST_FUNCTION,
+            format!("{name} failed: {message}"),
+        )),
     }
 }
 

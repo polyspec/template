@@ -4,12 +4,13 @@ import { analyzeTemplate, parseTemplate, type SyntaxTag, type SyntaxToken } from
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from './parser/scanner.js';
 import { AstProgramCore, type EngineOptions, type RenderOptions } from './render/engine.js';
 import type { ParsedTemplate } from './render/context.js';
+import { internalBoundary } from './errors.js';
 import { Source } from './source.js';
 
 export type { Template, Node, Expr, Span } from './ast.js';
-export { TemplateError, type ErrorCode, type ErrorObject } from './errors.js';
+export { TemplateError, internalBoundary, type ErrorCode, type ErrorObject } from './errors.js';
 export { NativeObject, SafeString, type Value, type MapValue, type ListValue } from './value/value.js';
-export { bind, bindMap, BindError } from './value/bind.js';
+export { bind, bindMap, checkText, BindError } from './value/bind.js';
 export { parseJson, parseJsonBytes, JsonSyntaxError } from './value/json.js';
 export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';
 export type { ArtifactRefresh, EngineOptions, Program, RenderOptions, DefineInput } from './render/engine.js';
@@ -37,13 +38,14 @@ function delimitersOf(value: string | undefined): Delimiters {
 
 // RT-2: parses one template source without loading other templates.
 export function parse(source: string | Uint8Array, name: string, options: ParseOptions = {}): Template {
-  return parseWithLines(source, name, delimitersOf(options.delimiters)).ast;
+  const delimiters = delimitersOf(options.delimiters);
+  return internalBoundary(name, () => parseWithLines(source, name, delimiters).ast);
 }
 
 /** Parses a template once and returns its AST with exact parser-owned tag ranges. */
 export function analyze(source: string | Uint8Array, name: string, options: ParseOptions = {}): { ast: Template; tags: readonly SyntaxTag[]; tokens: readonly SyntaxToken[] } {
-  const parsed = typeof source === 'string' ? Source.fromText(name, source) : Source.fromBytes(name, source);
-  return analyzeTemplate(parsed, delimitersOf(options.delimiters));
+  const delimiters = delimitersOf(options.delimiters);
+  return internalBoundary(name, () => analyzeTemplate(typeof source === 'string' ? Source.fromText(name, source) : Source.fromBytes(name, source), delimiters));
 }
 
 function parseWithLines(source: string | Uint8Array, name: string, delimiters: Delimiters): ParsedTemplate {

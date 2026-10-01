@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
+import { rustString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
@@ -13,7 +14,8 @@ import { root } from './drivers.mjs';
 const crate = join(root, 'packages/template-rust');
 const temporary = mkdtempSync(join(crate, 'generated_conformance_'));
 const integrationTest = join(crate, 'tests/generated_conformance_check.rs');
-const quote = value => JSON.stringify(value);
+// Paths and expected output are embedded as exact Rust string literals.
+const quote = rustString;
 
 function errorObject(error) {
   if (typeof error?.code !== 'string') return null;
@@ -73,11 +75,11 @@ mod case_${index} {
         use polyspec_template::Program;
         let data = ${data};
         let text = std::str::from_utf8(data).map_err(|_| super::ActualError::data("E_DATA_INVALID_UTF8"))?;
-        let assign: serde_json::Value = serde_json::from_str(text).map_err(|_| super::ActualError::data("E_DATA_UNSUPPORTED_TYPE"))?;
+        let assign = polyspec_template::read_json(text).map_err(super::ActualError::bind)?;
         let mut options = polyspec_template::RenderOptions::default();
-        ${testCase.hasDefine ? `let define: serde_json::Value = serde_json::from_str(include_str!(${quote(resolve(join(testCase.dir, 'define.json')))})).unwrap();
+        ${testCase.hasDefine ? `let define = polyspec_template::read_json(include_str!(${quote(resolve(join(testCase.dir, 'define.json')))})).map_err(super::ActualError::bind)?;
         options.define = polyspec_template::defines_from_json(&define).map_err(super::ActualError::bind)?;` : ''}
-        ${testCase.hasEnv ? `let env: serde_json::Value = serde_json::from_str(include_str!(${quote(resolve(join(testCase.dir, 'env.json')))})).unwrap();
+        ${testCase.hasEnv ? `let env = polyspec_template::read_json(include_str!(${quote(resolve(join(testCase.dir, 'env.json')))})).map_err(super::ActualError::bind)?;
         options.env = Some(polyspec_template::env_from_json(&env).map_err(super::ActualError::bind)?);` : ''}
         let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
         program.render(polyspec_template::RenderTarget::Name("input.tpl"), &assign, &options).map_err(super::ActualError::template)

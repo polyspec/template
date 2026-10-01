@@ -3,7 +3,7 @@
 //!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 
 use polyspec_template::{
-    AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json,
+    AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, TemplateError, check_json, defines_from_json,
     env_from_json, parse,
 };
 use std::path::{Path, PathBuf};
@@ -31,14 +31,19 @@ fn fail(error: TemplateError) -> ! {
 
 fn read_json(root: &Path, path: &str, template: &str) -> serde_json::Value {
     let bytes = std::fs::read(root.join(path)).unwrap_or_else(|error| usage(&format!("cannot read {path}: {error}")));
-    if let Err(error) = std::str::from_utf8(&bytes) {
-        fail(TemplateError::without_position(
+    let text = match std::str::from_utf8(&bytes) {
+        Ok(text) => text,
+        Err(error) => fail(TemplateError::without_position(
             polyspec_template::ErrorCode::E_DATA_INVALID_UTF8,
             template,
             format!("invalid UTF-8 at byte {}", error.valid_up_to()),
-        ));
+        )),
+    };
+    // Numbers, unpaired surrogates and the nesting depth are data errors (VAL-12, VAL-20).
+    if let Err(error) = check_json(text) {
+        bind_failure(template, error);
     }
-    serde_json::from_slice(&bytes).unwrap_or_else(|error| usage(&format!("{path} is not JSON: {error}")))
+    serde_json::from_str(text).unwrap_or_else(|error| usage(&format!("{path} is not JSON: {error}")))
 }
 
 fn bind_failure(template: &str, error: BindError) -> ! {

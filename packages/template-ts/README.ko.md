@@ -36,7 +36,7 @@ const assign = parseJson(document.getElementById('state').textContent);
 document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
 ```
 
-`parseJson`은 JSON 텍스트의 키 순서를 보존하고 안전 범위 밖의 정수를 거부한다. `JSON.parse`는 둘 다 하지 않는다.
+`parseJson`은 JSON 텍스트의 키 순서를 보존하고 ±(2^53 − 1) 밖의 숫자, 짝이 없는 surrogate escape, 64단계보다 깊은 중첩을 거부한다. `JSON.parse`는 어느 것도 하지 않는다.
 
 ## 파싱된 템플릿 렌더
 
@@ -57,7 +57,7 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | `new AstProgram({ loader, functions, limits, delimiters })` | AST program을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
 | `new Engine(program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `engine.render(nameOrAst, assign, { define, env })` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 경로나 HTML 항목을 제공한다. |
-| `astProgram.register(name, fn)` | 호스트 함수 `(args, { env }) => value`를 등록한다. |
+| `astProgram.register(name, fn)` | 호스트 함수 `(args, { env }) => value`를 등록한다. Native object 인자는 list나 map 안에 있어도 원본 class 인스턴스로 전달된다. |
 | `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. |
 | `parseJson`, `parseJsonBytes` | assign 데이터용 순서 보존 JSON 파서. |
 | `TemplateError` | `code`, `template`, `line`, `col`, `offset`, `end`, `message`를 가진 오류. |

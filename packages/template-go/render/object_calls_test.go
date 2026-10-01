@@ -21,10 +21,10 @@ func TestAssignedObjectRetainsPublicFieldsAndMethods(t *testing.T) {
 	root.Set("order", &testOrder{Total: 12})
 	context := NewContext(runtime, root, functions.Env{Timezone: "Z"}, "page.tpl")
 	bindings := NewRuntimeBindings(context)
-	if got := bindings.Member(root.MustGet("order"), "total"); got != float64(12) {
-		t.Fatalf("member = %v", got)
-	}
 	frame := NewFrame("page.tpl", nil, root)
+	if got, err := bindings.Member(root.MustGet("order"), "total", frame, ast.Span{0, 1}); err != nil || got != float64(12) {
+		t.Fatalf("member = %v %v", got, err)
+	}
 	got, err := bindings.MemberCall(root.MustGet("order"), "status_label", []value.Value{"ready"}, frame, ast.Span{0, 1})
 	if err != nil {
 		t.Fatal(err)

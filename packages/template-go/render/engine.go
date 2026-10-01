@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"unicode/utf8"
 
 	"github.com/polyspec/template/ast"
 	"github.com/polyspec/template/errs"
@@ -78,7 +79,10 @@ type Prepared interface {
 }
 
 // PreparedRender stores one AST execution for repeated renders.
-type PreparedRender struct{ execution preparedExecution }
+type PreparedRender struct {
+	name      string
+	execution preparedExecution
+}
 
 type cached struct {
 	version  string
@@ -168,7 +172,7 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 	return template, nil
 }
 
-// Prepare binds request data and resolves the target template once.
+// Prepare binds request data and resolves the target template once. A panic is E_INTERNAL (ERR-13).
 func (e *Engine) Prepare(target any, assign any, options RenderOptions) (Prepared, error) {
 	var name string
 	var parsedTarget *ParsedTemplate
@@ -181,6 +185,10 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (Prepare
 	default:
 		return nil, fmt.Errorf("render target must be a name or a template")
 	}
+	return Guard(name, func() (Prepared, error) { return e.prepare(name, parsedTarget, assign, options) })
+}
+
+func (e *Engine) prepare(name string, parsedTarget *ParsedTemplate, assign any, options RenderOptions) (Prepared, error) {
 	root, err := value.BindMap(assign)
 	if err != nil {
 		return nil, bindFailure(name, err)
@@ -206,7 +214,7 @@ func (e *Engine) Prepare(target any, assign any, options RenderOptions) (Prepare
 			return nil, err
 		}
 	}
-	return &PreparedRender{execution: &astPreparedExecution{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template}}, nil
+	return &PreparedRender{name: name, execution: &astPreparedExecution{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template}}, nil
 }
 
 // Render renders a template by name or AST (RT-3, RT-4).
@@ -218,9 +226,9 @@ func (e *Engine) Render(target any, assign any, options RenderOptions) (string, 
 	return prepared.Render()
 }
 
-// Render renders the prepared request.
+// Render renders the prepared request. A panic is E_INTERNAL (ERR-13).
 func (p *PreparedRender) Render() (string, error) {
-	return p.execution.render()
+	return Guard(p.name, p.execution.render)
 }
 
 func (p *astPreparedExecution) render() (string, error) {
@@ -248,6 +256,9 @@ func bindFailure(name string, err error) error {
 func (e *Engine) bindDefines(defines map[string]DefineInput) (map[string]*DefineEntry, error) {
 	registry := map[string]*DefineEntry{}
 	for id, input := range defines {
+		if !utf8.ValidString(id) {
+			return nil, &value.BindError{Code: errs.DataInvalidUTF8, Message: "a define id is not valid UTF-8"}
+		}
 		switch {
 		case input.HTML != nil:
 			html := *input.HTML

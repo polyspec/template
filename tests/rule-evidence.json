@@ -50,6 +50,12 @@
       "files": ["scripts/check-generated-native-calls.mjs", "tests/fixtures/native-object/input.tpl"]
     },
     {
+      "name": "internal-error-boundary",
+      "rules": ["ERR-12", "ERR-13"],
+      "verification": "make test-ts test-go test-rust test-php test-ext",
+      "files": ["packages/template-ts/tests/render/host-binding.test.ts", "packages/template-go/host_binding_test.go", "packages/template-rust/tests/object_calls.rs", "packages/template-php/tests/Value/HostBindingTest.php", "packages/template-php-ext/tests/HostBindingTest.php"]
+    },
+    {
       "name": "host-value-binding",
       "rules": ["VAL-1", "VAL-7", "VAL-11", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18"],
       "verification": "make test-ts test-go test-rust test-php test-ext",

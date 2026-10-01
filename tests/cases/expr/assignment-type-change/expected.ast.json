@@ -1,0 +1,403 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "List",
+        "items": [],
+        "span": [
+          6,
+          8
+        ]
+      },
+      "span": [
+        0,
+        9
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "a",
+                "span": [
+                  17,
+                  18
+                ]
+              }
+            ],
+            "span": [
+              12,
+              19
+            ]
+          }
+        ],
+        "span": [
+          12,
+          25
+        ]
+      },
+      "span": [
+        9,
+        26
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        26,
+        27
+      ]
+    },
+    {
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "Map",
+        "entries": [
+          {
+            "key": {
+              "type": "Literal",
+              "kind": "string",
+              "value": "k",
+              "span": [
+                34,
+                37
+              ]
+            },
+            "value": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                41,
+                42
+              ]
+            }
+          }
+        ],
+        "span": [
+          33,
+          43
+        ]
+      },
+      "span": [
+        27,
+        44
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "a",
+                "span": [
+                  52,
+                  53
+                ]
+              }
+            ],
+            "span": [
+              47,
+              54
+            ]
+          }
+        ],
+        "span": [
+          47,
+          60
+        ]
+      },
+      "span": [
+        44,
+        61
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        61,
+        62
+      ]
+    },
+    {
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "x",
+        "span": [
+          68,
+          71
+        ]
+      },
+      "span": [
+        62,
+        72
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          75,
+          76
+        ]
+      },
+      "span": [
+        72,
+        77
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        77,
+        78
+      ]
+    },
+    {
+      "type": "Set",
+      "name": "b",
+      "expr": {
+        "type": "List",
+        "items": [],
+        "span": [
+          84,
+          86
+        ]
+      },
+      "span": [
+        78,
+        87
+      ]
+    },
+    {
+      "type": "For",
+      "name": "i",
+      "iter": {
+        "type": "Call",
+        "name": "range",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              100,
+              101
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              103,
+              104
+            ]
+          }
+        ],
+        "span": [
+          94,
+          105
+        ]
+      },
+      "body": [
+        {
+          "type": "Set",
+          "name": "b",
+          "expr": {
+            "type": "Map",
+            "entries": [
+              {
+                "key": {
+                  "type": "Literal",
+                  "kind": "string",
+                  "value": "k",
+                  "span": [
+                    113,
+                    116
+                  ]
+                },
+                "value": {
+                  "type": "Var",
+                  "name": "b",
+                  "span": [
+                    120,
+                    121
+                  ]
+                }
+              }
+            ],
+            "span": [
+              112,
+              122
+            ]
+          },
+          "span": [
+            106,
+            123
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        87,
+        126
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "b",
+                "span": [
+                  134,
+                  135
+                ]
+              }
+            ],
+            "span": [
+              129,
+              136
+            ]
+          }
+        ],
+        "span": [
+          129,
+          142
+        ]
+      },
+      "span": [
+        126,
+        143
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        143,
+        144
+      ]
+    },
+    {
+      "type": "Set",
+      "name": "c",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1,
+        "span": [
+          150,
+          151
+        ]
+      },
+      "span": [
+        144,
+        152
+      ]
+    },
+    {
+      "type": "If",
+      "branches": [
+        {
+          "test": {
+            "type": "Literal",
+            "kind": "bool",
+            "value": true,
+            "span": [
+              155,
+              159
+            ]
+          },
+          "body": [
+            {
+              "type": "Set",
+              "name": "c",
+              "expr": {
+                "type": "Literal",
+                "kind": "string",
+                "value": "y",
+                "span": [
+                  166,
+                  169
+                ]
+              },
+              "span": [
+                160,
+                170
+              ]
+            }
+          ],
+          "span": [
+            152,
+            160
+          ]
+        }
+      ],
+      "else": null,
+      "span": [
+        152,
+        173
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "c",
+        "span": [
+          176,
+          177
+        ]
+      },
+      "span": [
+        173,
+        178
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        178,
+        179
+      ]
+    }
+  ]
+}

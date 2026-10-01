@@ -48,8 +48,9 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 | `AstProgram::parse(string $source, string $name, array $options = [])` | Parses one template into its AST (nested arrays). `$options['delimiters']` selects the delimiters. |
 | `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | Creates an AST program. Options: `functions`, `limits`, `delimiters`. |
 | `new Engine(Program $program)` | Creates an engine that delegates to one AST or generated program. |
-| `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | Renders a template name or a parsed template. `$assign` contains variables; options are `define` and `env`. |
-| `$astProgram->register(string $name, callable $fn)` | Registers a host function `fn(array $args, array $env): mixed`. |
+| `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | Renders a template name or a parsed template. `$assign` contains variables; options are `define` and `env`. Binding follows VAL-14: a closure or a resource is `E_DATA_UNSUPPORTED_TYPE`, a key that is not valid UTF-8 is `E_DATA_INVALID_UTF8`, and lists and maps nested deeper than 64 levels are `E_DATA_DEPTH`. Only public properties and methods of an object are visible, whatever the class scope of the caller. |
+| generated PHP program | The compiler declares a generated program in the namespace given by `--php-namespace` or the `phpNamespace` option of `compileSource`; instantiate it as `new \\Your\\Namespace\\GeneratedProgram($runtime)`. |
+| `$astProgram->register(string $name, callable $fn)` | Registers a host function `fn(array $args, array $env): mixed`. A native object argument is the original PHP object. |
 | `ArrayLoader`, `FilesystemLoader` | In-memory and filesystem loaders. |
 | `Json::parse(string $bytes)` | Order-preserving JSON parser for assign data. |
 | `TemplateError` | Exception with `errorCode`, `template`, `errorLine`, `errorCol`, `offset`, `end` and `toArray()`. |

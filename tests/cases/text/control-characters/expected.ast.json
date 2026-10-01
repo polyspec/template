@@ -1,0 +1,106 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "T:\u0000\u0001\u0007\b\t\u000b\f\u001b $x ${y} \\ \\\\ ' \"\n",
+      "span": [
+        0,
+        29
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "L:\u0001\b\f\u001b $x \\ ' \" \t",
+            "span": [
+              32,
+              80
+            ]
+          }
+        ],
+        "span": [
+          32,
+          86
+        ]
+      },
+      "span": [
+        29,
+        87
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        87,
+        88
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "R:\u0001\b\u000b\f\u001b $z {$w} \\ '",
+            "span": [
+              91,
+              115
+            ]
+          }
+        ],
+        "span": [
+          91,
+          121
+        ]
+      },
+      "span": [
+        88,
+        122
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        122,
+        123
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "E:\u0000\u0001$&<>",
+        "span": [
+          126,
+          146
+        ]
+      },
+      "span": [
+        123,
+        147
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        147,
+        148
+      ]
+    }
+  ]
+}

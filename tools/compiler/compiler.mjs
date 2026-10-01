@@ -13,15 +13,21 @@ import * as php from './backends/php.mjs';
 const backends = new Map([typescript, go, rust, php].map(backend => [backend.language, backend]));
 const backendOperations = ['emitDeclarations', 'emitRuntime', 'emitTemplates', 'emitEntry'];
 
-export function compileSource(graphPath, manifestPath, language) {
+// A PHP namespace is one or more identifiers separated by a backslash (docs/spec/compiler.md).
+const phpNamespacePattern = /^[A-Za-z_][A-Za-z0-9_]*(\\[A-Za-z_][A-Za-z0-9_]*)*$/;
+
+export function compileSource(graphPath, manifestPath, language, options = {}) {
   const backend = backends.get(language);
   if (backend === undefined) throw new Error(`compiler: unsupported target language ${language}`);
+  if (language === 'php' && !phpNamespacePattern.test(options.phpNamespace ?? '')) {
+    throw new Error(`compiler: the PHP target requires a namespace; ${JSON.stringify(options.phpNamespace ?? null)} is not a PHP namespace`);
+  }
   if (typeof backend.createTarget !== 'function') throw new Error(`compiler: backend ${language} does not implement createTarget`);
   for (const operation of backendOperations) if (typeof backend[operation] !== 'function') throw new Error(`compiler: backend ${language} does not implement ${operation}`);
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   const program = lowerSourceGraph(loadSourceGraph(graphPath), manifest);
   const target = backend.createTarget({ program, manifest });
-  const context = { program, manifest, target, templateBodies: templateBodies(program, target) };
+  const context = { program, manifest, options, target, templateBodies: templateBodies(program, target) };
   return [...backendOperations.map(operation => backend[operation](context)), ''].join('\n');
 }
 
@@ -32,9 +38,10 @@ function main(args) {
   const language = value('--lang');
   const output = value('--output');
   const refresh = value('--refresh');
+  const phpNamespace = value('--php-namespace');
   const check = args.includes('--check');
   if (!graph || !manifest || !language || !output || !refresh) {
-    throw new Error('usage: compiler.mjs --graph MANIFEST --manifest FILE --lang ts|go|rust|php --output FILE --refresh dev|true|false [--check]');
+    throw new Error('usage: compiler.mjs --graph MANIFEST --manifest FILE --lang ts|go|rust|php --output FILE --refresh dev|true|false [--php-namespace NAMESPACE] [--check]');
   }
   compileGeneratedArtifact({
     graphPath: graph,
@@ -44,7 +51,7 @@ function main(args) {
     refresh,
     check,
     compilerDigest: generatedCompilerDigest(language),
-    compile: () => compileSource(graph, manifest, language),
+    compile: () => compileSource(graph, manifest, language, phpNamespace === null ? {} : { phpNamespace }),
   });
   process.stdout.write(`compiler ${language}: ${check ? 'checked' : refresh === 'false' ? 'loaded' : 'ready'} ${output}\n`);
 }

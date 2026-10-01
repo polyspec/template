@@ -13,6 +13,9 @@ final class Json
 {
     private int $index = 0;
 
+    /** The number of arrays and objects that enclose the current position (VAL-20). */
+    private int $level = 0;
+
     private function __construct(private readonly string $text)
     {
     }
@@ -86,11 +89,13 @@ final class Json
 
     private function parseObject(): MapValue
     {
+        Bind::checkLevel(++$this->level);
         $map = new MapValue();
         $this->index++;
         $this->skipWhitespace();
         if (($this->text[$this->index] ?? null) === '}') {
             $this->index++;
+            $this->level--;
 
             return $map;
         }
@@ -114,6 +119,7 @@ final class Json
             }
             if ($next === '}') {
                 $this->index++;
+                $this->level--;
 
                 return $map;
             }
@@ -126,11 +132,13 @@ final class Json
      */
     private function parseArray(): array
     {
+        Bind::checkLevel(++$this->level);
         $list = [];
         $this->index++;
         $this->skipWhitespace();
         if (($this->text[$this->index] ?? null) === ']') {
             $this->index++;
+            $this->level--;
 
             return $list;
         }
@@ -144,6 +152,7 @@ final class Json
             }
             if ($next === ']') {
                 $this->index++;
+                $this->level--;
 
                 return $list;
             }
@@ -216,6 +225,7 @@ final class Json
 
     /**
      * Reads the four hexadecimal digits after \u (the index is at the u) and combines surrogate pairs.
+     * A surrogate outside a high-low pair is E_DATA_INVALID_UTF8 (VAL-12).
      */
     private function parseUnicodeEscape(): string
     {
@@ -235,6 +245,9 @@ final class Json
                 }
             }
         }
+        if ($code >= 0xD800 && $code <= 0xDFFF) {
+            throw new BindError('E_DATA_INVALID_UTF8', 'a \\u escape leaves a surrogate unpaired');
+        }
 
         return Utf8::chr((int) $code);
     }
@@ -246,15 +259,8 @@ final class Json
         }
         $literal = $m[0];
         $this->index += strlen($literal);
-        $value = (float) $literal;
-        if (!is_finite($value)) {
-            throw new BindError('E_DATA_NUMBER_NOT_FINITE', "number {$literal} is not finite");
-        }
-        $isIntegerLiteral = !isset($m[2]) && !isset($m[3]);
-        if ($isIntegerLiteral && abs($value) > Number::MAX_SAFE) {
-            throw new BindError('E_DATA_NUMBER_RANGE', "integer {$literal} is outside the safe range");
-        }
 
-        return $value;
+        // The nearest double decides, whatever the spelling of the literal (VAL-2).
+        return Bind::checkFloat((float) $literal);
     }
 }

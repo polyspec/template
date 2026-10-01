@@ -7,6 +7,7 @@ use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\ArrayLoader;
 use Polyspec\Template\PreparedRender;
+use Polyspec\Template\Program;
 use Polyspec\Template\Value\Json;
 use Polyspec\Template\Value\MapValue;
 
@@ -14,15 +15,17 @@ $root = dirname(__DIR__, 3);
 require $root . '/packages/template-php/vendor/autoload.php';
 require __DIR__ . '/generated/render_adapter.php';
 
-function generatedProgram(string $scenarioRoot): GeneratedProgram
+function generatedProgram(string $scenarioRoot): Program
 {
     $scenario = basename($scenarioRoot);
     if (!in_array($scenario, ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'], true)) {
         throw new RuntimeException('generated program is missing for scenario ' . $scenario);
     }
     require __DIR__ . '/generated/typed/' . $scenario . '.php';
+    // The namespace rule of tools/showcase/php-namespace.mjs: compiler-coverage becomes CompilerCoverage.
+    $class = 'Polyspec\\Showcase\\Generated\\' . str_replace(' ', '', ucwords(str_replace('-', ' ', $scenario))) . '\\GeneratedProgram';
 
-    return new GeneratedProgram();
+    return new $class();
 }
 
 function readJson(string $root, string $name): mixed

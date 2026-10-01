@@ -4,17 +4,51 @@ pub mod bind;
 pub mod json;
 pub mod number;
 
+use crate::value::bind::BindError;
+use std::any::Any;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
 
-/// Native object exposed to a template without copying its state.
-pub trait TemplateObject: fmt::Debug {
-    /// Reads one public member. Missing members return `None`.
-    fn member(&self, key: &str) -> Option<Value>;
-    /// Calls one public instance method. `None` means that the method is not public.
-    fn call(&self, method: &str, args: &[Value]) -> Option<Result<Value, String>>;
+/// The nesting depth limit of lists and maps (VAL-20).
+pub const MAX_DEPTH: usize = 64;
+
+/// A failure that host code reports to the engine (FUN-46, VAL-19).
+#[derive(Debug, Clone, PartialEq)]
+pub enum HostError {
+    /// A value of the host cannot be bound; the render fails with the code of the binding error.
+    Data(BindError),
+    /// The host code failed; the render fails with E_RUNTIME_HOST_FUNCTION and this message.
+    Failed(String),
+}
+
+impl From<BindError> for HostError {
+    fn from(error: BindError) -> HostError {
+        HostError::Data(error)
+    }
+}
+
+impl From<String> for HostError {
+    fn from(message: String) -> HostError {
+        HostError::Failed(message)
+    }
+}
+
+impl From<&str> for HostError {
+    fn from(message: &str) -> HostError {
+        HostError::Failed(message.to_string())
+    }
+}
+
+/// Native object exposed to a template without copying its state (VAL-18, VAL-19).
+pub trait TemplateObject: fmt::Debug + Any {
+    /// Reads one public field or property. `Ok(None)` means that the object has no public
+    /// field or property of that name; the lookup is then `null`.
+    fn member(&self, key: &str) -> Result<Option<Value>, HostError>;
+    /// Calls one public instance method. `None` means that the object has no public method of
+    /// that name.
+    fn call(&self, method: &str, args: &[Value]) -> Option<Result<Value, HostError>>;
 }
 
 /// An insertion-ordered map with string keys.
@@ -111,9 +145,10 @@ impl FromIterator<(String, Value)> for OrderedMap {
 ///
 /// A list and a map are reference counted, so cloning a value never copies a collection.
 /// Values are immutable once built; a function that changes a collection builds a new one.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum Value {
-    /// The null value.
+    /// The null value; the default value.
+    #[default]
     Null,
     /// A boolean.
     Bool(bool),
@@ -204,6 +239,27 @@ impl Value {
     /// Creates a value that retains the original native object.
     pub fn object(object: impl TemplateObject + 'static) -> Value {
         Value::Object(Rc::new(object))
+    }
+
+    /// Returns the original native object of a native object value when it has the type
+    /// `T` (VAL-18). A host function receives a native object argument as `Value::Object` and
+    /// recovers its own type with this method.
+    pub fn downcast_object<T: TemplateObject>(&self) -> Option<Rc<T>> {
+        match self {
+            Value::Object(object) => (Rc::clone(object) as Rc<dyn Any>).downcast::<T>().ok(),
+            _ => None,
+        }
+    }
+
+    /// Whether the depth of the value is at most `limit` (VAL-20). A list or map has depth one more
+    /// than its deepest element; every other value has depth 0. The walk stops below `limit`
+    /// levels, so it never recurses deeper than `limit + 1` frames.
+    pub fn depth_within(&self, limit: usize) -> bool {
+        match self {
+            Value::List(items) => limit > 0 && items.iter().all(|item| item.depth_within(limit - 1)),
+            Value::Map(map) => limit > 0 && map.values().all(|item| item.depth_within(limit - 1)),
+            _ => true,
+        }
     }
 
     /// The type of the value.

@@ -65,7 +65,7 @@ fn engine_renders_and_registers_functions() {
             "twice",
             Box::new(|args, _| match args.first() {
                 Some(Value::Number(n)) => Ok(Value::Number(n * 2.0)),
-                _ => Err("number".to_string()),
+                _ => Err("number".into()),
             }),
         )
         .expect("register");
@@ -99,7 +99,7 @@ fn engine_reports_host_failures_and_limits() {
         }),
         ..Default::default()
     });
-    engine.register("boom", Box::new(|_, _| Err("no".to_string()))).expect("register");
+    engine.register("boom", Box::new(|_, _| Err("no".into()))).expect("register");
     let error = engine
         .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
         .unwrap_err();
@@ -166,4 +166,14 @@ fn artifact_refresh_policies_are_independent_of_rendering() {
             .unwrap(),
         "1"
     );
+}
+
+#[test]
+fn date_text_with_a_multibyte_character_in_the_time_is_not_a_date() {
+    // The time field ends inside the two-byte character; the parser rejects the text instead of panicking.
+    assert!(to_unix_seconds(&Value::text("2024-01-01T12:34:5\u{e9}"), 0).is_err());
+    assert!(to_unix_seconds(&Value::text("2024-01-01 \u{e9}2:34:56"), 0).is_err());
+    assert!(to_unix_seconds(&Value::text("2024-01-01T12:34:56\u{e9}"), 0).is_err());
+    assert_eq!(parse_offset("+\u{e9}:00"), None);
+    assert_eq!(parse_offset("+0\u{e9}:0"), None);
 }

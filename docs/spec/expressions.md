@@ -20,7 +20,7 @@ This document defines the expression language used inside tags: tokens, grammar,
 
 **EXP-2** A NUMBER token whose form does not match the table, including `1.`, `.5`, `1e`, `0x1F` and `1_000`, is E_PARSE_INVALID_NUMBER. The value of a NUMBER token is the nearest IEEE 754 double; `1e3` has the value 1000.
 
-**EXP-3** A STRING token recognizes the escape sequences `\\`, `\'`, `\"`, `\n`, `\r`, `\t` and `\uXXXX` with four hexadecimal digits. Two consecutive `\uXXXX` escapes that form a UTF-16 surrogate pair produce one code point. Any other character after `\` is E_PARSE_INVALID_ESCAPE. A STRING token that reaches the end of the source before its closing quote is E_PARSE_UNTERMINATED_STRING at the opening quote; a tag body extends to the end of the source when no closing delimiter follows the string.
+**EXP-3** A STRING token recognizes the escape sequences `\\`, `\'`, `\"`, `\n`, `\r`, `\t` and `\uXXXX` with four hexadecimal digits. Two consecutive `\uXXXX` escapes that form a UTF-16 surrogate pair produce one code point. A `\uXXXX` escape of a surrogate (U+D800 to U+DFFF) that is not part of such a pair produces U+FFFD, so a decoded string is always valid Unicode text. Any other character after `\` is E_PARSE_INVALID_ESCAPE. A STRING token that reaches the end of the source before its closing quote is E_PARSE_UNTERMINATED_STRING at the opening quote; a tag body extends to the end of the source when no closing delimiter follows the string.
 
 **EXP-4** The tokens `true`, `false` and `null` are literals. Their spelling is case-sensitive; `True` and `NULL` are IDENT tokens.
 
@@ -100,9 +100,10 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 | map | number with an integer value | The value under the key obtained by stringifying the number, or `null` |
 | list | number with an integer value `i` where `0 <= i < length` | The element at index `i` |
 | list | string matching `^(0\|[1-9][0-9]*)$` whose integer value is in range | The element at that index |
+| native object | string | The value of the public field or property of that name (VAL-19), or `null` when there is none |
 | any other combination | any | `null` |
 
-The last row includes `null`, string, bool and number containers, negative indexes, out-of-range indexes and fractional numbers. Lookup never raises an error; a missing value at any depth is `null`.
+The last row includes `null`, string, bool and number containers, negative indexes, out-of-range indexes, fractional numbers and a native object with a key that is not a string. Lookup raises no error of its own; a missing value at any depth is `null`. The only errors of a lookup are the binding and accessor errors of a native object field (VAL-19).
 
 ## Loop meta
 

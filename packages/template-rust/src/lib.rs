@@ -18,7 +18,7 @@ pub mod source;
 pub mod value;
 
 pub use ast::{Expr, Node, Template};
-pub use error::{ErrorCode, TemplateError};
+pub use error::{ErrorCode, TemplateError, internal_boundary};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{Limits, ParsedTemplate};
@@ -27,9 +27,9 @@ pub use render::engine::{
     defines_from_json, env_from_json,
 };
 pub use render::runtime_environment::RuntimeEnvironment;
-pub use value::bind::{BindError, bind, to_json_value};
-pub use value::json::{parse_json, parse_json_bytes};
-pub use value::{OrderedMap, TemplateObject, Value};
+pub use value::bind::{BindError, bind, bind_value, bind_values, to_json_value, value_from_json};
+pub use value::json::{check_json, parse_json, parse_json_bytes, read_json};
+pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value};
 
 use parser::scanner::{DEFAULT_DELIMITERS, parse_delimiters};
 
@@ -40,8 +40,12 @@ pub struct ParseOptions {
     pub delimiters: Option<String>,
 }
 
-/// RT-2: parses one template source without loading other templates.
+/// RT-2: parses one template source without loading other templates. A panic is `E_INTERNAL` (ERR-13).
 pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, TemplateError> {
+    internal_boundary(name, || parse_source(source, name, options))
+}
+
+fn parse_source(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, TemplateError> {
     let delimiters = match &options.delimiters {
         Some(value) => parse_delimiters(value).ok_or_else(|| {
             TemplateError::without_position(

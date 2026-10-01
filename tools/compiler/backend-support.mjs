@@ -6,6 +6,33 @@ const scalarTypes = {
 };
 
 export const quote = value => JSON.stringify(value);
+
+// Exact string literals of each target language (docs/spec/compiler.md). Template text is valid
+// Unicode text, so every character is a scalar value; only the characters that a literal
+// interprets are escaped.
+const escapeControls = (value, escape) => [...value].map(char => {
+  const code = char.codePointAt(0);
+  if (char === '\\') return '\\\\';
+  if (char === '"') return '\\"';
+  return code < 0x20 || code === 0x7f ? escape(code) : char;
+}).join('');
+export const goString = value => `"${escapeControls(value, code => `\\u${code.toString(16).padStart(4, '0')}`)}"`;
+export const rustString = value => `"${escapeControls(value, code => `\\u{${code.toString(16)}}`)}"`;
+// A PHP string is single-quoted text with only \ and ' escaped. A line break is written as the
+// double-quoted literal "\n" or "\r" and joined with `.`, so no literal spans two source lines and
+// indentation of the generated source cannot change the text.
+const phpQuoted = value => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+export const phpString = value => {
+  const parts = value.split(/(\r|\n)/).filter(part => part !== '').map(part => part === '\n' ? '"\\n"' : part === '\r' ? '"\\r"' : phpQuoted(part));
+  if (parts.length === 0) return "''";
+  return parts.length === 1 ? parts[0] : `(${parts.join(' . ')})`;
+};
+export const phpLiteral = value => {
+  if (typeof value === 'string') return phpString(value);
+  if (Array.isArray(value)) return `[${value.map(phpLiteral).join(', ')}]`;
+  if (value === null) return 'null';
+  return String(value);
+};
 export const fieldName = name => name.replace(/[^A-Za-z0-9_]/g, '_');
 export const exportedName = name => fieldName(name)[0].toUpperCase() + fieldName(name).slice(1);
 export const functionName = name => `render_${fieldName(name)}`;
@@ -28,8 +55,10 @@ export const goType = type => (optional(type) && typeName(type) !== 'any' ? '*' 
 export const rustType = type => `${optional(type) ? 'Option<' : ''}${genericType(type, scalarTypes.rust, item => `Vec<${item}>`, (key, value) => `OrderedMap<${key}, ${value}>`)}${optional(type) ? '>' : ''}`;
 export const phpType = type => genericType(type, scalarTypes.php, () => 'array', () => 'MapValue');
 export const tsField = (name, type) => `${name}${optional(type) ? '?' : ''}: ${tsType(type)};`;
-export const phpField = (name, type) => `public readonly ${optional(type) ? '?' : ''}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
-export const phpInputField = (name, type) => `public ${optional(type) ? '?' : ''}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
+// PHP rejects a nullable mark on mixed, which already includes null.
+const phpNullable = type => optional(type) && phpType(type) !== 'mixed' ? '?' : '';
+export const phpField = (name, type) => `public readonly ${phpNullable(type)}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
+export const phpInputField = (name, type) => `public ${phpNullable(type)}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
 export const phpDefinitionDataField = (name, type) => `public bool $has_${name} = false, public ${phpType(type) === 'mixed' ? 'mixed' : `?${phpType(type)}`} $${name} = null`;
 export const indent = (level, source) => source.split('\n').map(line => line.length === 0 ? '' : '    '.repeat(level) + line).join('\n');
 
@@ -79,29 +108,29 @@ export function baseTarget(language) {
       set: (name, value, level) => indent(level, `const ${fieldName(name)} = ${value};`),
     },
     go: {
-      literal: (value, type) => value === null ? 'nil' : typeof value === 'string' ? quote(value) : type.kind === 'number' ? `float64(${value})` : String(value),
+      literal: (value, type) => value === null ? 'nil' : typeof value === 'string' ? goString(value) : type.kind === 'number' ? `float64(${value})` : String(value),
       var: (name, type) => `${optional(type) ? 'valueOrZero(' : ''}assign.${exportedName(name)}${optional(type) ? ')' : ''}`,
       local: (name, type) => `${optional(type) ? 'valueOrZero(' : ''}${name}${optional(type) ? ')' : ''}`,
       member: (object, key) => `${object}.${exportedName(key)}`,
-      text: (value, level) => indent(level, `out.WriteString(${quote(value)})`),
+      text: (value, level) => indent(level, `out.WriteString(${goString(value)})`),
       echo: (expression, level) => indent(level, `out.WriteString(generatedEscape(${expression}))`),
       set: (name, value, level) => indent(level, `${fieldName(name)} := ${value}\n_ = ${fieldName(name)}`),
     },
     rust: {
-      literal: (value, type) => value === null ? 'GeneratedValue::Null' : typeof value === 'string' ? quote(value) + '.to_string()' : type.kind === 'number' ? `${value}f64` : String(value),
+      literal: (value, type) => value === null ? 'GeneratedValue::Null' : typeof value === 'string' ? rustString(value) + '.to_string()' : type.kind === 'number' ? `${value}f64` : String(value),
       var: (name, type) => `assign.${name}${optional(type) ? '.clone().unwrap_or_default()' : '.clone()'}`,
       local: (name, type) => optional(type) ? `${name}.clone().unwrap_or_default()` : name,
       member: (object, key) => `${object}.${key}`,
-      text: (value, level) => indent(level, `out.push_str(${quote(value)});`),
+      text: (value, level) => indent(level, `out.push_str(${rustString(value)});`),
       echo: (expression, level) => indent(level, `out.push_str(&escape(&${expression}.to_string()));`),
       set: (name, value, level) => indent(level, `let ${fieldName(name)} = ${value};`),
     },
     php: {
-      literal: value => value === null ? 'null' : typeof value === 'string' ? quote(value) : String(value),
+      literal: value => phpLiteral(value),
       var: name => `$assign->${name}`,
       local: name => `$${name}`,
       member: (object, key) => `${object}?->${key}`,
-      text: (value, level) => indent(level, `$out .= ${quote(value)};`),
+      text: (value, level) => indent(level, `$out .= ${phpString(value)};`),
       echo: (expression, level) => indent(level, `$out .= generated_escape(${expression});`),
       set: (name, value, level) => indent(level, `$${fieldName(name)} = ${value};`),
     },

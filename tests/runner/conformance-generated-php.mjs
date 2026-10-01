@@ -35,6 +35,8 @@ function parsedTemplates(testCase) {
   return templates;
 }
 
+// Every case runs in its own PHP process, so all cases share one namespace.
+const namespace = 'Polyspec\\Generated\\Conformance';
 writeFileSync(runner, `<?php
 declare(strict_types=1);
 require $argv[1];
@@ -42,13 +44,15 @@ require $argv[2];
 use Polyspec\\Template\\TemplateError;
 use Polyspec\\Template\\Value\\BindError;
 use Polyspec\\Template\\Value\\Json;
+use Polyspec\\Template\\Value\\MapValue;
+// Definitions are given as PHP arrays, the form that every PHP program accepts (RT-24).
+function plain(mixed $value): mixed { if ($value instanceof MapValue) { $result = []; foreach ($value->entries() as $key => $item) $result[$key] = plain($item); return $result; } return is_array($value) ? array_map('plain', $value) : $value; }
 try {
     $assign = $argv[3] === '' ? [] : Json::parse(file_get_contents($argv[3]));
-    $define = [];
-    if ($argv[4] !== '') foreach (Json::parse(file_get_contents($argv[4]))->entries() as $name => $entry) $define[$name] = $entry;
+    $define = $argv[4] === '' ? [] : plain(Json::parse(file_get_contents($argv[4])));
     $options = ['define' => $define];
     if ($argv[5] !== '') $options['env'] = json_decode(file_get_contents($argv[5]), true, flags: JSON_THROW_ON_ERROR);
-    $html = (new GeneratedProgram())->render('input.tpl', $assign, $options);
+    $html = (new \\${namespace}\\GeneratedProgram())->render('input.tpl', $assign, $options);
     echo json_encode(['html' => base64_encode($html)], JSON_THROW_ON_ERROR);
 } catch (TemplateError $error) {
     echo json_encode(['error' => ['code' => $error->errorCode, 'template' => $error->template, 'line' => $error->errorLine, 'col' => $error->errorCol]], JSON_THROW_ON_ERROR);
@@ -73,7 +77,7 @@ try {
       const sourcePath = join(sources, `${id}.php`);
       writeFileSync(typePath, JSON.stringify(typeManifest));
       compileAst({ root: testCase.dir, output: graphPath, entry: 'input.tpl', refresh: 'dev', typeManifest: typePath, delimiters: testCase.options.delimiters ?? null });
-      writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'php'));
+      writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'php', { phpNamespace: namespace }));
       execFileSync('php', ['-l', sourcePath], { cwd: root, stdio: 'pipe' });
       const result = spawnSync('php', [runner, join(root, 'packages/template-php/vendor/autoload.php'), sourcePath,
         testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''],

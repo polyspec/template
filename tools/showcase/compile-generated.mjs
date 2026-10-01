@@ -7,6 +7,7 @@ import { root } from '../../tests/runner/drivers.mjs';
 import { compileSource } from '../compiler/compiler.mjs';
 import { generatedCompilerDigest, typescriptDeliveryDigest } from '../compiler/compiler-digest.mjs';
 import { compileGeneratedArtifact } from '../compiler/generated-artifact.mjs';
+import { showcasePhpNamespace } from './php-namespace.mjs';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
 const adapterRoot = join(root, 'tools/showcase/adapters');
@@ -43,7 +44,7 @@ for (const id of scenarios) {
       refresh,
       check,
       compilerDigest: generatedCompilerDigest(language),
-      compile: () => compileSource(graph, manifest, language),
+      compile: () => compileSource(graph, manifest, language, { phpNamespace: showcasePhpNamespace(id) }),
     });
   }
   const typescriptOutput = generatedOutput(id, 'ts');

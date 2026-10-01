@@ -66,6 +66,39 @@ function sameType(left, right) { return typeSource(required(left)) === typeSourc
 function acceptsType(actual, expected) { return required(expected).kind === 'any' || sameType(actual, expected); }
 function mergeType(left, right) { return sameType(left, right) ? { ...required(left), optional: left.optional || right.optional } : parseType('any'); }
 
+// The types that the assignments of lowered nodes give to locals, including assignments in nested
+// branches and loop bodies.
+function assignedTypes(nodes, assigned = new Map()) {
+  for (const node of nodes) {
+    if (node.op === 'set') assigned.set(node.name, assigned.has(node.name) ? mergeType(assigned.get(node.name), node.expr.valueType) : node.expr.valueType);
+    if (node.op === 'if') {
+      for (const branch of node.branches) assignedTypes(branch.body, assigned);
+      if (node.otherwise) assignedTypes(node.otherwise, assigned);
+    }
+    if (node.op === 'for') {
+      for (const [name, type] of assignedTypes(node.body)) if (name !== node.name) assigned.set(name, assigned.has(name) ? mergeType(assigned.get(name), type) : type);
+      if (node.empty) assignedTypes(node.empty, assigned);
+    }
+  }
+  return assigned;
+}
+
+// A local that a branch or a loop body assigns with another type holds either type afterwards, and
+// a loop body reads the value of the previous iteration, so the local takes the merged type of all
+// its assignments. Returns whether a type changed.
+function widenLocals(scope, assigned, except = null) {
+  let changed = false;
+  for (const [name, type] of assigned) {
+    if (name === except || !scope.has(name)) continue;
+    const merged = mergeType(scope.get(name), type);
+    if (typeSource(merged) !== typeSource(scope.get(name))) {
+      scope.set(name, merged);
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 function resolveTemplate(from, path, span = [0, 0], lines = [0]) {
   const value = path.startsWith('/') ? path.slice(1) : posix.join(posix.dirname(from), path);
   const normalized = posix.normalize(value);
@@ -228,15 +261,20 @@ export function lowerSourceGraph(graph, manifest) {
           scope.set(node.name, expr.valueType);
           return { op: 'set', name: node.name, expr, span: node.span };
         }
-        case 'If': return { op: 'if', branches: node.branches.map(branch => ({ test: lowerExpr(branch.test, scope, loops), body: lowerNodes(branch.body, templateName, scope, loops), span: branch.span })), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null, span: node.span };
+        case 'If': {
+          const lowered = { op: 'if', branches: node.branches.map(branch => ({ test: lowerExpr(branch.test, scope, loops), body: lowerNodes(branch.body, templateName, scope, loops), span: branch.span })), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null, span: node.span };
+          widenLocals(scope, assignedTypes([lowered]));
+          return lowered;
+        }
         case 'For': {
           const iter = lowerExpr(node.iter, scope, loops);
           const collection = required(iter.valueType);
           if (collection.kind !== 'list' && collection.kind !== 'map' && collection.kind !== 'any') throw new Error(`compiler: loop ${node.name} requires list, map or any, got ${typeSource(iter.valueType)}`);
           const itemType = collection.kind === 'list' ? collection.item : collection.kind === 'map' ? collection.value : parseType('any');
-          const nestedScope = new Map(scope).set(node.name, itemType);
           const nestedLoops = new Map(loops).set(node.name, itemType);
-          return { op: 'for', name: node.name, iter, itemType, body: lowerNodes(node.body, templateName, nestedScope, nestedLoops), empty: node.empty ? lowerNodes(node.empty, templateName, scope, loops) : null, span: node.span };
+          let body = lowerNodes(node.body, templateName, new Map(scope).set(node.name, itemType), nestedLoops);
+          while (widenLocals(scope, assignedTypes(body), node.name)) body = lowerNodes(node.body, templateName, new Map(scope).set(node.name, itemType), nestedLoops);
+          return { op: 'for', name: node.name, iter, itemType, body, empty: node.empty ? lowerNodes(node.empty, templateName, scope, loops) : null, span: node.span };
         }
         case 'Include': {
           const target = resolveTemplate(templateName, node.path, node.span, graph.lines?.get(templateName) ?? [0]);

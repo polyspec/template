@@ -164,50 +164,59 @@ final class RuntimeBindings
         return $order;
     }
 
-    public function member(mixed $container, string $key): mixed
+    /**
+     * Reads a fixed member name (EXP-18, VAL-19).
+     *
+     * @param array{0: int, 1: int} $span
+     */
+    public function member(mixed $container, string $key, Frame $frame, array $span): mixed
     {
-        if (is_object($container) && !$container instanceof MapValue) {
-            $reflection = new \ReflectionClass($container);
-            if (!$reflection->hasProperty($key) || !$reflection->getProperty($key)->isPublic()) {
-                return null;
-            }
-            return Bind::value($reflection->getProperty($key)->getValue($container));
-        }
-        return $this->index($container, $key);
+        return $this->index($container, $key, $frame, $span);
     }
 
-    /** Calls a public method on the original assigned object. */
+    /**
+     * Calls a public method on the original assigned object and binds its result (VAL-19).
+     *
+     * @param list<mixed> $args
+     * @param array{0: int, 1: int} $span
+     */
     public function memberCall(mixed $container, string $method, array $args, Frame $frame, array $span): mixed
     {
-        if (!is_object($container) || $container instanceof MapValue) {
+        if (!is_object($container) || $container instanceof MapValue || $container instanceof SafeString) {
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$method} is not a function");
         }
-        $reflection = new \ReflectionClass($container);
+        $reflection = new \ReflectionObject($container);
         if (!$reflection->hasMethod($method) || !$reflection->getMethod($method)->isPublic()) {
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$method} is not a function");
         }
-        try {
-            return Bind::value($reflection->getMethod($method)->invokeArgs($container, $args));
-        } catch (\Throwable $error) {
-            throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$method} failed: {$error->getMessage()}");
-        }
+        $target = $reflection->getMethod($method);
+
+        return $this->hostResult($method, static fn (): mixed => $target->invokeArgs($target->isStatic() ? null : $container, $args), $frame, $span);
     }
 
-    /** Calls a registered logical class function. */
+    /**
+     * Calls a registered logical class function and binds its result.
+     *
+     * @param list<mixed> $args
+     * @param array{0: int, 1: int} $span
+     */
     public function classCall(string $className, string $method, array $args, Frame $frame, array $span): mixed
     {
         $function = $this->context->services->classFunction($className, $method);
         if ($function === null) {
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$className}::{$method} is not a function");
         }
-        try {
-            return Bind::value($function($args, $this->context->env));
-        } catch (\Throwable $error) {
-            throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$className}::{$method} failed: {$error->getMessage()}");
-        }
+        $env = $this->context->env;
+
+        return $this->hostResult("{$className}::{$method}", static fn (): mixed => $function($args, $env), $frame, $span);
     }
 
-    public function index(mixed $container, mixed $key): mixed
+    /**
+     * Reads a dynamic list position, a map key or a public property of a native object (EXP-19, VAL-19).
+     *
+     * @param array{0: int, 1: int} $span
+     */
+    public function index(mixed $container, mixed $key, Frame $frame, array $span): mixed
     {
         if ($container instanceof MapValue) {
             if (Value::isString($key)) {
@@ -229,8 +238,31 @@ final class RuntimeBindings
 
             return $position !== null && $position >= 0 && $position < count($container) ? $container[$position] : null;
         }
+        if (is_object($container) && !$container instanceof SafeString && Value::isString($key)) {
+            $properties = Bind::publicProperties($container);
+            $name = Value::textOf($key);
+            if (!array_key_exists($name, $properties)) {
+                return null;
+            }
+
+            return $this->bound($properties[$name], $frame, $span);
+        }
 
         return null;
+    }
+
+    /**
+     * Checks the depth of a value that a list or map literal built (VAL-20).
+     *
+     * @param array{0: int, 1: int} $span
+     */
+    public function depth(mixed $value, Frame $frame, array $span): mixed
+    {
+        if (!Bind::depthWithin($value, Bind::MAX_DEPTH)) {
+            throw $this->error($frame, $span, 'E_RUNTIME_LIMIT', 'a list or map literal nests deeper than ' . Bind::MAX_DEPTH . ' levels');
+        }
+
+        return $value;
     }
 
     /**
@@ -305,13 +337,40 @@ final class RuntimeBindings
         if ($host === null) {
             throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$name} is not a function");
         }
+        $env = $this->context->env;
+
+        return $this->hostResult($name, static fn (): mixed => $host($args, $env), $frame, $span);
+    }
+
+    /**
+     * Runs host code and binds its result; a thrown exception is E_RUNTIME_HOST_FUNCTION at the call
+     * (FUN-46) and a value that cannot be bound fails with its code at the call (ERR-5).
+     *
+     * @param \Closure(): mixed $run
+     * @param array{0: int, 1: int} $span
+     */
+    private function hostResult(string $name, \Closure $run, Frame $frame, array $span): mixed
+    {
         try {
-            $result = $host($args, $this->context->env);
+            $result = $run();
+        } catch (TemplateError $error) {
+            throw $error;
         } catch (\Throwable $error) {
             throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$name} failed: " . $error->getMessage());
         }
+
+        return $this->bound($result, $frame, $span);
+    }
+
+    /**
+     * Binds a host value at the expression that produced it (ERR-5, VAL-11).
+     *
+     * @param array{0: int, 1: int} $span
+     */
+    private function bound(mixed $value, Frame $frame, array $span): mixed
+    {
         try {
-            return Bind::value($result);
+            return Bind::value($value);
         } catch (BindError $error) {
             throw $this->error($frame, $span, $error->errorCode, $error->getMessage());
         }

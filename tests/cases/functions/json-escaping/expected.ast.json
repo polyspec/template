@@ -87,6 +87,76 @@
         35,
         36
       ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "List",
+                "items": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1e+21,
+                    "span": [
+                      45,
+                      49
+                    ]
+                  },
+                  {
+                    "type": "Unary",
+                    "op": "-",
+                    "operand": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 1e+21,
+                      "span": [
+                        52,
+                        56
+                      ]
+                    },
+                    "span": [
+                      51,
+                      56
+                    ]
+                  }
+                ],
+                "span": [
+                  44,
+                  57
+                ]
+              }
+            ],
+            "span": [
+              39,
+              58
+            ]
+          }
+        ],
+        "span": [
+          39,
+          64
+        ]
+      },
+      "span": [
+        36,
+        65
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        65,
+        66
+      ]
     }
   ]
 }

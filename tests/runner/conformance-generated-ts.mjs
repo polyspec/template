@@ -54,7 +54,7 @@ function parsedTemplates(testCase) {
 const pending = [];
 const failures = [];
 let passed = 0;
-const cases = listCases();
+const cases = listCases(process.argv[2]);
 try {
   for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');

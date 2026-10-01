@@ -1,0 +1,142 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "Map",
+        "entries": [
+          {
+            "key": {
+              "type": "Literal",
+              "kind": "string",
+              "value": "k",
+              "span": [
+                7,
+                10
+              ]
+            },
+            "value": {
+              "type": "Literal",
+              "kind": "null",
+              "value": null,
+              "span": [
+                14,
+                18
+              ]
+            }
+          }
+        ],
+        "span": [
+          6,
+          19
+        ]
+      },
+      "span": [
+        0,
+        20
+      ]
+    },
+    {
+      "type": "For",
+      "name": "i",
+      "iter": {
+        "type": "Call",
+        "name": "range",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              33,
+              34
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 64,
+            "span": [
+              36,
+              38
+            ]
+          }
+        ],
+        "span": [
+          27,
+          39
+        ]
+      },
+      "body": [
+        {
+          "type": "Set",
+          "name": "a",
+          "expr": {
+            "type": "Map",
+            "entries": [
+              {
+                "key": {
+                  "type": "Literal",
+                  "kind": "string",
+                  "value": "k",
+                  "span": [
+                    47,
+                    50
+                  ]
+                },
+                "value": {
+                  "type": "Var",
+                  "name": "a",
+                  "span": [
+                    54,
+                    55
+                  ]
+                }
+              }
+            ],
+            "span": [
+              46,
+              56
+            ]
+          },
+          "span": [
+            40,
+            57
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        20,
+        60
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1,
+        "span": [
+          63,
+          64
+        ]
+      },
+      "span": [
+        60,
+        65
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        65,
+        66
+      ]
+    }
+  ]
+}

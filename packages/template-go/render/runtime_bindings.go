@@ -228,15 +228,12 @@ func (r *RuntimeBindings) Compare(left, right value.Value, frame *Frame, span as
 	return order, nil
 }
 
-// Member reads a fixed member name.
-func (r *RuntimeBindings) Member(container value.Value, key string) value.Value {
-	if result, ok := nativeMember(container, key); ok {
-		return result
-	}
-	return r.Index(container, key)
+// Member reads a fixed member name (EXP-18, VAL-19).
+func (r *RuntimeBindings) Member(container value.Value, key string, frame *Frame, span ast.Span) (value.Value, error) {
+	return r.Index(container, key, frame, span)
 }
 
-// MemberCall invokes a public method on the original assigned Go value.
+// MemberCall invokes a public method on the original assigned Go value and binds its result (VAL-19).
 func (r *RuntimeBindings) MemberCall(container value.Value, method string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
 	result, ok, err := nativeCall(container, method, args)
 	if err != nil {
@@ -245,18 +242,10 @@ func (r *RuntimeBindings) MemberCall(container value.Value, method string, args 
 	if !ok {
 		return nil, r.Error(frame, span, errs.RuntimeUnknownFunction, method+" is not a function")
 	}
-	bound, err := value.Bind(result)
-	if err != nil {
-		var bindError *value.BindError
-		if errors.As(err, &bindError) {
-			return nil, r.Error(frame, span, bindError.Code, bindError.Message)
-		}
-		return nil, err
-	}
-	return bound, nil
+	return bindResult(r, result, frame, span)
 }
 
-// ClassCall invokes a registered logical class function.
+// ClassCall invokes a registered logical class function and binds its result.
 func (r *RuntimeBindings) ClassCall(className, method string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
 	fn, ok := r.context.Services.ClassFunction(className, method)
 	if !ok {
@@ -266,18 +255,18 @@ func (r *RuntimeBindings) ClassCall(className, method string, args []value.Value
 	if err != nil {
 		return nil, r.Error(frame, span, errs.RuntimeHostFunction, className+"::"+method+" failed: "+err.Error())
 	}
-	return value.Bind(result)
+	return bindResult(r, result, frame, span)
 }
 
-// Index reads a dynamic list or map key.
-func (r *RuntimeBindings) Index(container, key value.Value) value.Value {
+// Index reads a dynamic list position, a map key or a public field of a native object (EXP-19, VAL-19).
+func (r *RuntimeBindings) Index(container, key value.Value, frame *Frame, span ast.Span) (value.Value, error) {
 	switch current := container.(type) {
 	case *value.OrderedMap:
 		if text, ok := value.TextOf(key); ok {
-			return current.MustGet(text)
+			return current.MustGet(text), nil
 		}
 		if number, ok := key.(float64); ok && number == math.Trunc(number) {
-			return current.MustGet(value.NumberToString(number))
+			return current.MustGet(value.NumberToString(number)), nil
 		}
 	case value.List:
 		position := -1
@@ -287,10 +276,38 @@ func (r *RuntimeBindings) Index(container, key value.Value) value.Value {
 			position, _ = strconv.Atoi(text)
 		}
 		if position >= 0 && position < len(current) {
-			return current[position]
+			return current[position], nil
+		}
+	default:
+		if text, ok := value.TextOf(key); ok {
+			if field, found := nativeMember(container, text); found {
+				return bindResult(r, field, frame, span)
+			}
 		}
 	}
-	return nil
+	return nil, nil
+}
+
+// Depth checks the depth of a value that a list or map literal built (VAL-20).
+func (r *RuntimeBindings) Depth(input value.Value, frame *Frame, span ast.Span) (value.Value, error) {
+	if !value.DepthWithin(input, value.MaxDepth) {
+		return nil, r.Error(frame, span, errs.RuntimeLimit, fmt.Sprintf("a list or map literal nests deeper than %d levels", value.MaxDepth))
+	}
+	return input, nil
+}
+
+// bindResult binds a host value; a value that cannot be bound fails with its data code at the
+// expression that produced it (ERR-5, VAL-11).
+func bindResult(r *RuntimeBindings, input any, frame *Frame, span ast.Span) (value.Value, error) {
+	result, err := value.Bind(input)
+	if err != nil {
+		var bindError *value.BindError
+		if errors.As(err, &bindError) {
+			return nil, r.Error(frame, span, bindError.Code, bindError.Message)
+		}
+		return nil, err
+	}
+	return result, nil
 }
 
 func nativeValue(v reflect.Value) value.Value {
@@ -303,7 +320,9 @@ func nativeValue(v reflect.Value) value.Value {
 	return v.Interface()
 }
 
-func nativeMember(container value.Value, key string) (value.Value, bool) {
+// nativeMember returns the exported struct field whose name equals the key ignoring case or whose
+// json tag name equals the key (VAL-19). The caller binds the field value.
+func nativeMember(container value.Value, key string) (any, bool) {
 	rv := reflect.ValueOf(container)
 	if !rv.IsValid() {
 		return nil, false
@@ -321,15 +340,12 @@ func nativeMember(container value.Value, key string) (value.Value, bool) {
 	for index := 0; index < typeOf.NumField(); index++ {
 		metadata := typeOf.Field(index)
 		jsonName := strings.Split(metadata.Tag.Get("json"), ",")[0]
-		if metadata.Name != key && !strings.EqualFold(metadata.Name, key) && (jsonName == "" || jsonName != key) {
+		if !strings.EqualFold(metadata.Name, key) && (jsonName == "" || jsonName != key) {
 			continue
 		}
 		field := rv.Field(index)
 		if field.CanInterface() {
-			bound, err := value.Bind(nativeValue(field))
-			if err == nil {
-				return bound, true
-			}
+			return nativeValue(field), true
 		}
 	}
 	return nil, false
@@ -449,15 +465,7 @@ func (r *RuntimeBindings) Call(name string, args []value.Value, frame *Frame, sp
 	if err != nil {
 		return nil, r.Error(frame, span, errs.RuntimeHostFunction, name+" failed: "+err.Error())
 	}
-	bound, err := value.Bind(result)
-	if err != nil {
-		var bindError *value.BindError
-		if errors.As(err, &bindError) {
-			return nil, r.Error(frame, span, bindError.Code, bindError.Message)
-		}
-		return nil, err
-	}
-	return bound, nil
+	return bindResult(r, result, frame, span)
 }
 
 // Limit checks expression and iteration limits.

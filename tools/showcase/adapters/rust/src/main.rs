@@ -221,7 +221,7 @@ impl RenderAdapter for Adapter {
                 id.clone(),
                 DefineInput {
                     template: entry.template.clone(),
-                    data: entry.data.clone().map(Value::Object),
+                    data: entry.data.clone().map(|data| polyspec_template::bind(&Value::Object(data))).transpose().map_err(|error| error.message)?,
                     html: entry.html.clone(),
                 },
             );
@@ -259,7 +259,7 @@ impl Adapter {
                 id.clone(),
                 DefineInput {
                     template: entry.template.clone(),
-                    data: entry.data.clone().map(Value::Object),
+                    data: entry.data.clone().map(|data| polyspec_template::bind(&Value::Object(data))).transpose().map_err(|error| error.message)?,
                     html: entry.html.clone(),
                 },
             );

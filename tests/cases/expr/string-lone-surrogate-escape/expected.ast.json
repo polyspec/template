@@ -1,0 +1,162 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Literal",
+                "kind": "string",
+                "value": "a�b",
+                "span": [
+                  3,
+                  13
+                ]
+              }
+            ],
+            "span": [
+              3,
+              20
+            ]
+          }
+        ],
+        "span": [
+          3,
+          26
+        ]
+      },
+      "span": [
+        0,
+        27
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        27,
+        28
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "length",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "�",
+            "span": [
+              38,
+              46
+            ]
+          }
+        ],
+        "span": [
+          31,
+          47
+        ]
+      },
+      "span": [
+        28,
+        48
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        48,
+        49
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "length",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "😀",
+            "span": [
+              59,
+              73
+            ]
+          }
+        ],
+        "span": [
+          52,
+          74
+        ]
+      },
+      "span": [
+        49,
+        75
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        75,
+        76
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Literal",
+                "kind": "string",
+                "value": "x�😀",
+                "span": [
+                  79,
+                  100
+                ]
+              }
+            ],
+            "span": [
+              79,
+              107
+            ]
+          }
+        ],
+        "span": [
+          79,
+          113
+        ]
+      },
+      "span": [
+        76,
+        114
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        114,
+        115
+      ]
+    }
+  ]
+}

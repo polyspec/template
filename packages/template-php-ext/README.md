@@ -53,7 +53,7 @@ try {
 
 The accessors avoid `getCode()`, `getLine()` and `getFile()`, which `\Exception` declares final. `getMessage()` returns the message of the specification.
 
-`renderJson` reads the numbers of the assign data as JSON literals, so an integer literal outside the safe range is reported and a float literal of the same magnitude is accepted. `render` applies the same rules to PHP integers and PHP floats.
+`render` and `renderJson` apply the binding rules of the specification: a number whose magnitude is greater than 2^53 − 1 is `E_DATA_NUMBER_RANGE` whether it is an integer or a float (VAL-2), an array key or property name that is not valid UTF-8 is `E_DATA_INVALID_UTF8`, a closure or a resource is `E_DATA_UNSUPPORTED_TYPE`, and lists and maps nested deeper than 64 levels, including a cyclic structure, are `E_DATA_DEPTH` (VAL-20). A native object passed to a host function, a class function or a method arrives as the original PHP object (VAL-18). Only public properties and methods are visible, whatever the class scope of the caller (VAL-19), and `__get` and `__call` are not consulted. Every method of the extension reports a Rust panic as `E_INTERNAL` instead of aborting the PHP process (ERR-13).
 
 `stubs/polyspec_template.stub.php` holds the signatures for static analysis and is never loaded at runtime.
 

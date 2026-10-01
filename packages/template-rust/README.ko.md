@@ -29,9 +29,13 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 | `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. |
 | `Engine::new(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `Engine::render(target, assign, &RenderOptions)` | 템플릿 이름 또는 파싱된 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 또는 HTML 항목을 제공한다. |
-| `AstProgram::register(name, function)` | 호스트 함수 `Fn(&[Value], &FunctionContext) -> Result<Value, String>`을 등록한다. |
+| `AstProgram::register(name, function)` | 호스트 함수 `Fn(&[Value], &FunctionContext) -> Result<Value, HostError>`를 등록한다. `Err("message".into())`는 호출을 `E_RUNTIME_HOST_FUNCTION`으로 실패시키고, 반환값은 호스트 데이터와 같이 검사한다. |
+| `AstProgram::render_values(target, OrderedMap, &RenderOptions)` | `Value`로 만든 root map을 렌더한다. Map은 `Value::Object` native object를 담을 수 있다. 숫자, 깊이, safe 문자열은 JSON 데이터와 같이 검사한다. |
+| `TemplateObject` | Native object. `member(key)`는 `Ok(Some(value))`, public field가 없으면 `Ok(None)`, 또는 `HostError`를 반환한다. `call(method, args)`는 public method가 없으면 `None`을 반환한다. |
+| `Value::downcast_object::<T>()` | 템플릿이 호스트 함수, class 함수, method에 넘긴 `T` 타입의 원본 `TemplateObject`를 반환한다. |
+| `internal_boundary` | 모든 공개 parse, prepare, render 연산은 panic을 호스트로 전파하지 않고 `E_INTERNAL`로 보고한다. |
 | `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. |
-| `parse_json`, `parse_json_bytes` | 템플릿 값으로의 JSON 파싱. |
+| `parse_json`, `parse_json_bytes`, `read_json` | 템플릿 값 또는 검사한 `serde_json::Value`로의 JSON 파싱. ±(2^53 − 1) 밖의 숫자, 짝이 없는 surrogate escape, 64단계보다 깊은 중첩은 각 데이터 코드로 실패한다. |
 | `TemplateError` | `code`, `template`, `line`, `col`, `offset`, `end`, `message`를 가진 오류. |
 | `Value::text`, `Value::safe_text`, `Value::list`, `Value::map` | text, safe text, list, map 값을 생성하는 함수. 값을 복제할 때 list와 map은 저장소를 공유한다. |
 | `Value::Safe` | echo 태그가 이스케이프 없이 쓰는 문자열. |

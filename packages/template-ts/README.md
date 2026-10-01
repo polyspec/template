@@ -36,7 +36,7 @@ const assign = parseJson(document.getElementById('state').textContent);
 document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
 ```
 
-`parseJson` preserves the key order of the JSON text and rejects integers outside the safe range. `JSON.parse` does neither.
+`parseJson` preserves the key order of the JSON text and rejects numbers outside ±(2^53 − 1), unpaired surrogate escapes and nesting deeper than 64 levels. `JSON.parse` does none of these.
 
 ## Render a parsed template
 
@@ -57,7 +57,7 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | `new AstProgram({ loader, functions, limits, delimiters })` | Creates an AST program. `loader` defaults to an empty `MapLoader`. |
 | `new Engine(program)` | Creates an engine that delegates to one AST or generated program. |
 | `engine.render(nameOrAst, assign, { define, env })` | Renders a template to a string. `assign` contains variables; `define` supplies template paths or HTML entries. |
-| `astProgram.register(name, fn)` | Registers a host function `(args, { env }) => value`. |
+| `astProgram.register(name, fn)` | Registers a host function `(args, { env }) => value`. A native object argument, also inside a list or map, is the original class instance. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. |
 | `parseJson`, `parseJsonBytes` | Order-preserving JSON parsers for assign data. |
 | `TemplateError` | Error with `code`, `template`, `line`, `col`, `offset`, `end`, `message`. |
