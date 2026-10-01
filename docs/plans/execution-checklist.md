@@ -284,3 +284,10 @@ Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete
 - `make release-test-matrix` proves each release layer independently: units, generated-source compilation, conformance, positioned errors and failure recovery, mutation rejection, isolated install projects, browser DOM output and performance parity.
 - `make install-check`, `make showcase-check`, `make docs-verify-idempotent` and `make release-check` pass in a clean checkout.
 - `docs/features.md` and `docs/features.ko.md` carry identical status fields with evidence links for every row.
+
+Evidence of 2026-10-02, with Node 26.8.1, Go 1.27.1 (from the `go.mod` toolchain line), Rust 1.98.1 and PHP 8.5.10:
+
+- `make check` passed with status 0 in a new checkout of commit "Make template tags stand out in VS Code whatever the color theme is" after `npm ci`, with the Makefile change of the commit that records this evidence. That run found that `runtime-interface-check` and `compiler-interface-check` did not install the PHP dependencies they use; both now depend on `build-php`. `make check` includes `test-browser`, `conformance-all-modes`, `install-check`, `showcase-check` and the documentation status check since commit "Repair the release checks broken by the host value changes and run them in make check".
+- `node tests/runner/parity.mjs` reported that 244 of 244 cases agree across `ts`, `go`, `rust`, `php` and `php-ext` on commit "Make template tags stand out in VS Code whatever the color theme is".
+- `make conformance-all-modes` passed all 1,952 cells without a fallback; `make test-browser`, `make install-check`, `make showcase-check` and `make docs-verify-idempotent` passed.
+- `make release-check` passed on commit "Make template tags stand out in VS Code whatever the color theme is": it ran `make release-test-matrix`, all seven layers, in an isolated clean checkout.

@@ -222,14 +222,14 @@ feature-check: ## Validate executable feature contracts and generated status pag
 runtime-interface-generate: ## Generate the runtime prepared-execution Mermaid diagrams
 	node scripts/generate-runtime-interface.mjs
 
-runtime-interface-check: ## Verify the prepared render interface in every runtime
+runtime-interface-check: build-php ## Verify the prepared render interface in every runtime
 	node scripts/generate-runtime-interface.mjs --check
 	node scripts/check-runtime-interface.mjs
 
 compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 	node scripts/generate-compiler-interface.mjs
 
-compiler-interface-check: ## Verify the typed generated module structure in every language
+compiler-interface-check: build-php ## Verify the typed generated module structure in every language
 	node scripts/generate-compiler-interface.mjs --check
 	node scripts/check-compiler-interface.mjs
 	node scripts/check-compiler-interface-mutations.mjs

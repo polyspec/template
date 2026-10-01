@@ -1,5 +1,6 @@
 # Changelog
 
+- Made `runtime-interface-check` and `compiler-interface-check` install the PHP dependencies they run; in a new checkout `make check` failed there because `vendor/bin/phpunit` did not exist. Recorded the definition-of-done evidence of 2026-10-02 in the execution checklist.
 - Made template tags stand out in VS Code whatever the color theme is. The grammar gives delimiters and sigils `keyword.control` scopes instead of `punctuation.definition.tag`, which HTML uses for `<` and `>`, and block names `entity.name.type`; the extension paints a background on every tag except comments from the tag ranges of the parser: the deep green `#16351c` in dark themes and `#e3f6dd` in light themes, a lightness step away from the editor background that keeps every syntax color readable. `templateStructure()` returns every tag range for it.
 - Moved the conversion of typed generated Go values into the runtime: `value.Convert` returns the template value of a `value.Source`, and generated records and typed maps implement it. Generated Go source no longer imports `reflect`, which `typed-generator-compile-check` forbids; a value test pins a record inside a slice, a nil record and a native object.
 - Created the namespaced generated class in the PHP install project; the required PHP namespace had made the class without a namespace unreachable.
