@@ -15,6 +15,7 @@
 
 ## Unreleased
 
+- Fixed HTML escaping in the Rust implementation, which the PHP extension also uses. After the first character that needs a reference, it copied the text byte by byte and panicked on the first multi-byte character, so `<제목>` aborted the Rust CLI and the PHP process. It now copies the text between replaced characters. The conformance case `echo/html-escape-multibyte` reproduces the failure in every language.
 - Added a manifest-declared language test matrix that requires equal semantic coverage for TypeScript, Go, Rust and PHP in both AST and generated modes. Added mutation checks for missing language support, test paths and compiler modes, and included the matrix in the default check.
 - Corrected the expression and guide documents to describe the implemented member-call and logical class-call syntax. The documents no longer state that method calls are unavailable or that generated native calls are partial.
 - Extended the function contract with `object.method(args...)` and `Class::function(args...)` syntax and opened Wave 8 for native instance binding and execution. The parser and AST support these nodes; runtime execution remains partial.

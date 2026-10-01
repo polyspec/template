@@ -15,6 +15,7 @@
 
 ## 미발행
 
+- Rust 구현의 HTML 이스케이프를 수정했다. PHP 확장도 이 구현을 쓴다. 참조로 바꿀 첫 문자를 만난 뒤부터 텍스트를 바이트 단위로 복사했기 때문에 첫 다중 바이트 문자에서 panic했고, `<제목>` 같은 텍스트가 Rust CLI와 PHP 프로세스를 중단시켰다. 이제 바꾼 문자 사이의 텍스트를 통째로 복사한다. 적합성 사례 `echo/html-escape-multibyte`가 모든 언어에서 이 실패를 재현한다.
 - 매니페스트가 선언한 언어 테스트 매트릭스를 추가해 TypeScript, Go, Rust, PHP의 AST와 generated mode가 같은 의미 범위를 검사하도록 강제했다. 언어 지원·테스트 경로·compiler mode 누락을 찾는 mutation 검사를 추가하고 기본 검사에 매트릭스를 포함했다.
 - 구현된 멤버 호출과 논리 클래스 호출 문법에 맞게 표현식과 가이드 문서를 수정했다. 메서드 호출을 사용할 수 없거나 generated native 호출이 partial이라는 잘못된 설명을 제거했다.
 - 함수 계약에 `object.method(args...)`와 `Class::function(args...)` 문법을 추가하고 native 인스턴스 binding·실행을 위한 Wave 8을 열었다. parser와 AST는 이 노드를 지원하지만 런타임 실행은 partial 상태다.
