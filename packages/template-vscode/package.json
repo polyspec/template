@@ -1,0 +1,98 @@
+{
+  "name": "polyspec-template",
+  "displayName": "Polyspec Template",
+  "description": "Syntax highlighting with embedded HTML, CSS and JavaScript, parse diagnostics, matching tags, folding and a whitespace formatter for the polyspec template language",
+  "version": "0.0.1",
+  "publisher": "polyspec",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polyspec/template",
+    "directory": "packages/template-vscode"
+  },
+  "engines": {
+    "vscode": "^1.138.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "main": "./dist/extension.cjs",
+  "activationEvents": [],
+  "contributes": {
+    "languages": [
+      {
+        "id": "polyspec-template",
+        "aliases": [
+          "Polyspec Template",
+          "polyspec-template"
+        ],
+        "extensions": [
+          ".tpl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "polyspec-template",
+        "scopeName": "text.html.polyspec-template",
+        "path": "./syntaxes/polyspec-template.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.css": "css",
+          "source.js": "javascript"
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "polyspec-template.goToMatchingTag",
+        "title": "Go to Matching Template Tag",
+        "category": "Polyspec Template"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "polyspec-template.goToMatchingTag",
+        "key": "ctrl+alt+\\",
+        "mac": "cmd+alt+\\",
+        "when": "editorTextFocus && editorLangId == polyspec-template"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "polyspec-template.goToMatchingTag",
+          "when": "editorLangId == polyspec-template"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node24 --external:vscode --outfile=dist/extension.cjs",
+    "test:grammar": "vscode-tmgrammar-test --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json \"tests/grammar/*.tpl\"",
+    "test:extension": "node --test tests/extension.test.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "package": "vsce package --no-dependencies --skip-license --out dist/polyspec-template.vsix",
+    "test:integration": "node tests/integration/run.mjs"
+  },
+  "dependencies": {
+    "@polyspec/template-format": "0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/vscode": "^1.138.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "tm-grammars": "^1.32.22",
+    "vscode-tmgrammar-test": "^0.1.3"
+  }
+}

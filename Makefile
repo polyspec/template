@@ -8,7 +8,8 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance delimiter-matrix parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
-	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean
+	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
+	build-format test-format format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -17,6 +18,9 @@ GO_DIR   := packages/template-go
 RUST_DIR := packages/template-rust
 PHP_DIR  := packages/template-php
 EXT_DIR  := packages/template-php-ext
+FORMAT_DIR := packages/template-format
+VSCODE_DIR := packages/template-vscode
+VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 
 # require-dir prints "not implemented" and fails when a package directory is absent.
 define require-dir
@@ -25,7 +29,7 @@ endef
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  check                  docs-check, lint, unit tests of every package, conformance"
+	@echo "  check                  docs-check, lint, unit tests of every package, formatter and extension tests, conformance"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, pint --test"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
@@ -50,9 +54,19 @@ help: ## List targets
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
 	@echo "  dependency-audit       Reject known JavaScript and PHP dependency advisories"
 	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
+	@echo "  build-format           Build the formatter library and the template-fmt CLI"
+	@echo "  test-format            Formatter, safety invariant and CLI tests, type check"
+	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
+	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
+	@echo "  install-cli            Link template-fmt into the global npm bin directory"
+	@echo "  build-vscode           Bundle the VS Code extension"
+	@echo "  test-vscode            Grammar tests, extension tests and type check"
+	@echo "  test-vscode-integration Run the extension inside VS Code (downloads VS Code into .vscode-test)"
+	@echo "  vscode-package         Build the .vsix with vsce"
+	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-format format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -92,6 +106,40 @@ test-rust: ## Rust clippy and tests
 
 test-php: build-php ## PHP unit tests
 	cd $(PHP_DIR) && vendor/bin/phpunit
+
+build-format: build-ts ## Build the formatter library and the template-fmt CLI
+	npm run build -w @polyspec/template-format
+
+test-format: build-format ## Formatter, safety invariant and CLI tests, type check
+	npm test -w @polyspec/template-format -- --run
+	npm run typecheck -w @polyspec/template-format
+
+format-check: build-format ## Check that the formatter fixtures are formatted
+	node $(FORMAT_DIR)/bin/template-fmt.mjs --check $(FORMAT_DIR)/tests/fixtures/expected
+
+format-external-check: build-format ## Run the formatter safety invariant on an explicit external template tree
+	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
+	TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" npm test -w @polyspec/template-format -- --run tests/invariant.test.ts
+
+install-cli: build-format ## Link template-fmt into the global npm bin directory
+	npm link -w @polyspec/template-format
+
+build-vscode: build-format ## Bundle the VS Code extension
+	npm run build -w polyspec-template
+
+test-vscode: build-vscode ## Grammar tests, extension tests and type check
+	npm run test:grammar -w polyspec-template
+	npm run test:extension -w polyspec-template
+	npm run typecheck -w polyspec-template
+
+test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
+	npm run test:integration -w polyspec-template
+
+vscode-package: build-vscode ## Build the .vsix
+	npm run package -w polyspec-template
+
+vscode-install: vscode-package ## Install the .vsix into the local VS Code
+	code --install-extension $(VSIX) --force
 
 conformance: ## Cross-language conformance suite
 	node tests/runner/conformance.mjs
@@ -286,4 +334,4 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(FORMAT_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first

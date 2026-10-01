@@ -1,0 +1,40 @@
+{
+  "name": "@polyspec/template-format",
+  "version": "0.0.1",
+  "description": "Formatter, command line tool and tag structure analysis for template sources; formatting changes only whitespace inside tags",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "bin": {
+    "template-fmt": "./bin/template-fmt.mjs"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@polyspec/template": "0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsup": "^8.5.1",
+    "vitest": "^5.0.3"
+  }
+}

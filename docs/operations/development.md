@@ -22,7 +22,7 @@ make help
 make check
 ```
 
-`make check` runs `docs-check`, `lint`, `test-ts`, `test-go`, `test-rust`, `test-php` and `conformance`. A target whose package does not exist yet prints `not implemented` and exits with status 1.
+`make check` runs `docs-check`, `lint`, `test-ts`, `test-format`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php` and `conformance`. A target whose package does not exist yet prints `not implemented` and exits with status 1.
 
 Single-language commands:
 

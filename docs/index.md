@@ -27,5 +27,6 @@ Documents that do not exist yet are listed in the [execution checklist](plans/ex
 - [Development](operations/development.md)
 - [Conformance](operations/conformance.md)
 - [Browser rendering](operations/browser.md)
+- [Formatter and VS Code extension](operations/editor-tools.md)
 - [Publication](operations/publication.md)
 - [Documentation](operations/documentation.md)

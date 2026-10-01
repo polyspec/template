@@ -1,0 +1,16 @@
+{
+  "name": "polyspec-template-integration-harness",
+  "description": "Development extension that only carries the integration test runner; the extension under test is installed from the .vsix",
+  "version": "0.0.1",
+  "publisher": "polyspec",
+  "private": true,
+  "engines": {
+    "vscode": "^1.138.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  }
+}
