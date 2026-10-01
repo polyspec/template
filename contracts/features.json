@@ -552,8 +552,8 @@
       "title": "PHP native extension",
       "title_ko": "PHP native extension",
       "status": "implemented",
-      "description": "Expose the supported AST runtime through the compiled PHP extension boundary.",
-      "description_ko": "컴파일된 PHP extension 경계에서 지원하는 AST runtime을 제공한다.",
+      "description": "Expose the supported AST runtime through the compiled PHP extension boundary, including the PHP value binding of VAL-14, retained native objects and logical class functions.",
+      "description_ko": "컴파일된 PHP extension 경계에서 지원하는 AST runtime을 제공한다. VAL-14의 PHP 값 binding, 유지되는 native 객체, 논리 class function을 포함한다.",
       "inputs": {
         "type": "PHPExtensionRequest",
         "fields": [

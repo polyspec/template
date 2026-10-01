@@ -123,6 +123,74 @@ final class EngineTest extends TestCase
         );
     }
 
+    public function testRenderBindsStdClassAsAMap(): void
+    {
+        // VAL-14: a stdClass is a map of its properties, also when it is empty or its keys look like a list.
+        $engine = new Engine($this->root);
+        $this->assertSame("{\"0\":\"a\",\"x\":1}\n", $engine->render('keys.tpl', ['m' => (object) ['0' => 'a', 'x' => 1]]));
+        $this->assertSame("{}\n", $engine->render('keys.tpl', ['m' => new \stdClass()]));
+        $this->assertSame("{}\n", $engine->render('keys.tpl', (object) ['m' => new \stdClass()]));
+    }
+
+    public function testRenderBindsJsonSerializableAsItsValue(): void
+    {
+        // VAL-14: an object implementing JsonSerializable binds the value of jsonSerialize().
+        $engine = new Engine($this->root);
+        $value = new class () implements \JsonSerializable {
+            public function jsonSerialize(): mixed
+            {
+                return ['b' => 2, 'c' => (object) []];
+            }
+        };
+        $this->assertSame("{\"b\":2,\"c\":{}}\n", $engine->render('keys.tpl', ['m' => $value]));
+    }
+
+    public function testRenderRetainsAnObjectWithItsPublicMembers(): void
+    {
+        // VAL-14, VAL-18, VAL-19: other objects keep the instance; only public properties and methods are visible.
+        $engine = new Engine($this->root);
+        $this->assertSame("1|||x:1|y\n", $engine->render('object.tpl', ['o' => self::object()]));
+        foreach (['object-hidden.tpl' => 'E_RUNTIME_UNKNOWN_FUNCTION', 'object-fail.tpl' => 'E_RUNTIME_HOST_FUNCTION', 'object-echo.tpl' => 'E_RUNTIME_STRINGIFY'] as $template => $code) {
+            try {
+                $engine->render($template, ['o' => self::object()]);
+                $this->fail("expected {$code} for {$template}");
+            } catch (TemplateError $error) {
+                $this->assertSame($code, $error->getErrorCode(), $template);
+            }
+        }
+    }
+
+    public function testRegisterClassMakesAClassFunctionCallable(): void
+    {
+        // FUN-43, VAL-19: a logical class function is registered by class name and function name.
+        $engine = new Engine($this->root);
+        $engine->registerClass('Order', 'status_label', static fn (array $args): string => $args[0] . ':ok');
+        $this->assertSame("ready:ok\n", $engine->render('class-call.tpl', []));
+    }
+
+    private static function object(): object
+    {
+        return new class () {
+            public int $a = 1;
+            private int $secret = 2;
+
+            public function label(string $prefix): string
+            {
+                return $prefix . ':' . $this->a . ($this->secret > 2 ? '' : '');
+            }
+
+            public function fail(): string
+            {
+                throw new \RuntimeException('failed');
+            }
+
+            private function hidden(): string
+            {
+                return 'hidden';
+            }
+        };
+    }
+
     public function testRenderJsonKeepsTheDocumentOrderOfIntegerLikeKeys(): void
     {
         $engine = new Engine($this->root);

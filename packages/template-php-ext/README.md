@@ -46,7 +46,8 @@ try {
 | `Engine::parse(string $source, string $name, array $options): array` | Parses one template and returns the AST as nested arrays. |
 | `Engine::parseToJson(string $source, string $name, array $options): string` | Parses one template and returns the AST as JSON text. |
 | `$engine->register(string $name, callable $function): void` | Registers a host function `fn(array $args, array $env): mixed`. |
-| `$engine->render(string $name, mixed $assign, array $options): string` | Renders a template with PHP assign data. `$options` accepts `define` and `env`. |
+| `$engine->registerClass(string $class, string $method, callable $function): void` | Registers the logical class function `Class::method` as `fn(array $args, array $env): mixed`. |
+| `$engine->render(string $name, mixed $assign, array $options): string` | Renders a template with PHP assign data. Arrays, `stdClass` and `JsonSerializable` values become template values, and other objects keep their instance with public properties and methods visible (VAL-14, RT-60). `$options` accepts `define` and `env`. |
 | `$engine->renderJson(string $name, string $assign, ?string $define, ?string $env): string` | Renders a template with assign data, template definitions and environment given as JSON text. |
 | `TemplateError` | Extends `\Exception`. `getErrorCode()`, `getTemplate()`, `getErrorLine()`, `getErrorCol()`, `getOffset()`, `getEnd()`, `toArray()`. |
 
