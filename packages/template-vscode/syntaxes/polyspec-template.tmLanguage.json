@@ -1,0 +1,520 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Polyspec Template",
+  "scopeName": "text.html.polyspec-template",
+  "comment": "HTML with template tags. Tags are injected at every position of the document, including attribute values, CSS, JavaScript and HTML comments. Tokens follow docs/spec/lexical.md, docs/spec/grammar.md and docs/spec/expressions.md with the default delimiters { and }.",
+  "patterns": [
+    { "include": "text.html.basic" }
+  ],
+  "injections": {
+    "L:text.html.polyspec-template - (meta.template | comment.block.polyspec-template)": {
+      "patterns": [
+        { "include": "#tags" }
+      ]
+    }
+  },
+  "repository": {
+    "tags": {
+      "patterns": [
+        { "include": "#escape" },
+        { "include": "#wrapped" },
+        { "include": "#tag-kinds" }
+      ]
+    },
+    "escape": {
+      "comment": "LEX-9: a backslash before an open delimiter that would start a tag.",
+      "match": "\\\\\\{(?=[ \\t]*(?:\\?#|:\\?|[=?:+#*%]|/[ \\t]*\\}|@[ \\t]*[A-Za-z_][A-Za-z0-9_]*[ \\t]*=))",
+      "name": "constant.character.escape.polyspec-template"
+    },
+    "wrapped": {
+      "comment": "LEX-17: a tag with doubled delimiters inside a wrapper pair. The wrapper is part of the tag.",
+      "patterns": [
+        {
+          "begin": "(\")[ \\t]*(\\{)(?=\\{[ \\t]*(?:\\?#|:\\?|[=?:+#*%]|/[ \\t]*\\}|@[ \\t]*[A-Za-z_][A-Za-z0-9_]*[ \\t]*=))",
+          "beginCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.begin.polyspec-template" },
+            "2": { "name": "punctuation.definition.tag.begin.polyspec-template" }
+          },
+          "end": "(?<=\\})[ \\t]*(\")",
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.end.polyspec-template" }
+          },
+          "name": "meta.template.wrapped.polyspec-template",
+          "patterns": [
+            { "include": "#wrapped-body" }
+          ]
+        },
+        {
+          "begin": "(')[ \\t]*(\\{)(?=\\{[ \\t]*(?:\\?#|:\\?|[=?:+#*%]|/[ \\t]*\\}|@[ \\t]*[A-Za-z_][A-Za-z0-9_]*[ \\t]*=))",
+          "beginCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.begin.polyspec-template" },
+            "2": { "name": "punctuation.definition.tag.begin.polyspec-template" }
+          },
+          "end": "(?<=\\})[ \\t]*(')",
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.end.polyspec-template" }
+          },
+          "name": "meta.template.wrapped.polyspec-template",
+          "patterns": [
+            { "include": "#wrapped-body" }
+          ]
+        },
+        {
+          "begin": "(/\\*)[ \\t]*(\\{)(?=\\{[ \\t]*(?:\\?#|:\\?|[=?:+#*%]|/[ \\t]*\\}|@[ \\t]*[A-Za-z_][A-Za-z0-9_]*[ \\t]*=))",
+          "beginCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.begin.polyspec-template" },
+            "2": { "name": "punctuation.definition.tag.begin.polyspec-template" }
+          },
+          "end": "(?<=\\})[ \\t]*(\\*/)",
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.end.polyspec-template" }
+          },
+          "name": "meta.template.wrapped.polyspec-template",
+          "patterns": [
+            { "include": "#wrapped-body" }
+          ]
+        },
+        {
+          "begin": "(<!--)[ \\t]*(\\{)(?=\\{[ \\t]*(?:\\?#|:\\?|[=?:+#*%]|/[ \\t]*\\}|@[ \\t]*[A-Za-z_][A-Za-z0-9_]*[ \\t]*=))",
+          "beginCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.begin.polyspec-template" },
+            "2": { "name": "punctuation.definition.tag.begin.polyspec-template" }
+          },
+          "end": "(?<=\\})[ \\t]*(-->)",
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.wrapper.end.polyspec-template" }
+          },
+          "name": "meta.template.wrapped.polyspec-template",
+          "patterns": [
+            { "include": "#wrapped-body" }
+          ]
+        }
+      ]
+    },
+    "wrapped-body": {
+      "patterns": [
+        { "include": "#tag-kinds" },
+        {
+          "match": "\\}",
+          "name": "punctuation.definition.tag.end.polyspec-template"
+        }
+      ]
+    },
+    "tag-kinds": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#directive" },
+        { "include": "#close" },
+        { "include": "#ifblock" },
+        { "include": "#elseif" },
+        { "include": "#assignment" },
+        { "include": "#else" },
+        { "include": "#if" },
+        { "include": "#echo-raw" },
+        { "include": "#echo" },
+        { "include": "#loop" },
+        { "include": "#include" },
+        { "include": "#block" }
+      ]
+    },
+    "comment": {
+      "comment": "LEX-10: a comment ends at the first *} and does not nest.",
+      "begin": "(\\{)[ \\t]*(\\*)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.comment.begin.polyspec-template" },
+        "2": { "name": "punctuation.definition.comment.begin.polyspec-template" }
+      },
+      "end": "\\*\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.comment.end.polyspec-template" }
+      },
+      "name": "comment.block.polyspec-template"
+    },
+    "directive": {
+      "comment": "LEX-23, GRM-24: the delimiter directive. Tags after a directive use other delimiters, which this grammar does not follow.",
+      "match": "(\\{)[ \\t]*(%)[ \\t]*(delimiter)[ \\t]*([^ \\t\\r\\n]{2})[ \\t]*(\\})",
+      "captures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.directive.polyspec-template" },
+        "3": { "name": "keyword.control.directive.polyspec-template" },
+        "4": { "name": "constant.other.delimiter.polyspec-template" },
+        "5": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.directive.polyspec-template"
+    },
+    "close": {
+      "comment": "GRM-11: {/} closes the innermost block.",
+      "match": "(\\{)[ \\t]*(/)[ \\t]*(\\})",
+      "captures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.end.polyspec-template" },
+        "3": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.end.polyspec-template"
+    },
+    "ifblock": {
+      "comment": "GRM-16: ?# followed by a block identifier.",
+      "begin": "(\\{)[ \\t]*(\\?#)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.ifblock.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.ifblock.polyspec-template",
+      "patterns": [
+        {
+          "match": "[A-Za-z_][A-Za-z0-9_]*",
+          "name": "entity.name.section.block.polyspec-template"
+        },
+        { "include": "#invalid" }
+      ]
+    },
+    "elseif": {
+      "comment": "GRM-10: :? followed by an expression.",
+      "begin": "(\\{)[ \\t]*(:\\?)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.elseif.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.elseif.polyspec-template",
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    "assignment": {
+      "comment": "LEX-6, GRM-17: : identifier and an assignment operator.",
+      "begin": "(\\{)[ \\t]*(:)[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(\\+\\+|--|[-+*/%]=|=(?![=>]))",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.assignment.polyspec-template" },
+        "3": { "name": "variable.other.assignment.polyspec-template" },
+        "4": { "name": "keyword.operator.assignment.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.assignment.polyspec-template",
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    "else": {
+      "comment": "GRM-10, GRM-8: {:} starts the else branch of an if, the empty branch of a loop or the else branch of an if-block.",
+      "begin": "(\\{)[ \\t]*(:)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.else.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.else.polyspec-template",
+      "patterns": [
+        { "include": "#invalid" }
+      ]
+    },
+    "if": {
+      "comment": "GRM-9: ? followed by an expression.",
+      "begin": "(\\{)[ \\t]*(\\?)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.if.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.if.polyspec-template",
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    "echo-raw": {
+      "comment": "GRM-6 with a final raw pipe step: the value is output without HTML escaping.",
+      "begin": "(\\{)[ \\t]*(=)(?=[^}]*\\|[ \\t]*raw[ \\t]*\\})",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.operator.echo.raw.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.echo.raw.polyspec-template",
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    "echo": {
+      "comment": "GRM-6: = followed by an expression.",
+      "begin": "(\\{)[ \\t]*(=)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.operator.echo.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.echo.polyspec-template",
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    "loop": {
+      "comment": "LEX-5, GRM-7: @ identifier = expression.",
+      "begin": "(\\{)[ \\t]*(@)[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(=)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.loop.polyspec-template" },
+        "3": { "name": "variable.other.loop.polyspec-template" },
+        "4": { "name": "keyword.operator.assignment.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.loop.polyspec-template",
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    "include": {
+      "comment": "GRM-12: + followed by a path.",
+      "begin": "(\\{)[ \\t]*(\\+)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.include.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.include.polyspec-template",
+      "patterns": [
+        { "include": "#path" },
+        { "include": "#invalid" }
+      ]
+    },
+    "block": {
+      "comment": "GRM-13 to GRM-15: # [identifier] [path] {scope item}.",
+      "begin": "(\\{)[ \\t]*(#)(?:[ \\t]*([A-Za-z_][A-Za-z0-9_]*)(?![A-Za-z0-9_./:-]))?",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.tag.begin.polyspec-template" },
+        "2": { "name": "keyword.control.block.polyspec-template" },
+        "3": { "name": "entity.name.section.block.polyspec-template" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.polyspec-template" }
+      },
+      "name": "meta.template.block.polyspec-template",
+      "patterns": [
+        { "include": "#path" },
+        {
+          "match": "([A-Za-z_][A-Za-z0-9_]*)(:)([^ \\t}\"']+)",
+          "captures": {
+            "1": { "name": "variable.parameter.scope.polyspec-template" },
+            "2": { "name": "punctuation.separator.key-value.polyspec-template" },
+            "3": { "patterns": [ { "include": "#expression" } ] }
+          }
+        },
+        {
+          "match": "[A-Za-z_][A-Za-z0-9_]*",
+          "name": "variable.parameter.scope.polyspec-template"
+        },
+        { "include": "#expression" }
+      ]
+    },
+    "path": {
+      "comment": "GRM-2, GRM-3: a string literal or a bare path that contains . or /.",
+      "patterns": [
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.path.polyspec-template",
+          "patterns": [ { "include": "#string-escape" } ]
+        },
+        {
+          "begin": "'",
+          "end": "'",
+          "name": "string.quoted.single.path.polyspec-template",
+          "patterns": [ { "include": "#string-escape" } ]
+        },
+        {
+          "match": "[A-Za-z0-9_-]*[./][A-Za-z0-9_./-]*",
+          "name": "string.unquoted.path.polyspec-template"
+        }
+      ]
+    },
+    "invalid": {
+      "match": "[^ \\t}]",
+      "name": "invalid.illegal.polyspec-template"
+    },
+    "string-escape": {
+      "comment": "EXP-3: the escape sequences of a string literal.",
+      "patterns": [
+        {
+          "match": "\\\\(?:[\\\\'\"nrt]|u[0-9A-Fa-f]{4})",
+          "name": "constant.character.escape.polyspec-template"
+        },
+        {
+          "match": "\\\\.",
+          "name": "invalid.illegal.escape.polyspec-template"
+        }
+      ]
+    },
+    "expression": {
+      "comment": "EXP-1 to EXP-7: expression tokens.",
+      "patterns": [
+        {
+          "begin": "\"",
+          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.polyspec-template" } },
+          "end": "\"",
+          "endCaptures": { "0": { "name": "punctuation.definition.string.end.polyspec-template" } },
+          "name": "string.quoted.double.polyspec-template",
+          "patterns": [ { "include": "#string-escape" } ]
+        },
+        {
+          "begin": "'",
+          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.polyspec-template" } },
+          "end": "'",
+          "endCaptures": { "0": { "name": "punctuation.definition.string.end.polyspec-template" } },
+          "name": "string.quoted.single.polyspec-template",
+          "patterns": [ { "include": "#string-escape" } ]
+        },
+        {
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)(::)([A-Za-z_][A-Za-z0-9_]*)(?=[ \\t]*\\()",
+          "captures": {
+            "1": { "name": "entity.name.type.class.polyspec-template" },
+            "2": { "name": "punctuation.separator.namespace.polyspec-template" },
+            "3": { "name": "entity.name.function.polyspec-template" }
+          }
+        },
+        {
+          "match": "\\|\\||&&|!(?!=)",
+          "name": "keyword.operator.logical.polyspec-template"
+        },
+        {
+          "match": "(\\|)[ \\t]*(?:(raw)|([A-Za-z_][A-Za-z0-9_]*))\\b",
+          "captures": {
+            "1": { "name": "keyword.operator.pipe.polyspec-template" },
+            "2": { "name": "support.function.filter.raw.polyspec-template" },
+            "3": { "name": "support.function.filter.polyspec-template" }
+          }
+        },
+        {
+          "match": "\\|",
+          "name": "keyword.operator.pipe.polyspec-template"
+        },
+        {
+          "match": "(?<![A-Za-z0-9_.])([A-Za-z_][A-Za-z0-9_]*)(\\.)(index_|key_|value_|last_|first_|size_)\\b",
+          "captures": {
+            "1": { "name": "variable.other.loop.polyspec-template" },
+            "2": { "name": "punctuation.accessor.polyspec-template" },
+            "3": { "name": "variable.language.loop-meta.polyspec-template" }
+          }
+        },
+        {
+          "match": "(\\.)([A-Za-z_][A-Za-z0-9_]*)(?=[ \\t]*\\()",
+          "captures": {
+            "1": { "name": "punctuation.accessor.polyspec-template" },
+            "2": { "name": "entity.name.function.member.polyspec-template" }
+          }
+        },
+        {
+          "match": "\\b(?:true|false|null)\\b",
+          "name": "constant.language.polyspec-template"
+        },
+        {
+          "match": "\\bin\\b",
+          "name": "keyword.operator.word.in.polyspec-template"
+        },
+        {
+          "match": "\\b[0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b",
+          "name": "constant.numeric.polyspec-template"
+        },
+        {
+          "match": "(\\.)([A-Za-z_][A-Za-z0-9_]*|[0-9]+)",
+          "captures": {
+            "1": { "name": "punctuation.accessor.polyspec-template" },
+            "2": { "name": "variable.other.property.polyspec-template" }
+          }
+        },
+        {
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=[ \\t]*\\()",
+          "name": "entity.name.function.polyspec-template"
+        },
+        {
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
+          "name": "variable.other.readwrite.polyspec-template"
+        },
+        {
+          "match": "\\.\\.\\.",
+          "name": "keyword.operator.spread.polyspec-template"
+        },
+        {
+          "match": "===|!==|==|!=",
+          "name": "keyword.operator.comparison.polyspec-template"
+        },
+        {
+          "match": "<=|>=|<|>",
+          "name": "keyword.operator.relational.polyspec-template"
+        },
+        {
+          "match": "\\?\\?",
+          "name": "keyword.operator.coalesce.polyspec-template"
+        },
+        {
+          "match": "\\?:",
+          "name": "keyword.operator.elvis.polyspec-template"
+        },
+        {
+          "match": "=>",
+          "name": "keyword.operator.key-value.polyspec-template"
+        },
+        {
+          "match": "\\?|:",
+          "name": "keyword.operator.ternary.polyspec-template"
+        },
+        {
+          "match": "[-+*/%]",
+          "name": "keyword.operator.arithmetic.polyspec-template"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.polyspec-template"
+        },
+        {
+          "match": "\\(",
+          "name": "punctuation.section.parens.begin.polyspec-template"
+        },
+        {
+          "match": "\\)",
+          "name": "punctuation.section.parens.end.polyspec-template"
+        },
+        {
+          "match": "\\[",
+          "name": "punctuation.section.brackets.begin.polyspec-template"
+        },
+        {
+          "match": "\\]",
+          "name": "punctuation.section.brackets.end.polyspec-template"
+        },
+        {
+          "match": "[^ \\t\\r\\n}]",
+          "name": "invalid.illegal.polyspec-template"
+        }
+      ]
+    }
+  }
+}

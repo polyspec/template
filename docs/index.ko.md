@@ -27,5 +27,6 @@
 - [개발](/ko/operations/development)
 - [적합성](/ko/operations/conformance)
 - [브라우저 렌더링](/ko/operations/browser)
+- [포매터와 VS Code 확장](/ko/operations/editor-tools)
 - [발행](/ko/operations/publication)
 - [문서](/ko/operations/documentation)

@@ -22,7 +22,7 @@ make help
 make check
 ```
 
-`make check`는 `docs-check`, `lint`, `test-ts`, `test-go`, `test-rust`, `test-php`, `conformance`를 실행한다. 패키지가 아직 없는 타겟은 `not implemented`를 출력하고 상태 1로 종료한다.
+`make check`는 `docs-check`, `lint`, `test-ts`, `test-format`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance`를 실행한다. 패키지가 아직 없는 타겟은 `not implemented`를 출력하고 상태 1로 종료한다.
 
 언어별 명령:
 
