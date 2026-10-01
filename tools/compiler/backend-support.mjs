@@ -64,6 +64,7 @@ export const indent = (level, source) => source.split('\n').map(line => line.len
 
 export function emitExpression(node, target) {
   if (node.op === 'literal') return target.literal(node.value, node.valueType);
+  if (node.op === 'to-value') return target.toValue(emitExpression(node.value, target), node.value.valueType, node);
   if (node.op === 'root') return target.var(fieldName(node.name), node.valueType.source, node);
   if (node.op === 'local') return target.local(fieldName(node.name), node.valueType.source);
   if (node.op === 'loop-meta') return target.loopMeta(node.loop, node.field, node);

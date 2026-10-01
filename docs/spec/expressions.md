@@ -150,7 +150,7 @@ The last row includes `null`, string, bool and number containers, negative index
 
 ## Equality and ordering
 
-**EXP-34** `a == b` with both operands of the same type: two numbers compare numerically; two strings compare as code point sequences; two booleans and two `null` values compare by identity; two lists are equal when they have the same length and every pair of elements at the same index satisfies `==`; two maps are equal when they have the same key set and every value under the same key satisfies `==`, independent of entry order.
+**EXP-34** `a == b` with both operands of the same type: two numbers compare numerically; two strings compare as code point sequences; two booleans and two `null` values compare by identity; two lists are equal when they have the same length and every pair of elements at the same index satisfies `==`; two maps are equal when they have the same key set and every value under the same key satisfies `==`, independent of entry order; two native objects compare under EXP-39.
 
 **EXP-35** `a == b` with a number and a string: when the string satisfies the conversion grammar of EXP-23 the values compare numerically, otherwise the result is `false`. Every other pair of different types is `false`; `null` equals only `null`.
 
@@ -158,7 +158,18 @@ The last row includes `null`, string, bool and number containers, negative index
 
 **EXP-37** `a === b` is `true` only when both operands have the same type and EXP-34 holds; a number and a string are never strictly equal. `a !== b` is the negation of `a === b`.
 
-**EXP-38** `<`, `>`, `<=` and `>=` compare two numbers numerically and two strings by code point sequence. Any other pair of types is E_RUNTIME_COMPARE.
+**EXP-38** `<`, `>`, `<=` and `>=` compare two numbers numerically and two strings by code point sequence. Any other pair of types is E_RUNTIME_COMPARE, including two native objects and a native object with any other value.
+
+**EXP-39** Two native objects (VAL-19) are equal under `==` and `===` when they are the same host object, and are otherwise not equal; `!=` and `!==` are the negations. The comparison reads no member and calls no host code. The same host object is defined per host:
+
+| Host | Same host object |
+| --- | --- |
+| TypeScript | the same instance (`===`) |
+| PHP | the same object (`===`), in the PHP AST program and in the PHP extension |
+| Go | the retained values are equal under Go `==`: a pointer is the same object as a pointer to the same address; a struct value has no identity, so it is the same object as a struct value of the same type whose fields are equal under Go `==`; a value whose dynamic contents are not comparable is the same object as no value |
+| Rust | the two values report the same `TemplateObject::identity`; the default identity is the address of the `TemplateObject`, and the PHP extension reports the address of the PHP object |
+
+A list or map that contains native objects compares its elements with these rules (EXP-34), and so do `in` (EXP-32) and `contains`. Reason: identity is the only equality that every host defines for an arbitrary object without running host code, and a template cannot compare the state of an object as a whole. Binding the same host object again, for example as the result of a host function that returns its argument, produces a value that is equal to the first one.
 
 ## Examples
 

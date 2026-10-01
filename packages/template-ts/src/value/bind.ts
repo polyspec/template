@@ -2,7 +2,7 @@
 import { MAX_SAFE } from './number.js';
 import { NativeObject, SafeString, type MapValue, type Value } from './value.js';
 
-export type BindErrorCode = 'E_DATA_NUMBER_RANGE' | 'E_DATA_NUMBER_NOT_FINITE' | 'E_DATA_UNSUPPORTED_TYPE' | 'E_DATA_INVALID_UTF8' | 'E_DATA_DEPTH';
+export type BindErrorCode = 'E_DATA_NUMBER_RANGE' | 'E_DATA_NUMBER_NOT_FINITE' | 'E_DATA_UNSUPPORTED_TYPE' | 'E_DATA_INVALID_UTF8' | 'E_DATA_DEPTH' | 'E_DATA_INVALID_JSON';
 
 /** The nesting depth limit of lists and maps (VAL-20). */
 export const MAX_DEPTH = 64;
@@ -116,22 +116,15 @@ export function depthWithin(value: Value, limit: number): boolean {
 }
 
 /**
- * VAL-18: converts template values passed to host code into host values. A native object becomes
- * the original instance, also inside a list or map; other values keep their template form.
+ * VAL-18, VAL-21: converts a template value passed to host code into a new host value. A safe
+ * string becomes its text, a list a new array, a map a new `Map` in entry order and a native object
+ * the original instance, at every depth, so a change that host code makes to an argument changes
+ * no template value.
  */
 export function hostArgument(value: Value): unknown {
+  if (value instanceof SafeString) return value.text;
   if (value instanceof NativeObject) return value.target;
-  if (Array.isArray(value)) return value.some(containsObject) ? value.map(hostArgument) : value;
-  if (value instanceof Map) {
-    if (![...value.values()].some(containsObject)) return value;
-    return new Map([...value].map(([key, item]) => [key, hostArgument(item)]));
-  }
+  if (Array.isArray(value)) return value.map(hostArgument);
+  if (value instanceof Map) return new Map([...value].map(([key, item]) => [key, hostArgument(item)]));
   return value;
-}
-
-function containsObject(value: Value): boolean {
-  if (value instanceof NativeObject) return true;
-  if (Array.isArray(value)) return value.some(containsObject);
-  if (value instanceof Map) return [...value.values()].some(containsObject);
-  return false;
 }

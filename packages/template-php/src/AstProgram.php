@@ -143,14 +143,17 @@ final class AstProgram implements Program, RuntimeServices
      */
     public function loadTemplate(string $name, ?Frame $from, ?array $span): array
     {
-        $loaded = $this->loader->load($name);
+        $fail = static fn (string $code, string $message): TemplateError => $from !== null && $span !== null
+            ? TemplateError::at($code, $from->name, $from->lines, $span[0], $span[1], $message)
+            : TemplateError::withoutPosition($code, $name, $message);
+        try {
+            $loaded = $this->loader->load($name);
+        } catch (\Throwable $error) {
+            // RT-9: every exception of the loader is a load failure of the requested name.
+            throw $fail('E_LOAD_FAILED', "template {$name} cannot be loaded: " . $error->getMessage());
+        }
         if ($loaded === null) {
-            $message = "template {$name} does not exist";
-            if ($from !== null && $span !== null) {
-                throw TemplateError::at('E_LOAD_NOT_FOUND', $from->name, $from->lines, $span[0], $span[1], $message);
-            }
-
-            throw TemplateError::withoutPosition('E_LOAD_NOT_FOUND', $name, $message);
+            throw $fail('E_LOAD_NOT_FOUND', "template {$name} does not exist");
         }
         $cached = $this->cache[$name] ?? null;
         if ($cached !== null && ($this->artifactRefresh === 'false' || ($this->artifactRefresh === 'true' && $cached['version'] === $loaded['version']))) {

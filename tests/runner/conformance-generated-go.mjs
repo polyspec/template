@@ -8,7 +8,7 @@ import { goString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, listCases } from './cases.mjs';
+import { firstDifference, listCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
 const goRoot = join(root, 'packages/template-go');
@@ -27,7 +27,7 @@ try {
     try {
       const directory = join(temporary, `case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`);
       const defineText = testCase.hasDefine ? readFileSync(join(testCase.dir, 'define.json'), 'utf8') : '{}';
-      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), JSON.parse(defineText));
+      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(directory, 'types.json'), graphPath = join(directory, 'ast');
       mkdirSync(directory);
       writeFileSync(typePath, JSON.stringify(typeManifest));
@@ -42,7 +42,7 @@ try {
 import ("encoding/base64"; "encoding/json"; "errors"; "testing"; template "github.com/polyspec/template"; "github.com/polyspec/template/errs"; "github.com/polyspec/template/value")
 func assertGeneratedError(t *testing.T, err error, code, name string, line, col int) { t.Helper(); if err == nil { t.Fatalf("expected %s", code) }; var te *errs.Error; if errors.As(err, &te) { if string(te.Code) != code || te.Template != name || te.Line != line || te.Col != col { t.Fatalf("expected %s %s:%d:%d, got %#v", code,name,line,col,te) }; return }; var be *value.BindError; if errors.As(err, &be) && string(be.Code) == code && name == "input.tpl" && line == 0 && col == 0 { return }; t.Fatalf("unexpected error: %T %v",err,err) }
 func generatedDefinitions(t *testing.T) map[string]template.DefineInput { var raw map[string]json.RawMessage; if err:=json.Unmarshal([]byte(${q(defineText)}),&raw);err!=nil{t.Fatal(err)}; result:=map[string]template.DefineInput{}; for name,encoded:=range raw { var path string; if json.Unmarshal(encoded,&path)==nil { result[name]=template.DefineInput{Template:path}; continue }; var entry struct{Template string \`json:"template"\`;Data any \`json:"data"\`;HTML *string \`json:"html"\`}; if err:=json.Unmarshal(encoded,&entry);err!=nil{t.Fatal(err)};result[name]=template.DefineInput{Template:entry.Template,Data:entry.Data,HTML:entry.HTML} }; return result }
-func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeString(${q(dataBase64)}); assign,runErr:=value.ParseJSON(data); options:=template.RenderOptions{Define:generatedDefinitions(t)}; ${envText ? `var env template.Env; if err:=json.Unmarshal([]byte(${q(envText)}),&env);err!=nil{t.Fatal(err)}; options.Env=&env;` : ''} var actual string; if runErr==nil { program,err:=NewGeneratedProgram(template.Options{});runErr=err;if runErr==nil{actual,runErr=program.Render("input.tpl",assign,options)} }; ${expectation} }
+func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeString(${q(dataBase64)}); assign,runErr:=value.ParseJSON(data); if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(defineText)})) }; ${envText ? `if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(envText)})) };` : ''} var actual string; if runErr==nil { options:=template.RenderOptions{Define:generatedDefinitions(t)}; ${envText ? `var env template.Env; if err:=json.Unmarshal([]byte(${q(envText)}),&env);err!=nil{t.Fatal(err)}; options.Env=&env;` : ''} program,err:=NewGeneratedProgram(template.Options{});runErr=err;if runErr==nil{actual,runErr=program.Render("input.tpl",assign,options)} }; ${expectation} }
 `);
       runnable.push(testCase);
     } catch (error) {

@@ -149,7 +149,8 @@ function sameTypeEquals(a: Value, b: Value, type: ValueType): boolean {
       return true;
     }
     case 'object':
-      return a === b;
+      // EXP-39: two native objects are equal when they hold the same instance.
+      return (a as NativeObject).target === (b as NativeObject).target;
   }
 }
 

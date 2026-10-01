@@ -58,6 +58,9 @@ type ParseOptions struct {
 	Delimiters string
 }
 
+// LoadResult is what a loader returns for a name: source text or a parsed AST, and a version.
+type LoadResult = loader.Result
+
 // NewMapLoader creates an in-memory loader.
 var NewMapLoader = loader.NewMapLoader
 

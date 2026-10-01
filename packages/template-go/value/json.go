@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -14,24 +13,59 @@ import (
 )
 
 // ParseJSON decodes JSON text into a value, preserving document order and applying VAL-2, VAL-12
-// and VAL-20.
+// and VAL-20. Text that is not one JSON document is E_DATA_INVALID_JSON. Every error is the first
+// violation in document order.
 func ParseJSON(text []byte) (Value, error) {
 	if !utf8.Valid(text) {
 		return nil, bindError(errs.DataInvalidUTF8, "invalid UTF-8 in JSON text")
 	}
-	if err := CheckJSON(text); err != nil {
+	if offset, err := CheckJSON(text); err != nil {
+		// The check stops at the start of the first violating token; a syntax error before that
+		// token is the earlier violation.
+		if syntax := syntaxError(text[:offset]); syntax != nil {
+			return nil, syntax
+		}
 		return nil, err
 	}
 	dec := json.NewDecoder(bytes.NewReader(text))
 	dec.UseNumber()
 	v, err := decodeValue(dec)
 	if err != nil {
-		return nil, err
+		return nil, invalidJSON(err)
 	}
 	if _, err := dec.Token(); err != io.EOF {
-		return nil, fmt.Errorf("unexpected content after the JSON value")
+		return nil, bindError(errs.DataInvalidJSON, "unexpected content after the JSON value")
 	}
 	return v, nil
+}
+
+// syntaxError decodes a prefix of a JSON text and returns the syntax error that the prefix
+// contains, or nil when the prefix only ends early.
+func syntaxError(prefix []byte) error {
+	dec := json.NewDecoder(bytes.NewReader(prefix))
+	dec.UseNumber()
+	for {
+		_, err := dec.Token()
+		if err == nil {
+			continue
+		}
+		if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+			return nil
+		}
+		return invalidJSON(err)
+	}
+}
+
+// invalidJSON reports a decoder failure as E_DATA_INVALID_JSON (VAL-12).
+func invalidJSON(err error) error {
+	var bindErr *BindError
+	if errors.As(err, &bindErr) {
+		return err
+	}
+	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+		return bindError(errs.DataInvalidJSON, "the JSON text ends before the value is complete")
+	}
+	return bindError(errs.DataInvalidJSON, "invalid JSON: %s", err.Error())
 }
 
 func decodeValue(dec *json.Decoder) (Value, error) {
@@ -63,7 +97,7 @@ func decodeFromToken(dec *json.Decoder, tok json.Token) (Value, error) {
 				}
 				key, ok := keyTok.(string)
 				if !ok {
-					return nil, fmt.Errorf("object key is not a string")
+					return nil, bindError(errs.DataInvalidJSON, "object key is not a string")
 				}
 				v, err := decodeValue(dec)
 				if err != nil {
@@ -90,7 +124,7 @@ func decodeFromToken(dec *json.Decoder, tok json.Token) (Value, error) {
 			return list, nil
 		}
 	}
-	return nil, fmt.Errorf("unexpected JSON token %v", tok)
+	return nil, bindError(errs.DataInvalidJSON, "unexpected JSON token %v", tok)
 }
 
 // decodeNumber converts a number literal to the nearest double and applies VAL-2.
@@ -108,17 +142,18 @@ func numberOf(literal string) (Value, error) {
 
 // CheckJSON applies the checks of VAL-2, VAL-12 and VAL-20 that encoding/json does not make, in
 // document order: a number outside the binding range, a \u escape that leaves a surrogate unpaired
-// and arrays or objects nested deeper than the limit fail at the first occurrence. The checks run
-// before the decoder reads the text, so the decoder never sees a document deeper than the limit,
-// and an unpaired surrogate is reported instead of being replaced with U+FFFD.
-func CheckJSON(text []byte) error {
+// and arrays or objects nested deeper than the limit fail at the first occurrence. It returns the
+// byte offset of the token that fails with the error. The checks run before the decoder reads the
+// text, so the decoder never sees a document deeper than the limit, and an unpaired surrogate is
+// reported instead of being replaced with U+FFFD.
+func CheckJSON(text []byte) (int, error) {
 	level := 0
 	for index := 0; index < len(text); index++ {
 		switch text[index] {
 		case '[', '{':
 			level++
 			if err := CheckLevel(level); err != nil {
-				return err
+				return index, err
 			}
 		case ']', '}':
 			if level > 0 {
@@ -127,7 +162,7 @@ func CheckJSON(text []byte) error {
 		case '"':
 			end, err := checkString(text, index+1)
 			if err != nil {
-				return err
+				return index, err
 			}
 			index = end
 		case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
@@ -138,12 +173,12 @@ func CheckJSON(text []byte) error {
 			// A malformed token is left to the decoder, which reports the syntax error.
 			if f, err := strconv.ParseFloat(string(text[start:index+1]), 64); err == nil || errors.Is(err, strconv.ErrRange) {
 				if _, err := CheckFloat(f); err != nil {
-					return err
+					return start, err
 				}
 			}
 		}
 	}
-	return nil
+	return len(text), nil
 }
 
 // checkString checks the escapes of one string that starts after its opening quote and returns

@@ -30,5 +30,8 @@ describe.skipIf(!built)('template CLI', () => {
   it('exits with status 1 on a usage error', () => {
     expect(run(['parse']).status).toBe(1);
     expect(run(['render', 'x.tpl', '--unknown', '1']).status).toBe(1);
+    expect(run(['parse', join(casesDir, 'text', 'plain', 'missing.tpl')]).status).toBe(1);
+    const missingData = run(['render', join(casesDir, 'echo', 'path', 'input.tpl'), '--data', 'missing.json']);
+    expect([missingData.status, missingData.stderr.startsWith('cannot read missing.json')]).toEqual([1, true]);
   });
 });

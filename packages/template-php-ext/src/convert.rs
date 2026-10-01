@@ -3,7 +3,7 @@
 use ext_php_rs::convert::{IntoZval, IntoZvalDyn};
 use ext_php_rs::ffi::{ZEND_ACC_PUBLIC, zend_function, zend_hash_str_find_ptr_lc};
 use ext_php_rs::types::array::Iter;
-use ext_php_rs::types::{ZendCallable, ZendHashTable, ZendObject, Zval};
+use ext_php_rs::types::{ArrayKey, ZendCallable, ZendHashTable, ZendObject, Zval};
 use ext_php_rs::zend::{ClassEntry, ExecutorGlobals, ce};
 use polyspec_template::value::bind::{check_integer, check_level, check_number};
 use polyspec_template::value::{HostError, TemplateObject};
@@ -66,9 +66,13 @@ fn bind_php(zval: &Zval, level: usize) -> Result<Value, BindError> {
             check_level(level + 1)?;
             let result = object.try_call_method("jsonSerialize", vec![]);
             if let Some(message) = take_exception_message() {
-                return Err(bind_error(ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("jsonSerialize() failed: {message}")));
+                return Err(bind_error(
+                    ErrorCode::E_RUNTIME_HOST_FUNCTION,
+                    format!("jsonSerialize() failed: {message}"),
+                ));
             }
-            let value = result.map_err(|error| bind_error(ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("jsonSerialize() failed: {error}")))?;
+            let value =
+                result.map_err(|error| bind_error(ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("jsonSerialize() failed: {error}")))?;
             return bind_php(&value, level + 1);
         }
         if object.instance_of(ce::stdclass()) {
@@ -80,7 +84,9 @@ fn bind_php(zval: &Zval, level: usize) -> Result<Value, BindError> {
         if instance_of(object, "Closure") {
             return Err(bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "a closure has no binding"));
         }
-        return Ok(Value::object(PhpObject { zval: zval.shallow_clone() }));
+        return Ok(Value::object(PhpObject {
+            zval: zval.shallow_clone(),
+        }));
     }
     Err(bind_error(
         ErrorCode::E_DATA_UNSUPPORTED_TYPE,
@@ -170,7 +176,11 @@ pub struct PhpObject {
 
 impl fmt::Debug for PhpObject {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let class = self.zval.object().and_then(|object| object.get_class_name().ok()).unwrap_or_default();
+        let class = self
+            .zval
+            .object()
+            .and_then(|object| object.get_class_name().ok())
+            .unwrap_or_default();
         write!(formatter, "PhpObject({class})")
     }
 }
@@ -184,7 +194,8 @@ impl PhpObject {
         // SAFETY: the function table of a live class entry maps lower-case names to `zend_function`
         // pointers; the lookup lower-cases the name and returns null when it is absent.
         let function = unsafe {
-            zend_hash_str_find_ptr_lc(&raw const entry.function_table, method.as_ptr().cast::<c_char>(), method.len()).cast::<zend_function>()
+            zend_hash_str_find_ptr_lc(&raw const entry.function_table, method.as_ptr().cast::<c_char>(), method.len())
+                .cast::<zend_function>()
         };
         if function.is_null() {
             return None;
@@ -232,6 +243,14 @@ impl TemplateObject for PhpObject {
             Err(error) => Err(HostError::Failed(error.to_string())),
         })
     }
+
+    /// EXP-39: the identity of a native object is the PHP object, so the same PHP object bound
+    /// twice is the same host object.
+    fn identity(&self) -> *const () {
+        self.zval
+            .object()
+            .map_or(std::ptr::null(), |object| std::ptr::from_ref(object).cast::<()>())
+    }
 }
 
 fn call_function(name: &str, params: Vec<&dyn IntoZvalDyn>) -> Result<Zval, String> {
@@ -248,8 +267,22 @@ pub fn php_to_map(zval: &Zval) -> Result<OrderedMap, BindError> {
     }
 }
 
-/// Converts a template value into a PHP value. A map becomes an array with its keys as text, a
-/// safe string becomes a plain string and a native object becomes the original PHP object (VAL-18).
+/// The key of a PHP array for a map key (VAL-21). PHP converts a string key that is the decimal
+/// form of an integer in the integer range, without a `+` sign, without leading zeros and other
+/// than `-0`, to an integer key; every other key stays a string.
+pub fn array_key(key: &str) -> ArrayKey<'_> {
+    let digits = key.strip_prefix('-').unwrap_or(key);
+    let canonical = key == "0"
+        || (digits.bytes().next().is_some_and(|first| (b'1'..=b'9').contains(&first)) && digits.bytes().all(|byte| byte.is_ascii_digit()));
+    match canonical.then(|| key.parse::<i64>().ok()).flatten() {
+        Some(index) => ArrayKey::Long(index),
+        None => ArrayKey::Str(key),
+    }
+}
+
+/// Converts a template value into a PHP value in the form of VAL-21. A list becomes a list array, a
+/// map an array with its entries in entry order and the keys of [`array_key`], a safe string a
+/// plain string and a native object the original PHP object (VAL-18).
 pub fn value_to_php(value: &Value) -> Result<Zval, String> {
     let result = match value {
         Value::Null => Zval::new(),
@@ -266,7 +299,9 @@ pub fn value_to_php(value: &Value) -> Result<Zval, String> {
         Value::Map(map) => {
             let mut table = ZendHashTable::new();
             for (key, item) in map.iter() {
-                table.insert(key.as_str(), value_to_php(item)?).map_err(|error| error.to_string())?;
+                table
+                    .insert(array_key(key), value_to_php(item)?)
+                    .map_err(|error| error.to_string())?;
             }
             into_zval(table)?
         }

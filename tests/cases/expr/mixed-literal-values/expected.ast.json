@@ -1,0 +1,257 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Map",
+                "entries": [
+                  {
+                    "key": {
+                      "type": "Literal",
+                      "kind": "string",
+                      "value": "a",
+                      "span": [
+                        9,
+                        12
+                      ]
+                    },
+                    "value": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 1,
+                      "span": [
+                        16,
+                        17
+                      ]
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "Literal",
+                      "kind": "string",
+                      "value": "b",
+                      "span": [
+                        19,
+                        22
+                      ]
+                    },
+                    "value": {
+                      "type": "List",
+                      "items": [
+                        {
+                          "type": "Literal",
+                          "kind": "bool",
+                          "value": true,
+                          "span": [
+                            27,
+                            31
+                          ]
+                        },
+                        {
+                          "type": "Literal",
+                          "kind": "string",
+                          "value": "x",
+                          "span": [
+                            33,
+                            36
+                          ]
+                        }
+                      ],
+                      "span": [
+                        26,
+                        37
+                      ]
+                    }
+                  },
+                  {
+                    "key": {
+                      "type": "Literal",
+                      "kind": "string",
+                      "value": "c",
+                      "span": [
+                        39,
+                        42
+                      ]
+                    },
+                    "value": {
+                      "type": "Map",
+                      "entries": [
+                        {
+                          "key": {
+                            "type": "Literal",
+                            "kind": "string",
+                            "value": "d",
+                            "span": [
+                              47,
+                              50
+                            ]
+                          },
+                          "value": {
+                            "type": "Literal",
+                            "kind": "null",
+                            "value": null,
+                            "span": [
+                              54,
+                              58
+                            ]
+                          }
+                        }
+                      ],
+                      "span": [
+                        46,
+                        59
+                      ]
+                    }
+                  }
+                ],
+                "span": [
+                  8,
+                  60
+                ]
+              }
+            ],
+            "span": [
+              3,
+              61
+            ]
+          }
+        ],
+        "span": [
+          3,
+          67
+        ]
+      },
+      "span": [
+        0,
+        68
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        68,
+        69
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "List",
+                "items": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      78,
+                      79
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "string",
+                    "value": "a",
+                    "span": [
+                      81,
+                      84
+                    ]
+                  },
+                  {
+                    "type": "List",
+                    "items": [
+                      {
+                        "type": "Literal",
+                        "kind": "bool",
+                        "value": true,
+                        "span": [
+                          87,
+                          91
+                        ]
+                      }
+                    ],
+                    "span": [
+                      86,
+                      92
+                    ]
+                  },
+                  {
+                    "type": "Map",
+                    "entries": [
+                      {
+                        "key": {
+                          "type": "Literal",
+                          "kind": "string",
+                          "value": "k",
+                          "span": [
+                            95,
+                            98
+                          ]
+                        },
+                        "value": {
+                          "type": "Literal",
+                          "kind": "number",
+                          "value": 2,
+                          "span": [
+                            102,
+                            103
+                          ]
+                        }
+                      }
+                    ],
+                    "span": [
+                      94,
+                      104
+                    ]
+                  }
+                ],
+                "span": [
+                  77,
+                  105
+                ]
+              }
+            ],
+            "span": [
+              72,
+              106
+            ]
+          }
+        ],
+        "span": [
+          72,
+          112
+        ]
+      },
+      "span": [
+        69,
+        113
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        113,
+        114
+      ]
+    }
+  ]
+}

@@ -34,8 +34,9 @@ impl Loaded {
 
 /// Loads templates by name (RT-9).
 pub trait Loader {
-    /// Returns the template for a name, or None when the name does not exist.
-    fn load(&self, name: &str) -> Option<Loaded>;
+    /// Returns the template for a name, `Ok(None)` when the name does not exist, or `Err` with a
+    /// message when loading fails; the engine reports a failure as `E_LOAD_FAILED`.
+    fn load(&self, name: &str) -> Result<Option<Loaded>, String>;
 }
 
 /// FNV-1a hash of bytes, used as the version of in-memory sources.
@@ -79,8 +80,8 @@ impl MapLoader {
 }
 
 impl Loader for MapLoader {
-    fn load(&self, name: &str) -> Option<Loaded> {
-        self.entries.get(name).cloned()
+    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+        Ok(self.entries.get(name).cloned())
     }
 }
 
@@ -108,24 +109,28 @@ impl FsLoader {
     }
 }
 
+/// RT-10: a name for which no regular file can be found does not exist; a regular file that cannot
+/// be read is a failure.
 impl Loader for FsLoader {
-    fn load(&self, name: &str) -> Option<Loaded> {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
         let path = self.path_of(name);
-        let metadata = std::fs::metadata(&path).ok()?;
+        let Ok(metadata) = std::fs::metadata(&path) else {
+            return Ok(None);
+        };
         if !metadata.is_file() {
-            return None;
+            return Ok(None);
         }
-        let bytes = std::fs::read(&path).ok()?;
+        let bytes = std::fs::read(&path).map_err(|error| format!("{}: {error}", path.display()))?;
         let modified = metadata
             .modified()
             .ok()
             .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
             .map(|d| d.as_nanos())
             .unwrap_or(0);
-        Some(Loaded::Source {
+        Ok(Some(Loaded::Source {
             bytes,
             version: format!("{modified}:{}", metadata.len()),
-        })
+        }))
     }
 }
 

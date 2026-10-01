@@ -47,8 +47,16 @@ pub trait TemplateObject: fmt::Debug + Any {
     /// field or property of that name; the lookup is then `null`.
     fn member(&self, key: &str) -> Result<Option<Value>, HostError>;
     /// Calls one public instance method. `None` means that the object has no public method of
-    /// that name.
+    /// that name. The arguments have the form of VAL-21.
     fn call(&self, method: &str, args: &[Value]) -> Option<Result<Value, HostError>>;
+
+    /// The identity of the host object (EXP-39): two native objects are equal when their
+    /// identities are equal. The default is the address of this `TemplateObject`; an object that
+    /// stands for a host object of another runtime, such as an object of the PHP extension,
+    /// returns the address of that host object.
+    fn identity(&self) -> *const () {
+        std::ptr::from_ref(self).cast::<()>()
+    }
 }
 
 /// An insertion-ordered map with string keys.
@@ -175,7 +183,7 @@ impl PartialEq for Value {
             (Value::Str(a), Value::Str(b)) | (Value::Safe(a), Value::Safe(b)) => a == b,
             (Value::List(a), Value::List(b)) => a == b,
             (Value::Map(a), Value::Map(b)) => a == b,
-            (Value::Object(a), Value::Object(b)) => Rc::ptr_eq(a, b),
+            (Value::Object(a), Value::Object(b)) => a.identity() == b.identity(),
             _ => false,
         }
     }
@@ -248,6 +256,28 @@ impl Value {
         match self {
             Value::Object(object) => (Rc::clone(object) as Rc<dyn Any>).downcast::<T>().ok(),
             _ => None,
+        }
+    }
+
+    /// The host form of a value that a template passes to host code (VAL-21): a safe string
+    /// becomes a plain string at every depth; every other value keeps its form, and a native
+    /// object stays the same `TemplateObject`. Values are immutable, so a list or map that holds
+    /// no safe string is shared.
+    pub fn host_argument(&self) -> Value {
+        match self {
+            Value::Safe(text) => Value::Str(text.clone()),
+            Value::List(items) if self.holds_safe() => Value::list(items.iter().map(Value::host_argument).collect()),
+            Value::Map(map) if self.holds_safe() => Value::map(map.iter().map(|(key, item)| (key.clone(), item.host_argument())).collect()),
+            _ => self.clone(),
+        }
+    }
+
+    fn holds_safe(&self) -> bool {
+        match self {
+            Value::Safe(_) => true,
+            Value::List(items) => items.iter().any(Value::holds_safe),
+            Value::Map(map) => map.values().any(Value::holds_safe),
+            _ => false,
         }
     }
 
@@ -390,6 +420,8 @@ fn same_type_equals(a: &Value, b: &Value) -> bool {
                 && x.iter()
                     .all(|(key, value)| y.get(key).is_some_and(|other| loose_equals(value, other)))
         }
+        // EXP-39: two native objects are equal when they are the same host object.
+        (Value::Object(x), Value::Object(y)) => x.identity() == y.identity(),
         _ => match (a.as_text(), b.as_text()) {
             (Some(x), Some(y)) => x == y,
             _ => false,

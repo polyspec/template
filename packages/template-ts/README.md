@@ -36,7 +36,7 @@ const assign = parseJson(document.getElementById('state').textContent);
 document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
 ```
 
-`parseJson` preserves the key order of the JSON text and rejects numbers outside ±(2^53 − 1), unpaired surrogate escapes and nesting deeper than 64 levels. `JSON.parse` does none of these.
+`parseJson` preserves the key order of the JSON text and rejects numbers outside ±(2^53 − 1), unpaired surrogate escapes and nesting deeper than 64 levels. Text that is not one JSON document is `E_DATA_INVALID_JSON`. `JSON.parse` does none of these.
 
 ## Render a parsed template
 
@@ -57,8 +57,8 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | `new AstProgram({ loader, functions, limits, delimiters })` | Creates an AST program. `loader` defaults to an empty `MapLoader`. |
 | `new Engine(program)` | Creates an engine that delegates to one AST or generated program. |
 | `engine.render(nameOrAst, assign, { define, env })` | Renders a template to a string. `assign` contains variables; `define` supplies template paths or HTML entries. |
-| `astProgram.register(name, fn)` | Registers a host function `(args, { env }) => value`. A native object argument, also inside a list or map, is the original class instance. |
-| `MapLoader`, `FsLoader` | In-memory and filesystem loaders. |
+| `astProgram.register(name, fn)` | Registers a host function `(args, { env }) => value`. Arguments have the form of VAL-21: a safe string is a `string`, a list is a new array, a map is a new `Map` in entry order, and a native object, also inside a list or map, is the original class instance. |
+| `MapLoader`, `FsLoader` | In-memory and filesystem loaders. An exception that a loader throws fails the render with `E_LOAD_FAILED`; `FsLoader` reports a regular file that cannot be read in this way. |
 | `parseJson`, `parseJsonBytes` | Order-preserving JSON parsers for assign data. |
 | `TemplateError` | Error with `code`, `template`, `line`, `col`, `offset`, `end`, `message`. |
 | `SafeString` | A string that the echo tag writes without escaping. |

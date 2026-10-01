@@ -28,7 +28,7 @@ pub use render::engine::{
 };
 pub use render::runtime_environment::RuntimeEnvironment;
 pub use value::bind::{BindError, bind, bind_value, bind_values, to_json_value, value_from_json};
-pub use value::json::{check_json, parse_json, parse_json_bytes, read_json};
+pub use value::json::{parse_json, parse_json_bytes, read_json};
 pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value};
 
 use parser::scanner::{DEFAULT_DELIMITERS, parse_delimiters};

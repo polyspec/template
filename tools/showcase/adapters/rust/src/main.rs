@@ -1,5 +1,9 @@
 mod render_adapter;
 
+// A generated module declares the complete API of its program: the typed records, the artifact
+// manifest and the value helpers. This adapter calls only `GeneratedProgram::render`, so the
+// declarations that it does not use are expected; the allowance covers the generated modules only.
+#[allow(dead_code)]
 mod generated {
     pub mod compiler_coverage {
         include!(concat!(
@@ -221,7 +225,12 @@ impl RenderAdapter for Adapter {
                 id.clone(),
                 DefineInput {
                     template: entry.template.clone(),
-                    data: entry.data.clone().map(|data| polyspec_template::bind(&Value::Object(data))).transpose().map_err(|error| error.message)?,
+                    data: entry
+                        .data
+                        .clone()
+                        .map(|data| polyspec_template::bind(&Value::Object(data)))
+                        .transpose()
+                        .map_err(|error| error.message)?,
                     html: entry.html.clone(),
                 },
             );
@@ -259,7 +268,12 @@ impl Adapter {
                 id.clone(),
                 DefineInput {
                     template: entry.template.clone(),
-                    data: entry.data.clone().map(|data| polyspec_template::bind(&Value::Object(data))).transpose().map_err(|error| error.message)?,
+                    data: entry
+                        .data
+                        .clone()
+                        .map(|data| polyspec_template::bind(&Value::Object(data)))
+                        .transpose()
+                        .map_err(|error| error.message)?,
                     html: entry.html.clone(),
                 },
             );

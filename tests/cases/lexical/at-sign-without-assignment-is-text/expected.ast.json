@@ -1,0 +1,14 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "@media screen {@media (max-width: 600px) { a { color: red } } }\n{@item}{@ item}{@item items}\n",
+      "span": [
+        0,
+        93
+      ]
+    }
+  ]
+}

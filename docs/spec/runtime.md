@@ -182,7 +182,7 @@ The logical request has this JSON shape:
 The interface declares two execution modes:
 
 - **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the complete cross-language mode.
-- **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust or PHP renderer before startup, loads or links that renderer once, and calls it for each request. All four core runtimes pass the 235-case generated conformance suite. Generated execution does not parse or interpret template AST during a request.
+- **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust or PHP renderer before startup, loads or links that renderer once, and calls it for each request. All four core runtimes pass the 244-case generated conformance suite. Generated execution does not parse or interpret template AST during a request.
 
 Native object calls are implemented in the AST and generated runtimes. The complete mode matrix and the package install check exercise the same assigned object field, instance method and class function behavior in TypeScript, Go, Rust and PHP.
 
@@ -223,8 +223,8 @@ flowchart TB
 
 - **RT-7** A template name is a path relative to the loader root, with `/` as separator, without a leading `/`. The name of a template rendered by `render(name, ...)` is `name`. When a string target matches a template entry in `define`, the entry path is rendered; this lets the host select a layout with a definition such as `layout: "layouts/page.tpl"`.
 - **RT-8** A path written in an include or block tag is resolved against the directory of the template that contains the tag. A path with a leading `/` is resolved against the root. `.` and `..` segments are normalized. A path that leaves the root after normalization fails with `E_LOAD_OUTSIDE_ROOT`.
-- **RT-9** A loader returns the source text and a version for a name, or reports that the name does not exist. A name that does not exist fails with `E_LOAD_NOT_FOUND`.
-- **RT-10** A filesystem loader reads `root/name` and uses the modification time and size of the file as the version. A map loader holds names and sources or parsed ASTs in memory and uses a content version. A compiled artifact loader holds parsed ASTs and uses the artifact hash as the version.
+- **RT-9** A loader returns the source text or a parsed AST and a version for a name, reports that the name does not exist, or reports a failure through the error mechanism of its language: a thrown exception in TypeScript and PHP, a returned error in Go and Rust. A name that does not exist fails with `E_LOAD_NOT_FOUND`. A failure fails with `E_LOAD_FAILED`, and the message of the error contains the message of the loader. The engine catches every exception that a TypeScript or PHP loader throws, as it does for a host function (FUN-46). Reason: a loader is host code that the engine calls, so its failure is a template error with a code and a position, like the failure of a host function, and not an exception that leaves `render` in some implementations only.
+- **RT-10** A filesystem loader reads `root/name` and uses the modification time and size of the file as the version. A name does not exist when no regular file can be found at `root/name`: the file system reports no metadata for the path, or the path names a directory or another file that is not a regular file. A regular file whose content cannot be read, for example because its permissions deny reading, is a failure (RT-9). A map loader holds names and sources or parsed ASTs in memory and uses a content version. A compiled artifact loader holds parsed ASTs and uses the artifact hash as the version.
 
 ## Scope
 

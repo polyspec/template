@@ -181,7 +181,7 @@ sequenceDiagram
 인터페이스는 두 실행 모드를 선언한다.
 
 - **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 완성된 cross-language mode다.
-- **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 네 core runtime 모두 generated 적합성 case 235개를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
+- **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 네 core runtime 모두 generated 적합성 case 244개를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
 
 Native object 호출은 AST와 generated runtime에 구현됐다. 전체 mode matrix와 패키지 설치 검사는 TypeScript, Go, Rust, PHP에서 같은 assign 객체 필드, 인스턴스 메서드와 클래스 함수 동작을 실행한다.
 
@@ -223,8 +223,8 @@ flowchart TB
 
 - **RT-7** 템플릿 이름은 로더 루트 기준 상대 경로이며 구분자는 `/`이고 앞에 `/`가 없다. `render(name, ...)`으로 렌더하는 템플릿의 이름은 `name`이다. 문자열 target이 `define`의 템플릿 항목과 일치하면 그 항목의 경로를 렌더한다. 따라서 호스트는 `layout: "layouts/page.tpl"` 같은 define으로 레이아웃을 선택할 수 있다.
 - **RT-8** include나 block 태그에 쓴 경로는 그 태그를 포함한 템플릿의 디렉터리를 기준으로 해석한다. 앞에 `/`가 있는 경로는 루트를 기준으로 해석한다. `.`과 `..` 세그먼트는 정규화한다. 정규화 후 루트를 벗어나는 경로는 `E_LOAD_OUTSIDE_ROOT`로 실패한다.
-- **RT-9** 로더는 이름에 대해 소스 텍스트와 버전을 반환하거나 이름이 없음을 보고한다. 없는 이름은 `E_LOAD_NOT_FOUND`로 실패한다.
-- **RT-10** 파일시스템 로더는 `root/name`을 읽고 파일의 수정 시각과 크기를 버전으로 사용한다. map 로더는 이름과 소스 또는 파싱된 AST를 메모리에 두고 콘텐츠 버전을 사용한다. 컴파일 artifact loader는 파싱된 AST를 보관하고 artifact 해시를 버전으로 사용한다.
+- **RT-9** 로더는 이름에 대해 소스 텍스트 또는 파싱된 AST와 버전을 반환하거나, 이름이 없음을 보고하거나, 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고한다. 없는 이름은 `E_LOAD_NOT_FOUND`로 실패한다. 실패는 `E_LOAD_FAILED`로 실패하며 오류 메시지는 로더의 메시지를 포함한다. 엔진은 호스트 함수와 마찬가지로(FUN-46) TypeScript나 PHP 로더가 던진 모든 예외를 잡는다. 이유: 로더는 엔진이 호출하는 호스트 코드이므로 그 실패는 호스트 함수의 실패처럼 코드와 위치를 가진 템플릿 오류이며, 일부 구현에서만 `render` 밖으로 나가는 예외가 아니다.
+- **RT-10** 파일시스템 로더는 `root/name`을 읽고 파일의 수정 시각과 크기를 버전으로 사용한다. `root/name`에서 일반 파일을 찾을 수 없으면, 즉 파일시스템이 경로의 메타데이터를 보고하지 않거나 경로가 디렉터리 또는 일반 파일이 아닌 다른 파일을 가리키면 이름이 없는 것이다. 권한이 읽기를 거부하는 경우처럼 내용을 읽을 수 없는 일반 파일은 실패다(RT-9). map 로더는 이름과 소스 또는 파싱된 AST를 메모리에 두고 콘텐츠 버전을 사용한다. 컴파일 artifact loader는 파싱된 AST를 보관하고 artifact 해시를 버전으로 사용한다.
 
 ## 스코프
 

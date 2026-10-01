@@ -11,7 +11,7 @@ export type { Template, Node, Expr, Span } from './ast.js';
 export { TemplateError, internalBoundary, type ErrorCode, type ErrorObject } from './errors.js';
 export { NativeObject, SafeString, type Value, type MapValue, type ListValue } from './value/value.js';
 export { bind, bindMap, checkText, BindError } from './value/bind.js';
-export { parseJson, parseJsonBytes, JsonSyntaxError } from './value/json.js';
+export { parseJson, parseJsonBytes } from './value/json.js';
 export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';
 export type { ArtifactRefresh, EngineOptions, Program, RenderOptions, DefineInput } from './render/engine.js';
 export { Engine } from './render/engine.js';

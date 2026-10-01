@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 // Validates schema/ast.schema.json, every tests/cases/**/expected.ast.json and every
-// ast field of tests/fixtures/expr/cases.json.
+// ast field of tests/fixtures/expr/cases.json, and checks that every case whose input.tpl
+// parses has its expected.ast.json (CNF-2, CNF-15).
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import { astPresenceFailures, readCaseFiles } from './conformance-case-files.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const schemaPath = 'schema/ast.schema.json';
 const schema = JSON.parse(readFileSync(join(root, schemaPath), 'utf8'));
 const errors = [];
+const cases = readCaseFiles(join(root, 'tests', 'cases'));
+for (const failure of astPresenceFailures(cases)) errors.push(failure);
 
 const ajv = new Ajv({ strict: true, allErrors: true });
 addFormats(ajv);
@@ -68,6 +72,6 @@ function report() {
     for (const error of errors) process.stderr.write(`[schema] ${error}\n`);
     process.exit(1);
   }
-  process.stdout.write(`[schema] schema valid; ${astFiles.length} AST files and ${exprCount} expression ASTs passed\n`);
+  process.stdout.write(`[schema] schema valid; AST presence checked in ${cases.length} cases; ${astFiles.length} AST files and ${exprCount} expression ASTs passed\n`);
   process.exit(0);
 }

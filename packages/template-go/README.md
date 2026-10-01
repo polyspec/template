@@ -65,9 +65,9 @@ engine := template.NewEngine(program)
 | `NewAstProgram(Options)` | Creates an AST program with `Loader`, `Functions`, `Limits` and `Delimiters`. |
 | `NewEngine(Program)` | Creates an engine that delegates to one AST or generated program. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | Renders a template to a string. `assign` contains variables and `Define` supplies template or HTML entries. |
-| `(*render.Engine).Register(name, fn)` | Registers a host function on an AST program. |
-| `NewMapLoader`, `NewFSLoader` | In-memory and `fs.FS` loaders. |
-| `ParseJSON` | Order-preserving JSON decoder for assign data. |
+| `(*render.Engine).Register(name, fn)` | Registers a host function on an AST program. Arguments have the form of VAL-21: a safe string is a `string`, a list is a new `value.List`, a map is a new `*value.OrderedMap` and a native object is the original value. |
+| `NewMapLoader`, `NewFSLoader` | In-memory and `fs.FS` loaders. `Loader.Load(name)` returns `(LoadResult, ok, error)`; a non-nil error fails the render with `E_LOAD_FAILED`, and the `fs.FS` loader returns one for a regular file that cannot be read. |
+| `ParseJSON` | Order-preserving JSON decoder for assign data. Text that is not one JSON document is `E_DATA_INVALID_JSON`. |
 | `Error` | Error with `Code`, `Template`, `Line`, `Col`, `Offset`, `End`, `Message`. |
 | `SafeString` | A string that the echo tag writes without escaping. |
 

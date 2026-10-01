@@ -18,9 +18,10 @@ type Result struct {
 	Version string
 }
 
-// Loader returns the template for a name; ok is false when the name does not exist.
+// Loader returns the template for a name (RT-9). ok is false when the name does not exist; a
+// non-nil error reports a failure, which the engine reports as E_LOAD_FAILED.
 type Loader interface {
-	Load(name string) (Result, bool)
+	Load(name string) (result Result, ok bool, err error)
 }
 
 // ContentHash returns the FNV-1a hash of bytes as hex.
@@ -55,9 +56,9 @@ func (l *MapLoader) SetAST(name string, template *ast.Template) {
 }
 
 // Load implements Loader.
-func (l *MapLoader) Load(name string) (Result, bool) {
+func (l *MapLoader) Load(name string) (Result, bool, error) {
 	r, ok := l.entries[name]
-	return r, ok
+	return r, ok, nil
 }
 
 // FSLoader reads templates from a file system.
@@ -70,20 +71,22 @@ func NewFSLoader(fsys fs.FS) *FSLoader {
 	return &FSLoader{fsys: fsys}
 }
 
-// Load implements Loader; the version is the modification time and size.
-func (l *FSLoader) Load(name string) (Result, bool) {
+// Load implements Loader; the version is the modification time and size (RT-10). A name for
+// which no regular file can be found does not exist; a regular file that cannot be read is a
+// failure.
+func (l *FSLoader) Load(name string) (Result, bool, error) {
 	if !fs.ValidPath(name) {
-		return Result{}, false
+		return Result{}, false, nil
 	}
 	info, err := fs.Stat(l.fsys, name)
-	if err != nil || info.IsDir() {
-		return Result{}, false
+	if err != nil || !info.Mode().IsRegular() {
+		return Result{}, false, nil
 	}
 	data, err := fs.ReadFile(l.fsys, name)
 	if err != nil {
-		return Result{}, false
+		return Result{}, false, err
 	}
-	return Result{Source: data, Version: fmt.Sprintf("%d:%d", info.ModTime().UnixNano(), info.Size())}, true
+	return Result{Source: data, Version: fmt.Sprintf("%d:%d", info.ModTime().UnixNano(), info.Size())}, true, nil
 }
 
 // ErrOutsideRoot is returned when a path leaves the loader root.

@@ -175,7 +175,7 @@ The machine-readable source for the function contract is [`contracts/functions.j
 
 ## Host functions
 
-- **FUN-43** A host registers a function with `register(name, fn)`. `name` is an identifier. `fn` receives the argument list as values and returns a value.
+- **FUN-43** A host registers a function with `register(name, fn)`. `name` is an identifier. `fn` receives the argument list as host values in the form of VAL-21 and returns a value.
 - **FUN-44** Registering a name that is a built-in function fails at registration time. Registering a name twice replaces the earlier function.
 - **FUN-45** The returned value is converted by the host binding rules of the data model. A value that cannot be converted fails with the corresponding `E_DATA_*` code.
 - **FUN-46** An error that `fn` reports through the error mechanism of the host language, a thrown exception in TypeScript and PHP or a returned error in Go and Rust, fails the render with `E_RUNTIME_HOST_FUNCTION` and the position of the call in the template. A panic of `fn` in Go or Rust is `E_INTERNAL` (ERR-13). A native object argument arrives as the original host object (VAL-18).

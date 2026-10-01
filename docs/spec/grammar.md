@@ -10,9 +10,9 @@ This document defines the body of every tag and the structure of blocks. Tag bou
 
 ```ebnf
 template   = { text | tag | wrapped | comment } ;
-tag        = "{" HWS sigil_body HWS "}" | "{" ":" HWS assign HWS "}" ;
+tag        = "{" HWS sigil_body HWS "}" | "{" HWS ":" HWS assign HWS "}" ;
 wrapped    = wrap_open HWS "{{" HWS sigil_body HWS "}}" HWS wrap_close
-           | wrap_open HWS "{{" ":" HWS assign HWS "}}" HWS wrap_close ;
+           | wrap_open HWS "{{" HWS ":" HWS assign HWS "}}" HWS wrap_close ;
 comment    = "{" HWS "*" { any } "*}" ;
 wrap_open  = '"' | "'" | "/*" | "<!--" ;
 wrap_close = '"' | "'" | "*/" | "-->" ;
@@ -63,7 +63,7 @@ The last tag is rejected with `E_PARSE_INVALID_PATH` because `notes` contains ne
 
 **GRM-4** A path is resolved against the directory of the template that contains the tag. A path that starts with `/` is resolved against the loader root. The segments `.` and `..` are normalized. A path whose normalized form leaves the loader root is rejected with `E_LOAD_OUTSIDE_ROOT`. Resolution is defined in `runtime.md`.
 
-**GRM-5** In the sigil forms, whitespace between the sigil and the first token of the body is optional. In the assignment form, `:` follows `{`, optional horizontal whitespace follows `:`, and the identifier follows that whitespace, as defined in `lexical.md`.
+**GRM-5** In the sigil forms, whitespace between the sigil and the first token of the body is optional. In the assignment form, optional horizontal whitespace follows `{`, `:` follows that whitespace, optional horizontal whitespace follows `:`, and the identifier follows that whitespace, as defined in `lexical.md`. `{:x = 1}`, `{ :x = 1}` and `{: x = 1}` are the same assignment.
 
 ## 3. Echo
 

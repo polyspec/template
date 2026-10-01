@@ -5,12 +5,12 @@
   "entry": "layout.tpl",
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "6a9d9d57d97253b83ed74ebe33816ef58513eac4172a973b2e49f5229d871e90",
-  "compilerDigest": "8f48def378c38a35c03922a63361f5bf5fa5a0df13e5ee430cba4cb23cf2dc6d",
+  "contractDigest": "b31099fbd68615e4ddf740aeb9e7d082a12d38e883345b282a129a953cb23aa4",
+  "compilerDigest": "d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1",
   "files": {
     "html-slot.ts": {
       "path": "html-slot.ts",
-      "artifactDigest": "af18511bc3002fa0612905f250a259f16fa83b93bb55fbbc22de1ee6e4f626aa"
+      "artifactDigest": "21e080989b753ddfd40013e2966bcd9ae92c8f8700278bcae9054484b4793d7b"
     }
   }
 }

@@ -235,7 +235,7 @@ func (r *RuntimeBindings) Member(container value.Value, key string, frame *Frame
 
 // MemberCall invokes a public method on the original assigned Go value and binds its result (VAL-19).
 func (r *RuntimeBindings) MemberCall(container value.Value, method string, args []value.Value, frame *Frame, span ast.Span) (value.Value, error) {
-	result, ok, err := nativeCall(container, method, args)
+	result, ok, err := nativeCall(container, method, value.HostArguments(args))
 	if err != nil {
 		return nil, r.Error(frame, span, errs.RuntimeHostFunction, method+" failed: "+err.Error())
 	}
@@ -251,7 +251,7 @@ func (r *RuntimeBindings) ClassCall(className, method string, args []value.Value
 	if !ok {
 		return nil, r.Error(frame, span, errs.RuntimeUnknownFunction, className+"::"+method+" is not a function")
 	}
-	result, err := fn(args, functions.Context{Env: r.context.Env})
+	result, err := fn(value.HostArguments(args), functions.Context{Env: r.context.Env})
 	if err != nil {
 		return nil, r.Error(frame, span, errs.RuntimeHostFunction, className+"::"+method+" failed: "+err.Error())
 	}
@@ -380,6 +380,10 @@ func nativeCall(container value.Value, method string, args []value.Value) (value
 	inputs := make([]reflect.Value, len(args))
 	for i, arg := range args {
 		input := reflect.ValueOf(arg)
+		if !input.IsValid() && nilable(t.In(i)) {
+			// VAL-21: null arrives as nil, which is the zero value of a parameter that can hold nil.
+			input = reflect.Zero(t.In(i))
+		}
 		if !input.IsValid() || !input.Type().AssignableTo(t.In(i)) {
 			return nil, true, fmt.Errorf("argument %d has incompatible type", i)
 		}
@@ -401,6 +405,15 @@ func nativeCall(container value.Value, method string, args []value.Value) (value
 		}
 	}
 	return nativeValue(outputs[0]), true, nil
+}
+
+// nilable reports whether a parameter of the type can hold nil.
+func nilable(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Interface, reflect.Pointer, reflect.Map, reflect.Slice, reflect.Func, reflect.Chan:
+		return true
+	}
+	return false
 }
 
 // Entries normalizes a loop operand.
@@ -461,7 +474,7 @@ func (r *RuntimeBindings) Call(name string, args []value.Value, frame *Frame, sp
 	if !ok {
 		return nil, r.Error(frame, span, errs.RuntimeUnknownFunction, name+" is not a function")
 	}
-	result, err := host(args, functionContext)
+	result, err := host(value.HostArguments(args), functionContext)
 	if err != nil {
 		return nil, r.Error(frame, span, errs.RuntimeHostFunction, name+" failed: "+err.Error())
 	}

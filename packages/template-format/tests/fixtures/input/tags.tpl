@@ -9,3 +9,4 @@
 {+  parts/head.tpl }{+ "a  b.tpl"}
 {#   head   "parts/head.tpl"    title  no:item.index_ }
 {?#  contents }<main>{#contents}</main>{:}<main class="empty"></main>{/}
+{ :x=1}{@row=rows}{=row}{/}

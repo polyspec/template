@@ -1,7 +1,8 @@
 // Generated.
 package generated
-import ("bytes"; "encoding/json"; "errors"; "fmt"; "time"; "unicode/utf8"; template "github.com/polyspec/template"; "github.com/polyspec/template/ast"; "github.com/polyspec/template/errs"; "github.com/polyspec/template/functions"; "github.com/polyspec/template/render"; "github.com/polyspec/template/value")
+import ("bytes"; "encoding/json"; "errors"; "fmt"; "reflect"; "time"; "unicode/utf8"; template "github.com/polyspec/template"; "github.com/polyspec/template/ast"; "github.com/polyspec/template/errs"; "github.com/polyspec/template/functions"; "github.com/polyspec/template/render"; "github.com/polyspec/template/value")
 type Page struct { Title string `json:"title"` }
+func (r Page) generatedValue() value.Value { result := value.NewOrderedMap(); result.Set("title", generatedValue(r.Title)); return result }
 type Assign struct {
 	Page Page `json:"page"`
 	Root_label string `json:"root_label"`
@@ -25,7 +26,7 @@ func (m *OrderedMap[K, V]) UnmarshalJSON(data []byte) error { decoder := json.Ne
 func strconvQuote(input string) string { data, _ := json.Marshal(input); return string(data) }
 type generatedValueSource interface { generatedValue() value.Value }
 func generatedPanic(err error) { if err != nil { panic(err) } }
-func generatedValue(input any) value.Value { switch item := input.(type) { case nil: return nil; case bool: return item; case float64: return item; case string: return item; case value.SafeString: return item; case value.List: return item; case *value.OrderedMap: return item }; if source, ok := input.(generatedValueSource); ok { return source.generatedValue() }; result, err := value.Convert(input); generatedPanic(err); return result }
+func generatedValue(input any) value.Value { switch item := input.(type) { case nil: return nil; case bool: return item; case float64: return item; case string: return item; case value.SafeString: return item; case value.List: result := make(value.List, len(item)); for index, element := range item { result[index] = generatedValue(element) }; return result; case *value.OrderedMap: return item }; reflected := reflect.ValueOf(input); if reflected.Kind() == reflect.Pointer && reflected.IsNil() { return nil }; if source, ok := input.(generatedValueSource); ok { return source.generatedValue() }; if reflected.Kind() == reflect.Slice { result := make(value.List, reflected.Len()); for index := range result { result[index] = generatedValue(reflected.Index(index).Interface()) }; return result }; result, err := value.Convert(input); generatedPanic(err); return result }
 func generatedResult[T any](input value.Value) T { result, err := generatedAs[T](input); generatedPanic(err); return result }
 func generatedAs[T any](input value.Value) (T, error) { if result, ok := input.(T); ok { return result, nil }; var result T; err := generatedDecode(input, &result); return result, err }
 func generatedTruthy(runtime *render.RuntimeBindings, input any) bool { return runtime.Truthy(generatedValue(input)) }

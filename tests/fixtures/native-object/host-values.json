@@ -1,0 +1,11 @@
+{
+  "description": "VAL-21 and EXP-39 expectations shared by the AST tests of every package and by scripts/check-generated-native-calls.mjs. Every host renders the templates with the assign entries order, same, other and items: order and same are one host object of the order class, other is a second object of that class and items is the list [1]. Every host registers describe, mutate and pick as host functions, Order::describe as a logical class function, and describe as a public method of the order class. describe returns the description of its arguments, mutate changes its list and map arguments and returns null, and pick returns its argument.",
+  "outputs": {
+    "arguments.tpl": "null,bool(true),number(1.5),string(a),string(r),list(number(1),string(s),list(null)),map(b=number(1),2=list(bool(true)),m=list()),object(order)|null,bool(true),number(1.5),string(a),string(r),list(number(1),string(s),list(null)),map(b=number(1),2=list(bool(true)),m=list()),object(order)|null,bool(true),number(1.5),string(a),string(r),list(number(1),string(s),list(null)),map(b=number(1),2=list(bool(true)),m=list()),object(order)\n",
+    "mutation.tpl": "[1,2]|{\"k\":\"v\"}|[1]\n",
+    "equality.tpl": "true|true|false|true|false|true|true|false|true|false|false|false\n"
+  },
+  "errors": {
+    "compare.tpl": "E_RUNTIME_COMPARE"
+  }
+}

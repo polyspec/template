@@ -29,6 +29,8 @@ node scripts/check-rules.mjs
 
 4. Run the suite for every implementation.
 
+`scripts/check-schema.mjs` fails when a case whose `input.tpl` parses has no `expected.ast.json`, and when a case that expects a lexical or parse error of `input.tpl` has one (CNF-15). `make schema-check`, `make docs-check` and therefore `make check` run it.
+
 `--update html` and `--update error` write the expected output from the TypeScript implementation. Review a generated file against the specification before committing it.
 
 ## Add an expression fixture

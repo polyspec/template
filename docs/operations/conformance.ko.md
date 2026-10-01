@@ -29,6 +29,8 @@ node scripts/check-rules.mjs
 
 4. 모든 구현에 대해 스위트를 실행한다.
 
+`scripts/check-schema.mjs`는 `input.tpl`이 파싱되는 케이스에 `expected.ast.json`이 없거나, `input.tpl`의 렉시컬 또는 파싱 오류를 기대하는 케이스에 그 파일이 있으면 실패한다(CNF-15). `make schema-check`와 `make docs-check`가 이를 실행하므로 `make check`도 실행한다.
+
 `--update html`과 `--update error`는 TypeScript 구현의 결과로 기대 파일을 쓴다. 생성된 파일은 커밋 전에 명세와 대조해 검토한다.
 
 ## 표현식 픽스처 추가

@@ -50,9 +50,9 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 | `new Engine(Program $program)` | Creates an engine that delegates to one AST or generated program. |
 | `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | Renders a template name or a parsed template. `$assign` contains variables; options are `define` and `env`. Binding follows VAL-14: a closure or a resource is `E_DATA_UNSUPPORTED_TYPE`, a key that is not valid UTF-8 is `E_DATA_INVALID_UTF8`, and lists and maps nested deeper than 64 levels are `E_DATA_DEPTH`. Only public properties and methods of an object are visible, whatever the class scope of the caller. |
 | generated PHP program | The compiler declares a generated program in the namespace given by `--php-namespace` or the `phpNamespace` option of `compileSource`; instantiate it as `new \\Your\\Namespace\\GeneratedProgram($runtime)`. |
-| `$astProgram->register(string $name, callable $fn)` | Registers a host function `fn(array $args, array $env): mixed`. A native object argument is the original PHP object. |
-| `ArrayLoader`, `FilesystemLoader` | In-memory and filesystem loaders. |
-| `Json::parse(string $bytes)` | Order-preserving JSON parser for assign data. |
+| `$astProgram->register(string $name, callable $fn)` | Registers a host function `fn(array $args, array $env): mixed`. Arguments have the form of VAL-21: a number is a `float`, a safe string is a `string`, a list is a list array, a map is an array in entry order and a native object is the original PHP object. |
+| `ArrayLoader`, `FilesystemLoader` | In-memory and filesystem loaders. An exception that a loader throws fails the render with `E_LOAD_FAILED`; `FilesystemLoader` throws one for a regular file that cannot be read. |
+| `Json::parse(string $bytes)` | Order-preserving JSON parser for assign data. Text that is not one JSON document is a `BindError` with `E_DATA_INVALID_JSON`. |
 | `TemplateError` | Exception with `errorCode`, `template`, `errorLine`, `errorCol`, `offset`, `end` and `toArray()`. |
 | `SafeString` | A string that the echo tag writes without escaping. |
 

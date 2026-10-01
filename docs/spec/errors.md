@@ -14,7 +14,7 @@
 
 **ERR-5** An error raised before rendering starts, while binding assign data, template definition data or the environment, has `template` equal to the entry template name, `line` 0, `col` 0, `offset` 0 and `end` 0. An error raised while binding a value during rendering points at the expression that produced the value: the call for the result of a host function, a logical class function or an instance method, and the lookup expression for a member of a native object (VAL-19).
 
-**ERR-6** An error for an entry template that the loader does not provide has `code` `E_LOAD_NOT_FOUND`, `template` equal to the requested name, `line` 0 and `col` 0.
+**ERR-6** An error for an entry template that the loader does not provide has `code` `E_LOAD_NOT_FOUND`, `template` equal to the requested name, `line` 0 and `col` 0. An error for an entry template whose loading fails (`E_LOAD_FAILED`) has the same `template`, `line` and `col`.
 
 ## Codes
 
@@ -53,6 +53,7 @@
 | `E_LOAD_NOT_FOUND` | The loader has no template for the resolved name. | The include or block tag; for the entry template see ERR-6. |
 | `E_LOAD_CYCLE` | An include or block renders a template that is already being rendered in the same chain. | The include or block tag. |
 | `E_LOAD_OUTSIDE_ROOT` | A resolved path leaves the loader root. | The include or block tag. |
+| `E_LOAD_FAILED` | The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10). | The include or block tag; for the entry template see ERR-6. |
 
 **ERR-10** Data errors:
 
@@ -63,6 +64,7 @@
 | `E_DATA_INVALID_UTF8` | A string or a map key is not valid Unicode text (VAL-12 to VAL-17). | ERR-5. |
 | `E_DATA_UNSUPPORTED_TYPE` | A value has a type that has no binding. | ERR-5. |
 | `E_DATA_DEPTH` | Lists and maps are nested deeper than the binding depth limit, including a cyclic host structure (VAL-20). | ERR-5. |
+| `E_DATA_INVALID_JSON` | JSON text of assign data, template definitions or the environment is not one JSON document (VAL-12). | ERR-5. |
 
 **ERR-11** Runtime errors:
 
@@ -87,7 +89,7 @@
 | --- | --- | --- |
 | `E_INTERNAL` | The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect. | ERR-5; for `parse`, the template name passed to `parse`. |
 
-**ERR-13** No implementation terminates the host process, and no panic or language runtime error leaves the public `parse`, `prepare` and `render` operations of an implementation, including the operations of a generated program and of the PHP extension. Each such failure is reported to the host as `E_INTERNAL`. The language runtime errors are the built-in subclasses of `Error` that the JavaScript engine raises (`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`) and the classes of the PHP `Error` hierarchy. Host code that the engine calls (a registered function, a logical class function, an instance method, a member accessor, `jsonSerialize()`) and that reports a failure through the error mechanism of its language, a thrown exception in TypeScript and PHP or a returned error in Go and Rust, fails with `E_RUNTIME_HOST_FUNCTION` before it reaches this boundary. A panic raised by such host code in Go or Rust is internal. Every other exception passes to the host unchanged, for example an argument error that an API raises before parsing or rendering starts, such as an invalid delimiter option or a request that does not match the declared types of a generated program.
+**ERR-13** No implementation terminates the host process, and no panic or language runtime error leaves the public `parse`, `prepare` and `render` operations of an implementation, including the operations of a generated program and of the PHP extension. Each such failure is reported to the host as `E_INTERNAL`. The language runtime errors are the built-in subclasses of `Error` that the JavaScript engine raises (`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`) and the classes of the PHP `Error` hierarchy. Host code that the engine calls (a registered function, a logical class function, an instance method, a member accessor, `jsonSerialize()`) and that reports a failure through the error mechanism of its language, a thrown exception in TypeScript and PHP or a returned error in Go and Rust, fails with `E_RUNTIME_HOST_FUNCTION` before it reaches this boundary. A loader that reports a failure in the same way fails with `E_LOAD_FAILED` (RT-9). A panic raised by such host code in Go or Rust is internal. Every other exception passes to the host unchanged, for example an argument error that an API raises before parsing or rendering starts, such as an invalid delimiter option or a request that does not match the declared types of a generated program.
 
 ## Example
 

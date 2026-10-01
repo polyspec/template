@@ -65,6 +65,16 @@ function nullable(type) { return { ...type, optional: true, source: typeSource(t
 function sameType(left, right) { return typeSource(required(left)) === typeSource(required(right)); }
 function acceptsType(actual, expected) { return required(expected).kind === 'any' || sameType(actual, expected); }
 function mergeType(left, right) { return sameType(left, right) ? { ...required(left), optional: left.optional || right.optional } : parseType('any'); }
+function holdsRecord(type) {
+  const value = required(type);
+  return value.kind === 'record' || (value.kind === 'list' && holdsRecord(value.item)) || (value.kind === 'map' && holdsRecord(value.value));
+}
+// A typed value that holds a record reaches a runtime operation (a function argument, an operator
+// operand or an echo) as a canonical value: a record becomes a map of its declared fields in
+// declaration order, at every depth (VAL-21, docs/spec/compiler.md).
+function dynamicValue(expr) {
+  return holdsRecord(expr.valueType) ? { op: 'to-value', value: expr, valueType: parseType('any'), span: expr.span } : expr;
+}
 
 // The types that the assignments of lowered nodes give to locals, including assignments in nested
 // branches and loop bodies.
@@ -182,20 +192,20 @@ export function lowerSourceGraph(graph, manifest) {
       case 'MemberCall': {
         const object = lowerExpr(node.object, scope, loops);
         if (required(object.valueType).kind !== 'any') throw new Error(`compiler: member call ${node.method} requires an any object`);
-        const args = node.args.map(value => lowerExpr(value, scope, loops));
+        const args = node.args.map(value => dynamicValue(lowerExpr(value, scope, loops)));
         return { op: 'member-call', object, method: node.method, args, valueType: parseType('any'), span: node.span };
       }
       case 'ClassCall': {
         const signature = functions.get(`${node.className}::${node.method}`);
         if (!signature) throw new Error(`compiler: class function ${node.className}::${node.method} is missing from the type manifest`);
-        const args = node.args.map(value => lowerExpr(value, scope, loops));
+        const args = node.args.map(value => dynamicValue(lowerExpr(value, scope, loops)));
         if (!signature.runtimeArity && (args.length < signature.minArgs || (signature.maxArgs !== -1 && args.length > signature.maxArgs))) throw new Error(`compiler: class function ${node.className}::${node.method} expects ${signature.minArgs}-${signature.maxArgs} arguments`);
         return { op: 'class-call', className: node.className, method: node.method, args, valueType: signature.returns, span: node.span };
       }
       case 'Call': {
         const signature = functions.get(node.name);
         if (!signature) throw new Error(`compiler: function ${node.name} is missing from the type manifest`);
-        const args = node.args.map(value => lowerExpr(value, scope, loops));
+        const args = node.args.map(value => dynamicValue(lowerExpr(value, scope, loops)));
         const minArgs = signature.minArgs ?? signature.args.length;
         const maxArgs = signature.maxArgs ?? signature.args.length;
         if (!signature.runtimeArity && (args.length < minArgs || (maxArgs !== -1 && args.length > maxArgs))) {
@@ -204,10 +214,12 @@ export function lowerSourceGraph(graph, manifest) {
         }
         return { op: 'call', name: node.name, implementation: signature.implementation, args, valueType: signature.returns, span: node.span };
       }
-      case 'Unary': return { op: 'unary', operator: node.op, operand: lowerExpr(node.operand, scope, loops), valueType: parseType(node.op === '!' ? 'boolean' : 'number'), span: node.span };
+      case 'Unary': return { op: 'unary', operator: node.op, operand: dynamicValue(lowerExpr(node.operand, scope, loops)), valueType: parseType(node.op === '!' ? 'boolean' : 'number'), span: node.span };
       case 'Binary': {
-        const left = lowerExpr(node.left, scope, loops);
-        const right = lowerExpr(node.right, scope, loops);
+        // `&&`, `||` and `??` test truthiness or null and return an operand, which keeps its type.
+        const shortCircuit = ['&&', '||', '??'].includes(node.op);
+        const left = shortCircuit ? lowerExpr(node.left, scope, loops) : dynamicValue(lowerExpr(node.left, scope, loops));
+        const right = shortCircuit ? lowerExpr(node.right, scope, loops) : dynamicValue(lowerExpr(node.right, scope, loops));
         const boolean = ['&&', '||', '==', '!=', '===', '!==', '<', '>', '<=', '>=', 'in'].includes(node.op);
         const arithmetic = ['-', '*', '/', '%'].includes(node.op);
         return { op: 'binary', operator: node.op, left, right, valueType: boolean ? parseType('boolean') : arithmetic ? parseType('number') : mergeType(left.valueType, right.valueType), span: node.span };
@@ -255,7 +267,7 @@ export function lowerSourceGraph(graph, manifest) {
       if (!nodeKinds.has(node?.type)) throw new Error(`compiler: invalid node ${node?.type ?? typeof node}`);
       switch (node.type) {
         case 'Text': return { op: 'text', value: node.value, span: node.span };
-        case 'Echo': return { op: 'echo', expr: lowerExpr(node.expr, scope, loops), span: node.span };
+        case 'Echo': return { op: 'echo', expr: dynamicValue(lowerExpr(node.expr, scope, loops)), span: node.span };
         case 'Set': {
           const expr = lowerExpr(node.expr, scope, loops);
           scope.set(node.name, expr.valueType);
