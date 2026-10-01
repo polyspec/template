@@ -26,6 +26,15 @@ describe('templateStructure', () => {
     }]);
   });
 
+  it('returns every tag in source order, including tags outside constructs and after a byte order mark', () => {
+    const source = '\uFEFF{* note *}{: n = 1}{= n}{? n}{+ "p.tpl"}{/}{# box}';
+    const result = templateStructure(source);
+    if (!result.ok) throw new Error(JSON.stringify(result.error));
+    expect(result.tags.map(tag => [tag.kind, source.slice(tag.start, tag.end)])).toEqual([
+      ['comment', '{* note *}'], ['assignment', '{: n = 1}'], ['echo', '{= n}'], ['if', '{? n}'], ['include', '{+ "p.tpl"}'], ['close', '{/}'], ['block', '{# box}'],
+    ]);
+  });
+
   it('assigns branch and close tags to the innermost construct', () => {
     const source = '{@ x = xs}{? x}a{:}b{/}{:}none{/}';
     const [loop, condition] = constructs(source);
@@ -61,7 +70,11 @@ describe('templateStructure', () => {
   });
 
   it('uses the delimiter option', () => {
-    expect(templateStructure('[? a]x[/]', { delimiters: '[]' })).toEqual({ ok: true, constructs: [expect.objectContaining({ kind: 'if', start: 0, end: 9 })] });
+    expect(templateStructure('[= a][? b]x[/]', { delimiters: '[]' })).toEqual({
+      ok: true,
+      tags: [{ kind: 'echo', start: 0, end: 5 }, { kind: 'if', start: 5, end: 10 }, { kind: 'close', start: 11, end: 14 }],
+      constructs: [expect.objectContaining({ kind: 'if', start: 5, end: 14 })],
+    });
   });
 });
 
