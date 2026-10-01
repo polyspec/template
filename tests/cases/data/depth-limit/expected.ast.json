@@ -1,0 +1,49 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "a",
+                "span": [
+                  8,
+                  9
+                ]
+              }
+            ],
+            "span": [
+              3,
+              10
+            ]
+          }
+        ],
+        "span": [
+          3,
+          16
+        ]
+      },
+      "span": [
+        0,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        17,
+        18
+      ]
+    }
+  ]
+}

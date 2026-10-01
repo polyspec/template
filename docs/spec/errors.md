@@ -12,7 +12,7 @@
 
 **ERR-4** There are no execution modes. Every error aborts parsing or rendering. A render that raises an error produces no output.
 
-**ERR-5** An error raised while binding assign data before rendering starts has `template` equal to the entry template name, `line` 0, `col` 0, `offset` 0 and `end` 0. An error raised while binding the result of a host function points at the call.
+**ERR-5** An error raised before rendering starts, while binding assign data, template definition data or the environment, has `template` equal to the entry template name, `line` 0, `col` 0, `offset` 0 and `end` 0. An error raised while binding a value during rendering points at the expression that produced the value: the call for the result of a host function, a logical class function or an instance method, and the lookup expression for a member of a native object (VAL-19).
 
 **ERR-6** An error for an entry template that the loader does not provide has `code` `E_LOAD_NOT_FOUND`, `template` equal to the requested name, `line` 0 and `col` 0.
 
@@ -58,10 +58,11 @@
 
 | Code | Condition | Position |
 | --- | --- | --- |
-| `E_DATA_NUMBER_RANGE` | An integer is outside the safe integer range. | ERR-5. |
+| `E_DATA_NUMBER_RANGE` | A finite number has a magnitude greater than 2^53 − 1 (VAL-2). | ERR-5. |
 | `E_DATA_NUMBER_NOT_FINITE` | A number is NaN or infinite. | ERR-5. |
-| `E_DATA_INVALID_UTF8` | A string is not valid UTF-8. | ERR-5. |
+| `E_DATA_INVALID_UTF8` | A string or a map key is not valid Unicode text (VAL-12 to VAL-17). | ERR-5. |
 | `E_DATA_UNSUPPORTED_TYPE` | A value has a type that has no binding. | ERR-5. |
+| `E_DATA_DEPTH` | Lists and maps are nested deeper than the binding depth limit, including a cyclic host structure (VAL-20). | ERR-5. |
 
 **ERR-11** Runtime errors:
 
@@ -73,12 +74,20 @@
 | `E_RUNTIME_STRINGIFY` | A list or map is converted to a string. | The start of the echo expression, of the operator expression or of the call. |
 | `E_RUNTIME_UNKNOWN_FUNCTION` | A call names a function that is neither built in nor registered. | The call. |
 | `E_RUNTIME_ARITY` | A call has an argument count outside the function's range. | The call. |
-| `E_RUNTIME_HOST_FUNCTION` | A registered function raised an error. | The call. |
+| `E_RUNTIME_HOST_FUNCTION` | Host code that the engine called reported an error (FUN-46, VAL-14, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. | The call or the lookup expression; ERR-5 for host code that runs while binding before rendering starts. |
 | `E_RUNTIME_UNKNOWN_LOOP` | A loop meta names a loop that is not enclosing the expression. | The loop meta. |
 | `E_RUNTIME_BLOCK_UNDEFINED` | `{# id}` names an id that the template definition registry does not contain. | The tag. |
 | `E_RUNTIME_BLOCK_REDEFINED` | `{# id path}` names an id that is registered with a different path. | The tag. |
 | `E_RUNTIME_DEPTH` | The nesting depth of includes and blocks exceeds the limit. | The include or block tag. |
-| `E_RUNTIME_LIMIT` | The iteration count, the output size, the expression depth or a range size exceeds its limit. | The loop tag, the echo, the expression or the call. |
+| `E_RUNTIME_LIMIT` | The iteration count, the output size, the expression depth, a range size or the depth of a value that a list or map literal builds (VAL-20) exceeds its limit. | The loop tag, the echo, the expression, the call or the literal. |
+
+**ERR-12** Internal errors:
+
+| Code | Condition | Position |
+| --- | --- | --- |
+| `E_INTERNAL` | The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect. | ERR-5; for `parse`, the template name passed to `parse`. |
+
+**ERR-13** No implementation terminates the host process, and no panic or language runtime error leaves the public `parse`, `prepare` and `render` operations of an implementation, including the operations of a generated program and of the PHP extension. Each such failure is reported to the host as `E_INTERNAL`. The language runtime errors are the built-in subclasses of `Error` that the JavaScript engine raises (`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`) and the classes of the PHP `Error` hierarchy. Host code that the engine calls (a registered function, a logical class function, an instance method, a member accessor, `jsonSerialize()`) and that reports a failure through the error mechanism of its language, a thrown exception in TypeScript and PHP or a returned error in Go and Rust, fails with `E_RUNTIME_HOST_FUNCTION` before it reaches this boundary. A panic raised by such host code in Go or Rust is internal. Every other exception passes to the host unchanged, for example an argument error that an API raises before parsing or rendering starts, such as an invalid delimiter option or a request that does not match the declared types of a generated program.
 
 ## Example
 

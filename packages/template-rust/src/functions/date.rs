@@ -30,9 +30,10 @@ pub fn parse_offset(text: &str) -> Option<i64> {
     if bytes.len() != 6 || !(bytes[0] == b'+' || bytes[0] == b'-') || bytes[3] != b':' {
         return None;
     }
-    let hours: i64 = text[1..3].parse().ok()?;
-    let minutes: i64 = text[4..6].parse().ok()?;
-    if !text[1..3].bytes().all(|b| b.is_ascii_digit()) || !text[4..6].bytes().all(|b| b.is_ascii_digit()) || hours > 23 || minutes > 59 {
+    let (hour_text, minute_text) = (text.get(1..3)?, text.get(4..6)?);
+    let hours: i64 = hour_text.parse().ok()?;
+    let minutes: i64 = minute_text.parse().ok()?;
+    if !hour_text.bytes().all(|b| b.is_ascii_digit()) || !minute_text.bytes().all(|b| b.is_ascii_digit()) || hours > 23 || minutes > 59 {
         return None;
     }
     let sign = if bytes[0] == b'-' { -1 } else { 1 };
@@ -89,13 +90,14 @@ fn parse_date_text(text: &str) -> Option<DateText<'_>> {
     let year = digits(0..4)?;
     let month = digits(5..7)?;
     let day = digits(8..10)?;
-    let mut rest = &text[10..];
+    let mut rest = text.get(10..)?;
     let (mut hour, mut minute, mut second) = (0, 0, 0);
     if rest.starts_with(' ') || rest.starts_with('T') {
         if rest.len() < 9 || rest.as_bytes()[3] != b':' || rest.as_bytes()[6] != b':' {
             return None;
         }
-        let time = &rest[1..9];
+        // A multi-byte character can end inside the time field; `get` rejects such a split.
+        let time = rest.get(1..9)?;
         let time_digits = |range: std::ops::Range<usize>| -> Option<i64> {
             let part = time.get(range)?;
             if part.bytes().all(|b| b.is_ascii_digit()) {
@@ -107,7 +109,7 @@ fn parse_date_text(text: &str) -> Option<DateText<'_>> {
         hour = time_digits(0..2)?;
         minute = time_digits(3..5)?;
         second = time_digits(6..8)?;
-        rest = &rest[9..];
+        rest = rest.get(9..)?;
     }
     let offset = if rest.is_empty() { None } else { Some(rest) };
     if let Some(offset) = offset {

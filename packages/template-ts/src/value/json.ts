@@ -1,7 +1,6 @@
-// JSON text parser that preserves document order and applies the number rules of VAL-12.
+// JSON text parser that preserves document order and applies VAL-2, VAL-12 and VAL-20.
 import { firstInvalidUtf8, utf8Decoder } from '../escape.js';
-import { BindError, checkNumber } from './bind.js';
-import { MAX_SAFE } from './number.js';
+import { BindError, checkLevel, checkNumber, checkText } from './bind.js';
 import { type MapValue, type Value } from './value.js';
 
 // The error that the JSON parser raises for text that is not JSON. It carries the byte offset of
@@ -21,9 +20,11 @@ export function parseJsonBytes(bytes: Uint8Array): Value {
   return parseJson(utf8Decoder.decode(bytes));
 }
 
-// Parses JSON text into a value. Object keys keep their document order and an integer literal
-// outside the safe range raises a BindError (VAL-12).
+// Parses JSON text into a value. Object keys keep their document order. A number outside the
+// binding range, an unpaired surrogate and nesting deeper than the limit raise a BindError at the
+// first occurrence in document order (VAL-2, VAL-12, VAL-20).
 export function parseJson(text: string): Value {
+  checkText(text);
   const parser = new JsonParser(text);
   const value = parser.parseValue();
   parser.skipWhitespace();
@@ -33,6 +34,7 @@ export function parseJson(text: string): Value {
 
 class JsonParser {
   index = 0;
+  private level = 0;
 
   constructor(private readonly text: string) {}
 
@@ -73,11 +75,13 @@ class JsonParser {
   }
 
   private parseObject(): MapValue {
+    checkLevel(++this.level);
     const map: MapValue = new Map();
     this.index++;
     this.skipWhitespace();
     if (this.text[this.index] === '}') {
       this.index++;
+      this.level--;
       return map;
     }
     for (;;) {
@@ -97,6 +101,7 @@ class JsonParser {
       }
       if (next === '}') {
         this.index++;
+        this.level--;
         return map;
       }
       this.fail('expected "," or "}"');
@@ -104,11 +109,13 @@ class JsonParser {
   }
 
   private parseArray(): Value[] {
+    checkLevel(++this.level);
     const list: Value[] = [];
     this.index++;
     this.skipWhitespace();
     if (this.text[this.index] === ']') {
       this.index++;
+      this.level--;
       return list;
     }
     for (;;) {
@@ -121,6 +128,7 @@ class JsonParser {
       }
       if (next === ']') {
         this.index++;
+        this.level--;
         return list;
       }
       this.fail('expected "," or "]"');
@@ -137,7 +145,7 @@ class JsonParser {
       if (char === '"') {
         result += this.text.slice(start, this.index);
         this.index++;
-        return result;
+        return checkText(result);
       }
       if (char === '\\') {
         result += this.text.slice(start, this.index);
@@ -176,12 +184,7 @@ class JsonParser {
     if (!match) this.fail('invalid number');
     const literal = match[0];
     this.index += literal.length;
-    const value = Number(literal);
-    if (!Number.isFinite(value)) throw new BindError('E_DATA_NUMBER_NOT_FINITE', `number ${literal} is not finite`);
-    const isIntegerLiteral = match[2] === undefined && match[3] === undefined;
-    if (isIntegerLiteral && Math.abs(value) > MAX_SAFE) {
-      throw new BindError('E_DATA_NUMBER_RANGE', `integer ${literal} is outside the safe range`);
-    }
-    return checkNumber(value);
+    // The nearest double decides, whatever the spelling of the literal (VAL-2).
+    return checkNumber(Number(literal));
   }
 }

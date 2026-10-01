@@ -41,13 +41,13 @@ export class Evaluator {
         return null;
       }
       case 'Member':
-        return this.runtime.member(this.evaluate(expr.object, frame), expr.key);
+        return this.runtime.member(this.evaluate(expr.object, frame), expr.key, frame, expr.span);
       case 'MemberCall':
         return this.runtime.memberCall(this.evaluate(expr.object, frame), expr.method, expr.args.map(arg => this.evaluate(arg, frame)), frame, expr.span);
       case 'ClassCall':
         return this.runtime.classCall(expr.className, expr.method, expr.args.map(arg => this.evaluate(arg, frame)), frame, expr.span);
       case 'Index':
-        return this.runtime.index(this.evaluate(expr.object, frame), this.evaluate(expr.index, frame));
+        return this.runtime.index(this.evaluate(expr.object, frame), this.evaluate(expr.index, frame), frame, expr.span);
       case 'Call':
         return this.runtime.call(expr.name, expr.args.map(arg => this.evaluate(arg, frame)), frame, expr.span);
       case 'Unary': {
@@ -70,7 +70,7 @@ export class Evaluator {
             list.push(this.evaluate(item, frame));
           }
         }
-        return list;
+        return this.runtime.depth(list, frame, expr.span);
       }
       case 'Map': {
         const map: MapValue = new Map();
@@ -82,7 +82,7 @@ export class Evaluator {
             map.set(key, this.evaluate(entry.value, frame));
           }
         }
-        return map;
+        return this.runtime.depth(map, frame, expr.span);
       }
     }
   }

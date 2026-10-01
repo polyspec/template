@@ -1,0 +1,38 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "MemberCall",
+        "object": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "method": "f",
+        "args": [],
+        "span": [
+          3,
+          8
+        ]
+      },
+      "span": [
+        0,
+        9
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        9,
+        10
+      ]
+    }
+  ]
+}

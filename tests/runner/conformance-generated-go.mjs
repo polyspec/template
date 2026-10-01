@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
+import { goString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
@@ -14,7 +15,8 @@ const goRoot = join(root, 'packages/template-go');
 const temporary = mkdtempSync(join(goRoot, 'generated_conformance_'));
 function errorObject(error) { return typeof error?.code === 'string' ? { code: error.code, template: error.template ?? 'input.tpl', line: error.line ?? 0, col: error.col ?? 0 } : null; }
 function parsedTemplates(testCase) { const templates = new Map(), pending = [[testCase.dir, '']]; while (pending.length) { const [directory, prefix] = pending.pop(); for (const entry of readdirSync(directory, { withFileTypes: true })) { const path = join(directory, entry.name), name = prefix ? `${prefix}/${entry.name}` : entry.name; if (entry.isDirectory()) pending.push([path, name]); else if (entry.isFile() && entry.name.endsWith('.tpl')) templates.set(name, parse(readFileSync(path), name, testCase.options)); } } return templates; }
-const q = value => JSON.stringify(value);
+// Paths and expected output are embedded as exact Go string literals.
+const q = goString;
 const failures = [];
 const runnable = [];
 let passed = 0;

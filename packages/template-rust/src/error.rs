@@ -32,6 +32,7 @@ pub enum ErrorCode {
     E_DATA_NUMBER_NOT_FINITE,
     E_DATA_INVALID_UTF8,
     E_DATA_UNSUPPORTED_TYPE,
+    E_DATA_DEPTH,
     E_RUNTIME_TYPE,
     E_RUNTIME_COMPARE,
     E_RUNTIME_DIV_ZERO,
@@ -44,6 +45,7 @@ pub enum ErrorCode {
     E_RUNTIME_BLOCK_REDEFINED,
     E_RUNTIME_DEPTH,
     E_RUNTIME_LIMIT,
+    E_INTERNAL,
 }
 
 impl ErrorCode {
@@ -75,6 +77,7 @@ impl ErrorCode {
             ErrorCode::E_DATA_NUMBER_NOT_FINITE => "E_DATA_NUMBER_NOT_FINITE",
             ErrorCode::E_DATA_INVALID_UTF8 => "E_DATA_INVALID_UTF8",
             ErrorCode::E_DATA_UNSUPPORTED_TYPE => "E_DATA_UNSUPPORTED_TYPE",
+            ErrorCode::E_DATA_DEPTH => "E_DATA_DEPTH",
             ErrorCode::E_RUNTIME_TYPE => "E_RUNTIME_TYPE",
             ErrorCode::E_RUNTIME_COMPARE => "E_RUNTIME_COMPARE",
             ErrorCode::E_RUNTIME_DIV_ZERO => "E_RUNTIME_DIV_ZERO",
@@ -87,6 +90,7 @@ impl ErrorCode {
             ErrorCode::E_RUNTIME_BLOCK_REDEFINED => "E_RUNTIME_BLOCK_REDEFINED",
             ErrorCode::E_RUNTIME_DEPTH => "E_RUNTIME_DEPTH",
             ErrorCode::E_RUNTIME_LIMIT => "E_RUNTIME_LIMIT",
+            ErrorCode::E_INTERNAL => "E_INTERNAL",
         }
     }
 }
@@ -201,3 +205,26 @@ impl fmt::Display for TemplateError {
 }
 
 impl std::error::Error for TemplateError {}
+
+/// Runs one public operation and reports a panic as `E_INTERNAL` for `template` (ERR-12, ERR-13).
+///
+/// The operations of the engine return their errors as values; a panic is an implementation
+/// defect or a panic of a host callback. Catching it here keeps the host process alive, also when
+/// the host is a foreign runtime that cannot unwind, such as the PHP extension.
+pub fn internal_boundary<T>(template: &str, operation: impl FnOnce() -> Result<T, TemplateError>) -> Result<T, TemplateError> {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(operation)) {
+        Ok(result) => result,
+        Err(payload) => {
+            let reason = payload
+                .downcast_ref::<&str>()
+                .map(|text| (*text).to_string())
+                .or_else(|| payload.downcast_ref::<String>().cloned())
+                .unwrap_or_else(|| "a panic without a message".to_string());
+            Err(TemplateError::without_position(
+                ErrorCode::E_INTERNAL,
+                template,
+                format!("internal failure: {reason}"),
+            ))
+        }
+    }
+}

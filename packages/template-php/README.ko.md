@@ -48,8 +48,9 @@ $json = Ast::toJson($ast);
 | `AstProgram::parse(string $source, string $name, array $options = [])` | 템플릿 하나를 AST(중첩 배열)로 파싱한다. `$options['delimiters']`가 구분자를 선택한다. |
 | `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | AST program을 생성한다. 옵션: `functions`, `limits`, `delimiters`. |
 | `new Engine(Program $program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
-| `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | 템플릿 이름 또는 파싱된 템플릿을 렌더한다. `$assign`은 변수를 담고 옵션은 `define`, `env`다. |
-| `$astProgram->register(string $name, callable $fn)` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. |
+| `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | 템플릿 이름 또는 파싱된 템플릿을 렌더한다. `$assign`은 변수를 담고 옵션은 `define`, `env`다. 바인딩은 VAL-14를 따른다. closure와 리소스는 `E_DATA_UNSUPPORTED_TYPE`, 유효한 UTF-8이 아닌 키는 `E_DATA_INVALID_UTF8`, 64단계보다 깊게 중첩된 list와 map은 `E_DATA_DEPTH`이다. 호출자의 class scope와 무관하게 객체의 public 프로퍼티와 method만 보인다. |
+| generated PHP program | Compiler는 `--php-namespace` 또는 `compileSource`의 `phpNamespace` 옵션이 정한 namespace에 generated program을 선언한다. `new \\Your\\Namespace\\GeneratedProgram($runtime)`로 만든다. |
+| `$astProgram->register(string $name, callable $fn)` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. Native object 인자는 원본 PHP 객체다. |
 | `ArrayLoader`, `FilesystemLoader` | 메모리 로더와 파일시스템 로더. |
 | `Json::parse(string $bytes)` | assign 데이터용 순서 보존 JSON 파서. |
 | `TemplateError` | `errorCode`, `template`, `errorLine`, `errorCol`, `offset`, `end`와 `toArray()`를 가진 예외. |

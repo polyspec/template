@@ -3,7 +3,7 @@ import type { Span } from '../ast.js';
 import { TemplateError } from '../errors.js';
 import { escapeHtml } from '../escape.js';
 import { builtins, FunctionError, toNumber, type FunctionContext } from '../functions/index.js';
-import { BindError, bind } from '../value/bind.js';
+import { BindError, MAX_DEPTH, bind, depthWithin, hostArgument } from '../value/bind.js';
 import { stringify as stringifyValue, StringifyError } from '../value/stringify.js';
 import {
   NativeObject, SafeString, compareValues, isString, isTruthy, looseEquals, strictEquals, textOf, typeOf,
@@ -113,45 +113,28 @@ export class RuntimeBindings {
     return order;
   }
 
-  /** Reads a fixed member from a template collection. */
-  member(container: Value, key: string): Value {
-    if (container instanceof NativeObject) {
-      const target = container.target as Record<string, unknown>;
-      if (!(key in target)) return null;
-      return bind(target[key]);
-    }
-    return this.index(container, key);
+  /** Reads a fixed member name (EXP-18, VAL-19). */
+  member(container: Value, key: string, frame: Frame, span: Span): Value {
+    return this.index(container, key, frame, span);
   }
 
-  /** Calls a public method on an assigned native object. */
+  /** Calls a public method on an assigned native object and binds its result (VAL-19). */
   memberCall(container: Value, method: string, args: Value[], frame: Frame, span: Span): Value {
-    if (!(container instanceof NativeObject)) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${method} is not a function`);
-    const target = container.target as Record<string, unknown>;
-    const candidate = target[method];
-    if (typeof candidate !== 'function') throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${method} is not a function`);
-    try {
-      return bind(Reflect.apply(candidate, container.target, args));
-    } catch (error) {
-      if (error instanceof TemplateError) throw error;
-      const message = error instanceof Error ? error.message : String(error);
-      throw this.error(frame, span, 'E_RUNTIME_HOST_FUNCTION', `${method} failed: ${message}`);
-    }
+    const candidate = container instanceof NativeObject ? publicMethod(container.target, method) : undefined;
+    if (candidate === undefined) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${method} is not a function`);
+    const target = (container as NativeObject).target;
+    return hostResult(this, method, () => Reflect.apply(candidate, target, args.map(hostArgument)), frame, span);
   }
 
-  /** Calls a registered logical class function. */
+  /** Calls a registered logical class function and binds its result. */
   classCall(className: string, method: string, args: Value[], frame: Frame, span: Span): Value {
     const fn = this.context.services.classFunction(className, method);
     if (!fn) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${className}::${method} is not a function`);
-    try {
-      return bind(fn(args, { env: this.context.env }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw this.error(frame, span, 'E_RUNTIME_HOST_FUNCTION', `${className}::${method} failed: ${message}`);
-    }
+    return hostResult(this, `${className}::${method}`, () => fn(args.map(hostArgument), { env: this.context.env }), frame, span);
   }
 
-  /** Reads a dynamic list position or map key. */
-  index(container: Value, key: Value): Value {
+  /** Reads a dynamic list position, a map key or a public field of a native object (EXP-19, VAL-19). */
+  index(container: Value, key: Value, frame: Frame, span: Span): Value {
     if (container instanceof Map) {
       if (isString(key)) return container.get(textOf(key)) ?? null;
       if (typeof key === 'number' && Number.isInteger(key)) return container.get(String(key)) ?? null;
@@ -164,8 +147,26 @@ export class RuntimeBindings {
       if (position === null || position < 0 || position >= container.length) return null;
       return container[position] as Value;
     }
-    if (container instanceof NativeObject && isString(key)) return this.member(container, textOf(key));
+    if (container instanceof NativeObject && isString(key)) {
+      const name = textOf(key);
+      const target = container.target;
+      if (!publicField(target, name)) return null;
+      let field: unknown;
+      try {
+        field = Reflect.get(target, name);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw this.error(frame, span, 'E_RUNTIME_HOST_FUNCTION', `${name} failed: ${message}`);
+      }
+      return bound(this, field, frame, span);
+    }
     return null;
+  }
+
+  /** Checks the depth of a value that a list or map literal built (VAL-20). */
+  depth(value: Value, frame: Frame, span: Span): Value {
+    if (!depthWithin(value, MAX_DEPTH)) throw this.error(frame, span, 'E_RUNTIME_LIMIT', `a list or map literal nests deeper than ${MAX_DEPTH} levels`);
+    return value;
   }
 
   /** Converts a nullable list or map into ordered loop entries. */
@@ -206,19 +207,7 @@ export class RuntimeBindings {
     }
     const host = this.context.services.hostFunction(name);
     if (!host) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${name} is not a function`);
-    let result: unknown;
-    try {
-      result = host(args, functionContext);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw this.error(frame, span, 'E_RUNTIME_HOST_FUNCTION', `${name} failed: ${message}`);
-    }
-    try {
-      return bind(result);
-    } catch (error) {
-      if (error instanceof BindError) throw this.error(frame, span, error.code, error.message);
-      throw error;
-    }
+    return hostResult(this, name, () => host(args.map(hostArgument), functionContext), frame, span);
   }
 
   /** Enforces an expression-depth or loop-iteration limit. */
@@ -235,5 +224,48 @@ export class RuntimeBindings {
   /** Creates one positioned runtime error through the active render context. */
   error(frame: Frame, span: Span, code: TemplateError['code'], message: string): TemplateError {
     return this.context.fail(code, frame, span, message);
+  }
+}
+
+/** VAL-19: an own property of the instance, or an accessor property on its prototype chain below `Object.prototype`. */
+function publicField(target: object, name: string): boolean {
+  if (Object.prototype.hasOwnProperty.call(target, name)) return true;
+  for (let prototype = Object.getPrototypeOf(target); prototype !== null && prototype !== Object.prototype; prototype = Object.getPrototypeOf(prototype)) {
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
+    if (descriptor) return descriptor.get !== undefined;
+  }
+  return false;
+}
+
+/** VAL-19: a function-valued data property on the prototype chain below `Object.prototype`, except `constructor`. */
+function publicMethod(target: object, name: string): ((...args: unknown[]) => unknown) | undefined {
+  if (name === 'constructor' || Object.prototype.hasOwnProperty.call(target, name)) return undefined;
+  for (let prototype = Object.getPrototypeOf(target); prototype !== null && prototype !== Object.prototype; prototype = Object.getPrototypeOf(prototype)) {
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
+    if (descriptor) return typeof descriptor.value === 'function' ? descriptor.value as (...args: unknown[]) => unknown : undefined;
+  }
+  return undefined;
+}
+
+/** Runs host code and binds its result; a failure is E_RUNTIME_HOST_FUNCTION at the call (FUN-46). */
+function hostResult(bindings: RuntimeBindings, name: string, run: () => unknown, frame: Frame, span: Span): Value {
+  let result: unknown;
+  try {
+    result = run();
+  } catch (error) {
+    if (error instanceof TemplateError) throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    throw bindings.error(frame, span, 'E_RUNTIME_HOST_FUNCTION', `${name} failed: ${message}`);
+  }
+  return bound(bindings, result, frame, span);
+}
+
+/** Binds a host value; a value that cannot be bound fails with its data code at the expression (ERR-5). */
+function bound(bindings: RuntimeBindings, value: unknown, frame: Frame, span: Span): Value {
+  try {
+    return bind(value);
+  } catch (error) {
+    if (error instanceof BindError) throw bindings.error(frame, span, error.code, error.message);
+    throw error;
   }
 }

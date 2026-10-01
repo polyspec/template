@@ -6,7 +6,7 @@ use ext_php_rs::ffi::{zend_class_entry, zend_object, zval};
 use ext_php_rs::prelude::*;
 use ext_php_rs::types::{ZendHashTable, Zval};
 use ext_php_rs::zend::ce;
-use polyspec_template::TemplateError as EngineError;
+use polyspec_template::{TemplateError as EngineError, internal_boundary};
 use std::os::raw::c_char;
 use std::ptr;
 
@@ -41,37 +41,43 @@ pub struct NativeTemplateError {
 #[php_impl]
 impl NativeTemplateError {
     /// Error code of the specification, such as `E_PARSE_UNCLOSED_BLOCK`.
-    pub fn get_error_code(&self) -> String {
-        self.code.clone()
+    pub fn get_error_code(&self) -> PhpResult<String> {
+        boundary(&self.template, || Ok(self.code.clone()))
     }
 
     /// Name of the template in which the error is located.
-    pub fn get_template(&self) -> String {
-        self.template.clone()
+    pub fn get_template(&self) -> PhpResult<String> {
+        boundary(&self.template, || Ok(self.template.clone()))
     }
 
     /// 1-based line, or 0 when the error has no position.
-    pub fn get_error_line(&self) -> i64 {
-        self.error_line
+    pub fn get_error_line(&self) -> PhpResult<i64> {
+        boundary(&self.template, || Ok(self.error_line))
     }
 
     /// 1-based byte column, or 0 when the error has no position.
-    pub fn get_error_col(&self) -> i64 {
-        self.error_col
+    pub fn get_error_col(&self) -> PhpResult<i64> {
+        boundary(&self.template, || Ok(self.error_col))
     }
 
     /// Start byte offset of the related token or node.
-    pub fn get_offset(&self) -> i64 {
-        self.offset
+    pub fn get_offset(&self) -> PhpResult<i64> {
+        boundary(&self.template, || Ok(self.offset))
     }
 
     /// End byte offset of the related token or node.
-    pub fn get_end(&self) -> i64 {
-        self.end
+    pub fn get_end(&self) -> PhpResult<i64> {
+        boundary(&self.template, || Ok(self.end))
     }
 
     /// The error as an array with the keys of the specification.
     pub fn to_array(&self) -> Result<Zval, PhpException> {
+        boundary(&self.template, || self.as_array())
+    }
+}
+
+impl NativeTemplateError {
+    fn as_array(&self) -> Result<Zval, PhpException> {
         let mut table = ZendHashTable::new();
         insert(&mut table, "code", self.code.clone())?;
         insert(&mut table, "template", self.template.clone())?;
@@ -86,6 +92,16 @@ impl NativeTemplateError {
 
 fn insert(table: &mut ZendHashTable, key: &str, value: impl IntoZval) -> Result<(), PhpException> {
     table.insert(key, value).map_err(|error| PhpException::default(error.to_string()))
+}
+
+/// Runs one method of the extension and reports a Rust panic as `E_INTERNAL` for `template`
+/// (ERR-12, ERR-13). A method handler of the extension cannot unwind into PHP, so without this
+/// boundary a panic would abort the PHP process.
+pub fn boundary<T>(template: &str, operation: impl FnOnce() -> PhpResult<T>) -> PhpResult<T> {
+    match internal_boundary(template, || Ok(operation())) {
+        Ok(result) => result,
+        Err(error) => Err(php_exception(&error)),
+    }
 }
 
 /// Builds a PHP exception that carries the fields of an engine error.

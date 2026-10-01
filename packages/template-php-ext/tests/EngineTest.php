@@ -97,10 +97,16 @@ final class EngineTest extends TestCase
         }
     }
 
-    public function testRenderAcceptsAFloatOutsideTheSafeIntegerRange(): void
+    public function testRenderRejectsAFloatOutsideTheSafeRange(): void
     {
+        // VAL-2: a float of magnitude above 2^53 - 1 fails like an integer of that magnitude.
         $engine = new Engine($this->root);
-        $this->assertSame("<p>1e+21</p>\n", $engine->render('echo.tpl', ['title' => 1e21]));
+        try {
+            $engine->render('echo.tpl', ['title' => 1e21]);
+            $this->fail('expected an error');
+        } catch (TemplateError $error) {
+            $this->assertSame('E_DATA_NUMBER_RANGE', $error->getErrorCode());
+        }
     }
 
     public function testRenderRejectsAStringThatIsNotUtf8(): void

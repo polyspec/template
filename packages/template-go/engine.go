@@ -81,17 +81,19 @@ func delimitersOf(option string) (parser.Delimiters, error) {
 	return d, nil
 }
 
-// Parse parses one template source into its AST (RT-2).
+// Parse parses one template source into its AST (RT-2). A panic is E_INTERNAL (ERR-13).
 func Parse(source []byte, name string, options ParseOptions) (*ast.Template, error) {
 	d, err := delimitersOf(options.Delimiters)
 	if err != nil {
 		return nil, err
 	}
-	parsed, err := parseWithLines(source, name, d)
-	if err != nil {
-		return nil, err
-	}
-	return parsed.AST, nil
+	return render.Guard(name, func() (*ast.Template, error) {
+		parsed, err := parseWithLines(source, name, d)
+		if err != nil {
+			return nil, err
+		}
+		return parsed.AST, nil
+	})
 }
 
 func parseWithLines(source []byte, name string, d parser.Delimiters) (*render.ParsedTemplate, error) {

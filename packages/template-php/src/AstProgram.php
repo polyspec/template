@@ -98,7 +98,7 @@ final class AstProgram implements Program, RuntimeServices
             }
         }
 
-        return Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]);
+        return InternalBoundary::run($name, static fn (): array => Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]));
     }
 
     /**
@@ -176,6 +176,16 @@ final class AstProgram implements Program, RuntimeServices
     public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender
     {
         $name = is_string($target) ? $target : (string) $target['name'];
+
+        return InternalBoundary::run($name, fn (): PreparedRender => $this->prepareBound($name, $target, $assign, $options));
+    }
+
+    /**
+     * @param string|array<string, mixed> $target
+     * @param array{define?: array<string, string|array{template?: string, data?: mixed, html?: string}>, env?: array{timezone?: string, now?: float|int}} $options
+     */
+    private function prepareBound(string $name, string|array $target, mixed $assign, array $options): PreparedRender
+    {
         try {
             $rootData = $assign === null ? new MapValue() : Bind::map($assign);
             $registry = $this->bindDefines($options['define'] ?? []);
@@ -187,7 +197,7 @@ final class AstProgram implements Program, RuntimeServices
         $targetName = is_array($targetEntry) && isset($targetEntry['template']) ? $targetEntry['template'] : $name;
         $template = is_string($target) ? $this->loadTemplate($targetName, null, null) : ['ast' => $target, 'lines' => null];
 
-        return new PreparedRender(new AstPreparedExecution($this, $rootData, $registry, $env, $targetName, $template));
+        return new PreparedRender($name, new AstPreparedExecution($this, $rootData, $registry, $env, $targetName, $template));
     }
 
     /**
@@ -210,6 +220,9 @@ final class AstProgram implements Program, RuntimeServices
         $registry = [];
         foreach ($defines as $id => $input) {
             $id = (string) $id;
+            if (Utf8::firstInvalid($id) >= 0) {
+                throw new BindError('E_DATA_INVALID_UTF8', 'a define id is not valid UTF-8');
+            }
             if (is_array($input) && isset($input['html']) && is_string($input['html'])) {
                 $registry[$id] = ['html' => $input['html']];
             } elseif (is_string($input) || (is_array($input) && isset($input['template']) && is_string($input['template']))) {

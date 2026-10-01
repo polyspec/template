@@ -1,7 +1,7 @@
 // Error object and error codes as defined in docs/spec/errors.md.
 
 // The code of a template error. Every code is listed with its condition and position in ERR-7
-// to ERR-11.
+// to ERR-12.
 export type ErrorCode =
   | 'E_LEX_INVALID_UTF8'
   | 'E_PARSE_UNTERMINATED_TAG'
@@ -28,6 +28,7 @@ export type ErrorCode =
   | 'E_DATA_NUMBER_NOT_FINITE'
   | 'E_DATA_INVALID_UTF8'
   | 'E_DATA_UNSUPPORTED_TYPE'
+  | 'E_DATA_DEPTH'
   | 'E_RUNTIME_TYPE'
   | 'E_RUNTIME_COMPARE'
   | 'E_RUNTIME_DIV_ZERO'
@@ -39,7 +40,8 @@ export type ErrorCode =
   | 'E_RUNTIME_BLOCK_UNDEFINED'
   | 'E_RUNTIME_BLOCK_REDEFINED'
   | 'E_RUNTIME_DEPTH'
-  | 'E_RUNTIME_LIMIT';
+  | 'E_RUNTIME_LIMIT'
+  | 'E_INTERNAL';
 
 export type Span = readonly [number, number];
 
@@ -136,4 +138,23 @@ export function errorAt(
 // Creates an error with no source position (data binding before rendering, entry template not found).
 export function errorWithoutPosition(code: ErrorCode, template: string, message: string): TemplateError {
   return new TemplateError({ code, template, line: 0, col: 0, offset: 0, end: 0, message });
+}
+
+// The errors that the JavaScript engine raises for a programming defect (ERR-13).
+const runtimeErrors = [TypeError, RangeError, ReferenceError, SyntaxError, EvalError, URIError];
+
+/**
+ * Runs one public parse, prepare or render operation and reports a language runtime error as
+ * E_INTERNAL for `template` (ERR-12, ERR-13). A template error and every other exception pass
+ * unchanged.
+ */
+export function internalBoundary<T>(template: string, operation: () => T): T {
+  try {
+    return operation();
+  } catch (error) {
+    if (runtimeErrors.some(type => error instanceof type)) {
+      throw errorWithoutPosition('E_INTERNAL', template, `internal failure: ${(error as Error).message}`);
+    }
+    throw error;
+  }
 }

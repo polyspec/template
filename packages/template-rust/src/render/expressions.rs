@@ -66,9 +66,9 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                     LoopMetaField::Size => Value::Number(meta.size as f64),
                 })
             }
-            Expr::Member { object, key, .. } => {
+            Expr::Member { object, key, span } => {
                 let container = self.evaluate(object, frame, scope)?;
-                Ok(self.runtime.member(&container, key))
+                self.runtime.member(self.context, &container, key, frame, *span)
             }
             Expr::MemberCall {
                 object,
@@ -95,10 +95,10 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                     .collect::<Result<Vec<_>, _>>()?;
                 self.runtime.class_call(self.context, class_name, method, values, frame, *span)
             }
-            Expr::Index { object, index, .. } => {
+            Expr::Index { object, index, span } => {
                 let container = self.evaluate(object, frame, scope)?;
                 let key = self.evaluate(index, frame, scope)?;
-                Ok(self.runtime.index(&container, &key))
+                self.runtime.index(self.context, &container, &key, frame, *span)
             }
             Expr::Call { name, args, span } => {
                 let mut values = Vec::with_capacity(args.len());
@@ -131,7 +131,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                     }
                 }
             }
-            Expr::List { items, .. } => {
+            Expr::List { items, span } => {
                 let mut list = Vec::new();
                 for item in items {
                     if let Expr::Spread { expr, span } = item {
@@ -141,9 +141,9 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                         list.push(self.evaluate(item, frame, scope)?);
                     }
                 }
-                Ok(Value::list(list))
+                self.runtime.depth(self.context, Value::list(list), frame, *span)
             }
-            Expr::Map { entries, .. } => {
+            Expr::Map { entries, span } => {
                 let mut map = OrderedMap::new();
                 for entry in entries {
                     match entry {
@@ -166,7 +166,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                         }
                     }
                 }
-                Ok(Value::map(map))
+                self.runtime.depth(self.context, Value::map(map), frame, *span)
             }
             Expr::Spread { span, .. } => Err(self.fail(frame, *span, ErrorCode::E_RUNTIME_TYPE, "spread outside of a literal")),
         }

@@ -66,7 +66,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		return e.runtime.Member(object, n.Key), nil
+		return e.runtime.Member(object, n.Key, frame, n.Span)
 	case *ast.MemberCall:
 		object, err := e.Evaluate(n.Object, frame)
 		if err != nil {
@@ -99,7 +99,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		return e.runtime.Index(object, key), nil
+		return e.runtime.Index(object, key, frame, n.Span)
 	case *ast.Call:
 		args := make([]value.Value, len(n.Args))
 		for i, arg := range n.Args {
@@ -151,7 +151,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			}
 			list = append(list, v)
 		}
-		return list, nil
+		return e.runtime.Depth(list, frame, n.Span)
 	case *ast.Map:
 		m := value.NewOrderedMap()
 		for _, entry := range n.Entries {
@@ -184,7 +184,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			}
 			m.Set(key, v)
 		}
-		return m, nil
+		return e.runtime.Depth(m, frame, n.Span)
 	}
 	return nil, e.fail(frame, ast.SpanOf(expr), errs.RuntimeType, "unknown expression node")
 }

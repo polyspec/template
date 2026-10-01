@@ -63,7 +63,7 @@ func TestTruthinessAndEquality(t *testing.T) {
 }
 
 func TestParseJSON(t *testing.T) {
-	v, err := value.ParseJSON([]byte(`{"2": 1, "1": 2, "x": 1e21}`))
+	v, err := value.ParseJSON([]byte(`{"2": 1, "1": 2, "x": 1e15}`))
 	if err != nil {
 		t.Fatal(err)
 	}

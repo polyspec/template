@@ -50,7 +50,7 @@ describe('bind', () => {
 
 describe('parseJson', () => {
   it('preserves document order and checks integer literals', () => {
-    const value = parseJson('{"2": 1, "1": 2, "x": 1e21}') as Map<string, unknown>;
+    const value = parseJson('{"2": 1, "1": 2, "x": 1e15}') as Map<string, unknown>;
     expect([...value.keys()]).toEqual(['2', '1', 'x']);
     expect(() => parseJson('9007199254740992')).toThrow(BindError);
     expect(() => parseJson('1e400')).toThrow(BindError);

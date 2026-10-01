@@ -1,13 +1,16 @@
 //! Conversion between PHP values and the template value model (VAL-14, VAL-1).
 
 use ext_php_rs::convert::{IntoZval, IntoZvalDyn};
-use ext_php_rs::types::{ArrayKey, ZendCallable, ZendHashTable, ZendObject, Zval};
-use ext_php_rs::zend::ClassEntry;
-use polyspec_template::value::number::MAX_SAFE;
-use polyspec_template::value::TemplateObject;
-use std::fmt;
-use std::rc::Rc;
+use ext_php_rs::ffi::{ZEND_ACC_PUBLIC, zend_function, zend_hash_str_find_ptr_lc};
+use ext_php_rs::types::array::Iter;
+use ext_php_rs::types::{ZendCallable, ZendHashTable, ZendObject, Zval};
+use ext_php_rs::zend::{ClassEntry, ExecutorGlobals, ce};
+use polyspec_template::value::bind::{check_integer, check_level, check_number};
+use polyspec_template::value::{HostError, TemplateObject};
 use polyspec_template::{BindError, ErrorCode, OrderedMap, Value};
+use std::fmt;
+use std::os::raw::c_char;
+use std::rc::Rc;
 
 fn bind_error(code: ErrorCode, message: impl Into<String>) -> BindError {
     BindError {
@@ -16,14 +19,19 @@ fn bind_error(code: ErrorCode, message: impl Into<String>) -> BindError {
     }
 }
 
-/// Converts a PHP value into a template value (VAL-14).
+/// Converts a PHP value into a template value (VAL-14, VAL-20).
 ///
-/// An integer is range-checked, a float is checked for finiteness, a string is checked for UTF-8,
-/// an array with the keys `0..n-1` in order becomes a list and every other array becomes a map
-/// whose keys are the PHP keys as text. A `stdClass` is a map of its properties, an object that
-/// implements `JsonSerializable` binds the value of `jsonSerialize()`, and every other object is
-/// retained as a native object (VAL-14, VAL-18).
+/// An integer and a float are checked under VAL-2, a string and every map key are checked for
+/// UTF-8, an array with the keys `0..n-1` in order becomes a list and every other array becomes a
+/// map. An object that implements `JsonSerializable` binds the value of `jsonSerialize()`, an
+/// instance of `stdClass` or of a subclass is a map of its public properties, a closure is
+/// rejected, and every other object is retained as a native object. Lists, maps and
+/// `jsonSerialize()` calls nest at most 64 levels, which also stops a cyclic structure.
 pub fn php_to_value(zval: &Zval) -> Result<Value, BindError> {
+    bind_php(zval, 0)
+}
+
+fn bind_php(zval: &Zval, level: usize) -> Result<Value, BindError> {
     let zval = zval.dereference();
     if zval.is_null() {
         return Ok(Value::Null);
@@ -32,35 +40,45 @@ pub fn php_to_value(zval: &Zval) -> Result<Value, BindError> {
         return Ok(Value::Bool(value));
     }
     if zval.is_long() {
-        let value = zval.long().unwrap_or_default();
-        if value.unsigned_abs() as f64 > MAX_SAFE {
-            return Err(bind_error(
-                ErrorCode::E_DATA_NUMBER_RANGE,
-                format!("integer {value} is outside the safe range"),
-            ));
-        }
-        return Ok(Value::Number(value as f64));
+        return check_integer(i128::from(zval.long().unwrap_or_default())).map(Value::Number);
     }
     if zval.is_double() {
-        let value = zval.double().unwrap_or(f64::NAN);
-        if !value.is_finite() {
-            return Err(bind_error(ErrorCode::E_DATA_NUMBER_NOT_FINITE, "number is not finite"));
-        }
-        return Ok(Value::Number(value));
+        return check_number(zval.double().unwrap_or(f64::NAN)).map(Value::Number);
     }
     if zval.is_string() {
-        let bytes = zval.zend_str().map(ext_php_rs::types::ZendStr::as_bytes).unwrap_or_default();
-        return match std::str::from_utf8(bytes) {
-            Ok(text) => Ok(Value::text(text)),
-            Err(_) => Err(bind_error(ErrorCode::E_DATA_INVALID_UTF8, "string is not valid UTF-8")),
-        };
+        return text_of(zval.zend_str().map(ext_php_rs::types::ZendStr::as_bytes).unwrap_or_default()).map(Value::text);
     }
     if let Some(table) = zval.array() {
-        return table_to_value(table);
+        check_level(level + 1)?;
+        return if is_list(table) {
+            let mut list = Vec::with_capacity(table.len());
+            let mut entries = Iter::new(table);
+            while let Some((_, item)) = entries.next_zval() {
+                list.push(bind_php(item, level + 1)?);
+            }
+            Ok(Value::list(list))
+        } else {
+            table_to_map(table, level + 1, false).map(Value::map)
+        };
     }
     if let Some(object) = zval.object() {
-        if let Some(value) = object_to_value(object)? {
-            return Ok(value);
+        if instance_of(object, "JsonSerializable") {
+            check_level(level + 1)?;
+            let result = object.try_call_method("jsonSerialize", vec![]);
+            if let Some(message) = take_exception_message() {
+                return Err(bind_error(ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("jsonSerialize() failed: {message}")));
+            }
+            let value = result.map_err(|error| bind_error(ErrorCode::E_RUNTIME_HOST_FUNCTION, format!("jsonSerialize() failed: {error}")))?;
+            return bind_php(&value, level + 1);
+        }
+        if object.instance_of(ce::stdclass()) {
+            check_level(level + 1)?;
+            let properties = properties_of(zval)?;
+            let table = properties.array().ok_or_else(unreadable_properties)?;
+            return table_to_map(table, level + 1, true).map(Value::map);
+        }
+        if instance_of(object, "Closure") {
+            return Err(bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "a closure has no binding"));
         }
         return Ok(Value::object(PhpObject { zval: zval.shallow_clone() }));
     }
@@ -70,8 +88,82 @@ pub fn php_to_value(zval: &Zval) -> Result<Value, BindError> {
     ))
 }
 
-/// A PHP object retained by reference. Its public properties and methods are visible; the visibility is
-/// that of a caller outside every class, as PHP decides it (VAL-18, VAL-19).
+fn text_of(bytes: &[u8]) -> Result<String, BindError> {
+    std::str::from_utf8(bytes)
+        .map(str::to_string)
+        .map_err(|_| bind_error(ErrorCode::E_DATA_INVALID_UTF8, "string is not valid UTF-8"))
+}
+
+fn instance_of(object: &ZendObject, class: &str) -> bool {
+    ClassEntry::try_find(class).is_some_and(|entry| object.instance_of(entry))
+}
+
+/// `array_is_list()`: the keys are the integers `0..n-1` in order. The keys are read as raw zvals,
+/// so a string key that is not valid UTF-8 cannot stop the check.
+fn is_list(table: &ZendHashTable) -> bool {
+    let mut entries = Iter::new(table);
+    let mut position = 0;
+    while let Some((key, _)) = entries.next_zval() {
+        if key.long() != Some(position) {
+            return false;
+        }
+        position += 1;
+    }
+    true
+}
+
+/// Binds every entry of an array as a map entry; an integer key becomes its decimal text and a
+/// string key must be valid UTF-8 (VAL-14, VAL-17). With `public_only` the array holds the
+/// properties of an object and the entries with mangled names are skipped.
+fn table_to_map(table: &ZendHashTable, level: usize, public_only: bool) -> Result<OrderedMap, BindError> {
+    let mut map = OrderedMap::with_capacity(table.len());
+    let mut entries = Iter::new(table);
+    while let Some((key, item)) = entries.next_zval() {
+        if public_only && is_mangled(&key) {
+            continue;
+        }
+        let key = match key.long() {
+            Some(number) => number.to_string(),
+            None => text_of(key.zend_str().map(ext_php_rs::types::ZendStr::as_bytes).unwrap_or_default())
+                .map_err(|_| bind_error(ErrorCode::E_DATA_INVALID_UTF8, "a map key is not valid UTF-8"))?,
+        };
+        map.insert(key, bind_php(item, level)?);
+    }
+    Ok(map)
+}
+
+/// The properties of an object as `get_mangled_object_vars()` returns them. The function ignores
+/// the class scope of the caller, so the public properties, the entries whose names are not
+/// mangled, are the same wherever the host calls `render` (VAL-14, VAL-19).
+fn properties_of(object: &Zval) -> Result<Zval, BindError> {
+    call_function("get_mangled_object_vars", vec![object]).map_err(|_| unreadable_properties())
+}
+
+fn unreadable_properties() -> BindError {
+    bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "the object properties cannot be read")
+}
+
+/// A private property name starts with `\0Class\0` and a protected one with `\0*\0`.
+fn is_mangled(key: &Zval) -> bool {
+    key.zend_str().is_some_and(|name| name.as_bytes().first() == Some(&0))
+}
+
+/// Takes the pending PHP exception, if there is one, and returns its message.
+pub fn take_exception_message() -> Option<String> {
+    let exception = ExecutorGlobals::take_exception()?;
+    let message = exception
+        .try_call_method("getMessage", vec![])
+        .ok()
+        .and_then(|message| message.string())
+        .unwrap_or_default();
+    // A failure of getMessage() leaves no exception behind that PHP would raise later.
+    let _ = ExecutorGlobals::take_exception();
+    Some(message)
+}
+
+/// A PHP object retained by reference. Its public properties and methods are visible; the
+/// visibility comes from the declarations and not from the scope of the code that called
+/// `render` (VAL-18, VAL-19).
 pub struct PhpObject {
     zval: Zval,
 }
@@ -83,84 +175,68 @@ impl fmt::Debug for PhpObject {
     }
 }
 
-impl TemplateObject for PhpObject {
-    fn member(&self, key: &str) -> Option<Value> {
-        let properties = call_function("get_object_vars", vec![&self.zval]).ok()?;
-        properties.array()?.get(key).and_then(|item| php_to_value(item).ok())
-    }
-
-    fn call(&self, method: &str, args: &[Value]) -> Option<Result<Value, String>> {
-        let mut pair = ZendHashTable::new();
-        pair.push(self.zval.shallow_clone()).ok()?;
-        pair.push(method).ok()?;
-        let pair = pair.into_zval(false).ok()?;
-        if call_function("is_callable", vec![&pair]).ok()?.bool() != Some(true) {
+impl PhpObject {
+    /// The public method of the class or an ancestor under a case-insensitive name; `None` for a
+    /// missing, private or protected method. `__call` is not consulted.
+    fn public_method(&self, method: &str) -> Option<()> {
+        let object = self.zval.object()?;
+        let entry = object.get_class_entry();
+        // SAFETY: the function table of a live class entry maps lower-case names to `zend_function`
+        // pointers; the lookup lower-cases the name and returns null when it is absent.
+        let function = unsafe {
+            zend_hash_str_find_ptr_lc(&raw const entry.function_table, method.as_ptr().cast::<c_char>(), method.len()).cast::<zend_function>()
+        };
+        if function.is_null() {
             return None;
         }
+        // SAFETY: `function` points to a function of the class entry, which outlives this call.
+        let flags = unsafe { (*function).common.fn_flags };
+        (flags & ZEND_ACC_PUBLIC != 0).then_some(())
+    }
+}
+
+impl TemplateObject for PhpObject {
+    fn member(&self, key: &str) -> Result<Option<Value>, HostError> {
+        let properties = properties_of(&self.zval)?;
+        let table = properties.array().ok_or_else(unreadable_properties)?;
+        let mut entries = Iter::new(table);
+        while let Some((name, item)) = entries.next_zval() {
+            if is_mangled(&name) {
+                continue;
+            }
+            let matches = match name.long() {
+                Some(number) => number.to_string() == key,
+                None => name.zend_str().is_some_and(|name| name.as_bytes() == key.as_bytes()),
+            };
+            if matches {
+                return Ok(Some(php_to_value(item)?));
+            }
+        }
+        Ok(None)
+    }
+
+    fn call(&self, method: &str, args: &[Value]) -> Option<Result<Value, HostError>> {
+        self.public_method(method)?;
         let object = self.zval.object()?;
         let params = match args.iter().map(value_to_php).collect::<Result<Vec<Zval>, String>>() {
             Ok(params) => params,
-            Err(error) => return Some(Err(error)),
+            Err(error) => return Some(Err(HostError::Failed(error))),
         };
         let params: Vec<&dyn IntoZvalDyn> = params.iter().map(|param| param as &dyn IntoZvalDyn).collect();
-        Some(
-            object
-                .try_call_method(method, params)
-                .map_err(|error| error.to_string())
-                .and_then(|result| php_to_value(&result).map_err(|error| error.message)),
-        )
+        let result = object.try_call_method(method, params);
+        if let Some(message) = take_exception_message() {
+            return Some(Err(HostError::Failed(message)));
+        }
+        Some(match result {
+            Ok(value) => php_to_value(&value).map_err(HostError::Data),
+            Err(error) => Err(HostError::Failed(error.to_string())),
+        })
     }
 }
 
 fn call_function(name: &str, params: Vec<&dyn IntoZvalDyn>) -> Result<Zval, String> {
     let function = ZendCallable::try_from_name(name).map_err(|error| error.to_string())?;
     function.try_call(params).map_err(|error| error.to_string())
-}
-
-/// Binds a `stdClass` as a map and a `JsonSerializable` object as its value (VAL-14); returns `None`
-/// for every other object.
-fn object_to_value(object: &ZendObject) -> Result<Option<Value>, BindError> {
-    if object.get_class_name().is_ok_and(|name| name == "stdClass") {
-        let properties = object
-            .get_properties()
-            .map_err(|_| bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "stdClass properties cannot be read"))?;
-        return table_to_map(properties).map(Some);
-    }
-    if ClassEntry::try_find("JsonSerializable").is_some_and(|serializable| object.instance_of(serializable)) {
-        let value = object
-            .try_call_method("jsonSerialize", vec![])
-            .map_err(|_| bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "jsonSerialize() failed"))?;
-        return php_to_value(&value).map(Some);
-    }
-    Ok(None)
-}
-
-fn table_to_value(table: &ZendHashTable) -> Result<Value, BindError> {
-    if table.has_sequential_keys() {
-        let mut list = Vec::with_capacity(table.len());
-        for (_, item) in table.iter() {
-            list.push(php_to_value(item)?);
-        }
-        return Ok(Value::list(list));
-    }
-    table_to_map(table)
-}
-
-fn table_to_map(table: &ZendHashTable) -> Result<Value, BindError> {
-    let mut map = OrderedMap::new();
-    for (key, item) in table.iter() {
-        map.insert(key_text(&key), php_to_value(item)?);
-    }
-    Ok(Value::map(map))
-}
-
-fn key_text(key: &ArrayKey<'_>) -> String {
-    match key {
-        ArrayKey::Long(value) => value.to_string(),
-        ArrayKey::String(value) => value.clone(),
-        ArrayKey::Str(value) => (*value).to_string(),
-        ArrayKey::ZendString(value) => String::from_utf8_lossy(value.as_bytes()).into_owned(),
-    }
 }
 
 /// Converts a PHP value into the assign data map. An empty array is an empty map.
@@ -172,8 +248,8 @@ pub fn php_to_map(zval: &Zval) -> Result<OrderedMap, BindError> {
     }
 }
 
-/// Converts a template value into a PHP value. A map becomes an array with its keys as text and a
-/// safe string becomes a plain string.
+/// Converts a template value into a PHP value. A map becomes an array with its keys as text, a
+/// safe string becomes a plain string and a native object becomes the original PHP object (VAL-18).
 pub fn value_to_php(value: &Value) -> Result<Zval, String> {
     let result = match value {
         Value::Null => Zval::new(),
@@ -194,7 +270,10 @@ pub fn value_to_php(value: &Value) -> Result<Zval, String> {
             }
             into_zval(table)?
         }
-        Value::Object(_) => return Err("native template objects cannot cross the PHP extension boundary".to_string()),
+        Value::Object(_) => match value.downcast_object::<PhpObject>() {
+            Some(object) => object.zval.shallow_clone(),
+            None => return Err("a native object of another host cannot cross the PHP extension boundary".to_string()),
+        },
     };
     Ok(result)
 }

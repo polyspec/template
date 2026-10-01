@@ -11,6 +11,9 @@ import (
 	"github.com/polyspec/template/errs"
 )
 
+// MaxDepth is the nesting depth limit of lists and maps (VAL-20).
+const MaxDepth = 64
+
 // BindError reports a value that has no binding (VAL-15).
 type BindError struct {
 	Code    errs.Code
@@ -23,7 +26,7 @@ func bindError(code errs.Code, format string, args ...any) *BindError {
 	return &BindError{Code: code, Message: fmt.Sprintf(format, args...)}
 }
 
-// CheckInteger rejects an integer outside the safe range (VAL-2).
+// CheckInteger rejects an integer whose magnitude is greater than 2^53 - 1 (VAL-2).
 func CheckInteger(i int64) (float64, error) {
 	if i > MaxSafe || i < -MaxSafe {
 		return 0, bindError(errs.DataNumberRange, "integer %d is outside the safe range", i)
@@ -31,16 +34,47 @@ func CheckInteger(i int64) (float64, error) {
 	return float64(i), nil
 }
 
-// CheckFloat rejects a number that is not finite (VAL-3).
+// CheckFloat rejects a number that is not finite (VAL-3) or whose magnitude is greater than
+// 2^53 - 1 (VAL-2).
 func CheckFloat(f float64) (float64, error) {
 	if math.IsNaN(f) || math.IsInf(f, 0) {
 		return 0, bindError(errs.DataNumberNotFinite, "number is not finite")
 	}
+	if math.Abs(f) > MaxSafe {
+		return 0, bindError(errs.DataNumberRange, "number %v is outside the safe range", f)
+	}
 	return f, nil
 }
 
-// Bind converts a Go value into a template value (VAL-15).
+// CheckLevel rejects a list or map entered at a level greater than the limit (VAL-20). The level
+// counts the enclosing lists and maps, including the one being entered.
+func CheckLevel(level int) error {
+	if level > MaxDepth {
+		return bindError(errs.DataDepth, "lists and maps nest deeper than %d levels", MaxDepth)
+	}
+	return nil
+}
+
+func checkText(text string) (string, error) {
+	if !utf8.ValidString(text) {
+		return "", bindError(errs.DataInvalidUTF8, "string is not valid UTF-8")
+	}
+	return text, nil
+}
+
+func checkKey(key string) (string, error) {
+	if !utf8.ValidString(key) {
+		return "", bindError(errs.DataInvalidUTF8, "a map key is not valid UTF-8")
+	}
+	return key, nil
+}
+
+// Bind converts a Go value into a template value (VAL-15, VAL-20).
 func Bind(input any) (Value, error) {
+	return bindAt(input, 0)
+}
+
+func bindAt(input any, level int) (Value, error) {
 	switch x := input.(type) {
 	case nil:
 		return nil, nil
@@ -77,32 +111,39 @@ func Bind(input any) (Value, error) {
 	case float64:
 		return CheckFloat(x)
 	case string:
-		if !utf8.ValidString(x) {
-			return nil, bindError(errs.DataInvalidUTF8, "string is not valid UTF-8")
-		}
-		return x, nil
+		return checkText(x)
 	case SafeString:
-		return x.Text, nil
+		return checkText(x.Text)
 	case *OrderedMap:
+		if err := CheckLevel(level + 1); err != nil {
+			return nil, err
+		}
 		out := NewOrderedMap()
 		for _, k := range x.Keys() {
-			v, err := Bind(x.MustGet(k))
+			key, err := checkKey(k)
 			if err != nil {
 				return nil, err
 			}
-			out.Set(k, v)
+			v, err := bindAt(x.MustGet(k), level+1)
+			if err != nil {
+				return nil, err
+			}
+			out.Set(key, v)
 		}
 		return out, nil
 	case []Value:
-		return bindSlice(reflect.ValueOf(x))
+		return bindSlice(reflect.ValueOf(x), level)
 	}
 	rv := reflect.ValueOf(input)
 	switch rv.Kind() {
 	case reflect.Slice, reflect.Array:
-		return bindSlice(rv)
+		return bindSlice(rv, level)
 	case reflect.Map:
 		if rv.Type().Key().Kind() != reflect.String {
 			return nil, bindError(errs.DataUnsupportedType, "map key is not a string")
+		}
+		if err := CheckLevel(level + 1); err != nil {
+			return nil, err
 		}
 		keys := rv.MapKeys()
 		names := make([]string, len(keys))
@@ -112,11 +153,15 @@ func Bind(input any) (Value, error) {
 		sort.Strings(names)
 		out := NewOrderedMap()
 		for _, name := range names {
-			v, err := Bind(rv.MapIndex(reflect.ValueOf(name).Convert(rv.Type().Key())).Interface())
+			key, err := checkKey(name)
 			if err != nil {
 				return nil, err
 			}
-			out.Set(name, v)
+			v, err := bindAt(rv.MapIndex(reflect.ValueOf(name).Convert(rv.Type().Key())).Interface(), level+1)
+			if err != nil {
+				return nil, err
+			}
+			out.Set(key, v)
 		}
 		return out, nil
 	case reflect.Struct:
@@ -129,15 +174,23 @@ func Bind(input any) (Value, error) {
 		if rv.Elem().Kind() == reflect.Struct {
 			return input, nil
 		}
-		return Bind(rv.Elem().Interface())
+		// A pointer to another kind binds the value it points to; the dereference counts as one
+		// level, so a pointer that leads back to itself stops at the depth limit (VAL-15, VAL-20).
+		if err := CheckLevel(level + 1); err != nil {
+			return nil, err
+		}
+		return bindAt(rv.Elem().Interface(), level+1)
 	}
 	return nil, bindError(errs.DataUnsupportedType, "a %s value has no binding", rv.Kind())
 }
 
-func bindSlice(rv reflect.Value) (Value, error) {
+func bindSlice(rv reflect.Value, level int) (Value, error) {
+	if err := CheckLevel(level + 1); err != nil {
+		return nil, err
+	}
 	out := make(List, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
-		v, err := Bind(rv.Index(i).Interface())
+		v, err := bindAt(rv.Index(i).Interface(), level+1)
 		if err != nil {
 			return nil, err
 		}
@@ -187,4 +240,30 @@ func BindMap(input any) (*OrderedMap, error) {
 		return nil, bindError(errs.DataUnsupportedType, "assign is not a map")
 	}
 	return m, nil
+}
+
+// DepthWithin reports whether the depth of a template value is at most limit (VAL-20). The walk
+// stops below the limit, so it never recurses deeper than limit + 1 calls.
+func DepthWithin(input Value, limit int) bool {
+	switch current := input.(type) {
+	case List:
+		if limit == 0 {
+			return false
+		}
+		for _, item := range current {
+			if !DepthWithin(item, limit-1) {
+				return false
+			}
+		}
+	case *OrderedMap:
+		if limit == 0 {
+			return false
+		}
+		for _, key := range current.Keys() {
+			if !DepthWithin(current.MustGet(key), limit-1) {
+				return false
+			}
+		}
+	}
+	return true
 }

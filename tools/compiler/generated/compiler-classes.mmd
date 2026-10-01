@@ -97,10 +97,11 @@ classDiagram
     +finite(number, frame, span) number or error
     +equal(left, right, strict) bool
     +compare(left, right, frame, span) ordering or error
-    +member(container, key) value
+    +member(container, key, frame, span) value or error
     +memberCall(container, method, args, frame, span) value or error
     +classCall(className, method, args, frame, span) value or error
-    +index(container, key) value
+    +index(container, key, frame, span) value or error
+    +depth(value, frame, span) value or error
     +entries(value, frame, span) entries or error
     +listSpread(value, frame, span) list or error
     +mapSpread(value, frame, span) map or error

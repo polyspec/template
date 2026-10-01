@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+namespace Polyspec\Showcase\Generated\CompilerCoverage;
+
+use Polyspec\Template\InternalBoundary;
 use Polyspec\Template\PreparedExecution;
+use Polyspec\Template\TemplateError;
 use Polyspec\Template\PreparedRender;
 use Polyspec\Template\Program;
 use Polyspec\Template\Render\Context;
@@ -39,121 +43,121 @@ const GENERATED_RECORDS_SCHEMA = 'eyJQYWdlIjp7InRpdGxlIjp7ImtpbmQiOiJzdHJpbmciLC
 const GENERATED_ASSIGN_SCHEMA = 'eyJmbGFnIjp7ImtpbmQiOiJib29sZWFuIiwib3B0aW9uYWwiOmZhbHNlfSwiZGFuZ2Vyb3VzIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9LCJlbXB0eV9saXN0Ijp7ImtpbmQiOiJsaXN0IiwiaXRlbSI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOmZhbHNlfSwib3B0aW9uYWwiOmZhbHNlfSwiZW1wdHlfbWFwIjp7ImtpbmQiOiJtYXAiLCJrZXkiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjpmYWxzZX0sInZhbHVlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9LCJvcHRpb25hbCI6ZmFsc2V9LCJwYWdlIjp7ImtpbmQiOiJyZWNvcmQiLCJuYW1lIjoiUGFnZSIsIm9wdGlvbmFsIjpmYWxzZX0sIm51bWJlcnMiOnsia2luZCI6Imxpc3QiLCJpdGVtIjp7ImtpbmQiOiJudW1iZXIiLCJvcHRpb25hbCI6ZmFsc2V9LCJvcHRpb25hbCI6ZmFsc2V9LCJsb29rdXAiOnsia2luZCI6Im1hcCIsImtleSI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOmZhbHNlfSwidmFsdWUiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjpmYWxzZX0sIm9wdGlvbmFsIjpmYWxzZX0sInJvd3MiOnsia2luZCI6Imxpc3QiLCJpdGVtIjp7ImtpbmQiOiJyZWNvcmQiLCJuYW1lIjoiUm93Iiwib3B0aW9uYWwiOmZhbHNlfSwib3B0aW9uYWwiOmZhbHNlfX0=';
 const GENERATED_DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6ImNhcmQudHBsIiwiaHRtbCI6dHJ1ZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YV9jYXJkX3RwbCIsImlucHV0Ijp7ImxhYmVsIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9fX0sImxheW91dCI6eyJmaWVsZCI6ImxheW91dCIsInRhcmdldCI6ImxheW91dC50cGwiLCJodG1sIjpmYWxzZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YV9sYXlvdXRfdHBsIiwiaW5wdXQiOnt9fX0=';
 function generated_schema(string $encoded): array { static $schemas = []; return $schemas[$encoded] ??= json_decode(base64_decode($encoded, true), true, flags: JSON_THROW_ON_ERROR); }
-function generated_bind_type(mixed $value, array $type, string $path): mixed { if ($value === null) { if (($type['optional'] ?? false) || $type['kind'] === 'null' || $type['kind'] === 'any') return null; throw new InvalidArgumentException($path . ' is required'); } if ($type['kind'] === 'any') return $value; if (in_array($type['kind'], ['string', 'number', 'boolean'], true)) { $valid = $type['kind'] === 'string' ? is_string($value) : ($type['kind'] === 'number' ? (is_float($value) || is_int($value)) : is_bool($value)); if (!$valid) throw new InvalidArgumentException($path . ' has an invalid type'); return $type['kind'] === 'number' ? (float) $value : $value; } if ($type['kind'] === 'list') { if (!is_array($value)) throw new InvalidArgumentException($path . ' is not a list'); return array_map(fn ($item, $index) => generated_bind_type($item, $type['item'], $path . '[' . $index . ']'), $value, array_keys($value)); } if ($type['kind'] === 'map') { if (!$value instanceof MapValue) throw new InvalidArgumentException($path . ' is not a map'); $result = new MapValue(); foreach ($value->entries() as $key => $item) $result->set((string) generated_bind_type($key, $type['key'], $path . '.key'), generated_bind_type($item, $type['value'], $path . '.' . $key)); return $result; } if ($type['kind'] === 'record') { $records = generated_schema(GENERATED_RECORDS_SCHEMA); return generated_bind_record($value, $records[$type['name']], $type['name'], $path); } throw new InvalidArgumentException($path . ' has an unknown generated type'); }
-function generated_bind_record(mixed $value, array $fields, string $class, string $path): object { if (!$value instanceof MapValue) throw new InvalidArgumentException($path . ' is not an object'); $arguments = []; foreach ($fields as $name => $type) { if (!$value->has($name)) { if (!($type['optional'] ?? false)) throw new InvalidArgumentException($path . '.' . $name . ' is required'); continue; } $arguments[$name] = generated_bind_type($value->get($name), $type, $path . '.' . $name); } return new $class(...$arguments); }
+function generated_bind_type(mixed $value, array $type, string $path): mixed { if ($value === null) { if (($type['optional'] ?? false) || $type['kind'] === 'null' || $type['kind'] === 'any') return null; throw new \InvalidArgumentException($path . ' is required'); } if ($type['kind'] === 'any') return $value; if (in_array($type['kind'], ['string', 'number', 'boolean'], true)) { $valid = $type['kind'] === 'string' ? is_string($value) : ($type['kind'] === 'number' ? (is_float($value) || is_int($value)) : is_bool($value)); if (!$valid) throw new \InvalidArgumentException($path . ' has an invalid type'); return $type['kind'] === 'number' ? (float) $value : $value; } if ($type['kind'] === 'list') { if (!is_array($value)) throw new \InvalidArgumentException($path . ' is not a list'); return array_map(fn ($item, $index) => generated_bind_type($item, $type['item'], $path . '[' . $index . ']'), $value, array_keys($value)); } if ($type['kind'] === 'map') { if (!$value instanceof MapValue) throw new \InvalidArgumentException($path . ' is not a map'); $result = new MapValue(); foreach ($value->entries() as $key => $item) $result->set((string) generated_bind_type($key, $type['key'], $path . '.key'), generated_bind_type($item, $type['value'], $path . '.' . $key)); return $result; } if ($type['kind'] === 'record') { $records = generated_schema(GENERATED_RECORDS_SCHEMA); return generated_bind_record($value, $records[$type['name']], __NAMESPACE__ . '\\' . $type['name'], $path); } throw new \InvalidArgumentException($path . ' has an unknown generated type'); }
+function generated_bind_record(mixed $value, array $fields, string $class, string $path): object { if (!$value instanceof MapValue) throw new \InvalidArgumentException($path . ' is not an object'); $arguments = []; foreach ($fields as $name => $type) { if (!$value->has($name)) { if (!($type['optional'] ?? false)) throw new \InvalidArgumentException($path . '.' . $name . ' is required'); continue; } $arguments[$name] = generated_bind_type($value->get($name), $type, $path . '.' . $name); } return new $class(...$arguments); }
 function generated_bind_assign(mixed $value): array { $root = Bind::map($value); return [generated_bind_record($root, generated_schema(GENERATED_ASSIGN_SCHEMA), Assign::class, 'assign'), $root]; }
-function generated_bind_definitions(array $input): array { $value = Bind::map($input); $arguments = []; $targets = []; $specs = generated_schema(GENERATED_DEFINITION_SCHEMA); foreach ($value->entries() as $id => $raw) { $spec = $specs[$id] ?? null; if ($spec === null) throw new InvalidArgumentException('define.' . $id . ' is not declared'); if (is_string($raw)) { if ($spec['target'] === null || $raw !== $spec['target']) throw new InvalidArgumentException('define.' . $id . ' has an invalid template'); $arguments[$spec['field']] = new Definition(template: $spec['target']); $targets[$id] = ['target' => $spec['target']]; continue; } if (!$raw instanceof MapValue) throw new InvalidArgumentException('define.' . $id . ' is not an object'); $template = $raw->get('template'); $html = $raw->get('html'); $data = $raw->get('data'); if (is_string($html)) { if (!$spec['html'] || $raw->has('template') || $raw->has('data')) throw new InvalidArgumentException('define.' . $id . ' has an invalid html entry'); $arguments[$spec['field']] = new Definition(html: $html); $targets[$id] = ['target' => null, 'html' => $html]; continue; } if (!is_string($template) || $spec['target'] === null || $template !== $spec['target']) throw new InvalidArgumentException('define.' . $id . ' has an invalid template'); $boundData = null; if ($raw->has('data')) { if ($data === []) $data = new MapValue(); if (!$data instanceof MapValue) throw new InvalidArgumentException('define.' . $id . '.data is not an object'); $values = []; foreach ($spec['input'] as $name => $type) { if ($data->has($name)) { $values['has_' . $name] = true; $values[$name] = generated_bind_type($data->get($name), $type, 'define.' . $id . '.data.' . $name); } } $class = $spec['class']; $boundData = new $class(...$values); } $arguments[$spec['field']] = new Definition(template: $spec['target'], data: $boundData); $targets[$id] = ['target' => $spec['target']]; } return [new Definitions(...$arguments), $targets]; }
+function generated_bind_definitions(array $input): array { $arguments = []; $targets = []; $specs = generated_schema(GENERATED_DEFINITION_SCHEMA); foreach ($input as $id => $raw) { $id = (string) $id; if (preg_match('//u', $id) !== 1) throw new BindError('E_DATA_INVALID_UTF8', 'a define id is not valid UTF-8'); $spec = $specs[$id] ?? null; if ($spec === null) throw new \InvalidArgumentException('define.' . $id . ' is not declared'); if (is_string($raw)) { if ($spec['target'] === null || $raw !== $spec['target']) throw new \InvalidArgumentException('define.' . $id . ' has an invalid template'); $arguments[$spec['field']] = new Definition(template: $spec['target']); $targets[$id] = ['target' => $spec['target']]; continue; } if (!is_array($raw)) throw new \InvalidArgumentException('define.' . $id . ' is not an object'); $template = $raw['template'] ?? null; $html = $raw['html'] ?? null; $data = array_key_exists('data', $raw) ? Bind::value($raw['data']) : null; if (is_string($html)) { if (!$spec['html'] || array_key_exists('template', $raw) || array_key_exists('data', $raw)) throw new \InvalidArgumentException('define.' . $id . ' has an invalid html entry'); $arguments[$spec['field']] = new Definition(html: $html); $targets[$id] = ['target' => null, 'html' => $html]; continue; } if (!is_string($template) || $spec['target'] === null || $template !== $spec['target']) throw new \InvalidArgumentException('define.' . $id . ' has an invalid template'); $boundData = null; if (array_key_exists('data', $raw)) { if ($data === []) $data = new MapValue(); if (!$data instanceof MapValue) throw new \InvalidArgumentException('define.' . $id . '.data is not an object'); $values = []; foreach ($spec['input'] as $name => $type) { if ($data->has($name)) { $values['has_' . $name] = true; $values[$name] = generated_bind_type($data->get($name), $type, 'define.' . $id . '.data.' . $name); } } $class = __NAMESPACE__ . '\\' . $spec['class']; $boundData = new $class(...$values); } $arguments[$spec['field']] = new Definition(template: $spec['target'], data: $boundData); $targets[$id] = ['target' => $spec['target']]; } return [new Definitions(...$arguments), $targets]; }
 function generated_list(array $items): array { $result = []; foreach ($items as $item) { if ($item['spread']) array_push($result, ...$item['value']); else $result[] = $item['value']; } return $result; }
 function generated_map(array $items): MapValue { $result = new MapValue(); foreach ($items as $item) { if ($item['spread']) { foreach ($item['value']->entries() as $key => $value) $result->set($key, $value); } else $result->set((string) $item['key'], $item['value']); } return $result; }
 function generated_env(mixed $input): array { if ($input === null) $input = []; if (!is_array($input)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env is not an object'); $timezone = $input['timezone'] ?? 'Z'; $now = $input['now'] ?? (float) time(); if (!is_string($timezone)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string'); if (!is_int($now) && !is_float($now)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number'); return ['timezone' => $timezone, 'now' => (float) $now]; }
 
 function render_card_tpl(Assign $assign, Definitions $definitions, Input_card_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
-    $frame = new Frame("card.tpl", [0,30], $rootData);
-    $scope->locals->set("label", $input->label);
-    $context->at($frame, [0,16]); $context->write("<p class=\"card\">");
-    $context->at($frame, [16,25]); $context->write($runtime->escape($scope->lookup($frame, "label"), $frame, [19,24]));
-    $context->at($frame, [25,30]); $context->write("</p>\n");
+    $frame = new Frame('card.tpl', [0, 30], $rootData);
+    $scope->locals->set('label', $input->label);
+    $context->at($frame, [0, 16]); $context->write('<p class="card">');
+    $context->at($frame, [16, 25]); $context->write($runtime->escape($scope->lookup($frame, 'label'), $frame, [19, 24]));
+    $context->at($frame, [25, 30]); $context->write(('</p>' . "\n"));
 }
 function render_layout_tpl(Assign $assign, Definitions $definitions, Input_layout_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
-    $frame = new Frame("layout.tpl", [0,29,66,76,100,137,191,268,305,392,463,468,483,563,567,582,586,592,608,655,684,695], $rootData);
+    $frame = new Frame('layout.tpl', [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], $rootData);
 
-    $scope->locals->set("values", generated_list([['spread' => false, 'value' => 0], ['spread' => true, 'value' => $runtime->listSpread($assign->numbers, $frame, [16,26])]]));
-    $scope->locals->set("merged", generated_map([['spread' => true, 'value' => $runtime->mapSpread($assign->lookup, $frame, [42,51])], ['spread' => false, 'key' => "z", 'value' => "Z"]]));
-    $context->at($frame, [66,80]); $context->write("<section>\n<h1>");
-    $context->at($frame, [80,94]); $context->write($runtime->escape($assign->page?->title, $frame, [83,93]));
-    $context->at($frame, [94,119]); $context->write("</h1>\n<p class=\"escaped\">");
-    $context->at($frame, [119,132]); $context->write($runtime->escape($assign->dangerous, $frame, [122,131]));
-    $context->at($frame, [132,156]); $context->write("</p>\n<p class=\"logical\">");
-    $context->at($frame, [156,171]); $context->write($runtime->escape(($runtime->truthy($assign->flag) && $runtime->truthy("x")), $frame, [159,170]));
-    $context->at($frame, [171,172]); $context->write("|");
-    $context->at($frame, [172,186]); $context->write($runtime->escape(($runtime->truthy(false) || $runtime->truthy(2)), $frame, [175,185]));
-    $context->at($frame, [186,219]); $context->write("</p>\n<p class=\"empty-truthiness\">");
-    $context->at($frame, [219,241]); $context->write($runtime->escape(($runtime->truthy($assign->empty_list) && $runtime->truthy($assign->flag)), $frame, [222,240]));
-    $context->at($frame, [241,242]); $context->write("|");
-    $context->at($frame, [242,263]); $context->write($runtime->escape(($runtime->truthy($assign->empty_map) && $runtime->truthy($assign->flag)), $frame, [245,262]));
-    $context->at($frame, [263,271]); $context->write("</p>\n<p>");
-    $context->at($frame, [271,284]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, "values"), 1), $frame, [274,283]));
-    $context->at($frame, [284,285]); $context->write("|");
-    $context->at($frame, [285,300]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, "merged"), "z"), $frame, [288,299]));
-    $context->at($frame, [300,305]); $context->write("</p>\n");
-    if ($runtime->truthy(($runtime->truthy($assign->flag) && $runtime->truthy($runtime->binary("==", $assign->page?->title, "Guide", $frame, [316,337]))))) {
-        $context->at($frame, [338,362]); $context->write("<strong>matched</strong>");    } else {
-        $context->at($frame, [365,388]); $context->write("<strong>missed</strong>");
+    $scope->locals->set('values', $runtime->depth(generated_list([['spread' => false, 'value' => 0], ['spread' => true, 'value' => $runtime->listSpread($assign->numbers, $frame, [16, 26])]]), $frame, [12, 27]));
+    $scope->locals->set('merged', $runtime->depth(generated_map([['spread' => true, 'value' => $runtime->mapSpread($assign->lookup, $frame, [42, 51])], ['spread' => false, 'key' => 'z', 'value' => 'Z']]), $frame, [41, 64]));
+    $context->at($frame, [66, 80]); $context->write(('<section>' . "\n" . '<h1>'));
+    $context->at($frame, [80, 94]); $context->write($runtime->escape($assign->page?->title, $frame, [83, 93]));
+    $context->at($frame, [94, 119]); $context->write(('</h1>' . "\n" . '<p class="escaped">'));
+    $context->at($frame, [119, 132]); $context->write($runtime->escape($assign->dangerous, $frame, [122, 131]));
+    $context->at($frame, [132, 156]); $context->write(('</p>' . "\n" . '<p class="logical">'));
+    $context->at($frame, [156, 171]); $context->write($runtime->escape(($runtime->truthy($assign->flag) && $runtime->truthy('x')), $frame, [159, 170]));
+    $context->at($frame, [171, 172]); $context->write('|');
+    $context->at($frame, [172, 186]); $context->write($runtime->escape(($runtime->truthy(false) || $runtime->truthy(2)), $frame, [175, 185]));
+    $context->at($frame, [186, 219]); $context->write(('</p>' . "\n" . '<p class="empty-truthiness">'));
+    $context->at($frame, [219, 241]); $context->write($runtime->escape(($runtime->truthy($assign->empty_list) && $runtime->truthy($assign->flag)), $frame, [222, 240]));
+    $context->at($frame, [241, 242]); $context->write('|');
+    $context->at($frame, [242, 263]); $context->write($runtime->escape(($runtime->truthy($assign->empty_map) && $runtime->truthy($assign->flag)), $frame, [245, 262]));
+    $context->at($frame, [263, 271]); $context->write(('</p>' . "\n" . '<p>'));
+    $context->at($frame, [271, 284]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, 'values'), 1, $frame, [274, 283]), $frame, [274, 283]));
+    $context->at($frame, [284, 285]); $context->write('|');
+    $context->at($frame, [285, 300]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, 'merged'), 'z', $frame, [288, 299]), $frame, [288, 299]));
+    $context->at($frame, [300, 305]); $context->write(('</p>' . "\n"));
+    if ($runtime->truthy(($runtime->truthy($assign->flag) && $runtime->truthy($runtime->binary('==', $assign->page?->title, 'Guide', $frame, [316, 337]))))) {
+        $context->at($frame, [338, 362]); $context->write('<strong>matched</strong>');    } else {
+        $context->at($frame, [365, 388]); $context->write('<strong>missed</strong>');
     }
-    $context->at($frame, [391,395]); $context->write("\n<p>");
-    $context->at($frame, [395,418]); $context->write($runtime->escape(($runtime->truthy($assign->flag) ? "yes" : "no"), $frame, [398,417]));
-    $context->at($frame, [418,419]); $context->write("|");
-    $context->at($frame, [419,429]); $context->write($runtime->escape($runtime->binary("+", $runtime->unary("-", 1, $frame, [422,424]), 3, $frame, [422,428]), $frame, [422,428]));
-    $context->at($frame, [429,430]); $context->write("|");
-    $context->at($frame, [430,458]); $context->write($runtime->escape($runtime->call("default", ["", "fallback"], $frame, [433,457]), $frame, [433,457]));
-    $context->at($frame, [458,468]); $context->write("</p>\n<ul>\n");
-    $row_entries = $runtime->entries($assign->rows, $frame, [468,585]);
+    $context->at($frame, [391, 395]); $context->write(("\n" . '<p>'));
+    $context->at($frame, [395, 418]); $context->write($runtime->escape(($runtime->truthy($assign->flag) ? 'yes' : 'no'), $frame, [398, 417]));
+    $context->at($frame, [418, 419]); $context->write('|');
+    $context->at($frame, [419, 429]); $context->write($runtime->escape($runtime->binary('+', $runtime->unary('-', 1, $frame, [422, 424]), 3, $frame, [422, 428]), $frame, [422, 428]));
+    $context->at($frame, [429, 430]); $context->write('|');
+    $context->at($frame, [430, 458]); $context->write($runtime->escape($runtime->call('default', ['', 'fallback'], $frame, [433, 457]), $frame, [433, 457]));
+    $context->at($frame, [458, 468]); $context->write(('</p>' . "\n" . '<ul>' . "\n"));
+    $row_entries = $runtime->entries($assign->rows, $frame, [468, 585]);
     $row_size = count($row_entries);
     $row_last_index = $row_size - 1;
-    $row_had = $scope->locals->has("row");
-    $row_previous = $scope->locals->get("row");
+    $row_had = $scope->locals->has('row');
+    $row_previous = $scope->locals->get('row');
     foreach ($row_entries as $row_index => [$row_key, $row_value]) {
-        $scope->locals->set("row", $row_value);
-        $row_stack = $scope->loops["row"] ?? [];
+        $scope->locals->set('row', $row_value);
+        $row_stack = $scope->loops['row'] ?? [];
         $row_stack[] = ['index_' => (float) $row_index, 'size_' => (float) $row_size, 'first_' => $row_index === 0, 'last_' => $row_index === $row_last_index, 'key_' => $row_key, 'value_' => $row_value];
-        $scope->loops["row"] = $row_stack;
+        $scope->loops['row'] = $row_stack;
         $context->iterations++;
-        $runtime->limit('iteration', $context->iterations, $frame, [468,585]);
-            $context->at($frame, [483,487]); $context->write("<li>");
-            $context->at($frame, [487,501]); $context->write($runtime->escape($scope->loopMeta("row")["index_"], $frame, [490,500]));
-            $context->at($frame, [501,502]); $context->write("/");
-            $context->at($frame, [502,515]); $context->write($runtime->escape($scope->loopMeta("row")["size_"], $frame, [505,514]));
-            $context->at($frame, [515,516]); $context->write(":");
-            $context->at($frame, [516,528]); $context->write($runtime->escape($scope->lookup($frame, "row")?->name, $frame, [519,527]));
-            $context->at($frame, [528,529]); $context->write(":");
-            $context->at($frame, [529,543]); $context->write($runtime->escape($scope->loopMeta("row")["first_"], $frame, [532,542]));
-            $context->at($frame, [543,544]); $context->write(":");
-            $context->at($frame, [544,557]); $context->write($runtime->escape($scope->loopMeta("row")["last_"], $frame, [547,556]));
-            $context->at($frame, [557,563]); $context->write("</li>\n");
-        $row_stack = $scope->loops["row"];
+        $runtime->limit('iteration', $context->iterations, $frame, [468, 585]);
+            $context->at($frame, [483, 487]); $context->write('<li>');
+            $context->at($frame, [487, 501]); $context->write($runtime->escape($scope->loopMeta('row')['index_'], $frame, [490, 500]));
+            $context->at($frame, [501, 502]); $context->write('/');
+            $context->at($frame, [502, 515]); $context->write($runtime->escape($scope->loopMeta('row')['size_'], $frame, [505, 514]));
+            $context->at($frame, [515, 516]); $context->write(':');
+            $context->at($frame, [516, 528]); $context->write($runtime->escape($scope->lookup($frame, 'row')?->name, $frame, [519, 527]));
+            $context->at($frame, [528, 529]); $context->write(':');
+            $context->at($frame, [529, 543]); $context->write($runtime->escape($scope->loopMeta('row')['first_'], $frame, [532, 542]));
+            $context->at($frame, [543, 544]); $context->write(':');
+            $context->at($frame, [544, 557]); $context->write($runtime->escape($scope->loopMeta('row')['last_'], $frame, [547, 556]));
+            $context->at($frame, [557, 563]); $context->write(('</li>' . "\n"));
+        $row_stack = $scope->loops['row'];
         array_pop($row_stack);
-        if ($row_stack === []) unset($scope->loops["row"]); else $scope->loops["row"] = $row_stack;
+        if ($row_stack === []) unset($scope->loops['row']); else $scope->loops['row'] = $row_stack;
     }
-    if ($row_had) $scope->locals->set("row", $row_previous); else $scope->locals->remove("row");
+    if ($row_had) $scope->locals->set('row', $row_previous); else $scope->locals->remove('row');
     if ($row_size === 0) {
-            $context->at($frame, [567,582]); $context->write("<li>empty</li>\n");
+            $context->at($frame, [567, 582]); $context->write(('<li>empty</li>' . "\n"));
     }
-    $context->at($frame, [586,592]); $context->write("</ul>\n");
-    $context->enter("partial.tpl", $frame, [592,607]);
-    try { render_partial_tpl($assign, $definitions, new Input_partial_tpl(values: $scope->lookup($frame, "values")), $context, $runtime, $rootData, $scope); } finally { $context->leave(); }
+    $context->at($frame, [586, 592]); $context->write(('</ul>' . "\n"));
+    $context->enter('partial.tpl', $frame, [592, 607]);
+    try { render_partial_tpl($assign, $definitions, new Input_partial_tpl(values: $scope->lookup($frame, 'values')), $context, $runtime, $rootData, $scope); } finally { $context->leave(); }
     if ($definitions->content !== null) {
-            $context->at($frame, [620,634]); $context->write("<p>defined</p>");
+            $context->at($frame, [620, 634]); $context->write('<p>defined</p>');
     } else {
-            $context->at($frame, [637,651]); $context->write("<p>missing</p>");
+            $context->at($frame, [637, 651]); $context->write('<p>missing</p>');
     }
-    $context->at($frame, [654,655]); $context->write("\n");
+    $context->at($frame, [654, 655]); $context->write("\n");
     $definition = $definitions->content;
-    if ($definition === null) throw $runtime->error($frame, [655,683], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
+    if ($definition === null) throw $runtime->error($frame, [655, 683], 'E_RUNTIME_BLOCK_UNDEFINED', 'define content is not registered');
     if ($definition?->html !== null) {
-        $context->at($frame, [655,683]); $context->write($definition->html);
+        $context->at($frame, [655, 683]); $context->write($definition->html);
     } else {
-        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_card_tpl)) throw $runtime->error($frame, [655,683], 'E_RUNTIME_TYPE', "generated definition content data has an invalid type");
-        $input = new Input_card_tpl(label: ($definition?->data !== null && $definition->data->has_label ? $definition->data->label : throw $runtime->error($frame, [655,683], 'E_RUNTIME_TYPE', "generated input card.tpl.label is missing")));
+        if ($definition?->data !== null && !($definition->data instanceof DefinitionData_card_tpl)) throw $runtime->error($frame, [655, 683], 'E_RUNTIME_TYPE', 'generated definition content data has an invalid type');
+        $input = new Input_card_tpl(label: ($definition?->data !== null && $definition->data->has_label ? $definition->data->label : throw $runtime->error($frame, [655, 683], 'E_RUNTIME_TYPE', 'generated input card.tpl.label is missing')));
         if ($definition?->data !== null) {
             if ($definition->data->has_label) $input->label = $definition->data->label;
         }
         $input->label = $assign->page?->title;
         $blockScope = new Scope();
-        $context->enter("card.tpl", $frame, [655,683]);
+        $context->enter('card.tpl', $frame, [655, 683]);
         try { render_card_tpl($assign, $definitions, $input, $context, $runtime, $rootData, $blockScope); } finally { $context->leave(); }
     }
-    $context->at($frame, [684,695]); $context->write("</section>\n");
+    $context->at($frame, [684, 695]); $context->write(('</section>' . "\n"));
 }
 function render_partial_tpl(Assign $assign, Definitions $definitions, Input_partial_tpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void {
-    $frame = new Frame("partial.tpl", [0,38], $rootData);
-    $scope->locals->set("values", $input->values);
-    $context->at($frame, [0,20]); $context->write("<p class=\"included\">");
-    $context->at($frame, [20,33]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, "values"), 2), $frame, [23,32]));
-    $context->at($frame, [33,38]); $context->write("</p>\n");
+    $frame = new Frame('partial.tpl', [0, 38], $rootData);
+    $scope->locals->set('values', $input->values);
+    $context->at($frame, [0, 20]); $context->write('<p class="included">');
+    $context->at($frame, [20, 33]); $context->write($runtime->escape($runtime->index($scope->lookup($frame, 'values'), 2, $frame, [23, 32]), $frame, [23, 32]));
+    $context->at($frame, [33, 38]); $context->write(('</p>' . "\n"));
 }
 function render_template(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void { switch ($target) {
-        case "layout.tpl": render_layout_tpl($assign, $definitions, new Input_layout_tpl(), $context, $runtime, $rootData, $scope); return;
+        case 'layout.tpl': render_layout_tpl($assign, $definitions, new Input_layout_tpl(), $context, $runtime, $rootData, $scope); return;
         default: throw $context->fail('E_LOAD_NOT_FOUND', null, null, 'template ' . $target . ' does not exist');
 } }
 final class GeneratedExecution implements PreparedExecution { public function __construct(private readonly string $target, private readonly Assign $assign, private readonly Definitions $definitions, private readonly MapValue $rootData, private readonly array $env, private readonly RuntimeEnvironment $services, private readonly ?string $html) {} public function render(): string { $context = new Context($this->services, $this->rootData, $this->env, $this->target); $runtime = new RuntimeBindings($context); $scope = new Scope(); $context->enter($this->target, null, null); try { if ($this->html !== null) $context->write($this->html); else render_template($this->target, $this->assign, $this->definitions, $context, $runtime, $this->rootData, $scope); return $context->output(); } finally { $context->leave(); } } }
-final class GeneratedProgram implements Program { public readonly RuntimeEnvironment $runtime; public function __construct(?RuntimeEnvironment $runtime = null) { $this->runtime = $runtime ?? new RuntimeEnvironment(); } public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender { if (!is_string($target)) throw new InvalidArgumentException('generated target must be a template name'); [$typedAssign, $rootData] = generated_bind_assign($assign); [$definitions, $targets] = generated_bind_definitions($options['define'] ?? []); $resolved = $targets[$target] ?? null; $targetName = $resolved['target'] ?? $target; $html = $resolved['html'] ?? null; return new PreparedRender(new GeneratedExecution($targetName, $typedAssign, $definitions, $rootData, generated_env($options['env'] ?? []), $this->runtime, $html)); } public function render(string|array $target, mixed $assign = [], array $options = []): string { return $this->prepare($target, $assign, $options)->render(); } }
+final class GeneratedProgram implements Program { public readonly RuntimeEnvironment $runtime; public function __construct(?RuntimeEnvironment $runtime = null) { $this->runtime = $runtime ?? new RuntimeEnvironment(); } public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender { if (!is_string($target)) throw new \InvalidArgumentException('generated target must be a template name'); return InternalBoundary::run($target, fn (): PreparedRender => $this->prepareBound($target, $assign, $options)); } private function prepareBound(string $target, mixed $assign, array $options): PreparedRender { try { [$typedAssign, $rootData] = generated_bind_assign($assign); [$definitions, $targets] = generated_bind_definitions($options['define'] ?? []); $env = generated_env($options['env'] ?? []); } catch (BindError $error) { throw TemplateError::withoutPosition($error->errorCode, $target, $error->getMessage()); } $resolved = $targets[$target] ?? null; $targetName = $resolved['target'] ?? $target; $html = $resolved['html'] ?? null; return new PreparedRender($target, new GeneratedExecution($targetName, $typedAssign, $definitions, $rootData, $env, $this->runtime, $html)); } public function render(string|array $target, mixed $assign = [], array $options = []): string { return $this->prepare($target, $assign, $options)->render(); } }

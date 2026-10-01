@@ -75,7 +75,8 @@ export function lexStringLiteral(source: Source, start: number, template: string
   for (;;) {
     if (index >= text.length) throw fail('E_PARSE_UNTERMINATED_STRING', start, start + 1, 'string literal is not terminated');
     const char = text[index] as string;
-    if (char === quote) return { decoded, end: index + 1 };
+    // EXP-3: a surrogate escape outside a high-low pair produces U+FFFD.
+    if (char === quote) return { decoded: decoded.replace(/[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g, '�'), end: index + 1 };
     if (char !== '\\') {
       decoded += char;
       index++;

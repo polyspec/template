@@ -1,10 +1,10 @@
 // Engine: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 import type { Template } from '../ast.js';
-import { errorAt, TemplateError, type Span } from '../errors.js';
+import { errorAt, internalBoundary, TemplateError, type Span } from '../errors.js';
 import { type Env, type HostFunction } from '../functions/index.js';
 import { MapLoader, resolvePath, type Loader, type LoadResult, PathError } from '../loader.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from '../parser/scanner.js';
-import { BindError, bind, bindMap } from '../value/bind.js';
+import { BindError, bind, bindMap, checkText } from '../value/bind.js';
 import type { MapValue, Value } from '../value/value.js';
 import { Frame, RenderContext, Scope, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
 import { RuntimeEnvironment } from './runtime-environment.js';
@@ -67,9 +67,10 @@ export interface PreparedRender {
 }
 
 class AstPreparedRender implements PreparedRender {
-  constructor(private readonly execution: AstPreparedExecution) {}
+  constructor(private readonly name: string, private readonly execution: AstPreparedExecution) {}
 
-  render(): string { return this.execution.render(); }
+  // A language runtime error during the render is E_INTERNAL (ERR-13).
+  render(): string { return internalBoundary(this.name, () => this.execution.render()); }
 }
 
 /** Prepares and renders one complete compiled template representation. */
@@ -174,6 +175,10 @@ export class AstProgramCore implements RuntimeServices, Program {
   // Prepares a request for repeated rendering.
   prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender {
     const name = typeof target === 'string' ? target : target.name;
+    return internalBoundary(name, () => this.prepareBound(name, target, assign, options));
+  }
+
+  private prepareBound(name: string, target: string | Template, assign: unknown, options: RenderOptions): PreparedRender {
     let rootData: MapValue;
     let registry: Map<string, DefineEntry>;
     let env: Env;
@@ -190,7 +195,7 @@ export class AstProgramCore implements RuntimeServices, Program {
     const targetEntry = typeof target === 'string' ? registry.get(target) : undefined;
     const targetName = targetEntry && 'template' in targetEntry ? targetEntry.template : name;
     const template = typeof target === 'string' ? this.loadTemplate(targetName, null, null) : { ast: target, lines: null };
-    return new AstPreparedRender(new AstPreparedExecution(this, rootData, registry, env, targetName, template));
+    return new AstPreparedRender(name, new AstPreparedExecution(this, rootData, registry, env, targetName, template));
   }
 
   // Renders a template name or a parsed template and returns the complete output (RT-3). It
@@ -202,6 +207,7 @@ export class AstProgramCore implements RuntimeServices, Program {
   private bindDefines(defines: Record<string, DefineInput>): Map<string, DefineEntry> {
     const registry = new Map<string, DefineEntry>();
     for (const [id, input] of Object.entries(defines)) {
+      checkText(id);
       if (typeof input !== 'string' && typeof input.html === 'string') {
         registry.set(id, { html: input.html });
       } else if (typeof input === 'string' || typeof input.template === 'string') {

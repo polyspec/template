@@ -34,13 +34,15 @@ Canonical artifact manifest는 각 template의 digest 항목과 함께 source �
 
 Typed IR은 모든 symbol, template path, definition target, function signature, input type을 해석하고 모든 node와 expression의 source span을 보존해 generated runtime 실패가 원본 template을 가리키게 한다. 변수 누락, 정적 타입에 없는 member, 선언하지 않은 definition, 잘못된 include path, 알 수 없는 함수 구현 종류, 호환되지 않는 block input은 compile 실패다. 명시적인 동적 `any`의 member, index, spread, loop는 IR에 남아 `RuntimeBindings`를 사용한다. Built-in과 host signature는 같은 call node를 사용하고 program load를 위해 구현 종류를 보존한다.
 
+Local 변수는 직선 코드에서 마지막 assignment의 type을 가진다. Branch나 loop body가 다른 type의 값으로 assign하는 local은 loop body 앞과 branch 또는 loop 뒤에서 그 assignment 전체를 병합한 type을 가진다. Loop body는 이전 반복이 assign한 값을 읽고 branch 뒤의 코드는 실행된 branch의 값을 읽기 때문이다. 서로 다른 두 type은 `any`로 병합한다.
+
 동적 source graph는 parse된 template과 요청 definition schema에서 생성한 type manifest를 사용한다. 이 manifest는 참조한 함수, definition target과 block input을 선언하되 root value를 `any`로 유지하며 sample JSON에서 정적 host type을 추측하지 않는다. 적합성 gate는 host 언어 artifact를 컴파일하기 전에 parse 가능한 모든 fixture의 이 도출 과정을 검사한다.
 
 도출한 manifest는 알고 있는 각 내장 함수의 선언된 `minArgs`와 `maxArgs`를 복사한다. 동적 conformance source는 잘못된 호출이 AST 실행과 같은 위치의 `E_RUNTIME_ARITY`를 내도록 arity 검사를 runtime에 남기며, 명시적인 정적 manifest는 lowering 중에 그 호출을 거부할 수 있다. 알 수 없는 함수는 열린 arity 호출로 남아 runtime registry에 도달하고, 구현이 없으면 일반 runtime 오류를 낸다.
 
 모든 generated module은 논리 구조 `Assign`, `DefinitionData<T>`, `Definition<T>`, `Definitions`, `Input<T>`, `ArtifactManifest`, `GeneratedProgram`을 노출한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
-네 generated backend 모두 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 네 core 언어와 canonical case 217개 전체에서 완료되었다.
+네 generated backend 모두 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 네 core 언어와 canonical case 235개 전체에서 완료되었다.
 
 `RuntimeServices`는 두 program mode가 함께 사용하는 runtime interface다. 구체적인 `RuntimeEnvironment`가 자원 제한, 등록 함수, 논리 class function을 소유하고 등록을 한 번 검증하며 이 interface를 구현한다. 각 `AstProgram`과 `GeneratedProgram`은 environment 하나를 소유한다. AST에만 필요한 template loading은 AST renderer에 속하며 environment나 generated 실행 상태에는 들어가지 않는다. `RuntimeBindings`가 `RuntimeServices`를 사용하므로 generated 코드는 AST loader나 interpreter에 의존하지 않고 같은 값·오류 의미를 사용한다.
 
@@ -50,9 +52,13 @@ TypeScript backend는 bind한 root, source line index가 있는 frame, render co
 
 PHP backend도 같은 실행 경계를 따른다. 생성된 template 함수는 `Context`, `Frame`, `RuntimeBindings`와 bind한 root map을 받고 context output limiter를 통해 출력하며 값 연산과 함수 호출을 package runtime에 위임한다. Typed map은 `MapValue`로 유지하므로 generated lookup, truthiness, ordering, spread가 PHP 배열의 key 변환에 영향을 받지 않고 data model을 보존한다.
 
+PHP backend는 compiler 호출자가 정하는 namespace를 요구한다. `compileSource`의 `phpNamespace` 옵션 또는 compiler 명령의 `--php-namespace` 옵션으로 지정한다. Namespace는 `\`로 구분한 하나 이상의 PHP 식별자다. 유효한 namespace 없이 PHP로 compile하면 source를 생성하기 전에 실패한다. 생성 파일은 모든 class, 함수, 상수를 그 namespace 안에 선언하고 runtime package는 완전한 이름으로 참조한다. Program이 내장 binding schema로부터 instance를 만드는 class도 같은 namespace에서 해석한다. 따라서 namespace가 다른 두 generated program은 한 PHP process에서 load하고 render할 수 있으며, 어느 쪽도 generated file 밖의 class와 충돌할 수 있는 전역 이름을 선언하지 않는다.
+
+모든 backend는 template text, 문자열 literal, template 이름, 경로, message를 포함한 program의 모든 문자열을 target 언어의 정확한 문자열 literal로 기록한다. 따라서 generated program은 유효한 모든 UTF-8 text에 대해 AST program과 같은 byte를 출력한다. 제어 문자와, 큰따옴표 PHP 문자열의 `$`처럼 target 언어가 문자열 literal 안에서 해석하는 문자도 마찬가지다. PHP backend는 `\`와 `'`만 escape한 작은따옴표 literal을 기록하고, 줄바꿈은 큰따옴표 literal `"\n"` 또는 `"\r"`로 기록해 `.`로 잇는다. 따라서 어떤 literal도 generated source의 두 줄에 걸치지 않는다. Rust backend는 `\`와 `"`를 escape하고 모든 제어 문자를 `\u{…}`로 기록한다. Go backend는 `\`와 `"`를 escape하고 모든 제어 문자를 `\u00XX`로 기록한다. TypeScript backend는 JSON 문자열 literal을 기록하며, 이는 정확한 JavaScript 문자열 literal이다.
+
 Go backend는 typed template 제어 흐름을 생성하되 관찰 가능한 값 연산을 `render.RuntimeBindings`로 전달한다. 생성 함수는 `render.Context`, source line index가 있는 frame과 render chain을 공유한다. 내부 오류 전파는 code와 source position을 포함한 원래의 구조화 template 오류를 보존하고, native typed value는 runtime 경계에서 canonical value model로 bind한다.
 
-Rust backend도 생성된 template 함수에서 `Result`를 직접 반환하고 값 연산을 `RuntimeBindings`에 위임한다. 검증된 artifact 데이터에서 `LineIndex`를 복원하고 `RenderContext`를 통해 출력하며 panic 변환 없이 구조화 오류를 전달한다. Typed 경계의 직렬화는 생성 record와 collection을 canonical `Value` model과 상호 변환한다.
+Rust backend도 생성된 template 함수에서 `Result`를 직접 반환하고 값 연산을 `RuntimeBindings`에 위임한다. 검증된 artifact 데이터에서 `LineIndex`를 복원하고 `RenderContext`를 통해 출력하며 구조화 오류를 panic이 아닌 값으로 전달한다. Panic은 공개 `prepare`와 `render` operation에서만 잡아 `E_INTERNAL`로 보고한다(ERR-13). Typed 경계의 직렬화는 생성 record와 collection을 canonical `Value` model과 상호 변환한다.
 
 Rust generated source module은 `polyspec-template`, `derive` feature를 켠 `serde`, `preserve_order`와 `arbitrary_precision` feature를 켠 `serde_json`에 직접 의존한다. 이는 generated module의 compile-time 의존성이므로 host crate가 직접 선언해야 한다. 격리 Cargo 설치 프로젝트는 압축을 푼 `.crate` package를 대상으로 generated module을 compile해 이 경계를 강제한다.
 
@@ -70,13 +76,13 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 
 ## 구현 상태
 
-AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 showcase는 이 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. TypeScript, Go, Rust, PHP에서 217개 전체 generated matrix가 통과하며, 별도의 generated native-call fixture가 네 언어에서 같은 assign object field, instance method, class function 결과를 출력한다.
+AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP의 구체적인 `GeneratedProgram`을 생성하고 showcase는 이 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. TypeScript, Go, Rust, PHP에서 235개 전체 generated matrix가 통과하며, 별도의 generated native-call fixture가 네 언어에서 같은 assign object field, instance method, class function 결과를 출력한다.
 
 Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract·compiler digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 
 `make conformance-generated-ts`는 canonical case 각각에 대해 새로운 generated TypeScript program을 만든다. Compile 진단, 입력 binding 진단, runtime 진단, 성공한 UTF-8 출력을 AST 실행과 같은 expected artifact에 대조한다.
 `make conformance-generated-php`는 각 case마다 별도로 생성하고 문법 검사한 PHP 소스로 같은 내용을 증명한다.
-`make generated-native-check`는 모든 backend로 dynamic-root program 하나를 compile하고 native object assign, public field read, instance method call, 등록된 class function call을 실행한다. 같은 matrix에서 public member 누락, 등록되지 않은 class function, native method와 class function의 실패, native 인자의 잘못된 타입과 개수도 검사한다. 모든 backend는 같은 호출 위치에서 같은 오류 코드를 반환해야 한다.
+`make generated-native-check`는 모든 backend로 dynamic-root program 하나를 compile하고 native object assign, public field read, instance method call, 등록된 class function call을 실행한다. 같은 matrix에서 public member 누락, 등록되지 않은 class function, native method와 class function의 실패, native 인자의 잘못된 타입과 개수도 검사한다. 모든 backend는 같은 호출 위치에서 같은 오류 코드를 반환해야 한다. 같은 객체는 include한 template, block 인자, template define 데이터에 원본 호스트 객체로 도달해야 한다(VAL-18). PHP backend는 namespace 두 개로 두 번 compile하며, 두 program은 `GeneratedProgram`과 `Assign`이라는 전역 class와 함께 한 PHP process에서 load하고 render한다. 유효한 namespace 없이 PHP로 compile하면 실패해야 한다.
 
 두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 네 언어의 필드와 연산을 검사한다.
 

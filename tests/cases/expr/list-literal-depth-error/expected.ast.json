@@ -1,0 +1,119 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "a",
+      "expr": {
+        "type": "List",
+        "items": [],
+        "span": [
+          6,
+          8
+        ]
+      },
+      "span": [
+        0,
+        9
+      ]
+    },
+    {
+      "type": "For",
+      "name": "i",
+      "iter": {
+        "type": "Call",
+        "name": "range",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              22,
+              23
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 64,
+            "span": [
+              25,
+              27
+            ]
+          }
+        ],
+        "span": [
+          16,
+          28
+        ]
+      },
+      "body": [
+        {
+          "type": "Set",
+          "name": "a",
+          "expr": {
+            "type": "List",
+            "items": [
+              {
+                "type": "Literal",
+                "kind": "number",
+                "value": 1,
+                "span": [
+                  36,
+                  37
+                ]
+              },
+              {
+                "type": "Var",
+                "name": "a",
+                "span": [
+                  39,
+                  40
+                ]
+              }
+            ],
+            "span": [
+              35,
+              41
+            ]
+          },
+          "span": [
+            29,
+            42
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        9,
+        45
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1,
+        "span": [
+          48,
+          49
+        ]
+      },
+      "span": [
+        45,
+        50
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        50,
+        51
+      ]
+    }
+  ]
+}

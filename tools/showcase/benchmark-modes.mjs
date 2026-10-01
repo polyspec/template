@@ -8,6 +8,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileAst } from '../compiler/ast-artifact.mjs';
 import { compileSource } from '../compiler/compiler.mjs';
+import { showcasePhpNamespace } from './php-namespace.mjs';
 
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -64,7 +65,7 @@ function compileSamples(language, mode) {
     compileAst({ root: scenario, output, entry: 'layout.tpl', refresh: 'dev', typeManifest: join(scenario, 'types.json') });
     if (mode === 'generated') {
       const target = language === 'typescript' ? 'ts' : language;
-      const source = compileSource(join(output, 'manifest.json'), join(scenario, 'types.json'), target);
+      const source = compileSource(join(output, 'manifest.json'), join(scenario, 'types.json'), target, { phpNamespace: showcasePhpNamespace(basename(scenario)) });
       sizes.push(Buffer.byteLength(source));
     } else {
       sizes.push(directoryBytes(output));

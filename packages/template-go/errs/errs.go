@@ -36,6 +36,7 @@ const (
 	DataNumberNotFinite      Code = "E_DATA_NUMBER_NOT_FINITE"
 	DataInvalidUTF8          Code = "E_DATA_INVALID_UTF8"
 	DataUnsupportedType      Code = "E_DATA_UNSUPPORTED_TYPE"
+	DataDepth                Code = "E_DATA_DEPTH"
 	RuntimeType              Code = "E_RUNTIME_TYPE"
 	RuntimeCompare           Code = "E_RUNTIME_COMPARE"
 	RuntimeDivZero           Code = "E_RUNTIME_DIV_ZERO"
@@ -48,6 +49,7 @@ const (
 	RuntimeBlockRedefined    Code = "E_RUNTIME_BLOCK_REDEFINED"
 	RuntimeDepth             Code = "E_RUNTIME_DEPTH"
 	RuntimeLimit             Code = "E_RUNTIME_LIMIT"
+	Internal                 Code = "E_INTERNAL"
 )
 
 // Span is a byte range [start, end) of a source.

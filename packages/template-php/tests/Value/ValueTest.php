@@ -70,10 +70,10 @@ final class ValueTest extends TestCase
 
     public function testJsonPreservesOrderAndChecksIntegerLiterals(): void
     {
-        $value = Json::parse('{"2": 1, "1": 2, "x": 1e21}');
+        $value = Json::parse('{"2": 1, "1": 2, "x": 1e15}');
         self::assertInstanceOf(MapValue::class, $value);
         self::assertSame(['2', '1', 'x'], $value->keys());
-        self::assertSame(1e21, $value->get('x'));
+        self::assertSame(1e15, $value->get('x'));
         $this->expectException(BindError::class);
         Json::parse('9007199254740992');
     }

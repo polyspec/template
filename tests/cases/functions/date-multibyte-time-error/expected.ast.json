@@ -1,0 +1,49 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2024-01-01T12:34:5é",
+            "span": [
+              8,
+              30
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y",
+            "span": [
+              32,
+              35
+            ]
+          }
+        ],
+        "span": [
+          3,
+          36
+        ]
+      },
+      "span": [
+        0,
+        37
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        37,
+        38
+      ]
+    }
+  ]
+}

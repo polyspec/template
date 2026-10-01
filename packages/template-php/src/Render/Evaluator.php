@@ -78,7 +78,7 @@ final class Evaluator
                     'size_' => (float) $meta['size'],
                 };
             case 'Member':
-                return $this->runtime->member($this->evaluate($expr['object'], $frame), $expr['key']);
+                return $this->runtime->member($this->evaluate($expr['object'], $frame), $expr['key'], $frame, $expr['span']);
             case 'MemberCall':
                 $args = array_map(fn (array $arg): mixed => $this->evaluate($arg, $frame), $expr['args']);
                 return $this->runtime->memberCall($this->evaluate($expr['object'], $frame), $expr['method'], $args, $frame, $expr['span']);
@@ -86,7 +86,7 @@ final class Evaluator
                 $args = array_map(fn (array $arg): mixed => $this->evaluate($arg, $frame), $expr['args']);
                 return $this->runtime->classCall($expr['className'], $expr['method'], $args, $frame, $expr['span']);
             case 'Index':
-                return $this->runtime->index($this->evaluate($expr['object'], $frame), $this->evaluate($expr['index'], $frame));
+                return $this->runtime->index($this->evaluate($expr['object'], $frame), $this->evaluate($expr['index'], $frame), $frame, $expr['span']);
             case 'Call':
                 $args = [];
                 foreach ($expr['args'] as $arg) {
@@ -119,7 +119,7 @@ final class Evaluator
                     }
                 }
 
-                return $list;
+                return $this->runtime->depth($list, $frame, $expr['span']);
             case 'Map':
                 $map = new MapValue();
                 foreach ($expr['entries'] as $entry) {
@@ -134,7 +134,7 @@ final class Evaluator
                     }
                 }
 
-                return $map;
+                return $this->runtime->depth($map, $frame, $expr['span']);
             default:
                 throw $this->fail($frame, $expr['span'], 'E_RUNTIME_TYPE', 'unknown expression node ' . $expr['type']);
         }

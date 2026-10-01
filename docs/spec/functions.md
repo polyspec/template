@@ -178,6 +178,6 @@ The machine-readable source for the function contract is [`contracts/functions.j
 - **FUN-43** A host registers a function with `register(name, fn)`. `name` is an identifier. `fn` receives the argument list as values and returns a value.
 - **FUN-44** Registering a name that is a built-in function fails at registration time. Registering a name twice replaces the earlier function.
 - **FUN-45** The returned value is converted by the host binding rules of the data model. A value that cannot be converted fails with the corresponding `E_DATA_*` code.
-- **FUN-46** An error thrown by `fn` fails the render with `E_RUNTIME_HOST_FUNCTION` and the position of the call in the template.
+- **FUN-46** An error that `fn` reports through the error mechanism of the host language, a thrown exception in TypeScript and PHP or a returned error in Go and Rust, fails the render with `E_RUNTIME_HOST_FUNCTION` and the position of the call in the template. A panic of `fn` in Go or Rust is `E_INTERNAL` (ERR-13). A native object argument arrives as the original host object (VAL-18).
 - **FUN-47** Every host that renders a template registers the same function names. A template that calls a name registered in one host only fails in the other host with `E_RUNTIME_UNKNOWN_FUNCTION`.
 - **FUN-48** A host function that returns a string returns a plain string. A host cannot return a safe string; a template applies `raw` to the result when it must be written unescaped.

@@ -4,25 +4,35 @@
   "entry": "input.tpl",
   "fields": {},
   "records": {},
-  "defines": {},
+  "defines": {
+    "card": {
+      "template": "part.tpl"
+    }
+  },
   "functions": {
     "Order::suffix": {
       "implementation": "host",
-      "args": ["string"],
+      "args": [
+        "string"
+      ],
       "minArgs": 1,
       "maxArgs": 1,
       "returns": "string"
     },
     "Order::fail": {
       "implementation": "host",
-      "args": ["string"],
+      "args": [
+        "string"
+      ],
       "minArgs": 1,
       "maxArgs": 1,
       "returns": "string"
     },
     "Order::missing": {
       "implementation": "host",
-      "args": ["string"],
+      "args": [
+        "string"
+      ],
       "minArgs": 1,
       "maxArgs": 1,
       "returns": "string"
@@ -35,6 +45,12 @@
     "throw-member.tpl": {},
     "throw-class.tpl": {},
     "member-type.tpl": {},
-    "member-arity.tpl": {}
+    "member-arity.tpl": {},
+    "part.tpl": {
+      "o": "any?"
+    },
+    "include.tpl": {},
+    "block.tpl": {},
+    "define.tpl": {}
   }
 }

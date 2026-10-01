@@ -32,10 +32,10 @@ fn cases() -> Vec<(String, PathBuf)> {
 
 fn read_json(path: &Path) -> Option<Result<serde_json::Value, ErrorCode>> {
     let bytes = fs::read(path).ok()?;
-    if std::str::from_utf8(&bytes).is_err() {
+    let Ok(text) = std::str::from_utf8(&bytes) else {
         return Some(Err(ErrorCode::E_DATA_INVALID_UTF8));
-    }
-    Some(serde_json::from_slice(&bytes).map_err(|_| ErrorCode::E_DATA_UNSUPPORTED_TYPE))
+    };
+    Some(polyspec_template::read_json(text).map_err(|error| error.code))
 }
 
 fn delimiters_of(dir: &Path) -> Option<String> {
@@ -62,11 +62,15 @@ fn render_case(dir: &Path) -> Outcome {
         Some(Err(code)) => return Outcome::Error(TemplateError::without_position(code, "input.tpl", "data")),
     };
     let mut options = RenderOptions::default();
-    if let Some(Ok(define)) = read_json(&dir.join("define.json")) {
-        options.define = defines_from_json(&define).expect("define");
+    match read_json(&dir.join("define.json")) {
+        None => {}
+        Some(Ok(define)) => options.define = defines_from_json(&define).expect("define"),
+        Some(Err(code)) => return Outcome::Error(TemplateError::without_position(code, "input.tpl", "define")),
     }
-    if let Some(Ok(env)) = read_json(&dir.join("env.json")) {
-        options.env = Some(env_from_json(&env).expect("env"));
+    match read_json(&dir.join("env.json")) {
+        None => {}
+        Some(Ok(env)) => options.env = Some(env_from_json(&env).expect("env")),
+        Some(Err(code)) => return Outcome::Error(TemplateError::without_position(code, "input.tpl", "env")),
     }
     match engine.render(RenderTarget::Name("input.tpl"), &assign, &options) {
         Ok(html) => Outcome::Html(html),
