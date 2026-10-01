@@ -24,6 +24,7 @@ class Range {
 const providers = {};
 const warnings = [];
 const diagnostics = new Map();
+const decorationTypes = [];
 const disposable = { dispose() {} };
 const vscode = {
   Range,
@@ -35,7 +36,19 @@ const vscode = {
   DocumentHighlightKind: { Text: 0 },
   FoldingRange: class { constructor(start, end, kind) { Object.assign(this, { start, end, kind }); } },
   FoldingRangeKind: { Region: 3 },
-  window: { createOutputChannel: () => ({ warn: message => warnings.push(message), dispose() {} }) },
+  DecorationRangeBehavior: { ClosedClosed: 1 },
+  window: {
+    createOutputChannel: () => ({ warn: message => warnings.push(message), dispose() {} }),
+    createTextEditorDecorationType: options => {
+      decorationTypes.push(options);
+      return { options, dispose() {} };
+    },
+    visibleTextEditors: [],
+    onDidChangeVisibleTextEditors: listener => {
+      providers.visible = listener;
+      return disposable;
+    },
+  },
   workspace: {
     textDocuments: [],
     onDidOpenTextDocument: listener => {
@@ -116,7 +129,8 @@ test('the bundle does not load the workspace packages at run time', () => {
   assert.ok(existsSync(join(root, manifest.main)));
 });
 
-test('activate registers formatting, diagnostics, highlights, folding and the matching tag command', () => {
+test('activate registers formatting, diagnostics, tag backgrounds, highlights, folding and the matching tag command', () => {
+  assert.equal(decorationTypes.length, 1);
   assert.equal(providers.document.language, 'polyspec-template');
   assert.equal(providers.range.language, 'polyspec-template');
   assert.equal(providers.highlight.language, 'polyspec-template');
@@ -164,6 +178,29 @@ test('the matching tag command cycles through the tags and starts from the enclo
   assert.equal(move(text, 13), 0);
   assert.equal(move(text, 9), 11);
   assert.equal(move('plain', 2), null);
+});
+
+test('tag backgrounds cover every tag except comments, with a light and a dark color', () => {
+  const [type] = decorationTypes;
+  assert.match(type.light.backgroundColor, /^rgba\(/);
+  assert.match(type.dark.backgroundColor, /^rgba\(/);
+  const text = '<p class="{= c}">{* note *}{? a}{= b | raw}{/}</p>';
+  const painted = [];
+  const editor = { document: documentOf(text), setDecorations: (decoration, ranges) => painted.push({ decoration, ranges }) };
+  vscode.window.visibleTextEditors = [editor];
+  providers.visible([editor]);
+  assert.equal(painted.length, 1);
+  assert.equal(painted[0].decoration.options, type);
+  assert.deepEqual(painted[0].ranges.map(range => text.slice(range.start.offset, range.end.offset)), ['{= c}', '{? a}', '{= b | raw}', '{/}']);
+});
+
+test('tag backgrounds stay unchanged while the document does not parse', () => {
+  const painted = [];
+  const editor = { document: documentOf('{? a}'), setDecorations: () => painted.push(true) };
+  vscode.window.visibleTextEditors = [editor];
+  providers.visible([editor]);
+  assert.deepEqual(painted, []);
+  vscode.window.visibleTextEditors = [];
 });
 
 test('document formatting replaces the document with the formatted text', () => {

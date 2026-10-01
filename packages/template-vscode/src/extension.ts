@@ -1,5 +1,6 @@
-// VS Code extension entry: registers formatting, parse diagnostics and the tag structure features of the template language.
+// VS Code extension entry: registers formatting, parse diagnostics, tag backgrounds and the tag structure features of the template language.
 import * as vscode from 'vscode';
+import { registerDecorations } from './decorations.js';
 import { registerDiagnostics } from './diagnostics.js';
 import { registerFormatting } from './formatting.js';
 import { registerStructure } from './structure.js';
@@ -12,6 +13,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(output);
   registerFormatting(context, LANGUAGE, output);
   registerDiagnostics(context, LANGUAGE);
+  registerDecorations(context, LANGUAGE);
   registerStructure(context, LANGUAGE);
 }
 

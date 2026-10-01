@@ -104,14 +104,15 @@ code --list-extensions --show-versions | grep polyspec
 
 ### 진단과 짝 태그
 
-`templateStructure()`는 `@polyspec/template`의 `analyze()`로 문서를 파싱하고, 오류 코드, 파서의 줄과 열, 문자열 범위를 가진 파싱 오류 또는 블록 구성을 돌려준다. 구성은 loop, if, if-block 태그와 그 블록의 else-if, else 태그, 닫는 태그이며, 파서가 받아들인 태그 범위에서 얻는다. 테스트는 모든 적합성 사례에서 구성을 AST의 `If`, `For`, `IfBlock` span과 분기 span과 비교한다. 확장은 이 함수만 사용한다.
+`templateStructure()`는 `@polyspec/template`의 `analyze()`로 문서를 파싱하고, 오류 코드, 파서의 줄과 열, 문자열 범위를 가진 파싱 오류 또는 모든 태그 범위와 블록 구성을 돌려준다. 구성은 loop, if, if-block 태그와 그 블록의 else-if, else 태그, 닫는 태그이며, 파서가 받아들인 태그 범위에서 얻는다. 테스트는 모든 적합성 사례에서 구성을 AST의 `If`, `For`, `IfBlock` span과 분기 span과 비교한다. 확장은 이 함수만 사용한다.
 
 - 진단: 확장은 템플릿 문서가 열릴 때와 마지막 변경 250 ms 뒤에 문서를 파싱하고, `E_PARSE_UNCLOSED_BLOCK`, `E_PARSE_UNEXPECTED_CLOSE`, `E_PARSE_ELSE_OUTSIDE_BLOCK` 같은 파싱 오류를 오류 코드와 함께 파서 위치에 게시한다. 문서가 파싱되면 진단을 지운다.
+- 태그 배경: 주석을 뺀 모든 태그에 기본 테마가 `keyword.control`에 주는 색조의 배경을 칠한다. 밝은 테마에서는 `rgba(175, 0, 219, 0.08)`, 어두운 테마에서는 `rgba(197, 134, 192, 0.16)`이므로, 색 테마와 관계없이 태그가 HTML과 구별된다. 확장은 템플릿 편집기가 보일 때와 마지막 변경 250 ms 뒤에 배경을 칠한다. 문서가 파싱되지 않는 동안에는 이전 배경이 남아 편집을 따라 움직인다.
 - 강조: 커서가 여는 태그, 분기 태그, 닫는 태그에 있으면 같은 구성의 모든 태그를 강조한다.
 - 접기: 닫는 태그가 뒤의 줄에 있는 구성은 여는 태그의 줄부터 닫는 태그 앞 줄까지 접힌다.
 - 명령 Go to Matching Template Tag(`polyspec-template.goToMatchingTag`)는 커서를 커서 아래 구성의 다음 태그로 옮기고, 마지막 태그에서는 여는 태그로 옮긴다. 태그 밖에서는 커서를 감싸는 가장 안쪽 구성의 다음 태그로 옮긴다. 단축키는 macOS에서 `Cmd+Alt+\`, Windows와 Linux에서 `Ctrl+Alt+\`이며 템플릿 편집기에서만 동작한다. 통합 테스트는 macOS에서 VS Code 1.138.0의 기본 단축키가 `Cmd+Alt+\`를 다른 명령에 연결하지 않는지 검사한다.
 
-문서가 파싱되지 않는 동안에는 강조, 접기, 명령이 사용할 구성이 없다. 확장은 템플릿 분기를 가로지르는 HTML 요소의 균형을 검사하지 않는다. HTML 구조는 VS Code의 HTML 기능에 맡긴다.
+문서가 파싱되지 않는 동안에는 강조, 접기, 명령이 사용할 구성이 없고, 태그 배경을 다시 계산하지 않는다. 확장은 템플릿 분기를 가로지르는 HTML 요소의 균형을 검사하지 않는다. HTML 구조는 VS Code의 HTML 기능에 맡긴다.
 
 ### 문법
 
@@ -119,8 +120,8 @@ code --list-extensions --show-versions | grep polyspec
 
 | 태그 종류 | 태그의 scope | 시길의 scope |
 | --- | --- | --- |
-| echo | `meta.template.echo.polyspec-template` | `keyword.operator.echo.polyspec-template` |
-| raw 출력(마지막 파이프 단계가 `raw`인 echo) | `meta.template.echo.raw.polyspec-template` | `keyword.operator.echo.raw.polyspec-template` |
+| echo | `meta.template.echo.polyspec-template` | `keyword.control.echo.polyspec-template` |
+| raw 출력(마지막 파이프 단계가 `raw`인 echo) | `meta.template.echo.raw.polyspec-template` | `keyword.control.echo.raw.polyspec-template` |
 | if | `meta.template.if.polyspec-template` | `keyword.control.if.polyspec-template` |
 | else-if | `meta.template.elseif.polyspec-template` | `keyword.control.elseif.polyspec-template` |
 | else | `meta.template.else.polyspec-template` | `keyword.control.else.polyspec-template` |
@@ -135,7 +136,7 @@ code --list-extensions --show-versions | grep polyspec
 | 래퍼 태그 | 태그 종류를 감싸는 `meta.template.wrapped.polyspec-template` | `punctuation.definition.wrapper.begin.polyspec-template` |
 | 이스케이프 `\{` | `constant.character.escape.polyspec-template` | |
 
-구분자는 `punctuation.definition.tag.begin.polyspec-template`과 `punctuation.definition.tag.end.polyspec-template`이다. 표현식 안에서 문법은 문자열과 그 이스케이프, 숫자, `true`, `false`, `null`, `in`, 비교, 관계, 논리, 산술, coalesce, elvis, 삼항, spread, key-value 연산자, 파이프와 그 함수(`support.function.filter.polyspec-template`, `raw`는 `support.function.filter.raw.polyspec-template`), 함수 호출, 멤버 호출, 클래스 호출, 멤버 접근, `row.index_` 같은 루프 메타, 변수, include와 block 경로, block 식별자, block scope 항목에 scope를 준다. 어떤 표현식 토큰도 받아들이지 않는 문자는 `invalid.illegal.polyspec-template`이다.
+구분자는 `keyword.control.tag.begin.polyspec-template`과 `keyword.control.tag.end.polyspec-template`이고, 블록 이름은 `entity.name.type.block.polyspec-template`이다. 흔히 쓰는 모든 테마가 `keyword.control`을 HTML 태그, 속성, 텍스트와 다른 색으로 칠하므로 구분자와 기호에 이 스코프를 쓴다. HTML이 `<`와 `>`에 쓰는 `punctuation.definition.tag`를 쓰면 태그가 HTML처럼 보였다. 표현식 안에서 문법은 문자열과 그 이스케이프, 숫자, `true`, `false`, `null`, `in`, 비교, 관계, 논리, 산술, coalesce, elvis, 삼항, spread, key-value 연산자, 파이프와 그 함수(`support.function.filter.polyspec-template`, `raw`는 `support.function.filter.raw.polyspec-template`), 함수 호출, 멤버 호출, 클래스 호출, 멤버 접근, `row.index_` 같은 루프 메타, 변수, include와 block 경로, block 식별자, block scope 항목에 scope를 준다. 어떤 표현식 토큰도 받아들이지 않는 문자는 `invalid.illegal.polyspec-template`이다.
 
 ### 문법의 한계
 

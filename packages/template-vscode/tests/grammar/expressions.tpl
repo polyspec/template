@@ -44,5 +44,5 @@
 {*                       ^^^^ support.function.filter.polyspec-template
 {*                                    ^^^^^ support.function.filter.polyspec-template
 {= "}" + x}
-{*  ^ string.quoted.double.polyspec-template - punctuation.definition.tag.end.polyspec-template
+{*  ^ string.quoted.double.polyspec-template - keyword.control.tag.end.polyspec-template
 {*       ^ meta.template.echo.polyspec-template variable.other.readwrite.polyspec-template

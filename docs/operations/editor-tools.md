@@ -104,14 +104,15 @@ The extension registers the language `polyspec-template` for `.tpl` files with:
 
 ### Diagnostics and matching tags
 
-`templateStructure()` parses a document with `analyze()` of `@polyspec/template` and returns either the parse error with its code, its parser line and column and its string range, or the block constructs. A construct is a loop, if or if-block tag, the else-if and else tags of that block and its close tag, taken from the tag ranges that the parser accepted. A test compares the constructs with the `If`, `For` and `IfBlock` spans and the branch spans of the AST for every conformance case. The extension uses only this function:
+`templateStructure()` parses a document with `analyze()` of `@polyspec/template` and returns either the parse error with its code, its parser line and column and its string range, or every tag range and the block constructs. A construct is a loop, if or if-block tag, the else-if and else tags of that block and its close tag, taken from the tag ranges that the parser accepted. A test compares the constructs with the `If`, `For` and `IfBlock` spans and the branch spans of the AST for every conformance case. The extension uses only this function:
 
 - Diagnostics: the extension parses a template document when it opens and 250 ms after the last change, and publishes the parse error, for example `E_PARSE_UNCLOSED_BLOCK`, `E_PARSE_UNEXPECTED_CLOSE` or `E_PARSE_ELSE_OUTSIDE_BLOCK`, at the parser position with the error code. The diagnostic is removed when the document parses.
+- Tag backgrounds: every tag except comments gets a background in the hue that the default themes give `keyword.control`, `rgba(175, 0, 219, 0.08)` in light themes and `rgba(197, 134, 192, 0.16)` in dark themes, so tags stand out from the HTML whatever the color theme is. The extension paints visible template editors when they appear and 250 ms after the last change. While a document does not parse, the previous backgrounds stay and move with the edits.
 - Highlights: with the cursor on an opening, branch or close tag, every tag of the same construct is highlighted.
 - Folding: each construct whose close tag is on a later line folds from the line of its opening tag to the line before its close tag.
 - The command Go to Matching Template Tag (`polyspec-template.goToMatchingTag`) moves the cursor to the next tag of the construct under the cursor, and from the last tag to the opening tag. Outside a tag it moves to the next tag of the innermost enclosing construct. The keybinding is `Cmd+Alt+\` on macOS and `Ctrl+Alt+\` on Windows and Linux, active only in a template editor. The integration test checks on macOS that the default keybindings of VS Code 1.138.0 bind `Cmd+Alt+\` to no other command.
 
-While a document does not parse, highlights, folding and the command have no constructs to use. The extension does not check the balance of HTML elements across template branches; HTML structure is left to the HTML features of VS Code.
+While a document does not parse, highlights, folding and the command have no constructs to use, and tag backgrounds are not recomputed. The extension does not check the balance of HTML elements across template branches; HTML structure is left to the HTML features of VS Code.
 
 ### Grammar
 
@@ -119,8 +120,8 @@ The grammar `text.html.polyspec-template` includes `text.html.basic` and injects
 
 | Tag kind | Scope of the tag | Scope of the sigil |
 | --- | --- | --- |
-| echo | `meta.template.echo.polyspec-template` | `keyword.operator.echo.polyspec-template` |
-| raw output (echo whose last pipe step is `raw`) | `meta.template.echo.raw.polyspec-template` | `keyword.operator.echo.raw.polyspec-template` |
+| echo | `meta.template.echo.polyspec-template` | `keyword.control.echo.polyspec-template` |
+| raw output (echo whose last pipe step is `raw`) | `meta.template.echo.raw.polyspec-template` | `keyword.control.echo.raw.polyspec-template` |
 | if | `meta.template.if.polyspec-template` | `keyword.control.if.polyspec-template` |
 | else-if | `meta.template.elseif.polyspec-template` | `keyword.control.elseif.polyspec-template` |
 | else | `meta.template.else.polyspec-template` | `keyword.control.else.polyspec-template` |
@@ -135,7 +136,7 @@ The grammar `text.html.polyspec-template` includes `text.html.basic` and injects
 | wrapped tag | `meta.template.wrapped.polyspec-template` around the tag kind | `punctuation.definition.wrapper.begin.polyspec-template` |
 | escape `\{` | `constant.character.escape.polyspec-template` | |
 
-Delimiters are `punctuation.definition.tag.begin.polyspec-template` and `punctuation.definition.tag.end.polyspec-template`. Inside expressions the grammar assigns scopes to strings and their escapes, numbers, `true`, `false` and `null`, `in`, comparison, relational, logical, arithmetic, coalesce, elvis, ternary, spread and key-value operators, the pipe and its function (`support.function.filter.polyspec-template`, and `support.function.filter.raw.polyspec-template` for `raw`), function calls, member calls, class calls, member access, loop metadata such as `row.index_`, variables, include and block paths, block identifiers and block scope items. A character that no expression token accepts is `invalid.illegal.polyspec-template`.
+Delimiters are `keyword.control.tag.begin.polyspec-template` and `keyword.control.tag.end.polyspec-template`, and a block name is `entity.name.type.block.polyspec-template`. The delimiters and the sigils use `keyword.control` because every common theme colors it apart from HTML tags, attributes and text; `punctuation.definition.tag`, which HTML uses for `<` and `>`, made the tags look like HTML. Inside expressions the grammar assigns scopes to strings and their escapes, numbers, `true`, `false` and `null`, `in`, comparison, relational, logical, arithmetic, coalesce, elvis, ternary, spread and key-value operators, the pipe and its function (`support.function.filter.polyspec-template`, and `support.function.filter.raw.polyspec-template` for `raw`), function calls, member calls, class calls, member access, loop metadata such as `row.index_`, variables, include and block paths, block identifiers and block scope items. A character that no expression token accepts is `invalid.illegal.polyspec-template`.
 
 ### Grammar limits
 

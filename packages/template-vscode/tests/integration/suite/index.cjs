@@ -60,7 +60,7 @@ const enabled = [
     const line = tokens.map(token => `${JSON.stringify(token.c)} ${token.t}`).join('\n');
     const echoStart = scopesOf(tokens, '{', 'meta.template.echo.polyspec-template');
     assert.ok(echoStart.length > 0 && echoStart[0].t.split(' ').includes('string.quoted.double.html'), line);
-    assert.ok(echoStart[0].t.split(' ').includes('punctuation.definition.tag.begin.polyspec-template'), line);
+    assert.ok(echoStart[0].t.split(' ').includes('keyword.control.tag.begin.polyspec-template'), line);
     assert.ok(scopesOf(tokens, 'post', 'variable.other.readwrite.polyspec-template').length > 0, line);
     assert.ok(scopesOf(tokens, '?', 'keyword.control.if.polyspec-template').length > 0, line);
     assert.ok(scopesOf(tokens, 'tr', 'entity.name.tag.html').length > 0, line);
