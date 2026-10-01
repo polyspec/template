@@ -15,6 +15,7 @@
 
 ## 미발행
 
+- `make conformance`, `make delimiter-matrix`, `make parity`가 모든 구현을 먼저 빌드하도록 했다. 이 타깃들은 Go와 Rust 명령줄 프로그램과 PHP 확장을 마지막 빌드 그대로 실행했기 때문에, 소스를 바꾼 뒤에도 오래된 바이너리를 검사했다. 실패 29건은 모두 오래된 빌드 때문이었고, 반대로 오래된 빌드가 실패를 감출 수도 있었다.
 - 포매터 패키지 `@polyspec/template-format`을 추가했다. `format()`과 명령 `template-fmt`을 제공한다. 포매터는 `docs/operations/editor-tools.md`의 스타일로 태그 안의 공백을 정규화하고, 태그 밖의 텍스트, 주석, 지시문, 여러 줄 태그를 유지하며, 포맷한 AST가 span을 제외하고 소스 AST와 같을 때만 결과를 돌려준다. 명령은 파일과 디렉터리를 출력하거나 다시 쓰거나(`--write`) 검사하고(`--check`, 종료 상태 1), 표준 입력을 읽으며, 파싱되지 않는 파일을 위치와 함께 보고하고 종료 상태 2로 끝난다.
 - `.tpl` 파일을 위한 VS Code 확장 `polyspec-template`을 추가했다. HTML을 포함하고 텍스트, 속성 값, CSS, JavaScript, HTML 주석에 템플릿 태그를 주입하는 TextMate 문법은 태그 종류마다, 표현식 토큰마다 scope를 준다. 언어 설정은 `{* *}` 주석과 구분자 괄호를 정의하고, 문서 포맷과 범위 포맷은 `@polyspec/template-format`을 호출한다. `.vsix`는 VS Code 1.138 이후의 Node.js 24 런타임용으로 포매터와 파서를 번들한다. VS Code는 Restricted Mode에서 이 선언이 없는 확장을 문법까지 비활성화하므로 확장은 신뢰하지 않은 작업 공간과 가상 작업 공간 지원을 선언한다. 통합 테스트는 `.vsix`를 VS Code 1.138.0에 설치하고 workspace trust를 켠 상태로 신뢰하지 않은 폴더를 열어 언어, 활성화, `_workbench.captureSyntaxTokens`로 속성 값 안의 태그 scope, `vscode.executeFormatDocumentProvider`로 포맷을 검사한다. `capabilities`를 지운 두 번째 실행은 VS Code가 확장을 비활성화하는지 요구한다.
 - VS Code 확장에 파싱 진단과 태그 구조를 추가했다. `@polyspec/template-format`의 `templateStructure()`는 문자열 위치를 가진 파싱 오류, 또는 파서의 태그 범위에서 얻은 블록 구성을 돌려주며, 테스트는 모든 적합성 사례에서 구성을 AST span과 대조한다. 확장은 파싱 오류를 오류 코드와 함께 파서 위치에 게시하고, 한 구성의 태그를 강조하고, 여러 줄 구성을 접고, Go to Matching Template Tag(macOS `Cmd+Alt+\`, Windows와 Linux `Ctrl+Alt+\`)를 제공한다. 템플릿 분기를 가로지르는 HTML 요소 균형은 검사하지 않는다.
