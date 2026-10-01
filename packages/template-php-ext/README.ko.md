@@ -46,7 +46,8 @@ try {
 | `Engine::parse(string $source, string $name, array $options): array` | 템플릿 하나를 파싱해 AST를 중첩 배열로 반환한다. |
 | `Engine::parseToJson(string $source, string $name, array $options): string` | 템플릿 하나를 파싱해 AST를 JSON 텍스트로 반환한다. |
 | `$engine->register(string $name, callable $function): void` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. |
-| `$engine->render(string $name, mixed $assign, array $options): string` | PHP assign 데이터로 템플릿을 렌더한다. `$options`는 `define`과 `env`를 받는다. |
+| `$engine->registerClass(string $class, string $method, callable $function): void` | 논리 클래스 함수 `Class::method`를 `fn(array $args, array $env): mixed`로 등록한다. |
+| `$engine->render(string $name, mixed $assign, array $options): string` | PHP assign 데이터로 템플릿을 렌더한다. 배열, `stdClass`, `JsonSerializable` 값은 템플릿 값이 되고, 그 밖의 객체는 공개 속성과 메서드가 보이는 인스턴스로 유지된다(VAL-14, RT-60). `$options`는 `define`과 `env`를 받는다. |
 | `$engine->renderJson(string $name, string $assign, ?string $define, ?string $env): string` | assign 데이터, 템플릿 define, 환경을 JSON 텍스트로 받아 템플릿을 렌더한다. |
 | `TemplateError` | `\Exception`을 상속한다. `getErrorCode()`, `getTemplate()`, `getErrorLine()`, `getErrorCol()`, `getOffset()`, `getEnd()`, `toArray()`. |
 

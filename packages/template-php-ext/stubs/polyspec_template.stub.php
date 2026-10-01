@@ -71,6 +71,11 @@ final class Engine
     public function register(string $name, callable $function): void {}
 
     /**
+     * Registers the logical class function Class::method as fn(array $args, array $env): mixed.
+     */
+    public function registerClass(string $className, string $method, callable $function): void {}
+
+    /**
      * Renders a template with assign data given as a PHP value.
      *
      * @param array{define?: array<string, string|array{template?: string, data?: mixed, html?: string}>, env?: array{timezone?: string, now?: float|int}} $options

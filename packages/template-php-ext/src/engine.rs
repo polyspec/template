@@ -9,7 +9,7 @@ use ext_php_rs::types::{ZendHashTable, Zval};
 use polyspec_template::functions::helpers::FunctionContext;
 use polyspec_template::{
     AstProgram as CoreProgram, BindError, EngineOptions, ErrorCode, FsLoader, Limits, ParseOptions, RenderOptions, RenderTarget,
-    TemplateError as EngineError, Value, defines_from_json, env_from_json, parse as core_parse, to_json_value,
+    OrderedMap, TemplateError as EngineError, Value, defines_from_json, env_from_json, parse as core_parse, to_json_value,
 };
 
 /// The template engine backed by the native implementation.
@@ -73,11 +73,20 @@ impl NativeEngine {
         self.engine.register(&name, host).map_err(PhpException::default)
     }
 
+    /// FUN-43, VAL-19: registers the logical class function `ClassName::method` as
+    /// `fn(array $args, array $env): mixed`.
+    pub fn register_class(&mut self, class_name: String, method: String, function: &Zval) -> PhpResult<()> {
+        let callable =
+            ZendCallable::new_owned(function.shallow_clone()).map_err(|_| PhpException::default("argument is not callable".to_string()))?;
+        let host = Box::new(move |args: &[Value], context: &FunctionContext<'_>| call_php(&callable, args, context));
+        self.engine.register_class(&class_name, &method, host).map_err(PhpException::default)
+    }
+
     /// Renders a template with data given as a PHP value.
     ///
     /// `options` accepts `define` and `env` as arrays of the form of the specification.
     pub fn render(&self, name: String, assign: Option<&Zval>, options: Option<&ZendHashTable>) -> PhpResult<String> {
-        let bound = (|| -> Result<(serde_json::Value, RenderOptions), BindError> {
+        let bound = (|| -> Result<(OrderedMap, RenderOptions), BindError> {
             let root = match assign {
                 Some(assign) => php_to_map(assign)?,
                 None => Default::default(),
@@ -91,11 +100,12 @@ impl NativeEngine {
                     render_options.env = Some(env_from_json(&php_to_json(env)?)?);
                 }
             }
-            Ok((to_json_value(&Value::map(root)), render_options))
+            Ok((root, render_options))
         })();
         let (assign, render_options) = bound.map_err(|error| php_exception(&bind_failure(&name, error)))?;
+        // The values go to the engine without JSON, so assigned objects keep their instances (VAL-18).
         self.engine
-            .render(RenderTarget::Name(&name), &assign, &render_options)
+            .render_values(RenderTarget::Name(&name), assign, &render_options)
             .map_err(|error| php_exception(&error))
     }
 

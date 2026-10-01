@@ -15,6 +15,7 @@
 
 ## Unreleased
 
+- Completed the PHP value binding of the PHP extension (VAL-14, RT-60). The extension rejected every PHP object, including an empty `stdClass`, which is the only PHP form of an empty map, and it had no `registerClass`. It now binds `stdClass` as a map and a `JsonSerializable` object as its value, retains other objects with their public properties and methods, and registers logical class functions. Rendering passes values to the engine without JSON, so objects keep their instances.
 - Fixed HTML escaping in the Rust implementation, which the PHP extension also uses. After the first character that needs a reference, it copied the text byte by byte and panicked on the first multi-byte character, so `<제목>` aborted the Rust CLI and the PHP process. It now copies the text between replaced characters. The conformance case `echo/html-escape-multibyte` reproduces the failure in every language.
 - Added a manifest-declared language test matrix that requires equal semantic coverage for TypeScript, Go, Rust and PHP in both AST and generated modes. Added mutation checks for missing language support, test paths and compiler modes, and included the matrix in the default check.
 - Corrected the expression and guide documents to describe the implemented member-call and logical class-call syntax. The documents no longer state that method calls are unavailable or that generated native calls are partial.
