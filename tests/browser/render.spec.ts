@@ -12,8 +12,9 @@ interface BrowserCase {
   id: string;
   templates: Record<string, string>;
   data: string;
-  define?: unknown;
-  env?: unknown;
+  // JSON text, read by the template's JSON parser in the page, as the command line programs read their files
+  define?: string;
+  env?: string;
   delimiters?: string;
   expectedHtml?: string;
   expectedError?: unknown;
@@ -46,8 +47,8 @@ function loadCases(): BrowserCase[] {
       const item: BrowserCase = { id: `${group.name}/${entry.name}`, templates, data: dataText ?? '{}' };
       const define = read('define.json');
       const env = read('env.json');
-      if (define) item.define = JSON.parse(define);
-      if (env) item.env = JSON.parse(env);
+      if (define !== undefined) item.define = define;
+      if (env !== undefined) item.env = env;
       if (options) item.delimiters = (JSON.parse(options) as { delimiters?: string }).delimiters;
       const html = read('expected.html');
       const error = read('expected.error.json');

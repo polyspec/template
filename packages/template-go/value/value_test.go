@@ -110,3 +110,43 @@ func TestBind(t *testing.T) {
 	}
 	_ = item{}.skip
 }
+
+type convertRecord struct{ Name string }
+
+func (r convertRecord) TemplateValue() value.Value {
+	result := value.NewOrderedMap()
+	result.Set("name", r.Name)
+	return result
+}
+
+type convertObject struct{ Name string }
+
+func TestConvertUsesSourceValues(t *testing.T) {
+	// VAL-21: a typed record of generated code reaches the runtime as a map of its fields, also inside a
+	// slice, a nil pointer is null, and a struct without a template value stays a native object.
+	converted, err := value.Convert([]convertRecord{{Name: "a"}, {Name: "b"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	list, ok := converted.(value.List)
+	if !ok || len(list) != 2 {
+		t.Fatalf("got %#v", converted)
+	}
+	for index, want := range []string{"a", "b"} {
+		entry, isMap := list[index].(*value.OrderedMap)
+		if !isMap {
+			t.Fatalf("item %d = %#v", index, list[index])
+		}
+		if name, _ := entry.Get("name"); name != want {
+			t.Fatalf("item %d name = %#v", index, name)
+		}
+	}
+	var missing *convertRecord
+	if converted, err := value.Convert(missing); err != nil || converted != nil {
+		t.Fatalf("nil record = %#v, %v", converted, err)
+	}
+	object := &convertObject{Name: "o"}
+	if converted, err := value.Convert(object); err != nil || converted != any(object) {
+		t.Fatalf("native object = %#v, %v", converted, err)
+	}
+}
