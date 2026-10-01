@@ -182,8 +182,8 @@ test('the matching tag command cycles through the tags and starts from the enclo
 
 test('tag backgrounds cover every tag except comments, with a light and a dark color', () => {
   const [type] = decorationTypes;
-  assert.match(type.light.backgroundColor, /^rgba\(/);
-  assert.match(type.dark.backgroundColor, /^rgba\(/);
+  assert.deepEqual(type.dark, { backgroundColor: '#16351c' });
+  assert.deepEqual(type.light, { backgroundColor: '#e3f6dd' });
   const text = '<p class="{= c}">{* note *}{? a}{= b | raw}{/}</p>';
   const painted = [];
   const editor = { document: documentOf(text), setDecorations: (decoration, ranges) => painted.push({ decoration, ranges }) };

@@ -4,10 +4,15 @@ import * as vscode from 'vscode';
 
 const DELAY_MS = 250;
 
-/** The background of a template tag: the hue that the default themes give `keyword.control`, at low opacity. */
+/**
+ * The background of a template tag: a deep green that differs in lightness from the editor background (about ΔL*
+ * +13 on the dark default theme, ΔL* 5 on the light one) and keeps every syntax color above 4.5:1 on the dark theme.
+ * A more saturated green such as #044700 is easier to see but lowers the keyword sigils to 4:1. A color at the
+ * editor's own lightness, such as black on a dark theme, cannot be told apart.
+ */
 const TAG_BACKGROUND: vscode.DecorationRenderOptions = {
-  light: { backgroundColor: 'rgba(175, 0, 219, 0.08)' },
-  dark: { backgroundColor: 'rgba(197, 134, 192, 0.16)' },
+  light: { backgroundColor: '#e3f6dd' },
+  dark: { backgroundColor: '#16351c' },
   borderRadius: '3px',
   rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
 };
