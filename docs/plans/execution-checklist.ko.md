@@ -284,3 +284,10 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 - `make release-test-matrix`가 단위, generated source compile, 적합성, 위치 오류와 실패 복구, mutation 거부, 격리 설치, browser DOM 출력, 성능 동일성의 각 release 계층을 독립적으로 증명.
 - 깨끗한 checkout에서 `make install-check`, `make showcase-check`, `make docs-verify-idempotent`, `make release-check` 통과.
 - `docs/features.md`와 `docs/features.ko.md`가 모든 행에 동일한 상태 필드와 근거 링크를 가짐.
+
+2026-10-02의 증거. Node 26.8.1, Go 1.27.1(`go.mod`의 toolchain 줄로 받음), Rust 1.98.1, PHP 8.5.10에서 실행했다.
+
+- 커밋 "Make template tags stand out in VS Code whatever the color theme is"의 새 체크아웃에서 `npm ci` 뒤 `make check`가 상태 0으로 통과했다. 이 증거를 기록하는 커밋의 Makefile 변경을 적용한 상태다. 이 실행에서 `runtime-interface-check`와 `compiler-interface-check`가 사용하는 PHP 의존성을 설치하지 않는다는 것을 발견했고, 이제 두 타깃은 `build-php`에 의존한다. 커밋 "Repair the release checks broken by the host value changes and run them in make check"부터 `make check`는 `test-browser`, `conformance-all-modes`, `install-check`, `showcase-check`, 문서 상태 검사를 포함한다.
+- 커밋 "Make template tags stand out in VS Code whatever the color theme is"에서 `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, `php-ext` 사이에 244개 케이스 중 244개가 일치한다고 보고했다.
+- `make conformance-all-modes`가 1,952개 칸을 fallback 없이 모두 통과했다. `make test-browser`, `make install-check`, `make showcase-check`, `make docs-verify-idempotent`가 통과했다.
+- 커밋 "Make template tags stand out in VS Code whatever the color theme is"에서 `make release-check`가 통과했다. 격리된 깨끗한 체크아웃에서 `make release-test-matrix`의 일곱 계층을 모두 실행했다.

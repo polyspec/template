@@ -1,5 +1,6 @@
 # 변경 기록
 
+- `runtime-interface-check`와 `compiler-interface-check`가 실행하는 PHP 의존성을 설치하게 했다. 새 체크아웃에서는 `vendor/bin/phpunit`이 없어 `make check`가 그곳에서 실패했다. 실행 체크리스트에 2026-10-02의 완료 기준 증거를 기록했다.
 - 색 테마와 관계없이 VS Code에서 템플릿 태그가 눈에 띄게 했다. 문법은 구분자와 기호에 HTML이 `<`와 `>`에 쓰는 `punctuation.definition.tag` 대신 `keyword.control` 스코프를, 블록 이름에 `entity.name.type`을 붙인다. 확장은 파서의 태그 범위로 주석을 뺀 모든 태그에 배경을 칠한다. 어두운 테마에서는 `#16351c`, 밝은 테마에서는 `#e3f6dd`인 진한 초록이며, 편집기 배경과 밝기가 다르면서 모든 문법 색을 읽을 수 있게 유지한다. 이를 위해 `templateStructure()`가 모든 태그 범위를 돌려준다.
 - 타입이 있는 generated Go 값의 변환을 런타임으로 옮겼다. `value.Convert`는 `value.Source`의 template 값을 반환하고, generated record와 타입 있는 map이 이를 구현한다. generated Go 소스는 더 이상 `reflect`를 import하지 않는다. `typed-generator-compile-check`가 이를 금지한다. slice 안의 record, nil record, native object를 값 테스트로 고정했다.
 - PHP 설치 프로젝트에서 namespace가 붙은 generated class를 생성하게 했다. 필수 PHP namespace 때문에 namespace 없는 클래스에 접근할 수 없었다.
