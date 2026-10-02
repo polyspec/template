@@ -28,6 +28,8 @@ Mutation test는 필수 근거다. Interface operation, artifact digest, output 
 
 모든 명세 규칙은 기계적으로 검사되는 근거 경로 하나를 갖는다. 실행 가능한 언어 동작은 canonical fixture가 직접 검증한다. Schema, host binding, 공개 runtime 구조, compiler artifact, 발행 경계에 관한 규칙은 `tests/rule-evidence.json`에 검증 명령과 구체적인 test file을 기록한다. 알 수 없는 규칙, 없는 근거 file, 중복된 비-fixture 배정, 근거 경로가 없는 규칙이 있으면 `make rules-check`가 실패한다.
 
+Package 설치 검사는 package, 설치 프로젝트, Go module cache와 Cargo target을 시스템 임시 디렉터리의 새 디렉터리 하나에 만들고, 설치 프로젝트가 통과하든 실패하든 검사가 끝날 때 그 디렉터리를 제거한다. Go는 기본적으로 module cache 파일을 읽기 전용으로 만들어 재귀 제거가 그 파일을 제거하지 못하므로, Go는 `-modcacherw`로 module cache를 만든다. 제거가 실패하면 검사는 그 디렉터리의 경로와 함께 실패한다. `scripts/check-install-workspace.mjs`가 설치 프로젝트보다 먼저 실행되어 두 조건을 증명한다.
+
 짧은 성능 실행은 안정적인 속도 점수가 아니라 정확성 회귀 검사다. 언어·모드마다 새 표본 세 개를 만들고 출력 식별값과 모든 metric field를 검사하며 커밋된 21표본 보고서는 바꾸지 않는다.
 
 발행 전에는 `make release-check`를 실행한다. 이 명령은 source worktree가 깨끗한지 확인하고 `HEAD`의 분리된 임시 worktree를 만든 다음 lock으로 고정한 JavaScript 의존성과 browser를 설치하고 그 안에서 전체 release matrix를 실행한다. Matrix는 첫 계약 검사 전에 lock으로 고정한 PHP 의존성을 준비하고 확장 test target은 자체 의존성을 준비한다. 임시 checkout은 성공하거나 실패해도 제거한다.

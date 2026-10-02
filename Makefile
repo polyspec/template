@@ -166,6 +166,7 @@ conformance-generated-php: build-ts ## PHP generated compiler conformance suite
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php ## AST and generated conformance in all four languages
 
 install-check: typed-generator ## Install immutable package artifacts in isolated install projects
+	node scripts/check-install-workspace.mjs
 	node scripts/check-package-installs.mjs
 
 parity: build-ts build-go build-rust build-php ## Cross-language output comparison
