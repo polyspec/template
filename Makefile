@@ -5,11 +5,11 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
-	conformance delimiter-matrix parity test-browser ext test-ext rules-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
+	conformance delimiter-matrix parity test-browser ext test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	build-language test-language build-lsp test-lsp format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
+	build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -22,6 +22,7 @@ SHOWCASE_RUST := tools/showcase/adapters/rust
 LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
 VSCODE_DIR := packages/template-vscode
+CODEMIRROR_DIR := packages/template-codemirror
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 
 # require-dir prints "not implemented" and fails when a package directory is absent.
@@ -40,6 +41,7 @@ help: ## List targets
 	@echo "  test-browser           Browser rendering test (Playwright)"
 	@echo "  ext / test-ext         Build and test the PHP extension"
 	@echo "  rules-check            Check case.json rule identifiers against docs/spec"
+	@echo "  editor-boundary-check  Check the editor layer boundaries (EDT-2, EDT-3)"
 	@echo "  doc-coverage           Check that public symbols carry documentation comments"
 	@echo "  schema-check           Validate schema/ast.schema.json and every expected.ast.json"
 	@echo "  docs-check             Document links, translation pairs, code blocks, status fields"
@@ -63,6 +65,8 @@ help: ## List targets
 	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
 	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
 	@echo "  install-cli            Link template-fmt into the global npm bin directory"
+	@echo "  build-codemirror       Build the CodeMirror 6 adapter"
+	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
 	@echo "  test-vscode            Grammar tests, extension tests and type check"
 	@echo "  test-vscode-integration Run the extension inside VS Code (downloads VS Code into .vscode-test)"
@@ -70,7 +74,7 @@ help: ## List targets
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
+check: docs-check rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -135,6 +139,14 @@ format-external-check: build-language ## Run the formatter safety invariant on a
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
 	TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" npm test -w @polyspec/template-language -- --run tests/invariant.test.ts
 
+build-codemirror: build-language ## Build the CodeMirror 6 adapter
+	npm run build -w @polyspec/template-codemirror
+
+test-codemirror: build-codemirror ## CodeMirror adapter tests against the editor fixtures, browser test, type check
+	npm test -w @polyspec/template-codemirror -- --run
+	npm run test:browser -w @polyspec/template-codemirror
+	npm run typecheck -w @polyspec/template-codemirror
+
 install-cli: build-language ## Link template-fmt into the global npm bin directory
 	npm link -w @polyspec/template-language
 
@@ -197,6 +209,9 @@ test-ext: ext ## Test the PHP extension
 
 rules-check: ## Check case.json rule identifiers against the specification
 	node scripts/check-rules.mjs
+
+editor-boundary-check: ## Check that adapters do not use the parser and the language service uses no editor, Node.js or DOM module
+	node scripts/check-editor-boundaries.mjs
 
 dependency-policy-check: build-php ## Reject unexplained or stale stable-version pins
 	node scripts/check-dependency-policy.mjs
@@ -353,4 +368,4 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
