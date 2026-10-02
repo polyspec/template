@@ -33,6 +33,6 @@ make showcase
 - [Feature status](docs/features.md) records implementation, verification and deployment per feature.
 - [Executable example site](examples/site/index.html) renders page scenarios and shows parity, repeatability and throughput artifacts.
 - [Operations](docs/operations/) describes development, conformance and documentation procedures.
-- [Formatter and VS Code extension](docs/operations/editor-tools.md) describes the `template-fmt` formatter and the VS Code extension.
+- [Formatter and VS Code extension](docs/operations/editor-tools.md) describes the `template-fmt` formatter, the CodeMirror 6 adapter and the VS Code extension.
 - [Execution checklist](docs/plans/execution-checklist.md) lists the tasks that remain.
 - [Changelog](CHANGELOG.md) records actual changes and their verification.

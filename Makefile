@@ -9,7 +9,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	build-language test-language format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
+	build-language test-language build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -21,6 +21,7 @@ EXT_DIR  := packages/template-php-ext
 SHOWCASE_RUST := tools/showcase/adapters/rust
 LANGUAGE_DIR := packages/template-language
 VSCODE_DIR := packages/template-vscode
+CODEMIRROR_DIR := packages/template-codemirror
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 
 # require-dir prints "not implemented" and fails when a package directory is absent.
@@ -60,6 +61,8 @@ help: ## List targets
 	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
 	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
 	@echo "  install-cli            Link template-fmt into the global npm bin directory"
+	@echo "  build-codemirror       Build the CodeMirror 6 adapter"
+	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
 	@echo "  test-vscode            Grammar tests, extension tests and type check"
 	@echo "  test-vscode-integration Run the extension inside VS Code (downloads VS Code into .vscode-test)"
@@ -67,7 +70,7 @@ help: ## List targets
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -124,6 +127,14 @@ format-check: build-language ## Check that the formatter fixtures are formatted
 format-external-check: build-language ## Run the formatter safety invariant on an explicit external template tree
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
 	TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" npm test -w @polyspec/template-language -- --run tests/invariant.test.ts
+
+build-codemirror: build-language ## Build the CodeMirror 6 adapter
+	npm run build -w @polyspec/template-codemirror
+
+test-codemirror: build-codemirror ## CodeMirror adapter tests against the editor fixtures, browser test, type check
+	npm test -w @polyspec/template-codemirror -- --run
+	npm run test:browser -w @polyspec/template-codemirror
+	npm run typecheck -w @polyspec/template-codemirror
 
 install-cli: build-language ## Link template-fmt into the global npm bin directory
 	npm link -w @polyspec/template-language
@@ -343,4 +354,4 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first

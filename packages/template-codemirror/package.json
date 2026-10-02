@@ -1,0 +1,55 @@
+{
+  "name": "@polyspec/template-codemirror",
+  "version": "0.0.1",
+  "description": "CodeMirror 6 extension for template sources: HTML language, template token classes, tag backgrounds, diagnostics, folding, matching tag highlights, indentation and formatting from @polyspec/template-language",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist/index.mjs",
+    "dist/index.mjs.map",
+    "dist/index.d.ts"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "test:browser": "playwright test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@polyspec/template-language": "0.0.1"
+  },
+  "peerDependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-html": "^6.4.12",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13"
+  },
+  "devDependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-html": "^6.4.12",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "esbuild": "^0.28.2",
+    "tsup": "^8.5.1",
+    "vitest": "^5.0.3"
+  }
+}

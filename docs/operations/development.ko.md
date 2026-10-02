@@ -22,7 +22,7 @@ make help
 make check
 ```
 
-`make check`는 `docs-check`, `rules-check`, `runtime-interface-check`, `compiler-interface-check`, `feature-check`, `language-test-matrix`, `contract-check`, `function-contract-check`, `lint`, `test-ts`, `test-language`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance-all-modes`, `delimiter-matrix`, `generated-native-check`, `test-ext`, `typed-generator-compile-check`, `install-check`, `test-browser`, `showcase-check`를 실행한다. 마지막 네 개는 릴리스 계층이기도 하다. `make check`를 통과한 변경이 릴리스 매트릭스에서 실패하면 안 되므로 `make check`에 포함한다. 패키지가 아직 없는 타겟은 `not implemented`를 출력하고 상태 1로 종료한다. `lint`는 ESLint, gofmt, Rust 크레이트·PHP 확장·Rust showcase adapter의 `cargo fmt --check`를 실행하고, Rust showcase adapter를 경고를 오류로 처리해 컴파일하며, Pint를 실행한다. `test-rust`와 `test-ext`는 Rust 크레이트와 PHP 확장에 경고를 오류로 처리하는 clippy를 실행한다.
+`make check`는 `docs-check`, `rules-check`, `runtime-interface-check`, `compiler-interface-check`, `feature-check`, `language-test-matrix`, `contract-check`, `function-contract-check`, `lint`, `test-ts`, `test-language`, `test-codemirror`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance-all-modes`, `delimiter-matrix`, `generated-native-check`, `test-ext`, `typed-generator-compile-check`, `install-check`, `test-browser`, `showcase-check`를 실행한다. 마지막 네 개는 릴리스 계층이기도 하다. `make check`를 통과한 변경이 릴리스 매트릭스에서 실패하면 안 되므로 `make check`에 포함한다. 패키지가 아직 없는 타겟은 `not implemented`를 출력하고 상태 1로 종료한다. `lint`는 ESLint, gofmt, Rust 크레이트·PHP 확장·Rust showcase adapter의 `cargo fmt --check`를 실행하고, Rust showcase adapter를 경고를 오류로 처리해 컴파일하며, Pint를 실행한다. `test-rust`와 `test-ext`는 Rust 크레이트와 PHP 확장에 경고를 오류로 처리하는 clippy를 실행한다.
 
 언어별 명령:
 

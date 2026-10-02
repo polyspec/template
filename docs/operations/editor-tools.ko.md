@@ -2,12 +2,13 @@
 
 [English](/operations/editor-tools).
 
-두 TypeScript 패키지가 템플릿 작성을 지원한다.
+세 TypeScript 패키지가 템플릿 작성을 지원한다.
 
 - `packages/template-language`(`@polyspec/template-language`): 언어 서비스 `openDocument()`([에디터 지원](/ko/spec/editor)), 포매터 `format()`, 명령줄 도구 `template-fmt`.
+- `packages/template-codemirror`(`@polyspec/template-codemirror`): 언어 서비스의 결과를 CodeMirror 편집기에 등록하는 CodeMirror 6 확장 `template()`([CodeMirror 6 어댑터](#codemirror-6-어댑터)).
 - `packages/template-vscode`(`polyspec-template`): 언어 정의, TextMate 문법, 포맷 제공자를 가진 VS Code 확장. 제공자는 `format()`을 호출하며 자체 포맷 규칙을 갖지 않는다.
 
-두 패키지는 템플릿 문법을 `@polyspec/template`에서 가져온다. 포매터는 파서가 돌려주는 태그 범위와 표현식 토큰을 사용하고, 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
+언어 서비스와 VS Code 확장은 템플릿 문법을 `@polyspec/template`에서 가져온다. 포매터는 파서가 돌려주는 태그 범위와 표현식 토큰을 사용하고, 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
 
 ## 포맷 스타일
 
@@ -181,11 +182,80 @@ code --list-extensions --show-versions | grep polyspec
 - `{` 앞에서 시작해 `{`를 지나는 HTML 패턴이 우선한다. 주입은 앞선 매치가 덮지 않은 위치에만 적용되기 때문이다. 따옴표 없는 속성 값 안의 태그(`value=a{= x}`)와 속성 이름 안의 태그(`data-{= n}="1"`)가 영향을 받는다. 따옴표가 있는 속성 값 안의 태그와 속성 사이의 태그는 강조한다.
 - raw 출력 scope, `@`의 루프 형식, 래퍼 태그의 시작은 태그 시작과 판단에 쓰는 문자가 한 줄에 있을 때 인식한다.
 
+## CodeMirror 6 어댑터
+
+`packages/template-codemirror`(`@polyspec/template-codemirror`)는 `@codemirror/lang-html` 위에 만든 CodeMirror 6 확장이다(EDT-16). 모든 결과를 언어 서비스의 `openDocument()`에서 얻고, 위치 외에는 아무것도 변환하지 않으며, 템플릿 규칙을 갖지 않는다([에디터 지원](/ko/spec/editor)). CodeMirror와 언어 서비스는 모두 문서 텍스트의 UTF-16 문자열 인덱스를 쓰므로, 언어 서비스의 위치가 곧 CodeMirror의 위치다. `@codemirror/state`, `@codemirror/view`, `@codemirror/language`, `@codemirror/lint`, `@codemirror/lang-html`, `@codemirror/commands`는 peer dependency이므로 어댑터는 편집기가 쓰는 각 패키지의 인스턴스 하나를 쓴다.
+
+```ts
+import { defaultKeymap } from '@codemirror/commands';
+import { EditorState } from '@codemirror/state';
+import { EditorView, keymap } from '@codemirror/view';
+import { goToMatchingTag, template } from '@polyspec/template-codemirror';
+
+new EditorView({
+  parent: document.querySelector('#editor') as HTMLElement,
+  state: EditorState.create({
+    doc: '<ul>\n  {@ item = items}\n    <li>{= item.name}</li>\n  {/}\n</ul>\n',
+    extensions: [
+      keymap.of([{ key: 'Mod-Alt-\\', run: goToMatchingTag }, ...defaultKeymap]),
+      template({ templateBlocks: 'indent', name: 'list.tpl' }),
+    ],
+  }),
+});
+```
+
+`template(options)`가 확장을 돌려준다. 옵션은 다음과 같다.
+
+| 옵션 | 의미 |
+| --- | --- |
+| `templateBlocks` | `indent`(기본값) 또는 `flat`. 들여쓰기 서비스와 `formatTemplate`의 `templateBlocks` 옵션이다 |
+| `delimiters` | 두 문자로 된 엔진 구분자 옵션. 기본값은 `{}`이다 |
+| `name` | 진단에 쓰는 템플릿 이름. 기본값은 `template.tpl`이다 |
+
+확장은 다음을 가진다.
+
+- `@codemirror/lang-html`의 HTML 언어
+- 상태의 텍스트에 대한 `TemplateDocument`를 갖는 상태 필드 `templateDocument`. 문서가 바뀔 때 텍스트를 한 번 분석하고, 아래의 모든 기능이 그 분석을 읽는다.
+- EDT-8의 모든 토큰에 붙는 클래스 `cm-template-<type>`의 마크. 토큰 마크는 문법 강조보다 우선순위가 높으므로 그 요소가 HTML 강조의 요소 안에 놓이고, HTML 속성 값 안의 템플릿 토큰도 템플릿 색을 유지한다.
+- 모든 태그 범위에 붙는 클래스 `cm-template-tag`의 마크(EDT-9). 우선순위가 가장 낮으므로 그 요소가 태그의 토큰 마크를 감싼다.
+- 주 커서 아래 구성의 모든 태그에 붙는 클래스 `cm-template-highlight`의 마크(`highlights`, EDT-11)
+- `@codemirror/lint`의 `linter`를 통한 진단. 심각도는 `error`, 출처는 `polyspec-template`, 메시지는 `CODE: message`이다. 예를 들면 `E_PARSE_UNCLOSED_BLOCK: block is not closed before the end of the file`이다(EDT-7). `templateDiagnostics(state)`는 상태에 대해 같은 진단을 돌려준다.
+- `foldingRanges`로 만든 `foldService` 접기(EDT-10). 한 줄을 접으면 여는 태그 다음 줄부터 닫는 태그 앞 줄까지 숨긴다. CodeMirror는 한 줄에 범위 하나를 접는다. 한 줄에서 여러 구성이 시작하면 가장 늦게 끝나는 구성을 접는다.
+- 편집기의 `indentUnit`과 `templateBlocks`로 구한 그 줄의 `lineIndentation` 열 너비를 돌려주는 `indentService`(EDT-13). Enter가 줄을 나누면 서비스는 줄을 나눈 텍스트를 분석하므로, 새 줄과 그 줄로 옮겨진 텍스트는 타이핑하는 줄의 들여쓰기를 얻는다. 언어 서비스가 요구하는 대로 들여쓰기 단위는 공백의 연속이거나 탭 하나여야 한다.
+- `formatTemplate`을 실행하는 Shift+Alt+F
+
+`lineIndentation`이 빈 줄에 빈 들여쓰기를 돌려주는 동안에는 Enter가 들여쓰기를 넣지 않고, `make test-codemirror`의 Enter 사례가 실패한다.
+
+기본 테마(`EditorView.baseTheme`)가 마크에 색을 칠한다. `&dark`는 어두운 테마의 편집기에, `&light`는 그 밖의 편집기에 적용된다. 태그 배경은 어두운 테마에서 `#16351c`, 밝은 테마에서 `#e3f6dd`이고, 강조는 `#7ee787`(어두운 테마)과 `#1a7f37`(밝은 테마)의 1픽셀 외곽선이며, 주석은 기울임꼴이다. 같은 클래스를 쓰는 테마가 이 규칙을 덮어쓴다.
+
+| 클래스 | 어두운 테마 | 밝은 테마 |
+| --- | --- | --- |
+| `cm-template-delimiter` | `#ff7b72` | `#cf222e` |
+| `cm-template-keyword` | `#ff7b72` | `#cf222e` |
+| `cm-template-variable` | `#ffa657` | `#953800` |
+| `cm-template-property` | `#79c0ff` | `#0550ae` |
+| `cm-template-function` | `#d2a8ff` | `#8250df` |
+| `cm-template-string` | `#a5d6ff` | `#0a3069` |
+| `cm-template-number` | `#79c0ff` | `#0550ae` |
+| `cm-template-operator` | `#e6edf3` | `#1f2328` |
+| `cm-template-comment` | `#8b949e` | `#6e7781` |
+| `cm-template-path` | `#a5d6ff` | `#0a3069` |
+
+명령은 다음과 같다.
+
+| 명령 | 동작 |
+| --- | --- |
+| `formatTemplate` | 편집기의 `indentUnit`과 `templateBlocks` 옵션으로 `format()`(EDT-12)을 실행해 문서를 바꾼다. `format()`이 오류를 돌려주면 아무것도 바꾸지 않고 `false`를 돌려준다. Shift+Alt+F가 이 명령을 실행한다. |
+| `goToMatchingTag` | 주 커서를 그 위치의 `matchingTag`(EDT-11)로 옮기고, 짝 태그가 없으면 `false`를 돌려준다. 확장은 이 명령에 키를 연결하지 않는다. 예제는 `Mod-Alt-\`를 연결한다. |
+
+Shift+Alt+F는 키맵 항목 `Shift-Alt-f`가 아니라 물리 키 F(`KeyboardEvent.code` `KeyF`)에 연결한다. 키맵 항목은 입력된 문자와 비교하는데, macOS에서 Option+Shift+F는 `Ï`를 입력하므로 그 항목은 macOS에서 실행되지 않는다.
+
 ## 검증
 
 ```sh
 make test-language
 make format-check
+make test-codemirror
 make test-vscode
 make test-vscode-integration
 make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
@@ -193,4 +263,6 @@ make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 
 `make test-vscode`는 `tm-grammars`의 HTML, CSS, JavaScript 문법과 함께 `vscode-tmgrammar-test`로 문법 테스트를 실행하고, 대체 `vscode` 모듈로 매니페스트와 번들한 제공자를 테스트한다. `make test-vscode-integration`은 `.vsix`를 빌드하고, `@vscode/test-electron`으로 `engines.vscode`의 최소 버전인 VS Code 1.138.0을 저장소 루트의 `.vscode-test`에 내려받고, VS Code 명령줄로 `.vsix`를 새 확장 디렉터리에 설치한다. 사용자 설치와 같이 workspace trust를 켜고 테스트 폴더를 신뢰하지 않은 상태로 VS Code를 실행해 `.tpl` 문서가 언어 `polyspec-template`으로 열리는지, 설치한 확장이 활성화되는지, `_workbench.captureSyntaxTokens`가 HTML 속성 값 안의 태그에 템플릿 scope를 보고하는지, 닫히지 않은 `{?`가 그 위치에 진단을 만드는지, 문서 강조, 접기 범위, Go to Matching Template Tag가 한 구성을 따르는지, 단축키가 비어 있는지, `vscode.executeFormatDocumentProvider`가 예제에 기대한 편집을 돌려주고 포맷된 문서와 파싱되지 않는 문서에는 편집을 돌려주지 않는지 검사한다. 두 번째 실행은 설치한 매니페스트에서 `capabilities`를 지우고 VS Code가 그 작업 공간에서 확장을 비활성화하는지 요구한다. 이것으로 첫 실행이 capability 누락을 찾아낸다는 것을 보인다.
 
-`make check`가 `test-language`, `format-check`, `test-vscode`, `test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
+`make test-codemirror`는 어댑터를 빌드하고 두 종류의 테스트를 실행한다. Vitest 테스트는 `packages/template-language/tests/editor`의 모든 에디터 픽스처마다 DOM 없이 `EditorState`를 만들고, `templateDiagnostics`의 진단, 상태의 decoration 집합에 있는 토큰 마크와 태그 마크, fold service의 접기 범위, 모든 조회 위치의 강조 마크와 `goToMatchingTag` 목적지, `templateBlocks` `indent`와 `flat` 및 공백 두 개의 들여쓰기 단위로 구한 모든 줄의 들여쓰기 서비스 결과, `formatTemplate`의 결과를 픽스처의 기대 결과와 비교한다(EDT-17). 다른 테스트는 한 줄을 입력하고 `insertNewlineAndIndent`로 Enter를 누르며, 옵션, `formatTemplate`의 들여쓰기 단위, 텍스트마다 분석 하나를 재사용하는지 검사한다. Playwright 테스트는 `tests/browser/page.ts`를 esbuild로 `packages/template-codemirror/dist/browser/page.js`에 번들하고 빈 Chromium 페이지에 불러온 뒤, `<ul>`, Enter, `{@ x = xs}`, Enter를 입력한 뒤의 들여쓰기, 토큰 클래스, HTML 속성 값 안의 템플릿 색, 밝은 테마와 어두운 테마의 태그 배경, 닫히지 않은 블록의 lint 진단, 포맷되는 텍스트와 파싱되지 않는 텍스트에서의 Shift+Alt+F를 검사한다.
+
+`make check`가 `test-language`, `test-codemirror`, `format-check`, `test-vscode`, `test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
