@@ -1,7 +1,7 @@
 // Template parser: text scanning, tag bodies, block structure and standalone lines
 // as defined in docs/spec/lexical.md and docs/spec/grammar.md.
 import type { Block, Comment, Expr, If, IfBlock, For, Node, Set as SetNode, Template } from '../ast.js';
-import { errorAt, type ErrorCode, type TemplateError } from '../errors.js';
+import { errorAt, TemplateError, type ErrorCode } from '../errors.js';
 import type { Token, TokenType } from '../expr/lexer.js';
 import { ExpressionParser } from '../expr/parser.js';
 import type { Source } from '../source.js';
@@ -99,6 +99,25 @@ export function analyzeTemplate(source: Source, delimiters: Delimiters = DEFAULT
   return new TemplateParser(source, delimiters).parse();
 }
 
+/** The tag ranges and expression tokens a parse accepted before its first error, and that error (EDT-6). */
+export interface PrefixAnalysis {
+  tags: readonly SyntaxTag[];
+  tokens: readonly SyntaxToken[];
+  error: TemplateError | null;
+}
+
+/** Parses a template and returns what the parser accepted before its first error instead of only the error. */
+export function analyzeTemplatePrefix(source: Source, delimiters: Delimiters = DEFAULT_DELIMITERS): PrefixAnalysis {
+  const parser = new TemplateParser(source, delimiters);
+  try {
+    const { tags, tokens } = parser.parse();
+    return { tags, tokens, error: null };
+  } catch (error) {
+    if (!(error instanceof TemplateError)) throw error;
+    return { tags: parser.acceptedTags, tokens: parser.consumedTokens(), error };
+  }
+}
+
 class TemplateParser {
   private delimiters: Delimiters;
   private readonly text: string;
@@ -138,10 +157,20 @@ class TemplateParser {
     return {
       ast: { type: 'Template', name: this.name, body: this.finalize(this.root, removed), comments: this.comments },
       tags: this.tags,
-      tokens: this.expressionParsers.flatMap(parser => parser.lexer.consumed
-        .filter(token => token.type !== 'CLOSE' && token.type !== 'EOF')
-        .map(syntaxToken)),
+      tokens: this.consumedTokens(),
     };
+  }
+
+  /** The tags accepted so far. */
+  get acceptedTags(): readonly SyntaxTag[] {
+    return this.tags;
+  }
+
+  /** The expression tokens read so far, in source order. */
+  consumedTokens(): SyntaxToken[] {
+    return this.expressionParsers.flatMap(parser => parser.lexer.consumed
+      .filter(token => token.type !== 'CLOSE' && token.type !== 'EOF')
+      .map(syntaxToken));
   }
 
   // Pass 1: text scanning and tag parsing.

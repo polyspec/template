@@ -276,6 +276,19 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | --- | --- | --- | --- |
 | T10.1 | `-modcacherw`로 만든 Go module cache를 포함해 설치 검사 작업 디렉터리를 제거하고, 제거할 수 없는 작업 디렉터리의 경로와 함께 검사를 실패시킴. `scripts/check-install-workspace.mjs`가 `make install-check`에서 실행됨 | `make install-check`; `make check` | [x] |
 
+## Wave 11 — 에디터 언어 서비스, LSP 서버, CodeMirror 어댑터
+
+의존: 없음. 모든 에디터 규칙을 하나의 언어 서비스로 옮기고, 각 에디터는 위치 변환과 기능 등록만 하는 어댑터로 그 서비스에 연결한다([에디터 지원](/ko/spec/editor)). 작업은 브랜치 `feat/<shortname>-<id>`와 작업 사본 `template-<shortname>-<id>`에서 하며, 작업이 `main`에 합쳐지면 둘 다 바로 지운다.
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T11.1 | `@polyspec/template`의 `analyzePrefix()`로 첫 오류 전까지 받아들인 태그와 표현식 토큰을 돌려줌(EDT-6) | `make test-ts` | [ ] |
+| T11.2 | `@polyspec/template-format`을 `@polyspec/template-language`로 바꾸고, 진단, 토큰, 태그 범위, 접기 범위, 강조, 짝 태그, `format`, `lineIndentation`을 가진 `openDocument()`를 추가(EDT-4~EDT-13). 접기와 짝 태그 규칙을 VS Code 확장에서 옮기고 에디터 픽스처를 추가(EDT-17) | `make test-language` | [ ] |
+| T11.3 | 명령 `template-lsp`를 가진 LSP 서버 `@polyspec/template-lsp`를 추가하고(EDT-14) 프로토콜로 에디터 픽스처를 검사 | `make test-lsp` | [ ] |
+| T11.4 | VS Code 확장을 함께 묶은 LSP 서버의 클라이언트로 바꾸고, TextMate 문법, 태그 배경, 짝 태그 명령을 유지(EDT-15) | `make test-vscode`; `make test-vscode-integration` | [ ] |
+| T11.5 | CodeMirror 6 어댑터 `@polyspec/template-codemirror`를 추가하고(EDT-16) `EditorState`와 브라우저에서 에디터 픽스처로 검사 | `make test-codemirror` | [ ] |
+| T11.6 | `@polyspec/template`을 선언하거나 import하는 어댑터(EDT-2), 에디터·Node.js·DOM 모듈을 import하는 언어 서비스(EDT-3)를 거부하고, 규칙 증거, 기능 상태, 문서, 의존성 정책을 기록 | `make check` | [ ] |
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -291,10 +304,11 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime 지원 뒤에 일치 검증과 발행 수행 |
 | W9 | 없음 | T9.1 |
 | W10 | 없음 | T10.1 |
+| W11 | {T11.3 → T11.4, T11.5} | T11.1 → T11.2 → 병렬 그룹 → T11.6 |
 
 ## 완료 정의
 
-- W0–W10의 모든 작업이 `done`.
+- W0–W11의 모든 작업이 `done`.
 - Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.

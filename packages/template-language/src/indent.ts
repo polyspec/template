@@ -60,11 +60,35 @@ interface Block {
   hasElse: boolean;
 }
 
+/** The indentation of one line: its start, the end of its current indentation, and the indentation it gets. */
+export interface LineIndentation {
+  start: number;
+  end: number;
+  /** The indentation under the rule, or null for a line that keeps its indentation. */
+  indentation: string | null;
+}
+
 /** Returns the edits that set the indentation of every line, or the reason why the HTML structure cannot be indented. */
 export function indentEdits(text: string, tags: readonly IndentTag[], options: IndentOptions): { edits: IndentEdit[] } | { error: IndentError } {
-  const scan = scanStructure(text, tags, options.templateBlocks);
-  if ('error' in scan) return scan;
+  const lines = lineIndentations(text, tags, options.unit, options.templateBlocks, false);
+  if ('error' in lines) return lines;
   const edits: IndentEdit[] = [];
+  for (const line of lines.lines) {
+    if (line.indentation === null) continue;
+    if (options.range !== null && (line.start < options.range.start || line.start >= options.range.end)) continue;
+    if (text.slice(line.start, line.end) !== line.indentation) edits.push({ start: line.start, end: line.end, text: line.indentation });
+  }
+  return { edits };
+}
+
+/**
+ * Returns the indentation of every line. A tolerant computation does not require a balanced structure: an end tag
+ * closes up to the open element of the same name and is ignored when no such element is open (EDT-13).
+ */
+export function lineIndentations(text: string, tags: readonly IndentTag[], unit: string, templateBlocks: 'indent' | 'flat', tolerant: boolean): { lines: LineIndentation[] } | { error: IndentError } {
+  const scan = scanStructure(text, tags, templateBlocks, tolerant);
+  if ('error' in scan) return scan;
+  const lines: LineIndentation[] = [];
   const dedents = new Set(scan.steps.filter(item => item.dedent).map(item => item.index));
   let step = 0;
   let depth = 0;
@@ -72,24 +96,24 @@ export function indentEdits(text: string, tags: readonly IndentTag[], options: I
     while (step < scan.steps.length && (scan.steps[step] as Step).index < lineStart) depth += (scan.steps[step++] as Step).delta;
     let first = lineStart;
     while (text[first] === ' ' || text[first] === '\t') first++;
-    const inRange = options.range === null || (lineStart >= options.range.start && lineStart < options.range.end);
-    if (inRange && !within(scan.kept, lineStart)) {
+    if (within(scan.kept, lineStart)) {
+      lines.push({ start: lineStart, end: first, indentation: null });
+    } else {
       const blank = first === text.length || text[first] === '\n' || text[first] === '\r';
       let level = depth + (within(scan.inside, lineStart) ? 1 : 0);
       if (dedents.has(first)) level--;
-      const indentation = blank ? '' : options.unit.repeat(Math.max(level, 0));
-      if (text.slice(lineStart, first) !== indentation) edits.push({ start: lineStart, end: first, text: indentation });
+      lines.push({ start: lineStart, end: first, indentation: blank ? '' : unit.repeat(Math.max(level, 0)) });
     }
     if (text.indexOf('\n', lineStart) < 0) break;
   }
-  return { edits };
+  return { lines };
 }
 
 function within(ranges: ReadonlyArray<{ start: number; end: number }>, index: number): boolean {
   return ranges.some(range => range.start < index && index < range.end);
 }
 
-function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks: 'indent' | 'flat'): Scan | { error: IndentError } {
+function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks: 'indent' | 'flat', tolerant: boolean): Scan | { error: IndentError } {
   const steps: Step[] = [];
   const kept: Scan['kept'] = [];
   const inside: Scan['inside'] = [];
@@ -115,11 +139,11 @@ function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks:
     const block = blocks[blocks.length - 1];
     if (block === undefined) return null;
     const end = names();
-    if (block.branchEnd !== null && !sameNames(block.branchEnd, end)) {
+    if (!tolerant && block.branchEnd !== null && !sameNames(block.branchEnd, end)) {
       return { index: tag.start, message: 'the HTML elements open at the end of this branch differ from those of the first branch' };
     }
     if (tag.kind === 'close') {
-      if (!block.hasElse && !sameNames(block.start.map(element => element.name), end)) {
+      if (!tolerant && !block.hasElse && !sameNames(block.start.map(element => element.name), end)) {
         return { index: tag.start, message: 'a template block without an else branch must end with the HTML elements open at its start' };
       }
       blocks.pop();
@@ -169,7 +193,7 @@ function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks:
       }
       index++;
     }
-    return { index: start, message: 'the HTML tag is not closed with ">"' };
+    return tolerant ? text.length : { index: start, message: 'the HTML tag is not closed with ">"' };
   };
 
   while (position < text.length) {
@@ -221,10 +245,21 @@ function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks:
       }
       const open = elements[elements.length - 1];
       if (open === undefined || open.name !== name) {
-        return { error: { index: position, message: open === undefined ? `the end tag </${name}> has no open element` : `the end tag </${name}> does not match the open element <${open.name}>` } };
+        if (!tolerant) {
+          return { error: { index: position, message: open === undefined ? `the end tag </${name}> has no open element` : `the end tag </${name}> does not match the open element <${open.name}>` } };
+        }
+        // A tolerant computation closes up to the open element of the same name, or ignores the end tag.
+        const match = elements.map(element => element.name).lastIndexOf(name);
+        if (match < 0) {
+          position = end;
+          continue;
+        }
+        // The elements left open inside the matched one close before this line; the matched one closes on it.
+        steps.push({ index: beforeLine(position), delta: match + 1 - elements.length, dedent: false });
+        elements = elements.slice(0, match + 1);
       }
-      elements.pop();
       steps.push({ index: position, delta: -1, dedent: true });
+      elements.pop();
       if (KEPT.has(name) && !elements.some(element => KEPT.has(element.name)) && keptStart !== null) {
         kept.push({ start: keptStart, end: text.indexOf('\n', position) < 0 ? text.length : text.indexOf('\n', position) });
         keptStart = null;
@@ -244,7 +279,7 @@ function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks:
   }
 
   const open = elements[elements.length - 1];
-  if (open !== undefined) return { error: { index: open.start, message: `the element <${open.name}> is not closed` } };
+  if (open !== undefined && !tolerant) return { error: { index: open.start, message: `the element <${open.name}> is not closed` } };
   steps.sort((left, right) => left.index - right.index);
   return { steps, kept, inside };
 

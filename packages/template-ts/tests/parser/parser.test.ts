@@ -1,6 +1,6 @@
 // Parser behavior that the fixtures do not cover directly.
 import { describe, expect, it } from 'vitest';
-import { analyze, parse, TemplateError } from '../../src/index.js';
+import { analyze, analyzePrefix, parse, TemplateError } from '../../src/index.js';
 
 function codeOf(fn: () => unknown): string | null {
   try {
@@ -69,5 +69,40 @@ describe('syntax analysis', () => {
       { source: 'title', kind: 'variable' },
       { source: 'ok', kind: 'variable' },
     ]);
+  });
+});
+
+describe('prefix analysis', () => {
+  const kinds = (source: string, result: ReturnType<typeof analyzePrefix>): string[] => result.tags.map(tag => `${tag.kind} ${source.slice(tag.start, tag.end)}`);
+
+  it('returns every tag and token and no error for a source that parses', () => {
+    const source = '{? a}{= b.c}{/}';
+    const result = analyzePrefix(source, 't.tpl');
+    expect(result.error).toBeNull();
+    expect(result.tags).toEqual(analyze(source, 't.tpl').tags);
+    expect(result.tokens).toEqual(analyze(source, 't.tpl').tokens);
+  });
+
+  it('returns every tag of a source whose block is not closed, with the parser error', () => {
+    const source = '<ul>{@ x = xs}<li>{= x}</li>';
+    const result = analyzePrefix(source, 't.tpl');
+    expect(result.error).toBeInstanceOf(TemplateError);
+    expect(result.error?.code).toBe('E_PARSE_UNCLOSED_BLOCK');
+    expect(kinds(source, result)).toEqual(['for {@ x = xs}', 'echo {= x}']);
+    // The loop variable and its `=` belong to the loop tag, not to an expression.
+    expect(result.tokens.map(token => source.slice(token.start, token.end))).toEqual(['xs', 'x']);
+  });
+
+  it('returns the tags before a tag that fails and the tokens read until the error', () => {
+    const source = '{= a}{? b}{= c +}{= d}{/}';
+    const result = analyzePrefix(source, 't.tpl');
+    expect(result.error?.code).toBe('E_PARSE_UNEXPECTED_TOKEN');
+    expect(kinds(source, result)).toEqual(['echo {= a}', 'if {? b}']);
+    expect(result.tokens.map(token => source.slice(token.start, token.end))).toEqual(['a', 'b', 'c', '+']);
+  });
+
+  it('uses the delimiter option', () => {
+    const source = '[? a]x';
+    expect(kinds(source, analyzePrefix(source, 't.tpl', { delimiters: '[]' }))).toEqual(['if [? a]']);
   });
 });

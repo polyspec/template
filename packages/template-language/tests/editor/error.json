@@ -1,0 +1,69 @@
+{
+  "diagnostics": [
+    {
+      "start": 18,
+      "end": 19,
+      "code": "E_PARSE_UNEXPECTED_TOKEN"
+    }
+  ],
+  "tokens": [
+    [
+      6,
+      7,
+      "delimiter"
+    ],
+    [
+      7,
+      8,
+      "keyword"
+    ],
+    [
+      9,
+      10,
+      "variable"
+    ],
+    [
+      10,
+      11,
+      "delimiter"
+    ]
+  ],
+  "tags": [
+    [
+      6,
+      11
+    ]
+  ],
+  "foldingRanges": [],
+  "highlights": {},
+  "matchingTags": {
+    "0": null,
+    "6": null,
+    "11": null,
+    "12": null,
+    "20": null,
+    "26": null,
+    "33": null
+  },
+  "lineIndentation": {
+    "indent": [
+      "",
+      "  ",
+      "  ",
+      "  ",
+      "",
+      ""
+    ],
+    "flat": [
+      "",
+      "  ",
+      "  ",
+      "  ",
+      "",
+      ""
+    ]
+  },
+  "formatted": {
+    "error": "parse"
+  }
+}

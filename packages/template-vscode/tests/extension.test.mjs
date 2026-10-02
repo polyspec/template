@@ -203,12 +203,13 @@ test('tag backgrounds cover every tag except comments, with a light and a dark c
   assert.deepEqual(painted[0].ranges.map(range => text.slice(range.start.offset, range.end.offset)), ['{= c}', '{? a}', '{= b | raw}', '{/}']);
 });
 
-test('tag backgrounds stay unchanged while the document does not parse', () => {
+test('tag backgrounds cover the tags the parser accepted while the document does not parse', () => {
   const painted = [];
-  const editor = { document: documentOf('{? a}'), setDecorations: () => painted.push(true) };
+  const text = '<ul>{@ x = xs}<li>{= x}</li>';
+  const editor = { document: documentOf(text), setDecorations: (decoration, ranges) => painted.push(ranges) };
   vscode.window.visibleTextEditors = [editor];
   providers.visible([editor]);
-  assert.deepEqual(painted, []);
+  assert.deepEqual(painted[0].map(range => text.slice(range.start.offset, range.end.offset)), ['{@ x = xs}', '{= x}']);
   vscode.window.visibleTextEditors = [];
 });
 

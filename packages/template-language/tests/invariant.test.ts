@@ -10,7 +10,7 @@ import { format } from '../src/index.js';
 import { sameTree, withoutLineIndentation } from '../src/invariant.js';
 import { repositoryRoot, templateFiles } from './helpers.js';
 
-const roots = ['tests/cases', 'tests/fixtures', 'examples', 'packages/template-format/tests/fixtures'].map(path => join(repositoryRoot, path));
+const roots = ['tests/cases', 'tests/fixtures', 'examples', 'packages/template-language/tests/fixtures'].map(path => join(repositoryRoot, path));
 const external = process.env.TEMPLATE_SOURCE_ROOT;
 if (external !== undefined && external !== '') {
   if (!existsSync(external)) throw new Error(`TEMPLATE_SOURCE_ROOT does not exist: ${external}`);

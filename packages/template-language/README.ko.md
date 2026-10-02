@@ -1,4 +1,4 @@
-# @polyspec/template-format
+# @polyspec/template-language
 
 [English](README.md).
 
@@ -7,14 +7,14 @@
 ## 라이브러리
 
 ```ts
-import { format } from '@polyspec/template-format';
+import { format } from '@polyspec/template-language';
 
 const result = format('<p>{=title|upper}</p>', { name: 'page.tpl' });
 if (result.ok) console.log(result.text);
 else console.error(`${result.error.line}:${result.error.col}: ${result.error.code}`);
 ```
 
-`templateStructure(source, options)`는 문자열 위치를 가진 파싱 오류, 또는 편집기가 진단, 짝 태그, 접기에 쓰는 블록 구성(여는 태그, 분기 태그, 닫는 태그)을 돌려준다.
+`openDocument(text, options)`는 텍스트를 한 번 분석하고, 모든 에디터 어댑터가 쓰는 진단, 강조 토큰, 태그 범위, 구성, 접기 범위, 강조, 짝 태그, 타이핑 들여쓰기를 돌려준다([에디터 지원](../../docs/spec/editor.ko.md)).
 
 `format()`의 옵션: `name`(오류에 쓰는 템플릿 이름), `delimiters`(두 문자, 기본값 `{}`), `range`(`{ start, end }` 문자열 인덱스. 범위 안에 완전히 들어가는 태그만 포맷한다).
 

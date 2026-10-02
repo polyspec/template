@@ -1,5 +1,5 @@
 // Tag backgrounds: paints the range of every template tag that the parser accepted, independent of the color theme.
-import { templateStructure } from '@polyspec/template-format';
+import { openDocument } from '@polyspec/template-language';
 import * as vscode from 'vscode';
 
 const DELAY_MS = 250;
@@ -17,22 +17,16 @@ const TAG_BACKGROUND: vscode.DecorationRenderOptions = {
   rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
 };
 
-/**
- * Returns the ranges of the tags of a document except comments, which the theme already shows as comments, or
- * null when the document does not parse.
- */
-export function tagRangesOf(document: vscode.TextDocument): vscode.Range[] | null {
-  const result = templateStructure(document.getText(), { name: document.uri.fsPath });
-  if (!result.ok) return null;
-  return result.tags
-    .filter(tag => tag.kind !== 'comment')
+/** Returns the ranges of the tags of a document except comments, from the tags the parser accepted (EDT-6, EDT-9). */
+export function tagRangesOf(document: vscode.TextDocument): vscode.Range[] {
+  return openDocument(document.getText(), { name: document.uri.fsPath }).tags
     .map(tag => new vscode.Range(document.positionAt(tag.start), document.positionAt(tag.end)));
 }
 
 /**
  * Paints tag backgrounds in visible template editors when they appear and after a document changes. A document
- * that does not parse keeps its previous backgrounds, which VS Code moves with the edits, so a tag being typed
- * does not clear the backgrounds of the whole document.
+ * that does not parse still has the tags the parser accepted before its error, so a tag being typed does not clear
+ * the backgrounds of the whole document.
  */
 export function registerDecorations(context: vscode.ExtensionContext, language: string): void {
   const decoration = vscode.window.createTextEditorDecorationType(TAG_BACKGROUND);
@@ -40,7 +34,6 @@ export function registerDecorations(context: vscode.ExtensionContext, language: 
   const paint = (document: vscode.TextDocument): void => {
     if (document.languageId !== language) return;
     const ranges = tagRangesOf(document);
-    if (ranges === null) return;
     for (const editor of vscode.window.visibleTextEditors) {
       if (editor.document === document) editor.setDecorations(decoration, ranges);
     }

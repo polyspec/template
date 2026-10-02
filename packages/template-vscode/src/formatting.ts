@@ -1,5 +1,5 @@
-// Document and range formatting through @polyspec/template-format, with the editor indent unit and the templateBlocks setting.
-import { format, type FormatOptions, type FormatResult } from '@polyspec/template-format';
+// Document and range formatting through @polyspec/template-language, with the editor indent unit and the templateBlocks setting.
+import { format, type FormatOptions, type FormatResult } from '@polyspec/template-language';
 import * as vscode from 'vscode';
 
 const LABELS: Record<string, string> = { html: 'HTML structure', invariant: 'formatted AST differs' };

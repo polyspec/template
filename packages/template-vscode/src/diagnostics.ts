@@ -1,19 +1,18 @@
 // Parse diagnostics: publishes the parser error of each template document at its exact range.
-import { templateStructure } from '@polyspec/template-format';
+import { openDocument } from '@polyspec/template-language';
 import * as vscode from 'vscode';
 
 const DELAY_MS = 250;
 
 /** Returns the diagnostics of a document: the parse error of @polyspec/template, or none when the document parses. */
 export function diagnosticsOf(document: vscode.TextDocument): vscode.Diagnostic[] {
-  const result = templateStructure(document.getText(), { name: document.uri.fsPath });
-  if (result.ok) return [];
-  const { error } = result;
-  const range = new vscode.Range(document.positionAt(error.start), document.positionAt(Math.max(error.end, error.start + 1)));
-  const diagnostic = new vscode.Diagnostic(range, error.message, vscode.DiagnosticSeverity.Error);
-  diagnostic.code = error.code;
-  diagnostic.source = 'polyspec-template';
-  return [diagnostic];
+  return openDocument(document.getText(), { name: document.uri.fsPath }).diagnostics.map(error => {
+    const range = new vscode.Range(document.positionAt(error.start), document.positionAt(error.end));
+    const diagnostic = new vscode.Diagnostic(range, error.message, vscode.DiagnosticSeverity.Error);
+    diagnostic.code = error.code;
+    diagnostic.source = error.source;
+    return diagnostic;
+  });
 }
 
 /** Publishes diagnostics when a document opens, changes (after a short delay) or closes. */

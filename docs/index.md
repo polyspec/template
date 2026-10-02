@@ -18,6 +18,7 @@
 | [`spec/errors.md`](spec/errors.md) | Error object and error codes |
 | [`spec/conformance.md`](spec/conformance.md) | Fixture layout, CLI contract, comparison rules |
 | [`spec/examples.md`](spec/examples.md) | Complete page example |
+| [`spec/editor.md`](spec/editor.md) | Language service, LSP server and editor adapters |
 
 Documents that do not exist yet are listed in the [execution checklist](plans/execution-checklist.md).
 

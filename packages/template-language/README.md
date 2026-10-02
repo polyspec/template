@@ -1,4 +1,4 @@
-# @polyspec/template-format
+# @polyspec/template-language
 
 [한국어](README.ko.md).
 
@@ -7,14 +7,14 @@ Formatter for template sources. It normalizes whitespace inside template tags an
 ## Library
 
 ```ts
-import { format } from '@polyspec/template-format';
+import { format } from '@polyspec/template-language';
 
 const result = format('<p>{=title|upper}</p>', { name: 'page.tpl' });
 if (result.ok) console.log(result.text);
 else console.error(`${result.error.line}:${result.error.col}: ${result.error.code}`);
 ```
 
-`templateStructure(source, options)` returns the parse error with string positions, or the block constructs (opening, branch and close tags) that editors use for diagnostics, matching tags and folding.
+`openDocument(text, options)` analyzes a text once and returns the diagnostics, highlight tokens, tag ranges, constructs, folding ranges, highlights, matching tags and typing indentation that every editor adapter uses ([editor support](../../docs/spec/editor.md)).
 
 Options of `format()`: `name` (template name in errors), `delimiters` (two characters, default `{}`) and `range` (`{ start, end }` string indexes; only tags completely inside the range are formatted).
 

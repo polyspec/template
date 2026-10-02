@@ -103,7 +103,7 @@
     "test:integration": "node tests/integration/run.mjs"
   },
   "dependencies": {
-    "@polyspec/template-format": "0.0.1"
+    "@polyspec/template-language": "0.0.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
