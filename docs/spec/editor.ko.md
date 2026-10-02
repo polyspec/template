@@ -86,7 +86,7 @@
 - `textDocument/onTypeFormatting`의 현재 줄은 요청 위치의 줄이다. 편집은 그 줄 앞의 공백과 탭을 바꾸며, 이미 `lineIndentation`과 같으면 서버는 편집을 돌려주지 않는다.
 - 포맷과 타이핑 포맷은 `{ scopeUri: <문서 URI>, section: 'polyspec-template' }`로 `workspace/configuration`을 요청하고 결과의 `format.templateBlocks`를 쓴다. `flat`이 아닌 값과, `workspace/configuration` 기능이 없는 클라이언트는 `indent`가 된다.
 
-**EDT-15** VS Code 확장 `polyspec-template`는 함께 묶은 `@polyspec/template-lsp`의 클라이언트다. 서버가 응답하기 전에 HTML과 템플릿 태그를 강조하는 TextMate 문법을 유지하며, 서버의 시맨틱 토큰이 그 뒤 템플릿 토큰의 색을 바꾼다. 태그 배경은 `polyspec-template/tagRanges`로 칠하고, 커서 이동은 `polyspec-template/matchingTag`로 한다.
+**EDT-15** VS Code 확장 `polyspec-template`는 `@polyspec/template-lsp`를 확장 안에 포함하고, 그 서버에 연결해 기능을 제공한다. 서버가 응답하기 전에 HTML과 템플릿 태그를 강조하는 TextMate 문법을 유지하며, 서버의 시맨틱 토큰이 그 뒤 템플릿 토큰의 색을 바꾼다. 태그 배경은 `polyspec-template/tagRanges`로 칠하고, 커서 이동은 `polyspec-template/matchingTag`로 한다.
 
 **EDT-16** `@polyspec/template-codemirror`는 `@codemirror/lang-html` 위에 만든 CodeMirror 6 확장 `template(options)`를 내보낸다. 토큰에 `cm-template-<type>` 클래스를 붙이고, 태그 배경을 칠하고, `@codemirror/lint`로 진단을 보고하며, 접기, 짝 태그 강조, `lineIndentation`을 쓰는 들여쓰기 서비스, 그리고 에디터의 들여쓰기 단위를 쓰는 명령 `formatTemplate`(`Shift-Alt-f`에 연결)을 제공한다. `options.templateBlocks`와 `options.delimiters`는 언어 서비스에 전달한다.
 

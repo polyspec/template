@@ -7,7 +7,7 @@
 - `packages/template-language`(`@polyspec/template-language`): 언어 서비스 `openDocument()`([에디터 지원](/ko/spec/editor)), 포매터 `format()`, 명령줄 도구 `template-fmt`.
 - `packages/template-lsp`(`@polyspec/template-lsp`): 언어 서비스의 어댑터인 Language Server Protocol 서버 `template-lsp`.
 - `packages/template-codemirror`(`@polyspec/template-codemirror`): 언어 서비스의 결과를 CodeMirror 편집기에 등록하는 CodeMirror 6 확장 `template()`([CodeMirror 6 어댑터](#codemirror-6-어댑터)).
-- `packages/template-vscode`(`polyspec-template`): 언어 정의, TextMate 문법, 함께 묶은 언어 서버의 클라이언트를 가진 VS Code 확장. 템플릿 규칙을 갖지 않는다.
+- `packages/template-vscode`(`polyspec-template`): 언어 정의와 TextMate 문법을 갖고, 확장 안에 포함한 언어 서버에 연결해 기능을 제공하는 VS Code 확장. 템플릿 규칙을 갖지 않는다.
 
 언어 서비스만 템플릿 문법을 `@polyspec/template`에서 가져온다. 언어 서비스와 포매터는 파서가 돌려주는 태그 범위와 표현식 토큰을 사용한다. 서버, CodeMirror 어댑터, 확장은 언어 서비스를 호출하며, 확장의 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
 
@@ -139,9 +139,9 @@ make vscode-install
 code --list-extensions --show-versions | grep polyspec
 ```
 
-`make vscode-package`는 `src/extension.ts`를 `vscode-languageclient`와 함께 `dist/extension.cjs`로 번들하고, 서버 진입점 `@polyspec/template-lsp/server`를 `@polyspec/template-language`, `@polyspec/template`과 함께 `dist/server.cjs`로 번들하며, `packages/template-vscode/dist/polyspec-template.vsix`를 만든다. 설치한 확장은 실행할 때 저장소가 필요 없다. `make vscode-install`은 `--force`를 붙여 `code --install-extension`을 실행한다.
+`make vscode-package`는 `src/extension.ts`와 `vscode-languageclient`를 한 파일 `dist/extension.cjs`로 만들고, 서버 진입점 `@polyspec/template-lsp/server`와 `@polyspec/template-language`, `@polyspec/template`을 한 파일 `dist/server.cjs`로 만든 뒤, `packages/template-vscode/dist/polyspec-template.vsix`를 만든다. 설치한 확장은 실행할 때 저장소가 필요 없다. `make vscode-install`은 `--force`를 붙여 `code --install-extension`을 실행한다.
 
-확장은 언어 서버 `template-lsp`의 클라이언트다(EDT-15). 언어 클라이언트는 VS Code의 Node.js 런타임으로 `dist/server.cjs`를 실행하고 표준 입력과 출력으로 통신한다. 클라이언트는 URI scheme과 관계없이 언어 `polyspec-template`의 열린 문서마다 텍스트를 서버에 보낸다.
+확장은 언어 서버 `template-lsp`에 연결해 동작한다(EDT-15). 확장의 언어 클라이언트(`vscode-languageclient`)가 VS Code의 Node.js 런타임으로 `dist/server.cjs`를 실행하고, 표준 입력과 출력으로 서버와 통신한다. 클라이언트는 URI scheme과 관계없이 언어 `polyspec-template`의 열린 문서마다 텍스트를 서버에 보낸다.
 
 확장과 서버는 열린 문서의 텍스트만 읽고 작업 공간의 코드를 실행하지 않으므로 확장은 `capabilities.untrustedWorkspaces.supported`를 선언한다. 이 선언이 없으면 VS Code는 Restricted Mode에서 문법을 포함한 확장 전체를 비활성화하고, 신뢰하지 않은 폴더의 `.tpl` 파일은 일반 텍스트로 열린다. 확장은 `capabilities.virtualWorkspaces`도 선언한다. 서버는 문서 텍스트를 프로토콜로만 받고 파일 시스템을 읽지 않으므로, 가상 작업 공간의 문서도 파일과 같이 분석하며 그 URI가 진단의 템플릿 이름이 된다. 확장은 `main` 진입점만 있고 `browser` 진입점이 없으므로, Node.js 확장 호스트가 없는 VS Code for the Web은 확장을 실행하지 않는다. VS Code는 Electron 빌드에 포함된 Node.js로 확장과 서버를 실행하므로 확장은 `engines.vscode` `^1.138.0`만 선언하고 `engines.node`는 선언하지 않는다. VS Code 1.138.0은 Node.js 24.18.1을 가진 Electron 42.10.0을 사용하므로 두 번들의 대상은 `node24`다.
 

@@ -15,7 +15,7 @@ make test-browser
 
 ## 브라우저에 템플릿과 데이터 전달
 
-- 템플릿: 템플릿 소스나 AST JSON을 번들해 `MapLoader`에 넣는다. `@polyspec/template/render` 진입점은 렉서와 파서 없이 AST JSON을 렌더한다.
+- 템플릿: 템플릿 소스나 AST JSON을 JavaScript 번들에 포함해 `MapLoader`에 넣는다. `@polyspec/template/render` 진입점은 렉서와 파서 없이 AST JSON을 렌더한다.
 - 데이터: `{= json(state) | raw}`로 assign 데이터를 `<script type="application/json">` 안에 임베드하고 패키지의 `parseJson`으로 읽는다. `data-state="{= json(state)}"` 같은 속성에는 `raw`가 필요 없다. echo 태그가 JSON 텍스트를 이스케이프하기 때문이다. `JSON.parse`는 정수 형태 키의 순서를 바꾸고 안전 범위 밖의 정수를 받아들인다.
 - 템플릿 define과 환경: 서버가 사용한 것과 같은 `define`과 `env` 값을 전달한다.
 

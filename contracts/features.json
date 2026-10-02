@@ -1096,7 +1096,7 @@
       "title_ko": "VS Code 확장",
       "status": "implemented",
       "description": "Register the .tpl language in VS Code with a TextMate grammar that embeds HTML, CSS and JavaScript and injects template tags, and a client of the bundled language server @polyspec/template-lsp for diagnostics, semantic tokens, matching tag highlights, folding, formatting, indentation while typing, tag backgrounds and the matching tag command (EDT-15).",
-      "description_ko": "VS Code에 .tpl 언어를 등록한다. HTML, CSS, JavaScript를 포함하고 템플릿 태그를 주입하는 TextMate 문법과, 진단, 시맨틱 토큰, 짝 태그 강조, 접기, 포맷, 타이핑 중 들여쓰기, 태그 배경, 짝 태그 명령을 제공하는 함께 묶은 언어 서버 @polyspec/template-lsp의 클라이언트를 갖는다(EDT-15).",
+      "description_ko": "VS Code에 .tpl 언어를 등록한다. HTML, CSS, JavaScript를 포함하고 템플릿 태그를 주입하는 TextMate 문법을 갖고, 진단, 시맨틱 토큰, 짝 태그 강조, 접기, 포맷, 타이핑 중 들여쓰기, 태그 배경, 짝 태그 명령은 확장 안에 포함한 언어 서버 @polyspec/template-lsp에 연결해 제공한다(EDT-15).",
       "inputs": {
         "type": "EditorDocument",
         "fields": [
