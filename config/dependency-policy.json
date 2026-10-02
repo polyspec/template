@@ -26,6 +26,14 @@
       "reason": "The latest stable release is outside the current lint peer contract and breaks declaration generation.",
       "removalCondition": "Remove the pin when the lint peer contract accepts the release and make test-ts passes with declaration output enabled.",
       "verification": ["make test-ts"]
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/template-vscode/package.json",
+      "package": "@types/vscode",
+      "reason": "vsce refuses to package an extension whose @types/vscode is newer than engines.vscode (^1.138.0): \"@types/vscode ^1.140.0 greater than engines.vscode ^1.138.0\". The extension uses no API added after VS Code 1.138, so raising engines.vscode would only exclude VS Code 1.138 and 1.139.",
+      "removalCondition": "Remove the exception when engines.vscode is raised to the latest @types/vscode release, because the extension needs an API of that release, and make vscode-package test-vscode-integration passes.",
+      "verification": ["make vscode-package", "make test-vscode-integration"]
     }
   ]
 }

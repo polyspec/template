@@ -1,5 +1,6 @@
 # 변경 기록
 
+- 의존성 정책 검사를 고쳤다. 모든 오래된 npm 의존성을 루트 package.json의 것으로 읽었고, 여러 워크스페이스가 공유하는 의존성은 `npm outdated --json`이 배열로 보고하므로 건너뛰었다. 그래서 오래된 `@types/node`가 걸리지 않았다. 이제 검사는 의존하는 워크스페이스의 manifest를 찾고, 두 형태를 모두 읽으며, 두 경우를 거부하는지 먼저 증명한다. `@types/node`를 26.6.4로 갱신하고 `@types/vscode` 1.138.0의 예외를 기록했다. vsce는 `engines.vscode`(^1.138.0)보다 새 `@types/vscode`를 거부하고, 확장은 VS Code 1.140의 API가 필요 없다. CI는 새로 나온 `@types/vscode` 1.140.0 때문에 실패했다.
 - 포매터와 에디터 패키지를 CI에서 실행하게 했다. job `editor`가 에디터 경계, 언어 서비스, 포매터, 언어 서버, CodeMirror, VS Code 검사와 `xvfb-run` 아래의 VS Code 통합 테스트를 실행하고, `pages` job은 이 job을 기다린다. 이 패키지들을 실행하는 CI job이 없었다.
 - 문서 빌드를 고쳤다. 실행 체크리스트 Wave 11의 병렬성 행이 `{…}` 형태의 표 칸이었고, VitePress가 이를 속성 목록으로 읽어 `vitepress build`가 실패했다. 사이트를 빌드하지 않던 `make check`에 `docs-static-check`를 추가했다.
 - README와 문서 목차를 갱신했다. 타입 고정 컴파일러의 generated 프로그램, 네 패키지로 된 에디터 지원, 시길 `%`, 현재 `make check`의 범위, 컴파일러 명세, 목차와 탐색 메뉴에 빠진 운영 문서, 제목 "포매터, 언어 서버, 에디터"다.
