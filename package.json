@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build -w @polyspec/template",
-    "lint": "eslint packages/template-ts/src packages/template-format/src packages/template-vscode/src",
+    "lint": "eslint packages/template-ts/src packages/template-language/src packages/template-vscode/src",
     "typecheck": "npm run typecheck -w @polyspec/template",
     "test": "node tests/runner/conformance.mjs",
     "test:browser": "playwright test",

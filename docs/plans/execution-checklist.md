@@ -276,6 +276,19 @@ Dependencies: none. A finished package install check left its temporary director
 | --- | --- | --- | --- |
 | T10.1 | Remove the install check workspace, including the Go module cache created with `-modcacherw`, and fail the check with the path of a workspace that cannot be removed; `scripts/check-install-workspace.mjs` runs in `make install-check` | `make install-check`; `make check` | [x] |
 
+## Wave 11 — Editor language service, LSP server and CodeMirror adapter
+
+Dependencies: none. Every editor rule moves into one language service, and each editor reaches it through an adapter that only converts positions and registers features ([editor support](../spec/editor.md)). A task runs in the branch `feat/<shortname>-<id>` and the worktree `template-<shortname>-<id>`; both are removed as soon as the task is merged into `main`.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T11.1 | Return the tags and expression tokens accepted before the first error with `analyzePrefix()` of `@polyspec/template` (EDT-6) | `make test-ts` | [ ] |
+| T11.2 | Rename `@polyspec/template-format` to `@polyspec/template-language`; add `openDocument()` with diagnostics, tokens, tag ranges, folding ranges, highlights, matching tags, `format` and `lineIndentation` (EDT-4 to EDT-13); move the folding and matching tag rules out of the VS Code extension; add the editor fixtures (EDT-17) | `make test-language` | [ ] |
+| T11.3 | Add the LSP server `@polyspec/template-lsp` with the command `template-lsp` (EDT-14) and test it through its protocol against the editor fixtures | `make test-lsp` | [ ] |
+| T11.4 | Make the VS Code extension a client of the bundled LSP server; keep the TextMate grammar, tag backgrounds and the matching tag command (EDT-15) | `make test-vscode`; `make test-vscode-integration` | [ ] |
+| T11.5 | Add the CodeMirror 6 adapter `@polyspec/template-codemirror` (EDT-16), test it with `EditorState` against the editor fixtures and in a browser | `make test-codemirror` | [ ] |
+| T11.6 | Reject an adapter that declares or imports `@polyspec/template` (EDT-2) or a language service that imports an editor, Node.js or DOM module (EDT-3); record rule evidence, feature status, documents and dependency policy | `make check` | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -291,10 +304,11 @@ Dependencies: none. A finished package install check left its temporary director
 | W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime support precedes parity and publication |
 | W9 | none | T9.1 |
 | W10 | none | T10.1 |
+| W11 | {T11.3 → T11.4, T11.5} | T11.1 → T11.2 → the parallel group → T11.6 |
 
 ## Definition of done
 
-- Every task in W0–W10 is `done`.
+- Every task in W0–W11 is `done`.
 - `make check` passes on a clean checkout with Node 26.8.1, Go 1.27.1, Rust 1.98.1 and PHP 8.5.
 - `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
 - `make test-browser` passes.

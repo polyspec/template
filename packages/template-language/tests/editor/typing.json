@@ -1,0 +1,140 @@
+{
+  "diagnostics": [
+    {
+      "start": 34,
+      "end": 35,
+      "code": "E_PARSE_UNCLOSED_BLOCK"
+    }
+  ],
+  "tokens": [
+    [
+      7,
+      8,
+      "delimiter"
+    ],
+    [
+      8,
+      9,
+      "keyword"
+    ],
+    [
+      10,
+      14,
+      "variable"
+    ],
+    [
+      15,
+      16,
+      "operator"
+    ],
+    [
+      17,
+      22,
+      "variable"
+    ],
+    [
+      22,
+      23,
+      "delimiter"
+    ],
+    [
+      34,
+      35,
+      "delimiter"
+    ],
+    [
+      35,
+      36,
+      "keyword"
+    ],
+    [
+      37,
+      41,
+      "variable"
+    ],
+    [
+      41,
+      46,
+      "property"
+    ],
+    [
+      46,
+      47,
+      "delimiter"
+    ],
+    [
+      51,
+      52,
+      "delimiter"
+    ],
+    [
+      52,
+      53,
+      "keyword"
+    ],
+    [
+      54,
+      58,
+      "variable"
+    ],
+    [
+      58,
+      63,
+      "property"
+    ],
+    [
+      63,
+      64,
+      "delimiter"
+    ]
+  ],
+  "tags": [
+    [
+      7,
+      23
+    ],
+    [
+      34,
+      47
+    ],
+    [
+      51,
+      64
+    ]
+  ],
+  "foldingRanges": [],
+  "highlights": {},
+  "matchingTags": {
+    "0": null,
+    "7": null,
+    "23": null,
+    "24": null,
+    "34": null,
+    "47": null,
+    "48": null,
+    "51": null,
+    "64": null,
+    "69": null
+  },
+  "lineIndentation": {
+    "indent": [
+      "",
+      "  ",
+      "    ",
+      "      ",
+      "        ",
+      ""
+    ],
+    "flat": [
+      "",
+      "  ",
+      "  ",
+      "    ",
+      "    ",
+      ""
+    ]
+  },
+  "formatted": {
+    "error": "parse"
+  }
+}

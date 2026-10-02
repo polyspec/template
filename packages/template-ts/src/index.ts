@@ -1,6 +1,6 @@
 // Package entry: parser, engine, loaders, values and errors.
 import type { Template } from './ast.js';
-import { analyzeTemplate, parseTemplate, type SyntaxTag, type SyntaxToken } from './parser/parser.js';
+import { analyzeTemplate, analyzeTemplatePrefix, parseTemplate, type PrefixAnalysis, type SyntaxTag, type SyntaxToken } from './parser/parser.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from './parser/scanner.js';
 import { AstProgramCore, type EngineOptions, type RenderOptions } from './render/engine.js';
 import type { ParsedTemplate } from './render/context.js';
@@ -21,6 +21,7 @@ export { RuntimeBindings } from './render/runtime-bindings.js';
 export type { Limits } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';
 export type { Delimiters } from './parser/scanner.js';
+export type { PrefixAnalysis, SyntaxTag, SyntaxToken } from './parser/parser.js';
 export { Source } from './source.js';
 export { PageCache, type PageCacheTTL } from './page-cache.js';
 
@@ -40,6 +41,16 @@ function delimitersOf(value: string | undefined): Delimiters {
 export function parse(source: string | Uint8Array, name: string, options: ParseOptions = {}): Template {
   const delimiters = delimitersOf(options.delimiters);
   return internalBoundary(name, () => parseWithLines(source, name, delimiters).ast);
+}
+
+/**
+ * Parses a template and returns the tag ranges and expression tokens the parser accepted before its first error,
+ * with that error, or every tag and token and a null error when the source parses (EDT-6). Editors use it while a
+ * text is being typed and does not parse.
+ */
+export function analyzePrefix(source: string | Uint8Array, name: string, options: ParseOptions = {}): PrefixAnalysis {
+  const delimiters = delimitersOf(options.delimiters);
+  return internalBoundary(name, () => analyzeTemplatePrefix(typeof source === 'string' ? Source.fromText(name, source) : Source.fromBytes(name, source), delimiters));
 }
 
 /** Parses a template once and returns its AST with exact parser-owned tag ranges. */

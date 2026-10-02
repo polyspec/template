@@ -19,7 +19,7 @@
 | docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/documentation) |
 | release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/testing) |
 | template-function-inventory | Template function inventory | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/template-functions) |
-| template-format | 템플릿 포매터와 CLI | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/editor-tools) |
+| template-language | 템플릿 언어 서비스, 포매터, CLI | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/editor-tools) |
 | template-vscode | VS Code 확장 | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass | [근거](operations/editor-tools) |
 | dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/dependencies) |
 | template-function-contract | Canonical template function contract | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/functions) |

@@ -18,6 +18,7 @@
 | [`spec/errors.md`](/ko/spec/errors) | 오류 객체와 오류 코드 |
 | [`spec/conformance.md`](/ko/spec/conformance) | 픽스처 구조, CLI 계약, 비교 규칙 |
 | [`spec/examples.md`](/ko/spec/examples) | 완전한 페이지 예제 |
+| [`spec/editor.md`](/ko/spec/editor) | 언어 서비스, LSP 서버, 에디터 어댑터 |
 
 아직 없는 문서는 [실행 체크리스트](/ko/plans/execution-checklist)에 나열되어 있다.
 

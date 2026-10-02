@@ -9,7 +9,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	build-format test-format format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
+	build-language test-language format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -19,7 +19,7 @@ RUST_DIR := packages/template-rust
 PHP_DIR  := packages/template-php
 EXT_DIR  := packages/template-php-ext
 SHOWCASE_RUST := tools/showcase/adapters/rust
-FORMAT_DIR := packages/template-format
+LANGUAGE_DIR := packages/template-language
 VSCODE_DIR := packages/template-vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 
@@ -55,8 +55,8 @@ help: ## List targets
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
 	@echo "  dependency-audit       Reject known JavaScript and PHP dependency advisories"
 	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
-	@echo "  build-format           Build the formatter library and the template-fmt CLI"
-	@echo "  test-format            Formatter, safety invariant and CLI tests, type check"
+	@echo "  build-language           Build the formatter library and the template-fmt CLI"
+	@echo "  test-language            Formatter, safety invariant and CLI tests, type check"
 	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
 	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
 	@echo "  install-cli            Link template-fmt into the global npm bin directory"
@@ -67,7 +67,7 @@ help: ## List targets
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-format format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -111,24 +111,24 @@ test-rust: ## Rust clippy and tests
 test-php: build-php ## PHP unit tests
 	cd $(PHP_DIR) && vendor/bin/phpunit
 
-build-format: build-ts ## Build the formatter library and the template-fmt CLI
-	npm run build -w @polyspec/template-format
+build-language: build-ts ## Build the formatter library and the template-fmt CLI
+	npm run build -w @polyspec/template-language
 
-test-format: build-format ## Formatter, safety invariant and CLI tests, type check
-	npm test -w @polyspec/template-format -- --run
-	npm run typecheck -w @polyspec/template-format
+test-language: build-language ## Formatter, safety invariant and CLI tests, type check
+	npm test -w @polyspec/template-language -- --run
+	npm run typecheck -w @polyspec/template-language
 
-format-check: build-format ## Check that the formatter fixtures are formatted
-	node $(FORMAT_DIR)/bin/template-fmt.mjs --check $(FORMAT_DIR)/tests/fixtures/expected
+format-check: build-language ## Check that the formatter fixtures are formatted
+	node $(LANGUAGE_DIR)/bin/template-fmt.mjs --check $(LANGUAGE_DIR)/tests/fixtures/expected
 
-format-external-check: build-format ## Run the formatter safety invariant on an explicit external template tree
+format-external-check: build-language ## Run the formatter safety invariant on an explicit external template tree
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
-	TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" npm test -w @polyspec/template-format -- --run tests/invariant.test.ts
+	TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" npm test -w @polyspec/template-language -- --run tests/invariant.test.ts
 
-install-cli: build-format ## Link template-fmt into the global npm bin directory
-	npm link -w @polyspec/template-format
+install-cli: build-language ## Link template-fmt into the global npm bin directory
+	npm link -w @polyspec/template-language
 
-build-vscode: build-format ## Bundle the VS Code extension
+build-vscode: build-language ## Bundle the VS Code extension
 	npm run build -w polyspec-template
 
 test-vscode: build-vscode ## Grammar tests, extension tests and type check
@@ -343,4 +343,4 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(FORMAT_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first

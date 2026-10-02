@@ -8,7 +8,7 @@ Language support for `.tpl` template files:
 - a scope for each tag kind and for the tokens of expressions;
 - comment toggling with `{* *}` and bracket pairs for the delimiters;
 - parse diagnostics at the parser position, highlights of the tags of one block construct, folding of multi-line constructs and the command Go to Matching Template Tag (`Cmd+Alt+\` on macOS, `Ctrl+Alt+\` on Windows and Linux), all computed by the template parser;
-- document and range formatting with `@polyspec/template-format`, which changes whitespace inside tags and the indentation of lines with the editor indent unit, and returns no edits when the formatted AST would differ from the source AST or the HTML structure is not balanced. The setting `polyspec-template.format.templateBlocks` (`indent` or `flat`) sets whether template blocks add an indentation level.
+- document and range formatting with `@polyspec/template-language`, which changes whitespace inside tags and the indentation of lines with the editor indent unit, and returns no edits when the formatted AST would differ from the source AST or the HTML structure is not balanced. The setting `polyspec-template.format.templateBlocks` (`indent` or `flat`) sets whether template blocks add an indentation level.
 
 ## Workspace trust
 

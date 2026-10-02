@@ -4,7 +4,7 @@
 
 Two TypeScript packages support template authors:
 
-- `packages/template-format` (`@polyspec/template-format`): the formatter library `format()`, the tag structure function `templateStructure()` and the command line tool `template-fmt`.
+- `packages/template-language` (`@polyspec/template-language`): the language service `openDocument()` ([editor support](../spec/editor.md)), the formatter `format()` and the command line tool `template-fmt`.
 - `packages/template-vscode` (`polyspec-template`): the VS Code extension with the language definition, the TextMate grammar and the formatting provider. The provider calls `format()` and contains no formatting rules.
 
 Both read the template syntax from `@polyspec/template`: the formatter uses the parser's tag ranges and expression tokens, and the grammar follows [lexical rules](../spec/lexical.md), [tag grammar](../spec/grammar.md) and [expressions](../spec/expressions.md).
@@ -118,7 +118,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 | 1 | `--check` found a file that is not formatted |
 | 2 | a file does not parse, a formatted AST differs, an HTML structure is not balanced, a path cannot be read, or the arguments are invalid |
 
-`make install-cli` runs `npm link -w @polyspec/template-format`, which links `template-fmt` into the global npm bin directory. The link points to the working tree, so `make build-format` updates the installed command.
+`make install-cli` runs `npm link -w @polyspec/template-language`, which links `template-fmt` into the global npm bin directory. The link points to the working tree, so `make build-language` updates the installed command.
 
 ## VS Code extension
 
@@ -128,7 +128,7 @@ make vscode-install
 code --list-extensions --show-versions | grep polyspec
 ```
 
-`make vscode-package` bundles `src/extension.ts` with `@polyspec/template-format` and `@polyspec/template` into `dist/extension.cjs` and writes `packages/template-vscode/dist/polyspec-template.vsix`. The installed extension does not need the repository at run time. `make vscode-install` runs `code --install-extension` with `--force`.
+`make vscode-package` bundles `src/extension.ts` with `@polyspec/template-language` and `@polyspec/template` into `dist/extension.cjs` and writes `packages/template-vscode/dist/polyspec-template.vsix`. The installed extension does not need the repository at run time. `make vscode-install` runs `code --install-extension` with `--force`.
 
 The extension declares `capabilities.untrustedWorkspaces.supported` and `capabilities.virtualWorkspaces`, because it only reads document text and runs no code of the workspace. Without the declaration VS Code disables the extension, including its grammar, in Restricted Mode, and a `.tpl` file in an untrusted folder opens as plain text. The extension declares `engines.vscode` `^1.138.0` and no `engines.node`, because VS Code runs extensions on the Node.js of its Electron build. VS Code 1.138.0 uses Electron 42.10.0 with Node.js 24.18.1, so the bundle targets `node24`.
 
@@ -140,10 +140,10 @@ The extension registers the language `polyspec-template` for `.tpl` files with:
 
 ### Diagnostics and matching tags
 
-`templateStructure()` parses a document with `analyze()` of `@polyspec/template` and returns either the parse error with its code, its parser line and column and its string range, or every tag range and the block constructs. A construct is a loop, if or if-block tag, the else-if and else tags of that block and its close tag, taken from the tag ranges that the parser accepted. A test compares the constructs with the `If`, `For` and `IfBlock` spans and the branch spans of the AST for every conformance case. The extension uses only this function:
+The extension takes diagnostics, tag ranges, constructs, folding ranges and matching tags from `openDocument()` of the language service ([editor support](../spec/editor.md), EDT-4 to EDT-11). A test compares the constructs with the `If`, `For` and `IfBlock` spans and the branch spans of the AST for every conformance case:
 
 - Diagnostics: the extension parses a template document when it opens and 250 ms after the last change, and publishes the parse error, for example `E_PARSE_UNCLOSED_BLOCK`, `E_PARSE_UNEXPECTED_CLOSE` or `E_PARSE_ELSE_OUTSIDE_BLOCK`, at the parser position with the error code. The diagnostic is removed when the document parses.
-- Tag backgrounds: every tag except comments gets the deep green background `#16351c` in dark themes and `#e3f6dd` in light themes. The background differs in lightness from the editor background (ΔL* +13.4 on Dark 2026, 5.1 on Light 2026) and keeps every syntax color of Dark 2026 above 4.5:1; the lowest is the keyword sigils at 4.8:1. A more saturated green such as `#044700` stands out more but lowers the sigils to 4.0:1, and a color at the editor's own lightness, such as black on a dark theme, cannot be told apart. The extension paints visible template editors when they appear and 250 ms after the last change. While a document does not parse, the previous backgrounds stay and move with the edits.
+- Tag backgrounds: every tag except comments gets the deep green background `#16351c` in dark themes and `#e3f6dd` in light themes. The background differs in lightness from the editor background (ΔL* +13.4 on Dark 2026, 5.1 on Light 2026) and keeps every syntax color of Dark 2026 above 4.5:1; the lowest is the keyword sigils at 4.8:1. A more saturated green such as `#044700` stands out more but lowers the sigils to 4.0:1, and a color at the editor's own lightness, such as black on a dark theme, cannot be told apart. The extension paints visible template editors when they appear and 250 ms after the last change. While a document does not parse, the backgrounds cover the tags the parser accepted before its error (EDT-6).
 - Highlights: with the cursor on an opening, branch or close tag, every tag of the same construct is highlighted.
 - Folding: each construct whose close tag is on a later line folds from the line of its opening tag to the line before its close tag.
 - The command Go to Matching Template Tag (`polyspec-template.goToMatchingTag`) moves the cursor to the next tag of the construct under the cursor, and from the last tag to the opening tag. Outside a tag it moves to the next tag of the innermost enclosing construct. The keybinding is `Cmd+Alt+\` on macOS and `Ctrl+Alt+\` on Windows and Linux, active only in a template editor. The integration test checks on macOS that the default keybindings of VS Code 1.138.0 bind `Cmd+Alt+\` to no other command.
@@ -184,7 +184,7 @@ Delimiters are `keyword.control.tag.begin.polyspec-template` and `keyword.contro
 ## Verification
 
 ```sh
-make test-format
+make test-language
 make format-check
 make test-vscode
 make test-vscode-integration
@@ -193,4 +193,4 @@ make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 
 `make test-vscode` runs the grammar tests with `vscode-tmgrammar-test` against the HTML, CSS and JavaScript grammars of `tm-grammars`, and tests the manifest and the bundled providers with a stand-in `vscode` module. `make test-vscode-integration` builds the `.vsix`, downloads VS Code 1.138.0, the minimum of `engines.vscode`, into `.vscode-test` at the repository root with `@vscode/test-electron`, and installs the `.vsix` into a new extensions directory with the VS Code command line. It starts VS Code with workspace trust enabled and the test folder untrusted, as a user installation runs, and checks that a `.tpl` document opens with the language `polyspec-template`, that the installed extension activates, that `_workbench.captureSyntaxTokens` reports the template scopes for a tag inside an HTML attribute value, that an unclosed `{?` produces a diagnostic at its position, that document highlights, folding ranges and Go to Matching Template Tag follow one construct, that the keybinding is free, and that `vscode.executeFormatDocumentProvider` returns the expected edits for a sample and no edits for a formatted document and for a document that does not parse. A second run removes `capabilities` from the installed manifest and requires that VS Code disables the extension in that workspace, which shows that the first run detects a missing capability.
 
-`make check` runs `test-format`, `format-check`, `test-vscode` and `test-vscode-integration`. `make format-external-check` runs the invariant test also on an explicit external template tree.
+`make check` runs `test-language`, `format-check`, `test-vscode` and `test-vscode-integration`. `make format-external-check` runs the invariant test also on an explicit external template tree.

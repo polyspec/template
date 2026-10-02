@@ -1018,12 +1018,12 @@
       ]
     },
     {
-      "id": "template-format",
-      "title": "Template formatter and CLI",
-      "title_ko": "템플릿 포매터와 CLI",
+      "id": "template-language",
+      "title": "Template language service, formatter and CLI",
+      "title_ko": "템플릿 언어 서비스, 포매터, CLI",
       "status": "implemented",
-      "description": "Normalize whitespace inside template tags and indent lines by the nesting of HTML elements and template blocks with format() and the template-fmt command, refuse a result whose AST without spans and line indentation differs from the source AST, and return the parse error, the tag ranges or the block constructs of a source with templateStructure().",
-      "description_ko": "format()과 template-fmt 명령으로 템플릿 태그 안의 공백을 정규화하고 HTML 요소와 템플릿 블록의 중첩에 따라 줄을 들여쓰며, span과 줄 들여쓰기를 제외한 AST가 소스 AST와 다른 결과는 거부하고, templateStructure()로 소스의 파싱 오류, 태그 범위 또는 블록 구성을 돌려준다.",
+      "description": "Normalize whitespace inside template tags and indent lines by the nesting of HTML elements and template blocks with format() and the template-fmt command, refuse a result whose AST without spans and line indentation differs from the source AST, and return the diagnostics, tokens, tag ranges, constructs, folding ranges, matching tags and typing indentation of a text with openDocument().",
+      "description_ko": "format()과 template-fmt 명령으로 템플릿 태그 안의 공백을 정규화하고 HTML 요소와 템플릿 블록의 중첩에 따라 줄을 들여쓰며, span과 줄 들여쓰기를 제외한 AST가 소스 AST와 다른 결과는 거부하고, openDocument()로 텍스트의 진단, 토큰, 태그 범위, 구성, 접기 범위, 짝 태그, 타이핑 들여쓰기를 돌려준다.",
       "inputs": {
         "type": "TemplateSource",
         "fields": [
@@ -1066,16 +1066,16 @@
         "typescript": "pass"
       },
       "fixtures": [
-        "packages/template-format/tests/fixtures",
+        "packages/template-language/tests/fixtures",
         "tests/cases"
       ],
       "tests": [
-        "packages/template-format/tests"
+        "packages/template-language/tests"
       ],
       "verification": [
         {
           "id": "check-1",
-          "command": "make test-format"
+          "command": "make test-language"
         },
         {
           "id": "check-2",
@@ -1095,8 +1095,8 @@
       "title": "VS Code extension",
       "title_ko": "VS Code 확장",
       "status": "implemented",
-      "description": "Register the .tpl language in VS Code with a TextMate grammar that embeds HTML, CSS and JavaScript and injects template tags, parse diagnostics, matching tag highlights, folding and navigation from the parser's tag structure, comment toggling, bracket pairs and formatting through @polyspec/template-format.",
-      "description_ko": "VS Code에 .tpl 언어를 등록한다. HTML, CSS, JavaScript를 포함하고 템플릿 태그를 주입하는 TextMate 문법, 파서의 태그 구조로 계산한 파싱 진단, 짝 태그 강조, 접기, 이동, 주석 토글, 괄호 쌍, @polyspec/template-format을 사용하는 포맷을 제공한다.",
+      "description": "Register the .tpl language in VS Code with a TextMate grammar that embeds HTML, CSS and JavaScript and injects template tags, parse diagnostics, matching tag highlights, folding and navigation from the parser's tag structure, comment toggling, bracket pairs and formatting through @polyspec/template-language.",
+      "description_ko": "VS Code에 .tpl 언어를 등록한다. HTML, CSS, JavaScript를 포함하고 템플릿 태그를 주입하는 TextMate 문법, 파서의 태그 구조로 계산한 파싱 진단, 짝 태그 강조, 접기, 이동, 주석 토글, 괄호 쌍, @polyspec/template-language을 사용하는 포맷을 제공한다.",
       "inputs": {
         "type": "EditorDocument",
         "fields": [
