@@ -2,9 +2,10 @@
 
 [한국어](/ko/operations/editor-tools).
 
-Two TypeScript packages support template authors:
+Three TypeScript packages support template authors:
 
 - `packages/template-language` (`@polyspec/template-language`): the language service `openDocument()` ([editor support](../spec/editor.md)), the formatter `format()` and the command line tool `template-fmt`.
+- `packages/template-lsp` (`@polyspec/template-lsp`): the Language Server Protocol server `template-lsp`, an adapter of the language service.
 - `packages/template-vscode` (`polyspec-template`): the VS Code extension with the language definition, the TextMate grammar and the formatting provider. The provider calls `format()` and contains no formatting rules.
 
 Both read the template syntax from `@polyspec/template`: the formatter uses the parser's tag ranges and expression tokens, and the grammar follows [lexical rules](../spec/lexical.md), [tag grammar](../spec/grammar.md) and [expressions](../spec/expressions.md).
@@ -120,6 +121,15 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 
 `make install-cli` runs `npm link -w @polyspec/template-language`, which links `template-fmt` into the global npm bin directory. The link points to the working tree, so `make build-language` updates the installed command.
 
+## Language server
+
+```sh
+make build-lsp
+node packages/template-lsp/bin/template-lsp.mjs --stdio
+```
+
+`template-lsp` serves the Language Server Protocol over standard input and output for an editor with a Language Server Protocol client: the client starts the command for `.tpl` documents. The server provides the capabilities of EDT-14 ([editor support](../spec/editor.md)): diagnostics, semantic tokens, folding ranges, document highlights, document and range formatting, on-type indentation after `\n`, `>` and `}`, and the requests `polyspec-template/tagRanges` and `polyspec-template/matchingTag`. It reads the setting `polyspec-template.format.templateBlocks` with `workspace/configuration` and writes format errors to the client log as warnings. The server contains no template rule: it calls `openDocument()` once per document version and converts the UTF-16 string indexes of the language service to protocol positions. The argument `--stdio`, which Language Server Protocol clients pass, is accepted and has no effect.
+
 ## VS Code extension
 
 ```sh
@@ -185,12 +195,15 @@ Delimiters are `keyword.control.tag.begin.polyspec-template` and `keyword.contro
 
 ```sh
 make test-language
+make test-lsp
 make format-check
 make test-vscode
 make test-vscode-integration
 make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 ```
 
+`make test-lsp` starts the built command `template-lsp` as a child process, speaks the protocol over its standard input and output with `vscode-jsonrpc` and compares, for every editor fixture (EDT-17), the published diagnostics, the decoded semantic tokens, the tag ranges, the folding ranges, the highlights and matching tags at the fixture positions, the on-type indentation of every line in both `templateBlocks` modes and the formatted text with the expected results. It also compares a text with a byte order mark, CRLF line ends and characters outside the Basic Multilingual Plane with the language service, and checks the declared capabilities, the split of a multi-line token for a client without `multilineTokenSupport`, the configuration request, a format error, range formatting and on-type formatting without an edit.
+
 `make test-vscode` runs the grammar tests with `vscode-tmgrammar-test` against the HTML, CSS and JavaScript grammars of `tm-grammars`, and tests the manifest and the bundled providers with a stand-in `vscode` module. `make test-vscode-integration` builds the `.vsix`, downloads VS Code 1.138.0, the minimum of `engines.vscode`, into `.vscode-test` at the repository root with `@vscode/test-electron`, and installs the `.vsix` into a new extensions directory with the VS Code command line. It starts VS Code with workspace trust enabled and the test folder untrusted, as a user installation runs, and checks that a `.tpl` document opens with the language `polyspec-template`, that the installed extension activates, that `_workbench.captureSyntaxTokens` reports the template scopes for a tag inside an HTML attribute value, that an unclosed `{?` produces a diagnostic at its position, that document highlights, folding ranges and Go to Matching Template Tag follow one construct, that the keybinding is free, and that `vscode.executeFormatDocumentProvider` returns the expected edits for a sample and no edits for a formatted document and for a document that does not parse. A second run removes `capabilities` from the installed manifest and requires that VS Code disables the extension in that workspace, which shows that the first run detects a missing capability.
 
-`make check` runs `test-language`, `format-check`, `test-vscode` and `test-vscode-integration`. `make format-external-check` runs the invariant test also on an explicit external template tree.
+`make check` runs `test-language`, `test-lsp`, `format-check`, `test-vscode` and `test-vscode-integration`. `make format-external-check` runs the invariant test also on an explicit external template tree.

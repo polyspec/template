@@ -2,9 +2,10 @@
 
 [English](/operations/editor-tools).
 
-두 TypeScript 패키지가 템플릿 작성을 지원한다.
+세 TypeScript 패키지가 템플릿 작성을 지원한다.
 
 - `packages/template-language`(`@polyspec/template-language`): 언어 서비스 `openDocument()`([에디터 지원](/ko/spec/editor)), 포매터 `format()`, 명령줄 도구 `template-fmt`.
+- `packages/template-lsp`(`@polyspec/template-lsp`): 언어 서비스의 어댑터인 Language Server Protocol 서버 `template-lsp`.
 - `packages/template-vscode`(`polyspec-template`): 언어 정의, TextMate 문법, 포맷 제공자를 가진 VS Code 확장. 제공자는 `format()`을 호출하며 자체 포맷 규칙을 갖지 않는다.
 
 두 패키지는 템플릿 문법을 `@polyspec/template`에서 가져온다. 포매터는 파서가 돌려주는 태그 범위와 표현식 토큰을 사용하고, 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
@@ -120,6 +121,15 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 
 `make install-cli`는 `npm link -w @polyspec/template-language`을 실행해 `template-fmt`를 전역 npm bin 디렉터리에 링크한다. 링크가 작업 트리를 가리키므로 `make build-language`이 설치된 명령을 갱신한다.
 
+## 언어 서버
+
+```sh
+make build-lsp
+node packages/template-lsp/bin/template-lsp.mjs --stdio
+```
+
+`template-lsp`는 Language Server Protocol 클라이언트가 있는 에디터에 표준 입력과 출력으로 Language Server Protocol을 제공한다. 클라이언트는 `.tpl` 문서에 대해 이 명령을 실행한다. 서버는 EDT-14([에디터 지원](/ko/spec/editor))의 기능을 제공한다. 진단, 시맨틱 토큰, 접기 범위, 문서 강조, 문서와 범위 포맷, `\n`, `>`, `}` 뒤의 타이핑 들여쓰기, 요청 `polyspec-template/tagRanges`와 `polyspec-template/matchingTag`다. 설정 `polyspec-template.format.templateBlocks`를 `workspace/configuration`으로 읽고, 포맷 오류는 클라이언트 로그에 경고로 쓴다. 서버는 템플릿 규칙을 갖지 않는다. 문서 버전마다 `openDocument()`를 한 번 호출하고, 언어 서비스의 UTF-16 문자열 인덱스를 프로토콜 위치로 변환한다. Language Server Protocol 클라이언트가 넘기는 인자 `--stdio`는 받아들이며 효과가 없다.
+
 ## VS Code 확장
 
 ```sh
@@ -185,12 +195,15 @@ code --list-extensions --show-versions | grep polyspec
 
 ```sh
 make test-language
+make test-lsp
 make format-check
 make test-vscode
 make test-vscode-integration
 make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 ```
 
+`make test-lsp`는 빌드한 명령 `template-lsp`를 자식 프로세스로 실행하고, `vscode-jsonrpc`로 표준 입력과 출력을 통해 프로토콜을 주고받으며, 모든 에디터 픽스처(EDT-17)에 대해 게시된 진단, 디코딩한 시맨틱 토큰, 태그 범위, 접기 범위, 픽스처 위치에서의 강조와 짝 태그, 두 `templateBlocks` 방식에서 모든 줄의 타이핑 들여쓰기, 포맷한 텍스트를 기대 결과와 비교한다. 또한 바이트 순서 표시, CRLF 줄 끝, 기본 다국어 평면 밖의 문자가 있는 텍스트를 언어 서비스와 비교하고, 선언한 기능, `multilineTokenSupport`가 없는 클라이언트에 대한 여러 줄 토큰의 분할, 설정 요청, 포맷 오류, 범위 포맷, 편집이 없는 타이핑 포맷을 검사한다.
+
 `make test-vscode`는 `tm-grammars`의 HTML, CSS, JavaScript 문법과 함께 `vscode-tmgrammar-test`로 문법 테스트를 실행하고, 대체 `vscode` 모듈로 매니페스트와 번들한 제공자를 테스트한다. `make test-vscode-integration`은 `.vsix`를 빌드하고, `@vscode/test-electron`으로 `engines.vscode`의 최소 버전인 VS Code 1.138.0을 저장소 루트의 `.vscode-test`에 내려받고, VS Code 명령줄로 `.vsix`를 새 확장 디렉터리에 설치한다. 사용자 설치와 같이 workspace trust를 켜고 테스트 폴더를 신뢰하지 않은 상태로 VS Code를 실행해 `.tpl` 문서가 언어 `polyspec-template`으로 열리는지, 설치한 확장이 활성화되는지, `_workbench.captureSyntaxTokens`가 HTML 속성 값 안의 태그에 템플릿 scope를 보고하는지, 닫히지 않은 `{?`가 그 위치에 진단을 만드는지, 문서 강조, 접기 범위, Go to Matching Template Tag가 한 구성을 따르는지, 단축키가 비어 있는지, `vscode.executeFormatDocumentProvider`가 예제에 기대한 편집을 돌려주고 포맷된 문서와 파싱되지 않는 문서에는 편집을 돌려주지 않는지 검사한다. 두 번째 실행은 설치한 매니페스트에서 `capabilities`를 지우고 VS Code가 그 작업 공간에서 확장을 비활성화하는지 요구한다. 이것으로 첫 실행이 capability 누락을 찾아낸다는 것을 보인다.
 
-`make check`가 `test-language`, `format-check`, `test-vscode`, `test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
+`make check`가 `test-language`, `test-lsp`, `format-check`, `test-vscode`, `test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.

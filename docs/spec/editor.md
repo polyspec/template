@@ -72,6 +72,20 @@ This document defines how editors support templates. One language service holds 
 
 The setting `polyspec-template.format.templateBlocks` (`indent` or `flat`) is read with `workspace/configuration` for each document.
 
+Positions and ranges are `Position` and `Range` values of the protocol. The custom requests have these parameters and results:
+
+| Request | Parameters | Result |
+| --- | --- | --- |
+| `polyspec-template/tagRanges` | `{ textDocument: TextDocumentIdentifier }` | `Range[]` in text order, or `null` when the document is not open |
+| `polyspec-template/matchingTag` | `{ textDocument: TextDocumentIdentifier, position: Position }` | the `Position` where the matching tag starts, or `null` when there is no matching tag or the document is not open |
+
+- The server analyzes each version of a document once (EDT-4). It publishes the diagnostics of every version with the version number and publishes an empty list when the document closes. The template name of a document is the file path of a `file:` URI, otherwise the URI.
+- The legend of the semantic tokens is the token types of EDT-8 in that order, without modifiers. A token that spans lines is sent as one token per line unless the client declares `multilineTokenSupport`.
+- A folding range starts on the protocol line where its first line starts and ends on the protocol line before the line of the close tag.
+- Formatting returns one edit that replaces the whole text, or no edit when the text is formatted. The indent unit is `tabSize` spaces, or one tab when `insertSpaces` is false. When `format` returns an error, the server returns no edits and sends `path:line:col: LABEL: message; no edits returned` as a `window/logMessage` warning; `LABEL` is the parser error code, `HTML structure` or `formatted AST differs`.
+- The current line of `textDocument/onTypeFormatting` is the line of the request position. The edit replaces the spaces and tabs at the start of that line; the server returns no edit when they already equal `lineIndentation`.
+- Formatting and on-type formatting request `workspace/configuration` with `{ scopeUri: <document URI>, section: 'polyspec-template' }` and use `format.templateBlocks` of the result. Any other value than `flat`, and a client without the `workspace/configuration` capability, give `indent`.
+
 **EDT-15** The VS Code extension `polyspec-template` is a client of `@polyspec/template-lsp`, which it bundles. It keeps the TextMate grammar, which highlights HTML and template tags before the server answers; the semantic tokens of the server then replace the template token colors. It paints the tag background from `polyspec-template/tagRanges` and moves the cursor with `polyspec-template/matchingTag`.
 
 **EDT-16** `@polyspec/template-codemirror` exports `template(options)`, a CodeMirror 6 extension built on `@codemirror/lang-html`. It marks tokens with the classes `cm-template-<type>`, paints the tag background, reports diagnostics through `@codemirror/lint`, provides folding, matching tag highlights, an indentation service with `lineIndentation` and the command `formatTemplate` (bound to `Shift-Alt-f`), which uses the editor's indent unit. `options.templateBlocks` and `options.delimiters` are passed to the language service.
