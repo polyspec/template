@@ -282,12 +282,14 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
-| T11.1 | `@polyspec/template`의 `analyzePrefix()`로 첫 오류 전까지 받아들인 태그와 표현식 토큰을 돌려줌(EDT-6) | `make test-ts` | [ ] |
-| T11.2 | `@polyspec/template-format`을 `@polyspec/template-language`로 바꾸고, 진단, 토큰, 태그 범위, 접기 범위, 강조, 짝 태그, `format`, `lineIndentation`을 가진 `openDocument()`를 추가(EDT-4~EDT-13). 접기와 짝 태그 규칙을 VS Code 확장에서 옮기고 에디터 픽스처를 추가(EDT-17) | `make test-language` | [ ] |
-| T11.3 | 명령 `template-lsp`를 가진 LSP 서버 `@polyspec/template-lsp`를 추가하고(EDT-14) 프로토콜로 에디터 픽스처를 검사 | `make test-lsp` | [ ] |
-| T11.4 | VS Code 확장을 함께 묶은 LSP 서버의 클라이언트로 바꾸고, TextMate 문법, 태그 배경, 짝 태그 명령을 유지(EDT-15) | `make test-vscode`; `make test-vscode-integration` | [ ] |
-| T11.5 | CodeMirror 6 어댑터 `@polyspec/template-codemirror`를 추가하고(EDT-16) `EditorState`와 브라우저에서 에디터 픽스처로 검사 | `make test-codemirror` | [ ] |
-| T11.6 | `@polyspec/template`을 선언하거나 import하는 어댑터(EDT-2), 에디터·Node.js·DOM 모듈을 import하는 언어 서비스(EDT-3)를 거부하고, 규칙 증거, 기능 상태, 문서, 의존성 정책을 기록 | `make check` | [ ] |
+| T11.1 | `@polyspec/template`의 `analyzePrefix()`로 첫 오류 전까지 받아들인 태그와 표현식 토큰을 돌려줌(EDT-6) | `make test-ts` | [x] |
+| T11.2 | `@polyspec/template-format`을 `@polyspec/template-language`로 바꾸고, 진단, 토큰, 태그 범위, 접기 범위, 강조, 짝 태그, `format`, `lineIndentation`을 가진 `openDocument()`를 추가(EDT-4~EDT-13). 접기와 짝 태그 규칙을 VS Code 확장에서 옮기고 에디터 픽스처를 추가(EDT-17) | `make test-language` | [x] |
+| T11.3 | 명령 `template-lsp`를 가진 LSP 서버 `@polyspec/template-lsp`를 추가하고(EDT-14) 프로토콜로 에디터 픽스처를 검사 | `make test-lsp` | [x] |
+| T11.4 | VS Code 확장을 함께 묶은 LSP 서버의 클라이언트로 바꾸고, TextMate 문법, 태그 배경, 짝 태그 명령을 유지(EDT-15) | `make test-vscode`; `make test-vscode-integration` | [x] |
+| T11.5 | CodeMirror 6 어댑터 `@polyspec/template-codemirror`를 추가하고(EDT-16) `EditorState`와 브라우저에서 에디터 픽스처로 검사 | `make test-codemirror` | [x] |
+| T11.6 | `@polyspec/template`을 선언하거나 import하는 어댑터(EDT-2), 에디터·Node.js·DOM 모듈을 import하는 언어 서비스(EDT-3)를 거부하고, 규칙 증거, 기능 상태, 문서, 의존성 정책을 기록 | `make check` | [x] |
+
+T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 커밋 "Refresh the generated artifact digests after the lockfile change"에서 `editor-boundary-check`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode`, `test-vscode-integration`을 포함한 `make check`가 통과했고, `rules-check`는 덮이지 않은 규칙이 없다고 보고했다.
 
 ## 병렬성 요약
 
