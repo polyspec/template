@@ -37,7 +37,7 @@ describe('format', () => {
 
   it('keeps a byte order mark and CRLF line terminators', () => {
     const source = '\uFEFF<ul>\r\n{@ x=xs}\r\n<li>{=x}</li>\r\n{/}\r\n</ul>\r\n';
-    expect(text(format(source))).toBe('\uFEFF<ul>\r\n{@ x = xs}\r\n<li>{= x}</li>\r\n{/}\r\n</ul>\r\n');
+    expect(text(format(source))).toBe('\uFEFF<ul>\r\n  {@ x = xs}\r\n    <li>{= x}</li>\r\n  {/}\r\n</ul>\r\n');
   });
 
   it('formats only the tags inside a range', () => {

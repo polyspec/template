@@ -11,7 +11,7 @@ Both read the template syntax from `@polyspec/template`: the formatter uses the 
 
 ## Formatting style
 
-The formatter changes only whitespace inside tags. It never changes text outside tags, so the rendered output does not change.
+The formatter changes whitespace inside tags and the indentation of lines. Inside tags it follows the table below. Outside tags it replaces only the spaces and tabs at the start of a line, according to the nesting of HTML elements and template blocks ([Indentation](#indentation)). It changes no other text outside tags.
 
 | Tag | Formatted form |
 | --- | --- |
@@ -34,7 +34,7 @@ The formatter changes only whitespace inside tags. It never changes text outside
 
 The formatter keeps these parts as written:
 
-- text outside tags, including whitespace and line terminators;
+- text outside tags, including whitespace and line terminators, except the indentation of lines;
 - comments `{* ... *}` and the delimiter directive `{% delimiter ..}`;
 - a tag whose body contains a line terminator;
 - the wrapper of a wrapped tag and the whitespace between the wrapper and the doubled delimiters;
@@ -42,17 +42,50 @@ The formatter keeps these parts as written:
 
 Custom delimiters are supported: the `--delimiters` option and the `delimiters` option of `format()` select the engine delimiters, and a `{% delimiter ..}` directive changes the delimiters for the tags after it.
 
+### Indentation
+
+The formatter sets the indentation of each line to the indent unit repeated by the line's depth. The indent unit is the `indent` option: a run of spaces or one tab, two spaces by default. `indent: null` keeps the indentation of every line, so only the whitespace inside tags changes.
+
+```
+<div class="board-list">
+  <h2>{= t["list.heading"]}</h2>
+  {? length(p.props.posts) == 0}
+    <p>{= t["list.empty"]}</p>
+  {:}
+    <ul>
+      {@ post = p.props.posts}
+        <li><a href="{= post.href}">{= post.title}</a></li>
+      {/}
+    </ul>
+  {/}
+</div>
+```
+
+- The depth of a line is the number of HTML elements and template blocks that are open where the line starts. A template block is an if, loop or if-block tag up to its close tag.
+- A line whose first non-blank text is an HTML end tag, a template close tag `{/}` or a branch tag `{:}` or `{:? }` gets one level less.
+- The option `templateBlocks: 'flat'` makes template blocks add no level: their tags and the lines inside them get the depth of the HTML elements alone. The default `'indent'` counts them like elements.
+- A line inside an HTML start tag that spans lines gets one level more than the tag; a line that starts inside a quoted attribute value keeps its indentation.
+- Void elements (`area`, `base`, `br`, `col`, `embed`, `hr`, `img`, `input`, `link`, `meta`, `param`, `source`, `track`, `wbr`) and start tags that end with `/>` open no element.
+- The formatter keeps the indentation of lines that start inside `<pre>`, `<textarea>`, `<script>`, `<style>`, an HTML comment or a tag, including the line of the end tag. It does not read HTML tags inside `<script>`, `<style>` and `<textarea>`.
+- A blank line becomes empty.
+- The text of a line after its indentation does not change; the formatter never moves an element to another line.
+
+The formatter needs the HTML structure to be balanced. When an end tag does not match the open element, an element is not closed at the end of the template, or the HTML elements that are open differ between the branches of a template block or between its start and its close tag, `format()` returns the error `reason: 'html'` with the position of the tag and changes nothing. A template whose output is not HTML is formatted with `indent: null`.
+
+Spaces and tabs at the start of a line are part of the rendered output, except on a line that holds only a block tag, which the renderer removes with its whitespace. Indentation therefore changes the whitespace at the start of rendered lines. Browsers do not display that whitespace, except inside `<pre>` and `<textarea>`, which the formatter keeps, and inside elements whose CSS `white-space` keeps spaces.
+
 ## Safety invariant
 
-`format()` parses the source with `analyze()` of `@polyspec/template`. It formats each tag with the parser's tag range and expression tokens, and parses the result again. It returns the result only when both ASTs are equal after every `span` field is removed. Otherwise it returns an error result and the caller keeps the source:
+`format()` parses the source with `analyze()` of `@polyspec/template`. It formats each tag with the parser's tag range and expression tokens, and parses the result again. It returns the result only when both ASTs are equal after every `span` field and, when the indentation changes, the spaces and tabs at the start of every line of text are removed. Otherwise it returns an error result and the caller keeps the source:
 
 | Result | Condition |
 | --- | --- |
 | `{ ok: true, text, changed }` | the source parses and the formatted AST equals the source AST |
 | `{ ok: false, error: { reason: 'parse', code, line, col, message } }` | the source does not parse; `code`, `line` and `col` are the parser error |
-| `{ ok: false, error: { reason: 'invariant', code: null, line, col, message } }` | the formatted text does not parse or parses to a different AST; the position is the first changed tag |
+| `{ ok: false, error: { reason: 'invariant', code: null, line, col, message } }` | the formatted text does not parse or parses to a different AST; the position is the first change |
+| `{ ok: false, error: { reason: 'html', code: null, line, col, message } }` | the HTML structure is not balanced ([Indentation](#indentation)); the position is the tag where the structure fails |
 
-The invariant test formats every `.tpl` file under `tests/cases` (with the delimiters of `options.json`), `tests/fixtures`, `examples` and the formatter fixtures. For each file that parses it requires the same AST without spans, the same text outside tags and no change on a second run.
+The invariant test formats every `.tpl` file under `tests/cases` (with the delimiters of `options.json`), `tests/fixtures`, `examples` and the formatter fixtures, once with `indent: null` and once with the default indentation. For each file that parses, `indent: null` must give the same AST without spans and the same text outside tags. The default indentation must give either the `html` error or the same AST and the same text outside tags once the spaces and tabs at the start of lines are removed. Both must not change on a second run.
 
 ## Command line
 
@@ -66,7 +99,8 @@ template-fmt < page.tpl
 ```
 
 ```
-usage: template-fmt [--write | --check] [--delimiters OC] [PATH ...]
+usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
+                    [--template-blocks indent|flat] [PATH ...]
 ```
 
 - One file without `--write` or `--check`: the formatted text goes to standard output.
@@ -74,13 +108,15 @@ usage: template-fmt [--write | --check] [--delimiters OC] [PATH ...]
 - A directory: the command formats every `.tpl` file below it, in sorted order, and skips `node_modules` and directories whose name starts with `.`. Several paths or a directory require `--write` or `--check`.
 - `--write`: rewrites every file that is not formatted and prints its path.
 - `--check`: changes nothing and prints the path of every file that is not formatted.
-- A file that does not parse, or whose formatted AST differs, is printed to standard error as `path:line:col: CODE: message` and is not changed.
+- `--indent`: the indent unit, `N` spaces (1 to 8), `tab`, or `keep` for `indent: null`. The default is `2`.
+- `--template-blocks`: `indent` (default) or `flat`, the `templateBlocks` option.
+- A file that does not parse, whose formatted AST differs or whose HTML structure is not balanced is printed to standard error as `path:line:col: LABEL: message` and is not changed. `LABEL` is the parser error code, `formatted AST differs` or `HTML structure`.
 
 | Exit status | Meaning |
 | --- | --- |
 | 0 | success; with `--check`, every file is formatted |
 | 1 | `--check` found a file that is not formatted |
-| 2 | a file does not parse, a formatted AST differs, a path cannot be read, or the arguments are invalid |
+| 2 | a file does not parse, a formatted AST differs, an HTML structure is not balanced, a path cannot be read, or the arguments are invalid |
 
 `make install-cli` runs `npm link -w @polyspec/template-format`, which links `template-fmt` into the global npm bin directory. The link points to the working tree, so `make build-format` updates the installed command.
 
@@ -100,7 +136,7 @@ The extension registers the language `polyspec-template` for `.tpl` files with:
 
 - block comment `{* *}` for comment toggling;
 - brackets and auto-closing pairs for `{ }`, `[ ]`, `( )`, quotes and `<!-- -->`;
-- document and range formatting through `format()`. Range formatting formats the tags that lie completely inside the selection. When `format()` returns an error, the provider returns no edits and writes the position to the output channel `Polyspec Template`.
+- document and range formatting through `format()`. The indent unit is the editor's: `tabSize` spaces, or a tab when `insertSpaces` is off. The setting `polyspec-template.format.templateBlocks` (`indent` or `flat`) is the `templateBlocks` option. Range formatting formats the tags that lie completely inside the selection and indents the lines that start inside it. When `format()` returns an error, the provider returns no edits and writes the position to the output channel `Polyspec Template`.
 
 ### Diagnostics and matching tags
 

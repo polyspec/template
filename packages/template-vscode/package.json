@@ -51,6 +51,25 @@
         }
       }
     ],
+    "configuration": {
+      "title": "Polyspec Template",
+      "properties": {
+        "polyspec-template.format.templateBlocks": {
+          "type": "string",
+          "enum": [
+            "indent",
+            "flat"
+          ],
+          "enumDescriptions": [
+            "Template blocks add an indentation level like HTML elements.",
+            "Template blocks add no indentation level; their lines get the depth of the HTML elements."
+          ],
+          "default": "indent",
+          "scope": "resource",
+          "description": "How the formatter indents the lines inside template blocks ({? }, {@ }, {?# })."
+        }
+      }
+    },
     "commands": [
       {
         "command": "polyspec-template.goToMatchingTag",

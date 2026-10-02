@@ -1,7 +1,8 @@
-// Formatter entry: formats every tag of a template and refuses a result whose AST differs from the source AST.
+// Formatter entry: formats every tag and the indentation of every line, and refuses a result whose AST differs from the source AST.
 import { analyze, parse, TemplateError } from '@polyspec/template';
 import { formatBody, type TagKind } from './body.js';
-import { sameTree } from './invariant.js';
+import { indentEdits } from './indent.js';
+import { sameTree, withoutLineIndentation } from './invariant.js';
 import { delimitersOf, tagParts, type Delimiters } from './tags.js';
 
 /** Options of {@link format}. */
@@ -10,14 +11,21 @@ export interface FormatOptions {
   name?: string;
   /** Engine delimiter option as two characters (LEX-22). The default is `{}`. */
   delimiters?: string;
-  /** String index range; only tags that lie completely inside it are formatted. */
+  /** String index range; only tags that lie completely inside it and lines that start inside it are formatted. */
   range?: { start: number; end: number };
+  /** Indent unit: a run of spaces or one tab. The default is two spaces. `null` keeps the indentation of every line. */
+  indent?: string | null;
+  /** `indent` (default): template blocks add an indentation level like HTML elements. `flat`: they add none. */
+  templateBlocks?: 'indent' | 'flat';
 }
 
 /** Why {@link format} returned no text. */
 export interface FormatError {
-  /** `parse`: the source does not parse. `invariant`: the formatted text does not parse to the same AST. */
-  reason: 'parse' | 'invariant';
+  /**
+   * `parse`: the source does not parse. `invariant`: the formatted text does not parse to the same AST. `html`: the
+   * HTML structure is not balanced, so the lines cannot be indented.
+   */
+  reason: 'parse' | 'invariant' | 'html';
   /** Error code of the parser, or null for an AST difference. */
   code: string | null;
   /** 1-based line of the error position. */
@@ -41,11 +49,14 @@ interface Edit {
 const BOM = '\uFEFF';
 
 /**
- * Formats the whitespace inside the tags of a template. Text outside tags, comments and
- * directives are never changed. The source and the result are parsed, and the result is
- * returned only when both ASTs are equal without their `span` fields.
+ * Formats the whitespace inside the tags of a template and the indentation of its lines. Other text outside tags,
+ * comments and directives are never changed. The source and the result are parsed, and the result is returned only
+ * when both ASTs are equal without their `span` fields and, when lines are indented, without the spaces and tabs at
+ * the start of lines of text.
  */
 export function format(source: string, options: FormatOptions = {}): FormatResult {
+  const indent = options.indent === undefined ? '  ' : options.indent;
+  if (indent !== null && !/^(?: +|\t)$/.test(indent)) throw new RangeError('indent must be a run of spaces or one tab');
   const name = options.name ?? 'template.tpl';
   const bom = source.startsWith(BOM) ? BOM : '';
   const text = source.slice(bom.length);
@@ -74,6 +85,14 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
     if (body === null || body === parts.body) continue;
     edits.push({ start: parts.bodyStart, end: parts.bodyEnd, text: body });
   }
+  if (indent !== null) {
+    const indentation = indentEdits(text, analysis.tags, { unit: indent, templateBlocks: options.templateBlocks ?? 'indent', range });
+    if ('error' in indentation) {
+      return { ok: false, error: { reason: 'html', code: null, ...positionOf(text, indentation.error.index), message: indentation.error.message } };
+    }
+    edits.push(...indentation.edits);
+    edits.sort((left, right) => left.start - right.start);
+  }
   if (edits.length === 0) return { ok: true, text: source, changed: false };
 
   const formatted = apply(text, edits);
@@ -85,7 +104,8 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
     const detail = error instanceof Error ? error.message : String(error);
     return { ok: false, error: { reason: 'invariant', code: null, ...positionOf(text, first.start), message: `formatted text does not parse: ${detail}` } };
   }
-  if (!sameTree(analysis.ast, after)) {
+  const same = indent === null ? sameTree(analysis.ast, after) : sameTree(withoutLineIndentation(analysis.ast), withoutLineIndentation(after));
+  if (!same) {
     const first = edits[0] as Edit;
     return { ok: false, error: { reason: 'invariant', code: null, ...positionOf(text, first.start), message: 'formatted text parses to a different AST' } };
   }

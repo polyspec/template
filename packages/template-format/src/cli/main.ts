@@ -1,7 +1,7 @@
 // Command line interface template-fmt: prints, rewrites or checks formatted templates.
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { parse, TemplateError } from '@polyspec/template';
-import { format, type FormatResult } from '../format.js';
+import { format, type FormatOptions, type FormatResult } from '../format.js';
 import { parseArguments, USAGE } from './args.js';
 import { collectFiles } from './files.js';
 
@@ -15,13 +15,14 @@ export async function main(argv: readonly string[]): Promise<number> {
     process.stdout.write(USAGE);
     return 0;
   }
-  const { mode, delimiters, paths } = parsed;
+  const { mode, delimiters, indent, templateBlocks, paths } = parsed;
+  const options: FormatOptions = delimiters === undefined ? { indent, templateBlocks } : { delimiters, indent, templateBlocks };
   const stdin = paths.length === 0 || (paths.length === 1 && paths[0] === '-');
   if (!stdin && paths.includes('-')) return usageError('"-" cannot be combined with other paths');
 
   if (stdin) {
     if (mode === 'write') return usageError('--write requires a path');
-    const result = formatBytes(await readStdin(), STDIN_NAME, delimiters);
+    const result = formatBytes(await readStdin(), STDIN_NAME, options);
     if (!result.ok) return reportFailure(STDIN_NAME, result);
     if (mode === 'check') {
       if (!result.changed) return 0;
@@ -46,7 +47,7 @@ export async function main(argv: readonly string[]): Promise<number> {
   let failed = false;
   let unformatted = false;
   for (const file of files) {
-    const result = formatBytes(readFileSync(file), file, delimiters);
+    const result = formatBytes(readFileSync(file), file, options);
     if (!result.ok) {
       reportFailure(file, result);
       failed = true;
@@ -71,13 +72,13 @@ function usageError(message: string): number {
 }
 
 // Decodes UTF-8 and formats. Invalid UTF-8 is reported with the parser's E_LEX_INVALID_UTF8 position.
-function formatBytes(bytes: Uint8Array, name: string, delimiters: string | undefined): FormatResult {
+function formatBytes(bytes: Uint8Array, name: string, options: FormatOptions): FormatResult {
   let source: string;
   try {
     source = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
   } catch {
     try {
-      parse(bytes, name);
+      parse(bytes, name, options.delimiters === undefined ? {} : { delimiters: options.delimiters });
     } catch (error) {
       if (error instanceof TemplateError) {
         return { ok: false, error: { reason: 'parse', code: error.code, line: error.line, col: error.col, message: error.message } };
@@ -85,12 +86,12 @@ function formatBytes(bytes: Uint8Array, name: string, delimiters: string | undef
     }
     return { ok: false, error: { reason: 'parse', code: 'E_LEX_INVALID_UTF8', line: 0, col: 0, message: 'invalid UTF-8' } };
   }
-  return format(source, delimiters === undefined ? { name } : { name, delimiters });
+  return format(source, { ...options, name });
 }
 
 function reportFailure(path: string, result: Extract<FormatResult, { ok: false }>): number {
   const { error } = result;
-  const label = error.reason === 'parse' ? error.code ?? 'parse error' : 'formatted AST differs';
+  const label = error.reason === 'parse' ? error.code ?? 'parse error' : error.reason === 'html' ? 'HTML structure' : 'formatted AST differs';
   process.stderr.write(`${path}:${error.line}:${error.col}: ${label}: ${error.message}\n`);
   return 2;
 }

@@ -8,7 +8,7 @@
 - 태그 종류마다, 그리고 표현식 토큰마다 scope를 준다.
 - `{* *}`로 주석을 토글하고 구분자에 괄호 쌍을 적용한다.
 - 템플릿 파서로 계산한 파싱 진단, 한 블록 구성의 태그 강조, 여러 줄 구성의 접기, 명령 Go to Matching Template Tag(macOS `Cmd+Alt+\`, Windows와 Linux `Ctrl+Alt+\`)를 제공한다.
-- `@polyspec/template-format`으로 문서 포맷과 범위 포맷을 한다. 포매터는 태그 안의 공백만 바꾸고, 포맷한 AST가 소스 AST와 다르면 편집을 돌려주지 않는다.
+- `@polyspec/template-format`으로 문서 포맷과 범위 포맷을 한다. 포매터는 태그 안의 공백과 줄의 들여쓰기를 편집기의 들여쓰기 단위로 바꾸고, 포맷한 AST가 소스 AST와 다르거나 HTML 구조의 짝이 맞지 않으면 편집을 돌려주지 않는다. 설정 `polyspec-template.format.templateBlocks`(`indent` 또는 `flat`)가 템플릿 블록이 들여쓰기 단계를 더할지 정한다.
 
 ## 작업 공간 신뢰
 
