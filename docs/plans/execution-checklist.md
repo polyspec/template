@@ -266,7 +266,7 @@ Dependencies: none. A tool that reads every comment of a template reads them fro
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T9.1 | List every comment in `Template.comments` with its value and span (AST-9) in the TypeScript, Go, Rust and PHP parsers and the PHP extension; add the schema definition and the shared cases `text/comment-list` and `delimiters/comment-custom` | `make conformance`; `make check` | [ ] |
+| T9.1 | List every comment in `Template.comments` with its value and span (AST-9) in the TypeScript, Go, Rust and PHP parsers and the PHP extension; add the schema definition and the shared cases `text/comment-list` and `delimiters/comment-custom` | `make conformance`; `make check` | [x] |
 
 ## Parallelism summary
 

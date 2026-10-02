@@ -266,7 +266,7 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
-| T9.1 | TypeScript, Go, Rust, PHP parser와 PHP 확장에서 모든 주석을 값과 span과 함께 `Template.comments`에 나열(AST-9). schema 정의와 공유 case `text/comment-list`, `delimiters/comment-custom` 추가 | `make conformance`; `make check` | [ ] |
+| T9.1 | TypeScript, Go, Rust, PHP parser와 PHP 확장에서 모든 주석을 값과 span과 함께 `Template.comments`에 나열(AST-9). schema 정의와 공유 case `text/comment-list`, `delimiters/comment-custom` 추가 | `make conformance`; `make check` | [x] |
 
 ## 병렬성 요약
 
