@@ -138,7 +138,7 @@ format-external-check: build-language ## Run the formatter safety invariant on a
 install-cli: build-language ## Link template-fmt into the global npm bin directory
 	npm link -w @polyspec/template-language
 
-build-vscode: build-language ## Bundle the VS Code extension
+build-vscode: build-lsp ## Bundle the VS Code extension
 	npm run build -w polyspec-template
 
 test-vscode: build-vscode ## Grammar tests, extension tests and type check
