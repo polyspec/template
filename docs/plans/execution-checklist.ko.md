@@ -260,6 +260,14 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | T8.7 | native 인스턴스 assign, 필드 조회, 멤버 호출과 클래스 호출 결과를 보여주는 showcase 페이지 추가 | `make showcase-check`; 정적 HTML 검사 | [x] |
 | T8.8 | 명세, 기능 상태, changelog, Pages 산출물과 완료 근거 동기화 | `make check`; `make docs-verify-idempotent`; `make docs-static-check` | [x] |
 
+## Wave 9 — AST의 템플릿 주석
+
+의존: 없음. 주석은 문장 노드를 만들지 않으므로, 템플릿의 모든 주석을 읽는 도구는 parser에서 주석을 읽는다.
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T9.1 | TypeScript, Go, Rust, PHP parser와 PHP 확장에서 모든 주석을 값과 span과 함께 `Template.comments`에 나열(AST-9). schema 정의와 공유 case `text/comment-list`, `delimiters/comment-custom` 추가 | `make conformance`; `make check` | [ ] |
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -273,14 +281,15 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | W6 | T6.1–T6.5, T6.7 | T6.6은 모두 끝난 뒤 |
 | W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler 계약과 구현 뒤에 증명과 발행 수행 |
 | W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime 지원 뒤에 일치 검증과 발행 수행 |
+| W9 | 없음 | T9.1 |
 
 ## 완료 정의
 
-- W0–W8의 모든 작업이 `done`.
+- W0–W9의 모든 작업이 `done`.
 - Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.
-- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 모든 mode·언어·케이스 조합(mode 두 개 × 언어 네 개 × 모든 정규 케이스. 2026-10-02의 244개 케이스로 1,952개)을 통과하고 generated 실행에서 AST로 fallback하지 않음.
+- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 모든 mode·언어·케이스 조합(mode 두 개 × 언어 네 개 × 모든 정규 케이스. T9.1의 246개 케이스로 1,968개)을 통과하고 generated 실행에서 AST로 fallback하지 않음.
 - `make release-test-matrix`가 단위, generated source compile, 적합성, 위치 오류와 실패 복구, mutation 거부, 격리 설치, browser DOM 출력, 성능 동일성의 각 release 계층을 독립적으로 증명.
 - 깨끗한 checkout에서 `make install-check`, `make showcase-check`, `make docs-verify-idempotent`, `make release-check` 통과.
 - `docs/features.md`와 `docs/features.ko.md`가 모든 행에 동일한 상태 필드와 근거 링크를 가짐.

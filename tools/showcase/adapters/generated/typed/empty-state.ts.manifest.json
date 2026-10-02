@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "b31099fbd68615e4ddf740aeb9e7d082a12d38e883345b282a129a953cb23aa4",
+  "contractDigest": "3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853",
   "compilerDigest": "d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1",
   "files": {
     "empty-state.ts": {

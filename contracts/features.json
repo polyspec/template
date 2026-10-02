@@ -102,14 +102,15 @@
       "title": "Canonical AST schema",
       "title_ko": "Canonical AST schema",
       "status": "implemented",
-      "description": "Validate canonical AST artifacts and preserve node and expression spans.",
-      "description_ko": "Canonical AST artifact를 검증하고 node와 expression span을 보존한다.",
+      "description": "Validate canonical AST artifacts, preserve node and expression spans and list template comments.",
+      "description_ko": "Canonical AST artifact를 검증하고 node와 expression span을 보존하며 템플릿 주석을 나열한다.",
       "inputs": {
         "type": "CanonicalAST",
         "fields": [
           "node type",
           "expression type",
-          "span"
+          "span",
+          "comment"
         ]
       },
       "outputs": {

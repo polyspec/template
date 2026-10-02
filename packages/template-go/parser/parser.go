@@ -59,6 +59,7 @@ type templateParser struct {
 	root                           *[]item
 	frames                         []*frame
 	tags                           []tagRange
+	comments                       []*ast.Comment
 	sawTag                         bool
 	textBeforeFirstTagIsWhitespace bool
 }
@@ -101,7 +102,11 @@ func (p *templateParser) parse() (*ast.Template, error) {
 		return nil, p.fail(errs.ParseUnclosedBlock, f.openStart, f.openStart+1, "block is not closed before the end of the file")
 	}
 	removed := standaloneRanges(p.text, p.tags)
-	return &ast.Template{Type: "Template", Name: p.name(), Body: p.finalize(*p.root, removed)}, nil
+	comments := p.comments
+	if comments == nil {
+		comments = []*ast.Comment{}
+	}
+	return &ast.Template{Type: "Template", Name: p.name(), Body: p.finalize(*p.root, removed), Comments: comments}, nil
 }
 
 func (p *templateParser) scan() error {
@@ -269,7 +274,14 @@ func (p *templateParser) parseComment(c tagContext, bodyStart int) (int, error) 
 	if at < 0 {
 		return 0, p.fail(errs.ParseUnterminatedComment, c.open, c.open+1, "comment is not terminated")
 	}
-	return p.finishTag(c, bodyStart+at+len(terminator))
+	end, err := p.finishTag(c, bodyStart+at+len(terminator))
+	if err != nil {
+		return 0, err
+	}
+	// The value starts after the sigil `*` (AST-9).
+	valueStart := skipHorizontalSpace(p.text, c.open+1) + 1
+	p.comments = append(p.comments, &ast.Comment{Type: "Comment", Value: p.text[valueStart : bodyStart+at], Span: ast.Span{c.start, end}})
+	return end, nil
 }
 
 func (p *templateParser) parseEcho(c tagContext, bodyStart int) (int, error) {

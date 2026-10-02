@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "b31099fbd68615e4ddf740aeb9e7d082a12d38e883345b282a129a953cb23aa4",
+  "contractDigest": "3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853",
   "compilerDigest": "d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1",
   "files": {
     "html-slot.ts": {

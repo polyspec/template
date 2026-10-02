@@ -190,6 +190,7 @@ $(function () { init({ debug: false }); });
 {
   "type": "Template",
   "name": "x.tpl",
+  "comments": [],
   "body": [
     { "type": "Text", "value": "<b>", "span": [0, 3] },
     {

@@ -1,0 +1,24 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "ab\n",
+      "span": [
+        0,
+        10
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "type": "Comment",
+      "value": " x ",
+      "span": [
+        1,
+        8
+      ]
+    }
+  ]
+}

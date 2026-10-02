@@ -6,13 +6,13 @@
   "delimiters": null,
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "b31099fbd68615e4ddf740aeb9e7d082a12d38e883345b282a129a953cb23aa4",
-  "compilerDigest": "d00cf09e31ac767a2e14004336a6a074bd0cb4488bf71c4850b2c934b52b895e",
+  "contractDigest": "3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853",
+  "compilerDigest": "b061335d1a441a3034acf446a1f31435e4ee6ede28f2fbd6136b701bed6b6354",
   "files": {
     "content.tpl": {
       "path": "content.tpl.ast.json",
       "sourceDigest": "c79abf1a243053bd7c145f39700c8d00b06a5d23eb222ae4d445e7e6102f6b7d",
-      "artifactDigest": "b46131277c86ff896fe2d1ee5ed43ac7ba59e7638882c88b53da15284ca4d0cd",
+      "artifactDigest": "2ebb456bc896d48a699d533525e2fa07abe52ca12618da6e6eb7bc91f7f591de",
       "lines": [
         0,
         10,
@@ -26,7 +26,7 @@
     "layout.tpl": {
       "path": "layout.tpl.ast.json",
       "sourceDigest": "8b9462afffb5aa9d81c6d17412eb9f828016bc33298cdb15eaa66eaa1d0b9431",
-      "artifactDigest": "d2b3dad690424e3615e082aa4459d1d90467f792e114a0d922fd0585f83ea2b8",
+      "artifactDigest": "2a8277c99d6d0eeeafddecbcc0a8ce88e0cafef905e347b17d52fbb08bb3ce74",
       "lines": [
         0,
         44,

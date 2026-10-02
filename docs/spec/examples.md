@@ -190,6 +190,7 @@ Template `x.tpl` with the source `<b>{= product.price | number}</b>`:
 {
   "type": "Template",
   "name": "x.tpl",
+  "comments": [],
   "body": [
     { "type": "Text", "value": "<b>", "span": [0, 3] },
     {

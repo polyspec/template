@@ -7,7 +7,7 @@ import type { ParsedTemplate } from './render/context.js';
 import { internalBoundary } from './errors.js';
 import { Source } from './source.js';
 
-export type { Template, Node, Expr, Span } from './ast.js';
+export type { Template, Comment, Node, Expr, Span } from './ast.js';
 export { TemplateError, internalBoundary, type ErrorCode, type ErrorObject } from './errors.js';
 export { NativeObject, SafeString, type Value, type MapValue, type ListValue } from './value/value.js';
 export { bind, bindMap, checkText, BindError } from './value/bind.js';

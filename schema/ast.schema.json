@@ -14,11 +14,25 @@
     "Template": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "name", "body"],
+      "required": ["type", "name", "body", "comments"],
       "properties": {
         "type": { "const": "Template" },
         "name": { "type": "string" },
-        "body": { "$ref": "#/definitions/NodeList" }
+        "body": { "$ref": "#/definitions/NodeList" },
+        "comments": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Comment" }
+        }
+      }
+    },
+    "Comment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value", "span"],
+      "properties": {
+        "type": { "const": "Comment" },
+        "value": { "type": "string" },
+        "span": { "$ref": "#/definitions/Span" }
       }
     },
     "NodeList": {
