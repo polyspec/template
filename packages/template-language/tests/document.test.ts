@@ -154,7 +154,7 @@ describe('line indentation', () => {
 
   it('gives a typed line the depth of the elements and blocks open before it', () => {
     const document = openDocument('<ul>\n{@ x = xs}\n\n{/}\n</ul>');
-    expect([0, 1, 2, 3, 4].map(line => document.lineIndentation(line, options))).toEqual(['', '  ', '', '  ', '']);
+    expect([0, 1, 2, 3, 4].map(line => document.lineIndentation(line, options))).toEqual(['', '  ', '    ', '  ', '']);
     const typing = openDocument('<ul>\n  {@ x = xs}\nx');
     expect(typing.lineIndentation(2, options)).toBe('    ');
     expect(typing.lineIndentation(2, { indent: '\t', templateBlocks: 'flat' })).toBe('\t');
@@ -163,6 +163,13 @@ describe('line indentation', () => {
   it('does not require a balanced structure and dedents end tags and branch tags', () => {
     const document = openDocument('<div>\n<p>\ntext\n</div>\n{? a}\n<b>\n{:}\n');
     expect([2, 3, 5, 6].map(line => document.lineIndentation(line, options))).toEqual(['    ', '', '  ', '']);
+  });
+
+  it('indents a blank line, which Enter creates, by the same depth', () => {
+    expect(openDocument('<ul>\n').lineIndentation(1, options)).toBe('  ');
+    expect(openDocument('<ul>\n    \n</ul>').lineIndentation(1, options)).toBe('  ');
+    expect(openDocument('<ul>\n{@ x = xs}\n').lineIndentation(2, options)).toBe('    ');
+    expect(openDocument('<ul>\n{@ x = xs}\n').lineIndentation(2, { indent: '  ', templateBlocks: 'flat' })).toBe('  ');
   });
 
   it('keeps the indentation of a line inside pre', () => {

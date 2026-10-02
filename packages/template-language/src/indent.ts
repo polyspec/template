@@ -102,7 +102,8 @@ export function lineIndentations(text: string, tags: readonly IndentTag[], unit:
       const blank = first === text.length || text[first] === '\n' || text[first] === '\r';
       let level = depth + (within(scan.inside, lineStart) ? 1 : 0);
       if (dedents.has(first)) level--;
-      lines.push({ start: lineStart, end: first, indentation: blank ? '' : unit.repeat(Math.max(level, 0)) });
+      // The formatter empties a blank line; a typed line, which Enter leaves blank, gets the indentation of its depth.
+      lines.push({ start: lineStart, end: first, indentation: blank && !tolerant ? '' : unit.repeat(Math.max(level, 0)) });
     }
     if (text.indexOf('\n', lineStart) < 0) break;
   }

@@ -53,7 +53,7 @@ This document defines how editors support templates. One language service holds 
 
 **EDT-12** `format(options)` is `format()` of the formatter with the options `indent`, `templateBlocks` and `range`.
 
-**EDT-13** `lineIndentation(line, options)` returns the indentation a line gets while it is typed: the indent unit repeated by the line's depth under the indentation rule of the formatter, with `options.indent` and `options.templateBlocks`. The depth comes from the text before the line. Unlike the formatter, it does not require a balanced structure: an end tag closes up to the open element of the same name and is ignored when no such element is open.
+**EDT-13** `lineIndentation(line, options)` returns the indentation a line gets while it is typed: the indent unit repeated by the line's depth under the indentation rule of the formatter, with `options.indent` and `options.templateBlocks`. The depth comes from the text before the line. Unlike the formatter, it does not require a balanced structure: an end tag closes up to the open element of the same name and is ignored when no such element is open. A blank line, which Enter creates, gets the indentation of its depth; only the formatter empties blank lines.
 
 ## Adapters
 
