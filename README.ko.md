@@ -33,6 +33,6 @@ make showcase
 - [기능 상태](docs/features.ko.md)는 기능별 구현, 검증, 배포를 기록한다.
 - [실행 가능한 예제 사이트](examples/site/index.html)는 페이지 시나리오를 렌더하고 일치성, 반복 렌더, 처리량 결과물을 보여준다.
 - [운영](docs/operations/)은 개발, 적합성, 문서 절차를 설명한다.
-- [포매터와 VS Code 확장](docs/operations/editor-tools.ko.md)은 `template-fmt` 포매터와 VS Code 확장을 설명한다.
+- [포매터와 VS Code 확장](docs/operations/editor-tools.ko.md)은 `template-fmt` 포매터, CodeMirror 6 어댑터, VS Code 확장을 설명한다.
 - [실행 체크리스트](docs/plans/execution-checklist.ko.md)는 남은 작업을 나열한다.
 - [변경 기록](CHANGELOG.ko.md)은 실제 변경과 검증을 기록한다.

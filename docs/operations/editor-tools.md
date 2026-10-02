@@ -6,9 +6,10 @@ Three TypeScript packages support template authors:
 
 - `packages/template-language` (`@polyspec/template-language`): the language service `openDocument()` ([editor support](../spec/editor.md)), the formatter `format()` and the command line tool `template-fmt`.
 - `packages/template-lsp` (`@polyspec/template-lsp`): the Language Server Protocol server `template-lsp`, an adapter of the language service.
+- `packages/template-codemirror` (`@polyspec/template-codemirror`): the CodeMirror 6 extension `template()`, which registers the results of the language service in a CodeMirror editor ([CodeMirror 6 adapter](#codemirror-6-adapter)).
 - `packages/template-vscode` (`polyspec-template`): the VS Code extension with the language definition, the TextMate grammar and a client of the bundled language server. It contains no template rules.
 
-Only the language service reads the template syntax from `@polyspec/template`: the language service and the formatter use the parser's tag ranges and expression tokens. The server and the extension call the language service, and the grammar of the extension follows [lexical rules](../spec/lexical.md), [tag grammar](../spec/grammar.md) and [expressions](../spec/expressions.md).
+Only the language service reads the template syntax from `@polyspec/template`: the language service and the formatter use the parser's tag ranges and expression tokens. The server, the CodeMirror adapter and the extension call the language service, and the grammar of the extension follows [lexical rules](../spec/lexical.md), [tag grammar](../spec/grammar.md) and [expressions](../spec/expressions.md).
 
 ## Formatting style
 
@@ -149,7 +150,7 @@ The extension registers the language `polyspec-template` for `.tpl` files with:
 - block comment `{* *}` for comment toggling;
 - brackets and auto-closing pairs for `{ }`, `[ ]`, `( )`, quotes and `<!-- -->`;
 - document and range formatting from the server. The indent unit is the editor's: `tabSize` spaces, or a tab when `insertSpaces` is off. The setting `polyspec-template.format.templateBlocks` (`indent` or `flat`) is the `templateBlocks` option; the server reads it with `workspace/configuration`. Range formatting formats the tags that lie completely inside the selection and indents the lines that start inside it. When `format()` returns an error, the server returns no edits and writes the position as a warning to the output channel `Polyspec Template`;
-- indentation while typing: after Enter, `>` and `}` the server sets the indentation of the current line to `lineIndentation()` (EDT-13). VS Code requests it only when `editor.formatOnType` is on, so the extension contributes `"[polyspec-template]": { "editor.formatOnType": true }` as a configuration default; a user or workspace setting for the language overrides it. A line that holds only spaces and tabs after Enter gets no indentation, because `lineIndentation()` returns an empty indentation for a blank line, as the formatter does.
+- indentation while typing: after Enter, `>` and `}` the server sets the indentation of the current line to `lineIndentation()` (EDT-13). VS Code requests it only when `editor.formatOnType` is on, so the extension contributes `"[polyspec-template]": { "editor.formatOnType": true }` as a configuration default; a user or workspace setting for the language overrides it. A blank line after Enter gets the indentation of its depth.
 
 ### Diagnostics and matching tags
 
@@ -195,12 +196,79 @@ Delimiters are `keyword.control.tag.begin.polyspec-template` and `keyword.contro
 - An HTML pattern that starts before a `{` and continues across it takes precedence, because the injection applies only where no earlier match covers the position. This affects a tag inside an unquoted attribute value (`value=a{= x}`) and inside an attribute name (`data-{= n}="1"`). Tags in quoted attribute values and between attributes are highlighted.
 - The raw output scope, the loop form of `@` and the start of a wrapped tag are recognized when the tag start and the deciding characters are on one line.
 
+## CodeMirror 6 adapter
+
+`packages/template-codemirror` (`@polyspec/template-codemirror`) is a CodeMirror 6 extension built on `@codemirror/lang-html` (EDT-16). It takes every result from `openDocument()` of the language service, converts nothing but positions and contains no template rule ([editor support](../spec/editor.md)). CodeMirror and the language service both use UTF-16 string indexes into the document text, so a language service position is a CodeMirror position. The packages `@codemirror/state`, `@codemirror/view`, `@codemirror/language`, `@codemirror/lint`, `@codemirror/lang-html` and `@codemirror/commands` are peer dependencies, so the adapter uses the one instance of each that the editor uses.
+
+```ts
+import { defaultKeymap } from '@codemirror/commands';
+import { EditorState } from '@codemirror/state';
+import { EditorView, keymap } from '@codemirror/view';
+import { goToMatchingTag, template } from '@polyspec/template-codemirror';
+
+new EditorView({
+  parent: document.querySelector('#editor') as HTMLElement,
+  state: EditorState.create({
+    doc: '<ul>\n  {@ item = items}\n    <li>{= item.name}</li>\n  {/}\n</ul>\n',
+    extensions: [
+      keymap.of([{ key: 'Mod-Alt-\\', run: goToMatchingTag }, ...defaultKeymap]),
+      template({ templateBlocks: 'indent', name: 'list.tpl' }),
+    ],
+  }),
+});
+```
+
+`template(options)` returns the extension. Its options:
+
+| Option | Meaning |
+| --- | --- |
+| `templateBlocks` | `indent` (default) or `flat`; the `templateBlocks` option of the indentation service and of `formatTemplate` |
+| `delimiters` | the engine delimiter option, two characters; the default is `{}` |
+| `name` | the template name of diagnostics; the default is `template.tpl` |
+
+The extension contains:
+
+- the HTML language of `@codemirror/lang-html`;
+- the state field `templateDocument`, which holds the `TemplateDocument` of the state's text. The text is analyzed once when the document changes, and every feature below reads that analysis;
+- a mark with the class `cm-template-<type>` on every token of EDT-8. Token marks have a higher precedence than syntax highlighting, so their elements are inside the elements of the HTML highlighting and a template token inside an HTML attribute value keeps the template color;
+- a mark with the class `cm-template-tag` on every tag range (EDT-9), with the lowest precedence, so its element encloses the token marks of the tag;
+- a mark with the class `cm-template-highlight` on every tag of the construct under the main cursor (`highlights`, EDT-11);
+- diagnostics through `linter` of `@codemirror/lint` with severity `error`, source `polyspec-template` and the message `CODE: message`, for example `E_PARSE_UNCLOSED_BLOCK: block is not closed before the end of the file` (EDT-7). `templateDiagnostics(state)` returns the same diagnostics for a state;
+- folding through `foldService` from `foldingRanges` (EDT-10). The fold of a line hides the lines after the opening tag up to the line before the close tag. CodeMirror folds one range per line; when several constructs start on one line, the one that ends last folds;
+- an `indentService` that returns the column width of `lineIndentation` for the line with the editor's `indentUnit` and `templateBlocks` (EDT-13). When Enter breaks a line, the service analyzes the text with the break, so the new line and the text moved to it get the indentation of a typed line. The indent unit must be a run of spaces or one tab, as the language service requires;
+- Shift+Alt+F, which runs `formatTemplate`.
+
+The default theme (`EditorView.baseTheme`) colors the marks. `&dark` applies in an editor with a dark theme and `&light` in all others. The tag background is `#16351c` in dark themes and `#e3f6dd` in light themes, the highlight is a one pixel outline in `#7ee787` (dark) and `#1a7f37` (light), and comments are italic. A theme with the same classes overrides these rules.
+
+| Class | Dark | Light |
+| --- | --- | --- |
+| `cm-template-delimiter` | `#ff7b72` | `#cf222e` |
+| `cm-template-keyword` | `#ff7b72` | `#cf222e` |
+| `cm-template-variable` | `#ffa657` | `#953800` |
+| `cm-template-property` | `#79c0ff` | `#0550ae` |
+| `cm-template-function` | `#d2a8ff` | `#8250df` |
+| `cm-template-string` | `#a5d6ff` | `#0a3069` |
+| `cm-template-number` | `#79c0ff` | `#0550ae` |
+| `cm-template-operator` | `#e6edf3` | `#1f2328` |
+| `cm-template-comment` | `#8b949e` | `#6e7781` |
+| `cm-template-path` | `#a5d6ff` | `#0a3069` |
+
+Commands:
+
+| Command | Effect |
+| --- | --- |
+| `formatTemplate` | replaces the document with `format()` (EDT-12) with the editor's `indentUnit` and the `templateBlocks` option. When `format()` returns an error, it changes nothing and returns `false`. Shift+Alt+F runs it. |
+| `goToMatchingTag` | moves the main cursor to `matchingTag` of its position (EDT-11) and returns `false` when there is none. The extension binds no key to it; the example binds `Mod-Alt-\`. |
+
+Shift+Alt+F is bound to the physical key F (`KeyboardEvent.code` `KeyF`) and not through a keymap entry `Shift-Alt-f`. A keymap entry matches the typed character, and on macOS Option+Shift+F types `Ï`, so the entry would never run there.
+
 ## Verification
 
 ```sh
 make test-language
 make test-lsp
 make format-check
+make test-codemirror
 make test-vscode
 make test-vscode-integration
 make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
@@ -210,4 +278,6 @@ make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 
 `make test-vscode` runs the grammar tests with `vscode-tmgrammar-test` against the HTML, CSS and JavaScript grammars of `tm-grammars`, and tests the manifest, that `dist/extension.cjs` loads only `vscode` and Node.js built-in modules and `dist/server.cjs` only Node.js built-in modules, that the `.vsix` contains both, that the manifest contributes every token type of the server legend that VS Code does not define, and that the bundled server publishes diagnostics and answers `polyspec-template/tagRanges`, `polyspec-template/matchingTag` and on-type formatting over standard input and output. The language client runs only in VS Code, so the integration test covers it. `make test-vscode-integration` builds the `.vsix`, downloads VS Code 1.138.0, the minimum of `engines.vscode`, into `.vscode-test` at the repository root with `@vscode/test-electron`, and installs the `.vsix` into a new extensions directory with the VS Code command line. It starts VS Code with workspace trust enabled and the test folder untrusted, as a user installation runs, and checks that a `.tpl` document opens with the language `polyspec-template`, that the installed extension activates and starts the bundled server, that `_workbench.captureSyntaxTokens` reports the template scopes for a tag inside an HTML attribute value, that the tag ranges the extension paints cover every tag except comments, also in a document that does not parse, that `vscode.provideDocumentSemanticTokens` returns the token types of the server, that `editor.formatOnType` is on for the language and typing `}` and Enter indents the current line, that an unclosed `{?` produces a diagnostic at its position, that document highlights, folding ranges and Go to Matching Template Tag follow one construct, that the keybinding is free, and that `vscode.executeFormatDocumentProvider` returns the expected edits for a sample and no edits for a formatted document and for a document that does not parse. A second run removes `capabilities` from the installed manifest and requires that VS Code disables the extension in that workspace, which shows that the first run detects a missing capability.
 
-`make check` runs `test-language`, `test-lsp`, `format-check`, `test-vscode` and `test-vscode-integration`. `make format-external-check` runs the invariant test also on an explicit external template tree.
+`make test-codemirror` builds the adapter and runs two kinds of tests. The Vitest tests create an `EditorState` without a DOM for every editor fixture under `packages/template-language/tests/editor` and compare with the fixture's expected results the diagnostics of `templateDiagnostics`, the token and tag marks of the state's decoration sets, the folding ranges of the fold service, the highlight marks and the `goToMatchingTag` target at every query position, the indentation service result of every line with `templateBlocks` `indent` and `flat` and the indent unit of two spaces, and the result of `formatTemplate` (EDT-17). Further tests type a line and press Enter with `insertNewlineAndIndent`, and check the options, the indent unit of `formatTemplate` and the reuse of one analysis per text. The Playwright test bundles `tests/browser/page.ts` with esbuild into `packages/template-codemirror/dist/browser/page.js`, loads it into a blank Chromium page and checks the indentation after typing `<ul>`, Enter, `{@ x = xs}` and Enter, the token classes, the template color inside an HTML attribute value, the tag background in light and dark themes, the lint diagnostic of an unclosed block, and Shift+Alt+F on a text that formats and on a text that does not parse.
+
+`make check` runs `test-language`, `test-lsp`, `test-codemirror`, `format-check`, `test-vscode` and `test-vscode-integration`. `make format-external-check` runs the invariant test also on an explicit external template tree.

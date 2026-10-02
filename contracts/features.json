@@ -1095,8 +1095,8 @@
       "title": "VS Code extension",
       "title_ko": "VS Code 확장",
       "status": "implemented",
-      "description": "Register the .tpl language in VS Code with a TextMate grammar that embeds HTML, CSS and JavaScript and injects template tags, parse diagnostics, matching tag highlights, folding and navigation from the parser's tag structure, comment toggling, bracket pairs and formatting through @polyspec/template-language.",
-      "description_ko": "VS Code에 .tpl 언어를 등록한다. HTML, CSS, JavaScript를 포함하고 템플릿 태그를 주입하는 TextMate 문법, 파서의 태그 구조로 계산한 파싱 진단, 짝 태그 강조, 접기, 이동, 주석 토글, 괄호 쌍, @polyspec/template-language을 사용하는 포맷을 제공한다.",
+      "description": "Register the .tpl language in VS Code with a TextMate grammar that embeds HTML, CSS and JavaScript and injects template tags, and a client of the bundled language server @polyspec/template-lsp for diagnostics, semantic tokens, matching tag highlights, folding, formatting, indentation while typing, tag backgrounds and the matching tag command (EDT-15).",
+      "description_ko": "VS Code에 .tpl 언어를 등록한다. HTML, CSS, JavaScript를 포함하고 템플릿 태그를 주입하는 TextMate 문법과, 진단, 시맨틱 토큰, 짝 태그 강조, 접기, 포맷, 타이핑 중 들여쓰기, 태그 배경, 짝 태그 명령을 제공하는 함께 묶은 언어 서버 @polyspec/template-lsp의 클라이언트를 갖는다(EDT-15).",
       "inputs": {
         "type": "EditorDocument",
         "fields": [
@@ -1161,6 +1161,145 @@
         }
       ],
       "docs": [
+        "docs/operations/editor-tools.md",
+        "docs/spec/editor.md"
+      ]
+    },
+    {
+      "id": "template-lsp",
+      "title": "Template language server",
+      "title_ko": "템플릿 언어 서버",
+      "status": "implemented",
+      "description": "Serve the language service over the Language Server Protocol with the command template-lsp: diagnostics, semantic tokens, folding ranges, document highlights, formatting, on-type indentation, tag ranges and matching tags (EDT-14).",
+      "description_ko": "명령 template-lsp로 Language Server Protocol을 통해 언어 서비스를 제공한다. 진단, 시맨틱 토큰, 접기 범위, 문서 강조, 포맷, 타이핑 중 들여쓰기, 태그 범위, 짝 태그다(EDT-14).",
+      "inputs": {
+        "type": "LanguageServerRequest",
+        "fields": [
+          "text document",
+          "position",
+          "formatting options",
+          "templateBlocks setting"
+        ]
+      },
+      "outputs": {
+        "type": "LanguageServerResult",
+        "fields": [
+          "diagnostics",
+          "semantic tokens",
+          "folding ranges",
+          "document highlights",
+          "text edits",
+          "tag ranges",
+          "matching tag position"
+        ]
+      },
+      "state": [
+        "initialize",
+        "open or change a document",
+        "analyze once per version",
+        "answer requests",
+        "close a document"
+      ],
+      "errors": [
+        {
+          "code": "FormatError",
+          "when": "the document does not parse, the HTML structure is not balanced or the formatted AST differs; no edits are returned and the error is logged"
+        },
+        {
+          "code": "E_PARSE_*",
+          "when": "the document does not parse; the error is published as a diagnostic"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "unsupported",
+        "rust": "unsupported",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "packages/template-language/tests/editor"
+      ],
+      "tests": [
+        "packages/template-lsp/tests/server.test.ts"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-lsp"
+        }
+      ],
+      "docs": [
+        "docs/spec/editor.md",
+        "docs/operations/editor-tools.md"
+      ]
+    },
+    {
+      "id": "template-codemirror",
+      "title": "CodeMirror 6 adapter",
+      "title_ko": "CodeMirror 6 어댑터",
+      "status": "implemented",
+      "description": "Provide the CodeMirror 6 extension template() on the HTML language with token classes, tag backgrounds, lint diagnostics, folding, matching tag highlights, an indentation service and the formatTemplate command from the language service (EDT-16).",
+      "description_ko": "HTML 언어 위에 언어 서비스로 만든 토큰 클래스, 태그 배경, lint 진단, 접기, 짝 태그 강조, 들여쓰기 서비스, formatTemplate 명령을 가진 CodeMirror 6 확장 template()을 제공한다(EDT-16).",
+      "inputs": {
+        "type": "EditorState",
+        "fields": [
+          "document text",
+          "indent unit",
+          "templateBlocks option",
+          "delimiters option"
+        ]
+      },
+      "outputs": {
+        "type": "EditorExtension",
+        "fields": [
+          "token marks",
+          "tag background marks",
+          "diagnostics",
+          "folding ranges",
+          "matching tag highlights",
+          "indentation",
+          "document replacement"
+        ]
+      },
+      "state": [
+        "analyze each document state once",
+        "decorate",
+        "lint",
+        "indent on Enter",
+        "format on command"
+      ],
+      "errors": [
+        {
+          "code": "FormatError",
+          "when": "the document does not parse, the HTML structure is not balanced or the formatted AST differs; formatTemplate changes nothing"
+        },
+        {
+          "code": "E_PARSE_*",
+          "when": "the document does not parse; the error is reported through @codemirror/lint"
+        }
+      ],
+      "clients": {
+        "go": "unsupported",
+        "php": "unsupported",
+        "rust": "unsupported",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "packages/template-language/tests/editor"
+      ],
+      "tests": [
+        "packages/template-codemirror/tests/fixtures.test.ts",
+        "packages/template-codemirror/tests/adapter.test.ts",
+        "packages/template-codemirror/tests/browser/editor.spec.ts"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-codemirror"
+        }
+      ],
+      "docs": [
+        "docs/spec/editor.md",
         "docs/operations/editor-tools.md"
       ]
     },
