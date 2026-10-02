@@ -11,7 +11,7 @@
 
 ## 포맷 스타일
 
-포매터는 태그 안의 공백만 바꾼다. 태그 밖의 텍스트는 바꾸지 않으므로 렌더 출력이 바뀌지 않는다.
+포매터는 태그 안의 공백과 줄의 들여쓰기를 바꾼다. 태그 안에서는 아래 표를 따른다. 태그 밖에서는 HTML 요소와 템플릿 블록의 중첩에 따라 줄 앞의 공백과 탭만 바꾼다([들여쓰기](#들여쓰기)). 태그 밖의 다른 텍스트는 바꾸지 않는다.
 
 | 태그 | 포맷 결과 |
 | --- | --- |
@@ -34,7 +34,7 @@
 
 포매터는 다음 부분을 작성된 그대로 둔다.
 
-- 공백과 줄 종결자를 포함한 태그 밖의 텍스트
+- 공백과 줄 종결자를 포함한 태그 밖의 텍스트. 줄의 들여쓰기는 예외다.
 - 주석 `{* ... *}`과 구분자 지시문 `{% delimiter ..}`
 - 본문에 줄 종결자가 있는 태그
 - 래퍼 태그의 래퍼, 그리고 래퍼와 겹친 구분자 사이의 공백
@@ -42,17 +42,50 @@
 
 사용자 구분자를 지원한다. `--delimiters` 옵션과 `format()`의 `delimiters` 옵션이 엔진 구분자를 지정하고, `{% delimiter ..}` 지시문은 그 뒤의 태그에 적용할 구분자를 바꾼다.
 
+### 들여쓰기
+
+포매터는 각 줄의 들여쓰기를 들여쓰기 단위를 그 줄의 깊이만큼 반복한 값으로 정한다. 들여쓰기 단위는 `indent` 옵션이며 공백 여러 개 또는 탭 하나다. 기본값은 공백 두 개다. `indent: null`은 모든 줄의 들여쓰기를 유지하므로 태그 안의 공백만 바뀐다.
+
+```
+<div class="board-list">
+  <h2>{= t["list.heading"]}</h2>
+  {? length(p.props.posts) == 0}
+    <p>{= t["list.empty"]}</p>
+  {:}
+    <ul>
+      {@ post = p.props.posts}
+        <li><a href="{= post.href}">{= post.title}</a></li>
+      {/}
+    </ul>
+  {/}
+</div>
+```
+
+- 줄의 깊이는 그 줄이 시작하는 위치에서 열려 있는 HTML 요소와 템플릿 블록의 수다. 템플릿 블록은 if, loop, if-block 태그부터 그 닫는 태그까지다.
+- 공백이 아닌 첫 텍스트가 HTML 끝 태그, 템플릿 닫는 태그 `{/}`, 분기 태그 `{:}`나 `{:? }`인 줄은 한 단계 덜 들여쓴다.
+- 옵션 `templateBlocks: 'flat'`이면 템플릿 블록은 단계를 더하지 않는다. 블록의 태그와 그 안의 줄은 HTML 요소만으로 정한 깊이를 갖는다. 기본값 `'indent'`는 템플릿 블록을 요소처럼 센다.
+- 여러 줄에 걸친 HTML 시작 태그 안의 줄은 그 태그보다 한 단계 더 들여쓴다. 따옴표로 감싼 속성 값 안에서 시작하는 줄은 들여쓰기를 유지한다.
+- void 요소(`area`, `base`, `br`, `col`, `embed`, `hr`, `img`, `input`, `link`, `meta`, `param`, `source`, `track`, `wbr`)와 `/>`로 끝나는 시작 태그는 요소를 열지 않는다.
+- 포매터는 `<pre>`, `<textarea>`, `<script>`, `<style>`, HTML 주석, 태그 안에서 시작하는 줄의 들여쓰기를 유지한다. 끝 태그가 있는 줄도 포함한다. `<script>`, `<style>`, `<textarea>` 안의 HTML 태그는 읽지 않는다.
+- 빈 줄은 비운다.
+- 들여쓰기 뒤의 줄 텍스트는 바뀌지 않는다. 포매터는 요소를 다른 줄로 옮기지 않는다.
+
+포매터는 HTML 구조의 짝이 맞아야 한다. 끝 태그가 열린 요소와 맞지 않거나, 템플릿 끝까지 닫히지 않은 요소가 있거나, 템플릿 블록의 분기 사이 또는 시작 태그와 닫는 태그 사이에서 열린 HTML 요소가 다르면, `format()`은 그 태그의 위치와 함께 `reason: 'html'` 오류를 돌려주고 아무것도 바꾸지 않는다. 출력이 HTML이 아닌 템플릿은 `indent: null`로 포맷한다.
+
+줄 앞의 공백과 탭은 렌더 출력의 일부다. 다만 블록 태그만 있는 줄은 렌더러가 그 공백과 함께 제거한다. 따라서 들여쓰기는 렌더된 줄 앞의 공백을 바꾼다. 브라우저는 그 공백을 표시하지 않는다. 예외는 포매터가 유지하는 `<pre>`와 `<textarea>` 안, 그리고 CSS `white-space`가 공백을 유지하는 요소 안이다.
+
 ## 안전 불변식
 
-`format()`은 `@polyspec/template`의 `analyze()`로 소스를 파싱한다. 파서의 태그 범위와 표현식 토큰으로 각 태그를 포맷하고 결과를 다시 파싱한다. 두 AST가 모든 `span` 필드를 제거한 상태에서 같을 때만 결과를 돌려준다. 다르면 오류 결과를 돌려주고 호출자는 소스를 유지한다.
+`format()`은 `@polyspec/template`의 `analyze()`로 소스를 파싱한다. 파서의 태그 범위와 표현식 토큰으로 각 태그를 포맷하고 결과를 다시 파싱한다. 두 AST가 모든 `span` 필드를, 그리고 들여쓰기를 바꿀 때는 텍스트의 모든 줄 앞 공백과 탭을 제거한 상태에서 같을 때만 결과를 돌려준다. 다르면 오류 결과를 돌려주고 호출자는 소스를 유지한다.
 
 | 결과 | 조건 |
 | --- | --- |
 | `{ ok: true, text, changed }` | 소스가 파싱되고 포맷한 AST가 소스 AST와 같다 |
 | `{ ok: false, error: { reason: 'parse', code, line, col, message } }` | 소스가 파싱되지 않는다. `code`, `line`, `col`은 파서 오류다 |
-| `{ ok: false, error: { reason: 'invariant', code: null, line, col, message } }` | 포맷한 텍스트가 파싱되지 않거나 다른 AST로 파싱된다. 위치는 처음 바뀐 태그다 |
+| `{ ok: false, error: { reason: 'invariant', code: null, line, col, message } }` | 포맷한 텍스트가 파싱되지 않거나 다른 AST로 파싱된다. 위치는 처음 바뀐 곳이다 |
+| `{ ok: false, error: { reason: 'html', code: null, line, col, message } }` | HTML 구조의 짝이 맞지 않는다([들여쓰기](#들여쓰기)). 위치는 구조가 어긋난 태그다 |
 
-불변식 테스트는 `tests/cases`(`options.json`의 구분자 적용), `tests/fixtures`, `examples`, 포매터 픽스처 아래의 모든 `.tpl` 파일을 포맷한다. 파싱되는 파일마다 span을 제외한 AST가 같고, 태그 밖의 텍스트가 같고, 두 번째 실행에서 바뀌지 않아야 한다.
+불변식 테스트는 `tests/cases`(`options.json`의 구분자 적용), `tests/fixtures`, `examples`, 포매터 픽스처 아래의 모든 `.tpl` 파일을 `indent: null`로 한 번, 기본 들여쓰기로 한 번 포맷한다. 파싱되는 파일마다 `indent: null`은 span을 제외한 AST와 태그 밖의 텍스트가 같아야 한다. 기본 들여쓰기는 `html` 오류이거나, 줄 앞 공백과 탭을 제거한 상태에서 AST와 태그 밖의 텍스트가 같아야 한다. 둘 다 두 번째 실행에서 바뀌지 않아야 한다.
 
 ## 명령줄
 
@@ -66,7 +99,8 @@ template-fmt < page.tpl
 ```
 
 ```
-usage: template-fmt [--write | --check] [--delimiters OC] [PATH ...]
+usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
+                    [--template-blocks indent|flat] [PATH ...]
 ```
 
 - `--write`와 `--check` 없이 파일 하나를 주면 포맷한 텍스트를 표준 출력에 쓴다.
@@ -74,13 +108,15 @@ usage: template-fmt [--write | --check] [--delimiters OC] [PATH ...]
 - 디렉터리를 주면 그 아래의 모든 `.tpl` 파일을 정렬 순서로 포맷하고, `node_modules`와 이름이 `.`으로 시작하는 디렉터리는 건너뛴다. 경로가 여러 개이거나 디렉터리이면 `--write`나 `--check`가 필요하다.
 - `--write`: 포맷되지 않은 파일을 다시 쓰고 그 경로를 출력한다.
 - `--check`: 아무것도 바꾸지 않고 포맷되지 않은 파일의 경로를 출력한다.
-- 파싱되지 않거나 포맷한 AST가 다른 파일은 표준 오류에 `path:line:col: CODE: message` 형식으로 출력하고 바꾸지 않는다.
+- `--indent`: 들여쓰기 단위. 공백 `N`개(1~8), `tab`, 또는 `indent: null`인 `keep`이다. 기본값은 `2`다.
+- `--template-blocks`: `templateBlocks` 옵션인 `indent`(기본값) 또는 `flat`.
+- 파싱되지 않거나, 포맷한 AST가 다르거나, HTML 구조의 짝이 맞지 않는 파일은 표준 오류에 `path:line:col: LABEL: message` 형식으로 출력하고 바꾸지 않는다. `LABEL`은 파서 오류 코드, `formatted AST differs` 또는 `HTML structure`다.
 
 | 종료 상태 | 의미 |
 | --- | --- |
 | 0 | 성공. `--check`에서는 모든 파일이 포맷되어 있다 |
 | 1 | `--check`가 포맷되지 않은 파일을 찾았다 |
-| 2 | 파싱되지 않는 파일, 다른 AST, 읽을 수 없는 경로 또는 잘못된 인자가 있다 |
+| 2 | 파싱되지 않는 파일, 다른 AST, 짝이 맞지 않는 HTML 구조, 읽을 수 없는 경로 또는 잘못된 인자가 있다 |
 
 `make install-cli`는 `npm link -w @polyspec/template-format`을 실행해 `template-fmt`를 전역 npm bin 디렉터리에 링크한다. 링크가 작업 트리를 가리키므로 `make build-format`이 설치된 명령을 갱신한다.
 
@@ -100,7 +136,7 @@ code --list-extensions --show-versions | grep polyspec
 
 - 주석 토글을 위한 블록 주석 `{* *}`
 - `{ }`, `[ ]`, `( )`, 따옴표, `<!-- -->`의 괄호 쌍과 자동 닫기
-- `format()`을 사용하는 문서 포맷과 범위 포맷. 범위 포맷은 선택 범위 안에 완전히 들어가는 태그를 포맷한다. `format()`이 오류를 돌려주면 제공자는 편집을 돌려주지 않고 출력 채널 `Polyspec Template`에 위치를 기록한다.
+- `format()`을 사용하는 문서 포맷과 범위 포맷. 들여쓰기 단위는 편집기의 것이다. 공백 `tabSize`개이며, `insertSpaces`가 꺼져 있으면 탭이다. 설정 `polyspec-template.format.templateBlocks`(`indent` 또는 `flat`)가 `templateBlocks` 옵션이다. 범위 포맷은 선택 범위 안에 완전히 들어가는 태그를 포맷하고 범위 안에서 시작하는 줄을 들여쓴다. `format()`이 오류를 돌려주면 제공자는 편집을 돌려주지 않고 출력 채널 `Polyspec Template`에 위치를 기록한다.
 
 ### 진단과 짝 태그
 

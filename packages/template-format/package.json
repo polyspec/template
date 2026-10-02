@@ -1,7 +1,7 @@
 {
   "name": "@polyspec/template-format",
   "version": "0.0.1",
-  "description": "Formatter, command line tool and tag structure analysis for template sources; formatting changes only whitespace inside tags",
+  "description": "Formatter, command line tool and tag structure analysis for template sources; formatting changes whitespace inside tags and the indentation of lines",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.mjs",

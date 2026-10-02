@@ -1022,8 +1022,8 @@
       "title": "Template formatter and CLI",
       "title_ko": "템플릿 포매터와 CLI",
       "status": "implemented",
-      "description": "Normalize whitespace inside template tags with format() and the template-fmt command, refuse a result whose AST without spans differs from the source AST, and return the parse error or the block constructs of a source with templateStructure().",
-      "description_ko": "format()과 template-fmt 명령으로 템플릿 태그 안의 공백을 정규화하고, span을 제외한 AST가 소스 AST와 다른 결과는 거부하며, templateStructure()로 소스의 파싱 오류 또는 블록 구성을 돌려준다.",
+      "description": "Normalize whitespace inside template tags and indent lines by the nesting of HTML elements and template blocks with format() and the template-fmt command, refuse a result whose AST without spans and line indentation differs from the source AST, and return the parse error, the tag ranges or the block constructs of a source with templateStructure().",
+      "description_ko": "format()과 template-fmt 명령으로 템플릿 태그 안의 공백을 정규화하고 HTML 요소와 템플릿 블록의 중첩에 따라 줄을 들여쓰며, span과 줄 들여쓰기를 제외한 AST가 소스 AST와 다른 결과는 거부하고, templateStructure()로 소스의 파싱 오류, 태그 범위 또는 블록 구성을 돌려준다.",
       "inputs": {
         "type": "TemplateSource",
         "fields": [

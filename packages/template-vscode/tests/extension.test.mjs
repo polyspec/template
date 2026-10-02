@@ -24,6 +24,8 @@ class Range {
 const providers = {};
 const warnings = [];
 const diagnostics = new Map();
+const settings = { 'format.templateBlocks': 'indent' };
+const SPACES = { tabSize: 2, insertSpaces: true };
 const decorationTypes = [];
 const disposable = { dispose() {} };
 const vscode = {
@@ -50,6 +52,7 @@ const vscode = {
     },
   },
   workspace: {
+    getConfiguration: section => ({ get: (key, fallback) => (section === 'polyspec-template' && key in settings ? settings[key] : fallback) }),
     textDocuments: [],
     onDidOpenTextDocument: listener => {
       providers.open = listener;
@@ -116,6 +119,12 @@ test('manifest contributes the language, the grammar and the language configurat
   const configuration = JSON.parse(readFileSync(join(root, language.configuration), 'utf8'));
   assert.deepEqual(configuration.comments.blockComment, ['{*', '*}']);
   assert.ok(configuration.brackets.some(([open, close]) => open === '{' && close === '}'));
+});
+
+test('manifest contributes the templateBlocks formatting setting', () => {
+  const setting = manifest.contributes.configuration.properties['polyspec-template.format.templateBlocks'];
+  assert.deepEqual(setting.enum, ['indent', 'flat']);
+  assert.equal(setting.default, 'indent');
 });
 
 test('manifest supports untrusted and virtual workspaces and declares no Node.js engine', () => {
@@ -205,7 +214,7 @@ test('tag backgrounds stay unchanged while the document does not parse', () => {
 
 test('document formatting replaces the document with the formatted text', () => {
   const text = '<p>{=a}</p>\n';
-  const edits = providers.document.provider.provideDocumentFormattingEdits(documentOf(text));
+  const edits = providers.document.provider.provideDocumentFormattingEdits(documentOf(text), SPACES);
   assert.equal(edits.length, 1);
   assert.equal(edits[0].newText, '<p>{= a}</p>\n');
   assert.equal(edits[0].range.start.offset, 0);
@@ -213,16 +222,34 @@ test('document formatting replaces the document with the formatted text', () => 
 });
 
 test('document formatting returns no edits for a formatted document', () => {
-  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('<p>{= a}</p>')), []);
+  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('<p>{= a}</p>'), SPACES), []);
 });
 
 test('document formatting returns no edits and logs the position for a source that does not parse', () => {
-  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('{? a}')), []);
+  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('{? a}'), SPACES), []);
   assert.match(warnings.at(-1), /^\/work\/page\.tpl:1:1: E_PARSE_UNCLOSED_BLOCK: /);
+});
+
+test('document formatting indents with the editor indent unit and the templateBlocks setting', () => {
+  const text = '<ul>\n{@ x = xs}\n<li>{= x}</li>\n{/}\n</ul>';
+  const format = options => providers.document.provider.provideDocumentFormattingEdits(documentOf(text), options)[0].newText;
+  assert.equal(format(SPACES), '<ul>\n  {@ x = xs}\n    <li>{= x}</li>\n  {/}\n</ul>');
+  assert.equal(format({ tabSize: 4, insertSpaces: false }), '<ul>\n\t{@ x = xs}\n\t\t<li>{= x}</li>\n\t{/}\n</ul>');
+  settings['format.templateBlocks'] = 'flat';
+  try {
+    assert.equal(format({ tabSize: 4, insertSpaces: true }), '<ul>\n    {@ x = xs}\n    <li>{= x}</li>\n    {/}\n</ul>');
+  } finally {
+    settings['format.templateBlocks'] = 'indent';
+  }
+});
+
+test('document formatting returns no edits and logs an HTML structure that is not balanced', () => {
+  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('<div>\n<p>a</div>'), SPACES), []);
+  assert.match(warnings.at(-1), /^\/work\/page\.tpl:2:5: HTML structure: the end tag <\/div> does not match the open element <p>; no edits returned$/);
 });
 
 test('range formatting formats only the tags inside the range', () => {
   const text = '{=a}{=b}';
-  const edits = providers.range.provider.provideDocumentRangeFormattingEdits(documentOf(text), new Range(new Position(4), new Position(8)));
+  const edits = providers.range.provider.provideDocumentRangeFormattingEdits(documentOf(text), new Range(new Position(4), new Position(8)), SPACES);
   assert.equal(edits[0].newText, '{=a}{= b}');
 });

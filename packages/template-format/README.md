@@ -2,7 +2,7 @@
 
 [한국어](README.ko.md).
 
-Formatter for template sources. It normalizes whitespace inside template tags and never changes text outside tags. It parses the source and the result with `@polyspec/template` and returns the result only when both ASTs are equal without their `span` fields.
+Formatter for template sources. It normalizes whitespace inside template tags and indents lines by the nesting of HTML elements and template blocks; it changes no other text outside tags. It parses the source and the result with `@polyspec/template` and returns the result only when both ASTs are equal without their `span` fields and the indentation of lines. `indent: null` keeps the indentation.
 
 ## Library
 

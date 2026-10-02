@@ -111,6 +111,22 @@ describe('template-fmt', () => {
     expect(run(['--delimiters', '[]'], '[=a[0]]')).toEqual({ status: 0, stdout: '[= a[0]]', stderr: '' });
   });
 
+  it('indents with --indent and --template-blocks', () => {
+    const source = '<ul>\n{@ x = xs}\n<li>{=x}</li>\n{/}\n</ul>\n';
+    expect(run([], source).stdout).toBe('<ul>\n  {@ x = xs}\n    <li>{= x}</li>\n  {/}\n</ul>\n');
+    expect(run(['--indent', '4'], source).stdout).toBe('<ul>\n    {@ x = xs}\n        <li>{= x}</li>\n    {/}\n</ul>\n');
+    expect(run(['--indent', 'tab', '--template-blocks', 'flat'], source).stdout).toBe('<ul>\n\t{@ x = xs}\n\t<li>{= x}</li>\n\t{/}\n</ul>\n');
+    expect(run(['--indent', 'keep'], source).stdout).toBe('<ul>\n{@ x = xs}\n<li>{= x}</li>\n{/}\n</ul>\n');
+  });
+
+  it('reports an HTML structure that is not balanced, keeps the file and exits with status 2', () => {
+    const file = join(work, 'a.tpl');
+    writeFileSync(file, '<div>\n<p>{=a}</div>\n');
+    expect(run(['--write', file])).toEqual({ status: 2, stdout: '', stderr: `${file}:2:8: HTML structure: the end tag </div> does not match the open element <p>\n` });
+    expect(readFileSync(file, 'utf8')).toBe('<div>\n<p>{=a}</div>\n');
+    expect(run(['--indent', 'keep', file])).toEqual({ status: 0, stdout: '<div>\n<p>{= a}</div>\n', stderr: '' });
+  });
+
   it('prints the usage with --help', () => {
     const result = run(['--help']);
     expect(result.status).toBe(0);
@@ -123,5 +139,8 @@ describe('template-fmt', () => {
     expect(run(['--write']).status).toBe(2);
     expect(run([work]).status).toBe(2);
     expect(run([join(work, 'missing.tpl'), '--check']).status).toBe(2);
+    for (const value of ['0', '9', 'x', '2.5']) expect(run(['--indent', value]).status).toBe(2);
+    expect(run(['--indent']).status).toBe(2);
+    expect(run(['--template-blocks', 'deep']).status).toBe(2);
   });
 });
