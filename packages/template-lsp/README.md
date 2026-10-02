@@ -16,4 +16,4 @@ The package entry exports the method names and the parameter and result types of
 import { MATCHING_TAG_METHOD, TAG_RANGES_METHOD, type MatchingTagParams } from '@polyspec/template-lsp';
 ```
 
-The capabilities and the request shapes are defined in [editor support](../../docs/spec/editor.md) (EDT-14); the command and its verification are described in [Formatter and VS Code extension](../../docs/operations/editor-tools.md).
+The capabilities and the request shapes are defined in [editor support](../../docs/spec/editor.md) (EDT-14); the command and its verification are described in [Formatter, language server and editors](../../docs/operations/editor-tools.md).

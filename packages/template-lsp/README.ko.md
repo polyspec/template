@@ -16,4 +16,4 @@ template-lsp --stdio
 import { MATCHING_TAG_METHOD, TAG_RANGES_METHOD, type MatchingTagParams } from '@polyspec/template-lsp';
 ```
 
-기능과 요청 형태는 [에디터 지원](../../docs/spec/editor.ko.md)(EDT-14)에 정의되어 있고, 명령과 그 검증은 [포매터와 VS Code 확장](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.
+기능과 요청 형태는 [에디터 지원](../../docs/spec/editor.ko.md)(EDT-14)에 정의되어 있고, 명령과 그 검증은 [포매터, 언어 서버, 에디터](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.

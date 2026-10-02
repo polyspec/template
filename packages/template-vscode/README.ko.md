@@ -26,4 +26,4 @@ make vscode-package
 make vscode-install
 ```
 
-문법은 기본 구분자 `{`와 `}`를 사용한다. 서버의 시맨틱 토큰은 `{% delimiter ..}` 지시문도 따른다. scope, 포맷 규칙, 한계는 [포매터와 VS Code 확장](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.ko.md)에 설명되어 있다.
+문법은 기본 구분자 `{`와 `}`를 사용한다. 서버의 시맨틱 토큰은 `{% delimiter ..}` 지시문도 따른다. scope, 포맷 규칙, 한계는 [포매터, 언어 서버, 에디터](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.ko.md)에 설명되어 있다.

@@ -306,7 +306,7 @@ T11.1 to T11.6 are complete. On 2026-10-02, `make check` passed on commit "Refre
 | W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime support precedes parity and publication |
 | W9 | none | T9.1 |
 | W10 | none | T10.1 |
-| W11 | {T11.3 → T11.4, T11.5} | T11.1 → T11.2 → the parallel group → T11.6 |
+| W11 | T11.3 → T11.4 alongside T11.5 | T11.1 → T11.2 → the parallel group → T11.6 |
 
 ## Definition of done
 

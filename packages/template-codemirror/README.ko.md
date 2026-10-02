@@ -36,4 +36,4 @@ new EditorView({
 
 마크의 클래스는 토큰 종류(`delimiter`, `keyword`, `variable`, `property`, `function`, `string`, `number`, `operator`, `comment`, `path`)에 대한 `cm-template-<type>`, 태그 배경에 대한 `cm-template-tag`, 커서 아래 구성의 태그에 대한 `cm-template-highlight`이다.
 
-옵션, 클래스, 기본 색, 명령은 [포매터와 VS Code 확장](../../docs/operations/editor-tools.ko.md#codemirror-6-어댑터)에, 계약은 [에디터 지원](../../docs/spec/editor.ko.md)에 설명되어 있다.
+옵션, 클래스, 기본 색, 명령은 [포매터, 언어 서버, 에디터](../../docs/operations/editor-tools.ko.md#codemirror-6-어댑터)에, 계약은 [에디터 지원](../../docs/spec/editor.ko.md)에 설명되어 있다.

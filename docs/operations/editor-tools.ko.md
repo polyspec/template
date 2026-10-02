@@ -1,4 +1,4 @@
-# 포매터와 VS Code 확장
+# 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
 
@@ -279,5 +279,7 @@ make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 `make test-vscode`는 `tm-grammars`의 HTML, CSS, JavaScript 문법과 함께 `vscode-tmgrammar-test`로 문법 테스트를 실행하고, 매니페스트를 테스트하고, `dist/extension.cjs`가 `vscode`와 Node.js 내장 모듈만, `dist/server.cjs`가 Node.js 내장 모듈만 불러오는지, `.vsix`가 둘 다 담는지, 매니페스트가 서버 legend의 토큰 종류 가운데 VS Code가 정의하지 않은 것을 모두 제공하는지, 번들한 서버가 표준 입력과 출력으로 진단을 게시하고 `polyspec-template/tagRanges`, `polyspec-template/matchingTag`, 타이핑 포맷에 응답하는지 검사한다. 언어 클라이언트는 VS Code 안에서만 실행되므로 통합 테스트가 이를 검사한다. `make test-vscode-integration`은 `.vsix`를 빌드하고, `@vscode/test-electron`으로 `engines.vscode`의 최소 버전인 VS Code 1.138.0을 저장소 루트의 `.vscode-test`에 내려받고, VS Code 명령줄로 `.vsix`를 새 확장 디렉터리에 설치한다. 사용자 설치와 같이 workspace trust를 켜고 테스트 폴더를 신뢰하지 않은 상태로 VS Code를 실행해 `.tpl` 문서가 언어 `polyspec-template`으로 열리는지, 설치한 확장이 활성화되어 번들한 서버를 시작하는지, `_workbench.captureSyntaxTokens`가 HTML 속성 값 안의 태그에 템플릿 scope를 보고하는지, 확장이 칠하는 태그 범위가 파싱되지 않는 문서에서도 주석을 뺀 모든 태그를 덮는지, `vscode.provideDocumentSemanticTokens`가 서버의 토큰 종류를 돌려주는지, 이 언어에서 `editor.formatOnType`이 켜져 있고 `}`와 Enter를 입력하면 현재 줄을 들여쓰는지, 닫히지 않은 `{?`가 그 위치에 진단을 만드는지, 문서 강조, 접기 범위, Go to Matching Template Tag가 한 구성을 따르는지, 단축키가 비어 있는지, `vscode.executeFormatDocumentProvider`가 예제에 기대한 편집을 돌려주고 포맷된 문서와 파싱되지 않는 문서에는 편집을 돌려주지 않는지 검사한다. 두 번째 실행은 설치한 매니페스트에서 `capabilities`를 지우고 VS Code가 그 작업 공간에서 확장을 비활성화하는지 요구한다. 이것으로 첫 실행이 capability 누락을 찾아낸다는 것을 보인다.
 
 `make test-codemirror`는 어댑터를 빌드하고 두 종류의 테스트를 실행한다. Vitest 테스트는 `packages/template-language/tests/editor`의 모든 에디터 픽스처마다 DOM 없이 `EditorState`를 만들고, `templateDiagnostics`의 진단, 상태의 decoration 집합에 있는 토큰 마크와 태그 마크, fold service의 접기 범위, 모든 조회 위치의 강조 마크와 `goToMatchingTag` 목적지, `templateBlocks` `indent`와 `flat` 및 공백 두 개의 들여쓰기 단위로 구한 모든 줄의 들여쓰기 서비스 결과, `formatTemplate`의 결과를 픽스처의 기대 결과와 비교한다(EDT-17). 다른 테스트는 한 줄을 입력하고 `insertNewlineAndIndent`로 Enter를 누르며, 옵션, `formatTemplate`의 들여쓰기 단위, 텍스트마다 분석 하나를 재사용하는지 검사한다. Playwright 테스트는 `tests/browser/page.ts`를 esbuild로 `packages/template-codemirror/dist/browser/page.js`에 번들하고 빈 Chromium 페이지에 불러온 뒤, `<ul>`, Enter, `{@ x = xs}`, Enter를 입력한 뒤의 들여쓰기, 토큰 클래스, HTML 속성 값 안의 템플릿 색, 밝은 테마와 어두운 테마의 태그 배경, 닫히지 않은 블록의 lint 진단, 포맷되는 텍스트와 파싱되지 않는 텍스트에서의 Shift+Alt+F를 검사한다.
+
+CI job `editor`는 `make editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode`를 실행하고, VS Code가 화면을 요구하므로 `make test-vscode-integration`을 `xvfb-run`의 가상 X 서버에서 실행한다.
 
 `make check`가 `test-language`, `test-lsp`, `test-codemirror`, `format-check`, `test-vscode`, `test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
