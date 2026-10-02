@@ -35,7 +35,7 @@ make showcase
 | `@polyspec/template-language` | 언어 서비스 `openDocument()`, 포매터 `format()`, 명령 `template-fmt` |
 | `@polyspec/template-lsp` | LSP 클라이언트가 있는 모든 에디터를 위한 Language Server Protocol 서버 `template-lsp` |
 | `@polyspec/template-codemirror` | CodeMirror 6 확장 `template()` |
-| `polyspec-template` | 함께 묶은 언어 서버의 클라이언트인 VS Code 확장 |
+| `polyspec-template` | 언어 서버 `template-lsp`를 확장 안에 포함하고, 그 서버에 연결해 기능을 제공하는 VS Code 확장 |
 
 `make vscode-install`은 VS Code 확장을 설치하고, `make install-cli`는 `template-fmt`를 연결한다.
 
