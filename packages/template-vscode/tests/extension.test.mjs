@@ -1,111 +1,46 @@
-// Extension manifest and bundled formatting providers, run against a minimal stand-in for the vscode module.
+// Extension manifest, bundles and the bundled language server. The client side runs in VS Code in tests/integration.
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
-import Module, { createRequire } from 'node:module';
+import { spawn } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { builtinModules } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
-import { test } from 'node:test';
+import { after, before, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+const SERVER = 'dist/server.cjs';
 
-class Position {
-  constructor(offset, line = 0) {
-    this.offset = offset;
-    this.line = line;
-  }
-}
-class Range {
-  constructor(start, end) {
-    this.start = start;
-    this.end = end;
-  }
-}
-const providers = {};
-const warnings = [];
-const diagnostics = new Map();
-const settings = { 'format.templateBlocks': 'indent' };
-const SPACES = { tabSize: 2, insertSpaces: true };
-const decorationTypes = [];
-const disposable = { dispose() {} };
-const vscode = {
-  Range,
-  Selection: Range,
-  TextEdit: { replace: (range, newText) => ({ range, newText }) },
-  Diagnostic: class { constructor(range, message, severity) { Object.assign(this, { range, message, severity }); } },
-  DiagnosticSeverity: { Error: 0 },
-  DocumentHighlight: class { constructor(range, kind) { Object.assign(this, { range, kind }); } },
-  DocumentHighlightKind: { Text: 0 },
-  FoldingRange: class { constructor(start, end, kind) { Object.assign(this, { start, end, kind }); } },
-  FoldingRangeKind: { Region: 3 },
-  DecorationRangeBehavior: { ClosedClosed: 1 },
-  window: {
-    createOutputChannel: () => ({ warn: message => warnings.push(message), dispose() {} }),
-    createTextEditorDecorationType: options => {
-      decorationTypes.push(options);
-      return { options, dispose() {} };
-    },
-    visibleTextEditors: [],
-    onDidChangeVisibleTextEditors: listener => {
-      providers.visible = listener;
-      return disposable;
-    },
-  },
-  workspace: {
-    getConfiguration: section => ({ get: (key, fallback) => (section === 'polyspec-template' && key in settings ? settings[key] : fallback) }),
-    textDocuments: [],
-    onDidOpenTextDocument: listener => {
-      providers.open = listener;
-      return disposable;
-    },
-    onDidChangeTextDocument: () => disposable,
-    onDidCloseTextDocument: () => disposable,
-  },
-  commands: {
-    registerTextEditorCommand: (command, callback) => {
-      providers.command = { command, callback };
-      return disposable;
-    },
-  },
-  languages: {
-    createDiagnosticCollection: () => ({ set: (uri, list) => diagnostics.set(uri, list), delete: uri => diagnostics.delete(uri), dispose() {} }),
-    registerDocumentHighlightProvider: (language, provider) => {
-      providers.highlight = { language, provider };
-      return disposable;
-    },
-    registerFoldingRangeProvider: (language, provider) => {
-      providers.folding = { language, provider };
-      return disposable;
-    },
-    registerDocumentFormattingEditProvider: (language, provider) => {
-      providers.document = { language, provider };
-      return { dispose() {} };
-    },
-    registerDocumentRangeFormattingEditProvider: (language, provider) => {
-      providers.range = { language, provider };
-      return { dispose() {} };
-    },
-  },
-};
+// The semantic token types that VS Code defines; other types of the server legend must be contributed.
+const STANDARD_TOKEN_TYPES = new Set(['namespace', 'class', 'enum', 'interface', 'struct', 'typeParameter', 'type', 'parameter', 'variable', 'property', 'enumMember', 'decorator', 'event', 'function', 'method', 'macro', 'label', 'comment', 'string', 'keyword', 'number', 'regexp', 'operator']);
 
-function documentOf(text) {
-  return {
-    getText: () => text,
-    languageId: 'polyspec-template',
-    uri: { fsPath: '/work/page.tpl' },
-    offsetAt: position => position.offset,
-    positionAt: offset => new Position(offset, text.slice(0, offset).split('\n').length - 1),
-  };
-}
+const builtins = new Set(builtinModules.flatMap(name => [name, `node:${name}`]));
+const requiredBy = path => [...new Set(readFileSync(join(root, path), 'utf8').match(/require\("[^"]+"\)/g).map(call => call.slice(9, -2)))];
 
-const load = Module._load;
-Module._load = function loadWithVscode(request, ...rest) {
-  return request === 'vscode' ? vscode : load.call(this, request, ...rest);
-};
-const extension = createRequire(import.meta.url)(join(root, manifest.main));
-Module._load = load;
-const context = { subscriptions: [] };
-extension.activate(context);
+let server;
+let connection;
+let initialized;
+const published = [];
+
+before(async () => {
+  server = spawn(process.execPath, [join(root, SERVER), '--stdio'], { stdio: ['pipe', 'pipe', 'inherit'] });
+  connection = createMessageConnection(new StreamMessageReader(server.stdout), new StreamMessageWriter(server.stdin));
+  connection.onNotification('textDocument/publishDiagnostics', params => {
+    published.push(params);
+  });
+  connection.listen();
+  initialized = await connection.sendRequest('initialize', { processId: process.pid, rootUri: null, capabilities: {} });
+  await connection.sendNotification('initialized', {});
+});
+
+after(async () => {
+  const exited = new Promise(resolvePromise => server.once('exit', code => resolvePromise(code)));
+  await connection.sendRequest('shutdown');
+  await connection.sendNotification('exit');
+  assert.equal(await exited, 0);
+  connection.dispose();
+});
 
 test('manifest contributes the language, the grammar and the language configuration', () => {
   const [language] = manifest.contributes.languages;
@@ -121,10 +56,11 @@ test('manifest contributes the language, the grammar and the language configurat
   assert.ok(configuration.brackets.some(([open, close]) => open === '{' && close === '}'));
 });
 
-test('manifest contributes the templateBlocks formatting setting', () => {
+test('manifest contributes the templateBlocks formatting setting and enables format on type for the language', () => {
   const setting = manifest.contributes.configuration.properties['polyspec-template.format.templateBlocks'];
   assert.deepEqual(setting.enum, ['indent', 'flat']);
   assert.equal(setting.default, 'indent');
+  assert.deepEqual(manifest.contributes.configurationDefaults, { '[polyspec-template]': { 'editor.formatOnType': true } });
 });
 
 test('manifest supports untrusted and virtual workspaces and declares no Node.js engine', () => {
@@ -132,125 +68,44 @@ test('manifest supports untrusted and virtual workspaces and declares no Node.js
   assert.deepEqual(Object.keys(manifest.engines), ['vscode']);
 });
 
-test('the bundle does not load the workspace packages at run time', () => {
-  const bundle = readFileSync(join(root, manifest.main), 'utf8');
-  assert.deepEqual([...new Set(bundle.match(/require\("[^"]+"\)/g))], ['require("vscode")']);
-  assert.ok(existsSync(join(root, manifest.main)));
-});
-
-test('activate registers formatting, diagnostics, tag backgrounds, highlights, folding and the matching tag command', () => {
-  assert.equal(decorationTypes.length, 1);
-  assert.equal(providers.document.language, 'polyspec-template');
-  assert.equal(providers.range.language, 'polyspec-template');
-  assert.equal(providers.highlight.language, 'polyspec-template');
-  assert.equal(providers.folding.language, 'polyspec-template');
-  assert.equal(providers.command.command, 'polyspec-template.goToMatchingTag');
+test('manifest contributes the Go to Matching Template Tag command and its keybinding', () => {
   const [command] = manifest.contributes.commands;
-  assert.equal(command.command, providers.command.command);
+  assert.equal(command.command, 'polyspec-template.goToMatchingTag');
   const [keybinding] = manifest.contributes.keybindings;
   assert.equal(keybinding.command, command.command);
+  assert.equal(keybinding.when, 'editorTextFocus && editorLangId == polyspec-template');
 });
 
-test('diagnostics report the parse error with its code and range and clear it when the document parses', () => {
-  const broken = documentOf('<p>\n  {? a}\n</p>');
-  providers.open(broken);
-  const [diagnostic] = diagnostics.get(broken.uri);
+test('manifest contributes every token type of the server legend that VS Code does not define', () => {
+  const legend = initialized.capabilities.semanticTokensProvider.legend.tokenTypes;
+  const contributed = manifest.contributes.semanticTokenTypes.map(type => type.id);
+  assert.deepEqual(contributed, legend.filter(type => !STANDARD_TOKEN_TYPES.has(type)));
+  for (const type of manifest.contributes.semanticTokenTypes) assert.ok(STANDARD_TOKEN_TYPES.has(type.superType), type.id);
+  const [scopes] = manifest.contributes.semanticTokenScopes;
+  assert.equal(scopes.language, 'polyspec-template');
+  for (const type of Object.keys(scopes.scopes)) assert.ok(legend.includes(type), type);
+});
+
+test('the bundles load no workspace package at run time and are packaged', () => {
+  assert.deepEqual(requiredBy(manifest.main).filter(name => !builtins.has(name)), ['vscode']);
+  assert.deepEqual(requiredBy(SERVER).filter(name => !builtins.has(name)), []);
+  const packaged = readFileSync(join(root, '.vscodeignore'), 'utf8').split('\n');
+  assert.ok(packaged.includes(`!${manifest.main.replace(/^\.\//, '')}`));
+  assert.ok(packaged.includes(`!${SERVER}`));
+});
+
+test('the bundled server publishes diagnostics and answers the requests of the extension', async () => {
+  const uri = 'file:///work/page.tpl';
+  const text = '<ul>\n{@ x = xs}\n<li>{= x}</li>\n{/}\n</ul>\n{? a}';
+  await connection.sendNotification('textDocument/didOpen', { textDocument: { uri, languageId: 'polyspec-template', version: 1, text } });
+  const textDocument = { uri };
+  const tags = await connection.sendRequest('polyspec-template/tagRanges', { textDocument });
+  assert.deepEqual(tags.map(range => [range.start.line, range.start.character, range.end.line, range.end.character]), [[1, 0, 1, 10], [2, 4, 2, 9], [3, 0, 3, 3], [5, 0, 5, 5]]);
+  assert.deepEqual(await connection.sendRequest('polyspec-template/matchingTag', { textDocument, position: { line: 1, character: 2 } }), { line: 3, character: 0 });
+  const edits = await connection.sendRequest('textDocument/onTypeFormatting', { textDocument, position: { line: 1, character: 10 }, ch: '}', options: { tabSize: 2, insertSpaces: true } });
+  assert.deepEqual(edits, [{ range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, newText: '  ' }]);
+  for (let attempt = 0; attempt < 50 && !published.some(params => params.uri === uri); attempt++) await new Promise(resolvePromise => setTimeout(resolvePromise, 20));
+  const [diagnostic] = published.find(params => params.uri === uri).diagnostics;
   assert.equal(diagnostic.code, 'E_PARSE_UNCLOSED_BLOCK');
-  assert.equal(diagnostic.source, 'polyspec-template');
-  assert.deepEqual([diagnostic.range.start.offset, diagnostic.range.start.line], [6, 1]);
-  const fixed = { ...documentOf('{? a}x{/}'), uri: broken.uri };
-  providers.open(fixed);
-  assert.deepEqual(diagnostics.get(broken.uri), []);
-});
-
-test('highlights cover every tag of the construct under the cursor', () => {
-  const text = '{? a}x{:? b}y{:}z{/}';
-  const highlights = providers.highlight.provider.provideDocumentHighlights(documentOf(text), new Position(14));
-  assert.deepEqual(highlights.map(item => text.slice(item.range.start.offset, item.range.end.offset)), ['{? a}', '{:? b}', '{:}', '{/}']);
-});
-
-test('folding ranges cover multi-line constructs up to the line before the close tag', () => {
-  const text = '{@ x = xs}\n{? x}\na\n{/}\n{/}\n{? y}b{/}\n';
-  const ranges = providers.folding.provider.provideFoldingRanges(documentOf(text));
-  assert.deepEqual(ranges.map(range => [range.start, range.end]), [[0, 3], [1, 2]]);
-});
-
-test('the matching tag command cycles through the tags and starts from the enclosing construct', () => {
-  const move = (text, offset) => {
-    const editor = { document: documentOf(text), selection: { active: new Position(offset) }, revealRange() {} };
-    providers.command.callback(editor);
-    return editor.selection.start?.offset ?? null;
-  };
-  const text = '{? a}x{:}yy{/}';
-  assert.equal(move(text, 0), 6);
-  assert.equal(move(text, 7), 11);
-  assert.equal(move(text, 13), 0);
-  assert.equal(move(text, 9), 11);
-  assert.equal(move('plain', 2), null);
-});
-
-test('tag backgrounds cover every tag except comments, with a light and a dark color', () => {
-  const [type] = decorationTypes;
-  assert.deepEqual(type.dark, { backgroundColor: '#16351c' });
-  assert.deepEqual(type.light, { backgroundColor: '#e3f6dd' });
-  const text = '<p class="{= c}">{* note *}{? a}{= b | raw}{/}</p>';
-  const painted = [];
-  const editor = { document: documentOf(text), setDecorations: (decoration, ranges) => painted.push({ decoration, ranges }) };
-  vscode.window.visibleTextEditors = [editor];
-  providers.visible([editor]);
-  assert.equal(painted.length, 1);
-  assert.equal(painted[0].decoration.options, type);
-  assert.deepEqual(painted[0].ranges.map(range => text.slice(range.start.offset, range.end.offset)), ['{= c}', '{? a}', '{= b | raw}', '{/}']);
-});
-
-test('tag backgrounds cover the tags the parser accepted while the document does not parse', () => {
-  const painted = [];
-  const text = '<ul>{@ x = xs}<li>{= x}</li>';
-  const editor = { document: documentOf(text), setDecorations: (decoration, ranges) => painted.push(ranges) };
-  vscode.window.visibleTextEditors = [editor];
-  providers.visible([editor]);
-  assert.deepEqual(painted[0].map(range => text.slice(range.start.offset, range.end.offset)), ['{@ x = xs}', '{= x}']);
-  vscode.window.visibleTextEditors = [];
-});
-
-test('document formatting replaces the document with the formatted text', () => {
-  const text = '<p>{=a}</p>\n';
-  const edits = providers.document.provider.provideDocumentFormattingEdits(documentOf(text), SPACES);
-  assert.equal(edits.length, 1);
-  assert.equal(edits[0].newText, '<p>{= a}</p>\n');
-  assert.equal(edits[0].range.start.offset, 0);
-  assert.equal(edits[0].range.end.offset, text.length);
-});
-
-test('document formatting returns no edits for a formatted document', () => {
-  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('<p>{= a}</p>'), SPACES), []);
-});
-
-test('document formatting returns no edits and logs the position for a source that does not parse', () => {
-  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('{? a}'), SPACES), []);
-  assert.match(warnings.at(-1), /^\/work\/page\.tpl:1:1: E_PARSE_UNCLOSED_BLOCK: /);
-});
-
-test('document formatting indents with the editor indent unit and the templateBlocks setting', () => {
-  const text = '<ul>\n{@ x = xs}\n<li>{= x}</li>\n{/}\n</ul>';
-  const format = options => providers.document.provider.provideDocumentFormattingEdits(documentOf(text), options)[0].newText;
-  assert.equal(format(SPACES), '<ul>\n  {@ x = xs}\n    <li>{= x}</li>\n  {/}\n</ul>');
-  assert.equal(format({ tabSize: 4, insertSpaces: false }), '<ul>\n\t{@ x = xs}\n\t\t<li>{= x}</li>\n\t{/}\n</ul>');
-  settings['format.templateBlocks'] = 'flat';
-  try {
-    assert.equal(format({ tabSize: 4, insertSpaces: true }), '<ul>\n    {@ x = xs}\n    <li>{= x}</li>\n    {/}\n</ul>');
-  } finally {
-    settings['format.templateBlocks'] = 'indent';
-  }
-});
-
-test('document formatting returns no edits and logs an HTML structure that is not balanced', () => {
-  assert.deepEqual(providers.document.provider.provideDocumentFormattingEdits(documentOf('<div>\n<p>a</div>'), SPACES), []);
-  assert.match(warnings.at(-1), /^\/work\/page\.tpl:2:5: HTML structure: the end tag <\/div> does not match the open element <p>; no edits returned$/);
-});
-
-test('range formatting formats only the tags inside the range', () => {
-  const text = '{=a}{=b}';
-  const edits = providers.range.provider.provideDocumentRangeFormattingEdits(documentOf(text), new Range(new Position(4), new Position(8)), SPACES);
-  assert.equal(edits[0].newText, '{=a}{= b}');
+  assert.deepEqual(diagnostic.range.start, { line: 5, character: 0 });
 });

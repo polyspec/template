@@ -6,9 +6,9 @@
 
 - `packages/template-language`(`@polyspec/template-language`): 언어 서비스 `openDocument()`([에디터 지원](/ko/spec/editor)), 포매터 `format()`, 명령줄 도구 `template-fmt`.
 - `packages/template-lsp`(`@polyspec/template-lsp`): 언어 서비스의 어댑터인 Language Server Protocol 서버 `template-lsp`.
-- `packages/template-vscode`(`polyspec-template`): 언어 정의, TextMate 문법, 포맷 제공자를 가진 VS Code 확장. 제공자는 `format()`을 호출하며 자체 포맷 규칙을 갖지 않는다.
+- `packages/template-vscode`(`polyspec-template`): 언어 정의, TextMate 문법, 함께 묶은 언어 서버의 클라이언트를 가진 VS Code 확장. 템플릿 규칙을 갖지 않는다.
 
-두 패키지는 템플릿 문법을 `@polyspec/template`에서 가져온다. 포매터는 파서가 돌려주는 태그 범위와 표현식 토큰을 사용하고, 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
+언어 서비스만 템플릿 문법을 `@polyspec/template`에서 가져온다. 언어 서비스와 포매터는 파서가 돌려주는 태그 범위와 표현식 토큰을 사용한다. 서버와 확장은 언어 서비스를 호출하며, 확장의 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
 
 ## 포맷 스타일
 
@@ -138,27 +138,31 @@ make vscode-install
 code --list-extensions --show-versions | grep polyspec
 ```
 
-`make vscode-package`는 `src/extension.ts`를 `@polyspec/template-language`, `@polyspec/template`과 함께 `dist/extension.cjs`로 번들하고 `packages/template-vscode/dist/polyspec-template.vsix`를 만든다. 설치한 확장은 실행할 때 저장소가 필요 없다. `make vscode-install`은 `--force`를 붙여 `code --install-extension`을 실행한다.
+`make vscode-package`는 `src/extension.ts`를 `vscode-languageclient`와 함께 `dist/extension.cjs`로 번들하고, 서버 진입점 `@polyspec/template-lsp/server`를 `@polyspec/template-language`, `@polyspec/template`과 함께 `dist/server.cjs`로 번들하며, `packages/template-vscode/dist/polyspec-template.vsix`를 만든다. 설치한 확장은 실행할 때 저장소가 필요 없다. `make vscode-install`은 `--force`를 붙여 `code --install-extension`을 실행한다.
 
-확장은 문서 텍스트만 읽고 작업 공간의 코드를 실행하지 않으므로 `capabilities.untrustedWorkspaces.supported`와 `capabilities.virtualWorkspaces`를 선언한다. 이 선언이 없으면 VS Code는 Restricted Mode에서 문법을 포함한 확장 전체를 비활성화하고, 신뢰하지 않은 폴더의 `.tpl` 파일은 일반 텍스트로 열린다. VS Code는 Electron 빌드에 포함된 Node.js로 확장을 실행하므로 확장은 `engines.vscode` `^1.138.0`만 선언하고 `engines.node`는 선언하지 않는다. VS Code 1.138.0은 Node.js 24.18.1을 가진 Electron 42.10.0을 사용하므로 번들 대상은 `node24`다.
+확장은 언어 서버 `template-lsp`의 클라이언트다(EDT-15). 언어 클라이언트는 VS Code의 Node.js 런타임으로 `dist/server.cjs`를 실행하고 표준 입력과 출력으로 통신한다. 클라이언트는 URI scheme과 관계없이 언어 `polyspec-template`의 열린 문서마다 텍스트를 서버에 보낸다.
+
+확장과 서버는 열린 문서의 텍스트만 읽고 작업 공간의 코드를 실행하지 않으므로 확장은 `capabilities.untrustedWorkspaces.supported`를 선언한다. 이 선언이 없으면 VS Code는 Restricted Mode에서 문법을 포함한 확장 전체를 비활성화하고, 신뢰하지 않은 폴더의 `.tpl` 파일은 일반 텍스트로 열린다. 확장은 `capabilities.virtualWorkspaces`도 선언한다. 서버는 문서 텍스트를 프로토콜로만 받고 파일 시스템을 읽지 않으므로, 가상 작업 공간의 문서도 파일과 같이 분석하며 그 URI가 진단의 템플릿 이름이 된다. 확장은 `main` 진입점만 있고 `browser` 진입점이 없으므로, Node.js 확장 호스트가 없는 VS Code for the Web은 확장을 실행하지 않는다. VS Code는 Electron 빌드에 포함된 Node.js로 확장과 서버를 실행하므로 확장은 `engines.vscode` `^1.138.0`만 선언하고 `engines.node`는 선언하지 않는다. VS Code 1.138.0은 Node.js 24.18.1을 가진 Electron 42.10.0을 사용하므로 두 번들의 대상은 `node24`다.
 
 확장은 `.tpl` 파일에 언어 `polyspec-template`을 등록하고 다음을 제공한다.
 
 - 주석 토글을 위한 블록 주석 `{* *}`
 - `{ }`, `[ ]`, `( )`, 따옴표, `<!-- -->`의 괄호 쌍과 자동 닫기
-- `format()`을 사용하는 문서 포맷과 범위 포맷. 들여쓰기 단위는 편집기의 것이다. 공백 `tabSize`개이며, `insertSpaces`가 꺼져 있으면 탭이다. 설정 `polyspec-template.format.templateBlocks`(`indent` 또는 `flat`)가 `templateBlocks` 옵션이다. 범위 포맷은 선택 범위 안에 완전히 들어가는 태그를 포맷하고 범위 안에서 시작하는 줄을 들여쓴다. `format()`이 오류를 돌려주면 제공자는 편집을 돌려주지 않고 출력 채널 `Polyspec Template`에 위치를 기록한다.
+- 서버의 문서 포맷과 범위 포맷. 들여쓰기 단위는 편집기의 것이다. 공백 `tabSize`개이며, `insertSpaces`가 꺼져 있으면 탭이다. 설정 `polyspec-template.format.templateBlocks`(`indent` 또는 `flat`)가 `templateBlocks` 옵션이며, 서버는 이를 `workspace/configuration`으로 읽는다. 범위 포맷은 선택 범위 안에 완전히 들어가는 태그를 포맷하고 범위 안에서 시작하는 줄을 들여쓴다. `format()`이 오류를 돌려주면 서버는 편집을 돌려주지 않고 출력 채널 `Polyspec Template`에 위치를 경고로 기록한다.
+- 타이핑 중 들여쓰기: Enter, `>`, `}` 뒤에 서버가 현재 줄의 들여쓰기를 `lineIndentation()`(EDT-13)으로 정한다. VS Code는 `editor.formatOnType`이 켜져 있을 때만 이를 요청하므로, 확장은 설정 기본값으로 `"[polyspec-template]": { "editor.formatOnType": true }`를 제공한다. 이 언어에 대한 사용자 설정이나 작업 공간 설정이 이를 덮어쓴다. Enter 뒤에 공백과 탭만 있는 줄은 들여쓰기를 받지 않는다. `lineIndentation()`이 포매터와 같이 빈 줄에 빈 들여쓰기를 돌려주기 때문이다.
 
 ### 진단과 짝 태그
 
-확장은 진단, 태그 범위, 구성, 접기 범위, 짝 태그를 언어 서비스의 `openDocument()`에서 얻는다([에디터 지원](/ko/spec/editor), EDT-4~EDT-11). 테스트는 모든 적합성 사례에서 구성을 AST의 `If`, `For`, `IfBlock` span과 분기 span과 비교한다.
+서버는 진단, 토큰, 태그 범위, 구성, 접기 범위, 짝 태그를 언어 서비스의 `openDocument()`에서 얻는다([에디터 지원](/ko/spec/editor), EDT-4~EDT-11). 언어 서비스의 테스트는 모든 적합성 사례에서 구성을 AST의 `If`, `For`, `IfBlock` span과 분기 span과 비교한다.
 
-- 진단: 확장은 템플릿 문서가 열릴 때와 마지막 변경 250 ms 뒤에 문서를 파싱하고, `E_PARSE_UNCLOSED_BLOCK`, `E_PARSE_UNEXPECTED_CLOSE`, `E_PARSE_ELSE_OUTSIDE_BLOCK` 같은 파싱 오류를 오류 코드와 함께 파서 위치에 게시한다. 문서가 파싱되면 진단을 지운다.
-- 태그 배경: 주석을 뺀 모든 태그에 어두운 테마에서는 `#16351c`, 밝은 테마에서는 `#e3f6dd`인 진한 초록 배경을 칠한다. 이 배경은 편집기 배경과 밝기가 다르고(Dark 2026에서 ΔL* +13.4, Light 2026에서 5.1), Dark 2026의 모든 문법 색을 4.5:1 이상으로 유지한다. 가장 낮은 것은 키워드 기호의 4.8:1이다. `#044700`처럼 채도가 더 높은 초록은 더 눈에 띄지만 기호를 4.0:1로 낮추고, 어두운 테마의 검정처럼 편집기와 밝기가 같은 색은 구별되지 않는다. 확장은 템플릿 편집기가 보일 때와 마지막 변경 250 ms 뒤에 배경을 칠한다. 문서가 파싱되지 않는 동안에는 파서가 오류 전까지 받아들인 태그에 배경을 칠한다(EDT-6).
+- 진단: 서버는 문서의 모든 버전에 대해 `E_PARSE_UNCLOSED_BLOCK`, `E_PARSE_UNEXPECTED_CLOSE`, `E_PARSE_ELSE_OUTSIDE_BLOCK` 같은 파싱 오류를 오류 코드와 함께 파서 위치에 게시한다. 문서가 파싱되거나 닫히면 진단을 지운다.
+- 시맨틱 토큰: 서버는 텍스트의 템플릿 부분을 EDT-8의 토큰 종류로 분류한다. 태그 밖의 텍스트는 문법의 HTML 색을 유지한다. 확장은 VS Code가 정의하지 않은 종류를 `semanticTokenTypes`로 제공한다. 상위 종류가 `keyword`인 `delimiter`와 상위 종류가 `string`인 `path`다. `semanticTokenScopes`는 `delimiter`를 `keyword.control.tag.begin.polyspec-template`에, `keyword`를 `keyword.control.polyspec-template`에, `path`를 `string.unquoted.path.polyspec-template`에 대응시키므로, 시맨틱 토큰 규칙이 없는 테마도 문법과 같이 구분자와 기호를 `keyword.control`로 칠한다.
+- 태그 배경: 주석을 뺀 모든 태그에 어두운 테마에서는 `#16351c`, 밝은 테마에서는 `#e3f6dd`인 진한 초록 배경을 칠한다. 이 배경은 편집기 배경과 밝기가 다르고(Dark 2026에서 ΔL* +13.4, Light 2026에서 5.1), Dark 2026의 모든 문법 색을 4.5:1 이상으로 유지한다. 가장 낮은 것은 키워드 기호의 4.8:1이다. `#044700`처럼 채도가 더 높은 초록은 더 눈에 띄지만 기호를 4.0:1로 낮추고, 어두운 테마의 검정처럼 편집기와 밝기가 같은 색은 구별되지 않는다. 확장은 템플릿 편집기가 보일 때와 마지막 변경 250 ms 뒤에 `polyspec-template/tagRanges`를 요청하고, 요청하는 동안 문서가 바뀌지 않았을 때만 결과를 칠한다. 문서가 파싱되지 않는 동안에는 파서가 오류 전까지 받아들인 태그에 배경을 칠한다(EDT-6). 확장은 API로 `tagRanges(document)`를 돌려주며(`vscode.extensions.getExtension('polyspec.polyspec-template').exports`), 이 함수는 확장이 칠하는 범위를 준다. VS Code에는 편집기의 장식을 읽는 API가 없으므로 통합 테스트는 이 범위를 여기서 읽는다.
 - 강조: 커서가 여는 태그, 분기 태그, 닫는 태그에 있으면 같은 구성의 모든 태그를 강조한다.
 - 접기: 닫는 태그가 뒤의 줄에 있는 구성은 여는 태그의 줄부터 닫는 태그 앞 줄까지 접힌다.
-- 명령 Go to Matching Template Tag(`polyspec-template.goToMatchingTag`)는 커서를 커서 아래 구성의 다음 태그로 옮기고, 마지막 태그에서는 여는 태그로 옮긴다. 태그 밖에서는 커서를 감싸는 가장 안쪽 구성의 다음 태그로 옮긴다. 단축키는 macOS에서 `Cmd+Alt+\`, Windows와 Linux에서 `Ctrl+Alt+\`이며 템플릿 편집기에서만 동작한다. 통합 테스트는 macOS에서 VS Code 1.138.0의 기본 단축키가 `Cmd+Alt+\`를 다른 명령에 연결하지 않는지 검사한다.
+- 명령 Go to Matching Template Tag(`polyspec-template.goToMatchingTag`)는 `polyspec-template/matchingTag`를 요청해 커서를 커서 아래 구성의 다음 태그로 옮기고, 마지막 태그에서는 여는 태그로 옮긴다. 태그 밖에서는 커서를 감싸는 가장 안쪽 구성의 다음 태그로 옮긴다. 단축키는 macOS에서 `Cmd+Alt+\`, Windows와 Linux에서 `Ctrl+Alt+\`이며 템플릿 편집기에서만 동작한다. 통합 테스트는 macOS에서 VS Code 1.138.0의 기본 단축키가 `Cmd+Alt+\`를 다른 명령에 연결하지 않는지 검사한다.
 
-문서가 파싱되지 않는 동안에는 강조, 접기, 명령이 사용할 구성이 없고, 태그 배경을 다시 계산하지 않는다. 확장은 템플릿 분기를 가로지르는 HTML 요소의 균형을 검사하지 않는다. HTML 구조는 VS Code의 HTML 기능에 맡긴다.
+문서가 파싱되지 않는 동안 강조, 접기, 명령은 닫힌 구성만 사용한다(EDT-6). 확장은 템플릿 분기를 가로지르는 HTML 요소의 균형을 검사하지 않는다. HTML 구조는 VS Code의 HTML 기능에 맡긴다.
 
 ### 문법
 
@@ -186,7 +190,7 @@ code --list-extensions --show-versions | grep polyspec
 
 ### 문법의 한계
 
-- 문법은 기본 구분자 `{`와 `}`를 사용한다. `{% delimiter ..}` 지시문 뒤의 태그와 엔진 옵션 `delimiters`로 렌더하는 템플릿은 태그로 강조하지 않는다. TextMate 문법은 문서에서 읽은 값으로 패턴을 바꿀 수 없고, 엔진 옵션은 소스에 없다.
+- 문법은 기본 구분자 `{`와 `}`를 사용한다. 문법은 `{% delimiter ..}` 지시문 뒤의 태그와 엔진 옵션 `delimiters`로 렌더하는 템플릿을 태그로 강조하지 않는다. TextMate 문법은 문서에서 읽은 값으로 패턴을 바꿀 수 없고, 엔진 옵션은 소스에 없다. 서버의 시맨틱 토큰은 지시문을 따르므로, 시맨틱 강조를 쓰는 테마에서는 지시문 뒤의 태그가 시맨틱 토큰 색을 받는다. 확장에는 엔진 옵션에 대한 설정이 없다.
 - 문법은 LEX-8에 따라 태그 본문이 오류여도 태그 시작을 태그로 강조한다. 오류를 보고하거나 블록 구조를 검사하지 않는다.
 - `{` 앞에서 시작해 `{`를 지나는 HTML 패턴이 우선한다. 주입은 앞선 매치가 덮지 않은 위치에만 적용되기 때문이다. 따옴표 없는 속성 값 안의 태그(`value=a{= x}`)와 속성 이름 안의 태그(`data-{= n}="1"`)가 영향을 받는다. 따옴표가 있는 속성 값 안의 태그와 속성 사이의 태그는 강조한다.
 - raw 출력 scope, `@`의 루프 형식, 래퍼 태그의 시작은 태그 시작과 판단에 쓰는 문자가 한 줄에 있을 때 인식한다.
@@ -204,6 +208,6 @@ make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 
 `make test-lsp`는 빌드한 명령 `template-lsp`를 자식 프로세스로 실행하고, `vscode-jsonrpc`로 표준 입력과 출력을 통해 프로토콜을 주고받으며, 모든 에디터 픽스처(EDT-17)에 대해 게시된 진단, 디코딩한 시맨틱 토큰, 태그 범위, 접기 범위, 픽스처 위치에서의 강조와 짝 태그, 두 `templateBlocks` 방식에서 모든 줄의 타이핑 들여쓰기, 포맷한 텍스트를 기대 결과와 비교한다. 또한 바이트 순서 표시, CRLF 줄 끝, 기본 다국어 평면 밖의 문자가 있는 텍스트를 언어 서비스와 비교하고, 선언한 기능, `multilineTokenSupport`가 없는 클라이언트에 대한 여러 줄 토큰의 분할, 설정 요청, 포맷 오류, 범위 포맷, 편집이 없는 타이핑 포맷을 검사한다.
 
-`make test-vscode`는 `tm-grammars`의 HTML, CSS, JavaScript 문법과 함께 `vscode-tmgrammar-test`로 문법 테스트를 실행하고, 대체 `vscode` 모듈로 매니페스트와 번들한 제공자를 테스트한다. `make test-vscode-integration`은 `.vsix`를 빌드하고, `@vscode/test-electron`으로 `engines.vscode`의 최소 버전인 VS Code 1.138.0을 저장소 루트의 `.vscode-test`에 내려받고, VS Code 명령줄로 `.vsix`를 새 확장 디렉터리에 설치한다. 사용자 설치와 같이 workspace trust를 켜고 테스트 폴더를 신뢰하지 않은 상태로 VS Code를 실행해 `.tpl` 문서가 언어 `polyspec-template`으로 열리는지, 설치한 확장이 활성화되는지, `_workbench.captureSyntaxTokens`가 HTML 속성 값 안의 태그에 템플릿 scope를 보고하는지, 닫히지 않은 `{?`가 그 위치에 진단을 만드는지, 문서 강조, 접기 범위, Go to Matching Template Tag가 한 구성을 따르는지, 단축키가 비어 있는지, `vscode.executeFormatDocumentProvider`가 예제에 기대한 편집을 돌려주고 포맷된 문서와 파싱되지 않는 문서에는 편집을 돌려주지 않는지 검사한다. 두 번째 실행은 설치한 매니페스트에서 `capabilities`를 지우고 VS Code가 그 작업 공간에서 확장을 비활성화하는지 요구한다. 이것으로 첫 실행이 capability 누락을 찾아낸다는 것을 보인다.
+`make test-vscode`는 `tm-grammars`의 HTML, CSS, JavaScript 문법과 함께 `vscode-tmgrammar-test`로 문법 테스트를 실행하고, 매니페스트를 테스트하고, `dist/extension.cjs`가 `vscode`와 Node.js 내장 모듈만, `dist/server.cjs`가 Node.js 내장 모듈만 불러오는지, `.vsix`가 둘 다 담는지, 매니페스트가 서버 legend의 토큰 종류 가운데 VS Code가 정의하지 않은 것을 모두 제공하는지, 번들한 서버가 표준 입력과 출력으로 진단을 게시하고 `polyspec-template/tagRanges`, `polyspec-template/matchingTag`, 타이핑 포맷에 응답하는지 검사한다. 언어 클라이언트는 VS Code 안에서만 실행되므로 통합 테스트가 이를 검사한다. `make test-vscode-integration`은 `.vsix`를 빌드하고, `@vscode/test-electron`으로 `engines.vscode`의 최소 버전인 VS Code 1.138.0을 저장소 루트의 `.vscode-test`에 내려받고, VS Code 명령줄로 `.vsix`를 새 확장 디렉터리에 설치한다. 사용자 설치와 같이 workspace trust를 켜고 테스트 폴더를 신뢰하지 않은 상태로 VS Code를 실행해 `.tpl` 문서가 언어 `polyspec-template`으로 열리는지, 설치한 확장이 활성화되어 번들한 서버를 시작하는지, `_workbench.captureSyntaxTokens`가 HTML 속성 값 안의 태그에 템플릿 scope를 보고하는지, 확장이 칠하는 태그 범위가 파싱되지 않는 문서에서도 주석을 뺀 모든 태그를 덮는지, `vscode.provideDocumentSemanticTokens`가 서버의 토큰 종류를 돌려주는지, 이 언어에서 `editor.formatOnType`이 켜져 있고 `}`와 Enter를 입력하면 현재 줄을 들여쓰는지, 닫히지 않은 `{?`가 그 위치에 진단을 만드는지, 문서 강조, 접기 범위, Go to Matching Template Tag가 한 구성을 따르는지, 단축키가 비어 있는지, `vscode.executeFormatDocumentProvider`가 예제에 기대한 편집을 돌려주고 포맷된 문서와 파싱되지 않는 문서에는 편집을 돌려주지 않는지 검사한다. 두 번째 실행은 설치한 매니페스트에서 `capabilities`를 지우고 VS Code가 그 작업 공간에서 확장을 비활성화하는지 요구한다. 이것으로 첫 실행이 capability 누락을 찾아낸다는 것을 보인다.
 
 `make check`가 `test-language`, `test-lsp`, `format-check`, `test-vscode`, `test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
