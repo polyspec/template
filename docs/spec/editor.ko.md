@@ -72,6 +72,20 @@
 
 설정 `polyspec-template.format.templateBlocks`(`indent` 또는 `flat`)는 문서마다 `workspace/configuration`으로 읽는다.
 
+위치와 범위는 프로토콜의 `Position`과 `Range` 값이다. 사용자 정의 요청의 매개변수와 결과는 다음과 같다.
+
+| 요청 | 매개변수 | 결과 |
+| --- | --- | --- |
+| `polyspec-template/tagRanges` | `{ textDocument: TextDocumentIdentifier }` | 텍스트 순서의 `Range[]`, 문서가 열려 있지 않으면 `null` |
+| `polyspec-template/matchingTag` | `{ textDocument: TextDocumentIdentifier, position: Position }` | 짝 태그가 시작하는 `Position`, 짝 태그가 없거나 문서가 열려 있지 않으면 `null` |
+
+- 서버는 문서의 각 버전을 한 번 분석한다(EDT-4). 모든 버전의 진단을 버전 번호와 함께 게시하고, 문서가 닫히면 빈 목록을 게시한다. 문서의 템플릿 이름은 `file:` URI이면 파일 경로이고, 아니면 URI다.
+- 시맨틱 토큰의 legend는 EDT-8의 토큰 종류를 그 순서대로 쓰며 modifier는 없다. 클라이언트가 `multilineTokenSupport`를 선언하지 않으면 여러 줄에 걸친 토큰은 줄마다 하나의 토큰으로 보낸다.
+- 접기 범위는 첫 줄이 시작하는 프로토콜 줄에서 시작하고, 닫는 태그가 있는 줄 앞의 프로토콜 줄에서 끝난다.
+- 포맷은 전체 텍스트를 바꾸는 편집 하나를 돌려주고, 텍스트가 이미 포맷되어 있으면 편집을 돌려주지 않는다. 들여쓰기 단위는 공백 `tabSize`개이고, `insertSpaces`가 false이면 탭 하나다. `format`이 오류를 돌려주면 서버는 편집을 돌려주지 않고 `path:line:col: LABEL: message; no edits returned`를 `window/logMessage` 경고로 보낸다. `LABEL`은 파서 오류 코드, `HTML structure` 또는 `formatted AST differs`다.
+- `textDocument/onTypeFormatting`의 현재 줄은 요청 위치의 줄이다. 편집은 그 줄 앞의 공백과 탭을 바꾸며, 이미 `lineIndentation`과 같으면 서버는 편집을 돌려주지 않는다.
+- 포맷과 타이핑 포맷은 `{ scopeUri: <문서 URI>, section: 'polyspec-template' }`로 `workspace/configuration`을 요청하고 결과의 `format.templateBlocks`를 쓴다. `flat`이 아닌 값과, `workspace/configuration` 기능이 없는 클라이언트는 `indent`가 된다.
+
 **EDT-15** VS Code 확장 `polyspec-template`는 함께 묶은 `@polyspec/template-lsp`의 클라이언트다. 서버가 응답하기 전에 HTML과 템플릿 태그를 강조하는 TextMate 문법을 유지하며, 서버의 시맨틱 토큰이 그 뒤 템플릿 토큰의 색을 바꾼다. 태그 배경은 `polyspec-template/tagRanges`로 칠하고, 커서 이동은 `polyspec-template/matchingTag`로 한다.
 
 **EDT-16** `@polyspec/template-codemirror`는 `@codemirror/lang-html` 위에 만든 CodeMirror 6 확장 `template(options)`를 내보낸다. 토큰에 `cm-template-<type>` 클래스를 붙이고, 태그 배경을 칠하고, `@codemirror/lint`로 진단을 보고하며, 접기, 짝 태그 강조, `lineIndentation`을 쓰는 들여쓰기 서비스, 그리고 에디터의 들여쓰기 단위를 쓰는 명령 `formatTemplate`(`Shift-Alt-f`에 연결)을 제공한다. `options.templateBlocks`와 `options.delimiters`는 언어 서비스에 전달한다.

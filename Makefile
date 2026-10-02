@@ -9,7 +9,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	build-language test-language format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
+	build-language test-language build-lsp test-lsp format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -20,6 +20,7 @@ PHP_DIR  := packages/template-php
 EXT_DIR  := packages/template-php-ext
 SHOWCASE_RUST := tools/showcase/adapters/rust
 LANGUAGE_DIR := packages/template-language
+LSP_DIR      := packages/template-lsp
 VSCODE_DIR := packages/template-vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 
@@ -57,6 +58,8 @@ help: ## List targets
 	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
 	@echo "  build-language           Build the formatter library and the template-fmt CLI"
 	@echo "  test-language            Formatter, safety invariant and CLI tests, type check"
+	@echo "  build-lsp              Build the language server template-lsp"
+	@echo "  test-lsp               Language server protocol tests against the editor fixtures, type check"
 	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
 	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
 	@echo "  install-cli            Link template-fmt into the global npm bin directory"
@@ -67,7 +70,7 @@ help: ## List targets
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
+check: docs-check rules-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -117,6 +120,13 @@ build-language: build-ts ## Build the formatter library and the template-fmt CLI
 test-language: build-language ## Formatter, safety invariant and CLI tests, type check
 	npm test -w @polyspec/template-language -- --run
 	npm run typecheck -w @polyspec/template-language
+
+build-lsp: build-language ## Build the language server template-lsp
+	npm run build -w @polyspec/template-lsp
+
+test-lsp: build-lsp ## Language server protocol tests against the editor fixtures, type check
+	npm test -w @polyspec/template-lsp -- --run
+	npm run typecheck -w @polyspec/template-lsp
 
 format-check: build-language ## Check that the formatter fixtures are formatted
 	node $(LANGUAGE_DIR)/bin/template-fmt.mjs --check $(LANGUAGE_DIR)/tests/fixtures/expected
@@ -343,4 +353,4 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
