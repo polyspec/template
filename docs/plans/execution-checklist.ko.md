@@ -268,6 +268,14 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | --- | --- | --- | --- |
 | T9.1 | TypeScript, Go, Rust, PHP parser와 PHP 확장에서 모든 주석을 값과 span과 함께 `Template.comments`에 나열(AST-9). schema 정의와 공유 case `text/comment-list`, `delimiters/comment-custom` 추가 | `make conformance`; `make check` | [x] |
 
+## Wave 10 — 설치 검사 작업 디렉터리 제거
+
+의존: 없음. Go module cache 파일이 읽기 전용이고 제거 실패가 무시되었으므로, 끝난 설치 검사는 매번 243 MB의 임시 디렉터리를 남겼다.
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T10.1 | `-modcacherw`로 만든 Go module cache를 포함해 설치 검사 작업 디렉터리를 제거하고, 제거할 수 없는 작업 디렉터리의 경로와 함께 검사를 실패시킴. `scripts/check-install-workspace.mjs`가 `make install-check`에서 실행됨 | `make install-check`; `make check` | [x] |
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -282,10 +290,11 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 | W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler 계약과 구현 뒤에 증명과 발행 수행 |
 | W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime 지원 뒤에 일치 검증과 발행 수행 |
 | W9 | 없음 | T9.1 |
+| W10 | 없음 | T10.1 |
 
 ## 완료 정의
 
-- W0–W9의 모든 작업이 `done`.
+- W0–W10의 모든 작업이 `done`.
 - Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
 - `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
 - `make test-browser` 통과.
