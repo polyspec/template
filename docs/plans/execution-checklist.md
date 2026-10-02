@@ -282,12 +282,14 @@ Dependencies: none. Every editor rule moves into one language service, and each 
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T11.1 | Return the tags and expression tokens accepted before the first error with `analyzePrefix()` of `@polyspec/template` (EDT-6) | `make test-ts` | [ ] |
-| T11.2 | Rename `@polyspec/template-format` to `@polyspec/template-language`; add `openDocument()` with diagnostics, tokens, tag ranges, folding ranges, highlights, matching tags, `format` and `lineIndentation` (EDT-4 to EDT-13); move the folding and matching tag rules out of the VS Code extension; add the editor fixtures (EDT-17) | `make test-language` | [ ] |
-| T11.3 | Add the LSP server `@polyspec/template-lsp` with the command `template-lsp` (EDT-14) and test it through its protocol against the editor fixtures | `make test-lsp` | [ ] |
-| T11.4 | Make the VS Code extension a client of the bundled LSP server; keep the TextMate grammar, tag backgrounds and the matching tag command (EDT-15) | `make test-vscode`; `make test-vscode-integration` | [ ] |
-| T11.5 | Add the CodeMirror 6 adapter `@polyspec/template-codemirror` (EDT-16), test it with `EditorState` against the editor fixtures and in a browser | `make test-codemirror` | [ ] |
-| T11.6 | Reject an adapter that declares or imports `@polyspec/template` (EDT-2) or a language service that imports an editor, Node.js or DOM module (EDT-3); record rule evidence, feature status, documents and dependency policy | `make check` | [ ] |
+| T11.1 | Return the tags and expression tokens accepted before the first error with `analyzePrefix()` of `@polyspec/template` (EDT-6) | `make test-ts` | [x] |
+| T11.2 | Rename `@polyspec/template-format` to `@polyspec/template-language`; add `openDocument()` with diagnostics, tokens, tag ranges, folding ranges, highlights, matching tags, `format` and `lineIndentation` (EDT-4 to EDT-13); move the folding and matching tag rules out of the VS Code extension; add the editor fixtures (EDT-17) | `make test-language` | [x] |
+| T11.3 | Add the LSP server `@polyspec/template-lsp` with the command `template-lsp` (EDT-14) and test it through its protocol against the editor fixtures | `make test-lsp` | [x] |
+| T11.4 | Make the VS Code extension a client of the bundled LSP server; keep the TextMate grammar, tag backgrounds and the matching tag command (EDT-15) | `make test-vscode`; `make test-vscode-integration` | [x] |
+| T11.5 | Add the CodeMirror 6 adapter `@polyspec/template-codemirror` (EDT-16), test it with `EditorState` against the editor fixtures and in a browser | `make test-codemirror` | [x] |
+| T11.6 | Reject an adapter that declares or imports `@polyspec/template` (EDT-2) or a language service that imports an editor, Node.js or DOM module (EDT-3); record rule evidence, feature status, documents and dependency policy | `make check` | [x] |
+
+T11.1 to T11.6 are complete. On 2026-10-02, `make check` passed on commit "Refresh the generated artifact digests after the lockfile change" of the branch `feat/language-T11.2`, including `editor-boundary-check`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode` and `test-vscode-integration`; `rules-check` reported no uncovered rule.
 
 ## Parallelism summary
 
