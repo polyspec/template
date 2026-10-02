@@ -53,7 +53,7 @@
 
 **EDT-12** `format(options)`는 `indent`, `templateBlocks`, `range` 옵션을 받는 포매터의 `format()`이다.
 
-**EDT-13** `lineIndentation(line, options)`는 타이핑하는 줄이 갖는 들여쓰기를 돌려준다. 포매터의 들여쓰기 규칙에 `options.indent`와 `options.templateBlocks`를 적용해, 들여쓰기 단위를 그 줄의 깊이만큼 반복한 값이다. 깊이는 그 줄 앞의 텍스트로 정한다. 포매터와 달리 짝이 맞는 구조를 요구하지 않는다. 끝 태그는 같은 이름의 열린 요소까지 닫고, 그런 요소가 열려 있지 않으면 무시한다.
+**EDT-13** `lineIndentation(line, options)`는 타이핑하는 줄이 갖는 들여쓰기를 돌려준다. 포매터의 들여쓰기 규칙에 `options.indent`와 `options.templateBlocks`를 적용해, 들여쓰기 단위를 그 줄의 깊이만큼 반복한 값이다. 깊이는 그 줄 앞의 텍스트로 정한다. 포매터와 달리 짝이 맞는 구조를 요구하지 않는다. 끝 태그는 같은 이름의 열린 요소까지 닫고, 그런 요소가 열려 있지 않으면 무시한다. Enter가 만드는 빈 줄도 그 깊이의 들여쓰기를 갖는다. 빈 줄을 비우는 것은 포매터뿐이다.
 
 ## 어댑터
 
