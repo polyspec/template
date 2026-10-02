@@ -6,9 +6,17 @@ type Span [2]int
 
 // Template is the root node.
 type Template struct {
-	Type string `json:"type"`
-	Name string `json:"name"`
-	Body []Node `json:"body"`
+	Type     string     `json:"type"`
+	Name     string     `json:"name"`
+	Body     []Node     `json:"body"`
+	Comments []*Comment `json:"comments"`
+}
+
+// Comment is a comment of the template, listed in Template.Comments in source order (AST-9).
+type Comment struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+	Span  Span   `json:"span"`
 }
 
 // Node is a statement node.

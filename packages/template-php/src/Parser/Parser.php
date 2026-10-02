@@ -30,6 +30,8 @@ final class Parser
     private array $frames = [];
     /** @var list<array{start: int, end: int, echo: bool}> */
     private array $tags = [];
+    /** @var list<array{type: 'Comment', value: string, span: array{0: int, 1: int}}> */
+    private array $comments = [];
     private bool $sawTag = false;
     private bool $textBeforeFirstTagIsWhitespace = true;
 
@@ -84,7 +86,7 @@ final class Parser
         }
         $removed = Standalone::ranges($this->text, $this->tags);
 
-        return ['type' => 'Template', 'name' => $this->source->name, 'body' => $this->finalize($this->root, $removed)];
+        return ['type' => 'Template', 'name' => $this->source->name, 'body' => $this->finalize($this->root, $removed), 'comments' => $this->comments];
     }
 
     private function scan(): void
@@ -341,8 +343,12 @@ final class Parser
         if ($at === false) {
             throw $this->fail('E_PARSE_UNTERMINATED_COMMENT', $open, $open + 1, 'comment is not terminated');
         }
+        $end = $this->finishTag($start, $wrapper, $at + strlen($terminator));
+        // The value starts after the sigil `*` (AST-9).
+        $valueStart = Scanner::skipHorizontalSpace($this->text, $open + 1) + 1;
+        $this->comments[] = Ast::comment(substr($this->text, $valueStart, $at - $valueStart), $start, $end);
 
-        return $this->finishTag($start, $wrapper, $at + strlen($terminator));
+        return $end;
     }
 
     /**

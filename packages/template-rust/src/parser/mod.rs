@@ -5,7 +5,7 @@ pub mod block_tag;
 pub mod scanner;
 pub mod standalone;
 
-use crate::ast::{BinaryOp, Expr, IfBranch, LiteralValue, Node, Template};
+use crate::ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, Node, Template};
 use crate::error::{ErrorCode, TemplateError};
 use crate::expr::lexer::LexerOptions;
 use crate::expr::parser::ExpressionParser;
@@ -60,6 +60,7 @@ struct TemplateParser<'a> {
     root: Vec<Item>,
     frames: Vec<Frame>,
     tags: Vec<TagRange>,
+    comments: Vec<Comment>,
     saw_tag: bool,
     text_before_first_tag_is_whitespace: bool,
 }
@@ -72,6 +73,7 @@ impl<'a> TemplateParser<'a> {
             root: Vec::new(),
             frames: Vec::new(),
             tags: Vec::new(),
+            comments: Vec::new(),
             saw_tag: false,
             text_before_first_tag_is_whitespace: true,
         }
@@ -114,6 +116,7 @@ impl<'a> TemplateParser<'a> {
         Ok(Template {
             name: self.source.name.clone(),
             body: finalize(root, &removed),
+            comments: std::mem::take(&mut self.comments),
         })
     }
 
@@ -405,7 +408,7 @@ impl<'a> TemplateParser<'a> {
         Ok(at + wrapper.closer.len())
     }
 
-    fn parse_comment(&self, context: &TagContext, body_start: usize) -> Result<usize, TemplateError> {
+    fn parse_comment(&mut self, context: &TagContext, body_start: usize) -> Result<usize, TemplateError> {
         let mut terminator = vec![b'*'];
         terminator.extend(self.close_sequence(context));
         let bytes = self.bytes();
@@ -420,7 +423,15 @@ impl<'a> TemplateParser<'a> {
                 "comment is not terminated",
             ));
         };
-        self.finish_tag(context, body_start + offset + terminator.len())
+        let end = self.finish_tag(context, body_start + offset + terminator.len())?;
+        // The value starts after the sigil `*` (AST-9).
+        let value_start = skip_horizontal_space(bytes, context.open + 1) + 1;
+        let value = self.source.text[value_start..body_start + offset].to_string();
+        self.comments.push(Comment {
+            value,
+            span: [context.start, end],
+        });
+        Ok(end)
     }
 
     fn parse_loop(&mut self, context: &TagContext, body_start: usize) -> Result<usize, TemplateError> {

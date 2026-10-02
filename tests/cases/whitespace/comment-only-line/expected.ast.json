@@ -10,5 +10,15 @@
         20
       ]
     }
+  ],
+  "comments": [
+    {
+      "type": "Comment",
+      "value": " c ",
+      "span": [
+        6,
+        13
+      ]
+    }
   ]
 }

@@ -10,5 +10,23 @@
         46
       ]
     }
+  ],
+  "comments": [
+    {
+      "type": "Comment",
+      "value": " note ",
+      "span": [
+        4,
+        14
+      ]
+    },
+    {
+      "type": "Comment",
+      "value": " standalone ",
+      "span": [
+        20,
+        36
+      ]
+    }
   ]
 }

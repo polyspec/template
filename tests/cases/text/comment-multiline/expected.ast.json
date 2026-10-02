@@ -10,5 +10,15 @@
         24
       ]
     }
+  ],
+  "comments": [
+    {
+      "type": "Comment",
+      "value": "\n  note\n",
+      "span": [
+        5,
+        17
+      ]
+    }
   ]
 }

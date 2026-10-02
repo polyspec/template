@@ -260,6 +260,14 @@ Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete
 | T8.7 | Add a showcase page with native instance assign, field access, member call and class call output | `make showcase-check`; static HTML checks | [x] |
 | T8.8 | Synchronize specifications, feature status, changelog, Pages artifacts and completion evidence | `make check`; `make docs-verify-idempotent`; `make docs-static-check` | [x] |
 
+## Wave 9 — Template comments in the AST
+
+Dependencies: none. A tool that reads every comment of a template reads them from the parser, because a comment produces no statement node.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T9.1 | List every comment in `Template.comments` with its value and span (AST-9) in the TypeScript, Go, Rust and PHP parsers and the PHP extension; add the schema definition and the shared cases `text/comment-list` and `delimiters/comment-custom` | `make conformance`; `make check` | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -273,14 +281,15 @@ Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete
 | W6 | T6.1–T6.5, T6.7 | T6.6 after all |
 | W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler contract and implementation precede proof and publication |
 | W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime support precedes parity and publication |
+| W9 | none | T9.1 |
 
 ## Definition of done
 
-- Every task in W0–W8 is `done`.
+- Every task in W0–W9 is `done`.
 - `make check` passes on a clean checkout with Node 26.8.1, Go 1.27.1, Rust 1.98.1 and PHP 8.5.
 - `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
 - `make test-browser` passes.
-- `make conformance-all-modes` passes every TypeScript, Go, Rust and PHP mode-language-case cell (two modes × four languages × every canonical case: 1,952 cells with the 244 cases of 2026-10-02) without a fallback from generated execution to AST execution.
+- `make conformance-all-modes` passes every TypeScript, Go, Rust and PHP mode-language-case cell (two modes × four languages × every canonical case: 1,968 cells with the 246 cases of T9.1) without a fallback from generated execution to AST execution.
 - `make release-test-matrix` proves each release layer independently: units, generated-source compilation, conformance, positioned errors and failure recovery, mutation rejection, isolated install projects, browser DOM output and performance parity.
 - `make install-check`, `make showcase-check`, `make docs-verify-idempotent` and `make release-check` pass in a clean checkout.
 - `docs/features.md` and `docs/features.ko.md` carry identical status fields with evidence links for every row.

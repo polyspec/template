@@ -6,13 +6,13 @@
   "delimiters": null,
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "b31099fbd68615e4ddf740aeb9e7d082a12d38e883345b282a129a953cb23aa4",
-  "compilerDigest": "d00cf09e31ac767a2e14004336a6a074bd0cb4488bf71c4850b2c934b52b895e",
+  "contractDigest": "3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853",
+  "compilerDigest": "b061335d1a441a3034acf446a1f31435e4ee6ede28f2fbd6136b701bed6b6354",
   "files": {
     "layout.tpl": {
       "path": "layout.tpl.ast.json",
       "sourceDigest": "43c54e2a5d18fbbc57a1ecdc73deb95dcaa74ffd9dc6732971be84d015d79263",
-      "artifactDigest": "b226d1fea0deb2958ba17ba3a20cb38d373e39c9d24ad611819cba12c3a1c689",
+      "artifactDigest": "5625936f1194645ddc65b40d21c3bd5b35d443b2bb515465ae07d240318032f0",
       "lines": [
         0,
         25,

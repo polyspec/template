@@ -87,7 +87,7 @@ The sequence `\\{/}` outputs `\{/}`: the first `\` is text, and `\{` is an escap
 
 ## 4. Tag end
 
-**LEX-10** A tag in the sigil form with the sigil `*` is a comment. A comment ends at the first `*}` after the opening `*`. The content between is not interpreted, produces no output and has no node in the AST. A comment does not nest. A comment that does not end before the end of the source is rejected with `E_PARSE_UNTERMINATED_COMMENT`.
+**LEX-10** A tag in the sigil form with the sigil `*` is a comment. A comment ends at the first `*}` after the opening `*`. The content between is not interpreted and produces no output. A comment has no statement node; the AST lists it in `Template.comments` (AST-9). A comment does not nest. A comment that does not end before the end of the source is rejected with `E_PARSE_UNTERMINATED_COMMENT`.
 
 ```
 {* removed *}

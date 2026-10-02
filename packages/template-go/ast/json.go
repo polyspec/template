@@ -8,9 +8,10 @@ import (
 // DecodeTemplate decodes the canonical AST artifact into the Go AST.
 func DecodeTemplate(data []byte) (*Template, error) {
 	var raw struct {
-		Type string            `json:"type"`
-		Name string            `json:"name"`
-		Body []json.RawMessage `json:"body"`
+		Type     string            `json:"type"`
+		Name     string            `json:"name"`
+		Body     []json.RawMessage `json:"body"`
+		Comments *[]*Comment       `json:"comments"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, err
@@ -18,7 +19,10 @@ func DecodeTemplate(data []byte) (*Template, error) {
 	if raw.Type != "Template" {
 		return nil, fmt.Errorf("ast root type must be Template")
 	}
-	template := &Template{Type: raw.Type, Name: raw.Name, Body: make([]Node, 0, len(raw.Body))}
+	if raw.Comments == nil {
+		return nil, fmt.Errorf("ast field comments is missing")
+	}
+	template := &Template{Type: raw.Type, Name: raw.Name, Body: make([]Node, 0, len(raw.Body)), Comments: *raw.Comments}
 	for _, item := range raw.Body {
 		node, err := decodeNode(item)
 		if err != nil {

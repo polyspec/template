@@ -1,6 +1,6 @@
 // Template parser: text scanning, tag bodies, block structure and standalone lines
 // as defined in docs/spec/lexical.md and docs/spec/grammar.md.
-import type { Block, Expr, If, IfBlock, For, Node, Set as SetNode, Template } from '../ast.js';
+import type { Block, Comment, Expr, If, IfBlock, For, Node, Set as SetNode, Template } from '../ast.js';
 import { errorAt, type ErrorCode, type TemplateError } from '../errors.js';
 import type { Token, TokenType } from '../expr/lexer.js';
 import { ExpressionParser } from '../expr/parser.js';
@@ -105,6 +105,7 @@ class TemplateParser {
   private readonly root: Item[] = [];
   private readonly frames: Frame[] = [];
   private readonly tags: SyntaxTag[] = [];
+  private readonly comments: Comment[] = [];
   private readonly expressionParsers: ExpressionParser[] = [];
   private sawTag = false;
   private textBeforeFirstTagIsWhitespace = true;
@@ -135,7 +136,7 @@ class TemplateParser {
     }
     const removed = standaloneRanges(this.text, this.tags);
     return {
-      ast: { type: 'Template', name: this.name, body: this.finalize(this.root, removed) },
+      ast: { type: 'Template', name: this.name, body: this.finalize(this.root, removed), comments: this.comments },
       tags: this.tags,
       tokens: this.expressionParsers.flatMap(parser => parser.lexer.consumed
         .filter(token => token.type !== 'CLOSE' && token.type !== 'EOF')
@@ -343,7 +344,11 @@ class TemplateParser {
     const terminator = '*' + this.closeSequence(context);
     const at = this.text.indexOf(terminator, bodyStart);
     if (at < 0) throw this.fail('E_PARSE_UNTERMINATED_COMMENT', context.open, context.open + 1, 'comment is not terminated');
-    return this.finishTag(context, at + terminator.length);
+    const end = this.finishTag(context, at + terminator.length);
+    // The value starts after the sigil `*` (AST-9).
+    const valueStart = skipHorizontalSpace(this.text, context.open + 1) + 1;
+    this.comments.push({ type: 'Comment', value: this.text.slice(valueStart, at), span: this.source.span(context.start, end) });
+    return end;
   }
 
   private parseLoop(context: TagContext, bodyStart: number): number {

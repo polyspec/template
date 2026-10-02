@@ -8,7 +8,11 @@ export interface Template {
   type: 'Template';
   name: string;
   body: Node[];
+  comments: Comment[];
 }
+
+// A comment of the template, listed in `Template.comments` in source order (AST-9).
+export interface Comment { type: 'Comment'; value: string; span: Span }
 
 // A statement node of a template body. The `type` field selects the member (AST-3).
 export type Node = Text | Echo | If | For | Set | Include | Block | IfBlock;

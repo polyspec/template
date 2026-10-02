@@ -17,7 +17,7 @@ pub mod render;
 pub mod source;
 pub mod value;
 
-pub use ast::{Expr, Node, Template};
+pub use ast::{Comment, Expr, Node, Template};
 pub use error::{ErrorCode, TemplateError, internal_boundary};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};

@@ -16,6 +16,12 @@ final class Ast
         return in_array($name, self::LOOP_META_FIELDS, true);
     }
 
+    /** @return array{type: 'Comment', value: string, span: array{0: int, 1: int}} */
+    public static function comment(string $value, int $start, int $end): array
+    {
+        return ['type' => 'Comment', 'value' => $value, 'span' => [$start, $end]];
+    }
+
     /** @return array<string, mixed> */
     public static function text(string $value, int $start, int $end): array
     {

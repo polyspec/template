@@ -127,6 +127,18 @@ pub struct Template {
     pub name: String,
     /// Statement nodes.
     pub body: Vec<Node>,
+    /// Comments of the template in source order (AST-9).
+    pub comments: Vec<Comment>,
+}
+
+/// A comment of the template, listed in `Template::comments` (AST-9).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "type", rename = "Comment")]
+pub struct Comment {
+    /// Source text between the sigil `*` and the `*` of the terminator.
+    pub value: String,
+    /// Span of the comment tag, including a wrapper.
+    pub span: Span,
 }
 
 /// Statement nodes.

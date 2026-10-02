@@ -1,0 +1,66 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p></p>\n",
+      "span": [
+        0,
+        15
+      ]
+    },
+    {
+      "type": "For",
+      "name": "i",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          22,
+          27
+        ]
+      },
+      "body": [],
+      "empty": null,
+      "span": [
+        15,
+        44
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "type": "Comment",
+      "value": " a ",
+      "span": [
+        3,
+        10
+      ]
+    },
+    {
+      "type": "Comment",
+      "value": " in loop ",
+      "span": [
+        28,
+        41
+      ]
+    },
+    {
+      "type": "Comment",
+      "value": "é",
+      "span": [
+        45,
+        62
+      ]
+    },
+    {
+      "type": "Comment",
+      "value": "",
+      "span": [
+        63,
+        68
+      ]
+    }
+  ]
+}
