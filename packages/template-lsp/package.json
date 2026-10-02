@@ -1,0 +1,43 @@
+{
+  "name": "@polyspec/template-lsp",
+  "version": "0.0.1",
+  "description": "Language Server Protocol server for template sources over standard input and output: diagnostics, semantic tokens, folding, matching tags, formatting and typing indentation from @polyspec/template-language",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    },
+    "./server": "./dist/main.mjs"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "bin": {
+    "template-lsp": "./bin/template-lsp.mjs"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@polyspec/template-language": "0.0.1",
+    "vscode-languageserver": "^10.1.2",
+    "vscode-languageserver-textdocument": "^1.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsup": "^8.5.1",
+    "vitest": "^5.0.3",
+    "vscode-jsonrpc": "^9.0.3"
+  }
+}

@@ -2,7 +2,7 @@
 // POLYSPEC_TEMPLATE_EXPECT is `enabled` for the released manifest and `disabled` for a manifest
 // without `capabilities`, which VS Code must disable in Restricted Mode.
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
+const { existsSync, readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const vscode = require('vscode');
 
@@ -29,6 +29,25 @@ function applyEdits(document, edits) {
     result = result.slice(0, document.offsetAt(edit.range.start)) + edit.newText + result.slice(document.offsetAt(edit.range.end));
   }
   return result;
+}
+
+// Polls a condition every 50 ms for up to 5 seconds and returns its last value.
+async function eventually(condition) {
+  let value = await condition();
+  for (let attempt = 0; attempt < 100 && !value; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+    value = await condition();
+  }
+  return value;
+}
+
+// Opens an untitled template document in an editor with the cursor at a position.
+async function untitled(content, line, character) {
+  const document = await vscode.workspace.openTextDocument({ language: 'polyspec-template', content });
+  const editor = await vscode.window.showTextDocument(document);
+  editor.options = { tabSize: 2, insertSpaces: true };
+  editor.selection = new vscode.Selection(new vscode.Position(line, character), new vscode.Position(line, character));
+  return editor;
 }
 
 function scopesOf(tokens, content, scope) {
@@ -64,6 +83,46 @@ const enabled = [
     assert.ok(scopesOf(tokens, 'post', 'variable.other.readwrite.polyspec-template').length > 0, line);
     assert.ok(scopesOf(tokens, '?', 'keyword.control.if.polyspec-template').length > 0, line);
     assert.ok(scopesOf(tokens, 'tr', 'entity.name.tag.html').length > 0, line);
+  }],
+  ['the extension starts the bundled language server', async () => {
+    const extension = vscode.extensions.getExtension(extensionId);
+    assert.ok(existsSync(join(extension.extensionPath, 'dist', 'server.cjs')));
+    assert.equal(typeof extension.exports.tagRanges, 'function');
+  }],
+  ['tag backgrounds cover every tag except comments and the tags accepted before a parse error', async () => {
+    const api = vscode.extensions.getExtension(extensionId).exports;
+    const blocks = await open('blocks.tpl');
+    const ranges = await eventually(() => api.tagRanges(blocks));
+    assert.deepEqual(ranges.map(range => blocks.getText(range)), ['{@ item = items}', '{? item.active}', '{:}', '{/}', '{= item.name}', '{:}', '{/}']);
+    const broken = await open('broken.tpl');
+    assert.deepEqual((await eventually(() => api.tagRanges(broken))).map(range => broken.getText(range)), ['{? a}']);
+  }],
+  ['semantic tokens of the server classify the template tags', async () => {
+    const document = await open('blocks.tpl');
+    const legend = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokensLegend', document.uri));
+    const tokens = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokens', document.uri));
+    const decoded = [];
+    let line = 0;
+    let character = 0;
+    for (let index = 0; index < tokens.data.length; index += 5) {
+      const [deltaLine, deltaStart, length, type] = tokens.data.slice(index, index + 4);
+      line += deltaLine;
+      character = deltaLine === 0 ? character + deltaStart : deltaStart;
+      decoded.push([document.getText(new vscode.Range(line, character, line, character + length)), legend.tokenTypes[type]]);
+    }
+    assert.deepEqual(decoded.slice(0, 6), [['{', 'delimiter'], ['@', 'keyword'], ['item', 'variable'], ['=', 'operator'], ['items', 'variable'], ['}', 'delimiter']]);
+  }],
+  ['format on type is enabled for the language and indents a line after } and after Enter', async () => {
+    assert.equal(vscode.workspace.getConfiguration('editor', { languageId: 'polyspec-template' }).get('formatOnType'), true);
+    const closing = await untitled('<ul>\n', 1, 0);
+    await vscode.commands.executeCommand('type', { text: '{@ x = xs}' });
+    assert.equal(await eventually(() => closing.document.getText() === '<ul>\n  {@ x = xs}') && closing.document.getText(), '<ul>\n  {@ x = xs}');
+    await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
+    const enter = await untitled('<ul>\n  {@ x = xs}<li>{= x}</li>\n  {/}\n</ul>', 1, 12);
+    await vscode.commands.executeCommand('type', { text: '\n' });
+    const expected = '<ul>\n  {@ x = xs}\n    <li>{= x}</li>\n  {/}\n</ul>';
+    assert.equal(await eventually(() => enter.document.getText() === expected) && enter.document.getText(), expected);
+    await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
   }],
   ['the format provider returns the expected edits', async () => {
     const document = await open('page.tpl');

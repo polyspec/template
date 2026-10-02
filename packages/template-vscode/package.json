@@ -1,7 +1,7 @@
 {
   "name": "polyspec-template",
   "displayName": "Polyspec Template",
-  "description": "Syntax highlighting with embedded HTML, CSS and JavaScript, parse diagnostics, matching tags, folding and a whitespace formatter for the polyspec template language",
+  "description": "Syntax highlighting with embedded HTML, CSS and JavaScript and a client of the bundled template language server: parse diagnostics, semantic tokens, matching tags, folding, formatting and typing indentation for the polyspec template language",
   "version": "0.0.1",
   "publisher": "polyspec",
   "license": "MIT",
@@ -51,6 +51,34 @@
         }
       }
     ],
+    "semanticTokenTypes": [
+      {
+        "id": "delimiter",
+        "superType": "keyword",
+        "description": "Open and close delimiter of a template tag"
+      },
+      {
+        "id": "path",
+        "superType": "string",
+        "description": "Unquoted include path or word of a block tag body"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "polyspec-template",
+        "scopes": {
+          "delimiter": [
+            "keyword.control.tag.begin.polyspec-template"
+          ],
+          "keyword": [
+            "keyword.control.polyspec-template"
+          ],
+          "path": [
+            "string.unquoted.path.polyspec-template"
+          ]
+        }
+      }
+    ],
     "configuration": {
       "title": "Polyspec Template",
       "properties": {
@@ -68,6 +96,11 @@
           "scope": "resource",
           "description": "How the formatter indents the lines inside template blocks ({? }, {@ }, {?# })."
         }
+      }
+    },
+    "configurationDefaults": {
+      "[polyspec-template]": {
+        "editor.formatOnType": true
       }
     },
     "commands": [
@@ -95,7 +128,7 @@
     }
   },
   "scripts": {
-    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node24 --external:vscode --outfile=dist/extension.cjs",
+    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node24 --external:vscode --outfile=dist/extension.cjs && esbuild @polyspec/template-lsp/server --bundle --platform=node --format=cjs --target=node24 --outfile=dist/server.cjs",
     "test:grammar": "vscode-tmgrammar-test --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json \"tests/grammar/*.tpl\"",
     "test:extension": "node --test tests/extension.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -103,7 +136,8 @@
     "test:integration": "node tests/integration/run.mjs"
   },
   "dependencies": {
-    "@polyspec/template-language": "0.0.1"
+    "@polyspec/template-lsp": "0.0.1",
+    "vscode-languageclient": "^10.1.2"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
@@ -112,6 +146,7 @@
     "@vscode/vsce": "^4.0.0",
     "esbuild": "^0.28.2",
     "tm-grammars": "^1.32.22",
+    "vscode-jsonrpc": "^9.0.3",
     "vscode-tmgrammar-test": "^0.1.3"
   }
 }
