@@ -1,6 +1,7 @@
-// Tag backgrounds: paints the range of every template tag that the parser accepted, independent of the color theme.
-import { openDocument } from '@polyspec/template-language';
+// Tag backgrounds: paints the tag ranges of the language server (polyspec-template/tagRanges), independent of the color theme.
+import { TAG_RANGES_METHOD, type TagRangesParams, type TagRangesResult } from '@polyspec/template-lsp';
 import * as vscode from 'vscode';
+import type { LanguageClient } from 'vscode-languageclient/node';
 
 const DELAY_MS = 250;
 
@@ -17,29 +18,39 @@ const TAG_BACKGROUND: vscode.DecorationRenderOptions = {
   rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
 };
 
-/** Returns the ranges of the tags of a document except comments, from the tags the parser accepted (EDT-6, EDT-9). */
-export function tagRangesOf(document: vscode.TextDocument): vscode.Range[] {
-  return openDocument(document.getText(), { name: document.uri.fsPath }).tags
-    .map(tag => new vscode.Range(document.positionAt(tag.start), document.positionAt(tag.end)));
+/**
+ * The tag ranges of a document from `polyspec-template/tagRanges`, or null when the server does not have the document
+ * open or the document changed while the request ran. These are the ranges that the extension paints.
+ */
+export async function tagRangesOf(client: LanguageClient, document: vscode.TextDocument): Promise<vscode.Range[] | null> {
+  const version = document.version;
+  const params: TagRangesParams = { textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(document) };
+  const result = await client.sendRequest<TagRangesResult>(TAG_RANGES_METHOD, params);
+  if (result === null || document.version !== version) return null;
+  return result.map(range => client.protocol2CodeConverter.asRange(range));
 }
 
 /**
  * Paints tag backgrounds in visible template editors when they appear and after a document changes. A document
- * that does not parse still has the tags the parser accepted before its error, so a tag being typed does not clear
- * the backgrounds of the whole document.
+ * that does not parse still has the tags the parser accepted before its error (EDT-6), so a tag being typed does not
+ * clear the backgrounds of the whole document.
  */
-export function registerDecorations(context: vscode.ExtensionContext, language: string): void {
+export function registerDecorations(context: vscode.ExtensionContext, client: LanguageClient, language: string): void {
   const decoration = vscode.window.createTextEditorDecorationType(TAG_BACKGROUND);
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
-  const paint = (document: vscode.TextDocument): void => {
+  const paint = async (document: vscode.TextDocument): Promise<void> => {
     if (document.languageId !== language) return;
-    const ranges = tagRangesOf(document);
+    const ranges = await tagRangesOf(client, document);
+    if (ranges === null) return;
     for (const editor of vscode.window.visibleTextEditors) {
       if (editor.document === document) editor.setDecorations(decoration, ranges);
     }
   };
+  const paintLogged = (document: vscode.TextDocument): void => {
+    paint(document).catch((error: unknown) => client.error('Painting the tag backgrounds failed', error, false));
+  };
   const paintVisible = (): void => {
-    new Set(vscode.window.visibleTextEditors.map(editor => editor.document)).forEach(paint);
+    new Set(vscode.window.visibleTextEditors.map(editor => editor.document)).forEach(paintLogged);
   };
   context.subscriptions.push(
     decoration,
@@ -49,7 +60,7 @@ export function registerDecorations(context: vscode.ExtensionContext, language: 
       clearTimeout(timers.get(key));
       timers.set(key, setTimeout(() => {
         timers.delete(key);
-        paint(event.document);
+        paintLogged(event.document);
       }, DELAY_MS));
     }),
     { dispose: () => timers.forEach(timer => clearTimeout(timer)) },

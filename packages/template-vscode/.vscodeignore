@@ -4,3 +4,4 @@
 !language-configuration.json
 !syntaxes/polyspec-template.tmLanguage.json
 !dist/extension.cjs
+!dist/server.cjs
