@@ -2,7 +2,7 @@
 
 [한국어](/ko/spec/editor).
 
-This document defines how editors support templates. One language service holds every editor rule, and each editor reaches it through a thin adapter. The formatting style and the indentation rule are in [Formatter and VS Code extension](../operations/editor-tools.md); this document refers to them.
+This document defines how editors support templates. One language service holds every editor rule, and each editor reaches it through a thin adapter. The formatting style and the indentation rule are in [Formatter, language server and editors](../operations/editor-tools.md); this document refers to them.
 
 ## Layers
 

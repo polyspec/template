@@ -71,6 +71,20 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: make test-browser
 
+  editor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: make editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode
+      # VS Code needs a display; the integration test runs it on a virtual X server.
+      - run: xvfb-run -a make test-vscode-integration
+
   go:
     runs-on: ubuntu-latest
     steps:
@@ -125,7 +139,7 @@ jobs:
 
   pages:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [release, docs, typescript, browser, go, rust, php]
+    needs: [release, docs, typescript, browser, editor, go, rust, php]
     runs-on: ubuntu-latest
     permissions:
       contents: read

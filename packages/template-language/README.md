@@ -29,4 +29,4 @@ template-fmt < page.tpl
 
 Exit status 0 means success, 1 means that `--check` found a file that is not formatted, and 2 means that a file does not parse, a formatted AST differs or the arguments are invalid.
 
-The formatting style, the safety invariant and the command line are described in [Formatter and VS Code extension](../../docs/operations/editor-tools.md).
+The formatting style, the safety invariant and the command line are described in [Formatter, language server and editors](../../docs/operations/editor-tools.md).

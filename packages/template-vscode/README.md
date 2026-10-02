@@ -26,4 +26,4 @@ make vscode-package
 make vscode-install
 ```
 
-The grammar uses the default delimiters `{` and `}`; the semantic tokens of the server also follow a `{% delimiter ..}` directive. Scopes, formatting rules and limits are described in [Formatter and VS Code extension](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.md).
+The grammar uses the default delimiters `{` and `}`; the semantic tokens of the server also follow a `{% delimiter ..}` directive. Scopes, formatting rules and limits are described in [Formatter, language server and editors](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.md).

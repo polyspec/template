@@ -36,4 +36,4 @@ new EditorView({
 
 The marks have the classes `cm-template-<type>` for the token types (`delimiter`, `keyword`, `variable`, `property`, `function`, `string`, `number`, `operator`, `comment`, `path`), `cm-template-tag` for the tag background and `cm-template-highlight` for the tags of the construct under the cursor.
 
-Options, classes, default colors and commands are described in [Formatter and VS Code extension](../../docs/operations/editor-tools.md#codemirror-6-adapter), and the contract in [Editor support](../../docs/spec/editor.md).
+Options, classes, default colors and commands are described in [Formatter, language server and editors](../../docs/operations/editor-tools.md#codemirror-6-adapter), and the contract in [Editor support](../../docs/spec/editor.md).

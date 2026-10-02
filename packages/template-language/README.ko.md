@@ -29,4 +29,4 @@ template-fmt < page.tpl
 
 종료 상태 0은 성공, 1은 `--check`가 포맷되지 않은 파일을 찾았음, 2는 파싱되지 않는 파일, 다른 AST 또는 잘못된 인자가 있음을 뜻한다.
 
-포맷 스타일, 안전 불변식, 명령줄은 [포매터와 VS Code 확장](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.
+포맷 스타일, 안전 불변식, 명령줄은 [포매터, 언어 서버, 에디터](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.
