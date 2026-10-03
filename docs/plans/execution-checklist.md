@@ -297,7 +297,7 @@ Dependencies: none. `c ? a : b` is a valid expression (EXP-7, EXP-13), but the T
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T12.1 | Add a conformance case with `c ? a : b`, `c ? a : b.x` and nested ternaries whose then-branch ends with an identifier; check it fails in every implementation that has the defect; parse a class call only when the identifier is followed by `::` and fix every implementation | `make check` | [ ] |
+| T12.1 | Add a conformance case with `c ? a : b`, `c ? a : b.x` and nested ternaries whose then-branch ends with an identifier; check it fails in every implementation that has the defect; parse a class call only when the identifier is followed by `::` and fix every implementation | `make check` | [x] |
 
 ## Parallelism summary
 
