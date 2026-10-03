@@ -82,10 +82,13 @@ try {
     }
   }
 
-  execFileSync('npx', [
-    'tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
-    ...pending.map(item => item.sourcePath),
-  ], { cwd: root, stdio: 'pipe', maxBuffer: 64 * 1024 * 1024 });
+  // tsc without input files prints its help and fails, so skip it when every case failed to compile.
+  if (pending.length > 0) {
+    execFileSync('npx', [
+      'tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
+      ...pending.map(item => item.sourcePath),
+    ], { cwd: root, stdio: 'pipe', maxBuffer: 64 * 1024 * 1024 });
+  }
 
   for (const { testCase, id } of pending) {
     try {
