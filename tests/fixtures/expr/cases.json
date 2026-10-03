@@ -2910,6 +2910,85 @@
     ]
   },
   {
+    "name": "ternary-identifier-branches",
+    "expr": "c ? a : b",
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "c"
+      },
+      {
+        "type": "QUESTION",
+        "value": "?"
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Ternary",
+      "test": {
+        "type": "Var",
+        "name": "c",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "then": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          4,
+          5
+        ]
+      },
+      "else": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          8,
+          9
+        ]
+      },
+      "span": [
+        0,
+        9
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "c": true,
+          "a": 1,
+          "b": 2
+        },
+        "value": 1
+      },
+      {
+        "data": {
+          "c": false,
+          "a": 1,
+          "b": 2
+        },
+        "value": 2
+      }
+    ]
+  },
+  {
     "name": "in-operator",
     "expr": "x in l",
     "tokens": [
@@ -3583,12 +3662,8 @@
         "value": "Order"
       },
       {
-        "type": "COLON",
-        "value": ":"
-      },
-      {
-        "type": "COLON",
-        "value": ":"
+        "type": "DOUBLE_COLON",
+        "value": "::"
       },
       {
         "type": "IDENT",
@@ -3630,6 +3705,103 @@
         22
       ]
     }
+  },
+  {
+    "name": "ternary-class-call-branch",
+    "expr": "c ? Order::label(a) : b",
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "c"
+      },
+      {
+        "type": "QUESTION",
+        "value": "?"
+      },
+      {
+        "type": "IDENT",
+        "value": "Order"
+      },
+      {
+        "type": "DOUBLE_COLON",
+        "value": "::"
+      },
+      {
+        "type": "IDENT",
+        "value": "label"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Ternary",
+      "test": {
+        "type": "Var",
+        "name": "c",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "then": {
+        "type": "ClassCall",
+        "className": "Order",
+        "method": "label",
+        "args": [
+          {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              17,
+              18
+            ]
+          }
+        ],
+        "span": [
+          4,
+          19
+        ]
+      },
+      "else": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          22,
+          23
+        ]
+      },
+      "span": [
+        0,
+        23
+      ]
+    }
+  },
+  {
+    "name": "error-class-call-separated-colons",
+    "expr": "Order: :status_label(x)",
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-call-result-call",

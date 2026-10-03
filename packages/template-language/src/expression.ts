@@ -25,28 +25,21 @@ function endsOperand(token: string | undefined): boolean {
  * Joins expression tokens with the separators of the formatting style: one space around binary
  * and ternary operators, `|`, `=>` and `in`; one space after `,`; no space after `(`, `[`, `...`
  * and unary `!` and `-`; no space before `,`, `)`, `]` and accessors; no space between a function
- * or method name and `(`, between an operand and an index `[`, and inside `Class::name`.
+ * or method name and `(`, between an operand and an index `[`, and around the `::` token of `Class::name`.
  */
 export function joinTokens(tokens: readonly string[]): string {
   const unary = tokens.map((token, index) => token === '!' || (token === '-' && !endsOperand(tokens[index - 1])));
-  const classColon = tokens.map(() => false);
-  for (let index = 0; index + 1 < tokens.length; index++) {
-    if (tokens[index] === ':' && tokens[index + 1] === ':' && isIdent(tokens[index - 1]) && isIdent(tokens[index + 2])) {
-      classColon[index] = true;
-      classColon[index + 1] = true;
-    }
-  }
   let output = tokens[0] ?? '';
   for (let index = 1; index < tokens.length; index++) {
     const previous = tokens[index - 1] as string;
     const current = tokens[index] as string;
-    output += separator(previous, current, unary[index - 1] === true, classColon[index - 1] === true || classColon[index] === true) + current;
+    output += separator(previous, current, unary[index - 1] === true) + current;
   }
   return output;
 }
 
-function separator(previous: string, current: string, previousUnary: boolean, classCall: boolean): string {
-  if (classCall) return '';
+function separator(previous: string, current: string, previousUnary: boolean): string {
+  if (previous === '::' || current === '::') return '';
   if (current === ',' || current === ')' || current === ']' || isAccessor(current)) return '';
   if (previous === '(' || previous === '[' || previous === '...' || previousUnary) return '';
   if (current === '(') return isIdent(previous) || isAccessor(previous) ? '' : ' ';

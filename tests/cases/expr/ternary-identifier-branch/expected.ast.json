@@ -1,0 +1,276 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "c",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "then": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            7,
+            8
+          ]
+        },
+        "else": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            11,
+            12
+          ]
+        },
+        "span": [
+          3,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        13,
+        14
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "c",
+          "span": [
+            17,
+            18
+          ]
+        },
+        "then": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            21,
+            22
+          ]
+        },
+        "else": {
+          "type": "Member",
+          "object": {
+            "type": "Var",
+            "name": "b",
+            "span": [
+              25,
+              26
+            ]
+          },
+          "key": "x",
+          "span": [
+            25,
+            28
+          ]
+        },
+        "span": [
+          17,
+          28
+        ]
+      },
+      "span": [
+        14,
+        29
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        29,
+        30
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "d",
+          "span": [
+            33,
+            34
+          ]
+        },
+        "then": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            37,
+            38
+          ]
+        },
+        "else": {
+          "type": "Member",
+          "object": {
+            "type": "Var",
+            "name": "b",
+            "span": [
+              41,
+              42
+            ]
+          },
+          "key": "x",
+          "span": [
+            41,
+            44
+          ]
+        },
+        "span": [
+          33,
+          44
+        ]
+      },
+      "span": [
+        30,
+        45
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        45,
+        46
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "c",
+          "span": [
+            49,
+            50
+          ]
+        },
+        "then": {
+          "type": "Ternary",
+          "test": {
+            "type": "Var",
+            "name": "d",
+            "span": [
+              53,
+              54
+            ]
+          },
+          "then": {
+            "type": "Var",
+            "name": "e",
+            "span": [
+              57,
+              58
+            ]
+          },
+          "else": {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              61,
+              62
+            ]
+          },
+          "span": [
+            53,
+            62
+          ]
+        },
+        "else": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            65,
+            66
+          ]
+        },
+        "span": [
+          49,
+          66
+        ]
+      },
+      "span": [
+        46,
+        67
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        67,
+        68
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "d",
+          "span": [
+            71,
+            72
+          ]
+        },
+        "then": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            75,
+            76
+          ]
+        },
+        "else": {
+          "type": "Var",
+          "name": "e",
+          "span": [
+            78,
+            79
+          ]
+        },
+        "span": [
+          71,
+          79
+        ]
+      },
+      "span": [
+        68,
+        80
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        80,
+        81
+      ]
+    }
+  ],
+  "comments": []
+}

@@ -117,6 +117,7 @@
 | `PIPE` | `\|` |
 | `QUESTION` `COLON` | `?` `:` |
 | `ELVIS` | `?:` |
+| `DOUBLE_COLON` | `::` |
 | `COALESCE` | `??` |
 | `ARROW` | `=>` |
 | `SPREAD` | `...` |

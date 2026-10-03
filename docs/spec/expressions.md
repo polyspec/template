@@ -16,7 +16,7 @@ This document defines the expression language used inside tags: tokens, grammar,
 | DOT_IDENT | `.` IDENT | Produced only under EXP-5 |
 | DOT_INDEX | `.` `[0-9]+` | Produced only under EXP-5 |
 | IN | `in` | Comparison operator |
-| operator | `?? ?: === !== == != <= >= && \|\| ... => ? : \| + - * / % ! < > ( ) [ ] ,` | Longest match |
+| operator | `?? ?: :: === !== == != <= >= && \|\| ... => ? : \| + - * / % ! < > ( ) [ ] ,` | Longest match |
 
 **EXP-2** A NUMBER token whose form does not match the table, including `1.`, `.5`, `1e`, `0x1F` and `1_000`, is E_PARSE_INVALID_NUMBER. The value of a NUMBER token is the nearest IEEE 754 double; `1e3` has the value 1000.
 
@@ -44,7 +44,7 @@ comparison     = additive [ ( "<" | ">" | "<=" | ">=" | IN ) additive ] ;
 additive       = multiplicative { ( "+" | "-" ) multiplicative } ;
 multiplicative = unary { ( "*" | "/" | "%" ) unary } ;
 unary          = ( "!" | "-" ) unary | postfix ;
-postfix        = ( call | primary ) { DOT_IDENT [ "(" [ args ] ")" ] | "[" expression "]" } ;
+postfix        = ( class-call | call | primary ) { DOT_IDENT [ "(" [ args ] ")" ] | "[" expression "]" } ;
 call           = IDENT "(" [ args ] ")" ;
 class-call     = IDENT "::" IDENT "(" [ args ] ")" ;
 args           = expression { "," expression } [ "," ] ;
@@ -74,7 +74,7 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 
 **EXP-10** An operator with associativity `none` cannot be chained without parentheses. `a == b == c` and `a < b < c` are E_PARSE_UNEXPECTED_TOKEN at the second operator.
 
-**EXP-11** A standalone call `f(x)` calls a function by name. A member call `a.f(x)` calls a declared method on the assigned object `a`. A class call `Order::f(x)` calls a declared logical class function. `(f)(x)` and `f(x)(y)` remain E_PARSE_UNEXPECTED_TOKEN. The parser emits `MemberCall` and `ClassCall`; execution requires the corresponding declared object method or class function.
+**EXP-11** A standalone call `f(x)` calls a function by name. A member call `a.f(x)` calls a declared method on the assigned object `a`. A class call `Order::f(x)` calls a declared logical class function. `(f)(x)` and `f(x)(y)` remain E_PARSE_UNEXPECTED_TOKEN. The parser emits `MemberCall` and `ClassCall`; execution requires the corresponding declared object method or class function. A class call starts only at an IDENT followed by the `::` token of EXP-1: `Order: :f(x)` is E_PARSE_UNEXPECTED_TOKEN, and in `c ? a : b` the `:` after the IDENT `a` separates the branches of the ternary.
 
 **EXP-12** A pipe step `left | f(a, b)` is equivalent to the call `f(left, a, b)`; `left | f` is equivalent to `f(left)`. The pipe is left-associative: `a | f | g(b)` is `g(f(a), b)`. The parser produces the call node; no pipe node exists.
 

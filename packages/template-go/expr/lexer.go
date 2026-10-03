@@ -28,7 +28,7 @@ var operators = []struct {
 }{
 	{"===", "SEQ"}, {"!==", "SNE"}, {"...", "SPREAD"},
 	{"==", "EQ"}, {"!=", "NE"}, {"<=", "LE"}, {">=", "GE"}, {"&&", "AND"}, {"||", "OR"},
-	{"??", "COALESCE"}, {"?:", "ELVIS"}, {"=>", "ARROW"},
+	{"??", "COALESCE"}, {"?:", "ELVIS"}, {"::", "DOUBLE_COLON"}, {"=>", "ARROW"},
 	{"(", "LPAREN"}, {")", "RPAREN"}, {"[", "LBRACKET"}, {"]", "RBRACKET"}, {",", "COMMA"},
 	{"|", "PIPE"}, {"?", "QUESTION"}, {":", "COLON"}, {"+", "PLUS"}, {"-", "MINUS"},
 	{"*", "STAR"}, {"/", "SLASH"}, {"%", "PERCENT"}, {"!", "BANG"}, {"<", "LT"}, {">", "GT"},

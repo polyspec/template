@@ -407,9 +407,8 @@ impl<'a> ExpressionParser<'a> {
         let mut node = if first.kind == TokenType::Ident {
             self.next_token()?;
             let after = self.peek()?;
-            if after.kind == TokenType::Colon {
+            if after.kind == TokenType::DoubleColon {
                 self.next_token()?;
-                self.expect(TokenType::Colon)?;
                 let method = self.expect(TokenType::Ident)?;
                 self.expect(TokenType::LParen)?;
                 let mut args = Vec::new();

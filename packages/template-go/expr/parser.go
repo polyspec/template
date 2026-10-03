@@ -362,11 +362,8 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 			return nil, err
 		}
 		switch {
-		case after.Type == "COLON":
+		case after.Type == "DOUBLE_COLON":
 			p.Next()
-			if _, err := p.Expect("COLON"); err != nil {
-				return nil, err
-			}
 			method, err := p.Expect("IDENT")
 			if err != nil {
 				return nil, err

@@ -117,6 +117,7 @@ A case has `name` (unique), `expr` (the expression source without a tag), `token
 | `PIPE` | `\|` |
 | `QUESTION` `COLON` | `?` `:` |
 | `ELVIS` | `?:` |
+| `DOUBLE_COLON` | `::` |
 | `COALESCE` | `??` |
 | `ARROW` | `=>` |
 | `SPREAD` | `...` |

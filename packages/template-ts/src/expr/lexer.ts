@@ -5,7 +5,7 @@ import type { Source } from '../source.js';
 export type TokenType =
   | 'IDENT' | 'NUMBER' | 'STRING' | 'DOT_IDENT' | 'DOT_INDEX'
   | 'LPAREN' | 'RPAREN' | 'LBRACKET' | 'RBRACKET' | 'COMMA' | 'PIPE'
-  | 'QUESTION' | 'COLON' | 'ELVIS' | 'COALESCE' | 'ARROW' | 'SPREAD'
+  | 'QUESTION' | 'COLON' | 'DOUBLE_COLON' | 'ELVIS' | 'COALESCE' | 'ARROW' | 'SPREAD'
   | 'PLUS' | 'MINUS' | 'STAR' | 'SLASH' | 'PERCENT' | 'BANG'
   | 'EQ' | 'NE' | 'SEQ' | 'SNE' | 'LT' | 'GT' | 'LE' | 'GE' | 'AND' | 'OR' | 'IN'
   | 'NULL' | 'TRUE' | 'FALSE' | 'EOF'
@@ -24,7 +24,7 @@ export interface Token {
 const OPERATORS: [string, TokenType][] = [
   ['===', 'SEQ'], ['!==', 'SNE'], ['...', 'SPREAD'],
   ['==', 'EQ'], ['!=', 'NE'], ['<=', 'LE'], ['>=', 'GE'], ['&&', 'AND'], ['||', 'OR'],
-  ['??', 'COALESCE'], ['?:', 'ELVIS'], ['=>', 'ARROW'],
+  ['??', 'COALESCE'], ['?:', 'ELVIS'], ['::', 'DOUBLE_COLON'], ['=>', 'ARROW'],
   ['(', 'LPAREN'], [')', 'RPAREN'], ['[', 'LBRACKET'], [']', 'RBRACKET'], [',', 'COMMA'],
   ['|', 'PIPE'], ['?', 'QUESTION'], [':', 'COLON'], ['+', 'PLUS'], ['-', 'MINUS'],
   ['*', 'STAR'], ['/', 'SLASH'], ['%', 'PERCENT'], ['!', 'BANG'], ['<', 'LT'], ['>', 'GT'],
