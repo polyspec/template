@@ -291,6 +291,14 @@ Dependencies: none. Every editor rule moves into one language service, and each 
 
 T11.1 to T11.6 are complete. On 2026-10-02, `make check` passed on commit "Refresh the generated artifact digests after the lockfile change" of the branch `feat/language-T11.2`, including `editor-boundary-check`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode` and `test-vscode-integration`; `rules-check` reported no uncovered rule.
 
+## Wave 12 — Ternary with an identifier before the colon
+
+Dependencies: none. `c ? a : b` is a valid expression (EXP-7, EXP-13), but the TypeScript expression parser reads an identifier followed by `:` as the start of a class call `Class::method()` and fails with `unexpected token "b"`; `c ? 1 : 2` and `c ? (a) : b` parse. The task runs in the branch `fix/ternary-T12.1` and the worktree `template-ternary-T12.1`.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T12.1 | Add a conformance case with `c ? a : b`, `c ? a : b.x` and nested ternaries whose then-branch ends with an identifier; check it fails in every implementation that has the defect; parse a class call only when the identifier is followed by `::` and fix every implementation | `make check` | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |

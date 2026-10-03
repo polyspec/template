@@ -291,6 +291,14 @@ T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext
 
 T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 커밋 "Refresh the generated artifact digests after the lockfile change"에서 `editor-boundary-check`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode`, `test-vscode-integration`을 포함한 `make check`가 통과했고, `rules-check`는 덮이지 않은 규칙이 없다고 보고했다.
 
+## Wave 12 — 콜론 앞에 식별자가 오는 삼항 연산
+
+의존: 없음. `c ? a : b`는 올바른 식이다(EXP-7, EXP-13). 그런데 TypeScript 식 파서는 `:` 앞의 식별자를 클래스 호출 `Class::method()`의 시작으로 읽어 `unexpected token "b"`로 실패한다. `c ? 1 : 2`와 `c ? (a) : b`는 파싱된다. 작업은 브랜치 `fix/ternary-T12.1`과 작업 사본 `template-ternary-T12.1`에서 한다.
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T12.1 | `c ? a : b`, `c ? a : b.x`, then 쪽이 식별자로 끝나는 중첩 삼항 연산을 담은 공통 사례를 추가하고, 결함이 있는 모든 구현에서 실패하는지 확인한 뒤, 식별자 뒤에 `::`가 올 때만 클래스 호출로 파싱하도록 모든 구현을 고친다 | `make check` | [ ] |
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
