@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Template execution lab</title><link rel="stylesheet" href="./styles.css"></head>
 <body><header class="hero"><p class="eyebrow">TEMPLATE · STATIC RENDER PROOF</p><h1>Template execution lab</h1><p class="lede">The shared source is parsed before this page is built. AST mode executes the committed nodes; generated mode lowers those same nodes into host-language renderers. Both modes use the same assign, define and output contract.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">PASS</strong></div><div class="status-card"><span>AST mode</span><strong class="pass">IMPLEMENTED</strong></div><div class="status-card"><span>Generated mode</span><strong class="pass">5 LANGUAGES</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
-<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · NATIVE VALUES</p><h2>Assign keeps the host instance</h2></div><p>A class instance passed through assign stays that instance. The template reads a public field, calls the instance method and calls a separately registered logical class function.</p></div><div class="native-proof"><details open><summary>template</summary><pre class="template-files">&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.label</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.status_label</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;ready&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">Order</span><span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-variable">suffix</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;!&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
+<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · NATIVE VALUES</p><h2>Assign keeps the host instance</h2></div><p>A class instance passed through assign stays that instance. The template reads a public field, calls the instance method and calls a separately registered logical class function.</p></div><div class="native-proof"><details open><summary>template</summary><pre class="template-files">&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.label</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.status_label</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;ready&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">Order</span><span class="syntax-operator">::</span><span class="syntax-variable">suffix</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;!&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
 </pre></details><details open><summary>host assign</summary><pre>class Order { public label = &#39;Order 12&#39;; public status_label(prefix) { return prefix + &#39;:12&#39;; } }
 const assign = { order: new Order() };</pre></details><p class="output-label">Rendered output · 64 bytes · 5f94e0e9fe74…</p><pre>&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;Order 12&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;ready:12&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;done!&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
 </pre></div></section><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>351</td><td>f9e5af2122de…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
@@ -78,8 +78,8 @@ const assign = { order: new Order() };</pre></details><p class="output-label">Re
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
-  &quot;compilerDigest&quot;: &quot;2c2441cac1b4a52ba2c13cfee83ec0e502be77a131397a0a39c2454a3667d39f&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
+  &quot;compilerDigest&quot;: &quot;626d3bbe3c13a9bb2bd05a38cf5f469651e63b02148e485c54e23a2df3376d58&quot;,
   &quot;files&quot;: {
     &quot;card.tpl&quot;: {
       &quot;path&quot;: &quot;card.tpl.ast.json&quot;,
@@ -1122,7 +1122,7 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
@@ -1288,7 +1288,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;e793d0f072354b43e4c47ac0855d82eeb81f61b6a3e97cc88786758165c99b83&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
@@ -1599,7 +1599,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;139cf8f1125c6b984293e04ea286163a5096ec9b135376082a61d3dcd7184516&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -1804,7 +1804,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;9df2c8454b9e699ef4504e2d043066d86eff192d1e67b1bb3dcfd241ff5d6cd9&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
@@ -1991,7 +1991,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;392b157a869ece00a5d8cff5e5521d065a5f1e6524240869c7af9ebaab86ce6e&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.php&quot;: {
@@ -2209,8 +2209,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
-  &quot;compilerDigest&quot;: &quot;2c2441cac1b4a52ba2c13cfee83ec0e502be77a131397a0a39c2454a3667d39f&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
+  &quot;compilerDigest&quot;: &quot;626d3bbe3c13a9bb2bd05a38cf5f469651e63b02148e485c54e23a2df3376d58&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2292,7 +2292,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
@@ -2363,7 +2363,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;e793d0f072354b43e4c47ac0855d82eeb81f61b6a3e97cc88786758165c99b83&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
@@ -2523,7 +2523,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;139cf8f1125c6b984293e04ea286163a5096ec9b135376082a61d3dcd7184516&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -2627,7 +2627,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;9df2c8454b9e699ef4504e2d043066d86eff192d1e67b1bb3dcfd241ff5d6cd9&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
@@ -2710,7 +2710,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;392b157a869ece00a5d8cff5e5521d065a5f1e6524240869c7af9ebaab86ce6e&quot;,
   &quot;files&quot;: {
     &quot;empty-state.php&quot;: {
@@ -2811,8 +2811,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
-  &quot;compilerDigest&quot;: &quot;2c2441cac1b4a52ba2c13cfee83ec0e502be77a131397a0a39c2454a3667d39f&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
+  &quot;compilerDigest&quot;: &quot;626d3bbe3c13a9bb2bd05a38cf5f469651e63b02148e485c54e23a2df3376d58&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2894,7 +2894,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
@@ -2963,7 +2963,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;e793d0f072354b43e4c47ac0855d82eeb81f61b6a3e97cc88786758165c99b83&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
@@ -3121,7 +3121,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;139cf8f1125c6b984293e04ea286163a5096ec9b135376082a61d3dcd7184516&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -3223,7 +3223,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;9df2c8454b9e699ef4504e2d043066d86eff192d1e67b1bb3dcfd241ff5d6cd9&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
@@ -3304,7 +3304,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;392b157a869ece00a5d8cff5e5521d065a5f1e6524240869c7af9ebaab86ce6e&quot;,
   &quot;files&quot;: {
     &quot;html-slot.php&quot;: {
@@ -3417,8 +3417,8 @@ createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
-  &quot;compilerDigest&quot;: &quot;2c2441cac1b4a52ba2c13cfee83ec0e502be77a131397a0a39c2454a3667d39f&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
+  &quot;compilerDigest&quot;: &quot;626d3bbe3c13a9bb2bd05a38cf5f469651e63b02148e485c54e23a2df3376d58&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -3552,7 +3552,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
@@ -3642,7 +3642,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;e793d0f072354b43e4c47ac0855d82eeb81f61b6a3e97cc88786758165c99b83&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
@@ -3825,7 +3825,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;139cf8f1125c6b984293e04ea286163a5096ec9b135376082a61d3dcd7184516&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -3954,7 +3954,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;9df2c8454b9e699ef4504e2d043066d86eff192d1e67b1bb3dcfd241ff5d6cd9&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
@@ -4062,7 +4062,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;392b157a869ece00a5d8cff5e5521d065a5f1e6524240869c7af9ebaab86ce6e&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.php&quot;: {
@@ -4209,8 +4209,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
-  &quot;compilerDigest&quot;: &quot;2c2441cac1b4a52ba2c13cfee83ec0e502be77a131397a0a39c2454a3667d39f&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
+  &quot;compilerDigest&quot;: &quot;626d3bbe3c13a9bb2bd05a38cf5f469651e63b02148e485c54e23a2df3376d58&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -4449,7 +4449,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;d26abd58c8e9268ddbd0749e95f0afad254cbb908c1b2ea02aa14d8d5c8098a1&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
@@ -4539,7 +4539,7 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;e793d0f072354b43e4c47ac0855d82eeb81f61b6a3e97cc88786758165c99b83&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
@@ -4732,7 +4732,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;139cf8f1125c6b984293e04ea286163a5096ec9b135376082a61d3dcd7184516&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -4866,7 +4866,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;9df2c8454b9e699ef4504e2d043066d86eff192d1e67b1bb3dcfd241ff5d6cd9&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
@@ -4982,7 +4982,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;3a6860b7ffc1e7e4f9f1d98d6b6f20dcac132767fea833c40e229db608137853&quot;,
+  &quot;contractDigest&quot;: &quot;a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d&quot;,
   &quot;compilerDigest&quot;: &quot;392b157a869ece00a5d8cff5e5521d065a5f1e6524240869c7af9ebaab86ce6e&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.php&quot;: {

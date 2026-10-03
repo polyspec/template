@@ -336,9 +336,8 @@ final class Parser
         if ($first->type === 'IDENT') {
             $this->next();
             $after = $this->peek();
-            if ($after->type === 'COLON') {
+            if ($after->type === 'DOUBLE_COLON') {
                 $this->next();
-                $this->expect('COLON');
                 $method = $this->expect('IDENT');
                 $this->expect('LPAREN');
                 $args = [];

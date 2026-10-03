@@ -16,7 +16,7 @@
 | DOT_IDENT | `.` IDENT | EXP-5 조건에서만 생성 |
 | DOT_INDEX | `.` `[0-9]+` | EXP-5 조건에서만 생성 |
 | IN | `in` | 비교 연산자 |
-| 연산자 | `?? ?: === !== == != <= >= && \|\| ... => ? : \| + - * / % ! < > ( ) [ ] ,` | 최장 일치 |
+| 연산자 | `?? ?: :: === !== == != <= >= && \|\| ... => ? : \| + - * / % ! < > ( ) [ ] ,` | 최장 일치 |
 
 **EXP-2** 표의 형태와 맞지 않는 NUMBER 토큰은 E_PARSE_INVALID_NUMBER이다. `1.`, `.5`, `1e`, `0x1F`, `1_000`이 여기에 해당한다. NUMBER 토큰의 값은 가장 가까운 IEEE 754 double이며 `1e3`의 값은 1000이다.
 
@@ -44,7 +44,7 @@ comparison     = additive [ ( "<" | ">" | "<=" | ">=" | IN ) additive ] ;
 additive       = multiplicative { ( "+" | "-" ) multiplicative } ;
 multiplicative = unary { ( "*" | "/" | "%" ) unary } ;
 unary          = ( "!" | "-" ) unary | postfix ;
-postfix        = ( call | primary ) { DOT_IDENT [ "(" [ args ] ")" ] | "[" expression "]" } ;
+postfix        = ( class-call | call | primary ) { DOT_IDENT [ "(" [ args ] ")" ] | "[" expression "]" } ;
 call           = IDENT "(" [ args ] ")" ;
 class-call     = IDENT "::" IDENT "(" [ args ] ")" ;
 args           = expression { "," expression } [ "," ] ;
@@ -74,7 +74,7 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 
 **EXP-10** 결합이 `없음`인 연산자는 괄호 없이 연쇄할 수 없다. `a == b == c`와 `a < b < c`는 두 번째 연산자에서 E_PARSE_UNEXPECTED_TOKEN이다.
 
-**EXP-11** 독립 호출 `f(x)`는 이름으로 함수를 호출한다. 멤버 호출 `a.f(x)`는 assign 인스턴스 `a`에 선언된 메서드를 호출한다. 클래스 호출 `Order::f(x)`는 선언된 논리 클래스 함수를 호출한다. `(f)(x)`와 `f(x)(y)`는 계속 E_PARSE_UNEXPECTED_TOKEN이다. 파서는 `MemberCall`과 `ClassCall`을 생성하며, 실행하려면 해당 객체 메서드나 클래스 함수가 선언되어 있어야 한다.
+**EXP-11** 독립 호출 `f(x)`는 이름으로 함수를 호출한다. 멤버 호출 `a.f(x)`는 assign 인스턴스 `a`에 선언된 메서드를 호출한다. 클래스 호출 `Order::f(x)`는 선언된 논리 클래스 함수를 호출한다. `(f)(x)`와 `f(x)(y)`는 계속 E_PARSE_UNEXPECTED_TOKEN이다. 파서는 `MemberCall`과 `ClassCall`을 생성하며, 실행하려면 해당 객체 메서드나 클래스 함수가 선언되어 있어야 한다. 클래스 호출은 IDENT 뒤에 EXP-1의 `::` 토큰이 올 때만 시작한다. `Order: :f(x)`는 E_PARSE_UNEXPECTED_TOKEN이고, `c ? a : b`에서 IDENT `a` 뒤의 `:`는 삼항 연산의 두 분기를 나눈다.
 
 **EXP-12** 파이프 단계 `left | f(a, b)`는 호출 `f(left, a, b)`와 같다. `left | f`는 `f(left)`와 같다. 파이프는 좌결합이다: `a | f | g(b)`는 `g(f(a), b)`이다. 파서는 호출 노드를 생성하며 파이프 노드는 존재하지 않는다.
 
