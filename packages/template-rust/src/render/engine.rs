@@ -109,6 +109,13 @@ pub struct Engine {
     program: Box<dyn Program>,
 }
 
+/// The bound root, the definition registry and the environment of one request.
+struct BoundRequest {
+    root: Rc<OrderedMap>,
+    registry: HashMap<String, DefineEntry>,
+    env: Env,
+}
+
 impl Engine {
     /// Creates an engine from an AST or generated program.
     pub fn new(program: impl Program + 'static) -> Engine {
@@ -279,7 +286,7 @@ impl AstProgram {
         assign: Root<'_>,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
-        let bound = (|| -> Result<(Rc<OrderedMap>, HashMap<String, DefineEntry>, Env), BindError> {
+        let bound = (|| -> Result<BoundRequest, BindError> {
             let root = match assign {
                 Root::Json(json) => Rc::new(bind_map(json)?),
                 Root::Bound(bound) => bound_root(bound),
@@ -292,9 +299,10 @@ impl AstProgram {
                     .map(|d| d.as_secs() as f64)
                     .unwrap_or(0.0),
             });
-            Ok((root, registry, env))
+            Ok(BoundRequest { root, registry, env })
         })();
-        let (root, registry, env) = bound.map_err(|error| TemplateError::without_position(error.code, name, error.message))?;
+        let BoundRequest { root, registry, env } =
+            bound.map_err(|error| TemplateError::without_position(error.code, name, error.message))?;
         let target_name = match target {
             RenderTarget::Name(name) => match registry.get(name) {
                 Some(DefineEntry::Template { template, .. }) => template.clone(),
