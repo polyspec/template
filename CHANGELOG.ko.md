@@ -1,5 +1,6 @@
 # 변경 기록
 
+- 호스트가 함수와 class를 등록한 뒤 한 program의 렌더가 동시에 실행될 수 있다고 정하고(T16.1, RT-70), Go program의 template cache를 mutex로 보호했다. 한 Go AST program을 렌더하는 두 goroutine이 cache map에서 경합했다. `TestConcurrentRendersShareOneProgram`이 변경 전 `go test -race`에서 실패했고 지금은 통과하며, bound map test도 한 program을 공유한다. Rust program은 `Send`도 `Sync`도 아니므로 Rust 호스트는 thread마다 program을 만든다.
 - `NewAstProgram`처럼 Go `Parse`도 구분자 쌍이 아닌 구분자 옵션에 Go의 인자 오류, 즉 `*errs.Error`가 아닌 `error`를 돌려준다(T15.3-1, ERR-13). 이전에는 ERR-1 오류인 E_DATA_UNSUPPORTED_TYPE을 돌려줬다. `TestInvalidDelimiterIsArgumentError`가 변경 전 `Parse`에서 실패했고 지금은 통과한다.
 - TypeScript, Rust, PHP generated program처럼 Go typed generated program도 없는 optional field를 null로 읽는다(T15.4). Go backend는 optional field를 `valueOrZero`로 읽었으므로, 없는 `string?` field에 대한 `{= note ?? '-'}`가 빈 문자열을 출력했다. 이제 field는 pointer로 남고, nil pointer는 null이며, `??`와 삼항 연산자는 operand를 결과의 pointer 또는 값 type으로 바꾼다. 새 `note ?? '-'` case로 `node scripts/check-generated-typed-values.mjs`가 Go에서 실패했고, 지금은 TypeScript, Go, Rust, PHP에서 통과한다. commit된 generated program과 예제 site를 다시 생성했다(`make typed-generator-check` 통과).
 - TypeScript package는 각 entry의 CommonJS 파일을 build의 출력 directory에 쓴다(T14.2-2). 이전에는 `dist/<entry>.cjs`를 작업 directory 기준으로 썼으므로 `--out-dir`을 쓰는 build가 `ENOENT`로 실패했다.
