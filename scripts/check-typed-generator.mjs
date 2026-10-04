@@ -148,7 +148,7 @@ function checkRust() {
         let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
         program.render(polyspec_template::RenderTarget::Name(target), &assign, &options).unwrap()
     }
-    ${index === 0 ? `pub fn execute_limited(target: &str, assign: &serde_json::Value, options: &polyspec_template::RenderOptions) -> Result<String, polyspec_template::TemplateError> {
+    ${index === 0 ? `pub fn execute_limited(target: &str, assign: &serde_json::Value, options: &polyspec_template::RenderOptions) -> Result<String, polyspec_template::RequestError> {
         use polyspec_template::Program;
         let mut limits = polyspec_template::Limits::default();
         limits.output_bytes = 1;
@@ -164,7 +164,7 @@ fn generated_${index}_matches() {
     options.define = polyspec_template::defines_from_json(&define).unwrap();
     ${fixtureExists(id, 'env.json') ? `options.env = Some(serde_json::from_str(${JSON.stringify(fixture(id, 'env.json'))}).unwrap());` : ''}
     assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, assign.clone(), options.clone()), ${JSON.stringify(expected(id))});
-    ${index === 0 ? `let error = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err();
+    ${index === 0 ? `let polyspec_template::RequestError::Template(error) = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err() else { panic!("expected a template error") };
     assert_eq!(error.code, polyspec_template::ErrorCode::E_RUNTIME_LIMIT);
     assert!(error.line > 0 && error.col > 0);` : ''}
 }`).join('\n');
