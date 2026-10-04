@@ -15,6 +15,8 @@ node tests/runner/parity.mjs
 
 `make conformance`는 디렉터리가 있는 모든 패키지를 빌드하고 모든 케이스를 실행한다. 러너는 한 구현에서 케이스가 끝날 때마다 `<case> [<lang>] pass|fail (<ms> ms)`을 출력하고, 그 뒤 케이스와 구현마다 한 행인 요약 표를 출력하며, 비교가 실패하면 상태 1로 종료한다. `parity.mjs`는 구현끼리 비교하며 기대 파일을 읽지 않는다.
 
+`make conformance-generated-ts`, `make conformance-generated-go`, `make conformance-generated-rust`, `make conformance-generated-php`는 모든 케이스의 generated program을 실행한다. `--case <group>/<name>`이나 `--case <group>`으로 케이스를 고른다. 각 케이스는 시작과 결과를 경과 시간과 함께 출력하고 30 s의 자기 deadline을 가진다. Go와 Rust 러너는 케이스 test를 `scripts/run-tests.mjs`로 실행한다. Go 케이스는 package `case_<case id>`이고 Rust 케이스는 test `case_<case id>`이며, 문자와 숫자가 아닌 글자가 이어진 부분은 `_` 하나로 쓴다. PHP 러너는 `php -l`과 케이스 process를 deadline에서 멈춘다. TypeScript 러너는 `tsc`를 300 s deadline 아래에서 한 번 실행하고 각 케이스를 worker에서 render한다.
+
 ## 케이스 추가
 
 1. `tests/cases/<group>/<name>/`을 만들고 `input.tpl`, `case.json`(`rules`와 `stage`), 필요하면 `data.json`, `define.json`, `env.json`, `options.json` 또는 추가 템플릿을 넣는다.

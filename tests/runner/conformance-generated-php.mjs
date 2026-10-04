@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+// PHP generated conformance: compiles every case into PHP source, checks it with `php -l` and runs
+// it in its own PHP process. Each case prints its start and its result with its elapsed time, and
+// each of the two PHP processes of a case is stopped when it outlives its deadline.
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
@@ -8,7 +10,11 @@ import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
+import { runBounded, seconds, stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
+
+// The time limit of one PHP process of a case.
+const PROCESS_TIMEOUT_MS = 30_000;
 
 const temporary = mkdtempSync(join(root, '.generated-conformance-php-'));
 const sources = join(temporary, 'source');
@@ -66,9 +72,20 @@ try {
 const failures = [];
 let passed = 0;
 const { cases, filtered } = generatedCases(process.argv.slice(2));
+const progress = stepProgress();
+
+// Runs one PHP process of a case; a process that outlives its deadline fails the case.
+async function php(args, step) {
+  const result = await runBounded('php', args, { cwd: root, timeoutMs: PROCESS_TIMEOUT_MS });
+  if (result.timedOut) throw Object.assign(new Error(`${step} exceeded its ${seconds(PROCESS_TIMEOUT_MS)} deadline`), { deadline: true });
+  return result;
+}
+
 try {
   for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');
+    const failed = failures.length;
+    progress.start(testCase.id);
     try {
       const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(temporary, `${id}.types.json`);
@@ -77,10 +94,10 @@ try {
       writeFileSync(typePath, JSON.stringify(typeManifest));
       compileAst({ root: testCase.dir, output: graphPath, entry: 'input.tpl', refresh: 'dev', typeManifest: typePath, delimiters: testCase.options.delimiters ?? null });
       writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'php', { phpNamespace: namespace }));
-      execFileSync('php', ['-l', sourcePath], { cwd: root, stdio: 'pipe' });
-      const result = spawnSync('php', [runner, join(root, 'packages/template-php/vendor/autoload.php'), sourcePath,
-        testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''],
-      { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+      const lint = await php(['-l', sourcePath], 'php -l');
+      if (lint.status !== 0) throw new Error(`${lint.stdout}${lint.stderr}`);
+      const result = await php([runner, join(root, 'packages/template-php/vendor/autoload.php'), sourcePath,
+        testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], 'the case process');
       if (result.status !== 0) throw new Error(result.stderr || `PHP exited with ${result.status}`);
       let actual;
       try { actual = JSON.parse(result.stdout); }
@@ -95,9 +112,13 @@ try {
     } catch (error) {
       const actual = errorObject(error);
       const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
-      if (difference) failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); else passed++;
+      if (error.deadline) failures.push(`${testCase.id}: ${error.message}`);
+      else if (difference) failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); else passed++;
     }
+    if (failures.length > failed) progress.fail(testCase.id, undefined, failures.slice(failed).join('\n'));
+    else progress.pass(testCase.id);
   }
+  progress.close('PHP generated conformance');
   if (!filtered) assert.equal(passed + failures.length, cases.length);
 } finally {
   rmSync(temporary, { recursive: true, force: true });

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-import assert from 'node:assert/strict';
+// Rust generated conformance: compiles every case into a module of one integration test file whose
+// tests are named after the cases, and runs it with scripts/run-tests.mjs, which prints each case
+// test with its elapsed time and stops a test that outlives its own timeout.
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -9,7 +11,11 @@ import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
+import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
+
+// The time limit of one generated case test.
+const CASE_TIMEOUT_SECONDS = 30;
 
 const crate = join(root, 'packages/template-rust');
 const temporary = mkdtempSync(join(crate, 'generated_conformance_'));
@@ -41,12 +47,23 @@ const failures = [];
 const runnable = [];
 let compilePassed = 0;
 const { cases } = generatedCases(process.argv.slice(2));
+const progress = stepProgress();
+// The module and the test of a case are named after its id.
+const names = new Map();
+function caseName(testCase) {
+  const name = `case_${testCase.id.toLowerCase().replaceAll(/[^a-z0-9]+/g, '_')}`;
+  if (names.has(name) && names.get(name) !== testCase.id) throw new Error(`${testCase.id} and ${names.get(name)} have the same Rust name ${name}`);
+  names.set(name, testCase.id);
+  return name;
+}
 
 try {
   for (const testCase of cases) {
+    const step = `${testCase.id} › compile`;
+    progress.start(step);
     try {
-      const index = runnable.length;
-      const directory = join(temporary, `case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`);
+      const name = caseName(testCase);
+      const directory = join(temporary, name);
       mkdirSync(directory);
       const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(directory, 'types.json');
@@ -55,19 +72,21 @@ try {
       writeFileSync(typePath, JSON.stringify(typeManifest));
       compileAst({ root: testCase.dir, output: graphPath, entry: 'input.tpl', refresh: 'dev', typeManifest: typePath, delimiters: testCase.options.delimiters ?? null });
       writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'rust'));
-      runnable.push({ testCase, sourcePath, index });
+      runnable.push({ testCase, sourcePath, name });
+      progress.pass(step);
     } catch (error) {
       const actual = errorObject(error);
       const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
-      if (difference) failures.push(`${testCase.id}: compile ${difference}: ${error.message}`);
-      else compilePassed++;
+      if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); progress.fail(step, undefined, difference); }
+      else { compilePassed++; progress.pass(step); }
     }
   }
+  progress.close('Rust generated conformance compile');
 
-  const modules = runnable.map(({ testCase, sourcePath, index }) => {
+  const modules = runnable.map(({ testCase, sourcePath, name }) => {
     const data = testCase.hasData ? `include_bytes!(${quote(resolve(join(testCase.dir, 'data.json')))})` : 'b"{}"';
     return `#[allow(dead_code, unused_imports, unused_variables)]
-mod case_${index} {
+mod ${name} {
     include!(${quote(resolve(sourcePath))});
     pub fn execute() -> Result<String, super::ActualError> {
         use polyspec_template::Program;
@@ -85,11 +104,11 @@ mod case_${index} {
 }`;
   }).join('\n');
 
-  const tests = runnable.map(({ testCase, index }) => testCase.expectedError === null
+  const tests = runnable.map(({ testCase, name }) => testCase.expectedError === null
     ? `#[test]
-fn case_${index}_matches() { assert_eq!(case_${index}::execute().unwrap(), ${quote(testCase.expectedHtml)}); }`
+fn ${name}() { assert_eq!(${name}::execute().unwrap(), ${quote(testCase.expectedHtml)}); }`
     : `#[test]
-fn case_${index}_matches() { let actual = case_${index}::execute().unwrap_err(); assert_eq!(actual, ActualError { code: ${quote(testCase.expectedError.code)}.to_string(), template: ${quote(testCase.expectedError.template)}.to_string(), line: ${testCase.expectedError.line}, col: ${testCase.expectedError.col} }); }`).join('\n');
+fn ${name}() { let actual = ${name}::execute().unwrap_err(); assert_eq!(actual, ActualError { code: ${quote(testCase.expectedError.code)}.to_string(), template: ${quote(testCase.expectedError.template)}.to_string(), line: ${testCase.expectedError.line}, col: ${testCase.expectedError.col} }); }`).join('\n');
 
   writeFileSync(integrationTest, `#[derive(Debug, PartialEq)]
 struct ActualError { code: String, template: String, line: usize, col: usize }
@@ -104,8 +123,12 @@ ${modules}
 ${tests}
 `);
   if (runnable.length > 0) {
-    const result = spawnSync(resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'generated_conformance_check'], { cwd: crate, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024, env: { ...process.env, RUSTFLAGS: '-Awarnings' } });
-    if (result.status !== 0) failures.push(`generated Rust execution failed:\n${result.stdout}${result.stderr}`);
+    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'cargo', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', crate, '--', '--locked', '--test', 'generated_conformance_check'], {
+      cwd: root,
+      stdio: 'inherit',
+      env: { ...process.env, PATH: `${resolve(process.env.HOME, '.cargo/bin')}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' },
+    });
+    if (result.status !== 0) failures.push('generated Rust execution failed; the failed cases are listed above');
   }
 } finally {
   rmSync(integrationTest, { force: true });
