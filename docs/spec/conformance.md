@@ -62,7 +62,7 @@ Conformance is verified by fixture cases that every implementation renders throu
 
 ## Runners
 
-**CNF-10** `tests/runner/conformance.mjs` enumerates the cases, runs every selected implementation, prints one row per case and implementation, and exits with status 1 when any comparison fails.
+**CNF-10** `tests/runner/conformance.mjs` enumerates the cases, runs every selected implementation, prints `<case> [<lang>] pass|fail (<ms> ms)` when a case finishes in an implementation, prints a summary table with one row per case and implementation after the last case, and exits with status 1 when any comparison fails.
 
 | Option | Effect |
 | --- | --- |

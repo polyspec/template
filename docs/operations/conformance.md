@@ -13,7 +13,7 @@ node tests/runner/conformance.mjs --case loop/meta-fields
 node tests/runner/parity.mjs
 ```
 
-`make conformance` builds every package whose directory exists and runs all cases. The runner prints one row per case and implementation and exits with status 1 when a comparison fails. `parity.mjs` compares the implementations with each other and does not read expected files.
+`make conformance` builds every package whose directory exists and runs all cases. The runner prints `<case> [<lang>] pass|fail (<ms> ms)` when a case finishes in an implementation, then a summary table with one row per case and implementation, and exits with status 1 when a comparison fails. `parity.mjs` compares the implementations with each other and does not read expected files.
 
 ## Add a case
 

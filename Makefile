@@ -120,7 +120,7 @@ test-rust: ## Rust clippy and tests
 test-php: build-php ## PHP unit tests
 	node scripts/run-tests.mjs phpunit --cwd $(PHP_DIR)
 
-test-scripts: ## Tests of the test runner and the conformance runners
+test-scripts: build-ts ## Tests of the test runner and the conformance runners
 	node scripts/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI

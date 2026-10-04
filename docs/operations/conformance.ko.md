@@ -13,7 +13,7 @@ node tests/runner/conformance.mjs --case loop/meta-fields
 node tests/runner/parity.mjs
 ```
 
-`make conformance`는 디렉터리가 있는 모든 패키지를 빌드하고 모든 케이스를 실행한다. 러너는 케이스와 구현마다 한 행을 출력하고 비교가 실패하면 상태 1로 종료한다. `parity.mjs`는 구현끼리 비교하며 기대 파일을 읽지 않는다.
+`make conformance`는 디렉터리가 있는 모든 패키지를 빌드하고 모든 케이스를 실행한다. 러너는 한 구현에서 케이스가 끝날 때마다 `<case> [<lang>] pass|fail (<ms> ms)`을 출력하고, 그 뒤 케이스와 구현마다 한 행인 요약 표를 출력하며, 비교가 실패하면 상태 1로 종료한다. `parity.mjs`는 구현끼리 비교하며 기대 파일을 읽지 않는다.
 
 ## 케이스 추가
 
