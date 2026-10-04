@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Conformance runner: runs every fixture case through the selected language CLIs
 // and compares the AST, the HTML output and the error fields with the expected files.
+// Each case prints `<case> [<lang>] pass|fail (<ms> ms)` when it finishes in a language; the
+// summary table follows the last case. Each CLI call has its own timeout (drivers.mjs).
 //
 // Options:
 //   --langs ts,go,rust,php,php-ext   languages to run (default: every language whose package exists)
@@ -91,6 +93,7 @@ const results = [];
 for (const testCase of cases) {
   const row = { id: testCase.id, outcome: {} };
   for (const language of languages) {
+    const started = performance.now();
     const problems = [];
     if (testCase.expectedAst) {
       const parsed = invoke(language, parseArgs(testCase), testCase.dir);
@@ -132,6 +135,7 @@ for (const testCase of cases) {
       problems.push('case has neither expected.html nor expected.error.json');
     }
     row.outcome[language] = problems.length ? 'fail' : 'pass';
+    process.stdout.write(`${testCase.id} [${language}] ${row.outcome[language]} (${Math.round(performance.now() - started)} ms)\n`);
     for (const problem of problems) failures.push(`${testCase.id} [${language}] ${problem}`);
   }
   results.push(row);
