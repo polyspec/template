@@ -314,7 +314,6 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
 | T14.1 | host binding의 문자열, map key, define id를 `mb_check_encoding`으로 검사하고, 위치를 보고하는 곳은 `Utf8::firstInvalid`를 유지한다. 모든 1 byte와 2 byte 배열, 경계의 3 byte와 4 byte 배열에서 두 검사를 비교하는 test를 더한다 | `make check` | [o] |
-| T14.3 | PHP package test를 선언 범위(`^8.2`)의 가장 낮은 PHP version에서도 `make check`로 돌린다. 지금은 설치된 PHP에서만 돈다 | `make check` | [ ] |
 | T14.2 | 여러 render에서 data를 한 번 binding한다. 공개 `bind` 연산이 depth를 담은 opaque bound 값을 돌려주고, `merge`가 VAL-20을 검사하며, `render`가 bound `assign`과 bound `define` data를 다시 binding하지 않고 받는다. 모든 runtime에 둔다 | `make check` | [ ] |
 
 ## 병렬성 요약
@@ -333,7 +332,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W9 | 없음 | T9.1 |
 | W10 | 없음 | T10.1 |
 | W11 | T11.3 → T11.4와 T11.5를 병렬로 | T11.1 → T11.2 → 병렬 그룹 → T11.6 |
-| W14 | T14.3을 T14.1과 병렬로 | T14.1 → T14.2 |
+| W14 | 없음 | T14.1 → T14.2 |
 
 ## 완료 정의
 
