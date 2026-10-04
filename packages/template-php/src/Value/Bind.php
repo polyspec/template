@@ -164,7 +164,7 @@ final class Bind
 
     private static function text(string $text): string
     {
-        if (Utf8::firstInvalid($text) >= 0) {
+        if (!Utf8::isValid($text)) {
             throw new BindError('E_DATA_INVALID_UTF8', 'string is not valid UTF-8');
         }
 
@@ -173,7 +173,7 @@ final class Bind
 
     private static function key(string $key): string
     {
-        if (Utf8::firstInvalid($key) >= 0) {
+        if (!Utf8::isValid($key)) {
             throw new BindError('E_DATA_INVALID_UTF8', 'a map key is not valid UTF-8');
         }
 

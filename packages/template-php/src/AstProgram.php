@@ -223,7 +223,7 @@ final class AstProgram implements Program, RuntimeServices
         $registry = [];
         foreach ($defines as $id => $input) {
             $id = (string) $id;
-            if (Utf8::firstInvalid($id) >= 0) {
+            if (!Utf8::isValid($id)) {
                 throw new BindError('E_DATA_INVALID_UTF8', 'a define id is not valid UTF-8');
             }
             if (is_array($input) && isset($input['html']) && is_string($input['html'])) {
