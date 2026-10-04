@@ -44,13 +44,16 @@
 
 ## Required checks
 
-- Run the tests of every changed package and `make docs-check` before a commit.
-- Run `make check` before marking a task done in `docs/plans/execution-checklist.md`.
+- While a task is in progress, run only the Red and Green tests that own the change. Before a commit, run those tests and `make docs-check`.
+- Before marking a task `[o]` in `docs/plans/execution-checklist.md`, run the owning command of the task, the command in its Verification column, on the committed tree.
+- Run `make check` once, when every active task is done. Do not run it for each fix or each task, and do not repeat it without a change.
+- Every test prints its start, its result and its elapsed time while the run goes on, and has its own timeout. Do not put a time limit on a whole run, a package or a file. A test that runs for tens of minutes, or that prints only a start and an end, is a defect.
 
 ## Checklist
 
 - This repository has one checklist, `docs/plans/execution-checklist.md`. Split a task into sub-items or add tasks to it; do not create another checklist. Every repository keeps its own checklist.
 - A task has one of four states: `[ ]` waiting, `[~]` in progress, `[o]` done, `[!] cause: <cause>; retry: <condition>` bypassed. `scripts/check-documents.mjs` accepts no other state.
+- The Verification column of a task names its owning command, which runs the Red and Green tests of the task, not `make check`. Tasks that are already `[o]` keep their command.
 - `[!]` is used only when the next task cannot proceed without bypassing this one. When the retry condition holds, resume the task without waiting for approval. `[!]` is not done. An audit covers only the `[!]` tasks with their causes and retry conditions and does not repeat unrelated full test runs.
 - A new problem gets a new task. A problem related to a task that is `[o]` gets a sub-item with the next derived ID (`T12.1-1`, `T12.1-2`) that goes through `[~]` and `[o]`; the `[o]` task keeps its state.
 - Independent tasks may run in parallel, but finishing a task in progress comes before starting a new one: the number of `[o]` tasks grows, not the number of `[~]` tasks.

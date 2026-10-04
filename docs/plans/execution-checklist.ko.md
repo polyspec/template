@@ -339,6 +339,18 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | --- | --- | --- | --- |
 | T16.1 | 모든 runtime의 render가 하나의 program을 공유할 수 있는지 정하고 runtime 명세에 규칙을 적는다. 공유할 수 있으면 Go에서 한 program을 동시에 렌더하는 race test를 더하고 모든 runtime의 template cache를 그에 맞게 안전하게 한다. 공유할 수 없으면 호스트가 thread나 goroutine마다 program 하나를 쓴다고 적는다 | `make check` | [o] |
 
+## Wave 17 — test 실행
+
+의존성: 없음. 각 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 전체 suite는 활성 작업이 모두 끝났을 때 한 번 실행한다. AGENTS는 모든 작업을 완료로 표시하기 전에 `make check`를 요구했고, `AGENTS.ko.md`에는 "결정과 수용 규칙" 절이 없었다. `test-go`는 package마다 120 s로 제한했고, `test-rust`와 `test-php`는 test에 timeout을 주지 않았으며 test가 도는 동안 아무것도 출력하지 않았다. conformance runner는 마지막 case가 끝난 뒤에야 표를 출력했다. 네 generated conformance runner는 모든 case를 `go test`나 `cargo test` 호출 하나에서 600 s 제한 하나로 실행하거나, 제한 없이 자기 process에서 실행했고, 마지막 개수만 출력했다. VS Code integration runner는 VS Code 실행, profile 설치, check를 각각 제한 없이 기다렸다. 작업은 branch `fix/test-runs-T17.1`과 worktree `template-test-runs-T17`에서 진행한다.
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T17.1 | 진행 중인 작업은 변경을 소유한 Red와 Green test만 실행하고, 커밋 전에는 `make docs-check`도 실행하며, 작업은 소유 명령이 통과한 뒤 `[o]`가 되고, `make check`는 활성 작업이 모두 끝났을 때 한 번 실행한다고 AGENTS에 적는다. 모든 test가 진행을 출력하고 자기 timeout을 가지며 실행 전체에는 시간 제한이 없다고 적는다. Verification 열에 소유 명령을 적는다. `AGENTS.ko.md`에 "결정과 수용 규칙" 절을 더한다 | `make docs-check` | [o] |
+| T17.2 | node, vitest, go, cargo, phpunit용 test runner `scripts/run-tests.mjs`와 `scripts/test-progress/`를 더한다. runner는 각 test를 경과 시간과 함께 출력하고 test를 자기 timeout에서 멈추며, 그 test는 `tests/scripts/run-tests.test.mjs`에 둔다. `test-go`, `test-rust`, `test-php`를 runner로 실행하고, `test-go`의 package 120 s 제한을 없애고, PHPUnit 시간 제한을 강제한다 | `node scripts/run-tests.mjs node -- tests/scripts/run-tests.test.mjs` | [ ] |
+| T17.3 | `tests/runner/conformance.mjs`가 한 언어에서 case가 끝날 때마다 `<case> [<lang>] pass\|fail (<ms>)`을 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/conformance-progress.test.mjs` | [ ] |
+| T17.4 | 네 generated conformance runner의 모든 case에 자기 deadline과 경과 시간이 붙은 결과 줄을 준다. Go와 Rust는 `scripts/run-tests.mjs`로 실행하고 Rust test 이름은 case id로 짓는다. PHP는 `php -l`과 case process에 timeout을 둔다. TypeScript는 `tsc`에 deadline과 단계 줄을 두고 각 render를 timeout이 있는 worker에서 실행한다. 600 s 제한을 없앤다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/generated-conformance.test.mjs` | [ ] |
+| T17.5 | `packages/template-vscode/tests/integration/run.mjs`의 모든 VS Code 실행과 profile 설치에 넘으면 process를 kill하는 deadline을 두고, `suite/index.cjs`의 모든 check에 `Promise.race`로 timeout을 걸고 `ok`와 `not ok` 줄에 경과 시간을 붙인다 | `npm run test:integration -w polyspec-template` | [ ] |
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -358,6 +370,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W14 | 없음 | T14.1 → T14.2 |
 | W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
+| W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} |
 
 ## 완료 정의
 
