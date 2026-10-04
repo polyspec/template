@@ -103,8 +103,11 @@ fn bind_json(input: &serde_json::Value, level: usize) -> Result<Value, BindError
     }
 }
 
-/// Binds a value that must be a map.
+/// Binds a value that must be a map. A null value is an empty map (RT-4).
 pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
+    if input.is_null() {
+        return Ok(OrderedMap::new());
+    }
     match bind(input)? {
         Value::Map(map) => Ok(Rc::try_unwrap(map).unwrap_or_else(|shared| (*shared).clone())),
         _ => Err(bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "assign is not a map")),

@@ -33,7 +33,7 @@ engine.
 
 - **RT-2** `parse` produces the AST defined in the AST document without loading other templates. Includes and block tags are resolved during rendering.
 - **RT-3** `render` accepts a template name or a parsed template. With a name, the engine loads the template through its loader. It returns the complete output as one string.
-- **RT-4** `assign` is a map converted by the host binding rules. `define` is the template definition map (RT-24). `env` is a map with `timezone` and `now` as defined in the functions document. Each of `define` and `env` may be omitted; an omitted `define` is an empty map.
+- **RT-4** `assign` is a map converted by the host binding rules. A null `assign` (`undefined` too in TypeScript, `nil` in Go) and, in PHP, an empty array are an empty map. `define` is the template definition map (RT-24). `env` is a map with `timezone` and `now` as defined in the functions document. Each of `define` and `env` may be omitted; an omitted `define` is an empty map.
 - **RT-5** `functions` in the engine options and `register` add host functions as defined in the functions document.
 - **RT-6** `limits` in the engine options overrides the limit values of RT-33. An omitted limit keeps its default.
 - **RT-61** Both `AstProgram` and `GeneratedProgram` bind `assign`, resolve `define` and `env`, and select the target in `prepare`. The returned program-specific state exposes the same `PreparedRender.render` operation.
