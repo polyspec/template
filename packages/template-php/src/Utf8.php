@@ -10,6 +10,15 @@ namespace Polyspec\Template;
 final class Utf8
 {
     /**
+     * Returns whether the bytes are valid UTF-8, with the same result as `firstInvalid() < 0`. Binding uses it
+     * because it checks in native code and reports no position.
+     */
+    public static function isValid(string $bytes): bool
+    {
+        return mb_check_encoding($bytes, 'UTF-8');
+    }
+
+    /**
      * Returns the index of the first invalid byte, or -1 when the bytes are valid UTF-8.
      */
     public static function firstInvalid(string $bytes): int

@@ -307,6 +307,16 @@ Dependencies: none. Every checklist uses four task states: `[ ]` waiting, `[~]` 
 | --- | --- | --- | --- |
 | T13.1 | Accept only the four task states in `scripts/check-documents.mjs`, with the cause and the retry condition of a bypassed task; check it fails on the `[x]` rows; write every done task as `[o]`; state the checklist rules in AGENTS | `make docs-check` | [o] |
 
+## Wave 14 — Data binding cost
+
+Dependencies: none. Host binding checks every string, map key and define id with `Utf8::firstInvalid`, a loop in PHP that reads one byte per step. Binding a map of 1442 strings (49 KB, mostly Korean text) took 1.16 ms, of which the loop took 1.01 ms; `mb_check_encoding` gives the same result in 0.02 ms. A renderer that renders one document as several templates binds the same data once per render. The tasks run in the branch `fix/utf8-T14.1` and the worktree `template-utf8-T14.1`.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T14.1 | Check the strings, map keys and define ids of host binding with `mb_check_encoding` and keep `Utf8::firstInvalid` where a position is reported; add a test that compares both on every 1-byte and 2-byte sequence and on the boundary 3-byte and 4-byte sequences | `make check` | [o] |
+| T14.3 | Run the PHP package tests on the lowest PHP version of its declared range (`^8.2`) in `make check`; today they run only on the installed PHP | `make check` | [ ] |
+| T14.2 | Bind data once for several renders: a public `bind` operation that returns an opaque bound value with its depth, a `merge` that checks VAL-20, and `render` that accepts a bound `assign` and bound `define` data without binding them again, in every runtime | `make check` | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -323,6 +333,7 @@ Dependencies: none. Every checklist uses four task states: `[ ]` waiting, `[~]` 
 | W9 | none | T9.1 |
 | W10 | none | T10.1 |
 | W11 | T11.3 → T11.4 alongside T11.5 | T11.1 → T11.2 → the parallel group → T11.6 |
+| W14 | T14.3 alongside T14.1 | T14.1 → T14.2 |
 
 ## Definition of done
 
