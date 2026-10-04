@@ -57,6 +57,7 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | `new AstProgram({ loader, functions, limits, delimiters })` | AST program을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
 | `new Engine(program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `engine.render(nameOrAst, assign, { define, env })` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 경로나 HTML 항목을 제공한다. |
+| `bind(value)`, `merge(first, second)` | `bind`는 데이터를 한 번 검사하고 `BoundMap`을 반환한다. `merge`는 두 bound map을 합치며, `second`의 항목이 같은 key를 가진 `first`의 항목을 바꾼다. `render`와 `prepare`는 bound map을 `assign`과 정의 `data`로 받고 다시 binding하지 않는다. 다른 위치에서는 `E_DATA_UNSUPPORTED_TYPE`으로 실패한다(VAL-22). 오류에는 template과 위치가 없다(ERR-14). 두 entry와 두 module format은 하나의 bound map type을 공유한다. |
 | `astProgram.register(name, fn)` | 호스트 함수 `(args, { env }) => value`를 등록한다. 인자는 VAL-21 형태다. safe 문자열은 `string`, list는 새 배열, map은 항목 순서의 새 `Map`이며, native object는 list나 map 안에 있어도 원본 class 인스턴스로 전달된다. |
 | `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. 로더가 던진 예외는 렌더를 `E_LOAD_FAILED`로 실패시키며, `FsLoader`는 읽을 수 없는 일반 파일을 이 방식으로 보고한다. |
 | `parseJson`, `parseJsonBytes` | assign 데이터용 순서 보존 JSON 파서. |

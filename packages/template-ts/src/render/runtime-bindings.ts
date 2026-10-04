@@ -3,7 +3,7 @@ import type { Span } from '../ast.js';
 import { TemplateError } from '../errors.js';
 import { escapeHtml } from '../escape.js';
 import { builtins, FunctionError, toNumber, type FunctionContext } from '../functions/index.js';
-import { BindError, MAX_DEPTH, bind, depthWithin, hostArgument } from '../value/bind.js';
+import { BindError, MAX_DEPTH, bindValue, depthWithin, hostArgument } from '../value/bind.js';
 import { stringify as stringifyValue, StringifyError } from '../value/stringify.js';
 import {
   NativeObject, SafeString, compareValues, isString, isTruthy, looseEquals, strictEquals, textOf, typeOf,
@@ -263,7 +263,7 @@ function hostResult(bindings: RuntimeBindings, name: string, run: () => unknown,
 /** Binds a host value; a value that cannot be bound fails with its data code at the expression (ERR-5). */
 function bound(bindings: RuntimeBindings, value: unknown, frame: Frame, span: Span): Value {
   try {
-    return bind(value);
+    return bindValue(value);
   } catch (error) {
     if (error instanceof BindError) throw bindings.error(frame, span, error.code, error.message);
     throw error;

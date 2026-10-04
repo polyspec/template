@@ -6,8 +6,8 @@
   "delimiters": null,
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "32cd55018614fab23eb4bd5689f2fac33560dc4a5f2ce9d48c4c33f25e3f82fd",
-  "compilerDigest": "626d3bbe3c13a9bb2bd05a38cf5f469651e63b02148e485c54e23a2df3376d58",
+  "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
+  "compilerDigest": "115ac32eb958e628faf7eefd3e87648822c8996a365a0a9814c0a9b605926942",
   "files": {
     "content.tpl": {
       "path": "content.tpl.ast.json",

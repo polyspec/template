@@ -65,6 +65,7 @@ engine := template.NewEngine(program)
 | `NewAstProgram(Options)` | `Loader`, `Functions`, `Limits`, `Delimiters`를 가진 AST program을 생성한다. |
 | `NewEngine(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `Define`은 템플릿 또는 HTML 항목을 제공한다. |
+| `Bind(value)`, `Merge(first, second)` | `Bind`는 데이터를 한 번 검사하고 `BoundMap`을 반환한다. zero value는 빈 bound map이다. `Merge`는 두 bound map을 합치며, `second`의 항목이 같은 key를 가진 `first`의 항목을 바꾼다. `Render`와 `Prepare`는 `BoundMap`을 `assign`과 정의 `Data`로 받고 다시 binding하지 않는다. 다른 위치와 pointer로는 `E_DATA_UNSUPPORTED_TYPE`으로 실패한다(VAL-22). 동시에 실행되는 render가 하나의 bound map을 읽을 수 있다. 오류에는 template과 위치가 없다(ERR-14). |
 | `(*render.Engine).Register(name, fn)` | AST program에 호스트 함수를 등록한다. 인자는 VAL-21 형태다. safe 문자열은 `string`, list는 새 `value.List`, map은 새 `*value.OrderedMap`, native object는 원본 값이다. |
 | `NewMapLoader`, `NewFSLoader` | 메모리 로더와 `fs.FS` 로더. `Loader.Load(name)`은 `(LoadResult, ok, error)`를 반환한다. nil이 아닌 오류는 렌더를 `E_LOAD_FAILED`로 실패시키며, `fs.FS` 로더는 읽을 수 없는 일반 파일에 대해 오류를 반환한다. |
 | `ParseJSON` | assign 데이터용 순서 보존 JSON 디코더. 하나의 JSON 문서가 아닌 텍스트는 `E_DATA_INVALID_JSON`이다. |

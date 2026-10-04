@@ -76,7 +76,8 @@ final class Engine
     public function registerClass(string $className, string $method, callable $function): void {}
 
     /**
-     * Renders a template with assign data given as a PHP value.
+     * Renders a template with assign data given as a PHP value or as a BoundMap, which is not bound
+     * again (VAL-22).
      *
      * @param array{define?: array<string, string|array{template?: string, data?: mixed, html?: string}>, env?: array{timezone?: string, now?: float|int}} $options
      */
@@ -86,4 +87,24 @@ final class Engine
      * Renders a template with assign data, template definitions and environment given as JSON text.
      */
     public function renderJson(string $name, string $assign, ?string $define = null, ?string $env = null): string {}
+}
+
+/**
+ * A map that host binding checked once (VAL-22). PHP code cannot instantiate, clone or unserialize
+ * the class; `bind` and `merge` create it.
+ */
+final class BoundMap
+{
+    /**
+     * Applies host binding to a value and returns a bound map; null and `[]` give the empty bound map and a
+     * bound map of the extension is returned unchanged. Errors have no template and no position
+     * (ERR-14).
+     */
+    public static function bind(mixed $value): BoundMap {}
+
+    /**
+     * Returns a bound map with the entries of $first and $second: an entry of $second replaces the
+     * entry of $first with the same key in its position (RT-26).
+     */
+    public static function merge(mixed $first, mixed $second): BoundMap {}
 }

@@ -337,6 +337,42 @@ let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 
 전체 API는 각 패키지 문서에 있다: [TypeScript](https://github.com/polyspec/template/tree/main/packages/template-ts), [Go](https://github.com/polyspec/template/tree/main/packages/template-go), [Rust](https://github.com/polyspec/template/tree/main/packages/template-rust), [PHP](https://github.com/polyspec/template/tree/main/packages/template-php).
 
+## 같은 데이터로 여러 번 렌더
+
+같은 데이터로 여러 템플릿을 렌더하는 페이지는 `bind`로 데이터를 한 번 검사하고, 그 bound map을 모든 render에 준다. render는 그것을 다시 검사하지 않는다. `merge`는 한 render의 데이터를 공유 데이터에 더한다. 두 번째 map의 항목이 같은 key를 가진 첫 번째 map의 항목을 바꾼다([VAL-22](spec/data-model.md)). bound map은 assign과 정의 데이터로 받는다. list 안처럼 그 밖의 위치에서는 `E_DATA_UNSUPPORTED_TYPE`으로 실패한다.
+
+```ts
+import { bind, merge } from '@polyspec/template';
+
+const shared = bind({ site: 'Shop', user });
+const header = engine.render('header.tpl', shared);
+const page = engine.render('page.tpl', merge(shared, bind({ items })));
+```
+
+```go
+shared, _ := template.Bind(map[string]any{"site": "Shop", "user": user})
+items, _ := template.Bind(map[string]any{"items": rows})
+header, _ := engine.Render("header.tpl", shared, template.RenderOptions{})
+page, _ := engine.Render("page.tpl", template.Merge(shared, items), template.RenderOptions{})
+```
+
+```php
+use Polyspec\Template\BoundMap;
+
+$shared = BoundMap::bind(['site' => 'Shop', 'user' => $user]);
+$header = $engine->render('header.tpl', $shared);
+$page = $engine->render('page.tpl', BoundMap::merge($shared, BoundMap::bind(['items' => $items])));
+```
+
+```rust
+let shared = bind(&serde_json::json!({ "site": "Shop", "user": user }))?;
+let header = engine.render_bound(RenderTarget::Name("header.tpl"), &shared, &RenderOptions::default())?;
+let data = merge(&shared, &bind(&serde_json::json!({ "items": items }))?);
+let page = engine.render_bound(RenderTarget::Name("page.tpl"), &data, &RenderOptions::default())?;
+```
+
+PHP extension은 같은 연산을 가진 `Polyspec\Template\Native\BoundMap`을 제공한다. PHP package의 bound map은 extension에서 실패하고, extension의 bound map은 PHP package에서 실패한다.
+
 ## 브라우저에서 렌더
 
 같은 템플릿을 TypeScript 패키지로 브라우저에서 렌더한다. 서버가 assign 데이터를 JSON으로 임베드하면 브라우저가 그것을 읽어 같은 템플릿 이름을 렌더한다. [브라우저 렌더링](/ko/operations/browser)이 템플릿과 데이터를 전달하는 방법과 컴포넌트 프레임워크를 엔진 옆에 두는 방법을 설명한다.

@@ -45,7 +45,7 @@ func templateError(t *testing.T, err error) *errs.Error {
 }
 
 func bindCode(input any) errs.Code {
-	_, err := value.Bind(input)
+	_, err := value.BindValue(input)
 	var bindErr *value.BindError
 	if errors.As(err, &bindErr) {
 		return bindErr.Code
@@ -67,7 +67,7 @@ func nestedList(levels int) any {
 func TestNumbersAreCheckedByValue(t *testing.T) {
 	for _, input := range []any{1e19, float64(1 << 53), int64(1) << 53, uint64(1) << 60, -9007199254740992.0} {
 		if code := bindCode(input); code != errs.DataNumberRange {
-			t.Errorf("Bind(%v) = %s", input, code)
+			t.Errorf("BindValue(%v) = %s", input, code)
 		}
 	}
 	for _, text := range []string{"9007199254740992", "9007199254740992.0", "1e19", "-9.007199254740992e15"} {
@@ -85,7 +85,7 @@ func TestNumbersAreCheckedByValue(t *testing.T) {
 func TestKeysAndJSONTextAreCheckedAsUnicode(t *testing.T) {
 	for _, input := range []any{map[string]any{"\xff": 1}, []any{map[string]any{"\xff": 1}}} {
 		if code := bindCode(input); code != errs.DataInvalidUTF8 {
-			t.Errorf("Bind(%v) = %s", input, code)
+			t.Errorf("BindValue(%v) = %s", input, code)
 		}
 	}
 	ordered := value.NewOrderedMap()

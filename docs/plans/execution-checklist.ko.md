@@ -314,17 +314,26 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
 | T14.1 | host binding의 문자열, map key, define id를 `mb_check_encoding`으로 검사하고, 위치를 보고하는 곳은 `Utf8::firstInvalid`를 유지한다. 모든 1 byte와 2 byte 배열, 경계의 3 byte와 4 byte 배열에서 두 검사를 비교하는 test를 더한다 | `make check` | [o] |
-| T14.2 | 여러 render에서 data를 한 번 binding한다. 공개 `bind` 연산이 depth를 담은 opaque bound 값을 돌려주고, `merge`가 VAL-20을 검사하며, `render`가 bound `assign`과 bound `define` data를 다시 binding하지 않고 받는다. 모든 runtime에 둔다 | `make check` | [ ] |
+| T14.2 | 여러 render에서 data를 한 번 binding한다(VAL-22, RT-4, RT-24, RT-61, ERR-14). TypeScript, browser entry, Go, Rust, PHP, PHP extension에 `bind`와 `merge`를 가진 bound map type을 둔다. `tools/compiler/interface.json`은 새 `php-extension`과 `javascript-esm` mapping을 포함한 모든 구현의 type과 이름을 적고, 각 구현이 bound map을 `render`와 `prepare`에 넘기는 연산이나 parameter type도 적는다. interface check는 그 type의 다른 public 연산에서 실패한다. TypeScript build는 bound map class를 가진 runtime module 하나를 모든 entry와 두 module format이 공유하게 한다. 지금은 tsup의 CommonJS build가 chunk를 나누지 않아 `index.cjs`와 `render.cjs`가 각자 runtime 사본을 가진다. TypeScript와 Rust의 `bind`처럼 bound map 연산의 이름을 이미 가진 export는 이름을 바꾸거나 없애고, backend와 generated program을 다시 만든다. `render`와 `prepare`는 generated program과 PHP extension에서도 bound `assign`과 bound 정의 `data`를 다시 binding하지 않고 받고, typed program은 그것을 record로 변환한다(RT-68). 다른 위치에 있거나 다른 구현이 만든 bound map은 host binding이 E_DATA_UNSUPPORTED_TYPE으로 실패시킨다. `tests/rule-evidence.json`에 VAL-22와 ERR-14 group을 두고 모든 구현의 test와 merge 순서, 거부하는 위치, byte 동일성의 공통 fixture를 둔다. `bound-data` feature를 implemented로 바꾸고, guide에 `bind`와 `merge`를 보이고, changelog를 쓴다. 진행: TypeScript, browser entry, Go, Rust, PHP, PHP extension과 generated program 네 개에 구현했고, `tools/compiler/interface.json`과 그 검사, `bound-data` evidence group을 더했다. 모든 runtime의 T14.2 test, `scripts/check-generated-bound-data.mjs`, mutation을 포함한 compiler interface 검사, `scripts/check-rules.mjs`가 통과한다. 남은 것: `make check` | `make check` | [~] |
 
 ## Wave 15 — runtime마다 다른 binding 오류
 
-의존성: 없음. runtime 사이에 binding 차이가 두 개 있다. Rust는 null `assign`을 E_DATA_UNSUPPORTED_TYPE으로 실패시킨다(`value/bind.rs`의 `bind_map`). PHP extension도 같다(`convert.rs`의 `php_to_map`). TypeScript, Go, PHP는 RT-4대로 빈 map으로 렌더한다. typed generated program은 선언한 type과 맞지 않는 request를 ERR-13대로 PHP에서 `\InvalidArgumentException`, TypeScript에서 `Error`, Go에서 `fmt.Errorf`의 `error`로 보고한다. Rust는 E_DATA_UNSUPPORTED_TYPE으로 보고한다.
+의존성: 없음. runtime은 두 곳에서 T14.2 명세와 달랐다. Rust는 null `assign`을 E_DATA_UNSUPPORTED_TYPE으로 실패시킨다(`value/bind.rs`의 `bind_map`). PHP extension도 같다(`convert.rs`의 `php_to_map`). TypeScript, Go, PHP는 RT-4대로 빈 map으로 렌더한다. typed generated program은 선언한 type과 맞지 않는 request를 ERR-13대로 PHP에서 `\InvalidArgumentException`, TypeScript에서 `Error`, Go에서 `fmt.Errorf`의 `error`로 보고한다. Rust는 E_DATA_UNSUPPORTED_TYPE으로 보고한다. T14.2에서 세 번째를 찾았다. Go typed generated program은 없는 optional field를 그 type의 zero value로 읽으므로 `??`가 적용되지 않는다.
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
 | T15.1 | `assign`이 JSON `null`이고 빈 map으로 렌더하는 conformance case를 더한다. Rust에서 실패하는지 확인한다. Rust `render`, `render_values`, `prepare`와, `render_values`와 `render`로 렌더하는 PHP extension의 `render`가 null `assign`을 빈 map으로 받게 한다(`bind_map`, `php_to_map`). RT-4에 규칙을 적는다 | `make check` | [o] |
 | T15.1-1 | generated TypeScript와 PHP program이 AST program처럼 null `assign`을 빈 map으로 binding하게 한다(RT-4). 네 generated conformance runner의 `--case`가 case를 고르고, 아무 case도 고르지 못하면 실패하게 한다. runner는 위치 인자 filter만 읽었으므로 `--case data/null-assign`이 case 0개를 실행하고 통과했다 | `make check` | [o] |
 | T15.2 | `assign`과 정의 `data`가 선언한 type과 맞지 않는 request를 렌더하는 test를 모든 generated runtime에 더한다. runtime마다 보고가 다른지 확인한다. 모든 runtime이 ERR-13대로, 그대로 전달되고 ERR-1 오류가 아닌 자기 언어의 인자 오류로 보고하게 한다 | `make check` | [o] |
+| T15.4 | TypeScript generated program처럼 Go typed generated program이 없는 optional field를 null로 읽게 한다. Go backend는 optional field를 `valueOrZero`로 읽으므로, assign 데이터에 없는 `string?` field `c`에 대해 `{= c ?? '-'}`가 `-`가 아니라 빈 문자열을 렌더한다. 모든 generated runtime에 case를 더하고 Go에서 실패하는지 확인한 뒤 backend를 고친다 | `make check` | [ ] |
+
+## Wave 16 — 동시 render
+
+의존성: 없음. VAL-22는 render들이 하나의 bound map을 동시에 읽을 수 있다고 적지만, render들이 하나의 program을 공유할 수 있는지는 명세에 없다. Go AST program은 template cache를 lock 없이 읽고 쓰므로, 한 program의 동시 render는 경합한다(`go test -race`, `render/engine.go`의 `LoadTemplate`에서 cache를 읽고 쓰는 곳).
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T16.1 | 모든 runtime의 render가 하나의 program을 공유할 수 있는지 정하고 runtime 명세에 규칙을 적는다. 공유할 수 있으면 Go에서 한 program을 동시에 렌더하는 race test를 더하고 모든 runtime의 template cache를 그에 맞게 안전하게 한다. 공유할 수 없으면 호스트가 thread나 goroutine마다 program 하나를 쓴다고 적는다 | `make check` | [ ] |
 
 ## 병렬성 요약
 
@@ -343,7 +352,8 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W10 | 없음 | T10.1 |
 | W11 | T11.3 → T11.4와 T11.5를 병렬로 | T11.1 → T11.2 → 병렬 그룹 → T11.6 |
 | W14 | 없음 | T14.1 → T14.2 |
-| W15 | T15.1, T15.2 | 없음 |
+| W15 | T15.1, T15.2, T15.4 | 없음 |
+| W16 | 없음 | T16.1 |
 
 ## 완료 정의
 

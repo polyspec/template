@@ -1,7 +1,7 @@
 // Host binding of JavaScript values and native objects (VAL-2, VAL-13, VAL-17 to VAL-20, FUN-46, ERR-13).
 import { describe, expect, it } from 'vitest';
 import { AstProgram, MapLoader, parse, parseJson, TemplateError, type ErrorCode, type Template } from '../../src/index.js';
-import { bind, BindError } from '../../src/value/bind.js';
+import { bindValue, BindError } from '../../src/value/bind.js';
 import { FsLoader } from '../../src/node/index.js';
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -51,9 +51,9 @@ class Order {
 
 describe('numbers', () => {
   it('checks the value, not the host type or the JSON spelling (VAL-2)', () => {
-    for (const value of [2 ** 53, 1e19, -9007199254740992, BigInt('9007199254740992')]) expect(code(() => bind(value))).toBe('E_DATA_NUMBER_RANGE');
+    for (const value of [2 ** 53, 1e19, -9007199254740992, BigInt('9007199254740992')]) expect(code(() => bindValue(value))).toBe('E_DATA_NUMBER_RANGE');
     for (const text of ['9007199254740992', '9007199254740992.0', '1e19', '-9.007199254740992e15']) expect(code(() => parseJson(text))).toBe('E_DATA_NUMBER_RANGE');
-    expect(bind(-9007199254740991)).toBe(-9007199254740991);
+    expect(bindValue(-9007199254740991)).toBe(-9007199254740991);
     expect(parseJson('9007199254740991.0')).toBe(9007199254740991);
     expect(code(() => parseJson(`1${'0'.repeat(400)}`))).toBe('E_DATA_NUMBER_NOT_FINITE');
   });
@@ -61,7 +61,7 @@ describe('numbers', () => {
 
 describe('strings and keys', () => {
   it('rejects text that is not well-formed UTF-16 (VAL-13, VAL-17)', () => {
-    for (const value of ['a\ud800', '\udc00', new Map([['\ud800', 1]]), { '\udc00': 1 }]) expect(code(() => bind(value))).toBe('E_DATA_INVALID_UTF8');
+    for (const value of ['a\ud800', '\udc00', new Map([['\ud800', 1]]), { '\udc00': 1 }]) expect(code(() => bindValue(value))).toBe('E_DATA_INVALID_UTF8');
     expect(code(() => parseJson('"\\ud800"'))).toBe('E_DATA_INVALID_UTF8');
     expect(code(() => parseJson('{"\\udc00": 1}'))).toBe('E_DATA_INVALID_UTF8');
     expect(code(() => parseJson('"\ud800"'))).toBe('E_DATA_INVALID_UTF8');
@@ -86,9 +86,9 @@ describe('depth', () => {
     list.push(list);
     const map = new Map<string, unknown>();
     map.set('self', map);
-    for (const value of [cyclic, list, map, nested(200000)]) expect(code(() => bind(value))).toBe('E_DATA_DEPTH');
-    expect(code(() => bind(nested(64)))).toBe('OK');
-    expect(code(() => bind(nested(65)))).toBe('E_DATA_DEPTH');
+    for (const value of [cyclic, list, map, nested(200000)]) expect(code(() => bindValue(value))).toBe('E_DATA_DEPTH');
+    expect(code(() => bindValue(nested(64)))).toBe('OK');
+    expect(code(() => bindValue(nested(65)))).toBe('E_DATA_DEPTH');
     expect(code(() => parseJson('['.repeat(200000)))).toBe('E_DATA_DEPTH');
     const templates = program({ 'a.tpl': '{= json(m) | raw}' });
     expect(templates.render('a.tpl', { m: nested(63) })).toBe(`${'['.repeat(63)}${']'.repeat(63)}`);

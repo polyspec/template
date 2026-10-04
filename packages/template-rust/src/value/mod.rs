@@ -1,6 +1,7 @@
 //! Value types, safe strings, truthiness, equality and ordering (docs/spec/data-model.md, expressions.md).
 
 pub mod bind;
+pub mod bound;
 pub mod json;
 pub mod number;
 

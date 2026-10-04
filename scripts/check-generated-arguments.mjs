@@ -67,8 +67,8 @@ func TestGeneratedArguments(t *testing.T) { program, err := NewGeneratedProgram(
   writeFileSync(rustSource, compileSource(graphManifest, types, 'rust'));
   const rustTest = join(root, 'packages/template-rust/tests/generated_arguments_check.rs');
   writeFileSync(rustTest, `mod generated { include!(${rustString(rustSource)}); }
-use polyspec_template::{DefineInput, OrderedMap, Program, RenderOptions, RenderTarget, RuntimeEnvironment, Value};
-fn options(name: Value) -> RenderOptions { let mut options = RenderOptions::default(); let mut data = OrderedMap::new(); data.insert("name".to_string(), name); options.define.insert("card".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(Value::map(data)), html: None }); options }
+use polyspec_template::{DefineData, DefineInput, OrderedMap, Program, RenderOptions, RenderTarget, RuntimeEnvironment, Value};
+fn options(name: Value) -> RenderOptions { let mut options = RenderOptions::default(); let mut data = OrderedMap::new(); data.insert("name".to_string(), name); options.define.insert("card".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(DefineData::Value(Value::map(data))), html: None }); options }
 fn kind<T, E: std::fmt::Debug>(result: Result<T, E>) -> String { match result { Ok(_) => "rendered".to_string(), Err(error) => { let text = format!("{error:?}"); if text.starts_with("Argument(") { "argument".to_string() } else { text } } } }
 #[test] fn generated_arguments_fail_as_argument_errors() { let program = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); assert_eq!(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::text("N"))).unwrap(), ${rustString(expected)}); let first = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": 1 }), &options(Value::text("N")))); let second = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::Number(2.0)))); assert!(first == "argument" && second == "argument", "Rust reports {first}, {second}"); }
 `);

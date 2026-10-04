@@ -314,17 +314,26 @@ Dependencies: none. Host binding checks every string, map key and define id with
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
 | T14.1 | Check the strings, map keys and define ids of host binding with `mb_check_encoding` and keep `Utf8::firstInvalid` where a position is reported; add a test that compares both on every 1-byte and 2-byte sequence and on the boundary 3-byte and 4-byte sequences | `make check` | [o] |
-| T14.2 | Bind data once for several renders: a public `bind` operation that returns an opaque bound value with its depth, a `merge` that checks VAL-20, and `render` that accepts a bound `assign` and bound `define` data without binding them again, in every runtime | `make check` | [ ] |
+| T14.2 | Bind data once for several renders (VAL-22, RT-4, RT-24, RT-61, ERR-14): a bound map type with `bind` and `merge` in TypeScript, the browser entry, Go, Rust, PHP and the PHP extension; `tools/compiler/interface.json` lists the type and its names for every implementation, including new `php-extension` and `javascript-esm` mappings, and the operation or parameter type through which each implementation passes a bound map to `render` and `prepare`, and the interface checks fail on another public operation of the type; the TypeScript build shares one runtime module that holds the bound map class across its entries and both module formats, because the CommonJS build of tsup does not split chunks and `index.cjs` and `render.cjs` each hold a copy of the runtime today; an export that already has the name of a bound map operation, such as the TypeScript and Rust `bind`, is renamed or removed and the backends and generated programs are regenerated; `render` and `prepare` accept a bound `assign` and bound definition `data` without binding them again, also in generated programs and the PHP extension, and typed programs convert them to their records (RT-68); host binding fails with E_DATA_UNSUPPORTED_TYPE on a bound map at any other position or from another implementation; a VAL-22 and ERR-14 group in `tests/rule-evidence.json` with tests in every implementation and a shared fixture of merge order, rejected positions and byte equality; the `bound-data` feature becomes implemented; the guide shows `bind` and `merge`; a changelog entry. Progress: implemented in TypeScript, the browser entry, Go, Rust, PHP, the PHP extension and the four generated programs, with `tools/compiler/interface.json`, its checks and the `bound-data` evidence group; the T14.2 tests of every runtime, `scripts/check-generated-bound-data.mjs`, the compiler interface check with its mutations and `scripts/check-rules.mjs` pass. Remaining: `make check` | `make check` | [~] |
 
 ## Wave 15 — Binding errors that differ between runtimes
 
-Dependencies: none. Two bindings differ between the runtimes. Rust fails with E_DATA_UNSUPPORTED_TYPE on a null `assign` (`bind_map` in `value/bind.rs`), and so does the PHP extension (`php_to_map` in `convert.rs`), while TypeScript, Go and PHP render it as an empty map, as RT-4 states. A typed generated program reports a request that does not match its declared types with `\InvalidArgumentException` in PHP, `Error` in TypeScript and an `error` of `fmt.Errorf` in Go, as ERR-13 states, while Rust reports it as E_DATA_UNSUPPORTED_TYPE.
+Dependencies: none. The runtimes differed from the T14.2 specification in two places. Rust fails with E_DATA_UNSUPPORTED_TYPE on a null `assign` (`bind_map` in `value/bind.rs`), and so does the PHP extension (`php_to_map` in `convert.rs`), while TypeScript, Go and PHP render it as an empty map, as RT-4 states. A typed generated program reports a request that does not match its declared types with `\InvalidArgumentException` in PHP, `Error` in TypeScript and an `error` of `fmt.Errorf` in Go, as ERR-13 states, while Rust reports it as E_DATA_UNSUPPORTED_TYPE. T14.2 found a third: the Go typed generated program reads an absent optional field as the zero value of its type, so `??` does not apply.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
 | T15.1 | Add a conformance case whose `assign` is JSON `null` and that renders as an empty map; check it fails in Rust; make Rust `render`, `render_values` and `prepare` and the PHP extension `render`, which renders through `render_values` and `render`, accept a null `assign` as an empty map (`bind_map`, `php_to_map`); state the rule in RT-4 | `make check` | [o] |
 | T15.1-1 | Make the generated TypeScript and PHP programs bind a null `assign` as an empty map, as their AST programs do (RT-4); make `--case` of the four generated conformance runners select the case and fail when it selects none, because the runners read only a positional filter and `--case data/null-assign` ran 0 cases and passed | `make check` | [o] |
 | T15.2 | Add a test in every generated runtime that renders a request whose `assign` and definition `data` do not match the declared types; check that the runtimes report it differently; make every runtime report it as ERR-13 states, an argument error of its language that passes unchanged and is not an ERR-1 error | `make check` | [o] |
+| T15.4 | Make the Go typed generated program read an absent optional field as null, as the TypeScript generated program does: the Go backend reads an optional field through `valueOrZero`, so `{= c ?? '-'}` with a `string?` field `c` that the assign data lacks renders an empty string and not `-`; add the case in every generated runtime, check that it fails in Go, then fix the backend | `make check` | [ ] |
+
+## Wave 16 — Concurrent renders
+
+Dependencies: none. VAL-22 states that renders may read one bound map concurrently, but the specification does not state whether renders may share one program. The Go AST program reads and writes its template cache without a lock, so concurrent renders of one program race (`go test -race`, `render/engine.go`, the cache read and write in `LoadTemplate`).
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T16.1 | Decide whether renders of every runtime may share one program and state the rule in the runtime specification; when they may, add a race test that renders one program concurrently in Go and make the template cache of every runtime safe for it; when they may not, state that a host uses one program per thread or goroutine | `make check` | [ ] |
 
 ## Parallelism summary
 
@@ -343,7 +352,8 @@ Dependencies: none. Two bindings differ between the runtimes. Rust fails with E_
 | W10 | none | T10.1 |
 | W11 | T11.3 → T11.4 alongside T11.5 | T11.1 → T11.2 → the parallel group → T11.6 |
 | W14 | none | T14.1 → T14.2 |
-| W15 | T15.1, T15.2 | none |
+| W15 | T15.1, T15.2, T15.4 | none |
+| W16 | none | T16.1 |
 
 ## Definition of done
 

@@ -3,6 +3,7 @@ package errs
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 )
 
@@ -117,4 +118,13 @@ func At(code Code, template string, lines LineIndex, span Span, message string) 
 // WithoutPosition creates an error that has no source position (ERR-5, ERR-6).
 func WithoutPosition(code Code, template, message string) *Error {
 	return &Error{Code: code, Template: template, Message: message}
+}
+
+// FromPanic converts a recovered panic value into the error that a public operation returns: a
+// template error passes unchanged, and every other value is E_INTERNAL (ERR-13).
+func FromPanic(template string, failure any) error {
+	if templateError, ok := failure.(*Error); ok {
+		return templateError
+	}
+	return WithoutPosition(Internal, template, fmt.Sprintf("internal failure: %v", failure))
 }

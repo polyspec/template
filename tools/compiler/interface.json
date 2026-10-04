@@ -252,6 +252,13 @@
         "loopMeta"
       ],
       "invariant": "Includes share one scope and blocks create a new scope in both compiler modes."
+    },
+    "BoundMap": {
+      "operations": [
+        "bind",
+        "merge"
+      ],
+      "invariant": "Holds only values that host binding checked; prepare and render take it as assign and as definition data without binding it again, and no other operation creates or changes it (VAL-22)."
     }
   },
   "components": {
@@ -644,6 +651,30 @@
         "lookup",
         "loopMeta"
       ]
+    },
+    "BoundMap": {
+      "kind": "concrete",
+      "operations": [
+        {
+          "name": "bind",
+          "parameters": [
+            "value"
+          ],
+          "returns": "BoundMap or error"
+        },
+        {
+          "name": "merge",
+          "parameters": [
+            "first",
+            "second"
+          ],
+          "returns": "BoundMap or error"
+        }
+      ],
+      "acceptedBy": [
+        "prepare",
+        "render"
+      ]
     }
   },
   "operations": [
@@ -846,7 +877,22 @@
       "scopeOperations": [
         "lookup",
         "loopMeta"
-      ]
+      ],
+      "boundMap": {
+        "type": "BoundMap",
+        "operations": {
+          "bind": "bind",
+          "merge": "merge"
+        },
+        "assign": {
+          "prepare": "prepare",
+          "render": "render"
+        },
+        "generatedOperations": [
+          "bindMap",
+          "bindData"
+        ]
+      }
     },
     "go": {
       "backend": "GoBackend",
@@ -885,7 +931,22 @@
       "scopeOperations": [
         "Lookup",
         "LoopMeta"
-      ]
+      ],
+      "boundMap": {
+        "type": "BoundMap",
+        "operations": {
+          "bind": "Bind",
+          "merge": "Merge"
+        },
+        "assign": {
+          "prepare": "Prepare",
+          "render": "Render"
+        },
+        "generatedOperations": [
+          "value.BindMap",
+          "value.BindData"
+        ]
+      }
     },
     "rust": {
       "backend": "RustBackend",
@@ -950,7 +1011,22 @@
       "scopeOperations": [
         "lookup",
         "loop_meta"
-      ]
+      ],
+      "boundMap": {
+        "type": "BoundMap",
+        "operations": {
+          "bind": "bind",
+          "merge": "merge"
+        },
+        "assign": {
+          "prepare": "prepare_bound",
+          "render": "render_bound"
+        },
+        "generatedOperations": [
+          "bind_data",
+          "bound_root"
+        ]
+      }
     },
     "php": {
       "backend": "PhpBackend",
@@ -989,7 +1065,56 @@
       "scopeOperations": [
         "lookup",
         "loopMeta"
-      ]
+      ],
+      "boundMap": {
+        "type": "Polyspec\\Template\\BoundMap",
+        "operations": {
+          "bind": "bind",
+          "merge": "merge"
+        },
+        "assign": {
+          "prepare": "prepare",
+          "render": "render"
+        },
+        "generatedOperations": [
+          "Bind::map",
+          "Bind::data"
+        ]
+      }
+    },
+    "php-extension": {
+      "boundMap": {
+        "type": "Polyspec\\Template\\Native\\BoundMap",
+        "operations": {
+          "bind": "bind",
+          "merge": "merge"
+        },
+        "assign": {
+          "render": "render"
+        },
+        "generatedOperations": [],
+        "notAcceptedBy": [
+          "render_json"
+        ]
+      }
+    },
+    "javascript-esm": {
+      "entry": "@polyspec/template/render",
+      "boundMap": {
+        "type": "BoundMap",
+        "operations": {
+          "bind": "bind",
+          "merge": "merge"
+        },
+        "assign": {
+          "prepare": "prepare",
+          "render": "render"
+        },
+        "generatedOperations": [
+          "bindMap",
+          "bindData"
+        ]
+      }
     }
   },
   "forbidden": [

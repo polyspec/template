@@ -299,7 +299,7 @@ func (r *RuntimeBindings) Depth(input value.Value, frame *Frame, span ast.Span) 
 // bindResult binds a host value; a value that cannot be bound fails with its data code at the
 // expression that produced it (ERR-5, VAL-11).
 func bindResult(r *RuntimeBindings, input any, frame *Frame, span ast.Span) (value.Value, error) {
-	result, err := value.Bind(input)
+	result, err := value.BindValue(input)
 	if err != nil {
 		var bindError *value.BindError
 		if errors.As(err, &bindError) {

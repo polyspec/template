@@ -1,7 +1,8 @@
 //! Template language implementation: lexer, parser, renderer, functions and the command line contract.
 //!
 //! The specification is in `docs/spec/` of the repository. `parse` produces the AST of one template,
-//! `Engine::render` renders a template name or a parsed template with JSON assign data and template definitions.
+//! `Engine::render` renders a template name or a parsed template with JSON assign data and template definitions;
+//! `bind` checks data once and `Engine::render_bound` renders the bound map without checking it again.
 
 #![deny(missing_docs)]
 
@@ -27,7 +28,8 @@ pub use render::engine::{
     defines_from_json, env_from_json,
 };
 pub use render::runtime_environment::RuntimeEnvironment;
-pub use value::bind::{BindError, bind, bind_value, bind_values, to_json_value, value_from_json};
+pub use value::bind::{BindError, bind_json, bind_value, bind_values, to_json_value, value_from_json};
+pub use value::bound::{BindInput, BoundMap, DefineData, bind, bind_data, bound_root, merge};
 pub use value::json::{parse_json, parse_json_bytes, read_json};
 pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value};
 

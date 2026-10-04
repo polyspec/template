@@ -69,8 +69,9 @@ func checkKey(key string) (string, error) {
 	return key, nil
 }
 
-// Bind converts a Go value into a template value (VAL-15, VAL-20).
-func Bind(input any) (Value, error) {
+// BindValue converts a Go value into a template value (VAL-15, VAL-20). A bound map fails at every
+// position, because render takes one only as assign and as definition data (VAL-22).
+func BindValue(input any) (Value, error) {
 	return bindAt(input, 0)
 }
 
@@ -133,6 +134,13 @@ func bindAt(input any, level int) (Value, error) {
 		return out, nil
 	case []Value:
 		return bindSlice(reflect.ValueOf(x), level)
+	case BoundMap:
+		return nil, bindError(errs.DataUnsupportedType, "a bound map is accepted only as assign and as definition data")
+	case *BoundMap:
+		if x == nil {
+			return nil, nil
+		}
+		return nil, bindError(errs.DataUnsupportedType, "a pointer to a bound map has no binding")
 	}
 	rv := reflect.ValueOf(input)
 	switch rv.Kind() {
@@ -217,7 +225,7 @@ func bindStruct(rv reflect.Value) (Value, error) {
 				name = tagName
 			}
 		}
-		v, err := Bind(rv.Field(i).Interface())
+		v, err := BindValue(rv.Field(i).Interface())
 		if err != nil {
 			return nil, err
 		}
@@ -226,20 +234,33 @@ func bindStruct(rv reflect.Value) (Value, error) {
 	return out, nil
 }
 
-// BindMap binds a value that must be a map.
+// BindMap binds assign data (RT-4): null is the empty map, a bound map gives its entries without
+// binding them again (VAL-22), and every other value must bind to a map.
 func BindMap(input any) (*OrderedMap, error) {
-	if input == nil {
-		return NewOrderedMap(), nil
+	if bound, ok := input.(BoundMap); ok {
+		return bound.boundEntries(), nil
 	}
-	v, err := Bind(input)
+	v, err := BindValue(input)
 	if err != nil {
 		return nil, err
+	}
+	if v == nil {
+		return NewOrderedMap(), nil
 	}
 	m, ok := v.(*OrderedMap)
 	if !ok {
 		return nil, bindError(errs.DataUnsupportedType, "assign is not a map")
 	}
 	return m, nil
+}
+
+// BindData binds the data of a template definition (RT-24): a bound map gives its entries without
+// binding them again (VAL-22); every other value is bound like any host value.
+func BindData(input any) (Value, error) {
+	if bound, ok := input.(BoundMap); ok {
+		return bound.boundEntries(), nil
+	}
+	return BindValue(input)
 }
 
 // DepthWithin reports whether the depth of a template value is at most limit (VAL-20). The walk

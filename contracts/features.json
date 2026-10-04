@@ -1501,6 +1501,99 @@
         "docs/spec/expressions.md",
         "docs/spec/data-model.md"
       ]
+    },
+    {
+      "id": "bound-data",
+      "title": "Bound data for several renders",
+      "title_ko": "여러 render를 위한 bound data",
+      "status": "implemented",
+      "description": "Bind host data once with `bind`, combine bound maps with `merge` in RT-26 order, and render a bound `assign` or bound definition `data` without binding it again (VAL-22, RT-61, ERR-14).",
+      "description_ko": "`bind`로 호스트 data를 한 번 binding하고, `merge`로 bound map을 RT-26 순서로 합치며, bound `assign`이나 bound 정의 `data`를 다시 binding하지 않고 렌더한다(VAL-22, RT-61, ERR-14).",
+      "inputs": {
+        "type": "HostValue",
+        "fields": [
+          "assign",
+          "definition data"
+        ]
+      },
+      "outputs": {
+        "type": "BoundMap",
+        "fields": [
+          "checked entries"
+        ]
+      },
+      "state": [
+        "bind host value",
+        "merge bound maps",
+        "render without binding again"
+      ],
+      "errors": [
+        {
+          "code": "E_DATA_UNSUPPORTED_TYPE",
+          "when": "the value is not a map, or a bound map appears at a position other than assign and definition data, or another implementation created it"
+        },
+        {
+          "code": "E_DATA_DEPTH",
+          "when": "the host value nests deeper than VAL-20 allows"
+        },
+        {
+          "code": "E_DATA_INVALID_UTF8",
+          "when": "a string or a map key of the host value is not valid Unicode text"
+        },
+        {
+          "code": "E_DATA_NUMBER_RANGE",
+          "when": "a finite number of the host value has a magnitude greater than 2^53 - 1"
+        },
+        {
+          "code": "E_DATA_NUMBER_NOT_FINITE",
+          "when": "a number of the host value is NaN or infinite"
+        },
+        {
+          "code": "E_RUNTIME_HOST_FUNCTION",
+          "when": "host code that binding calls, such as jsonSerialize(), reports an error"
+        },
+        {
+          "code": "E_INTERNAL",
+          "when": "bind or merge fails in a way that the specification does not define (ERR-13)"
+        }
+      ],
+      "clients": {
+        "go": "pass",
+        "php": "pass",
+        "rust": "pass",
+        "typescript": "pass"
+      },
+      "fixtures": [
+        "tests/fixtures/bound-data/cases.json"
+      ],
+      "tests": [
+        "packages/template-ts/tests/value/bound.test.ts",
+        "packages/template-ts/tests/value/bound-formats.test.ts",
+        "packages/template-go/bound_test.go",
+        "packages/template-rust/tests/bound.rs",
+        "packages/template-php/tests/Value/BoundMapTest.php",
+        "packages/template-php-ext/tests/BoundMapTest.php",
+        "scripts/check-generated-bound-data.mjs"
+      ],
+      "verification": [
+        {
+          "id": "check-1",
+          "command": "make test-ts test-go test-rust test-php test-ext"
+        },
+        {
+          "id": "check-2",
+          "command": "make generated-native-check"
+        },
+        {
+          "id": "check-3",
+          "command": "make compiler-interface-check"
+        }
+      ],
+      "docs": [
+        "docs/spec/data-model.md",
+        "docs/spec/runtime.md",
+        "docs/spec/errors.md"
+      ]
     }
   ]
 }

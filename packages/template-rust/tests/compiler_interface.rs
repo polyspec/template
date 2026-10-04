@@ -34,6 +34,18 @@ struct RustMapping {
     runtime_environment_fields: Vec<String>,
     #[serde(rename = "runtimeEnvironmentOperations")]
     runtime_environment_operations: Vec<String>,
+    #[serde(rename = "boundMap")]
+    bound_map: BoundMapMapping,
+}
+
+#[derive(Deserialize)]
+struct BoundMapMapping {
+    #[serde(rename = "type")]
+    type_name: String,
+    operations: HashMap<String, String>,
+    assign: HashMap<String, String>,
+    #[serde(rename = "generatedOperations")]
+    generated_operations: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -109,11 +121,33 @@ fn runtime_declarations_match_manifest() {
             _ => None,
         })
         .collect();
-    assert_eq!(methods.len(), manifest.runtime_contract.program.operations.len());
-    for (method, operation) in methods.iter().zip(&manifest.runtime_contract.program.operations) {
-        assert_eq!(method.sig.ident, operation.name);
-        assert_eq!(method.sig.inputs.len() - 1, operation.parameters.len());
-    }
+    // Each logical operation has a method for JSON assign data and, under the name of the manifest,
+    // a method for a bound map (VAL-22).
+    let bound_names: Vec<String> = manifest
+        .runtime_contract
+        .program
+        .operations
+        .iter()
+        .map(|operation| manifest.languages.rust.bound_map.assign[&operation.name].clone())
+        .collect();
+    let expected_program: Vec<(String, usize)> = manifest
+        .runtime_contract
+        .program
+        .operations
+        .iter()
+        .map(|operation| (operation.name.clone(), operation.parameters.len()))
+        .chain(
+            bound_names
+                .iter()
+                .zip(&manifest.runtime_contract.program.operations)
+                .map(|(name, operation)| (name.clone(), operation.parameters.len())),
+        )
+        .collect();
+    let actual_program: Vec<(String, usize)> = methods
+        .iter()
+        .map(|method| (method.sig.ident.to_string(), method.sig.inputs.len() - 1))
+        .collect();
+    assert_eq!(actual_program, expected_program);
 
     let engine = source
         .items
@@ -148,7 +182,15 @@ fn runtime_declarations_match_manifest() {
             _ => None,
         })
         .collect();
-    assert_eq!(operations, manifest.runtime_contract.engine.operations);
+    let expected_engine: Vec<String> = manifest
+        .runtime_contract
+        .engine
+        .operations
+        .iter()
+        .cloned()
+        .chain(bound_names.iter().cloned())
+        .collect();
+    assert_eq!(operations, expected_engine);
     let ast_program = source
         .items
         .iter()
@@ -341,4 +383,41 @@ fn runtime_declarations_match_manifest() {
         assert!(actual_by_name.contains_key(name), "RuntimeEnvironment.{name} is missing");
         assert!(operation.parameters.len() <= 3);
     }
+}
+
+/// VAL-22: the bound map type has private fields, no method and no trait implementation, and the
+/// public functions of its module are exactly the operations of the manifest and the operations
+/// that it declares for generated programs.
+#[test]
+fn bound_map_declarations_match_manifest() {
+    let manifest_path = std::env::var("TEMPLATE_INTERFACE_MANIFEST").unwrap_or_else(|_| "../../tools/compiler/interface.json".to_string());
+    let manifest: Manifest = serde_json::from_str(&fs::read_to_string(manifest_path).unwrap()).unwrap();
+    let mapping = &manifest.languages.rust.bound_map;
+    let source = syn::parse_file(&fs::read_to_string("src/value/bound.rs").unwrap()).unwrap();
+    let names_type = |ty: &syn::Type| matches!(ty, syn::Type::Path(path) if path.path.is_ident(&mapping.type_name));
+    let mut functions = Vec::new();
+    for item in &source.items {
+        match item {
+            Item::Struct(item) if item.ident == mapping.type_name => {
+                assert!(
+                    item.fields.iter().all(|field| matches!(field.vis, syn::Visibility::Inherited)),
+                    "BoundMap has a public field"
+                );
+            }
+            Item::Impl(item) if names_type(&item.self_ty) => {
+                panic!("BoundMap has an implementation block, which adds an operation");
+            }
+            Item::Fn(item) if matches!(item.vis, syn::Visibility::Public(_)) => functions.push(item.sig.ident.to_string()),
+            _ => {}
+        }
+    }
+    let mut expected: Vec<String> = mapping
+        .operations
+        .values()
+        .cloned()
+        .chain(mapping.generated_operations.iter().cloned())
+        .collect();
+    expected.sort();
+    functions.sort();
+    assert_eq!(functions, expected);
 }

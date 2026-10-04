@@ -1,5 +1,5 @@
 // Generated.
-import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bind, bindMap, checkText, internalBoundary } from '@polyspec/template';
+import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from '@polyspec/template';
 const generatedRecords = { "Page": { "title": { "kind": "string", "optional": true } }, "Slot": { "template": { "kind": "string", "optional": true }, "html": { "kind": "string", "optional": true } } };
 const generatedAssign = { "title": { "kind": "string", "optional": true }, "heading": { "kind": "string", "optional": true }, "island_label": { "kind": "string", "optional": true }, "root_label": { "kind": "string", "optional": true }, "defined_label": { "kind": "string", "optional": true }, "page": { "kind": "record", "name": "Page", "optional": true } };
 const generatedDefinitionSpecs = { "content": { "field": "content", "target": "content.tpl", "html": true, "input": {} }, "layout": { "field": "layout", "target": "layout.tpl", "html": false, "input": {} } };
@@ -63,7 +63,7 @@ function generatedBindDefinitions(input) { const definitions = {}; const targets
         throw new Error('define.' + id + ' is not an object');
     const template = raw.template;
     const html = raw.html;
-    const data = raw.data === undefined ? undefined : bind(raw.data);
+    const data = raw.data === undefined ? undefined : bindData(raw.data);
     if (typeof html === 'string') {
         if (!spec.html || template !== undefined || data !== undefined)
             throw new Error('define.' + id + ' has an invalid html entry');

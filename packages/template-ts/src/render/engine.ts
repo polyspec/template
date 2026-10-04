@@ -4,7 +4,7 @@ import { errorAt, internalBoundary, TemplateError, type Span } from '../errors.j
 import { type Env, type HostFunction } from '../functions/index.js';
 import { MapLoader, resolvePath, type Loader, type LoadResult, PathError } from '../loader.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from '../parser/scanner.js';
-import { BindError, bind, bindMap, checkText } from '../value/bind.js';
+import { BindError, bindData, bindMap, checkText } from '../value/bind.js';
 import type { MapValue, Value } from '../value/value.js';
 import { Frame, RenderContext, Scope, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
 import { RuntimeEnvironment } from './runtime-environment.js';
@@ -188,7 +188,7 @@ export class AstProgramCore implements RuntimeServices, Program {
     let registry: Map<string, DefineEntry>;
     let env: Env;
     try {
-      rootData = bindMap(assign ?? new Map());
+      rootData = bindMap(assign);
       registry = this.bindDefines(options.define ?? {});
       env = this.bindEnv(options.env ?? {});
     } catch (error) {
@@ -224,7 +224,7 @@ export class AstProgramCore implements RuntimeServices, Program {
           if (error instanceof PathError) throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: ${error.message}`);
           throw error;
         }
-        const data = typeof input === 'string' || input.data === undefined ? null : bind(input.data);
+        const data = typeof input === 'string' || input.data === undefined ? null : bindData(input.data);
         if (data !== null && !(data instanceof Map)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: data is not a map`);
         registry.set(id, { template: name, data });
       } else {

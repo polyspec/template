@@ -1,8 +1,6 @@
 package render
 
 import (
-	"fmt"
-
 	"github.com/polyspec/template/errs"
 )
 
@@ -22,8 +20,5 @@ func Guard[T any](template string, operation func() (T, error)) (result T, err e
 
 // Internal converts a recovered panic value into the error that a public operation returns.
 func Internal(template string, failure any) error {
-	if templateError, ok := failure.(*errs.Error); ok {
-		return templateError
-	}
-	return errs.WithoutPosition(errs.Internal, template, fmt.Sprintf("internal failure: %v", failure))
+	return errs.FromPanic(template, failure)
 }

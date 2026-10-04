@@ -190,7 +190,7 @@ final class AstProgram implements Program, RuntimeServices
     private function prepareBound(string $name, string|array $target, mixed $assign, array $options): PreparedRender
     {
         try {
-            $rootData = $assign === null ? new MapValue() : Bind::map($assign);
+            $rootData = Bind::map($assign);
             $registry = $this->bindDefines($options['define'] ?? []);
             $env = $this->bindEnv($options['env'] ?? []);
         } catch (BindError $error) {
@@ -236,10 +236,7 @@ final class AstProgram implements Program, RuntimeServices
                 }
                 $data = null;
                 if (is_array($input) && array_key_exists('data', $input)) {
-                    $data = Bind::value($input['data']);
-                    if ($data === []) {
-                        $data = new MapValue();
-                    }
+                    $data = Bind::data($input['data']);
                     if (!$data instanceof MapValue) {
                         throw new BindError('E_DATA_UNSUPPORTED_TYPE', "define {$id}: data is not a map");
                     }
