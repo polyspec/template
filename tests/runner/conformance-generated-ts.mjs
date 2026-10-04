@@ -1,28 +1,27 @@
 #!/usr/bin/env node
 // Compiles every fixture through the product TypeScript backend and compares
 // generated execution or compile diagnostics with the canonical expectations.
+// tsc runs as one step under a deadline; each case renders in a worker under its own deadline.
+// Every step and every case prints its start and its result with its elapsed time.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
-import { parse, parseJsonBytes } from '../../packages/template-ts/dist/index.mjs';
+import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { inWorker, runBounded, seconds, stepProgress } from './bounded.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
+
+// The time limits of the tsc step and of the render of one case.
+const TSC_TIMEOUT_MS = 300_000;
+const RENDER_TIMEOUT_MS = 30_000;
 
 const temporary = mkdtempSync(join(root, '.generated-conformance-ts-'));
 const sources = join(temporary, 'source');
 const output = join(temporary, 'output');
 mkdirSync(sources);
-
-function plain(value) {
-  if (value instanceof Map) return Object.fromEntries([...value].map(([key, item]) => [key, plain(item)]));
-  if (Array.isArray(value)) return value.map(plain);
-  return value;
-}
 
 function errorObject(error, template = null) {
   if (typeof error?.code !== 'string') return null;
@@ -55,9 +54,12 @@ const pending = [];
 const failures = [];
 let passed = 0;
 const { cases } = generatedCases(process.argv.slice(2));
+const progress = stepProgress();
 try {
   for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');
+    const step = `${testCase.id} › compile`;
+    progress.start(step);
     try {
       const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(temporary, `${id}.types.json`);
@@ -74,39 +76,52 @@ try {
       });
       writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'ts'));
       pending.push({ testCase, id, sourcePath });
+      progress.pass(step);
     } catch (error) {
       const actual = errorObject(error);
       const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
-      if (difference) failures.push(`${testCase.id}: compile ${difference}: ${error.message}`);
-      else passed++;
+      if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); progress.fail(step, undefined, difference); }
+      else { passed++; progress.pass(step); }
     }
   }
 
   // tsc without input files prints its help and fails, so skip it when every case failed to compile.
   if (pending.length > 0) {
-    execFileSync('npx', [
+    const step = `tsc (${pending.length} files)`;
+    progress.start(step);
+    const result = await runBounded('npx', [
       'tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
       ...pending.map(item => item.sourcePath),
-    ], { cwd: root, stdio: 'pipe', maxBuffer: 64 * 1024 * 1024 });
+    ], { cwd: root, timeoutMs: TSC_TIMEOUT_MS });
+    if (result.timedOut || result.status !== 0) {
+      const reason = result.timedOut ? `tsc exceeded its ${seconds(TSC_TIMEOUT_MS)} deadline` : `tsc exited with ${result.status}\n${result.stdout}${result.stderr}`;
+      progress.fail(step, undefined, reason);
+      throw new Error(reason);
+    }
+    progress.pass(step);
   }
 
   for (const { testCase, id } of pending) {
-    try {
-      const { GeneratedProgram } = await import(pathToFileURL(join(output, `${id}.js`)).href);
-      const assign = testCase.hasData ? parseJsonBytes(readFileSync(join(testCase.dir, 'data.json'))) : new Map();
-      const define = testCase.hasDefine ? plain(parseJsonBytes(readFileSync(join(testCase.dir, 'define.json')))) : {};
-      const env = testCase.hasEnv ? plain(parseJsonBytes(readFileSync(join(testCase.dir, 'env.json')))) : undefined;
-      const actual = new GeneratedProgram().render('input.tpl', assign, { define, env });
-      if (testCase.expectedError !== null) failures.push(`${testCase.id}: expected ${testCase.expectedError.code}, generated execution succeeded`);
-      else if (actual !== testCase.expectedHtml) failures.push(`${testCase.id}: generated HTML differs`);
-      else passed++;
-    } catch (error) {
-      const actual = errorObject(error, 'input.tpl');
+    const step = `${testCase.id} › render`;
+    progress.start(step);
+    const failed = failures.length;
+    const result = await inWorker(new URL('./generated-ts-render.mjs', import.meta.url), {
+      module: join(output, `${id}.js`), dir: testCase.dir, hasData: testCase.hasData, hasDefine: testCase.hasDefine, hasEnv: testCase.hasEnv,
+    }, RENDER_TIMEOUT_MS);
+    if (result.timedOut) failures.push(`${testCase.id}: render exceeded its ${seconds(RENDER_TIMEOUT_MS)} deadline`);
+    else if (result.failure) failures.push(`${testCase.id}: render ${result.failure}`);
+    else if (result.error) {
+      const actual = errorObject(result.error, 'input.tpl');
       const difference = testCase.expectedError === null || actual === null ? 'unexpected render failure' : firstDifference(testCase.expectedError, actual);
-      if (difference) failures.push(`${testCase.id}: render ${difference}: ${error.message}`);
+      if (difference) failures.push(`${testCase.id}: render ${difference}: ${result.error.message}`);
       else passed++;
-    }
+    } else if (testCase.expectedError !== null) failures.push(`${testCase.id}: expected ${testCase.expectedError.code}, generated execution succeeded`);
+    else if (result.html !== testCase.expectedHtml) failures.push(`${testCase.id}: generated HTML differs`);
+    else passed++;
+    if (failures.length > failed) progress.fail(step, undefined, failures.slice(failed).join('\n'));
+    else progress.pass(step);
   }
+  progress.close('TypeScript generated conformance steps');
   assert.equal(passed + failures.length, cases.length);
 } finally {
   rmSync(temporary, { recursive: true, force: true });

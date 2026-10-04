@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-import assert from 'node:assert/strict';
+// Go generated conformance: compiles every case into its own Go package and runs the packages with
+// scripts/run-tests.mjs, which prints each case test with its elapsed time and stops a test that
+// outlives its own timeout.
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -9,7 +11,11 @@ import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
+import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
+
+// The time limit of one generated case test.
+const CASE_TIMEOUT_SECONDS = 30;
 
 const goRoot = join(root, 'packages/template-go');
 const temporary = mkdtempSync(join(goRoot, 'generated_conformance_'));
@@ -21,8 +27,11 @@ const failures = [];
 const runnable = [];
 let passed = 0;
 const { cases } = generatedCases(process.argv.slice(2));
+const progress = stepProgress();
 try {
   for (const testCase of cases) {
+    const step = `${testCase.id} › compile`;
+    progress.start(step);
     try {
       const directory = join(temporary, `case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`);
       const defineText = testCase.hasDefine ? readFileSync(join(testCase.dir, 'define.json'), 'utf8') : '{}';
@@ -44,16 +53,19 @@ func generatedDefinitions(t *testing.T) map[string]template.DefineInput { var ra
 func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeString(${q(dataBase64)}); assign,runErr:=value.ParseJSON(data); if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(defineText)})) }; ${envText ? `if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(envText)})) };` : ''} var actual string; if runErr==nil { options:=template.RenderOptions{Define:generatedDefinitions(t)}; ${envText ? `var env template.Env; if err:=json.Unmarshal([]byte(${q(envText)}),&env);err!=nil{t.Fatal(err)}; options.Env=&env;` : ''} program,err:=NewGeneratedProgram(template.Options{});runErr=err;if runErr==nil{actual,runErr=program.Render("input.tpl",assign,options)} }; ${expectation} }
 `);
       runnable.push(testCase);
+      progress.pass(step);
     } catch (error) {
       const actual = errorObject(error);
       const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
-      if (difference) failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); else passed++;
+      if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); progress.fail(step, undefined, difference); }
+      else { passed++; progress.pass(step); }
     }
   }
+  progress.close('Go generated conformance compile');
   if (runnable.length) {
-    const relative = `./${basename(temporary)}/...`;
-    const result = spawnSync('go', ['test', relative], { cwd: goRoot, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024 });
-    if (result.status !== 0) failures.push(`generated Go execution failed:\n${result.stdout}${result.stderr}`); else passed += runnable.length;
+    // The package of a case is named after the case: generated_conformance_<suffix>/case_<case id>.
+    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', goRoot, '--', `./${basename(temporary)}/...`], { cwd: root, stdio: 'inherit' });
+    if (result.status !== 0) failures.push('generated Go execution failed; the failed cases are listed above'); else passed += runnable.length;
   }
 } finally { rmSync(temporary, { recursive: true, force: true }); }
 for (const failure of failures) process.stderr.write(`${failure}\n`);
