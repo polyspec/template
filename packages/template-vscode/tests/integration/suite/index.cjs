@@ -7,6 +7,8 @@ const { join } = require('node:path');
 const vscode = require('vscode');
 
 const workspace = join(__dirname, '..', 'workspace');
+// The time limit of one check.
+const CHECK_TIMEOUT_MS = 20000;
 const extensionId = process.env.POLYSPEC_TEMPLATE_EXTENSION;
 const expect = process.env.POLYSPEC_TEMPLATE_EXPECT;
 
@@ -197,19 +199,33 @@ const disabled = [
   }],
 ];
 
-/** Runs every check of the expected mode and fails with the names of the failed checks. */
+// Runs one check and rejects when it does not end within its time limit.
+function bounded(name, check) {
+  let timer;
+  const timeout = new Promise((resolve, reject) => {
+    timer = setTimeout(() => reject(new Error(`${name} exceeded its ${CHECK_TIMEOUT_MS / 1000} s timeout`)), CHECK_TIMEOUT_MS);
+  });
+  return Promise.race([Promise.resolve().then(check), timeout]).finally(() => clearTimeout(timer));
+}
+
+/**
+ * Runs every check of the expected mode with its own time limit, prints each check when it starts
+ * and when it ends with its elapsed time, and fails with the names of the failed checks.
+ */
 async function run() {
   console.log(`[suite] VS Code ${vscode.version}, Electron ${process.versions.electron}, Node.js ${process.versions.node}, expect ${expect}`);
   const checks = [...common, ...(expect === 'enabled' ? enabled : expect === 'disabled' ? disabled : [])];
   assert.ok(checks.length > common.length, `unknown POLYSPEC_TEMPLATE_EXPECT ${expect}`);
   const failures = [];
   for (const [name, check] of checks) {
+    console.log(`[suite] start - ${name}`);
+    const started = Date.now();
     try {
-      await check();
-      console.log(`[suite] ok - ${name}`);
+      await bounded(name, check);
+      console.log(`[suite] ok - ${name} (${Date.now() - started} ms)`);
     } catch (error) {
       failures.push(name);
-      console.log(`[suite] not ok - ${name}\n${error && error.stack ? error.stack : error}`);
+      console.log(`[suite] not ok - ${name} (${Date.now() - started} ms)\n${error && error.stack ? error.stack : error}`);
     }
   }
   console.log(`[suite] ${checks.length - failures.length} of ${checks.length} checks passed`);
