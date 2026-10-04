@@ -339,6 +339,18 @@ Dependencies: none. VAL-22 states that renders may read one bound map concurrent
 | --- | --- | --- | --- |
 | T16.1 | Decide whether renders of every runtime may share one program and state the rule in the runtime specification; when they may, add a race test that renders one program concurrently in Go and make the template cache of every runtime safe for it; when they may not, state that a host uses one program per thread or goroutine | `make check` | [o] |
 
+## Wave 17 — Test runs
+
+Dependencies: none. Each test prints its start, its result and its elapsed time while the run goes on and has its own timeout; the whole suite runs once, when every active task is done. AGENTS required `make check` before any task was marked done, and `AGENTS.ko.md` lacked the section "Decision and acceptance rules". `test-go` limited each package to 120 s; `test-rust` and `test-php` gave a test no timeout and printed nothing while it ran. The conformance runner printed its table only after the last case. The four generated conformance runners ran all cases in one `go test` or `cargo test` call under one 600 s limit, or in their own process without a limit, and printed only a final count. The VS Code integration runner waited for each VS Code launch, each profile installation and each check without a limit. The tasks run in the branch `fix/test-runs-T17.1` and the worktree `template-test-runs-T17`.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T17.1 | State in AGENTS that a task in progress runs only the Red and Green tests that own the change, that a commit also runs `make docs-check`, that a task becomes `[o]` after its owning command passes and that `make check` runs once when every active task is done; state that every test prints its progress and has its own timeout and that no whole run has a time limit; name the owning command in the Verification column; add the section "Decision and acceptance rules" to `AGENTS.ko.md` | `make docs-check` | [o] |
+| T17.2 | Add the test runner `scripts/run-tests.mjs` with `scripts/test-progress/` for node, vitest, go, cargo and phpunit, which prints each test with its elapsed time and stops a test at its own timeout, with its tests in `tests/scripts/run-tests.test.mjs`; run `test-go`, `test-rust` and `test-php` through it, remove the 120 s package limit of `test-go` and enforce the PHPUnit time limit | `node scripts/run-tests.mjs node -- tests/scripts/run-tests.test.mjs` | [ ] |
+| T17.3 | Make `tests/runner/conformance.mjs` print `<case> [<lang>] pass\|fail (<ms>)` when a case finishes in a language, and keep the summary at the end | `node scripts/run-tests.mjs node -- tests/scripts/conformance-progress.test.mjs` | [ ] |
+| T17.4 | Give every case of the four generated conformance runners its own deadline and a result line with its elapsed time: Go and Rust through `scripts/run-tests.mjs` with Rust tests named by case id, PHP `php -l` and the case process under a timeout, TypeScript `tsc` under a deadline with a step line and each render in a worker under a timeout; remove the 600 s limits | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/generated-conformance.test.mjs` | [ ] |
+| T17.5 | Give every VS Code launch and profile installation of `packages/template-vscode/tests/integration/run.mjs` a deadline that kills the process, and every check of `suite/index.cjs` a timeout through `Promise.race` with the elapsed time on its `ok` and `not ok` line | `npm run test:integration -w polyspec-template` | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -358,6 +370,7 @@ Dependencies: none. VAL-22 states that renders may read one bound map concurrent
 | W14 | none | T14.1 → T14.2 |
 | W15 | T15.1, T15.2, T15.3, T15.4 | none |
 | W16 | none | T16.1 |
+| W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} |
 
 ## Definition of done
 
