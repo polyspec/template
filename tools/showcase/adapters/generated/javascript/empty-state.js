@@ -46,7 +46,7 @@ function generatedBindRecord(value, fields, path, partial = false) { const objec
     }
     result[name] = generatedBindType(object.get(name), type, path + '.' + name);
 } return result; }
-function generatedBindAssign(value) { const root = bindMap(value); return { assign: generatedBindRecord(root, generatedAssign, 'assign'), root }; }
+function generatedBindAssign(value) { const root = bindMap(value ?? new Map()); return { assign: generatedBindRecord(root, generatedAssign, 'assign'), root }; }
 function generatedBindDefinitions(input) { const definitions = {}; const targets = new Map(); for (const [id, raw] of Object.entries(input ?? {})) {
     checkText(id);
     const spec = generatedDefinitionSpecs[id];

@@ -6,11 +6,11 @@
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d",
-  "compilerDigest": "392b157a869ece00a5d8cff5e5521d065a5f1e6524240869c7af9ebaab86ce6e",
+  "compilerDigest": "d1c0bd76a42c533c73452b2b972dcbce9f9af02b74ed402292ac2c4a15a3e2e7",
   "files": {
     "react-boundary.php": {
       "path": "react-boundary.php",
-      "artifactDigest": "e053b1baf91689ac1350c531d1724ee5f09677f5aec96170752ccb7a1e1bc7cf"
+      "artifactDigest": "8dbc23bc8f4c7ae1c281b8081103d59e1646705ed681e6bef0001f46bd829aaa"
     }
   }
 }

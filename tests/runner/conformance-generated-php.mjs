@@ -7,7 +7,7 @@ import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, listCases, typeDefinitions } from './cases.mjs';
+import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
 const temporary = mkdtempSync(join(root, '.generated-conformance-php-'));
@@ -65,7 +65,7 @@ try {
 
 const failures = [];
 let passed = 0;
-const cases = listCases(process.argv[2]);
+const { cases, filtered } = generatedCases(process.argv.slice(2));
 try {
   for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');
@@ -98,7 +98,7 @@ try {
       if (difference) failures.push(`${testCase.id}: compile ${difference}: ${error.message}`); else passed++;
     }
   }
-  if (process.argv[2] === undefined) assert.equal(passed + failures.length, cases.length);
+  if (!filtered) assert.equal(passed + failures.length, cases.length);
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }

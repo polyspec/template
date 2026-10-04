@@ -10,7 +10,7 @@ import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse, parseJsonBytes } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, listCases, typeDefinitions } from './cases.mjs';
+import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
 const temporary = mkdtempSync(join(root, '.generated-conformance-ts-'));
@@ -54,7 +54,7 @@ function parsedTemplates(testCase) {
 const pending = [];
 const failures = [];
 let passed = 0;
-const cases = listCases(process.argv[2]);
+const { cases } = generatedCases(process.argv.slice(2));
 try {
   for (const testCase of cases) {
     const id = testCase.id.replaceAll('/', '--');

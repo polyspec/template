@@ -15,12 +15,12 @@ It executes seven layers in order and stops at the first failure.
 | Contracts | Manifest-generated declarations and Mermaid, document pairs, schemas, public API documentation, locked dependency advisories, format and static analysis | Structural drift, stale generated files, known dependency vulnerability, undocumented API or invalid source |
 | Units | Lexer, parser, data model, functions, runtime, limits, artifact refresh and page cache in every core package | The smallest package and test identify the defect |
 | Compiler | Canonical AST lifecycle, typed IR rejection, four generated backends and host compiler checks | The rejected IR node, stale artifact or target compiler diagnostic |
-| Conformance | 247 canonical cases through four AST and four generated programs, plus the PHP extension support level | Exact language, mode, case and output or structured diagnostic difference |
+| Conformance | 248 canonical cases through four AST and four generated programs, plus the PHP extension support level | Exact language, mode, case and output or structured diagnostic difference |
 | Regressions | Positioned errors, failure recovery, request immutability and mutations of interfaces, artifacts and benchmark hashes | A known bad mutation is accepted or recovery changes output |
 | Package installs | Immutable npm, Go module, Cargo and Composer packages, plus browser DOM output | Package installation, public import or install project output failure |
 | Presentation and performance | Static example HTML, parser-backed highlighting, bounded source views, documentation idempotence and a fresh equal-output benchmark smoke run | Invalid HTML, stale site, unequal second build or invalid measurement row |
 
-The complete mode matrix contains 1,976 core cells: 247 cases × two compiler modes × four languages. Success cases compare exact UTF-8 bytes. Failure cases compare the error code, message, template name and source position. Generated execution is also checked for parser, AST interpreter and fallback references before its host source is accepted.
+The complete mode matrix contains 1,984 core cells: 248 cases × two compiler modes × four languages. Success cases compare exact UTF-8 bytes. Failure cases compare the error code, message, template name and source position. Generated execution is also checked for parser, AST interpreter and fallback references before its host source is accepted.
 
 The language test matrix is declared in `contracts/features.json`. Its semantic features must declare pass support for TypeScript, Go, Rust and PHP, and its required checks must cover both `ast` and `gen`. `make language-test-matrix` rejects a missing feature, language declaration or test path; `make conformance-all-modes`, `make function-contract-check` and `make generated-native-check` provide the executable coverage.
 

@@ -8,7 +8,7 @@ import { goString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, listCases, typeDefinitions } from './cases.mjs';
+import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
 const goRoot = join(root, 'packages/template-go');
@@ -20,8 +20,7 @@ const q = goString;
 const failures = [];
 const runnable = [];
 let passed = 0;
-const cases = listCases(process.argv[2]);
-if (process.argv[2] === undefined) assert.ok(cases.length > 0);
+const { cases } = generatedCases(process.argv.slice(2));
 try {
   for (const testCase of cases) {
     try {
