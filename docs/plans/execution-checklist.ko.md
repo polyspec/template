@@ -350,6 +350,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.3 | `tests/runner/conformance.mjs`가 한 언어에서 case가 끝날 때마다 `<case> [<lang>] pass\|fail (<ms>)`을 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/conformance-progress.test.mjs` | [o] |
 | T17.4 | 네 generated conformance runner의 모든 case에 자기 deadline과 경과 시간이 붙은 결과 줄을 준다. Go와 Rust는 `scripts/run-tests.mjs`로 실행하고 Rust test 이름은 case id로 짓는다. PHP는 `php -l`과 case process에 timeout을 둔다. TypeScript는 `tsc`에 deadline과 단계 줄을 두고 각 render를 timeout이 있는 worker에서 실행한다. 600 s 제한을 없앤다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/generated-conformance.test.mjs` | [o] |
 | T17.5 | `packages/template-vscode/tests/integration/run.mjs`의 모든 VS Code 실행과 profile 설치에 넘으면 process를 kill하는 deadline을 두고, `suite/index.cjs`의 모든 check에 `Promise.race`로 timeout을 걸고 `ok`와 `not ok` 줄에 경과 시간을 붙인다 | `npm run test:integration -w polyspec-template` | [o] |
+| T17.5-1 | VS Code 실행을 suite 결과로 끝낸다. VS Code 1.138은 suite가 결과를 출력한 뒤 종료하는 데 300 s를 넘기기도 했으므로 `make check`가 실행 deadline에서 실패했다. suite 줄 `[suite] N of M checks passed`가 나오면 VS Code는 20 s 안에 종료해야 하고, 그 뒤 process group을 kill하고 실행은 suite 결과를 따른다 | `npm run test:integration -w polyspec-template` | [o] |
 
 ## 병렬성 요약
 
