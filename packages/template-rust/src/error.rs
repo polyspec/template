@@ -242,6 +242,12 @@ impl From<TemplateError> for RequestError {
     }
 }
 
+impl From<ArgumentError> for RequestError {
+    fn from(error: ArgumentError) -> RequestError {
+        RequestError::Argument(error)
+    }
+}
+
 impl fmt::Display for RequestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

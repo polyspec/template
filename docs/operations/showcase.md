@@ -141,7 +141,7 @@ fn render() -> Result<String, Box<dyn std::error::Error>> {
     let engine = Engine::new(AstProgram::new(EngineOptions {
         loader: Some(Box::new(FsLoader::new(root))),
         ..Default::default()
-    }));
+    })?);
 
     let options = RenderOptions {
         define: defines_from_json(&define_json)?,

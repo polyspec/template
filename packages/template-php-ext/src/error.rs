@@ -5,8 +5,8 @@ use ext_php_rs::exception::PhpException;
 use ext_php_rs::ffi::{zend_class_entry, zend_object, zval};
 use ext_php_rs::prelude::*;
 use ext_php_rs::types::{ZendHashTable, Zval};
-use ext_php_rs::zend::ce;
-use polyspec_template::{TemplateError as EngineError, internal_boundary};
+use ext_php_rs::zend::{ClassEntry, ce};
+use polyspec_template::{ErrorCode, TemplateError as EngineError, internal_boundary};
 use std::os::raw::c_char;
 use std::ptr;
 
@@ -101,6 +101,20 @@ pub fn boundary<T>(template: &str, operation: impl FnOnce() -> PhpResult<T>) -> 
     match internal_boundary(template, || Ok(operation())) {
         Ok(result) => result,
         Err(error) => Err(php_exception(&error)),
+    }
+}
+
+/// Builds the PHP argument error of an argument error of the engine, `\InvalidArgumentException`, as the PHP
+/// package raises for the same option (ERR-13). The class belongs to SPL, which PHP always contains, so a
+/// missing class is an internal failure.
+pub fn argument_exception(message: String) -> PhpException {
+    match ClassEntry::try_find("InvalidArgumentException") {
+        Some(class) => PhpException::new(message, 0, class),
+        None => php_exception(&EngineError::without_position(
+            ErrorCode::E_INTERNAL,
+            "",
+            "the class InvalidArgumentException is missing".to_string(),
+        )),
     }
 }
 

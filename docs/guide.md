@@ -324,7 +324,7 @@ $html = $engine->render('layout', $assign, ['define' => ['layout' => ['template'
 ```
 
 ```rust
-let engine = Engine::new(AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() }));
+let engine = Engine::new(AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() })?);
 let mut options = RenderOptions::default();
 options.define.insert("layout".to_string(), DefineInput { template: Some("page.tpl".to_string()), ..Default::default() });
 options.define.insert("content".to_string(), DefineInput { template: Some("pages/list.tpl".to_string()), ..Default::default() });

@@ -59,7 +59,8 @@ fn engine_renders_and_registers_functions() {
     let mut engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()
-    });
+    })
+    .expect("valid engine options");
     engine
         .register(
             "twice",
@@ -98,7 +99,8 @@ fn engine_reports_host_failures_and_limits() {
             ..Default::default()
         }),
         ..Default::default()
-    });
+    })
+    .expect("valid engine options");
     engine.register("boom", Box::new(|_, _| Err("no".into()))).expect("register");
     let error = engine
         .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
@@ -119,7 +121,8 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
     let engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()
-    });
+    })
+    .expect("valid engine options");
     assert_eq!(
         engine
             .render(
@@ -146,7 +149,8 @@ fn artifact_refresh_policies_are_independent_of_rendering() {
         loader: Some(Box::new(dev_loader)),
         artifact_refresh: ArtifactRefresh::Dev,
         ..Default::default()
-    });
+    })
+    .expect("valid engine options");
     assert_eq!(
         dev.render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
             .unwrap(),
@@ -159,7 +163,8 @@ fn artifact_refresh_policies_are_independent_of_rendering() {
         loader: Some(Box::new(immutable_loader)),
         artifact_refresh: ArtifactRefresh::False,
         ..Default::default()
-    });
+    })
+    .expect("valid engine options");
     assert_eq!(
         immutable
             .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())

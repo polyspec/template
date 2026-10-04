@@ -55,6 +55,7 @@ fn program(sources: &[&str]) -> AstProgram {
         loader: Some(Box::new(loader)),
         ..Default::default()
     })
+    .expect("valid engine options")
 }
 
 fn render(program: &AstProgram, index: usize, root: OrderedMap) -> Result<String, TemplateError> {

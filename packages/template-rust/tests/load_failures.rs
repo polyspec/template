@@ -27,6 +27,7 @@ fn render(loader: Box<dyn Loader>, target: &str) -> Result<String, TemplateError
         loader: Some(loader),
         ..Default::default()
     })
+    .expect("valid engine options")
     .render_values(RenderTarget::Name(target), OrderedMap::new(), &RenderOptions::default())
 }
 

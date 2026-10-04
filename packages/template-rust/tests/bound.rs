@@ -35,6 +35,7 @@ fn program() -> AstProgram {
         loader: Some(Box::new(loader)),
         ..Default::default()
     })
+    .expect("valid engine options")
 }
 
 fn definition(data: DefineData) -> RenderOptions {

@@ -1,9 +1,13 @@
 //! Parser behavior that the fixtures do not cover directly.
 
-use polyspec_template::{ErrorCode, Node, ParseOptions, parse};
+use polyspec_template::{ErrorCode, Node, ParseOptions, RequestError, parse};
 
 fn code_of(source: &str, options: &ParseOptions) -> Option<ErrorCode> {
-    parse(source.as_bytes(), "t.tpl", options).err().map(|error| error.code)
+    match parse(source.as_bytes(), "t.tpl", options) {
+        Ok(_) => None,
+        Err(RequestError::Template(error)) => Some(error.code),
+        Err(RequestError::Argument(error)) => panic!("unexpected argument error: {error}"),
+    }
 }
 
 fn kinds(source: &str) -> Vec<&'static str> {

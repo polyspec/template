@@ -9,7 +9,7 @@
 ```rust
 use polyspec_template::{AstProgram, DefineInput, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget, Value};
 
-let mut program = AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() });
+let mut program = AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() })?;
 program.register("greet", Box::new(|args, _| Ok(Value::text(format!("Hello, {}", args[0].as_text().unwrap_or(""))))))?;
 let engine = Engine::new(program);
 let assign = serde_json::json!({ "title": "Home" });
@@ -26,7 +26,7 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 | 항목 | 설명 |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | 선택적인 구분자로 UTF-8 템플릿 하나를 AST로 파싱한다. |
-| `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. |
+| `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. 구분자 쌍이 아닌 구분자 옵션에는 `ArgumentError`를 돌려준다. |
 | `Engine::new(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `Engine::render(target, assign, &RenderOptions)` | 템플릿 이름 또는 파싱된 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 또는 HTML 항목을 제공한다. |
 | `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind`는 `&serde_json::Value`, `&OrderedMap`, `&BoundMap`을 한 번 검사하고 `BoundMap`을 반환한다. `merge`는 두 bound map을 합치며, `second`의 항목이 같은 key를 가진 `first`의 항목을 바꾼다. `render_bound`와 `prepare_bound`는 bound map을 assign으로 받고, `DefineData::Bound`는 그것을 정의 데이터로 준다. 둘 다 다시 binding하지 않는다(VAL-22). `BoundMap`은 `Send`가 아니다. 오류에는 template과 위치가 없다(ERR-14). |

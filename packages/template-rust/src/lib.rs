@@ -42,22 +42,19 @@ pub struct ParseOptions {
     pub delimiters: Option<String>,
 }
 
-/// RT-2: parses one template source without loading other templates. A panic is `E_INTERNAL` (ERR-13).
-pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, TemplateError> {
+/// RT-2: parses one template source without loading other templates. A delimiter option that is not a
+/// delimiter pair is an argument error, and a panic is `E_INTERNAL` (ERR-13).
+pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, RequestError> {
     internal_boundary(name, || parse_source(source, name, options))
 }
 
-fn parse_source(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, TemplateError> {
+fn parse_source(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, RequestError> {
     let delimiters = match &options.delimiters {
-        Some(value) => parse_delimiters(value).ok_or_else(|| {
-            TemplateError::without_position(
-                ErrorCode::E_PARSE_INVALID_DIRECTIVE,
-                name,
-                format!("{value:?} is not a delimiter pair"),
-            )
+        Some(value) => parse_delimiters(value).ok_or_else(|| ArgumentError {
+            message: format!("{value:?} is not a delimiter pair"),
         })?,
         None => DEFAULT_DELIMITERS,
     };
     let parsed = source::Source::from_bytes(name, source)?;
-    parser::parse_template(&parsed, delimiters)
+    Ok(parser::parse_template(&parsed, delimiters)?)
 }

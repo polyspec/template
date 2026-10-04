@@ -4,7 +4,7 @@ pub mod lexer;
 pub mod parser;
 
 use crate::ast::Expr;
-use crate::error::TemplateError;
+use crate::error::{ErrorCode, TemplateError};
 use crate::expr::lexer::{ExpressionLexer, LexerOptions, TokenType};
 use crate::expr::parser::ExpressionParser;
 use crate::render::context::{Frame, RenderContext, Scope};
@@ -61,7 +61,8 @@ pub fn parse_expression(text: &str) -> Result<Expr, TemplateError> {
 
 /// Evaluates a bare expression AST against root data given as JSON.
 pub fn evaluate_expression(expr: &Expr, data: &serde_json::Value) -> Result<Value, TemplateError> {
-    let engine = AstProgram::new(Default::default());
+    let engine = AstProgram::new(Default::default())
+        .map_err(|error| TemplateError::without_position(ErrorCode::E_INTERNAL, "expression", error.message))?;
     let root = bind_map(data).map_err(|error| TemplateError::without_position(error.code, "expression", error.message))?;
     let root = Rc::new(root);
     let mut context = RenderContext::new(
