@@ -49,13 +49,16 @@ enum Outcome {
 }
 
 fn render_case(dir: &Path) -> Outcome {
-    let engine = Engine::new(AstProgram::new(EngineOptions {
-        loader: Some(Box::new(FsLoader::new(dir))),
-        functions: Default::default(),
-        limits: None,
-        delimiters: delimiters_of(dir),
-        artifact_refresh: Default::default(),
-    }));
+    let engine = Engine::new(
+        AstProgram::new(EngineOptions {
+            loader: Some(Box::new(FsLoader::new(dir))),
+            functions: Default::default(),
+            limits: None,
+            delimiters: delimiters_of(dir),
+            artifact_refresh: Default::default(),
+        })
+        .expect("valid engine options"),
+    );
     let assign = match read_json(&dir.join("data.json")) {
         None => serde_json::Value::Object(Default::default()),
         Some(Ok(value)) => value,

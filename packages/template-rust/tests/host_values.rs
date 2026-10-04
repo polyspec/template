@@ -69,7 +69,8 @@ fn render(target: &str, names: &[String]) -> Result<String, polyspec_template::T
     let mut program = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()
-    });
+    })
+    .expect("valid engine options");
     let order = Value::object(Order);
     let Value::Object(original) = order.clone() else { unreachable!() };
     let describe_original = Rc::clone(&original);

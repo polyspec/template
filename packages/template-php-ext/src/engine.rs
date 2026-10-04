@@ -2,7 +2,7 @@
 
 use crate::bound::bound_of;
 use crate::convert::{array_key, php_to_map, php_to_value, value_to_php};
-use crate::error::{boundary, php_exception};
+use crate::error::{argument_exception, boundary, php_exception};
 use ext_php_rs::convert::IntoZval;
 use ext_php_rs::error::Error as ExtError;
 use ext_php_rs::exception::PhpException;
@@ -12,7 +12,7 @@ use ext_php_rs::types::{ZendHashTable, Zval};
 use polyspec_template::functions::helpers::FunctionContext;
 use polyspec_template::{
     AstProgram as CoreProgram, BindError, DefineData, DefineInput, EngineOptions, ErrorCode, FsLoader, HostError, Limits, OrderedMap,
-    ParseOptions, RenderOptions, RenderTarget, TemplateError as EngineError, Value, bind, defines_from_json, env_from_json,
+    ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError as EngineError, Value, bind, defines_from_json, env_from_json,
     parse as core_parse, read_json, to_json_value,
 };
 use std::collections::HashMap;
@@ -121,9 +121,6 @@ impl NativeEngine {
         }
         if let Some(options) = options {
             if let Some(delimiters) = options.get("delimiters").and_then(Zval::str) {
-                if polyspec_template::parser::scanner::parse_delimiters(delimiters).is_none() {
-                    return Err(PhpException::default(format!("{delimiters:?} is not a delimiter pair")));
-                }
                 engine_options.delimiters = Some(delimiters.to_string());
             }
             if let Some(limits) = options.get("limits").and_then(Zval::array) {
@@ -131,16 +128,19 @@ impl NativeEngine {
             }
         }
         Ok(NativeEngine {
-            engine: CoreProgram::new(engine_options),
+            engine: CoreProgram::new(engine_options).map_err(|error| argument_exception(error.message))?,
         })
     }
 
     fn ast_json(source: &Zval, name: &str, options: Option<&ZendHashTable>) -> PhpResult<String> {
         let bytes = source_bytes(source);
         let parse_options = ParseOptions {
-            delimiters: delimiters_of(options)?,
+            delimiters: delimiters_of(options),
         };
-        let ast = core_parse(bytes, name, &parse_options).map_err(|error| php_exception(&error))?;
+        let ast = core_parse(bytes, name, &parse_options).map_err(|error| match error {
+            RequestError::Template(error) => php_exception(&error),
+            RequestError::Argument(error) => argument_exception(error.message),
+        })?;
         serde_json::to_string(&ast).map_err(|error| PhpException::default(format!("cannot write the AST: {error}")))
     }
 }
@@ -223,14 +223,11 @@ fn source_bytes(zval: &Zval) -> &[u8] {
     zval.zend_str().map(ext_php_rs::types::ZendStr::as_bytes).unwrap_or_default()
 }
 
-fn delimiters_of(options: Option<&ZendHashTable>) -> PhpResult<Option<String>> {
-    let Some(delimiters) = options.and_then(|options| options.get("delimiters")).and_then(Zval::str) else {
-        return Ok(None);
-    };
-    if polyspec_template::parser::scanner::parse_delimiters(delimiters).is_none() {
-        return Err(PhpException::default(format!("{delimiters:?} is not a delimiter pair")));
-    }
-    Ok(Some(delimiters.to_string()))
+fn delimiters_of(options: Option<&ZendHashTable>) -> Option<String> {
+    options
+        .and_then(|options| options.get("delimiters"))
+        .and_then(Zval::str)
+        .map(str::to_string)
 }
 
 fn read_limits(table: &ZendHashTable) -> Limits {

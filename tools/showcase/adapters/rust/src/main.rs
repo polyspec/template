@@ -65,10 +65,13 @@ impl Adapter {
                     .unwrap_or_default(),
             )?
         } else {
-            Engine::new(AstProgram::new(EngineOptions {
-                loader: Some(Box::new(artifact_loader(&root)?)),
-                ..Default::default()
-            }))
+            Engine::new(
+                AstProgram::new(EngineOptions {
+                    loader: Some(Box::new(artifact_loader(&root)?)),
+                    ..Default::default()
+                })
+                .expect("valid engine options"),
+            )
         };
         Ok(Adapter { root, engine })
     }

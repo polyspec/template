@@ -9,7 +9,7 @@ Rust implementation of the template language: lexer, parser, renderer, built-in 
 ```rust
 use polyspec_template::{AstProgram, DefineInput, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget, Value};
 
-let mut program = AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() });
+let mut program = AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() })?;
 program.register("greet", Box::new(|args, _| Ok(Value::text(format!("Hello, {}", args[0].as_text().unwrap_or(""))))))?;
 let engine = Engine::new(program);
 let assign = serde_json::json!({ "title": "Home" });
@@ -26,7 +26,7 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 | Item | Description |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | Parses one UTF-8 template into its AST with optional delimiters. |
-| `AstProgram::new(EngineOptions)` | Creates an AST program with a loader, host functions, limits and delimiters. |
+| `AstProgram::new(EngineOptions)` | Creates an AST program with a loader, host functions, limits and delimiters, or returns an `ArgumentError` for a delimiter option that is not a delimiter pair. |
 | `Engine::new(Program)` | Creates an engine that delegates to one AST or generated program. |
 | `Engine::render(target, assign, &RenderOptions)` | Renders a template name or a parsed template to a string. `assign` contains variables and `define` supplies template or HTML entries. |
 | `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind` checks a `&serde_json::Value`, a `&OrderedMap` or a `&BoundMap` once and returns a `BoundMap`; `merge` combines two bound maps, and an entry of `second` replaces the entry of `first` with the same key. `render_bound` and `prepare_bound` take a bound map as assign, and `DefineData::Bound` gives one as definition data, without binding it again (VAL-22). A `BoundMap` is not `Send`. Errors have no template and no position (ERR-14). |

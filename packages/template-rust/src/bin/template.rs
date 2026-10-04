@@ -3,7 +3,7 @@
 //!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 
 use polyspec_template::{
-    AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
+    ArgumentError, AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
     defines_from_json, env_from_json, parse, read_json as parse_json_text,
 };
 use std::path::{Path, PathBuf};
@@ -22,6 +22,12 @@ struct Options {
     env: Option<String>,
     root: Option<String>,
     delimiters: Option<String>,
+}
+
+/// An argument error is not an ERR-1 error (ERR-13); it ends like a usage error.
+fn argument(error: ArgumentError) -> ! {
+    eprintln!("{error}");
+    exit(1);
 }
 
 fn fail(error: TemplateError) -> ! {
@@ -93,12 +99,6 @@ fn main() {
         .map(|c| c.as_os_str().to_string_lossy().to_string())
         .collect::<Vec<_>>()
         .join("/");
-    if let Some(delimiters) = &options.delimiters
-        && polyspec_template::parser::scanner::parse_delimiters(delimiters).is_none()
-    {
-        usage(&format!("{delimiters:?} is not a delimiter pair"));
-    }
-
     if command == "parse" {
         let source = std::fs::read(&file_path).unwrap_or_else(|error| usage(&format!("cannot read {file}: {error}")));
         match parse(
@@ -109,18 +109,22 @@ fn main() {
             },
         ) {
             Ok(ast) => print!("{}", serde_json::to_string(&ast).unwrap_or_default()),
-            Err(error) => fail(error),
+            Err(RequestError::Template(error)) => fail(error),
+            Err(RequestError::Argument(error)) => argument(error),
         }
         return;
     }
 
-    let engine = Engine::new(AstProgram::new(EngineOptions {
-        loader: Some(Box::new(polyspec_template::FsLoader::new(&root))),
-        functions: Default::default(),
-        limits: None,
-        delimiters: options.delimiters.clone(),
-        artifact_refresh: Default::default(),
-    }));
+    let engine = Engine::new(
+        AstProgram::new(EngineOptions {
+            loader: Some(Box::new(polyspec_template::FsLoader::new(&root))),
+            functions: Default::default(),
+            limits: None,
+            delimiters: options.delimiters.clone(),
+            artifact_refresh: Default::default(),
+        })
+        .unwrap_or_else(|error| argument(error)),
+    );
     let assign = match &options.data {
         Some(path) => read_json(&root, path, &name),
         None => serde_json::Value::Object(Default::default()),
@@ -135,10 +139,6 @@ fn main() {
     match engine.render(RenderTarget::Name(&name), &assign, &render_options) {
         Ok(output) => print!("{output}"),
         Err(RequestError::Template(error)) => fail(error),
-        // An argument error of the request is not an ERR-1 error (ERR-13); it ends like a usage error.
-        Err(RequestError::Argument(error)) => {
-            eprintln!("{error}");
-            exit(1);
-        }
+        Err(RequestError::Argument(error)) => argument(error),
     }
 }

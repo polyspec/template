@@ -280,6 +280,20 @@ final class EngineTest extends TestCase
         $this->assertSame('Echo', $ast['body'][0]['type']);
     }
 
+    public function testInvalidDelimitersOfAnEngineAreAnArgumentError(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('"x" is not a delimiter pair');
+        new Engine($this->root, ['delimiters' => 'x']);
+    }
+
+    public function testInvalidDelimitersOfAParseAreAnArgumentError(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('"x" is not a delimiter pair');
+        Engine::parse('text', 'x.tpl', ['delimiters' => 'x']);
+    }
+
     public function testMissingTemplateIsReported(): void
     {
         $engine = new Engine($this->root);

@@ -1,7 +1,7 @@
 //! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
 use crate::ast::Template;
-use crate::error::{ErrorCode, RequestError, Span, TemplateError, internal_boundary};
+use crate::error::{ArgumentError, ErrorCode, RequestError, Span, TemplateError, internal_boundary};
 use crate::functions::{Env, HostFunction};
 use crate::loader::{Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
@@ -178,19 +178,21 @@ struct AstPreparedExecution<'e> {
 }
 
 impl AstProgram {
-    /// Creates an engine. Panics when the delimiter option is not a delimiter pair.
-    pub fn new(options: EngineOptions) -> AstProgram {
+    /// Creates an engine. A delimiter option that is not a delimiter pair is an argument error (ERR-13).
+    pub fn new(options: EngineOptions) -> Result<AstProgram, ArgumentError> {
         let delimiters = match options.delimiters {
-            Some(value) => parse_delimiters(&value).unwrap_or_else(|| panic!("{value:?} is not a delimiter pair")),
+            Some(value) => parse_delimiters(&value).ok_or_else(|| ArgumentError {
+                message: format!("{value:?} is not a delimiter pair"),
+            })?,
             None => DEFAULT_DELIMITERS,
         };
-        AstProgram {
+        Ok(AstProgram {
             loader: options.loader.unwrap_or_else(|| Box::new(MapLoader::new())),
             runtime: RuntimeEnvironment::new(options.limits, options.functions),
             delimiters,
             artifact_refresh: options.artifact_refresh,
             cache: RefCell::new(HashMap::new()),
-        }
+        })
     }
 
     /// FUN-43, FUN-44: registers a host function. Returns an error message for an invalid or built-in name.

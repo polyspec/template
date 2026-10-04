@@ -325,6 +325,7 @@ Dependencies: none. The runtimes differed from the T14.2 specification in two pl
 | T15.1 | Add a conformance case whose `assign` is JSON `null` and that renders as an empty map; check it fails in Rust; make Rust `render`, `render_values` and `prepare` and the PHP extension `render`, which renders through `render_values` and `render`, accept a null `assign` as an empty map (`bind_map`, `php_to_map`); state the rule in RT-4 | `make check` | [o] |
 | T15.1-1 | Make the generated TypeScript and PHP programs bind a null `assign` as an empty map, as their AST programs do (RT-4); make `--case` of the four generated conformance runners select the case and fail when it selects none, because the runners read only a positional filter and `--case data/null-assign` ran 0 cases and passed | `make check` | [o] |
 | T15.2 | Add a test in every generated runtime that renders a request whose `assign` and definition `data` do not match the declared types; check that the runtimes report it differently; make every runtime report it as ERR-13 states, an argument error of its language that passes unchanged and is not an ERR-1 error | `make check` | [o] |
+| T15.3 | Add tests that create a Rust engine and parse in Rust with a delimiter option that is not a delimiter pair, and the same in the PHP extension; check that Rust `AstProgram::new` panics, Rust `parse` returns an ERR-1 error and the extension raises an `\Exception`; make them report the argument error of ERR-13: `AstProgram::new` returns `Result<AstProgram, ArgumentError>`, `parse` returns `RequestError::Argument` and the extension raises an `\InvalidArgumentException` as the PHP package does | `cargo test --test delimiters`, `run-tests.sh --filter Delimiters` | [o] |
 | T15.4 | Make the Go typed generated program read an absent optional field as null, as the TypeScript generated program does: the Go backend reads an optional field through `valueOrZero`, so `{= c ?? '-'}` with a `string?` field `c` that the assign data lacks renders an empty string and not `-`; add the case in every generated runtime, check that it fails in Go, then fix the backend | `make check` | [ ] |
 
 ## Wave 16 — Concurrent renders
@@ -352,7 +353,7 @@ Dependencies: none. VAL-22 states that renders may read one bound map concurrent
 | W10 | none | T10.1 |
 | W11 | T11.3 → T11.4 alongside T11.5 | T11.1 → T11.2 → the parallel group → T11.6 |
 | W14 | none | T14.1 → T14.2 |
-| W15 | T15.1, T15.2, T15.4 | none |
+| W15 | T15.1, T15.2, T15.3, T15.4 | none |
 | W16 | none | T16.1 |
 
 ## Definition of done

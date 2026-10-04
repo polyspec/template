@@ -325,6 +325,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T15.1 | `assign`이 JSON `null`이고 빈 map으로 렌더하는 conformance case를 더한다. Rust에서 실패하는지 확인한다. Rust `render`, `render_values`, `prepare`와, `render_values`와 `render`로 렌더하는 PHP extension의 `render`가 null `assign`을 빈 map으로 받게 한다(`bind_map`, `php_to_map`). RT-4에 규칙을 적는다 | `make check` | [o] |
 | T15.1-1 | generated TypeScript와 PHP program이 AST program처럼 null `assign`을 빈 map으로 binding하게 한다(RT-4). 네 generated conformance runner의 `--case`가 case를 고르고, 아무 case도 고르지 못하면 실패하게 한다. runner는 위치 인자 filter만 읽었으므로 `--case data/null-assign`이 case 0개를 실행하고 통과했다 | `make check` | [o] |
 | T15.2 | `assign`과 정의 `data`가 선언한 type과 맞지 않는 request를 렌더하는 test를 모든 generated runtime에 더한다. runtime마다 보고가 다른지 확인한다. 모든 runtime이 ERR-13대로, 그대로 전달되고 ERR-1 오류가 아닌 자기 언어의 인자 오류로 보고하게 한다 | `make check` | [o] |
+| T15.3 | 구분자 쌍이 아닌 구분자 옵션으로 Rust engine을 만들고 Rust에서 parse하는 test와 PHP extension의 같은 test를 추가한다. Rust `AstProgram::new`가 panic하고, Rust `parse`가 ERR-1 오류를 돌려주고, extension이 `\Exception`을 던지는지 확인한다. ERR-13의 인자 오류로 보고하게 한다: `AstProgram::new`는 `Result<AstProgram, ArgumentError>`를, `parse`는 `RequestError::Argument`를 돌려주고, extension은 PHP package처럼 `\InvalidArgumentException`을 던진다 | `cargo test --test delimiters`, `run-tests.sh --filter Delimiters` | [o] |
 | T15.4 | TypeScript generated program처럼 Go typed generated program이 없는 optional field를 null로 읽게 한다. Go backend는 optional field를 `valueOrZero`로 읽으므로, assign 데이터에 없는 `string?` field `c`에 대해 `{= c ?? '-'}`가 `-`가 아니라 빈 문자열을 렌더한다. 모든 generated runtime에 case를 더하고 Go에서 실패하는지 확인한 뒤 backend를 고친다 | `make check` | [ ] |
 
 ## Wave 16 — 동시 render
@@ -352,7 +353,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W10 | 없음 | T10.1 |
 | W11 | T11.3 → T11.4와 T11.5를 병렬로 | T11.1 → T11.2 → 병렬 그룹 → T11.6 |
 | W14 | 없음 | T14.1 → T14.2 |
-| W15 | T15.1, T15.2, T15.4 | 없음 |
+| W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
 
 ## 완료 정의
