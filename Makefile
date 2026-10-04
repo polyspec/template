@@ -347,9 +347,10 @@ showcase-check: build-ts ## Verify example-site parity, repeatability and browse
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
 	node tools/showcase/compile.mjs --refresh true
 
-generated-native-check: build-ts ## Execute generated member and class calls with native and typed values in every core language
+generated-native-check: build-ts ## Execute generated member and class calls with native and typed values, and typed request argument errors, in every core language
 	node scripts/check-generated-native-calls.mjs
 	node scripts/check-generated-typed-values.mjs
+	node scripts/check-generated-arguments.mjs
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
 	node tools/showcase/compile-generated.mjs --refresh true

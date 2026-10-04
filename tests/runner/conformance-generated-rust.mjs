@@ -80,7 +80,7 @@ mod case_${index} {
         ${testCase.hasEnv ? `let env = polyspec_template::read_json(include_str!(${quote(resolve(join(testCase.dir, 'env.json')))})).map_err(super::ActualError::bind)?;
         options.env = Some(polyspec_template::env_from_json(&env).map_err(super::ActualError::bind)?);` : ''}
         let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
-        program.render(polyspec_template::RenderTarget::Name("input.tpl"), &assign, &options).map_err(super::ActualError::template)
+        program.render(polyspec_template::RenderTarget::Name("input.tpl"), &assign, &options).map_err(super::ActualError::request)
     }
 }`;
   }).join('\n');
@@ -97,6 +97,8 @@ impl ActualError {
     fn data(code: &str) -> Self { Self { code: code.to_string(), template: "input.tpl".to_string(), line: 0, col: 0 } }
     fn bind(error: polyspec_template::BindError) -> Self { Self::data(error.code.as_str()) }
     fn template(error: polyspec_template::TemplateError) -> Self { Self { code: error.code.as_str().to_string(), template: error.template, line: error.line, col: error.col } }
+    // An argument error (ERR-13) is not an ERR-1 error, so it never equals an expected error object.
+    fn request(error: polyspec_template::RequestError) -> Self { match error { polyspec_template::RequestError::Template(error) => Self::template(error), polyspec_template::RequestError::Argument(error) => Self { code: format!("argument error: {}", error.message), template: String::new(), line: 0, col: 0 } } }
 }
 ${modules}
 ${tests}

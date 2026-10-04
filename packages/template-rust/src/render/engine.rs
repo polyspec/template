@@ -1,7 +1,7 @@
 //! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
 use crate::ast::Template;
-use crate::error::{ErrorCode, Span, TemplateError, internal_boundary};
+use crate::error::{ErrorCode, RequestError, Span, TemplateError, internal_boundary};
 use crate::functions::{Env, HostFunction};
 use crate::loader::{Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
@@ -79,10 +79,10 @@ pub trait Program {
         target: RenderTarget<'_>,
         assign: &serde_json::Value,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, TemplateError>;
+    ) -> Result<PreparedRender<'_>, RequestError>;
 
     /// Renders one request.
-    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError>;
+    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError>;
 }
 
 /// Delegates requests to one complete program.
@@ -104,12 +104,12 @@ impl Engine {
         target: RenderTarget<'_>,
         assign: &serde_json::Value,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, TemplateError> {
+    ) -> Result<PreparedRender<'_>, RequestError> {
         self.program.prepare(target, assign, options)
     }
 
     /// Renders a request through the selected program.
-    pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
+    pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError> {
         self.program.render(target, assign, options)
     }
 }
@@ -331,12 +331,12 @@ impl Program for AstProgram {
         target: RenderTarget<'_>,
         assign: &serde_json::Value,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, TemplateError> {
-        AstProgram::prepare(self, target, assign, options)
+    ) -> Result<PreparedRender<'_>, RequestError> {
+        Ok(AstProgram::prepare(self, target, assign, options)?)
     }
 
-    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
-        AstProgram::render(self, target, assign, options)
+    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError> {
+        Ok(AstProgram::render(self, target, assign, options)?)
     }
 }
 

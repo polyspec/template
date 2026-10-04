@@ -210,12 +210,55 @@ impl fmt::Display for TemplateError {
 
 impl std::error::Error for TemplateError {}
 
+/// A request that does not match what a program declares, such as the declared types of the `assign`
+/// or the definition data of a generated program (ERR-13). It is not an ERR-1 error: it passes to the
+/// host unchanged and carries no error code or template position.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ArgumentError {
+    /// Free text that names the member of the request.
+    pub message: String,
+}
+
+impl fmt::Display for ArgumentError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl std::error::Error for ArgumentError {}
+
+/// The failure of a request to a program: an ERR-1 error or an argument error of the request (ERR-13).
+#[derive(Debug, Clone, PartialEq)]
+pub enum RequestError {
+    /// An ERR-1 error of parsing, binding or rendering.
+    Template(TemplateError),
+    /// A request that does not match what the program declares.
+    Argument(ArgumentError),
+}
+
+impl From<TemplateError> for RequestError {
+    fn from(error: TemplateError) -> RequestError {
+        RequestError::Template(error)
+    }
+}
+
+impl fmt::Display for RequestError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            RequestError::Template(error) => error.fmt(f),
+            RequestError::Argument(error) => error.fmt(f),
+        }
+    }
+}
+
+impl std::error::Error for RequestError {}
+
 /// Runs one public operation and reports a panic as `E_INTERNAL` for `template` (ERR-12, ERR-13).
 ///
 /// The operations of the engine return their errors as values; a panic is an implementation
 /// defect or a panic of a host callback. Catching it here keeps the host process alive, also when
 /// the host is a foreign runtime that cannot unwind, such as the PHP extension.
-pub fn internal_boundary<T>(template: &str, operation: impl FnOnce() -> Result<T, TemplateError>) -> Result<T, TemplateError> {
+pub fn internal_boundary<T, E: From<TemplateError>>(template: &str, operation: impl FnOnce() -> Result<T, E>) -> Result<T, E> {
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(operation)) {
         Ok(result) => result,
         Err(payload) => {
@@ -224,11 +267,7 @@ pub fn internal_boundary<T>(template: &str, operation: impl FnOnce() -> Result<T
                 .map(|text| (*text).to_string())
                 .or_else(|| payload.downcast_ref::<String>().cloned())
                 .unwrap_or_else(|| "a panic without a message".to_string());
-            Err(TemplateError::without_position(
-                ErrorCode::E_INTERNAL,
-                template,
-                format!("internal failure: {reason}"),
-            ))
+            Err(TemplateError::without_position(ErrorCode::E_INTERNAL, template, format!("internal failure: {reason}")).into())
         }
     }
 }
