@@ -5,6 +5,24 @@ import { root } from './drivers.mjs';
 
 export const casesDir = join(root, 'tests', 'cases');
 
+// Returns the cases that the arguments of a generated runner select: every case without arguments,
+// or one case or group with `--case group/name | group`. Other arguments and a filter that selects
+// no case end the process, so a run never passes without running a case.
+export function generatedCases(argv) {
+  let filter;
+  if (argv.length === 2 && argv[0] === '--case') filter = argv[1];
+  else if (argv.length !== 0) {
+    process.stderr.write('usage: conformance-generated-<language>.mjs [--case group/name | group]\n');
+    process.exit(2);
+  }
+  const cases = listCases(filter);
+  if (cases.length === 0) {
+    process.stderr.write(`no cases found${filter === undefined ? '' : ` for ${filter}`}\n`);
+    process.exit(1);
+  }
+  return { cases, filtered: filter !== undefined };
+}
+
 export function listCases(filter) {
   const cases = [];
   if (!existsSync(casesDir)) return cases;
