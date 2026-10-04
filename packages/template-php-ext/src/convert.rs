@@ -258,9 +258,10 @@ fn call_function(name: &str, params: Vec<&dyn IntoZvalDyn>) -> Result<Zval, Stri
     function.try_call(params).map_err(|error| error.to_string())
 }
 
-/// Converts a PHP value into the assign data map. An empty array is an empty map.
+/// Converts a PHP value into the assign data map. Null and an empty array are an empty map (RT-4).
 pub fn php_to_map(zval: &Zval) -> Result<OrderedMap, BindError> {
     match php_to_value(zval)? {
+        Value::Null => Ok(OrderedMap::new()),
         Value::Map(map) => Ok(Rc::try_unwrap(map).unwrap_or_else(|shared| (*shared).clone())),
         Value::List(list) if list.is_empty() => Ok(OrderedMap::new()),
         _ => Err(bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "assign is not a map")),

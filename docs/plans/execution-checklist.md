@@ -316,6 +316,15 @@ Dependencies: none. Host binding checks every string, map key and define id with
 | T14.1 | Check the strings, map keys and define ids of host binding with `mb_check_encoding` and keep `Utf8::firstInvalid` where a position is reported; add a test that compares both on every 1-byte and 2-byte sequence and on the boundary 3-byte and 4-byte sequences | `make check` | [o] |
 | T14.2 | Bind data once for several renders: a public `bind` operation that returns an opaque bound value with its depth, a `merge` that checks VAL-20, and `render` that accepts a bound `assign` and bound `define` data without binding them again, in every runtime | `make check` | [ ] |
 
+## Wave 15 — Binding errors that differ between runtimes
+
+Dependencies: none. Two bindings differ between the runtimes. Rust fails with E_DATA_UNSUPPORTED_TYPE on a null `assign` (`bind_map` in `value/bind.rs`), and so does the PHP extension (`php_to_map` in `convert.rs`), while TypeScript, Go and PHP render it as an empty map, as RT-4 states. A typed generated program reports a request that does not match its declared types with `\InvalidArgumentException` in PHP, `Error` in TypeScript and an `error` of `fmt.Errorf` in Go, as ERR-13 states, while Rust reports it as E_DATA_UNSUPPORTED_TYPE.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T15.1 | Add a conformance case whose `assign` is JSON `null` and that renders as an empty map; check it fails in Rust; make Rust `render`, `render_values` and `prepare` and the PHP extension `render`, which renders through `render_values` and `render`, accept a null `assign` as an empty map (`bind_map`, `php_to_map`); state the rule in RT-4 | `make check` | [o] |
+| T15.2 | Add a test in every generated runtime that renders a request whose `assign` and definition `data` do not match the declared types; check that the runtimes report it differently; make every runtime report it as ERR-13 states, an argument error of its language that passes unchanged and is not an ERR-1 error | `make check` | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -333,6 +342,7 @@ Dependencies: none. Host binding checks every string, map key and define id with
 | W10 | none | T10.1 |
 | W11 | T11.3 → T11.4 alongside T11.5 | T11.1 → T11.2 → the parallel group → T11.6 |
 | W14 | none | T14.1 → T14.2 |
+| W15 | T15.1, T15.2 | none |
 
 ## Definition of done
 
