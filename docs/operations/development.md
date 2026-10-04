@@ -22,7 +22,9 @@ make help
 make check
 ```
 
-`make check` runs `docs-check`, `docs-static-check`, `rules-check`, `editor-boundary-check`, `runtime-interface-check`, `compiler-interface-check`, `feature-check`, `language-test-matrix`, `contract-check`, `function-contract-check`, `lint`, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance-all-modes`, `delimiter-matrix`, `generated-native-check`, `test-ext`, `typed-generator-compile-check`, `install-check`, `test-browser` and `showcase-check`. The last four are also release layers; they are part of `make check` because a change that passes `make check` must not fail the release matrix. A target whose package does not exist yet prints `not implemented` and exits with status 1. `lint` runs ESLint, gofmt, `cargo fmt --check` for the Rust crate, the PHP extension and the Rust showcase adapter, compiles the Rust showcase adapter with warnings as errors and runs Pint. `test-rust` and `test-ext` run clippy with warnings as errors on the Rust crate and on the PHP extension.
+`make check` runs `docs-check`, `docs-static-check`, `test-scripts`, `rules-check`, `editor-boundary-check`, `runtime-interface-check`, `compiler-interface-check`, `feature-check`, `language-test-matrix`, `contract-check`, `function-contract-check`, `lint`, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance-all-modes`, `delimiter-matrix`, `generated-native-check`, `test-ext`, `typed-generator-compile-check`, `install-check`, `test-browser` and `showcase-check`. The last four are also release layers; they are part of `make check` because a change that passes `make check` must not fail the release matrix. A target whose package does not exist yet prints `not implemented` and exits with status 1. `lint` runs ESLint, gofmt, `cargo fmt --check` for the Rust crate, the PHP extension and the Rust showcase adapter, compiles the Rust showcase adapter with warnings as errors and runs Pint. `test-rust` and `test-ext` run clippy with warnings as errors on the Rust crate and on the PHP extension.
+
+`test-go`, `test-rust` and `test-php` run `go test`, `cargo test` and PHPUnit through `scripts/run-tests.mjs`. The runner prints each test when it starts, every 5 s while it runs and when it passes, fails or is skipped, with its elapsed time, and stops the tool when a test outlives its own timeout (30 s, `--timeout <seconds>`); no package, file or whole run has a time limit. `cargo test` runs one test at a time, so each test prints its start before its result. PHPUnit also stops a test after 10 s (`enforceTimeLimit`, `failOnRisky`). `test-scripts` runs the tests of the runner in `tests/scripts/`.
 
 Single-language commands:
 
@@ -41,5 +43,5 @@ node tests/runner/parity.mjs
 2. Add or change the fixture cases in `tests/cases/` and the expression fixtures in `tests/fixtures/expr/`.
 3. Add a failing test in the package, change the code, and keep the test.
 4. Update `docs/features.md`, `docs/features.ko.md`, `CHANGELOG.md` and `CHANGELOG.ko.md`.
-5. Run the tests of every changed package and `make docs-check`.
+5. Run the Red and Green tests that own the change and `make docs-check`.
 6. Commit with a message that names the action, the subject and the object.

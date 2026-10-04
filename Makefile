@@ -4,7 +4,7 @@ export PATH := $(HOME)/.cargo/bin:$(PATH)
 CARGO ?= $(HOME)/.cargo/bin/cargo
 
 .DEFAULT_GOAL := help
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
+.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
 	conformance delimiter-matrix parity test-browser ext test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
@@ -32,10 +32,11 @@ endef
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  check                  docs-check, lint, unit tests of every package, formatter and extension tests, conformance"
+	@echo "  check                  docs-check, lint, unit tests of every package and of the test runner, formatter and extension tests, conformance"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
+	@echo "  test-scripts           Tests of the test runner and the conformance runners"
 	@echo "  conformance            Cross-language conformance suite (tests/runner/conformance.mjs)"
 	@echo "  parity                 Cross-language output comparison without expected files"
 	@echo "  test-browser           Browser rendering test (Playwright)"
@@ -74,7 +75,7 @@ help: ## List targets
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-check: docs-check docs-static-check rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
+check: docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
 
 lint: build-php ## Lint every package
 	$(call require-dir,$(TS_DIR),lint)
@@ -108,15 +109,19 @@ test-ts: build-ts ## TypeScript unit tests and type check
 
 test-go: ## Go unit tests
 	$(call require-dir,$(GO_DIR),test-go)
-	cd $(GO_DIR) && go vet ./... && go test -race -count=1 -timeout=120s ./...
+	cd $(GO_DIR) && go vet ./...
+	node scripts/run-tests.mjs go --cwd $(GO_DIR) -- -race ./...
 
 test-rust: ## Rust clippy and tests
 	$(call require-dir,$(RUST_DIR),test-rust)
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
-	$(CARGO) test --locked --manifest-path $(RUST_DIR)/Cargo.toml
+	node scripts/run-tests.mjs cargo --cwd $(RUST_DIR) -- --locked
 
 test-php: build-php ## PHP unit tests
-	cd $(PHP_DIR) && vendor/bin/phpunit
+	node scripts/run-tests.mjs phpunit --cwd $(PHP_DIR)
+
+test-scripts: ## Tests of the test runner and the conformance runners
+	node scripts/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
 	npm run build -w @polyspec/template-language
