@@ -80,7 +80,7 @@ if (JSON.stringify(statuses('docs/features.md')) !== JSON.stringify(statuses('do
   errors.push('docs/features.md: English and Korean status fields differ');
 }
 
-// Checkbox columns of task tables in docs/plans must match between the two languages.
+// The task states of task tables in docs/plans must be valid and match between the two languages.
 function checkboxes(path) {
   return readFileSync(join(root, path), 'utf8').split('\n')
     .filter(line => /^\| T[0-9]+\.[A-Z0-9.]+ /.test(line))
@@ -88,7 +88,8 @@ function checkboxes(path) {
       const cells = line.split('|').slice(1, -1).map(c => c.trim());
       const id = cells[0].replace(/ `parallel`$/, '');
       const last = cells[cells.length - 1];
-      if (!/^\[( |x)\]( blocked: .+)?$/.test(last)) errors.push(`${path}: invalid checkbox for ${id}: ${last}`);
+      // The four task states of AGENTS; a bypassed task records its cause and its retry condition.
+      if (!/^\[( |~|o)\]$|^\[!\] cause: .+; retry: .+$/.test(last)) errors.push(`${path}: invalid task state for ${id}: ${last}`);
       return [id, last];
     });
 }
