@@ -337,7 +337,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
-| T16.1 | 모든 runtime의 render가 하나의 program을 공유할 수 있는지 정하고 runtime 명세에 규칙을 적는다. 공유할 수 있으면 Go에서 한 program을 동시에 렌더하는 race test를 더하고 모든 runtime의 template cache를 그에 맞게 안전하게 한다. 공유할 수 없으면 호스트가 thread나 goroutine마다 program 하나를 쓴다고 적는다 | `make check` | [ ] |
+| T16.1 | 모든 runtime의 render가 하나의 program을 공유할 수 있는지 정하고 runtime 명세에 규칙을 적는다. 공유할 수 있으면 Go에서 한 program을 동시에 렌더하는 race test를 더하고 모든 runtime의 template cache를 그에 맞게 안전하게 한다. 공유할 수 없으면 호스트가 thread나 goroutine마다 program 하나를 쓴다고 적는다 | `make check` | [o] |
 
 ## 병렬성 요약
 

@@ -337,7 +337,7 @@ Dependencies: none. VAL-22 states that renders may read one bound map concurrent
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T16.1 | Decide whether renders of every runtime may share one program and state the rule in the runtime specification; when they may, add a race test that renders one program concurrently in Go and make the template cache of every runtime safe for it; when they may not, state that a host uses one program per thread or goroutine | `make check` | [ ] |
+| T16.1 | Decide whether renders of every runtime may share one program and state the rule in the runtime specification; when they may, add a race test that renders one program concurrently in Go and make the template cache of every runtime safe for it; when they may not, state that a host uses one program per thread or goroutine | `make check` | [o] |
 
 ## Parallelism summary
 

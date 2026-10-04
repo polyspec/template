@@ -3,6 +3,7 @@ package render
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -56,8 +57,10 @@ type Engine struct {
 	delimiters      parser.Delimiters
 	parse           ParseFunc
 	artifactRefresh ArtifactRefresh
-	cache           map[string]cached
-	now             func() float64
+	// cacheLock guards cache, which concurrent renders of one program read and write (RT-62a).
+	cacheLock sync.Mutex
+	cache     map[string]cached
+	now       func() float64
 }
 
 type preparedExecution interface {
@@ -157,7 +160,10 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 	if !ok {
 		return nil, fail(errs.LoadNotFound, "template "+name+" does not exist")
 	}
-	if c, ok := e.cache[name]; ok && (e.artifactRefresh == ArtifactRefreshFalse || (e.artifactRefresh == ArtifactRefreshTrue && c.version == loaded.Version)) {
+	e.cacheLock.Lock()
+	c, ok := e.cache[name]
+	e.cacheLock.Unlock()
+	if ok && (e.artifactRefresh == ArtifactRefreshFalse || (e.artifactRefresh == ArtifactRefreshTrue && c.version == loaded.Version)) {
 		return c.template, nil
 	}
 	var template *ParsedTemplate
@@ -173,7 +179,9 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 		}
 		template = parsed
 	}
+	e.cacheLock.Lock()
 	e.cache[name] = cached{version: loaded.Version, template: template}
+	e.cacheLock.Unlock()
 	return template, nil
 }
 

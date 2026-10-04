@@ -116,6 +116,12 @@
       "rules": ["EDT-16"],
       "verification": "make test-codemirror",
       "files": ["packages/template-codemirror/tests/fixtures.test.ts", "packages/template-codemirror/tests/adapter.test.ts", "packages/template-codemirror/tests/browser/editor.spec.ts"]
+    },
+    {
+      "name": "concurrent-renders",
+      "rules": ["RT-70"],
+      "verification": "make test-go",
+      "files": ["packages/template-go/concurrency_test.go", "packages/template-go/bound_test.go"]
     }
   ]
 }

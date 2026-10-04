@@ -244,15 +244,11 @@ func TestBindErrors(t *testing.T) {
 func TestConcurrentRendersReadOneBoundMap(t *testing.T) {
 	cases := readBoundCases(t)
 	bound := mustBind(t, fixtureValue(t, cases.Assign))
-	// Each goroutine has its own program, because the specification states that renders may share
-	// one bound map; it does not state that renders may share one program.
-	programs := make([]*template.AstProgram, 8)
-	for index := range programs {
-		programs[index] = boundProgram(t, nil)
-	}
+	// The goroutines share one program and one bound map (RT-62a, VAL-22).
+	program := boundProgram(t, nil)
 	var wait sync.WaitGroup
-	failures := make(chan string, len(programs))
-	for _, program := range programs {
+	failures := make(chan string, 8)
+	for range 8 {
 		wait.Go(func() {
 			output, err := program.Render("page.tpl", bound, template.RenderOptions{})
 			if err != nil || output != cases.Outputs["page"] {
