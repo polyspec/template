@@ -98,3 +98,17 @@ func TestLimits(t *testing.T) {
 		t.Errorf("limit: %v", err)
 	}
 }
+
+// An invalid delimiter option is an argument error of Go, an error that is not an *errs.Error, in
+// Parse as in NewAstProgram (ERR-13, T15.3-1).
+func TestInvalidDelimiterIsArgumentError(t *testing.T) {
+	_, err := template.Parse([]byte("x"), "a.tpl", template.ParseOptions{Delimiters: "{"})
+	var templateError *errs.Error
+	if err == nil || errors.As(err, &templateError) {
+		t.Fatalf("Parse with an invalid delimiter = %v, want an argument error that is not an *errs.Error", err)
+	}
+	_, err = template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{}), Delimiters: "{"})
+	if err == nil || errors.As(err, &templateError) {
+		t.Fatalf("NewAstProgram with an invalid delimiter = %v, want an argument error that is not an *errs.Error", err)
+	}
+}

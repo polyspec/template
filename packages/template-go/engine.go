@@ -2,6 +2,7 @@
 package template
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/polyspec/template/ast"
@@ -79,7 +80,8 @@ func delimitersOf(option string) (parser.Delimiters, error) {
 	}
 	d, ok := parser.ParseDelimiters(option)
 	if !ok {
-		return parser.Delimiters{}, &Error{Code: errs.DataUnsupportedType, Message: option + " is not a delimiter pair"}
+		// An invalid option is an argument error of Go and not an ERR-1 error (ERR-13), as in NewAstProgram.
+		return parser.Delimiters{}, fmt.Errorf("%q is not a delimiter pair", option)
 	}
 	return d, nil
 }
