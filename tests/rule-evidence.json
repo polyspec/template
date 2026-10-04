@@ -2,6 +2,26 @@
   "schema": 1,
   "groups": [
     {
+      "name": "bound-data",
+      "rules": [
+        "VAL-22",
+        "ERR-14"
+      ],
+      "verification": "make test-ts test-go test-rust test-php test-ext generated-native-check compiler-interface-check",
+      "files": [
+        "tests/fixtures/bound-data/cases.json",
+        "packages/template-ts/tests/value/bound.test.ts",
+        "packages/template-ts/tests/value/bound-formats.test.ts",
+        "packages/template-go/bound_test.go",
+        "packages/template-go/value/bound_test.go",
+        "packages/template-rust/tests/bound.rs",
+        "packages/template-php/tests/Value/BoundMapTest.php",
+        "packages/template-php-ext/tests/BoundMapTest.php",
+        "scripts/check-generated-bound-data.mjs",
+        "scripts/check-compiler-interface-mutations.mjs"
+      ]
+    },
+    {
       "name": "serialized-ast-schema",
       "rules": ["AST-8", "CNF-15"],
       "verification": "make schema-check",

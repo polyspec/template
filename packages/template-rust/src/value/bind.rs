@@ -69,11 +69,11 @@ pub fn check_level(level: usize) -> Result<(), BindError> {
 }
 
 /// Converts a `serde_json::Value` into a template value (VAL-16).
-pub fn bind(input: &serde_json::Value) -> Result<Value, BindError> {
-    bind_json(input, 0)
+pub fn bind_json(input: &serde_json::Value) -> Result<Value, BindError> {
+    bind_json_at(input, 0)
 }
 
-fn bind_json(input: &serde_json::Value, level: usize) -> Result<Value, BindError> {
+fn bind_json_at(input: &serde_json::Value, level: usize) -> Result<Value, BindError> {
     match input {
         serde_json::Value::Null => Ok(Value::Null),
         serde_json::Value::Bool(value) => Ok(Value::Bool(*value)),
@@ -88,7 +88,7 @@ fn bind_json(input: &serde_json::Value, level: usize) -> Result<Value, BindError
             check_level(level + 1)?;
             let mut list = Vec::with_capacity(items.len());
             for item in items {
-                list.push(bind_json(item, level + 1)?);
+                list.push(bind_json_at(item, level + 1)?);
             }
             Ok(Value::list(list))
         }
@@ -96,7 +96,7 @@ fn bind_json(input: &serde_json::Value, level: usize) -> Result<Value, BindError
             check_level(level + 1)?;
             let mut map = OrderedMap::with_capacity(entries.len());
             for (key, value) in entries {
-                map.insert(key.clone(), bind_json(value, level + 1)?);
+                map.insert(key.clone(), bind_json_at(value, level + 1)?);
             }
             Ok(Value::map(map))
         }
@@ -108,7 +108,7 @@ pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
     if input.is_null() {
         return Ok(OrderedMap::new());
     }
-    match bind(input)? {
+    match bind_json(input)? {
         Value::Map(map) => Ok(Rc::try_unwrap(map).unwrap_or_else(|shared| (*shared).clone())),
         _ => Err(bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "assign is not a map")),
     }

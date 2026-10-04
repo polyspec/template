@@ -6,7 +6,9 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -305,4 +307,116 @@ func equalNames(left, right []string) bool {
 		}
 	}
 	return true
+}
+
+type boundMapManifest struct {
+	Languages struct {
+		Go struct {
+			BoundMap struct {
+				Type                string            `json:"type"`
+				Operations          map[string]string `json:"operations"`
+				GeneratedOperations []string          `json:"generatedOperations"`
+			} `json:"boundMap"`
+		} `json:"go"`
+	} `json:"languages"`
+}
+
+// TestBoundMapInterface checks that the bound map type has no exported field or method and that the
+// exported functions of the value package that take or return it are exactly the operations of the
+// manifest and the operations that it declares for generated programs (VAL-22).
+func TestBoundMapInterface(t *testing.T) {
+	manifestPath := os.Getenv("TEMPLATE_INTERFACE_MANIFEST")
+	if manifestPath == "" {
+		manifestPath = "../../tools/compiler/interface.json"
+	}
+	manifestBytes, err := os.ReadFile(manifestPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var manifest boundMapManifest
+	if err := json.Unmarshal(manifestBytes, &manifest); err != nil {
+		t.Fatal(err)
+	}
+	mapping := manifest.Languages.Go.BoundMap
+	allowed := map[string]bool{}
+	for _, name := range mapping.Operations {
+		allowed[name] = true
+	}
+	for _, name := range mapping.GeneratedOperations {
+		allowed[strings.TrimPrefix(name, "value.")] = true
+	}
+	packages, err := parser.ParseDir(token.NewFileSet(), "value", func(info fs.FileInfo) bool { return !strings.HasSuffix(info.Name(), "_test.go") }, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mentions := func(fields *ast.FieldList) bool {
+		found := false
+		if fields == nil {
+			return false
+		}
+		ast.Inspect(fields, func(node ast.Node) bool {
+			if identifier, ok := node.(*ast.Ident); ok && identifier.Name == mapping.Type {
+				found = true
+			}
+			return true
+		})
+		return found
+	}
+	found := map[string]bool{}
+	for _, file := range packages["value"].Files {
+		for _, declaration := range file.Decls {
+			switch current := declaration.(type) {
+			case *ast.GenDecl:
+				for _, specification := range current.Specs {
+					if typeSpec, ok := specification.(*ast.TypeSpec); ok && typeSpec.Name.Name == mapping.Type {
+						for _, name := range fieldNames(typeSpec.Type.(*ast.StructType)) {
+							if ast.IsExported(name) {
+								t.Errorf("BoundMap has the exported field %s", name)
+							}
+						}
+					}
+				}
+			case *ast.FuncDecl:
+				if !ast.IsExported(current.Name.Name) {
+					continue
+				}
+				if current.Recv != nil {
+					if receiverName(current.Recv.List[0].Type) == mapping.Type {
+						t.Errorf("BoundMap has the exported method %s", current.Name.Name)
+					}
+					continue
+				}
+				if mentions(current.Type.Params) || mentions(current.Type.Results) || allowed[current.Name.Name] {
+					if !allowed[current.Name.Name] {
+						t.Errorf("value exports the undeclared bound map operation %s", current.Name.Name)
+					}
+					found[current.Name.Name] = true
+				}
+			}
+		}
+	}
+	for name := range allowed {
+		if !found[name] {
+			t.Errorf("value does not export the bound map operation %s", name)
+		}
+	}
+	root, err := parser.ParseFile(token.NewFileSet(), "bound.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	aliases := map[string]bool{}
+	for _, declaration := range root.Decls {
+		if general, ok := declaration.(*ast.GenDecl); ok && general.Tok == token.VAR {
+			for _, specification := range general.Specs {
+				for _, name := range specification.(*ast.ValueSpec).Names {
+					aliases[name.Name] = true
+				}
+			}
+		}
+	}
+	for _, name := range mapping.Operations {
+		if !aliases[name] {
+			t.Errorf("package template does not export %s", name)
+		}
+	}
 }

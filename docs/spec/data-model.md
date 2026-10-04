@@ -79,7 +79,7 @@ This document defines the value types that templates operate on, the safe string
 
 ## Host binding
 
-**VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host.
+**VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host. A bound map (VAL-22) has passed binding, so `render` uses it as `assign` or as definition data without binding it again (RT-61).
 
 **VAL-12** JSON text is the reference form of assign data. Every implementation accepts JSON text and produces the same values. Each implementation parses JSON text with a parser that preserves document order and applies the number rule of VAL-2 and the depth limit of VAL-20; the TypeScript implementation provides this parser in the package and does not use `JSON.parse` for assign data.
 
@@ -109,6 +109,7 @@ A text that is not one JSON document is E_DATA_INVALID_JSON: a syntax error, an 
 | `Map` with string keys | map, in insertion order; a key follows the `string` row |
 | plain object, whose prototype is `Object.prototype` or `null` | map, in property enumeration order of the platform; a key follows the `string` row; integer-like keys enumerate first in ascending order, so a JSON object with such keys must be bound from JSON text, not from a parsed object |
 | `Date`, function, symbol, `Map` with a non-string key | E_DATA_UNSUPPORTED_TYPE |
+| bound map (VAL-22) | E_DATA_UNSUPPORTED_TYPE, except as `assign` and as definition `data` (VAL-22) |
 | class instance | object (VAL-19); the original instance is retained |
 
 **VAL-14** PHP.
@@ -122,6 +123,7 @@ A text that is not one JSON document is E_DATA_INVALID_JSON: a syntax error, an 
 | `string` | string; a value that is not valid UTF-8 is E_DATA_INVALID_UTF8 |
 | `array` for which `array_is_list()` is true | list |
 | other `array` | map; each key is converted to a string; an integer key `1` becomes the key `"1"`; a string key that is not valid UTF-8 is E_DATA_INVALID_UTF8 |
+| bound map (VAL-22) | E_DATA_UNSUPPORTED_TYPE, except as `assign` and as definition `data` (VAL-22) |
 | object implementing `JsonSerializable` | the binding of the value that `jsonSerialize()` returns; an exception thrown by `jsonSerialize()` is E_RUNTIME_HOST_FUNCTION with the message of the exception |
 | other instance of `stdClass` or of a subclass of `stdClass` | map of its public properties, in the order of `get_mangled_object_vars()`; a property name that is not valid UTF-8 is E_DATA_INVALID_UTF8 |
 | `Closure` | E_DATA_UNSUPPORTED_TYPE |
@@ -142,6 +144,7 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 | slice, array | list |
 | the insertion-ordered map type provided by the package | map, in insertion order; a key follows the `string` row |
 | `map[string]T` | map with the keys sorted by byte order; a key follows the `string` row |
+| bound map (VAL-22) | E_DATA_UNSUPPORTED_TYPE, except as `assign` and as definition `data` (VAL-22); a non-nil pointer to a bound map is E_DATA_UNSUPPORTED_TYPE at every position, and a nil one is null |
 | struct value, pointer to a struct | object (VAL-19); the original value is retained |
 | pointer to a value of another kind | the binding of the value it points to; `nil` is null; each such dereference counts as one level of VAL-20, so a pointer that leads back to itself fails with E_DATA_DEPTH |
 | function, channel and every other kind | E_DATA_UNSUPPORTED_TYPE |
@@ -158,6 +161,8 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 | `serde_json::Value::Object` | map, in insertion order; the `preserve_order` feature of `serde_json` is required |
 | `Value` that the host builds and passes to `render_values`, or that a host function, a logical class function or a `TemplateObject` returns | the same value after the checks of VAL-2, VAL-3 and VAL-20 |
 | `Value::Object` | object (VAL-19); the `TemplateObject` is retained |
+
+A bound map (VAL-22) is a type of its own that none of these inputs can hold, so `render` receives it only as `assign` and as definition `data`.
 
 **VAL-17** Map keys are strings in every host. A host map whose key is not a string is converted only where a table above defines the conversion; otherwise it is E_DATA_UNSUPPORTED_TYPE. A key is checked like a string value: a key that is not valid UTF-8, or in TypeScript a key that is not well-formed UTF-16, is E_DATA_INVALID_UTF8.
 
@@ -199,6 +204,33 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 - A list or a map arrives as a new host value that the host owns. A change that the host makes to a received list or map changes no template value: a later read of the same template value in the render returns the value it had before the call. A native object is not copied (VAL-18).
 - In PHP, a map arrives as an array, so the key conversion of PHP arrays applies: a key that is the decimal text of an integer in the PHP integer range, without a sign `+`, without leading zeros and other than `-0`, becomes an integer key. A PHP array cannot distinguish an empty map from an empty list, or a map whose keys are `"0"` to `"n-1"` in that order from a list; such a map arrives as that array, and binding the array again (VAL-14) produces a list. The PHP AST program and the PHP extension produce the same arrays.
 - Reason: every host receives plain values of its own language that its binding table (VAL-13 to VAL-16) accepts, so host code needs no implementation class to read an argument and can return an argument without converting it. An internal representation, such as a safe string wrapper or the PHP class `MapValue`, never reaches host code, and the two PHP implementations pass the same values.
+
+## Bound data
+
+**VAL-22** A host binds data once with `bind` and renders it many times as a bound map. Every implementation provides the bound map type and two operations; their names in each language are listed in [`tools/compiler/interface.json`](../../tools/compiler/interface.json) (RT-67). An implementation is one package: the TypeScript package with all its entry points and module formats, including the browser entry `@polyspec/template/render` (`typescript` and `javascript-esm` in `supportLevels`), the Go module, the Rust crate, the PHP package, and the PHP extension. Every entry point and module format of one implementation accepts the bound maps that the others create.
+
+- `bind(value)` accepts every host value that host binding (VAL-13 to VAL-16) turns into a map, and the values that `render` uses as an empty map (RT-4); it does not take JSON text. A host binds JSON text by parsing it with the JSON parser of the package (VAL-12) and passing the result to `bind`. `bind` applies host binding (VAL-11 to VAL-20) and returns a bound map. A value that `render` uses as an empty map returns an empty bound map. A bound map of the same implementation is returned unchanged, because it is immutable and already checked. Any other value that binding does not turn into a map fails with E_DATA_UNSUPPORTED_TYPE. A failure is the error of ERR-14. `tools/compiler/interface.json` names the operation or parameter type through which each implementation passes a bound map to `render` and `prepare`, such as the Rust `prepare_bound` and `render_bound` and the PHP extension `render`; an operation that takes JSON text, such as the PHP extension `render_json`, does not accept a bound map.
+- `merge(first, second)` returns a bound map with the entries of `first` and `second` by the precedence of RT-26: an entry of `second` replaces the entry of `first` with the same key and keeps the position of `first`; the other entries of `second` follow in their order. It reads no value again.
+
+In TypeScript, PHP and the PHP extension the parameters of `bind` and `merge` accept any value, so the check runs inside the operation: an argument of `merge` that is not a bound map of the same implementation fails with E_DATA_UNSUPPORTED_TYPE. In Go and Rust the parameter type of `merge` is the bound map type, so the compiler rejects another value.
+
+`render` and `prepare` accept a bound map as `assign` (RT-4) and as the `data` of a template definition (RT-24) and do not bind it again (RT-61). Host binding of a bound map at any other position, inside a list, a map or an object that is given to `bind`, `render` or `prepare`, or as the result of host code (VAL-11), fails with E_DATA_UNSUPPORTED_TYPE. A bound map that another implementation created, such as a bound map of the PHP extension given to the PHP implementation, fails with E_DATA_UNSUPPORTED_TYPE at every position. A bound map is never a native object (VAL-19). Reason: a bound map is accepted only where `render` uses it as a whole map, so no binding rule has to combine the depth of a bound map with the level at which it is met (VAL-20), and `merge` of two maps that each satisfy VAL-20 satisfies it too.
+
+Through the host interface, which is `bind`, `merge`, `prepare`, `render` and the arguments of host functions (VAL-21), the host cannot construct a non-empty bound map in another way and cannot change a bound map or a list or map inside it. So a bound map holds only values that binding checked. The bound map type has no public operation other than `bind`, `merge` and the operations that `tools/compiler/interface.json` declares for generated programs, and the compiler interface checks (RT-67) fail when an implementation exports another one. Each language uses these mechanisms:
+
+| Implementation | Bound map type |
+| --- | --- |
+| TypeScript and JavaScript | A class whose state is in private `#` fields; its constructor fails unless the package calls it, so `new` from JavaScript and a subclass fail. The package identifies a bound map with `#field in value`, so an object that only inherits the prototype of the class is a class instance (VAL-19) |
+| PHP | A `final` class with a private constructor and a private `__clone()`, whose `__unserialize()` fails |
+| PHP extension | A final class of the extension that PHP code cannot instantiate, clone or unserialize |
+| Go | A struct with unexported fields that `bind` and `merge` return by value; its zero value is the empty bound map, which holds no unchecked value; a nil pointer to it is null (RT-4) |
+| Rust | A struct with private fields |
+
+Reflection, `unsafe` code, a closure bound to the class scope, and the operations that a runtime exports for generated programs (RuntimeBindings, RenderFrame, RenderScope and the render context, RT-67) are not the host interface. A host that changes a bound map through them is outside this specification. Reason: generated programs live outside the runtime package and read bound maps through these exported operations.
+
+A Go bound map may be read by concurrent renders. A Rust bound map is not `Send`, because template values share their lists and maps with `Rc`, so a Rust host binds data in the thread that renders it.
+
+A native object inside a bound map stays a reference (VAL-18) whose members are bound when a template reads them (VAL-19); the host may change such an object, as without a bound map.
 
 ## Examples
 

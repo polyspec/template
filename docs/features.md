@@ -26,5 +26,6 @@ The executable source is [contracts/features.json](../contracts/features.json). 
 | dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](operations/dependencies) |
 | template-function-contract | Canonical template function contract | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/functions) |
 | object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/ast) |
+| bound-data | Bound data for several renders | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/data-model) |
 
 Run `make feature-check` to validate every contract and referenced path. An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.

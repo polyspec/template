@@ -65,6 +65,7 @@ engine := template.NewEngine(program)
 | `NewAstProgram(Options)` | Creates an AST program with `Loader`, `Functions`, `Limits` and `Delimiters`. |
 | `NewEngine(Program)` | Creates an engine that delegates to one AST or generated program. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | Renders a template to a string. `assign` contains variables and `Define` supplies template or HTML entries. |
+| `Bind(value)`, `Merge(first, second)` | `Bind` checks data once and returns a `BoundMap`, whose zero value is the empty bound map; `Merge` combines two bound maps, and an entry of `second` replaces the entry of `first` with the same key. `Render` and `Prepare` take a `BoundMap` as `assign` and as definition `Data` without binding it again; at another position, and as a pointer, it fails with `E_DATA_UNSUPPORTED_TYPE` (VAL-22). Concurrent renders may read one bound map. Errors have no template and no position (ERR-14). |
 | `(*render.Engine).Register(name, fn)` | Registers a host function on an AST program. Arguments have the form of VAL-21: a safe string is a `string`, a list is a new `value.List`, a map is a new `*value.OrderedMap` and a native object is the original value. |
 | `NewMapLoader`, `NewFSLoader` | In-memory and `fs.FS` loaders. `Loader.Load(name)` returns `(LoadResult, ok, error)`; a non-nil error fails the render with `E_LOAD_FAILED`, and the `fs.FS` loader returns one for a regular file that cannot be read. |
 | `ParseJSON` | Order-preserving JSON decoder for assign data. Text that is not one JSON document is `E_DATA_INVALID_JSON`. |

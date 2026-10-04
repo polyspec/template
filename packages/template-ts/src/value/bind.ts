@@ -1,4 +1,5 @@
 // Host binding of JavaScript values (VAL-13), the number rule (VAL-2, VAL-3) and the depth limit (VAL-20).
+import { boundEntries } from './bound.js';
 import { MAX_SAFE } from './number.js';
 import { NativeObject, SafeString, type MapValue, type Value } from './value.js';
 
@@ -46,8 +47,9 @@ export function checkLevel(level: number): void {
   if (level > MAX_DEPTH) throw new BindError('E_DATA_DEPTH', `lists and maps nest deeper than ${MAX_DEPTH} levels`);
 }
 
-// Converts a JavaScript value into a template value.
-export function bind(input: unknown): Value {
+// Converts a JavaScript value into a template value. A bound map fails at every position, because
+// `render` takes one only as assign and as definition data (VAL-22).
+export function bindValue(input: unknown): Value {
   return bindAt(input, 0);
 }
 
@@ -71,6 +73,7 @@ function bindAt(input: unknown, level: number): Value {
     default:
       throw new BindError('E_DATA_UNSUPPORTED_TYPE', `a ${typeof input} value has no binding`);
   }
+  if (boundEntries(input) !== undefined) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a bound map is accepted only as assign and as definition data');
   if (input instanceof SafeString) return checkText(input.text);
   if (input instanceof NativeObject) return input;
   if (input instanceof Date) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a Date value has no binding');
@@ -97,11 +100,25 @@ function bindAt(input: unknown, level: number): Value {
   return new NativeObject(input);
 }
 
-/** Binds a host value and requires the result to be a string-keyed template map. */
+/**
+ * Binds assign data (RT-4): null and undefined are the empty map, a bound map gives its entries
+ * without binding them again (VAL-22), and every other value must bind to a map.
+ */
 export function bindMap(input: unknown): MapValue {
-  const value = bind(input);
+  if (input === null || input === undefined) return new Map();
+  const entries = boundEntries(input);
+  if (entries !== undefined) return entries;
+  const value = bindValue(input);
   if (!(value instanceof Map)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'assign is not a map');
   return value;
+}
+
+/**
+ * Binds the data of a template definition (RT-24): a bound map gives its entries without binding
+ * them again (VAL-22); every other value is bound like any host value.
+ */
+export function bindData(input: unknown): Value {
+  return boundEntries(input) ?? bindValue(input);
 }
 
 /** VAL-20: whether the depth of a template value is at most `limit`; the walk stops below the limit. */

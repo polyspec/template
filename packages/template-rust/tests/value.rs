@@ -2,7 +2,7 @@
 
 use polyspec_template::value::number::{format_number, number_to_string, positional, round_number, shortest_digits};
 use polyspec_template::value::{Value, compare_values, loose_equals, strict_equals};
-use polyspec_template::{ErrorCode, bind, bind_value, parse_json};
+use polyspec_template::{ErrorCode, bind_json, bind_value, parse_json};
 use std::cmp::Ordering;
 
 #[test]
@@ -87,11 +87,11 @@ fn binding_checks_the_numeric_value_and_not_its_spelling() {
         ErrorCode::E_DATA_NUMBER_NOT_FINITE
     );
     assert_eq!(
-        bind(&serde_json::json!(9007199254740992u64)).unwrap_err().code,
+        bind_json(&serde_json::json!(9007199254740992u64)).unwrap_err().code,
         ErrorCode::E_DATA_NUMBER_RANGE
     );
     assert_eq!(
-        bind(&serde_json::json!(-9007199254740991i64)).expect("bind"),
+        bind_json(&serde_json::json!(-9007199254740991i64)).expect("bind"),
         Value::Number(-9007199254740991.0)
     );
     assert_eq!(
@@ -127,7 +127,7 @@ fn binding_limits_the_nesting_depth() {
     for _ in 0..1000 {
         deep = serde_json::Value::Array(vec![deep]);
     }
-    assert_eq!(bind(&deep).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
+    assert_eq!(bind_json(&deep).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
     let mut value = Value::Null;
     for _ in 0..65 {
         value = Value::list(vec![value]);

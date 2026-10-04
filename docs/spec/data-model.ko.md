@@ -79,7 +79,7 @@
 
 ## 호스트 바인딩
 
-**VAL-11** 호스트 바인딩은 호스트 언어의 값을 템플릿 값으로 변환한다. 바인딩은 assign 데이터, 템플릿 define 데이터, 호스트가 계산한 scope 인자, 호스트 함수·논리 class 함수·instance method의 반환값, 템플릿이 읽는 native object member의 값에 적용된다(VAL-19). VAL-12부터 VAL-16의 변환 표는 허용되는 입력의 전체 집합이며 그 외 입력은 E_DATA_UNSUPPORTED_TYPE이다. VAL-17부터 VAL-21은 모든 호스트에 적용된다.
+**VAL-11** 호스트 바인딩은 호스트 언어의 값을 템플릿 값으로 변환한다. 바인딩은 assign 데이터, 템플릿 define 데이터, 호스트가 계산한 scope 인자, 호스트 함수·논리 class 함수·instance method의 반환값, 템플릿이 읽는 native object member의 값에 적용된다(VAL-19). VAL-12부터 VAL-16의 변환 표는 허용되는 입력의 전체 집합이며 그 외 입력은 E_DATA_UNSUPPORTED_TYPE이다. VAL-17부터 VAL-21은 모든 호스트에 적용된다. bound map(VAL-22)은 바인딩을 거쳤으므로 `render`가 `assign`이나 정의 data로 받을 때 다시 binding하지 않는다(RT-61).
 
 **VAL-12** JSON 텍스트는 assign 데이터의 기준 형태다. 모든 구현은 JSON 텍스트를 받아 같은 값을 생성한다. 각 구현은 문서 순서를 보존하고 VAL-2의 숫자 규칙과 VAL-20의 깊이 제한을 적용하는 파서로 JSON 텍스트를 파싱한다. TypeScript 구현은 이 파서를 패키지에 제공하며 assign 데이터에 `JSON.parse`를 사용하지 않는다.
 
@@ -109,6 +109,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 | string 키의 `Map` | 삽입 순서의 map. 키는 `string` 행을 따른다 |
 | prototype이 `Object.prototype` 또는 `null`인 일반 객체 | 플랫폼의 프로퍼티 열거 순서의 map. 키는 `string` 행을 따른다. 정수 형태의 키는 오름차순으로 먼저 열거되므로, 그런 키를 가진 JSON 객체는 파싱된 객체가 아니라 JSON 텍스트에서 바인딩해야 한다 |
 | `Date`, 함수, symbol, string이 아닌 키를 가진 `Map` | E_DATA_UNSUPPORTED_TYPE |
+| bound map(VAL-22) | E_DATA_UNSUPPORTED_TYPE. `assign`과 정의 `data`일 때는 예외다(VAL-22). |
 | 클래스 인스턴스 | object(VAL-19). 원본 인스턴스를 유지한다 |
 
 **VAL-14** PHP.
@@ -122,6 +123,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 | `string` | string. 유효한 UTF-8이 아닌 값은 E_DATA_INVALID_UTF8 |
 | `array_is_list()`가 true인 `array` | list |
 | 그 외 `array` | map. 각 키를 string으로 변환. 정수 키 `1`은 키 `"1"`이 된다. 유효한 UTF-8이 아닌 string 키는 E_DATA_INVALID_UTF8 |
+| bound map(VAL-22) | E_DATA_UNSUPPORTED_TYPE. `assign`과 정의 `data`일 때는 예외다(VAL-22). |
 | `JsonSerializable`을 구현한 객체 | `jsonSerialize()`가 반환한 값의 바인딩. `jsonSerialize()`가 던진 예외는 그 예외의 message를 가진 E_RUNTIME_HOST_FUNCTION |
 | 그 외 `stdClass` 또는 `stdClass` 하위 클래스의 인스턴스 | `get_mangled_object_vars()` 순서의 public 프로퍼티 map. 유효한 UTF-8이 아닌 프로퍼티 이름은 E_DATA_INVALID_UTF8 |
 | `Closure` | E_DATA_UNSUPPORTED_TYPE |
@@ -142,6 +144,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 | 슬라이스, 배열 | list |
 | 패키지가 제공하는 삽입 순서 map 타입 | 삽입 순서의 map. 키는 `string` 행을 따른다 |
 | `map[string]T` | 키를 바이트 순으로 정렬한 map. 키는 `string` 행을 따른다 |
+| bound map(VAL-22) | E_DATA_UNSUPPORTED_TYPE. `assign`과 정의 `data`일 때는 예외다(VAL-22). nil이 아닌 bound map pointer는 어느 위치에서든 E_DATA_UNSUPPORTED_TYPE이고, nil pointer는 null이다. |
 | 구조체 값, 구조체 포인터 | object(VAL-19). 원본 값을 유지한다 |
 | 그 밖의 kind를 가리키는 포인터 | 가리키는 값의 바인딩. `nil`은 null. 이런 역참조 한 번은 VAL-20의 한 단계로 세므로, 자기 자신으로 돌아오는 포인터는 E_DATA_DEPTH로 실패한다 |
 | 함수, 채널과 그 밖의 모든 kind | E_DATA_UNSUPPORTED_TYPE |
@@ -158,6 +161,8 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 | `serde_json::Value::Object` | 삽입 순서의 map. `serde_json`의 `preserve_order` 기능이 필요하다 |
 | 호스트가 만들어 `render_values`에 전달한 `Value`, 또는 호스트 함수·논리 class 함수·`TemplateObject`가 반환한 `Value` | VAL-2, VAL-3, VAL-20 검사를 거친 같은 값 |
 | `Value::Object` | object(VAL-19). `TemplateObject`를 유지한다 |
+
+bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을 수 없다. 그래서 `render`는 bound map을 `assign`과 정의 `data`로만 받는다.
 
 **VAL-17** 모든 호스트에서 map 키는 string이다. string이 아닌 키를 가진 호스트 map은 위 표가 변환을 정의한 경우에만 변환되며 그 외에는 E_DATA_UNSUPPORTED_TYPE이다. 키는 string 값과 같이 검사한다. 유효한 UTF-8이 아닌 키, TypeScript에서는 올바른 형식의 UTF-16이 아닌 키는 E_DATA_INVALID_UTF8이다.
 
@@ -200,6 +205,33 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 - PHP에서 map은 배열로 도착하므로 PHP 배열의 키 변환이 적용된다. PHP 정수 범위 안의 정수를 나타내는 10진 텍스트이고 `+` 부호와 선행 0이 없으며 `-0`이 아닌 키는 정수 키가 된다. PHP 배열은 빈 map과 빈 list를 구별하지 못하고, 키가 차례대로 `"0"`부터 `"n-1"`인 map과 list도 구별하지 못한다. 그런 map은 그 배열로 도착하며 그 배열을 다시 바인딩하면(VAL-14) list가 된다. PHP AST program과 PHP 확장은 같은 배열을 만든다.
 - 이유: 모든 호스트가 자기 언어의 일반 값, 즉 자기 바인딩 표(VAL-13~VAL-16)가 받는 값을 받는다. 따라서 호스트 코드는 인자를 읽기 위해 구현 클래스가 필요 없고 인자를 변환 없이 반환할 수 있다. safe 문자열 wrapper나 PHP 클래스 `MapValue` 같은 내부 표현은 호스트 코드에 도달하지 않으며 두 PHP 구현은 같은 값을 넘긴다.
 
+
+## Bound data
+
+**VAL-22** 호스트는 `bind`로 data를 한 번 binding하고, bound map으로 여러 번 렌더한다. 모든 구현은 bound map type과 연산 두 개를 제공한다. 언어별 이름은 [`tools/compiler/interface.json`](../../tools/compiler/interface.json)에 둔다(RT-67). 구현은 package 하나다. TypeScript package는 browser entry `@polyspec/template/render`를 포함한 모든 entry point와 module format이 한 구현이다(`supportLevels`의 `typescript`와 `javascript-esm`). Go module, Rust crate, PHP package, PHP extension도 각각 한 구현이다. 한 구현의 모든 entry point와 module format은 서로가 만든 bound map을 받는다.
+
+- `bind(value)`는 호스트 바인딩(VAL-13~VAL-16)이 map으로 바꾸는 모든 호스트 값과 `render`가 빈 map으로 쓰는 값(RT-4)을 받는다. JSON text는 받지 않는다. 호스트는 JSON text를 package의 JSON parser(VAL-12)로 parse한 결과를 `bind`에 준다. `bind`는 호스트 바인딩(VAL-11~VAL-20)을 적용하고 bound map을 돌려준다. `render`가 빈 map으로 쓰는 값은 빈 bound map을 돌려준다. 같은 구현의 bound map은 바꾸지 않고 그대로 돌려준다. 바뀌지 않고 이미 검사했기 때문이다. 바인딩이 map으로 바꾸지 않는 그 밖의 값은 E_DATA_UNSUPPORTED_TYPE으로 실패한다. 실패는 ERR-14의 오류다. 각 구현이 bound map을 `render`와 `prepare`에 넘기는 연산이나 parameter type은 `tools/compiler/interface.json`에 적는다. 예를 들어 Rust의 `prepare_bound`와 `render_bound`, PHP extension의 `render`다. PHP extension의 `render_json`처럼 JSON text를 받는 연산은 bound map을 받지 않는다.
+- `merge(first, second)`는 RT-26의 우선순위로 `first`와 `second`의 항목을 가진 bound map을 돌려준다. `second`의 항목은 같은 key의 `first` 항목을 바꾸고 `first`의 위치를 유지한다. `second`의 나머지 항목은 그 뒤에 순서대로 붙는다. 값을 다시 읽지 않는다.
+
+TypeScript, PHP, PHP extension에서는 `bind`와 `merge`의 parameter가 모든 값을 받으므로 연산 안에서 검사한다. 같은 구현의 bound map이 아닌 `merge`의 인자는 E_DATA_UNSUPPORTED_TYPE으로 실패한다. Go와 Rust에서는 `merge`의 parameter type이 bound map type이므로 compiler가 다른 값을 거부한다.
+
+`render`와 `prepare`는 bound map을 `assign`(RT-4)과 템플릿 정의의 `data`(RT-24)로 받고, 다시 binding하지 않는다(RT-61). 그 밖의 위치에 있는 bound map, 즉 `bind`, `render`, `prepare`에 준 list, map, object 안의 bound map과 호스트 코드의 결과(VAL-11)인 bound map은 호스트 바인딩이 E_DATA_UNSUPPORTED_TYPE으로 실패시킨다. 다른 구현이 만든 bound map, 예를 들어 PHP 구현에 준 PHP extension의 bound map은 어느 위치에서든 E_DATA_UNSUPPORTED_TYPE으로 실패한다. bound map은 native object(VAL-19)가 되지 않는다. 이유: bound map은 `render`가 map 전체로 쓰는 위치에서만 받으므로, bound map의 depth를 그것을 만난 level과 합치는 binding 규칙이 필요 없다(VAL-20). 그리고 각각 VAL-20을 만족하는 두 map의 `merge`도 VAL-20을 만족한다.
+
+host interface, 즉 `bind`, `merge`, `prepare`, `render`와 host function의 인자(VAL-21)로는 호스트가 다른 방법으로 비어 있지 않은 bound map을 만들 수 없고, bound map이나 그 안의 list와 map을 바꿀 수 없다. 그래서 bound map은 바인딩이 검사한 값만 가진다. bound map type은 `bind`, `merge`, 그리고 `tools/compiler/interface.json`이 generated program을 위해 선언한 연산 외의 public 연산을 갖지 않는다. 구현이 다른 연산을 export하면 compiler interface check(RT-67)가 실패한다. 언어마다 다음 방법을 쓴다.
+
+| 구현 | bound map type |
+| --- | --- |
+| TypeScript와 JavaScript | 상태를 private `#` field에 둔 class. package가 부르지 않은 constructor 호출은 실패하므로 JavaScript의 `new`와 subclass가 실패한다. package는 `#field in value`로 bound map을 식별하므로, class의 prototype만 상속한 object는 class 인스턴스(VAL-19)다 |
+| PHP | private constructor와 private `__clone()`, 실패하는 `__unserialize()`를 가진 `final` class |
+| PHP extension | PHP 코드가 instance로 만들거나 clone하거나 unserialize할 수 없는 extension의 final class |
+| Go | `bind`와 `merge`가 값으로 돌려주는, unexported field를 가진 struct. zero value는 빈 bound map이고 검사하지 않은 값을 갖지 않는다. 그 nil pointer는 null이다(RT-4) |
+| Rust | private field를 가진 struct |
+
+reflection, `unsafe` 코드, class scope에 bind한 closure, runtime이 generated program을 위해 export하는 연산(RuntimeBindings, RenderFrame, RenderScope, render context, RT-67)은 host interface가 아니다. 그것으로 bound map을 바꾸는 호스트는 이 명세의 범위 밖이다. 이유: generated program은 runtime package 밖에 있고, 이 export된 연산으로 bound map을 읽는다.
+
+Go bound map은 동시에 실행되는 render가 읽을 수 있다. Rust bound map은 `Send`가 아니다. template 값이 list와 map을 `Rc`로 공유하기 때문이다. 그래서 Rust 호스트는 data를 렌더하는 thread에서 binding한다.
+
+bound map 안의 native object는 참조로 남고(VAL-18), 템플릿이 member를 읽을 때 binding된다(VAL-19). 호스트는 bound map이 없을 때처럼 그 object를 바꿀 수 있다.
 
 ## 예시
 

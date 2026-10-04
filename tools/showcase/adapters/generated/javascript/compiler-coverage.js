@@ -1,5 +1,5 @@
 // Generated.
-import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bind, bindMap, checkText, internalBoundary } from '@polyspec/template';
+import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from '@polyspec/template';
 const generatedRecords = { "Page": { "title": { "kind": "string", "optional": false } }, "Row": { "name": { "kind": "string", "optional": false } }, "Slot": { "template": { "kind": "string", "optional": true }, "html": { "kind": "string", "optional": true } } };
 const generatedAssign = { "flag": { "kind": "boolean", "optional": false }, "dangerous": { "kind": "string", "optional": false }, "empty_list": { "kind": "list", "item": { "kind": "string", "optional": false }, "optional": false }, "empty_map": { "kind": "map", "key": { "kind": "string", "optional": false }, "value": { "kind": "string", "optional": false }, "optional": false }, "page": { "kind": "record", "name": "Page", "optional": false }, "numbers": { "kind": "list", "item": { "kind": "number", "optional": false }, "optional": false }, "lookup": { "kind": "map", "key": { "kind": "string", "optional": false }, "value": { "kind": "string", "optional": false }, "optional": false }, "rows": { "kind": "list", "item": { "kind": "record", "name": "Row", "optional": false }, "optional": false } };
 const generatedDefinitionSpecs = { "content": { "field": "content", "target": "card.tpl", "html": true, "input": { "label": { "kind": "string", "optional": false } } }, "layout": { "field": "layout", "target": "layout.tpl", "html": false, "input": {} } };
@@ -63,7 +63,7 @@ function generatedBindDefinitions(input) { const definitions = {}; const targets
         throw new Error('define.' + id + ' is not an object');
     const template = raw.template;
     const html = raw.html;
-    const data = raw.data === undefined ? undefined : bind(raw.data);
+    const data = raw.data === undefined ? undefined : bindData(raw.data);
     if (typeof html === 'string') {
         if (!spec.html || template !== undefined || data !== undefined)
             throw new Error('define.' + id + ' has an invalid html entry');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Value;
 
+use Polyspec\Template\BoundMap;
 use Polyspec\Template\Utf8;
 
 /**
@@ -141,6 +142,11 @@ final class Bind
         if ($input instanceof \Closure) {
             throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a closure has no binding');
         }
+        // A bound map is accepted only as assign and as definition data, and a bound map of the PHP
+        // extension, another implementation, at no position (VAL-22).
+        if ($input instanceof BoundMap || $input instanceof \Polyspec\Template\Native\BoundMap) {
+            throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a bound map is accepted only as assign and as definition data');
+        }
         if (is_object($input)) {
             // Preserve objects so public fields and methods remain available to templates.
             return $input;
@@ -180,8 +186,18 @@ final class Bind
         return $key;
     }
 
+    /**
+     * Binds assign data (RT-4): null and the empty array are the empty map, a bound map gives its
+     * entries without binding them again (VAL-22), and every other value must bind to a map.
+     */
     public static function map(mixed $input): MapValue
     {
+        if ($input === null) {
+            return new MapValue();
+        }
+        if ($input instanceof BoundMap) {
+            return self::boundEntries($input);
+        }
         $value = self::value($input);
         if (!$value instanceof MapValue) {
             if ($value === []) {
@@ -192,5 +208,32 @@ final class Bind
         }
 
         return $value;
+    }
+
+    /**
+     * Binds the data of a template definition (RT-24): a bound map gives its entries without binding
+     * them again (VAL-22); every other value is bound like any host value, and the empty array is the
+     * empty map.
+     */
+    public static function data(mixed $input): mixed
+    {
+        if ($input instanceof BoundMap) {
+            return self::boundEntries($input);
+        }
+        $value = self::value($input);
+
+        return $value === [] ? new MapValue() : $value;
+    }
+
+    /**
+     * The entries of a bound map. They are private to the class, so the binding of the runtime reads
+     * them in the scope of the class; host code has no operation that reads them (VAL-22).
+     */
+    private static function boundEntries(BoundMap $bound): MapValue
+    {
+        static $read = null;
+        $read ??= \Closure::bind(static fn (BoundMap $bound): MapValue => $bound->entries, null, BoundMap::class);
+
+        return $read($bound);
     }
 }

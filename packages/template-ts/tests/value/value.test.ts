@@ -1,6 +1,6 @@
 // Truthiness, equality, ordering and binding (EXP-33 to EXP-38, VAL-13).
 import { describe, expect, it } from 'vitest';
-import { bind, BindError } from '../../src/value/bind.js';
+import { bindValue, BindError } from '../../src/value/bind.js';
 import { parseJson } from '../../src/value/json.js';
 import { compareValues, isTruthy, looseEquals, strictEquals, SafeString } from '../../src/value/value.js';
 
@@ -39,12 +39,12 @@ describe('ordering', () => {
   });
 });
 
-describe('bind', () => {
+describe('bindValue', () => {
   it('rejects unsupported values and out-of-range integers', () => {
-    expect(() => bind(NaN)).toThrow(BindError);
-    expect(() => bind(() => 1)).toThrow(BindError);
-    expect(() => bind(BigInt('9007199254740992'))).toThrow(BindError);
-    expect(bind({ a: [1, 'b'] })).toEqual(new Map([['a', [1, 'b']]]));
+    expect(() => bindValue(NaN)).toThrow(BindError);
+    expect(() => bindValue(() => 1)).toThrow(BindError);
+    expect(() => bindValue(BigInt('9007199254740992'))).toThrow(BindError);
+    expect(bindValue({ a: [1, 'b'] })).toEqual(new Map([['a', [1, 'b']]]));
   });
 });
 

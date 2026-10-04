@@ -1,5 +1,6 @@
 //! Conversion between PHP values and the template value model (VAL-14, VAL-1).
 
+use crate::bound::object_bound;
 use ext_php_rs::convert::{IntoZval, IntoZvalDyn};
 use ext_php_rs::ffi::{ZEND_ACC_PUBLIC, zend_function, zend_hash_str_find_ptr_lc};
 use ext_php_rs::types::array::Iter;
@@ -62,6 +63,14 @@ fn bind_php(zval: &Zval, level: usize) -> Result<Value, BindError> {
         };
     }
     if let Some(object) = zval.object() {
+        // A bound map is accepted only as assign and as definition data, and a bound map of the PHP
+        // implementation, another implementation, at no position (VAL-22). Both classes are final.
+        if object_bound(object).is_some() || object.get_class_name().is_ok_and(|name| name == "Polyspec\\Template\\BoundMap") {
+            return Err(bind_error(
+                ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                "a bound map is accepted only as assign and as definition data",
+            ));
+        }
         if instance_of(object, "JsonSerializable") {
             check_level(level + 1)?;
             let result = object.try_call_method("jsonSerialize", vec![]);

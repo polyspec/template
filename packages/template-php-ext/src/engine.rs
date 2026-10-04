@@ -1,5 +1,6 @@
 //! The PHP engine class (RT-1 to RT-6).
 
+use crate::bound::bound_of;
 use crate::convert::{array_key, php_to_map, php_to_value, value_to_php};
 use crate::error::{boundary, php_exception};
 use ext_php_rs::convert::IntoZval;
@@ -10,9 +11,9 @@ use ext_php_rs::types::array::Iter;
 use ext_php_rs::types::{ZendHashTable, Zval};
 use polyspec_template::functions::helpers::FunctionContext;
 use polyspec_template::{
-    AstProgram as CoreProgram, BindError, DefineInput, EngineOptions, ErrorCode, FsLoader, HostError, Limits, OrderedMap, ParseOptions,
-    RenderOptions, RenderTarget, TemplateError as EngineError, Value, defines_from_json, env_from_json, parse as core_parse, read_json,
-    to_json_value,
+    AstProgram as CoreProgram, BindError, DefineData, DefineInput, EngineOptions, ErrorCode, FsLoader, HostError, Limits, OrderedMap,
+    ParseOptions, RenderOptions, RenderTarget, TemplateError as EngineError, Value, bind, defines_from_json, env_from_json,
+    parse as core_parse, read_json, to_json_value,
 };
 use std::collections::HashMap;
 
@@ -68,13 +69,24 @@ impl NativeEngine {
         })
     }
 
-    /// Renders a template with data given as a PHP value.
+    /// Renders a template with data given as a PHP value, or as a bound map that is not bound again
+    /// (VAL-22).
     ///
     /// `options` accepts `define` and `env` as arrays of the form of the specification. The values
     /// go to the engine without JSON, so assigned objects keep their instances (VAL-18).
     pub fn render(&self, name: String, assign: Option<&Zval>, options: Option<&ZendHashTable>) -> PhpResult<String> {
         boundary(&name, || {
-            let (assign, render_options) = bind_request(assign, options).map_err(|error| php_exception(&bind_failure(&name, error)))?;
+            let render_options = bind_options(options).map_err(|error| php_exception(&bind_failure(&name, error)))?;
+            if let Some(bound) = assign.and_then(bound_of) {
+                return self
+                    .engine
+                    .render_bound(RenderTarget::Name(&name), bound, &render_options)
+                    .map_err(|error| php_exception(&error));
+            }
+            let assign = match assign {
+                Some(assign) => php_to_map(assign).map_err(|error| php_exception(&bind_failure(&name, error)))?,
+                None => OrderedMap::new(),
+            };
             self.engine
                 .render_values(RenderTarget::Name(&name), assign, &render_options)
                 .map_err(|error| php_exception(&error))
@@ -133,12 +145,8 @@ impl NativeEngine {
     }
 }
 
-/// Binds the assign value, the template definitions and the environment of `render` (VAL-14).
-fn bind_request(assign: Option<&Zval>, options: Option<&ZendHashTable>) -> Result<(OrderedMap, RenderOptions), BindError> {
-    let root = match assign {
-        Some(assign) => php_to_map(assign)?,
-        None => OrderedMap::new(),
-    };
+/// Binds the template definitions and the environment of `render` (VAL-14).
+fn bind_options(options: Option<&ZendHashTable>) -> Result<RenderOptions, BindError> {
     let mut render_options = RenderOptions::default();
     if let Some(options) = options {
         if let Some(define) = options.get("define") {
@@ -148,7 +156,7 @@ fn bind_request(assign: Option<&Zval>, options: Option<&ZendHashTable>) -> Resul
             render_options.env = Some(env_from_json(&to_json_value(&php_to_value(env)?))?);
         }
     }
-    Ok((root, render_options))
+    Ok(render_options)
 }
 
 /// Reads the template definitions of `render` (RT-24). The data of an entry is bound as its own
@@ -181,7 +189,7 @@ fn defines_from_php(zval: &Zval) -> Result<HashMap<String, DefineInput>, BindErr
         } else if let Some(fields) = entry.array() {
             DefineInput {
                 template: fields.get("template").and_then(Zval::str).map(str::to_string),
-                data: fields.get("data").map(php_to_value).transpose()?,
+                data: fields.get("data").map(define_data).transpose()?,
                 html: fields.get("html").and_then(Zval::str).map(str::to_string),
             }
         } else {
@@ -193,6 +201,18 @@ fn defines_from_php(zval: &Zval) -> Result<HashMap<String, DefineInput>, BindErr
         defines.insert(id, input);
     }
     Ok(defines)
+}
+
+/// The data of a definition: a bound map of the extension is not bound again (VAL-22), and every
+/// other value is bound as its own value.
+fn define_data(zval: &Zval) -> Result<DefineData, BindError> {
+    match bound_of(zval) {
+        Some(bound) => bind(bound).map(DefineData::Bound).map_err(|error| BindError {
+            code: error.code,
+            message: error.message,
+        }),
+        None => php_to_value(zval).map(DefineData::Value),
+    }
 }
 
 fn bind_failure(template: &str, error: BindError) -> EngineError {

@@ -57,6 +57,7 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | `new AstProgram({ loader, functions, limits, delimiters })` | Creates an AST program. `loader` defaults to an empty `MapLoader`. |
 | `new Engine(program)` | Creates an engine that delegates to one AST or generated program. |
 | `engine.render(nameOrAst, assign, { define, env })` | Renders a template to a string. `assign` contains variables; `define` supplies template paths or HTML entries. |
+| `bind(value)`, `merge(first, second)` | `bind` checks data once and returns a `BoundMap`; `merge` combines two bound maps, and an entry of `second` replaces the entry of `first` with the same key. `render` and `prepare` take a bound map as `assign` and as definition `data` without binding it again; at another position it fails with `E_DATA_UNSUPPORTED_TYPE` (VAL-22). Errors have no template and no position (ERR-14). Both entries and both module formats share one bound map type. |
 | `astProgram.register(name, fn)` | Registers a host function `(args, { env }) => value`. Arguments have the form of VAL-21: a safe string is a `string`, a list is a new array, a map is a new `Map` in entry order, and a native object, also inside a list or map, is the original class instance. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. An exception that a loader throws fails the render with `E_LOAD_FAILED`; `FsLoader` reports a regular file that cannot be read in this way. |
 | `parseJson`, `parseJsonBytes` | Order-preserving JSON parsers for assign data. |

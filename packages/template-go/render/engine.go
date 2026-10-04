@@ -275,7 +275,7 @@ func (e *Engine) bindDefines(defines map[string]DefineInput) (map[string]*Define
 			}
 			entry := &DefineEntry{Template: name}
 			if input.Data != nil {
-				bound, err := value.Bind(input.Data)
+				bound, err := value.BindData(input.Data)
 				if err != nil {
 					return nil, err
 				}

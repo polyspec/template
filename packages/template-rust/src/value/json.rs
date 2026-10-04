@@ -2,7 +2,7 @@
 
 use crate::error::ErrorCode;
 use crate::value::Value;
-use crate::value::bind::{BindError, bind, check_level, check_number};
+use crate::value::bind::{BindError, bind_json, check_level, check_number};
 
 /// Parses JSON bytes into a template value. Invalid UTF-8 is `E_DATA_INVALID_UTF8`; text that is
 /// not one JSON document is `E_DATA_INVALID_JSON` (VAL-12).
@@ -16,7 +16,7 @@ pub fn parse_json_bytes(bytes: &[u8]) -> Result<Value, BindError> {
 
 /// Parses JSON text into a template value.
 pub fn parse_json(text: &str) -> Result<Value, BindError> {
-    bind(&read_json(text)?)
+    bind_json(&read_json(text)?)
 }
 
 /// Parses JSON text into a `serde_json::Value` with the checks of VAL-2, VAL-12 and VAL-20, in

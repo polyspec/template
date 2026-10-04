@@ -333,6 +333,42 @@ let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 
 The package documents give the full API: [TypeScript](https://github.com/polyspec/template/tree/main/packages/template-ts), [Go](https://github.com/polyspec/template/tree/main/packages/template-go), [Rust](https://github.com/polyspec/template/tree/main/packages/template-rust), [PHP](https://github.com/polyspec/template/tree/main/packages/template-php).
 
+## Render the same data several times
+
+A page that renders several templates with the same data checks the data once with `bind` and gives the bound map to every render, which does not check it again. `merge` adds the data of one render to the shared data: an entry of the second map replaces the entry of the first with the same key ([VAL-22](spec/data-model.md)). A bound map is accepted as assign and as definition data; at every other position, such as inside a list, it fails with `E_DATA_UNSUPPORTED_TYPE`.
+
+```ts
+import { bind, merge } from '@polyspec/template';
+
+const shared = bind({ site: 'Shop', user });
+const header = engine.render('header.tpl', shared);
+const page = engine.render('page.tpl', merge(shared, bind({ items })));
+```
+
+```go
+shared, _ := template.Bind(map[string]any{"site": "Shop", "user": user})
+items, _ := template.Bind(map[string]any{"items": rows})
+header, _ := engine.Render("header.tpl", shared, template.RenderOptions{})
+page, _ := engine.Render("page.tpl", template.Merge(shared, items), template.RenderOptions{})
+```
+
+```php
+use Polyspec\Template\BoundMap;
+
+$shared = BoundMap::bind(['site' => 'Shop', 'user' => $user]);
+$header = $engine->render('header.tpl', $shared);
+$page = $engine->render('page.tpl', BoundMap::merge($shared, BoundMap::bind(['items' => $items])));
+```
+
+```rust
+let shared = bind(&serde_json::json!({ "site": "Shop", "user": user }))?;
+let header = engine.render_bound(RenderTarget::Name("header.tpl"), &shared, &RenderOptions::default())?;
+let data = merge(&shared, &bind(&serde_json::json!({ "items": items }))?);
+let page = engine.render_bound(RenderTarget::Name("page.tpl"), &data, &RenderOptions::default())?;
+```
+
+The PHP extension provides `Polyspec\Template\Native\BoundMap` with the same operations. A bound map of the PHP package fails in the extension, and a bound map of the extension fails in the PHP package.
+
 ## Render in a browser
 
 The same templates render in a browser from the TypeScript package. The server embeds the assign data as JSON, and the browser reads it and renders the same template name. [Browser rendering](operations/browser.md) describes how to ship templates and data, and how to place a component framework next to the engine.

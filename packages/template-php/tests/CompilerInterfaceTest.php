@@ -95,4 +95,28 @@ final class CompilerInterfaceTest extends TestCase
             array_filter($scope->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
         )));
     }
+
+    /**
+     * VAL-22: the bound map class is final and has exactly the static operations of the manifest;
+     * `__unserialize` is public because PHP calls it, and it fails.
+     */
+    public function testBoundMapDeclarationsMatchManifest(): void
+    {
+        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../../tools/compiler/interface.json';
+        $manifest = json_decode((string) file_get_contents($manifestPath), true, flags: JSON_THROW_ON_ERROR);
+        $mapping = $manifest['languages']['php']['boundMap'];
+        $type = new \ReflectionClass($mapping['type']);
+        self::assertTrue($type->isFinal());
+        self::assertFalse($type->isInstantiable());
+        self::assertFalse($type->isCloneable());
+        $public = array_map(static fn (\ReflectionMethod $method): string => $method->getName(), $type->getMethods(\ReflectionMethod::IS_PUBLIC));
+        sort($public);
+        $expected = [...array_values($mapping['operations']), '__unserialize'];
+        sort($expected);
+        self::assertSame($expected, $public);
+        foreach ($mapping['operations'] as $name) {
+            self::assertTrue($type->getMethod($name)->isStatic());
+        }
+        self::assertSame([], array_map(static fn (\ReflectionProperty $property): string => $property->getName(), $type->getProperties(\ReflectionProperty::IS_PUBLIC)));
+    }
 }

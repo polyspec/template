@@ -32,12 +32,12 @@ PageCache.getOrSet(key, ttl, render)
 
 - **RT-2** `parse`는 다른 템플릿을 로드하지 않고 AST 문서에 정의된 AST를 생성한다. include와 block 태그는 렌더 중에 해석한다.
 - **RT-3** `render`는 템플릿 이름 또는 파싱된 템플릿을 받는다. 이름을 받으면 엔진이 로더로 템플릿을 로드한다. 전체 출력을 하나의 문자열로 반환한다.
-- **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이다. null `assign`(TypeScript의 `undefined`, Go의 `nil`도)과 PHP의 빈 배열은 빈 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다.
+- **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이거나, 다시 binding하지 않는 bound map(VAL-22)이다. null `assign`(TypeScript의 `undefined`, Go의 `nil`도)과 PHP의 빈 배열은 빈 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다.
 - **RT-5** 엔진 옵션의 `functions`와 `register`는 함수 문서에 정의된 대로 호스트 함수를 추가한다.
 - **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다.
-- **RT-61** `AstProgram`과 `GeneratedProgram` 모두 `prepare`에서 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target을 선택한다. 반환된 program별 상태는 동일한 `PreparedRender.render` 연산을 제공한다.
+- **RT-61** `AstProgram`과 `GeneratedProgram` 모두 `prepare`에서 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target을 선택한다. `assign`이나 템플릿 정의의 `data`로 받은 bound map(VAL-22)은 PHP extension을 포함한 모든 구현에서 다시 binding하지 않는다. 그것을 렌더한 결과는 `bind`를 실행한 시점에 bound map의 항목을 항목으로 가진 호스트 map을 렌더한 결과와 byte가 같다. `merge`의 결과이면 합친 항목을 가진 호스트 map이다. native object의 member만은 템플릿이 읽을 때 읽는다(VAL-19). typed generated program은 bound `assign`을 root record로, bound 정의 `data`를 definition data record로 여전히 변환한다(RT-68). 반환된 program별 상태는 동일한 `PreparedRender.render` 연산을 제공한다.
 - **RT-62** `PreparedRender.render`는 렌더마다 필요한 scope, output, 실행 상태만 만든다. 입력이 바뀌지 않은 반복 호출은 같은 UTF-8 바이트를 출력한다. `render`는 `prepare(...).render()`와 같으며 단일 호출 편의 연산으로 유지한다.
-- **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 생성 렌더러도 AST renderer와 동일한 정규화 요청(`target`, 바인딩된 `assign`, 바인딩된 `define`, 해석된 `env`)을 받는다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
+- **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 생성 렌더러도 AST renderer와 동일한 정규화 요청(`target`, 호스트 바인딩을 거친 `assign`과 `define`, 해석한 `env`)을 받는다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
 - **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. build coordinator는 `dev`에서 compiler 호출마다 생성하고, `true`에서 digest가 바뀐 뒤 생성하며, `false`에서 소스를 읽지 않는다. `false`에서 배포 산출물이 없거나 오래되거나 손상되면 오류다.
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
@@ -250,7 +250,7 @@ flowchart TB
 
 ## block
 
-- **RT-24** `define` map은 식별자를 템플릿 define에 대응시킨다. define은 문자열 경로 또는 `template: path`와 선택적인 `data: map`을 가진 객체다. `html: string`을 가진 객체는 완성된 HTML을 제공한다. `render`에 주는 define의 템플릿 경로는 로더 루트 기준이다. 언어 간 픽스처 형식은 RT-46에 정의한다.
+- **RT-24** `define` map은 식별자를 템플릿 define에 대응시킨다. define은 문자열 경로 또는 `template: path`와 선택적인 `data`를 가진 객체다. `data`는 map이거나 bound map(VAL-22)이다. `html: string`을 가진 객체는 완성된 HTML을 제공한다. `render`에 주는 define의 템플릿 경로는 로더 루트 기준이다. 언어 간 픽스처 형식은 RT-46에 정의한다.
 - **RT-25** `{# id}`는 `id`로 등록된 define을 렌더한다. 등록되지 않은 식별자는 `E_RUNTIME_BLOCK_UNDEFINED`로 실패한다.
 - **RT-26** 템플릿 define은 새 로컬 스코프에서, 루트 `assign`, define의 `data`, 태그의 scope 인자 순으로 만든 컨텍스트 데이터로 렌더한다. 같은 이름은 뒤의 출처가 앞의 출처를 덮어쓴다. 호출하는 템플릿의 로컬 변수와 루프 메타는 보이지 않는다.
 - **RT-27** HTML 항목은 그 문자열을 이스케이프 없이 출력에 쓴다. HTML 항목에 준 scope 인자는 무시한다.

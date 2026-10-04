@@ -1,0 +1,20 @@
+{
+  "description": "VAL-22, ERR-14 and RT-61 expectations shared by the tests of every implementation. Each test binds `assign` with `bind` and renders page.tpl with the bound map and with `assign` itself; both outputs equal `outputs.page`. It merges the bound `assign` with the bound `second`; the merged map has the keys `mergedKeys` in this order and renders page.tpl as `outputs.merged`. It renders define.tpl with the definition `part` whose template is part.tpl and whose data is the bound `definitionData`, and with `assign` as the root; the output is `outputs.define`. It renders empty.tpl with the bound map of a null value (and, in PHP, of an empty array) as `outputs.empty`. Each entry of `rejections` names a position where host binding meets a bound map and fails with the code `E_DATA_UNSUPPORTED_TYPE`: `list` is `assign` with the entry `items`, a list that holds a bound map; `map` is `assign` with the entry `inner`, a map whose entry `k` is a bound map; `bind` is `bind` of a map whose entry `k` is a bound map; `definitionData` is definition data whose entry `k` is a bound map; `result` renders result.tpl, where the host function `pick` returns a bound map. A rejection before rendering has the position of ERR-5, a rejection of `bind` the position of ERR-14, and `result` the position of the call (ERR-5).",
+  "assign": { "a": "1", "b": "x", "list": [1, 2], "m": { "k": "v" } },
+  "second": { "b": "y", "c": "z" },
+  "mergedKeys": ["a", "b", "list", "m", "c"],
+  "definitionData": { "label": "L", "a": "2" },
+  "outputs": {
+    "page": "1|x|12|v|\n",
+    "merged": "1|y|12|v|z\n",
+    "define": "[L:2:x]\n",
+    "empty": "none\n"
+  },
+  "rejections": {
+    "list": { "template": "page.tpl", "line": 0, "col": 0 },
+    "map": { "template": "page.tpl", "line": 0, "col": 0 },
+    "bind": { "template": "", "line": 0, "col": 0 },
+    "definitionData": { "template": "define.tpl", "line": 0, "col": 0 },
+    "result": { "template": "result.tpl", "line": 1, "col": 4 }
+  }
+}

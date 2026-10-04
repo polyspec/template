@@ -10,7 +10,8 @@ use crate::render::context::{DefineEntry, Frame, Limits, ParsedTemplate, RenderC
 use crate::render::runtime_environment::RuntimeEnvironment;
 use crate::render::statements::Renderer;
 use crate::source::Source;
-use crate::value::bind::{BindError, bind, bind_map, bind_value, bind_values};
+use crate::value::bind::{BindError, bind_json, bind_map, bind_values};
+use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
 use crate::value::{OrderedMap, Value};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -48,8 +49,9 @@ pub struct EngineOptions {
 pub struct DefineInput {
     /// Root-relative template path.
     pub template: Option<String>,
-    /// Entry data; it is bound like assign data, so it may hold native objects (VAL-11, VAL-16).
-    pub data: Option<Value>,
+    /// Entry data: a value that is bound like assign data, so it may hold native objects (VAL-11,
+    /// VAL-16), or a bound map that is not bound again (VAL-22).
+    pub data: Option<DefineData>,
     /// Pre-rendered HTML.
     pub html: Option<String>,
 }
@@ -61,6 +63,12 @@ pub struct RenderOptions {
     pub define: HashMap<String, DefineInput>,
     /// Environment; `Z` and the current time when absent.
     pub env: Option<Env>,
+}
+
+/// The assign of one request: JSON data that is bound, or a bound map that is not bound again (VAL-22).
+enum Root<'a> {
+    Json(&'a serde_json::Value),
+    Bound(&'a BoundMap),
 }
 
 /// A template to render: a name resolved by the loader or a parsed template.
@@ -83,6 +91,17 @@ pub trait Program {
 
     /// Renders one request.
     fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError>;
+
+    /// Prepares a reusable render request whose assign is a bound map, which is not bound again (VAL-22).
+    fn prepare_bound(
+        &self,
+        target: RenderTarget<'_>,
+        assign: &BoundMap,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'_>, RequestError>;
+
+    /// Renders one request whose assign is a bound map, which is not bound again (VAL-22).
+    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RequestError>;
 }
 
 /// Delegates requests to one complete program.
@@ -111,6 +130,21 @@ impl Engine {
     /// Renders a request through the selected program.
     pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError> {
         self.program.render(target, assign, options)
+    }
+
+    /// Prepares a request whose assign is a bound map through the selected program (VAL-22).
+    pub fn prepare_bound(
+        &self,
+        target: RenderTarget<'_>,
+        assign: &BoundMap,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'_>, RequestError> {
+        self.program.prepare_bound(target, assign, options)
+    }
+
+    /// Renders a request whose assign is a bound map through the selected program (VAL-22).
+    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RequestError> {
+        self.program.render_bound(target, assign, options)
     }
 }
 
@@ -219,18 +253,35 @@ impl AstProgram {
             RenderTarget::Name(name) => name.to_owned(),
             RenderTarget::Ast(ast) => ast.name.clone(),
         };
-        internal_boundary(&name, || self.prepare_bound(&name, target, assign, options))
+        internal_boundary(&name, || self.prepare_request(&name, target, Root::Json(assign), options))
     }
 
-    fn prepare_bound<'e>(
+    /// Prepares a render request whose assign is a bound map, which is not bound again (VAL-22).
+    pub fn prepare_bound<'e>(
+        &'e self,
+        target: RenderTarget<'_>,
+        assign: &BoundMap,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'e>, TemplateError> {
+        let name = match target {
+            RenderTarget::Name(name) => name.to_owned(),
+            RenderTarget::Ast(ast) => ast.name.clone(),
+        };
+        internal_boundary(&name, || self.prepare_request(&name, target, Root::Bound(assign), options))
+    }
+
+    fn prepare_request<'e>(
         &'e self,
         name: &str,
         target: RenderTarget<'_>,
-        assign: &serde_json::Value,
+        assign: Root<'_>,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
-        let bound = (|| -> Result<(OrderedMap, HashMap<String, DefineEntry>, Env), BindError> {
-            let root = bind_map(assign)?;
+        let bound = (|| -> Result<(Rc<OrderedMap>, HashMap<String, DefineEntry>, Env), BindError> {
+            let root = match assign {
+                Root::Json(json) => Rc::new(bind_map(json)?),
+                Root::Bound(bound) => bound_root(bound),
+            };
             let registry = bind_defines(&options.define)?;
             let env = options.env.clone().unwrap_or_else(|| Env {
                 timezone: "Z".to_string(),
@@ -258,7 +309,7 @@ impl AstProgram {
         };
         let execution = AstPreparedExecution {
             engine: self,
-            root: Rc::new(root),
+            root,
             registry,
             env,
             target_name,
@@ -270,6 +321,11 @@ impl AstProgram {
     /// Renders a template with data given as JSON.
     pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
         self.prepare(target, assign, options)?.render()
+    }
+
+    /// Renders a template whose assign is a bound map, which is not bound again (VAL-22).
+    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError> {
+        self.prepare_bound(target, assign, options)?.render()
     }
 
     /// Renders a native value map while retaining assigned native objects. The map is bound
@@ -338,6 +394,19 @@ impl Program for AstProgram {
     fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError> {
         Ok(AstProgram::render(self, target, assign, options)?)
     }
+
+    fn prepare_bound(
+        &self,
+        target: RenderTarget<'_>,
+        assign: &BoundMap,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'_>, RequestError> {
+        Ok(AstProgram::prepare_bound(self, target, assign, options)?)
+    }
+
+    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RequestError> {
+        Ok(AstProgram::render_bound(self, target, assign, options)?)
+    }
 }
 
 impl RuntimeServices for AstProgram {
@@ -397,7 +466,7 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
             })?;
             let data = match &input.data {
                 None => None,
-                Some(value) => match bind_value(value)? {
+                Some(data) => match bind_data(data)? {
                     Value::Map(map) => Some(map),
                     _ => {
                         return Err(BindError {
@@ -450,7 +519,7 @@ pub fn defines_from_json(value: &serde_json::Value) -> Result<HashMap<String, De
             id.clone(),
             DefineInput {
                 template: fields.get("template").and_then(|v| v.as_str()).map(str::to_string),
-                data: fields.get("data").map(bind).transpose()?,
+                data: fields.get("data").map(bind_json).transpose()?.map(DefineData::Value),
                 html: fields.get("html").and_then(|v| v.as_str()).map(str::to_string),
             },
         );

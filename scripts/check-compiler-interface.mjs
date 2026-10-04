@@ -112,6 +112,25 @@ if (runtime.RenderFrame?.fields?.join(',') !== manifest.types.RenderFrame.fields
 if (runtime.RenderScope?.fields?.join(',') !== manifest.types.RenderScope.fields.join(',')) throw new Error('RenderScope fields differ');
 if (runtime.RenderScope?.operations?.join(',') !== manifest.types.RenderScope.operations.join(',')) throw new Error('RenderScope operations differ');
 
+// VAL-22: the bound map type has the operations bind and merge in every implementation, and the
+// manifest names them, the operations that take a bound map as assign and the operations that it
+// declares for generated programs.
+const boundContract = runtime.BoundMap;
+if (boundContract?.operations?.map(item => item.name).join(',') !== 'bind,merge' || manifest.types.BoundMap?.operations?.join(',') !== 'bind,merge') throw new Error('BoundMap operations differ');
+if (boundContract.acceptedBy?.join(',') !== 'prepare,render') throw new Error('BoundMap acceptance differs');
+for (const language of [...core.languages, 'php-extension', 'javascript-esm']) {
+  const bound = manifest.languages?.[language]?.boundMap;
+  if (typeof bound?.type !== 'string' || Object.keys(bound.operations ?? {}).join(',') !== 'bind,merge' || !Object.values(bound.operations).every(name => typeof name === 'string' && name !== '')) {
+    throw new Error(`${language}: BoundMap mapping is incomplete`);
+  }
+  const accepted = Object.keys(bound.assign ?? {});
+  if (!accepted.includes('render') || !accepted.every(name => boundContract.acceptedBy.includes(name)) || (language !== 'php-extension' && !accepted.includes('prepare'))) {
+    throw new Error(`${language}: BoundMap assign mapping is incomplete`);
+  }
+  if (!Array.isArray(bound.generatedOperations)) throw new Error(`${language}: BoundMap generated operations are missing`);
+}
+if (manifest.languages['javascript-esm'].entry !== '@polyspec/template/render') throw new Error('javascript-esm: the browser entry is missing');
+
 function declaration(source, kind, name) {
   return source.statements.find(statement => statement.name?.text === name && statement.kind === kind);
 }
@@ -164,6 +183,26 @@ for (const operation of runtime.RuntimeBindings.operations) {
   if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeBindings.${operation.name} signature differs`);
 }
 
+// The TypeScript bound map class has no member other than its private state, its constructor and
+// its static block, and both entries export bind and merge under the names of the manifest.
+const boundPath = process.env.TEMPLATE_TS_BOUND_SOURCE ? resolve(process.env.TEMPLATE_TS_BOUND_SOURCE) : resolve(root, 'packages/template-ts/src/value/bound.ts');
+const boundSource = ts.createSourceFile(boundPath, readFileSync(boundPath, 'utf8'), ts.ScriptTarget.Latest, true);
+const boundClass = declaration(boundSource, ts.SyntaxKind.ClassDeclaration, manifest.languages.typescript.boundMap.type);
+if (!boundClass) throw new Error('typescript: BoundMap class is missing');
+for (const member of boundClass.members) {
+  const allowed = ts.isConstructorDeclaration(member) || ts.isClassStaticBlockDeclaration(member) ||
+    (ts.isPropertyDeclaration(member) && ts.isPrivateIdentifier(member.name));
+  if (!allowed) throw new Error(`typescript: BoundMap has the undeclared member ${member.name?.getText(boundSource) ?? ts.SyntaxKind[member.kind]}`);
+}
+for (const [language, entry] of [['typescript', 'index.ts'], ['javascript-esm', 'render.ts']]) {
+  const entryPath = resolve(root, 'packages/template-ts/src', entry);
+  const entrySource = ts.createSourceFile(entryPath, readFileSync(entryPath, 'utf8'), ts.ScriptTarget.Latest, true);
+  const exported = entrySource.statements.filter(ts.isExportDeclaration).flatMap(statement => statement.exportClause && ts.isNamedExports(statement.exportClause) ? statement.exportClause.elements.map(element => element.name.text) : []);
+  for (const name of [...Object.values(manifest.languages[language].boundMap.operations), manifest.languages[language].boundMap.type]) {
+    if (!exported.includes(name)) throw new Error(`${language}: ${entry} does not export ${name}`);
+  }
+}
+
 const contextPath = resolve(root, 'packages/template-ts/src/render/context.ts');
 const contextSource = ts.createSourceFile(contextPath, readFileSync(contextPath, 'utf8'), ts.ScriptTarget.Latest, true);
 const services = declaration(contextSource, ts.SyntaxKind.InterfaceDeclaration, 'RuntimeServices');
@@ -188,7 +227,7 @@ function run(label, command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, env: { ...process.env, GOCACHE: process.env.GOCACHE ?? '/tmp/template-go-cache' } });
   if (result.error || result.status !== 0) throw new Error(`${label} failed:\n${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
 }
-run('go interface AST check', 'go', ['test', '-run', '^TestCompilerRuntimeInterface$', '.'], resolve(root, 'packages/template-go'));
+run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'packages/template-go'));
 run('rust interface AST check', resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/template-rust'));
 run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/template-php'));
 

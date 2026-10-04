@@ -228,9 +228,10 @@ impl RenderAdapter for Adapter {
                     data: entry
                         .data
                         .clone()
-                        .map(|data| polyspec_template::bind(&Value::Object(data)))
+                        .map(|data| polyspec_template::bind_json(&Value::Object(data)))
                         .transpose()
-                        .map_err(|error| error.message)?,
+                        .map_err(|error| error.message)?
+                        .map(polyspec_template::DefineData::Value),
                     html: entry.html.clone(),
                 },
             );
@@ -271,9 +272,10 @@ impl Adapter {
                     data: entry
                         .data
                         .clone()
-                        .map(|data| polyspec_template::bind(&Value::Object(data)))
+                        .map(|data| polyspec_template::bind_json(&Value::Object(data)))
                         .transpose()
-                        .map_err(|error| error.message)?,
+                        .map_err(|error| error.message)?
+                        .map(polyspec_template::DefineData::Value),
                     html: entry.html.clone(),
                 },
             );

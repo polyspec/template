@@ -22,6 +22,11 @@ try {
     ['missing RuntimeEnvironment operation', manifest => manifest.runtimeContract.RuntimeEnvironment.operations.pop()],
     ['AST field added to RenderFrame', manifest => manifest.languages.typescript.frameFields.push('ast')],
     ['missing RenderScope operation', manifest => manifest.languages.typescript.scopeOperations.pop()],
+    ['added BoundMap operation', manifest => manifest.runtimeContract.BoundMap.operations.push({ name: 'entries', parameters: ['map'], returns: 'map' })],
+    ['missing BoundMap mapping', manifest => { delete manifest.languages.go.boundMap; }],
+    ['renamed Go BoundMap operation', manifest => { manifest.languages.go.boundMap.operations.merge = 'Combine'; }],
+    ['renamed Rust bound assign operation', manifest => { manifest.languages.rust.boundMap.assign.render = 'render_map'; }],
+    ['renamed PHP BoundMap operation', manifest => { manifest.languages.php.boundMap.operations.bind = 'create'; }],
   ];
   for (const [name, mutate] of mutations) {
     const manifest = structuredClone(original);
@@ -50,8 +55,18 @@ try {
     maxBuffer: 16 * 1024 * 1024,
   });
   if (backendResult.status === 0) throw new Error('missing backend operation was accepted');
+  // VAL-22: a public operation added to the TypeScript bound map class is rejected.
+  const boundSource = join(directory, 'bound.ts');
+  writeFileSync(boundSource, readFileSync(resolve(root, 'packages/template-ts/src/value/bound.ts'), 'utf8').replace('  static {', '  entries(): number {\n    return 0;\n  }\n\n  static {'));
+  const boundResult = spawnSync(process.execPath, ['scripts/check-compiler-interface.mjs'], {
+    cwd: root,
+    env: { ...process.env, TEMPLATE_TS_BOUND_SOURCE: boundSource },
+    encoding: 'utf8',
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  if (boundResult.status === 0 || !boundResult.stderr.includes('BoundMap has the undeclared member entries')) throw new Error('a public bound map operation was accepted');
 } finally {
   rmSync(directory, { recursive: true, force: true });
 }
 
-process.stdout.write('compiler interface: 11 structural mutations rejected\n');
+process.stdout.write('compiler interface: 17 structural mutations rejected\n');

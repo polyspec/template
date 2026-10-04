@@ -1,0 +1,31 @@
+{
+  "schema": 3,
+  "root": "Assign",
+  "entry": "page.tpl",
+  "fields": {
+    "a": "string",
+    "b": "string",
+    "list": "list<number>",
+    "m": "Inner",
+    "c": "string?"
+  },
+  "records": {
+    "Inner": { "k": "string" }
+  },
+  "defines": {
+    "part": { "template": "part.tpl" }
+  },
+  "functions": {
+    "pick": { "implementation": "host", "args": [], "minArgs": 0, "maxArgs": 0, "returns": "any", "runtimeArity": true }
+  },
+  "templates": {
+    "page.tpl": {},
+    "define.tpl": {},
+    "part.tpl": {
+      "label": "string",
+      "a": "string"
+    },
+    "empty.tpl": {},
+    "result.tpl": {}
+  }
+}
