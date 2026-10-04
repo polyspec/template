@@ -5,7 +5,8 @@
   "fields": {
     "page": "Page",
     "rows": "list<Row>",
-    "tags": "map<string,number>"
+    "tags": "map<string,number>",
+    "note": "string?"
   },
   "records": {
     "Page": { "title": "string", "count": "number" },

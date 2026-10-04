@@ -10,10 +10,12 @@ export const language = 'go';
 const goSpan = span => `ast.Span{${span.join(', ')}}`;
 const goLines = lines => `errs.LineIndex{${lines.join(', ')}}`;
 const goResult = node => goType(node.valueType.source);
+// An operand of a non-optional type where the result is optional: the optional type is a pointer in Go.
+const goOperand = (expression, operand, node) => goType(node.valueType.source).startsWith('*') && !goType(operand.valueType.source).startsWith('*') ? `generatedPointer(${expression})` : expression;
 
 export function createTarget({ program }) {
   const target = baseTarget(language);
-  target.var = (name, type, node) => program.dynamicRoot ? node.scope ? `generatedResult[${goType(type)}](scope.Lookup(frame, ${goString(name)}))` : `generatedMember[${goType(type)}](runtime, rootData, ${goString(name)}, frame, ${goSpan(node.span)})` : `${optional(type) ? 'valueOrZero(' : ''}assign.${exportedName(name)}${optional(type) ? ')' : ''}`;
+  target.var = (name, type, node) => program.dynamicRoot ? node.scope ? `generatedResult[${goType(type)}](scope.Lookup(frame, ${goString(name)}))` : `generatedMember[${goType(type)}](runtime, rootData, ${goString(name)}, frame, ${goSpan(node.span)})` : `assign.${exportedName(name)}`;
   target.local = (name, type) => `generatedResult[${goType(type)}](scope.Lookup(frame, ${goString(name)}))`;
   target.set = (name, value, level) => indent(level, `scope.Locals[${goString(name)}] = generatedValue(${value})`);
   target.member = (object, key, owner, node) => owner.kind === 'any' ? `generatedMember[${goResult(node)}](runtime, ${object}, ${goString(key)}, frame, ${goSpan(node.span)})` : `${object}.${exportedName(key)}`;
@@ -67,10 +69,11 @@ ${emitNodes(node.otherwise, target, n + 1)}
   target.binary = (operator, left, right, node) => {
     if (operator === '&&') return `func() bool { left := ${left}; if !generatedTruthy(runtime, left) { return false }; return generatedTruthy(runtime, ${right}) }()`;
     if (operator === '||') return `func() bool { left := ${left}; if generatedTruthy(runtime, left) { return true }; return generatedTruthy(runtime, ${right}) }()`;
-    if (operator === '??') return `func() ${goResult(node)} { left := ${left}; if generatedValue(left) != nil { return left }; return ${right} }()`;
+    // `??` returns the left operand when it is not null: a pointer of an optional type is read through after the test.
+    if (operator === '??') return `func() ${goResult(node)} { left := ${left}; if generatedValue(left) != nil { return ${goType(node.left.valueType.source).startsWith('*') && !goResult(node).startsWith('*') ? '*left' : goOperand('left', node.left, node)} }; return ${goOperand(right, node.right, node)} }()`;
     return `generatedBinary[${goResult(node)}](runtime, ${goString(operator)}, ${left}, ${right}, frame, ${goSpan(node.span)})`;
   };
-  target.ternary = (test, thenValue, elseValue, node) => `func() ${goResult(node)} { if generatedTruthy(runtime, ${test}) { return ${thenValue} }; return ${elseValue} }()`;
+  target.ternary = (test, thenValue, elseValue, node) => `func() ${goResult(node)} { if generatedTruthy(runtime, ${test}) { return ${goOperand(thenValue, node.then, node)} }; return ${goOperand(elseValue, node.otherwise, node)} }()`;
   target.list = (items, type, node) => `generatedDepth(runtime, func() ${goType(type.source)} { result := ${goType(type.source)}{}; ${items.map(item => item.spread ? `result = append(result, generatedListSpread[${goType(type.item.source)}](runtime, ${item.value}, frame, ${goSpan(item.span)})...)` : `result = append(result, ${item.value})`).join('; ')}; return result }(), frame, ${goSpan(node.span)})`;
   target.map = (entries, type, node) => `generatedDepth(runtime, func() ${goType(type.source)} { result := NewOrderedMap[${goType(type.key.source)}, ${goType(type.value.source)}](); ${entries.map(item => item.spread ? `for _, entry := range generatedMapSpread[${goType(type.key.source)}, ${goType(type.value.source)}](runtime, ${item.value}, frame, ${goSpan(item.span)}).Entries() { result.Set(entry.Key, entry.Value) }` : `result.Set(${item.value[0]}, ${item.value[1]})`).join('; ')}; return result }(), frame, ${goSpan(node.span)})`;
   target.ifNode = (node, n, scope = []) => node.branches.map((branch, index) => `${'\t'.repeat(n)}${index ? '} else if' : 'if'} generatedTruthy(runtime, ${emitExpression(branch.test, target)}) {
@@ -137,7 +140,7 @@ func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta { resu
 func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &span)) }
 func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &span)) }
 func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
-func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPointer[T any](input T) *T { return &input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: "Z", Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != "" { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }`;
