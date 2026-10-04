@@ -4,7 +4,9 @@
 // is not trusted. A second run removes `capabilities` from the installed manifest and requires the suite to
 // observe that VS Code disables the extension, which shows that the first run detects that regression.
 // The VS Code build is the minimum version of engines.vscode and is cached in .vscode-test at the repository root.
-import { spawn, spawnSync } from 'node:child_process';
+// Every profile installation and every VS Code launch prints its start and its result with its elapsed time, and
+// is killed with its process group when it outlives its deadline.
+import { spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -17,6 +19,9 @@ const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const extensionId = `${manifest.publisher}.${manifest.name}`;
 const vsix = join(root, 'dist', `${manifest.name}.vsix`);
 const version = manifest.engines.vscode.replace(/^\^/, '');
+// The time limits of one profile installation and of one launch, which runs every check of the suite.
+const INSTALL_TIMEOUT_MS = 120_000;
+const LAUNCH_TIMEOUT_MS = 300_000;
 
 const executable = await downloadAndUnzipVSCode({ version, cachePath: join(root, '..', '..', '.vscode-test') });
 const cli = resolveCliPathFromVSCodeExecutablePath(executable);
@@ -24,8 +29,35 @@ const cli = resolveCliPathFromVSCodeExecutablePath(executable);
 // bytes, so the profiles are created below /tmp instead of the longer per-user temporary directory.
 const work = mkdtempSync(join(process.platform === 'win32' ? tmpdir() : '/tmp', 'pst-'));
 
+// Runs a command in its own process group and resolves its exit code; the group is killed at the deadline.
+function bounded(step, command, args, { timeoutMs, env, output }) {
+  console.log(`[integration] start - ${step} (deadline ${timeoutMs / 1000} s)`);
+  const started = Date.now();
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(command, args, { env, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    child.stdout.on('data', data => output(data, process.stdout));
+    child.stderr.on('data', data => output(data, process.stderr));
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try { process.kill(-child.pid, 'SIGKILL'); } catch { /* the group has ended */ }
+    }, timeoutMs);
+    child.on('error', error => { clearTimeout(timer); reject(error); });
+    child.on('exit', code => {
+      clearTimeout(timer);
+      const elapsed = `${((Date.now() - started) / 1000).toFixed(1)} s`;
+      if (timedOut) {
+        reject(new Error(`${step} exceeded its ${timeoutMs / 1000} s deadline and was killed (${elapsed})`));
+        return;
+      }
+      console.log(`[integration] ${code === 0 ? 'ok' : 'not ok'} - ${step}: exit ${code} (${elapsed})`);
+      resolvePromise(code);
+    });
+  });
+}
+
 // Installs the .vsix into a new profile and returns its directories.
-function installProfile(name) {
+async function installProfile(name) {
   const extensions = join(work, name, 'extensions');
   const userData = join(work, name, 'user-data');
   mkdirSync(join(userData, 'User'), { recursive: true });
@@ -34,12 +66,17 @@ function installProfile(name) {
     'security.workspace.trust.enabled': true,
     'security.workspace.trust.startupPrompt': 'never',
   }));
-  const install = spawnSync(cli, [`--extensions-dir=${extensions}`, `--user-data-dir=${userData}`, '--install-extension', vsix, '--force'], { encoding: 'utf8' });
-  if (install.status !== 0) throw new Error(`installing ${vsix} failed: ${install.stderr}${install.stdout}`);
+  let text = '';
+  const status = await bounded(`install ${name}`, cli, [`--extensions-dir=${extensions}`, `--user-data-dir=${userData}`, '--install-extension', vsix, '--force'], {
+    timeoutMs: INSTALL_TIMEOUT_MS,
+    env: process.env,
+    output: data => { text += data; },
+  });
+  if (status !== 0) throw new Error(`installing ${vsix} failed: ${text}`);
   return { extensions, userData };
 }
 
-function launch(profile, expect) {
+function launch(name, profile, expect) {
   const args = [
     join(here, 'workspace'),
     '--no-sandbox',
@@ -53,31 +90,29 @@ function launch(profile, expect) {
     `--extensionDevelopmentPath=${join(here, 'harness')}`,
     `--extensionTestsPath=${join(here, 'suite', 'index.cjs')}`,
   ];
-  return new Promise((resolvePromise, reject) => {
-    const child = spawn(executable, args, { env: { ...process.env, POLYSPEC_TEMPLATE_EXPECT: expect, POLYSPEC_TEMPLATE_EXTENSION: extensionId } });
-    child.stdout.on('data', data => process.stdout.write(data));
-    child.stderr.on('data', data => process.stderr.write(data));
-    child.on('error', reject);
-    child.on('exit', code => resolvePromise(code));
+  return bounded(`launch ${name}, expect ${expect}`, executable, args, {
+    timeoutMs: LAUNCH_TIMEOUT_MS,
+    env: { ...process.env, POLYSPEC_TEMPLATE_EXPECT: expect, POLYSPEC_TEMPLATE_EXTENSION: extensionId },
+    output: (data, stream) => stream.write(data),
   });
 }
 
 let failed = false;
 try {
-  const installed = installProfile('installed');
+  const installed = await installProfile('installed');
   console.log(`[integration] installed ${extensionId} from ${vsix}`);
-  const supported = await launch(installed, 'enabled');
+  const supported = await launch('installed', installed, 'enabled');
   console.log(`[integration] installed extension in an untrusted workspace: exit ${supported}`);
   failed ||= supported !== 0;
 
-  const stripped = installProfile('without-capability');
+  const stripped = await installProfile('without-capability');
   const directory = readdirSync(stripped.extensions).find(entry => entry.startsWith(`${extensionId}-`));
   if (directory === undefined) throw new Error(`${extensionId} is not in ${stripped.extensions}`);
   const strippedManifestPath = join(stripped.extensions, directory, 'package.json');
   const strippedManifest = JSON.parse(readFileSync(strippedManifestPath, 'utf8'));
   delete strippedManifest.capabilities;
   writeFileSync(strippedManifestPath, JSON.stringify(strippedManifest, null, 2));
-  const restricted = await launch(stripped, 'disabled');
+  const restricted = await launch('without-capability', stripped, 'disabled');
   console.log(`[integration] extension without capabilities in an untrusted workspace: exit ${restricted}`);
   failed ||= restricted !== 0;
 } catch (error) {

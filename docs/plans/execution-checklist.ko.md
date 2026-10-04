@@ -349,7 +349,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.2 | node, vitest, go, cargo, phpunit용 test runner `scripts/run-tests.mjs`와 `scripts/test-progress/`를 더한다. runner는 각 test를 경과 시간과 함께 출력하고 test를 자기 timeout에서 멈추며, 그 test는 `tests/scripts/run-tests.test.mjs`에 둔다. `test-go`, `test-rust`, `test-php`를 runner로 실행하고, `test-go`의 package 120 s 제한을 없애고, PHPUnit 시간 제한을 강제한다 | `node scripts/run-tests.mjs node -- tests/scripts/run-tests.test.mjs` | [o] |
 | T17.3 | `tests/runner/conformance.mjs`가 한 언어에서 case가 끝날 때마다 `<case> [<lang>] pass\|fail (<ms>)`을 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/conformance-progress.test.mjs` | [o] |
 | T17.4 | 네 generated conformance runner의 모든 case에 자기 deadline과 경과 시간이 붙은 결과 줄을 준다. Go와 Rust는 `scripts/run-tests.mjs`로 실행하고 Rust test 이름은 case id로 짓는다. PHP는 `php -l`과 case process에 timeout을 둔다. TypeScript는 `tsc`에 deadline과 단계 줄을 두고 각 render를 timeout이 있는 worker에서 실행한다. 600 s 제한을 없앤다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/generated-conformance.test.mjs` | [o] |
-| T17.5 | `packages/template-vscode/tests/integration/run.mjs`의 모든 VS Code 실행과 profile 설치에 넘으면 process를 kill하는 deadline을 두고, `suite/index.cjs`의 모든 check에 `Promise.race`로 timeout을 걸고 `ok`와 `not ok` 줄에 경과 시간을 붙인다 | `npm run test:integration -w polyspec-template` | [ ] |
+| T17.5 | `packages/template-vscode/tests/integration/run.mjs`의 모든 VS Code 실행과 profile 설치에 넘으면 process를 kill하는 deadline을 두고, `suite/index.cjs`의 모든 check에 `Promise.race`로 timeout을 걸고 `ok`와 `not ok` 줄에 경과 시간을 붙인다 | `npm run test:integration -w polyspec-template` | [o] |
 
 ## 병렬성 요약
 
