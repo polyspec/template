@@ -50,7 +50,7 @@ func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta { resu
 func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &span)) }
 func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &span)) }
 func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
-func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPointer[T any](input T) *T { return &input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: "Z", Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != "" { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
@@ -58,14 +58,14 @@ func render_content_tpl(assign Assign, definitions *Definitions, input Input_con
 	frame := render.NewFrame("content.tpl", errs.LineIndex{0, 41, 65, 76}, rootData)
 
     generatedWrite(context, "<section data-react-island id=\"counter\">\u000a<p>", frame, ast.Span{0, 44})
-    generatedWrite(context, generatedEscape(runtime, valueOrZero(assign.Island_label), frame, ast.Span{47, 59}), frame, ast.Span{44, 60})
+    generatedWrite(context, generatedEscape(runtime, assign.Island_label, frame, ast.Span{47, 59}), frame, ast.Span{44, 60})
     generatedWrite(context, "</p>\u000a</section>\u000a", frame, ast.Span{60, 76})
 }
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 7, 26, 38, 46}, rootData)
 
     generatedWrite(context, "<main>\u000a<h1>", frame, ast.Span{0, 11})
-    generatedWrite(context, generatedEscape(runtime, valueOrZero(assign.Title), frame, ast.Span{14, 19}), frame, ast.Span{11, 20})
+    generatedWrite(context, generatedEscape(runtime, assign.Title, frame, ast.Span{14, 19}), frame, ast.Span{11, 20})
     generatedWrite(context, "</h1>\u000a", frame, ast.Span{20, 26})
     { definition := definitions.Content
     if definition == nil { panic(runtime.Error(frame, ast.Span{26, 37}, errs.RuntimeBlockUndefined, "define content is not registered")) }

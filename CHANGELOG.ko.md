@@ -1,5 +1,6 @@
 # 변경 기록
 
+- TypeScript, Rust, PHP generated program처럼 Go typed generated program도 없는 optional field를 null로 읽는다(T15.4). Go backend는 optional field를 `valueOrZero`로 읽었으므로, 없는 `string?` field에 대한 `{= note ?? '-'}`가 빈 문자열을 출력했다. 이제 field는 pointer로 남고, nil pointer는 null이며, `??`와 삼항 연산자는 operand를 결과의 pointer 또는 값 type으로 바꾼다. 새 `note ?? '-'` case로 `node scripts/check-generated-typed-values.mjs`가 Go에서 실패했고, 지금은 TypeScript, Go, Rust, PHP에서 통과한다. commit된 generated program과 예제 site를 다시 생성했다(`make typed-generator-check` 통과).
 - TypeScript package는 각 entry의 CommonJS 파일을 build의 출력 directory에 쓴다(T14.2-2). 이전에는 `dist/<entry>.cjs`를 작업 directory 기준으로 썼으므로 `--out-dir`을 쓰는 build가 `ENOENT`로 실패했다.
 - Rust engine은 요청의 binding 입력을 `BoundRequest`로 이름 붙인다(T14.2-1). T14.2가 돌려준 tuple은 `cargo clippy -D warnings`에서 `type_complexity`로 실패했다.
 - Rust와 PHP extension이 구분자 쌍이 아닌 구분자 옵션을 인자 오류로 보고하게 했다(T15.3, ERR-13). Rust `AstProgram::new`는 panic했고 이제 `Result<AstProgram, ArgumentError>`를 돌려준다. Rust `parse`는 ERR-1 `E_PARSE_INVALID_DIRECTIVE`를 돌려줬고 이제 `RequestError::Argument`를 돌려준다. PHP extension은 `\Exception`을 던졌고 이제 PHP package처럼 `\InvalidArgumentException`을 던진다. command line program은 이 오류를 status 1로 끝내고 옵션을 직접 검사하지 않는다. `tests/delimiters.rs`는 이전 signature로는 compile되지 않았고 지금은 통과한다. `EngineTest.php`의 extension test 두 개는 변경 전 `\Exception`으로 실패했고 변경 후 통과한다.

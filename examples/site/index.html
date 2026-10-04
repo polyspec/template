@@ -1123,7 +1123,7 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;d27b092000f208be37b3475636b29db727ee1e4c0313262993acd9273c5a119a&quot;,
+  &quot;compilerDigest&quot;: &quot;6c98f9c54a9da8532f1e541070fec24d8b8a213cd150e9989dc0464743660517&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.ts&quot;,
@@ -1289,7 +1289,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;48195d42d1769d1b80c6cf55056e9e2cbb3e5bceca5d5e01913786a0c42dc5a4&quot;,
+  &quot;compilerDigest&quot;: &quot;8c0d31fe77c653656b3050761e16bc2fe3789b8ae0913c23f1e10ec1ab29c69a&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
@@ -1600,11 +1600,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;6ad7b55063ffbba7ceb60e8701f638a6eb78c9cea88b8e3f10842e7131d77811&quot;,
+  &quot;compilerDigest&quot;: &quot;a97d81e0decc4a2266805f51e95e8ed79a588df55ec1bb4f34bb24b5f2edaad2&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;afc1062269b966a0d83560aeb8eaddfb6500f77cab4efd13ea8688274e977bb8&quot;
+      &quot;artifactDigest&quot;: &quot;337947c027b15dc33caa6da20a196493ad9542f3a9ac73b0c3d9e03238f256b4&quot;
     }
   }
 }
@@ -1667,7 +1667,7 @@ func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta { resu
 func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &amp;span)) }
 func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &amp;span)) }
 func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
-func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPointer[T any](input T) *T { return &amp;input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: &quot;Z&quot;, Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != &quot;&quot; { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
@@ -1805,7 +1805,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;4ae0ca01cbfb6fb9deae2c1e543814e70cf52df3fcb7b26c91b95dca8225a794&quot;,
+  &quot;compilerDigest&quot;: &quot;9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.rust&quot;,
@@ -1992,7 +1992,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;92f85bc12b2af143f076e46f105cae8096fb7ec171b7efc087fda0307c229562&quot;,
+  &quot;compilerDigest&quot;: &quot;f1fddd9c1bcff151d5b875bd22a5bd4142c9be9694bbd3b7b81d5dc46f38ec53&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.php&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.php&quot;,
@@ -2293,7 +2293,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;d27b092000f208be37b3475636b29db727ee1e4c0313262993acd9273c5a119a&quot;,
+  &quot;compilerDigest&quot;: &quot;6c98f9c54a9da8532f1e541070fec24d8b8a213cd150e9989dc0464743660517&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
       &quot;path&quot;: &quot;empty-state.ts&quot;,
@@ -2364,7 +2364,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;48195d42d1769d1b80c6cf55056e9e2cbb3e5bceca5d5e01913786a0c42dc5a4&quot;,
+  &quot;compilerDigest&quot;: &quot;8c0d31fe77c653656b3050761e16bc2fe3789b8ae0913c23f1e10ec1ab29c69a&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
       &quot;path&quot;: &quot;empty-state.js&quot;,
@@ -2524,11 +2524,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;6ad7b55063ffbba7ceb60e8701f638a6eb78c9cea88b8e3f10842e7131d77811&quot;,
+  &quot;compilerDigest&quot;: &quot;a97d81e0decc4a2266805f51e95e8ed79a588df55ec1bb4f34bb24b5f2edaad2&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;6df00dea1f1156a3d133dad065f6b1ed52ca7696e1dbf0de3d94731807a8a464&quot;
+      &quot;artifactDigest&quot;: &quot;6380db8df354f4971f02c176dcb0c7818e15b07187712615cdb811126e022834&quot;
     }
   }
 }
@@ -2575,7 +2575,7 @@ func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta { resu
 func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &amp;span)) }
 func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &amp;span)) }
 func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
-func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPointer[T any](input T) *T { return &amp;input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: &quot;Z&quot;, Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != &quot;&quot; { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
@@ -2628,7 +2628,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;4ae0ca01cbfb6fb9deae2c1e543814e70cf52df3fcb7b26c91b95dca8225a794&quot;,
+  &quot;compilerDigest&quot;: &quot;9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
       &quot;path&quot;: &quot;empty-state.rust&quot;,
@@ -2711,7 +2711,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;92f85bc12b2af143f076e46f105cae8096fb7ec171b7efc087fda0307c229562&quot;,
+  &quot;compilerDigest&quot;: &quot;f1fddd9c1bcff151d5b875bd22a5bd4142c9be9694bbd3b7b81d5dc46f38ec53&quot;,
   &quot;files&quot;: {
     &quot;empty-state.php&quot;: {
       &quot;path&quot;: &quot;empty-state.php&quot;,
@@ -2895,7 +2895,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;d27b092000f208be37b3475636b29db727ee1e4c0313262993acd9273c5a119a&quot;,
+  &quot;compilerDigest&quot;: &quot;6c98f9c54a9da8532f1e541070fec24d8b8a213cd150e9989dc0464743660517&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
       &quot;path&quot;: &quot;html-slot.ts&quot;,
@@ -2964,7 +2964,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;48195d42d1769d1b80c6cf55056e9e2cbb3e5bceca5d5e01913786a0c42dc5a4&quot;,
+  &quot;compilerDigest&quot;: &quot;8c0d31fe77c653656b3050761e16bc2fe3789b8ae0913c23f1e10ec1ab29c69a&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
       &quot;path&quot;: &quot;html-slot.js&quot;,
@@ -3122,11 +3122,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;6ad7b55063ffbba7ceb60e8701f638a6eb78c9cea88b8e3f10842e7131d77811&quot;,
+  &quot;compilerDigest&quot;: &quot;a97d81e0decc4a2266805f51e95e8ed79a588df55ec1bb4f34bb24b5f2edaad2&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;df2a2b6eddac6ee37d441e2eda180cc9044b253b05ab4509a605fd46ba34453d&quot;
+      &quot;artifactDigest&quot;: &quot;3e343af9ad7a5c25eebcffb7ee20a85ae366be3340fadafaee25e4845fe46e5a&quot;
     }
   }
 }
@@ -3173,7 +3173,7 @@ func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta { resu
 func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &amp;span)) }
 func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &amp;span)) }
 func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
-func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPointer[T any](input T) *T { return &amp;input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: &quot;Z&quot;, Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != &quot;&quot; { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
@@ -3224,7 +3224,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;4ae0ca01cbfb6fb9deae2c1e543814e70cf52df3fcb7b26c91b95dca8225a794&quot;,
+  &quot;compilerDigest&quot;: &quot;9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
       &quot;path&quot;: &quot;html-slot.rust&quot;,
@@ -3305,7 +3305,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;92f85bc12b2af143f076e46f105cae8096fb7ec171b7efc087fda0307c229562&quot;,
+  &quot;compilerDigest&quot;: &quot;f1fddd9c1bcff151d5b875bd22a5bd4142c9be9694bbd3b7b81d5dc46f38ec53&quot;,
   &quot;files&quot;: {
     &quot;html-slot.php&quot;: {
       &quot;path&quot;: &quot;html-slot.php&quot;,
@@ -3553,7 +3553,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;d27b092000f208be37b3475636b29db727ee1e4c0313262993acd9273c5a119a&quot;,
+  &quot;compilerDigest&quot;: &quot;6c98f9c54a9da8532f1e541070fec24d8b8a213cd150e9989dc0464743660517&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
       &quot;path&quot;: &quot;react-boundary.ts&quot;,
@@ -3643,7 +3643,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;48195d42d1769d1b80c6cf55056e9e2cbb3e5bceca5d5e01913786a0c42dc5a4&quot;,
+  &quot;compilerDigest&quot;: &quot;8c0d31fe77c653656b3050761e16bc2fe3789b8ae0913c23f1e10ec1ab29c69a&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
       &quot;path&quot;: &quot;react-boundary.js&quot;,
@@ -3826,11 +3826,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;6ad7b55063ffbba7ceb60e8701f638a6eb78c9cea88b8e3f10842e7131d77811&quot;,
+  &quot;compilerDigest&quot;: &quot;a97d81e0decc4a2266805f51e95e8ed79a588df55ec1bb4f34bb24b5f2edaad2&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;d3dc1eec15d080dc6a997352e0df54b542722f7bcf0f8c57cb750086493e7dc9&quot;
+      &quot;artifactDigest&quot;: &quot;809f46402ffb5329f32c95d70d5bfcfa7e438a123b90c7e586328a8f97d55642&quot;
     }
   }
 }
@@ -3887,7 +3887,7 @@ func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta { resu
 func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &amp;span)) }
 func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &amp;span)) }
 func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
-func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPointer[T any](input T) *T { return &amp;input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: &quot;Z&quot;, Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != &quot;&quot; { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
@@ -3895,14 +3895,14 @@ func render_content_tpl(assign Assign, definitions *Definitions, input Input_con
 	frame := render.NewFrame(&quot;content.tpl&quot;, errs.LineIndex{0, 41, 65, 76}, rootData)
 
     generatedWrite(context, &quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\u000a&lt;p&gt;&quot;, frame, ast.Span{0, 44})
-    generatedWrite(context, generatedEscape(runtime, valueOrZero(assign.Island_label), frame, ast.Span{47, 59}), frame, ast.Span{44, 60})
+    generatedWrite(context, generatedEscape(runtime, assign.Island_label, frame, ast.Span{47, 59}), frame, ast.Span{44, 60})
     generatedWrite(context, &quot;&lt;/p&gt;\u000a&lt;/section&gt;\u000a&quot;, frame, ast.Span{60, 76})
 }
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame(&quot;layout.tpl&quot;, errs.LineIndex{0, 7, 26, 38, 46}, rootData)
 
     generatedWrite(context, &quot;&lt;main&gt;\u000a&lt;h1&gt;&quot;, frame, ast.Span{0, 11})
-    generatedWrite(context, generatedEscape(runtime, valueOrZero(assign.Title), frame, ast.Span{14, 19}), frame, ast.Span{11, 20})
+    generatedWrite(context, generatedEscape(runtime, assign.Title, frame, ast.Span{14, 19}), frame, ast.Span{11, 20})
     generatedWrite(context, &quot;&lt;/h1&gt;\u000a&quot;, frame, ast.Span{20, 26})
     { definition := definitions.Content
     if definition == nil { panic(runtime.Error(frame, ast.Span{26, 37}, errs.RuntimeBlockUndefined, &quot;define content is not registered&quot;)) }
@@ -3955,7 +3955,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;4ae0ca01cbfb6fb9deae2c1e543814e70cf52df3fcb7b26c91b95dca8225a794&quot;,
+  &quot;compilerDigest&quot;: &quot;9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
       &quot;path&quot;: &quot;react-boundary.rust&quot;,
@@ -4063,7 +4063,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;92f85bc12b2af143f076e46f105cae8096fb7ec171b7efc087fda0307c229562&quot;,
+  &quot;compilerDigest&quot;: &quot;f1fddd9c1bcff151d5b875bd22a5bd4142c9be9694bbd3b7b81d5dc46f38ec53&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.php&quot;: {
       &quot;path&quot;: &quot;react-boundary.php&quot;,
@@ -4450,7 +4450,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;d27b092000f208be37b3475636b29db727ee1e4c0313262993acd9273c5a119a&quot;,
+  &quot;compilerDigest&quot;: &quot;6c98f9c54a9da8532f1e541070fec24d8b8a213cd150e9989dc0464743660517&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
       &quot;path&quot;: &quot;scope-precedence.ts&quot;,
@@ -4540,7 +4540,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;48195d42d1769d1b80c6cf55056e9e2cbb3e5bceca5d5e01913786a0c42dc5a4&quot;,
+  &quot;compilerDigest&quot;: &quot;8c0d31fe77c653656b3050761e16bc2fe3789b8ae0913c23f1e10ec1ab29c69a&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
@@ -4733,11 +4733,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;6ad7b55063ffbba7ceb60e8701f638a6eb78c9cea88b8e3f10842e7131d77811&quot;,
+  &quot;compilerDigest&quot;: &quot;a97d81e0decc4a2266805f51e95e8ed79a588df55ec1bb4f34bb24b5f2edaad2&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;d60a18e3a3f5f95c22e887cef032481933bd2bc5cd72bc4f936032c55313434d&quot;
+      &quot;artifactDigest&quot;: &quot;e44447afe3084266815511230675f1d137d70cd7528fa737721bfd8472604d46&quot;
     }
   }
 }
@@ -4789,7 +4789,7 @@ func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta { resu
 func generatedWrite(context *render.Context, text string, frame *render.Frame, span ast.Span) { generatedPanic(context.Write(text, frame, &amp;span)) }
 func generatedEnter(context *render.Context, name string, frame *render.Frame, span ast.Span) { generatedPanic(context.Enter(name, frame, &amp;span)) }
 func generatedLimit(runtime *render.RuntimeBindings, kind string, count int, frame *render.Frame, span ast.Span) { generatedPanic(runtime.Limit(kind, count, frame, span)) }
-func valueOrZero[T any](input *T) T { if input == nil { var zero T; return zero }; return *input }
+func generatedPointer[T any](input T) *T { return &amp;input }
 func generatedPlain(input any) any { switch item := input.(type) { case *value.OrderedMap: result := map[string]any{}; for _, key := range item.Keys() { entry, _ := item.Get(key); result[key] = generatedPlain(entry) }; return result; case value.List: result := make([]any, len(item)); for index, entry := range item { result[index] = generatedPlain(entry) }; return result; default: return input } }
 func generatedDecode(input any, output any) error { data, err := json.Marshal(generatedPlain(input)); if err != nil { return err }; return json.Unmarshal(data, output) }
 func generatedEnv(options template.RenderOptions) functions.Env { env := functions.Env{Timezone: &quot;Z&quot;, Now: float64(time.Now().Unix())}; if options.Env != nil { if options.Env.Timezone != &quot;&quot; { env.Timezone = options.Env.Timezone }; env.Now = options.Env.Now }; return env }
@@ -4867,7 +4867,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;4ae0ca01cbfb6fb9deae2c1e543814e70cf52df3fcb7b26c91b95dca8225a794&quot;,
+  &quot;compilerDigest&quot;: &quot;9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
       &quot;path&quot;: &quot;scope-precedence.rust&quot;,
@@ -4983,7 +4983,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f&quot;,
-  &quot;compilerDigest&quot;: &quot;92f85bc12b2af143f076e46f105cae8096fb7ec171b7efc087fda0307c229562&quot;,
+  &quot;compilerDigest&quot;: &quot;f1fddd9c1bcff151d5b875bd22a5bd4142c9be9694bbd3b7b81d5dc46f38ec53&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.php&quot;: {
       &quot;path&quot;: &quot;scope-precedence.php&quot;,

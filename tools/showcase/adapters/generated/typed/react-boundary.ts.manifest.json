@@ -6,7 +6,7 @@
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "d27b092000f208be37b3475636b29db727ee1e4c0313262993acd9273c5a119a",
+  "compilerDigest": "6c98f9c54a9da8532f1e541070fec24d8b8a213cd150e9989dc0464743660517",
   "files": {
     "react-boundary.ts": {
       "path": "react-boundary.ts",

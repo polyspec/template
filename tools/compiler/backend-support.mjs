@@ -110,8 +110,8 @@ export function baseTarget(language) {
     },
     go: {
       literal: (value, type) => value === null ? 'nil' : typeof value === 'string' ? goString(value) : type.kind === 'number' ? `float64(${value})` : String(value),
-      var: (name, type) => `${optional(type) ? 'valueOrZero(' : ''}assign.${exportedName(name)}${optional(type) ? ')' : ''}`,
-      local: (name, type) => `${optional(type) ? 'valueOrZero(' : ''}${name}${optional(type) ? ')' : ''}`,
+      var: name => `assign.${exportedName(name)}`,
+      local: name => name,
       member: (object, key) => `${object}.${exportedName(key)}`,
       text: (value, level) => indent(level, `out.WriteString(${goString(value)})`),
       echo: (expression, level) => indent(level, `out.WriteString(generatedEscape(${expression}))`),
