@@ -324,7 +324,7 @@ Dependencies: none. Two bindings differ between the runtimes. Rust fails with E_
 | --- | --- | --- | --- |
 | T15.1 | Add a conformance case whose `assign` is JSON `null` and that renders as an empty map; check it fails in Rust; make Rust `render`, `render_values` and `prepare` and the PHP extension `render`, which renders through `render_values` and `render`, accept a null `assign` as an empty map (`bind_map`, `php_to_map`); state the rule in RT-4 | `make check` | [o] |
 | T15.1-1 | Make the generated TypeScript and PHP programs bind a null `assign` as an empty map, as their AST programs do (RT-4); make `--case` of the four generated conformance runners select the case and fail when it selects none, because the runners read only a positional filter and `--case data/null-assign` ran 0 cases and passed | `make check` | [o] |
-| T15.2 | Add a test in every generated runtime that renders a request whose `assign` and definition `data` do not match the declared types; check that the runtimes report it differently; make every runtime report it as ERR-13 states, an argument error of its language that passes unchanged and is not an ERR-1 error | `make check` | [ ] |
+| T15.2 | Add a test in every generated runtime that renders a request whose `assign` and definition `data` do not match the declared types; check that the runtimes report it differently; make every runtime report it as ERR-13 states, an argument error of its language that passes unchanged and is not an ERR-1 error | `make check` | [o] |
 
 ## Parallelism summary
 

@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "a04bc6b1fd20794ba6e991deccefe1e4cb9c1a79c72ae17878bd149b79baf80d",
+  "contractDigest": "32cd55018614fab23eb4bd5689f2fac33560dc4a5f2ce9d48c4c33f25e3f82fd",
   "compilerDigest": "0768b7801b725c79516a2790941ea464a49fc0c6ca89ccb7fbff9820794fe584",
   "files": {
     "scope-precedence.ts": {

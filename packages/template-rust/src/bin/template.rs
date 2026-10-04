@@ -3,8 +3,8 @@
 //!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 
 use polyspec_template::{
-    AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json,
-    env_from_json, parse, read_json as parse_json_text,
+    AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
+    defines_from_json, env_from_json, parse, read_json as parse_json_text,
 };
 use std::path::{Path, PathBuf};
 use std::process::exit;
@@ -134,6 +134,11 @@ fn main() {
     }
     match engine.render(RenderTarget::Name(&name), &assign, &render_options) {
         Ok(output) => print!("{output}"),
-        Err(error) => fail(error),
+        Err(RequestError::Template(error)) => fail(error),
+        // An argument error of the request is not an ERR-1 error (ERR-13); it ends like a usage error.
+        Err(RequestError::Argument(error)) => {
+            eprintln!("{error}");
+            exit(1);
+        }
     }
 }

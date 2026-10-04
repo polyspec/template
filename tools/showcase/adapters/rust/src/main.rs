@@ -39,7 +39,7 @@ mod generated {
 
 use polyspec_template::{
     AstProgram, DefineInput, Engine, EngineOptions, Env, MapLoader, PreparedRender, RenderOptions,
-    RenderTarget, RuntimeEnvironment,
+    RenderTarget, RequestError, RuntimeEnvironment,
 };
 use render_adapter::{
     DefineEntry, DefineRegistry, Environment, RenderAdapter, RenderRequest, RepeatResult, Scenario,
@@ -250,7 +250,7 @@ impl RenderAdapter for Adapter {
                 &Value::Object(request.assign.clone()),
                 &options,
             )
-            .map_err(|error| error.message)
+            .map_err(request_message)
     }
 
     fn render_twice(&self, request: &RenderRequest) -> Result<RepeatResult, String> {
@@ -293,7 +293,15 @@ impl Adapter {
                 &Value::Object(request.assign.clone()),
                 &options,
             )
-            .map_err(|error| error.message)
+            .map_err(request_message)
+    }
+}
+
+// The text of a failed request: the message of an ERR-1 error or of an argument error (ERR-13).
+fn request_message(error: RequestError) -> String {
+    match error {
+        RequestError::Template(error) => error.message,
+        RequestError::Argument(error) => error.message,
     }
 }
 

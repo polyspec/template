@@ -18,7 +18,7 @@ pub mod source;
 pub mod value;
 
 pub use ast::{Comment, Expr, Node, Template};
-pub use error::{ErrorCode, TemplateError, internal_boundary};
+pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_boundary};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{Limits, ParsedTemplate};

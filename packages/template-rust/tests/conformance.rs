@@ -4,8 +4,8 @@ mod common;
 
 use common::{json_equal, repo_root};
 use polyspec_template::{
-    AstProgram, Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json,
-    env_from_json, parse,
+    AstProgram, Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
+    defines_from_json, env_from_json, parse,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -74,7 +74,8 @@ fn render_case(dir: &Path) -> Outcome {
     }
     match engine.render(RenderTarget::Name("input.tpl"), &assign, &options) {
         Ok(html) => Outcome::Html(html),
-        Err(error) => Outcome::Error(error),
+        Err(RequestError::Template(error)) => Outcome::Error(error),
+        Err(RequestError::Argument(error)) => panic!("an AST program reported an argument error: {error}"),
     }
 }
 
