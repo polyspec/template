@@ -41,7 +41,7 @@ MAKEFLAGS += -k
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install uninstall-cli rerun-failed \
+	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install cargo-downloads-check uninstall-cli rerun-failed \
 	owner-check conformance-cases function-inventory-check dependency-review
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -157,7 +157,7 @@ lint-ext:
 	$(CARGO) fmt --manifest-path $(EXT_DIR)/Cargo.toml --check
 lint-showcase-format:
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
-lint-showcase-warnings:
+lint-showcase-warnings: cargo-downloads-check
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
 lint-php: build-php
 	$(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
@@ -178,6 +178,11 @@ install: install-tools ## Install the tools of the checkout, the npm dependencie
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
 
+# The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
+# lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
+cargo-downloads-check: ## Check that the crates of every Cargo.lock are downloaded; names make install otherwise
+	node scripts/check-cargo-downloads.mjs
+
 install-tools: ## Install npm and Go of the checkout into var/tools; skipped when the exact versions are present
 	$(ONLINE) node scripts/install-tools.mjs
 
@@ -187,7 +192,7 @@ build-ts: ## Build the TypeScript package
 build-go: ## Build the Go CLI
 	cd $(GO_DIR) && go build -o template ./cmd/template && cd $(CURDIR) && node scripts/publish-build.mjs $(GO_DIR)/template var/build/template-go
 
-build-rust: ## Build the Rust CLI
+build-rust: cargo-downloads-check ## Build the Rust CLI
 	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && node scripts/publish-build.mjs $(RUST_DIR)/target/release/template var/build/template-rust
 
 build-php: ## Install PHP dependencies
@@ -214,15 +219,15 @@ test-go-unit:
 test-rust: test-rust-clippy test-rust-unit ## Rust clippy and tests
 
 .PHONY: test-rust-clippy test-rust-unit
-test-rust-clippy:
+test-rust-clippy: cargo-downloads-check
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
-test-rust-unit:
+test-rust-unit: cargo-downloads-check
 	node scripts/run-tests.mjs cargo --cwd $(RUST_DIR) -- --locked
 
 test-php: build-php ## PHP unit tests
 	node scripts/run-tests.mjs phpunit --cwd $(PHP_DIR)
 
-test-scripts: build-ts build-language build-lsp build-php ## Tests of the test runner and the conformance runners
+test-scripts: cargo-downloads-check build-ts build-language build-lsp build-php ## Tests of the test runner and the conformance runners
 	node scripts/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
@@ -295,10 +300,10 @@ vscode-package: build-vscode ## Build the .vsix
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
 
-conformance: build-ts build-go build-rust build-php ext ## Cross-language conformance suite (builds every implementation first)
+conformance: cargo-downloads-check build-ts build-go build-rust build-php ext ## Cross-language conformance suite (builds every implementation first)
 	node tests/runner/conformance.mjs
 
-delimiter-matrix: build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
+delimiter-matrix: cargo-downloads-check build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
 	node tests/runner/delimiter-matrix.mjs
 
 conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
@@ -307,7 +312,7 @@ conformance-generated-ts: build-ts ## TypeScript generated compiler conformance 
 conformance-generated-go: build-ts ## Go generated compiler conformance suite
 	node tests/runner/conformance-generated-go.mjs
 
-conformance-generated-rust: build-ts ## Rust generated compiler conformance suite
+conformance-generated-rust: cargo-downloads-check build-ts ## Rust generated compiler conformance suite
 	node tests/runner/conformance-generated-rust.mjs
 
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
@@ -315,7 +320,7 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php ## AST and generated conformance in all four languages
 
-conformance-cases: build-ts build-go build-rust build-php ext ## AST and generated conformance in all four languages for the cases of CASES only
+conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php ext ## AST and generated conformance in all four languages for the cases of CASES only
 	node scripts/conformance-cases.mjs $(CASES)
 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
@@ -329,16 +334,16 @@ install-check: install-workspace-check package-installs-check ## Install immutab
 .PHONY: install-workspace-check package-installs-check
 install-workspace-check:
 	node scripts/check-install-workspace.mjs
-package-installs-check: typed-generator
+package-installs-check: cargo-downloads-check typed-generator
 	node scripts/check-package-installs.mjs
 
-parity: build-ts build-go build-rust build-php ## Cross-language output comparison
+parity: cargo-downloads-check build-ts build-go build-rust build-php ## Cross-language output comparison
 	node tests/runner/parity.mjs
 
 test-browser: build-ts ## Browser rendering test
 	node tests/browser/run.mjs
 
-ext: ## Build the PHP extension
+ext: cargo-downloads-check ## Build the PHP extension
 	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml && node scripts/publish-build.mjs $(EXT_DIR)/target/release/$(LIBRARY_FILE) $(EXT_LIBRARY)
 
 test-ext: test-ext-clippy test-ext-conformance test-ext-unit ## Test the PHP extension
@@ -346,9 +351,9 @@ test-ext: test-ext-clippy test-ext-conformance test-ext-unit ## Test the PHP ext
 .PHONY: build-ext-php test-ext-clippy test-ext-conformance test-ext-unit
 build-ext-php:
 	node scripts/composer-install.mjs $(EXT_DIR)
-test-ext-clippy:
+test-ext-clippy: cargo-downloads-check
 	$(CARGO) clippy --locked --release --manifest-path $(EXT_DIR)/Cargo.toml -- -D warnings
-test-ext-conformance: ext
+test-ext-conformance: cargo-downloads-check ext
 	node tests/runner/conformance.mjs --langs php-ext
 test-ext-unit: ext build-ext-php
 	node scripts/run-tests.mjs phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
@@ -421,9 +426,9 @@ compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 compiler-interface-check: compiler-interface-diagrams-check compiler-interface-languages-check compiler-interface-mutations-check ## Verify the typed generated module structure in every language
 
 .PHONY: compiler-interface-languages-check compiler-interface-mutations-check
-compiler-interface-languages-check: build-php
+compiler-interface-languages-check: cargo-downloads-check build-php
 	node scripts/check-compiler-interface.mjs
-compiler-interface-mutations-check: build-php
+compiler-interface-mutations-check: cargo-downloads-check build-php
 	node scripts/check-compiler-interface-mutations.mjs
 
 docs: ## Build the documentation site
@@ -440,10 +445,10 @@ docs-static-check: docs ## Build the documentation site as static files
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
 	node scripts/generate-showcase-contract.mjs
 
-contract-check: build-ts build-php ## Verify generated declarations, implementations and runtime state recovery
+contract-check: cargo-downloads-check build-ts build-php ## Verify generated declarations, implementations and runtime state recovery
 	node scripts/check-showcase-contract.mjs
 
-showcase: typed-generator build-php ## Build the executable example site and its result artifacts
+showcase: cargo-downloads-check typed-generator build-php ## Build the executable example site and its result artifacts
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
 	node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
@@ -451,7 +456,7 @@ showcase: typed-generator build-php ## Build the executable example site and its
 	node scripts/update-benchmark-docs.mjs
 	node tools/showcase/build-site.mjs
 
-bench: typed-generator build-php ## Measure production AST and generated artifacts
+bench: cargo-downloads-check typed-generator build-php ## Measure production AST and generated artifacts
 	node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs
@@ -462,7 +467,7 @@ benchmark-check: benchmark-results-check benchmark-docs-check ## Verify committe
 benchmark-results-check:
 	node scripts/check-benchmark-results.mjs
 
-benchmark-smoke: typed-generator build-php ## Measure a fresh short equal-output sample without changing committed results
+benchmark-smoke: cargo-downloads-check typed-generator build-php ## Measure a fresh short equal-output sample without changing committed results
 	node scripts/check-benchmark-smoke.mjs
 
 template-function-inventory: ## Inventory function-shaped calls in an explicit external template tree
@@ -496,7 +501,7 @@ showcase-check: typed-generator-compile-check showcase-build-check contract-chec
 .PHONY: showcase-ast-check showcase-build-check showcase-site-check showcase-html-check
 showcase-ast-check: build-ts
 	node tools/showcase/compile.mjs --refresh false
-showcase-build-check: showcase-ast-check build-php
+showcase-build-check: cargo-downloads-check showcase-ast-check build-php
 	node tools/showcase/build.mjs --check --langs $(SHOWCASE_LANGS)
 showcase-site-check: build-ts
 	node tools/showcase/build-site.mjs --check
@@ -509,13 +514,13 @@ showcase-compile: build-ts ## Generate committed canonical AST artifacts
 generated-native-check: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
 
 .PHONY: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check
-generated-native-calls-check: build-ts build-php
+generated-native-calls-check: cargo-downloads-check build-ts build-php
 	node scripts/check-generated-native-calls.mjs
-generated-typed-values-check: build-ts build-php
+generated-typed-values-check: cargo-downloads-check build-ts build-php
 	node scripts/check-generated-typed-values.mjs
-generated-arguments-check: build-ts build-php
+generated-arguments-check: cargo-downloads-check build-ts build-php
 	node scripts/check-generated-arguments.mjs
-generated-bound-data-check: build-ts build-php
+generated-bound-data-check: cargo-downloads-check build-ts build-php
 	node scripts/check-generated-bound-data.mjs
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
@@ -536,7 +541,7 @@ compiler-ir-rules-check: build-ts
 conformance-type-manifest-check: build-ts
 	node scripts/check-conformance-type-manifest.mjs
 
-typed-generator-compile-check: build-php compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
+typed-generator-compile-check: cargo-downloads-check build-php compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs

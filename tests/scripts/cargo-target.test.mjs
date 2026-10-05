@@ -16,7 +16,8 @@ for (const target of ['build-rust', 'test-rust']) {
     const directory = mkdtempSync(path.join(tmpdir(), 'template-cargo-target-'));
     t.after(() => rmSync(directory, { recursive: true, force: true }));
     const cargo = path.join(directory, 'cargo');
-    writeFileSync(cargo, '#!/bin/sh\necho "cargo received CARGO_TARGET_DIR=${CARGO_TARGET_DIR-unset}"\nexit 3\n');
+    // `fetch` is the check of the downloads (cargo-downloads-check), which every target that runs cargo runs first.
+    writeFileSync(cargo, '#!/bin/sh\n[ "$1" = fetch ] && exit 0\necho "cargo received CARGO_TARGET_DIR=${CARGO_TARGET_DIR-unset}"\nexit 3\n');
     chmodSync(cargo, 0o755);
     const run = spawnSync('make', ['--no-print-directory', target, `CARGO=${cargo}`], {
       cwd: ROOT, encoding: 'utf8', env: { ...process.env, CARGO_TARGET_DIR: path.join(directory, 'other-checkout-target') },
