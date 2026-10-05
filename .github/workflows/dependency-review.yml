@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+# rustup installs no toolchain on the first cargo (T18.7-1); this workflow runs no cargo.
+env:
+  RUSTUP_AUTO_INSTALL: '0'
+
 jobs:
   review:
     runs-on: ubuntu-latest

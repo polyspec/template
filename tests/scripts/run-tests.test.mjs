@@ -183,6 +183,9 @@ test('a Rust test that outlives its timeout stops cargo test and fails by its na
 });
 
 test('a PHPUnit test that outlives its timeout stops PHPUnit and fails by its name', async () => {
+  // The test creates the PHPUnit that it runs, as make build-php does (T18.7-1); with an unchanged lock it installs nothing.
+  const install = spawnSync('composer', ['install', '--no-interaction', '--quiet'], { cwd: path.join(ROOT, 'packages/template-php'), encoding: 'utf8' });
+  assert.equal(install.status, 0, install.stdout + install.stderr);
   await withDirectory(async directory => {
     const file = path.join(directory, 'HangTest.php');
     await writeFile(file, '<?php\nuse PHPUnit\\Framework\\TestCase;\nfinal class HangTest extends TestCase {\n    public function testHangs(): void { sleep(600); $this->assertTrue(true); }\n}\n');
@@ -204,7 +207,19 @@ test('a tool that fails before any test runs fails the summary line too', COMPIL
     const run = runner(['cargo', '--cwd', directory, '--', '--offline'], { env: { ...process.env, CARGO_TARGET_DIR: path.join(directory, 'target') } });
     assert.notEqual(run.status, 0);
     assert.doesNotMatch(run.stdout, /✔ cargo /);
-    assert.match(run.stdout, /✖ cargo .*: 0 passed, 0 failed, 0 timed out, 0 skipped, the tool exited with [1-9]\d*/);
+    assert.match(run.stdout, /✖ cargo .*: 0 passed, 0 failed, 0 timed out, 0 skipped, the tool exited with [1-9]\d*: error\[E0425\]: cannot find function `undefined`/);
+  });
+});
+
+test('the summary of a tool that exits without a failing test names the error lines of the tool', async () => {
+  // The cargo of this case is a stub that fails as rustup fails on a toolchain without its cargo component (T18.7-1).
+  await withDirectory(async directory => {
+    const bin = path.join(directory, 'bin');
+    await mkdir(bin);
+    await writeFile(path.join(bin, 'cargo'), "#!/bin/sh\necho 'info: syncing channel updates' >&2\necho \"error: the 'cargo' binary is not applicable to the example toolchain\" >&2\nexit 1\n", { mode: 0o755 });
+    const run = runner(['cargo', '--cwd', directory], { env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH}` } });
+    assert.equal(run.status, 1, run.stdout + run.stderr);
+    assert.match(run.stdout, /^\[\s*[\d.]+s\] ✖ cargo .*: 0 passed, 0 failed, 0 timed out, 0 skipped, the tool exited with 1: error: the 'cargo' binary is not applicable to the example toolchain \(\d+\.\ds\)$/m);
   });
 });
 
