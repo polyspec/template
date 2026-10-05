@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "comment": "Written by make dependency-review RECORD=1 (scripts/dependency-review.mjs) from the registries; make dependency-policy-check compares the checkout with it without a network.",
+  "reviewed": "2026-10-05T11:49:47.987Z",
+  "locks": [
+    {
+      "lock": "package-lock.json",
+      "sha256": "0b14fc70008d95216cc454c4e520e785ee5a338922ef843ec5726f4ee534157c",
+      "advisories": []
+    },
+    {
+      "lock": "packages/template-php/composer.lock",
+      "sha256": "fe64b4e523ccae3a2a4a597fd136673cedd308c8b14edc2c82f23ec808817bff",
+      "advisories": []
+    },
+    {
+      "lock": "packages/template-php-ext/composer.lock",
+      "sha256": "e0773706a6cc3ca69a0887e47d3e63a219908985a51b38583bc91fee905dbed2",
+      "advisories": []
+    }
+  ],
+  "dependencies": [
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@codemirror/commands",
+      "version": "6.11.1",
+      "latest": "6.11.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@codemirror/lang-html",
+      "version": "6.4.12",
+      "latest": "6.4.12"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@codemirror/language",
+      "version": "6.12.4",
+      "latest": "6.12.4"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@codemirror/lint",
+      "version": "6.9.7",
+      "latest": "6.9.7"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@codemirror/state",
+      "version": "6.7.6",
+      "latest": "6.7.6"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@codemirror/view",
+      "version": "6.43.13",
+      "latest": "6.43.13"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@eslint/js",
+      "version": "10.0.1",
+      "latest": "10.0.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@playwright/test",
+      "version": "1.63.0",
+      "latest": "1.63.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@types/node",
+      "version": "26.6.4",
+      "latest": "26.6.4"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@types/vscode",
+      "version": "1.138.0",
+      "latest": "1.140.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@vscode/test-electron",
+      "version": "3.1.0",
+      "latest": "3.1.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@vscode/vsce",
+      "version": "4.0.0",
+      "latest": "4.0.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "ajv",
+      "version": "8.20.0",
+      "latest": "8.20.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "ajv-formats",
+      "version": "3.0.1",
+      "latest": "3.0.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "esbuild",
+      "version": "0.27.2",
+      "latest": "0.28.2"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "eslint",
+      "version": "10.12.0",
+      "latest": "10.12.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "tm-grammars",
+      "version": "1.32.22",
+      "latest": "1.32.22"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "tsup",
+      "version": "8.5.1",
+      "latest": "8.5.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "typescript",
+      "version": "6.0.3",
+      "latest": "7.0.2"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "typescript-eslint",
+      "version": "8.71.0",
+      "latest": "8.71.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "vitepress",
+      "version": "1.6.4",
+      "latest": "1.6.4"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "vitest",
+      "version": "5.0.3",
+      "latest": "5.0.3"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "vscode-jsonrpc",
+      "version": "9.0.3",
+      "latest": "9.0.3"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "vscode-tmgrammar-test",
+      "version": "0.1.3",
+      "latest": "0.1.3"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/template-php/composer.json",
+      "package": "laravel/pint",
+      "version": "v1.30.4",
+      "latest": "v1.30.4"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/template-php/composer.json",
+      "package": "phpunit/phpunit",
+      "version": "11.5.57",
+      "latest": "11.5.57"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/template-php-ext/composer.json",
+      "package": "phpunit/phpunit",
+      "version": "11.5.57",
+      "latest": "11.5.57"
+    }
+  ]
+}

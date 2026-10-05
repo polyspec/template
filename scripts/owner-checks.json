@@ -5,7 +5,7 @@
     { "paths": ["docs/**", "*.md", "schema/*.md", "packages/*/README*.md"], "targets": ["docs-check", "docs-static-check"] },
     { "paths": ["contracts/features.json", "scripts/features/**"], "targets": ["feature-check", "docs-check"] },
     { "paths": ["contracts/functions.json", "tests/runner/function-contract.mjs", "scripts/check-function-contract.mjs"], "targets": ["function-contract-check"] },
-    { "paths": ["config/dependency-policy.json", "package.json", "package-lock.json", "scripts/check-dependency-policy*.mjs"], "targets": ["dependency-policy-check"] },
+    { "paths": ["config/dependency-policy.json", "config/dependency-review.json", "package.json", "package-lock.json", "packages/*/composer.{json,lock}", "scripts/check-dependency-policy*.mjs", "scripts/dependency-{state,review}.mjs"], "targets": ["dependency-policy-check"], "tests": ["tests/scripts/dependency-policy.test.mjs"] },
     { "paths": ["schema/ast.schema.json", "scripts/check-schema*.mjs", "scripts/conformance-case-files.mjs"], "targets": ["schema-check"] },
     { "paths": ["tests/rule-evidence.json", "scripts/check-rules.mjs"], "targets": ["rules-check"] },
     { "paths": ["tests/cases/**"], "targets": ["conformance-cases"], "variable": "CASES" },
