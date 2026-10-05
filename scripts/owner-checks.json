@@ -1,6 +1,6 @@
 {
   "comment": "The owner checks of the repository paths (T13.1-4), read by scripts/owner-check.mjs: make owner-check runs the targets and node test files of the rules whose globs match a changed path. Every tracked path matches a rule; always lists the tests that run for every change. A rule with variable passes the matched paths to its targets in that make variable. Globs: * within one path segment, ** across segments, {a,b} either alternative.",
-  "always": ["tests/scripts/editorconfig.test.mjs"],
+  "always": ["tests/scripts/editorconfig.test.mjs", "tests/scripts/toolchain-files.test.mjs"],
   "owners": [
     { "paths": ["docs/**", "*.md", "schema/*.md", "packages/*/README*.md"], "targets": ["docs-check", "docs-static-check"] },
     { "paths": ["contracts/features.json", "scripts/features/**"], "targets": ["feature-check", "docs-check"] },
@@ -25,6 +25,7 @@
     { "paths": ["scripts/conformance-cases.mjs"], "tests": ["tests/scripts/conformance-cases.test.mjs"] },
     { "paths": ["scripts/holder-lock.mjs"], "tests": ["tests/scripts/holder-lock.test.mjs"] },
     { "paths": ["scripts/install-cli.mjs"], "tests": ["tests/scripts/install-cli.test.mjs"] },
+    { "paths": ["scripts/install-tools.mjs", "config/toolchain.json"], "tests": ["tests/scripts/install-tools.test.mjs", "tests/scripts/toolchain-files.test.mjs"] },
     { "paths": ["scripts/check-documents.mjs"], "targets": ["docs-check"], "tests": ["tests/scripts/check-documents.test.mjs"] },
     { "paths": ["scripts/check-docs-static.mjs"], "targets": ["docs-static-check"] },
     { "paths": ["scripts/check-doc-coverage.mjs", "scripts/update-benchmark-docs.mjs"], "targets": ["docs-check"] },
@@ -51,7 +52,7 @@
     { "paths": ["packages/template-php-ext/**"], "targets": ["test-ext"] },
     { "paths": ["eslint.config.mjs"], "targets": ["lint-js"] },
     { "paths": [".npmrc"], "tests": ["tests/scripts/no-symlinks.test.mjs"] },
-    { "paths": [".node-version", "rust-toolchain.toml", ".github/workflows/*.yml"], "tests": ["tests/scripts/toolchain-files.test.mjs"] },
+    { "paths": [".node-version", "rust-toolchain.toml", ".github/workflows/*.yml", "packages/template-go/go.mod"], "tests": ["tests/scripts/toolchain-files.test.mjs"] },
     { "paths": [".github/workflows/*.yml"], "tests": ["tests/scripts/suite-parity.test.mjs"] },
     { "paths": [".gitignore"], "tests": ["tests/scripts/ignored-files.test.mjs"] },
     { "paths": [".editorconfig"], "tests": ["tests/scripts/editorconfig.test.mjs"] }

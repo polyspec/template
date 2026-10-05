@@ -16,6 +16,7 @@
   "engines": {
     "node": ">=26"
   },
+  "packageManager": "npm@12.2.0",
   "dependencies": {
     "@polyspec/template": "file:packages/template-ts",
     "@polyspec/template-codemirror": "file:packages/template-codemirror",

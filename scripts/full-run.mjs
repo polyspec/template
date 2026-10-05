@@ -10,7 +10,8 @@
 // current tree (`git rev-parse HEAD^{tree}`); `rerun-failed` is refused unless that record exists and has targets that
 // did not pass. The guard prints its decision with the reason, runs each target with `make <target>` to its end,
 // prints its start and its result with the elapsed time, and writes the record before and after each target, so a run
-// that is stopped stays recorded as `incomplete`. No step has a time limit.
+// that is stopped stays recorded as `incomplete`. The record and each rerun hold the versions of the toolchains of the
+// run (`environment`). No step has a time limit.
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -103,6 +104,31 @@ function alive(pid) {
   }
 }
 
+// The commands that print the version of each toolchain of a run.
+const VERSION_COMMANDS = {
+  node: ['node', ['--version']],
+  npm: ['npm', ['--version']],
+  go: ['go', ['env', 'GOVERSION']],
+  cargo: ['cargo', ['--version']],
+  php: ['php', ['-r', 'echo PHP_VERSION;']],
+  composer: ['composer', ['--version', '--no-ansi']],
+};
+
+/**
+ * The version of each toolchain on PATH in `root`, as the commands print it, or `unavailable: <reason>`. The record of a
+ * run keeps them as evidence of what the run ran on: config/toolchain.json pins PHP by its minor version, because
+ * setup-php cannot pin a patch, so the patch of each run is recorded here (T19.2).
+ */
+export function toolchainVersions(root = ROOT) {
+  const versions = {};
+  for (const [name, [command, args]] of Object.entries(VERSION_COMMANDS)) {
+    const run = spawnSync(command, args, { cwd: root, encoding: 'utf8' });
+    const line = (run.stdout ?? '').trim().split('\n')[0];
+    versions[name] = run.error ? `unavailable: ${run.error.message}` : run.status === 0 ? line : `unavailable: ${command} exited with ${run.status}`;
+  }
+  return versions;
+}
+
 const seconds = milliseconds => `${(milliseconds / 1000).toFixed(1)} s`;
 
 // Runs `make <target>` in the checkout with the output of make; resolves whether it ended with status 0.
@@ -118,7 +144,7 @@ function makeTarget(root, target) {
  * Inspects the checkout, decides and runs. `runTarget(name)` resolves whether a target passed. Returns the exit
  * status: 0 when the full result of the tree is passed, 1 otherwise.
  */
-export async function fullRun({ root = ROOT, mode, targets = [], runTarget = name => makeTarget(root, name), print = line => console.log(line) }) {
+export async function fullRun({ root = ROOT, mode, targets = [], runTarget = name => makeTarget(root, name), print = line => console.log(line), environment = () => toolchainVersions(root) }) {
   const active = activeItems(readFileSync(path.join(root, CHECKLIST), 'utf8'));
   const dirty = git(root, 'status', '--porcelain', '--untracked-files=no').split('\n').filter(Boolean);
   const tree = git(root, 'rev-parse', 'HEAD^{tree}').trim();
@@ -131,9 +157,9 @@ export async function fullRun({ root = ROOT, mode, targets = [], runTarget = nam
 
   const now = () => new Date().toISOString();
   const current = mode === 'run'
-    ? { tree, commit, result: 'incomplete', pid: process.pid, started: now(), ended: null, targets: targets.map(name => ({ name, status: 'pending' })), reruns: [] }
+    ? { tree, commit, result: 'incomplete', pid: process.pid, started: now(), ended: null, environment: environment(), targets: targets.map(name => ({ name, status: 'pending' })), reruns: [] }
     : { ...record, result: 'incomplete', pid: process.pid };
-  const rerun = mode === 'run' ? null : { started: now(), ended: null, targets: decision.targets, result: 'incomplete' };
+  const rerun = mode === 'run' ? null : { started: now(), ended: null, environment: environment(), targets: decision.targets, result: 'incomplete' };
   if (rerun) current.reruns.push(rerun);
   writeRecord(root, current);
 

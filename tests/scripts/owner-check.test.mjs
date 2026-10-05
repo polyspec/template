@@ -132,5 +132,5 @@ test('the declaration of this repository owns every path and selects the docs ch
   assert.equal(validate.status, 0, validate.stdout + validate.stderr);
   const run = spawnSync(process.execPath, [SCRIPT, '--dry-run', '--paths', 'docs/index.md'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stdout + run.stderr);
-  assert.match(run.stdout, /^\[owner-check\] 1 changed paths select docs-check; docs-static-check; node tests tests\/scripts\/editorconfig\.test\.mjs$/m);
+  assert.match(run.stdout, /^\[owner-check\] 1 changed paths select docs-check; docs-static-check; node tests tests\/scripts\/editorconfig\.test\.mjs tests\/scripts\/toolchain-files\.test\.mjs$/m);
 });
