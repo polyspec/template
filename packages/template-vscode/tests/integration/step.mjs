@@ -4,6 +4,8 @@
 // by the result of its suite.
 import { spawn } from 'node:child_process';
 
+import { stopProcessGroup } from '../../../../scripts/process-group.mjs';
+
 // VS Code 1.138 sometimes takes minutes to exit after the suite has ended and printed its result. The result of a
 // launch is the result of its suite, so VS Code gets this long to exit after the suite line before it is killed.
 // The grace starts after the result has been printed; it ends VS Code and does not decide the result.
@@ -62,7 +64,9 @@ export function runStep(step, command, args, { env, output, settle = () => undef
         log(`[integration] ${step}: the process ended on ${signal}`);
       }
       log(`[integration] ${code === 0 ? 'ok' : 'not ok'} - ${step}: exit ${code} (${seconds(Date.now() - started)})`);
-      resolvePromise(code);
+      // The processes that VS Code started in its group, such as its helpers, may still write into the profile that the
+      // caller removes next; the step resolves after no process of the group is left (T19.13).
+      stopProcessGroup(child).then(() => resolvePromise(code), reject);
     });
   });
 }

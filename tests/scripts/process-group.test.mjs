@@ -1,4 +1,4 @@
-// Tests the helper tests/scripts/process-group.mjs (T20.3): after it stops a process group whose processes keep
+// Tests the helper scripts/process-group.mjs (T20.3): after it stops a process group whose processes keep
 // writing into a directory, the directory can be removed, every time.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -8,7 +8,7 @@ import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import test from 'node:test';
 
-import { stopProcessGroup } from './process-group.mjs';
+import { stopProcessGroup } from '../../scripts/process-group.mjs';
 
 // Each attempt starts writers, stops them and removes their directory; 20 attempts under the load of a full run take
 // longer than the default 30 s of one test (T20.3-1).

@@ -1,4 +1,4 @@
-// A test helper that stops a process group and waits until no process of it is left (T20.3). A test that started a
+// Stops a process group and waits until no process of it is left (T20.3, T19.13). A caller that started a
 // command in its own group (`detached: true`) and removes the command's directory afterwards must wait: SIGKILL ends
 // the processes of the group soon, not at once, and a process that is still running writes into the directory while it
 // is removed, which fails with ENOTEMPTY.
