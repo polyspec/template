@@ -69,9 +69,13 @@ export function acquire(lock, checkout) {
     unlinkSync(pending);
   }
   let held = true;
+  const handlers = new Map();
   const release = () => {
     if (!held) return;
     held = false;
+    // A released lock leaves no handler behind, so a process may take and release locks many times.
+    process.removeListener('exit', release);
+    for (const [signal, handler] of handlers) process.removeListener(signal, handler);
     const current = readHolder(lock);
     if (current === null || current.token !== holder.token) throw new Error(`${lock} is no longer held by process ${process.pid}`);
     unlinkSync(lock);
@@ -79,10 +83,12 @@ export function acquire(lock, checkout) {
   // The holder releases the lock when it exits, also through process.exit or a signal.
   process.on('exit', release);
   for (const [signal, number] of [['SIGINT', 2], ['SIGTERM', 15], ['SIGHUP', 1]]) {
-    process.once(signal, () => {
+    const handler = () => {
       release();
       process.exit(128 + number);
-    });
+    };
+    handlers.set(signal, handler);
+    process.once(signal, handler);
   }
   return release;
 }

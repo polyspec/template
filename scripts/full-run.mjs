@@ -17,11 +17,16 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { acquire } from './holder-lock.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const USAGE = 'Usage: node scripts/full-run.mjs run <target>... | rerun-failed';
 export const CHECKLIST = 'docs/plans/execution-checklist.md';
 // The record of the last full run of this checkout; /var/ is ignored by Git.
 export const RECORD = 'var/full-run.json';
+// The holder lock of the record: a guard holds it from reading the record to its last write, so two guards never
+// decide on the same record or write it in turn (T19.12).
+export const LOCK = 'var/full-run.json.lock';
 
 const TASK_ROW = /^\|\s*(T\d[\w.-]*)\s*\|/;
 
@@ -146,6 +151,23 @@ function makeTarget(root, target) {
  * status: 0 when the full result of the tree is passed, 1 otherwise.
  */
 export async function fullRun({ root = ROOT, mode, targets = [], runTarget = name => makeTarget(root, name), print = line => console.log(line), environment = () => toolchainVersions(root) }) {
+  mkdirSync(path.join(root, path.dirname(LOCK)), { recursive: true });
+  let release;
+  try {
+    release = acquire(path.join(root, LOCK), root);
+  } catch (error) {
+    print(`[full-run] refuse: ${error.message}; the guard of another run reads or writes ${RECORD}`);
+    return 1;
+  }
+  try {
+    return await guardedRun({ root, mode, targets, runTarget, print, environment });
+  } finally {
+    release();
+  }
+}
+
+// Decides and runs while the guard holds the lock of the record.
+async function guardedRun({ root, mode, targets, runTarget, print, environment }) {
   const active = activeItems(readFileSync(path.join(root, CHECKLIST), 'utf8'));
   const dirty = git(root, 'status', '--porcelain', '--untracked-files=no').split('\n').filter(Boolean);
   const tree = git(root, 'rev-parse', 'HEAD^{tree}').trim();
