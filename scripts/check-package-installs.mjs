@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 // Builds immutable package artifacts and verifies AST/generated installation outside the workspace.
+// The install projects read no source of the network and use the toolchains of the checkout (T19.1): the Go install project
+// resolves modules only from the proxy of the run, verifies no checksum against a database of the network and runs the
+// installed Go toolchain of the go directive of packages/template-go/go.mod; the Rust install project builds with the toolchain
+// of rust-toolchain.toml and a lock derived from packages/template-rust/Cargo.lock; the PHP install project reads only the
+// package of the run.
 // Each command is a step without a time limit that prints its start, its output and its result with
 // its elapsed time on standard error and is judged by its exit status.
 import assert from 'node:assert/strict';
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
-import { createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
+import { installCargoLock, createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
 import { runStepSync } from './test-progress/step.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
@@ -52,7 +57,7 @@ assert.equal(ast, expected); assert.equal(generated, expected); assert.equal(ast
 function checkGo() {
   const version = 'v0.0.1';
   const module = 'github.com/polyspec/template';
-  const goVersion = run('go', ['env', 'GOVERSION']).trim().replace(/^go/, '');
+  const goVersion = /^go (\S+)$/m.exec(readFileSync(join(root, 'packages/template-go/go.mod'), 'utf8'))[1];
   const proxy = join(temporary, 'go-proxy');
   const endpoint = join(proxy, 'github.com/polyspec/template/@v');
   const zipRoot = join(temporary, 'go-zip', `${module}@${version}`);
@@ -79,7 +84,7 @@ import ("encoding/json"; "fmt"; "os"; template "github.com/polyspec/template"; "
 func definitions(data []byte) map[string]template.DefineInput { var raw map[string]json.RawMessage; if err:=json.Unmarshal(data,&raw);err!=nil{panic(err)}; out:=map[string]template.DefineInput{}; for name,value:=range raw { var path string; if json.Unmarshal(value,&path)==nil { out[name]=template.DefineInput{Template:path}; continue }; var entry struct{Template string \`json:"template"\`;Data any \`json:"data"\`;HTML *string \`json:"html"\`}; if err:=json.Unmarshal(value,&entry);err!=nil{panic(err)}; out[name]=template.DefineInput{Template:entry.Template,Data:entry.Data,HTML:entry.HTML} }; return out }
 func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(data);if err!=nil{panic(err)}; defineBytes,_:=os.ReadFile("define.json"); options:=template.RenderOptions{Define:definitions(defineBytes)}; expected,_:=os.ReadFile("expected.html"); astProgram,err:=template.NewAstProgram(template.Options{Loader:template.NewFSLoader(os.DirFS("templates"))});if err!=nil{panic(err)}; ast,err:=astProgram.Render("layout",assign,options);if err!=nil{panic(err)}; generatedProgram,err:=generated.NewGeneratedProgram(template.Options{});if err!=nil{panic(err)}; direct,err:=generatedProgram.Render("layout",assign,options);if err!=nil{panic(err)}; if ast!=string(expected)||direct!=string(expected)||ast!=direct{panic("install project output differs")};fmt.Print("ok")}
 `);
-  const environment = { GOPROXY: `file://${proxy},https://proxy.golang.org`, GOSUMDB: 'sum.golang.org', GONOSUMDB: module, GOTOOLCHAIN: 'auto', ...goModuleEnvironment(temporary) };
+  const environment = { GOPROXY: `file://${proxy}`, GOSUMDB: 'off', GOTOOLCHAIN: 'local', ...goModuleEnvironment(temporary) };
   run('go', ['mod', 'tidy'], { cwd: directory, env: environment });
   run('go', ['run', '-mod=readonly', '.'], { cwd: directory, env: environment });
 }
@@ -96,11 +101,19 @@ function checkRust() {
   stageScenario(directory);
   cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.rust'), join(directory, 'generated.rs'));
   writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, 'polyspec-template-0.0.1'))}}\nserde={version="1",features=["derive"]}\nserde_json={version="1",features=["preserve_order","arbitrary_precision"]}\n`);
+  // The install project builds with the locked versions of the package and the toolchain of the checkout. Cargo does not
+  // resolve the development dependencies of a path dependency for an install project.
+  const manifest = readFileSync(join(root, 'packages/template-rust/Cargo.toml'), 'utf8');
+  const development = [...(/^\[dev-dependencies\]\n((?:[^[\n].*\n?)*)/m.exec(manifest)?.[1] ?? '').matchAll(/^([\w-]+)\s*=/gm)].map(match => match[1]);
+  writeFileSync(join(directory, 'Cargo.lock'), installCargoLock(readFileSync(join(root, 'packages/template-rust/Cargo.lock'), 'utf8'), {
+    name: 'install-check', version: '0.0.1', dependencies: ['polyspec-template', 'serde', 'serde_json'], removed: { 'polyspec-template': development }, lockPath: 'packages/template-rust/Cargo.lock',
+  }));
+  cpSync(join(root, 'rust-toolchain.toml'), join(directory, 'rust-toolchain.toml'));
   writeFileSync(join(directory, 'src/main.rs'), `mod generated { include!(concat!(env!("CARGO_MANIFEST_DIR"), "/generated.rs")); }
 use polyspec_template::{AstProgram, Engine, EngineOptions, FsLoader, Program, RenderOptions, RenderTarget, RuntimeEnvironment};
 fn main(){ let assign:serde_json::Value=serde_json::from_str(include_str!("../data.json")).unwrap(); let raw:serde_json::Value=serde_json::from_str(include_str!("../define.json")).unwrap(); let mut options=RenderOptions::default(); options.define=polyspec_template::defines_from_json(&raw).unwrap(); let expected=include_str!("../expected.html"); let ast=Engine::new(AstProgram::new(EngineOptions{loader:Some(Box::new(FsLoader::new("templates"))),..Default::default()}).unwrap()).render(RenderTarget::Name("layout"),&assign,&options).unwrap(); let program=generated::GeneratedProgram::new(RuntimeEnvironment::new(None,std::collections::HashMap::new())); let direct=program.render(RenderTarget::Name("layout"),&assign,&options).unwrap(); assert_eq!(ast,expected);assert_eq!(direct,expected);assert_eq!(ast,direct); }
 `);
-  run(resolve(process.env.HOME, '.cargo/bin/cargo'), ['run', '--quiet'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
+  run(resolve(process.env.HOME, '.cargo/bin/cargo'), ['run', '--quiet', '--locked'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
 }
 
 function checkPhp() {
@@ -112,7 +125,7 @@ function checkPhp() {
   cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.php'), join(directory, 'generated.php'));
   const dist = `file://${archive}`;
   writeFileSync(join(directory, 'composer.json'), JSON.stringify({
-    repositories: [{ type: 'package', package: { name: 'polyspec/template', version: '0.0.1', dist: { url: dist, type: 'zip' }, autoload: { 'psr-4': { 'Polyspec\\Template\\': 'src/' } }, require: { php: '^8.2', 'ext-mbstring': '*' } } }],
+    repositories: [{ 'packagist.org': false }, { type: 'package', package: { name: 'polyspec/template', version: '0.0.1', dist: { url: dist, type: 'zip' }, autoload: { 'psr-4': { 'Polyspec\\Template\\': 'src/' } }, require: { php: '^8.2', 'ext-mbstring': '*' } } }],
     require: { 'polyspec/template': '0.0.1' }, config: { 'allow-plugins': false },
   }));
   run('composer', ['install', '--no-interaction', '--no-progress', '--prefer-dist'], { cwd: directory });

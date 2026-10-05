@@ -35,7 +35,7 @@
     { "paths": ["scripts/check-typed-generator.mjs"], "targets": ["typed-generator-compile-check"] },
     { "paths": ["scripts/check-language-test-matrix*.mjs"], "targets": ["language-test-matrix"] },
     { "paths": ["scripts/check-editor-boundaries.mjs", "scripts/editor-fixtures.mjs"], "targets": ["editor-boundary-check", "test-language", "test-lsp", "test-codemirror"] },
-    { "paths": ["scripts/check-install-workspace.mjs", "scripts/install-workspace.mjs", "scripts/check-package-installs.mjs"], "targets": ["install-check"], "tests": ["tests/scripts/long-steps.test.mjs"] },
+    { "paths": ["scripts/check-install-workspace.mjs", "scripts/install-workspace.mjs", "scripts/check-package-installs.mjs"], "targets": ["install-check"], "tests": ["tests/scripts/long-steps.test.mjs", "tests/scripts/package-installs.test.mjs"] },
     { "paths": ["scripts/check-benchmark-results.mjs", "scripts/check-benchmark-smoke.mjs"], "targets": ["benchmark-check"] },
     { "paths": ["scripts/check-clean-release.mjs"], "tests": ["tests/scripts/clean-release.test.mjs"] },
     { "paths": ["tools/compiler/**"], "targets": ["compiler-ir-check", "compiler-interface-check", "typed-generator-compile-check", "contract-check"] },

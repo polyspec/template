@@ -132,6 +132,10 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 의존: 없음. 같은 checkout이나 서로 다른 checkout에서 동시에 도는 두 실행이, 다른 실행이 쓰고 있는 resource를 바꾸거나 초기화했다. `tests/browser/server.mjs`는 고정 port `127.0.0.1:4173`에서 listen했으므로 두 번째 실행은 `EADDRINUSE`로 실패했고, Playwright는 어느 서버가 그 port를 잡고 있든 그 port에서 page를 열었다. `packages/template-vscode/tests/integration/run.mjs`는 VS Code를 저장소 root의 `.vscode-test`에 내려받아 풀며, 한 checkout의 모든 실행이 이 directory를 공유한다. `make clean`은 실행이 그 directory를 쓰는 동안에도 지웠다. 실행의 resource는 그 실행이 격리한다(system이 배정하는 port, 임시 directory, 실행의 이름). 하나뿐인 resource는 한 번에 holder 하나를 가지며, holder는 원자적으로 만드는 lock file에 기록되고 그 file은 holder의 checkout, process ID, 시작 시각을 적는다. 다른 실행은 그 holder를 밝히며 실패하고, holder가 lock을 푼다. process가 끝난 lock은 보고되고 명시적인 명령으로 지운다. 작업은 branch `fix/shared-T18.1`과 worktree `template-shared-T18.1`에서 한다.
 
+## Wave 19 — 한 tree가 정하는 결과
+
+의존성: 없음. 검사에는 열 가지 결함 class가 있었다. 검사의 결과가 시간, network, 기계, 이전 실행의 잔여물에도 의존했다. package 설치 검사는 crate와 Go toolchain을 network에서 해석했고 Rust 설치 프로젝트를 기계의 기본 toolchain으로 빌드했으며, Go는 내려받은 toolchain으로 스스로 전환했고, test runner는 Go의 compile error를 숨기고 test가 없는 실행을 통과시켰으며, target들은 자신이 만들지 않은 PHP 의존성과 package build를 읽었고, owner check는 바뀐 path를 읽는 target을 놓쳤으며, 출력은 제거 후 다시 쓰는 방식으로 교체되었고, recipe는 처음 실패한 명령에서 멈췄으며, 여러 실패가 기대값을 밝히지 않았다. 각 작업은 한 class를 가장 작은 경계에서 재현하고 저장소 전체에서 고치며 test를 유지한다. AGENTS는 열 가지 규칙을 적는다.
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -153,6 +157,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W16 | 없음 | T16.1 |
 | W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 |
 | W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | 없음 |
+| W19 | 없음 | T19.1 → T19.12 순서대로 |
 
 ## 완료 정의
 
