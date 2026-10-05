@@ -372,6 +372,7 @@ Dependencies: none. Two concurrent runs of one checkout or of different checkout
 | T18.3 | Make `tests/scripts/browser-server.test.mjs` run `tests/browser/run.mjs` against the package build of `make test-scripts` instead of `make test-browser`, whose package build (tsup `clean: true`) emptied `packages/template-ts/dist` while the other tests of `make test-scripts` read it: `make check` failed in `tests/scripts/generated-conformance.test.mjs` with `TS7016` for `@polyspec/template` | `node scripts/run-tests.mjs node -- tests/scripts/browser-server.test.mjs` | [o] |
 | T18.4 | Install every npm dependency as a copy without bin links: npm linked the five workspace packages into `node_modules` and wrote 37 bin links into `node_modules/.bin`. `.npmrc` sets `install-links=true` and `bin-links=false`; the root `package.json` declares the packages of `packages/` as `file:` dependencies with overrides instead of npm workspaces, which npm always links, and holds their development tools; each build target installs the copy of its package again; the recipes and scripts start every tool with the file of its package (`scripts/tools.mjs`); the dependency policy reads the root manifest only; `tests/scripts/no-symlinks.test.mjs` fails on any symbolic link below `node_modules` or `vendor` | `node scripts/run-tests.mjs node -- tests/scripts/no-symlinks.test.mjs` | [o] |
 | T18.5 | Install `template-fmt` with `make install-cli` under the declared prefix `CLI_PREFIX` without a symbolic link: a copy of the formatter package in `<prefix>/lib/polyspec-template-fmt` and an executable script `<prefix>/bin/template-fmt` that runs its entry by absolute path; `make uninstall-cli` removes both. `npm link` and `npm install --global` write a bin link, and since T18.4 a global install fails because npm resolves `@polyspec/template` 0.0.1 from the registry | `node scripts/run-tests.mjs node -- tests/scripts/install-cli.test.mjs` | [o] |
+| T18.6 | Update eslint to the latest stable release 10.12.0: `make dependency-policy-check` failed with `outdated npm dependency has no exception: eslint 10.11.0 < 10.12.0`, so `make release-check` failed; record the digest of the changed `package-lock.json` in the generated JavaScript showcase manifests and the example page | `make dependency-policy-check lint-js` | [o] |
 
 ## Parallelism summary
 
@@ -393,7 +394,7 @@ Dependencies: none. Two concurrent runs of one checkout or of different checkout
 | W15 | T15.1, T15.2, T15.3, T15.4 | none |
 | W16 | none | T16.1 |
 | W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
-| W18 | T18.1, T18.2, T18.3, T18.4, T18.5 | none |
+| W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | none |
 
 ## Definition of done
 

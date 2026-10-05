@@ -372,6 +372,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T18.3 | `tests/scripts/browser-server.test.mjs`가 `make test-browser` 대신 `make test-scripts`의 package build로 `tests/browser/run.mjs`를 실행하게 한다. `make test-browser`의 package build(tsup `clean: true`)는 `make test-scripts`의 다른 test가 읽는 동안 `packages/template-ts/dist`를 비웠고, `make check`가 `tests/scripts/generated-conformance.test.mjs`에서 `@polyspec/template`의 `TS7016`으로 실패했다 | `node scripts/run-tests.mjs node -- tests/scripts/browser-server.test.mjs` | [o] |
 | T18.4 | 모든 npm 의존성을 bin link 없는 사본으로 설치한다. npm은 다섯 workspace package를 `node_modules`에 link했고 `node_modules/.bin`에 bin link 37개를 썼다. `.npmrc`는 `install-links=true`와 `bin-links=false`를 정한다. root `package.json`은 npm이 언제나 link하는 npm workspace 대신 `packages/`의 package를 override와 함께 `file:` 의존성으로 선언하고 그 개발 도구를 가진다. 각 build target은 그 package의 사본을 다시 설치한다. recipe와 script는 모든 도구를 그 package의 파일로 실행한다(`scripts/tools.mjs`). dependency policy는 root manifest만 읽는다. `tests/scripts/no-symlinks.test.mjs`는 `node_modules`나 `vendor` 아래의 symbolic link 하나에도 실패한다 | `node scripts/run-tests.mjs node -- tests/scripts/no-symlinks.test.mjs` | [o] |
 | T18.5 | `make install-cli`로 `template-fmt`를 symbolic link 없이 선언한 prefix `CLI_PREFIX` 아래에 설치한다. formatter package의 사본은 `<prefix>/lib/polyspec-template-fmt`에, 그 진입점을 절대 경로로 실행하는 실행 script는 `<prefix>/bin/template-fmt`에 둔다. `make uninstall-cli`는 둘 다 지운다. `npm link`와 `npm install --global`은 bin link를 쓰며, T18.4 이후 전역 설치는 npm이 `@polyspec/template` 0.0.1을 registry에서 찾으므로 실패한다 | `node scripts/run-tests.mjs node -- tests/scripts/install-cli.test.mjs` | [o] |
+| T18.6 | eslint를 최신 안정 release 10.12.0으로 올린다. `make dependency-policy-check`가 `outdated npm dependency has no exception: eslint 10.11.0 < 10.12.0`으로 실패했으므로 `make release-check`가 실패했다. 바뀐 `package-lock.json`의 digest를 생성된 JavaScript showcase manifest와 예제 page에 기록한다 | `make dependency-policy-check lint-js` | [o] |
 
 ## 병렬성 요약
 
@@ -393,7 +394,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
 | W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
-| W18 | T18.1, T18.2, T18.3, T18.4, T18.5 | 없음 |
+| W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | 없음 |
 
 ## 완료 정의
 

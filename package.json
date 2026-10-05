@@ -18,9 +18,9 @@
   },
   "dependencies": {
     "@polyspec/template": "file:packages/template-ts",
+    "@polyspec/template-codemirror": "file:packages/template-codemirror",
     "@polyspec/template-language": "file:packages/template-language",
     "@polyspec/template-lsp": "file:packages/template-lsp",
-    "@polyspec/template-codemirror": "file:packages/template-codemirror",
     "polyspec-template": "file:packages/template-vscode"
   },
   "devDependencies": {
@@ -39,7 +39,7 @@
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "esbuild": "0.27.2",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "tm-grammars": "^1.32.22",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
