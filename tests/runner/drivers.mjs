@@ -85,10 +85,6 @@ export const drivers = {
   },
 };
 
-export function available(name) {
-  return existsSync(drivers[name].dir);
-}
-
 export function prepare(name) {
   const driver = drivers[name];
   if (!existsSync(driver.dir)) throw new Error(`${name}: package directory is absent (${driver.dir})`);
@@ -107,7 +103,8 @@ export function invoke(name, args, cwd) {
 
 export function selectLanguages(option) {
   const all = Object.keys(drivers);
-  if (!option) return all.filter(available);
+  // Every language runs unless the option names the languages; prepare fails on an absent package (T19.4).
+  if (!option) return all;
   const names = option.split(',').map(s => s.trim()).filter(Boolean);
   for (const name of names) {
     if (!drivers[name]) throw new Error(`unknown language: ${name} (known: ${all.join(', ')})`);
