@@ -25,6 +25,10 @@ unit:
 \t@echo "ran unit"
 check:
 \t@echo "ran the full suite"
+release-test-matrix:
+\tnode scripts/full-run.mjs run $(CHECK_TARGETS)
+release-check:
+\tnode scripts/check-clean-release.mjs
 `;
 
 const OWNERS = {
@@ -107,6 +111,14 @@ test('a glob that matches no path and a full-suite target fail with their names'
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.match(run.stderr, /the glob schema\/\*\* matches no tracked path/);
   assert.match(run.stderr, /the target check runs the full suite/);
+});
+
+test('a target that runs the guard of the full suite or the clean release check is a full-suite target', (t) => {
+  const owners = { owners: [...OWNERS.owners, { paths: ['docs/**'], targets: ['release-test-matrix', 'release-check'] }] };
+  const run = repository(t, owners, FILES)('--validate');
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.match(run.stderr, /the target release-test-matrix runs the full suite/);
+  assert.match(run.stderr, /the target release-check runs the full suite/);
 });
 
 test('a rule with a variable passes its changed paths to its target', (t) => {

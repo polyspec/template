@@ -79,7 +79,7 @@ help: ## List targets
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
 	@echo "  install-check         Install package artifacts and compare AST/generated output"
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
-	@echo "  release-test-matrix    Run every commercial release verification layer"
+	@echo "  release-test-matrix    The full suite of make check through the same guard"
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
 	@echo "  dependency-audit       The dependency gate, which also rejects a lock with an advisory at its review"
 	@echo "  dependency-policy-check Check manifests and locks against the policy and the review record, without a network"
@@ -103,11 +103,13 @@ help: ## List targets
 	@echo "  clean-vscode-test      Remove .vscode-test while holding its lock; fails while an integration run holds it"
 	@echo "  vscode-test-unlock     Remove the lock of .vscode-test whose holder process has ended"
 
-# The targets of the full suite. `make check` runs them through the guard scripts/full-run.mjs, which refuses while a
-# checklist task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree,
-# runs each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
-# current tree that did not pass.
-CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check function-inventory-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check
+# The targets of the full suite, the one list of every runner: `make check`, `make release-test-matrix`, `make
+# release-check` in a clean checkout and the release job of the CI workflow run them through the guard
+# scripts/full-run.mjs, which refuses while a checklist task is [~], while tracked changes are uncommitted or when
+# var/full-run.json records a run of the current tree, runs each target with `make <target>` to its end and records its
+# result; `make rerun-failed` reruns the targets of the current tree that did not pass. The list stays on one line:
+# scripts/owner-check.mjs reads it.
+CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node scripts/full-run.mjs run $(CHECK_TARGETS)
@@ -376,25 +378,8 @@ language-test-matrix: ## Verify the manifest requires equal semantic test covera
 	node scripts/check-language-test-matrix.mjs
 	node scripts/check-language-test-matrix-mutations.mjs
 
-release-test-matrix: build-php ## Run all release layers in deterministic order
-	@echo "[release 1/7] contracts, generated documentation and static analysis"
-	$(MAKE) docs-check rules-check feature-check dependency-audit runtime-interface-check compiler-interface-check lint
-	@echo "[release 2/7] lexer, parser, value, runtime and page-cache units"
-	$(MAKE) test-ts test-go test-rust test-php
-	@echo "[release 3/7] IR, generated source and host compiler checks"
-	$(MAKE) typed-generator-compile-check
-	@echo "[release 4/7] complete AST/generated conformance and extension support"
-	$(MAKE) ext conformance-all-modes test-ext
-	@echo "[release 5/7] positioned errors, recovery and mutation rejection"
-	node scripts/check-compiler-interface-mutations.mjs
-	node scripts/check-ast-artifact.mjs
-	node scripts/check-generated-artifact.mjs
-	node scripts/check-showcase-contract.mjs
-	node scripts/check-benchmark-results.mjs
-	@echo "[release 6/7] isolated package installs and browser output"
-	$(MAKE) install-check test-browser
-	@echo "[release 7/7] static presentation and fresh performance contract"
-	$(MAKE) showcase-check benchmark-smoke docs-verify-idempotent
+release-test-matrix: ## The full suite of make check through the same guard: every target of CHECK_TARGETS to its end
+	node scripts/full-run.mjs run $(CHECK_TARGETS)
 
 release-check: ## Install and run the release matrix in an isolated clean worktree
 	node scripts/check-clean-release.mjs

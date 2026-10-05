@@ -17,7 +17,7 @@
     { "paths": ["tests/runner/{bounded,cases,drivers,conformance,delimiter-matrix,generated-ts-render,parity}.mjs", "tests/runner/conformance-generated-*.mjs"], "tests": ["tests/scripts/conformance-progress.test.mjs", "tests/scripts/delimiter-matrix-progress.test.mjs", "tests/scripts/generated-conformance.test.mjs", "tests/scripts/long-steps.test.mjs"] },
     { "paths": ["tests/scripts/*.test.mjs"], "tests": ["$path"] },
     { "paths": ["tests/scripts/slow-command.mjs", "scripts/run-tests.mjs", "scripts/test-progress/**", "scripts/tools.mjs"], "tests": ["tests/scripts/run-tests.test.mjs", "tests/scripts/test-targets.test.mjs"] },
-    { "paths": ["Makefile"], "tests": ["tests/scripts/test-targets.test.mjs", "tests/scripts/full-run.test.mjs", "tests/scripts/cargo-target.test.mjs", "tests/scripts/build-package.test.mjs", "tests/scripts/owner-check.test.mjs", "tests/scripts/conformance-cases.test.mjs"] },
+    { "paths": ["Makefile"], "tests": ["tests/scripts/test-targets.test.mjs", "tests/scripts/full-run.test.mjs", "tests/scripts/cargo-target.test.mjs", "tests/scripts/build-package.test.mjs", "tests/scripts/owner-check.test.mjs", "tests/scripts/conformance-cases.test.mjs", "tests/scripts/suite-parity.test.mjs"] },
     { "paths": ["scripts/full-run.mjs"], "tests": ["tests/scripts/full-run.test.mjs"] },
     { "paths": ["scripts/build-package.mjs"], "tests": ["tests/scripts/build-package.test.mjs"] },
     { "paths": ["scripts/owner-check.mjs", "scripts/owner-checks.json"], "tests": ["tests/scripts/owner-check.test.mjs"] },
@@ -37,7 +37,7 @@
     { "paths": ["scripts/check-editor-boundaries.mjs", "scripts/editor-fixtures.mjs"], "targets": ["editor-boundary-check", "test-language", "test-lsp", "test-codemirror"] },
     { "paths": ["scripts/check-install-workspace.mjs", "scripts/install-workspace.mjs", "scripts/check-package-installs.mjs"], "targets": ["install-check"], "tests": ["tests/scripts/long-steps.test.mjs"] },
     { "paths": ["scripts/check-benchmark-results.mjs", "scripts/check-benchmark-smoke.mjs"], "targets": ["benchmark-check"] },
-    { "paths": ["scripts/check-clean-release.mjs"], "targets": ["release-check"] },
+    { "paths": ["scripts/check-clean-release.mjs"], "tests": ["tests/scripts/clean-release.test.mjs"] },
     { "paths": ["tools/compiler/**"], "targets": ["compiler-ir-check", "compiler-interface-check", "typed-generator-compile-check", "contract-check"] },
     { "paths": ["packages/template-ts/**"], "targets": ["test-ts", "lint-js"] },
     { "paths": ["packages/template-language/**"], "targets": ["test-language", "format-check", "lint-js"] },
@@ -51,6 +51,7 @@
     { "paths": ["eslint.config.mjs"], "targets": ["lint-js"] },
     { "paths": [".npmrc"], "tests": ["tests/scripts/no-symlinks.test.mjs"] },
     { "paths": [".node-version", "rust-toolchain.toml", ".github/workflows/*.yml"], "tests": ["tests/scripts/toolchain-files.test.mjs"] },
+    { "paths": [".github/workflows/*.yml"], "tests": ["tests/scripts/suite-parity.test.mjs"] },
     { "paths": [".gitignore"], "tests": ["tests/scripts/ignored-files.test.mjs"] },
     { "paths": [".editorconfig"], "tests": ["tests/scripts/editorconfig.test.mjs"] }
   ]

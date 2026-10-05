@@ -1,4 +1,8 @@
-# Continuous integration. Every job invokes an existing Makefile target or a script of the repository.
+# Continuous integration. Every job invokes an existing Makefile target or a script of the repository. The release job
+# runs the full suite, the targets of CHECK_TARGETS, through the guard of `make check`, which runs every target to its
+# end, and uploads its record var/full-run.json. A verifying job runs every step after a failing step (`!cancelled()`)
+# and a make with several targets keeps going (`-k`), so one run reports every failure; only the pages job, which
+# publishes, stops at its first failure.
 name: CI
 
 on:
@@ -31,8 +35,16 @@ jobs:
           php-version: '8.5'
           tools: composer:v2
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
-      - run: make release-test-matrix
+        if: ${{ !cancelled() }}
+      - run: xvfb-run -a make check
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: full-run
+          path: var/full-run.json
 
   docs:
     runs-on: ubuntu-latest
@@ -43,8 +55,11 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: make docs-check
+        if: ${{ !cancelled() }}
       - run: make rules-check
+        if: ${{ !cancelled() }}
 
   typescript:
     runs-on: ubuntu-latest
@@ -55,9 +70,13 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: make lint-js
+        if: ${{ !cancelled() }}
       - run: make test-ts
+        if: ${{ !cancelled() }}
       - run: node tests/runner/conformance.mjs --langs ts
+        if: ${{ !cancelled() }}
 
   browser:
     runs-on: ubuntu-latest
@@ -68,8 +87,11 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+        if: ${{ !cancelled() }}
       - run: make test-browser
+        if: ${{ !cancelled() }}
 
   editor:
     runs-on: ubuntu-latest
@@ -80,10 +102,14 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
-      - run: make editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode
+        if: ${{ !cancelled() }}
+      - run: make -k editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode
+        if: ${{ !cancelled() }}
       # VS Code needs a display; the integration test runs it on a virtual X server.
       - run: xvfb-run -a make test-vscode-integration
+        if: ${{ !cancelled() }}
 
   go:
     runs-on: ubuntu-latest
@@ -98,9 +124,13 @@ jobs:
           go-version-file: packages/template-go/go.mod
           cache: false
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: make test-go
+        if: ${{ !cancelled() }}
       - run: make build-ts
+        if: ${{ !cancelled() }}
       - run: node tests/runner/conformance.mjs --langs ts,go
+        if: ${{ !cancelled() }}
 
   rust:
     runs-on: ubuntu-latest
@@ -111,10 +141,15 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: rustup show
+        if: ${{ !cancelled() }}
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: make test-rust
+        if: ${{ !cancelled() }}
       - run: make build-ts
+        if: ${{ !cancelled() }}
       - run: node tests/runner/conformance.mjs --langs ts,rust
+        if: ${{ !cancelled() }}
 
   php:
     runs-on: ubuntu-latest
@@ -132,10 +167,15 @@ jobs:
           php-version: ${{ matrix.php }}
           tools: composer:v2
       - run: npm ci
+        if: ${{ !cancelled() }}
       - run: make test-php
+        if: ${{ !cancelled() }}
       - run: make build-ts
+        if: ${{ !cancelled() }}
       - run: node tests/runner/conformance.mjs --langs ts,php
+        if: ${{ !cancelled() }}
       - run: make test-ext
+        if: ${{ !cancelled() }}
 
   pages:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
