@@ -81,7 +81,8 @@ export default class ProgressReporter extends Transform {
   }
 
   _flush(callback) {
-    this.progress.close('node --test');
+    // A failure that node --test does not count, such as a run of zero tests, fails the process too.
+    if (!this.progress.close('node --test').ok) process.exitCode = 1;
     callback();
   }
 }

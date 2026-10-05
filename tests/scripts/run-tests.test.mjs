@@ -79,6 +79,29 @@ test('go test events become start, pass, fail and skip lines with failure output
   assert.deepEqual(progress.counts, { passed: 1, failed: 2, skipped: 1, timedOut: 0 });
 });
 
+test('a run in which no test ran fails, also when its groups passed', async () => {
+  // A run of zero tests verified nothing (T19.4): a package or file without tests, a filter that selects nothing or a
+  // tool that found no test passed the summary before.
+  const empty = recorder();
+  assert.equal(empty.progress.close('empty').ok, false);
+  assert.match(empty.lines.at(-1), /^✖ empty: 0 passed, 0 failed, 0 timed out, 0 skipped, no test ran \(/);
+  const groups = recorder();
+  groups.progress.start('file', { group: true });
+  groups.progress.pass('file', 1);
+  assert.equal(groups.progress.close('groups').ok, false);
+  assert.match(groups.lines.at(-1), /^✖ groups: 0 passed, 0 failed, 0 timed out, 0 skipped, no test ran \(/);
+  const one = recorder();
+  one.progress.start('test');
+  one.progress.pass('test', 1);
+  assert.equal(one.progress.close('one').ok, true);
+  await withDirectory(async directory => {
+    await writeFile(path.join(directory, 'empty.test.mjs'), 'export {};\n');
+    const run = runner(['node', '--', path.join(directory, 'empty.test.mjs')]);
+    assert.equal(run.status, 1, run.stdout + run.stderr);
+    assert.match(run.stdout, /✖ node --test: 0 passed, 0 failed, 0 timed out, 0 skipped, no test ran/);
+  });
+});
+
 test('serial libtest output starts a test before its result arrives', () => {
   const { lines, progress, tick } = recorder();
   const events = cargoEvents(progress);
@@ -221,7 +244,7 @@ test('a tool that fails before any test runs fails the summary line too', COMPIL
     const run = runner(['cargo', '--cwd', directory, '--', '--offline'], { env: { ...process.env, CARGO_TARGET_DIR: path.join(directory, 'target') } });
     assert.notEqual(run.status, 0);
     assert.doesNotMatch(run.stdout, /✔ cargo /);
-    assert.match(run.stdout, /✖ cargo .*: 0 passed, 0 failed, 0 timed out, 0 skipped, the tool exited with [1-9]\d*: error\[E0425\]: cannot find function `undefined`/);
+    assert.match(run.stdout, /✖ cargo .*: 0 passed, 0 failed, 0 timed out, 0 skipped, no test ran, the tool exited with [1-9]\d*: error\[E0425\]: cannot find function `undefined`/);
   });
 });
 
@@ -233,7 +256,7 @@ test('the summary of a tool that exits without a failing test names the error li
     await writeFile(path.join(bin, 'cargo'), "#!/bin/sh\necho 'info: syncing channel updates' >&2\necho \"error: the 'cargo' binary is not applicable to the example toolchain\" >&2\nexit 1\n", { mode: 0o755 });
     const run = runner(['cargo', '--cwd', directory], { env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH}` } });
     assert.equal(run.status, 1, run.stdout + run.stderr);
-    assert.match(run.stdout, /^\[\s*[\d.]+s\] ✖ cargo .*: 0 passed, 0 failed, 0 timed out, 0 skipped, the tool exited with 1: error: the 'cargo' binary is not applicable to the example toolchain \(\d+\.\ds\)$/m);
+    assert.match(run.stdout, /^\[\s*[\d.]+s\] ✖ cargo .*: 0 passed, 0 failed, 0 timed out, 0 skipped, no test ran, the tool exited with 1: error: the 'cargo' binary is not applicable to the example toolchain \(\d+\.\ds\)$/m);
   });
 });
 

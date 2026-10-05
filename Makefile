@@ -133,12 +133,12 @@ rerun-failed: ## Rerun only the targets of make check that did not pass on the c
 	node scripts/full-run.mjs rerun-failed
 
 lint: build-php lint-js ## Lint every package
-	@test ! -d $(GO_DIR) || { out=$$(gofmt -l $(GO_DIR)); test -z "$$out" || { echo "$$out"; exit 1; }; }
-	@test ! -d $(RUST_DIR) || $(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
-	@test ! -d $(EXT_DIR) || $(CARGO) fmt --manifest-path $(EXT_DIR)/Cargo.toml --check
+	@out=$$(gofmt -l $(GO_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
+	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
+	$(CARGO) fmt --manifest-path $(EXT_DIR)/Cargo.toml --check
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
-	@test ! -d $(PHP_DIR) || $(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
+	$(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
 
 lint-js: ## Lint the TypeScript sources with eslint
 	$(call require-dir,$(TS_DIR),lint-js)
@@ -320,7 +320,7 @@ docs-check: ## Document checks
 	node scripts/check-documents.mjs
 	node scripts/check-schema.mjs
 	node scripts/check-schema-mutations.mjs
-	@test ! -f scripts/check-doc-coverage.mjs || node scripts/check-doc-coverage.mjs
+	node scripts/check-doc-coverage.mjs
 	node scripts/update-benchmark-docs.mjs --check
 	node scripts/features/build.mjs --check
 	node scripts/features/check.mjs

@@ -71,8 +71,9 @@ export function createProgress({ write, heartbeatMs = 5000, timeoutMs, onTimeout
       line(`○ ${id} skipped`);
     },
     /**
-     * End the run. Tests still running are failures; a failed group or a nonzero `exitCode` of
-     * the tool fails the run even when no test failed, and the summary names the failed groups.
+     * End the run. Tests still running are failures; a failed group, a nonzero `exitCode` of the
+     * tool or a run in which no test ran fails the run even when no test failed, and the summary
+     * names the failed groups.
      * When no test failed, the summary of a nonzero `exitCode` names the last `errors`, the error
      * lines of the tool, so that it says why the tool exited (T18.7-1). The summary also names the `build` errors, the
      * compiler errors of a package that did not build (T19.3).
@@ -80,13 +81,13 @@ export function createProgress({ write, heartbeatMs = 5000, timeoutMs, onTimeout
     close(label, { exitCode = 0, errors = [], build = [] } = {}) {
       clearInterval(timer);
       for (const id of [...running.keys()]) this.fail(id, undefined, 'the test did not finish');
-      const failed = counts.failed + counts.timedOut + groupCounts.failed + (exitCode === 0 ? 0 : 1);
       const tests = counts.passed + counts.failed + counts.timedOut + counts.skipped;
+      // A run in which no test ran verified nothing and fails (T19.4).
+      const none = tests === 0;
+      const failed = counts.failed + counts.timedOut + groupCounts.failed + (exitCode === 0 ? 0 : 1) + (none ? 1 : 0);
       // A group can fail while every test in it passed, for example on a failed hook of a file.
       const groupsFailed = groupCounts.failed === 1 ? ', 1 group failed' : `, ${groupCounts.failed} groups failed`;
-      const summary = tests || !(groupCounts.passed + groupCounts.failed)
-        ? `${counts.passed} passed, ${counts.failed} failed, ${counts.timedOut} timed out, ${counts.skipped} skipped${groupCounts.failed ? groupsFailed : ''}`
-        : `${groupCounts.passed} passed, ${groupCounts.failed} failed`;
+      const summary = `${counts.passed} passed, ${counts.failed} failed, ${counts.timedOut} timed out, ${counts.skipped} skipped${groupCounts.failed ? groupsFailed : ''}${none ? ', no test ran' : ''}`;
       const unexplained = counts.failed + counts.timedOut + groupCounts.failed === 0;
       const why = !unexplained ? '' : errors.length ? `: ${errors.slice(-3).join('; ')}` : ' and printed no error line';
       const exit = exitCode === 0 ? '' : `, the tool exited with ${exitCode}${why}`;

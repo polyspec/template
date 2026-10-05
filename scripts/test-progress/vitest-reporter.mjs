@@ -66,6 +66,7 @@ export default class ProgressReporter {
 
   onTestRunEnd(testModules, unhandledErrors) {
     for (const error of unhandledErrors) this.progress.line(`✖ unhandled error: ${error.stack ?? error.message}`);
-    this.progress.close('vitest');
+    // A failure that vitest does not count, such as a run of zero tests, fails the process too.
+    if (!this.progress.close('vitest').ok) process.exitCode = 1;
   }
 }
