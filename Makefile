@@ -21,6 +21,14 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 # Each checkout builds its Rust crates into their own target. A CARGO_TARGET_DIR inherited from the environment, such as
 # the target of another checkout, would let cargo judge binaries built from other sources fresh for this one (T18.7).
 unexport CARGO_TARGET_DIR
+# A check reads no network (AGENTS): make install downloads what the checks read, and every recipe and the scripts that
+# it starts run cargo, go and npm offline, so a missing download fails at once instead of reaching a registry in one run
+# and not in another (T20.1-2). The targets that download, install, install-tools and dependency-review, run their
+# commands with $(ONLINE).
+export CARGO_NET_OFFLINE := true
+export GOPROXY := off
+export npm_config_offline := true
+ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline
 
 .DEFAULT_GOAL := help
 # make keeps going after a failed target and fails at the end, so one run reports every failure (T19.8). A target that
@@ -161,14 +169,14 @@ lint-js: ## Lint the TypeScript sources with eslint
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
 install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml and the crates of every Cargo.lock
-	$(NPM) ci
+	$(ONLINE) $(NPM) ci
 	rustup toolchain install --no-self-update
-	$(CARGO) fetch --locked --manifest-path $(EXT_DIR)/Cargo.toml
-	$(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
-	$(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
+	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(EXT_DIR)/Cargo.toml
+	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
+	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
 
 install-tools: ## Install npm and Go of the checkout into var/tools; skipped when the exact versions are present
-	node scripts/install-tools.mjs
+	$(ONLINE) node scripts/install-tools.mjs
 
 build-ts: ## Build the TypeScript package
 	node scripts/build-package.mjs --package template-ts --install
@@ -362,7 +370,7 @@ dependency-policy-mutation-check:
 dependency-audit: dependency-policy-check ## The dependency gate, which also rejects a lock with an advisory at its review
 
 dependency-review: install-tools ## Ask the registries for newer stable releases and advisories; RECORD=1 records the review, UPDATE=1 updates first
-	node scripts/dependency-review.mjs $(if $(RECORD),--record) $(if $(UPDATE),--update)
+	$(ONLINE) node scripts/dependency-review.mjs $(if $(RECORD),--record) $(if $(UPDATE),--update)
 
 doc-coverage: ## Check that public symbols carry documentation comments
 	node scripts/check-doc-coverage.mjs

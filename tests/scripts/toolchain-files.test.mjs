@@ -7,7 +7,8 @@
 // - Rust is the toolchain of `rust-toolchain.toml` with the components that `make lint` and `make test-rust` use,
 //   installed by one explicit step, never by rustup on the first cargo: several processes that start cargo at once, as
 //   the files of one `node --test` run do, each installed it and broke the installs of the others (T18.7-1);
-// - make install downloads the crates of every Cargo.lock, which the checks resolve with cargo --offline (T20.1-1);
+// - make install downloads the crates of every Cargo.lock, which the checks resolve with cargo --offline (T20.1-1), and
+//   every other recipe runs cargo, go and npm offline (T20.1-2);
 // - PHP is one of the minor versions of config/toolchain.json and Composer its exact version: setup-php cannot pin a
 //   patch, so the minor is the pin and var/full-run.json records the patch of each run;
 // - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04.
@@ -146,14 +147,25 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   const cargo = process.env.CARGO ?? path.join(process.env.HOME, '.cargo/bin/cargo');
   const locks = spawnSync('git', ['ls-files', '*Cargo.lock'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.ok(locks.length > 0, 'git ls-files listed no Cargo.lock');
-  const fetches = locks.map(lock => `${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), ['node scripts/install-tools.mjs', `${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', ...fetches]);
+  // Only the commands that download leave the offline settings of the recipes (T20.1-2).
+  const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline';
+  const fetches = locks.map(lock => `${online} ${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', ...fetches]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
     assert.match(text, /\nenv:\n {2}RUSTUP_AUTO_INSTALL: '0'\n/, `${file} does not set RUSTUP_AUTO_INSTALL to 0 for its jobs`);
     assert.doesNotMatch(text, /rustup show/, `${file} runs rustup show, which installs the toolchain as a side effect`);
   }
+});
+
+test('every recipe runs cargo, go and npm offline, so no check reaches a registry', () => {
+  const offline = { CARGO_NET_OFFLINE: 'false', GOPROXY: 'https://proxy.golang.org', npm_config_offline: 'false' };
+  assert.equal(recipe('echo "$CARGO_NET_OFFLINE $GOPROXY $npm_config_offline"', offline), 'true off true', 'a recipe of the Makefile lets cargo, go or npm reach a registry');
+  const npm = recipe('$(NPM) config get offline', offline);
+  assert.equal(npm, 'true', `npm of the recipes: expected offline true, actual ${npm}`);
+  const go = recipe('go env GOPROXY', offline);
+  assert.equal(go, 'off', `go of the recipes: expected GOPROXY off, actual ${go}`);
 });
 
 test('every CI job installs with make install and bootstraps the tools of the checkout with Go', () => {
