@@ -1,5 +1,7 @@
 node_modules/
 dist/
+packages/template-ts/dist.inputs
+packages/template-ts/dist.next-*/
 *.tsbuildinfo
 target/
 packages/template-go/template

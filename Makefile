@@ -132,8 +132,7 @@ install: ## Install the npm dependencies as copies without bin links (.npmrc)
 
 build-ts: ## Build the TypeScript package
 	$(call require-dir,$(TS_DIR),build-ts)
-	cd $(TS_DIR) && $(TSUP)
-	$(call reinstall,@polyspec/template)
+	node scripts/build-ts.mjs --install
 
 build-go: ## Build the Go CLI
 	$(call require-dir,$(GO_DIR),build-go)
@@ -425,7 +424,7 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: clean-vscode-test ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(TS_DIR)/dist.inputs $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
 
 clean-vscode-test: ## Remove .vscode-test while holding its lock; fails with the holder while an integration run holds it
 	node scripts/holder-lock.mjs run $(VSCODE_TEST).lock -- rm -rf $(VSCODE_TEST)
