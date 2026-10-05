@@ -45,7 +45,7 @@
 
 ## 필수 검사
 
-- 작업이 진행 중일 때는 변경을 소유한 Red와 Green test만 실행한다. 커밋 전에는 그 test와 `make docs-check`를 실행한다.
+- 작업이 진행 중일 때는 변경을 소유한 Red와 Green test만 실행한다. 커밋 전에는 그 test와 `make docs-check`를 실행한다. `docs/` 아래(`docs/.vitepress` 포함) file을 바꾸는 커밋은 site를 빌드하고 그 link와 locale을 검사하는 `make docs-static-check`도 실행한다.
 - `docs/plans/execution-checklist.md`에서 작업을 `[o]`로 표시하기 전에 그 작업의 소유 명령, 즉 Verification 열의 명령을 커밋된 tree에서 실행한다.
 - `make check`는 활성 작업이 모두 끝났을 때 한 번 실행한다. 수정마다, 작업마다 실행하지 않고, 변경 없이 반복하지 않는다. guard `scripts/full-run.mjs`가 어떤 단계보다 먼저 이를 강제한다. 작업이 `[~]`이거나, 추적 파일의 변경이 커밋되지 않았거나, `var/full-run.json`이 현재 tree의 전체 실행을 기록하고 있으면 `make check`는 거부된다. `make rerun-failed`는 현재 tree에서 통과하지 못한 target만 다시 실행한다(`docs/operations/development.md`).
 - 모든 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 실행 전체, package, 파일에 시간 제한을 두지 않는다. 수십 분 걸리는 test와 시작과 끝만 출력하는 test는 결함이다.
