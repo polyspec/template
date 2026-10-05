@@ -35,18 +35,14 @@ CLI_PREFIX ?= $(HOME)/.local
 
 # npm installs every dependency, also every package of this repository, as a copy and writes no bin link
 # (.npmrc, T18.4), so the recipes start each tool with the file of its package.
-TSUP       := node $(CURDIR)/node_modules/tsup/dist/cli-default.js
 TSC        := node $(CURDIR)/node_modules/typescript/bin/tsc
 # The esbuild package replaces bin/esbuild with the executable of the platform when it installs.
-ESBUILD    := $(CURDIR)/node_modules/esbuild/bin/esbuild
 ESLINT     := node $(CURDIR)/node_modules/eslint/bin/eslint.js
 VITEPRESS  := node $(CURDIR)/node_modules/vitepress/bin/vitepress.js
 VITEST     := node $(CURDIR)/node_modules/vitest/vitest.mjs
 PLAYWRIGHT := node $(CURDIR)/node_modules/@playwright/test/cli.js
 VSCE       := node $(CURDIR)/node_modules/@vscode/vsce/vsce
 TMGRAMMAR  := node $(CURDIR)/node_modules/vscode-tmgrammar-test/dist/unit.js
-# $(call reinstall,<package>) installs the npm copy of a package of this repository again after its build.
-reinstall = rm -rf node_modules/$(1) && npm install --no-audit --no-fund
 
 # require-dir prints "not implemented" and fails when a package directory is absent.
 define require-dir
@@ -135,7 +131,7 @@ install: ## Install the npm dependencies as copies without bin links (.npmrc)
 
 build-ts: ## Build the TypeScript package
 	$(call require-dir,$(TS_DIR),build-ts)
-	node scripts/build-ts.mjs --install
+	node scripts/build-package.mjs --package template-ts --install
 
 build-go: ## Build the Go CLI
 	$(call require-dir,$(GO_DIR),build-go)
@@ -166,20 +162,18 @@ test-rust: ## Rust clippy and tests
 test-php: build-php ## PHP unit tests
 	node scripts/run-tests.mjs phpunit --cwd $(PHP_DIR)
 
-test-scripts: build-ts build-language build-php ## Tests of the test runner and the conformance runners
+test-scripts: build-ts build-language build-lsp build-php ## Tests of the test runner and the conformance runners
 	node scripts/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
-	cd $(LANGUAGE_DIR) && $(TSUP)
-	$(call reinstall,@polyspec/template-language)
+	node scripts/build-package.mjs --package template-language --install
 
 test-language: build-language ## Formatter, safety invariant and CLI tests, type check
 	node scripts/run-tests.mjs vitest --cwd $(LANGUAGE_DIR)
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
 build-lsp: build-language ## Build the language server template-lsp
-	cd $(LSP_DIR) && $(TSUP)
-	$(call reinstall,@polyspec/template-lsp)
+	node scripts/build-package.mjs --package template-lsp --install
 
 test-lsp: build-lsp ## Language server protocol tests against the editor fixtures, type check
 	node scripts/run-tests.mjs vitest --cwd $(LSP_DIR)
@@ -193,8 +187,7 @@ format-external-check: build-language ## Run the formatter safety invariant on a
 	cd $(LANGUAGE_DIR) && TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" $(VITEST) run tests/invariant.test.ts
 
 build-codemirror: build-language ## Build the CodeMirror 6 adapter
-	cd $(CODEMIRROR_DIR) && $(TSUP)
-	$(call reinstall,@polyspec/template-codemirror)
+	node scripts/build-package.mjs --package template-codemirror --install
 
 test-codemirror: build-codemirror ## CodeMirror adapter tests against the editor fixtures, browser test, type check
 	node scripts/run-tests.mjs vitest --cwd $(CODEMIRROR_DIR)
@@ -208,7 +201,7 @@ uninstall-cli: ## Remove the formatter copy and the script template-fmt of $(CLI
 	node scripts/install-cli.mjs uninstall --prefix $(CLI_PREFIX)
 
 build-vscode: build-lsp ## Bundle the VS Code extension
-	cd $(VSCODE_DIR) && $(ESBUILD) src/extension.ts --bundle --platform=node --format=cjs --target=node24 --external:vscode --outfile=dist/extension.cjs && $(ESBUILD) @polyspec/template-lsp/server --bundle --platform=node --format=cjs --target=node24 --outfile=dist/server.cjs
+	node scripts/build-package.mjs --package template-vscode
 
 test-vscode: build-vscode ## Grammar tests, extension tests and type check
 	cd $(VSCODE_DIR) && $(TMGRAMMAR) --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json "tests/grammar/*.tpl"
@@ -436,7 +429,7 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: clean-vscode-test ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(TS_DIR)/dist.inputs $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
 
 clean-vscode-test: ## Remove .vscode-test while holding its lock; fails with the holder while an integration run holds it
 	node scripts/holder-lock.mjs run $(VSCODE_TEST).lock -- rm -rf $(VSCODE_TEST)
