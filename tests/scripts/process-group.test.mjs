@@ -10,12 +10,15 @@ import test from 'node:test';
 
 import { stopProcessGroup } from './process-group.mjs';
 
-test('a stopped process group writes nothing into a directory that is then removed', async () => {
+// Each attempt starts writers, stops them and removes their directory; 20 attempts under the load of a full run take
+// longer than the default 30 s of one test (T20.3-1).
+test('a stopped process group writes nothing into a directory that is then removed', { timeout: 300_000 }, async () => {
   const failures = [];
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const directory = mkdtempSync(path.join(tmpdir(), 'template-process-group-'));
-    // Three background processes of the group create directories as fast as they can.
-    const child = spawn('sh', ['-c', `for n in 1 2 3; do (while :; do mkdir -p "${directory}/d$n/$RANDOM"; done) & done; wait`], { detached: true, stdio: 'ignore' });
+    // Three background processes of the group create directories as fast as they can, among 50 names each, so that
+    // the directory stays small and its removal fast.
+    const child = spawn('sh', ['-c', `for n in 1 2 3; do (while :; do mkdir -p "${directory}/d$n/$((RANDOM % 50))"; done) & done; wait`], { detached: true, stdio: 'ignore' });
     await sleep(100);
     await stopProcessGroup(child);
     try {
