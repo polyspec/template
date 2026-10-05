@@ -1,4 +1,4 @@
-# Continuous integration. Every job invokes an existing Makefile target or npm script.
+# Continuous integration. Every job invokes an existing Makefile target or a script of the repository.
 name: CI
 
 on:
@@ -31,7 +31,7 @@ jobs:
           php-version: '8.5'
           tools: composer:v2
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - run: make release-test-matrix
 
   docs:
@@ -55,7 +55,7 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - run: npm run lint
+      - run: make lint-js
       - run: make test-ts
       - run: node tests/runner/conformance.mjs --langs ts
 
@@ -68,7 +68,7 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - run: make test-browser
 
   editor:
@@ -80,7 +80,7 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
       - run: make editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode
       # VS Code needs a display; the integration test runs it on a virtual X server.
       - run: xvfb-run -a make test-vscode-integration
@@ -160,7 +160,7 @@ jobs:
         env:
           VITEPRESS_BASE: /${{ github.event.repository.name }}/
       - run: |
-          npm run build -w @polyspec/template
+          make build-ts
           mkdir -p docs/.vitepress/dist/examples
           cp -R examples/site docs/.vitepress/dist/examples/site
           test -s docs/.vitepress/dist/examples/site/index.html

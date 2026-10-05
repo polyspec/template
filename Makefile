@@ -9,7 +9,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock
+	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -27,6 +27,21 @@ CODEMIRROR_DIR := packages/template-codemirror
 VSCODE_TEST := $(CURDIR)/.vscode-test
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 
+# npm installs every dependency, also every package of this repository, as a copy and writes no bin link
+# (.npmrc, T18.4), so the recipes start each tool with the file of its package.
+TSUP       := node $(CURDIR)/node_modules/tsup/dist/cli-default.js
+TSC        := node $(CURDIR)/node_modules/typescript/bin/tsc
+# The esbuild package replaces bin/esbuild with the executable of the platform when it installs.
+ESBUILD    := $(CURDIR)/node_modules/esbuild/bin/esbuild
+ESLINT     := node $(CURDIR)/node_modules/eslint/bin/eslint.js
+VITEPRESS  := node $(CURDIR)/node_modules/vitepress/bin/vitepress.js
+VITEST     := node $(CURDIR)/node_modules/vitest/vitest.mjs
+PLAYWRIGHT := node $(CURDIR)/node_modules/@playwright/test/cli.js
+VSCE       := node $(CURDIR)/node_modules/@vscode/vsce/vsce
+TMGRAMMAR  := node $(CURDIR)/node_modules/vscode-tmgrammar-test/dist/unit.js
+# $(call reinstall,<package>) installs the npm copy of a package of this repository again after its build.
+reinstall = rm -rf node_modules/$(1) && npm install --no-audit --no-fund
+
 # require-dir prints "not implemented" and fails when a package directory is absent.
 define require-dir
 	@test -d $(1) || { echo "$(2): not implemented ($(1) is absent)"; exit 1; }
@@ -36,6 +51,8 @@ help: ## List targets
 	@echo "Targets:"
 	@echo "  check                  docs-check, lint, unit tests of every package and of the test runner, formatter and extension tests, conformance"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
+	@echo "  lint-js                eslint on the TypeScript sources"
+	@echo "  install                npm ci: every dependency as a copy, no bin links"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  test-scripts           Tests of the test runner and the conformance runners"
@@ -67,7 +84,7 @@ help: ## List targets
 	@echo "  test-lsp               Language server protocol tests against the editor fixtures, type check"
 	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
 	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
-	@echo "  install-cli            Link template-fmt into the global npm bin directory"
+	@echo "  install-cli            Install a copy of the formatter package with template-fmt into the global npm directory"
 	@echo "  build-codemirror       Build the CodeMirror 6 adapter"
 	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
@@ -81,9 +98,7 @@ help: ## List targets
 
 check: docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
 
-lint: build-php ## Lint every package
-	$(call require-dir,$(TS_DIR),lint)
-	npm run lint
+lint: build-php lint-js ## Lint every package
 	@test ! -d $(GO_DIR) || { out=$$(gofmt -l $(GO_DIR)); test -z "$$out" || { echo "$$out"; exit 1; }; }
 	@test ! -d $(RUST_DIR) || $(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
 	@test ! -d $(EXT_DIR) || $(CARGO) fmt --manifest-path $(EXT_DIR)/Cargo.toml --check
@@ -91,9 +106,17 @@ lint: build-php ## Lint every package
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
 	@test ! -d $(PHP_DIR) || $(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
 
+lint-js: ## Lint the TypeScript sources with eslint
+	$(call require-dir,$(TS_DIR),lint-js)
+	$(ESLINT) packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src
+
+install: ## Install the npm dependencies as copies without bin links (.npmrc)
+	npm ci
+
 build-ts: ## Build the TypeScript package
 	$(call require-dir,$(TS_DIR),build-ts)
-	npm run build -w @polyspec/template
+	cd $(TS_DIR) && $(TSUP)
+	$(call reinstall,@polyspec/template)
 
 build-go: ## Build the Go CLI
 	$(call require-dir,$(GO_DIR),build-go)
@@ -109,7 +132,7 @@ build-php: ## Install PHP dependencies
 
 test-ts: build-ts ## TypeScript unit tests and type check
 	node scripts/run-tests.mjs vitest --cwd $(TS_DIR)
-	npm run typecheck -w @polyspec/template
+	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json && $(TSC) --noEmit -p $(TS_DIR)/tsconfig.node.json
 
 test-go: ## Go unit tests
 	$(call require-dir,$(GO_DIR),test-go)
@@ -128,50 +151,53 @@ test-scripts: build-ts build-php ## Tests of the test runner and the conformance
 	node scripts/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
-	npm run build -w @polyspec/template-language
+	cd $(LANGUAGE_DIR) && $(TSUP)
+	$(call reinstall,@polyspec/template-language)
 
 test-language: build-language ## Formatter, safety invariant and CLI tests, type check
 	node scripts/run-tests.mjs vitest --cwd $(LANGUAGE_DIR)
-	npm run typecheck -w @polyspec/template-language
+	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
 build-lsp: build-language ## Build the language server template-lsp
-	npm run build -w @polyspec/template-lsp
+	cd $(LSP_DIR) && $(TSUP)
+	$(call reinstall,@polyspec/template-lsp)
 
 test-lsp: build-lsp ## Language server protocol tests against the editor fixtures, type check
 	node scripts/run-tests.mjs vitest --cwd $(LSP_DIR)
-	npm run typecheck -w @polyspec/template-lsp
+	$(TSC) --noEmit -p $(LSP_DIR)/tsconfig.json
 
 format-check: build-language ## Check that the formatter fixtures are formatted
 	node $(LANGUAGE_DIR)/bin/template-fmt.mjs --check $(LANGUAGE_DIR)/tests/fixtures/expected
 
 format-external-check: build-language ## Run the formatter safety invariant on an explicit external template tree
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
-	TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" npm test -w @polyspec/template-language -- --run tests/invariant.test.ts
+	cd $(LANGUAGE_DIR) && TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" $(VITEST) run tests/invariant.test.ts
 
 build-codemirror: build-language ## Build the CodeMirror 6 adapter
-	npm run build -w @polyspec/template-codemirror
+	cd $(CODEMIRROR_DIR) && $(TSUP)
+	$(call reinstall,@polyspec/template-codemirror)
 
 test-codemirror: build-codemirror ## CodeMirror adapter tests against the editor fixtures, browser test, type check
 	node scripts/run-tests.mjs vitest --cwd $(CODEMIRROR_DIR)
-	npm run test:browser -w @polyspec/template-codemirror
-	npm run typecheck -w @polyspec/template-codemirror
+	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
+	$(TSC) --noEmit -p $(CODEMIRROR_DIR)/tsconfig.json
 
-install-cli: build-language ## Link template-fmt into the global npm bin directory
-	npm link -w @polyspec/template-language
+install-cli: build-language ## Install a copy of the formatter package with template-fmt into the global npm directory
+	npm install --global --install-links $(LANGUAGE_DIR)
 
 build-vscode: build-lsp ## Bundle the VS Code extension
-	npm run build -w polyspec-template
+	cd $(VSCODE_DIR) && $(ESBUILD) src/extension.ts --bundle --platform=node --format=cjs --target=node24 --external:vscode --outfile=dist/extension.cjs && $(ESBUILD) @polyspec/template-lsp/server --bundle --platform=node --format=cjs --target=node24 --outfile=dist/server.cjs
 
 test-vscode: build-vscode ## Grammar tests, extension tests and type check
-	npm run test:grammar -w polyspec-template
+	cd $(VSCODE_DIR) && $(TMGRAMMAR) --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json "tests/grammar/*.tpl"
 	node scripts/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs
-	npm run typecheck -w polyspec-template
+	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
 test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
-	npm run test:integration -w polyspec-template -- --cache $(VSCODE_TEST)
+	cd $(VSCODE_DIR) && node tests/integration/run.mjs --cache $(VSCODE_TEST)
 
 vscode-package: build-vscode ## Build the .vsix
-	npm run package -w polyspec-template
+	cd $(VSCODE_DIR) && $(VSCE) package --no-dependencies --skip-license --out dist/polyspec-template.vsix
 
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
@@ -270,18 +296,18 @@ compiler-interface-check: build-php ## Verify the typed generated module structu
 	node scripts/check-compiler-interface-mutations.mjs
 
 docs: ## Build the documentation site
-	npx vitepress build docs
+	$(VITEPRESS) build docs
 
 docs-verify-idempotent: ## Build the documentation site twice and compare
-	npx vitepress build docs
+	$(VITEPRESS) build docs
 	rm -rf docs/.vitepress/dist.first
 	cp -R docs/.vitepress/dist docs/.vitepress/dist.first
-	npx vitepress build docs
+	$(VITEPRESS) build docs
 	diff -r docs/.vitepress/dist.first docs/.vitepress/dist
 	rm -rf docs/.vitepress/dist.first
 
 docs-static-check: ## Build the documentation site as static files
-	npx vitepress build docs
+	$(VITEPRESS) build docs
 	node scripts/check-docs-static.mjs
 
 contract-generate: ## Generate showcase declarations and Mermaid diagrams

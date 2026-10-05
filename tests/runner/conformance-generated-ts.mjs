@@ -14,6 +14,7 @@ import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { inWorker, runStep, seconds, stepProgress } from './bounded.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
+import { tsc } from '../../scripts/tools.mjs';
 
 // The time limit of the render of one case.
 const RENDER_TIMEOUT_MS = 30_000;
@@ -89,8 +90,9 @@ try {
   if (pending.length > 0) {
     const step = `tsc (${pending.length} files)`;
     progress.start(step);
-    const result = await runStep('npx', [
-      'tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
+    // The compiler runs as `node <tsc>`, started by name, by the path of its package (no bin links, T18.4).
+    const result = await runStep('node', [
+      tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
       ...pending.map(item => item.sourcePath),
     ], { cwd: root });
     if (result.status !== 0) {

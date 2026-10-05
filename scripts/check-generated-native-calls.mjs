@@ -8,6 +8,7 @@ import { compileAst } from '../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
+import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/native-object');
 const temporary = mkdtempSync(join(root, '.generated-native-calls-'));
@@ -40,7 +41,7 @@ try {
   writeFileSync(tsSource, compileSource(graphManifest, join(fixture, 'types.json'), 'ts'));
   const tsOutput = join(temporary, 'ts');
   mkdirSync(tsOutput);
-  run('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', tsOutput, tsSource], root);
+  run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', tsOutput, tsSource], root);
   const tsRunner = join(temporary, 'native.mjs');
   writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/native.js';
 import { RuntimeEnvironment } from '@polyspec/template';

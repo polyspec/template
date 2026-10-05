@@ -14,6 +14,7 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
+import { vitest } from './tools.mjs';
 
 import { createProgress } from './test-progress/progress.mjs';
 
@@ -52,8 +53,9 @@ export function toolCommand({ tool, timeoutSeconds, cwd, args }) {
       };
     case 'vitest':
       return {
-        command: path.join(ROOT, 'node_modules/.bin/vitest'),
-        args: ['run', `--testTimeout=${milliseconds}`, `--hookTimeout=${milliseconds}`, `--reporter=${path.join(ROOT, 'scripts/test-progress/vitest-reporter.mjs')}`, ...args],
+        // npm writes no bin links (.npmrc), so the runner starts the entry of the vitest package with node.
+        command: process.execPath,
+        args: [vitest, 'run', `--testTimeout=${milliseconds}`, `--hookTimeout=${milliseconds}`, `--reporter=${path.join(ROOT, 'scripts/test-progress/vitest-reporter.mjs')}`, ...args],
       };
     case 'go':
       // go test has no per-test limit; this runner applies it. -timeout=0 removes the limit of

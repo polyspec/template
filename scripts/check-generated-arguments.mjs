@@ -12,6 +12,7 @@ import { compileAst } from '../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../tools/compiler/compiler.mjs';
 import { phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
+import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/typed-arguments');
 const types = join(fixture, 'types.json');
@@ -31,8 +32,8 @@ try {
   // TypeScript.
   const tsSource = join(temporary, 'typed.ts');
   writeFileSync(tsSource, compileSource(graphManifest, types, 'ts'));
-  const tsc = spawnSync('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], { cwd: root, encoding: 'utf8' });
-  if (tsc.status !== 0) failures.push(`TypeScript: tsc exited with ${tsc.status}\n${tsc.stdout}${tsc.stderr}`);
+  const compiled = spawnSync('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], { cwd: root, encoding: 'utf8' });
+  if (compiled.status !== 0) failures.push(`TypeScript: tsc exited with ${compiled.status}\n${compiled.stdout}${compiled.stderr}`);
   const tsRunner = join(temporary, 'typed.mjs');
   writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/typed.js';
 import { RuntimeEnvironment, TemplateError } from '@polyspec/template';

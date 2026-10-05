@@ -127,25 +127,8 @@
       ]
     }
   },
-  "scripts": {
-    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node24 --external:vscode --outfile=dist/extension.cjs && esbuild @polyspec/template-lsp/server --bundle --platform=node --format=cjs --target=node24 --outfile=dist/server.cjs",
-    "test:grammar": "vscode-tmgrammar-test --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json \"tests/grammar/*.tpl\"",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "package": "vsce package --no-dependencies --skip-license --out dist/polyspec-template.vsix",
-    "test:integration": "node tests/integration/run.mjs"
-  },
   "dependencies": {
     "@polyspec/template-lsp": "0.0.1",
     "vscode-languageclient": "^10.1.2"
-  },
-  "devDependencies": {
-    "@types/node": "^26.6.3",
-    "@types/vscode": "^1.138.0",
-    "@vscode/test-electron": "^3.1.0",
-    "@vscode/vsce": "^4.0.0",
-    "esbuild": "^0.28.2",
-    "tm-grammars": "^1.32.22",
-    "vscode-jsonrpc": "^9.0.3",
-    "vscode-tmgrammar-test": "^0.1.3"
   }
 }

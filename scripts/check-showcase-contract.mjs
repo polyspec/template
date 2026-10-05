@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { tsc } from './tools.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const adapterRoot = join(root, 'tools', 'showcase', 'adapters');
@@ -257,7 +258,7 @@ async function main() {
   run('product generated compiler', process.execPath, ['tools/showcase/compile-generated.mjs', '--refresh', 'dev', '--check']);
   for (const language of languageNames) checkStaticImplementation(language);
 
-  run('TypeScript declarations', 'npx', ['--no-install', 'tsc', '--noEmit', '-p', 'tools/showcase/adapters/tsconfig.json']);
+  run('TypeScript declarations', 'node', [tsc, '--noEmit', '-p', 'tools/showcase/adapters/tsconfig.json']);
   const gofmt = run('Go formatting', 'gofmt', ['-d', join(adapterRoot, 'go', 'main.go'), join(adapterRoot, 'go', 'render_adapter.go')]);
   assert(gofmt.trim() === '', `Go sources are not formatted:\n${gofmt}`);
   run('Go contract compilation', 'go', ['test', './...'], join(adapterRoot, 'go'));

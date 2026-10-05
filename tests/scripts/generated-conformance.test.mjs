@@ -29,10 +29,10 @@ test('the TypeScript runner prints the tsc step and each render with its elapsed
 });
 
 test('the tsc step has no deadline and is judged by the exit code of tsc', COMPILES, () => {
-  // npx waits 1.5 s before it runs tsc, so tsc ends later than a small limit would allow.
+  // Every node started by name, tsc included, waits 1.5 s, so tsc ends later than a small limit would allow.
   const directory = mkdtempSync(path.join(tmpdir(), 'template-slow-tsc-'));
   try {
-    const stdout = generated('ts', { ...process.env, PATH: slowCommandPath(directory, 'npx', 1.5) });
+    const stdout = generated('ts', { ...process.env, PATH: slowCommandPath(directory, 'node', 1.5) });
     assert.match(stdout, /▶ tsc \(1 files\)\n[^]*✔ tsc \(1 files\) \((?:1\.[5-9]|[2-9]\.\d|\d{2,}\.\d)s\)\n/);
     assert.match(stdout, /1\/1 TypeScript generated conformance cases passed/);
   } finally {

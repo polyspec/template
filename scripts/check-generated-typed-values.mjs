@@ -10,6 +10,7 @@ import { compileAst } from '../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
+import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/typed-values');
 const types = join(fixture, 'types.json');
@@ -43,7 +44,7 @@ try {
   // TypeScript generated program and the TypeScript AST program as the reference.
   const tsSource = join(temporary, 'typed.ts');
   writeFileSync(tsSource, compileSource(graphManifest, types, 'ts'));
-  run('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
+  run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
   const tsRunner = join(temporary, 'typed.mjs');
   writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/typed.js';
 import { AstProgram, MapLoader, RuntimeEnvironment } from '@polyspec/template';

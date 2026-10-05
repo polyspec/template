@@ -75,9 +75,8 @@ node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR]
 ## Development
 
 ```sh
-npm run build -w @polyspec/template
-npm test -w @polyspec/template -- --run
-npm run typecheck -w @polyspec/template
+make build-ts
+make test-ts
 ```
 
 Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process.

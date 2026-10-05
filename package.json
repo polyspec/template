@@ -4,20 +4,11 @@
   "private": true,
   "description": "Template language with one specification and TypeScript, Go, Rust and PHP implementations",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "build": "npm run build -w @polyspec/template",
-    "lint": "eslint packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src",
-    "typecheck": "npm run typecheck -w @polyspec/template",
     "test": "node tests/runner/conformance.mjs",
     "test:browser": "node tests/browser/run.mjs",
     "docs:check": "node scripts/check-documents.mjs",
     "schema:check": "node scripts/check-schema.mjs",
-    "docs:build": "vitepress build docs",
-    "docs:dev": "vitepress dev docs",
-    "docs:preview": "vitepress preview docs",
     "docs:coverage": "node scripts/check-doc-coverage.mjs",
     "bench": "node tools/bench/run.mjs"
   },
@@ -25,16 +16,38 @@
   "engines": {
     "node": ">=26"
   },
+  "dependencies": {
+    "@polyspec/template": "file:packages/template-ts",
+    "@polyspec/template-language": "file:packages/template-language",
+    "@polyspec/template-lsp": "file:packages/template-lsp",
+    "@polyspec/template-codemirror": "file:packages/template-codemirror",
+    "polyspec-template": "file:packages/template-vscode"
+  },
   "devDependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-html": "^6.4.12",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "@types/vscode": "^1.138.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "esbuild": "0.27.2",
     "eslint": "^10.11.0",
+    "tm-grammars": "^1.32.22",
+    "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0",
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vitest": "^5.0.3",
+    "vscode-jsonrpc": "^9.0.3",
+    "vscode-tmgrammar-test": "^0.1.3"
   },
   "allowScripts": {
     "esbuild@0.27.2": true,
@@ -45,6 +58,9 @@
   "overrides": {
     "vitepress": {
       "vite": "6.4.3"
-    }
+    },
+    "@polyspec/template": "file:packages/template-ts",
+    "@polyspec/template-language": "file:packages/template-language",
+    "@polyspec/template-lsp": "file:packages/template-lsp"
   }
 }
