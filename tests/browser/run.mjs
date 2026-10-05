@@ -5,6 +5,12 @@
 // port that the system assigns; Playwright receives the address of the listening line in
 // TEMPLATE_BROWSER_URL, runs the cases, each with its own timeout (playwright.config.ts), and the
 // server is stopped.
+//
+//   node tests/browser/run.mjs [--server-command <command>] [<playwright arguments>]
+//
+// The server runs as `<command> tests/browser/server.mjs`; the command is the Node.js of this process unless
+// --server-command names another, such as a test's wrapper that starts the server slowly (T20.2). No command is looked
+// up on PATH.
 import { spawn } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,12 +21,11 @@ const READY = /^listening on (http:\/\/\S+)$/m;
 const seconds = milliseconds => `${(milliseconds / 1000).toFixed(1)}s`;
 
 /** Starts the server and resolves the server process and its address once it listens; rejects when it exits first. */
-function startServer() {
+function startServer(command) {
   const step = 'start the static server';
   process.stdout.write(`▶ ${step}\n`);
   const started = Date.now();
-  // The server is started by name, as a command of PATH.
-  const server = spawn('node', [join(root, 'tests/browser/server.mjs')], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+  const server = spawn(command, [join(root, 'tests/browser/server.mjs')], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
   return new Promise((resolvePromise, reject) => {
     let output = '';
     let ready = false;
@@ -48,12 +53,15 @@ function startServer() {
   });
 }
 
+const args = process.argv.slice(2);
+const serverCommand = args[0] === '--server-command' ? args.splice(0, 2)[1] : process.execPath;
 let server;
 try {
-  const started = await startServer();
+  if (!serverCommand) throw new Error('--server-command needs a command');
+  const started = await startServer(serverCommand);
   server = started.server;
   // npm writes no bin links (.npmrc), so Playwright starts by the path of its package.
-  const tests = spawn(process.execPath, [playwright, 'test', ...process.argv.slice(2)], {
+  const tests = spawn(process.execPath, [playwright, 'test', ...args], {
     cwd: root,
     env: { ...process.env, TEMPLATE_BROWSER_URL: started.url },
     stdio: 'inherit',

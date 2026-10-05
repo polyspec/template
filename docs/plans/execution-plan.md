@@ -136,6 +136,10 @@ Dependencies: none. Two concurrent runs of one checkout or of different checkout
 
 Dependencies: none. The checks had ten classes of defects: the result of a check also depended on the time, the network, the machine and the leftovers of earlier runs: the package install check resolved crates and Go toolchains from the network and built the Rust install project with the default toolchain of the machine, Go switched itself to a downloaded toolchain, the test runner hid the compile errors of Go and passed a run without tests, targets read PHP dependencies and package builds that they did not create, owner checks missed the targets that read a changed path, outputs were replaced by removal and rewriting, recipes stopped at their first failing command and several failures named no expected value. Each task reproduces one class at its smallest boundary, fixes it everywhere in the repository and keeps the test; AGENTS states the ten rules.
 
+## Wave 20 — Tests that share nothing with other runs
+
+Dependencies: none. In one `node --test` run of `make test-scripts` the test files run at once, and checks that wrote into the checkout, looked up a command on PATH or left processes behind failed by the timing of other files: a runner's temporary files in the repository root failed the owner check of every tracked path, the browser test's slow server stub was not certain to run and its assertion on the inode of `dist` met the prerequisite build of T18.8-2, and a temporary directory was removed while a stub's child process still wrote into it. Each check now keeps its files under the system temporary directory, receives its commands explicitly and waits for the processes it starts.
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -158,6 +162,7 @@ Dependencies: none. The checks had ten classes of defects: the result of a check
 | W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 |
 | W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | none |
 | W19 | none | T19.1 → T19.12 in order |
+| W20 | T20.1, T20.2, T20.3 | none |
 
 ## Definition of done
 

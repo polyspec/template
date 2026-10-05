@@ -136,6 +136,10 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 의존성: 없음. 검사에는 열 가지 결함 class가 있었다. 검사의 결과가 시간, network, 기계, 이전 실행의 잔여물에도 의존했다. package 설치 검사는 crate와 Go toolchain을 network에서 해석했고 Rust 설치 프로젝트를 기계의 기본 toolchain으로 빌드했으며, Go는 내려받은 toolchain으로 스스로 전환했고, test runner는 Go의 compile error를 숨기고 test가 없는 실행을 통과시켰으며, target들은 자신이 만들지 않은 PHP 의존성과 package build를 읽었고, owner check는 바뀐 path를 읽는 target을 놓쳤으며, 출력은 제거 후 다시 쓰는 방식으로 교체되었고, recipe는 처음 실패한 명령에서 멈췄으며, 여러 실패가 기대값을 밝히지 않았다. 각 작업은 한 class를 가장 작은 경계에서 재현하고 저장소 전체에서 고치며 test를 유지한다. AGENTS는 열 가지 규칙을 적는다.
 
+## Wave 20 — 다른 실행과 아무것도 공유하지 않는 test
+
+의존성: 없음. `make test-scripts`의 한 `node --test` 실행에서 test file들은 동시에 실행되고, checkout에 쓰거나 PATH에서 명령을 찾거나 process를 남기는 검사는 다른 file의 timing에 따라 실패했다. 저장소 root에 있는 runner의 임시 file은 모든 추적 경로에 대한 owner 검사를 실패시켰고, browser test의 느린 server stub은 실행이 확실하지 않았으며 `dist` inode에 대한 단언은 T18.8-2의 전제 조건 build와 만났고, stub의 자식 process가 아직 쓰는 동안 임시 directory를 지웠다. 이제 각 검사는 file을 system 임시 directory 아래에 두고, 명령을 명시적으로 받으며, 시작한 process를 기다린다.
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -158,6 +162,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 |
 | W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | 없음 |
 | W19 | 없음 | T19.1 → T19.12 순서대로 |
+| W20 | T20.1, T20.2, T20.3 | 없음 |
 
 ## 완료 정의
 
