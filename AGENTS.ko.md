@@ -56,7 +56,7 @@
 - 이 저장소의 checklist는 `docs/plans/execution-checklist.md` 하나다. 작업을 하위 항목으로 나누거나 작업을 추가하고, 다른 checklist를 만들지 않는다. 저장소마다 자기 checklist를 따로 운영한다.
 - 작업 상태는 네 가지다. `[ ]` 대기, `[~]` 진행 중, `[o]` 완료, `[!] cause: <원인>; retry: <조건>` 일시 우회. `scripts/check-documents.mjs`는 다른 상태를 받지 않는다.
 - 작업은 작업 표의 한 행이다. 첫 칸은 ID로 `T<wave>.<number>` 또는 `T<wave>.<track>.<number>`이고 `T12.1-1` 같은 하위 항목 ID도 쓴다. 다른 칸은 산출물, test, 소유 명령을 적고, 마지막 칸은 상태다. checklist file에서 상태 표시와 task list 표시 `[x]`, `[X]`는 작업 행의 마지막 칸 시작에만 둔다. 범례, 본문, 작업 text, 다른 표 칸, inline code는 상태를 말로 적으므로 checklist를 읽는 도구가 모든 표시를 믿을 수 있다.
-- checklist는 작업만 담는다: 제목, 그 아래 번역 link, 웨이브와 절의 heading, 그리고 `| ID |`로 시작하는 header 행, 그 구분 행, 작업 행으로 이루어진 작업 표. 웨이브의 계획, 의존 관계, 작업의 원인, 완료 기준, 완료 정의와 그 증거는 `docs/plans/execution-plan.md`에 둔다. `scripts/check-documents.mjs`는 checklist의 그 밖의 줄과 표시에서 file, 줄, 열을 적으며 실패한다.
+- checklist는 작업만 담는다: 제목, 웨이브와 절의 heading, 그리고 `| ID |`로 시작하는 header 행, 그 구분 행, 작업 행으로 이루어진 작업 표. 웨이브의 계획, 의존 관계, 작업의 원인, 완료 기준, 완료 정의와 그 증거는 `docs/plans/execution-plan.md`에 둔다. `scripts/check-documents.mjs`는 checklist의 그 밖의 줄과 표시에서 file, 줄, 열을 적으며 실패한다.
 - 작업의 Verification 열에는 소유 명령을 적는다. 소유 명령은 `make check`가 아니라 그 작업의 Red와 Green test를 실행한다. 이미 `[o]`인 작업은 자기 명령을 유지한다.
 - `[!]`는 이 작업을 우회하지 않으면 다음 작업을 진행할 수 없을 때만 쓴다. 재시도 조건이 성립하면 승인을 기다리지 않고 재개한다. `[!]`는 완료가 아니다. 감사는 `[!]` 작업과 그 원인·재시도 조건만 다루고, 관련 없는 full test를 반복하지 않는다.
 - 새 문제는 새 작업으로 올린다. `[o]` 작업과 관련된 문제는 그 작업의 ID를 이어 붙인 하위 항목(`T12.1-1`, `T12.1-2`)으로 올려 `[~]`와 `[o]`를 거치게 하고, `[o]` 작업의 상태는 그대로 둔다.

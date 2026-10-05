@@ -29,7 +29,7 @@ Every document has a `.ko.md` file with the same information.
 node scripts/check-documents.mjs
 ```
 
-The checker fails when a document has no translation pair, a relative link does not resolve, a link is absolute, code blocks differ between the two languages, a feature row has an invalid status or no evidence link, a task row of the checklist `docs/plans/execution-checklist.md` has an invalid state or differs between the two languages, or the checklist holds a line other than its title, the translation link, a heading or a task table row, or a state marker or task list marker anywhere other than the start of the last cell of a task row; it reports such a line or marker with the file, the line and the column. `make docs-check` runs the checker.
+The checker fails when a document has no translation pair, a relative link does not resolve, a link is absolute, code blocks differ between the two languages, a feature row has an invalid status or no evidence link, a task row of the checklist `docs/plans/execution-checklist.md` has an invalid state or differs between the two languages, or the checklist holds a line other than a heading, its title included, or a task table row, or a state marker or task list marker anywhere other than the start of the last cell of a task row; it reports such a line or marker with the file, the line and the column. `make docs-check` runs the checker.
 
 ## Source comments
 
