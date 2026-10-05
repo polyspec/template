@@ -9,7 +9,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock
+	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -26,6 +26,8 @@ CODEMIRROR_DIR := packages/template-codemirror
 # The VS Code builds of the integration test; scripts/holder-lock.mjs guards it with $(VSCODE_TEST).lock.
 VSCODE_TEST := $(CURDIR)/.vscode-test
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
+# The prefix of `make install-cli`: the formatter copy in $(CLI_PREFIX)/lib and the script in $(CLI_PREFIX)/bin.
+CLI_PREFIX ?= $(HOME)/.local
 
 # npm installs every dependency, also every package of this repository, as a copy and writes no bin link
 # (.npmrc, T18.4), so the recipes start each tool with the file of its package.
@@ -84,7 +86,8 @@ help: ## List targets
 	@echo "  test-lsp               Language server protocol tests against the editor fixtures, type check"
 	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
 	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
-	@echo "  install-cli            Install a copy of the formatter package with template-fmt into the global npm directory"
+	@echo "  install-cli            Install a copy of the formatter and the script template-fmt under CLI_PREFIX (~/.local)"
+	@echo "  uninstall-cli          Remove them"
 	@echo "  build-codemirror       Build the CodeMirror 6 adapter"
 	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
@@ -147,7 +150,7 @@ test-rust: ## Rust clippy and tests
 test-php: build-php ## PHP unit tests
 	node scripts/run-tests.mjs phpunit --cwd $(PHP_DIR)
 
-test-scripts: build-ts build-php ## Tests of the test runner and the conformance runners
+test-scripts: build-ts build-language build-php ## Tests of the test runner and the conformance runners
 	node scripts/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
@@ -182,8 +185,11 @@ test-codemirror: build-codemirror ## CodeMirror adapter tests against the editor
 	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
 	$(TSC) --noEmit -p $(CODEMIRROR_DIR)/tsconfig.json
 
-install-cli: build-language ## Install a copy of the formatter package with template-fmt into the global npm directory
-	npm install --global --install-links $(LANGUAGE_DIR)
+install-cli: build-language ## Install a copy of the formatter and the script $(CLI_PREFIX)/bin/template-fmt
+	node scripts/install-cli.mjs install --prefix $(CLI_PREFIX)
+
+uninstall-cli: ## Remove the formatter copy and the script template-fmt of $(CLI_PREFIX)
+	node scripts/install-cli.mjs uninstall --prefix $(CLI_PREFIX)
 
 build-vscode: build-lsp ## Bundle the VS Code extension
 	cd $(VSCODE_DIR) && $(ESBUILD) src/extension.ts --bundle --platform=node --format=cjs --target=node24 --external:vscode --outfile=dist/extension.cjs && $(ESBUILD) @polyspec/template-lsp/server --bundle --platform=node --format=cjs --target=node24 --outfile=dist/server.cjs
