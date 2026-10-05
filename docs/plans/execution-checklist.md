@@ -368,7 +368,7 @@ Dependencies: none. Two concurrent runs of one checkout or of different checkout
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
 | T18.1 | Make `tests/browser/server.mjs` listen on a port that the system assigns and print it in its line `listening on http://127.0.0.1:<port>`; `tests/browser/run.mjs` passes that address to Playwright in `TEMPLATE_BROWSER_URL`, which `playwright.config.ts` requires | `node scripts/run-tests.mjs node -- tests/scripts/browser-port.test.mjs` | [o] |
-| T18.2 | Give the VS Code directory `.vscode-test` a holder lock `.vscode-test.lock`: the integration run holds it from the download to its last launch, a second run fails with the holder, `make clean` removes the directory only while it holds the lock, and a lock of an ended process is reported and removed by `make vscode-test-unlock` | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [ ] |
+| T18.2 | Give the VS Code directory `.vscode-test` a holder lock `.vscode-test.lock`: the integration run holds it from the download to its last launch, a second run fails with the holder, `make clean` removes the directory only while it holds the lock, and a lock of an ended process is reported and removed by `make vscode-test-unlock` | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [o] |
 
 ## Parallelism summary
 

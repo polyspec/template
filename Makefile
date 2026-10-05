@@ -9,7 +9,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install
+	build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -23,6 +23,8 @@ LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
 VSCODE_DIR := packages/template-vscode
 CODEMIRROR_DIR := packages/template-codemirror
+# The VS Code builds of the integration test; scripts/holder-lock.mjs guards it with $(VSCODE_TEST).lock.
+VSCODE_TEST := $(CURDIR)/.vscode-test
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 
 # require-dir prints "not implemented" and fails when a package directory is absent.
@@ -74,6 +76,8 @@ help: ## List targets
 	@echo "  vscode-package         Build the .vsix with vsce"
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
+	@echo "  clean-vscode-test      Remove .vscode-test while holding its lock; fails while an integration run holds it"
+	@echo "  vscode-test-unlock     Remove the lock of .vscode-test whose holder process has ended"
 
 check: docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
 
@@ -164,7 +168,7 @@ test-vscode: build-vscode ## Grammar tests, extension tests and type check
 	npm run typecheck -w polyspec-template
 
 test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
-	npm run test:integration -w polyspec-template
+	npm run test:integration -w polyspec-template -- --cache $(VSCODE_TEST)
 
 vscode-package: build-vscode ## Build the .vsix
 	npm run package -w polyspec-template
@@ -374,5 +378,11 @@ compiler-ir-check: build-ts ## Verify canonical AST coverage and type/scope reje
 typed-generator-compile-check: build-php compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
 
-clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist .vscode-test $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+clean: clean-vscode-test ## Remove build outputs
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+
+clean-vscode-test: ## Remove .vscode-test while holding its lock; fails with the holder while an integration run holds it
+	node scripts/holder-lock.mjs run $(VSCODE_TEST).lock -- rm -rf $(VSCODE_TEST)
+
+vscode-test-unlock: ## Remove the lock of .vscode-test whose holder process has ended
+	node scripts/holder-lock.mjs clear $(VSCODE_TEST).lock
