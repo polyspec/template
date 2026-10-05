@@ -41,7 +41,10 @@ RUST_DIR := packages/template-rust
 PHP_DIR  := packages/template-php
 EXT_DIR  := packages/template-php-ext
 # The shared library of the PHP extension that `make ext` builds: .dylib on macOS, .so elsewhere.
-EXT_LIBRARY := $(EXT_DIR)/target/release/libpolyspec_template.$(if $(filter Darwin,$(shell uname -s)),dylib,so)
+LIBRARY_FILE := libpolyspec_template.$(if $(filter Darwin,$(shell uname -s)),dylib,so)
+# The builds that the checks run, published by scripts/publish-build.mjs only when their bytes change: cargo links
+# target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1).
+EXT_LIBRARY := var/build/$(LIBRARY_FILE)
 SHOWCASE_RUST := tools/showcase/adapters/rust
 LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
@@ -163,10 +166,10 @@ build-ts: ## Build the TypeScript package
 	node scripts/build-package.mjs --package template-ts --install
 
 build-go: ## Build the Go CLI
-	cd $(GO_DIR) && go build -o template ./cmd/template
+	cd $(GO_DIR) && go build -o template ./cmd/template && cd $(CURDIR) && node scripts/publish-build.mjs $(GO_DIR)/template var/build/template-go
 
 build-rust: ## Build the Rust CLI
-	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml
+	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && node scripts/publish-build.mjs $(RUST_DIR)/target/release/template var/build/template-rust
 
 build-php: ## Install PHP dependencies
 	cd $(PHP_DIR) && composer install --no-interaction --quiet
@@ -317,7 +320,7 @@ test-browser: build-ts ## Browser rendering test
 	node tests/browser/run.mjs
 
 ext: ## Build the PHP extension
-	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml
+	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml && node scripts/publish-build.mjs $(EXT_DIR)/target/release/$(LIBRARY_FILE) $(EXT_LIBRARY)
 
 test-ext: test-ext-clippy test-ext-conformance test-ext-unit ## Test the PHP extension
 
@@ -518,7 +521,7 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: clean-vscode-test ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build
 
 clean-vscode-test: ## Remove .vscode-test while holding its lock; fails with the holder while an integration run holds it
 	node scripts/holder-lock.mjs run $(VSCODE_TEST).lock -- rm -rf $(VSCODE_TEST)

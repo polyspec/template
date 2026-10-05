@@ -13,7 +13,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 test('prepare builds the CLI of a language also when its binary is present', async (t) => {
   const directory = mkdtempSync(path.join(tmpdir(), 'template-drivers-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
-  for (const file of ['tests/runner/drivers.mjs', 'scripts/test-progress/step.mjs']) {
+  for (const file of ['tests/runner/drivers.mjs', 'scripts/publish-build.mjs', 'scripts/test-progress/step.mjs']) {
     mkdirSync(path.dirname(path.join(directory, file)), { recursive: true });
     copyFileSync(path.join(ROOT, file), path.join(directory, file));
   }
