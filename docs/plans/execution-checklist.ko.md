@@ -342,7 +342,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 ## Wave 17 — test 실행
 
-의존성: 없음. 각 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 전체 suite는 활성 작업이 모두 끝났을 때 한 번 실행한다. AGENTS는 모든 작업을 완료로 표시하기 전에 `make check`를 요구했고, `AGENTS.ko.md`에는 "결정과 수용 규칙" 절이 없었다. `test-go`는 package마다 120 s로 제한했고, `test-rust`와 `test-php`는 test에 timeout을 주지 않았으며 test가 도는 동안 아무것도 출력하지 않았다. conformance runner는 마지막 case가 끝난 뒤에야 표를 출력했다. 네 generated conformance runner는 모든 case를 `go test`나 `cargo test` 호출 하나에서 600 s 제한 하나로 실행하거나, 제한 없이 자기 process에서 실행했고, 마지막 개수만 출력했다. VS Code integration runner는 VS Code 실행, profile 설치, check를 각각 제한 없이 기다렸다. 작업은 branch `fix/test-runs-T17.1`과 worktree `template-test-runs-T17`에서 진행한다. 오래 걸리는 작업(build, `tsc`, 설치, VS Code download·설치·실행, 실행 전체)은 단계 log를 출력하고 timeout을 두지 않는다. 시간 제한은 예상보다 느린 정상 실행을 실패시키기 때문이다. T17.4와 T17.5는 `tsc`, profile 설치, 실행에 deadline을 주었고, driver build와 package 설치 검사에도 시간 제한이 있었다. `tests/runner/delimiter-matrix.mjs`는 마지막 case 뒤에 한 줄만 출력했고, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode`의 unit test는 `scripts/run-tests.mjs`로 실행하지 않았다. T17.6부터 T17.10은 branch `test/no-deadline-T17.6`과 worktree `template-no-deadline-T17.6`에서 진행한다.
+의존성: 없음. 각 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 전체 suite는 활성 작업이 모두 끝났을 때 한 번 실행한다. AGENTS는 모든 작업을 완료로 표시하기 전에 `make check`를 요구했고, `AGENTS.ko.md`에는 "결정과 수용 규칙" 절이 없었다. `test-go`는 package마다 120 s로 제한했고, `test-rust`와 `test-php`는 test에 timeout을 주지 않았으며 test가 도는 동안 아무것도 출력하지 않았다. conformance runner는 마지막 case가 끝난 뒤에야 표를 출력했다. 네 generated conformance runner는 모든 case를 `go test`나 `cargo test` 호출 하나에서 600 s 제한 하나로 실행하거나, 제한 없이 자기 process에서 실행했고, 마지막 개수만 출력했다. VS Code integration runner는 VS Code 실행, profile 설치, check를 각각 제한 없이 기다렸다. 작업은 branch `fix/test-runs-T17.1`과 worktree `template-test-runs-T17`에서 진행한다. 오래 걸리는 작업(build, `tsc`, 설치, VS Code download·설치·실행, 실행 전체)은 단계 log를 출력하고 timeout을 두지 않는다. 시간 제한은 예상보다 느린 정상 실행을 실패시키기 때문이다. T17.4와 T17.5는 `tsc`, profile 설치, 실행에 deadline을 주었고, driver build와 package 설치 검사에도 시간 제한이 있었다. `tests/runner/delimiter-matrix.mjs`는 마지막 case 뒤에 한 줄만 출력했고, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode`의 unit test는 `scripts/run-tests.mjs`로 실행하지 않았다. T17.6부터 T17.10은 branch `test/no-deadline-T17.6`과 worktree `template-no-deadline-T17.6`에서 진행한다. T17.1-1은 branch `test/full-run-T17.1-1`과 worktree `template-full-run-T17.1-1`에서 진행한다.
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
@@ -360,6 +360,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.9 | `tests/runner/delimiter-matrix.mjs`가 한 언어에서 구분자 쌍이 끝날 때마다 `<pair> [<lang>] pass\|fail (<ms> ms)`를 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [o] |
 | T17.10 | `test-ts`, `test-language`, `test-lsp`, `test-codemirror`의 vitest test와 `test-vscode`의 `node --test` test를 `scripts/run-tests.mjs`로 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [o] |
 | T17.11 | `make test-browser`의 정적 서버를 startup deadline 30 s가 있는 Playwright `webServer` 대신 `tests/browser/run.mjs`에서 시간 제한 없는 단계로 띄운다(Playwright는 `timeout: 0`을 60 s로 읽는다). 서버 출력을 출력하고, 준비를 `listening on http://127.0.0.1:4173` 줄로 판단하며, 서버가 먼저 종료하면 실패한다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/browser-server.test.mjs` | [o] |
+| T17.1-1 | 한 번의 전체 실행을 guard `scripts/full-run.mjs`로 강제한다. `make check`는 어떤 단계보다 먼저 이 guard를 시작한다. guard는 이 checklist의 작업 행이 `[~]`이면 거부하고 활성 ID를 작업과 함께 나열하며, 추적 파일의 변경이 커밋되지 않았으면 거부하고, 같은 tree(`git rev-parse HEAD^{tree}`)의 두 번째 전체 실행을 앞선 실행을 밝히며 거부한다. `CHECK_TARGETS`의 각 target을 `make <target>`으로 끝까지 실행하고, 각 target의 앞뒤에 `var/full-run.json`(tree, commit, 결과, 각 target의 상태와 시각)을 쓰므로 멈춘 실행은 `incomplete`로 남는다. `make rerun-failed`는 현재 tree에서 통과하지 못한 target만 다시 실행하고, 그것이 통과하면 결과를 완성한다. 원인: AGENTS는 `make check`를 활성 작업이 모두 끝났을 때 한 번 실행한다고 적었지만 이를 강제하는 것이 없었다. 진행 중인 작업이 있는 실행, 커밋되지 않은 변경의 실행, 같은 tree의 두 번째 실행이 모두 suite를 시작했다. Red: `make -n check`는 `docs-check`의 첫 단계를 출력했으므로 suite는 checklist의 내용과 상관없이 시작했고, `make -n rerun-failed`는 `No rule to make target`으로 실패했으며, `tests/scripts/full-run.test.mjs`는 `scripts/full-run.mjs`에 대한 `ERR_MODULE_NOT_FOUND`로 실패했다. Green: 그 10개 case가 통과한다. `make -n check`는 guard만 출력하고, `[~]`가 있는 fixture checklist, 더러운 tree, 한 tree의 두 번째 실행, record 없는 `rerun-failed`는 stub target이 실행되기 전에 거부되며, `rerun-failed`는 실패했거나 끝나지 않은 stub target만 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/full-run.test.mjs` | [o] |
 
 ## Wave 18 — 한 실행의 test resource
 
@@ -393,7 +394,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W14 | 없음 | T14.1 → T14.2 |
 | W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
-| W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
+| W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 |
 | W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | 없음 |
 
 ## 완료 정의

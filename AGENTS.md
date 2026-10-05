@@ -47,7 +47,7 @@
 
 - While a task is in progress, run only the Red and Green tests that own the change. Before a commit, run those tests and `make docs-check`.
 - Before marking a task `[o]` in `docs/plans/execution-checklist.md`, run the owning command of the task, the command in its Verification column, on the committed tree.
-- Run `make check` once, when every active task is done. Do not run it for each fix or each task, and do not repeat it without a change.
+- Run `make check` once, when every active task is done. Do not run it for each fix or each task, and do not repeat it without a change. The guard `scripts/full-run.mjs` enforces this before any step: `make check` is refused while a task is `[~]`, while tracked changes are uncommitted, and when `var/full-run.json` records a full run of the current tree; `make rerun-failed` reruns only the targets of the current tree that did not pass (`docs/operations/development.md`).
 - Every test prints its start, its result and its elapsed time while the run goes on, and has its own timeout. Do not put a time limit on a whole run, a package or a file. A test that runs for tens of minutes, or that prints only a start and an end, is a defect.
 - A long-running operation, such as a build, a type check with `tsc`, an installation, a download, the installation or launch of a program, or a whole run, prints a log line for each step and has no timeout, including no deadline for missing output. Its success or failure is judged from its exit status, its result and its errors, because a time limit fails a normal run that is slower than expected. A test case is a short verification unit and keeps its own timeout.
 
