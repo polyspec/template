@@ -11,13 +11,16 @@
 // did not pass. The guard prints its decision with the reason, runs each target with `make -k <target>` to its end,
 // prints its start and its result with the elapsed time, and writes the record before and after each target, so a run
 // that is stopped stays recorded as `incomplete`. The record and each rerun hold the versions of the toolchains of the
-// run (`environment`). No step has a time limit.
-import { spawn, spawnSync } from 'node:child_process';
+// run (`environment`). The output of each target goes to var/report/full-run/targets/<target>.log, and the end of the
+// run writes var/report/full-run/summary.md with the first failure lines of each failed target (T20.1-9). No step has a
+// time limit.
+import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { acquire } from './holder-lock.mjs';
+import { runLogged, startReport, writeSummary } from './target-report.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const USAGE = 'Usage: node scripts/full-run.mjs run <target>... | rerun-failed';
@@ -136,21 +139,15 @@ export function toolchainVersions(root = ROOT) {
 
 const seconds = milliseconds => `${(milliseconds / 1000).toFixed(1)} s`;
 
-// Runs `make -k <target>` in the checkout with the output of make, which keeps going after a failed prerequisite so the
-// run reports every failure (T19.8); resolves whether it ended with status 0.
-function makeTarget(root, target) {
-  return new Promise((resolve, reject) => {
-    const child = spawn('make', ['-k', target], { cwd: root, stdio: 'inherit' });
-    child.once('error', reject);
-    child.once('exit', status => resolve(status === 0));
-  });
-}
+// The report of the run: the log of each target and a summary with the first failure lines of each failed target
+// (scripts/target-report.mjs, T20.1-9). A run starts it; a rerun replaces the logs of its targets.
+const REPORT = 'var/report/full-run';
 
 /**
  * Inspects the checkout, decides and runs. `runTarget(name)` resolves whether a target passed. Returns the exit
  * status: 0 when the full result of the tree is passed, 1 otherwise.
  */
-export async function fullRun({ root = ROOT, mode, targets = [], runTarget = name => makeTarget(root, name), print = line => console.log(line), environment = () => toolchainVersions(root) }) {
+export async function fullRun({ root = ROOT, mode, targets = [], runTarget = name => runLogged(root, name, path.join(root, REPORT)), print = line => console.log(line), environment = () => toolchainVersions(root) }) {
   mkdirSync(path.join(root, path.dirname(LOCK)), { recursive: true });
   let release;
   try {
@@ -185,6 +182,7 @@ async function guardedRun({ root, mode, targets, runTarget, print, environment }
   const rerun = mode === 'run' ? null : { started: now(), ended: null, environment: environment(), targets: decision.targets, result: 'incomplete' };
   if (rerun) current.reruns.push(rerun);
   writeRecord(root, current);
+  if (mode === 'run') startReport(path.join(root, REPORT));
 
   const begin = Date.now();
   for (const [index, name] of decision.targets.entries()) {
@@ -205,6 +203,7 @@ async function guardedRun({ root, mode, targets, runTarget, print, environment }
   current.ended = now();
   if (rerun) Object.assign(rerun, { ended: current.ended, result: decision.targets.every(name => !failed.includes(name)) ? 'passed' : 'failed' });
   writeRecord(root, current);
+  writeSummary(path.join(root, REPORT), `make check of tree ${tree}`, current.targets);
   const summary = `${decision.targets.length - decision.targets.filter(name => failed.includes(name)).length} of ${decision.targets.length} targets passed in ${seconds(Date.now() - begin)}`;
   print(failed.length === 0
     ? `[full-run] result passed for tree ${tree}: ${summary}`

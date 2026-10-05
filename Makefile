@@ -41,7 +41,7 @@ MAKEFLAGS += -k
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers cargo-downloads-check uninstall-cli rerun-failed \
+	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers ci-targets cargo-downloads-check uninstall-cli rerun-failed \
 	owner-check conformance-cases function-inventory-check dependency-review
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -181,6 +181,11 @@ install: install-tools ## Install the tools of the checkout, the npm dependencie
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
 install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
 	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
+
+# The CI jobs run their targets with make ci-targets: each target runs to its end also after a failure, and the report
+# in var/report/ci-targets holds the log of each target and a summary of the failures, which the job uploads (T20.1-9).
+ci-targets: ## Run TARGETS past failures and write their logs and summary to var/report/ci-targets
+	node scripts/ci-targets.mjs $(CURDIR)/var/report/ci-targets $(TARGETS)
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium

@@ -25,6 +25,7 @@
     { "paths": ["scripts/conformance-cases.mjs"], "tests": ["tests/scripts/conformance-cases.test.mjs"] },
     { "paths": ["scripts/holder-lock.mjs"], "tests": ["tests/scripts/holder-lock.test.mjs"] },
     { "paths": ["scripts/install-vscode.mjs", "packages/template-vscode/tests/integration/run.mjs"], "targets": ["test-vscode-integration"], "tests": ["tests/scripts/install-vscode.test.mjs", "tests/scripts/toolchain-files.test.mjs"] },
+    { "paths": ["scripts/ci-targets.mjs", "scripts/target-report.mjs"], "tests": ["tests/scripts/target-report.test.mjs", "tests/scripts/full-run.test.mjs"] },
     { "paths": ["scripts/check-cargo-downloads.mjs"], "tests": ["tests/scripts/cargo-downloads.test.mjs"] },
     { "paths": ["scripts/composer-install.mjs"], "targets": ["test-php", "test-ext"], "tests": ["tests/scripts/test-targets.test.mjs", "tests/scripts/toolchain-files.test.mjs", "tests/scripts/drivers.test.mjs"] },
     { "paths": ["scripts/publish-build.mjs"], "targets": ["conformance", "delimiter-matrix", "test-ext", "benchmark-smoke"], "tests": ["tests/scripts/publish-build.test.mjs", "tests/scripts/drivers.test.mjs"] },

@@ -181,6 +181,11 @@ test('every CI job installs with make install and bootstraps the tools of the ch
   }
 });
 
+// The targets that a step of make names, also those of `make ci-targets TARGETS="..."`.
+function makeTargets(step) {
+  return step.replace(/^.*\bmake\b/, '').replace(/TARGETS="([^"]*)"/, '$1').split(/\s+/).filter(word => /^[a-z][\w-]*$/.test(word));
+}
+
 // The targets that `make <targets>` runs: the targets, their prerequisites and, for `check`, the full suite.
 function reached(targets) {
   const makefile = read('Makefile');
@@ -205,7 +210,7 @@ test('only the CI jobs that run the VS Code integration test install VS Code, be
   assert.doesNotMatch(install.stdout, /install-vscode/, 'make install downloads VS Code for every job');
   for (const job of jobs('.github/workflows/ci.yml')) {
     const steps = [...job.text.matchAll(/- run: (.*)\n/g)].map(match => match[1]);
-    const runs = steps.findIndex(step => /\bmake\b/.test(step) && reached(step.replace(/^.*\bmake\b/, '').split(/\s+/).filter(word => /^[a-z][\w-]*$/.test(word))).has('test-vscode-integration'));
+    const runs = steps.findIndex(step => /\bmake\b/.test(step) && reached(makeTargets(step)).has('test-vscode-integration'));
     const installs = steps.indexOf('make install-vscode');
     if (runs === -1) assert.equal(installs, -1, `ci.yml job ${job.name} installs VS Code and runs no VS Code integration test`);
     else assert.ok(installs !== -1 && installs < runs, `ci.yml job ${job.name} runs the VS Code integration test without make install-vscode before it`);
@@ -225,6 +230,27 @@ test('every CI step runs its tools through make, so the recipes give them their 
     }
   }
   assert.deepEqual(direct, [], 'CI steps that start a tool without make; run it through its make target');
+});
+
+test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
+  const SETUP = new Set(['install', 'install-tools', 'install-vscode', 'install-browsers']);
+  const REPORTS = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
+  const problems = [];
+  for (const job of jobs('.github/workflows/ci.yml')) {
+    const lines = [...job.text.matchAll(/- run: (\|\n(?:\s{10,}.*\n?)+|.*)/g)].flatMap(([, block]) => block.replace(/^\|\n/, '').split('\n').map(line => line.trim()).filter(Boolean));
+    const runners = new Set();
+    for (const line of lines.filter(line => /\bmake\b/.test(line))) {
+      const [target] = makeTargets(line);
+      if (target in REPORTS) runners.add(target);
+      else if (!SETUP.has(target)) problems.push(`${job.name}: \`${line}\` runs a check without make check or make ci-targets, so it stops at a failure and leaves no report`);
+    }
+    if (runners.size === 0) problems.push(`${job.name}: no step runs make check or make ci-targets`);
+    for (const runner of runners) {
+      const upload = new RegExp(`- uses: actions/upload-artifact@\\S+.*\\n\\s+if: \\$\\{\\{ !cancelled\\(\\) \\}\\}\\n\\s+with:\\n\\s+name: report-.+\\n\\s+path: (?:\\|\\n(?:\\s+.*\\n)*?\\s+${REPORTS[runner].replace(/[/.]/g, '\\$&')}\\n|${REPORTS[runner].replace(/[/.]/g, '\\$&')}\\n)\\s+if-no-files-found: error\\n`);
+      if (!upload.test(job.text)) problems.push(`${job.name}: no upload of ${REPORTS[runner]} under if: !cancelled() with if-no-files-found: error`);
+    }
+  }
+  assert.deepEqual(problems, []);
 });
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {

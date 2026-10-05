@@ -31,7 +31,7 @@
 - Build: 검사는 자기가 읽는 것을, 입력이 바뀌지 않으면 아무것도 하지 않는 build로 만든다. 앞 target이나 앞 실행의 build에 기대지 않는다. 다른 것이 읽는 build는 byte가 바뀔 때에만 임시 파일과 rename으로 게시한다.
 - 공유 상태: 실행은 자기 directory에만 쓴다. 임시 파일은 checkout 밖에 실행의 이름으로, cache는 checkout 안(`var/`)에 둔다. 여러 실행이 읽고 쓰는 record는 읽을 때부터 마지막으로 쓸 때까지 lock을 쥔다. 실행은 자기가 시작한 group의 process를 남기지 않는다.
 - 아무것도 검증하지 않으면 실패: test가 하나도 실행되지 않은 실행은 실패한다. test는 build나 package가 없을 때 자기를 건너뛰지 않고, 그것을 build하거나 실패한다.
-- 한 실행에 모든 실패: make는 계속 진행하고(`MAKEFLAGS += -k`), 전체 suite의 target은 명령 하나를 실행하며 다른 검사는 prerequisite로 적고, 여러 언어의 검사는 모든 언어를 실행하고 실패한 언어를 모두 밝힌다.
+- 한 실행에 모든 실패: make는 계속 진행하고(`MAKEFLAGS += -k`), 전체 suite의 target은 명령 하나를 실행하며 다른 검사는 prerequisite로 적고, 여러 언어의 검사는 모든 언어를 실행하고 실패한 언어를 모두 밝힌다. `make check`와 `make ci-targets`는 target마다의 log와, 실패한 target마다 첫 실패 줄을 담은 summary를 `var/report`에 쓰고, 모든 CI job은 실패한 뒤에도 그 report를 upload한다.
 - Owner: 검사가 읽는 모든 경로는 `scripts/owner-checks.json`의 `inputs`에 선언되고, 그 검사를 선택하는 규칙을 가진다.
 - 메시지: 실패는 실패한 것을 기대값과 실제값, 또는 명령과 해결 방법과 함께 밝힌다.
 - Platform: script, test, recipe는 stream을 실행의 파일이나 `-`로 다루고 `/dev/stdin`, `/dev/fd`, `/proc/self` 같은 device path로 다루지 않는다. Linux는 이 경로를 파일로 열기 때문에 Node.js가 child의 input으로 주는 socket을 열지 못한다. `tests/scripts/device-paths.test.mjs`가 추적되는 모든 source를 검사한다.

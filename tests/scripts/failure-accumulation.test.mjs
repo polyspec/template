@@ -58,7 +58,10 @@ test('make keeps going after a failed target, and the full run starts make with 
   const run = spawnSync('make', ['--no-print-directory', '-f', 'Makefile', '-f', probe, 'accumulation-probe'], { cwd: ROOT, encoding: 'utf8' });
   assert.deepEqual(run.stdout.split('\n').filter(Boolean), ['a', 'b'], `make did not run the probe targets of ${probe}; stderr: ${run.stderr}`);
   assert.notEqual(run.status, 0);
-  assert.match(readFileSync(path.join(ROOT, 'scripts/full-run.mjs'), 'utf8'), /spawn\('make', \['-k', target\]/);
+  // The full run and make ci-targets run each target through runLogged of scripts/target-report.mjs (T20.1-9).
+  assert.match(readFileSync(path.join(ROOT, 'scripts/target-report.mjs'), 'utf8'), /spawn\('make', \['-k', target\]/);
+  assert.match(readFileSync(path.join(ROOT, 'scripts/full-run.mjs'), 'utf8'), /runTarget = name => runLogged\(root, name, /);
+  assert.match(readFileSync(path.join(ROOT, 'scripts/ci-targets.mjs'), 'utf8'), /await runLogged\(root, name, report\)/);
 });
 
 test('checkLanguages runs every language and names each language that failed', () => {

@@ -53,7 +53,7 @@ test('the release job of the CI workflow runs make check and keeps its record', 
   const upload = release.steps.find(step => /uses: actions\/upload-artifact@/.test(step));
   assert.ok(upload, 'the release job does not upload the record of the full run');
   assert.match(upload, /\n {8}if: \$\{\{ !cancelled\(\) \}\}\n/);
-  assert.match(upload, /\n {10}path: var\/full-run\.json\n/);
+  assert.match(upload, /\n {10}path: \|\n {12}var\/full-run\.json\n {12}var\/report\/full-run\/\n/);
 });
 
 test('a verifying CI job runs every later step after a failing step, and a make with several targets keeps going', () => {
@@ -65,7 +65,8 @@ test('a verifying CI job runs every later step after a failing step, and a make 
         if (!command) continue;
         if (!publishes) assert.match(step, /\n {8}if: \$\{\{ !cancelled\(\) \}\}(\n|$)/, `${file} job ${job.name} stops after a failing step before: ${command}`);
         for (const make of command.matchAll(/\bmake((?: [^|&;]+)?)/g)) {
-          const goals = make[1].trim().split(/\s+/).filter(word => word && !word.startsWith('-') && !word.includes('='));
+          const goals = make[1].replace(/\w+="[^"]*"/g, '').trim().split(/\s+/).filter(word => word && !word.startsWith('-') && !word.includes('='));
+          // TARGETS="..." of make ci-targets are the targets of its runner, which runs each to its end (T20.1-9).
           if (goals.length > 1) assert.match(make[0], /^make -k /, `${file} job ${job.name}: make ${make[1].trim()} stops at its first failing target`);
         }
       }
