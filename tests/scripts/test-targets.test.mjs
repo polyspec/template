@@ -48,7 +48,7 @@ for (const [target, reader] of [
 ]) {
   test(`${target} installs the Composer packages of template-php before ${reader}`, () => {
     const lines = commands(target);
-    const install = lines.indexOf('cd packages/template-php && composer install --no-interaction --quiet');
+    const install = lines.indexOf('node scripts/composer-install.mjs packages/template-php');
     assert.notEqual(install, -1, `make -n ${target} does not install the Composer packages of packages/template-php:\n${lines.join('\n')}`);
   });
 }

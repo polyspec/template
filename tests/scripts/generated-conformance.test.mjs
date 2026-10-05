@@ -20,8 +20,8 @@ const COMPILES = { timeout: 300_000 };
 before(() => {
   const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', 'template-ts', '--install'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(build.status, 0, `the build of template-ts failed:\n${build.stdout}${build.stderr}`);
-  const composer = spawnSync('composer', ['install', '--no-interaction', '--quiet'], { cwd: path.join(ROOT, 'packages/template-php'), encoding: 'utf8' });
-  assert.equal(composer.status, 0, `composer install in packages/template-php failed:\n${composer.stdout}${composer.stderr}`);
+  const composer = spawnSync(process.execPath, [path.join(ROOT, 'scripts/composer-install.mjs'), 'packages/template-php'], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(composer.status, 0, `${composer.stdout}${composer.stderr}`);
 });
 
 function generated(language, env = process.env) {

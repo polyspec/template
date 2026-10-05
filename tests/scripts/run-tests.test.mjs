@@ -221,7 +221,7 @@ test('a Rust test that outlives its timeout stops cargo test and fails by its na
 
 test('a PHPUnit test that outlives its timeout stops PHPUnit and fails by its name', async () => {
   // The test creates the PHPUnit that it runs, as make build-php does (T18.7-1); with an unchanged lock it installs nothing.
-  const install = spawnSync('composer', ['install', '--no-interaction', '--quiet'], { cwd: path.join(ROOT, 'packages/template-php'), encoding: 'utf8' });
+  const install = spawnSync(process.execPath, [path.join(ROOT, 'scripts/composer-install.mjs'), 'packages/template-php'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(install.status, 0, install.stdout + install.stderr);
   await withDirectory(async directory => {
     const file = path.join(directory, 'HangTest.php');
