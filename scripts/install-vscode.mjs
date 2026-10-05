@@ -4,10 +4,11 @@
 //   node scripts/install-vscode.mjs <directory>
 //
 // The build is the minimum version of engines.vscode in packages/template-vscode/package.json for the platform of the
-// machine, in <directory>/vscode-<platform>-<version>, the layout of @vscode/test-electron. make install runs it with
-// the network; `make test-vscode-integration` only reads the installed copy and never downloads. An install of a
-// present copy does nothing. A new copy is downloaded into <directory>/.next-<pid> and renamed into place, so a reader
-// finds either no copy or a complete one, and two installs at once keep the copy of the first.
+// machine, in <directory>/vscode-<platform>-<version>, the layout of @vscode/test-electron. `make install-vscode` runs
+// it with the network after make install, only where the integration test runs (T20.1-6);
+// `make test-vscode-integration` only reads the installed copy and never downloads. An install of a present copy does
+// nothing. A new copy is downloaded into <directory>/.next-<pid> and renamed into place, so a reader finds either no
+// copy or a complete one, and two installs at once keep the copy of the first.
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,7 +31,7 @@ const complete = directory => existsSync(join(directory, COMPLETE));
 /** The executable of the installed copy; fails with the fix when the copy is missing or incomplete. */
 export function installedExecutable(base) {
   const { version, platform, directory } = vscodeCopy(base);
-  if (!complete(directory)) throw new Error(`VS Code ${version} is not installed in ${directory}; run make install`);
+  if (!complete(directory)) throw new Error(`VS Code ${version} is not installed in ${directory}; run make install-vscode`);
   return util.downloadDirToExecutablePath(directory, platform);
 }
 

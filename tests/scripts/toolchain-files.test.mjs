@@ -150,7 +150,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // Only the commands that download leave the offline settings of the recipes (T20.1-2).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const fetches = locks.map(lock => `${online} ${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, `${online} node scripts/install-vscode.mjs ${path.join(ROOT, 'var/tools/vscode')}`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
@@ -178,6 +178,37 @@ test('every CI job installs with make install and bootstraps the tools of the ch
       assert.match(job.text, /uses: actions\/setup-go@\S+.*\n\s+with:\n\s+go-version-file: packages\/template-go\/go\.mod\n/, `${file} job ${job.name} has no Go to bootstrap make install-tools`);
       if (file.endsWith('/ci.yml')) assert.match(job.text, /- run: make install\n/, `${file} job ${job.name} does not install with make install`);
     }
+  }
+});
+
+// The targets that `make <targets>` runs: the targets, their prerequisites and, for `check`, the full suite.
+function reached(targets) {
+  const makefile = read('Makefile');
+  const prerequisites = new Map();
+  for (const line of makefile.split('\n')) {
+    const rule = /^([a-z][\w-]*(?: [a-z][\w-]*)*):(?!=)\s*([^#]*)/.exec(line);
+    if (rule) for (const name of rule[1].split(' ')) prerequisites.set(name, rule[2].trim().split(/\s+/).filter(Boolean));
+  }
+  const suite = /^CHECK_TARGETS := (.*)$/m.exec(makefile)[1].split(/\s+/).filter(Boolean);
+  const seen = new Set();
+  const visit = (name) => {
+    if (seen.has(name)) return;
+    seen.add(name);
+    for (const next of [...(prerequisites.get(name) ?? []), ...(name === 'check' ? suite : [])]) visit(next);
+  };
+  for (const target of targets) visit(target);
+  return seen;
+}
+
+test('only the CI jobs that run the VS Code integration test install VS Code, before they run it', () => {
+  const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8' });
+  assert.doesNotMatch(install.stdout, /install-vscode/, 'make install downloads VS Code for every job');
+  for (const job of jobs('.github/workflows/ci.yml')) {
+    const steps = [...job.text.matchAll(/- run: (.*)\n/g)].map(match => match[1]);
+    const runs = steps.findIndex(step => /\bmake\b/.test(step) && reached(step.replace(/^.*\bmake\b/, '').split(/\s+/).filter(word => /^[a-z][\w-]*$/.test(word))).has('test-vscode-integration'));
+    const installs = steps.indexOf('make install-vscode');
+    if (runs === -1) assert.equal(installs, -1, `ci.yml job ${job.name} installs VS Code and runs no VS Code integration test`);
+    else assert.ok(installs !== -1 && installs < runs, `ci.yml job ${job.name} runs the VS Code integration test without make install-vscode before it`);
   }
 });
 
