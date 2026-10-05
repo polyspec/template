@@ -3,7 +3,7 @@
 // failed removal fails with the path of the workspace. Each command is a step without a time limit
 // that prints its start and its result with its elapsed time on standard error.
 import assert from 'node:assert/strict';
-import { chmodSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
 import { runStepSync } from './test-progress/step.mjs';
@@ -51,17 +51,12 @@ function removesGoModuleCache() {
   }
 }
 
+// The removal fails on a workspace that no longer exists; a directory without write permission would not make it fail
+// for root, which removes it anyway (T19.11).
 function failedRemovalNamesPath() {
   const workspace = createWorkspace();
-  try {
-    const locked = join(workspace, 'locked');
-    mkdirSync(locked);
-    writeFileSync(join(locked, 'file'), '');
-    chmodSync(locked, 0o555);
-    assert.throws(() => removeWorkspace(workspace), error => error instanceof Error && error.message.includes(workspace), 'a failed removal names the workspace');
-  } finally {
-    discard(workspace);
-  }
+  discard(workspace);
+  assert.throws(() => removeWorkspace(workspace), error => error instanceof Error && error.message.includes(workspace), 'a failed removal names the workspace');
 }
 
 let failed = 0;

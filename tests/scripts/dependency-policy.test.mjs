@@ -200,7 +200,8 @@ test('the gate fails on a stale Composer lock without a registry', (t) => {
   });
   const result = run(CHECK, ['--root', root], stub.env);
   assert.equal(result.status, 1, result.stdout + result.stderr);
-  assert.match(result.stderr, /^\[dependency-policy\] packages\/template-php-ext\/composer\.json: composer validate --strict failed: .*lock file is not up to date.*\. Fix: run composer update --lock in packages\/template-php-ext\.$/m);
+  // The message of the gate, not the wording of composer, which a release of composer may change (T19.11).
+  assert.match(result.stderr, /^\[dependency-policy\] packages\/template-php-ext\/composer\.json: composer validate --strict failed: .+\. Fix: run composer update --lock in packages\/template-php-ext\.$/m);
   assert.deepEqual(registryCalls(stub.calls()), [], 'the gate queried a registry');
 });
 

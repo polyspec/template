@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { AstProgram, MapLoader, parse, parseJson, TemplateError, type ErrorCode, type Template } from '../../src/index.js';
 import { bindValue, BindError } from '../../src/value/bind.js';
 import { FsLoader } from '../../src/node/index.js';
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -194,7 +194,12 @@ describe('loader failures', () => {
       chmodSync(join(root, 'locked.tpl'), 0o000);
       mkdirSync(join(root, 'folder.tpl'));
       const files = new AstProgram({ loader: new FsLoader(root) });
-      expect(code(() => files.render('locked.tpl', {}))).toBe('E_LOAD_FAILED');
+      // Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly when the
+      // process cannot read it, and the process cannot read it exactly when it does not run as root.
+      const readable = (() => { try { readFileSync(join(root, 'locked.tpl')); return true; } catch { return false; } })();
+      expect(readable).toBe(process.getuid?.() === 0);
+      if (readable) expect(files.render('locked.tpl', {})).toBe('x');
+      else expect(code(() => files.render('locked.tpl', {}))).toBe('E_LOAD_FAILED');
       expect(code(() => files.render('folder.tpl', {}))).toBe('E_LOAD_NOT_FOUND');
       expect(code(() => files.render('missing.tpl', {}))).toBe('E_LOAD_NOT_FOUND');
     } finally {

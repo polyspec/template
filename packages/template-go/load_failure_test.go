@@ -62,7 +62,20 @@ func TestFilesystemLoaderFailures(t *testing.T) {
 		t.Fatal(err)
 	}
 	loader := template.NewFSLoader(os.DirFS(root))
-	for name, code := range map[string]errs.Code{"locked.tpl": errs.LoadFailed, "folder.tpl": errs.LoadNotFound, "missing.tpl": errs.LoadNotFound} {
+	// Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly when the process
+	// cannot read it, and the process cannot read it exactly when it does not run as root.
+	_, readErr := os.ReadFile(locked)
+	if readable, root := readErr == nil, os.Geteuid() == 0; readable != root {
+		t.Fatalf("locked.tpl readable = %v, running as root = %v", readable, root)
+	}
+	if readErr == nil {
+		if out, err := renderWith(t, loader, "locked.tpl"); err != nil || out != "x" {
+			t.Errorf("locked.tpl as root = %q, %v, want \"x\"", out, err)
+		}
+	} else if _, err := renderWith(t, loader, "locked.tpl"); templateError(t, err).Code != errs.LoadFailed {
+		t.Errorf("locked.tpl = %s, want %s", templateError(t, err).Code, errs.LoadFailed)
+	}
+	for name, code := range map[string]errs.Code{"folder.tpl": errs.LoadNotFound, "missing.tpl": errs.LoadNotFound} {
 		_, err := renderWith(t, loader, name)
 		if got := templateError(t, err); got.Code != code {
 			t.Errorf("%s = %s, want %s", name, got.Code, code)

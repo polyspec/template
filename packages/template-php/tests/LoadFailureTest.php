@@ -66,8 +66,17 @@ final class LoadFailureTest extends TestCase
         file_put_contents($root . '/locked.tpl', 'x');
         chmod($root . '/locked.tpl', 0o000);
         try {
+            // Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly when the
+            // process cannot read it, and the process cannot read it exactly when it does not run as root.
+            $readable = @file_get_contents($root . '/locked.tpl') !== false;
+            $asRoot = posix_geteuid() === 0;
+            try {
+                $locked = (new AstProgram(new FilesystemLoader($root)))->render('locked.tpl', []);
+            } catch (TemplateError $error) {
+                $locked = $error->errorCode;
+            }
             $codes = [];
-            foreach (['locked.tpl', 'folder.tpl', 'missing.tpl'] as $name) {
+            foreach (['folder.tpl', 'missing.tpl'] as $name) {
                 $codes[] = self::failure(new FilesystemLoader($root), $name)->errorCode;
             }
         } finally {
@@ -76,7 +85,9 @@ final class LoadFailureTest extends TestCase
             rmdir($root . '/folder.tpl');
             rmdir($root);
         }
-        $this->assertSame(['E_LOAD_FAILED', 'E_LOAD_NOT_FOUND', 'E_LOAD_NOT_FOUND'], $codes);
+        $this->assertSame($asRoot, $readable, 'locked.tpl is readable exactly when the test runs as root');
+        $this->assertSame($readable ? 'x' : 'E_LOAD_FAILED', $locked);
+        $this->assertSame(['E_LOAD_NOT_FOUND', 'E_LOAD_NOT_FOUND'], $codes);
     }
 
     public function testTextThatIsNotOneJsonDocumentIsInvalidJson(): void
