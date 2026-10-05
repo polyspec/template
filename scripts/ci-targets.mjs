@@ -7,6 +7,7 @@
 // written to <report directory>/targets/<target>.log; summary.md names each failed target with its first failure lines
 // (scripts/target-report.mjs). The run holds the lock <report directory>.lock, so two runs never write one report.
 // It ends with status 1 when a target failed. `make ci-targets TARGETS="..."` starts it in the CI jobs.
+import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,6 +21,8 @@ if (!directory || targets.length === 0) {
   process.exit(2);
 }
 const report = path.resolve(directory);
+// The lock lies beside the report, in var/report, which a new checkout does not have (T20.1-11).
+mkdirSync(path.dirname(report), { recursive: true });
 const release = acquire(`${report}.lock`, root);
 try {
   startReport(report);

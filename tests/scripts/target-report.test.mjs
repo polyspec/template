@@ -19,16 +19,18 @@ test('a run with a failing target keeps going and leaves the log of every target
   // MAKEFILES adds the probe targets to every make that the run starts.
   const probe = path.join(directory, 'probe.mk');
   writeFileSync(probe, 'report-probe-fail:\n\t@echo preparing the probe; echo "✖ the probe failed: expected 1, actual 2"; false\nreport-probe-pass:\n\t@echo the probe passed\n');
-  const report = path.join(directory, 'report');
+  // The parent of the report does not exist yet, as var/report in a new checkout.
+  const report = path.join(directory, 'var/report/ci-targets');
   const summaryFile = path.join(directory, 'step-summary.md');
   const run = spawnSync(process.execPath, ['scripts/ci-targets.mjs', report, 'report-probe-fail', 'report-probe-pass'], {
     cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFILES: probe, GITHUB_STEP_SUMMARY: summaryFile },
   });
   assert.equal(run.status, 1, run.stdout + run.stderr);
+  // GNU Make 4 prints `make[N]: Entering directory` around the output of a make below another make (T17.1-4).
   const failing = readFileSync(path.join(report, 'targets/report-probe-fail.log'), 'utf8');
-  assert.match(failing, /^preparing the probe\n✖ the probe failed: expected 1, actual 2\n/);
+  assert.match(failing, /^(?:make\[\d+\]: Entering directory .*\n)?preparing the probe\n✖ the probe failed: expected 1, actual 2\n/);
   assert.match(failing, /\[report\] make -k report-probe-fail ended with status 2\n$/);
-  assert.match(readFileSync(path.join(report, 'targets/report-probe-pass.log'), 'utf8'), /^the probe passed\n/, 'the run stopped at the failed target');
+  assert.match(readFileSync(path.join(report, 'targets/report-probe-pass.log'), 'utf8'), /^(?:make\[\d+\]: Entering directory .*\n)?the probe passed\n/, 'the run stopped at the failed target');
   const summary = readFileSync(path.join(report, 'summary.md'), 'utf8');
   assert.match(summary, /^# make ci-targets report-probe-fail report-probe-pass\n\n1 of 2 targets passed\.\n/);
   assert.match(summary, /\| report-probe-fail \| failed \| \d+\.\d s \|\n\| report-probe-pass \| passed \| \d+\.\d s \|/);
