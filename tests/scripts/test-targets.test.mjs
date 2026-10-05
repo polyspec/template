@@ -24,7 +24,7 @@ for (const [target, runner] of [
   ['test-language', 'node scripts/run-tests.mjs vitest --cwd packages/template-language'],
   ['test-lsp', 'node scripts/run-tests.mjs vitest --cwd packages/template-lsp'],
   ['test-codemirror', 'node scripts/run-tests.mjs vitest --cwd packages/template-codemirror'],
-  ['test-vscode', 'node scripts/run-tests.mjs node --cwd packages/template-vscode -- tests/extension.test.mjs tests/integration-step.test.mjs'],
+  ['test-vscode', 'node scripts/run-tests.mjs node --cwd packages/template-vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs'],
 ]) {
   test(`${target} runs its unit tests through scripts/run-tests.mjs`, () => {
     const lines = commands(target);

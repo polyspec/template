@@ -289,7 +289,7 @@ test-vscode: test-vscode-grammar test-vscode-unit test-vscode-types ## Grammar t
 test-vscode-grammar: build-vscode
 	cd $(VSCODE_DIR) && $(TMGRAMMAR) --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json "tests/grammar/*.tpl"
 test-vscode-unit: build-vscode
-	node scripts/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs
+	node scripts/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
 test-vscode-types: build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
