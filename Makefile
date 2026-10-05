@@ -6,6 +6,8 @@
 # toolchain at run time.
 export PATH := $(CURDIR)/var/tools/bin:$(HOME)/.cargo/bin:$(PATH)
 export GOTOOLCHAIN := local
+# go builds into the build cache of the checkout, never into a cache that other checkouts and runs share (T19.14).
+export GOCACHE := $(CURDIR)/var/go/cache
 # GNU Make 3.81 starts a recipe line without shell syntax itself and finds its program with the PATH that make started
 # with, not the exported PATH above, also when SHELL names another shell: a line `npm ci` ran the npm of the machine. A
 # recipe therefore starts npm by the path of its wrapper, $(NPM), and go and gofmt only in lines that the shell runs,
@@ -521,7 +523,7 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: clean-vscode-test ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 
 clean-vscode-test: ## Remove .vscode-test while holding its lock; fails with the holder while an integration run holds it
 	node scripts/holder-lock.mjs run $(VSCODE_TEST).lock -- rm -rf $(VSCODE_TEST)

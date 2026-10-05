@@ -62,7 +62,7 @@ func request(title any, name any) (value.Value, template.RenderOptions) { assign
 func kind(err error) string { if err == nil { return "rendered" }; var te *errs.Error; if errors.As(err, &te) { return "template " + string(te.Code) }; return "argument" }
 func TestGeneratedArguments(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; assign, options := request("T", "N"); actual, err := program.Render("input.tpl", assign, options); if err != nil || actual != "T|N" { t.Fatalf("Go renders %q %v", actual, err) }; first, firstOptions := request(1.0, "N"); _, firstErr := program.Render("input.tpl", first, firstOptions); second, secondOptions := request("T", 2.0); _, secondErr := program.Render("input.tpl", second, secondOptions); if kind(firstErr) != "argument" || kind(secondErr) != "argument" { t.Fatalf("Go reports %s, %s", kind(firstErr), kind(secondErr)) } }
 `);
-        run('Go', 'go', ['test', '.'], goDir, { GOCACHE: '/tmp/template-go-cache' });
+        run('Go', 'go', ['test', '.'], goDir);
       } finally {
         rmSync(goDir, { recursive: true, force: true });
       }

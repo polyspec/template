@@ -74,7 +74,7 @@ func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGenerat
   options := template.RenderOptions{Define: map[string]template.DefineInput{"part": {Template: "part.tpl", Data: bound(t, ${goString(json(cases.definitionData))})}}}
   actual, err := program.Render("define.tpl", fixture(t, ${goString(json(cases.assign))}), options); if err != nil || actual != ${goString(cases.outputs.define)} { t.Fatalf("bound definition data: %q %v", actual, err) } }
 `);
-        run('go', ['test', '.'], goDir, { GOCACHE: '/tmp/template-go-cache' });
+        run('go', ['test', '.'], goDir);
       } finally {
         rmSync(goDir, { recursive: true, force: true });
       }
