@@ -1,4 +1,5 @@
-// Bounded steps of the generated conformance runners. A step runs a command in its own process
+// Steps of the generated conformance runners. A long step, such as a compiler, runs without a time
+// limit and is judged by its exit status. The step of one case runs a command in its own process
 // group, or a function in a worker, and is stopped when it outlives its deadline, so one case that
 // does not end fails by its name instead of stopping the run.
 import { spawn } from 'node:child_process';
@@ -11,10 +12,25 @@ export function stepProgress() {
 }
 
 /**
- * Runs a command and resolves `{ status, stdout, stderr, timedOut }`. A command that runs longer
- * than `timeoutMs` is killed with its process group and resolves with `timedOut: true`.
+ * Runs a long step, such as a compiler, without a time limit and resolves
+ * `{ status, stdout, stderr }`; the step is judged by its exit status and its output.
+ */
+export async function runStep(command, args, { cwd, env, stdio = 'pipe' }) {
+  const { status, stdout, stderr } = await run(command, args, { cwd, env, stdio });
+  return { status, stdout, stderr };
+}
+
+/**
+ * Runs the command of one case and resolves `{ status, stdout, stderr, timedOut }`. A command
+ * that runs longer than `timeoutMs` is killed with its process group and resolves with
+ * `timedOut: true`.
  */
 export function runBounded(command, args, { cwd, env, timeoutMs, stdio = 'pipe' }) {
+  return run(command, args, { cwd, env, stdio, timeoutMs });
+}
+
+// Runs a command in its own process group; without `timeoutMs` it has no time limit.
+function run(command, args, { cwd, env, timeoutMs, stdio }) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { cwd, env, detached: true, stdio: ['ignore', stdio, stdio] });
     let stdout = '';
@@ -22,7 +38,7 @@ export function runBounded(command, args, { cwd, env, timeoutMs, stdio = 'pipe' 
     child.stdout?.setEncoding('utf8').on('data', data => { stdout += data; });
     child.stderr?.setEncoding('utf8').on('data', data => { stderr += data; });
     let timedOut = false;
-    const timer = setTimeout(() => {
+    const timer = timeoutMs === undefined ? undefined : setTimeout(() => {
       timedOut = true;
       try { process.kill(-child.pid, 'SIGKILL'); } catch { /* the group has ended */ }
     }, timeoutMs);

@@ -2,18 +2,21 @@
 // time, and that the bounded steps they use stop a command or a worker at its deadline.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { inWorker, runBounded } from '../runner/bounded.mjs';
+import { slowCommandPath } from './slow-command.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A runner compiles the case and, for Go and Rust, a test binary.
 const COMPILES = { timeout: 300_000 };
 
-function generated(language) {
-  const run = spawnSync(process.execPath, [path.join(ROOT, `tests/runner/conformance-generated-${language}.mjs`), '--case', 'echo/path'], { cwd: ROOT, encoding: 'utf8' });
+function generated(language, env = process.env) {
+  const run = spawnSync(process.execPath, [path.join(ROOT, `tests/runner/conformance-generated-${language}.mjs`), '--case', 'echo/path'], { cwd: ROOT, env, encoding: 'utf8' });
   assert.equal(run.status, 0, `${run.stdout}${run.stderr}`);
   return run.stdout;
 }
@@ -23,6 +26,18 @@ test('the TypeScript runner prints the tsc step and each render with its elapsed
   assert.match(stdout, /▶ tsc \(1 files\)\n[^]*✔ tsc \(1 files\) \(\d+\.\ds\)\n/);
   assert.match(stdout, /▶ echo\/path › render\n[^]*✔ echo\/path › render \(\d+\.\ds\)\n/);
   assert.match(stdout, /1\/1 TypeScript generated conformance cases passed/);
+});
+
+test('the tsc step has no deadline and is judged by the exit code of tsc', COMPILES, () => {
+  // npx waits 1.5 s before it runs tsc, so tsc ends later than a small limit would allow.
+  const directory = mkdtempSync(path.join(tmpdir(), 'template-slow-tsc-'));
+  try {
+    const stdout = generated('ts', { ...process.env, PATH: slowCommandPath(directory, 'npx', 1.5) });
+    assert.match(stdout, /▶ tsc \(1 files\)\n[^]*✔ tsc \(1 files\) \((?:[2-9]|\d\d+)\.\ds\)\n/);
+    assert.match(stdout, /1\/1 TypeScript generated conformance cases passed/);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test('the Go runner prints each case test with its elapsed time', COMPILES, () => {
