@@ -61,9 +61,9 @@
 
 ## 필수 검사
 
-- 작업이 진행 중일 때는 변경을 소유한 Red와 Green test만 실행한다. 커밋 전에는 `make owner-check`를 실행한다. 이 명령은 `scripts/owner-checks.json`이 바뀐 경로의 owner로 선언한 target과 test를 실행하고 전체 suite는 실행하지 않으며, 어느 규칙도 소유하지 않는 경로에서 실패한다. 새 경로는 같은 변경에서 그 file에 owner를 얻는다. `tests/cases` 아래 변경은 `make conformance-cases`로 그 case만 모든 mode에서 실행한다.
-- `docs/plans/execution-checklist.md`에서 작업을 `[o]`로 표시하기 전에 그 작업의 소유 명령, 즉 Verification 열의 명령을 커밋된 tree에서 실행한다.
-- `make check`는 활성 작업이 모두 끝났을 때 한 번 실행한다. 수정마다, 작업마다 실행하지 않고, 변경 없이 반복하지 않는다. guard `scripts/full-run.mjs`가 어떤 단계보다 먼저 이를 강제한다. 작업이 `[~]`이거나, 추적 파일의 변경이 커밋되지 않았거나, `var/full-run.json`이 현재 tree의 전체 실행을 기록하고 있으면 `make check`는 거부된다. `make rerun-failed`는 현재 tree에서 통과하지 못한 target만 다시 실행한다(`docs/operations/development.md`).
+- 개발에서는 unit test만 실행한다. 작업이 진행 중일 때는 변경을 소유한 Red와 Green unit test를 실행한다. 개발 중에도, commit이나 push 전에도 전체 검사나 end-to-end 검사를 로컬에서 실행하지 않는다. `make check`, `make rerun-failed`, `make owner-check`, conformance runner, browser test, VS Code integration test가 그렇다. CI가 push 뒤에 이것을 실행하며(`.github/workflows/ci.yml`), job마다의 report(`var/report`)가 모든 실패를 log와 함께 밝힌다. 새 경로는 같은 변경에서 `scripts/owner-checks.json`에 owner를 얻고, owner check는 CI에서 실행된다.
+- 작업은 커밋된 tree에서 unit test가 통과하고 그것을 담은 push를 CI가 통과했을 때 `docs/plans/execution-checklist.md`에서 `[o]`가 된다. Verification 열의 소유 명령이 전체 검사나 end-to-end 검사이면 로컬이 아니라 CI에서 실행된다.
+- `make check`는 push 뒤에 CI의 release job에서 tree마다 한 번 전체 suite를 실행한다. guard `scripts/full-run.mjs`가 어떤 단계보다 먼저 이를 강제한다. 작업이 `[~]`이거나, 추적 파일의 변경이 커밋되지 않았거나, `var/full-run.json`이 현재 tree의 전체 실행을 기록하고 있으면 `make check`는 거부된다. `make rerun-failed`는 현재 tree에서 통과하지 못한 target만 다시 실행한다(`docs/operations/development.md`).
 - 모든 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 실행 전체, package, 파일에 시간 제한을 두지 않는다. 수십 분 걸리는 test와 시작과 끝만 출력하는 test는 결함이다.
 - build, `tsc` type check, 설치, download, program 설치나 실행, 실행 전체 같은 오래 걸리는 작업은 단계마다 log 줄을 출력하고 timeout을 두지 않으며, 출력이 없는 시간의 deadline도 두지 않는다. 성공과 실패는 exit status, 결과, 오류로 판단한다. 시간 제한은 예상보다 느린 정상 실행을 실패시키기 때문이다. test case는 짧은 검증 단위이므로 자기 timeout을 유지한다.
 
@@ -73,7 +73,7 @@
 - 작업 상태는 네 가지다. `[ ]` 대기, `[~]` 진행 중, `[o]` 완료, `[!] cause: <원인>; retry: <조건>` 일시 우회. `scripts/check-documents.mjs`는 다른 상태를 받지 않는다.
 - 작업은 작업 표의 한 행이다. 첫 칸은 ID로 `T<wave>.<number>` 또는 `T<wave>.<track>.<number>`이고 `T12.1-1` 같은 하위 항목 ID도 쓴다. 다른 칸은 산출물, test, 소유 명령을 적고, 마지막 칸은 상태다. checklist file에서 상태 표시와 task list 표시 `[x]`, `[X]`는 작업 행의 마지막 칸 시작에만 둔다. 범례, 본문, 작업 text, 다른 표 칸, inline code는 상태를 말로 적으므로 checklist를 읽는 도구가 모든 표시를 믿을 수 있다.
 - checklist는 작업만 담는다: 제목, 웨이브와 절의 heading, 그리고 `| ID |`로 시작하는 header 행, 그 구분 행, 작업 행으로 이루어진 작업 표. 웨이브의 계획, 의존 관계, 작업의 원인, 완료 기준, 완료 정의와 그 증거는 `docs/plans/execution-plan.md`에 둔다. `scripts/check-documents.mjs`는 checklist의 그 밖의 줄과 표시에서 file, 줄, 열을 적으며 실패한다.
-- 작업의 Verification 열에는 소유 명령을 적는다. 소유 명령은 `make check`가 아니라 그 작업의 Red와 Green test를 실행한다. 이미 `[o]`인 작업은 자기 명령을 유지한다.
+- 작업의 Verification 열에는 소유 명령을 적는다. 소유 명령은 `make check`가 아니라 그 작업의 Red와 Green test를 실행한다. 로컬에서는 그 unit test만 실행하고 나머지는 CI가 실행한다. 이미 `[o]`인 작업은 자기 명령을 유지한다.
 - `[!]`는 이 작업을 우회하지 않으면 다음 작업을 진행할 수 없을 때만 쓴다. 재시도 조건이 성립하면 승인을 기다리지 않고 재개한다. `[!]`는 완료가 아니다. 감사는 `[!]` 작업과 그 원인·재시도 조건만 다루고, 관련 없는 full test를 반복하지 않는다.
 - 새 문제는 새 작업으로 올린다. `[o]` 작업과 관련된 문제는 그 작업의 ID를 이어 붙인 하위 항목(`T12.1-1`, `T12.1-2`)으로 올려 `[~]`와 `[o]`를 거치게 하고, `[o]` 작업의 상태는 그대로 둔다.
 - 독립 작업은 병렬로 진행해도 되지만, 새 작업을 시작하는 것보다 진행 중인 작업을 끝내는 것이 먼저다. `[~]`가 아니라 `[o]`가 계속 늘어나야 한다.
