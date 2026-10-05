@@ -5,7 +5,7 @@
 // worker under its own deadline.
 // Every step and every case prints its start and its result with its elapsed time.
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
@@ -15,11 +15,13 @@ import { inWorker, runStep, seconds, stepProgress } from './bounded.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 import { tsc } from '../../scripts/tools.mjs';
+import { nodeWorkspace } from '../../scripts/temporary-workspace.mjs';
 
 // The time limit of the render of one case.
 const RENDER_TIMEOUT_MS = 30_000;
 
-const temporary = mkdtempSync(join(root, '.generated-conformance-ts-'));
+// The generated sources import @polyspec/template, which the workspace holds as a copy of the installed package.
+const temporary = nodeWorkspace('generated-conformance-ts');
 const sources = join(temporary, 'source');
 const output = join(temporary, 'output');
 mkdirSync(sources);

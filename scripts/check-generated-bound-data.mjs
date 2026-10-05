@@ -3,18 +3,20 @@
 // that the generated program renders a bound map (VAL-22) as assign and as definition data with the
 // bytes of the host map (RT-61). The root is typed, so the program converts a bound assign to its
 // root record and bound definition data to the data record of `part` (RT-68).
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
+import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/bound-data');
 const cases = JSON.parse(readFileSync(join(fixture, 'cases.json'), 'utf8'));
-const temporary = mkdtempSync(join(root, '.generated-bound-data-'));
+// The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
+const temporary = nodeWorkspace('generated-bound-data');
 const run = (command, args, cwd, env = {}) => {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
   if (result.status !== 0) throw new Error(`${command} failed\n${result.stdout}${result.stderr}`);
@@ -47,8 +49,7 @@ check(program.render('define.tpl', cases.assign, { define: { part: { template: '
   run(process.execPath, [tsRunner], root);
 
   // Go.
-  const goDir = join(root, 'packages/template-go', `.generated-bound-data-${process.pid}`);
-  mkdirSync(goDir);
+  const goDir = goWorkspace('generated-bound-data-go');
   try {
     writeFileSync(join(goDir, 'generated.go'), source('go'));
     const goHeader = `package generated
@@ -76,7 +77,8 @@ func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGenerat
 
   // Rust.
   writeFileSync(join(temporary, 'bound.rust'), source('rust'));
-  const rustTest = join(root, 'packages/template-rust/tests/generated_bound_data_check.rs');
+  const rust = rustWorkspace('generated-bound-data-rust');
+  const rustTest = rust.test('generated_bound_data_check');
   writeFileSync(rustTest, `mod generated { include!(${rustString(join(temporary, 'bound.rust'))}); }
 use polyspec_template::{DefineData, DefineInput, Program, RenderOptions, RenderTarget, RuntimeEnvironment, bind, merge};
 fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap() }
@@ -97,9 +99,9 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
 }
 `);
   try {
-    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--manifest-path', join(root, 'packages/template-rust/Cargo.toml'), '--test', 'generated_bound_data_check'], root, { RUSTFLAGS: '-Dwarnings -Adead-code' });
+    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
   } finally {
-    rmSync(rustTest, { force: true });
+    rmSync(rust.directory, { recursive: true, force: true });
   }
 
   // PHP.

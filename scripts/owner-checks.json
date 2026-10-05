@@ -35,6 +35,7 @@
     { "paths": ["scripts/check-showcase-html.mjs", "tools/showcase/**", "examples/site/**"], "targets": ["showcase-check"] },
     { "paths": ["scripts/check-ast-artifact.mjs", "scripts/check-generated-artifact.mjs", "scripts/check-compiler-ir.mjs", "scripts/check-conformance-type-manifest.mjs"], "targets": ["compiler-ir-check"] },
     { "paths": ["scripts/check-typed-generator.mjs"], "targets": ["typed-generator-compile-check"] },
+    { "paths": ["scripts/temporary-workspace.mjs"], "targets": ["generated-native-check", "typed-generator-compile-check"], "tests": ["tests/scripts/temporary-files.test.mjs", "tests/scripts/generated-conformance.test.mjs"] },
     { "paths": ["scripts/check-language-test-matrix*.mjs"], "targets": ["language-test-matrix"] },
     { "paths": ["scripts/check-editor-boundaries.mjs", "scripts/editor-fixtures.mjs"], "targets": ["editor-boundary-check", "test-language", "test-lsp", "test-codemirror"] },
     { "paths": ["scripts/check-install-workspace.mjs", "scripts/install-workspace.mjs", "scripts/check-package-installs.mjs"], "targets": ["install-check"], "tests": ["tests/scripts/long-steps.test.mjs", "tests/scripts/package-installs.test.mjs"] },

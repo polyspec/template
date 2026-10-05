@@ -3,7 +3,7 @@
 // tests are named after the cases, and runs it with scripts/run-tests.mjs, which prints each case
 // test with its elapsed time and stops a test that outlives its own timeout.
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { rustString } from '../../tools/compiler/backend-support.mjs';
@@ -13,13 +13,16 @@ import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
+import { rustWorkspace } from '../../scripts/temporary-workspace.mjs';
 
 // The time limit of one generated case test.
 const CASE_TIMEOUT_SECONDS = 30;
 
-const crate = join(root, 'packages/template-rust');
-const temporary = mkdtempSync(join(crate, 'generated_conformance_'));
-const integrationTest = join(crate, 'tests/generated_conformance_check.rs');
+// A crate of the system temporary directory that depends on packages/template-rust; it holds the generated cases and
+// their integration test.
+const workspace = rustWorkspace('generated-conformance-rust');
+const temporary = workspace.directory;
+const integrationTest = workspace.test('generated_conformance_check');
 // Paths and expected output are embedded as exact Rust string literals.
 const quote = rustString;
 
@@ -123,15 +126,14 @@ ${modules}
 ${tests}
 `);
   if (runnable.length > 0) {
-    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'cargo', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', crate, '--', '--locked', '--test', 'generated_conformance_check'], {
+    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'cargo', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', '--locked', '--offline', '--test', 'generated_conformance_check'], {
       cwd: root,
       stdio: 'inherit',
-      env: { ...process.env, PATH: `${resolve(process.env.HOME, '.cargo/bin')}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' },
+      env: { ...workspace.env, PATH: `${resolve(process.env.HOME, '.cargo/bin')}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' },
     });
     if (result.status !== 0) failures.push('generated Rust execution failed; the failed cases are listed above');
   }
 } finally {
-  rmSync(integrationTest, { force: true });
   rmSync(temporary, { recursive: true, force: true });
 }
 

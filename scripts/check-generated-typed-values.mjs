@@ -3,20 +3,22 @@
 // that typed records, typed lists and typed maps reach host functions, built-in functions and
 // operators as canonical values (VAL-21, EXP-34, docs/spec/compiler.md). The AST program renders the
 // same template with the same data to the same output.
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
+import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/typed-values');
 const types = join(fixture, 'types.json');
 const source = readFileSync(join(fixture, 'input.tpl'), 'utf8');
 const expected = readFileSync(join(fixture, 'expected.html'), 'utf8');
-const temporary = mkdtempSync(join(root, '.generated-typed-values-'));
+// The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
+const temporary = nodeWorkspace('generated-typed-values');
 const run = (command, args, cwd, env = {}) => {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
   if (result.status !== 0) throw new Error(`${command} failed\n${result.stdout}${result.stderr}`);
@@ -62,8 +64,7 @@ if (reference !== expected) throw new Error('TypeScript AST typed values differ:
   run(process.execPath, [tsRunner], root);
 
   // Go.
-  const goDir = join(root, 'packages/template-go', `.generated-typed-values-${process.pid}`);
-  mkdirSync(goDir);
+  const goDir = goWorkspace('generated-typed-values-go');
   try {
     writeFileSync(join(goDir, 'generated.go'), compileSource(graphManifest, types, 'go'));
     writeFileSync(join(goDir, 'generated_test.go'), `package generated
@@ -79,16 +80,17 @@ func TestGeneratedTypedValues(t *testing.T) { program, err := NewGeneratedProgra
   // Rust.
   const rustSource = join(temporary, 'typed.rust');
   writeFileSync(rustSource, compileSource(graphManifest, types, 'rust'));
-  const rustTest = join(root, 'packages/template-rust/tests/generated_typed_values_check.rs');
+  const rust = rustWorkspace('generated-typed-values-rust');
+  const rustTest = rust.test('generated_typed_values_check');
   writeFileSync(rustTest, `mod generated { include!(${rustString(rustSource)}); }
 use polyspec_template::{Program, RenderOptions, RenderTarget, RuntimeEnvironment, Value};
 fn describe_value(value: &Value) -> String { match value { Value::Null => "null".to_string(), Value::Bool(value) => format!("bool({value})"), Value::Number(value) => format!("number({value})"), Value::Str(text) => format!("string({text})"), Value::List(items) => format!("list({})", items.iter().map(describe_value).collect::<Vec<_>>().join(",")), Value::Map(map) => format!("map({})", map.iter().map(|(key, item)| format!("{key}={}", describe_value(item))).collect::<Vec<_>>().join(",")), _ => "unexpected".to_string() } }
 #[test] fn generated_typed_values_match() { let mut runtime = RuntimeEnvironment::new(None, std::collections::HashMap::new()); runtime.register("describe", Box::new(|args, _| Ok(Value::text(args.iter().map(describe_value).collect::<Vec<_>>().join(","))))).unwrap(); let program = generated::GeneratedProgram::new(runtime); let assign = serde_json::json!({ "page": { "title": "T", "count": 2 }, "rows": [{ "name": "a" }, { "name": "b" }], "tags": { "x": 1 } }); assert_eq!(program.render(RenderTarget::Name("input.tpl"), &assign, &RenderOptions::default()).unwrap(), ${rustString(expected)}); }
 `);
   try {
-    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--manifest-path', join(root, 'packages/template-rust/Cargo.toml'), '--test', 'generated_typed_values_check'], root, { RUSTFLAGS: '-Dwarnings -Adead-code' });
+    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_typed_values_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
   } finally {
-    rmSync(rustTest, { force: true });
+    rmSync(rust.directory, { recursive: true, force: true });
   }
 
   // PHP.
