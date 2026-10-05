@@ -889,8 +889,8 @@
       "title": "Release verification matrix",
       "title_ko": "Release verification matrix",
       "status": "implemented",
-      "description": "Run contract, unit, compiler, conformance, mutation, package install, presentation and performance gates in a fixed order.",
-      "description_ko": "계약, 단위, compiler, 적합성, mutation, package 설치, 표시와 성능 gate를 고정 순서로 실행한다.",
+      "description": "Run contract, unit, compiler, conformance, mutation, package install, presentation and performance gates as the one full suite of make check, every target to its end.",
+      "description_ko": "계약, 단위, compiler, 적합성, mutation, package 설치, 표시와 성능 gate를 make check의 유일한 전체 suite로, 모든 target을 끝까지 실행한다.",
       "inputs": {
         "type": "ReleaseCheckout",
         "fields": [
@@ -935,7 +935,9 @@
       ],
       "tests": [
         "scripts/check-clean-release.mjs",
-        "scripts/check-compiler-interface-mutations.mjs"
+        "scripts/check-compiler-interface-mutations.mjs",
+        "tests/scripts/suite-parity.test.mjs",
+        "tests/scripts/clean-release.test.mjs"
       ],
       "verification": [
         {

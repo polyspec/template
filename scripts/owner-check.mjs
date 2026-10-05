@@ -58,10 +58,24 @@ function makeTargets(makefile) {
   return new Set([...makefile.matchAll(/^([a-zA-Z0-9_-]+):(?!=)/gm)].map(match => match[1]));
 }
 
+/**
+ * The targets of the Makefile that run the full suite: `check`, `rerun-failed`, and every target whose recipe starts the
+ * guard scripts/full-run.mjs or the clean release check scripts/check-clean-release.mjs, which runs the guard in a clean
+ * checkout (T17.1-2).
+ */
+export function fullSuiteTargets(makefile) {
+  const result = new Set(['check', 'rerun-failed']);
+  for (const match of makefile.matchAll(/^([a-zA-Z0-9_-]+):(?!=)[^\n]*\n((?:\t[^\n]*\n?)*)/gm)) {
+    if (/scripts\/(full-run|check-clean-release)\.mjs/.test(match[2])) result.add(match[1]);
+  }
+  return result;
+}
+
 /** The errors of the declaration against the tracked paths and the Makefile. */
 export function validate(declaration, tracked, makefile, exists) {
   const errors = [];
   const targets = makeTargets(makefile);
+  const fullSuite = fullSuiteTargets(makefile);
   const suite = (makefile.match(/^CHECK_TARGETS := (.*)$/m)?.[1] ?? '').split(/\s+/).filter(Boolean);
   const rules = declaration.owners.map(rule => ({ ...rule, expressions: rule.paths.map(globExpression) }));
   for (const rule of rules) {
@@ -70,7 +84,7 @@ export function validate(declaration, tracked, makefile, exists) {
     });
     for (const target of rule.targets ?? []) {
       if (!targets.has(target)) errors.push(`${DECLARATION}: the target ${target} of ${rule.paths.join(' ')} is not a target of the Makefile`);
-      if (target === 'check' || target === 'rerun-failed') errors.push(`${DECLARATION}: the target ${target} runs the full suite, which an owner check never runs`);
+      if (fullSuite.has(target)) errors.push(`${DECLARATION}: the target ${target} runs the full suite, which an owner check never runs`);
     }
     for (const test of rule.tests ?? []) if (test !== '$path' && !exists(test)) errors.push(`${DECLARATION}: the test ${test} of ${rule.paths.join(' ')} does not exist`);
   }

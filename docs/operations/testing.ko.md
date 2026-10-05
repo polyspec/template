@@ -8,7 +8,7 @@
 make release-test-matrix
 ```
 
-일곱 계층을 순서대로 실행하며 처음 실패한 위치에서 중단한다.
+이 명령은 `make check`의 전체 suite를 같은 guard `scripts/full-run.mjs`로 실행한다. `Makefile`의 `CHECK_TARGETS`에 있는 모든 target을 앞선 target의 실패와 상관없이 각각 `make <target>`으로 끝까지 실행하고, target마다 결과와 걸린 시간을 `var/full-run.json`에 기록한다. `CHECK_TARGETS`는 전체 suite의 유일한 목록이며 `make check`, `make release-test-matrix`, `make release-check`, CI workflow의 release job이 이를 실행하고, release job은 그 기록을 올린다. guard는 tree마다 한 번 실행하므로, 어떤 tree에서 `make check`를 실행한 뒤에는 `make release-test-matrix`가 그 tree를 그 실행을 밝히며 거부한다. `make rerun-failed`는 통과하지 못한 target을 다시 실행한다. target들은 일곱 계층을 다룬다.
 
 | 계층 | 범위 | 실패 근거 |
 | --- | --- | --- |
@@ -32,4 +32,4 @@ Package 설치 검사는 package, 설치 프로젝트, Go module cache와 Cargo 
 
 짧은 성능 실행은 안정적인 속도 점수가 아니라 정확성 회귀 검사다. 언어·모드마다 새 표본 세 개를 만들고 출력 식별값과 모든 metric field를 검사하며 커밋된 21표본 보고서는 바꾸지 않는다.
 
-발행 전에는 `make release-check`를 실행한다. 이 명령은 source worktree가 깨끗한지 확인하고 `HEAD`의 분리된 임시 worktree를 만든 다음 lock으로 고정한 JavaScript 의존성과 browser를 설치하고 그 안에서 전체 release matrix를 실행한다. Matrix는 첫 계약 검사 전에 lock으로 고정한 PHP 의존성을 준비하고 확장 test target은 자체 의존성을 준비한다. 임시 checkout은 성공하거나 실패해도 제거한다.
+발행 전에는 `make release-check`를 실행한다. 이 명령은 source worktree가 깨끗한지 확인하고 `HEAD`의 분리된 임시 worktree를 만든 다음 lock으로 고정한 JavaScript 의존성과 browser를 설치하고 그 안에서 전체 release matrix를 실행한다. 각 target은 lock으로 고정한 PHP 의존성 같은 자기 의존성을 준비한다. 임시 checkout은 성공하거나 실패해도 제거한다.

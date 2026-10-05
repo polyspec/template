@@ -8,7 +8,7 @@ The release gate runs with:
 make release-test-matrix
 ```
 
-It executes seven layers in order and stops at the first failure.
+It runs the full suite of `make check` through the same guard `scripts/full-run.mjs`: every target of `CHECK_TARGETS` in the `Makefile`, each with `make <target>` to its end, whether an earlier target failed or not, and it records the result of each target with its elapsed time in `var/full-run.json`. `CHECK_TARGETS` is the one list of the full suite; `make check`, `make release-test-matrix`, `make release-check` and the release job of the CI workflow run it, and the release job uploads the record. The guard runs once per tree, so after `make check` on a tree `make release-test-matrix` refuses that tree and names its run; `make rerun-failed` reruns the targets that did not pass. The targets cover seven layers:
 
 | Layer | Scope | Failure evidence |
 | --- | --- | --- |
@@ -32,4 +32,4 @@ The package install check creates its packages, install projects, Go module cach
 
 The short performance run is a correctness regression, not a stable speed score. It creates three fresh samples for every language-mode row, verifies output identity and validates all metric fields without replacing the committed 21-sample report.
 
-Before publication, `make release-check` requires a clean source worktree, creates a detached temporary worktree at `HEAD`, installs the locked JavaScript dependencies and browser, and runs the complete release matrix there. The matrix prepares the locked PHP dependencies before its first contract check, and the extension test target prepares its own dependencies. The temporary checkout is removed whether the matrix succeeds or fails.
+Before publication, `make release-check` requires a clean source worktree, creates a detached temporary worktree at `HEAD`, installs the locked JavaScript dependencies and browser, and runs the complete release matrix there. Each target prepares its own dependencies, such as the locked PHP dependencies. The temporary checkout is removed whether the matrix succeeds or fails.
