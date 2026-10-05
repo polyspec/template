@@ -52,4 +52,4 @@ node scripts/check-doc-coverage.mjs
 
 The checker reports one line per undocumented symbol or file and fails. `make docs-check` runs it.
 
-`make docs-static-check` builds the site and fails when a page links to a source-only or legacy route, such as a `.ko.md` file, or leaves its locale. A Korean document under `docs/` links to another Korean page by its site route, `/ko/<path>`. A commit that changes a file under `docs/` runs it with `make docs-check`.
+`make docs-static-check` builds the site and fails when a page links to a source-only or legacy route, such as a `.ko.md` file, or leaves its locale. A Korean document under `docs/` links to another Korean page by its site route, `/ko/<path>`. `make owner-check` runs it with `make docs-check` for a change under `docs/`.

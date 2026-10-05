@@ -12,7 +12,8 @@ unexport CARGO_TARGET_DIR
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli rerun-failed
+	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli rerun-failed \
+	owner-check conformance-cases function-inventory-check
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -56,6 +57,8 @@ help: ## List targets
 	@echo "Targets:"
 	@echo "  check                  The full suite through scripts/full-run.mjs: once per tree, when no checklist task is [~]"
 	@echo "  rerun-failed           Rerun the targets of check that did not pass on the current tree"
+	@echo "  owner-check            The owner checks of the changed paths (scripts/owner-checks.json); PATHS or BASE select the paths"
+	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
 	@echo "  lint-js                eslint on the TypeScript sources"
 	@echo "  install                npm ci: every dependency as a copy, no bin links"
@@ -107,7 +110,7 @@ help: ## List targets
 # checklist task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree,
 # runs each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
 # current tree that did not pass.
-CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check
+CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check function-inventory-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node scripts/full-run.mjs run $(CHECK_TARGETS)
@@ -240,6 +243,15 @@ conformance-generated-php: build-ts ## PHP generated compiler conformance suite
 	node tests/runner/conformance-generated-php.mjs
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php ## AST and generated conformance in all four languages
+
+conformance-cases: build-ts build-go build-rust build-php ext ## AST and generated conformance in all four languages for the cases of CASES only
+	node scripts/conformance-cases.mjs $(CASES)
+
+function-inventory-check: ## Inventory the function-shaped calls of the fixture template
+	node tests/runner/function-inventory.mjs
+
+owner-check: ## Run the owner checks of the changed paths: PATHS, the paths since BASE, or the uncommitted changes
+	node scripts/owner-check.mjs $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base "$(BASE)")
 
 install-check: typed-generator ## Install immutable package artifacts in isolated install projects
 	node scripts/check-install-workspace.mjs

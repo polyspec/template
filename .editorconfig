@@ -22,3 +22,14 @@ indent_style = tab
 
 [*.tpl]
 trim_trailing_whitespace = false
+
+# Byte-exact inputs and expected outputs of tests: an editor keeps their bytes.
+[{tests/cases,tests/fixtures}/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+# Files that `make showcase` writes: their indentation follows the generator.
+[{examples/site/index.html,tools/showcase/adapters/*/generated/**}]
+indent_style = unset

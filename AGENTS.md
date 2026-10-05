@@ -46,7 +46,7 @@
 
 ## Required checks
 
-- While a task is in progress, run only the Red and Green tests that own the change. Before a commit, run those tests and `make docs-check`; a commit that changes a file under `docs/`, `docs/.vitepress` included, also runs `make docs-static-check`, which builds the site and checks its links and locales.
+- While a task is in progress, run only the Red and Green tests that own the change. Before a commit, run `make owner-check`: it runs the targets and tests that `scripts/owner-checks.json` declares as owners of the changed paths, never the full suite, and fails on a path that no rule owns. A new path gets its owner in that file in the same change. A change under `tests/cases` runs only its cases, in every mode, through `make conformance-cases`.
 - Before marking a task `[o]` in `docs/plans/execution-checklist.md`, run the owning command of the task, the command in its Verification column, on the committed tree.
 - Run `make check` once, when every active task is done. Do not run it for each fix or each task, and do not repeat it without a change. The guard `scripts/full-run.mjs` enforces this before any step: `make check` is refused while a task is `[~]`, while tracked changes are uncommitted, and when `var/full-run.json` records a full run of the current tree; `make rerun-failed` reruns only the targets of the current tree that did not pass (`docs/operations/development.md`).
 - Every test prints its start, its result and its elapsed time while the run goes on, and has its own timeout. Do not put a time limit on a whole run, a package or a file. A test that runs for tens of minutes, or that prints only a start and an end, is a defect.

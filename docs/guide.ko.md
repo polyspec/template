@@ -317,7 +317,7 @@ const html = engine.render('layout', assign, {
 program, _ := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS("templates"))})
 engine := template.NewEngine(program)
 html, _ := engine.Render("layout", assign, template.RenderOptions{
-	Define: map[string]template.DefineInput{"layout": {Template: "page.tpl"}, "content": {Template: "pages/list.tpl"}},
+  Define: map[string]template.DefineInput{"layout": {Template: "page.tpl"}, "content": {Template: "pages/list.tpl"}},
 })
 ```
 

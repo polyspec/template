@@ -86,44 +86,44 @@ console.log(html);
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
+  "encoding/json"
+  "fmt"
+  "os"
 
-	template "github.com/polyspec/template"
+  template "github.com/polyspec/template"
 )
 
 func read(path string) []byte {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
-	return data
+  data, err := os.ReadFile(path)
+  if err != nil {
+    panic(err)
+  }
+  return data
 }
 
 func main() {
-	root := "examples/site/scenarios/scope-precedence"
-	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS(root))})
-	if err != nil {
-		panic(err)
-	}
-	engine := template.NewEngine(program)
+  root := "examples/site/scenarios/scope-precedence"
+  program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS(root))})
+  if err != nil {
+    panic(err)
+  }
+  engine := template.NewEngine(program)
 
-	var assign map[string]any
-	if err := json.Unmarshal(read(root+"/data.json"), &assign); err != nil {
-		panic(err)
-	}
-	var define map[string]template.DefineInput
-	if err := json.Unmarshal(read(root+"/define.json"), &define); err != nil {
-		panic(err)
-	}
-	html, err := engine.Render("layout", assign, template.RenderOptions{
-		Define: define,
-	})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Print(html)
+  var assign map[string]any
+  if err := json.Unmarshal(read(root+"/data.json"), &assign); err != nil {
+    panic(err)
+  }
+  var define map[string]template.DefineInput
+  if err := json.Unmarshal(read(root+"/define.json"), &define); err != nil {
+    panic(err)
+  }
+  html, err := engine.Render("layout", assign, template.RenderOptions{
+    Define: define,
+  })
+  if err != nil {
+    panic(err)
+  }
+  fmt.Print(html)
 }
 ```
 
