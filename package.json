@@ -12,7 +12,7 @@
     "lint": "eslint packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src",
     "typecheck": "npm run typecheck -w @polyspec/template",
     "test": "node tests/runner/conformance.mjs",
-    "test:browser": "playwright test",
+    "test:browser": "node tests/browser/run.mjs",
     "docs:check": "node scripts/check-documents.mjs",
     "schema:check": "node scripts/check-schema.mjs",
     "docs:build": "vitepress build docs",

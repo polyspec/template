@@ -361,6 +361,15 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.10 | `test-ts`, `test-language`, `test-lsp`, `test-codemirror`의 vitest test와 `test-vscode`의 `node --test` test를 `scripts/run-tests.mjs`로 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [o] |
 | T17.11 | `make test-browser`의 정적 서버를 startup deadline 30 s가 있는 Playwright `webServer` 대신 `tests/browser/run.mjs`에서 시간 제한 없는 단계로 띄운다(Playwright는 `timeout: 0`을 60 s로 읽는다). 서버 출력을 출력하고, 준비를 `listening on http://127.0.0.1:4173` 줄로 판단하며, 서버가 먼저 종료하면 실패한다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/browser-server.test.mjs` | [o] |
 
+## Wave 18 — 한 실행의 test resource
+
+의존: 없음. 같은 checkout이나 서로 다른 checkout에서 동시에 도는 두 실행이, 다른 실행이 쓰고 있는 resource를 바꾸거나 초기화했다. `tests/browser/server.mjs`는 고정 port `127.0.0.1:4173`에서 listen했으므로 두 번째 실행은 `EADDRINUSE`로 실패했고, Playwright는 어느 서버가 그 port를 잡고 있든 그 port에서 page를 열었다. `packages/template-vscode/tests/integration/run.mjs`는 VS Code를 저장소 root의 `.vscode-test`에 내려받아 풀며, 한 checkout의 모든 실행이 이 directory를 공유한다. `make clean`은 실행이 그 directory를 쓰는 동안에도 지웠다. 실행의 resource는 그 실행이 격리한다(system이 배정하는 port, 임시 directory, 실행의 이름). 하나뿐인 resource는 한 번에 holder 하나를 가지며, holder는 원자적으로 만드는 lock file에 기록되고 그 file은 holder의 checkout, process ID, 시작 시각을 적는다. 다른 실행은 그 holder를 밝히며 실패하고, holder가 lock을 푼다. process가 끝난 lock은 보고되고 명시적인 명령으로 지운다. 작업은 branch `fix/shared-T18.1`과 worktree `template-shared-T18.1`에서 한다.
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T18.1 | `tests/browser/server.mjs`가 system이 배정하는 port에서 listen하고 그 port를 `listening on http://127.0.0.1:<port>` 줄에 출력하게 한다. `tests/browser/run.mjs`는 그 주소를 `playwright.config.ts`가 요구하는 `TEMPLATE_BROWSER_URL`로 Playwright에 넘긴다 | `node scripts/run-tests.mjs node -- tests/scripts/browser-port.test.mjs` | [o] |
+| T18.2 | VS Code directory `.vscode-test`에 holder lock `.vscode-test.lock`을 둔다. integration 실행은 내려받기부터 마지막 launch까지 lock을 잡고, 두 번째 실행은 holder를 밝히며 실패하며, `make clean`은 lock을 잡은 동안에만 directory를 지우고, 끝난 process의 lock은 보고되고 `make vscode-test-unlock`으로 지운다 | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [ ] |
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -381,6 +390,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
 | W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
+| W18 | T18.1, T18.2 | 없음 |
 
 ## 완료 정의
 
