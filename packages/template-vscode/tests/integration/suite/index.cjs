@@ -6,9 +6,9 @@ const { existsSync, readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const vscode = require('vscode');
 
+const { bounded, eventually, textBecomes } = require('./wait.cjs');
+
 const workspace = join(__dirname, '..', 'workspace');
-// The time limit of one check.
-const CHECK_TIMEOUT_MS = 20000;
 const extensionId = process.env.POLYSPEC_TEMPLATE_EXTENSION;
 const expect = process.env.POLYSPEC_TEMPLATE_EXPECT;
 
@@ -33,16 +33,6 @@ function applyEdits(document, edits) {
   return result;
 }
 
-// Polls a condition every 50 ms for up to 5 seconds and returns its last value.
-async function eventually(condition) {
-  let value = await condition();
-  for (let attempt = 0; attempt < 100 && !value; attempt++) {
-    await new Promise(resolve => setTimeout(resolve, 50));
-    value = await condition();
-  }
-  return value;
-}
-
 // Opens an untitled template document in an editor with the cursor at a position.
 async function untitled(content, line, character) {
   const document = await vscode.workspace.openTextDocument({ language: 'polyspec-template', content });
@@ -50,6 +40,12 @@ async function untitled(content, line, character) {
   editor.options = { tabSize: 2, insertSpaces: true };
   editor.selection = new vscode.Selection(new vscode.Position(line, character), new vscode.Position(line, character));
   return editor;
+}
+
+// Types into `editor`: the command `type` types into the focused editor, so it waits until `editor` is the active one.
+async function typeInto(editor, text) {
+  await eventually(() => vscode.window.activeTextEditor?.document === editor.document, () => `the editor of ${editor.document.uri} to be active; the active editor shows ${vscode.window.activeTextEditor?.document.uri ?? 'no document'}`);
+  await vscode.commands.executeCommand('type', { text });
 }
 
 function scopesOf(tokens, content, scope) {
@@ -94,15 +90,15 @@ const enabled = [
   ['tag backgrounds cover every tag except comments and the tags accepted before a parse error', async () => {
     const api = vscode.extensions.getExtension(extensionId).exports;
     const blocks = await open('blocks.tpl');
-    const ranges = await eventually(() => api.tagRanges(blocks));
+    const ranges = await eventually(() => api.tagRanges(blocks), () => 'the tag ranges of blocks.tpl');
     assert.deepEqual(ranges.map(range => blocks.getText(range)), ['{@ item = items}', '{? item.active}', '{:}', '{/}', '{= item.name}', '{:}', '{/}']);
     const broken = await open('broken.tpl');
-    assert.deepEqual((await eventually(() => api.tagRanges(broken))).map(range => broken.getText(range)), ['{? a}']);
+    assert.deepEqual((await eventually(() => api.tagRanges(broken), () => 'the tag ranges of broken.tpl')).map(range => broken.getText(range)), ['{? a}']);
   }],
   ['semantic tokens of the server classify the template tags', async () => {
     const document = await open('blocks.tpl');
-    const legend = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokensLegend', document.uri));
-    const tokens = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokens', document.uri));
+    const legend = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokensLegend', document.uri), () => 'the semantic token legend of blocks.tpl');
+    const tokens = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokens', document.uri), () => 'the semantic tokens of blocks.tpl');
     const decoded = [];
     let line = 0;
     let character = 0;
@@ -117,13 +113,15 @@ const enabled = [
   ['format on type is enabled for the language and indents a line after } and after Enter', async () => {
     assert.equal(vscode.workspace.getConfiguration('editor', { languageId: 'polyspec-template' }).get('formatOnType'), true);
     const closing = await untitled('<ul>\n', 1, 0);
-    await vscode.commands.executeCommand('type', { text: '{@ x = xs}' });
-    assert.equal(await eventually(() => closing.document.getText() === '<ul>\n  {@ x = xs}') && closing.document.getText(), '<ul>\n  {@ x = xs}');
+    await typeInto(closing, '{@ x = xs}');
+    await textBecomes(closing.document, '<ul>\n  {@ x = xs}');
+    assert.equal(closing.document.getText(), '<ul>\n  {@ x = xs}');
     await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
     const enter = await untitled('<ul>\n  {@ x = xs}<li>{= x}</li>\n  {/}\n</ul>', 1, 12);
-    await vscode.commands.executeCommand('type', { text: '\n' });
+    await typeInto(enter, '\n');
     const expected = '<ul>\n  {@ x = xs}\n    <li>{= x}</li>\n  {/}\n</ul>';
-    assert.equal(await eventually(() => enter.document.getText() === expected) && enter.document.getText(), expected);
+    await textBecomes(enter.document, expected);
+    assert.equal(enter.document.getText(), expected);
     await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
   }],
   ['the format provider returns the expected edits', async () => {
@@ -198,15 +196,6 @@ const disabled = [
     assert.notEqual(document.languageId, 'polyspec-template');
   }],
 ];
-
-// Runs one check and rejects when it does not end within its time limit.
-function bounded(name, check) {
-  let timer;
-  const timeout = new Promise((resolve, reject) => {
-    timer = setTimeout(() => reject(new Error(`${name} exceeded its ${CHECK_TIMEOUT_MS / 1000} s timeout`)), CHECK_TIMEOUT_MS);
-  });
-  return Promise.race([Promise.resolve().then(check), timeout]).finally(() => clearTimeout(timer));
-}
 
 /**
  * Runs every check of the expected mode with its own time limit, prints each check when it starts
