@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
+import { checkLanguages } from './language-checks.mjs';
 import { tsc } from './tools.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 
@@ -199,10 +200,7 @@ function checkPhp() {
 }
 
 try {
-  checkTypeScript();
-  checkGo();
-  checkRust();
-  checkPhp();
+  checkLanguages('compiler', { TypeScript: checkTypeScript, Go: checkGo, Rust: checkRust, PHP: checkPhp });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }

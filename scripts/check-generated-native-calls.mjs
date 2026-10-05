@@ -9,6 +9,7 @@ import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
+import { checkLanguages } from './language-checks.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/native-object');
@@ -39,13 +40,15 @@ try {
   compileAst({ root: fixture, output: graph, entry: 'input.tpl', refresh: 'dev', typeManifest: join(fixture, 'types.json') });
   const graphManifest = join(graph, 'manifest.json');
 
-  const tsSource = join(temporary, 'native.ts');
-  writeFileSync(tsSource, compileSource(graphManifest, join(fixture, 'types.json'), 'ts'));
-  const tsOutput = join(temporary, 'ts');
-  mkdirSync(tsOutput);
-  run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', tsOutput, tsSource], root);
-  const tsRunner = join(temporary, 'native.mjs');
-  writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/native.js';
+  checkLanguages('generated native calls', {
+    TypeScript: () => {
+      const tsSource = join(temporary, 'native.ts');
+      writeFileSync(tsSource, compileSource(graphManifest, join(fixture, 'types.json'), 'ts'));
+      const tsOutput = join(temporary, 'ts');
+      mkdirSync(tsOutput);
+      run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', tsOutput, tsSource], root);
+      const tsRunner = join(temporary, 'native.mjs');
+      writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/native.js';
 import { RuntimeEnvironment } from '@polyspec/template';
 class Order {
   label = 'Order 12';
@@ -91,14 +94,15 @@ function renderHostValue(target) {
 for (const [target, output] of Object.entries(hostValues.outputs)) { const rendered = renderHostValue(target); if (rendered !== output) throw new Error('TypeScript generated ' + target + ' differs: ' + JSON.stringify(rendered)); }
 for (const [target, expectedCode] of Object.entries(hostValues.errors)) { let actualCode = 'OK'; try { renderHostValue(target); } catch (error) { actualCode = error.code; } if (actualCode !== expectedCode) throw new Error('TypeScript generated ' + target + ' = ' + actualCode); }
 `);
-  run(process.execPath, [tsRunner], root);
-
-  const goDir = goWorkspace('generated-native-calls-go');
-  try {
-    const goSource = join(goDir, 'generated.go');
-    writeFileSync(goSource, compileSource(graphManifest, join(fixture, 'types.json'), 'go'));
-    const goPassing = Object.entries(passing).map(([target, output]) => `${goString(target)}: ${goString(output)}`).join(', ');
-    writeFileSync(join(goDir, 'generated_test.go'), `package generated
+      run(process.execPath, [tsRunner], root);
+    },
+    Go: () => {
+      const goDir = goWorkspace('generated-native-calls-go');
+      try {
+        const goSource = join(goDir, 'generated.go');
+        writeFileSync(goSource, compileSource(graphManifest, join(fixture, 'types.json'), 'go'));
+        const goPassing = Object.entries(passing).map(([target, output]) => `${goString(target)}: ${goString(output)}`).join(', ');
+        writeFileSync(join(goDir, 'generated_test.go'), `package generated
 import ("testing"; "fmt"; "strconv"; "strings"; template "github.com/polyspec/template"; "github.com/polyspec/template/functions"; "github.com/polyspec/template/value")
 type Order struct { Label string }
 func (o Order) StatusLabel(prefix string) (string, error) { return prefix + ":12", nil }
@@ -111,17 +115,18 @@ func describeArguments(args []any, order *ValueOrder) string { parts := []string
 func renderHostValue(t *testing.T, target string) (string, error) { order := &ValueOrder{Label: "order"}; program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; describe := func(args []value.Value, _ functions.Context) (any, error) { return describeArguments(args, order), nil }; if err := program.Runtime.Register("describe", describe); err != nil { t.Fatal(err) }; if err := program.Runtime.Register("mutate", func(args []value.Value, _ functions.Context) (any, error) { args[0].(value.List)[0] = "changed"; args[1].(*value.OrderedMap).Set("k", "changed"); args[2].(value.List)[0] = "changed"; return nil, nil }); err != nil { t.Fatal(err) }; if err := program.Runtime.Register("pick", func(args []value.Value, _ functions.Context) (any, error) { return args[0], nil }); err != nil { t.Fatal(err) }; if err := program.Runtime.RegisterClass("Order", "describe", describe); err != nil { t.Fatal(err) }; return program.Render(target, map[string]any{"order": order, "same": order, "other": &ValueOrder{Label: "order"}, "items": []any{1}}, template.RenderOptions{}) }
 func TestGeneratedHostValues(t *testing.T) { for target, output := range map[string]string{${Object.entries(hostValues.outputs).map(([name, output]) => `${goString(name)}: ${goString(output)}`).join(', ')}} { actual, err := renderHostValue(t, target); if err != nil || actual != output { t.Fatalf("generated Go %s = %q %v", target, actual, err) } }; for target, code := range map[string]string{${Object.entries(hostValues.errors).map(([name, code]) => `${goString(name)}: ${goString(code)}`).join(', ')}} { _, err := renderHostValue(t, target); if err == nil || !strings.HasPrefix(err.Error(), code+":") { t.Fatalf("generated Go %s = %v, want %s", target, err, code) } } }
 `);
-    run('go', ['test', '.'], goDir, { GOCACHE: '/tmp/template-go-cache' });
-  } finally {
-    rmSync(goDir, { recursive: true, force: true });
-  }
-
-  const rustSource = join(temporary, 'native.rust');
-  writeFileSync(rustSource, compileSource(graphManifest, join(fixture, 'types.json'), 'rust'));
-  const rust = rustWorkspace('generated-native-calls-rust');
-  const rustTest = rust.test('generated_native_object_check');
-  const rustPassing = Object.entries(passing).map(([target, output]) => `(${rustString(target)}, ${rustString(output)})`).join(', ');
-  writeFileSync(rustTest, `mod generated { include!(${rustString(rustSource)}); }
+        run('go', ['test', '.'], goDir, { GOCACHE: '/tmp/template-go-cache' });
+      } finally {
+        rmSync(goDir, { recursive: true, force: true });
+      }
+    },
+    Rust: () => {
+      const rustSource = join(temporary, 'native.rust');
+      writeFileSync(rustSource, compileSource(graphManifest, join(fixture, 'types.json'), 'rust'));
+      const rust = rustWorkspace('generated-native-calls-rust');
+      const rustTest = rust.test('generated_native_object_check');
+      const rustPassing = Object.entries(passing).map(([target, output]) => `(${rustString(target)}, ${rustString(output)})`).join(', ');
+      writeFileSync(rustTest, `mod generated { include!(${rustString(rustSource)}); }
 use polyspec_template::{DefineData, DefineInput, ErrorCode, HostError, OrderedMap, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, TemplateObject, Value};
 fn template_error(error: RequestError) -> polyspec_template::TemplateError { match error { RequestError::Template(error) => error, RequestError::Argument(error) => panic!("unexpected argument error: {error}") } }
 #[derive(Debug)] struct Order;
@@ -137,25 +142,28 @@ impl TemplateObject for ValueOrder { fn member(&self, _key: &str) -> Result<Opti
 fn render_host_value(target: &str) -> Result<String, RequestError> { let order = Value::object(ValueOrder); let Value::Object(original) = order.clone() else { unreachable!() }; let mut runtime = RuntimeEnvironment::new(None, std::collections::HashMap::new()); let function_original = std::rc::Rc::clone(&original); runtime.register("describe", Box::new(move |args, _| Ok(Value::text(describe_arguments(args, &|object| std::rc::Rc::ptr_eq(object, &function_original)))))).unwrap(); runtime.register("mutate", Box::new(|_, _| Ok(Value::Null))).unwrap(); runtime.register("pick", Box::new(|args, _| Ok(args[0].clone()))).unwrap(); let class_original = std::rc::Rc::clone(&original); runtime.register_class("Order", "describe", Box::new(move |args, _| Ok(Value::text(describe_arguments(args, &|object| std::rc::Rc::ptr_eq(object, &class_original)))))).unwrap(); let program = generated::GeneratedProgram::new(runtime); let mut root = OrderedMap::new(); root.insert("order".to_string(), order.clone()); root.insert("same".to_string(), order); root.insert("other".to_string(), Value::object(ValueOrder)); root.insert("items".to_string(), Value::list(vec![Value::Number(1.0)])); program.render_values(RenderTarget::Name(target), root, &RenderOptions::default()) }
 #[test] fn generated_host_values_match() { for (target, output) in [${Object.entries(hostValues.outputs).map(([name, output]) => `(${rustString(name)}, ${rustString(output)})`).join(', ')}] { assert_eq!(render_host_value(target).unwrap(), output, "Rust generated {target}"); } for (target, code) in [${Object.entries(hostValues.errors).map(([name, code]) => `(${rustString(name)}, ErrorCode::${code})`).join(', ')}] { assert_eq!(template_error(render_host_value(target).unwrap_err()).code, code, "Rust generated {target}"); } }
 `);
-  try {
-    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_native_object_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
-  } finally {
-    rmSync(rust.directory, { recursive: true, force: true });
-  }
-
-  // The PHP target requires a namespace chosen by the caller of the compiler (docs/spec/compiler.md).
-  for (const invalid of [undefined, '', '\\Leading', 'Trailing\\', 'Two\\\\Separators', '1Digit']) {
-    assert.throws(() => compileSource(graphManifest, join(fixture, 'types.json'), 'php', invalid === undefined ? {} : { phpNamespace: invalid }), /requires a namespace/);
-  }
-  const phpSource = join(temporary, 'native.php');
-  writeFileSync(phpSource, compileSource(graphManifest, join(fixture, 'types.json'), 'php', { phpNamespace }));
-  const secondNamespace = 'Polyspec\\Generated\\NativeCheckSecond';
-  const secondSource = join(temporary, 'native-second.php');
-  writeFileSync(secondSource, compileSource(graphManifest, join(fixture, 'types.json'), 'php', { phpNamespace: secondNamespace }));
-  const phpPassing = Object.entries(passing).map(([target, output]) => `${phpString(target)} => ${phpString(output)}`).join(', ');
-  // Global host classes with the generated names and a second program in one process do not collide.
-  const phpRunner = `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; final class GeneratedProgram {} final class Assign {} function render_template(): void {} require ${phpString(phpSource)}; require ${phpString(secondSource)}; class Order { public string $label = 'Order 12'; public function status_label(mixed $prefix): string { if (!is_string($prefix)) throw new RuntimeException('invalid status_label'); return $prefix . ':12'; } public function fail(mixed $prefix): string { throw new RuntimeException('failed member'); } } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->registerClass('Order', 'suffix', static fn (array $args, array $env): string => 'done' . $args[0]); $runtime->registerClass('Order', 'fail', static function (array $args, array $env): string { throw new RuntimeException('failed class'); }); $program = new \\${phpNamespace}\\GeneratedProgram($runtime); $order = new Order(); $actual = $program->render('input.tpl', ['order' => $order]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated native output differs'); $second = (new \\${secondNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['order' => $order]); if ($second !== ${phpString(expected)}) throw new RuntimeException('second PHP generated program output differs'); $define = ['card' => ['template' => 'part.tpl', 'data' => ['o' => $order]]]; foreach ([${phpPassing}] as $target => $output) { $rendered = $program->render($target, ['order' => $order], ['define' => $define]); if ($rendered !== $output) throw new RuntimeException('PHP generated ' . $target . ' differs: ' . $rendered); } $expectedCodes = json_decode(${phpString(JSON.stringify(errorCases))}, true); foreach ($expectedCodes as $target => $expectedCode) { try { $program->render($target, ['order' => new Order()]); throw new RuntimeException('PHP native error did not fail: ' . $target); } catch (Polyspec\\Template\\TemplateError $error) { if ($error->errorCode !== $expectedCode) throw new RuntimeException('PHP native error ' . $target . ' = ' . $error->errorCode . ', want ' . $expectedCode); } } final class ValueOrder { public function describe(mixed ...$args): string { return value_describe_arguments($args, $this); } } function value_describe(mixed $value, object $order): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . value_describe_arguments($value, $order) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . value_describe($item, $order); return 'map(' . implode(',', $parts) . ')'; } return $value === $order ? 'object(order)' : 'unexpected'; } function value_describe_arguments(array $args, object $order): string { return implode(',', array_map(static fn (mixed $item): string => value_describe($item, $order), $args)); } function render_host_value(string $target): string { $valueOrder = new ValueOrder(); $valuesRuntime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $valuesRuntime->register('describe', static fn (array $args): string => value_describe_arguments($args, $valueOrder)); $valuesRuntime->register('mutate', static function (array $args): mixed { $args[0][0] = 'changed'; $args[1]['k'] = 'changed'; $args[2][] = 'added'; return null; }); $valuesRuntime->register('pick', static fn (array $args): mixed => $args[0]); $valuesRuntime->registerClass('Order', 'describe', static fn (array $args): string => value_describe_arguments($args, $valueOrder)); return (new \\${phpNamespace}\\GeneratedProgram($valuesRuntime))->render($target, ['order' => $valueOrder, 'same' => $valueOrder, 'other' => new ValueOrder(), 'items' => [1]]); } $hostValues = json_decode(${phpString(JSON.stringify(hostValues))}, true); foreach ($hostValues['outputs'] as $target => $output) { $rendered = render_host_value($target); if ($rendered !== $output) throw new RuntimeException('PHP generated ' . $target . ' differs: ' . $rendered); } foreach ($hostValues['errors'] as $target => $expectedCode) { try { render_host_value($target); throw new RuntimeException('PHP generated ' . $target . ' did not fail'); } catch (Polyspec\\Template\\TemplateError $error) { if ($error->errorCode !== $expectedCode) throw new RuntimeException('PHP generated ' . $target . ' = ' . $error->errorCode); } }`;
-  run('php', ['-r', phpRunner], root);
+      try {
+        run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_native_object_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+      } finally {
+        rmSync(rust.directory, { recursive: true, force: true });
+      }
+    },
+    PHP: () => {
+      // The PHP target requires a namespace chosen by the caller of the compiler (docs/spec/compiler.md).
+      for (const invalid of [undefined, '', '\\Leading', 'Trailing\\', 'Two\\\\Separators', '1Digit']) {
+        assert.throws(() => compileSource(graphManifest, join(fixture, 'types.json'), 'php', invalid === undefined ? {} : { phpNamespace: invalid }), /requires a namespace/);
+      }
+      const phpSource = join(temporary, 'native.php');
+      writeFileSync(phpSource, compileSource(graphManifest, join(fixture, 'types.json'), 'php', { phpNamespace }));
+      const secondNamespace = 'Polyspec\\Generated\\NativeCheckSecond';
+      const secondSource = join(temporary, 'native-second.php');
+      writeFileSync(secondSource, compileSource(graphManifest, join(fixture, 'types.json'), 'php', { phpNamespace: secondNamespace }));
+      const phpPassing = Object.entries(passing).map(([target, output]) => `${phpString(target)} => ${phpString(output)}`).join(', ');
+      // Global host classes with the generated names and a second program in one process do not collide.
+      const phpRunner = `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; final class GeneratedProgram {} final class Assign {} function render_template(): void {} require ${phpString(phpSource)}; require ${phpString(secondSource)}; class Order { public string $label = 'Order 12'; public function status_label(mixed $prefix): string { if (!is_string($prefix)) throw new RuntimeException('invalid status_label'); return $prefix . ':12'; } public function fail(mixed $prefix): string { throw new RuntimeException('failed member'); } } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->registerClass('Order', 'suffix', static fn (array $args, array $env): string => 'done' . $args[0]); $runtime->registerClass('Order', 'fail', static function (array $args, array $env): string { throw new RuntimeException('failed class'); }); $program = new \\${phpNamespace}\\GeneratedProgram($runtime); $order = new Order(); $actual = $program->render('input.tpl', ['order' => $order]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated native output differs'); $second = (new \\${secondNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['order' => $order]); if ($second !== ${phpString(expected)}) throw new RuntimeException('second PHP generated program output differs'); $define = ['card' => ['template' => 'part.tpl', 'data' => ['o' => $order]]]; foreach ([${phpPassing}] as $target => $output) { $rendered = $program->render($target, ['order' => $order], ['define' => $define]); if ($rendered !== $output) throw new RuntimeException('PHP generated ' . $target . ' differs: ' . $rendered); } $expectedCodes = json_decode(${phpString(JSON.stringify(errorCases))}, true); foreach ($expectedCodes as $target => $expectedCode) { try { $program->render($target, ['order' => new Order()]); throw new RuntimeException('PHP native error did not fail: ' . $target); } catch (Polyspec\\Template\\TemplateError $error) { if ($error->errorCode !== $expectedCode) throw new RuntimeException('PHP native error ' . $target . ' = ' . $error->errorCode . ', want ' . $expectedCode); } } final class ValueOrder { public function describe(mixed ...$args): string { return value_describe_arguments($args, $this); } } function value_describe(mixed $value, object $order): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . value_describe_arguments($value, $order) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . value_describe($item, $order); return 'map(' . implode(',', $parts) . ')'; } return $value === $order ? 'object(order)' : 'unexpected'; } function value_describe_arguments(array $args, object $order): string { return implode(',', array_map(static fn (mixed $item): string => value_describe($item, $order), $args)); } function render_host_value(string $target): string { $valueOrder = new ValueOrder(); $valuesRuntime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $valuesRuntime->register('describe', static fn (array $args): string => value_describe_arguments($args, $valueOrder)); $valuesRuntime->register('mutate', static function (array $args): mixed { $args[0][0] = 'changed'; $args[1]['k'] = 'changed'; $args[2][] = 'added'; return null; }); $valuesRuntime->register('pick', static fn (array $args): mixed => $args[0]); $valuesRuntime->registerClass('Order', 'describe', static fn (array $args): string => value_describe_arguments($args, $valueOrder)); return (new \\${phpNamespace}\\GeneratedProgram($valuesRuntime))->render($target, ['order' => $valueOrder, 'same' => $valueOrder, 'other' => new ValueOrder(), 'items' => [1]]); } $hostValues = json_decode(${phpString(JSON.stringify(hostValues))}, true); foreach ($hostValues['outputs'] as $target => $output) { $rendered = render_host_value($target); if ($rendered !== $output) throw new RuntimeException('PHP generated ' . $target . ' differs: ' . $rendered); } foreach ($hostValues['errors'] as $target => $expectedCode) { try { render_host_value($target); throw new RuntimeException('PHP generated ' . $target . ' did not fail'); } catch (Polyspec\\Template\\TemplateError $error) { if ($error->errorCode !== $expectedCode) throw new RuntimeException('PHP generated ' . $target . ' = ' . $error->errorCode); } }`;
+      run('php', ['-r', phpRunner], root);
+    },
+  });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }

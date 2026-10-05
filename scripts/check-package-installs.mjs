@@ -11,6 +11,7 @@ import assert from 'node:assert/strict';
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { installCargoLock, createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
+import { checkLanguages } from './language-checks.mjs';
 import { runStepSync } from './test-progress/step.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
@@ -139,11 +140,8 @@ $assign=Json::parse(file_get_contents(__DIR__.'/data.json')); $raw=Json::parse(f
 
 let failure;
 try {
-  checkTypeScript();
-  checkGo();
-  checkRust();
-  checkPhp();
   assert.equal(Buffer.byteLength(expected), 177);
+  checkLanguages('package installs', { TypeScript: checkTypeScript, Go: checkGo, Rust: checkRust, PHP: checkPhp });
 } catch (error) {
   failure = error;
 }
