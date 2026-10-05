@@ -359,6 +359,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.8 | `scripts/check-package-installs.mjs`(600 s)와 `scripts/check-install-workspace.mjs`(120 s)의 각 명령을 시간 제한 없이 log가 있는 단계로 실행하고 exit code로 판단한다 | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [o] |
 | T17.9 | `tests/runner/delimiter-matrix.mjs`가 한 언어에서 구분자 쌍이 끝날 때마다 `<pair> [<lang>] pass\|fail (<ms> ms)`를 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [o] |
 | T17.10 | `test-ts`, `test-language`, `test-lsp`, `test-codemirror`의 vitest test와 `test-vscode`의 `node --test` test를 `scripts/run-tests.mjs`로 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [o] |
+| T17.11 | `make test-browser`의 정적 서버를 startup deadline 30 s가 있는 Playwright `webServer` 대신 `tests/browser/run.mjs`에서 시간 제한 없는 단계로 띄운다(Playwright는 `timeout: 0`을 60 s로 읽는다). 서버 출력을 출력하고, 준비를 `listening on http://127.0.0.1:4173` 줄로 판단하며, 서버가 먼저 종료하면 실패한다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/browser-server.test.mjs` | [o] |
 
 ## 병렬성 요약
 
@@ -379,7 +380,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W14 | 없음 | T14.1 → T14.2 |
 | W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
-| W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10} |
+| W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
 
 ## 완료 정의
 

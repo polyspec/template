@@ -359,6 +359,7 @@ Dependencies: none. Each test prints its start, its result and its elapsed time 
 | T17.8 | Run each command of `scripts/check-package-installs.mjs` (600 s) and `scripts/check-install-workspace.mjs` (120 s) as a logged step without a time limit, judged by its exit code | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [o] |
 | T17.9 | Make `tests/runner/delimiter-matrix.mjs` print `<pair> [<lang>] pass\|fail (<ms> ms)` when a delimiter pair finishes in a language, and keep the summary at the end | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [o] |
 | T17.10 | Run the vitest tests of `test-ts`, `test-language`, `test-lsp` and `test-codemirror` and the `node --test` tests of `test-vscode` through `scripts/run-tests.mjs` | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [o] |
+| T17.11 | Start the static server of `make test-browser` in `tests/browser/run.mjs` as a step without a time limit instead of the Playwright `webServer` with its 30 s startup deadline (Playwright reads `timeout: 0` as 60 s); print the server output, judge readiness by the line `listening on http://127.0.0.1:4173` and fail when the server exits first | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/browser-server.test.mjs` | [o] |
 
 ## Parallelism summary
 
@@ -379,7 +380,7 @@ Dependencies: none. Each test prints its start, its result and its elapsed time 
 | W14 | none | T14.1 → T14.2 |
 | W15 | T15.1, T15.2, T15.3, T15.4 | none |
 | W16 | none | T16.1 |
-| W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10} |
+| W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
 
 ## Definition of done
 

@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
-// The static server serves the repository root so that the page can import the package build.
+// tests/browser/run.mjs starts the static server, which serves the repository root so that the page
+// can import the package build, and runs Playwright once the server listens.
 export default defineConfig({
   testDir: 'tests/browser',
   timeout: 60_000,
@@ -9,11 +10,5 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4173',
     browserName: 'chromium',
-  },
-  webServer: {
-    command: 'node tests/browser/server.mjs',
-    url: 'http://127.0.0.1:4173/tests/browser/index.html',
-    reuseExistingServer: false,
-    timeout: 30_000,
   },
 });
