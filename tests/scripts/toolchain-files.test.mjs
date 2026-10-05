@@ -253,6 +253,15 @@ test('every CI job runs its targets past failures and uploads their report, also
   assert.deepEqual(problems, []);
 });
 
+test('a new push cancels the running CI of its workflow and ref', () => {
+  for (const file of WORKFLOWS) {
+    const text = read(file);
+    const [, triggers = ''] = /\non:\n((?: {2}.*\n|\s*\n)+)/.exec(`\n${text}`) ?? [];
+    if (!/^ {2}(?:push|pull_request):/m.test(triggers)) continue;
+    assert.match(text, /\nconcurrency:\n {2}group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: true\n/, `${file} runs on push without a concurrency group of its workflow and ref that cancels the run in progress`);
+  }
+});
+
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
     const text = read(file);
