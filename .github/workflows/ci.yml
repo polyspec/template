@@ -41,6 +41,8 @@ jobs:
           tools: composer:2.10.3
       - run: make install
         if: ${{ !cancelled() }}
+      - run: make install-vscode
+        if: ${{ !cancelled() }}
       - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
         if: ${{ !cancelled() }}
       - run: xvfb-run -a make check
@@ -127,6 +129,8 @@ jobs:
       - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
         if: ${{ !cancelled() }}
       - run: make -k editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode
+        if: ${{ !cancelled() }}
+      - run: make install-vscode
         if: ${{ !cancelled() }}
       # VS Code needs a display; the integration test runs it on a virtual X server.
       - run: xvfb-run -a make test-vscode-integration

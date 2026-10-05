@@ -3,9 +3,9 @@
 // installed from the .vsix into an extensions directory, workspace trust is enabled and the opened folder
 // is not trusted. A second run removes `capabilities` from the installed manifest and requires the suite to
 // observe that VS Code disables the extension, which shows that the first run detects that regression.
-// The VS Code build is the minimum version of engines.vscode, installed by `make install` (scripts/install-vscode.mjs)
+// The VS Code build is the minimum version of engines.vscode, installed by `make install-vscode` (scripts/install-vscode.mjs)
 // into the tools directory of the required option --vscode (`make test-vscode-integration` names var/tools/vscode). The
-// run only reads that copy and never downloads; without it, it fails with `run make install` (T20.1-4).
+// run only reads that copy and never downloads; without it, it fails with `run make install-vscode` (T20.1-4, T20.1-6).
 // Every profile installation and every VS Code launch is a step without a time limit (step.mjs): it
 // prints its start, a line every 10 s while it runs and its result with its elapsed time, and is judged by its
 // exit code or by the result of its suite.

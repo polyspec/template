@@ -41,7 +41,7 @@ MAKEFLAGS += -k
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install cargo-downloads-check uninstall-cli rerun-failed \
+	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode cargo-downloads-check uninstall-cli rerun-failed \
 	owner-check conformance-cases function-inventory-check dependency-review
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -61,8 +61,8 @@ LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
 VSCODE_DIR := packages/template-vscode
 CODEMIRROR_DIR := packages/template-codemirror
-# The VS Code build of the integration test, installed by make install (scripts/install-vscode.mjs) and only read by
-# the test, which never downloads (T20.1-4).
+# The VS Code build of the integration test, installed by make install-vscode (scripts/install-vscode.mjs) after make
+# install and only read by the test, which never downloads (T20.1-4). Only a run of the test needs it (T20.1-6).
 VSCODE_TOOLS := $(CURDIR)/var/tools/vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 # The prefix of `make install-cli`: the formatter copy in $(CLI_PREFIX)/lib and the script in $(CLI_PREFIX)/bin.
@@ -127,7 +127,7 @@ help: ## List targets
 	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
 	@echo "  test-vscode            Grammar tests, extension tests and type check"
-	@echo "  test-vscode-integration Run the extension inside the VS Code that make install installs into var/tools/vscode"
+	@echo "  test-vscode-integration Run the extension inside the VS Code that make install-vscode installs into var/tools/vscode"
 	@echo "  vscode-package         Build the .vsix with vsce"
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
@@ -168,9 +168,8 @@ lint-js: ## Lint the TypeScript sources with eslint
 # make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
-install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages, the VS Code of the integration test and the crates of every Cargo.lock
+install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages and the crates of every Cargo.lock
 	$(ONLINE) $(NPM) ci
-	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
 	rustup toolchain install --no-self-update
 	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
 	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
@@ -180,6 +179,9 @@ install: install-tools ## Install the tools of the checkout, the npm dependencie
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
+install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
+	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
+
 cargo-downloads-check: ## Check that the crates of every Cargo.lock are downloaded; names make install otherwise
 	node scripts/check-cargo-downloads.mjs
 
