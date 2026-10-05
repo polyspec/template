@@ -30,9 +30,9 @@
 - 기존 코드, 이력, 관례는 검토할 근거이지 권위가 아니다. 현재 계약과 이 규칙을 충족할 때만 유지한다.
 - 검토 중 이상을 발견하면 가장 작은 안정된 경계에서 재현한다. 그것이 빠진 일반 규칙을 드러내는지 판단하고, 드러내면 그 규칙을 더한 뒤, 재현을 red에서 green으로 바꾸는 regression test를 유지한다.
 - 예외는 기계로 검사하는 좁은 경계, 문서화된 이유, 제거 조건을 가져야 한다. 아키텍처가 불변 조건을 직접 충족할 수 있으면 예외를 만들지 않는다.
-- 프로젝트가 선언한 runtime 범위를 지원하는 최신 stable 의존성 release를 사용한다. prerelease를 stable로 취급하지 않는다.
+- 프로젝트가 선언한 runtime 범위를 지원하는 최신 stable 의존성 release, 곧 의존성을 고르거나 올릴 때 알려진 최신 release를 사용한다. prerelease를 stable로 취급하지 않는다. 의존성은 `make dependency-review UPDATE=1`로 고르고 올리며, 바뀐 manifest나 lock은 `make dependency-review RECORD=1`이 쓰는 review 기록과 함께 커밋한다. 검증 suite는 그 기록을 읽고 registry를 조회하지 않으므로 같은 tree는 언제나 같은 결과를 낸다.
 - 오래된 의존성을 말없이 고정하지 않는다. 재현 가능한 호환성 이유와 고정을 풀 수 있는 조건을 기록하고, release 검사가 오래되었거나 설명 없는 고정을 거부하게 한다.
-- release는 설정된 심각도의 알려진 의존성 취약점을 거부해야 하며, 정확히 잠긴 의존성 graph로 전체 release matrix를 통과해야 한다.
+- release는 설정된 심각도의 알려진 의존성 취약점을 거부해야 하며, 정확히 잠긴 의존성 graph로 전체 release matrix를 통과해야 한다. review는 모든 lock의 보안 권고를 기록하고, gate는 review 때 보안 권고가 있던 lock을 거부하며, 예약된 dependency review가 나중에 공개된 보안 권고를 찾는다.
 
 ## 변경과 기록
 

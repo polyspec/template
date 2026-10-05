@@ -30,9 +30,9 @@
 - Existing code, history and convention are evidence to inspect, not authority. Keep them only when they satisfy the current contract and these rules.
 - When inspection reveals an anomaly, reproduce it at the smallest stable boundary. Decide whether it exposes a missing general rule, add that rule when it does, then keep the regression test that turns the reproduction from red to green.
 - An exception must have a narrow machine-checked boundary, a documented reason and a removal condition. Do not create an exception when the architecture can satisfy the invariant directly.
-- Use the latest stable dependency release that supports the project's declared runtime range. Do not treat a prerelease as stable.
+- Use the latest stable dependency release that supports the project's declared runtime range: the latest known when a dependency is chosen or updated. Do not treat a prerelease as stable. Choose and update dependencies with `make dependency-review UPDATE=1` and commit a changed manifest or lock with the review record that `make dependency-review RECORD=1` writes; the verification suite reads that record and queries no registry, so one tree gives one result at any time.
 - Do not silently pin an older dependency. Record a reproducible compatibility reason and the condition that permits removing the pin, and make release checks reject stale or unexplained pins.
-- A release must reject known dependency vulnerabilities at the configured severity and must pass the complete release matrix with the exact locked dependency graph.
+- A release must reject known dependency vulnerabilities at the configured severity and must pass the complete release matrix with the exact locked dependency graph. The review records the advisories of every lock, the gate rejects a lock with an advisory at its review, and the scheduled dependency review finds an advisory published later.
 
 ## Changes and history
 

@@ -1308,8 +1308,8 @@
       "title": "Dependency policy",
       "title_ko": "Dependency policy",
       "status": "implemented",
-      "description": "Check supported runtime versions, locked dependency advisories and explicitly justified version exceptions.",
-      "description_ko": "지원 runtime version, lock 의존성 권고와 명시적으로 정당화한 version 예외를 검사한다.",
+      "description": "Check supported runtime versions, locked dependency advisories and explicitly justified version exceptions against the recorded dependency review, without a network.",
+      "description_ko": "지원 runtime version, lock 의존성 권고와 명시적으로 정당화한 version 예외를 기록된 의존성 review와 대조해 network 없이 검사한다.",
       "inputs": {
         "type": "DependencyGraph",
         "fields": [
@@ -1349,11 +1349,13 @@
       "fixtures": [
         "package-lock.json",
         "packages/template-php/composer.lock",
-        "packages/template-php-ext/composer.lock"
+        "packages/template-php-ext/composer.lock",
+        "config/dependency-review.json"
       ],
       "tests": [
         "scripts/check-dependency-policy.mjs",
-        "scripts/check-dependency-policy-mutation.mjs"
+        "scripts/check-dependency-policy-mutation.mjs",
+        "tests/scripts/dependency-policy.test.mjs"
       ],
       "verification": [
         {

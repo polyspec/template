@@ -13,7 +13,7 @@ unexport CARGO_TARGET_DIR
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
 	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli rerun-failed \
-	owner-check conformance-cases function-inventory-check
+	owner-check conformance-cases function-inventory-check dependency-review
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -81,8 +81,9 @@ help: ## List targets
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  release-test-matrix    Run every commercial release verification layer"
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
-	@echo "  dependency-audit       Reject known JavaScript and PHP dependency advisories"
-	@echo "  dependency-policy-check Reject unexplained or stale stable-version pins"
+	@echo "  dependency-audit       The dependency gate, which also rejects a lock with an advisory at its review"
+	@echo "  dependency-policy-check Check manifests and locks against the policy and the review record, without a network"
+	@echo "  dependency-review      Ask the registries for newer stable releases and advisories; RECORD=1 records the review, UPDATE=1 updates first"
 	@echo "  build-language           Build the formatter library and the template-fmt CLI"
 	@echo "  test-language            Formatter, safety invariant and CLI tests, type check"
 	@echo "  build-lsp              Build the language server template-lsp"
@@ -272,14 +273,17 @@ rules-check: ## Check case.json rule identifiers against the specification
 editor-boundary-check: ## Check that adapters do not use the parser and the language service uses no editor, Node.js or DOM module
 	node scripts/check-editor-boundaries.mjs
 
-dependency-policy-check: build-php ## Reject unexplained or stale stable-version pins
+# The dependency gate reads only the files of the checkout: the manifests, the locks, config/dependency-policy.json and
+# the review record config/dependency-review.json, so one tree gives one result at any time. make dependency-review asks
+# the registries; it is a developer command and a scheduled workflow, not a step of make check or of the gating CI jobs.
+dependency-policy-check: ## Check manifests and locks against the policy and the review record, without a network
 	node scripts/check-dependency-policy.mjs
 	node scripts/check-dependency-policy-mutation.mjs
 
-dependency-audit: dependency-policy-check ## Reject known advisories in locked dependencies
-	npm audit --audit-level=moderate
-	cd $(PHP_DIR) && composer audit --locked --no-interaction
-	cd $(EXT_DIR) && composer audit --locked --no-interaction
+dependency-audit: dependency-policy-check ## The dependency gate, which also rejects a lock with an advisory at its review
+
+dependency-review: ## Ask the registries for newer stable releases and advisories; RECORD=1 records the review, UPDATE=1 updates first
+	node scripts/dependency-review.mjs $(if $(RECORD),--record) $(if $(UPDATE),--update)
 
 doc-coverage: ## Check that public symbols carry documentation comments
 	node scripts/check-doc-coverage.mjs

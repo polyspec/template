@@ -1,0 +1,26 @@
+# The scheduled dependency review (T18.10). It asks the registries for newer stable releases and advisories of the
+# committed locks and fails with one line for each, naming the package, its version, the newer release or the advisory
+# and the fix command. It is not a gate of a commit: make check and the CI workflow read only the files of the tree.
+name: Dependency review
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+      - run: make dependency-review
