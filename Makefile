@@ -157,9 +157,15 @@ lint-php: build-php
 lint-js: ## Lint the TypeScript sources with eslint
 	$(ESLINT) packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src
 
-install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc) and the Rust toolchain of rust-toolchain.toml
+# make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
+# runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
+# downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
+install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml and the crates of every Cargo.lock
 	$(NPM) ci
 	rustup toolchain install --no-self-update
+	$(CARGO) fetch --locked --manifest-path $(EXT_DIR)/Cargo.toml
+	$(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
+	$(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
 
 install-tools: ## Install npm and Go of the checkout into var/tools; skipped when the exact versions are present
 	node scripts/install-tools.mjs

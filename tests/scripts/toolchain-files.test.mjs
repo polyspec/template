@@ -7,6 +7,7 @@
 // - Rust is the toolchain of `rust-toolchain.toml` with the components that `make lint` and `make test-rust` use,
 //   installed by one explicit step, never by rustup on the first cargo: several processes that start cargo at once, as
 //   the files of one `node --test` run do, each installed it and broke the installs of the others (T18.7-1);
+// - make install downloads the crates of every Cargo.lock, which the checks resolve with cargo --offline (T20.1-1);
 // - PHP is one of the minor versions of config/toolchain.json and Composer its exact version: setup-php cannot pin a
 //   patch, so the minor is the pin and var/full-run.json records the patch of each run;
 // - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04.
@@ -138,10 +139,15 @@ test('PHP is a minor version of config/toolchain.json and Composer its exact ver
   }
 });
 
-test('make install installs the tools of the checkout and the Rust toolchain, and no make or CI job lets rustup install it on the first cargo', () => {
+test('make install installs the tools of the checkout, the Rust toolchain and the crates of every Cargo.lock, and no make or CI job lets rustup install it on the first cargo', () => {
   const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(install.status, 0, install.stderr);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), ['node scripts/install-tools.mjs', `${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update']);
+  // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1).
+  const cargo = process.env.CARGO ?? path.join(process.env.HOME, '.cargo/bin/cargo');
+  const locks = spawnSync('git', ['ls-files', '*Cargo.lock'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  assert.ok(locks.length > 0, 'git ls-files listed no Cargo.lock');
+  const fetches = locks.map(lock => `${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), ['node scripts/install-tools.mjs', `${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', ...fetches]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
