@@ -51,7 +51,7 @@ guard는 `CHECK_TARGETS`의 각 target을 `make <target>`으로 끝까지 실행
 
 CI workflow(`.github/workflows/ci.yml`)는 `main`으로의 push와 pull request마다 target을 별도 job에서 실행한다. `make check`를 실행하지 않으므로 guard는 CI 실행을 판단하지 않는다. push는 활성 작업이 모두 끝났을 때만 한다. CI처럼 새 checkout에는 record가 없으므로, 그곳에서 `make check`는 `[~]` 작업이 없고 tree가 깨끗하면 실행된다.
 
-`test-go`, `test-rust`, `test-php`는 `go test`, `cargo test`, PHPUnit을 `scripts/run-tests.mjs`로 실행하고, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`는 vitest를, `test-vscode`는 `node --test`를 이 runner로 실행한다. runner는 각 test가 시작할 때, 실행 중에는 5 s마다, 통과·실패·건너뜀으로 끝날 때 경과 시간과 함께 출력하고, test가 자기 timeout(30 s, `--timeout <seconds>`)을 넘으면 도구를 멈춘다. package, 파일, 실행 전체에는 시간 제한이 없다. `cargo test`는 test를 하나씩 실행하므로 각 test는 결과 전에 시작을 출력한다. PHPUnit도 10 s가 지난 test를 멈춘다(`enforceTimeLimit`, `failOnRisky`). `test-scripts`는 `tests/scripts/`에 있는 runner의 test를 실행한다.
+`test-go`, `test-rust`, `test-php`는 `go test`, `cargo test`, PHPUnit을 `scripts/run-tests.mjs`로 실행하고, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`는 vitest를, `test-vscode`는 `node --test`를 이 runner로 실행한다. runner는 각 test가 시작할 때, 실행 중에는 5 s마다, 통과·실패·건너뜀으로 끝날 때 경과 시간과 함께 출력하고, test가 자기 timeout(30 s, `--timeout <seconds>`)을 넘으면 도구를 멈춘다. package, 파일, 실행 전체에는 시간 제한이 없다. `cargo test`는 test를 하나씩 실행하므로 각 test는 결과 전에 시작을 출력한다. PHPUnit도 10 s가 지난 test를 멈춘다(`enforceTimeLimit`, `failOnRisky`). build되지 않는 Go package는 compiler 출력과 `✖ build of <package> failed`를 출력하고, 요약 줄은 compiler error를 밝힌다. `test-scripts`는 `tests/scripts/`에 있는 runner의 test를 실행한다.
 
 언어별 명령:
 

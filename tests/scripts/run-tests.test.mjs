@@ -167,6 +167,20 @@ test('a Go test that outlives its timeout stops go test and fails by its name', 
   });
 });
 
+test('a Go module that does not compile prints its build errors and the summary names them', COMPILES, async () => {
+  // go test -json reports the compiler output as build-output events and the end of the build as a build-fail event
+  // (T19.3); the runner dropped both, so the run said only that the package failed.
+  await withDirectory(async directory => {
+    await writeFile(path.join(directory, 'go.mod'), 'module example.com/broken\n\ngo 1.24\n');
+    await writeFile(path.join(directory, 'broken_test.go'), 'package broken\n\nimport "testing"\n\nfunc TestBroken(t *testing.T) { missing() }\n');
+    const run = runner(['go', '--cwd', directory, '--', './...']);
+    assert.notEqual(run.status, 0);
+    assert.match(run.stdout, /^\[\s*[\d.]+s\] .*broken_test\.go:5:33: undefined: missing$/m, run.stdout);
+    assert.match(run.stdout, /✖ build of example\.com\/broken(?: \[example\.com\/broken\.test\])? failed/, run.stdout);
+    assert.match(run.stdout, /✖ go .*: .*; build errors: .*broken_test\.go:5:33: undefined: missing/, run.stdout);
+  });
+});
+
 test('a Rust test that outlives its timeout stops cargo test and fails by its name', COMPILES, async () => {
   await withDirectory(async directory => {
     await mkdir(path.join(directory, 'src'));

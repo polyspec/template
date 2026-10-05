@@ -78,12 +78,24 @@ function splitCargo(args) {
   return index === -1 ? { cargo: args, harness: [] } : { cargo: args.slice(0, index), harness: args.slice(index + 1) };
 }
 
-/** Read go test -json events into progress lines; a test's output is shown only when it fails. */
-export function goEvents(progress) {
+/**
+ * Read go test -json events into progress lines; a test's output is shown only when it fails. The compiler output of a
+ * package that does not build arrives as `build-output` events and its end as a `build-fail` event: both are printed,
+ * and the error lines are added to `build` for the summary (T19.3).
+ */
+export function goEvents(progress, build = []) {
   const output = new Map();
   return line => {
     let event;
     try { event = JSON.parse(line); } catch { return progress.line(line); }
+    if (event.Action === 'build-output') {
+      for (const text of String(event.Output ?? '').split('\n').filter(Boolean)) {
+        progress.line(text);
+        if (!text.startsWith('#')) build.push(text.trim());
+      }
+      return undefined;
+    }
+    if (event.Action === 'build-fail') return progress.line(`✖ build of ${event.ImportPath} failed`);
     const id = event.Test ? `${event.Package} › ${event.Test.replaceAll('/', ' › ')}` : event.Package;
     const group = !event.Test;
     switch (event.Action) {
@@ -216,6 +228,8 @@ async function main() {
   }) : undefined;
   // The error lines of the tool, which the summary names when the tool exits without a failing test.
   const errors = [];
+  // The compiler errors of a Go package that does not build, which the summary names.
+  const build = [];
   const noting = handle => (text) => {
     if (ERROR_LINE.test(text.trim())) errors.push(text.trim());
     handle(text);
@@ -225,12 +239,12 @@ async function main() {
     child.stdout.setEncoding('utf8').on('data', events.stdout);
     readline.createInterface({ input: child.stderr }).on('line', noting(events.stderr));
   } else if (reads) {
-    readline.createInterface({ input: child.stdout }).on('line', noting({ go: goEvents, phpunit: phpunitEvents }[options.tool](progress)));
+    readline.createInterface({ input: child.stdout }).on('line', noting(options.tool === 'go' ? goEvents(progress, build) : phpunitEvents(progress)));
   }
   const { status, signal } = await new Promise(resolve => child.on('close', (status, signal) => resolve({ status, signal })));
   const code = status ?? (signal ? 1 : 0);
   if (progress) {
-    const summary = progress.close(label, { exitCode: timedOut ? 0 : code, errors });
+    const summary = progress.close(label, { exitCode: timedOut ? 0 : code, errors, build });
     process.exitCode = summary.ok && !timedOut ? 0 : 1;
   } else {
     // node --test and vitest print their summary from inside the tool; a tool that then ends on a
