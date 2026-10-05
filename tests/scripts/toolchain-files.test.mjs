@@ -104,6 +104,13 @@ test('Go is the version of the go directive of packages/template-go/go.mod, and 
   assert.equal(recipe('echo "$GOTOOLCHAIN"', { GOTOOLCHAIN: 'auto' }), 'local', 'the recipes of the Makefile let go download a toolchain');
 });
 
+test('go builds into the build cache of the checkout, and no script names another one', () => {
+  // T19.14: the generated checks set GOCACHE to the fixed /tmp/template-go-cache, which every checkout and run shared.
+  assert.equal(recipe('echo "$GOCACHE"', { GOCACHE: '/tmp/elsewhere' }), path.join(ROOT, 'var/go/cache'), 'the recipes of the Makefile use another Go build cache');
+  const named = spawnSync('git', ['grep', '-n', 'GOCACHE', '--', 'scripts', 'tests/runner', 'tools'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  assert.deepEqual(named, [], 'scripts that set their own Go build cache');
+});
+
 test('rust-toolchain.toml names the toolchain and the components that cargo of the Rust targets uses', () => {
   const toolchain = read('rust-toolchain.toml');
   const channel = /^channel = "([^"]+)"$/m.exec(toolchain)?.[1];
