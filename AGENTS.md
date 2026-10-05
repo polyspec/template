@@ -20,6 +20,7 @@
 - Handle a defect by adding a failing test that reproduces it, fixing the code, and keeping the test.
 - Use repository-relative paths. Require explicit paths for external inputs.
 - Do not use symbolic links. npm installs every dependency, also a package of this repository, as a copy and writes no bin link (`.npmrc`); a recipe or script starts a tool with the file of its package.
+- Each checkout builds its Rust crates into their own target. Do not point `CARGO_TARGET_DIR` at the target of another checkout: cargo judges freshness by modification times, so it takes binaries built from the sources of another checkout as fresh. The Makefile does not pass an inherited `CARGO_TARGET_DIR` to cargo, and a worktree removes its target when it is removed. A test reads the files of the checkout from the `CARGO_MANIFEST_DIR` that cargo sets when it runs the test, not from a path compiled into the binary.
 
 ## Decision and acceptance rules
 

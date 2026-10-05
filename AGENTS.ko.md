@@ -20,6 +20,7 @@
 - 결함은 재현하는 실패 테스트를 추가하고, 코드를 수정하고, 테스트를 유지하는 절차로 처리한다.
 - 저장소 상대경로를 사용한다. 외부 입력 경로는 명시적으로 받는다.
 - symbolic link를 사용하지 않는다. npm은 이 저장소의 package를 포함한 모든 의존성을 사본으로 설치하고 bin link를 쓰지 않는다(`.npmrc`). recipe와 script는 도구를 그 package의 파일로 실행한다.
+- checkout마다 Rust crate를 자기 target에 빌드한다. `CARGO_TARGET_DIR`를 다른 checkout의 target으로 두지 않는다. cargo는 수정 시각으로 최신 여부를 판정하므로 다른 checkout의 소스로 빌드한 binary를 최신으로 받아들인다. Makefile은 물려받은 `CARGO_TARGET_DIR`를 cargo에 넘기지 않고, worktree는 지울 때 자기 target도 지운다. test는 checkout의 file을 binary에 compile된 경로가 아니라 cargo가 test를 실행할 때 정하는 `CARGO_MANIFEST_DIR`에서 읽는다.
 
 ## 결정과 수용 규칙
 

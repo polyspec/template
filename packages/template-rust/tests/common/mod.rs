@@ -3,13 +3,12 @@
 
 use std::path::{Path, PathBuf};
 
-/// Repository root (two levels above the crate).
+/// Repository root (two levels above the crate). It comes from the `CARGO_MANIFEST_DIR` that cargo sets when it runs
+/// the test, not from the path compiled into the binary, which names the checkout that built it.
 pub fn repo_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
-        .join("..")
-        .canonicalize()
-        .expect("repository root")
+    let manifest = std::env::var_os("CARGO_MANIFEST_DIR")
+        .expect("CARGO_MANIFEST_DIR: run the tests with cargo test, which sets the directory of the crate");
+    Path::new(&manifest).join("..").join("..").canonicalize().expect("repository root")
 }
 
 /// Structural JSON equality: key order is ignored, numbers compare by value.

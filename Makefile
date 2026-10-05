@@ -2,6 +2,9 @@
 
 export PATH := $(HOME)/.cargo/bin:$(PATH)
 CARGO ?= $(HOME)/.cargo/bin/cargo
+# Each checkout builds its Rust crates into their own target. A CARGO_TARGET_DIR inherited from the environment, such as
+# the target of another checkout, would let cargo judge binaries built from other sources fresh for this one (T18.7).
+unexport CARGO_TARGET_DIR
 
 .DEFAULT_GOAL := help
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
