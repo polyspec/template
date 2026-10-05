@@ -21,6 +21,10 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 unexport CARGO_TARGET_DIR
 
 .DEFAULT_GOAL := help
+# make keeps going after a failed target and fails at the end, so one run reports every failure (T19.8). A target that
+# runs several checks names them as prerequisites of one command each, because make stops a recipe at its first
+# failed command; a prerequisite that fails keeps the targets that depend on it from running.
+MAKEFLAGS += -k
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
 	conformance delimiter-matrix parity test-browser ext test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
@@ -57,11 +61,6 @@ VITEST     := node $(CURDIR)/node_modules/vitest/vitest.mjs
 PLAYWRIGHT := node $(CURDIR)/node_modules/@playwright/test/cli.js
 VSCE       := node $(CURDIR)/node_modules/@vscode/vsce/vsce
 TMGRAMMAR  := node $(CURDIR)/node_modules/vscode-tmgrammar-test/dist/unit.js
-
-# require-dir prints "not implemented" and fails when a package directory is absent.
-define require-dir
-	@test -d $(1) || { echo "$(2): not implemented ($(1) is absent)"; exit 1; }
-endef
 
 help: ## List targets
 	@echo "Targets:"
@@ -132,16 +131,23 @@ check: ## Full check through the guard: once per tree, when no checklist task is
 rerun-failed: ## Rerun only the targets of make check that did not pass on the current tree
 	node scripts/full-run.mjs rerun-failed
 
-lint: build-php lint-js ## Lint every package
+lint: lint-js lint-go lint-rust lint-ext lint-showcase-format lint-showcase-warnings lint-php ## Lint every package
+
+.PHONY: lint-go lint-rust lint-ext lint-showcase-format lint-showcase-warnings lint-php
+lint-go:
 	@out=$$(gofmt -l $(GO_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
+lint-rust:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
+lint-ext:
 	$(CARGO) fmt --manifest-path $(EXT_DIR)/Cargo.toml --check
+lint-showcase-format:
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
+lint-showcase-warnings:
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
+lint-php: build-php
 	$(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
 
 lint-js: ## Lint the TypeScript sources with eslint
-	$(call require-dir,$(TS_DIR),lint-js)
 	$(ESLINT) packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src
 
 install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc) and the Rust toolchain of rust-toolchain.toml
@@ -152,33 +158,41 @@ install-tools: ## Install npm and Go of the checkout into var/tools; skipped whe
 	node scripts/install-tools.mjs
 
 build-ts: ## Build the TypeScript package
-	$(call require-dir,$(TS_DIR),build-ts)
 	node scripts/build-package.mjs --package template-ts --install
 
 build-go: ## Build the Go CLI
-	$(call require-dir,$(GO_DIR),build-go)
 	cd $(GO_DIR) && go build -o template ./cmd/template
 
 build-rust: ## Build the Rust CLI
-	$(call require-dir,$(RUST_DIR),build-rust)
 	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml
 
 build-php: ## Install PHP dependencies
-	$(call require-dir,$(PHP_DIR),build-php)
 	cd $(PHP_DIR) && composer install --no-interaction --quiet
 
-test-ts: build-ts ## TypeScript unit tests and type check
-	node scripts/run-tests.mjs vitest --cwd $(TS_DIR)
-	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json && $(TSC) --noEmit -p $(TS_DIR)/tsconfig.node.json
+test-ts: test-ts-unit test-ts-types test-ts-types-node ## TypeScript unit tests and type check
 
-test-go: ## Go unit tests
-	$(call require-dir,$(GO_DIR),test-go)
+.PHONY: test-ts-unit test-ts-types test-ts-types-node
+test-ts-unit: build-ts
+	node scripts/run-tests.mjs vitest --cwd $(TS_DIR)
+test-ts-types: build-ts
+	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json
+test-ts-types-node: build-ts
+	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.node.json
+
+test-go: test-go-vet test-go-unit ## Go unit tests
+
+.PHONY: test-go-vet test-go-unit
+test-go-vet:
 	cd $(GO_DIR) && go vet ./...
+test-go-unit:
 	node scripts/run-tests.mjs go --cwd $(GO_DIR) -- -race ./...
 
-test-rust: ## Rust clippy and tests
-	$(call require-dir,$(RUST_DIR),test-rust)
+test-rust: test-rust-clippy test-rust-unit ## Rust clippy and tests
+
+.PHONY: test-rust-clippy test-rust-unit
+test-rust-clippy:
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
+test-rust-unit:
 	node scripts/run-tests.mjs cargo --cwd $(RUST_DIR) -- --locked
 
 test-php: build-php ## PHP unit tests
@@ -190,15 +204,23 @@ test-scripts: build-ts build-language build-lsp build-php ## Tests of the test r
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
 	node scripts/build-package.mjs --package template-language --install
 
-test-language: build-language ## Formatter, safety invariant and CLI tests, type check
+test-language: test-language-unit test-language-types ## Formatter, safety invariant and CLI tests, type check
+
+.PHONY: test-language-unit test-language-types
+test-language-unit: build-language
 	node scripts/run-tests.mjs vitest --cwd $(LANGUAGE_DIR)
+test-language-types: build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
 build-lsp: build-language ## Build the language server template-lsp
 	node scripts/build-package.mjs --package template-lsp --install
 
-test-lsp: build-lsp ## Language server protocol tests against the editor fixtures, type check
+test-lsp: test-lsp-unit test-lsp-types ## Language server protocol tests against the editor fixtures, type check
+
+.PHONY: test-lsp-unit test-lsp-types
+test-lsp-unit: build-lsp
 	node scripts/run-tests.mjs vitest --cwd $(LSP_DIR)
+test-lsp-types: build-lsp
 	$(TSC) --noEmit -p $(LSP_DIR)/tsconfig.json
 
 format-check: build-language ## Check that the formatter fixtures are formatted
@@ -211,9 +233,14 @@ format-external-check: build-language ## Run the formatter safety invariant on a
 build-codemirror: build-language ## Build the CodeMirror 6 adapter
 	node scripts/build-package.mjs --package template-codemirror --install
 
-test-codemirror: build-codemirror ## CodeMirror adapter tests against the editor fixtures, browser test, type check
+test-codemirror: test-codemirror-unit test-codemirror-browser test-codemirror-types ## CodeMirror adapter tests against the editor fixtures, browser test, type check
+
+.PHONY: test-codemirror-unit test-codemirror-browser test-codemirror-types
+test-codemirror-unit: build-codemirror
 	node scripts/run-tests.mjs vitest --cwd $(CODEMIRROR_DIR)
+test-codemirror-browser: build-codemirror
 	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
+test-codemirror-types: build-codemirror
 	$(TSC) --noEmit -p $(CODEMIRROR_DIR)/tsconfig.json
 
 install-cli: build-language ## Install a copy of the formatter and the script $(CLI_PREFIX)/bin/template-fmt
@@ -225,9 +252,14 @@ uninstall-cli: ## Remove the formatter copy and the script template-fmt of $(CLI
 build-vscode: build-lsp ## Bundle the VS Code extension
 	node scripts/build-package.mjs --package template-vscode
 
-test-vscode: build-vscode ## Grammar tests, extension tests and type check
+test-vscode: test-vscode-grammar test-vscode-unit test-vscode-types ## Grammar tests, extension tests and type check
+
+.PHONY: test-vscode-grammar test-vscode-unit test-vscode-types
+test-vscode-grammar: build-vscode
 	cd $(VSCODE_DIR) && $(TMGRAMMAR) --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json "tests/grammar/*.tpl"
+test-vscode-unit: build-vscode
 	node scripts/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs
+test-vscode-types: build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
 test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
@@ -268,8 +300,12 @@ function-inventory-check: ## Inventory the function-shaped calls of the fixture 
 owner-check: ## Run the owner checks of the changed paths: PATHS, the paths since BASE, or the uncommitted changes
 	node scripts/owner-check.mjs $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base "$(BASE)")
 
-install-check: typed-generator ## Install immutable package artifacts in isolated install projects
+install-check: install-workspace-check package-installs-check ## Install immutable package artifacts in isolated install projects
+
+.PHONY: install-workspace-check package-installs-check
+install-workspace-check:
 	node scripts/check-install-workspace.mjs
+package-installs-check: typed-generator
 	node scripts/check-package-installs.mjs
 
 parity: build-ts build-go build-rust build-php ## Cross-language output comparison
@@ -279,13 +315,18 @@ test-browser: build-ts ## Browser rendering test
 	node tests/browser/run.mjs
 
 ext: ## Build the PHP extension
-	$(call require-dir,$(EXT_DIR),ext)
 	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml
 
-test-ext: ext ## Test the PHP extension
-	$(CARGO) clippy --locked --release --manifest-path $(EXT_DIR)/Cargo.toml -- -D warnings
+test-ext: test-ext-clippy test-ext-conformance test-ext-unit ## Test the PHP extension
+
+.PHONY: build-ext-php test-ext-clippy test-ext-conformance test-ext-unit
+build-ext-php:
 	cd $(EXT_DIR) && composer install --no-interaction --quiet
+test-ext-clippy:
+	$(CARGO) clippy --locked --release --manifest-path $(EXT_DIR)/Cargo.toml -- -D warnings
+test-ext-conformance: ext
 	node tests/runner/conformance.mjs --langs php-ext
+test-ext-unit: ext build-ext-php
 	cd $(EXT_DIR) && ./run-tests.sh
 
 rules-check: ## Check case.json rule identifiers against the specification
@@ -297,8 +338,12 @@ editor-boundary-check: ## Check that adapters do not use the parser and the lang
 # The dependency gate reads only the files of the checkout: the manifests, the locks, config/dependency-policy.json and
 # the review record config/dependency-review.json, so one tree gives one result at any time. make dependency-review asks
 # the registries; it is a developer command and a scheduled workflow, not a step of make check or of the gating CI jobs.
-dependency-policy-check: ## Check manifests and locks against the policy and the review record, without a network
+dependency-policy-check: dependency-policy-state-check dependency-policy-mutation-check ## Check manifests and locks against the policy and the review record, without a network
+
+.PHONY: dependency-policy-state-check dependency-policy-mutation-check
+dependency-policy-state-check:
 	node scripts/check-dependency-policy.mjs
+dependency-policy-mutation-check:
 	node scripts/check-dependency-policy-mutation.mjs
 
 dependency-audit: dependency-policy-check ## The dependency gate, which also rejects a lock with an advisory at its review
@@ -309,39 +354,52 @@ dependency-review: install-tools ## Ask the registries for newer stable releases
 doc-coverage: ## Check that public symbols carry documentation comments
 	node scripts/check-doc-coverage.mjs
 
-schema-check: ## Validate the AST schema and fixtures
+schema-check: schema-fixtures-check schema-mutations-check ## Validate the AST schema and fixtures
+
+.PHONY: schema-fixtures-check schema-mutations-check
+schema-fixtures-check:
 	node scripts/check-schema.mjs
+schema-mutations-check:
 	node scripts/check-schema-mutations.mjs
 
-docs-check: ## Document checks
+docs-check: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check schema-check doc-coverage benchmark-docs-check feature-check ## Document checks
+
+.PHONY: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check benchmark-docs-check feature-pages-check feature-contracts-check
+runtime-interface-diagrams-check:
 	node scripts/generate-runtime-interface.mjs --check
+compiler-interface-diagrams-check:
 	node scripts/generate-compiler-interface.mjs --check
+showcase-contract-diagrams-check:
 	node scripts/generate-showcase-contract.mjs --check
+documents-check:
 	node scripts/check-documents.mjs
-	node scripts/check-schema.mjs
-	node scripts/check-schema-mutations.mjs
-	node scripts/check-doc-coverage.mjs
+benchmark-docs-check:
 	node scripts/update-benchmark-docs.mjs --check
-	node scripts/features/build.mjs --check
-	node scripts/features/check.mjs
 
-feature-check: ## Validate executable feature contracts and generated status pages
+feature-check: feature-pages-check feature-contracts-check ## Validate executable feature contracts and generated status pages
+feature-pages-check:
 	node scripts/features/build.mjs --check
+feature-contracts-check:
 	node scripts/features/check.mjs
 
 runtime-interface-generate: ## Generate the runtime prepared-execution Mermaid diagrams
 	node scripts/generate-runtime-interface.mjs
 
-runtime-interface-check: build-php ## Verify the prepared render interface in every runtime
-	node scripts/generate-runtime-interface.mjs --check
+runtime-interface-check: runtime-interface-diagrams-check runtime-interface-runtimes-check ## Verify the prepared render interface in every runtime
+
+.PHONY: runtime-interface-runtimes-check
+runtime-interface-runtimes-check: build-php
 	node scripts/check-runtime-interface.mjs
 
 compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 	node scripts/generate-compiler-interface.mjs
 
-compiler-interface-check: build-php ## Verify the typed generated module structure in every language
-	node scripts/generate-compiler-interface.mjs --check
+compiler-interface-check: compiler-interface-diagrams-check compiler-interface-languages-check compiler-interface-mutations-check ## Verify the typed generated module structure in every language
+
+.PHONY: compiler-interface-languages-check compiler-interface-mutations-check
+compiler-interface-languages-check: build-php
 	node scripts/check-compiler-interface.mjs
+compiler-interface-mutations-check: build-php
 	node scripts/check-compiler-interface-mutations.mjs
 
 docs: ## Build the documentation site
@@ -349,12 +407,10 @@ docs: ## Build the documentation site
 
 # The copy of the first build goes into a directory of this run outside the checkout, which the recipe removes, so two
 # runs never share it (T19.7).
-docs-verify-idempotent: ## Build the documentation site twice and compare
-	$(VITEPRESS) build docs
+docs-verify-idempotent: docs ## Build the documentation site twice and compare
 	@first=$$(mktemp -d) || exit 1; cp -R docs/.vitepress/dist "$$first/dist" && $(VITEPRESS) build docs && diff -r "$$first/dist" docs/.vitepress/dist; status=$$?; rm -rf "$$first"; exit $$status
 
-docs-static-check: ## Build the documentation site as static files
-	$(VITEPRESS) build docs
+docs-static-check: docs ## Build the documentation site as static files
 	node scripts/check-docs-static.mjs
 
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
@@ -376,9 +432,11 @@ bench: typed-generator build-php ## Measure production AST and generated artifac
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs
 
-benchmark-check: ## Verify committed benchmark structure and equal output
+benchmark-check: benchmark-results-check benchmark-docs-check ## Verify committed benchmark structure and equal output
+
+.PHONY: benchmark-results-check
+benchmark-results-check:
 	node scripts/check-benchmark-results.mjs
-	node scripts/update-benchmark-docs.mjs --check
 
 benchmark-smoke: typed-generator build-php ## Measure a fresh short equal-output sample without changing committed results
 	node scripts/check-benchmark-smoke.mjs
@@ -387,12 +445,20 @@ template-function-inventory: ## Inventory function-shaped calls in an explicit e
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
 	node scripts/inventory-template-functions.mjs --root "$(TEMPLATE_SOURCE_ROOT)"
 
-function-contract-check: ## Check the canonical function contract against all language registries
+function-contract-check: function-contract-registries-check function-contract-runtimes-check ## Check the canonical function contract against all language registries
+
+.PHONY: function-contract-registries-check function-contract-runtimes-check
+function-contract-registries-check:
 	node scripts/check-function-contract.mjs
+function-contract-runtimes-check:
 	node tests/runner/function-contract.mjs
 
-language-test-matrix: ## Verify the manifest requires equal semantic test coverage
+language-test-matrix: language-test-matrix-manifest-check language-test-matrix-mutations-check ## Verify the manifest requires equal semantic test coverage
+
+.PHONY: language-test-matrix-manifest-check language-test-matrix-mutations-check
+language-test-matrix-manifest-check:
 	node scripts/check-language-test-matrix.mjs
+language-test-matrix-mutations-check:
 	node scripts/check-language-test-matrix-mutations.mjs
 
 release-test-matrix: ## The full suite of make check through the same guard: every target of CHECK_TARGETS to its end
@@ -401,34 +467,49 @@ release-test-matrix: ## The full suite of make check through the same guard: eve
 release-check: ## Install and run the release matrix in an isolated clean worktree
 	node scripts/check-clean-release.mjs
 
-showcase-check: build-ts ## Verify example-site parity, repeatability and browser output
-	$(MAKE) typed-generator-compile-check
+showcase-check: typed-generator-compile-check showcase-build-check contract-check showcase-site-check showcase-html-check ## Verify example-site parity, repeatability and browser output
+
+.PHONY: showcase-ast-check showcase-build-check showcase-site-check showcase-html-check
+showcase-ast-check: build-ts
 	node tools/showcase/compile.mjs --refresh false
+showcase-build-check: showcase-ast-check build-php
 	node tools/showcase/build.mjs --check --langs $(SHOWCASE_LANGS)
-	node scripts/check-showcase-contract.mjs
+showcase-site-check: build-ts
 	node tools/showcase/build-site.mjs --check
+showcase-html-check: build-ts
 	node scripts/check-showcase-html.mjs
 
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
 	node tools/showcase/compile.mjs --refresh true
 
-generated-native-check: build-ts build-php ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
+generated-native-check: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
+
+.PHONY: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check
+generated-native-calls-check: build-ts build-php
 	node scripts/check-generated-native-calls.mjs
+generated-typed-values-check: build-ts build-php
 	node scripts/check-generated-typed-values.mjs
+generated-arguments-check: build-ts build-php
 	node scripts/check-generated-arguments.mjs
+generated-bound-data-check: build-ts build-php
 	node scripts/check-generated-bound-data.mjs
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
 	node tools/showcase/compile-generated.mjs --refresh true
 
-typed-generator-check: build-ts ## Verify type-fixed generated source is reproducible
-	node tools/showcase/compile.mjs --refresh false
+typed-generator-check: showcase-ast-check ## Verify type-fixed generated source is reproducible
 	node tools/showcase/compile-generated.mjs --refresh dev --check
 
-compiler-ir-check: build-ts ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
+compiler-ir-check: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
+
+.PHONY: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check
+ast-artifact-check: build-ts
 	node scripts/check-ast-artifact.mjs
+generated-artifact-check: build-ts
 	node scripts/check-generated-artifact.mjs
+compiler-ir-rules-check: build-ts
 	node scripts/check-compiler-ir.mjs
+conformance-type-manifest-check: build-ts
 	node scripts/check-conformance-type-manifest.mjs
 
 typed-generator-compile-check: build-php compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources

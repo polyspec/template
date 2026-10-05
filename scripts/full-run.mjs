@@ -8,7 +8,7 @@
 // row of docs/plans/execution-checklist.md is `[~]`, while tracked changes are uncommitted, and while the run of
 // another process is still going on. A full run is refused when var/full-run.json already records a run of the
 // current tree (`git rev-parse HEAD^{tree}`); `rerun-failed` is refused unless that record exists and has targets that
-// did not pass. The guard prints its decision with the reason, runs each target with `make <target>` to its end,
+// did not pass. The guard prints its decision with the reason, runs each target with `make -k <target>` to its end,
 // prints its start and its result with the elapsed time, and writes the record before and after each target, so a run
 // that is stopped stays recorded as `incomplete`. The record and each rerun hold the versions of the toolchains of the
 // run (`environment`). No step has a time limit.
@@ -131,10 +131,11 @@ export function toolchainVersions(root = ROOT) {
 
 const seconds = milliseconds => `${(milliseconds / 1000).toFixed(1)} s`;
 
-// Runs `make <target>` in the checkout with the output of make; resolves whether it ended with status 0.
+// Runs `make -k <target>` in the checkout with the output of make, which keeps going after a failed prerequisite so the
+// run reports every failure (T19.8); resolves whether it ended with status 0.
 function makeTarget(root, target) {
   return new Promise((resolve, reject) => {
-    const child = spawn('make', [target], { cwd: root, stdio: 'inherit' });
+    const child = spawn('make', ['-k', target], { cwd: root, stdio: 'inherit' });
     child.once('error', reject);
     child.once('exit', status => resolve(status === 0));
   });

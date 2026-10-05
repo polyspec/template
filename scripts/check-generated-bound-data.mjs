@@ -11,6 +11,7 @@ import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
+import { checkLanguages } from './language-checks.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/bound-data');
@@ -30,11 +31,13 @@ try {
   compileAst({ root: fixture, output: graph, entry: 'page.tpl', refresh: 'dev', typeManifest: types });
   const source = (language, options) => compileSource(join(graph, 'manifest.json'), types, language, options);
 
-  // TypeScript.
-  writeFileSync(join(temporary, 'bound.ts'), source('ts'));
-  run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), join(temporary, 'bound.ts')], root);
-  const tsRunner = join(temporary, 'bound.mjs');
-  writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/bound.js';
+  checkLanguages('generated bound data', {
+    TypeScript: () => {
+      // TypeScript.
+      writeFileSync(join(temporary, 'bound.ts'), source('ts'));
+      run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), join(temporary, 'bound.ts')], root);
+      const tsRunner = join(temporary, 'bound.mjs');
+      writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/bound.js';
 import { RuntimeEnvironment, bind, merge } from '@polyspec/template';
 const cases = ${json(cases)};
 const check = (actual, expected, label) => { if (actual !== expected) throw new Error('TypeScript generated ' + label + ': ' + JSON.stringify(actual)); };
@@ -46,40 +49,42 @@ check(prepared.render() + prepared.render(), cases.outputs.page + cases.outputs.
 check(program.render('page.tpl', merge(bind(cases.assign), bind(cases.second))), cases.outputs.merged, 'merged assign');
 check(program.render('define.tpl', cases.assign, { define: { part: { template: 'part.tpl', data: bind(cases.definitionData) } } }), cases.outputs.define, 'bound definition data');
 `);
-  run(process.execPath, [tsRunner], root);
-
-  // Go.
-  const goDir = goWorkspace('generated-bound-data-go');
-  try {
-    writeFileSync(join(goDir, 'generated.go'), source('go'));
-    const goHeader = `package generated
+      run(process.execPath, [tsRunner], root);
+    },
+    Go: () => {
+      // Go.
+      const goDir = goWorkspace('generated-bound-data-go');
+      try {
+        writeFileSync(join(goDir, 'generated.go'), source('go'));
+        const goHeader = `package generated
 import ("testing"; template "github.com/polyspec/template")
 func fixture(t *testing.T, text string) template.Value { t.Helper(); parsed, err := template.ParseJSON([]byte(text)); if err != nil { t.Fatal(err) }; return parsed }
 func bound(t *testing.T, text string) template.BoundMap { t.Helper(); result, err := template.Bind(fixture(t, text)); if err != nil { t.Fatal(err) }; return result }
 `;
-    writeFileSync(join(goDir, 'bound_test.go'), `${goHeader}
+        writeFileSync(join(goDir, 'bound_test.go'), `${goHeader}
 func TestGeneratedBoundAssign(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }
   check := func(assign any, expected, label string) { t.Helper(); actual, err := program.Render("page.tpl", assign, template.RenderOptions{}); if err != nil || actual != expected { t.Fatalf("%s: %q %v", label, actual, err) } }
   check(bound(t, ${goString(json(cases.assign))}), ${goString(cases.outputs.page)}, "bound assign")
   check(fixture(t, ${goString(json(cases.assign))}), ${goString(cases.outputs.page)}, "host assign")
   check(template.Merge(bound(t, ${goString(json(cases.assign))}), bound(t, ${goString(json(cases.second))})), ${goString(cases.outputs.merged)}, "merged assign") }
 `);
-    writeFileSync(join(goDir, 'definition_test.go'), `package generated
+        writeFileSync(join(goDir, 'definition_test.go'), `package generated
 import ("testing"; template "github.com/polyspec/template")
 func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }
   options := template.RenderOptions{Define: map[string]template.DefineInput{"part": {Template: "part.tpl", Data: bound(t, ${goString(json(cases.definitionData))})}}}
   actual, err := program.Render("define.tpl", fixture(t, ${goString(json(cases.assign))}), options); if err != nil || actual != ${goString(cases.outputs.define)} { t.Fatalf("bound definition data: %q %v", actual, err) } }
 `);
-    run('go', ['test', '.'], goDir, { GOCACHE: '/tmp/template-go-cache' });
-  } finally {
-    rmSync(goDir, { recursive: true, force: true });
-  }
-
-  // Rust.
-  writeFileSync(join(temporary, 'bound.rust'), source('rust'));
-  const rust = rustWorkspace('generated-bound-data-rust');
-  const rustTest = rust.test('generated_bound_data_check');
-  writeFileSync(rustTest, `mod generated { include!(${rustString(join(temporary, 'bound.rust'))}); }
+        run('go', ['test', '.'], goDir, { GOCACHE: '/tmp/template-go-cache' });
+      } finally {
+        rmSync(goDir, { recursive: true, force: true });
+      }
+    },
+    Rust: () => {
+      // Rust.
+      writeFileSync(join(temporary, 'bound.rust'), source('rust'));
+      const rust = rustWorkspace('generated-bound-data-rust');
+      const rustTest = rust.test('generated_bound_data_check');
+      writeFileSync(rustTest, `mod generated { include!(${rustString(join(temporary, 'bound.rust'))}); }
 use polyspec_template::{DefineData, DefineInput, Program, RenderOptions, RenderTarget, RuntimeEnvironment, bind, merge};
 fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap() }
 #[test] fn generated_programs_render_bound_maps() {
@@ -98,16 +103,17 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
   assert_eq!(page.render(RenderTarget::Name("define.tpl"), &assign, &options).unwrap(), ${rustString(cases.outputs.define)});
 }
 `);
-  try {
-    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
-  } finally {
-    rmSync(rust.directory, { recursive: true, force: true });
-  }
-
-  // PHP.
-  const phpNamespace = 'Polyspec\\Generated\\BoundData';
-  writeFileSync(join(temporary, 'bound.php'), source('php', { phpNamespace }));
-  run('php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))};
+      try {
+        run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+      } finally {
+        rmSync(rust.directory, { recursive: true, force: true });
+      }
+    },
+    PHP: () => {
+      // PHP.
+      const phpNamespace = 'Polyspec\\Generated\\BoundData';
+      writeFileSync(join(temporary, 'bound.php'), source('php', { phpNamespace }));
+      run('php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))};
 require ${phpString(join(temporary, 'bound.php'))};
 use Polyspec\\Template\\BoundMap;
 $cases = json_decode(${phpString(json(cases))}, true, flags: JSON_THROW_ON_ERROR);
@@ -117,6 +123,8 @@ $check($program->render('page.tpl', BoundMap::bind($cases['assign'])), $cases['o
 $check($program->render('page.tpl', $cases['assign']), $cases['outputs']['page'], 'host assign');
 $check($program->render('page.tpl', BoundMap::merge(BoundMap::bind($cases['assign']), BoundMap::bind($cases['second']))), $cases['outputs']['merged'], 'merged assign');
 $check($program->render('define.tpl', $cases['assign'], ['define' => ['part' => ['template' => 'part.tpl', 'data' => BoundMap::bind($cases['definitionData'])]]]), $cases['outputs']['define'], 'bound definition data');`], root);
+    },
+  });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
