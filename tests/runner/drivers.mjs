@@ -1,5 +1,5 @@
 // Language drivers for the conformance and parity runners.
-// Each driver builds its CLI when the binary is absent and runs `parse` or `render`. A build is a
+// Each driver builds its CLI before a run, which does nothing when its inputs are unchanged, and runs `parse` or `render`. A build is a
 // long-running step without a time limit; it prints its start, its output and its result on
 // standard error, so the result lines of the runners on standard output stay in order. Each CLI
 // call is a case and keeps its own timeout.
@@ -85,10 +85,15 @@ export const drivers = {
   },
 };
 
+/**
+ * Builds the CLI of the language `name` before a run. The build runs every time, because a present binary may be
+ * built from older sources (T19.6); each build does nothing when its inputs are unchanged: make build-ts and
+ * scripts/build-package.mjs, go build, cargo build and composer install.
+ */
 export function prepare(name) {
   const driver = drivers[name];
   if (!existsSync(driver.dir)) throw new Error(`${name}: package directory is absent (${driver.dir})`);
-  if (!existsSync(driver.binary)) driver.build();
+  driver.build();
 }
 
 // Runs one CLI invocation and returns {status, stdout, stderr}.
