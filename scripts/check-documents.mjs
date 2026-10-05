@@ -125,6 +125,24 @@ if (JSON.stringify(checkboxes(CHECKLIST)) !== JSON.stringify(checkboxes(CHECKLIS
   errors.push(`${CHECKLIST}: English and Korean task ids or checkboxes differ`);
 }
 
+// VitePress builds the pages under docs/ as Vue templates, which evaluate `{{ ... }}` outside a fenced code block, also
+// in inline code: `{{ msg }}` rendered as nothing and `${{ !cancelled() }}` failed the build with
+// `_ctx.cancelled is not a function` (T20.1-11). Such text is written in an element with v-pre.
+function interpolations(path) {
+  if (!existsSync(join(root, path))) return;
+  let fenced = false;
+  readFileSync(join(root, path), 'utf8').split('\n').forEach((line, index) => {
+    if (/^```/.test(line)) fenced = !fenced;
+    if (fenced) return;
+    const prose = line.replace(/<(code|span)\s+v-pre>[\s\S]*?<\/\1>/g, '');
+    const found = prose.indexOf('{{');
+    if (found !== -1) errors.push(`${path}:${index + 1}:${line.indexOf('{{') + 1}: {{ outside a code block is a Vue interpolation that VitePress evaluates when it renders the page; write it in <code v-pre>...</code>`);
+  });
+}
+for (const path of documents) {
+  if (path.startsWith('docs/')) for (const file of [path, path.replace(/\.md$/, '.ko.md')]) interpolations(file);
+}
+
 if (errors.length) {
   for (const error of errors) process.stderr.write(`[docs] ${error}\n`);
   process.exitCode = 1;

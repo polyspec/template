@@ -108,6 +108,12 @@ test('a derived sub-item with an invalid state fails', (t) => {
   assert.match(run.stderr, /\[docs\] docs\/plans\/execution-checklist\.md: invalid task state for T1\.2-1: done/);
 });
 
+test('a Vue interpolation outside a code block of a page of docs fails with its location', (t) => {
+  const run = check(t, CLEAN.replace('| T1.2-1 | Name the union members |', '| T1.2-1 | Name the union members of `${{ x }}` |'));
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.match(run.stderr, /\[docs\] docs\/plans\/execution-checklist\.md:\d+:\d+: \{\{ outside a code block is a Vue interpolation that VitePress evaluates when it renders the page; write it in <code v-pre>\.\.\.<\/code>/);
+});
+
 test('the documents of this repository pass', () => {
   const run = spawnSync(process.execPath, [CHECKER], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stdout + run.stderr);
