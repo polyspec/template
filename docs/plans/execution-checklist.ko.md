@@ -294,3 +294,11 @@
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
 | T19.1 | package 설치 검사가 network의 source를 읽지 않고 checkout의 toolchain을 쓰게 한다. Go 설치 프로젝트는 module을 `proxy.golang.org`에서 해석하고 checksum을 `sum.golang.org`에 대조했으며 `GOTOOLCHAIN=auto`로 실행했으므로, Go 1.27.0인 기계에서는 실행마다 Go toolchain 1.27.1을 module cache에 내려받았다. Rust 설치 프로젝트에는 lock이 없었으므로 cargo가 `serde`와 `serde_json`을 실행 시점의 최신 release로 해석했고, `rust-toolchain.toml` 밖인 시스템 임시 디렉터리에서 기계의 기본 toolchain(1.98.0, checkout은 1.98.1을 고정한다)으로 빌드했다. PHP 설치 프로젝트는 Packagist를 읽을 수 있었다. Go 설치 프로젝트는 실행의 proxy만, `GOSUMDB=off`, `GOTOOLCHAIN=local`과 `packages/template-go/go.mod`의 go 지시문을 쓴다. Rust 설치 프로젝트는 `rust-toolchain.toml`을 복사하고 `packages/template-rust/Cargo.lock`에서 유도한 lock(`scripts/install-workspace.mjs`의 `installCargoLock`)으로 `cargo run --locked`를 실행한다. PHP 설치 프로젝트는 Packagist를 끈다 | `node scripts/run-tests.mjs node -- tests/scripts/package-installs.test.mjs` | [o] |
+
+## Wave 20 — 다른 실행과 아무것도 공유하지 않는 test
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T20.1 | 검사와 runner의 모든 임시 directory와 생성 test를 checkout이 아니라 system 임시 directory 아래에 만든다. runner와 script 아홉 개가 임시 directory를 저장소 root, Go module, Rust crate 안에 만들었고, 여섯 개가 Rust test를 `packages/template-rust/tests`에 썼으므로 `make test-scripts` 4번 중 4번 `tests/scripts/owner-check.test.mjs`가 다른 test의 file에서 실패했고, 동시에 실행되는 `cargo test`가 반쯤 쓴 test를 compile할 수 있었다. Class: 공유 상태를 쓰는 test | `node scripts/run-tests.mjs node -- tests/scripts/temporary-files.test.mjs` | [ ] |
+| T20.2 | `tests/browser/run.mjs`가 명시적 명령으로 server를 시작하게 한다. `--server-command`가 다른 명령을 지정하지 않으면 그 process의 Node.js다. `tests/scripts/browser-server.test.mjs`는 느린 wrapper를 그렇게 넘기고, wrapper가 실행되었는지 단언하며, `packages/template-ts/dist`의 inode가 그대로인지 대신 run.mjs가 build 단계를 실행하지 않는지 단언한다. server를 PATH에서 찾았으므로 test의 느린 stub이 실행되는지가 PATH 해석에 달려 있었고(한 실행은 0.6 s에 server를 시작했다), T18.8-2의 전제 조건 build가 실행 중에 그 `dist`를 다시 내보냈으므로 inode 단언이 실패했다. Class: 환경에 의존하는 test, 공유 상태의 경합 | `node scripts/run-tests.mjs node -- tests/scripts/browser-server.test.mjs` | [o] |
+| T20.3 | `tests/scripts/long-steps.test.mjs`가 느린 stub이 시작한 process가 끝난 뒤에만 임시 directory를 지우게 한다. 긴 package 설치 단계 case가 `make test-scripts` 4번 중 1번 그 directory에서 `ENOTEMPTY`로 실패했다. Class: 새는 process | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [ ] |
