@@ -8,9 +8,11 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// The commands that make prints for `target` without running them.
+// The commands that make prints for `target` without running them. A make started by another make, as `make check`
+// starts `make test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
+// print them, and --no-print-directory removes them, so the lines are the commands on every make.
 function commands(target) {
-  const run = spawnSync('make', ['-n', target], { cwd: ROOT, encoding: 'utf8' });
+  const run = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(run.status, 0, run.stderr);
   return run.stdout.split('\n');
 }
