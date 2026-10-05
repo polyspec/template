@@ -308,6 +308,7 @@
 | T19.12 | 전체 실행의 record를 lock한다. `scripts/full-run.mjs`는 lock 없이 `var/full-run.json`을 읽고 결정하고 썼으므로, 함께 시작한 두 guard가 모두 실행하고 record를 번갈아 썼다. 이제 guard는 record를 읽을 때부터 마지막으로 쓸 때까지 `scripts/holder-lock.mjs`의 holder lock `var/full-run.json.lock`을 쥐고, 다른 guard가 쥐고 있으면 holder를 밝혀 거부하며, 놓인 holder lock은 process handler를 남기지 않는다. 첫 문서 build의 복사본은 T19.7부터 그 실행의 directory를 쓴다 | `node --test tests/scripts/full-run.test.mjs tests/scripts/holder-lock.test.mjs` | [o] |
 | T19.13 | 검사가 시작한 group의 process를 남기지 않는다. `tests/runner/bounded.mjs`의 `runBounded`와 `runStep`은 명령이 닫힐 때, VS Code integration test의 `runStep`은 VS Code가 끝날 때 resolve했으므로, group의 background process가 아직 실행되며 호출자가 다음에 지우는 directory에 쓸 수 있었다. 이제 `tests/scripts`에서 옮긴 `scripts/process-group.mjs`의 `stopProcessGroup`이 group의 process를 하나도 찾지 못한 뒤에 resolve한다 | `node --test tests/scripts/process-group-callers.test.mjs tests/scripts/process-group.test.mjs` | [o] |
 | T19.14 | Go를 checkout의 build cache에 build한다. generated 검사, `scripts/check-typed-generator.mjs`, `scripts/check-compiler-interface.mjs`는 함께 써야 할 요구 없이 모든 checkout과 실행이 함께 쓰는 고정된 `/tmp/template-go-cache`를 `GOCACHE`로 설정했다. 이제 Makefile이 `GOCACHE=var/go/cache`를 export하고, script는 recipe의 환경을 쓰며, `make clean`은 `var/go`를 지운다 | `node --test tests/scripts/toolchain-files.test.mjs` | [o] |
+| T19.15 | 멱등성 규칙을 AGENTS에 적는다. Wave 19의 결함 종류마다 규칙 하나를 둔다. toolchain, network, build, 공유 상태, 아무것도 검증하지 않음, 한 실행에 모든 실패, owner, 메시지, 도구 출력과 사용자로부터의 독립성이다 | `make docs-check` | [o] |
 
 ## Wave 20 — 다른 실행과 아무것도 공유하지 않는 test
 
