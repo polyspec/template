@@ -120,7 +120,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 | 1 | `--check`가 포맷되지 않은 파일을 찾았다 |
 | 2 | 파싱되지 않는 파일, 다른 AST, 짝이 맞지 않는 HTML 구조, 읽을 수 없는 경로 또는 잘못된 인자가 있다 |
 
-`make install-cli`는 명령 `template-fmt`를 symbolic link 없이 prefix `CLI_PREFIX`(기본값 `~/.local`) 아래에 설치한다. `scripts/install-cli.mjs`는 build된 formatter package와 이 checkout의 template package의 사본을 bin link 없이 설치하는 npm project `<prefix>/lib/polyspec-template-fmt`와, 복사된 formatter package의 진입점을 절대 경로로 `node`에 넘겨 실행하는 실행 script `<prefix>/bin/template-fmt`를 쓴다. `<prefix>/bin`을 `PATH`에 둔다. `make build-language` 뒤에 다시 실행해 바뀐 build를 설치하며, `make uninstall-cli`는 project와 script를 지운다.
+`make install-cli`는 명령 `template-fmt`를 symbolic link 없이 prefix `CLI_PREFIX`(기본값 `~/.local`) 아래에 설치한다. `scripts/install-cli.mjs`는 build된 formatter package와 이 checkout의 template package의 사본을 bin link 없이 설치하는 npm project `<prefix>/lib/polyspec-template-fmt`와, 복사된 formatter package의 진입점을 절대 경로로 `node`에 넘겨 실행하는 실행 script `<prefix>/bin/template-fmt`를 쓴다. 설치는 `<prefix>/lib/.polyspec-template-fmt.next-<pid>`에서 준비되어 rename으로 project를 대체하고, script는 임시 파일과 rename으로 쓰이므로, 실패한 설치는 이전 설치를 그대로 둔다. `<prefix>/bin`을 `PATH`에 둔다. `make build-language` 뒤에 다시 실행해 바뀐 build를 설치하며, `make uninstall-cli`는 project와 script를 지운다.
 
 ## 언어 서버
 

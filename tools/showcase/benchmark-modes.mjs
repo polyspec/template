@@ -2,7 +2,7 @@
 // Measures production AST and generated artifacts under one output contract.
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,14 @@ import { showcasePhpNamespace } from './php-namespace.mjs';
 
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
+// --output <file> writes the result into a temporary file next to <file> and renames it, so a reader never finds the
+// file empty or half written and a failed run keeps the previous result (T19.7); without it the result goes to stdout.
+const argv = process.argv.slice(2);
+if (!(argv.length === 0 || (argv.length === 2 && argv[0] === '--output'))) {
+  process.stderr.write('usage: benchmark-modes.mjs [--output <file>]\n');
+  process.exit(2);
+}
+const output = argv.length === 2 ? resolve(argv[1]) : null;
 const sampleCount = Number(process.env.BENCH_SAMPLES ?? 21);
 const iterations = Number(process.env.BENCH_ITERATIONS ?? 1000);
 const warmup = Number(process.env.BENCH_WARMUP ?? 20);
@@ -143,12 +151,16 @@ try {
   for (const [language, [command, args]] of Object.entries(commands)) {
     for (const mode of ['ast', 'generated']) results.push(measure(language, command, args, mode));
   }
-  process.stdout.write(JSON.stringify({
+  const text = JSON.stringify({
     schema: 1,
     scenario: basename(scenario),
     condition: 'independent processes, production artifacts, page cache disabled, exact UTF-8 output contract',
     results,
-  }, null, 2) + '\n');
+  }, null, 2) + '\n';
+  if (output) {
+    writeFileSync(`${output}.next-${process.pid}`, text);
+    renameSync(`${output}.next-${process.pid}`, output);
+  } else process.stdout.write(text);
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
