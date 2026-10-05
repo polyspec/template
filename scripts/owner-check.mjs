@@ -82,30 +82,34 @@ export function validate(declaration, tracked, makefile, exists) {
   return errors;
 }
 
-/** The owners of the changed paths: the targets with their make variables, and the test files. */
-export function select(declaration, changed, order) {
+/** The owners of the changed paths: the targets with their make variables, and the test files. A removed path that no
+ * rule owns selects nothing; an existing path that no rule owns is unowned. */
+export function select(declaration, changed, order, exists = () => true) {
   const rules = declaration.owners.map(rule => ({ ...rule, expressions: rule.paths.map(globExpression) }));
   const targets = new Map();
-  const tests = new Set(declaration.always ?? []);
+  const selected = new Set(declaration.always ?? []);
   const reasons = [];
   const unowned = [];
   for (const path of changed) {
     const matched = rules.filter(rule => rule.expressions.some(expression => expression.test(path)));
-    if (!matched.length) unowned.push(path);
+    if (!matched.length && !exists(path)) reasons.push(`${path} -> nothing: the path was removed and no rule owns it`);
+    else if (!matched.length) unowned.push(path);
     for (const rule of matched) {
-      const owned = [...(rule.targets ?? []), ...(rule.tests ?? []).map(test => (test === '$path' ? path : test))];
+      // A test that is the changed path itself runs only while the path exists.
+      const tests = (rule.tests ?? []).flatMap(test => (test !== '$path' ? [test] : exists(path) ? [path] : []));
+      const owned = [...(rule.targets ?? []), ...tests];
       reasons.push(`${path} -> ${owned.join(' ')}`);
       for (const target of rule.targets ?? []) {
         const variables = targets.get(target) ?? {};
         if (rule.variable) variables[rule.variable] = [...(variables[rule.variable] ?? []), path];
         targets.set(target, variables);
       }
-      for (const test of rule.tests ?? []) tests.add(test === '$path' ? path : test);
+      for (const test of tests) selected.add(test);
     }
   }
   const position = target => (order.includes(target) ? order.indexOf(target) : order.length);
   const sorted = [...targets].sort(([a], [b]) => position(a) - position(b) || a.localeCompare(b));
-  return { targets: sorted.map(([target, variables]) => ({ target, variables })), tests: [...tests].sort(), reasons, unowned };
+  return { targets: sorted.map(([target, variables]) => ({ target, variables })), tests: [...selected].sort(), reasons, unowned };
 }
 
 function changedPaths(values) {
@@ -139,7 +143,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }
   const changed = changedPaths(values);
   const order = (makefile.match(/^CHECK_TARGETS := (.*)$/m)?.[1] ?? '').split(/\s+/).filter(Boolean);
-  const selection = select(declaration, changed, order);
+  const selection = select(declaration, changed, order, path => existsSync(join(root, path)));
   if (selection.unowned.length) {
     for (const path of selection.unowned) console.error(`[owner-check] ${path}: the path matches no owner in ${DECLARATION}`);
     process.exit(1);

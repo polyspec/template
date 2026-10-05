@@ -55,7 +55,9 @@ function repository(t, owners, files) {
   git(directory, 'init', '--quiet');
   git(directory, 'add', '.');
   git(directory, '-c', 'user.name=test', '-c', 'user.email=test@example.com', 'commit', '--quiet', '-m', 'fixture');
-  return (...args) => spawnSync(process.execPath, [SCRIPT, ...args], { cwd: directory, encoding: 'utf8' });
+  const run = (...args) => spawnSync(process.execPath, [SCRIPT, ...args], { cwd: directory, encoding: 'utf8' });
+  run.directory = directory;
+  return run;
 }
 
 const FILES = { 'README.md': '# Fixture\n', 'docs/index.md': '# Index\n', 'src/main.txt': 'main\n', 'tests/cases/text/plain/input.tpl': 'a\n' };
@@ -76,9 +78,27 @@ test('a tracked path without an owner fails with its name before any target runs
 });
 
 test('a new path without an owner fails with its name', (t) => {
-  const run = repository(t, OWNERS, FILES)('--paths', 'notes/new.txt');
+  const check = repository(t, OWNERS, FILES);
+  mkdirSync(path.join(check.directory, 'notes'));
+  writeFileSync(path.join(check.directory, 'notes/new.txt'), 'new\n');
+  const run = check();
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.match(run.stderr, /^\[owner-check\] notes\/new\.txt: the path matches no owner in scripts\/owner-checks\.json$/m);
+});
+
+test('a removed path that no rule owns selects nothing', (t) => {
+  const run = repository(t, OWNERS, FILES)('--paths', 'notes/removed.txt docs/index.md');
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+  assert.match(run.stdout, /^\[owner-check\] notes\/removed\.txt -> nothing: the path was removed and no rule owns it$/m);
+  assert.deepEqual(run.stdout.match(/^ran .*$/gm), ['ran docs-check', 'ran docs-static-check']);
+});
+
+test('a removed test file is not run', (t) => {
+  const owners = { owners: [...OWNERS.owners, { paths: ['tests/*.test.mjs'], tests: ['$path'] }] };
+  const run = repository(t, owners, { ...FILES, 'tests/kept.test.mjs': '' })('--dry-run', '--paths', 'tests/removed.test.mjs');
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+  assert.match(run.stdout, /^\[owner-check\] tests\/removed\.test\.mjs -> $/m);
+  assert.match(run.stdout, /^\[owner-check\] 1 changed paths select nothing$/m);
 });
 
 test('a glob that matches no path and a full-suite target fail with their names', (t) => {
