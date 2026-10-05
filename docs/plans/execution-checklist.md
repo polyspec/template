@@ -369,6 +369,7 @@ Dependencies: none. Two concurrent runs of one checkout or of different checkout
 | --- | --- | --- | --- |
 | T18.1 | Make `tests/browser/server.mjs` listen on a port that the system assigns and print it in its line `listening on http://127.0.0.1:<port>`; `tests/browser/run.mjs` passes that address to Playwright in `TEMPLATE_BROWSER_URL`, which `playwright.config.ts` requires | `node scripts/run-tests.mjs node -- tests/scripts/browser-port.test.mjs` | [o] |
 | T18.2 | Give the VS Code directory `.vscode-test` a holder lock `.vscode-test.lock`: the integration run holds it from the download to its last launch, a second run fails with the holder, `make clean` removes the directory only while it holds the lock, and a lock of an ended process is reported and removed by `make vscode-test-unlock` | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [o] |
+| T18.3 | Make `tests/scripts/browser-server.test.mjs` run `tests/browser/run.mjs` against the package build of `make test-scripts` instead of `make test-browser`, whose package build (tsup `clean: true`) emptied `packages/template-ts/dist` while the other tests of `make test-scripts` read it: `make check` failed in `tests/scripts/generated-conformance.test.mjs` with `TS7016` for `@polyspec/template` | `node scripts/run-tests.mjs node -- tests/scripts/browser-server.test.mjs` | [o] |
 
 ## Parallelism summary
 
@@ -390,7 +391,7 @@ Dependencies: none. Two concurrent runs of one checkout or of different checkout
 | W15 | T15.1, T15.2, T15.3, T15.4 | none |
 | W16 | none | T16.1 |
 | W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
-| W18 | T18.1, T18.2 | none |
+| W18 | T18.1, T18.2, T18.3 | none |
 
 ## Definition of done
 
