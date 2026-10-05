@@ -47,5 +47,6 @@ One language service holds every editor rule, and each editor reaches it through
 - [Executable example site](examples/site/index.html) renders page scenarios and shows parity, repeatability and throughput artifacts.
 - [Operations](docs/operations/) describes development, conformance, release testing, dependency, documentation and publication procedures.
 - [Formatter, language server and editors](docs/operations/editor-tools.md) describes how to build, install and verify the formatter, the language server, the CodeMirror 6 adapter and the VS Code extension.
-- [Execution checklist](docs/plans/execution-checklist.md) lists the tasks, their verification and the completion evidence.
+- [Execution plan](docs/plans/execution-plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence.
+- [Execution checklist](docs/plans/execution-checklist.md) lists the tasks, their verification and their states.
 - [Changelog](CHANGELOG.md) records actual changes and their verification.

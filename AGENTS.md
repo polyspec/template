@@ -3,7 +3,7 @@
 ## Documents
 
 - English documents are canonical. Every document has a `.ko.md` file with the same information. Edit both in the same change.
-- One authoritative document per topic. Contracts are in `docs/spec/`. Implementation, verification and deployment status are in `docs/features.md`. Current procedures are in `docs/operations/`. Actual changes and their verification results are in `CHANGELOG.md`. Proposals awaiting approval are in `docs/plans/`; after approval, move the content into the specification and remove the proposal.
+- One authoritative document per topic. Contracts are in `docs/spec/`. Implementation, verification and deployment status are in `docs/features.md`. Current procedures are in `docs/operations/`. Actual changes and their verification results are in `CHANGELOG.md`. The execution plan is `docs/plans/execution-plan.md`, and its tasks are in the checklist `docs/plans/execution-checklist.md`. Proposals awaiting approval are in `docs/plans/`; after approval, move the content into the specification and remove the proposal.
 - Documents describe current behavior. When the direction changes, change the specification first and mark parts that are not implemented.
 - A behavior change, its documents, its feature status row and its changelog entry are one change.
 - Record test results and deployment separately. Do not use results from earlier code as evidence for changed code.
@@ -55,6 +55,8 @@
 
 - This repository has one checklist, `docs/plans/execution-checklist.md`. Split a task into sub-items or add tasks to it; do not create another checklist. Every repository keeps its own checklist.
 - A task has one of four states: `[ ]` waiting, `[~]` in progress, `[o]` done, `[!] cause: <cause>; retry: <condition>` bypassed. `scripts/check-documents.mjs` accepts no other state.
+- A task is a row of a task table. Its first cell is its ID, `T<wave>.<number>` or `T<wave>.<track>.<number>`, with derived sub-items such as `T12.1-1`; its other cells name its deliverables and tests and its owning command; its last cell is its state. A state marker, and a task list marker `[x]` or `[X]`, stands in a checklist file only at the start of the last cell of a task row. A legend, prose, the text of a task, another table cell or inline code names a state in words, so that a tool that reads the checklist can trust every marker.
+- The checklist holds only tasks: its title, the translation link under it, wave and section headings, and task tables made of a header row that starts with `| ID |`, its separator row and the task rows. The plan of the waves, their dependencies, the causes of their tasks, the exit criteria and the definition of done with its evidence are in `docs/plans/execution-plan.md`. `scripts/check-documents.mjs` fails on any other line and any other marker of the checklist with its file, line and column.
 - The Verification column of a task names its owning command, which runs the Red and Green tests of the task, not `make check`. Tasks that are already `[o]` keep their command.
 - `[!]` is used only when the next task cannot proceed without bypassing this one. When the retry condition holds, resume the task without waiting for approval. `[!]` is not done. An audit covers only the `[!]` tasks with their causes and retry conditions and does not repeat unrelated full test runs.
 - A new problem gets a new task. A problem related to a task that is `[o]` gets a sub-item with the next derived ID (`T12.1-1`, `T12.1-2`) that goes through `[~]` and `[o]`; the `[o]` task keeps its state.

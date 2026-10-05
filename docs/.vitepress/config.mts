@@ -70,6 +70,7 @@ const englishSidebar = [
     text: 'Status',
     items: [
       { text: 'Feature status', link: '/features' },
+      { text: 'Execution plan', link: '/plans/execution-plan' },
       { text: 'Execution checklist', link: '/plans/execution-checklist' },
     ],
   },
@@ -113,6 +114,7 @@ const koreanSidebar = [
     text: '상태',
     items: [
       { text: '기능 상태', link: '/ko/features' },
+      { text: '실행 계획', link: '/ko/plans/execution-plan' },
       { text: '실행 체크리스트', link: '/ko/plans/execution-checklist' },
     ],
   },

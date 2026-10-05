@@ -21,7 +21,7 @@
 | [`spec/examples.md`](spec/examples.md) | Complete page example |
 | [`spec/editor.md`](spec/editor.md) | Language service, LSP server and editor adapters |
 
-The [execution checklist](plans/execution-checklist.md) lists the tasks, their verification and the completion evidence.
+The [execution plan](plans/execution-plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence. The [execution checklist](plans/execution-checklist.md) lists the tasks, their verification and their states.
 
 ## Status and procedures
 
