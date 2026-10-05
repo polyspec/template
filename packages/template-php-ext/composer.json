@@ -16,9 +16,6 @@
         }
     },
     "bin": ["bin/template-ext.php"],
-    "scripts": {
-        "test": "./run-tests.sh"
-    },
     "config": {
         "platform": {
             "php": "8.2.0"

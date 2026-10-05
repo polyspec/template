@@ -2,7 +2,6 @@
 // Go generated conformance: compiles every case into its own Go package and runs the packages with
 // scripts/run-tests.mjs, which prints each case test with its elapsed time and stops a test that
 // outlives its own timeout.
-import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
@@ -10,7 +9,7 @@ import { goString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
+import { caseTestFailures, firstDifference, generatedCases, runCaseTests, typeDefinitions } from './cases.mjs';
 import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
 import { goWorkspace } from '../../scripts/temporary-workspace.mjs';
@@ -65,8 +64,10 @@ func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeS
   progress.close('Go generated conformance compile');
   if (runnable.length) {
     // The package of a case is named after the case: case_<case id> of the temporary module.
-    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', './...'], { cwd: root, stdio: 'inherit' });
-    if (result.status !== 0) failures.push('generated Go execution failed; the failed cases are listed above'); else passed += runnable.length;
+    const names = new Map(runnable.map(testCase => [`case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`, testCase.id]));
+    const run = await runCaseTests(['go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', './...'], { cwd: root }, names);
+    failures.push(...caseTestFailures('Go', run));
+    if (run.status === 0 || run.failed.length > 0) passed += runnable.length - run.failed.length;
   }
 } finally { rmSync(temporary, { recursive: true, force: true }); }
 for (const failure of failures) process.stderr.write(`${failure}\n`);

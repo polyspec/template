@@ -96,12 +96,15 @@ export function prepare(name) {
   driver.build();
 }
 
-// Runs one CLI invocation and returns {status, stdout, stderr}.
-export function invoke(name, args, cwd) {
+// Runs one CLI invocation and returns {status, stdout, stderr}. A call that outlives its limit (`timeoutMs`, 10 s by
+// default) returns status -1 with the command and the limit (T19.10).
+export function invoke(name, args, cwd, { timeoutMs = INVOKE_TIMEOUT_MS } = {}) {
   const [command, argv] = drivers[name].command(args);
-  const result = spawnSync(command, argv, { encoding: 'utf8', timeout: INVOKE_TIMEOUT_MS, cwd: cwd ?? root, env: environment(), maxBuffer: 64 * 1024 * 1024 });
+  const result = spawnSync(command, argv, { encoding: 'utf8', timeout: timeoutMs, cwd: cwd ?? root, env: environment(), maxBuffer: 64 * 1024 * 1024 });
   if (result.error) {
-    return { status: -1, stdout: '', stderr: result.error.message };
+    const call = [command, ...argv].join(' ');
+    const stderr = result.error.code === 'ETIMEDOUT' ? `${call} did not finish within its limit of ${timeoutMs / 1000} s` : `${call} failed: ${result.error.message}`;
+    return { status: -1, stdout: '', stderr };
   }
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }

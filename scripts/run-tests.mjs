@@ -11,6 +11,7 @@
 // vitest stop a test at its timeout themselves; for go, cargo and phpunit this runner stops the
 // tool when a test outlives it. No tool has a time limit on a package, a file or a whole run.
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
@@ -19,11 +20,20 @@ import { vitest } from './tools.mjs';
 import { createProgress } from './test-progress/progress.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const USAGE = 'Usage: node scripts/run-tests.mjs <node|vitest|go|cargo|phpunit> [--timeout <seconds>] [--cwd <directory>] [--] [<arguments>]';
+const USAGE = 'Usage: node scripts/run-tests.mjs <node|vitest|go|cargo|phpunit> [--timeout <seconds>] [--php-extension <file>] [--cwd <directory>] [--] [<arguments>]';
 const DEFAULT_TIMEOUT_SECONDS = 30;
 // A line in which a tool reports an error: `error: ...` and `error[E0425]: ...` of cargo and rustc, `fatal error: ...`,
 // `panic: ...` of Go and `PHP Fatal error: ...`.
 const ERROR_LINE = /^(?:error(?:\[\w+\])?:|fatal error:|panic:|PHP Fatal error:)/i;
+
+// The fix for a tool that cannot start.
+const INSTALL = {
+  node: () => 'run make install',
+  vitest: () => 'run make install',
+  go: () => 'run make install-tools, which installs Go into var/tools',
+  cargo: () => 'install rustup and run make install, which installs the toolchain of rust-toolchain.toml',
+  phpunit: ({ cwd }) => `run composer install in ${path.relative(ROOT, cwd) || '.'}`,
+};
 
 export function parseArguments(argv) {
   const [tool, ...rest] = argv;
@@ -35,6 +45,9 @@ export function parseArguments(argv) {
     if (flag === '--timeout') {
       if (!/^[1-9]\d*$/.test(value ?? '')) throw new Error(USAGE);
       options.timeoutSeconds = Number(value);
+    } else if (flag === '--php-extension') {
+      if (!value) throw new Error(USAGE);
+      options.phpExtension = path.resolve(ROOT, value);
     } else if (flag === '--cwd') {
       if (!value) throw new Error(USAGE);
       options.cwd = path.resolve(ROOT, value);
@@ -45,7 +58,7 @@ export function parseArguments(argv) {
 }
 
 /** The command of a tool with its progress and timeout arguments. */
-export function toolCommand({ tool, timeoutSeconds, cwd, args }) {
+export function toolCommand({ tool, timeoutSeconds, cwd, args, phpExtension }) {
   const milliseconds = String(timeoutSeconds * 1000);
   switch (tool) {
     case 'node':
@@ -68,6 +81,8 @@ export function toolCommand({ tool, timeoutSeconds, cwd, args }) {
       // One test at a time, so each test prints its start before its result.
       return { command: 'cargo', args: ['test', ...splitCargo(args).cargo, '--', '--test-threads=1', ...splitCargo(args).harness] };
     case 'phpunit':
+      // --php-extension loads a PHP extension, such as the build of packages/template-php-ext, into the PHP of PHPUnit.
+      if (phpExtension) return { command: 'php', args: ['-d', `extension=${phpExtension}`, path.join(cwd, 'vendor/bin/phpunit'), '--teamcity', ...args] };
       return { command: path.join(cwd, 'vendor/bin/phpunit'), args: ['--teamcity', ...args] };
   }
   throw new Error(USAGE);
@@ -214,6 +229,11 @@ async function main() {
   const { command, args } = toolCommand(options);
   const label = `${options.tool} ${path.relative(ROOT, options.cwd) || '.'}${options.args.length ? ` ${options.args.join(' ')}` : ''}`;
   process.stdout.write(`▶ ${label} (each test ${options.timeoutSeconds}s)\n`);
+  if (options.phpExtension && !existsSync(options.phpExtension)) {
+    process.stdout.write(`✖ ${label}: the PHP extension ${path.relative(ROOT, options.phpExtension)} is not built; run make ext\n`);
+    process.exitCode = 1;
+    return;
+  }
   const reads = ['go', 'cargo', 'phpunit'].includes(options.tool);
   const cargo = options.tool === 'cargo';
   // A runner started from inside node --test must not join that run as its child.
@@ -241,7 +261,17 @@ async function main() {
   } else if (reads) {
     readline.createInterface({ input: child.stdout }).on('line', noting(options.tool === 'go' ? goEvents(progress, build) : phpunitEvents(progress)));
   }
-  const { status, signal } = await new Promise(resolve => child.on('close', (status, signal) => resolve({ status, signal })));
+  // A tool that cannot start, such as a command missing on PATH, fails with its command and the install fix (T19.10).
+  const started = await new Promise((resolve) => {
+    child.once('error', error => resolve({ error }));
+    child.once('close', (status, signal) => resolve({ status, signal }));
+  });
+  if (started.error) {
+    process.stdout.write(`✖ ${label}: cannot start ${command}: ${started.error.message}; ${INSTALL[options.tool](options)}\n`);
+    process.exitCode = 1;
+    return;
+  }
+  const { status, signal } = started;
   const code = status ?? (signal ? 1 : 0);
   if (progress) {
     const summary = progress.close(label, { exitCode: timedOut ? 0 : code, errors, build });

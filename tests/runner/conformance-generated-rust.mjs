@@ -2,7 +2,6 @@
 // Rust generated conformance: compiles every case into a module of one integration test file whose
 // tests are named after the cases, and runs it with scripts/run-tests.mjs, which prints each case
 // test with its elapsed time and stops a test that outlives its own timeout.
-import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
@@ -10,7 +9,7 @@ import { rustString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
+import { caseTestFailures, firstDifference, generatedCases, runCaseTests, typeDefinitions } from './cases.mjs';
 import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
 import { rustWorkspace } from '../../scripts/temporary-workspace.mjs';
@@ -49,6 +48,8 @@ function parsedTemplates(testCase) {
 const failures = [];
 const runnable = [];
 let compilePassed = 0;
+// The cases whose generated test passed.
+let executed = 0;
 const { cases } = generatedCases(process.argv.slice(2));
 const progress = stepProgress();
 // The module and the test of a case are named after its id.
@@ -126,18 +127,18 @@ ${modules}
 ${tests}
 `);
   if (runnable.length > 0) {
-    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'cargo', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', '--locked', '--offline', '--test', 'generated_conformance_check'], {
+    const run = await runCaseTests(['cargo', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', '--locked', '--offline', '--test', 'generated_conformance_check'], {
       cwd: root,
-      stdio: 'inherit',
       env: { ...workspace.env, PATH: `${resolve(process.env.HOME, '.cargo/bin')}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' },
-    });
-    if (result.status !== 0) failures.push('generated Rust execution failed; the failed cases are listed above');
+    }, new Map(runnable.map(({ testCase, name }) => [name, testCase.id])));
+    failures.push(...caseTestFailures('Rust', run));
+    if (run.status === 0 || run.failed.length > 0) executed = runnable.length - run.failed.length;
   }
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
 for (const failure of failures) process.stderr.write(`${failure}\n`);
-const passed = failures.length === 0 ? cases.length : compilePassed;
+const passed = compilePassed + executed;
 process.stdout.write(`${passed}/${cases.length} Rust generated conformance cases passed\n`);
 process.exit(failures.length === 0 ? 0 : 1);
