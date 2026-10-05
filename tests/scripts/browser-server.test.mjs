@@ -20,7 +20,7 @@ test('make test-browser waits for a server that starts slowly and runs the brows
     const run = spawnSync('make', ['-s', 'test-browser'], { cwd: ROOT, env: { ...process.env, PATH: slowCommandPath(directory, 'node', 1.5) }, encoding: 'utf8' });
     const output = `${run.stdout}${run.stderr}`;
     assert.equal(run.status, 0, output);
-    assert.match(output, /\[server\] listening on http:\/\/127\.0\.0\.1:4173\n/);
+    assert.match(output, /\[server\] listening on http:\/\/127\.0\.0\.1:\d+\n/);
     assert.match(output, /✔ start the static server \((?:1\.[5-9]|[2-9]\.\d|\d{2,}\.\d)s\)\n/);
     assert.match(output, /\d+ passed/);
   } finally {

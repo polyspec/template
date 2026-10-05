@@ -361,6 +361,15 @@ Dependencies: none. Each test prints its start, its result and its elapsed time 
 | T17.10 | Run the vitest tests of `test-ts`, `test-language`, `test-lsp` and `test-codemirror` and the `node --test` tests of `test-vscode` through `scripts/run-tests.mjs` | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [o] |
 | T17.11 | Start the static server of `make test-browser` in `tests/browser/run.mjs` as a step without a time limit instead of the Playwright `webServer` with its 30 s startup deadline (Playwright reads `timeout: 0` as 60 s); print the server output, judge readiness by the line `listening on http://127.0.0.1:4173` and fail when the server exits first | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/browser-server.test.mjs` | [o] |
 
+## Wave 18 — Test resources of one run
+
+Dependencies: none. Two concurrent runs of one checkout or of different checkouts replaced or reset a resource that another run was using. `tests/browser/server.mjs` listened on the fixed port `127.0.0.1:4173`, so a second run failed with `EADDRINUSE`, and Playwright loaded the page from that port whichever server held it. `packages/template-vscode/tests/integration/run.mjs` downloads and unpacks VS Code into `.vscode-test` at the repository root, which every session in one checkout shares, and `make clean` removed that directory while a run used it. A resource of a run is isolated by the run (a port that the system assigns, a temporary directory, a name of the run). A resource that exists once has one holder at a time, recorded in a lock file that is created atomically and names the checkout, the process ID and the start time of the holder; another run fails with that holder, the holder releases the lock, and a lock whose process has ended is reported and removed by an explicit command. The tasks run in the branch `fix/shared-T18.1` and the worktree `template-shared-T18.1`.
+
+| ID | Task | Verification | Done |
+| --- | --- | --- | --- |
+| T18.1 | Make `tests/browser/server.mjs` listen on a port that the system assigns and print it in its line `listening on http://127.0.0.1:<port>`; `tests/browser/run.mjs` passes that address to Playwright in `TEMPLATE_BROWSER_URL`, which `playwright.config.ts` requires | `node scripts/run-tests.mjs node -- tests/scripts/browser-port.test.mjs` | [o] |
+| T18.2 | Give the VS Code directory `.vscode-test` a holder lock `.vscode-test.lock`: the integration run holds it from the download to its last launch, a second run fails with the holder, `make clean` removes the directory only while it holds the lock, and a lock of an ended process is reported and removed by `make vscode-test-unlock` | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [ ] |
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -381,6 +390,7 @@ Dependencies: none. Each test prints its start, its result and its elapsed time 
 | W15 | T15.1, T15.2, T15.3, T15.4 | none |
 | W16 | none | T16.1 |
 | W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
+| W18 | T18.1, T18.2 | none |
 
 ## Definition of done
 
