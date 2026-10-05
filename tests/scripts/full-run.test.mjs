@@ -10,7 +10,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { activeItems, decide, fullRun, RECORD } from '../../scripts/full-run.mjs';
+import { activeItems, decide, fullRun, RECORD, toolchainVersions } from '../../scripts/full-run.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -64,6 +64,8 @@ const commit = (directory, file, text) => {
 
 const record = directory => JSON.parse(readFileSync(path.join(directory, RECORD), 'utf8'));
 
+const ENVIRONMENT = { node: 'v26.8.1', npm: '12.2.0', go: 'go1.27.1', cargo: 'cargo 1.98.1', php: '8.5.11', composer: 'Composer version 2.10.3' };
+
 // Runs the guard with stub targets that pass unless they are named in `failing`; returns the exit status, the
 // printed lines and the targets that ran.
 async function guard(directory, mode, targets, failing = []) {
@@ -74,6 +76,7 @@ async function guard(directory, mode, targets, failing = []) {
     mode,
     targets,
     print: line => lines.push(line),
+    environment: () => ENVIRONMENT,
     runTarget: async name => {
       // The record names the target as running while it runs, with the run still incomplete.
       const current = record(directory);
@@ -209,6 +212,7 @@ test('rerun-failed reruns only the failed targets, and a passing rerun completes
   assert.equal(completed.result, 'passed');
   assert.deepEqual(completed.targets.map(target => target.status), ['passed', 'passed', 'passed']);
   assert.equal(completed.reruns.length, 2);
+  assert.deepEqual(completed.reruns.map(rerun => rerun.environment), [ENVIRONMENT, ENVIRONMENT], 'a rerun does not record the toolchains it ran on');
 
   const again = await guard(directory, 'rerun-failed', []);
   assert.equal(again.status, 1);
@@ -222,6 +226,7 @@ test('a run that stops records the run as incomplete, and rerun-failed runs its 
     mode: 'run',
     targets: ['a', 'b', 'c'],
     print: () => {},
+    environment: () => ENVIRONMENT,
     runTarget: async name => {
       if (name === 'b') throw new Error('stopped');
       return true;
@@ -240,4 +245,15 @@ test('a run that stops records the run as incomplete, and rerun-failed runs its 
   assert.equal(rerun.status, 0, rerun.output);
   assert.deepEqual(rerun.ran, ['b', 'c']);
   assert.equal(record(directory).result, 'passed');
+});
+
+test('the record of a run holds the version of each toolchain that the run ran on', async t => {
+  const directory = checkout(t, DONE);
+  const run = await guard(directory, 'run', ['a']);
+  assert.equal(run.status, 0, run.output);
+  assert.deepEqual(record(directory).environment, ENVIRONMENT);
+  const versions = toolchainVersions(ROOT);
+  assert.deepEqual(Object.keys(versions), ['node', 'npm', 'go', 'cargo', 'php', 'composer']);
+  assert.equal(versions.node, process.version);
+  assert.match(versions.php, /^\d+\.\d+\.\d+$/, `the PHP version of the record is ${versions.php}, not a patch version`);
 });

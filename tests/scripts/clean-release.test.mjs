@@ -1,5 +1,5 @@
 // Tests the clean release check scripts/check-clean-release.mjs (`make release-check`, T17.1-2): it refuses a source
-// tree with changes, installs the locked dependencies and the browser in a detached worktree of HEAD, runs
+// tree with changes, installs with `make install` and installs the browser in a detached worktree of HEAD, runs
 // `make release-test-matrix` there and removes the worktree whether the matrix passes or fails. The fixture is a
 // temporary Git repository with a copy of the script; `npm`, `node` and `make` are stubs on PATH that log their
 // command and directory, so no dependency is installed and no suite runs.
@@ -36,7 +36,8 @@ function fixture(t) {
   const log = path.join(base, 'calls.log');
   writeFileSync(log, '');
   for (const name of ['npm', 'node', 'make']) {
-    const status = name === 'make' ? '${STUB_MAKE_STATUS:-0}' : '0';
+    // make install passes; make release-test-matrix exits with STUB_MAKE_STATUS.
+    const status = name === 'make' ? '$([ "$1" = release-test-matrix ] && echo "${STUB_MAKE_STATUS:-0}" || echo 0)' : '0';
     writeFileSync(path.join(bin, name), `#!/bin/sh\nfiles=$(ls | tr '\\n' ' ')\necho "${name} $* | $(pwd) | $files" >> "${log}"\nexit ${status}\n`);
     chmodSync(path.join(bin, name), 0o755);
   }
@@ -56,7 +57,7 @@ test('the release check runs the matrix in a detached worktree of HEAD and remov
   const result = release.run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
   const calls = release.calls();
-  assert.deepEqual(calls.map(call => call.command.split(' ')[0] === 'node' ? 'node playwright install chromium' : call.command), ['npm ci', 'node playwright install chromium', 'make release-test-matrix']);
+  assert.deepEqual(calls.map(call => call.command.split(' ')[0] === 'node' ? 'node playwright install chromium' : call.command), ['make install', 'node playwright install chromium', 'make release-test-matrix']);
   assert.match(calls[1].command, /^node \S+\/node_modules\/@playwright\/test\/cli\.js install chromium$/);
   for (const call of calls) {
     assert.notEqual(call.directory, release.repository, `${call.command} ran in the source tree`);

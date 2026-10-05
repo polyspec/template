@@ -1,6 +1,16 @@
 # Build, test and documentation targets. Every target is idempotent.
 
-export PATH := $(HOME)/.cargo/bin:$(PATH)
+# make install-tools installs the npm of packageManager in package.json and the Go of packages/template-go/go.mod into
+# var/tools (scripts/install-tools.mjs); their wrappers in var/tools/bin come first, so every recipe uses the tools of
+# the checkout and never the npm or Go of the machine (T19.2). GOTOOLCHAIN=local keeps go from downloading another
+# toolchain at run time.
+export PATH := $(CURDIR)/var/tools/bin:$(HOME)/.cargo/bin:$(PATH)
+export GOTOOLCHAIN := local
+# GNU Make 3.81 starts a recipe line without shell syntax itself and finds its program with the PATH that make started
+# with, not the exported PATH above, also when SHELL names another shell: a line `npm ci` ran the npm of the machine. A
+# recipe therefore starts npm by the path of its wrapper, $(NPM), and go and gofmt only in lines that the shell runs,
+# which finds them with the exported PATH (T19.2). A script that a recipe starts gets the exported PATH.
+NPM := $(CURDIR)/var/tools/bin/npm
 # make install installs the Rust toolchain of rust-toolchain.toml; rustup does not install it on the first cargo, which
 # several processes start at once in one run and whose installs then break each other (T18.7-1). A missing toolchain
 # fails with rustup's message, which names rustup toolchain install.
@@ -16,7 +26,7 @@ unexport CARGO_TARGET_DIR
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli rerun-failed \
+	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli rerun-failed \
 	owner-check conformance-cases function-inventory-check dependency-review
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -61,7 +71,8 @@ help: ## List targets
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
 	@echo "  lint-js                eslint on the TypeScript sources"
-	@echo "  install                npm ci: every dependency as a copy, no bin links; the Rust toolchain of rust-toolchain.toml"
+	@echo "  install                install-tools; npm ci: every dependency as a copy, no bin links; the Rust toolchain of rust-toolchain.toml"
+	@echo "  install-tools          npm of package.json packageManager and Go of go.mod into var/tools, first on PATH"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  test-scripts           Tests of the test runner and the conformance runners"
@@ -133,9 +144,12 @@ lint-js: ## Lint the TypeScript sources with eslint
 	$(call require-dir,$(TS_DIR),lint-js)
 	$(ESLINT) packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src
 
-install: ## Install the npm dependencies as copies without bin links (.npmrc) and the Rust toolchain of rust-toolchain.toml
-	npm ci
+install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc) and the Rust toolchain of rust-toolchain.toml
+	$(NPM) ci
 	rustup toolchain install --no-self-update
+
+install-tools: ## Install npm and Go of the checkout into var/tools; skipped when the exact versions are present
+	node scripts/install-tools.mjs
 
 build-ts: ## Build the TypeScript package
 	$(call require-dir,$(TS_DIR),build-ts)
@@ -289,7 +303,7 @@ dependency-policy-check: ## Check manifests and locks against the policy and the
 
 dependency-audit: dependency-policy-check ## The dependency gate, which also rejects a lock with an advisory at its review
 
-dependency-review: ## Ask the registries for newer stable releases and advisories; RECORD=1 records the review, UPDATE=1 updates first
+dependency-review: install-tools ## Ask the registries for newer stable releases and advisories; RECORD=1 records the review, UPDATE=1 updates first
 	node scripts/dependency-review.mjs $(if $(RECORD),--record) $(if $(UPDATE),--update)
 
 doc-coverage: ## Check that public symbols carry documentation comments

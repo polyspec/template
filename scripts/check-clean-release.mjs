@@ -31,7 +31,7 @@ try {
 
   run('git', ['worktree', 'add', '--detach', checkout, 'HEAD']);
   attached = true;
-  run('npm', ['ci'], checkout);
+  run('make', ['install'], checkout);
   run('node', [join(checkout, 'node_modules/@playwright/test/cli.js'), 'install', 'chromium'], checkout);
   run('make', ['release-test-matrix'], checkout);
   process.stdout.write('release: isolated clean checkout passed\n');
