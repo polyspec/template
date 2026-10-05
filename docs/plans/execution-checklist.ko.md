@@ -358,7 +358,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.7 | `tests/runner/drivers.mjs`의 driver build를 600 s 제한 없이 log가 있는 단계로 실행한다. 시작, 출력, 결과를 경과 시간과 함께 standard error에 출력하고 exit code로 판단한다. CLI 호출마다의 10 s timeout은 유지한다 | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [o] |
 | T17.8 | `scripts/check-package-installs.mjs`(600 s)와 `scripts/check-install-workspace.mjs`(120 s)의 각 명령을 시간 제한 없이 log가 있는 단계로 실행하고 exit code로 판단한다 | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [o] |
 | T17.9 | `tests/runner/delimiter-matrix.mjs`가 한 언어에서 구분자 쌍이 끝날 때마다 `<pair> [<lang>] pass\|fail (<ms> ms)`를 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [o] |
-| T17.10 | `test-ts`, `test-language`, `test-lsp`, `test-codemirror`의 vitest test와 `test-vscode`의 `node --test` test를 `scripts/run-tests.mjs`로 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [ ] |
+| T17.10 | `test-ts`, `test-language`, `test-lsp`, `test-codemirror`의 vitest test와 `test-vscode`의 `node --test` test를 `scripts/run-tests.mjs`로 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [o] |
 
 ## 병렬성 요약
 

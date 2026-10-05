@@ -104,7 +104,7 @@ build-php: ## Install PHP dependencies
 	cd $(PHP_DIR) && composer install --no-interaction --quiet
 
 test-ts: build-ts ## TypeScript unit tests and type check
-	npm test -w @polyspec/template -- --run
+	node scripts/run-tests.mjs vitest --cwd $(TS_DIR)
 	npm run typecheck -w @polyspec/template
 
 test-go: ## Go unit tests
@@ -127,14 +127,14 @@ build-language: build-ts ## Build the formatter library and the template-fmt CLI
 	npm run build -w @polyspec/template-language
 
 test-language: build-language ## Formatter, safety invariant and CLI tests, type check
-	npm test -w @polyspec/template-language -- --run
+	node scripts/run-tests.mjs vitest --cwd $(LANGUAGE_DIR)
 	npm run typecheck -w @polyspec/template-language
 
 build-lsp: build-language ## Build the language server template-lsp
 	npm run build -w @polyspec/template-lsp
 
 test-lsp: build-lsp ## Language server protocol tests against the editor fixtures, type check
-	npm test -w @polyspec/template-lsp -- --run
+	node scripts/run-tests.mjs vitest --cwd $(LSP_DIR)
 	npm run typecheck -w @polyspec/template-lsp
 
 format-check: build-language ## Check that the formatter fixtures are formatted
@@ -148,7 +148,7 @@ build-codemirror: build-language ## Build the CodeMirror 6 adapter
 	npm run build -w @polyspec/template-codemirror
 
 test-codemirror: build-codemirror ## CodeMirror adapter tests against the editor fixtures, browser test, type check
-	npm test -w @polyspec/template-codemirror -- --run
+	node scripts/run-tests.mjs vitest --cwd $(CODEMIRROR_DIR)
 	npm run test:browser -w @polyspec/template-codemirror
 	npm run typecheck -w @polyspec/template-codemirror
 
@@ -160,7 +160,7 @@ build-vscode: build-lsp ## Bundle the VS Code extension
 
 test-vscode: build-vscode ## Grammar tests, extension tests and type check
 	npm run test:grammar -w polyspec-template
-	npm run test:extension -w polyspec-template
+	node scripts/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs
 	npm run typecheck -w polyspec-template
 
 test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
