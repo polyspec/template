@@ -32,7 +32,12 @@ fs.appendFileSync(process.env.STUB_LOG, JSON.stringify({ name, args, cwd: proces
 if (name === 'npm' && args[0] === 'pack') {
   const destination = args[args.indexOf('--pack-destination') + 1];
   fs.writeFileSync(path.join(destination, 'polyspec-template-0.0.1.tgz'), '');
-  process.stdout.write('polyspec-template-0.0.1.tgz\\n');
+  // npm may print notices after the name of the archive; the check computes the name (T19.11).
+  process.stdout.write('polyspec-template-0.0.1.tgz\\nnpm notice New minor version of npm available\\n');
+}
+if (name === 'npm' && args[0] === 'install' && !fs.existsSync(args.at(-1))) {
+  process.stderr.write('npm error enoent ' + args.at(-1) + '\\n');
+  process.exit(1);
 }
 if (name === 'go' && args[0] === 'env') process.stdout.write('go1.0.0\\n');
 if (name === 'cargo' && args[0] === 'package') {

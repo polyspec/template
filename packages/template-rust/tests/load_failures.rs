@@ -54,16 +54,25 @@ fn the_filesystem_loader_separates_missing_and_unreadable_files() {
     let locked = root.join("locked.tpl");
     std::fs::write(&locked, "x").expect("file");
     std::fs::set_permissions(&locked, std::fs::Permissions::from_mode(0o000)).expect("permissions");
-    let codes: Vec<ErrorCode> = ["locked.tpl", "folder.tpl", "missing.tpl"]
+    // Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly when the
+    // process cannot read it, and the process cannot read it exactly when it does not run as root.
+    let readable = std::fs::read(&locked).is_ok();
+    let user = std::process::Command::new("id").arg("-u").output().expect("id -u");
+    let as_root = String::from_utf8_lossy(&user.stdout).trim() == "0";
+    let locked_result = render(Box::new(FsLoader::new(&root)), "locked.tpl").map_err(|error| error.code);
+    let codes: Vec<ErrorCode> = ["folder.tpl", "missing.tpl"]
         .iter()
         .map(|name| render(Box::new(FsLoader::new(&root)), name).unwrap_err().code)
         .collect();
     std::fs::set_permissions(&locked, std::fs::Permissions::from_mode(0o600)).expect("permissions");
     std::fs::remove_dir_all(&root).expect("cleanup");
-    assert_eq!(
-        codes,
-        vec![ErrorCode::E_LOAD_FAILED, ErrorCode::E_LOAD_NOT_FOUND, ErrorCode::E_LOAD_NOT_FOUND]
-    );
+    assert_eq!(readable, as_root, "locked.tpl readable = {readable}, running as root = {as_root}");
+    if readable {
+        assert_eq!(locked_result, Ok("x".to_string()));
+    } else {
+        assert_eq!(locked_result, Err(ErrorCode::E_LOAD_FAILED));
+    }
+    assert_eq!(codes, vec![ErrorCode::E_LOAD_NOT_FOUND, ErrorCode::E_LOAD_NOT_FOUND]);
 }
 
 #[test]

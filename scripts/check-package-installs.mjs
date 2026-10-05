@@ -8,7 +8,7 @@
 // Each command is a step without a time limit that prints its start, its output and its result with
 // its elapsed time on standard error and is judged by its exit status.
 import assert from 'node:assert/strict';
-import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { installCargoLock, createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
@@ -36,7 +36,12 @@ function checkTypeScript() {
   const directory = join(temporary, 'typescript');
   mkdirSync(directory);
   writeFileSync(join(directory, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
-  const archive = run('npm', ['pack', join(root, 'packages/template-ts'), '--pack-destination', artifacts, '--silent']).split('\n').at(-1);
+  // npm names the archive <name without @, / as ->-<version>.tgz; the name is computed, not read from the output of npm,
+  // whose wording a release of npm may change (T19.11).
+  const manifest = JSON.parse(readFileSync(join(root, 'packages/template-ts/package.json'), 'utf8'));
+  const archive = `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`;
+  run('npm', ['pack', join(root, 'packages/template-ts'), '--pack-destination', artifacts, '--silent']);
+  assert.ok(existsSync(join(artifacts, archive)), `npm pack wrote no ${archive} into ${artifacts}`);
   run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', join(artifacts, archive)], { cwd: directory });
   stageScenario(directory);
   cpSync(join(root, 'tools/showcase/adapters/generated/javascript/scope-precedence.js'), join(directory, 'generated.mjs'));
