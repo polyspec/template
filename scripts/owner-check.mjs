@@ -5,7 +5,9 @@
 //
 // The declaration is checked on every run, before any owner runs: every tracked path matches at least one owner
 // rule, every glob matches at least one tracked path (new files not ignored count as tracked), every target exists in the Makefile and is not the full suite,
-// and every test file exists. A failure names the path, the glob or the target. `always` lists the tests that run for
+// and every test file exists. `inputs` declares, for a target, the globs of the paths that it reads; each such path
+// needs a rule that selects the target or a target that runs it as a prerequisite (T19.9). A failure names the path,
+// the glob or the target. `always` lists the tests that run for
 // every change; they do not make a path owned.
 //
 // A glob matches a repository path: `*` within one path segment, `**` across segments, `{a,b}` either alternative.
@@ -58,6 +60,23 @@ function makeTargets(makefile) {
   return new Set([...makefile.matchAll(/^([a-zA-Z0-9_-]+):(?!=)/gm)].map(match => match[1]));
 }
 
+/** The prerequisites of each target of the Makefile. */
+function makePrerequisites(makefile) {
+  const prerequisites = new Map();
+  for (const match of makefile.matchAll(/^([a-zA-Z0-9_-]+(?: [a-zA-Z0-9_-]+)*):(?!=)([^#\n]*)/gm)) {
+    for (const name of match[1].split(' ')) prerequisites.set(name, [...(prerequisites.get(name) ?? []), ...match[2].trim().split(/\s+/).filter(Boolean)]);
+  }
+  return prerequisites;
+}
+
+/** The targets that `target` runs: itself and its prerequisites, transitively. */
+function closure(target, prerequisites, result = new Set()) {
+  if (result.has(target)) return result;
+  result.add(target);
+  for (const prerequisite of prerequisites.get(target) ?? []) closure(prerequisite, prerequisites, result);
+  return result;
+}
+
 /**
  * The targets of the Makefile that run the full suite: `check`, `rerun-failed`, and every target whose recipe starts the
  * guard scripts/full-run.mjs or the clean release check scripts/check-clean-release.mjs, which runs the guard in a clean
@@ -93,7 +112,29 @@ export function validate(declaration, tracked, makefile, exists) {
   for (const path of tracked) {
     if (!rules.some(rule => rule.expressions.some(expression => expression.test(path)))) errors.push(`${path}: the path matches no owner in ${DECLARATION}`);
   }
-  return errors;
+  // `inputs` declares the paths that a target reads (T19.9). For each of them a rule must select the target or a target
+  // that runs it as a prerequisite, so a change of the path runs a check that reads it.
+  const prerequisites = makePrerequisites(makefile);
+  const runs = new Map();
+  const selects = (rule, target) => (rule.targets ?? []).some((selected) => {
+    if (!runs.has(selected)) runs.set(selected, closure(selected, prerequisites));
+    return runs.get(selected).has(target);
+  });
+  for (const [target, globs] of Object.entries(declaration.inputs ?? {})) {
+    if (!targets.has(target)) {
+      errors.push(`${DECLARATION}: the inputs of ${target} name a target that is not a target of the Makefile`);
+      continue;
+    }
+    for (const glob of globs) {
+      const expression = globExpression(glob);
+      const paths = tracked.filter(path => expression.test(path));
+      if (!paths.length) errors.push(`${DECLARATION}: the input glob ${glob} of ${target} matches no tracked path`);
+      for (const path of paths) {
+        if (!rules.some(rule => rule.expressions.some(owner => owner.test(path)) && selects(rule, target))) errors.push(`${path}: an input of the target ${target}, which no owner rule of the path selects`);
+      }
+    }
+  }
+  return [...new Set(errors)];
 }
 
 /** The owners of the changed paths: the targets with their make variables, and the test files. A removed path that no
