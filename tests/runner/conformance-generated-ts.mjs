@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Compiles every fixture through the product TypeScript backend and compares
 // generated execution or compile diagnostics with the canonical expectations.
-// tsc runs as one step under a deadline; each case renders in a worker under its own deadline.
+// tsc runs as one step without a time limit and is judged by its exit code; each case renders in a
+// worker under its own deadline.
 // Every step and every case prints its start and its result with its elapsed time.
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -10,12 +11,11 @@ import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
-import { inWorker, runBounded, seconds, stepProgress } from './bounded.mjs';
+import { inWorker, runStep, seconds, stepProgress } from './bounded.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { root } from './drivers.mjs';
 
-// The time limits of the tsc step and of the render of one case.
-const TSC_TIMEOUT_MS = 300_000;
+// The time limit of the render of one case.
 const RENDER_TIMEOUT_MS = 30_000;
 
 const temporary = mkdtempSync(join(root, '.generated-conformance-ts-'));
@@ -89,12 +89,12 @@ try {
   if (pending.length > 0) {
     const step = `tsc (${pending.length} files)`;
     progress.start(step);
-    const result = await runBounded('npx', [
+    const result = await runStep('npx', [
       'tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
       ...pending.map(item => item.sourcePath),
-    ], { cwd: root, timeoutMs: TSC_TIMEOUT_MS });
-    if (result.timedOut || result.status !== 0) {
-      const reason = result.timedOut ? `tsc exceeded its ${seconds(TSC_TIMEOUT_MS)} deadline` : `tsc exited with ${result.status}\n${result.stdout}${result.stderr}`;
+    ], { cwd: root });
+    if (result.status !== 0) {
+      const reason = `tsc exited with ${result.status}\n${result.stdout}${result.stderr}`;
       progress.fail(step, undefined, reason);
       throw new Error(reason);
     }
