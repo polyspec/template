@@ -43,7 +43,8 @@ make owner-check
 - while a task row of the checklist is `[~]`; the refusal lists each active ID with its task;
 - while tracked files have uncommitted changes (`git status --porcelain --untracked-files=no`), because a full run verifies a committed tree;
 - when `var/full-run.json` records a full run of the current tree (`git rev-parse HEAD^{tree}`); the refusal names that run with its commit, its start time and its result;
-- while the process of an `incomplete` record still runs.
+- while the process of an `incomplete` record still runs;
+- while the guard of another run holds `var/full-run.json.lock`, the holder lock of the record (`scripts/holder-lock.mjs`), which a guard takes before it reads the record and releases after its last write, also when a target throws, so two guards never decide on the same record or write it in turn; the refusal names the holder, and `node scripts/holder-lock.mjs clear var/full-run.json.lock` removes a lock whose process has ended.
 
 The guard runs each target of `CHECK_TARGETS` with `make -k <target>` to its end, also after a target fails, and prints `[full-run] start <target> (<n>/<total>)` and `[full-run] <target> passed|failed in <seconds> s`; no target has a time limit. It writes `var/full-run.json` before and after each target: the tree, the commit, the process, the start and end times, the versions of Node.js, npm, Go, cargo, PHP and Composer on `PATH` (`environment`, also for each rerun), the result (`incomplete` until the last target ends, then `passed` or `failed`), the failed targets and each target with its status (`pending`, `running`, `passed`, `failed`), its times and its elapsed milliseconds. A run that is stopped therefore stays recorded as `incomplete`, with the target that was running. `var/` is ignored by Git, so each checkout and worktree has its own record. A commit that changes the tree permits a new full run when no task is `[~]`.
 

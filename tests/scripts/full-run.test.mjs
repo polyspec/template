@@ -3,14 +3,14 @@
 // a full run, it records each target as the run proceeds, and `make rerun-failed` reruns only the targets of the
 // current tree that did not pass. The targets of these tests are stubs; no test runs a real target.
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { activeItems, decide, fullRun, RECORD, toolchainVersions } from '../../scripts/full-run.mjs';
+import { activeItems, decide, fullRun, LOCK, RECORD, toolchainVersions } from '../../scripts/full-run.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -257,3 +257,28 @@ test('the record of a run holds the version of each toolchain that the run ran o
   assert.equal(versions.node, process.version);
   assert.match(versions.php, /^\d+\.\d+\.\d+$/, `the PHP version of the record is ${versions.php}, not a patch version`);
 });
+
+test('a guard is refused while the guard of another run holds the lock of the record, and runs no target', async (t) => {
+  // T19.12: two guards read the record, both decided to run and wrote the record in turn.
+  const directory = checkout(t, DONE);
+  const other = spawn('sleep', ['60'], { stdio: 'ignore' });
+  t.after(() => other.kill());
+  mkdirSync(path.join(directory, 'var'), { recursive: true });
+  writeFileSync(path.join(directory, LOCK), `${JSON.stringify({ checkout: directory, pid: other.pid, started: '2026-10-05T00:00:00.000Z', token: 'other' })}\n`);
+  const run = await guard(directory, 'run', ['a']);
+  assert.equal(run.status, 1, run.output);
+  assert.match(run.output, new RegExp(`^\\[full-run\\] refuse: .*full-run\\.json\\.lock is held by process ${other.pid} of the checkout .*; the guard of another run reads or writes var/full-run\\.json$`, 'm'));
+  assert.deepEqual(run.ran, []);
+  assert.equal(existsSync(path.join(directory, RECORD)), false, 'the refused guard wrote the record');
+});
+
+test('the guard releases the lock of the record after a run and after a target that throws', async (t) => {
+  const directory = checkout(t, DONE);
+  const run = await guard(directory, 'run', ['a']);
+  assert.equal(run.status, 0, run.output);
+  assert.equal(existsSync(path.join(directory, LOCK)), false, 'the lock stayed after the run');
+  commit(directory, 'next.txt', 'next\n');
+  await assert.rejects(fullRun({ root: directory, mode: 'run', targets: ['a'], print: () => {}, environment: () => ENVIRONMENT, runTarget: async () => { throw new Error('stopped'); } }), /stopped/);
+  assert.equal(existsSync(path.join(directory, LOCK)), false, 'the lock stayed after a target that threw');
+});
+

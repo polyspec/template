@@ -44,6 +44,7 @@ make owner-check
 - 추적 파일에 커밋되지 않은 변경이 있을 때(`git status --porcelain --untracked-files=no`). 전체 실행은 커밋된 tree를 검증하기 때문이다.
 - `var/full-run.json`이 현재 tree(`git rev-parse HEAD^{tree}`)의 전체 실행을 기록하고 있을 때. 거부 메시지는 그 실행을 commit, 시작 시각, 결과와 함께 밝힌다.
 - `incomplete` record의 process가 아직 실행 중일 때.
+- 다른 실행의 guard가 record의 holder lock `var/full-run.json.lock`(`scripts/holder-lock.mjs`)을 쥐고 있을 때. guard는 record를 읽기 전에 이 lock을 잡고 마지막으로 쓴 뒤에 놓으며, target이 예외를 던져도 놓으므로, 두 guard가 같은 record로 결정하거나 번갈아 쓰지 않는다. 거부 메시지는 holder를 밝히고, `node scripts/holder-lock.mjs clear var/full-run.json.lock`은 process가 끝난 lock을 지운다.
 
 guard는 `CHECK_TARGETS`의 각 target을 `make -k <target>`으로 끝까지 실행하며, target이 실패한 뒤에도 계속하고, `[full-run] start <target> (<n>/<total>)`와 `[full-run] <target> passed|failed in <seconds> s`를 출력한다. 어떤 target에도 시간 제한이 없다. 각 target의 앞뒤에 `var/full-run.json`을 쓴다. 이 record는 tree, commit, process, 시작과 끝 시각, `PATH`의 Node.js, npm, Go, cargo, PHP, Composer version(`environment`, 각 rerun에도 기록), 결과(마지막 target이 끝날 때까지 `incomplete`, 그다음 `passed` 또는 `failed`), 실패한 target, 그리고 각 target의 상태(`pending`, `running`, `passed`, `failed`), 시각, 경과 millisecond를 담는다. 따라서 멈춘 실행은 실행 중이던 target과 함께 `incomplete`로 기록되어 남는다. `var/`는 Git이 무시하므로 checkout과 worktree마다 자기 record를 가진다. tree를 바꾸는 commit은 `[~]` 작업이 없을 때 새 전체 실행을 허용한다.
 
