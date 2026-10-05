@@ -32,3 +32,23 @@ for (const [target, runner] of [
     assert.deepEqual(lines.filter(line => !line.startsWith('node scripts/run-tests.mjs') && RUNS_TESTS_DIRECTLY.test(line)), []);
   });
 }
+
+// The targets that run PHP with the Composer packages of packages/template-php (its vendor/autoload.php), with the file
+// that reads them. A target installs them first with build-php, so it passes on a checkout without vendor (T19.5).
+for (const [target, reader] of [
+  ['conformance-generated-php', 'tests/runner/conformance-generated-php.mjs'],
+  ['contract-check', 'scripts/check-showcase-contract.mjs runs tools/showcase/adapters/php.php'],
+  ['benchmark-smoke', 'scripts/check-benchmark-smoke.mjs runs tools/showcase/adapters/php.php'],
+  ['generated-native-check', 'scripts/check-generated-native-calls.mjs'],
+  ['bench', 'tools/showcase/benchmark-modes.mjs runs tools/showcase/adapters/php.php'],
+  ['showcase', 'tools/showcase/build.mjs runs tools/showcase/adapters/php.php'],
+  ['typed-generator-compile-check', 'scripts/check-typed-generator.mjs'],
+  ['compiler-interface-check', 'scripts/check-compiler-interface.mjs'],
+  ['test-php', 'scripts/run-tests.mjs phpunit'],
+]) {
+  test(`${target} installs the Composer packages of template-php before ${reader}`, () => {
+    const lines = commands(target);
+    const install = lines.indexOf('cd packages/template-php && composer install --no-interaction --quiet');
+    assert.notEqual(install, -1, `make -n ${target} does not install the Composer packages of packages/template-php:\n${lines.join('\n')}`);
+  });
+}

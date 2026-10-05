@@ -254,7 +254,7 @@ conformance-generated-go: build-ts ## Go generated compiler conformance suite
 conformance-generated-rust: build-ts ## Rust generated compiler conformance suite
 	node tests/runner/conformance-generated-rust.mjs
 
-conformance-generated-php: build-ts ## PHP generated compiler conformance suite
+conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
 	node tests/runner/conformance-generated-php.mjs
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php ## AST and generated conformance in all four languages
@@ -362,10 +362,10 @@ docs-static-check: ## Build the documentation site as static files
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
 	node scripts/generate-showcase-contract.mjs
 
-contract-check: build-ts ## Verify generated declarations, implementations and runtime state recovery
+contract-check: build-ts build-php ## Verify generated declarations, implementations and runtime state recovery
 	node scripts/check-showcase-contract.mjs
 
-showcase: typed-generator ## Build the executable example site and its result artifacts
+showcase: typed-generator build-php ## Build the executable example site and its result artifacts
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
 	node tools/showcase/benchmark-modes.mjs > examples/site/data/mode-benchmark.json
@@ -373,7 +373,7 @@ showcase: typed-generator ## Build the executable example site and its result ar
 	node scripts/update-benchmark-docs.mjs
 	node tools/showcase/build-site.mjs
 
-bench: typed-generator ## Measure production AST and generated artifacts
+bench: typed-generator build-php ## Measure production AST and generated artifacts
 	node tools/showcase/benchmark-modes.mjs > examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs
@@ -382,7 +382,7 @@ benchmark-check: ## Verify committed benchmark structure and equal output
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs --check
 
-benchmark-smoke: typed-generator ## Measure a fresh short equal-output sample without changing committed results
+benchmark-smoke: typed-generator build-php ## Measure a fresh short equal-output sample without changing committed results
 	node scripts/check-benchmark-smoke.mjs
 
 template-function-inventory: ## Inventory function-shaped calls in an explicit external template tree
@@ -414,7 +414,7 @@ showcase-check: build-ts ## Verify example-site parity, repeatability and browse
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
 	node tools/showcase/compile.mjs --refresh true
 
-generated-native-check: build-ts ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
+generated-native-check: build-ts build-php ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
 	node scripts/check-generated-native-calls.mjs
 	node scripts/check-generated-typed-values.mjs
 	node scripts/check-generated-arguments.mjs
