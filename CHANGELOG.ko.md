@@ -1,5 +1,6 @@
 # 변경 기록
 
+- 새 push가 같은 workflow와 ref의 실행 중인 CI를 취소하게 했다(T20.1-12). `ci.yml`은 실행을 `<workflow>-<ref>`로 묶고 `cancel-in-progress: true`를 두며, `tests/scripts/toolchain-files.test.mjs`의 case가 push나 pull request로 실행되는 모든 workflow에 이것을 요구한다.
 - T20.1-9에 대한 CI의 실패를 고쳤다(T20.1-11). 새 checkout에는 `var/report`가 없으므로 `make ci-targets`는 모든 job에서 lock의 `ENOENT`로 실패했다. report test는 GNU Make 4의 `Entering directory` 줄을 기대하지 않았다. checklist의 `{{`를 담은 inline code는 build가 통과하는 동안 두 page의 렌더를 실패시켰다. 이제 `scripts/ci-targets.mjs`는 lock 전에 `var/report`를 만들고, test는 GNU Make 4를 받아들이며, `scripts/check-documents.mjs`는 docs 아래 page의 code block 밖 Vue interpolation에서 실패한다.
 - 개발에서는 unit test만 실행한다고 적었다(T20.1-10). AGENTS는 commit마다 그 전에 `make owner-check`를, push 전에 `make check`를 요구했다. 이제 AGENTS와 `docs/operations/development.md`는 commit이나 push 전에 전체 검사나 end-to-end 검사를 로컬에서 실행하지 않으며, CI가 push 뒤에 이것을 실행하고 모든 실패의 report를 남긴다고 적는다.
 - CI의 모든 실패 이유를 남기게 했다(T20.1-9). release job만 기록을 upload했고, 어떤 job도 job log 밖에 target 출력을 남기지 않았다. 이제 `make check`와 `make ci-targets`는 target마다의 log와, 실패한 target마다 첫 실패 줄을 담은 summary를 `var/report`에 job summary로도 쓰며, 모든 CI job은 이것으로 검사를 실행하고 `!cancelled()`로 report를 upload한다. test가 실패한 target의 report와 모든 job의 step을 검사한다.
