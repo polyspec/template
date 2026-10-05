@@ -41,7 +41,7 @@ MAKEFLAGS += -k
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode cargo-downloads-check uninstall-cli rerun-failed \
+	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers cargo-downloads-check uninstall-cli rerun-failed \
 	owner-check conformance-cases function-inventory-check dependency-review
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -182,6 +182,9 @@ install: install-tools ## Install the tools of the checkout, the npm dependencie
 install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
 	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
 
+install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
+	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
+
 cargo-downloads-check: ## Check that the crates of every Cargo.lock are downloaded; names make install otherwise
 	node scripts/check-cargo-downloads.mjs
 
@@ -304,6 +307,17 @@ vscode-install: vscode-package ## Install the .vsix into the local VS Code
 
 conformance: cargo-downloads-check build-ts build-go build-rust build-php ext ## Cross-language conformance suite (builds every implementation first)
 	node tests/runner/conformance.mjs
+
+# The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
+.PHONY: conformance-ts conformance-go conformance-rust conformance-php
+conformance-ts: cargo-downloads-check build-ts ## Conformance suite of TypeScript
+	node tests/runner/conformance.mjs --langs ts
+conformance-go: cargo-downloads-check build-ts build-go ## Conformance suite of TypeScript and Go
+	node tests/runner/conformance.mjs --langs ts,go
+conformance-rust: cargo-downloads-check build-ts build-rust ## Conformance suite of TypeScript and Rust
+	node tests/runner/conformance.mjs --langs ts,rust
+conformance-php: cargo-downloads-check build-ts build-php ## Conformance suite of TypeScript and PHP
+	node tests/runner/conformance.mjs --langs ts,php
 
 delimiter-matrix: cargo-downloads-check build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
 	node tests/runner/delimiter-matrix.mjs

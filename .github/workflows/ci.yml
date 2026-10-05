@@ -43,7 +43,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-vscode
         if: ${{ !cancelled() }}
-      - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - run: make install-browsers
         if: ${{ !cancelled() }}
       - run: xvfb-run -a make check
         if: ${{ !cancelled() }}
@@ -90,7 +90,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make test-ts
         if: ${{ !cancelled() }}
-      - run: node tests/runner/conformance.mjs --langs ts
+      - run: make conformance-ts
         if: ${{ !cancelled() }}
 
   browser:
@@ -107,7 +107,7 @@ jobs:
           cache: false
       - run: make install
         if: ${{ !cancelled() }}
-      - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - run: make install-browsers
         if: ${{ !cancelled() }}
       - run: make test-browser
         if: ${{ !cancelled() }}
@@ -126,7 +126,7 @@ jobs:
           cache: false
       - run: make install
         if: ${{ !cancelled() }}
-      - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - run: make install-browsers
         if: ${{ !cancelled() }}
       - run: make -k editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode
         if: ${{ !cancelled() }}
@@ -152,9 +152,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make test-go
         if: ${{ !cancelled() }}
-      - run: make build-ts
-        if: ${{ !cancelled() }}
-      - run: node tests/runner/conformance.mjs --langs ts,go
+      - run: make conformance-go
         if: ${{ !cancelled() }}
 
   rust:
@@ -173,9 +171,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make test-rust
         if: ${{ !cancelled() }}
-      - run: make build-ts
-        if: ${{ !cancelled() }}
-      - run: node tests/runner/conformance.mjs --langs ts,rust
+      - run: make conformance-rust
         if: ${{ !cancelled() }}
 
   php:
@@ -201,9 +197,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make test-php
         if: ${{ !cancelled() }}
-      - run: make build-ts
-        if: ${{ !cancelled() }}
-      - run: node tests/runner/conformance.mjs --langs ts,php
+      - run: make conformance-php
         if: ${{ !cancelled() }}
       - run: make test-ext
         if: ${{ !cancelled() }}
