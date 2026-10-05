@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import test from 'node:test';
+import test, { before } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { inWorker, runBounded } from '../runner/bounded.mjs';
@@ -14,6 +14,15 @@ import { slowCommandPath } from './slow-command.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A runner compiles the case and, for Go and Rust, a test binary.
 const COMPILES = { timeout: 300_000 };
+
+// The runners compile with the build of template-ts and run PHP with the Composer packages of template-php. The test
+// builds and installs them itself, which does nothing when their inputs are unchanged (T19.6).
+before(() => {
+  const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', 'template-ts', '--install'], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(build.status, 0, `the build of template-ts failed:\n${build.stdout}${build.stderr}`);
+  const composer = spawnSync('composer', ['install', '--no-interaction', '--quiet'], { cwd: path.join(ROOT, 'packages/template-php'), encoding: 'utf8' });
+  assert.equal(composer.status, 0, `composer install in packages/template-php failed:\n${composer.stdout}${composer.stderr}`);
+});
 
 function generated(language, env = process.env) {
   const run = spawnSync(process.execPath, [path.join(ROOT, `tests/runner/conformance-generated-${language}.mjs`), '--case', 'echo/path'], { cwd: ROOT, env, encoding: 'utf8' });

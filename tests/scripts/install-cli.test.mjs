@@ -1,16 +1,24 @@
 // Tests that `make install-cli` installs the command template-fmt under a declared prefix without a symbolic link
 // (T18.5): a copy of the formatter package in <prefix>/lib and an executable script in <prefix>/bin that runs it, which
-// `make uninstall-cli` removes. The test runs scripts/install-cli.mjs on the formatter build of `make test-scripts`.
+// `make uninstall-cli` removes. The test builds the template and formatter packages that the script copies with
+// scripts/build-package.mjs before its case, which does nothing when their inputs are unchanged (T19.6).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { existsSync, lstatSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import test from 'node:test';
+import test, { before } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCRIPT = path.join(ROOT, 'scripts/install-cli.mjs');
+
+before(() => {
+  for (const name of ['template-ts', 'template-language']) {
+    const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', name, '--install'], { cwd: ROOT, encoding: 'utf8' });
+    assert.equal(build.status, 0, `the build of ${name} failed:\n${build.stdout}${build.stderr}`);
+  }
+});
 
 function links(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
