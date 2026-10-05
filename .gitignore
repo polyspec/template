@@ -19,3 +19,5 @@ playwright-report/
 packages/template-php/.phpunit.result.cache
 .vscode-test/
 .vscode-test.lock
+
+/var/

@@ -9,7 +9,7 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli
+	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli rerun-failed
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -51,7 +51,8 @@ endef
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  check                  docs-check, lint, unit tests of every package and of the test runner, formatter and extension tests, conformance"
+	@echo "  check                  The full suite through scripts/full-run.mjs: once per tree, when no checklist task is [~]"
+	@echo "  rerun-failed           Rerun the targets of check that did not pass on the current tree"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
 	@echo "  lint-js                eslint on the TypeScript sources"
 	@echo "  install                npm ci: every dependency as a copy, no bin links"
@@ -99,7 +100,17 @@ help: ## List targets
 	@echo "  clean-vscode-test      Remove .vscode-test while holding its lock; fails while an integration run holds it"
 	@echo "  vscode-test-unlock     Remove the lock of .vscode-test whose holder process has ended"
 
-check: docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check ## Full check
+# The targets of the full suite. `make check` runs them through the guard scripts/full-run.mjs, which refuses while a
+# checklist task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree,
+# runs each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
+# current tree that did not pass.
+CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check language-test-matrix contract-check function-contract-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check
+
+check: ## Full check through the guard: once per tree, when no checklist task is [~]
+	node scripts/full-run.mjs run $(CHECK_TARGETS)
+
+rerun-failed: ## Rerun only the targets of make check that did not pass on the current tree
+	node scripts/full-run.mjs rerun-failed
 
 lint: build-php lint-js ## Lint every package
 	@test ! -d $(GO_DIR) || { out=$$(gofmt -l $(GO_DIR)); test -z "$$out" || { echo "$$out"; exit 1; }; }
