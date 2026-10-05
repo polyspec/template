@@ -3,19 +3,30 @@
 // finds every file of the previous build and every module that a file imports; two builds of the same inputs write
 // the same files; a build whose inputs are unchanged does not build; and the inputs of a package include the installed
 // packages of this repository that it depends on. Each case builds into a `dist` of its own temporary directory, never
-// into the `dist` of the package. The installed copies that a package depends on must exist (`make test-scripts`
-// builds them first).
+// into the `dist` of the package. The test creates what it depends on (T18.8-2): before the cases it builds and installs
+// the packages of this repository that the packages depend on with scripts/build-package.mjs, as `make build-lsp` does,
+// so it passes on a checkout where nothing was built; with unchanged inputs those builds and installs do nothing. A
+// reinstall of an installed copy publishes file by file, so a reader of the copy never finds a file of it missing.
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import test from 'node:test';
+import test, { before } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const BUILD = path.join(ROOT, 'scripts/build-package.mjs');
 const PACKAGES = ['template-ts', 'template-language', 'template-lsp', 'template-codemirror', 'template-vscode'];
+// The packages of this repository that the packages depend on, in the order of their dependencies.
+const PREREQUISITES = ['template-ts', 'template-language', 'template-lsp'];
+
+before(() => {
+  for (const name of PREREQUISITES) {
+    const result = spawnSync(process.execPath, [BUILD, '--package', name, '--install'], { cwd: ROOT, encoding: 'utf8' });
+    assert.equal(result.status, 0, `the prerequisite build of ${name} failed:\n${result.stdout}${result.stderr}`);
+  }
+});
 
 // The names and contents of the files of `dist`.
 function snapshot(dist) {
@@ -103,6 +114,40 @@ test('the inputs of a package include the installed packages of this repository 
   for (const file of ['packages/template-vscode/src/extension.ts', 'package-lock.json', 'node_modules/@polyspec/template-lsp/dist/main.mjs', 'node_modules/@polyspec/template-language/dist/index.mjs', 'node_modules/@polyspec/template/dist/index.mjs']) {
     assert.ok(inputs.includes(file), `the inputs of template-vscode do not include ${file}`);
   }
+});
+
+test('a reinstall of an installed copy never removes a file that a reader of the copy needs', async (t) => {
+  const copy = path.join(ROOT, 'node_modules/@polyspec/template');
+  const files = list => list.flatMap(entry => (statSync(path.join(copy, entry)).isDirectory() ? readdirSync(path.join(copy, entry)).map(name => `${entry}/${name}`) : [entry]));
+  const present = files(readdirSync(copy));
+  assert.ok(present.some(file => file.startsWith('dist/')), `${copy} has no dist`);
+  // A file that the package does not have makes the copy differ from the package, so the build installs it again.
+  const stale = path.join(copy, 'dist/stale-of-a-previous-build.mjs');
+  writeFileSync(stale, 'export {};\n');
+  t.after(() => rmSync(stale, { force: true }));
+  const missing = new Set();
+  let polls = 0;
+  const poll = setInterval(() => {
+    polls += 1;
+    for (const file of present) if (!existsSync(path.join(copy, file))) missing.add(file);
+  }, 1);
+  const result = await new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [BUILD, '--package', 'template-ts', '--install'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+    let output = '';
+    child.stdout.on('data', chunk => { output += chunk; });
+    child.stderr.on('data', chunk => { output += chunk; });
+    child.on('error', reject);
+    child.on('close', status => resolve({ status, output }));
+  });
+  clearInterval(poll);
+  assert.equal(result.status, 0, result.output);
+  assert.match(result.output, /^build-package: installing node_modules\/@polyspec\/template again/m);
+  t.diagnostic(`the reader polled the copy ${polls} times during the install`);
+  assert.ok(polls > 5, `the reader polled ${polls} times`);
+  assert.deepEqual([...missing].sort(), [], `the reader found files of the copy missing during the install:\n${result.output}`);
+  assert.ok(!existsSync(stale), 'the install kept a file that the package does not have');
+  const again = spawnSync(process.execPath, [BUILD, '--package', 'template-ts', '--install'], { cwd: ROOT, encoding: 'utf8' });
+  assert.match(again.stdout, /holds the files of the package; no install$/m);
 });
 
 test('an unknown package fails with its name', () => {
