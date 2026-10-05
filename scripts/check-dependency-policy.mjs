@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -49,65 +49,39 @@ for (const exception of policy.exceptions) {
 }
 
 /**
- * The exception keys of the outdated npm dependencies. `npm outdated --json` reports one object per package, or an
- * array with one entry per dependent workspace when several workspaces depend on it; `dependent` is the directory
- * name of the workspace, which `manifests` maps to its package.json path. Throws for an outdated dependency without
- * an exception.
+ * The exception keys of the outdated npm dependencies. The root package.json is the only npm manifest: the packages of
+ * the repository are dependencies of the root, not npm workspaces (T18.4), so `npm outdated --json` reports one object
+ * per package. Throws for an outdated dependency without an exception.
  */
-export function npmExceptionKeys(outdated, declaredKeys, manifests) {
+export function npmExceptionKeys(outdated, declaredKeys) {
   const keys = new Set();
-  for (const [name, report] of Object.entries(outdated)) {
-    for (const detail of Array.isArray(report) ? report : [report]) {
-      if (!older(detail.current, detail.latest)) continue;
-      const manifest = manifests.get(detail.dependent);
-      if (manifest === undefined) throw new Error(`outdated npm dependency has an unknown dependent: ${name} in ${detail.dependent}`);
-      const key = `npm:${manifest}:${name}`;
-      if (!declaredKeys.has(key)) throw new Error(`outdated npm dependency has no exception: ${name} ${detail.current} < ${detail.latest} in ${manifest}`);
-      keys.add(key);
-    }
+  for (const [name, detail] of Object.entries(outdated)) {
+    if (Array.isArray(detail)) throw new Error(`npm reported ${name} for several dependents; the root package.json is the only npm manifest`);
+    if (!older(detail.current, detail.latest)) continue;
+    const key = `npm:package.json:${name}`;
+    if (!declaredKeys.has(key)) throw new Error(`outdated npm dependency has no exception: ${name} ${detail.current} < ${detail.latest} in package.json`);
+    keys.add(key);
   }
   return keys;
 }
 
-/** The package.json path of the root and of every workspace, by the directory name npm reports as `dependent`. */
-function npmManifests() {
-  const manifests = new Map([[basename(root), 'package.json']]);
-  const rootManifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  for (const pattern of rootManifest.workspaces ?? []) {
-    if (!pattern.endsWith('/*')) throw new Error(`unsupported workspace pattern: ${pattern}`);
-    const parent = pattern.slice(0, -2);
-    for (const entry of readdirSync(join(root, parent), { withFileTypes: true })) {
-      if (entry.isDirectory() && existsSync(join(root, parent, entry.name, 'package.json'))) manifests.set(entry.name, `${parent}/${entry.name}/package.json`);
-    }
-  }
-  return manifests;
-}
-
-// The check first proves that it rejects an outdated dependency of a workspace and one that several workspaces
-// report as an array, which an earlier version of this check did not read.
+// The check first proves that it rejects an outdated dependency without an exception and accepts one with an exception.
 function provesRejection() {
-  const manifests = new Map([['root', 'package.json'], ['editor', 'packages/editor/package.json']]);
-  const report = { current: '1.0.0', wanted: '1.0.0', latest: '1.1.0' };
-  const cases = [
-    { example: { ...report, dependent: 'editor' } },
-    { example: [{ ...report, dependent: 'root' }, { ...report, dependent: 'editor' }] },
-  ];
-  for (const outdated of cases) {
-    let rejected = false;
-    try {
-      npmExceptionKeys(outdated, new Set(['npm:package.json:example']), manifests);
-    } catch (error) {
-      rejected = String(error.message).includes('has no exception');
-    }
-    if (!rejected) throw new Error('dependency policy accepted an outdated workspace dependency without an exception');
+  const outdated = { example: { current: '1.0.0', wanted: '1.0.0', latest: '1.1.0' } };
+  let rejected = false;
+  try {
+    npmExceptionKeys(outdated, new Set());
+  } catch (error) {
+    rejected = String(error.message).includes('has no exception');
   }
-  if (npmExceptionKeys({ example: { ...report, dependent: 'editor' } }, new Set(['npm:packages/editor/package.json:example']), manifests).size !== 1) {
-    throw new Error('dependency policy rejected an outdated workspace dependency with an exception');
+  if (!rejected) throw new Error('dependency policy accepted an outdated dependency without an exception');
+  if (npmExceptionKeys(outdated, new Set(['npm:package.json:example'])).size !== 1) {
+    throw new Error('dependency policy rejected an outdated dependency with an exception');
   }
 }
 provesRejection();
 
-const found = new Set(npmExceptionKeys(command('npm', ['outdated', '--json'], root), new Set(declared.keys()), npmManifests()));
+const found = new Set(npmExceptionKeys(command('npm', ['outdated', '--json'], root), new Set(declared.keys())));
 
 const composerManifests = new Set();
 for (const entry of policy.composerPlatforms) {

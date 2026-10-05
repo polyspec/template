@@ -19,6 +19,7 @@
 - Keep code and tests in separate directories inside each package. Core tests are in the core package. Extension tests are in the extension package.
 - Handle a defect by adding a failing test that reproduces it, fixing the code, and keeping the test.
 - Use repository-relative paths. Require explicit paths for external inputs.
+- Do not use symbolic links. npm installs every dependency, also a package of this repository, as a copy and writes no bin link (`.npmrc`); a recipe or script starts a tool with the file of its package.
 
 ## Decision and acceptance rules
 

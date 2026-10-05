@@ -10,6 +10,7 @@ import { compileAst } from '../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
+import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/bound-data');
 const cases = JSON.parse(readFileSync(join(fixture, 'cases.json'), 'utf8'));
@@ -29,7 +30,7 @@ try {
 
   // TypeScript.
   writeFileSync(join(temporary, 'bound.ts'), source('ts'));
-  run('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), join(temporary, 'bound.ts')], root);
+  run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), join(temporary, 'bound.ts')], root);
   const tsRunner = join(temporary, 'bound.mjs');
   writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/bound.js';
 import { RuntimeEnvironment, bind, merge } from '@polyspec/template';

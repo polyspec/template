@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
+import { tsc } from './tools.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const generated = resolve(root, 'tools/showcase/adapters/generated/typed');
@@ -63,10 +64,10 @@ function checkTypeScript() {
   for (const duplicate of ['generatedTruthy', 'generatedDefault', 'generatedIn', 'function stringify(', 'function escape(']) {
     assert.equal(coverageSource.includes(duplicate), false, `TypeScript generated source duplicates runtime semantics: ${duplicate}`);
   }
-  run('npx', ['tsc', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', ...sources]);
+  run('node', [tsc, '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', ...sources]);
   const output = join(temporary, 'typescript');
   mkdirSync(output);
-  run('npx', ['tsc', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output, ...sources]);
+  run('node', [tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output, ...sources]);
   const imports = `import { RuntimeEnvironment } from '@polyspec/template';\n` + scenarios.map((id, index) => `import { GeneratedProgram as Program${index} } from './${id}.js';`).join('\n');
   const cases = scenarios.map((id, index) => `{
     const actual = new Program${index}().render(${JSON.stringify(target(id))}, ${fixture(id, 'data.json')}, { define: ${fixture(id, 'define.json')}${fixtureExists(id, 'env.json') ? `, env: ${fixture(id, 'env.json')}` : ''} });

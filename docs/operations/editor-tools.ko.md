@@ -120,7 +120,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 | 1 | `--check`가 포맷되지 않은 파일을 찾았다 |
 | 2 | 파싱되지 않는 파일, 다른 AST, 짝이 맞지 않는 HTML 구조, 읽을 수 없는 경로 또는 잘못된 인자가 있다 |
 
-`make install-cli`는 `npm link -w @polyspec/template-language`을 실행해 `template-fmt`를 전역 npm bin 디렉터리에 링크한다. 링크가 작업 트리를 가리키므로 `make build-language`이 설치된 명령을 갱신한다.
+`make install-cli`는 `npm install --global --install-links packages/template-language`를 실행해 build된 package의 사본을 전역 npm 디렉터리에, 명령 `template-fmt`를 전역 npm bin 디렉터리에 설치한다. `make build-language` 뒤에 다시 실행해 바뀐 build를 설치한다.
 
 ## 언어 서버
 

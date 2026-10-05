@@ -120,7 +120,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 | 1 | `--check` found a file that is not formatted |
 | 2 | a file does not parse, a formatted AST differs, an HTML structure is not balanced, a path cannot be read, or the arguments are invalid |
 
-`make install-cli` runs `npm link -w @polyspec/template-language`, which links `template-fmt` into the global npm bin directory. The link points to the working tree, so `make build-language` updates the installed command.
+`make install-cli` runs `npm install --global --install-links packages/template-language`, which installs a copy of the built package into the global npm directory and the command `template-fmt` into the global npm bin directory. Run it again after `make build-language` to install the changed build.
 
 ## Language server
 

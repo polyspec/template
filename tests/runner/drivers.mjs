@@ -35,7 +35,7 @@ export const drivers = {
     dir: join(packages, 'template-ts'),
     binary: join(packages, 'template-ts', 'dist', 'index.mjs'),
     build() {
-      build('ts', 'npm', ['run', 'build', '-w', '@polyspec/template'], root);
+      build('ts', 'make', ['build-ts'], root);
     },
     command(args) {
       return ['node', [join(packages, 'template-ts', 'bin', 'template.mjs'), ...args]];

@@ -75,9 +75,8 @@ node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR]
 ## 개발
 
 ```sh
-npm run build -w @polyspec/template
-npm test -w @polyspec/template -- --run
-npm run typecheck -w @polyspec/template
+make build-ts
+make test-ts
 ```
 
 테스트는 `tests/`에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.

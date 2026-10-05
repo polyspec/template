@@ -17,10 +17,12 @@ The Rust PHP binding of `packages/template-php-ext` supports PHP 8.5; on macOS t
 ## Commands
 
 ```sh
-npm ci
+make install
 make help
 make check
 ```
+
+`make install` runs `npm ci`. npm installs every dependency as a copy and writes no bin link (`.npmrc`: `install-links=true`, `bin-links=false`): the root `package.json` declares the five packages of `packages/` as `file:` dependencies with overrides for the dependencies between them and holds the development tools of every package, and there are no npm workspaces, because npm always links a workspace. Each build target installs the npm copy of its package again after the build (`make build-ts` the copy of `@polyspec/template`, and so on), and the recipes start TypeScript, tsup, esbuild, Vitest, Playwright, ESLint, VitePress, vsce and vscode-tmgrammar-test with the file of their package (`scripts/tools.mjs` for the scripts). `tests/scripts/no-symlinks.test.mjs` fails on any symbolic link below `node_modules` or `vendor`.
 
 `make check` runs `docs-check`, `docs-static-check`, `test-scripts`, `rules-check`, `editor-boundary-check`, `runtime-interface-check`, `compiler-interface-check`, `feature-check`, `language-test-matrix`, `contract-check`, `function-contract-check`, `lint`, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`, `format-check`, `test-vscode`, `test-vscode-integration`, `test-go`, `test-rust`, `test-php`, `conformance-all-modes`, `delimiter-matrix`, `generated-native-check`, `test-ext`, `typed-generator-compile-check`, `install-check`, `test-browser` and `showcase-check`. The last four are also release layers; they are part of `make check` because a change that passes `make check` must not fail the release matrix. A target whose package does not exist yet prints `not implemented` and exits with status 1. `lint` runs ESLint, gofmt, `cargo fmt --check` for the Rust crate, the PHP extension and the Rust showcase adapter, compiles the Rust showcase adapter with warnings as errors and runs Pint. `test-rust` and `test-ext` run clippy with warnings as errors on the Rust crate and on the PHP extension.
 

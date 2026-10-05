@@ -7,7 +7,7 @@ TypeScript 패키지는 서버에서 실행되는 것과 같은 엔진으로 브
 ## 브라우저 테스트 실행
 
 ```sh
-npx playwright install chromium
+node node_modules/@playwright/test/cli.js install chromium
 make test-browser
 ```
 

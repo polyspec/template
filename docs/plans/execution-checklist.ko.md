@@ -370,6 +370,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T18.1 | `tests/browser/server.mjs`가 system이 배정하는 port에서 listen하고 그 port를 `listening on http://127.0.0.1:<port>` 줄에 출력하게 한다. `tests/browser/run.mjs`는 그 주소를 `playwright.config.ts`가 요구하는 `TEMPLATE_BROWSER_URL`로 Playwright에 넘긴다 | `node scripts/run-tests.mjs node -- tests/scripts/browser-port.test.mjs` | [o] |
 | T18.2 | VS Code directory `.vscode-test`에 holder lock `.vscode-test.lock`을 둔다. integration 실행은 내려받기부터 마지막 launch까지 lock을 잡고, 두 번째 실행은 holder를 밝히며 실패하며, `make clean`은 lock을 잡은 동안에만 directory를 지우고, 끝난 process의 lock은 보고되고 `make vscode-test-unlock`으로 지운다 | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [o] |
 | T18.3 | `tests/scripts/browser-server.test.mjs`가 `make test-browser` 대신 `make test-scripts`의 package build로 `tests/browser/run.mjs`를 실행하게 한다. `make test-browser`의 package build(tsup `clean: true`)는 `make test-scripts`의 다른 test가 읽는 동안 `packages/template-ts/dist`를 비웠고, `make check`가 `tests/scripts/generated-conformance.test.mjs`에서 `@polyspec/template`의 `TS7016`으로 실패했다 | `node scripts/run-tests.mjs node -- tests/scripts/browser-server.test.mjs` | [o] |
+| T18.4 | 모든 npm 의존성을 bin link 없는 사본으로 설치한다. npm은 다섯 workspace package를 `node_modules`에 link했고 `node_modules/.bin`에 bin link 37개를 썼다. `.npmrc`는 `install-links=true`와 `bin-links=false`를 정한다. root `package.json`은 npm이 언제나 link하는 npm workspace 대신 `packages/`의 package를 override와 함께 `file:` 의존성으로 선언하고 그 개발 도구를 가진다. 각 build target은 그 package의 사본을 다시 설치한다. recipe와 script는 모든 도구를 그 package의 파일로 실행한다(`scripts/tools.mjs`). dependency policy는 root manifest만 읽는다. `tests/scripts/no-symlinks.test.mjs`는 `node_modules`나 `vendor` 아래의 symbolic link 하나에도 실패한다 | `node scripts/run-tests.mjs node -- tests/scripts/no-symlinks.test.mjs` | [o] |
 
 ## 병렬성 요약
 
@@ -391,7 +392,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
 | W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} |
-| W18 | T18.1, T18.2, T18.3 | 없음 |
+| W18 | T18.1, T18.2, T18.3, T18.4 | 없음 |
 
 ## 완료 정의
 

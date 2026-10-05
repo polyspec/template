@@ -7,7 +7,7 @@ The TypeScript package renders in a browser with the same engine that runs on a 
 ## Run the browser test
 
 ```sh
-npx playwright install chromium
+node node_modules/@playwright/test/cli.js install chromium
 make test-browser
 ```
 

@@ -8,6 +8,7 @@
 import { spawn } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { playwright } from '../../scripts/tools.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const READY = /^listening on (http:\/\/\S+)$/m;
@@ -51,12 +52,13 @@ let server;
 try {
   const started = await startServer();
   server = started.server;
-  const playwright = spawn(join(root, 'node_modules/.bin/playwright'), ['test', ...process.argv.slice(2)], {
+  // npm writes no bin links (.npmrc), so Playwright starts by the path of its package.
+  const tests = spawn(process.execPath, [playwright, 'test', ...process.argv.slice(2)], {
     cwd: root,
     env: { ...process.env, TEMPLATE_BROWSER_URL: started.url },
     stdio: 'inherit',
   });
-  const { code, signal } = await new Promise(resolvePromise => playwright.on('close', (code, signal) => resolvePromise({ code, signal })));
+  const { code, signal } = await new Promise(resolvePromise => tests.on('close', (code, signal) => resolvePromise({ code, signal })));
   if (signal) process.stdout.write(`✖ playwright ended on ${signal}\n`);
   process.exitCode = code ?? 1;
 } catch (error) {
