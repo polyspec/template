@@ -212,6 +212,21 @@ test('only the CI jobs that run the VS Code integration test install VS Code, be
   }
 });
 
+test('every CI step runs its tools through make, so the recipes give them their offline settings and checks', () => {
+  const direct = [];
+  for (const file of WORKFLOWS) {
+    for (const job of jobs(file)) {
+      for (const [, block] of job.text.matchAll(/- run: (\|\n(?:\s{10,}.*\n?)+|.*)/g)) {
+        for (const line of block.replace(/^\|\n/, '').split('\n').map(line => line.trim()).filter(Boolean)) {
+          const command = line.replace(/^xvfb-run(?: -\S+)* /, '');
+          if (/^(?:node|npm|npx|cargo|go|php|composer|rustup)\b/.test(command)) direct.push(`${file} job ${job.name}: ${line}`);
+        }
+      }
+    }
+  }
+  assert.deepEqual(direct, [], 'CI steps that start a tool without make; run it through its make target');
+});
+
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
     const text = read(file);
