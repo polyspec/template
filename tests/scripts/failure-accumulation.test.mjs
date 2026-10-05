@@ -4,7 +4,8 @@
 // each language run every language to its end and name every language that failed.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -46,14 +47,17 @@ test('every target of the full suite and of its prerequisites runs at most one c
   assert.deepEqual(several, [], 'targets whose later commands do not run after a failed command');
 });
 
-test('make keeps going after a failed target, and the full run starts make with -k', () => {
+test('make keeps going after a failed target, and the full run starts make with -k', (t) => {
   assert.match(MAKEFILE, /^MAKEFLAGS \+= -k$/m);
-  // A second makefile with two failing targets: both run.
-  const run = spawnSync('make', ['--no-print-directory', '-f', 'Makefile', '-f', '/dev/stdin', 'accumulation-probe'], {
-    cwd: ROOT, encoding: 'utf8', input: 'accumulation-probe: accumulation-a accumulation-b\naccumulation-a:\n\t@echo a; false\naccumulation-b:\n\t@echo b; false\n',
-  });
+  // A second makefile with two failing targets: both run. It is a file of the run, not the device path of standard
+  // input, which Linux cannot open when it is the socket of `input` (T19.8-1).
+  const directory = mkdtempSync(path.join(tmpdir(), 'template-accumulation-probe-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const probe = path.join(directory, 'probe.mk');
+  writeFileSync(probe, 'accumulation-probe: accumulation-a accumulation-b\naccumulation-a:\n\t@echo a; false\naccumulation-b:\n\t@echo b; false\n');
+  const run = spawnSync('make', ['--no-print-directory', '-f', 'Makefile', '-f', probe, 'accumulation-probe'], { cwd: ROOT, encoding: 'utf8' });
+  assert.deepEqual(run.stdout.split('\n').filter(Boolean), ['a', 'b'], `make did not run the probe targets of ${probe}; stderr: ${run.stderr}`);
   assert.notEqual(run.status, 0);
-  assert.deepEqual(run.stdout.split('\n').filter(Boolean), ['a', 'b'], run.stderr);
   assert.match(readFileSync(path.join(ROOT, 'scripts/full-run.mjs'), 'utf8'), /spawn\('make', \['-k', target\]/);
 });
 

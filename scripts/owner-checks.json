@@ -1,6 +1,6 @@
 {
   "comment": "The owner checks of the repository paths (T13.1-4), read by scripts/owner-check.mjs: make owner-check runs the targets and node test files of the rules whose globs match a changed path. Every tracked path matches a rule; always lists the tests that run for every change. A rule with variable passes the matched paths to its targets in that make variable. Globs: * within one path segment, ** across segments, {a,b} either alternative. inputs declares, for a make target, the globs of the paths that it reads; scripts/owner-check.mjs fails when a rule of such a path does not select the target or a target that runs it as a prerequisite.",
-  "always": ["tests/scripts/editorconfig.test.mjs", "tests/scripts/toolchain-files.test.mjs"],
+  "always": ["tests/scripts/editorconfig.test.mjs", "tests/scripts/toolchain-files.test.mjs", "tests/scripts/device-paths.test.mjs"],
   "owners": [
     { "paths": ["docs/**", "*.md", "schema/*.md", "packages/*/README*.md"], "targets": ["docs-check", "docs-static-check"] },
     { "paths": ["contracts/features.json", "scripts/features/**"], "targets": ["feature-check", "docs-check"] },

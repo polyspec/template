@@ -34,6 +34,7 @@ A check gives the same result for the same tree, at any time and on any machine.
 - Every failure in one run: make keeps going (`MAKEFLAGS += -k`), a target of the full suite runs one command and names its other checks as prerequisites, and a check of several languages runs every language and names each that failed.
 - Owners: every path that a check reads is declared in `inputs` of `scripts/owner-checks.json` and has a rule that selects that check.
 - Messages: a failure names what failed with the expected and the actual value, or with the command and the fix.
+- Platform: a script, test or recipe reaches a stream through a file of its run or `-`, never through a device path such as `/dev/stdin`, `/dev/fd` or `/proc/self`, which Linux opens as a file and so cannot open for the socket that Node.js gives a child as its input; `tests/scripts/device-paths.test.mjs` checks every tracked source.
 - Independence: a test does not depend on the wording or the layout of the output of a tool, on the user that runs it or on the time it takes beyond its own timeout; it computes what it can and asserts the result for the user and the platform that run it.
 
 ## Decision and acceptance rules
