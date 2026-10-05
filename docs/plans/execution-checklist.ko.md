@@ -368,7 +368,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
 | T18.1 | `tests/browser/server.mjs`가 system이 배정하는 port에서 listen하고 그 port를 `listening on http://127.0.0.1:<port>` 줄에 출력하게 한다. `tests/browser/run.mjs`는 그 주소를 `playwright.config.ts`가 요구하는 `TEMPLATE_BROWSER_URL`로 Playwright에 넘긴다 | `node scripts/run-tests.mjs node -- tests/scripts/browser-port.test.mjs` | [o] |
-| T18.2 | VS Code directory `.vscode-test`에 holder lock `.vscode-test.lock`을 둔다. integration 실행은 내려받기부터 마지막 launch까지 lock을 잡고, 두 번째 실행은 holder를 밝히며 실패하며, `make clean`은 lock을 잡은 동안에만 directory를 지우고, 끝난 process의 lock은 보고되고 `make vscode-test-unlock`으로 지운다 | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [ ] |
+| T18.2 | VS Code directory `.vscode-test`에 holder lock `.vscode-test.lock`을 둔다. integration 실행은 내려받기부터 마지막 launch까지 lock을 잡고, 두 번째 실행은 holder를 밝히며 실패하며, `make clean`은 lock을 잡은 동안에만 directory를 지우고, 끝난 process의 lock은 보고되고 `make vscode-test-unlock`으로 지운다 | `node scripts/run-tests.mjs node -- tests/scripts/holder-lock.test.mjs` | [o] |
 
 ## 병렬성 요약
 
