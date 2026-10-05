@@ -9,6 +9,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { stopProcessGroup } from './process-group.mjs';
 import { slowCommandPath } from './slow-command.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -60,7 +61,8 @@ test('an install project step that runs longer than a small limit passes by its 
       });
       child.on('close', () => resolve('closed'));
     });
-    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* the check has ended */ }
+    // The check and the commands it started run on after the step; they stop before their directory is removed (T20.3).
+    await stopProcessGroup(child);
     assert.equal(ended, 'packed', stderr);
     assert.match(stderr, /▶ package installs: npm pack /);
   } finally {
