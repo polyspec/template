@@ -2,6 +2,8 @@
 // Exercises every valid ASCII delimiter pair through every language CLI.
 // This is deliberately data-driven: a new delimiter character cannot be
 // accepted by one implementation accidentally while another rejects it.
+// Each pair prints `<pair> [<lang>] pass|fail (<ms> ms)` when it finishes in a language, and the
+// summary follows the last pair. Each CLI call has its own timeout (drivers.mjs).
 import { mkdtempSync, writeFileSync, rmSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -28,28 +30,27 @@ const quoted = [
   ['{}', `{:a="x\\\"}{}{}"}|{=a}`, '|x&quot;}{}{}'],
 ];
 
+// Renders input.tpl in `language` with the delimiter pair `pair` and prints the result line of `name`.
+function check(name, language, pair, expected) {
+  const started = performance.now();
+  const result = invoke(language, ['render', 'input.tpl', '--root', root, '--delimiters', pair], root);
+  const passed = result.status === 0 && result.stdout === expected;
+  if (!passed) failures.push(`${language} ${name}: status=${result.status}, output=${JSON.stringify(result.stdout)}, error=${result.stderr.trim()}`);
+  process.stdout.write(`${name} [${language}] ${passed ? 'pass' : 'fail'} (${Math.round(performance.now() - started)} ms)\n`);
+}
+
 try {
   for (const open of delimiterChars) {
     for (const close of delimiterChars) {
       const source = `L${open}:a=1${close}R${open}=a${close}E`;
       writeFileSync(input, source);
-      for (const language of languages) {
-        const result = invoke(language, ['render', 'input.tpl', '--root', root, '--delimiters', `${open}${close}`], root);
-        if (result.status !== 0 || result.stdout !== 'LR1E') {
-          failures.push(`${language} ${JSON.stringify(open + close)}: status=${result.status}, output=${JSON.stringify(result.stdout)}, error=${result.stderr.trim()}`);
-        }
-      }
+      for (const language of languages) check(JSON.stringify(open + close), language, `${open}${close}`, 'LR1E');
     }
   }
 
-  for (const [pair, source, expected] of quoted) {
+  for (const [index, [pair, source, expected]] of quoted.entries()) {
     writeFileSync(input, source);
-    for (const language of languages) {
-      const result = invoke(language, ['render', 'input.tpl', '--root', root, '--delimiters', pair], root);
-      if (result.status !== 0 || result.stdout !== expected) {
-        failures.push(`${language} quoted ${JSON.stringify(pair)}: status=${result.status}, output=${JSON.stringify(result.stdout)}, error=${result.stderr.trim()}`);
-      }
-    }
+    for (const language of languages) check(`quoted ${index + 1} ${JSON.stringify(pair)}`, language, pair, expected);
   }
 } finally {
   rmSync(root, { recursive: true, force: true });

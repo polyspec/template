@@ -357,7 +357,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.6 | 오래 걸리는 작업은 단계 log를 출력하고 timeout을 두지 않으며 출력이 없는 시간의 deadline도 두지 않고 exit status, 결과, 오류로 판단하며, test case는 자기 timeout을 유지한다고 AGENTS에 적는다. `AGENTS.ko.md`처럼 `AGENTS.md`에도 영어 문서가 정본이라고 적는다 | `make docs-check` | [o] |
 | T17.7 | `tests/runner/drivers.mjs`의 driver build를 600 s 제한 없이 log가 있는 단계로 실행한다. 시작, 출력, 결과를 경과 시간과 함께 standard error에 출력하고 exit code로 판단한다. CLI 호출마다의 10 s timeout은 유지한다 | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [o] |
 | T17.8 | `scripts/check-package-installs.mjs`(600 s)와 `scripts/check-install-workspace.mjs`(120 s)의 각 명령을 시간 제한 없이 log가 있는 단계로 실행하고 exit code로 판단한다 | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [o] |
-| T17.9 | `tests/runner/delimiter-matrix.mjs`가 한 언어에서 구분자 쌍이 끝날 때마다 `<pair> [<lang>] pass\|fail (<ms> ms)`를 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [ ] |
+| T17.9 | `tests/runner/delimiter-matrix.mjs`가 한 언어에서 구분자 쌍이 끝날 때마다 `<pair> [<lang>] pass\|fail (<ms> ms)`를 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [o] |
 | T17.10 | `test-ts`, `test-language`, `test-lsp`, `test-codemirror`의 vitest test와 `test-vscode`의 `node --test` test를 `scripts/run-tests.mjs`로 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [ ] |
 
 ## 병렬성 요약
