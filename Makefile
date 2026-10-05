@@ -347,13 +347,11 @@ compiler-interface-check: build-php ## Verify the typed generated module structu
 docs: ## Build the documentation site
 	$(VITEPRESS) build docs
 
+# The copy of the first build goes into a directory of this run outside the checkout, which the recipe removes, so two
+# runs never share it (T19.7).
 docs-verify-idempotent: ## Build the documentation site twice and compare
 	$(VITEPRESS) build docs
-	rm -rf docs/.vitepress/dist.first
-	cp -R docs/.vitepress/dist docs/.vitepress/dist.first
-	$(VITEPRESS) build docs
-	diff -r docs/.vitepress/dist.first docs/.vitepress/dist
-	rm -rf docs/.vitepress/dist.first
+	@first=$$(mktemp -d) || exit 1; cp -R docs/.vitepress/dist "$$first/dist" && $(VITEPRESS) build docs && diff -r "$$first/dist" docs/.vitepress/dist; status=$$?; rm -rf "$$first"; exit $$status
 
 docs-static-check: ## Build the documentation site as static files
 	$(VITEPRESS) build docs
@@ -368,13 +366,13 @@ contract-check: build-ts build-php ## Verify generated declarations, implementat
 showcase: typed-generator build-php ## Build the executable example site and its result artifacts
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
-	node tools/showcase/benchmark-modes.mjs > examples/site/data/mode-benchmark.json
+	node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs
 	node tools/showcase/build-site.mjs
 
 bench: typed-generator build-php ## Measure production AST and generated artifacts
-	node tools/showcase/benchmark-modes.mjs > examples/site/data/mode-benchmark.json
+	node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs
 
@@ -437,7 +435,7 @@ typed-generator-compile-check: build-php compiler-ir-check typed-generator-check
 	node scripts/check-typed-generator.mjs
 
 clean: clean-vscode-test ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist docs/.vitepress/dist.first
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist
 
 clean-vscode-test: ## Remove .vscode-test while holding its lock; fails with the holder while an integration run holds it
 	node scripts/holder-lock.mjs run $(VSCODE_TEST).lock -- rm -rf $(VSCODE_TEST)
