@@ -73,8 +73,10 @@ export function createProgress({ write, heartbeatMs = 5000, timeoutMs, onTimeout
     /**
      * End the run. Tests still running are failures; a failed group or a nonzero `exitCode` of
      * the tool fails the run even when no test failed, and the summary names the failed groups.
+     * When no test failed, the summary of a nonzero `exitCode` names the last `errors`, the error
+     * lines of the tool, so that it says why the tool exited (T18.7-1).
      */
-    close(label, { exitCode = 0 } = {}) {
+    close(label, { exitCode = 0, errors = [] } = {}) {
       clearInterval(timer);
       for (const id of [...running.keys()]) this.fail(id, undefined, 'the test did not finish');
       const failed = counts.failed + counts.timedOut + groupCounts.failed + (exitCode === 0 ? 0 : 1);
@@ -84,7 +86,9 @@ export function createProgress({ write, heartbeatMs = 5000, timeoutMs, onTimeout
       const summary = tests || !(groupCounts.passed + groupCounts.failed)
         ? `${counts.passed} passed, ${counts.failed} failed, ${counts.timedOut} timed out, ${counts.skipped} skipped${groupCounts.failed ? groupsFailed : ''}`
         : `${groupCounts.passed} passed, ${groupCounts.failed} failed`;
-      const exit = exitCode === 0 ? '' : `, the tool exited with ${exitCode}`;
+      const unexplained = counts.failed + counts.timedOut + groupCounts.failed === 0;
+      const why = !unexplained ? '' : errors.length ? `: ${errors.slice(-3).join('; ')}` : ' and printed no error line';
+      const exit = exitCode === 0 ? '' : `, the tool exited with ${exitCode}${why}`;
       line(`${failed ? '✖' : '✔'} ${label}: ${summary}${exit} (${seconds(now() - started)})`);
       return { ...counts, ok: failed === 0 };
     },

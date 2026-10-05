@@ -1,6 +1,10 @@
 # Build, test and documentation targets. Every target is idempotent.
 
 export PATH := $(HOME)/.cargo/bin:$(PATH)
+# make install installs the Rust toolchain of rust-toolchain.toml; rustup does not install it on the first cargo, which
+# several processes start at once in one run and whose installs then break each other (T18.7-1). A missing toolchain
+# fails with rustup's message, which names rustup toolchain install.
+export RUSTUP_AUTO_INSTALL := 0
 CARGO ?= $(HOME)/.cargo/bin/cargo
 # Each checkout builds its Rust crates into their own target. A CARGO_TARGET_DIR inherited from the environment, such as
 # the target of another checkout, would let cargo judge binaries built from other sources fresh for this one (T18.7).
@@ -57,7 +61,7 @@ help: ## List targets
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
 	@echo "  lint-js                eslint on the TypeScript sources"
-	@echo "  install                npm ci: every dependency as a copy, no bin links"
+	@echo "  install                npm ci: every dependency as a copy, no bin links; the Rust toolchain of rust-toolchain.toml"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  test-scripts           Tests of the test runner and the conformance runners"
@@ -129,8 +133,9 @@ lint-js: ## Lint the TypeScript sources with eslint
 	$(call require-dir,$(TS_DIR),lint-js)
 	$(ESLINT) packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src
 
-install: ## Install the npm dependencies as copies without bin links (.npmrc)
+install: ## Install the npm dependencies as copies without bin links (.npmrc) and the Rust toolchain of rust-toolchain.toml
 	npm ci
+	rustup toolchain install --no-self-update
 
 build-ts: ## Build the TypeScript package
 	$(call require-dir,$(TS_DIR),build-ts)

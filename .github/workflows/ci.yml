@@ -17,6 +17,10 @@ concurrency:
 permissions:
   contents: read
 
+# rustup installs no toolchain on the first cargo; a job that uses Rust installs it first (T18.7-1).
+env:
+  RUSTUP_AUTO_INSTALL: '0'
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -34,7 +38,7 @@ jobs:
         with:
           php-version: '8.5'
           tools: composer:v2
-      - run: npm ci
+      - run: make install
         if: ${{ !cancelled() }}
       - run: node node_modules/@playwright/test/cli.js install --with-deps chromium
         if: ${{ !cancelled() }}
@@ -140,7 +144,7 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-      - run: rustup show
+      - run: rustup toolchain install --no-self-update
         if: ${{ !cancelled() }}
       - run: npm ci
         if: ${{ !cancelled() }}
@@ -166,6 +170,8 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:v2
+      - run: rustup toolchain install --no-self-update
+        if: ${{ !cancelled() }}
       - run: npm ci
         if: ${{ !cancelled() }}
       - run: make test-php

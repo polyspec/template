@@ -21,6 +21,9 @@ import { createProgress } from './test-progress/progress.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const USAGE = 'Usage: node scripts/run-tests.mjs <node|vitest|go|cargo|phpunit> [--timeout <seconds>] [--cwd <directory>] [--] [<arguments>]';
 const DEFAULT_TIMEOUT_SECONDS = 30;
+// A line in which a tool reports an error: `error: ...` and `error[E0425]: ...` of cargo and rustc, `fatal error: ...`,
+// `panic: ...` of Go and `PHP Fatal error: ...`.
+const ERROR_LINE = /^(?:error(?:\[\w+\])?:|fatal error:|panic:|PHP Fatal error:)/i;
 
 export function parseArguments(argv) {
   const [tool, ...rest] = argv;
@@ -211,17 +214,23 @@ async function main() {
     timeoutMs: options.timeoutSeconds * 1000,
     onTimeout: () => { timedOut = true; process.kill(-child.pid, 'SIGTERM'); },
   }) : undefined;
+  // The error lines of the tool, which the summary names when the tool exits without a failing test.
+  const errors = [];
+  const noting = handle => (text) => {
+    if (ERROR_LINE.test(text.trim())) errors.push(text.trim());
+    handle(text);
+  };
   if (cargo) {
     const events = cargoEvents(progress);
     child.stdout.setEncoding('utf8').on('data', events.stdout);
-    readline.createInterface({ input: child.stderr }).on('line', events.stderr);
+    readline.createInterface({ input: child.stderr }).on('line', noting(events.stderr));
   } else if (reads) {
-    readline.createInterface({ input: child.stdout }).on('line', { go: goEvents, phpunit: phpunitEvents }[options.tool](progress));
+    readline.createInterface({ input: child.stdout }).on('line', noting({ go: goEvents, phpunit: phpunitEvents }[options.tool](progress)));
   }
   const { status, signal } = await new Promise(resolve => child.on('close', (status, signal) => resolve({ status, signal })));
   const code = status ?? (signal ? 1 : 0);
   if (progress) {
-    const summary = progress.close(label, { exitCode: timedOut ? 0 : code });
+    const summary = progress.close(label, { exitCode: timedOut ? 0 : code, errors });
     process.exitCode = summary.ok && !timedOut ? 0 : 1;
   } else {
     // node --test and vitest print their summary from inside the tool; a tool that then ends on a
