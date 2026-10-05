@@ -8,6 +8,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileAst } from '../compiler/ast-artifact.mjs';
 import { compileSource } from '../compiler/compiler.mjs';
+import { publishBuild } from '../../scripts/publish-build.mjs';
 import { showcasePhpNamespace } from './php-namespace.mjs';
 
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
@@ -140,11 +141,18 @@ try {
   mkdirSync(join(temporary, 'bin'), { recursive: true });
   const goBinary = join(temporary, 'bin/showcase-go');
   run('go', ['build', '-o', goBinary, '.'], join(root, 'tools/showcase/adapters/go'));
+  const goAdapter = join(root, 'var/build/showcase-adapter-go');
+  publishBuild(goBinary, goAdapter);
   run(cargo, ['build', '--release', '--locked', '--manifest-path', join(root, 'tools/showcase/adapters/rust/Cargo.toml')]);
+  // The measurement runs the Go and Rust builds published to var/build, which change only when their bytes change:
+  // cargo links target/release again on every build, go build writes a new file, and the first run of a new executable
+  // file includes the check of macOS (T19.6-1).
+  const rustAdapter = join(root, 'var/build/showcase-adapter-rust');
+  publishBuild(join(root, 'tools/showcase/adapters/rust/target/release/showcase-adapter-rust'), rustAdapter);
   const commands = {
     typescript: ['node', ['--experimental-strip-types', join(root, 'tools/showcase/adapters/typescript.ts'), scenario]],
-    go: [goBinary, [scenario]],
-    rust: [join(root, 'tools/showcase/adapters/rust/target/release/showcase-adapter-rust'), [scenario]],
+    go: [goAdapter, [scenario]],
+    rust: [rustAdapter, [scenario]],
     php: ['php', [join(root, 'tools/showcase/adapters/php.php'), scenario]],
   };
   const results = [];

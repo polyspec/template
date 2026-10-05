@@ -47,7 +47,7 @@ test('a tool that cannot start fails with its command and the install fix', (t) 
 
 test('a CLI call of the drivers that outlives its limit names the limit and the command', async (t) => {
   const copy = directory(t, 'template-drivers-limit-');
-  for (const file of ['tests/runner/drivers.mjs', 'scripts/test-progress/step.mjs']) {
+  for (const file of ['tests/runner/drivers.mjs', 'scripts/publish-build.mjs', 'scripts/test-progress/step.mjs']) {
     mkdirSync(path.dirname(path.join(copy, file)), { recursive: true });
     copyFileSync(path.join(ROOT, file), path.join(copy, file));
   }
@@ -70,6 +70,6 @@ test('the Go and PHP install projects print the expected and the actual output',
 test('the PHP extension tests run through scripts/run-tests.mjs', () => {
   const run = spawnSync('make', ['--no-print-directory', '-n', 'test-ext-unit'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /^node scripts\/run-tests\.mjs phpunit --php-extension packages\/template-php-ext\/target\/release\/libpolyspec_template\.(?:dylib|so) --cwd packages\/template-php-ext$/m);
+  assert.match(run.stdout, /^node scripts\/run-tests\.mjs phpunit --php-extension var\/build\/libpolyspec_template\.(?:dylib|so) --cwd packages\/template-php-ext$/m);
   assert.doesNotMatch(run.stdout, /run-tests\.sh/);
 });
