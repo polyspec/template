@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Proves that an install project run removes its workspace, including a Go module cache, and that a
-// failed removal fails with the path of the workspace.
+// failed removal fails with the path of the workspace. Each command is a step without a time limit
+// that prints its start and its result with its elapsed time on standard error.
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
+import { runStepSync } from './test-progress/step.mjs';
 
 function run(command, args, cwd, env = {}) {
-  const result = spawnSync(command, args, { cwd, env: { ...process.env, ...env }, encoding: 'utf8', timeout: 120_000 });
-  if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} failed\n${result.stdout}${result.stderr}${result.error ?? ''}`);
+  runStepSync('install workspace', command, args, { cwd, env: { ...process.env, ...env } });
 }
 
 /** Returns the directories in the temporary directory whose names start with the workspace name. */

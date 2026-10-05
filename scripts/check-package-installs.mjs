@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 // Builds immutable package artifacts and verifies AST/generated installation outside the workspace.
+// Each command is a step without a time limit that prints its start, its output and its result with
+// its elapsed time on standard error and is judged by its exit status.
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
+import { runStepSync } from './test-progress/step.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -14,15 +16,7 @@ const artifacts = join(temporary, 'artifacts');
 mkdirSync(artifacts);
 
 function run(command, args, options = {}) {
-  const result = spawnSync(command, args, {
-    cwd: options.cwd ?? root,
-    env: { ...process.env, ...options.env },
-    encoding: 'utf8',
-    timeout: 600_000,
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} failed\n${result.stdout}${result.stderr}`);
-  return result.stdout.trim();
+  return runStepSync('package installs', command, args, { cwd: options.cwd ?? root, env: { ...process.env, ...options.env }, capture: true }).trim();
 }
 
 function stageScenario(directory) {
