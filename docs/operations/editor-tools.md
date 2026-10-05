@@ -120,7 +120,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 | 1 | `--check` found a file that is not formatted |
 | 2 | a file does not parse, a formatted AST differs, an HTML structure is not balanced, a path cannot be read, or the arguments are invalid |
 
-`make install-cli` runs `npm install --global --install-links packages/template-language`, which installs a copy of the built package into the global npm directory and the command `template-fmt` into the global npm bin directory. Run it again after `make build-language` to install the changed build.
+`make install-cli` installs the command `template-fmt` under the prefix `CLI_PREFIX` (default `~/.local`) without a symbolic link: `scripts/install-cli.mjs` writes the npm project `<prefix>/lib/polyspec-template-fmt`, which installs copies of the built formatter package and of the template package of this checkout without bin links, and the executable script `<prefix>/bin/template-fmt`, which runs `node` with the entry of the copied formatter package by its absolute path. Put `<prefix>/bin` on `PATH`. Run it again after `make build-language` to install the changed build; `make uninstall-cli` removes the project and the script.
 
 ## Language server
 

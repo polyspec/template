@@ -37,7 +37,7 @@ make showcase
 | `@polyspec/template-codemirror` | CodeMirror 6 확장 `template()` |
 | `polyspec-template` | 언어 서버 `template-lsp`를 확장 안에 포함하고, 그 서버에 연결해 기능을 제공하는 VS Code 확장 |
 
-`make vscode-install`은 VS Code 확장을 설치하고, `make install-cli`는 `template-fmt`를 연결한다.
+`make vscode-install`은 VS Code 확장을 설치하고, `make install-cli`는 `template-fmt`를 `CLI_PREFIX` 아래의 script(`~/.local/bin`)로 설치한다.
 
 ## 문서
 

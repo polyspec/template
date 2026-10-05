@@ -37,7 +37,7 @@ One language service holds every editor rule, and each editor reaches it through
 | `@polyspec/template-codemirror` | the CodeMirror 6 extension `template()` |
 | `polyspec-template` | the VS Code extension, a client of the bundled language server |
 
-`make vscode-install` installs the VS Code extension, and `make install-cli` links `template-fmt`.
+`make vscode-install` installs the VS Code extension, and `make install-cli` installs `template-fmt` as a script under `CLI_PREFIX` (`~/.local/bin`).
 
 ## Documents
 
