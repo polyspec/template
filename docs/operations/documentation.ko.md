@@ -51,3 +51,5 @@ node scripts/check-doc-coverage.mjs
 ```
 
 검사기는 문서화되지 않은 심볼이나 파일마다 한 행을 보고하고 실패한다. `make docs-check`가 이를 실행한다.
+
+`make docs-static-check`는 site를 빌드하고, 페이지가 `.ko.md` file 같은 source 전용 경로나 이전 경로를 link하거나 자기 locale을 벗어나면 실패한다. `docs/` 아래 한국어 문서는 다른 한국어 페이지를 site route `/ko/<path>`로 link한다. `docs/` 아래 file을 바꾸는 커밋은 `make docs-check`와 함께 이를 실행한다.
