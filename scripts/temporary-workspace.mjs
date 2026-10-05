@@ -9,7 +9,7 @@
 //   tests build into the target of packages/template-rust, the target of this checkout (T18.7).
 // - goWorkspace: a module that requires the module of packages/template-go and replaces it with that directory.
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -74,7 +74,11 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   writeFileSync(join(directory, 'Cargo.lock'), original);
   const env = { ...process.env, CARGO_TARGET_DIR: join(RUST, 'target') };
   const metadata = spawnSync(CARGO, ['metadata', '--offline', '--format-version', '1', '--manifest-path', manifest], { cwd: directory, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-  if (metadata.error || metadata.status !== 0) throw new Error(`cargo metadata of ${directory} failed: ${metadata.error?.message ?? metadata.stderr}`);
+  // --offline: the crates come from the registry of CARGO_HOME, into which make install downloads every Cargo.lock.
+  if (metadata.error || metadata.status !== 0) {
+    rmSync(directory, { recursive: true, force: true });
+    throw new Error(`cargo metadata --offline of ${directory} failed; a crate of packages/template-rust/Cargo.lock is not in the registry of CARGO_HOME, run make install: ${metadata.error?.message ?? metadata.stderr}`);
+  }
   const known = lockPackages(original);
   const chosen = [...lockPackages(readFileSync(join(directory, 'Cargo.lock'), 'utf8'))].filter(([key]) => !key.startsWith('template-generated-check '));
   // A package keeps its version, source and checksum; its dependencies can only lose those that only the tests of
@@ -83,7 +87,10 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
     const original = known.get(key);
     return !original || original.checksum !== entry.checksum || entry.dependencies.some(dependency => !original.dependencies.includes(dependency));
   }).map(([key]) => key);
-  if (other.length) throw new Error(`the lock of ${directory} holds packages that packages/template-rust/Cargo.lock does not: ${other.join(', ')}`);
+  if (other.length) {
+    rmSync(directory, { recursive: true, force: true });
+    throw new Error(`the lock of ${directory} holds packages that packages/template-rust/Cargo.lock does not: ${other.join(', ')}`);
+  }
   return { directory, manifest, env, targetDirectory: env.CARGO_TARGET_DIR, test: file => join(directory, 'tests', `${file}.rs`) };
 }
 
