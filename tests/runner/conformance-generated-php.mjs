@@ -3,7 +3,7 @@
 // it in its own PHP process. Each case prints its start and its result with its elapsed time, and
 // each of the two PHP processes of a case is stopped when it outlives its deadline.
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
@@ -12,11 +12,12 @@ import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { runBounded, seconds, stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
+import { temporaryDirectory } from '../../scripts/temporary-workspace.mjs';
 
 // The time limit of one PHP process of a case.
 const PROCESS_TIMEOUT_MS = 30_000;
 
-const temporary = mkdtempSync(join(root, '.generated-conformance-php-'));
+const temporary = temporaryDirectory('generated-conformance-php');
 const sources = join(temporary, 'source');
 const runner = join(temporary, 'runner.php');
 mkdirSync(sources);

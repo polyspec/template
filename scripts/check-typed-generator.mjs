@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 // Compiles each generated artifact in an install project and exercises its Program implementation.
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
 import { tsc } from './tools.mjs';
+import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const generated = resolve(root, 'tools/showcase/adapters/generated/typed');
 const scenarioRoot = resolve(root, 'examples/site/scenarios');
-const temporary = mkdtempSync(join(root, '.tmp-generated-program-'));
+// The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
+const temporary = nodeWorkspace('generated-program');
 const scenarios = ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'];
 
 function generatedSource(id, language) {
@@ -88,8 +90,7 @@ function checkGo() {
     assert.equal(coverageSource.includes(duplicate), false, `Go generated source duplicates runtime semantics: ${duplicate}`);
   }
   for (const id of scenarios) {
-    const directory = join(root, 'packages/template-go', `.generated-check-${id}`);
-    mkdirSync(directory);
+    const directory = goWorkspace(`generated-program-go-${id}`);
     try {
       copyFileSync(generatedSource(id, 'go'), join(directory, 'generated.go'));
       writeFileSync(join(directory, 'generated_test.go'), `package generated
@@ -141,7 +142,8 @@ function checkRust() {
   for (const duplicate of ['trait GeneratedTruthy', 'trait GeneratedContains', 'fn generated_in(', 'fn escape(', 'catch_unwind']) {
     assert.equal(coverageSource.includes(duplicate), false, `Rust generated source duplicates or flattens runtime semantics: ${duplicate}`);
   }
-  const test = join(root, 'packages/template-rust/tests/generated_program_check.rs');
+  const rust = rustWorkspace('generated-program-rust');
+  const test = rust.test('generated_program_check');
   const modules = scenarios.map((id, index) => `mod generated_${index} {
     include!(${JSON.stringify(generatedSource(id, 'rust'))});
     pub fn execute(target: &str, assign: serde_json::Value, options: polyspec_template::RenderOptions) -> String {
@@ -171,9 +173,9 @@ fn generated_${index}_matches() {
 }`).join('\n');
   writeFileSync(test, `${modules}\n${cases}\n`);
   try {
-    run(resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--manifest-path', join(root, 'packages/template-rust/Cargo.toml'), '--test', 'generated_program_check'], { env: { RUSTFLAGS: '-Dwarnings -Adead-code' } });
+    run(resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_program_check'], { env: { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' } });
   } finally {
-    rmSync(test);
+    rmSync(rust.directory, { recursive: true, force: true });
   }
 }
 

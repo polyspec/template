@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 // Compiles and executes one native object/class-call program in every generated backend.
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../tools/compiler/ast-artifact.mjs';
 import { compileSource } from '../tools/compiler/compiler.mjs';
 import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
+import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/native-object');
-const temporary = mkdtempSync(join(root, '.generated-native-calls-'));
+// The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
+const temporary = nodeWorkspace('generated-native-calls');
 const expected = '<article><h1>Order 12</h1><p>ready:12</p><p>done!</p></article>\n';
 // VAL-18: the object reaches an included template, a block argument and definition data unchanged.
 const passing = { 'include.tpl': 'Order 12|p:12\n', 'block.tpl': 'Order 12|p:12\n', 'define.tpl': 'Order 12|p:12\n' };
@@ -91,8 +93,7 @@ for (const [target, expectedCode] of Object.entries(hostValues.errors)) { let ac
 `);
   run(process.execPath, [tsRunner], root);
 
-  const goDir = join(root, 'packages/template-go', `.generated-native-${process.pid}`);
-  mkdirSync(goDir);
+  const goDir = goWorkspace('generated-native-calls-go');
   try {
     const goSource = join(goDir, 'generated.go');
     writeFileSync(goSource, compileSource(graphManifest, join(fixture, 'types.json'), 'go'));
@@ -117,7 +118,8 @@ func TestGeneratedHostValues(t *testing.T) { for target, output := range map[str
 
   const rustSource = join(temporary, 'native.rust');
   writeFileSync(rustSource, compileSource(graphManifest, join(fixture, 'types.json'), 'rust'));
-  const rustTest = join(root, 'packages/template-rust/tests/generated_native_object_check.rs');
+  const rust = rustWorkspace('generated-native-calls-rust');
+  const rustTest = rust.test('generated_native_object_check');
   const rustPassing = Object.entries(passing).map(([target, output]) => `(${rustString(target)}, ${rustString(output)})`).join(', ');
   writeFileSync(rustTest, `mod generated { include!(${rustString(rustSource)}); }
 use polyspec_template::{DefineData, DefineInput, ErrorCode, HostError, OrderedMap, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, TemplateObject, Value};
@@ -136,9 +138,9 @@ fn render_host_value(target: &str) -> Result<String, RequestError> { let order =
 #[test] fn generated_host_values_match() { for (target, output) in [${Object.entries(hostValues.outputs).map(([name, output]) => `(${rustString(name)}, ${rustString(output)})`).join(', ')}] { assert_eq!(render_host_value(target).unwrap(), output, "Rust generated {target}"); } for (target, code) in [${Object.entries(hostValues.errors).map(([name, code]) => `(${rustString(name)}, ErrorCode::${code})`).join(', ')}] { assert_eq!(template_error(render_host_value(target).unwrap_err()).code, code, "Rust generated {target}"); } }
 `);
   try {
-    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--manifest-path', join(root, 'packages/template-rust/Cargo.toml'), '--test', 'generated_native_object_check'], root, { RUSTFLAGS: '-Dwarnings -Adead-code' });
+    run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_native_object_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
   } finally {
-    rmSync(rustTest, { force: true });
+    rmSync(rust.directory, { recursive: true, force: true });
   }
 
   // The PHP target requires a namespace chosen by the caller of the compiler (docs/spec/compiler.md).

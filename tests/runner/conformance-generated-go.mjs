@@ -3,8 +3,8 @@
 // scripts/run-tests.mjs, which prints each case test with its elapsed time and stops a test that
 // outlives its own timeout.
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
 import { goString } from '../../tools/compiler/backend-support.mjs';
 import { compileSource } from '../../tools/compiler/compiler.mjs';
@@ -13,12 +13,13 @@ import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
+import { goWorkspace } from '../../scripts/temporary-workspace.mjs';
 
 // The time limit of one generated case test.
 const CASE_TIMEOUT_SECONDS = 30;
 
-const goRoot = join(root, 'packages/template-go');
-const temporary = mkdtempSync(join(goRoot, 'generated_conformance_'));
+// A module of the system temporary directory that uses the module of packages/template-go from that directory.
+const temporary = goWorkspace('generated-conformance-go');
 function errorObject(error) { return typeof error?.code === 'string' ? { code: error.code, template: error.template ?? 'input.tpl', line: error.line ?? 0, col: error.col ?? 0 } : null; }
 function parsedTemplates(testCase) { const templates = new Map(), pending = [[testCase.dir, '']]; while (pending.length) { const [directory, prefix] = pending.pop(); for (const entry of readdirSync(directory, { withFileTypes: true })) { const path = join(directory, entry.name), name = prefix ? `${prefix}/${entry.name}` : entry.name; if (entry.isDirectory()) pending.push([path, name]); else if (entry.isFile() && entry.name.endsWith('.tpl')) templates.set(name, parse(readFileSync(path), name, testCase.options)); } } return templates; }
 // Paths and expected output are embedded as exact Go string literals.
@@ -63,8 +64,8 @@ func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeS
   }
   progress.close('Go generated conformance compile');
   if (runnable.length) {
-    // The package of a case is named after the case: generated_conformance_<suffix>/case_<case id>.
-    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', goRoot, '--', `./${basename(temporary)}/...`], { cwd: root, stdio: 'inherit' });
+    // The package of a case is named after the case: case_<case id> of the temporary module.
+    const result = spawnSync(process.execPath, [join(root, 'scripts/run-tests.mjs'), 'go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', './...'], { cwd: root, stdio: 'inherit' });
     if (result.status !== 0) failures.push('generated Go execution failed; the failed cases are listed above'); else passed += runnable.length;
   }
 } finally { rmSync(temporary, { recursive: true, force: true }); }
