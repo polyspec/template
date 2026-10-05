@@ -22,6 +22,20 @@
 - symbolic link를 사용하지 않는다. npm은 이 저장소의 package를 포함한 모든 의존성을 사본으로 설치하고 bin link를 쓰지 않는다(`.npmrc`). recipe와 script는 도구를 그 package의 파일로 실행한다.
 - checkout마다 Rust crate를 자기 target에 빌드한다. `CARGO_TARGET_DIR`를 다른 checkout의 target으로 두지 않는다. cargo는 수정 시각으로 최신 여부를 판정하므로 다른 checkout의 소스로 빌드한 binary를 최신으로 받아들인다. Makefile은 물려받은 `CARGO_TARGET_DIR`를 cargo에 넘기지 않고, worktree는 지울 때 자기 target도 지운다. test는 checkout의 file을 binary에 compile된 경로가 아니라 cargo가 test를 실행할 때 정하는 `CARGO_MANIFEST_DIR`에서 읽는다.
 
+## 멱등성
+
+검사는 같은 tree에 대해 언제, 어느 machine에서나 같은 결과를 낸다. 아래 규칙은 각각 한 종류의 결함을 다룬다. 한 종류의 결함은 그 종류가 나타나는 모든 곳에서 고치고, 규칙에는 test를 둔다.
+
+- Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `.node-version`, npm은 `package.json`의 `packageManager`, Go는 `packages/template-go/go.mod`, Rust는 `rust-toolchain.toml`, PHP minor version과 Composer는 `config/toolchain.json`이 선언한다. `make install-tools`가 npm과 Go를 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mjs`가 모든 변경에서 version을 검사한다.
+- Network: 검사는 tree와 checkout의 도구만 읽고, registry, proxy, download를 읽지 않는다. registry에 묻는 review는 따로 있는 명령이고 그 결과를 commit한다.
+- Build: 검사는 자기가 읽는 것을, 입력이 바뀌지 않으면 아무것도 하지 않는 build로 만든다. 앞 target이나 앞 실행의 build에 기대지 않는다. 다른 것이 읽는 build는 byte가 바뀔 때에만 임시 파일과 rename으로 게시한다.
+- 공유 상태: 실행은 자기 directory에만 쓴다. 임시 파일은 checkout 밖에 실행의 이름으로, cache는 checkout 안(`var/`)에 둔다. 여러 실행이 읽고 쓰는 record는 읽을 때부터 마지막으로 쓸 때까지 lock을 쥔다. 실행은 자기가 시작한 group의 process를 남기지 않는다.
+- 아무것도 검증하지 않으면 실패: test가 하나도 실행되지 않은 실행은 실패한다. test는 build나 package가 없을 때 자기를 건너뛰지 않고, 그것을 build하거나 실패한다.
+- 한 실행에 모든 실패: make는 계속 진행하고(`MAKEFLAGS += -k`), 전체 suite의 target은 명령 하나를 실행하며 다른 검사는 prerequisite로 적고, 여러 언어의 검사는 모든 언어를 실행하고 실패한 언어를 모두 밝힌다.
+- Owner: 검사가 읽는 모든 경로는 `scripts/owner-checks.json`의 `inputs`에 선언되고, 그 검사를 선택하는 규칙을 가진다.
+- 메시지: 실패는 실패한 것을 기대값과 실제값, 또는 명령과 해결 방법과 함께 밝힌다.
+- 독립성: test는 도구 출력의 문구나 형식, test를 실행하는 사용자, 자기 timeout을 넘지 않는 소요 시간에 기대지 않는다. 계산할 수 있는 것은 계산하고, test를 실행하는 사용자와 platform에 맞는 결과를 검사한다.
+
 ## 결정과 수용 규칙
 
 - 구현을 바꾸기 전에 불변 조건, 수용 조건, 실패 조건을 정한다. test는 그 조건의 근거를 제공하며, 구현 뒤에 더 약한 대체 조건을 정의하지 않는다.

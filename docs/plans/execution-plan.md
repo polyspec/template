@@ -161,7 +161,7 @@ Dependencies: none. In one `node --test` run of `make test-scripts` the test fil
 | W16 | none | T16.1 |
 | W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 |
 | W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | none |
-| W19 | none | T19.1 → T19.12 in order |
+| W19 | none | T19.1 → T19.15 in order; T19.6-1 after T19.11 |
 | W20 | T20.1, T20.2, T20.3 | T20.3-1 after T20.3 |
 
 ## Definition of done
