@@ -21,7 +21,7 @@
 | [`spec/examples.md`](/ko/spec/examples) | 완전한 페이지 예제 |
 | [`spec/editor.md`](/ko/spec/editor) | 언어 서비스, LSP 서버, 에디터 어댑터 |
 
-[실행 체크리스트](/ko/plans/execution-checklist)는 작업, 검증 방법, 완료 증거를 나열한다.
+[실행 계획](/ko/plans/execution-plan)은 웨이브, 그 의존 관계와 원인, 완료 기준, 완료 정의와 그 증거를 적는다. [실행 체크리스트](/ko/plans/execution-checklist)는 작업, 검증 방법, 상태를 나열한다.
 
 ## 상태와 절차
 

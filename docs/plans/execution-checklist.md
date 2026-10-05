@@ -2,47 +2,7 @@
 
 [한국어](/ko/plans/execution-checklist).
 
-This document lists every task required to deliver the template engine: the specification, the conformance suite, the TypeScript, Go, Rust and PHP implementations, the PHP extension, the browser build, benchmarks and documentation. Tasks are grouped into waves. Tasks inside a wave marked `parallel` are independent of each other. A wave starts only when its listed dependencies are complete.
-
-## How to use
-
-- Task ID format: `T<wave>.<number>` or `T<wave>.<track>.<number>`.
-- The last column of every task row is its state (AGENTS): `[ ]` waiting, `[~]` in progress, `[o]` done, `[!] cause: <cause>; retry: <condition>` bypassed. A task is `[o]` only after its verification command passed on the committed tree.
-- Every task names its deliverable files, its tests and one verification command. A task is `done` only when the verification command passes on the committed tree.
-- No temporary scripts or folders. Every check is a Makefile target, a script under `scripts/`, or a committed test.
-- Code and tests are separate directories inside each package. Core tests stay in the core package. Extension tests stay in the extension package.
-- A defect is handled by adding a failing test that reproduces it, fixing the code, and keeping the test.
-- Files that grow beyond one responsibility are split by role.
-
-## Dependency overview
-
-```
-W0 foundation ──► W1 specification (parallel docs) ──► W1.11 spec review
-                                                        │
-                                                        ▼
-                                          W2 conformance assets (parallel)
-                                                        │
-                                                        ▼
-                                          W3 TypeScript (sequential core, parallel leaves)
-                                                        │
-                       ┌────────────────────────────────┼────────────────────────────────┐
-                       ▼                                ▼                                ▼
-                 W4.G Go track                    W4.R Rust track                  W4.P PHP track
-                       └────────────────────────────────┼────────────────────────────────┘
-                                                        ▼
-                                         W4.X cross-language gate (make check)
-                                                        │
-                                          ┌─────────────┴─────────────┐
-                                          ▼                           ▼
-                                   W5 PHP extension            W6 bench, docs site, status
-                                          └─────────────┬─────────────┘
-                                                        ▼
-                                              W7 package installation
-```
-
 ## Wave 0 — Repository foundation (sequential)
-
-Dependencies: none. Each task depends on the previous one.
 
 | ID | Task | Deliverables | Verification | Done |
 | --- | --- | --- | --- | --- |
@@ -54,11 +14,7 @@ Dependencies: none. Each task depends on the previous one.
 | T0.6 | This checklist | `docs/plans/execution-checklist.md`(.ko) | `make docs-check` | [o] |
 | T0.7 | Operations documents | `docs/operations/development.md`(.ko): toolchain install, `make` targets, commit procedure; `docs/operations/documentation.md`(.ko): document rules and checker | `make docs-check` | [o] |
 
-Exit criteria: `make docs-check` passes; `make help` lists every target; first commit exists.
-
 ## Wave 1 — Specification (parallel)
-
-Dependencies: T0.2, T0.5. Tasks T1.1–T1.10 are `parallel`. T1.11 runs after all of them. Each document is an English file plus a `.ko.md` file with the same content. Every normative rule carries an identifier (`LEX-1`, `GRM-4`, `EXP-12`, `VAL-3`, `FUN-7`, `RT-5`, `AST-2`, `ERR-9`, `CNF-1`) so fixtures and tests can cite it.
 
 | ID | Task | Deliverables | Content | Verification | Done |
 | --- | --- | --- | --- | --- | --- |
@@ -74,11 +30,7 @@ Dependencies: T0.2, T0.5. Tasks T1.1–T1.10 are `parallel`. T1.11 runs after al
 | T1.10 | Examples | `docs/spec/examples.md`(.ko) | One complete page: layout, header partial, footer definition with scope arguments, list with loop meta, card definition, assign data file, define file, expected output, AST excerpt | `make docs-check` | [o] |
 | T1.11 | Specification review (sequential) | Edits across `docs/spec/*` | Term consistency; every error code used in text exists in `errors.md`; every function in `expressions.md`/`examples.md` exists in `functions.md`; every rule has an ID; both languages carry the same information | `make docs-check`; review record in `CHANGELOG.md` | [o] |
 
-Exit criteria: all ten document pairs exist; `make docs-check` passes; `schema/ast.schema.json` validates against its meta-schema.
-
 ## Wave 2 — Conformance assets (parallel)
-
-Dependencies: T1.11. All tasks are `parallel`. Fixture ASTs are written by hand for at least the cases marked `AST by hand`; the remaining `expected.ast.json` files are produced by T3.13 and reviewed before commit.
 
 | ID | Task | Deliverables | Verification | Done |
 | --- | --- | --- | --- | --- |
@@ -101,11 +53,7 @@ Dependencies: T1.11. All tasks are `parallel`. Fixture ASTs are written by hand 
 | T2.17 | Fixtures: wrapped tags | `tests/cases/wrapper/`: quoted, comment and HTML-comment wrappers, `&#123;&#123;` without wrapper stays text, `"{= x}"` keeps quotes, missing wrapper closer error, wrapped tag on a standalone line | `node scripts/check-schema.mjs` | [o] |
 | T2.18 | Fixtures: delimiters | `tests/cases/delimiters/`: `options.json` delimiters, file directive, directive overriding the option, close delimiter used by the grammar (`[= a[0]]`), directive not first error, invalid delimiter character error, escape with a custom open delimiter | `node scripts/check-schema.mjs` | [o] |
 
-Exit criteria: at least 80 cases enumerated; every hand-written AST validates; every spec rule ID appears in at least one case.
-
 ## Wave 3 — TypeScript implementation
-
-Dependencies: T2.1, T2.2, T2.4, and the fixture tasks. Package `packages/template-ts`, npm name `@polyspec/template`. Source in `src/`, tests in `tests/`. Marked tasks are `parallel`; others follow their dependencies.
 
 | ID | Task | Deliverables | Tests | Verification | Depends on | Done |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -126,11 +74,7 @@ Dependencies: T2.1, T2.2, T2.4, and the fixture tasks. Package `packages/templat
 | T3.15 | Fixture expansion | Cases added for every defect found in T3.12–T3.14 | — | `node tests/runner/conformance.mjs --langs ts` | T3.12 | [o] |
 | T3.16 | Package documentation | `packages/template-ts/README.md`(.ko): API, CLI, browser usage | — | `make docs-check` | T3.11 | [o] |
 
-Exit criteria: `make test-ts`, `npm run lint`, `node tests/runner/conformance.mjs --langs ts` and `make test-browser` pass; `docs/features.md` rows `template-ts` and `template-browser` set to `implemented`/`passed`.
-
 ## Wave 4 — Go, Rust and PHP implementations (three parallel tracks)
-
-Dependencies: T3.13 (reviewed ASTs) and T3.15. The three tracks are independent. Inside a track the order is fixed. Each track mirrors the TypeScript module split and keeps tests separate from code.
 
 ### Track G — Go (`packages/template-go`, module `github.com/polyspec/template`)
 
@@ -188,11 +132,7 @@ Dependencies: T3.13 (reviewed ASTs) and T3.15. The three tracks are independent.
 | T4.X.2 | Full gate | `make check` (docs-check, lint, four unit suites, conformance) | [o] |
 | T4.X.3 | Status update | `docs/features.md`(.ko) rows for `template-go`, `template-rust`, `template-php`, `conformance` with evidence links; `CHANGELOG.md`(.ko) entry | `make docs-check` | [o] |
 
-Exit criteria: `make check` passes on a clean checkout.
-
 ## Wave 5 — PHP extension (sequential)
-
-Dependencies: T4.R.11, T4.P.11.
 
 | ID | Task | Deliverables | Verification | Done |
 | --- | --- | --- | --- | --- |
@@ -203,11 +143,7 @@ Dependencies: T4.R.11, T4.P.11.
 | T5.5 | Makefile targets | `ext`, `test-ext`; runner driver `php-ext` | `node tests/runner/conformance.mjs --langs php-ext` | [o] |
 | T5.6 | Status update | `docs/features.md`(.ko) row `template-php-ext`; `CHANGELOG.md`(.ko) | `make docs-check` | [o] |
 
-Exit criteria: `make ext` builds; `extension_loaded('polyspec_template')` is true; conformance passes for `php-ext`.
-
 ## Wave 6 — Benchmarks, documentation site, status (parallel)
-
-Dependencies: T4.X.2. Tasks T6.1–T6.5 and T6.7 are `parallel`; T6.6 follows them.
 
 | ID | Task | Deliverables | Verification | Done |
 | --- | --- | --- | --- | --- |
@@ -219,17 +155,7 @@ Dependencies: T4.X.2. Tasks T6.1–T6.5 and T6.7 are `parallel`; T6.6 follows th
 | T6.7 | Executable example site | `examples/site/` scenarios and static page; `tools/showcase/build.mjs`; AST/generated-program parity, repeatability and same-condition mode benchmark JSON artifacts | `make showcase`; `make showcase-check` | [o] |
 | T6.6 | Final status | `docs/features.md`(.ko) with test revisions; `CHANGELOG.md`(.ko) | `make check` | [o] |
 
-T6.2 is complete. `scripts/check-doc-coverage.mjs` runs from `make doc-coverage` and `make docs-check`; the checker reports 250 documented public symbols and files (template-ts 55, template-go 58, template-php 25, template-rust 1, files 111).
-
-T6.7 covers shared layouts, nested partials and loops, define data and scope precedence, an HTML slot and a missing definition. It follows RT-43–RT-53: every scenario uses the same JSON-shaped assign and direct path-based define registry for every implementation, and every render starts from the `layout` target. The adapter types, fields, operations and state transitions are declared in `tools/compiler/interface.json`; the generator writes language declarations and Mermaid sources, and `make contract-check` verifies the mapped implementations and failure recovery. `make showcase` compares raw output and repeated-render hashes across five implementations, compares AST programs with product compiler artifacts, and writes HTML, JSON and same-condition mode benchmark artifacts. `make showcase-check` verifies the artifacts and static HTML page. The example has no controller or service dependency.
-
-T6.6 is complete. On 2026-09-11, `make check` passed; `make test-ext` built the PHP extension and passed 216 of 216 conformance cases and 236 extension tests; `make showcase` passed output equality and repeatability checks. The feature status and changelog record these results.
-
-Exit criteria: `make check`, `make showcase-check`, and `make docs-verify-idempotent` pass.
-
 ## Wave 7 — Generated compiler completion and package installation
-
-Dependencies: T4.X.2. All verification is self-contained in this repository. Package install checks install immutable package artifacts into isolated temporary projects and depend on no checkout outside this repository.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
@@ -247,8 +173,6 @@ Dependencies: T4.X.2. All verification is self-contained in this repository. Pac
 
 ## Wave 8 — Assigned object and class function execution
 
-Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete until native instances can be assigned and the same member and class calls execute in every runtime and generated program.
-
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
 | T8.1 | Add the common object value boundary without copying host classes | four-language value and binding tests | [o] |
@@ -262,23 +186,17 @@ Dependencies: T7.1 and the canonical AST parser changes. This wave is incomplete
 
 ## Wave 9 — Template comments in the AST
 
-Dependencies: none. A tool that reads every comment of a template reads them from the parser, because a comment produces no statement node.
-
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
 | T9.1 | List every comment in `Template.comments` with its value and span (AST-9) in the TypeScript, Go, Rust and PHP parsers and the PHP extension; add the schema definition and the shared cases `text/comment-list` and `delimiters/comment-custom` | `make conformance`; `make check` | [o] |
 
 ## Wave 10 — Install check workspace removal
 
-Dependencies: none. A finished package install check left its temporary directory, 243 MB each time, because the Go module cache files are read-only and the removal failure was ignored.
-
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
 | T10.1 | Remove the install check workspace, including the Go module cache created with `-modcacherw`, and fail the check with the path of a workspace that cannot be removed; `scripts/check-install-workspace.mjs` runs in `make install-check` | `make install-check`; `make check` | [o] |
 
 ## Wave 11 — Editor language service, LSP server and CodeMirror adapter
-
-Dependencies: none. Every editor rule moves into one language service, and each editor reaches it through an adapter that only converts positions and registers features ([editor support](../spec/editor.md)). A task runs in the branch `feat/<shortname>-<id>` and the worktree `template-<shortname>-<id>`; both are removed as soon as the task is merged into `main`.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
@@ -289,11 +207,7 @@ Dependencies: none. Every editor rule moves into one language service, and each 
 | T11.5 | Add the CodeMirror 6 adapter `@polyspec/template-codemirror` (EDT-16), test it with `EditorState` against the editor fixtures and in a browser | `make test-codemirror` | [o] |
 | T11.6 | Reject an adapter that declares or imports `@polyspec/template` (EDT-2) or a language service that imports an editor, Node.js or DOM module (EDT-3); record rule evidence, feature status, documents and dependency policy | `make check` | [o] |
 
-T11.1 to T11.6 are complete. On 2026-10-02, `make check` passed on commit "Refresh the generated artifact digests after the lockfile change" of the branch `feat/language-T11.2`, including `editor-boundary-check`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode` and `test-vscode-integration`; `rules-check` reported no uncovered rule.
-
 ## Wave 12 — Ternary with an identifier before the colon
-
-Dependencies: none. `c ? a : b` is a valid expression (EXP-7, EXP-13), but the TypeScript expression parser reads an identifier followed by `:` as the start of a class call `Class::method()` and fails with `unexpected token "b"`; `c ? 1 : 2` and `c ? (a) : b` parse. The task runs in the branch `fix/ternary-T12.1` and the worktree `template-ternary-T12.1`.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
@@ -301,15 +215,12 @@ Dependencies: none. `c ? a : b` is a valid expression (EXP-7, EXP-13), but the T
 
 ## Wave 13 — Four task states
 
-Dependencies: none. Every checklist uses four task states: `[ ]` waiting, `[~]` in progress, `[o]` done and `[!]` bypassed with a cause and a retry condition. This checklist used `[x]` and `[ ] blocked: <reason>`, and `scripts/check-documents.mjs` accepted only those.
-
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T13.1 | Accept only the four task states in `scripts/check-documents.mjs`, with the cause and the retry condition of a bypassed task; check it fails on the `[x]` rows; write every done task as `[o]`; state the checklist rules in AGENTS | `make docs-check` | [o] |
+| T13.1 | Accept only the four task states in `scripts/check-documents.mjs`, with the cause and the retry condition of a bypassed task; check it fails on the rows marked with the letter x; write every done task with the done state of AGENTS; state the checklist rules in AGENTS | `make docs-check` | [o] |
+| T13.1-1 | Make the checklist hold only tasks and its markers only as task states: `scripts/check-documents.mjs` fails, with the file, the line and the column and with no exception, on a line of `docs/plans/execution-checklist.md` other than its title, the translation link, a heading or a task table row, and on a state marker of AGENTS or a task list marker (the letter x or X in square brackets) anywhere other than the start of the last cell of a task row; it reads derived sub-items such as `T14.2-1` as task rows. Move the prose of the checklist (the introduction, the dependency overview, the dependencies, causes and exit criteria of each wave, the parallelism summary and the definition of done with its evidence) into `docs/plans/execution-plan.md` in both languages; move its rules (the task ID format and the content of a task row) into AGENTS, which defines the states, and remove its legend; write the states in words in the texts of W13, T13.1, T17.1 and T17.1-1. Cause: the legend and four texts of the checklist wrote 14 state markers and 2 task list markers in each language, and a tool that counted markers reported tasks in progress that did not exist; 93 lines of each language were not tasks; the checker validated only the last cell of rows whose ID had no derived part, so it checked neither where a marker stands nor the states of the 9 derived sub-items. Red: in `tests/scripts/check-documents.test.mjs`, a fixture checklist with markers in a legend, prose, the text of a task, inline code and the cause of a bypassed task, a fixture with a paragraph under a heading and a derived sub-item with the state `done` all passed the checker with `7 document pairs passed` (3 of the 5 cases failed with `0 !== 1`). Green: the 5 cases pass: the first fixture fails with its 16 marker locations (such as `docs/plans/execution-checklist.md:10:27`) and its 4 line locations, the paragraph fails at line 7, the derived sub-item fails with `invalid task state for T1.2-1: done`, the checklist of a title, a link, a heading and a task table passes, and the checker passes this repository | `node scripts/run-tests.mjs node -- tests/scripts/check-documents.test.mjs` | [o] |
 
 ## Wave 14 — Data binding cost
-
-Dependencies: none. Host binding checks every string, map key and define id with `Utf8::firstInvalid`, a loop in PHP that reads one byte per step. Binding a map of 1442 strings (49 KB, mostly Korean text) took 1.16 ms, of which the loop took 1.01 ms; `mb_check_encoding` gives the same result in 0.02 ms. A renderer that renders one document as several templates binds the same data once per render. The tasks run in the branch `fix/utf8-T14.1` and the worktree `template-utf8-T14.1`.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
@@ -319,8 +230,6 @@ Dependencies: none. Host binding checks every string, map key and define id with
 | T14.2-2 | Write the CommonJS files of the TypeScript package into the output directory of the build: T14.2 wrote `dist/<entry>.cjs` relative to the working directory, so a build of the package with `--out-dir` failed with `ENOENT: dist/index.cjs`; `onSuccess` writes into `--out-dir`, else `dist`, and `tsup` with and without `--out-dir` writes `index.cjs`, `render.cjs` and `node.cjs` there | `npx tsup --out-dir <dir>` | [o] |
 
 ## Wave 15 — Binding errors that differ between runtimes
-
-Dependencies: none. The runtimes differed from the T14.2 specification in two places. Rust fails with E_DATA_UNSUPPORTED_TYPE on a null `assign` (`bind_map` in `value/bind.rs`), and so does the PHP extension (`php_to_map` in `convert.rs`), while TypeScript, Go and PHP render it as an empty map, as RT-4 states. A typed generated program reports a request that does not match its declared types with `\InvalidArgumentException` in PHP, `Error` in TypeScript and an `error` of `fmt.Errorf` in Go, as ERR-13 states, while Rust reports it as E_DATA_UNSUPPORTED_TYPE. T14.2 found a third: the Go typed generated program reads an absent optional field as the zero value of its type, so `??` does not apply.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
@@ -334,19 +243,15 @@ Dependencies: none. The runtimes differed from the T14.2 specification in two pl
 
 ## Wave 16 — Concurrent renders
 
-Dependencies: none. VAL-22 states that renders may read one bound map concurrently, but the specification does not state whether renders may share one program. The Go AST program reads and writes its template cache without a lock, so concurrent renders of one program race (`go test -race`, `render/engine.go`, the cache read and write in `LoadTemplate`).
-
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
 | T16.1 | Decide whether renders of every runtime may share one program and state the rule in the runtime specification; when they may, add a race test that renders one program concurrently in Go and make the template cache of every runtime safe for it; when they may not, state that a host uses one program per thread or goroutine | `make check` | [o] |
 
 ## Wave 17 — Test runs
 
-Dependencies: none. Each test prints its start, its result and its elapsed time while the run goes on and has its own timeout; the whole suite runs once, when every active task is done. AGENTS required `make check` before any task was marked done, and `AGENTS.ko.md` lacked the section "Decision and acceptance rules". `test-go` limited each package to 120 s; `test-rust` and `test-php` gave a test no timeout and printed nothing while it ran. The conformance runner printed its table only after the last case. The four generated conformance runners ran all cases in one `go test` or `cargo test` call under one 600 s limit, or in their own process without a limit, and printed only a final count. The VS Code integration runner waited for each VS Code launch, each profile installation and each check without a limit. The tasks run in the branch `fix/test-runs-T17.1` and the worktree `template-test-runs-T17`. A long-running operation (a build, `tsc`, an installation, a VS Code download, installation or launch, a whole run) prints step logs and has no timeout, because a time limit fails a normal run that is slower than expected; T17.4 and T17.5 gave `tsc`, the profile installations and the launches deadlines, and the driver build and the package install checks also had time limits. `tests/runner/delimiter-matrix.mjs` printed one line after its last case, and the unit tests of `test-ts`, `test-language`, `test-lsp`, `test-codemirror` and `test-vscode` did not run through `scripts/run-tests.mjs`. T17.6 to T17.10 run in the branch `test/no-deadline-T17.6` and the worktree `template-no-deadline-T17.6`. T17.1-1 runs in the branch `test/full-run-T17.1-1` and the worktree `template-full-run-T17.1-1`.
-
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
-| T17.1 | State in AGENTS that a task in progress runs only the Red and Green tests that own the change, that a commit also runs `make docs-check`, that a task becomes `[o]` after its owning command passes and that `make check` runs once when every active task is done; state that every test prints its progress and has its own timeout and that no whole run has a time limit; name the owning command in the Verification column; add the section "Decision and acceptance rules" to `AGENTS.ko.md` | `make docs-check` | [o] |
+| T17.1 | State in AGENTS that a task in progress runs only the Red and Green tests that own the change, that a commit also runs `make docs-check`, that a task becomes done after its owning command passes and that `make check` runs once when every active task is done; state that every test prints its progress and has its own timeout and that no whole run has a time limit; name the owning command in the Verification column; add the section "Decision and acceptance rules" to `AGENTS.ko.md` | `make docs-check` | [o] |
 | T17.2 | Add the test runner `scripts/run-tests.mjs` with `scripts/test-progress/` for node, vitest, go, cargo and phpunit, which prints each test with its elapsed time and stops a test at its own timeout, with its tests in `tests/scripts/run-tests.test.mjs`; run `test-go`, `test-rust` and `test-php` through it, remove the 120 s package limit of `test-go` and enforce the PHPUnit time limit | `node scripts/run-tests.mjs node -- tests/scripts/run-tests.test.mjs` | [o] |
 | T17.3 | Make `tests/runner/conformance.mjs` print `<case> [<lang>] pass\|fail (<ms>)` when a case finishes in a language, and keep the summary at the end | `node scripts/run-tests.mjs node -- tests/scripts/conformance-progress.test.mjs` | [o] |
 | T17.4 | Give every case of the four generated conformance runners its own deadline and a result line with its elapsed time: Go and Rust through `scripts/run-tests.mjs` with Rust tests named by case id, PHP `php -l` and the case process under a timeout, TypeScript `tsc` under a deadline with a step line and each render in a worker under a timeout; remove the 600 s limits | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/generated-conformance.test.mjs` | [o] |
@@ -360,11 +265,9 @@ Dependencies: none. Each test prints its start, its result and its elapsed time 
 | T17.9 | Make `tests/runner/delimiter-matrix.mjs` print `<pair> [<lang>] pass\|fail (<ms> ms)` when a delimiter pair finishes in a language, and keep the summary at the end | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [o] |
 | T17.10 | Run the vitest tests of `test-ts`, `test-language`, `test-lsp` and `test-codemirror` and the `node --test` tests of `test-vscode` through `scripts/run-tests.mjs` | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [o] |
 | T17.11 | Start the static server of `make test-browser` in `tests/browser/run.mjs` as a step without a time limit instead of the Playwright `webServer` with its 30 s startup deadline (Playwright reads `timeout: 0` as 60 s); print the server output, judge readiness by the line `listening on http://127.0.0.1:4173` and fail when the server exits first | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/browser-server.test.mjs` | [o] |
-| T17.1-1 | Enforce the single full run with the guard `scripts/full-run.mjs`, which `make check` starts before any step: it refuses while a task row of this checklist is `[~]` and lists each active ID with its task, refuses while tracked changes are uncommitted, refuses a second full run of the same tree (`git rev-parse HEAD^{tree}`) and names the earlier run, runs each target of `CHECK_TARGETS` with `make <target>` to its end and writes `var/full-run.json` (tree, commit, result, each target with its status and times) before and after each target, so a stopped run stays `incomplete`; `make rerun-failed` reruns only the targets of the current tree that did not pass and completes the result when they pass. Cause: AGENTS stated that `make check` runs once, when every active task is done, and nothing enforced it: a run with a task in progress, a run of uncommitted changes and a second run of the same tree all started the suite. Red: `make -n check` printed the first step of `docs-check`, so the suite started whatever the checklist held, `make -n rerun-failed` failed with `No rule to make target`, and `tests/scripts/full-run.test.mjs` failed with `ERR_MODULE_NOT_FOUND` for `scripts/full-run.mjs`. Green: its 10 cases pass: `make -n check` prints only the guard, a fixture checklist with `[~]`, a dirty tree, a second run of one tree and `rerun-failed` without a record are refused before any stub target runs, and `rerun-failed` runs only the stub targets that failed or did not finish | `node scripts/run-tests.mjs node -- tests/scripts/full-run.test.mjs` | [o] |
+| T17.1-1 | Enforce the single full run with the guard `scripts/full-run.mjs`, which `make check` starts before any step: it refuses while a task row of this checklist is in progress and lists each active ID with its task, refuses while tracked changes are uncommitted, refuses a second full run of the same tree (`git rev-parse HEAD^{tree}`) and names the earlier run, runs each target of `CHECK_TARGETS` with `make <target>` to its end and writes `var/full-run.json` (tree, commit, result, each target with its status and times) before and after each target, so a stopped run stays `incomplete`; `make rerun-failed` reruns only the targets of the current tree that did not pass and completes the result when they pass. Cause: AGENTS stated that `make check` runs once, when every active task is done, and nothing enforced it: a run with a task in progress, a run of uncommitted changes and a second run of the same tree all started the suite. Red: `make -n check` printed the first step of `docs-check`, so the suite started whatever the checklist held, `make -n rerun-failed` failed with `No rule to make target`, and `tests/scripts/full-run.test.mjs` failed with `ERR_MODULE_NOT_FOUND` for `scripts/full-run.mjs`. Green: its 10 cases pass: `make -n check` prints only the guard, a fixture checklist with a task in progress, a dirty tree, a second run of one tree and `rerun-failed` without a record are refused before any stub target runs, and `rerun-failed` runs only the stub targets that failed or did not finish | `node scripts/run-tests.mjs node -- tests/scripts/full-run.test.mjs` | [o] |
 
 ## Wave 18 — Test resources of one run
-
-Dependencies: none. Two concurrent runs of one checkout or of different checkouts replaced or reset a resource that another run was using. `tests/browser/server.mjs` listened on the fixed port `127.0.0.1:4173`, so a second run failed with `EADDRINUSE`, and Playwright loaded the page from that port whichever server held it. `packages/template-vscode/tests/integration/run.mjs` downloads and unpacks VS Code into `.vscode-test` at the repository root, which every session in one checkout shares, and `make clean` removed that directory while a run used it. A resource of a run is isolated by the run (a port that the system assigns, a temporary directory, a name of the run). A resource that exists once has one holder at a time, recorded in a lock file that is created atomically and names the checkout, the process ID and the start time of the holder; another run fails with that holder, the holder releases the lock, and a lock whose process has ended is reported and removed by an explicit command. The tasks run in the branch `fix/shared-T18.1` and the worktree `template-shared-T18.1`.
 
 | ID | Task | Verification | Done |
 | --- | --- | --- | --- |
@@ -374,43 +277,3 @@ Dependencies: none. Two concurrent runs of one checkout or of different checkout
 | T18.4 | Install every npm dependency as a copy without bin links: npm linked the five workspace packages into `node_modules` and wrote 37 bin links into `node_modules/.bin`. `.npmrc` sets `install-links=true` and `bin-links=false`; the root `package.json` declares the packages of `packages/` as `file:` dependencies with overrides instead of npm workspaces, which npm always links, and holds their development tools; each build target installs the copy of its package again; the recipes and scripts start every tool with the file of its package (`scripts/tools.mjs`); the dependency policy reads the root manifest only; `tests/scripts/no-symlinks.test.mjs` fails on any symbolic link below `node_modules` or `vendor` | `node scripts/run-tests.mjs node -- tests/scripts/no-symlinks.test.mjs` | [o] |
 | T18.5 | Install `template-fmt` with `make install-cli` under the declared prefix `CLI_PREFIX` without a symbolic link: a copy of the formatter package in `<prefix>/lib/polyspec-template-fmt` and an executable script `<prefix>/bin/template-fmt` that runs its entry by absolute path; `make uninstall-cli` removes both. `npm link` and `npm install --global` write a bin link, and since T18.4 a global install fails because npm resolves `@polyspec/template` 0.0.1 from the registry | `node scripts/run-tests.mjs node -- tests/scripts/install-cli.test.mjs` | [o] |
 | T18.6 | Update eslint to the latest stable release 10.12.0: `make dependency-policy-check` failed with `outdated npm dependency has no exception: eslint 10.11.0 < 10.12.0`, so `make release-check` failed; record the digest of the changed `package-lock.json` in the generated JavaScript showcase manifests and the example page | `make dependency-policy-check lint-js` | [o] |
-
-## Parallelism summary
-
-| Wave | Parallel groups | Sequential constraints |
-| --- | --- | --- |
-| W0 | none | T0.1 → T0.7 in order |
-| W1 | T1.1–T1.10 | T1.11 after all |
-| W2 | T2.1–T2.18 | none |
-| W3 | {T3.2, T3.3, T3.4}, {T3.6, T3.9} with T3.5, {T3.14, T3.15, T3.16} | T3.1 → T3.5 → T3.7 → T3.10 → T3.11 → T3.12 → T3.13 |
-| W4 | tracks G, R, P | inside each track: 1 → 11; T4.X after all tracks |
-| W5 | none | T5.1 → T5.6 |
-| W6 | T6.1–T6.5, T6.7 | T6.6 after all |
-| W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler contract and implementation precede proof and publication |
-| W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 | runtime support precedes parity and publication |
-| W9 | none | T9.1 |
-| W10 | none | T10.1 |
-| W11 | T11.3 → T11.4 alongside T11.5 | T11.1 → T11.2 → the parallel group → T11.6 |
-| W14 | none | T14.1 → T14.2 |
-| W15 | T15.1, T15.2, T15.3, T15.4 | none |
-| W16 | none | T16.1 |
-| W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 |
-| W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | none |
-
-## Definition of done
-
-- Every task in W0–W11 is `done`.
-- `make check` passes on a clean checkout with Node 26.8.1, Go 1.27.1, Rust 1.98.1 and PHP 8.5.
-- `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
-- `make test-browser` passes.
-- `make conformance-all-modes` passes every TypeScript, Go, Rust and PHP mode-language-case cell (two modes × four languages × every canonical case: 1,968 cells with the 246 cases of T9.1) without a fallback from generated execution to AST execution.
-- `make release-test-matrix` proves each release layer independently: units, generated-source compilation, conformance, positioned errors and failure recovery, mutation rejection, isolated install projects, browser DOM output and performance parity.
-- `make install-check`, `make showcase-check`, `make docs-verify-idempotent` and `make release-check` pass in a clean checkout.
-- `docs/features.md` and `docs/features.ko.md` carry identical status fields with evidence links for every row.
-
-Evidence of 2026-10-02, with Node 26.8.1, Go 1.27.1 (from the `go.mod` toolchain line), Rust 1.98.1 and PHP 8.5.10:
-
-- `make check` passed with status 0 in a new checkout of commit "Make template tags stand out in VS Code whatever the color theme is" after `npm ci`, with the Makefile change of the commit that records this evidence. That run found that `runtime-interface-check` and `compiler-interface-check` did not install the PHP dependencies they use; both now depend on `build-php`. `make check` includes `test-browser`, `conformance-all-modes`, `install-check`, `showcase-check` and the documentation status check since commit "Repair the release checks broken by the host value changes and run them in make check".
-- `node tests/runner/parity.mjs` reported that 244 of 244 cases agree across `ts`, `go`, `rust`, `php` and `php-ext` on commit "Make template tags stand out in VS Code whatever the color theme is".
-- `make conformance-all-modes` passed all 1,952 cells without a fallback; `make test-browser`, `make install-check`, `make showcase-check` and `make docs-verify-idempotent` passed.
-- `make release-check` passed on commit "Make template tags stand out in VS Code whatever the color theme is": it ran `make release-test-matrix`, all seven layers, in an isolated clean checkout.
