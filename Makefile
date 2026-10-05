@@ -200,7 +200,7 @@ parity: build-ts build-go build-rust build-php ## Cross-language output comparis
 	node tests/runner/parity.mjs
 
 test-browser: build-ts ## Browser rendering test
-	npx playwright test
+	node tests/browser/run.mjs
 
 ext: ## Build the PHP extension
 	$(call require-dir,$(EXT_DIR),ext)

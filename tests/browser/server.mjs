@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Static file server for the browser test: serves the repository root on 127.0.0.1:4173.
+// Static file server for the browser test: serves the repository root on 127.0.0.1:4173 and prints
+// `listening on http://127.0.0.1:4173` once it accepts connections.
 import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { dirname, extname, join, normalize, resolve } from 'node:path';
@@ -28,4 +29,4 @@ createServer((request, response) => {
   }
   response.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
   createReadStream(file).pipe(response);
-}).listen(4173, '127.0.0.1');
+}).listen(4173, '127.0.0.1', () => console.log('listening on http://127.0.0.1:4173'));

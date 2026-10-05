@@ -11,7 +11,7 @@ npx playwright install chromium
 make test-browser
 ```
 
-`make test-browser` builds the package, starts a static server on `127.0.0.1:4173` from `tests/browser/server.mjs`, opens `tests/browser/index.html` in Chromium and compares the rendered output of every case with `expected.html` or `expected.error.json`. Cases whose input depends on raw bytes (invalid UTF-8, a byte order mark) are covered by the command line suite and skipped in the browser.
+`make test-browser` builds the package and runs `tests/browser/run.mjs`, which starts a static server on `127.0.0.1:4173` from `tests/browser/server.mjs` as a step without a time limit: the step prints its start, the output of the server with the prefix `[server]` and its result with the elapsed time, ends when the server prints `listening on http://127.0.0.1:4173` and fails when the server exits first. Playwright then opens `tests/browser/index.html` in Chromium and compares the rendered output of every case with `expected.html` or `expected.error.json`. Cases whose input depends on raw bytes (invalid UTF-8, a byte order mark) are covered by the command line suite and skipped in the browser.
 
 ## Ship templates and data to a browser
 
