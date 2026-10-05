@@ -1,28 +1,26 @@
 // Language drivers for the conformance and parity runners.
-// Each driver builds its CLI when the binary is absent and runs `parse` or `render`.
+// Each driver builds its CLI when the binary is absent and runs `parse` or `render`. A build is a
+// long-running step without a time limit; it prints its start, its output and its result on
+// standard error, so the result lines of the runners on standard output stay in order. Each CLI
+// call is a case and keeps its own timeout.
 import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { runStepSync } from '../../scripts/test-progress/step.mjs';
+
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const packages = join(root, 'packages');
 
-function run(command, args, options = {}) {
-  return spawnSync(command, args, {
-    encoding: 'utf8',
-    timeout: options.timeout ?? 10000,
-    cwd: options.cwd ?? root,
-    env: { ...process.env, PATH: `${process.env.HOME}/.cargo/bin:${process.env.PATH}` },
-    maxBuffer: 64 * 1024 * 1024,
-  });
-}
+const environment = () => ({ ...process.env, PATH: `${process.env.HOME}/.cargo/bin:${process.env.PATH}` });
 
-function build(name, command, args, cwd) {
-  const result = run(command, args, { cwd, timeout: 600000 });
-  if (result.status !== 0) {
-    throw new Error(`${name}: build failed\n${result.stdout}${result.stderr}`);
-  }
+// The time limit of one CLI call.
+const INVOKE_TIMEOUT_MS = 10_000;
+
+/** Builds the CLI of the driver `name` as a logged step; throws when the build fails. */
+export function build(name, command, args, cwd) {
+  runStepSync(`build ${name}`, command, args, { cwd, env: environment() });
 }
 
 // The shared library of the PHP extension: .dylib on macOS, .so elsewhere.
@@ -100,7 +98,7 @@ export function prepare(name) {
 // Runs one CLI invocation and returns {status, stdout, stderr}.
 export function invoke(name, args, cwd) {
   const [command, argv] = drivers[name].command(args);
-  const result = run(command, argv, { cwd });
+  const result = spawnSync(command, argv, { encoding: 'utf8', timeout: INVOKE_TIMEOUT_MS, cwd: cwd ?? root, env: environment(), maxBuffer: 64 * 1024 * 1024 });
   if (result.error) {
     return { status: -1, stdout: '', stderr: result.error.message };
   }
