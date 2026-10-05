@@ -1,9 +1,8 @@
-// Tests the holder lock of a resource that exists once (scripts/holder-lock.mjs) and its use for the VS Code
-// directory: one holder at a time, a refusal that names the holder, release by the holder, and a lock of an ended
-// process that is reported and removed only by `clear`.
+// Tests the holder lock of a resource that exists once (scripts/holder-lock.mjs): one holder at a time, a refusal that
+// names the holder, release by the holder, and a lock of an ended process that is reported and removed only by `clear`.
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -94,31 +93,4 @@ test('clear fails while the holder runs', { timeout: 20_000 }, async t => {
   assert.equal(refused.status, 1);
   assert.match(refused.stderr, new RegExp(`held by process ${holder.pid} of the checkout .*, which still runs`));
   assert.equal(existsSync(lock), true);
-});
-
-test('make clean-vscode-test fails while the directory is held and removes it otherwise', { timeout: 20_000 }, async t => {
-  const directory = workspace(t);
-  const cache = path.join(directory, '.vscode-test');
-  mkdirSync(cache);
-  const holder = await holdLock(t, `${cache}.lock`);
-  const refused = spawnSync('make', ['-s', 'clean-vscode-test', `VSCODE_TEST=${cache}`], { cwd: ROOT, encoding: 'utf8' });
-  assert.notEqual(refused.status, 0);
-  assert.match(refused.stderr, new RegExp(`held by process ${holder.pid} `));
-  assert.equal(existsSync(cache), true);
-  holder.stdin.end();
-  await new Promise(resolvePromise => holder.once('exit', resolvePromise));
-  const removed = spawnSync('make', ['-s', 'clean-vscode-test', `VSCODE_TEST=${cache}`], { cwd: ROOT, encoding: 'utf8' });
-  assert.equal(removed.status, 0, removed.stderr);
-  assert.equal(existsSync(cache), false);
-  assert.equal(existsSync(`${cache}.lock`), false);
-});
-
-test('the VS Code integration run fails with the holder before it downloads', { timeout: 20_000 }, async t => {
-  const cache = path.join(workspace(t), '.vscode-test');
-  const holder = await holdLock(t, `${cache}.lock`);
-  const run = spawnSync(process.execPath, ['tests/integration/run.mjs', '--cache', cache], { cwd: path.join(ROOT, 'packages/template-vscode'), encoding: 'utf8' });
-  assert.notEqual(run.status, 0);
-  assert.match(run.stderr, new RegExp(`held by process ${holder.pid} `));
-  assert.doesNotMatch(run.stdout, /download VS Code/);
-  assert.equal(existsSync(cache), false);
 });

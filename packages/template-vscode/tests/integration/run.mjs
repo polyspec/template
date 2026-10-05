@@ -3,11 +3,10 @@
 // installed from the .vsix into an extensions directory, workspace trust is enabled and the opened folder
 // is not trusted. A second run removes `capabilities` from the installed manifest and requires the suite to
 // observe that VS Code disables the extension, which shows that the first run detects that regression.
-// The VS Code build is the minimum version of engines.vscode and is cached in the directory of the required option
-// --cache (`make test-vscode-integration` names .vscode-test at the repository root). The run holds the lock
-// `<cache>.lock` of scripts/holder-lock.mjs from the download to its last launch, so a second run and `make clean`
-// fail with the holder while the run uses the directory.
-// The download, every profile installation and every VS Code launch is a step without a time limit (step.mjs): it
+// The VS Code build is the minimum version of engines.vscode, installed by `make install` (scripts/install-vscode.mjs)
+// into the tools directory of the required option --vscode (`make test-vscode-integration` names var/tools/vscode). The
+// run only reads that copy and never downloads; without it, it fails with `run make install` (T20.1-4).
+// Every profile installation and every VS Code launch is a step without a time limit (step.mjs): it
 // prints its start, a line every 10 s while it runs and its result with its elapsed time, and is judged by its
 // exit code or by the result of its suite.
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -15,25 +14,21 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { downloadAndUnzipVSCode, resolveCliPathFromVSCodeExecutablePath } from '@vscode/test-electron';
+import { resolveCliPathFromVSCodeExecutablePath } from '@vscode/test-electron';
 
-import { acquire } from '../../../../scripts/holder-lock.mjs';
-import { logged, runStep } from './step.mjs';
+import { installedExecutable } from '../../../../scripts/install-vscode.mjs';
+import { runStep } from './step.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..', '..');
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const extensionId = `${manifest.publisher}.${manifest.name}`;
 const vsix = join(root, 'dist', `${manifest.name}.vsix`);
-const version = manifest.engines.vscode.replace(/^\^/, '');
 const SUITE_RESULT = /\[suite\] (\d+) of (\d+) checks passed/;
-const { values } = parseArgs({ options: { cache: { type: 'string' } } });
-if (!values.cache) throw new Error('--cache <directory> is required');
-const cache = resolve(values.cache);
-
-acquire(`${cache}.lock`, join(root, '..', '..'));
-console.log(`[integration] holding ${cache}.lock`);
-const executable = await logged(`download VS Code ${version}`, () => downloadAndUnzipVSCode({ version, cachePath: cache }));
+const { values } = parseArgs({ options: { vscode: { type: 'string' } } });
+if (!values.vscode) throw new Error('--vscode <directory> is required');
+const executable = installedExecutable(values.vscode);
+console.log(`[integration] VS Code ${executable}`);
 const cli = resolveCliPathFromVSCodeExecutablePath(executable);
 // VS Code creates its IPC socket in the user data directory; a Unix socket path is limited to about 100
 // bytes, so the profiles are created below /tmp instead of the longer per-user temporary directory.

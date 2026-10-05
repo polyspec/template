@@ -1,7 +1,6 @@
-// A step of the integration runner: the download of VS Code, a profile installation or a VS Code
-// launch. A step is a long-running operation, so it has no time limit; it prints its start, a line
-// every 10 s while it runs and its result with its elapsed time, and is judged by its exit code or
-// by the result of its suite.
+// A step of the integration runner: a profile installation or a VS Code launch. A step is a long-running
+// operation, so it has no time limit; it prints its start, a line every 10 s while it runs and its result with its
+// elapsed time, and is judged by its exit code or by the result of its suite.
 import { spawn } from 'node:child_process';
 
 import { stopProcessGroup } from '../../../../scripts/process-group.mjs';
@@ -12,23 +11,6 @@ import { stopProcessGroup } from '../../../../scripts/process-group.mjs';
 export const EXIT_GRACE_MS = 20_000;
 
 const seconds = milliseconds => `${(milliseconds / 1000).toFixed(1)} s`;
-
-/** Prints the start, the still-running lines and the end of an operation of this process. */
-export async function logged(step, operation, { log = console.log, heartbeatMs = 10_000 } = {}) {
-  log(`[integration] start - ${step}`);
-  const started = Date.now();
-  const heartbeat = setInterval(() => log(`[integration] … ${step} still running (${seconds(Date.now() - started)})`), heartbeatMs);
-  try {
-    const result = await operation();
-    log(`[integration] ok - ${step} (${seconds(Date.now() - started)})`);
-    return result;
-  } catch (error) {
-    log(`[integration] not ok - ${step} (${seconds(Date.now() - started)})`);
-    throw error;
-  } finally {
-    clearInterval(heartbeat);
-  }
-}
 
 /**
  * Runs a command in its own process group and resolves its exit code. `output` receives the output of the command.

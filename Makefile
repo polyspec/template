@@ -41,7 +41,7 @@ MAKEFLAGS += -k
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install clean-vscode-test vscode-test-unlock uninstall-cli rerun-failed \
+	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install uninstall-cli rerun-failed \
 	owner-check conformance-cases function-inventory-check dependency-review
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -61,8 +61,9 @@ LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
 VSCODE_DIR := packages/template-vscode
 CODEMIRROR_DIR := packages/template-codemirror
-# The VS Code builds of the integration test; scripts/holder-lock.mjs guards it with $(VSCODE_TEST).lock.
-VSCODE_TEST := $(CURDIR)/.vscode-test
+# The VS Code build of the integration test, installed by make install (scripts/install-vscode.mjs) and only read by
+# the test, which never downloads (T20.1-4).
+VSCODE_TOOLS := $(CURDIR)/var/tools/vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 # The prefix of `make install-cli`: the formatter copy in $(CLI_PREFIX)/lib and the script in $(CLI_PREFIX)/bin.
 CLI_PREFIX ?= $(HOME)/.local
@@ -126,12 +127,10 @@ help: ## List targets
 	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
 	@echo "  test-vscode            Grammar tests, extension tests and type check"
-	@echo "  test-vscode-integration Run the extension inside VS Code (downloads VS Code into .vscode-test)"
+	@echo "  test-vscode-integration Run the extension inside the VS Code that make install installs into var/tools/vscode"
 	@echo "  vscode-package         Build the .vsix with vsce"
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
-	@echo "  clean-vscode-test      Remove .vscode-test while holding its lock; fails while an integration run holds it"
-	@echo "  vscode-test-unlock     Remove the lock of .vscode-test whose holder process has ended"
 
 # The targets of the full suite, the one list of every runner: `make check`, `make release-test-matrix`, `make
 # release-check` in a clean checkout and the release job of the CI workflow run them through the guard
@@ -169,8 +168,9 @@ lint-js: ## Lint the TypeScript sources with eslint
 # make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
-install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages and the crates of every Cargo.lock
+install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages, the VS Code of the integration test and the crates of every Cargo.lock
 	$(ONLINE) $(NPM) ci
+	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
 	rustup toolchain install --no-self-update
 	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
 	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
@@ -287,7 +287,7 @@ test-vscode-types: build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
 test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
-	cd $(VSCODE_DIR) && node tests/integration/run.mjs --cache $(VSCODE_TEST)
+	cd $(VSCODE_DIR) && node tests/integration/run.mjs --vscode $(VSCODE_TOOLS)
 
 vscode-package: build-vscode ## Build the .vsix
 	cd $(VSCODE_DIR) && $(VSCE) package --no-dependencies --skip-license --out dist/polyspec-template.vsix
@@ -539,11 +539,6 @@ conformance-type-manifest-check: build-ts
 typed-generator-compile-check: build-php compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
 
-clean: clean-vscode-test ## Remove build outputs
+clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 
-clean-vscode-test: ## Remove .vscode-test while holding its lock; fails with the holder while an integration run holds it
-	node scripts/holder-lock.mjs run $(VSCODE_TEST).lock -- rm -rf $(VSCODE_TEST)
-
-vscode-test-unlock: ## Remove the lock of .vscode-test whose holder process has ended
-	node scripts/holder-lock.mjs clear $(VSCODE_TEST).lock

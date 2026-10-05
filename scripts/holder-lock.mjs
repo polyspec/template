@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The holder lock of a resource that exists once, such as the VS Code directory `.vscode-test` of a checkout.
+// The holder lock of a resource that exists once, such as the record of the full run of a checkout.
 // A lock is a file that names its holder: the checkout, the process ID and the start time. The file is written
 // completely under a name of its own and then linked to the lock path, which fails when the lock exists, so the
 // lock appears atomically with its whole content. One process holds a lock at a time; another process fails with
