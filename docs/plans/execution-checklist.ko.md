@@ -342,7 +342,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 ## Wave 17 — test 실행
 
-의존성: 없음. 각 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 전체 suite는 활성 작업이 모두 끝났을 때 한 번 실행한다. AGENTS는 모든 작업을 완료로 표시하기 전에 `make check`를 요구했고, `AGENTS.ko.md`에는 "결정과 수용 규칙" 절이 없었다. `test-go`는 package마다 120 s로 제한했고, `test-rust`와 `test-php`는 test에 timeout을 주지 않았으며 test가 도는 동안 아무것도 출력하지 않았다. conformance runner는 마지막 case가 끝난 뒤에야 표를 출력했다. 네 generated conformance runner는 모든 case를 `go test`나 `cargo test` 호출 하나에서 600 s 제한 하나로 실행하거나, 제한 없이 자기 process에서 실행했고, 마지막 개수만 출력했다. VS Code integration runner는 VS Code 실행, profile 설치, check를 각각 제한 없이 기다렸다. 작업은 branch `fix/test-runs-T17.1`과 worktree `template-test-runs-T17`에서 진행한다.
+의존성: 없음. 각 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 전체 suite는 활성 작업이 모두 끝났을 때 한 번 실행한다. AGENTS는 모든 작업을 완료로 표시하기 전에 `make check`를 요구했고, `AGENTS.ko.md`에는 "결정과 수용 규칙" 절이 없었다. `test-go`는 package마다 120 s로 제한했고, `test-rust`와 `test-php`는 test에 timeout을 주지 않았으며 test가 도는 동안 아무것도 출력하지 않았다. conformance runner는 마지막 case가 끝난 뒤에야 표를 출력했다. 네 generated conformance runner는 모든 case를 `go test`나 `cargo test` 호출 하나에서 600 s 제한 하나로 실행하거나, 제한 없이 자기 process에서 실행했고, 마지막 개수만 출력했다. VS Code integration runner는 VS Code 실행, profile 설치, check를 각각 제한 없이 기다렸다. 작업은 branch `fix/test-runs-T17.1`과 worktree `template-test-runs-T17`에서 진행한다. 오래 걸리는 작업(build, `tsc`, 설치, VS Code download·설치·실행, 실행 전체)은 단계 log를 출력하고 timeout을 두지 않는다. 시간 제한은 예상보다 느린 정상 실행을 실패시키기 때문이다. T17.4와 T17.5는 `tsc`, profile 설치, 실행에 deadline을 주었고, driver build와 package 설치 검사에도 시간 제한이 있었다. `tests/runner/delimiter-matrix.mjs`는 마지막 case 뒤에 한 줄만 출력했고, `test-ts`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode`의 unit test는 `scripts/run-tests.mjs`로 실행하지 않았다. T17.6부터 T17.10은 branch `test/no-deadline-T17.6`과 worktree `template-no-deadline-T17.6`에서 진행한다.
 
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
@@ -350,8 +350,15 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | T17.2 | node, vitest, go, cargo, phpunit용 test runner `scripts/run-tests.mjs`와 `scripts/test-progress/`를 더한다. runner는 각 test를 경과 시간과 함께 출력하고 test를 자기 timeout에서 멈추며, 그 test는 `tests/scripts/run-tests.test.mjs`에 둔다. `test-go`, `test-rust`, `test-php`를 runner로 실행하고, `test-go`의 package 120 s 제한을 없애고, PHPUnit 시간 제한을 강제한다 | `node scripts/run-tests.mjs node -- tests/scripts/run-tests.test.mjs` | [o] |
 | T17.3 | `tests/runner/conformance.mjs`가 한 언어에서 case가 끝날 때마다 `<case> [<lang>] pass\|fail (<ms>)`을 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/conformance-progress.test.mjs` | [o] |
 | T17.4 | 네 generated conformance runner의 모든 case에 자기 deadline과 경과 시간이 붙은 결과 줄을 준다. Go와 Rust는 `scripts/run-tests.mjs`로 실행하고 Rust test 이름은 case id로 짓는다. PHP는 `php -l`과 case process에 timeout을 둔다. TypeScript는 `tsc`에 deadline과 단계 줄을 두고 각 render를 timeout이 있는 worker에서 실행한다. 600 s 제한을 없앤다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/generated-conformance.test.mjs` | [o] |
+| T17.4-1 | `tests/runner/conformance-generated-ts.mjs`의 `tsc` 단계 deadline 300 s를 없앤다. 시작 줄, 실행 중 줄, 경과 시간이 붙은 결과 줄은 유지하고, `tsc`의 exit code로 판단하며, 각 render의 30 s deadline은 유지한다 | `node scripts/run-tests.mjs node --timeout 300 -- tests/scripts/generated-conformance.test.mjs` | [ ] |
 | T17.5 | `packages/template-vscode/tests/integration/run.mjs`의 모든 VS Code 실행과 profile 설치에 넘으면 process를 kill하는 deadline을 두고, `suite/index.cjs`의 모든 check에 `Promise.race`로 timeout을 걸고 `ok`와 `not ok` 줄에 경과 시간을 붙인다 | `npm run test:integration -w polyspec-template` | [o] |
-| T17.5-1 | VS Code 실행을 suite 결과로 끝낸다. VS Code 1.138은 suite가 결과를 출력한 뒤 종료하는 데 300 s를 넘기기도 했으므로 `make check`가 실행 deadline에서 실패했다. suite 줄 `[suite] N of M checks passed`가 나오면 VS Code는 20 s 안에 종료해야 하고, 그 뒤 process group을 kill하고 실행은 suite 결과를 따른다 | `npm run test:integration -w polyspec-template` | [o] |
+| T17.5-1 | VS Code 실행을 suite 결과로 끝낸다. VS Code 1.138은 suite가 결과를 출력한 뒤 종료하는 데 300 s를 넘기기도 했으므로 `make check`가 실행 deadline에서 실패했다. suite 줄 `[suite] N of M checks passed`가 나오면 VS Code는 20 s 안에 종료해야 하고, 그 뒤 process group을 kill하고 실행은 suite 결과를 따른다. 20 s는 suite 결과가 출력된 뒤에 시작하므로 VS Code를 끝내는 정리이며 실행의 통과 여부를 정하지 않는다 | `npm run test:integration -w polyspec-template` | [o] |
+| T17.5-2 | `packages/template-vscode/tests/integration/run.mjs`의 profile 설치 deadline(120 s)과 VS Code 실행 deadline(300 s)을 없앤다. download, 각 설치, 각 실행의 시작, 단계가 도는 동안 10 s마다 한 줄, 결과를 경과 시간과 함께 출력하고, 각 단계를 exit code와 suite 결과로 판단한다. check timeout 20 s와 suite 결과 뒤 종료 유예 20 s는 유지한다 | `node scripts/run-tests.mjs node --cwd packages/template-vscode -- tests/integration-step.test.mjs` | [ ] |
+| T17.6 | 오래 걸리는 작업은 단계 log를 출력하고 timeout을 두지 않으며 출력이 없는 시간의 deadline도 두지 않고 exit status, 결과, 오류로 판단하며, test case는 자기 timeout을 유지한다고 AGENTS에 적는다. `AGENTS.ko.md`처럼 `AGENTS.md`에도 영어 문서가 정본이라고 적는다 | `make docs-check` | [o] |
+| T17.7 | `tests/runner/drivers.mjs`의 driver build를 600 s 제한 없이 log가 있는 단계로 실행한다. 시작, 출력, 결과를 경과 시간과 함께 standard error에 출력하고 exit code로 판단한다. CLI 호출마다의 10 s timeout은 유지한다 | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [ ] |
+| T17.8 | `scripts/check-package-installs.mjs`(600 s)와 `scripts/check-install-workspace.mjs`(120 s)의 각 명령을 시간 제한 없이 log가 있는 단계로 실행하고 exit code로 판단한다 | `node scripts/run-tests.mjs node -- tests/scripts/long-steps.test.mjs` | [ ] |
+| T17.9 | `tests/runner/delimiter-matrix.mjs`가 한 언어에서 구분자 쌍이 끝날 때마다 `<pair> [<lang>] pass\|fail (<ms> ms)`를 출력하게 하고, 요약은 끝에 그대로 둔다 | `node scripts/run-tests.mjs node -- tests/scripts/delimiter-matrix-progress.test.mjs` | [ ] |
+| T17.10 | `test-ts`, `test-language`, `test-lsp`, `test-codemirror`의 vitest test와 `test-vscode`의 `node --test` test를 `scripts/run-tests.mjs`로 실행한다 | `node scripts/run-tests.mjs node -- tests/scripts/test-targets.test.mjs` | [ ] |
 
 ## 병렬성 요약
 
@@ -372,7 +379,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W14 | 없음 | T14.1 → T14.2 |
 | W15 | T15.1, T15.2, T15.3, T15.4 | 없음 |
 | W16 | 없음 | T16.1 |
-| W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} |
+| W17 | 없음 | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10} |
 
 ## 완료 정의
 

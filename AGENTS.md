@@ -2,7 +2,7 @@
 
 ## Documents
 
-- Every document has a `.ko.md` file with the same information. Edit both in the same change.
+- English documents are canonical. Every document has a `.ko.md` file with the same information. Edit both in the same change.
 - One authoritative document per topic. Contracts are in `docs/spec/`. Implementation, verification and deployment status are in `docs/features.md`. Current procedures are in `docs/operations/`. Actual changes and their verification results are in `CHANGELOG.md`. Proposals awaiting approval are in `docs/plans/`; after approval, move the content into the specification and remove the proposal.
 - Documents describe current behavior. When the direction changes, change the specification first and mark parts that are not implemented.
 - A behavior change, its documents, its feature status row and its changelog entry are one change.
@@ -48,6 +48,7 @@
 - Before marking a task `[o]` in `docs/plans/execution-checklist.md`, run the owning command of the task, the command in its Verification column, on the committed tree.
 - Run `make check` once, when every active task is done. Do not run it for each fix or each task, and do not repeat it without a change.
 - Every test prints its start, its result and its elapsed time while the run goes on, and has its own timeout. Do not put a time limit on a whole run, a package or a file. A test that runs for tens of minutes, or that prints only a start and an end, is a defect.
+- A long-running operation, such as a build, a type check with `tsc`, an installation, a download, the installation or launch of a program, or a whole run, prints a log line for each step and has no timeout, including no deadline for missing output. Its success or failure is judged from its exit status, its result and its errors, because a time limit fails a normal run that is slower than expected. A test case is a short verification unit and keeps its own timeout.
 
 ## Checklist
 

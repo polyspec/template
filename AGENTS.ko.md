@@ -48,6 +48,7 @@
 - `docs/plans/execution-checklist.md`에서 작업을 `[o]`로 표시하기 전에 그 작업의 소유 명령, 즉 Verification 열의 명령을 커밋된 tree에서 실행한다.
 - `make check`는 활성 작업이 모두 끝났을 때 한 번 실행한다. 수정마다, 작업마다 실행하지 않고, 변경 없이 반복하지 않는다.
 - 모든 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 실행 전체, package, 파일에 시간 제한을 두지 않는다. 수십 분 걸리는 test와 시작과 끝만 출력하는 test는 결함이다.
+- build, `tsc` type check, 설치, download, program 설치나 실행, 실행 전체 같은 오래 걸리는 작업은 단계마다 log 줄을 출력하고 timeout을 두지 않으며, 출력이 없는 시간의 deadline도 두지 않는다. 성공과 실패는 exit status, 결과, 오류로 판단한다. 시간 제한은 예상보다 느린 정상 실행을 실패시키기 때문이다. test case는 짧은 검증 단위이므로 자기 timeout을 유지한다.
 
 ## Checklist
 
