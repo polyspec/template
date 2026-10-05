@@ -16,31 +16,31 @@ go get github.com/polyspec/template
 package main
 
 import (
-	"fmt"
-	"os"
+  "fmt"
+  "os"
 
-	template "github.com/polyspec/template"
-	"github.com/polyspec/template/functions"
+  template "github.com/polyspec/template"
+  "github.com/polyspec/template/functions"
 )
 
 func main() {
-	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS("templates"))})
-	if err != nil {
-		panic(err)
-	}
-	_ = program.Register("greet", func(args []template.Value, _ functions.Context) (any, error) {
-		return "Hello, " + args[0].(string), nil
-	})
-	engine := template.NewEngine(program)
-	assign := map[string]any{"title": "Home"}
+  program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS("templates"))})
+  if err != nil {
+    panic(err)
+  }
+  _ = program.Register("greet", func(args []template.Value, _ functions.Context) (any, error) {
+    return "Hello, " + args[0].(string), nil
+  })
+  engine := template.NewEngine(program)
+  assign := map[string]any{"title": "Home"}
 html, err := engine.Render("layout", assign, template.RenderOptions{
-	Define: map[string]template.DefineInput{"layout": {Template: "layout.tpl"}, "content": {Template: "pages/home.tpl"}},
-		Env:    &template.Env{Timezone: "+09:00", Now: 1789084800},
-	})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Print(html)
+  Define: map[string]template.DefineInput{"layout": {Template: "layout.tpl"}, "content": {Template: "pages/home.tpl"}},
+    Env:    &template.Env{Timezone: "+09:00", Now: 1789084800},
+  })
+  if err != nil {
+    panic(err)
+  }
+  fmt.Print(html)
 }
 ```
 
