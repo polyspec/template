@@ -70,7 +70,7 @@ export const drivers = {
   php: {
     dir: join(packages, 'template-php'),
     build() {
-      build('php', 'composer', ['install', '--no-interaction', '--quiet'], join(packages, 'template-php'));
+      build('php', process.execPath, [join(root, 'scripts/composer-install.mjs'), join(packages, 'template-php')], root);
     },
     command(args) {
       return ['php', [join(packages, 'template-php', 'bin', 'template.php'), ...args]];

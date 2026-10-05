@@ -148,9 +148,9 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   const locks = spawnSync('git', ['ls-files', '*Cargo.lock'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.ok(locks.length > 0, 'git ls-files listed no Cargo.lock');
   // Only the commands that download leave the offline settings of the recipes (T20.1-2).
-  const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline';
+  const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const fetches = locks.map(lock => `${online} ${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', ...fetches]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
@@ -159,9 +159,9 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   }
 });
 
-test('every recipe runs cargo, go and npm offline, so no check reaches a registry', () => {
-  const offline = { CARGO_NET_OFFLINE: 'false', GOPROXY: 'https://proxy.golang.org', npm_config_offline: 'false' };
-  assert.equal(recipe('echo "$CARGO_NET_OFFLINE $GOPROXY $npm_config_offline"', offline), 'true off true', 'a recipe of the Makefile lets cargo, go or npm reach a registry');
+test('every recipe runs cargo, go, npm and Composer offline, so no check reaches a registry', () => {
+  const offline = { CARGO_NET_OFFLINE: 'false', GOPROXY: 'https://proxy.golang.org', npm_config_offline: 'false', COMPOSER_DISABLE_NETWORK: '0' };
+  assert.equal(recipe('echo "$CARGO_NET_OFFLINE $GOPROXY $npm_config_offline $COMPOSER_DISABLE_NETWORK"', offline), 'true off true 1', 'a recipe of the Makefile lets cargo, go, npm or Composer reach a registry');
   const npm = recipe('$(NPM) config get offline', offline);
   assert.equal(npm, 'true', `npm of the recipes: expected offline true, actual ${npm}`);
   const go = recipe('go env GOPROXY', offline);

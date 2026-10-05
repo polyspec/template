@@ -22,13 +22,14 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 # the target of another checkout, would let cargo judge binaries built from other sources fresh for this one (T18.7).
 unexport CARGO_TARGET_DIR
 # A check reads no network (AGENTS): make install downloads what the checks read, and every recipe and the scripts that
-# it starts run cargo, go and npm offline, so a missing download fails at once instead of reaching a registry in one run
+# it starts run cargo, go, npm and Composer offline, so a missing download fails at once instead of reaching a registry in one run
 # and not in another (T20.1-2). The targets that download, install, install-tools and dependency-review, run their
 # commands with $(ONLINE).
 export CARGO_NET_OFFLINE := true
 export GOPROXY := off
 export npm_config_offline := true
-ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline
+export COMPOSER_DISABLE_NETWORK := 1
+ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK
 
 .DEFAULT_GOAL := help
 # make keeps going after a failed target and fails at the end, so one run reports every failure (T19.8). A target that
@@ -168,9 +169,11 @@ lint-js: ## Lint the TypeScript sources with eslint
 # make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
-install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml and the crates of every Cargo.lock
+install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages and the crates of every Cargo.lock
 	$(ONLINE) $(NPM) ci
 	rustup toolchain install --no-self-update
+	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
+	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(EXT_DIR)/Cargo.toml
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
@@ -188,7 +191,7 @@ build-rust: ## Build the Rust CLI
 	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && node scripts/publish-build.mjs $(RUST_DIR)/target/release/template var/build/template-rust
 
 build-php: ## Install PHP dependencies
-	cd $(PHP_DIR) && composer install --no-interaction --quiet
+	node scripts/composer-install.mjs $(PHP_DIR)
 
 test-ts: test-ts-unit test-ts-types test-ts-types-node ## TypeScript unit tests and type check
 
@@ -342,7 +345,7 @@ test-ext: test-ext-clippy test-ext-conformance test-ext-unit ## Test the PHP ext
 
 .PHONY: build-ext-php test-ext-clippy test-ext-conformance test-ext-unit
 build-ext-php:
-	cd $(EXT_DIR) && composer install --no-interaction --quiet
+	node scripts/composer-install.mjs $(EXT_DIR)
 test-ext-clippy:
 	$(CARGO) clippy --locked --release --manifest-path $(EXT_DIR)/Cargo.toml -- -D warnings
 test-ext-conformance: ext
