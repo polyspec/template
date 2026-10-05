@@ -1,7 +1,5 @@
 # 실행 체크리스트
 
-[English](/plans/execution-checklist).
-
 ## Wave 0 — 저장소 기반 (순차)
 
 | ID | 작업 | 산출물 | 검증 | 완료 |
@@ -219,6 +217,7 @@
 | --- | --- | --- | --- |
 | T13.1 | `scripts/check-documents.mjs`가 네 가지 작업 상태만 받고, 일시 우회 작업은 원인과 재시도 조건을 담게 한다. 글자 x로 표시한 행에서 실패하는지 확인한다. 모든 완료 작업을 AGENTS의 완료 상태로 쓴다. AGENTS에 checklist 규칙을 적는다 | `make docs-check` | [o] |
 | T13.1-1 | checklist가 작업만 담고 표시는 작업 상태로만 쓰게 한다: `scripts/check-documents.mjs`는 `docs/plans/execution-checklist.md`의 제목, 번역 link, heading, 작업 표 행이 아닌 줄과, 작업 행 마지막 칸의 시작이 아닌 곳에 있는 AGENTS의 상태 표시나 task list 표시(대괄호 안의 글자 x 또는 X)에서 예외 없이 file, 줄, 열을 적으며 실패한다. `T14.2-1` 같은 하위 항목도 작업 행으로 읽는다. checklist의 본문(소개, 의존 관계 개요, 웨이브마다 의존 관계·원인·완료 기준, 병렬 요약, 완료 정의와 그 증거)은 두 언어 모두 `docs/plans/execution-plan.md`로 옮긴다. 규칙(작업 ID 형식, 작업 행의 내용)은 상태를 정하는 AGENTS로 옮기고 범례를 지운다. W13, T13.1, T17.1, T17.1-1의 text는 상태를 말로 적는다. Cause: checklist의 범례와 text 넷이 언어마다 상태 표시 14개와 task list 표시 2개를 적었고, 표시를 세는 도구가 존재하지 않는 진행 중 작업을 보고했다. 언어마다 93줄이 작업이 아니었다. 검사기는 ID에 하위 부분이 없는 행의 마지막 칸만 검사했으므로 표시가 어디에 있는지도, 하위 항목 9개의 상태도 검사하지 않았다. Red: `tests/scripts/check-documents.test.mjs`에서 범례, 본문, 작업 text, inline code, 일시 우회 작업의 원인에 표시가 있는 fixture checklist, heading 아래 문단이 있는 fixture, 상태가 `done`인 하위 항목이 모두 `7 document pairs passed`로 검사기를 통과했다(5개 case 중 3개가 `0 !== 1`로 실패). Green: 5개 case가 통과한다. 첫 fixture는 표시 위치 16개(`docs/plans/execution-checklist.md:10:27` 등)와 줄 위치 4개로 실패하고, 문단은 7번째 줄에서 실패하며, 하위 항목은 `invalid task state for T1.2-1: done`으로 실패하고, 제목, link, heading, 작업 표로 된 checklist는 통과하며, 검사기는 이 저장소를 통과시킨다 | `node scripts/run-tests.mjs node -- tests/scripts/check-documents.test.mjs` | [o] |
+| T13.1-2 | checklist의 번역 link 줄에서 `scripts/check-documents.mjs`가 실패하게 해 checklist가 heading과 작업 표만 담게 하고, 두 언어에서 그 줄을 지운다. Cause: AGENTS는 모든 문서에 `.ko.md` file이 있다고 적지만, T13.1-1은 checklist 셋째 줄의 link를 번역 link로 받았다. Red: 셋째 줄에 `[한국어](/ko/plans/execution-checklist).`가 있는 checklist를 검사기가 통과시켰으므로 `tests/scripts/check-documents.test.mjs`의 새 case `a translation link line fails with its location`이 `0 !== 1`로 실패했다. 바꾼 검사기는 그 줄을 지우기 전에 `docs/plans/execution-checklist.md:3:1`과 한국어 file의 같은 곳을 보고했다. Green: 6개 case가 통과하고, 검사기는 이 저장소를 통과시킨다 | `node scripts/run-tests.mjs node -- tests/scripts/check-documents.test.mjs` | [o] |
 
 ## Wave 14 — Data binding 비용
 

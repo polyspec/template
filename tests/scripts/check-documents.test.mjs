@@ -1,5 +1,5 @@
-// Tests the checklist rules of scripts/check-documents.mjs (T13.1-1): the checklist holds only its title, the
-// translation link, headings and task tables; a state marker of AGENTS, or a task list marker `[x]` or `[X]`, stands
+// Tests the checklist rules of scripts/check-documents.mjs (T13.1-1): the checklist holds only headings, its title
+// included, and task tables; a state marker of AGENTS, or a task list marker `[x]` or `[X]`, stands
 // only at the start of the last cell of a task row, derived sub-items included; every other line and marker fails with
 // its file, line and column. Each case runs a copy of the checker in a temporary repository that holds the documents
 // the checker requires; the last case runs the checker on this repository.
@@ -39,11 +39,9 @@ Dependencies: none. A task row that is [o] is done, and a task list writes [x] o
 | T1.4 | Mark a task list item \`[x]\` | \`make test-ts\` | [ ] |
 `;
 
-// A checklist of only a title, the translation link, a heading and a task table, with every state written in words
+// A checklist of only a title, a heading and a task table, with every state written in words
 // outside the state cells.
 const CLEAN = `# Execution checklist
-
-[한국어](/ko/plans/execution-checklist).
 
 ## Wave 1 — Parser
 
@@ -85,18 +83,18 @@ test('a marker outside a task state fails with its file, line and column', (t) =
   assert.equal(run.stderr.match(/is not the state of a task/g).length, 16, run.stderr);
 });
 
-test('a line that is not a heading, a task table row or the translation link fails with its location', (t) => {
+test('a line that is not a heading or a task table row fails with its location', (t) => {
   const run = check(t, STRAY);
   assert.equal(run.status, 1, run.stdout + run.stderr);
   for (const file of FILES) {
     for (const line of [3, 5]) {
-      assert.ok(run.stderr.includes(`[docs] ${file}:${line}:1: the line is not a heading, a task table row or the translation link;`), run.stderr);
+      assert.ok(run.stderr.includes(`[docs] ${file}:${line}:1: the line is not a heading or a task table row;`), run.stderr);
     }
   }
   assert.equal(run.stderr.match(/the line is not a heading/g).length, 4, run.stderr);
   const paragraph = check(t, CLEAN.replace('## Wave 1 — Parser\n', '## Wave 1 — Parser\n\nDependencies: none.\n'));
   assert.equal(paragraph.status, 1, paragraph.stdout + paragraph.stderr);
-  assert.match(paragraph.stderr, /\[docs\] docs\/plans\/execution-checklist\.md:7:1: the line is not a heading/);
+  assert.match(paragraph.stderr, /\[docs\] docs\/plans\/execution-checklist\.md:5:1: the line is not a heading/);
 });
 
 test('a checklist of headings and task rows whose markers are task states passes, derived sub-items included', (t) => {
@@ -113,4 +111,12 @@ test('a derived sub-item with an invalid state fails', (t) => {
 test('the documents of this repository pass', () => {
   const run = spawnSync(process.execPath, [CHECKER], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stdout + run.stderr);
+});
+
+test('a translation link line fails with its location', (t) => {
+  const run = check(t, CLEAN.replace('# Execution checklist\n\n', '# Execution checklist\n\n[한국어](/ko/plans/execution-checklist).\n\n'));
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  for (const file of FILES) {
+    assert.ok(run.stderr.includes(`[docs] ${file}:3:1: the line is not a heading or a task table row;`), run.stderr);
+  }
 });

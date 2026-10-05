@@ -80,7 +80,7 @@ if (JSON.stringify(statuses('docs/features.md')) !== JSON.stringify(statuses('do
   errors.push('docs/features.md: English and Korean status fields differ');
 }
 
-// The checklist of AGENTS holds only tasks: its title, the translation link under it, headings and task tables, whose
+// The checklist of AGENTS holds only tasks: headings, its title included, and task tables, whose
 // header row starts with `| ID |`, followed by the separator row and the task rows. Its plan, causes, exit criteria and
 // evidence are in docs/plans/execution-plan.md. A task row starts with its ID, derived sub-items (T12.1-1) included;
 // its state, the last cell, must be valid and match between the two languages. A state marker of AGENTS, or a task
@@ -107,10 +107,10 @@ function checkboxes(path) {
       const cell = line.lastIndexOf('|', line.trimEnd().length - 2) + 1;
       state = cell + line.slice(cell).search(/\S/);
     } else {
-      const item = line === '' || /^#{1,6} \S/.test(line) || (index === 2 && /^\[[^\]]+\]\([^)]+\)\.$/.test(line)) ||
+      const item = line === '' || /^#{1,6} \S/.test(line) ||
         TABLE_HEADER.test(line) || (TABLE_SEPARATOR.test(line) && TABLE_HEADER.test(lines[index - 1] ?? ''));
       if (!item) {
-        errors.push(`${path}:${index + 1}:1: the line is not a heading, a task table row or the translation link; a checklist holds only tasks, and its plan belongs in docs/plans/execution-plan.md`);
+        errors.push(`${path}:${index + 1}:1: the line is not a heading or a task table row; a checklist holds only tasks, and its plan belongs in docs/plans/execution-plan.md`);
       }
     }
     for (const marker of line.matchAll(STATE_MARKER)) {
