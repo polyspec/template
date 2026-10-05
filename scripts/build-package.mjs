@@ -17,13 +17,19 @@
 // write the same files, so a rebuild of unchanged inputs gives a reader the same contents.
 //
 // With --install, the npm copy of the package in node_modules is installed again when its files differ from the
-// package, as the build targets of the Makefile need it.
+// package, as the build targets of the Makefile need it. Other processes read that copy while it is installed, for
+// example the other test files of one `node --test` run, so the install publishes like the build (T18.8-2): each file
+// that differs is written into `<copy>.next-<pid>` next to the copy and moves into the copy with rename(2), the
+// modules that a file imports first, then the files that the package no longer has are removed. A reader of the copy
+// finds the previous or the new file, never none. npm installed the copy as a copy of the package files (.npmrc
+// install-links); a change of the dependencies of the package is a change of package-lock.json, which `npm install`
+// installs, and the install fails with that fix instead of changing the dependency tree.
 //
 // Usage: node scripts/build-package.mjs --package <template-ts|template-language|template-lsp|template-codemirror|
 //        template-vscode> [--dist <directory>] [--force] [--install] [--print-inputs]
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -158,29 +164,58 @@ function build(hash) {
   console.log(`build-package: published ${names.length} files into ${dist}${stale.length ? `; removed ${stale.length} files of the previous build: ${stale.join(' ')}` : ''}`);
 }
 
-// The files of the package that npm installs: package.json and the paths of `files`.
+// The files of the package that npm installs: package.json, the README and LICENSE files that npm always packs, and
+// the paths of `files`.
 function packedFiles() {
   const listed = manifest.files ?? [];
-  return ['package.json', ...listed.flatMap(entry => {
+  const always = readdirSync(pkg).filter(name => /^(README|LICENSE|LICENCE)(\..*)?$/i.test(name) && statSync(join(pkg, name)).isFile());
+  return ['package.json', ...always, ...listed.flatMap(entry => {
     const path = join(pkg, entry);
     if (!existsSync(path)) return [];
     return statSync(path).isDirectory() ? files(path).map(file => relative(pkg, file)) : [entry];
   })];
 }
 
-// Installs the npm copy of the package again when a file of it differs from the package.
+// The dependency fields of a manifest, which npm resolves into package-lock.json.
+const dependencyFields = data => JSON.stringify(['dependencies', 'optionalDependencies', 'peerDependencies'].map(field => data[field] ?? {}));
+
+// Installs the npm copy of the package again, file by file, when a file of it differs from the package.
 function install() {
   const copy = join(root, 'node_modules', manifest.name);
+  const where = relative(root, copy);
+  if (!existsSync(join(copy, 'package.json'))) throw new Error(`${where} is not installed; run npm ci`);
+  const installed = JSON.parse(readFileSync(join(copy, 'package.json'), 'utf8'));
+  if (dependencyFields(installed) !== dependencyFields(manifest)) {
+    throw new Error(`${where}: the dependencies of ${manifest.name} differ from its installed copy; run npm install, which updates package-lock.json and the copy`);
+  }
   const packed = packedFiles();
-  const differs = packed.some(file => !existsSync(join(copy, file)) || !readFileSync(join(copy, file)).equals(readFileSync(join(pkg, file))))
-    || (existsSync(join(copy, 'dist')) && files(join(copy, 'dist')).some(file => !packed.includes(relative(copy, file))));
-  if (!differs) {
-    console.log(`build-package: ${relative(root, copy)} holds the files of the package; no install`);
+  const changed = packed.filter(file => !existsSync(join(copy, file)) || !readFileSync(join(copy, file)).equals(readFileSync(join(pkg, file))));
+  const listed = (manifest.files ?? []).filter(entry => existsSync(join(copy, entry)) && statSync(join(copy, entry)).isDirectory());
+  const stale = listed.flatMap(entry => files(join(copy, entry)).map(file => relative(copy, file))).filter(file => !packed.includes(file)).sort();
+  if (changed.length === 0 && stale.length === 0) {
+    console.log(`build-package: ${where} holds the files of the package; no install`);
     return;
   }
-  console.log(`build-package: installing ${relative(root, copy)} again`);
-  rmSync(copy, { recursive: true, force: true });
-  run('npm', ['install', '--no-audit', '--no-fund'], { cwd: root });
+  console.log(`build-package: installing ${where} again: ${changed.length} changed files, ${stale.length} files that the package does not have`);
+  const next = `${copy}.next-${process.pid}`;
+  rmSync(next, { recursive: true, force: true });
+  for (const file of changed) {
+    mkdirSync(dirname(join(next, file)), { recursive: true });
+    copyFileSync(join(pkg, file), join(next, file));
+  }
+  // The files of each directory in the order of publication; package.json, which names the entries, last.
+  const directories = [...new Set(changed.map(file => dirname(file)))].sort();
+  const order = directories.flatMap(directory => {
+    const names = changed.filter(file => dirname(file) === directory).map(file => file.slice(directory === '.' ? 0 : directory.length + 1));
+    return publicationOrder(join(next, directory), names).map(name => (directory === '.' ? name : join(directory, name)));
+  });
+  for (const file of [...order.filter(file => file !== 'package.json'), ...order.filter(file => file === 'package.json')]) {
+    mkdirSync(dirname(join(copy, file)), { recursive: true });
+    renameSync(join(next, file), join(copy, file));
+  }
+  for (const file of stale) unlinkSync(join(copy, file));
+  rmSync(next, { recursive: true, force: true });
+  console.log(`build-package: installed ${changed.length} files into ${where}${stale.length ? `; removed ${stale.join(' ')}` : ''}`);
 }
 
 const list = inputFiles();
