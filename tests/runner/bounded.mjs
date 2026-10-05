@@ -4,6 +4,7 @@
 // does not end fails by its name instead of stopping the run.
 import { spawn } from 'node:child_process';
 import { Worker } from 'node:worker_threads';
+import { stopProcessGroup } from '../../scripts/process-group.mjs';
 import { createProgress } from '../../scripts/test-progress/progress.mjs';
 
 /** Progress lines on standard output: start, a line every 5 s while running, result with elapsed time. */
@@ -29,7 +30,8 @@ export function runBounded(command, args, { cwd, env, timeoutMs, stdio = 'pipe' 
   return run(command, args, { cwd, env, stdio, timeoutMs });
 }
 
-// Runs a command in its own process group; without `timeoutMs` it has no time limit.
+// Runs a command in its own process group; without `timeoutMs` it has no time limit. It resolves after no process of
+// the group is left, also a background process that the command started and left running (T19.13).
 function run(command, args, { cwd, env, timeoutMs, stdio }) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { cwd, env, detached: true, stdio: ['ignore', stdio, stdio] });
@@ -43,7 +45,10 @@ function run(command, args, { cwd, env, timeoutMs, stdio }) {
       try { process.kill(-child.pid, 'SIGKILL'); } catch { /* the group has ended */ }
     }, timeoutMs);
     child.on('error', error => { clearTimeout(timer); reject(error); });
-    child.on('close', status => { clearTimeout(timer); resolve({ status, stdout, stderr, timedOut }); });
+    child.on('close', (status) => {
+      clearTimeout(timer);
+      stopProcessGroup(child).then(() => resolve({ status, stdout, stderr, timedOut }), reject);
+    });
   });
 }
 

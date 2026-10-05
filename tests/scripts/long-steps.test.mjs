@@ -9,7 +9,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { stopProcessGroup } from './process-group.mjs';
+import { stopProcessGroup } from '../../scripts/process-group.mjs';
 import { slowCommandPath } from './slow-command.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
