@@ -121,6 +121,31 @@ test('a target that runs the guard of the full suite or the clean release check 
   assert.match(run.stderr, /the target release-check runs the full suite/);
 });
 
+test('a declared input of a target fails the validation when no owner rule selects that target for it', (t) => {
+  // T19.9: `inputs` declares the paths that a target reads; a rule must select the target, or a target that runs it as a
+  // prerequisite, for each of them, else a change of the path runs no check that reads it.
+  const makefile = `${MAKEFILE}aggregate: unit\n`;
+  const owners = { ...OWNERS, inputs: { unit: ['src/**', 'docs/**'], 'docs-check': ['docs/**'], missing: ['src/**'], aggregate: ['nothing/**'] } };
+  const check = repository(t, owners, FILES);
+  writeFileSync(path.join(check.directory, 'Makefile'), makefile);
+  const run = check('--validate');
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.match(run.stderr, /^\[owner-check\] docs\/index\.md: an input of the target unit, which no owner rule of the path selects$/m);
+  assert.match(run.stderr, /^\[owner-check\] scripts\/owner-checks\.json: the inputs of missing name a target that is not a target of the Makefile$/m);
+  assert.match(run.stderr, /^\[owner-check\] scripts\/owner-checks\.json: the input glob nothing\/\*\* of aggregate matches no tracked path$/m);
+  assert.doesNotMatch(run.stderr, /src\/main\.txt: an input of the target unit/);
+  assert.doesNotMatch(run.stderr, /an input of the target docs-check/);
+});
+
+test('a rule that selects a target which runs another target as a prerequisite selects the inputs of that target', (t) => {
+  const makefile = `${MAKEFILE}aggregate: unit\n`;
+  const owners = { owners: [...OWNERS.owners.filter(rule => !rule.paths.includes('src/**')), { paths: ['src/**', 'Makefile', 'scripts/**'], targets: ['aggregate'] }], inputs: { unit: ['src/**'] } };
+  const check = repository(t, owners, FILES);
+  writeFileSync(path.join(check.directory, 'Makefile'), makefile);
+  const run = check('--validate');
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+});
+
 test('a rule with a variable passes its changed paths to its target', (t) => {
   const run = repository(t, OWNERS, FILES)('--paths', 'tests/cases/text/plain/input.tpl tests/cases/text/other/input.tpl');
   assert.equal(run.status, 0, run.stdout + run.stderr);
