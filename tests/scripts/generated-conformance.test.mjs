@@ -33,7 +33,7 @@ test('the tsc step has no deadline and is judged by the exit code of tsc', COMPI
   const directory = mkdtempSync(path.join(tmpdir(), 'template-slow-tsc-'));
   try {
     const stdout = generated('ts', { ...process.env, PATH: slowCommandPath(directory, 'npx', 1.5) });
-    assert.match(stdout, /▶ tsc \(1 files\)\n[^]*✔ tsc \(1 files\) \((?:[2-9]|\d\d+)\.\ds\)\n/);
+    assert.match(stdout, /▶ tsc \(1 files\)\n[^]*✔ tsc \(1 files\) \((?:1\.[5-9]|[2-9]\.\d|\d{2,}\.\d)s\)\n/);
     assert.match(stdout, /1\/1 TypeScript generated conformance cases passed/);
   } finally {
     rmSync(directory, { recursive: true, force: true });
