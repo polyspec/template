@@ -592,8 +592,7 @@
         "tests/cases"
       ],
       "tests": [
-        "packages/template-php-ext/tests",
-        "packages/template-php-ext/run-tests.sh"
+        "packages/template-php-ext/tests"
       ],
       "verification": [
         {

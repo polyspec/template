@@ -73,4 +73,4 @@ composer install
 make test-ext
 ```
 
-`make test-ext`는 명령줄 인터페이스로 적합성 케이스를 실행한 뒤 `run-tests.sh`를 실행한다. `run-tests.sh`는 빌드된 라이브러리를 로드하고 `tests/`의 스위트를 실행한다. 단위 테스트의 템플릿은 `tests/templates`에 있다.
+`make test-ext`는 명령줄 인터페이스로 적합성 케이스를 실행하고, `tests/`의 스위트를 `scripts/run-tests.mjs phpunit --php-extension`으로 PHPUnit에서 실행한다. 이것은 빌드된 라이브러리를 로드하고 각 test를 경과 시간과 함께 출력한다. 단위 테스트의 템플릿은 `tests/templates`에 있다.

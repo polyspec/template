@@ -1,6 +1,8 @@
 // Fixture case enumeration and comparison helpers shared by the runners.
+import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import readline from 'node:readline';
 import { root } from './drivers.mjs';
 
 export const casesDir = join(root, 'tests', 'cases');
@@ -150,3 +152,31 @@ export function describeText(expected, actual) {
   const line = expected.slice(0, index).split('\n').length;
   return `first difference at byte ${index} (line ${line}): expected ${JSON.stringify(expected.slice(index, index + 40))}, got ${JSON.stringify(actual.slice(index, index + 40))}`;
 }
+
+/**
+ * Runs `node scripts/run-tests.mjs <args>` on the generated tests of the cases, prints its output as it arrives and
+ * resolves its exit status, the ids of the cases whose test failed and its last line (T19.10). A case is found in a
+ * failure line (`✖`) by the name of its test or package, `case_<name>`, which `names` maps to the case id.
+ */
+export function runCaseTests(args, { cwd, env }, names) {
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(process.execPath, [join(root, 'scripts/run-tests.mjs'), ...args], { cwd, env, stdio: ['ignore', 'pipe', 'inherit'] });
+    const failed = new Set();
+    let last = '';
+    readline.createInterface({ input: child.stdout }).on('line', (line) => {
+      process.stdout.write(`${line}\n`);
+      if (line.trim()) last = line.trim();
+      if (/ ✖ /.test(line)) for (const match of line.matchAll(/\bcase_[A-Za-z0-9_]+/g)) if (names.has(match[0])) failed.add(names.get(match[0]));
+    });
+    child.once('error', reject);
+    child.once('close', status => resolvePromise({ status, failed: [...failed], last }));
+  });
+}
+
+/** The failures of a run of `runCaseTests`: one for each failed case, or the last line when no case failed. */
+export function caseTestFailures(language, run) {
+  if (run.status === 0) return [];
+  if (run.failed.length > 0) return run.failed.map(id => `${id}: the generated ${language} test of the case failed`);
+  return [`the generated ${language} tests failed before any case failed: ${run.last}`];
+}
+

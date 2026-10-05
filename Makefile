@@ -40,6 +40,8 @@ GO_DIR   := packages/template-go
 RUST_DIR := packages/template-rust
 PHP_DIR  := packages/template-php
 EXT_DIR  := packages/template-php-ext
+# The shared library of the PHP extension that `make ext` builds: .dylib on macOS, .so elsewhere.
+EXT_LIBRARY := $(EXT_DIR)/target/release/libpolyspec_template.$(if $(filter Darwin,$(shell uname -s)),dylib,so)
 SHOWCASE_RUST := tools/showcase/adapters/rust
 LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
@@ -327,7 +329,7 @@ test-ext-clippy:
 test-ext-conformance: ext
 	node tests/runner/conformance.mjs --langs php-ext
 test-ext-unit: ext build-ext-php
-	cd $(EXT_DIR) && ./run-tests.sh
+	node scripts/run-tests.mjs phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
 rules-check: ## Check case.json rule identifiers against the specification
 	node scripts/check-rules.mjs
