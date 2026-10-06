@@ -223,7 +223,7 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
 
 static pt_s pt_text_at(pt_ctx *ctx, pt_value value, const pt_frame *frame, size_t start, size_t end)
 {
-    pt_s text;
+    pt_s text = {NULL, 0};
     if (!pt_stringify(ctx->arena, value, &text)) {
         pt_ctx_fail(ctx, "E_RUNTIME_STRINGIFY", frame, start, end, zend_string_init("a list or map cannot be converted to text", 41, 0));
     }
@@ -238,7 +238,7 @@ static double pt_number_at(pt_ctx *ctx, pt_value value, const pt_frame *frame, c
         case PT_NUMBER: return value.u.number;
         case PT_STRING:
         case PT_SAFE: {
-            double number;
+            double number = 0;
             if (pt_numeric_string(value.u.str.s, value.u.str.n, &number)) {
                 return number;
             }
@@ -291,7 +291,7 @@ static pt_value pt_host_result(pt_ctx *ctx, const char *name, zval *result, cons
         zend_string_release(message);
         pt_ctx_fail(ctx, "E_RUNTIME_HOST_FUNCTION", frame, expr->start, expr->end, text);
     }
-    pt_value value;
+    pt_value value = {0};
     pt_bind_error error = {NULL, NULL};
     bool bound = pt_bind_value(ctx->arena, result, &value, &error);
     zval_ptr_dtor(result);
@@ -420,7 +420,7 @@ static pt_value pt_index(pt_ctx *ctx, pt_value container, pt_value key, const pt
         return found ? *found : pt_null();
     }
     if (container.type == PT_LIST) {
-        zend_long position;
+        zend_long position = 0;
         bool has = false;
         if (key.type == PT_NUMBER && pt_is_integer(key.u.number)) {
             position = zend_dval_to_lval(key.u.number);
@@ -434,7 +434,7 @@ static pt_value pt_index(pt_ctx *ctx, pt_value container, pt_value key, const pt
         return pt_null();
     }
     if (container.type == PT_OBJECT && pt_is_string(key)) {
-        pt_value value;
+        pt_value value = {0};
         bool found;
         pt_bind_error error = {NULL, NULL};
         if (!pt_object_property(ctx->arena, container.u.object, key.u.str, &value, &found, &error)) {
@@ -473,7 +473,7 @@ static pt_value pt_call(pt_ctx *ctx, const pt_expr *expr, pt_value *args, const 
             }
             PT_FAIL_AT(ctx, "E_RUNTIME_ARITY", frame, expr, "%s accepts %u to " ZEND_LONG_FMT " arguments, got %u", expr->name.s, builtin->min, builtin->max == UINT32_MAX ? ZEND_LONG_MAX : (zend_long)builtin->max, count);
         }
-        pt_value result;
+        pt_value result = {0};
         pt_function_error error = {NULL, NULL};
         if (!builtin->call(ctx->arena, &ctx->request->env, args, count, &result, &error)) {
             pt_ctx_fail(ctx, error.code, frame, expr->start, expr->end, error.message);
@@ -785,7 +785,7 @@ static void pt_render_nodes(pt_ctx *ctx, const pt_body *body, const pt_frame *fr
 
 static pt_s pt_resolve_at(pt_ctx *ctx, pt_s path, const pt_frame *frame, size_t start, size_t end)
 {
-    pt_s name;
+    pt_s name = {NULL, 0};
     if (!pt_resolve_path(ctx->arena, frame->name, path, &name)) {
         zend_string *quoted = pt_json_quote(path.s, path.n);
         zend_string *message = zend_strpprintf(0, "%s leaves the loader root", ZSTR_VAL(quoted));
@@ -848,7 +848,7 @@ static void pt_render_for(pt_ctx *ctx, const pt_node *node, const pt_frame *fram
     uint32_t position = 0;
     const pt_map *map = iterable.type == PT_MAP ? iterable.u.map : NULL;
     for (uint32_t i = 0; position < size; i++) {
-        pt_value key, value;
+        pt_value key = {0}, value = {0};
         if (map != NULL) {
             if (!map->entries[i].live) {
                 continue;
