@@ -1,5 +1,6 @@
 # 변경 기록
 
+- 모든 변경을 pull request와 merge queue로 게시하게 했다(T17.1-7). ruleset `main`은 bypass actor 없이 승인 없는 pull request, `REBASE` merge queue, 선형 history, check `push-gate`와 CI의 모든 job을 요구하고, 선언은 auto-merge의 저장소 설정을 정한다.
 - 오래된 compiled artifact를 `main` 전에 잡게 했다(T17.1-6). AST compiler digest는 build 대신 `packages/template-ts`의 추적 source로 계산하고, `make artifact-digest-check`는 commit된 artifact가 다른 compiler의 digest를 기록하면 각 manifest와 `make showcase`를 밝히며 실패한다. job `push-gate`와 `showcase-check`가 이를 실행한다. artifact 30개와 page는 새 digest로 다시 compile했다.
 - T8.5-1 뒤에 showcase artifact를 다시 만들었다(T8.5-2). AST artifact manifest는 template-ts build의 digest를 기록하고 T8.5-1이 그것을 바꿨으므로, release job이 `examples/site/index.html`을 오래된 것으로 판정했다. manifest 다섯 개와 page를 다시 썼고 digest만 바뀐다.
 - 모든 runtime에서 native object의 `json`을 실패시켰다(T8.5-1). PHP runtime은 `E_INTERNAL`을 냈고 다른 runtime은 `null`을 썼다. FUN-26은 native object이거나 그것을 담은 값에는 JSON text가 없고 호출 위치에서 E_RUNTIME_TYPE으로 실패한다고 적으며, 공유 fixture `tests/fixtures/native-object/json.tpl`이 모든 runtime, extension, generated program에서 이를 검사한다.

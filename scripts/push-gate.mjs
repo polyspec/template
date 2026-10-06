@@ -24,7 +24,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const USAGE = 'Usage: node scripts/push-gate.mjs hook | commit <rev> | hooks-check';
 const NO_OBJECT = /^0+$/;
 
-const REASON = 'A push happens only when no checklist task is [~] (AGENTS.md): CI runs the full suite on the pushed tree, and its guard refuses a tree with a task in progress.';
+const REASON = 'A push happens only when no checklist task is [~] (AGENTS.md): CI runs the full suite on every pull request and every merge group of the merge queue, and its guard refuses a tree with a task in progress.';
 const ADVICE = 'Complete each task ([o] with its changelog entry, committed), or mark it [!] with its cause and retry condition when it must be bypassed; then push again.';
 
 function git(root, ...args) {

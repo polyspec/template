@@ -190,9 +190,9 @@ test('the CI command fails for a commit whose hook is missing or not executable'
   assert.match(missing.stdout, /^::error::.*\.githooks\/pre-push is not tracked/m);
 });
 
-test('the push-gate workflow runs the CI command through make on every push and pull request', () => {
+test('the push-gate workflow runs the CI command through make on every push, pull request and merge group', () => {
   const workflow = readFileSync(path.join(ROOT, '.github/workflows/push-gate.yml'), 'utf8');
-  assert.match(workflow, /\non:\n {2}push:\n {2}pull_request:\n/);
+  assert.match(workflow, /\non:\n {2}push:\n {4}branches-ignore: \['gh-readonly-queue\/\*\*'\]\n {2}pull_request:\n {2}merge_group:\n/);
   assert.match(workflow, /\njobs:\n {2}push-gate:\n {4}runs-on: ubuntu-24\.04\n/);
   assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
   // T20.1-8, T20.1-9: the job runs its tools through make and uploads the report of the targets; besides the gate of

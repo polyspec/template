@@ -48,7 +48,7 @@ MAKEFLAGS += -k
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
 	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers ci-targets cargo-downloads-check uninstall-cli rerun-failed \
-	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit
+	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit github-ruleset github-ruleset-check
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -91,6 +91,8 @@ help: ## List targets
 	@echo "  hooks                  Set core.hooksPath to .githooks and check the pre-push hook of the push gate"
 	@echo "  hooks-check            Fail while core.hooksPath is not .githooks or .githooks/pre-push is not executable"
 	@echo "  push-gate-commit       The push gate of CI on COMMIT (HEAD): fail while it has a task [~] or no executable pre-push hook"
+	@echo "  github-ruleset         Change the GitHub ruleset and repository settings of .github/ruleset.json where they differ"
+	@echo "  github-ruleset-check   Fail when the live GitHub ruleset or repository settings differ from .github/ruleset.json"
 	@echo "  owner-check            The owner checks of the changed paths (scripts/owner-checks.json); PATHS or BASE select the paths"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
@@ -364,6 +366,19 @@ hooks-check: ## Fail while core.hooksPath is not .githooks or .githooks/pre-push
 COMMIT ?= HEAD
 push-gate-commit: ## Fail while COMMIT (HEAD) has a checklist task [~] or does not track an executable pre-push hook
 	node scripts/push-gate.mjs commit $(COMMIT)
+
+# The GitHub CLI of the machine, authenticated with administration access to the repository; only the targets
+# github-ruleset and github-ruleset-check start it.
+GH := gh
+# The GitHub ruleset main and the repository settings of .github/ruleset.json (scripts/github-ruleset.mjs): main receives
+# a change only through a pull request and the merge queue, after every required check passed on the merge group, and no
+# target of this repository pushes main (T17.1-7). These targets reach the GitHub API, so no target of the full suite
+# runs them.
+github-ruleset: ## Change the repository settings and create or update the ruleset of .github/ruleset.json where they differ, then compare again
+	node scripts/github-ruleset.mjs apply --gh $(GH)
+
+github-ruleset-check: ## Fail when the live repository settings or ruleset differ from .github/ruleset.json, naming each field
+	node scripts/github-ruleset.mjs check --gh $(GH)
 
 owner-check: hooks-check ## Run the owner checks of the changed paths: PATHS, the paths since BASE, or the uncommitted changes
 	node scripts/owner-check.mjs $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base "$(BASE)")
