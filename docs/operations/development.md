@@ -18,7 +18,7 @@
 
 PHP is pinned by its minor version: setup-php, which installs PHP in CI, installs the latest patch of a minor version and cannot pin a patch. Each full run records the versions it ran on, the PHP patch included, in `environment` of `var/full-run.json`. Composer is pinned exactly (`composer:2.10.3` in the workflows). make is not pinned: the Makefile uses no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1 printed the same commands for every target (T17.1-4). The CI jobs run on `ubuntu-24.04`, pin every action by its commit and install with `make install`; setup-go provides the Go that bootstraps `make install-tools`.
 
-The Rust PHP binding of `packages/template-php-ext` supports PHP 8.5; on macOS the extension is linked with `-Wl,-undefined,dynamic_lookup`, which the build script of the package emits, because the PHP binary that loads the extension provides the PHP symbols.
+The PHP extension `packages/template-php-ext` is an implementation in C. `make ext` builds it with phpize, configure and make of the php-config on `PATH`, which must belong to the php on `PATH` that runs the tests, for every PHP version of `config/toolchain.json`; CI installs both with setup-php. `make ext-arginfo` generates its arginfo header from the stub with gen_stub.php of the PHP build.
 
 ## Commands
 

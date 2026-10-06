@@ -17,10 +17,8 @@ final class CliTest extends TestCase
      */
     private function invoke(array $arguments): array
     {
-        $library = dirname(__DIR__) . '/target/release/libpolyspec_template.dylib';
-        if (!is_file($library)) {
-            $library = dirname(__DIR__) . '/target/release/libpolyspec_template.so';
-        }
+        // The library that make ext publishes (T21.4).
+        $library = Support::repositoryRoot() . '/var/build/polyspec_template.so';
         $command = array_merge([PHP_BINARY, '-d', 'extension=' . $library, dirname(__DIR__) . '/bin/template-ext.php'], $arguments);
         $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
         $process = proc_open($command, $descriptors, $pipes);

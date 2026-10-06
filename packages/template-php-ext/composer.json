@@ -1,7 +1,7 @@
 {
     "name": "polyspec/template-php-ext",
-    "description": "Tests of the PHP extension that renders templates with the native implementation",
-    "type": "project",
+    "description": "PHP extension that renders templates with an independent C implementation of the specification",
+    "type": "php-ext",
     "license": "MIT",
     "require": {
         "php": "^8.2"
@@ -16,6 +16,10 @@
         }
     },
     "bin": ["bin/template-ext.php"],
+    "php-ext": {
+        "extension-name": "polyspec_template",
+        "build-path": "src"
+    },
     "config": {
         "platform": {
             "php": "8.2.0"

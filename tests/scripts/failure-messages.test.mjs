@@ -70,6 +70,6 @@ test('the Go and PHP install projects print the expected and the actual output',
 test('the PHP extension tests run through scripts/run-tests.mjs', () => {
   const run = spawnSync('make', ['--no-print-directory', '-n', 'test-ext-unit'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /^node scripts\/run-tests\.mjs phpunit --php-extension var\/build\/libpolyspec_template\.(?:dylib|so) --cwd packages\/template-php-ext$/m);
+  assert.match(run.stdout, /^node scripts\/run-tests\.mjs phpunit --php-extension var\/build\/polyspec_template\.so --cwd packages\/template-php-ext$/m);
   assert.doesNotMatch(run.stdout, /run-tests\.sh/);
 });

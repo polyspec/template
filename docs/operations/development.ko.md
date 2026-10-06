@@ -18,7 +18,7 @@
 
 PHP는 minor version으로 고정한다. CI에서 PHP를 설치하는 setup-php는 minor version의 최신 patch를 설치하고 patch를 고정할 수 없다. 각 full run은 자기가 실행된 version을 PHP patch까지 `var/full-run.json`의 `environment`에 기록한다. Composer는 정확히 고정한다(workflow의 `composer:2.10.3`). make는 고정하지 않는다. Makefile은 GNU Make 3.81보다 새로운 구문을 쓰지 않고, make 3.81과 GNU Make 4.4.1은 모든 target에 같은 명령을 출력했다(T17.1-4). CI job은 `ubuntu-24.04`에서 실행되고, 모든 action을 commit으로 고정하며, `make install`로 설치한다. setup-go는 `make install-tools`를 bootstrap하는 Go를 제공한다.
 
-`packages/template-php-ext`의 Rust PHP 바인딩은 PHP 8.5를 지원한다. macOS에서는 확장을 로드하는 PHP 바이너리가 PHP 심볼을 제공하므로 확장을 `-Wl,-undefined,dynamic_lookup`으로 링크하며, 이 인자는 패키지의 빌드 스크립트가 내보낸다.
+PHP 확장 `packages/template-php-ext`는 C 구현이다. `make ext`는 `config/toolchain.json`의 모든 PHP version에서 `PATH`의 php-config로 phpize, configure, make를 실행해 빌드한다. 이 php-config는 test를 실행하는 `PATH`의 php와 같은 PHP여야 하며, CI는 둘 다 setup-php로 설치한다. `make ext-arginfo`는 PHP build의 gen_stub.php로 stub에서 arginfo header를 만든다.
 
 ## 명령
 

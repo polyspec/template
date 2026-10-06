@@ -12,7 +12,7 @@
 | template-go | Go runtime | implemented | go: pass<br>php: unsupported<br>rust: unsupported<br>typescript: unsupported | [근거](spec/compiler) |
 | template-rust | Rust runtime | implemented | go: unsupported<br>php: unsupported<br>rust: pass<br>typescript: unsupported | [근거](spec/compiler) |
 | template-php | PHP runtime | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [근거](spec/compiler) |
-| template-php-ext | PHP native extension | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [근거](operations/testing) |
+| template-php-ext | C로 구현한 PHP native extension | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [근거](operations/testing) |
 | performance-measurements | Performance measurements | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/benchmark) |
 | showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](operations/showcase) |
 | generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [근거](spec/compiler) |

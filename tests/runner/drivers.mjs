@@ -24,9 +24,6 @@ export function build(name, command, args, cwd) {
   runStepSync(`build ${name}`, command, args, { cwd, env: environment() });
 }
 
-// The shared library of the PHP extension: .dylib on macOS, .so elsewhere.
-const LIBRARY = `libpolyspec_template.${process.platform === 'darwin' ? 'dylib' : 'so'}`;
-
 // The runs execute the builds published to var/build, which changes only when the bytes of a build change: cargo
 // links target/release again on every build, and macOS checks a new executable file on its first run, which outlived
 // the 10 s limit of a call on a loaded machine (T19.6-1). `make build-go`, `make build-rust` and `make ext` publish to
@@ -34,7 +31,7 @@ const LIBRARY = `libpolyspec_template.${process.platform === 'darwin' ? 'dylib' 
 export const published = {
   go: join(root, 'var', 'build', 'template-go'),
   rust: join(root, 'var', 'build', 'template-rust'),
-  'php-ext': join(root, 'var', 'build', LIBRARY),
+  'php-ext': join(root, 'var', 'build', 'polyspec_template.so'),
 };
 
 export const drivers = {
@@ -79,8 +76,8 @@ export const drivers = {
   'php-ext': {
     dir: join(packages, 'template-php-ext'),
     build() {
-      build('php-ext', `${process.env.HOME}/.cargo/bin/cargo`, ['build', '--locked', '--release'], join(packages, 'template-php-ext'));
-      publishBuild(join(packages, 'template-php-ext', 'target', 'release', LIBRARY), published['php-ext']);
+      // The C extension builds with phpize, configure and make and publishes its library itself (T21.4).
+      build('php-ext', process.execPath, [join(root, 'scripts/build-php-extension.mjs'), join(packages, 'template-php-ext', 'src'), published['php-ext']], root);
     },
     command(args) {
       return ['php', [`-dextension=${published['php-ext']}`, join(packages, 'template-php-ext', 'bin', 'template-ext.php'), ...args]];
@@ -91,7 +88,7 @@ export const drivers = {
 /**
  * Builds the CLI of the language `name` before a run. The build runs every time, because a present binary may be
  * built from older sources (T19.6); each build does nothing when its inputs are unchanged: make build-ts and
- * scripts/build-package.mjs, go build, cargo build and composer install.
+ * scripts/build-package.mjs, go build, cargo build, composer install and scripts/build-php-extension.mjs.
  */
 export function prepare(name) {
   const driver = drivers[name];

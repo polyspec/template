@@ -22,7 +22,6 @@ const OUTPUTS = [
   'packages/template-codemirror/dist/index.mjs',
   'packages/template-vscode/dist/extension.cjs',
   'packages/template-rust/target/debug/template',
-  'packages/template-php-ext/target/release/libpolyspec_template_php.dylib',
   'tools/showcase/adapters/rust/target/release/showcase-adapter-rust',
   'packages/template-go/template',
   'packages/template-php/vendor/autoload.php',
