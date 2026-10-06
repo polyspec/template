@@ -67,7 +67,7 @@ static zend_long pt_truncate(double number)
 
 static bool pt_to_integer(pt_value value, zend_long *integer, pt_function_error *error)
 {
-    double number;
+    double number = 0;
     if (!pt_to_number(value, &number, error)) {
         return false;
     }
@@ -98,7 +98,7 @@ static bool pt_finite_result(double value, pt_value *result, pt_function_error *
 
 PT_FN(pt_fn_escape)
 {
-    pt_s text;
+    pt_s text = {NULL, 0};
     if (!pt_stringify_arg(arena, a[0], &text, error)) {
         return false;
     }
@@ -111,7 +111,7 @@ PT_FN(pt_fn_escape)
 
 PT_FN(pt_fn_raw)
 {
-    pt_s text;
+    pt_s text = {NULL, 0};
     if (!pt_stringify_arg(arena, a[0], &text, error)) {
         return false;
     }
@@ -130,7 +130,7 @@ PT_FN(pt_fn_json)
 
 PT_FN(pt_fn_url)
 {
-    pt_s text;
+    pt_s text = {NULL, 0};
     if (!pt_stringify_arg(arena, a[0], &text, error)) {
         return false;
     }
@@ -153,7 +153,7 @@ PT_FN(pt_fn_url)
 
 PT_FN(pt_fn_nl2br)
 {
-    pt_s text;
+    pt_s text = {NULL, 0};
     if (!pt_arg_string(a[0], "nl2br", &text, error)) {
         return false;
     }
@@ -175,7 +175,7 @@ PT_FN(pt_fn_nl2br)
 
 PT_FN(pt_fn_str)
 {
-    pt_s text;
+    pt_s text = {NULL, 0};
     if (!pt_stringify_arg(arena, a[0], &text, error)) {
         return false;
     }
@@ -194,7 +194,7 @@ PT_FN(pt_fn_type)
 
 static bool pt_case(pt_arena *arena, pt_value value, const char *name, bool upper, pt_value *result, pt_function_error *error)
 {
-    pt_s text;
+    pt_s text = {NULL, 0};
     if (!pt_arg_string(value, name, &text, error)) {
         return false;
     }
@@ -260,7 +260,7 @@ PT_FN(pt_fn_trim)
 
 PT_FN(pt_fn_replace)
 {
-    pt_s text, search, replacement;
+    pt_s text = {NULL, 0}, search = {NULL, 0}, replacement = {NULL, 0};
     if (!pt_arg_string(a[0], "replace", &text, error) || !pt_arg_string(a[1], "replace", &search, error) || !pt_arg_string(a[2], "replace", &replacement, error)) {
         return false;
     }
@@ -286,7 +286,7 @@ PT_FN(pt_fn_replace)
 
 PT_FN(pt_fn_split)
 {
-    pt_s text, separator;
+    pt_s text = {NULL, 0}, separator = {NULL, 0};
     if (!pt_arg_string(a[0], "split", &text, error) || !pt_arg_string(a[1], "split", &separator, error)) {
         return false;
     }
@@ -324,7 +324,7 @@ static size_t pt_utf8_offset(pt_s text, size_t count)
 PT_FN(pt_fn_truncate)
 {
     pt_s text, suffix = PT_S("...");
-    zend_long limit;
+    zend_long limit = 0;
     if (!pt_arg_string(a[0], "truncate", &text, error) || !pt_to_integer(a[1], &limit, error)) {
         return false;
     }
@@ -385,7 +385,7 @@ PT_FN(pt_fn_contains)
 
 PT_FN(pt_fn_starts_with)
 {
-    pt_s text, prefix;
+    pt_s text = {NULL, 0}, prefix = {NULL, 0};
     if (!pt_arg_string(a[0], "starts_with", &text, error) || !pt_arg_string(a[1], "starts_with", &prefix, error)) {
         return false;
     }
@@ -395,7 +395,7 @@ PT_FN(pt_fn_starts_with)
 
 PT_FN(pt_fn_ends_with)
 {
-    pt_s text, suffix;
+    pt_s text = {NULL, 0}, suffix = {NULL, 0};
     if (!pt_arg_string(a[0], "ends_with", &text, error) || !pt_arg_string(a[1], "ends_with", &suffix, error)) {
         return false;
     }
@@ -528,7 +528,7 @@ PT_FN(pt_fn_slice)
         return PT_TYPE_ERROR("slice requires a list or a string");
     }
     zend_long size = is_list ? (zend_long)a[0].u.list->count : (zend_long)pt_utf8_length(a[0].u.str.s, a[0].u.str.n);
-    zend_long from;
+    zend_long from = 0;
     if (!pt_to_integer(a[1], &from, error)) {
         return false;
     }
@@ -592,7 +592,7 @@ static pt_value pt_lookup_path(pt_value value, pt_s path)
         const char *dot = memchr(path.s + start, '.', path.n - start);
         size_t end = dot ? (size_t)(dot - path.s) : path.n;
         pt_s segment = {path.s + start, end - start};
-        zend_long index;
+        zend_long index = 0;
         if (current.type == PT_MAP) {
             pt_value *found = pt_map_get(current.u.map, segment.s, segment.n);
             current = found ? *found : pt_null();
@@ -696,7 +696,7 @@ PT_FN(pt_fn_join)
     pt_buf buf;
     pt_buf_init(&buf, arena);
     for (uint32_t i = 0; i < list->count; i++) {
-        pt_s text;
+        pt_s text = {NULL, 0};
         if (!pt_stringify_arg(arena, list->items[i], &text, error)) {
             return false;
         }
@@ -766,8 +766,8 @@ static void pt_positional(pt_arena *arena, double value, pt_decimal *decimal)
         return;
     }
     char digits[32];
-    size_t k;
-    int exponent;
+    size_t k = 0;
+    int exponent = 0;
     pt_shortest_digits(value, &decimal->negative, digits, &k, &exponent);
     if (exponent <= 0) {
         pt_buf_addc(&decimal->integer, '0');
@@ -845,11 +845,11 @@ static bool pt_decimals_arg(pt_value *a, uint32_t n, const char *name, zend_long
 
 PT_FN(pt_fn_number)
 {
-    zend_long places;
+    zend_long places = 0;
     if (!pt_decimals_arg(a, n, "number", &places, error)) {
         return false;
     }
-    double value;
+    double value = 0;
     if (!pt_to_number(a[0], &value, error)) {
         return false;
     }
@@ -892,11 +892,11 @@ PT_FN(pt_fn_number)
 
 PT_FN(pt_fn_round)
 {
-    zend_long places;
+    zend_long places = 0;
     if (!pt_decimals_arg(a, n, "round", &places, error)) {
         return false;
     }
-    double value;
+    double value = 0;
     if (!pt_to_number(a[0], &value, error)) {
         return false;
     }
@@ -916,19 +916,19 @@ PT_FN(pt_fn_round)
 
 PT_FN(pt_fn_floor)
 {
-    double value;
+    double value = 0;
     return pt_to_number(a[0], &value, error) && pt_finite_result(floor(value), result, error);
 }
 
 PT_FN(pt_fn_ceil)
 {
-    double value;
+    double value = 0;
     return pt_to_number(a[0], &value, error) && pt_finite_result(ceil(value), result, error);
 }
 
 PT_FN(pt_fn_abs)
 {
-    double value;
+    double value = 0;
     if (!pt_to_number(a[0], &value, error)) {
         return false;
     }
@@ -959,7 +959,7 @@ PT_FN(pt_fn_max) { return pt_extreme(a, n, "max", false, result, error); }
 
 PT_FN(pt_fn_num)
 {
-    double value;
+    double value = 0;
     if (!pt_to_number(a[0], &value, error)) {
         return false;
     }
@@ -1126,7 +1126,7 @@ static pt_s pt_format_date(pt_arena *arena, zend_long seconds, pt_s format, zend
     zend_long local = seconds + offset;
     zend_long days = pt_floor_div(local, 86400);
     zend_long second_of_day = local - days * 86400;
-    zend_long year, month, day;
+    zend_long year = 0, month = 0, day = 0;
     pt_civil_from_days(days, &year, &month, &day);
     zend_long hour = second_of_day / 3600;
     zend_long minute = (second_of_day % 3600) / 60;
@@ -1179,18 +1179,18 @@ PT_FN(pt_fn_date)
         *result = pt_string(PT_S(""));
         return true;
     }
-    zend_long offset;
+    zend_long offset = 0;
     if (!pt_parse_offset(env->timezone, &offset)) {
         zend_string *quoted = pt_json_quote(env->timezone.s, env->timezone.n);
         zend_string *message = zend_strpprintf(0, "%s is not a time zone offset", ZSTR_VAL(quoted));
         zend_string_release(quoted);
         return pt_type_error(error, message);
     }
-    zend_long seconds;
+    zend_long seconds = 0;
     if (!pt_unix_seconds(a[0], offset, &seconds, error)) {
         return false;
     }
-    pt_s format;
+    pt_s format = {NULL, 0};
     if (!pt_arg_string(a[1], "date", &format, error)) {
         return false;
     }

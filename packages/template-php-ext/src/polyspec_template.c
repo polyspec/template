@@ -372,6 +372,13 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, __construct)
     zend_hash_clean(&engine->cache);
 }
 
+static void pt_parse_into(pt_run *run, zend_string *source, zend_string *name, char open, char close, zval *result)
+{
+    pt_template *template = pt_parse(run, ZSTR_VAL(name), ZSTR_LEN(name), ZSTR_VAL(source), ZSTR_LEN(source), open, close);
+    pt_ast_to_zval(template, result);
+    pt_template_release(template);
+}
+
 /* RT-2: parses one source; on success `result` holds the AST as nested arrays. */
 static bool pt_parse_source(zend_string *source, zend_string *name, HashTable *options, zval *result)
 {
@@ -381,10 +388,9 @@ static bool pt_parse_source(zend_string *source, zend_string *name, HashTable *o
     }
     pt_run run;
     pt_run_init(&run);
+    /* The work of a run is a function of its own: no local of the frame that calls setjmp changes after it. */
     if (setjmp(run.jump) == 0) {
-        pt_template *template = pt_parse(&run, ZSTR_VAL(name), ZSTR_LEN(name), ZSTR_VAL(source), ZSTR_LEN(source), open, close);
-        pt_ast_to_zval(template, result);
-        pt_template_release(template);
+        pt_parse_into(&run, source, name, open, close, result);
     }
     return pt_run_finish(&run);
 }
@@ -469,7 +475,7 @@ static void pt_define_add(pt_run *run, pt_s name, HashTable *defines, pt_s id, c
         entry->html = true;
         entry->template = html->u.str;
     } else if (template != NULL) {
-        pt_s resolved;
+        pt_s resolved = {NULL, 0};
         if (!pt_resolve_path(&run->arena, PT_S(""), template->u.str, &resolved)) {
             pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
         }
@@ -556,12 +562,39 @@ static void pt_env_from_json(pt_run *run, pt_s name, const pt_value *value, pt_e
 
 static pt_value pt_read_json(pt_run *run, pt_s name, zend_string *text)
 {
-    pt_value value;
+    pt_value value = {0};
     pt_bind_error error = {NULL, NULL};
     if (!pt_json_parse(&run->arena, ZSTR_VAL(text), ZSTR_LEN(text), &value, &error)) {
         pt_request_fail(run, name, error.code, error.message);
     }
     return value;
+}
+
+static void pt_render_json_into(pt_run *run, pt_engine *engine, zend_string *name, zend_string *assign, zend_string *define, zend_string *env, smart_str *output)
+{
+    pt_request request;
+    memset(&request, 0, sizeof(request));
+    request.name = pt_strdup(&run->arena, ZSTR_VAL(name), ZSTR_LEN(name));
+    pt_value data = pt_read_json(run, request.name, assign);
+    pt_value definitions = {0}, environment = {0};
+    if (define) {
+        definitions = pt_read_json(run, request.name, define);
+    }
+    if (env) {
+        environment = pt_read_json(run, request.name, env);
+    }
+    if (data.type == PT_MAP) {
+        request.data = data.u.map;
+    } else if (data.type == PT_NULL || (data.type == PT_LIST && data.u.list->count == 0)) {
+        request.data = pt_map_new(&run->arena, 0);
+    } else {
+        pt_request_fail(run, request.name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("assign is not a map", 19, 0));
+    }
+    if (define) {
+        request.defines = pt_defines_from_json(run, request.name, definitions);
+    }
+    pt_env_from_json(run, request.name, env ? &environment : NULL, &request.env);
+    pt_render(run, engine, &request, output);
 }
 
 ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson)
@@ -580,29 +613,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson)
     pt_run run;
     pt_run_init(&run);
     if (setjmp(run.jump) == 0) {
-        pt_request request;
-        memset(&request, 0, sizeof(request));
-        request.name = pt_strdup(&run.arena, ZSTR_VAL(name), ZSTR_LEN(name));
-        pt_value data = pt_read_json(&run, request.name, assign);
-        pt_value definitions, environment;
-        if (define) {
-            definitions = pt_read_json(&run, request.name, define);
-        }
-        if (env) {
-            environment = pt_read_json(&run, request.name, env);
-        }
-        if (data.type == PT_MAP) {
-            request.data = data.u.map;
-        } else if (data.type == PT_NULL || (data.type == PT_LIST && data.u.list->count == 0)) {
-            request.data = pt_map_new(&run.arena, 0);
-        } else {
-            pt_request_fail(&run, request.name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("assign is not a map", 19, 0));
-        }
-        if (define) {
-            request.defines = pt_defines_from_json(&run, request.name, definitions);
-        }
-        pt_env_from_json(&run, request.name, env ? &environment : NULL, &request.env);
-        pt_render(&run, engine, &request, &output);
+        pt_render_json_into(&run, engine, name, assign, define, env, &output);
     }
     if (!pt_run_finish(&run)) {
         smart_str_free(&output);
@@ -703,7 +714,7 @@ static pt_map *pt_define_data(pt_run *run, pt_s name, pt_s id, zval *input)
         }
         return map;
     }
-    pt_value value;
+    pt_value value = {0};
     if (!pt_bind_value(&run->arena, input, &value, &error)) {
         pt_bind_fail_run(run, name, &error);
     }
@@ -727,7 +738,7 @@ static HashTable *pt_defines_from_php(pt_run *run, pt_s name, zval *input)
     zend_string *key;
     zval *entry;
     ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), index, key, entry) {
-        pt_s id;
+        pt_s id = {NULL, 0};
         if (key == NULL) {
             char digits[32];
             int written = snprintf(digits, sizeof(digits), ZEND_LONG_FMT, (zend_long)index);
@@ -754,7 +765,7 @@ static HashTable *pt_defines_from_php(pt_run *run, pt_s name, zval *input)
             define->html = true;
             define->template = pt_strdup(&run->arena, Z_STRVAL_P(html), Z_STRLEN_P(html));
         } else if (template != NULL) {
-            pt_s resolved;
+            pt_s resolved = {NULL, 0};
             if (!pt_resolve_path(&run->arena, PT_S(""), (pt_s){Z_STRVAL_P(template), Z_STRLEN_P(template)}, &resolved)) {
                 pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
             }
@@ -801,6 +812,25 @@ static void pt_env_from_php(pt_run *run, pt_s name, zval *input, pt_env *env)
     }
 }
 
+static void pt_render_php_into(pt_run *run, pt_engine *engine, zend_string *name, zval *assign, HashTable *options, smart_str *output)
+{
+    pt_request request;
+    memset(&request, 0, sizeof(request));
+    request.name = pt_strdup(&run->arena, ZSTR_VAL(name), ZSTR_LEN(name));
+    pt_bind_error error = {NULL, NULL};
+    if (assign == NULL) {
+        request.data = pt_map_new(&run->arena, 0);
+    } else if (!pt_bind_map(&run->arena, assign, &request.data, &error)) {
+        pt_bind_fail_run(run, request.name, &error);
+    }
+    zval *define = options ? zend_hash_str_find(options, "define", 6) : NULL;
+    if (define != NULL) {
+        request.defines = pt_defines_from_php(run, request.name, define);
+    }
+    pt_env_from_php(run, request.name, options ? zend_hash_str_find(options, "env", 3) : NULL, &request.env);
+    pt_render(run, engine, &request, output);
+}
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, render)
 {
     zend_string *name;
@@ -818,21 +848,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, render)
     pt_run run;
     pt_run_init(&run);
     if (setjmp(run.jump) == 0) {
-        pt_request request;
-        memset(&request, 0, sizeof(request));
-        request.name = pt_strdup(&run.arena, ZSTR_VAL(name), ZSTR_LEN(name));
-        pt_bind_error error = {NULL, NULL};
-        if (assign == NULL) {
-            request.data = pt_map_new(&run.arena, 0);
-        } else if (!pt_bind_map(&run.arena, assign, &request.data, &error)) {
-            pt_bind_fail_run(&run, request.name, &error);
-        }
-        zval *define = options ? zend_hash_str_find(options, "define", 6) : NULL;
-        if (define != NULL) {
-            request.defines = pt_defines_from_php(&run, request.name, define);
-        }
-        pt_env_from_php(&run, request.name, options ? zend_hash_str_find(options, "env", 3) : NULL, &request.env);
-        pt_render(&run, engine, &request, &output);
+        pt_render_php_into(&run, engine, name, assign, options, &output);
     }
     if (!pt_run_finish(&run)) {
         smart_str_free(&output);
@@ -908,7 +924,7 @@ ZEND_METHOD(Polyspec_Template_Native_BoundMap, bind)
     pt_bound *bound = pt_bound_from(object);
     ZVAL_DEREF(value);
     if (Z_TYPE_P(value) != IS_NULL) {
-        pt_value result;
+        pt_value result = {0};
         pt_bind_error error = {NULL, NULL};
         if (!pt_bind_value(&bound->arena, value, &result, &error)) {
             OBJ_RELEASE(object);
