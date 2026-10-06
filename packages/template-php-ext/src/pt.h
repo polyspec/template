@@ -380,7 +380,8 @@ typedef struct pt_bind_error {
 } pt_bind_error;
 
 bool pt_json_parse(pt_arena *arena, const char *text, size_t length, pt_value *result, pt_bind_error *error);
-void pt_json_write(pt_buf *buf, pt_value value);
+/* FUN-26: false for a value that is or holds a native object, which has no JSON text (VAL-19). */
+bool pt_json_write(pt_buf *buf, pt_value value);
 
 /* Template names (RT-7, RT-8): false when the path leaves the loader root. */
 bool pt_resolve_path(pt_arena *arena, pt_s current, pt_s path, pt_s *name);

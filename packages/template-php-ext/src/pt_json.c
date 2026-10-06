@@ -370,30 +370,32 @@ static void pt_json_quote_into(pt_buf *buf, pt_s text)
     pt_buf_addc(buf, '"');
 }
 
-void pt_json_write(pt_buf *buf, pt_value value)
+bool pt_json_write(pt_buf *buf, pt_value value)
 {
     switch (value.type) {
-        case PT_NULL: PT_BUF_LIT(buf, "null"); return;
+        case PT_NULL: PT_BUF_LIT(buf, "null"); return true;
         case PT_BOOL:
             if (value.u.b) {
                 PT_BUF_LIT(buf, "true");
             } else {
                 PT_BUF_LIT(buf, "false");
             }
-            return;
-        case PT_NUMBER: pt_buf_adds(buf, pt_number_text(buf->arena, value.u.number)); return;
+            return true;
+        case PT_NUMBER: pt_buf_adds(buf, pt_number_text(buf->arena, value.u.number)); return true;
         case PT_STRING:
-        case PT_SAFE: pt_json_quote_into(buf, value.u.str); return;
+        case PT_SAFE: pt_json_quote_into(buf, value.u.str); return true;
         case PT_LIST:
             pt_buf_addc(buf, '[');
             for (uint32_t i = 0; i < value.u.list->count; i++) {
                 if (i) {
                     pt_buf_addc(buf, ',');
                 }
-                pt_json_write(buf, value.u.list->items[i]);
+                if (!pt_json_write(buf, value.u.list->items[i])) {
+                    return false;
+                }
             }
             pt_buf_addc(buf, ']');
-            return;
+            return true;
         case PT_MAP: {
             pt_buf_addc(buf, '{');
             bool first = true;
@@ -408,14 +410,14 @@ void pt_json_write(pt_buf *buf, pt_value value)
                 first = false;
                 pt_json_quote_into(buf, map->entries[i].key);
                 pt_buf_addc(buf, ':');
-                pt_json_write(buf, map->entries[i].value);
+                if (!pt_json_write(buf, map->entries[i].value)) {
+                    return false;
+                }
             }
             pt_buf_addc(buf, '}');
-            return;
+            return true;
         }
         default:
-            /* A native object has no JSON form; it is written as null like in every other runtime. */
-            PT_BUF_LIT(buf, "null");
-            return;
+            return false;
     }
 }

@@ -1,5 +1,6 @@
 # 변경 기록
 
+- 모든 runtime에서 native object의 `json`을 실패시켰다(T8.5-1). PHP runtime은 `E_INTERNAL`을 냈고 다른 runtime은 `null`을 썼다. FUN-26은 native object이거나 그것을 담은 값에는 JSON text가 없고 호출 위치에서 E_RUNTIME_TYPE으로 실패한다고 적으며, 공유 fixture `tests/fixtures/native-object/json.tpl`이 모든 runtime, extension, generated program에서 이를 검사한다.
 - 실행의 입력을 `setjmp`를 넘어 memory에 두었다(T21.4-2). GCC는 `Engine::render`의 parameter 두 개에 여전히 `-Wclobbered`를 냈다. 모든 실행은 입력 구조체의 pointer를 받는 `pt_run_work`를 거친다.
 - ruleset `main`이 요구하는 check인 job `push-gate`에서 문서, checklist, feature, rule 검사를 실행해(T17.1-5) 그것을 어기는 commit이 `main`에 갈 수 없게 했다. 이 검사들은 Node.js만 필요하며, `tests/scripts/push-gate.test.mjs`의 test가 이를 요구한다.
 - CI matrix의 모든 조합을 끝까지 실행했다(T20.1-13). PHP 8.2 job이 실패하자 GitHub가 PHP 8.5 job을 취소했다. `ci.yml`의 php job은 `fail-fast: false`를 두고, `tests/scripts/toolchain-files.test.mjs`가 matrix를 가진 모든 job에 이것을 요구한다.

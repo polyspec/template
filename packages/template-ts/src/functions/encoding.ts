@@ -2,7 +2,7 @@
 import { escapeHtml } from '../escape.js';
 import { numberToString } from '../value/number.js';
 import { NativeObject, SafeString, typeOf, type Value } from '../value/value.js';
-import { argString, safe, stringifyArg, type BuiltIn } from './helpers.js';
+import { argString, safe, stringifyArg, typeError, type BuiltIn } from './helpers.js';
 
 function jsonString(text: string): string {
   let result = '"';
@@ -35,7 +35,8 @@ export function toJson(value: Value): string {
   if (typeof value === 'number') return numberToString(value);
   if (typeof value === 'string') return jsonString(value);
   if (value instanceof SafeString) return jsonString(value.text);
-  if (value instanceof NativeObject) return 'null';
+  // FUN-26: a native object is opaque (VAL-19) and has no JSON text.
+  if (value instanceof NativeObject) throw typeError('json does not accept a native object');
   if (Array.isArray(value)) return '[' + value.map(toJson).join(',') + ']';
   const parts: string[] = [];
   for (const [key, entry] of value) parts.push(jsonString(key) + ':' + toJson(entry));

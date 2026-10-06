@@ -62,36 +62,45 @@ func jsonString(text string) string {
 	return b.String()
 }
 
-// ToJSON implements FUN-26 to FUN-28.
-func ToJSON(v value.Value) string {
+// ToJSON implements FUN-26 to FUN-28. A native object is opaque (VAL-19) and has no JSON text, so a value that is or
+// holds one fails with E_RUNTIME_TYPE.
+func ToJSON(v value.Value) (string, error) {
 	switch x := v.(type) {
 	case nil:
-		return "null"
+		return "null", nil
 	case bool:
 		if x {
-			return "true"
+			return "true", nil
 		}
-		return "false"
+		return "false", nil
 	case float64:
-		return value.NumberToString(x)
+		return value.NumberToString(x), nil
 	case string:
-		return jsonString(x)
+		return jsonString(x), nil
 	case value.SafeString:
-		return jsonString(x.Text)
+		return jsonString(x.Text), nil
 	case value.List:
 		parts := make([]string, len(x))
 		for i, item := range x {
-			parts[i] = ToJSON(item)
+			text, err := ToJSON(item)
+			if err != nil {
+				return "", err
+			}
+			parts[i] = text
 		}
-		return "[" + strings.Join(parts, ",") + "]"
+		return "[" + strings.Join(parts, ",") + "]", nil
 	case *value.OrderedMap:
 		parts := make([]string, 0, x.Len())
 		for _, key := range x.Keys() {
-			parts = append(parts, jsonString(key)+":"+ToJSON(x.MustGet(key)))
+			text, err := ToJSON(x.MustGet(key))
+			if err != nil {
+				return "", err
+			}
+			parts = append(parts, jsonString(key)+":"+text)
 		}
-		return "{" + strings.Join(parts, ",") + "}"
+		return "{" + strings.Join(parts, ",") + "}", nil
 	}
-	return "null"
+	return "", typeError("json does not accept a native object")
 }
 
 // PercentEncode implements FUN-29.
@@ -127,7 +136,7 @@ var encodingFunctions = map[string]BuiltIn{
 		return safe(text), nil
 	}},
 	"json": {1, 1, func(args []value.Value, _ Context) (value.Value, error) {
-		return ToJSON(args[0]), nil
+		return ToJSON(args[0])
 	}},
 	"url": {1, 1, func(args []value.Value, _ Context) (value.Value, error) {
 		text, err := stringifyArg(args[0])

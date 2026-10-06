@@ -120,7 +120,7 @@ The machine-readable source for the function contract is [`contracts/functions.j
 
 ## json
 
-- **FUN-26** `json(v)` returns compact JSON text without whitespace. Map keys are written in insertion order. Numbers are written by the number-to-string rule of the data model.
+- **FUN-26** `json(v)` returns compact JSON text without whitespace. Map keys are written in insertion order. Numbers are written by the number-to-string rule of the data model. A native object is opaque (VAL-19) and has no JSON text: `json` of a value that is or holds a native object, at any depth of its lists and maps, fails with E_RUNTIME_TYPE at the call; it never writes `null` or another stand-in for the object.
 - **FUN-27** Strings are escaped per JSON, and additionally `<` is written as `\u003c`, `>` as `\u003e`, `&` as `\u0026`, U+2028 as `\u2028` and U+2029 as `\u2029`. `/` and non-ASCII characters are written as themselves.
 - **FUN-28** The result is a plain string. An echo tag therefore escapes it, which is correct in element text and in an attribute value of either quote style. A script element receives the JSON text with `{= json(v) | raw}`; the escaping of FUN-27 keeps that text inside a script element. A safe string given to `json` is written as a JSON string of its text.
 - **FUN-49** A structural quote of JSON cannot be escaped, so JSON text is never safe in a double-quoted attribute without escaping. This is the reason FUN-28 returns a plain string.

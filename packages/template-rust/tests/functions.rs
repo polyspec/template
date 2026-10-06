@@ -30,7 +30,7 @@ fn date_parsing_and_formatting() {
 fn json_and_url_encoding() {
     let mut map = OrderedMap::new();
     map.insert("a".to_string(), Value::text("<&>\u{2028}".to_string()));
-    assert_eq!(to_json(&Value::map(map)), "{\"a\":\"\\u003c\\u0026\\u003e\\u2028\"}");
+    assert_eq!(to_json(&Value::map(map)).unwrap(), "{\"a\":\"\\u003c\\u0026\\u003e\\u2028\"}");
     assert_eq!(
         to_json(&Value::list(vec![
             Value::Number(1e21),
@@ -38,7 +38,8 @@ fn json_and_url_encoding() {
             Value::Null,
             Value::Bool(true),
             Value::safe_text("x".to_string())
-        ])),
+        ]))
+        .unwrap(),
         "[1e+21,0.1,null,true,\"x\"]"
     );
     assert_eq!(percent_encode("a b/é~!*'()"), "a%20b%2F%C3%A9~%21%2A%27%28%29");

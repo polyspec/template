@@ -123,7 +123,10 @@ PT_FN(pt_fn_json)
 {
     pt_buf buf;
     pt_buf_init(&buf, arena);
-    pt_json_write(&buf, a[0]);
+    if (!pt_json_write(&buf, a[0])) {
+        /* FUN-26: a native object is opaque (VAL-19) and has no JSON text. */
+        return PT_TYPE_ERROR("json does not accept a native object");
+    }
     *result = pt_string(pt_buf_done(&buf));
     return true;
 }

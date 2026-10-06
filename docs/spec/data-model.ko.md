@@ -168,7 +168,7 @@ bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을
 
 **VAL-18** 바인딩은 할당된 native object 참조를 복사하지 않고 유지한다. 템플릿이 호스트 함수, 논리 class 함수 또는 instance method에 인자로 넘긴 native object는 직접 넘기든 list나 map 인자 안에 넣어 넘기든 원본 호스트 객체로 도착한다. 같은 PHP 객체, 같은 JavaScript 인스턴스, 같은 Go 값이며, Rust에서는 같은 `TemplateObject`이고 호스트는 `Value::downcast_object`로 이를 되찾는다. 그 밖의 인자 값의 형태는 VAL-21이 정의한다. 리소스 핸들과 함수는 PHP closure를 포함해 템플릿 값이 아니며 바인딩은 이를 E_DATA_UNSUPPORTED_TYPE으로 거부한다. 렌더링은 값을 읽기만 하며 호스트 데이터에 쓰지 않는다.
 
-**VAL-19** Native object는 템플릿의 불투명한 값이다. Truthy이며 stringify·반복·spread할 수 없다.
+**VAL-19** Native object는 템플릿의 불투명한 값이다. Truthy이며 stringify·반복·spread할 수 없고 JSON으로 쓸 수 없다(FUN-26).
 
 - string 키의 lookup(`o.name`, `o['name']`, EXP-18)은 원본 인스턴스의 public field 또는 property를 읽고 그 값을 바인딩한다(VAL-11). public field나 property가 아닌 이름은 `null`을 반환하며 string이 아닌 모든 키도 같다. 바인딩할 수 없는 field 값은 그 `E_DATA_*` 코드로 실패하고, 오류를 발생시킨 accessor는 E_RUNTIME_HOST_FUNCTION으로 실패한다. 두 오류 모두 lookup 표현식을 가리킨다(ERR-5).
 - Member call `o.name(args)`은 원본 인스턴스의 public method를 인자와 함께 호출하고(VAL-18) 결과를 바인딩한다. public method가 아닌 이름은 E_RUNTIME_UNKNOWN_FUNCTION이며, private 또는 protected method와 PHP `__call` 같은 동적 dispatch hook만 처리하는 이름도 포함한다. 인자를 거부하거나 오류를 발생시킨 method는 E_RUNTIME_HOST_FUNCTION이다. 바인딩할 수 없는 결과는 그 `E_DATA_*` 코드로 호출 위치에서 실패한다.
