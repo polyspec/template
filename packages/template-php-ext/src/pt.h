@@ -6,6 +6,7 @@
 #define PT_H
 
 #include "php.h"
+#include "Zend/zend_smart_str.h"
 #include <setjmp.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -81,6 +82,8 @@ typedef struct pt_run {
     pt_arena arena;
     pt_error error;
     pt_template *parsing; /* the template that a failed parse leaves to the boundary to release */
+    pt_template **held;   /* the templates that a render uses; the boundary releases them */
+    uint32_t held_count, held_capacity;
 } pt_run;
 
 /* The line index of a source: the byte offsets of the line starts (LEX-16). */
@@ -430,7 +433,7 @@ typedef struct pt_request {
 /* Renders the template `name`; the output is appended to `output`. */
 void pt_render(pt_run *run, pt_engine *engine, const pt_request *request, smart_str *output);
 
-/* Loads a template through the loader of the engine (RT-9, RT-10, RT-40); the run keeps a reference. */
-pt_template *pt_load(pt_run *run, pt_engine *engine, pt_s name, pt_s from, const pt_lines *lines, size_t start, size_t end, bool positioned);
+/* Releases the templates that a run holds. */
+void pt_run_release_templates(pt_run *run);
 
 #endif

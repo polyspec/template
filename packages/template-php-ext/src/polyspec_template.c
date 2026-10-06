@@ -189,6 +189,8 @@ static void pt_run_init(pt_run *run)
     pt_arena_init(&run->arena);
     memset(&run->error, 0, sizeof(run->error));
     run->parsing = NULL;
+    run->held = NULL;
+    run->held_count = run->held_capacity = 0;
 }
 
 /* Ends a run: throws its error when it failed and frees what it allocated. Returns whether it
@@ -200,6 +202,7 @@ static bool pt_run_finish(pt_run *run)
         pt_template_release(run->parsing);
         run->parsing = NULL;
     }
+    pt_run_release_templates(run);
     pt_arena_free(&run->arena);
     if (failed) {
         pt_throw(&run->error);
@@ -436,6 +439,180 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson)
         RETURN_THROWS();
     }
     RETURN_STR(text.s);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* Requests (RT-4, RT-24, RT-25)                                                                    */
+/* ----------------------------------------------------------------------------------------------- */
+
+/* A failure while binding the request has the entry template and no position (ERR-5). */
+ZEND_NORETURN static void pt_request_fail(pt_run *run, pt_s name, const char *code, zend_string *message)
+{
+    pt_fail_bare(run, code, name, message);
+}
+
+static HashTable *pt_defines_new(pt_run *run)
+{
+    HashTable *defines = zend_new_array(4);
+    zval owner;
+    ZVAL_ARR(&owner, defines);
+    pt_arena_keep(&run->arena, &owner);
+    zval_ptr_dtor(&owner);
+    return defines;
+}
+
+/* Adds one template definition: an HTML string, or a template path with optional data (RT-24). */
+static void pt_define_add(pt_run *run, pt_s name, HashTable *defines, pt_s id, const pt_value *html, const pt_value *template, bool has_data, pt_map *data, bool data_is_map)
+{
+    pt_define *entry = pt_alloc(&run->arena, sizeof(pt_define));
+    if (html != NULL) {
+        entry->html = true;
+        entry->template = html->u.str;
+    } else if (template != NULL) {
+        pt_s resolved;
+        if (!pt_resolve_path(&run->arena, PT_S(""), template->u.str, &resolved)) {
+            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
+        }
+        if (has_data && !data_is_map) {
+            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: data is not a map", id.s));
+        }
+        entry->template = resolved;
+        entry->data = has_data ? data : NULL;
+    } else {
+        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: entry needs \"template\" or \"html\"", id.s));
+    }
+    zend_hash_str_update_ptr(defines, id.s, id.n, entry);
+}
+
+/* The definitions of JSON text: a map from id to a path or to a map with template, data or html. */
+static HashTable *pt_defines_from_json(pt_run *run, pt_s name, pt_value value)
+{
+    if (value.type != PT_MAP) {
+        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("define is not an object", 23, 0));
+    }
+    HashTable *defines = pt_defines_new(run);
+    const pt_map *map = value.u.map;
+    for (uint32_t i = 0; i < map->used; i++) {
+        if (!map->entries[i].live) {
+            continue;
+        }
+        pt_s id = map->entries[i].key;
+        pt_value input = map->entries[i].value;
+        if (pt_is_string(input)) {
+            pt_define_add(run, name, defines, id, NULL, &input, false, NULL, false);
+            continue;
+        }
+        const pt_value *html = NULL, *template = NULL;
+        pt_value *data = NULL;
+        if (input.type == PT_MAP) {
+            pt_value *found = pt_map_get(input.u.map, "html", 4);
+            html = found && pt_is_string(*found) ? found : NULL;
+            found = pt_map_get(input.u.map, "template", 8);
+            template = found && pt_is_string(*found) ? found : NULL;
+            data = pt_map_get(input.u.map, "data", 4);
+        }
+        pt_map *map_data = NULL;
+        bool is_map = false;
+        if (data != NULL) {
+            if (data->type == PT_MAP) {
+                map_data = data->u.map;
+                is_map = true;
+            } else if (data->type == PT_LIST && data->u.list->count == 0) {
+                map_data = pt_map_new(&run->arena, 0);
+                is_map = true;
+            }
+        }
+        pt_define_add(run, name, defines, id, html, template, data != NULL, map_data, is_map);
+    }
+    return defines;
+}
+
+/* The environment (RT-25): timezone defaults to Z and now to the current time. */
+static void pt_env_from_json(pt_run *run, pt_s name, const pt_value *value, pt_env *env)
+{
+    env->timezone = PT_S("Z");
+    env->now = (double)time(NULL);
+    if (value == NULL || value->type == PT_NULL || value->type == PT_LIST) {
+        return;
+    }
+    if (value->type != PT_MAP) {
+        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env is not an object", 20, 0));
+    }
+    pt_value *timezone = pt_map_get(value->u.map, "timezone", 8);
+    if (timezone != NULL && timezone->type != PT_NULL) {
+        if (!pt_is_string(*timezone)) {
+            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.timezone is not a string", 28, 0));
+        }
+        env->timezone = timezone->u.str;
+    }
+    pt_value *now = pt_map_get(value->u.map, "now", 3);
+    if (now != NULL && now->type != PT_NULL) {
+        if (now->type != PT_NUMBER) {
+            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.now is not a number", 23, 0));
+        }
+        env->now = now->u.number;
+    }
+}
+
+static pt_value pt_read_json(pt_run *run, pt_s name, zend_string *text)
+{
+    pt_value value;
+    pt_bind_error error = {NULL, NULL};
+    if (!pt_json_parse(&run->arena, ZSTR_VAL(text), ZSTR_LEN(text), &value, &error)) {
+        pt_request_fail(run, name, error.code, error.message);
+    }
+    return value;
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson)
+{
+    zend_string *name, *assign, *define = NULL, *env = NULL;
+    ZEND_PARSE_PARAMETERS_START(2, 4)
+        Z_PARAM_STR(name)
+        Z_PARAM_STR(assign)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_STR_OR_NULL(define)
+        Z_PARAM_STR_OR_NULL(env)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_engine *engine = pt_engine_of(Z_OBJ_P(ZEND_THIS));
+    smart_str output = {0};
+    pt_run run;
+    pt_run_init(&run);
+    if (setjmp(run.jump) == 0) {
+        pt_request request;
+        memset(&request, 0, sizeof(request));
+        request.name = pt_strdup(&run.arena, ZSTR_VAL(name), ZSTR_LEN(name));
+        pt_value data = pt_read_json(&run, request.name, assign);
+        pt_value definitions, environment;
+        if (define) {
+            definitions = pt_read_json(&run, request.name, define);
+        }
+        if (env) {
+            environment = pt_read_json(&run, request.name, env);
+        }
+        if (data.type == PT_MAP) {
+            request.data = data.u.map;
+        } else if (data.type == PT_NULL || (data.type == PT_LIST && data.u.list->count == 0)) {
+            request.data = pt_map_new(&run.arena, 0);
+        } else {
+            pt_request_fail(&run, request.name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("assign is not a map", 19, 0));
+        }
+        if (define) {
+            request.defines = pt_defines_from_json(&run, request.name, definitions);
+        }
+        pt_env_from_json(&run, request.name, env ? &environment : NULL, &request.env);
+        pt_render(&run, engine, &request, &output);
+    }
+    if (!pt_run_finish(&run)) {
+        smart_str_free(&output);
+        RETURN_THROWS();
+    }
+    smart_str_0(&output);
+    if (output.s == NULL) {
+        RETURN_EMPTY_STRING();
+    }
+    RETURN_STR(output.s);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
