@@ -5,20 +5,21 @@
 //   node scripts/full-run.mjs rerun-failed      rerun the targets of the current tree that did not pass
 //
 // The full suite runs once, when every active checklist item is done (AGENTS). The guard refuses a run while a task
-// row of docs/plans/execution-checklist.md is `[~]`, while tracked changes are uncommitted, and while the run of
-// another process is still going on. A full run is refused when var/full-run.json already records a run of the
-// current tree (`git rev-parse HEAD^{tree}`); `rerun-failed` is refused unless that record exists and has targets that
-// did not pass. The guard prints its decision with the reason, runs each target with `make -k <target>` to its end,
-// prints its start and its result with the elapsed time, and writes the record before and after each target, so a run
-// that is stopped stays recorded as `incomplete`. The record and each rerun hold the versions of the toolchains of the
-// run (`environment`). The output of each target goes to var/report/full-run/targets/<target>.log, and the end of the
-// run writes var/report/full-run/summary.md with the first failure lines of each failed target (T20.1-9). No step has a
-// time limit.
+// row of docs/plans/execution-checklist.md is `[~]`, while the pre-push hook is not installed (scripts/git-hooks.mjs),
+// while tracked changes are uncommitted, and while the run of another process is still going on. A full run is refused
+// when var/full-run.json already records a run of the current tree (`git rev-parse HEAD^{tree}`); `rerun-failed` is
+// refused unless that record exists and has targets that did not pass. The guard prints its decision with the reason,
+// runs each target with `make -k <target>` to its end, prints its start and its result with the elapsed time, and writes
+// the record before and after each target, so a run that is stopped stays recorded as `incomplete`. The record and each
+// rerun hold the versions of the toolchains of the run (`environment`). The output of each target goes to
+// var/report/full-run/targets/<target>.log, and the end of the run writes var/report/full-run/summary.md with the first
+// failure lines of each failed target (T20.1-9). No step has a time limit.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { hooksIssue } from './git-hooks.mjs';
 import { acquire } from './holder-lock.mjs';
 import { runLogged, startReport, writeSummary } from './target-report.mjs';
 
@@ -49,15 +50,17 @@ export function activeItems(text) {
 const notPassed = record => record.targets.filter(target => target.status !== 'passed').map(target => target.name);
 
 /**
- * Decides whether the guard runs. `mode` is `run` or `rerun-failed`; `active` the active checklist items; `dirty` the
- * `git status --porcelain` lines of tracked files; `tree` the current tree; `record` the record of the last run or
- * null; `running` whether the process of an incomplete record still exists. Returns `{ run, reason, targets }`.
+ * Decides whether the guard runs. `mode` is `run` or `rerun-failed`; `active` the active checklist items; `hooks` why
+ * the pre-push hook is not installed, or null; `dirty` the `git status --porcelain` lines of tracked files; `tree` the
+ * current tree; `record` the record of the last run or null; `running` whether the process of an incomplete record
+ * still exists. Returns `{ run, reason, targets }`.
  */
-export function decide({ mode, targets, active, dirty, tree, record, running }) {
+export function decide({ mode, targets, active, hooks, dirty, tree, record, running }) {
   const refuse = reason => ({ run: false, reason, targets: [] });
   if (active.length > 0) {
     return refuse(`${active.length} active checklist item${active.length === 1 ? '' : 's'} in ${CHECKLIST}; the full suite runs once, when every active item is done:\n${active.map(item => `  ${item.id} ${item.title}`).join('\n')}`);
   }
+  if (hooks) return refuse(`the pre-push hook is not installed: ${hooks}`);
   if (dirty.length > 0) {
     return refuse(`the working tree has uncommitted tracked changes; a full run verifies a committed tree:\n${dirty.map(line => `  ${line}`).join('\n')}`);
   }
@@ -171,7 +174,7 @@ async function guardedRun({ root, mode, targets, runTarget, print, environment }
   const commit = git(root, 'rev-parse', 'HEAD').trim();
   const record = readRecord(root);
   const running = Boolean(record && record.result === 'incomplete' && record.pid !== process.pid && alive(record.pid));
-  const decision = decide({ mode, targets, active, dirty, tree, record, running });
+  const decision = decide({ mode, targets, active, hooks: hooksIssue(root), dirty, tree, record, running });
   print(`[full-run] ${decision.run ? 'run' : 'refuse'}: ${decision.reason}`);
   if (!decision.run) return 1;
 

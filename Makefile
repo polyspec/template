@@ -31,6 +31,12 @@ export npm_config_offline := true
 export COMPOSER_DISABLE_NETWORK := 1
 ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK
 
+# Git runs the hooks of core.hooksPath. Every make invocation sets it to the tracked hooks in .githooks, whose pre-push
+# hook runs the push gate scripts/push-gate.mjs (T17.1-3); `make hooks` installs and checks it.
+ifneq ($(shell git config core.hooksPath),.githooks)
+$(shell git config core.hooksPath .githooks)
+endif
+
 .DEFAULT_GOAL := help
 # make keeps going after a failed target and fails at the end, so one run reports every failure (T19.8). A target that
 # runs several checks names them as prerequisites of one command each, because make stops a recipe at its first
@@ -42,7 +48,7 @@ MAKEFLAGS += -k
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
 	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers ci-targets cargo-downloads-check uninstall-cli rerun-failed \
-	owner-check conformance-cases function-inventory-check dependency-review
+	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -82,6 +88,9 @@ help: ## List targets
 	@echo "Targets:"
 	@echo "  check                  The full suite through scripts/full-run.mjs: once per tree, when no checklist task is [~]"
 	@echo "  rerun-failed           Rerun the targets of check that did not pass on the current tree"
+	@echo "  hooks                  Set core.hooksPath to .githooks and check the pre-push hook of the push gate"
+	@echo "  hooks-check            Fail while core.hooksPath is not .githooks or .githooks/pre-push is not executable"
+	@echo "  push-gate-commit       The push gate of CI on COMMIT (HEAD): fail while it has a task [~] or no executable pre-push hook"
 	@echo "  owner-check            The owner checks of the changed paths (scripts/owner-checks.json); PATHS or BASE select the paths"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
@@ -344,7 +353,19 @@ conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
 	node tests/runner/function-inventory.mjs
 
-owner-check: ## Run the owner checks of the changed paths: PATHS, the paths since BASE, or the uncommitted changes
+hooks: ## Set core.hooksPath to .githooks and check the pre-push hook of the push gate
+	git config core.hooksPath .githooks
+	node scripts/push-gate.mjs hooks-check
+
+hooks-check: ## Fail while core.hooksPath is not .githooks or .githooks/pre-push is not executable
+	node scripts/push-gate.mjs hooks-check
+
+# The job push-gate of .github/workflows/push-gate.yml runs this target on the pushed commit (T17.1-3).
+COMMIT ?= HEAD
+push-gate-commit: ## Fail while COMMIT (HEAD) has a checklist task [~] or does not track an executable pre-push hook
+	node scripts/push-gate.mjs commit $(COMMIT)
+
+owner-check: hooks-check ## Run the owner checks of the changed paths: PATHS, the paths since BASE, or the uncommitted changes
 	node scripts/owner-check.mjs $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base "$(BASE)")
 
 install-check: install-workspace-check package-installs-check ## Install immutable package artifacts in isolated install projects
