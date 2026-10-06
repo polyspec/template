@@ -9,7 +9,7 @@ use Polyspec\Template\Native\Engine;
 use Polyspec\Template\Native\TemplateError;
 
 /**
- * Host binding of PHP values and native objects (VAL-2, VAL-14, VAL-17 to VAL-20, FUN-46, ERR-13).
+ * Host binding of PHP values and native objects (VAL-2, VAL-14, VAL-17 to VAL-20, FUN-46).
  *
  * The same scenarios run against the PHP AST runtime in `packages/template-php/tests/Value/HostBindingTest.php`.
  */
@@ -39,22 +39,6 @@ final class HostBindingTest extends TestCase
     {
         $error = $this->failure('date-multibyte.tpl', []);
         $this->assertSame(['E_RUNTIME_TYPE', 1, 4], [$error->getErrorCode(), $error->getErrorLine(), $error->getErrorCol()]);
-    }
-
-    public function testEveryMethodOfTheExtensionRunsInsideThePanicBoundary(): void
-    {
-        // ERR-13: a method handler cannot unwind into PHP, so every PHP method of the extension calls boundary().
-        foreach (glob(dirname(__DIR__) . '/src/*.rs') ?: [] as $file) {
-            $source = (string) file_get_contents($file);
-            preg_match_all('/#\[php_impl\]\nimpl \w+ \{\n(.*?)\n\}\n/s', $source, $blocks);
-            foreach ($blocks[1] as $block) {
-                preg_match_all('/pub fn (\w+)\([^{]*\{\n\s*([^\n]*)/', $block, $methods, PREG_SET_ORDER);
-                $this->assertNotSame([], $methods, $file);
-                foreach ($methods as [, $name, $firstLine]) {
-                    $this->assertStringStartsWith('boundary(', $firstLine, "{$file}: {$name}");
-                }
-            }
-        }
     }
 
     public function testMapKeysThatAreNotUtf8AreRejected(): void

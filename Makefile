@@ -51,11 +51,10 @@ GO_DIR   := packages/template-go
 RUST_DIR := packages/template-rust
 PHP_DIR  := packages/template-php
 EXT_DIR  := packages/template-php-ext
-# The shared library of the PHP extension that `make ext` builds: .dylib on macOS, .so elsewhere.
-LIBRARY_FILE := libpolyspec_template.$(if $(filter Darwin,$(shell uname -s)),dylib,so)
 # The builds that the checks run, published by scripts/publish-build.mjs only when their bytes change: cargo links
-# target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1).
-EXT_LIBRARY := var/build/$(LIBRARY_FILE)
+# target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1). The C PHP
+# extension is built by phpize as polyspec_template.so on every platform (T21.4).
+EXT_LIBRARY := var/build/polyspec_template.so
 SHOWCASE_RUST := tools/showcase/adapters/rust
 LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
@@ -147,15 +146,13 @@ check: ## Full check through the guard: once per tree, when no checklist task is
 rerun-failed: ## Rerun only the targets of make check that did not pass on the current tree
 	node scripts/full-run.mjs rerun-failed
 
-lint: lint-js lint-go lint-rust lint-ext lint-showcase-format lint-showcase-warnings lint-php ## Lint every package
+lint: lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php ## Lint every package
 
-.PHONY: lint-go lint-rust lint-ext lint-showcase-format lint-showcase-warnings lint-php
+.PHONY: lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php
 lint-go:
 	@out=$$(gofmt -l $(GO_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
 lint-rust:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
-lint-ext:
-	$(CARGO) fmt --manifest-path $(EXT_DIR)/Cargo.toml --check
 lint-showcase-format:
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
 lint-showcase-warnings: cargo-downloads-check
@@ -174,7 +171,6 @@ install: install-tools ## Install the tools of the checkout, the npm dependencie
 	rustup toolchain install --no-self-update
 	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
 	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
-	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(EXT_DIR)/Cargo.toml
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
 
@@ -365,21 +361,22 @@ parity: cargo-downloads-check build-ts build-go build-rust build-php ## Cross-la
 test-browser: build-ts ## Browser rendering test
 	node tests/browser/run.mjs
 
-ext: cargo-downloads-check ## Build the PHP extension
-	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml && node scripts/publish-build.mjs $(EXT_DIR)/target/release/$(LIBRARY_FILE) $(EXT_LIBRARY)
+# The PHP extension is a C implementation in $(EXT_DIR)/src: scripts/build-php-extension.mjs builds it with phpize,
+# configure and make of the php-config of PATH in a temporary directory, with every compiler warning as an error, and
+# publishes the library by rename when its bytes change; it does nothing for unchanged inputs (T21.1, T21.4).
+ext: ## Build the PHP extension
+	node scripts/build-php-extension.mjs $(EXT_DIR)/src $(EXT_LIBRARY)
 
-test-ext: test-ext-clippy test-ext-conformance test-ext-unit ## Test the PHP extension
+test-ext: test-ext-conformance test-ext-unit ## Test the PHP extension
 
 # The C extension in $(EXT_DIR)/src declares its PHP classes in polyspec_template.stub.php; gen_stub.php of the PHP
 # build generates polyspec_template_arginfo.h from it, which is committed for builds from the package (T21.1).
 ext-arginfo: ## Generate the arginfo header of the C extension from its stub with gen_stub.php
 	node scripts/build-php-extension.mjs --arginfo $(EXT_DIR)/src
 
-.PHONY: build-ext-php test-ext-clippy test-ext-conformance test-ext-unit
+.PHONY: build-ext-php test-ext-conformance test-ext-unit
 build-ext-php:
 	node scripts/composer-install.mjs $(EXT_DIR)
-test-ext-clippy: cargo-downloads-check
-	$(CARGO) clippy --locked --release --manifest-path $(EXT_DIR)/Cargo.toml -- -D warnings
 test-ext-conformance: cargo-downloads-check ext
 	node tests/runner/conformance.mjs --langs php-ext
 test-ext-unit: ext build-ext-php
@@ -572,5 +569,5 @@ typed-generator-compile-check: cargo-downloads-check build-php compiler-ir-check
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target $(EXT_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 

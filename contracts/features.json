@@ -550,11 +550,11 @@
     },
     {
       "id": "template-php-ext",
-      "title": "PHP native extension",
-      "title_ko": "PHP native extension",
+      "title": "PHP native extension in C",
+      "title_ko": "C로 구현한 PHP native extension",
       "status": "implemented",
-      "description": "Expose the supported AST runtime through the compiled PHP extension boundary, including the PHP value binding of VAL-14, retained native objects and logical class functions.",
-      "description_ko": "컴파일된 PHP extension 경계에서 지원하는 AST runtime을 제공한다. VAL-14의 PHP 값 binding, 유지되는 native 객체, 논리 class function을 포함한다.",
+      "description": "Render templates with an independent C implementation loaded as a PHP extension, including the PHP value binding of VAL-14, retained native objects, logical class functions and bound maps.",
+      "description_ko": "PHP extension으로 load되는 C 독립 구현으로 template을 render한다. VAL-14의 PHP 값 binding, 유지되는 native 객체, 논리 class function, bound map을 포함한다.",
       "inputs": {
         "type": "PHPExtensionRequest",
         "fields": [

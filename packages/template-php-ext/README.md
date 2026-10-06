@@ -2,21 +2,29 @@
 
 [한국어](README.ko.md).
 
-PHP extension that renders templates with the native implementation. It registers the classes `Polyspec\Template\Native\Engine` and `Polyspec\Template\Native\TemplateError`. The behaviour is the behaviour of the specification in `docs/spec/`.
+PHP extension that renders templates with an independent implementation in C. It registers the classes `Polyspec\Template\Native\Engine`, `Polyspec\Template\Native\BoundMap` and `Polyspec\Template\Native\TemplateError`. The behaviour is the behaviour of the specification in `docs/spec/`; the PHP implementation `packages/template-php` and the conformance cases in `tests/cases` define it.
 
 ## Build
 
-The build needs Rust 1.98.1 and the PHP development headers of the PHP that will load the extension.
+The sources, `config.m4` and the stub `polyspec_template.stub.php` are in `src/`. The build needs a C compiler and phpize and php-config of the PHP that will load the extension, PHP 8.2 or later.
 
 ```sh
 make ext
 ```
 
-The shared library is written to `target/release/libpolyspec_template.dylib` on macOS and `target/release/libpolyspec_template.so` on Linux. Load it with the `extension` setting of `php.ini` or with `-d extension=<path>` on the command line.
+`make ext` runs `scripts/build-php-extension.mjs`, which builds the extension with phpize, configure and make in a temporary directory, with every compiler warning as an error, and publishes the shared library to `var/build/polyspec_template.so` of the repository. It builds nothing when the sources and the PHP build are unchanged, and it fails when php-config and php of `PATH` are not one PHP. Load the library with the `extension` setting of `php.ini` or with `-d extension=<path>` on the command line.
 
 ```sh
-php -d extension=packages/template-php-ext/target/release/libpolyspec_template.dylib -r 'var_dump(extension_loaded("polyspec_template"));'
+php -d extension=var/build/polyspec_template.so -r 'var_dump(extension_loaded("polyspec_template"));'
 ```
+
+The package has the Composer type `php-ext` with the build path `src`, so PIE builds and installs it into the PHP that runs PIE. A build by hand runs the same steps in `src`:
+
+```sh
+cd src && phpize && ./configure && make
+```
+
+gen_stub.php of the PHP build generates `src/polyspec_template_arginfo.h` from the stub; the header is committed. After a change of the stub, `make ext-arginfo` generates it again, and the build fails while the header does not match the stub.
 
 ## Render
 
@@ -54,15 +62,15 @@ try {
 
 The accessors avoid `getCode()`, `getLine()` and `getFile()`, which `\Exception` declares final. `getMessage()` returns the message of the specification.
 
-`render` and `renderJson` apply the binding rules of the specification: a number whose magnitude is greater than 2^53 − 1 is `E_DATA_NUMBER_RANGE` whether it is an integer or a float (VAL-2), an array key or property name that is not valid UTF-8 is `E_DATA_INVALID_UTF8`, a closure or a resource is `E_DATA_UNSUPPORTED_TYPE`, and lists and maps nested deeper than 64 levels, including a cyclic structure, are `E_DATA_DEPTH` (VAL-20). Host functions, class functions and methods receive the same arguments as in the PHP AST runtime (VAL-21): a number is a `float`, a safe string is a `string`, a list is a list array, a map is an array in entry order whose decimal integer keys are integer keys, and a native object is the original PHP object (VAL-18). Two native objects are equal when they are the same PHP object (EXP-39). JSON text that is not one JSON document is `E_DATA_INVALID_JSON`, and a template file that exists but cannot be read is `E_LOAD_FAILED`. Only public properties and methods are visible, whatever the class scope of the caller (VAL-19), and `__get` and `__call` are not consulted. Every method of the extension reports a Rust panic as `E_INTERNAL` instead of aborting the PHP process (ERR-13).
+`render` and `renderJson` apply the binding rules of the specification: a number whose magnitude is greater than 2^53 − 1 is `E_DATA_NUMBER_RANGE` whether it is an integer or a float (VAL-2), an array key or property name that is not valid UTF-8 is `E_DATA_INVALID_UTF8`, a closure or a resource is `E_DATA_UNSUPPORTED_TYPE`, and lists and maps nested deeper than 64 levels, including a cyclic structure, are `E_DATA_DEPTH` (VAL-20). Host functions, class functions and methods receive the same arguments as in the PHP AST runtime (VAL-21): a number is a `float`, a safe string is a `string`, a list is a list array, a map is an array in entry order whose decimal integer keys are integer keys, and a native object is the original PHP object (VAL-18). Two native objects are equal when they are the same PHP object (EXP-39). JSON text that is not one JSON document is `E_DATA_INVALID_JSON`, and a template file that exists but cannot be read is `E_LOAD_FAILED`. Only public properties and methods are visible, whatever the class scope of the caller (VAL-19), and `__get` and `__call` are not consulted. A template error of host code, such as a nested render that fails, passes to the caller unchanged; any other exception of host code is `E_RUNTIME_HOST_FUNCTION` (FUN-46).
 
-`stubs/polyspec_template.stub.php` holds the signatures for static analysis and is never loaded at runtime.
+`src/polyspec_template.stub.php` holds the signatures for static analysis and is never loaded at runtime.
 
 ## Command line
 
 ```sh
-php -d extension=target/release/libpolyspec_template.dylib bin/template-ext.php parse FILE [--root DIR] [--delimiters OC]
-php -d extension=target/release/libpolyspec_template.dylib bin/template-ext.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php parse FILE [--root DIR] [--delimiters OC]
+php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
 `parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.

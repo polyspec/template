@@ -12,7 +12,7 @@ The executable source is [contracts/features.json](../contracts/features.json). 
 | template-go | Go runtime | implemented | go: pass<br>php: unsupported<br>rust: unsupported<br>typescript: unsupported | [Evidence](spec/compiler) |
 | template-rust | Rust runtime | implemented | go: unsupported<br>php: unsupported<br>rust: pass<br>typescript: unsupported | [Evidence](spec/compiler) |
 | template-php | PHP runtime | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [Evidence](spec/compiler) |
-| template-php-ext | PHP native extension | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [Evidence](operations/testing) |
+| template-php-ext | PHP native extension in C | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported | [Evidence](operations/testing) |
 | performance-measurements | Performance measurements | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](operations/benchmark) |
 | showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](operations/showcase) |
 | generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass | [Evidence](spec/compiler) |

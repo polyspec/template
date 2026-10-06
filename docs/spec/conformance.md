@@ -48,7 +48,7 @@ Conformance is verified by fixture cases that every implementation renders throu
 | go | `packages/template-go/template` |
 | rust | `packages/template-rust/target/release/template` |
 | php | `php packages/template-php/bin/template.php` |
-| php-ext | `php -d extension=packages/template-php-ext/target/release/libpolyspec_template.so packages/template-php-ext/bin/template-ext.php` |
+| php-ext | `php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php` |
 
 ## Comparison
 
