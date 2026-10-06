@@ -253,6 +253,17 @@ test('every CI job runs its targets past failures and uploads their report, also
   assert.deepEqual(problems, []);
 });
 
+test('a job of a matrix runs every combination to its end, also after another combination failed (T20.1-13)', () => {
+  // GitHub cancels the other jobs of a matrix at the first failure unless fail-fast is false; CI lost the
+  // result of PHP 8.5 that way when PHP 8.2 failed.
+  for (const file of WORKFLOWS) {
+    for (const job of jobs(file)) {
+      if (!/\n {4}strategy:\n/.test(job.text)) continue;
+      assert.match(job.text, /\n {4}strategy:\n {6}fail-fast: false\n/, `${file} job ${job.name} has a matrix that cancels its other jobs at the first failure`);
+    }
+  }
+});
+
 test('a new push cancels the running CI of its workflow and ref', () => {
   for (const file of WORKFLOWS) {
     const text = read(file);
