@@ -197,7 +197,7 @@ test('the push-gate workflow runs the CI command through make on every push and 
   assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
   // T20.1-8, T20.1-9: the job runs its tools through make and uploads the report of the targets; besides the gate of
   // tasks it runs the document, checklist, feature and rule checks (T17.1-5).
-  assert.match(workflow, /- run: make ci-targets TARGETS="push-gate-commit documents-check feature-check rules-check"\n/);
+  assert.match(workflow, /- run: make ci-targets TARGETS="push-gate-commit documents-check feature-check rules-check artifact-digest-check"\n/);
   assert.match(workflow, /path: var\/report\/ci-targets\/\n/);
   const commands = spawnSync('make', ['--no-print-directory', '-n', 'push-gate-commit'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(commands.status, 0, commands.stderr);
@@ -219,7 +219,7 @@ function packageImports(file, seen = new Set()) {
 test('the checks of the job push-gate run with Node.js alone, which is all that the job installs (T17.1-5)', () => {
   const workflow = readFileSync(path.join(ROOT, '.github/workflows/push-gate.yml'), 'utf8');
   const targets = /- run: make ci-targets TARGETS="([^"]+)"/.exec(workflow)[1].split(' ');
-  assert.deepEqual(targets, ['push-gate-commit', 'documents-check', 'feature-check', 'rules-check']);
+  assert.deepEqual(targets, ['push-gate-commit', 'documents-check', 'feature-check', 'rules-check', 'artifact-digest-check']);
   for (const target of targets) {
     const commands = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8' });
     assert.equal(commands.status, 0, commands.stderr);

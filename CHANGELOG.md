@@ -1,5 +1,6 @@
 # Changelog
 
+- Caught stale compiled artifacts before `main` (T17.1-6). The AST compiler digest is computed from the tracked sources of `packages/template-ts` instead of its build, and `make artifact-digest-check` fails, naming each manifest and `make showcase`, when a committed artifact records the digest of another compiler; the job `push-gate` and `showcase-check` run it. The 30 artifacts and the page are compiled again for the new digest.
 - Regenerated the showcase artifacts after T8.5-1 (T8.5-2). The AST artifact manifests record a digest of the template-ts build, which T8.5-1 changed, so the release job found `examples/site/index.html` stale; the five manifests and the page are written again, and only the digests change.
 - Failed `json` of a native object in every runtime (T8.5-1). The PHP runtime raised `E_INTERNAL` and the other runtimes wrote `null`; FUN-26 states that a value that is or holds a native object has no JSON text and fails with E_RUNTIME_TYPE at the call, and the shared fixture `tests/fixtures/native-object/json.tpl` checks it in every runtime, the extension and the generated programs.
 - Kept the inputs of a run in memory across `setjmp` (T21.4-2). GCC still warned with `-Wclobbered` for two parameters of `Engine::render`; every run goes through `pt_run_work`, which takes a pointer to a structure of its inputs.

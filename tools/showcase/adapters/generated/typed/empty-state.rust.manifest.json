@@ -6,7 +6,7 @@
   "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
   "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99",
+  "compilerDigest": "5bb19be65abd2787fd51d230a68337c7a9025c178126d5712b91264d38c802ac",
   "files": {
     "empty-state.rust": {
       "path": "empty-state.rust",

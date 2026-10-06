@@ -163,7 +163,7 @@ Dependencies: none. The PHP extension `packages/template-php-ext` wrapped the Ru
 | W14 | none | T14.1 → T14.2 |
 | W15 | T15.1, T15.2, T15.3, T15.4 | none |
 | W16 | none | T16.1 |
-| W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 → T17.1-2 → T17.1-3 → T17.1-5 |
+| W17 | none | T17.1 → T17.2 → {T17.3, T17.4, T17.5} → T17.6 → {T17.4-1, T17.5-2, T17.7, T17.8, T17.9, T17.10, T17.11} → T17.1-1 → T17.1-2 → T17.1-3 → T17.1-5 → T17.1-6 |
 | W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | none |
 | W19 | none | T19.1 → T19.15 in order; T19.6-1 after T19.11; T19.8-1 after T19.15 |
 | W20 | T20.1, T20.2, T20.3 | T20.3-1 after T20.3; T20.1-1 after T20.3-1; T20.1-2 after T20.1-1; T20.1-3 after T20.1-2; T20.1-4 after T20.1-3; T20.1-5 after T20.1-4; T20.1-6 after T20.1-5; T20.1-7 after T20.1-6; T20.1-8 after T20.1-7; T20.1-9 after T20.1-8; T20.1-10 after T20.1-9; T20.1-11 after T20.1-10; T20.1-12 after T20.1-11; T20.1-13 after T20.1-12 |

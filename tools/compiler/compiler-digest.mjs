@@ -17,13 +17,26 @@ function digestFiles(relativePaths) {
   return digest.digest('hex');
 }
 
-/** Identifies the parser and AST artifact compiler implementation. */
+/** The files under a directory of the repository, sorted, as repository paths. */
+function filesUnder(relativeDirectory) {
+  return readdirSync(join(projectRoot, relativeDirectory), { recursive: true, withFileTypes: true })
+    .filter(entry => entry.isFile())
+    .map(entry => join(entry.parentPath ?? entry.path, entry.name).slice(projectRoot.length).replace(/^[\\/]+/, '').replaceAll('\\', '/'))
+    .sort();
+}
+
+/**
+ * Identifies the parser and AST artifact compiler implementation: the sources and the build configuration of
+ * packages/template-ts, which the build of the package turns into dist with the tools of package-lock.json, and the
+ * artifact writer (T17.1-6). The digest reads only tracked sources, so a check computes it without building the package.
+ */
 export function astCompilerDigest() {
-  const distribution = readdirSync(join(projectRoot, 'packages/template-ts/dist'), { withFileTypes: true })
-    .filter(entry => entry.isFile() && entry.name.endsWith('.mjs'))
-    .map(entry => `packages/template-ts/dist/${entry.name}`);
   return digestFiles([
-    ...distribution,
+    ...filesUnder('packages/template-ts/src'),
+    'packages/template-ts/package.json',
+    'packages/template-ts/tsconfig.json',
+    'packages/template-ts/tsup.config.ts',
+    'package-lock.json',
     'tools/compiler/ast-artifact.mjs',
   ]);
 }

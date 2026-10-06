@@ -7,7 +7,7 @@
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "e84ff85fca8d072b415fbbf4c7496501868f08d225aad4dfe5d139d1a95d4b78",
+  "compilerDigest": "be198ebcbf26b8ce02a6b5c65869dd77a3f59c0ef3024f471306f19b489653d3",
   "files": {
     "content.tpl": {
       "path": "content.tpl.ast.json",

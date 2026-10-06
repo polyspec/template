@@ -541,9 +541,13 @@ release-test-matrix: ## The full suite of make check through the same guard: eve
 release-check: ## Install and run the release matrix in an isolated clean worktree
 	node scripts/check-clean-release.mjs
 
-showcase-check: typed-generator-compile-check showcase-build-check contract-check showcase-site-check showcase-html-check ## Verify example-site parity, repeatability and browser output
+showcase-check: artifact-digest-check typed-generator-compile-check showcase-build-check contract-check showcase-site-check showcase-html-check ## Verify example-site parity, repeatability and browser output
 
-.PHONY: showcase-ast-check showcase-build-check showcase-site-check showcase-html-check
+.PHONY: artifact-digest-check showcase-ast-check showcase-build-check showcase-site-check showcase-html-check
+# The committed artifacts record the digest of the compiler that built them; the check reads only tracked sources, so the
+# job push-gate runs it (T17.1-6).
+artifact-digest-check: ## Fail when a committed compiled artifact records the digest of another compiler; names make showcase
+	node scripts/check-artifact-digests.mjs
 showcase-ast-check: build-ts
 	node tools/showcase/compile.mjs --refresh false
 showcase-build-check: cargo-downloads-check showcase-ast-check build-php

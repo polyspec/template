@@ -74,7 +74,7 @@ Compile mode와 artifact 갱신은 서로 독립적인 build 설정이다.
 - `true`는 source, type, contract, compiler 구현 digest를 계산하고 digest가 달라졌을 때만 emit한다.
 - `false`는 template source를 읽지 않고 아무것도 emit하지 않는다. 배포 artifact를 검증해 사용한다.
 
-Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다. Artifact manifest는 mode, target, entry, source digest, type digest, contract digest, compiler digest와 file을 기록한다. Compiler digest는 해당 target을 만든 parser/compiler module을 포괄하므로 compiler 구현이 바뀌면 나머지 입력이 같아도 artifact를 갱신한다. Artifact가 없거나 손상됐거나 호환되지 않으면 runtime 시작 전에 실패한다.
+Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다. Artifact manifest는 mode, target, entry, source digest, type digest, contract digest, compiler digest와 file을 기록한다. Compiler digest는 해당 target을 만든 parser/compiler module을 포괄하므로 compiler 구현이 바뀌면 나머지 입력이 같아도 artifact를 갱신한다. digest는 추적되는 source로 계산한다. AST artifact는 `packages/template-ts`의 source와 build 설정, `package-lock.json`, artifact writer로, generated artifact는 `tools/compiler`의 module로 계산하므로, 검사가 build 없이 읽는다(`make artifact-digest-check`). Artifact가 없거나 손상됐거나 호환되지 않으면 runtime 시작 전에 실패한다.
 
 ## 구현 상태
 
