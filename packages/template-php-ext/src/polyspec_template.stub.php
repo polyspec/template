@@ -71,7 +71,49 @@ final class Engine
     public static function parseToJson(string $source, string $name, array $options = []): string {}
 
     /**
+     * Registers a host function fn(array $args, array $env): mixed.
+     */
+    public function register(string $name, callable $function): void {}
+
+    /**
+     * Registers the logical class function Class::method as fn(array $args, array $env): mixed.
+     */
+    public function registerClass(string $className, string $method, callable $function): void {}
+
+    /**
+     * Renders a template with assign data given as a PHP value or as a BoundMap, which is not bound
+     * again (VAL-22).
+     *
+     * @param array<string, mixed> $options The key define maps a definition id to a template path or to an array with
+     *        the keys template, data and html; the key env holds an array with the keys timezone (a string) and now
+     *        (a number).
+     */
+    public function render(string $name, mixed $assign = [], array $options = []): string {}
+
+    /**
      * Renders a template with assign data, template definitions and environment given as JSON text.
      */
     public function renderJson(string $name, string $assign, ?string $define = null, ?string $env = null): string {}
+}
+
+/**
+ * A map that host binding checked once (VAL-22). PHP code cannot instantiate, clone or unserialize
+ * the class; `bind` and `merge` create it.
+ *
+ * @not-serializable
+ */
+final class BoundMap
+{
+    /**
+     * Applies host binding to a value and returns a bound map; null and `[]` give the empty bound map and a
+     * bound map of the extension is returned unchanged. Errors have no template and no position
+     * (ERR-14).
+     */
+    public static function bind(mixed $value): BoundMap {}
+
+    /**
+     * Returns a bound map with the entries of $first and $second: an entry of $second replaces the
+     * entry of $first with the same key in its position (RT-26).
+     */
+    public static function merge(mixed $first, mixed $second): BoundMap {}
 }

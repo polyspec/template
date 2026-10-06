@@ -324,7 +324,9 @@ static pt_value pt_member_call(pt_ctx *ctx, pt_value container, const pt_expr *e
 {
     zend_function *method = NULL;
     if (container.type == PT_OBJECT) {
-        zend_string *lower = zend_string_tolower(zend_string_init(expr->name.s, expr->name.n, 0));
+        zend_string *name = zend_string_init(expr->name.s, expr->name.n, 0);
+        zend_string *lower = zend_string_tolower(name);
+        zend_string_release(name);
         method = zend_hash_find_ptr(&container.u.object->ce->function_table, lower);
         zend_string_release(lower);
         if (method != NULL && !(method->common.fn_flags & ZEND_ACC_PUBLIC)) {
