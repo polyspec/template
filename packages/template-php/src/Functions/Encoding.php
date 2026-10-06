@@ -38,7 +38,10 @@ final class Encoding
         if (is_array($value)) {
             return '[' . implode(',', array_map([self::class, 'toJson'], $value)) . ']';
         }
-        /** @var MapValue $value */
+        if (!$value instanceof MapValue) {
+            // FUN-26: a native object is opaque (VAL-19) and has no JSON text.
+            throw Helpers::typeError('json does not accept a native object');
+        }
         $parts = [];
         foreach ($value->entries() as $key => $entry) {
             $parts[] = self::jsonString($key) . ':' . self::toJson($entry);

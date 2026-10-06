@@ -32,13 +32,22 @@ func TestDate(t *testing.T) {
 	}
 }
 
+func mustJSON(t *testing.T, v value.Value) string {
+	t.Helper()
+	text, err := functions.ToJSON(v)
+	if err != nil {
+		t.Fatalf("json: %v", err)
+	}
+	return text
+}
+
 func TestJSONAndURL(t *testing.T) {
 	m := value.NewOrderedMap()
 	m.Set("a", "<&> ")
-	if got, want := functions.ToJSON(m), fmt.Sprintf("{\"a\":\""+`\u%04x\u%04x\u%04x\u%04x`+"\"}", '<', '&', '>', 0x2028); got != want {
+	if got, want := mustJSON(t, m), fmt.Sprintf("{\"a\":\""+`\u%04x\u%04x\u%04x\u%04x`+"\"}", '<', '&', '>', 0x2028); got != want {
 		t.Errorf("json: %s", got)
 	}
-	if got := functions.ToJSON(value.List{1e21, 0.1, nil, true, value.SafeString{Text: "x"}}); got != `[1e+21,0.1,null,true,"x"]` {
+	if got := mustJSON(t, value.List{1e21, 0.1, nil, true, value.SafeString{Text: "x"}}); got != `[1e+21,0.1,null,true,"x"]` {
 		t.Errorf("json list: %s", got)
 	}
 	if got := functions.PercentEncode("a b/é~!*'()"); got != "a%20b%2F%C3%A9~%21%2A%27%28%29" {

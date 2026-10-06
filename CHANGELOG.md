@@ -1,5 +1,6 @@
 # Changelog
 
+- Failed `json` of a native object in every runtime (T8.5-1). The PHP runtime raised `E_INTERNAL` and the other runtimes wrote `null`; FUN-26 states that a value that is or holds a native object has no JSON text and fails with E_RUNTIME_TYPE at the call, and the shared fixture `tests/fixtures/native-object/json.tpl` checks it in every runtime, the extension and the generated programs.
 - Kept the inputs of a run in memory across `setjmp` (T21.4-2). GCC still warned with `-Wclobbered` for two parameters of `Engine::render`; every run goes through `pt_run_work`, which takes a pointer to a structure of its inputs.
 - Ran the document, checklist, feature and rule checks in the job `push-gate` (T17.1-5), the check that the ruleset `main` requires, so a commit that breaks them cannot reach `main`; they need Node.js alone, which a test of `tests/scripts/push-gate.test.mjs` requires.
 - Ran every combination of a CI matrix to its end (T20.1-13). The job PHP 8.2 failed and GitHub cancelled the job PHP 8.5; the php job of `ci.yml` sets `fail-fast: false`, and `tests/scripts/toolchain-files.test.mjs` requires it of every job with a matrix.

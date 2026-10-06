@@ -1,7 +1,7 @@
 //! escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
 
 use crate::escape::escape_html;
-use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_string, stringify_arg};
+use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_string, stringify_arg, type_error};
 use crate::value::Value;
 use crate::value::number::number_to_string;
 
@@ -29,24 +29,24 @@ fn json_string(text: &str) -> String {
     result
 }
 
-/// FUN-26 to FUN-28: compact JSON text of a value.
-pub fn to_json(value: &Value) -> String {
-    match value {
+/// FUN-26 to FUN-28: compact JSON text of a value. A native object is opaque (VAL-19) and has no JSON
+/// text, so a value that is or holds one fails with `E_RUNTIME_TYPE`.
+pub fn to_json(value: &Value) -> Result<String, FunctionError> {
+    Ok(match value {
         Value::Null => "null".to_string(),
-        Value::Bool(true) => "true".to_string(),
-        Value::Bool(false) => "false".to_string(),
+        Value::Bool(value) => value.to_string(),
         Value::Number(number) => number_to_string(*number),
         Value::Str(text) | Value::Safe(text) => json_string(text),
-        Value::List(list) => format!("[{}]", list.iter().map(to_json).collect::<Vec<_>>().join(",")),
+        Value::List(list) => format!("[{}]", list.iter().map(to_json).collect::<Result<Vec<_>, _>>()?.join(",")),
         Value::Map(map) => {
-            let parts: Vec<String> = map
+            let parts = map
                 .iter()
-                .map(|(key, value)| format!("{}:{}", json_string(key), to_json(value)))
-                .collect();
+                .map(|(key, value)| Ok(format!("{}:{}", json_string(key), to_json(value)?)))
+                .collect::<Result<Vec<String>, FunctionError>>()?;
             format!("{{{}}}", parts.join(","))
         }
-        Value::Object(_) => "null".to_string(),
-    }
+        Value::Object(_) => return Err(type_error("json does not accept a native object")),
+    })
 }
 
 /// FUN-29: percent-encodes every byte except the unreserved characters.
@@ -71,7 +71,7 @@ fn raw(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Function
 }
 
 fn json(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
-    Ok(Value::text(to_json(&args[0])))
+    Ok(Value::text(to_json(&args[0])?))
 }
 
 fn url(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
