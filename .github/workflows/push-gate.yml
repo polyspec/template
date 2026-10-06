@@ -2,8 +2,9 @@
 # on the head commit of the pull request, through make (T20.1-8): `make ci-targets TARGETS="push-gate-commit"` runs
 # `node scripts/push-gate.mjs commit`, which fails while a task of docs/plans/execution-checklist.md is [~] in that
 # commit, naming each task, and when the commit does not track .githooks/pre-push with mode 100755. The pre-push hook
-# refuses such a push locally; this job reports a push that did not run the hook. The job reads only the commit and
-# installs nothing; like every job that runs make it sets up the Node.js of .node-version and the Go of go.mod. It pins
+# refuses such a push locally; this job reports a push that did not run the hook. It also runs the document, checklist,
+# feature and rule checks, which need Node.js alone, so the check that the ruleset main of .github/ruleset.json requires
+# fails a commit that breaks them (T17.1-5). The job reads only the commit and installs nothing; like every job that runs make it sets up the Node.js of .node-version and the Go of go.mod. It pins
 # every action by its commit, runs on ubuntu-24.04 and uploads its report under !cancelled() (T20.1-9). A new push
 # cancels the running gate of its workflow and ref (T20.1-12).
 name: Push gate
@@ -37,7 +38,7 @@ jobs:
         with:
           go-version-file: packages/template-go/go.mod
           cache: false
-      - run: make ci-targets TARGETS="push-gate-commit"
+      - run: make ci-targets TARGETS="push-gate-commit documents-check feature-check rules-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}

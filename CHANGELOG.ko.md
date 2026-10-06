@@ -1,5 +1,6 @@
 # 변경 기록
 
+- ruleset `main`이 요구하는 check인 job `push-gate`에서 문서, checklist, feature, rule 검사를 실행해(T17.1-5) 그것을 어기는 commit이 `main`에 갈 수 없게 했다. 이 검사들은 Node.js만 필요하며, `tests/scripts/push-gate.test.mjs`의 test가 이를 요구한다.
 - CI matrix의 모든 조합을 끝까지 실행했다(T20.1-13). PHP 8.2 job이 실패하자 GitHub가 PHP 8.5 job을 취소했다. `ci.yml`의 php job은 `fail-fast: false`를 두고, `tests/scripts/toolchain-files.test.mjs`가 matrix를 가진 모든 job에 이것을 요구한다.
 - CI runner의 GCC로 C extension을 build했다(T21.4-1). GCC는 `-Werror`에서 `Engine::render`의 지역 변수 두 개가 `longjmp`로 바뀔 수 있고 `date`의 지역 변수 하나가 초기화되지 않고 쓰일 수 있다고 경고했다. 각 실행의 작업은 별도 함수가 되었고, out parameter로 채우는 지역 변수는 모두 초기화한 상태로 시작한다.
 - checklist 작업이 `[~]`인 동안 push를 불가능하게 했다(T17.1-3). 추적되는 pre-push hook `.githooks/pre-push`는 `scripts/push-gate.mjs hook`을 실행하고, 이 script는 push되는 commit이나 working tree의 checklist에 진행 중 작업이 있는 동안 각 작업을 밝히며 push를 거부한다. 모든 make 실행은 `core.hooksPath`를 `.githooks`로 설정하고, `make hooks`와 `make hooks-check`가 이를 설치하고 검사하며, `make check`의 guard는 그것이 없으면 거부한다. workflow `.github/workflows/push-gate.yml`은 모든 push와 pull request에서 고정한 action으로 `ubuntu-24.04`에서 `make ci-targets TARGETS="push-gate-commit"`로 같은 gate를 실행하고, report를 upload하며, 새 push가 같은 ref의 실행 중인 gate를 취소한다.
