@@ -195,10 +195,40 @@ test('the push-gate workflow runs the CI command through make on every push and 
   assert.match(workflow, /\non:\n {2}push:\n {2}pull_request:\n/);
   assert.match(workflow, /\njobs:\n {2}push-gate:\n {4}runs-on: ubuntu-24\.04\n/);
   assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
-  // T20.1-8, T20.1-9: the job runs its tool through make and uploads the report of the target.
-  assert.match(workflow, /- run: make ci-targets TARGETS="push-gate-commit"\n/);
+  // T20.1-8, T20.1-9: the job runs its tools through make and uploads the report of the targets; besides the gate of
+  // tasks it runs the document, checklist, feature and rule checks (T17.1-5).
+  assert.match(workflow, /- run: make ci-targets TARGETS="push-gate-commit documents-check feature-check rules-check"\n/);
   assert.match(workflow, /path: var\/report\/ci-targets\/\n/);
   const commands = spawnSync('make', ['--no-print-directory', '-n', 'push-gate-commit'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(commands.status, 0, commands.stderr);
   assert.match(commands.stdout, /^node scripts\/push-gate\.mjs commit HEAD$/m);
+});
+
+// The modules that a script imports, transitively: [file, specifier] of every import that is not relative.
+function packageImports(file, seen = new Set()) {
+  if (seen.has(file)) return [];
+  seen.add(file);
+  const found = [];
+  for (const [, specifier] of readFileSync(path.join(ROOT, file), 'utf8').matchAll(/^import [^'"]*['"]([^'"]+)['"]/gm)) {
+    if (specifier.startsWith('.')) found.push(...packageImports(path.join(path.dirname(file), specifier), seen));
+    else if (!specifier.startsWith('node:')) found.push([file, specifier]);
+  }
+  return found;
+}
+
+test('the checks of the job push-gate run with Node.js alone, which is all that the job installs (T17.1-5)', () => {
+  const workflow = readFileSync(path.join(ROOT, '.github/workflows/push-gate.yml'), 'utf8');
+  const targets = /- run: make ci-targets TARGETS="([^"]+)"/.exec(workflow)[1].split(' ');
+  assert.deepEqual(targets, ['push-gate-commit', 'documents-check', 'feature-check', 'rules-check']);
+  for (const target of targets) {
+    const commands = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8' });
+    assert.equal(commands.status, 0, commands.stderr);
+    const lines = commands.stdout.split('\n').filter(Boolean);
+    assert.ok(lines.length > 0, `make -n ${target} prints no command`);
+    for (const line of lines) {
+      const script = /^node (scripts\/\S+\.mjs)\b/.exec(line);
+      assert.ok(script, `make ${target} runs ${line}, not a script of the checkout with Node.js`);
+      assert.deepEqual(packageImports(script[1]), [], `make ${target} runs ${script[1]}, which imports a package that the job push-gate does not install`);
+    }
+  }
 });
