@@ -1,5 +1,6 @@
 # Changelog
 
+- Kept the inputs of a run in memory across `setjmp` (T21.4-2). GCC still warned with `-Wclobbered` for two parameters of `Engine::render`; every run goes through `pt_run_work`, which takes a pointer to a structure of its inputs.
 - Ran the document, checklist, feature and rule checks in the job `push-gate` (T17.1-5), the check that the ruleset `main` requires, so a commit that breaks them cannot reach `main`; they need Node.js alone, which a test of `tests/scripts/push-gate.test.mjs` requires.
 - Ran every combination of a CI matrix to its end (T20.1-13). The job PHP 8.2 failed and GitHub cancelled the job PHP 8.5; the php job of `ci.yml` sets `fail-fast: false`, and `tests/scripts/toolchain-files.test.mjs` requires it of every job with a matrix.
 - Built the C extension with the GCC of the CI runner (T21.4-1). GCC warned with `-Werror` that two locals of `Engine::render` might be clobbered by `longjmp` and that a local of `date` may be used uninitialized; the work of each run is a function of its own and every local filled through an out parameter starts initialized.

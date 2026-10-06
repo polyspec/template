@@ -195,6 +195,24 @@ static void pt_run_init(pt_run *run)
 
 /* Ends a run: throws its error when it failed and frees what it allocated. Returns whether it
  * succeeded. */
+static bool pt_run_finish(pt_run *run);
+
+/* The work of one run and its input, which a failure leaves through longjmp. */
+typedef void (*pt_work)(pt_run *run, void *input);
+
+/* Runs `work` with `input` as one run and ends it with pt_run_finish(). The inputs of the work are in the structure
+ * that `input` points to, in memory, so no local of the frame that calls setjmp holds a value that a longjmp could
+ * clobber (-Wclobbered). */
+static bool pt_run_work(pt_work work, void *input)
+{
+    pt_run run;
+    pt_run_init(&run);
+    if (setjmp(run.jump) == 0) {
+        work(&run, input);
+    }
+    return pt_run_finish(&run);
+}
+
 static bool pt_run_finish(pt_run *run)
 {
     bool failed = run->error.code != NULL || run->error.exception != NULL;
@@ -372,27 +390,28 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, __construct)
     zend_hash_clean(&engine->cache);
 }
 
-static void pt_parse_into(pt_run *run, zend_string *source, zend_string *name, char open, char close, zval *result)
+typedef struct pt_parse_input {
+    zend_string *source, *name;
+    char open, close;
+    zval *result;
+} pt_parse_input;
+
+static void pt_parse_into(pt_run *run, void *context)
 {
-    pt_template *template = pt_parse(run, ZSTR_VAL(name), ZSTR_LEN(name), ZSTR_VAL(source), ZSTR_LEN(source), open, close);
-    pt_ast_to_zval(template, result);
+    pt_parse_input *input = context;
+    pt_template *template = pt_parse(run, ZSTR_VAL(input->name), ZSTR_LEN(input->name), ZSTR_VAL(input->source), ZSTR_LEN(input->source), input->open, input->close);
+    pt_ast_to_zval(template, input->result);
     pt_template_release(template);
 }
 
 /* RT-2: parses one source; on success `result` holds the AST as nested arrays. */
 static bool pt_parse_source(zend_string *source, zend_string *name, HashTable *options, zval *result)
 {
-    char open, close;
-    if (!pt_option_delimiters(options, &open, &close)) {
+    pt_parse_input input = {source, name, '{', '}', result};
+    if (!pt_option_delimiters(options, &input.open, &input.close)) {
         return false;
     }
-    pt_run run;
-    pt_run_init(&run);
-    /* The work of a run is a function of its own: no local of the frame that calls setjmp changes after it. */
-    if (setjmp(run.jump) == 0) {
-        pt_parse_into(&run, source, name, open, close, result);
-    }
-    return pt_run_finish(&run);
+    return pt_run_work(pt_parse_into, &input);
 }
 
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse)
@@ -570,8 +589,18 @@ static pt_value pt_read_json(pt_run *run, pt_s name, zend_string *text)
     return value;
 }
 
-static void pt_render_json_into(pt_run *run, pt_engine *engine, zend_string *name, zend_string *assign, zend_string *define, zend_string *env, smart_str *output)
+typedef struct pt_json_input {
+    pt_engine *engine;
+    zend_string *name, *assign, *define, *env;
+    smart_str *output;
+} pt_json_input;
+
+static void pt_render_json_into(pt_run *run, void *context)
 {
+    pt_json_input *input = context;
+    pt_engine *engine = input->engine;
+    zend_string *name = input->name, *assign = input->assign, *define = input->define, *env = input->env;
+    smart_str *output = input->output;
     pt_request request;
     memset(&request, 0, sizeof(request));
     request.name = pt_strdup(&run->arena, ZSTR_VAL(name), ZSTR_LEN(name));
@@ -608,14 +637,9 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson)
         Z_PARAM_STR_OR_NULL(env)
     ZEND_PARSE_PARAMETERS_END();
 
-    pt_engine *engine = pt_engine_of(Z_OBJ_P(ZEND_THIS));
     smart_str output = {0};
-    pt_run run;
-    pt_run_init(&run);
-    if (setjmp(run.jump) == 0) {
-        pt_render_json_into(&run, engine, name, assign, define, env, &output);
-    }
-    if (!pt_run_finish(&run)) {
+    pt_json_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, define, env, &output};
+    if (!pt_run_work(pt_render_json_into, &input)) {
         smart_str_free(&output);
         RETURN_THROWS();
     }
@@ -812,8 +836,22 @@ static void pt_env_from_php(pt_run *run, pt_s name, zval *input, pt_env *env)
     }
 }
 
-static void pt_render_php_into(pt_run *run, pt_engine *engine, zend_string *name, zval *assign, HashTable *options, smart_str *output)
+typedef struct pt_php_input {
+    pt_engine *engine;
+    zend_string *name;
+    zval *assign;
+    HashTable *options;
+    smart_str *output;
+} pt_php_input;
+
+static void pt_render_php_into(pt_run *run, void *context)
 {
+    pt_php_input *input = context;
+    pt_engine *engine = input->engine;
+    zend_string *name = input->name;
+    zval *assign = input->assign;
+    HashTable *options = input->options;
+    smart_str *output = input->output;
     pt_request request;
     memset(&request, 0, sizeof(request));
     request.name = pt_strdup(&run->arena, ZSTR_VAL(name), ZSTR_LEN(name));
@@ -843,14 +881,9 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, render)
         Z_PARAM_ARRAY_HT(options)
     ZEND_PARSE_PARAMETERS_END();
 
-    pt_engine *engine = pt_engine_of(Z_OBJ_P(ZEND_THIS));
     smart_str output = {0};
-    pt_run run;
-    pt_run_init(&run);
-    if (setjmp(run.jump) == 0) {
-        pt_render_php_into(&run, engine, name, assign, options, &output);
-    }
-    if (!pt_run_finish(&run)) {
+    pt_php_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, options, &output};
+    if (!pt_run_work(pt_render_php_into, &input)) {
         smart_str_free(&output);
         RETURN_THROWS();
     }
