@@ -1,5 +1,6 @@
 # 변경 기록
 
+- T8.5-1 뒤에 showcase artifact를 다시 만들었다(T8.5-2). AST artifact manifest는 template-ts build의 digest를 기록하고 T8.5-1이 그것을 바꿨으므로, release job이 `examples/site/index.html`을 오래된 것으로 판정했다. manifest 다섯 개와 page를 다시 썼고 digest만 바뀐다.
 - 모든 runtime에서 native object의 `json`을 실패시켰다(T8.5-1). PHP runtime은 `E_INTERNAL`을 냈고 다른 runtime은 `null`을 썼다. FUN-26은 native object이거나 그것을 담은 값에는 JSON text가 없고 호출 위치에서 E_RUNTIME_TYPE으로 실패한다고 적으며, 공유 fixture `tests/fixtures/native-object/json.tpl`이 모든 runtime, extension, generated program에서 이를 검사한다.
 - 실행의 입력을 `setjmp`를 넘어 memory에 두었다(T21.4-2). GCC는 `Engine::render`의 parameter 두 개에 여전히 `-Wclobbered`를 냈다. 모든 실행은 입력 구조체의 pointer를 받는 `pt_run_work`를 거친다.
 - ruleset `main`이 요구하는 check인 job `push-gate`에서 문서, checklist, feature, rule 검사를 실행해(T17.1-5) 그것을 어기는 commit이 `main`에 갈 수 없게 했다. 이 검사들은 Node.js만 필요하며, `tests/scripts/push-gate.test.mjs`의 test가 이를 요구한다.

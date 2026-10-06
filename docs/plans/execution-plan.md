@@ -156,7 +156,7 @@ Dependencies: none. The PHP extension `packages/template-php-ext` wrapped the Ru
 | W5 | none | T5.1 → T5.6 |
 | W6 | T6.1–T6.5, T6.7 | T6.6 after all |
 | W7 | T7.1 → T7.2 → {T7.3, T7.5} → {T7.4, T7.6, T7.7} → T7.8 → T7.9 → T7.10 → T7.11 | compiler contract and implementation precede proof and publication |
-| W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 → T8.5-1 | runtime support precedes parity and publication |
+| W8 | T8.1 → {T8.2, T8.3} → T8.4 → {T8.5, T8.6, T8.7} → T8.8 → T8.5-1 → T8.5-2 | runtime support precedes parity and publication |
 | W9 | none | T9.1 |
 | W10 | none | T10.1 |
 | W11 | T11.3 → T11.4 alongside T11.5 | T11.1 → T11.2 → the parallel group → T11.6 |
