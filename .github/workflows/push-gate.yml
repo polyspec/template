@@ -1,22 +1,25 @@
-# The push gate (T17.1-3). Every push to any branch and every pull request runs the push gate on the pushed commit, or
-# on the head commit of the pull request, through make (T20.1-8): `make ci-targets TARGETS="push-gate-commit ..."` runs
+# The push gate (T17.1-3). Every push to a branch other than those of the merge queue, every pull request and every
+# merge group of the merge queue runs the push gate, through make (T20.1-8), on the pushed commit, the head commit of the
+# pull request or the merge group commit: `make ci-targets TARGETS="push-gate-commit ..."` runs
 # `node scripts/push-gate.mjs commit`, which fails while a task of docs/plans/execution-checklist.md is [~] in that
 # commit, naming each task, and when the commit does not track .githooks/pre-push with mode 100755. The pre-push hook
 # refuses such a push locally; this job reports a push that did not run the hook. It also runs the document, checklist,
 # feature and rule checks (T17.1-5) and the compiler digests of the committed artifacts (T17.1-6), which need Node.js
-# alone, so the check that the ruleset main of .github/ruleset.json requires fails a commit that breaks them.
-# The job installs nothing; like every job that runs make it sets up the Node.js of .node-version and the Go of go.mod.
-# It pins every action by its commit, runs on ubuntu-24.04 and uploads its report under !cancelled() (T20.1-9). A new
-# push cancels the running gate of its workflow and ref (T20.1-12).
+# alone. The ruleset main of .github/ruleset.json requires this job, so the merge queue merges no commit that fails it
+# (T17.1-7). The job installs nothing; like every job that runs make it sets up the Node.js of .node-version and the Go
+# of go.mod. It pins every action by its commit, runs on ubuntu-24.04 and uploads its report under !cancelled()
+# (T20.1-9). A new push to a pull request cancels the gate of its previous push; no other run is cancelled.
 name: Push gate
 
 on:
   push:
+    branches-ignore: ['gh-readonly-queue/**']
   pull_request:
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

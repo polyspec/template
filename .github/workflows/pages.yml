@@ -1,0 +1,61 @@
+# The documentation site of main (T17.1-7). The merge queue moves main to a commit only after CI passed on its merge
+# group, so this workflow builds and publishes the site of every commit that main receives. It publishes, so it stops
+# at its first failure; it pins its actions by commit and runs on ubuntu-24.04. A newer commit of main does not cancel
+# the deployment of the previous one.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+# rustup installs no toolchain on the first cargo; a job that uses Rust installs it first (T18.7-1).
+env:
+  RUSTUP_AUTO_INSTALL: '0'
+
+jobs:
+  pages:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: packages/template-go/go.mod
+          cache: false
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - run: make install
+      - run: make ci-targets TARGETS="docs-static-check build-ts"
+        env:
+          VITEPRESS_BASE: /${{ github.event.repository.name }}/
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: report-pages
+          path: var/report/ci-targets/
+          if-no-files-found: error
+      - run: |
+          mkdir -p docs/.vitepress/dist/examples
+          cp -R examples/site docs/.vitepress/dist/examples/site
+          test -s docs/.vitepress/dist/examples/site/index.html
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: docs/.vitepress/dist
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -3,19 +3,21 @@
 # `make ci-targets TARGETS="..."`; both run every target to its end also after a failure and write a report, the log of
 # each target and a summary with the first failure lines of each failed target, which is also the job summary. Every
 # job uploads its report under `!cancelled()`, the release job also its record var/full-run.json (T20.1-9). A verifying
-# job runs every step after a failing step (`!cancelled()`); only the pages job, which publishes, stops at its first
-# failure. Every job runs on ubuntu-24.04, pins its actions by commit and installs with `make install`, which installs
-# the npm and Go of the checkout into var/tools with the Go of setup-go (T19.2).
+# job runs every step after a failing step (`!cancelled()`). Every job runs on ubuntu-24.04, pins its actions by commit
+# and installs with `make install`, which installs the npm and Go of the checkout into var/tools with the Go of setup-go
+# (T19.2). The workflow runs on every pull request and every merge group of the merge queue: the ruleset main of
+# .github/ruleset.json requires every job, and the queue moves main to the merge group commit only after they passed on
+# it, so the run of the merge group is the evidence of the commit that main receives (T17.1-7). A new push to a pull
+# request cancels the run of its previous push; a merge group has a ref of its own, and its run is never cancelled.
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -234,45 +236,3 @@ jobs:
           name: report-php-${{ matrix.php }}
           path: var/report/ci-targets/
           if-no-files-found: error
-
-  pages:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [release, docs, typescript, browser, editor, go, rust, php]
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
-        with:
-          node-version-file: .node-version
-          cache: npm
-      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
-        with:
-          go-version-file: packages/template-go/go.mod
-          cache: false
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-      - run: make install
-      - run: make ci-targets TARGETS="docs-static-check build-ts"
-        env:
-          VITEPRESS_BASE: /${{ github.event.repository.name }}/
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ !cancelled() }}
-        with:
-          name: report-pages
-          path: var/report/ci-targets/
-          if-no-files-found: error
-      - run: |
-          mkdir -p docs/.vitepress/dist/examples
-          cp -R examples/site docs/.vitepress/dist/examples/site
-          test -s docs/.vitepress/dist/examples/site/index.html
-      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        with:
-          path: docs/.vitepress/dist
-      - id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -264,13 +264,21 @@ test('a job of a matrix runs every combination to its end, also after another co
   }
 });
 
-test('a new push cancels the running CI of its workflow and ref', () => {
+test('a new push to a pull request cancels the running CI of its workflow and ref, and no other run is cancelled (T17.1-7)', () => {
+  // A merge group has a ref of its own and its run decides whether main receives the commit, so only pull request runs
+  // are cancelled.
   for (const file of WORKFLOWS) {
     const text = read(file);
     const [, triggers = ''] = /\non:\n((?: {2}.*\n|\s*\n)+)/.exec(`\n${text}`) ?? [];
-    if (!/^ {2}(?:push|pull_request):/m.test(triggers)) continue;
-    assert.match(text, /\nconcurrency:\n {2}group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: true\n/, `${file} runs on push without a concurrency group of its workflow and ref that cancels the run in progress`);
+    if (!/^ {2}(?:push|pull_request|merge_group):/m.test(triggers)) continue;
+    assert.match(text, /\nconcurrency:\n {2}group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}\n/, `${file} has no concurrency group of its workflow and ref that cancels only the run of a pull request`);
   }
+});
+
+test('CI runs on every pull request and merge group, and the push gate also on the pushed branches outside the queue (T17.1-7)', () => {
+  assert.match(read('.github/workflows/ci.yml'), /\non:\n {2}pull_request:\n {2}merge_group:\n\n/);
+  assert.match(read('.github/workflows/push-gate.yml'), /\non:\n {2}push:\n {4}branches-ignore: \['gh-readonly-queue\/\*\*'\]\n {2}pull_request:\n {2}merge_group:\n\n/);
+  assert.match(read('.github/workflows/pages.yml'), /\non:\n {2}push:\n {4}branches: \[main\]\n\n/);
 });
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
