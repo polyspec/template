@@ -74,7 +74,7 @@ Compilation mode and artifact refresh are independent build settings.
 - `true` computes source, type, contract and compiler-implementation digests and emits only when a digest changed.
 - `false` reads no template source and emits nothing. It validates and uses the deployed artifact.
 
-Generated files are completed in a temporary location and replaced atomically. An artifact manifest records its mode, target, entry, source digest, type digest, contract digest, compiler digest and files. The compiler digest covers the parser/compiler modules that produced that target, so a compiler implementation change invalidates an otherwise unchanged artifact. A missing, corrupt or incompatible artifact fails before runtime startup.
+Generated files are completed in a temporary location and replaced atomically. An artifact manifest records its mode, target, entry, source digest, type digest, contract digest, compiler digest and files. The compiler digest covers the parser/compiler modules that produced that target, so a compiler implementation change invalidates an otherwise unchanged artifact. It is computed from tracked sources: for AST artifacts the sources and build configuration of `packages/template-ts`, `package-lock.json` and the artifact writer, for generated artifacts the modules of `tools/compiler`, so a check reads it without a build (`make artifact-digest-check`). A missing, corrupt or incompatible artifact fails before runtime startup.
 
 ## Implementation status
 

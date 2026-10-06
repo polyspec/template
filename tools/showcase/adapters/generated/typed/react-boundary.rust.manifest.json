@@ -6,7 +6,7 @@
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99",
+  "compilerDigest": "5bb19be65abd2787fd51d230a68337c7a9025c178126d5712b91264d38c802ac",
   "files": {
     "react-boundary.rust": {
       "path": "react-boundary.rust",

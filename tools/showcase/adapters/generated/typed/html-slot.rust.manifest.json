@@ -6,7 +6,7 @@
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
   "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "9b4eec7b9e90fe449b19bc0b5bfcabc35e4d55e67e0e50330df3ab50c93f6b99",
+  "compilerDigest": "5bb19be65abd2787fd51d230a68337c7a9025c178126d5712b91264d38c802ac",
   "files": {
     "html-slot.rust": {
       "path": "html-slot.rust",
