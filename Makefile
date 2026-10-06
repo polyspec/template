@@ -37,7 +37,7 @@ ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_
 # failed command; a prerequisite that fails keeps the targets that depend on it from running.
 MAKEFLAGS += -k
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
-	conformance delimiter-matrix parity test-browser ext test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
+	conformance delimiter-matrix parity test-browser ext ext-arginfo test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
@@ -96,6 +96,7 @@ help: ## List targets
 	@echo "  parity                 Cross-language output comparison without expected files"
 	@echo "  test-browser           Browser rendering test (Playwright)"
 	@echo "  ext / test-ext         Build and test the PHP extension"
+	@echo "  ext-arginfo            Generate the arginfo header of the C extension from its stub with gen_stub.php"
 	@echo "  rules-check            Check case.json rule identifiers against docs/spec"
 	@echo "  editor-boundary-check  Check the editor layer boundaries (EDT-2, EDT-3)"
 	@echo "  doc-coverage           Check that public symbols carry documentation comments"
@@ -368,6 +369,11 @@ ext: cargo-downloads-check ## Build the PHP extension
 	$(CARGO) build --locked --release --manifest-path $(EXT_DIR)/Cargo.toml && node scripts/publish-build.mjs $(EXT_DIR)/target/release/$(LIBRARY_FILE) $(EXT_LIBRARY)
 
 test-ext: test-ext-clippy test-ext-conformance test-ext-unit ## Test the PHP extension
+
+# The C extension in $(EXT_DIR)/src declares its PHP classes in polyspec_template.stub.php; gen_stub.php of the PHP
+# build generates polyspec_template_arginfo.h from it, which is committed for builds from the package (T21.1).
+ext-arginfo: ## Generate the arginfo header of the C extension from its stub with gen_stub.php
+	node scripts/build-php-extension.mjs --arginfo $(EXT_DIR)/src
 
 .PHONY: build-ext-php test-ext-clippy test-ext-conformance test-ext-unit
 build-ext-php:

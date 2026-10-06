@@ -140,6 +140,10 @@ Dependencies: none. The checks had ten classes of defects: the result of a check
 
 Dependencies: none. In one `node --test` run of `make test-scripts` the test files run at once, and checks that wrote into the checkout, looked up a command on PATH or left processes behind failed by the timing of other files: a runner's temporary files in the repository root failed the owner check of every tracked path, the browser test's slow server stub was not certain to run and its assertion on the inode of `dist` met the prerequisite build of T18.8-2, and a temporary directory was removed while a stub's child process still wrote into it. Each check now keeps its files under the system temporary directory, receives its commands explicitly and waits for the processes it starts.
 
+## Wave 21 — PHP extension in C
+
+Dependencies: none. The PHP extension `packages/template-php-ext` wrapped the Rust implementation with ext-php-rs, so it was not an implementation of its own and depended on cargo, a Rust toolchain and the bindings of ext-php-rs for every PHP version. It becomes an independent implementation in C whose specification is the PHP implementation `packages/template-php` and the conformance cases: its sources, `config.m4` and the stub of its classes are in `src/`, gen_stub.php generates the arginfo from the stub, and phpize, configure and make build it. The tasks add the parser, the renderer with JSON data, the binding of PHP values, and then replace the Rust extension in the targets, the runners and CI.
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -163,6 +167,7 @@ Dependencies: none. In one `node --test` run of `make test-scripts` the test fil
 | W18 | T18.1, T18.2, T18.3, T18.4, T18.5, T18.6 | none |
 | W19 | none | T19.1 → T19.15 in order; T19.6-1 after T19.11; T19.8-1 after T19.15 |
 | W20 | T20.1, T20.2, T20.3 | T20.3-1 after T20.3; T20.1-1 after T20.3-1; T20.1-2 after T20.1-1; T20.1-3 after T20.1-2; T20.1-4 after T20.1-3; T20.1-5 after T20.1-4; T20.1-6 after T20.1-5; T20.1-7 after T20.1-6; T20.1-8 after T20.1-7; T20.1-9 after T20.1-8; T20.1-10 after T20.1-9; T20.1-11 after T20.1-10; T20.1-12 after T20.1-11 |
+| W21 | none | T21.1 → T21.2 → T21.3 → T21.4 |
 
 ## Definition of done
 
