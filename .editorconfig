@@ -17,6 +17,13 @@ indent_size = 4
 [*.rs]
 indent_size = 4
 
+[*.{c,h}]
+indent_size = 4
+
+# The arginfo header that gen_stub.php generates from the stub of the C extension: its indentation follows the generator.
+[packages/template-php-ext/src/*_arginfo.h]
+indent_style = unset
+
 [Makefile]
 indent_style = tab
 
