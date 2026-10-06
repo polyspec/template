@@ -69,4 +69,9 @@ final class Engine
      * @param array{delimiters?: string} $options
      */
     public static function parseToJson(string $source, string $name, array $options = []): string {}
+
+    /**
+     * Renders a template with assign data, template definitions and environment given as JSON text.
+     */
+    public function renderJson(string $name, string $assign, ?string $define = null, ?string $env = null): string {}
 }

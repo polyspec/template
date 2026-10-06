@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e573b3dad5244d9f43b32d39fee0784d3e1c510b */
+ * Stub hash: ea5995bc42b84c954538d424ad91cf8b52e6a166 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_TemplateError_getErrorCode, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -35,6 +35,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_E
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_renderJson, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, assign, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, define, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, env, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Polyspec_Template_Native_TemplateError, getErrorCode);
 ZEND_METHOD(Polyspec_Template_Native_TemplateError, getTemplate);
 ZEND_METHOD(Polyspec_Template_Native_TemplateError, getErrorLine);
@@ -45,6 +52,7 @@ ZEND_METHOD(Polyspec_Template_Native_TemplateError, toArray);
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson);
+ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson);
 
 static const zend_function_entry class_Polyspec_Template_Native_TemplateError_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_TemplateError, getErrorCode, arginfo_class_Polyspec_Template_Native_TemplateError_getErrorCode, ZEND_ACC_PUBLIC)
@@ -61,6 +69,7 @@ static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[]
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, parse, arginfo_class_Polyspec_Template_Native_Engine_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, parseToJson, arginfo_class_Polyspec_Template_Native_Engine_parseToJson, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Native_Engine, renderJson, arginfo_class_Polyspec_Template_Native_Engine_renderJson, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
