@@ -616,6 +616,346 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
+/* Host functions (FUN-43, FUN-44)                                                                  */
+/* ----------------------------------------------------------------------------------------------- */
+
+static bool pt_identifier(zend_string *name)
+{
+    const char *s = ZSTR_VAL(name);
+    size_t n = ZSTR_LEN(name);
+    if (n == 0 || !((s[0] >= 'A' && s[0] <= 'Z') || (s[0] >= 'a' && s[0] <= 'z') || s[0] == '_')) {
+        return false;
+    }
+    for (size_t i = 1; i < n; i++) {
+        char c = s[i];
+        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')) {
+            return false;
+        }
+    }
+    return true;
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, register)
+{
+    zend_string *name;
+    zend_fcall_info fci;
+    zend_fcall_info_cache fcc;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(name)
+        Z_PARAM_FUNC(fci, fcc)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_identifier(name)) {
+        zend_string *quoted = pt_json_quote(ZSTR_VAL(name), ZSTR_LEN(name));
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is not an identifier", ZSTR_VAL(quoted));
+        zend_string_release(quoted);
+        RETURN_THROWS();
+    }
+    if (pt_builtin_find(ZSTR_VAL(name), ZSTR_LEN(name)) != NULL) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is a built-in function", ZSTR_VAL(name));
+        RETURN_THROWS();
+    }
+    zval function;
+    ZVAL_COPY(&function, &fci.function_name);
+    zend_hash_update(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->functions, name, &function);
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass)
+{
+    zend_string *class_name, *method;
+    zend_fcall_info fci;
+    zend_fcall_info_cache fcc;
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_STR(class_name)
+        Z_PARAM_STR(method)
+        Z_PARAM_FUNC(fci, fcc)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_identifier(class_name) || !pt_identifier(method)) {
+        zend_throw_exception(spl_ce_InvalidArgumentException, "class function names must be identifiers", 0);
+        RETURN_THROWS();
+    }
+    zend_string *key = zend_strpprintf(0, "%s::%s", ZSTR_VAL(class_name), ZSTR_VAL(method));
+    zval function;
+    ZVAL_COPY(&function, &fci.function_name);
+    zend_hash_update(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->classes, key, &function);
+    zend_string_release(key);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* render with PHP values (RT-4, RT-24, RT-25, VAL-11, VAL-14, VAL-22)                              */
+/* ----------------------------------------------------------------------------------------------- */
+
+ZEND_NORETURN static void pt_bind_fail_run(pt_run *run, pt_s name, pt_bind_error *error)
+{
+    pt_request_fail(run, name, error->code, error->message);
+}
+
+/* The data of a definition: a bound map of the extension is not bound again (VAL-22); every other
+ * value is bound as its own value, and the empty array is the empty map. */
+static pt_map *pt_define_data(pt_run *run, pt_s name, pt_s id, zval *input)
+{
+    pt_bind_error error = {NULL, NULL};
+    pt_map *map;
+    if (pt_bound_of(input) != NULL) {
+        if (!pt_bind_map(&run->arena, input, &map, &error)) {
+            pt_bind_fail_run(run, name, &error);
+        }
+        return map;
+    }
+    pt_value value;
+    if (!pt_bind_value(&run->arena, input, &value, &error)) {
+        pt_bind_fail_run(run, name, &error);
+    }
+    if (value.type == PT_MAP) {
+        return value.u.map;
+    }
+    if (value.type == PT_LIST && value.u.list->count == 0) {
+        return pt_map_new(&run->arena, 0);
+    }
+    pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: data is not a map", id.s));
+}
+
+static HashTable *pt_defines_from_php(pt_run *run, pt_s name, zval *input)
+{
+    ZVAL_DEREF(input);
+    if (Z_TYPE_P(input) != IS_ARRAY) {
+        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("define is not an object", 23, 0));
+    }
+    HashTable *defines = pt_defines_new(run);
+    zend_ulong index;
+    zend_string *key;
+    zval *entry;
+    ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), index, key, entry) {
+        pt_s id;
+        if (key == NULL) {
+            char digits[32];
+            int written = snprintf(digits, sizeof(digits), ZEND_LONG_FMT, (zend_long)index);
+            id = pt_strdup(&run->arena, digits, (size_t)written);
+        } else {
+            if (pt_utf8_first_invalid(ZSTR_VAL(key), ZSTR_LEN(key)) < ZSTR_LEN(key)) {
+                pt_request_fail(run, name, "E_DATA_INVALID_UTF8", zend_string_init("a define id is not valid UTF-8", 30, 0));
+            }
+            id = pt_strdup(&run->arena, ZSTR_VAL(key), ZSTR_LEN(key));
+        }
+        ZVAL_DEREF(entry);
+        pt_define *define = pt_alloc(&run->arena, sizeof(pt_define));
+        zval *html = NULL, *template = NULL, *data = NULL;
+        if (Z_TYPE_P(entry) == IS_ARRAY) {
+            html = zend_hash_str_find_deref(Z_ARRVAL_P(entry), "html", 4);
+            template = zend_hash_str_find_deref(Z_ARRVAL_P(entry), "template", 8);
+            data = zend_hash_str_find(Z_ARRVAL_P(entry), "data", 4);
+            html = html && Z_TYPE_P(html) == IS_STRING ? html : NULL;
+            template = template && Z_TYPE_P(template) == IS_STRING ? template : NULL;
+        } else if (Z_TYPE_P(entry) == IS_STRING) {
+            template = entry;
+        }
+        if (html != NULL) {
+            define->html = true;
+            define->template = pt_strdup(&run->arena, Z_STRVAL_P(html), Z_STRLEN_P(html));
+        } else if (template != NULL) {
+            pt_s resolved;
+            if (!pt_resolve_path(&run->arena, PT_S(""), (pt_s){Z_STRVAL_P(template), Z_STRLEN_P(template)}, &resolved)) {
+                pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
+            }
+            define->template = pt_strdup(&run->arena, resolved.s, resolved.n);
+            define->data = data != NULL ? pt_define_data(run, name, id, data) : NULL;
+        } else {
+            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: entry needs \"template\" or \"html\"", id.s));
+        }
+        zend_hash_str_update_ptr(defines, id.s, id.n, define);
+    } ZEND_HASH_FOREACH_END();
+    return defines;
+}
+
+static void pt_env_from_php(pt_run *run, pt_s name, zval *input, pt_env *env)
+{
+    env->timezone = PT_S("Z");
+    env->now = (double)time(NULL);
+    if (input == NULL) {
+        return;
+    }
+    ZVAL_DEREF(input);
+    if (Z_TYPE_P(input) == IS_NULL) {
+        return;
+    }
+    if (Z_TYPE_P(input) != IS_ARRAY) {
+        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env is not an object", 20, 0));
+    }
+    zval *timezone = zend_hash_str_find_deref(Z_ARRVAL_P(input), "timezone", 8);
+    if (timezone != NULL && Z_TYPE_P(timezone) != IS_NULL) {
+        if (Z_TYPE_P(timezone) != IS_STRING) {
+            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.timezone is not a string", 28, 0));
+        }
+        env->timezone = pt_strdup(&run->arena, Z_STRVAL_P(timezone), Z_STRLEN_P(timezone));
+    }
+    zval *now = zend_hash_str_find_deref(Z_ARRVAL_P(input), "now", 3);
+    if (now != NULL && Z_TYPE_P(now) != IS_NULL) {
+        if (Z_TYPE_P(now) == IS_LONG) {
+            env->now = (double)Z_LVAL_P(now);
+        } else if (Z_TYPE_P(now) == IS_DOUBLE) {
+            env->now = Z_DVAL_P(now);
+        } else {
+            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.now is not a number", 23, 0));
+        }
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, render)
+{
+    zend_string *name;
+    zval *assign = NULL;
+    HashTable *options = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_STR(name)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ZVAL(assign)
+        Z_PARAM_ARRAY_HT(options)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_engine *engine = pt_engine_of(Z_OBJ_P(ZEND_THIS));
+    smart_str output = {0};
+    pt_run run;
+    pt_run_init(&run);
+    if (setjmp(run.jump) == 0) {
+        pt_request request;
+        memset(&request, 0, sizeof(request));
+        request.name = pt_strdup(&run.arena, ZSTR_VAL(name), ZSTR_LEN(name));
+        pt_bind_error error = {NULL, NULL};
+        if (assign == NULL) {
+            request.data = pt_map_new(&run.arena, 0);
+        } else if (!pt_bind_map(&run.arena, assign, &request.data, &error)) {
+            pt_bind_fail_run(&run, request.name, &error);
+        }
+        zval *define = options ? zend_hash_str_find(options, "define", 6) : NULL;
+        if (define != NULL) {
+            request.defines = pt_defines_from_php(&run, request.name, define);
+        }
+        pt_env_from_php(&run, request.name, options ? zend_hash_str_find(options, "env", 3) : NULL, &request.env);
+        pt_render(&run, engine, &request, &output);
+    }
+    if (!pt_run_finish(&run)) {
+        smart_str_free(&output);
+        RETURN_THROWS();
+    }
+    smart_str_0(&output);
+    if (output.s == NULL) {
+        RETURN_EMPTY_STRING();
+    }
+    RETURN_STR(output.s);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* BoundMap (VAL-22, ERR-14, RT-26)                                                                 */
+/* ----------------------------------------------------------------------------------------------- */
+
+static zend_object_handlers pt_bound_handlers;
+
+static zend_object *pt_bound_create(zend_class_entry *class_type)
+{
+    pt_bound *bound = zend_object_alloc(sizeof(pt_bound), class_type);
+    zend_object_std_init(&bound->std, class_type);
+    object_properties_init(&bound->std, class_type);
+    bound->std.handlers = &pt_bound_handlers;
+    pt_arena_init(&bound->arena);
+    bound->map = pt_map_new(&bound->arena, 0);
+    bound->sources[0] = bound->sources[1] = NULL;
+    return &bound->std;
+}
+
+static void pt_bound_free(zend_object *object)
+{
+    pt_bound *bound = pt_bound_from(object);
+    pt_arena_free(&bound->arena);
+    for (int i = 0; i < 2; i++) {
+        if (bound->sources[i]) {
+            OBJ_RELEASE(bound->sources[i]);
+        }
+    }
+    zend_object_std_dtor(object);
+}
+
+/* `new` fails: only bind and merge create a bound map. */
+static zend_function *pt_bound_get_constructor(zend_object *object)
+{
+    zend_throw_error(NULL, "Instantiation of class %s is not allowed; use bind or merge", ZSTR_VAL(object->ce->name));
+    return NULL;
+}
+
+/* Throws the error of a bind or merge, which has no template and no position (ERR-14). */
+static void pt_throw_bare(const char *code, zend_string *message)
+{
+    zend_string *template = ZSTR_EMPTY_ALLOC();
+    zend_object *object = pt_error_object(code, template, 0, 0, 0, 0, message);
+    zend_string_release(message);
+    zval exception;
+    ZVAL_OBJ(&exception, object);
+    zend_throw_exception_object(&exception);
+}
+
+ZEND_METHOD(Polyspec_Template_Native_BoundMap, bind)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (pt_bound_of(value) != NULL) {
+        ZVAL_DEREF(value);
+        RETURN_COPY(value);
+    }
+    zend_object *object = pt_bound_create(pt_bound_ce);
+    pt_bound *bound = pt_bound_from(object);
+    ZVAL_DEREF(value);
+    if (Z_TYPE_P(value) != IS_NULL) {
+        pt_value result;
+        pt_bind_error error = {NULL, NULL};
+        if (!pt_bind_value(&bound->arena, value, &result, &error)) {
+            OBJ_RELEASE(object);
+            pt_throw_bare(error.code, error.message);
+            RETURN_THROWS();
+        }
+        if (result.type == PT_MAP) {
+            bound->map = result.u.map;
+        } else if (!(result.type == PT_LIST && result.u.list->count == 0)) {
+            OBJ_RELEASE(object);
+            pt_throw_bare("E_DATA_UNSUPPORTED_TYPE", zend_string_init("bind takes a value that binds to a map", 38, 0));
+            RETURN_THROWS();
+        }
+    }
+    RETURN_OBJ(object);
+}
+
+ZEND_METHOD(Polyspec_Template_Native_BoundMap, merge)
+{
+    zval *first, *second;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(first)
+        Z_PARAM_ZVAL(second)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_bound *left = pt_bound_of(first), *right = pt_bound_of(second);
+    if (left == NULL || right == NULL) {
+        pt_throw_bare("E_DATA_UNSUPPORTED_TYPE", zend_string_init("merge takes two bound maps of the extension", 43, 0));
+        RETURN_THROWS();
+    }
+    zend_object *object = pt_bound_create(pt_bound_ce);
+    pt_bound *bound = pt_bound_from(object);
+    /* The merged map reads the values of both maps without binding them again, so it keeps them. */
+    bound->map = pt_map_copy(&bound->arena, left->map);
+    for (uint32_t i = 0; i < right->map->used; i++) {
+        if (right->map->entries[i].live) {
+            pt_map_set(bound->map, right->map->entries[i].key, right->map->entries[i].value);
+        }
+    }
+    bound->sources[0] = &left->std;
+    bound->sources[1] = &right->std;
+    GC_ADDREF(&left->std);
+    GC_ADDREF(&right->std);
+    RETURN_OBJ(object);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
 /* Module                                                                                           */
 /* ----------------------------------------------------------------------------------------------- */
 
@@ -643,6 +983,14 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_engine_handlers.free_obj = pt_engine_free;
     pt_engine_handlers.clone_obj = NULL;
     pt_engine_handlers.get_gc = pt_engine_get_gc;
+
+    pt_bound_ce = register_class_Polyspec_Template_Native_BoundMap();
+    pt_bound_ce->create_object = pt_bound_create;
+    memcpy(&pt_bound_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    pt_bound_handlers.offset = XtOffsetOf(pt_bound, std);
+    pt_bound_handlers.free_obj = pt_bound_free;
+    pt_bound_handlers.clone_obj = NULL;
+    pt_bound_handlers.get_constructor = pt_bound_get_constructor;
     return SUCCESS;
 }
 
