@@ -2,7 +2,7 @@
 
 [한국어](/ko/operations/publication).
 
-No package has been published. Each package installs from a local checkout as follows. Registry publication is recorded in `docs/features.md` when it happens.
+No package has been published to a registry. Each package installs from a local checkout as follows. Registry publication is recorded in `docs/features.md` when it happens.
 
 ## Local installation
 
@@ -37,7 +37,25 @@ polyspec-template = { path = "../template/packages/template-rust" }
 
 ## Version
 
-Every package declares version `0.0.1`. The version changes together in every package and in `CHANGELOG.md`.
+Every package declares version `0.0.1`. The version changes together in every package and in `CHANGELOG.md`, whose section `## Unreleased` above the released versions holds the entries of every change since the last release.
+
+## Tag releases
+
+A release is a tag of a commit of `main` (AGENTS, T22.1-4): `vX.Y.Z` releases the npm packages `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp` and `@polyspec/template-codemirror`, the Composer packages `polyspec/template` and `polyspec/template-php-ext` and the Cargo package `polyspec-template` at version X.Y.Z, and `packages/template-go/vX.Y.Z` releases the Go module `github.com/polyspec/template/packages/template-go`. The push of the tag runs `.github/workflows/release.yml` (`on: push: tags: ['v*', '*/v*']`, permission `contents: write`), which is not the job `release` of `ci.yml`. After `make install`, its steps run `scripts/release.mjs` in this order and stop at the first failure:
+
+```sh
+make release-verify
+make release-versions
+make release-assets
+make release-publish
+```
+
+1. `make release-verify` requires the tagged commit to be an ancestor of `origin/main` (`git merge-base --is-ancestor`) and the latest check runs `push-gate` and `ci-passed` of that commit (`gh api repos/<repository>/commits/<sha>/check-runs`) to be completed with the conclusion `success`; it names a missing or failed check and does not run the tests again.
+2. `make release-versions` requires X.Y.Z in every manifest of `MANIFESTS` (a `composer.json` without a `version` field takes the version from the tag, as Composer does) and the section `## X.Y.Z` in `CHANGELOG.md`, and names each file with its version and the version of the tag; for `packages/template-go/vX.Y.Z` it requires the module path of `packages/template-go/go.mod` and the section.
+3. `make release-assets` builds the npm packages and writes `var/release/assets`: `npm pack` of each npm package (`.tgz`), `git archive` of the directory of each Composer package of the tagged commit (`.zip`) and `cargo package --no-verify --locked` of `packages/template-rust` (`.crate`). An archive is named `<package name>-<version>.<ext>`, with `@scope/` and `vendor/` written as `scope-` and `vendor-`. A Go tag builds none.
+4. `make release-publish` runs `gh release create <tag> --verify-tag --title <tag> --notes-file <the section X.Y.Z>` with the archives.
+
+The tag reaches the steps through the environment variable `TAG`. `tests/scripts/release.test.mjs` runs each step against fakes of `gh`, `npm` and `cargo` and requires every tracked manifest to be released or declared in `NOT_RELEASED` with its reason, and `tests/scripts/toolchain-files.test.mjs` requires the trigger, the permission and the order of the steps.
 
 ## Documentation site
 
