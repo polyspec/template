@@ -48,7 +48,7 @@ MAKEFLAGS += -k
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
 	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers ci-targets cargo-downloads-check uninstall-cli rerun-failed \
-	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit github-ruleset github-ruleset-check
+	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit github-ruleset github-ruleset-check ci-passed
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -194,6 +194,13 @@ install-vscode: ## Install the VS Code of the integration test into var/tools/vs
 # in var/report/ci-targets holds the log of each target and a summary of the failures, which the job uploads (T20.1-9).
 ci-targets: ## Run TARGETS past failures and write their logs and summary to var/report/ci-targets
 	node scripts/ci-targets.mjs $(CURDIR)/var/report/ci-targets $(TARGETS)
+
+# ci-passed is the step of the job ci-passed, the last job of .github/workflows/ci.yml and its check that the ruleset main
+# requires: it fails unless every job of RESULTS, the JSON of needs, has the result success (T22.1-3). make passes a
+# variable of its command line to the environment of the recipe, so the script reads RESULTS there and the JSON never
+# becomes shell text.
+ci-passed: ## Fail unless every job of RESULTS, the JSON of needs of the job ci-passed, has the result success
+	node scripts/ci-passed.mjs
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium

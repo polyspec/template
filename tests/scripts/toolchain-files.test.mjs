@@ -11,7 +11,10 @@
 //   every other recipe runs cargo, go and npm offline (T20.1-2);
 // - PHP is one of the minor versions of config/toolchain.json and Composer its exact version: setup-php cannot pin a
 //   patch, so the minor is the pin and var/full-run.json records the patch of each run;
-// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04.
+// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
+// - the last job of ci.yml is ci-passed, the check of ci.yml that the ruleset main requires: it runs after every other
+//   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
+//   needs, so it passes only when every other job passed (T22.1-3).
 // make itself is not pinned: the recipes use no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1
 // print the same commands for every target (T17.1-4).
 import assert from 'node:assert/strict';
@@ -29,8 +32,41 @@ const TOOLCHAIN = JSON.parse(read('config/toolchain.json'));
 
 // The jobs of a workflow with their text.
 function jobs(file) {
-  const [, body] = read(file).split(/\njobs:\n/);
-  return body.split(/\n(?= {2}[a-z][a-z0-9-]*:\n)/).map(text => ({ name: text.trim().split(':')[0], text }));
+  return jobsOf(read(file));
+}
+
+function jobsOf(text) {
+  const [, body] = text.split(/\njobs:\n/);
+  return body.split(/\n(?= {2}[a-z][a-z0-9-]*:\n)/).map(job => ({ name: job.trim().split(':')[0], text: job }));
+}
+
+// The job ci-passed of ci.yml runs only make ci-passed, which reads the results of the other jobs: it installs nothing,
+// runs no check of the suite and writes no report.
+const CI_PASSED = 'ci-passed';
+const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
+
+// Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
+export function ciPassedViolations(text) {
+  const all = jobsOf(text);
+  const job = all.find(entry => entry.name === CI_PASSED);
+  if (!job) return [`ci.yml: the job ${CI_PASSED} is missing; the ruleset main requires it as the check of ci.yml`];
+  const found = [];
+  const others = all.filter(entry => entry.name !== CI_PASSED);
+  const key = (entry, name) => new RegExp(`^ {4}${name}: (.*)$`, 'm').exec(entry.text)?.[1].trim() ?? '';
+  if (all.at(-1).name !== CI_PASSED) found.push(`ci.yml: the job ${CI_PASSED} is not the last job; the jobs are ${all.map(entry => entry.name).join(', ')}`);
+  if (key(job, 'if') !== '${{ always() }}') found.push(`ci.yml: the job ${CI_PASSED} has if: '${key(job, 'if')}', not '\${{ always() }}'; it must run after a failed, skipped or cancelled job too`);
+  const needs = key(job, 'needs').replace(/^\[|\]$/g, '').split(',').map(name => name.trim()).filter(Boolean);
+  if (JSON.stringify([...needs].sort()) !== JSON.stringify(others.map(entry => entry.name).sort())) {
+    found.push(`ci.yml: the job ${CI_PASSED} needs [${needs.join(', ')}], not every other job [${others.map(entry => entry.name).join(', ')}]`);
+  }
+  const runners = [...new Set(others.map(entry => key(entry, 'runs-on')))].sort();
+  if (JSON.stringify([key(job, 'runs-on')]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${key(job, 'runs-on')}', not on the runner of the other jobs ${runners.join(', ')}`);
+  const runs = [...job.text.matchAll(/^ {6}(?:- )? {0,2}run: (.*)$/gm)].map(match => match[1]);
+  const steps = job.text.split(/\n(?= {6}- )/).slice(1);
+  if (JSON.stringify(runs) !== JSON.stringify([CI_PASSED_RUN]) || !/run: /.test(steps.at(-1) ?? '') || /\n {8}if:/.test(steps.at(-1) ?? '')) {
+    found.push(`ci.yml: the job ${CI_PASSED} runs [${runs.join(', ')}], not the last step ${CI_PASSED_RUN} without a condition of its own`);
+  }
+  return found;
 }
 
 // Runs `command` as a recipe line of a second makefile read after the Makefile, so it gets the environment and the
@@ -187,7 +223,7 @@ test('every CI job installs with make install and bootstraps the tools of the ch
     const direct = /- run: (npm ci|npm install|rustup )[^\n]*/.exec(text);
     assert.equal(direct?.[0], undefined, `${file} installs without make install`);
     for (const job of jobs(file)) {
-      if (!/- run: .*\bmake /.test(job.text)) continue;
+      if (!/- run: .*\bmake /.test(job.text) || (file.endsWith('/ci.yml') && job.name === CI_PASSED)) continue;
       assert.match(job.text, /uses: actions\/setup-go@\S+.*\n\s+with:\n\s+go-version-file: packages\/template-go\/go\.mod\n/, `${file} job ${job.name} has no Go to bootstrap make install-tools`);
       if (file.endsWith('/ci.yml')) assert.match(job.text, /- run: make install\n/, `${file} job ${job.name} does not install with make install`);
     }
@@ -249,7 +285,7 @@ test('every CI job runs its targets past failures and uploads their report, also
   const SETUP = new Set(['install', 'install-tools', 'install-vscode', 'install-browsers']);
   const REPORTS = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
   const problems = [];
-  for (const job of jobs('.github/workflows/ci.yml')) {
+  for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
     const lines = [...job.text.matchAll(/- run: (\|\n(?:\s{10,}.*\n?)+|.*)/g)].flatMap(([, block]) => block.replace(/^\|\n/, '').split('\n').map(line => line.trim()).filter(Boolean));
     const runners = new Set();
     for (const line of lines.filter(line => /\bmake\b/.test(line))) {
@@ -283,7 +319,8 @@ test('a new push to a pull request cancels the running CI of its workflow and re
   for (const file of WORKFLOWS) {
     const text = read(file);
     const [, triggers = ''] = /\non:\n((?: {2}.*\n|\s*\n)+)/.exec(`\n${text}`) ?? [];
-    if (!/^ {2}(?:push|pull_request|merge_group):/m.test(triggers)) continue;
+    // A tag push runs a release, which no later push replaces.
+    if (!/^ {2}(?:push|pull_request|merge_group):/m.test(triggers) || /^ {4}tags:/m.test(triggers)) continue;
     assert.match(text, /\nconcurrency:\n {2}group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}\n/, `${file} has no concurrency group of its workflow and ref that cancels only the run of a pull request`);
   }
 });
@@ -299,6 +336,27 @@ test('each workflow declares exactly its triggers: CI on every pull request, mer
   for (const [file, block] of Object.entries(triggers)) {
     const [, declared = ''] = /\n(on:\n(?: .*\n)+)/.exec(`\n${read(file)}`) ?? [];
     assert.equal(declared, block, `${file} declares other triggers`);
+  }
+});
+
+test('ci-passed is the last job of ci.yml, runs always, needs every other job and runs make ci-passed (T22.1-3)', () => {
+  const text = read('.github/workflows/ci.yml');
+  assert.deepEqual(ciPassedViolations(text), []);
+  const [head] = text.split('\n  ci-passed:\n');
+  const job = text.slice(head.length);
+  const broken = {
+    missing: [`${head}\n`, 'the job ci-passed is missing'],
+    'not last': [head.replace('\njobs:\n', `\njobs:\n${job.replace(/^\n/, '')}\n`), 'the job ci-passed is not the last job'],
+    'not always': [text.replace('    if: ${{ always() }}\n', '    if: ${{ success() }}\n'), "the job ci-passed has if: '${{ success() }}'"],
+    'needs one job': [text.replace(/ {4}needs: \[[^\]]*\]\n/, '    needs: [release]\n'), 'the job ci-passed needs [release], not every other job'],
+    'another runner': [`${head}${job.replace('runs-on: ubuntu-24.04', 'runs-on: ubuntu-26.04')}`, "the job ci-passed runs on 'ubuntu-26.04'"],
+    'another step': [text.replace(CI_PASSED_RUN, 'make ci-passed'), 'the job ci-passed runs [make ci-passed], not the last step'],
+    'skippable step': [text.replace(`        run: ${CI_PASSED_RUN}\n`, `        if: \${{ !cancelled() }}\n        run: ${CI_PASSED_RUN}\n`), 'without a condition of its own'],
+  };
+  for (const [name, [brokenText, message]] of Object.entries(broken)) {
+    assert.notEqual(brokenText, text, name);
+    const found = ciPassedViolations(brokenText);
+    assert.ok(found.some(issue => issue.includes(message)), `${name}: ${found.join('; ')}`);
   }
 });
 

@@ -72,39 +72,7 @@
               "integration_id": 15368
             },
             {
-              "context": "release",
-              "integration_id": 15368
-            },
-            {
-              "context": "docs",
-              "integration_id": 15368
-            },
-            {
-              "context": "typescript",
-              "integration_id": 15368
-            },
-            {
-              "context": "browser",
-              "integration_id": 15368
-            },
-            {
-              "context": "editor",
-              "integration_id": 15368
-            },
-            {
-              "context": "go",
-              "integration_id": 15368
-            },
-            {
-              "context": "rust",
-              "integration_id": 15368
-            },
-            {
-              "context": "php (8.2)",
-              "integration_id": 15368
-            },
-            {
-              "context": "php (8.5)",
+              "context": "ci-passed",
               "integration_id": 15368
             }
           ]

@@ -59,7 +59,10 @@ test('the release job of the CI workflow runs make check and keeps its record', 
 test('a verifying CI job runs every later step after a failing step, and a make with several targets keeps going', () => {
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
-      const publishes = job.steps.some(step => /uses: actions\/deploy-pages@/.test(step));
+      // A job that publishes stops at its first failure. The step of the job ci-passed of ci.yml runs also after a
+      // cancelled job: a skipped step would pass the check that the ruleset main requires (T22.1-3).
+      const publishes = job.steps.some(step => /uses: actions\/deploy-pages@|run: make release-publish\b/.test(step))
+        || (file.endsWith('/ci.yml') && job.name === 'ci-passed');
       for (const step of job.steps) {
         const command = step.match(/^ {6}- run: (.*)$/m)?.[1];
         if (!command) continue;
