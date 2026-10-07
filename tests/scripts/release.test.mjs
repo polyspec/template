@@ -433,27 +433,32 @@ test('a packed manifest with a polyspec dependency that is not an exact version 
     ['require polyspec/template: 0.0.2 is another version, not 0.0.1']);
 });
 
-// The consumer projects of tests/fixtures/release-consumer install the archives of the manifests of the tree with their
-// committed locks in a directory outside the repository, from empty caches (scripts/release-consumer.mjs).
+// The consumer projects of tests/fixtures/release-consumer install the archives of the built packages of the tree with
+// their committed locks in a directory outside the repository, from empty caches (scripts/release-consumer.mjs).
 function packedTree(t) {
   const folder = mkdtempSync(path.join(tmpdir(), 'template-release-install-'));
   t.after(() => rmSync(folder, { recursive: true, force: true }));
-  return { folder, packed: consumer.packTreeAssets(folder) };
+  return { folder, packed: consumer.packTree(folder) };
 }
 
-test('the npm consumer project installs the packed tarballs with npm ci', t => {
+test('the npm consumer project installs every packed tarball with npm ci', t => {
   const { folder, packed } = packedTree(t);
   const project = path.join(folder, 'npm-project');
   consumer.consumerProject('npm', project, packed);
   const manifest = JSON.parse(readFileSync(path.join(project, 'package.json'), 'utf8'));
-  assert.deepEqual(manifest.dependencies, {
-    '@polyspec/template': `file:polyspec-template-${packed.version}.tgz`,
-    '@polyspec/template-language': `file:polyspec-template-language-${packed.version}.tgz`,
-  }, 'the consumer project names the tarballs of the version of the tree; make release-consumer-lock writes its lock');
+  const tarballs = Object.fromEntries(release.PACKAGES.filter(([kind]) => kind === 'npm')
+    .map(([, , name]) => [name, `file:${release.assetName(name, packed.version, 'tgz')}`]));
+  assert.deepEqual(manifest.dependencies, tarballs, 'the consumer project names every tarball of the version of the tree; make release-consumer-lock writes its lock');
+  const lock = JSON.parse(readFileSync(path.join(project, 'package-lock.json'), 'utf8')).packages;
+  for (const [key, entry] of Object.entries(lock)) {
+    if (key === '') continue;
+    if (key.startsWith('node_modules/@polyspec/')) assert.equal(entry.integrity, undefined, `${key}: the archive under test is built in the run`);
+    else assert.ok(/^\d+\.\d+\.\d+/.test(entry.version) && entry.resolved.startsWith('https://registry.npmjs.org/') && entry.integrity.startsWith('sha512-'), `${key}: pinned by version and integrity`);
+  }
   consumer.install('npm', project, folder);
-  for (const [name, spec] of Object.entries(manifest.dependencies)) {
+  for (const [name, spec] of Object.entries(tarballs)) {
     assert.equal(JSON.parse(readFileSync(path.join(project, 'node_modules', name, 'package.json'), 'utf8')).version, packed.version, name);
-    assert.equal(JSON.parse(readFileSync(path.join(project, 'package-lock.json'), 'utf8')).packages[`node_modules/${name}`].resolved, spec, name);
+    assert.equal(lock[`node_modules/${name}`].resolved, spec, name);
   }
 });
 
@@ -463,6 +468,8 @@ test('the Composer consumer project installs the packed zips from an artifact re
   consumer.consumerProject('composer', project, packed);
   assert.deepEqual(JSON.parse(readFileSync(path.join(project, 'composer.json'), 'utf8')).require, { 'polyspec/template': packed.version },
     'the consumer project requires the version of the tree; make release-consumer-lock writes its lock');
+  const locked = JSON.parse(readFileSync(path.join(project, 'composer.lock'), 'utf8')).packages;
+  assert.deepEqual(locked.map(entry => [entry.name, entry.version, entry.dist.shasum]), [['polyspec/template', packed.version, '']]);
   consumer.install('composer', project, folder);
   const installed = JSON.parse(readFileSync(path.join(project, 'vendor/composer/installed.json'), 'utf8')).packages;
   assert.deepEqual(installed.map(entry => [entry.name, entry.version]), [['polyspec/template', packed.version]]);
@@ -474,9 +481,10 @@ test('the Composer consumer project installs the packed zips from an artifact re
 });
 
 test('the zips of a tag are the same bytes on every run', t => {
-  const first = packedTree(t);
-  const second = packedTree(t);
-  for (const name of first.packed.names) {
-    assert.ok(readFileSync(path.join(first.packed.directory, name)).equals(readFileSync(path.join(second.packed.directory, name))), name);
-  }
+  const box = sandbox(t);
+  const tag = box.tag('v0.0.1');
+  const zips = () => release.assets(box.root, tag).filter(name => name.endsWith('.zip')).map(name => readFileSync(path.join(box.root, release.ASSETS, name)));
+  const first = zips();
+  const second = zips();
+  first.forEach((bytes, index) => assert.ok(bytes.equals(second[index]), String(index)));
 });

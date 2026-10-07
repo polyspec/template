@@ -3,6 +3,8 @@
   "private": true,
   "dependencies": {
     "@polyspec/template": "file:polyspec-template-0.0.3.tgz",
-    "@polyspec/template-language": "file:polyspec-template-language-0.0.3.tgz"
+    "@polyspec/template-codemirror": "file:polyspec-template-codemirror-0.0.3.tgz",
+    "@polyspec/template-language": "file:polyspec-template-language-0.0.3.tgz",
+    "@polyspec/template-lsp": "file:polyspec-template-lsp-0.0.3.tgz"
   }
 }

@@ -21,10 +21,12 @@ CARGO ?= $(HOME)/.cargo/bin/cargo
 # Each checkout builds its Rust crates into their own target. A CARGO_TARGET_DIR inherited from the environment, such as
 # the target of another checkout, would let cargo judge binaries built from other sources fresh for this one (T18.7).
 unexport CARGO_TARGET_DIR
-# A check reads no network (AGENTS): make install downloads what the checks read, and every recipe and the scripts that
-# it starts run cargo, go, npm and Composer offline, so a missing download fails at once instead of reaching a registry in one run
-# and not in another (T20.1-2). The targets that download, install, install-tools and dependency-review, run their
-# commands with $(ONLINE).
+# A check makes no registry query whose result depends on time, and downloads only what a lock pins by exact version and
+# integrity (AGENTS): make install downloads what the checks read, and every recipe and the scripts that it starts run
+# cargo, go, npm and Composer offline, so a missing download fails at once instead of reaching a registry in one run and
+# not in another (T20.1-2). The targets that resolve or download, install, install-tools, dependency-review and
+# release-consumer-lock, run their commands with $(ONLINE); the install test of the release assets runs npm ci of its
+# committed lock online (scripts/release-consumer.mjs).
 export CARGO_NET_OFFLINE := true
 export GOPROXY := off
 export npm_config_offline := true
@@ -217,9 +219,9 @@ release-verify release-versions release-assets release-publish: ## A step of the
 release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror)
 
 # The locks of the consumer projects of tests/fixtures/release-consumer, written from their manifests and the archives of
-# the manifests of the tree (scripts/release-consumer.mjs, T22.3-1); a release that changes the version runs it.
-release-consumer-lock: ## Write the locks of the consumer projects of the release assets
-	node scripts/release-consumer.mjs lock
+# the built packages of the tree (scripts/release-consumer.mjs, T22.3-1); a release that changes the version runs it.
+release-consumer-lock: build-ts build-language build-lsp build-codemirror ## Write the locks of the consumer projects of the release assets
+	$(ONLINE) node scripts/release-consumer.mjs lock
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
@@ -271,7 +273,7 @@ test-rust-unit: cargo-downloads-check
 test-php: build-php ## PHP unit tests
 	node scripts/run-tests.mjs phpunit --cwd $(PHP_DIR)
 
-test-scripts: cargo-downloads-check build-ts build-language build-lsp build-php ## Tests of the test runner and the conformance runners
+test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php ## Tests of the test runner and the conformance runners
 	node scripts/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
