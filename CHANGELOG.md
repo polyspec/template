@@ -1,6 +1,14 @@
 # Changelog
 
+[한국어](CHANGELOG.ko.md).
+
+## Unreleased
+
+- Kept the section `## Unreleased` above the released versions (T22.1-1). The entries of the tag `v0.0.1` form the section `## 0.0.1`, the entries after it stay under `## Unreleased`, and every change adds its entry there; the language link of the changelog stands below its title.
 - Declared the triggers of each workflow exactly (T17.1-9). `ci.yml` runs on every pull request, merge group and manual run (`workflow_dispatch`), and `pages.yml` deploys the documentation site on a push to `main` and on a manual run.
+
+## 0.0.1
+
 - Published every change through a pull request and the merge queue (T17.1-7).
 - Caught stale compiled artifacts before `main` (T17.1-6). The AST compiler digest is computed from the tracked sources of `packages/template-ts` instead of its build, and `make artifact-digest-check` fails, naming each manifest and `make showcase`, when a committed artifact records the digest of another compiler; the job `push-gate` and `showcase-check` run it. The 30 artifacts and the page are compiled again for the new digest.
 - Regenerated the showcase artifacts after T8.5-1 (T8.5-2). The AST artifact manifests record a digest of the template-ts build, which T8.5-1 changed, so the release job found `examples/site/index.html` stale; the five manifests and the page are written again, and only the digests change.
@@ -127,10 +135,6 @@
 - Updated the Pages configure, artifact upload and deployment actions to their current stable majors.
 - Disabled the Go dependency cache in CI because the package has no external modules or checksum file, avoiding an invalid root-module probe.
 - Moved static Pages publication behind the complete CI matrix and removed the parallel documentation workflow and its duplicate document and showcase checks.
-
-[한국어](CHANGELOG.ko.md).
-
-## Unreleased
 
 - Specified the form of host arguments (VAL-21) and made every implementation follow it. A host function, a logical class function and an instance method receive plain values of their language: a safe string is a string, a list is a new list, a map is a new ordered map (TypeScript `Map`, Go `*value.OrderedMap`, Rust `Value::Map`, PHP array in entry order), a number is a PHP `float`, and a native object is the original object. The PHP AST runtime passed `MapValue` and `SafeString` objects while the PHP extension passed arrays and strings; TypeScript, Go and Rust passed safe strings; TypeScript and Go passed the template's own lists and maps, so a host function could change a value that the template read later; Go rejected a `null` argument of a method parameter that accepts nil; the PHP extension converted the map key `-0` to the integer key `0`.
 - Specified the equality of native objects (EXP-39): two native objects are equal when they are the same host object, and an ordering comparison of a native object is `E_RUNTIME_COMPARE`. TypeScript compared wrappers, so the same instance bound twice was unequal; Go and Rust never reported equality; the PHP AST runtime failed with `E_INTERNAL`; the PHP extension wrapped each binding of a PHP object anew. `TemplateObject::identity` reports the identity of a Rust native object, and the extension reports the PHP object.

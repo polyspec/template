@@ -144,6 +144,10 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 의존성: 없음. PHP extension `packages/template-php-ext`는 ext-php-rs로 Rust 구현을 감쌌다. 그래서 독립된 구현이 아니었고, PHP version마다 cargo, Rust toolchain, ext-php-rs binding에 의존했다. 이제 PHP 구현 `packages/template-php`와 conformance case를 사양으로 하는 C 독립 구현이 된다. source, `config.m4`, class의 stub은 `src/`에 있고, gen_stub.php가 stub에서 arginfo를 만들며, phpize, configure, make가 build한다. 작업은 parser, JSON data를 쓰는 renderer, PHP 값의 binding을 차례로 더하고, 그다음 target, runner, CI에서 Rust extension을 바꾼다.
 
+## Wave 22 — Tag 릴리스
+
+의존성: 없음. 모든 변경은 필수 check와 함께 merge queue로 `main`에 도달하므로 `main`의 모든 commit은 전체 suite를 통과했고, 릴리스는 메인테이너가 버전 올림 pull request 뒤에 `main`의 commit에 붙이는 tag다. changelog는 tag `v0.0.1`의 항목을 `## Unreleased` 아래에 두었고, `packages/template-go/go.mod`의 module 경로는 `go get`이 그 directory로 해석하지 않는 `github.com/polyspec/template`이었으며, ruleset `main`은 `ci.yml`의 모든 job을 적었으므로 새 job은 ruleset이 이름을 적기 전까지 요구되지 않았고, tag에서 실행되는 workflow가 없었다. 종료 조건: changelog는 `## 0.0.1` 위에 `## Unreleased`를 두고, module 경로는 `github.com/polyspec/template/packages/template-go`이며, ruleset은 정확히 `push-gate`와 `ci-passed`를 요구하고, `.github/workflows/release.yml`은 check를 통과했고 manifest가 tag의 버전을 담으며 changelog에 그 section이 있는 `main`의 commit에 대해서만 tag의 GitHub Release를 만든다.
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -168,6 +172,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W19 | 없음 | T19.1 → T19.15 순서대로, T19.6-1은 T19.11 뒤, T19.8-1은 T19.15 뒤 |
 | W20 | T20.1, T20.2, T20.3 | T20.3-1은 T20.3 뒤, T20.1-1은 T20.3-1 뒤, T20.1-2는 T20.1-1 뒤, T20.1-3은 T20.1-2 뒤, T20.1-4는 T20.1-3 뒤, T20.1-5는 T20.1-4 뒤, T20.1-6은 T20.1-5 뒤, T20.1-7은 T20.1-6 뒤, T20.1-8은 T20.1-7 뒤, T20.1-9는 T20.1-8 뒤, T20.1-10은 T20.1-9 뒤, T20.1-11은 T20.1-10 뒤, T20.1-12는 T20.1-11 뒤, T20.1-13은 T20.1-12 뒤 |
 | W21 | 없음 | T21.1 → T21.2 → T21.3 → T21.4 → T21.4-1 → T21.4-2 |
+| W22 | 없음 | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 |
 
 ## 완료 정의
 

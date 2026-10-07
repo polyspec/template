@@ -144,6 +144,10 @@ Dependencies: none. In one `node --test` run of `make test-scripts` the test fil
 
 Dependencies: none. The PHP extension `packages/template-php-ext` wrapped the Rust implementation with ext-php-rs, so it was not an implementation of its own and depended on cargo, a Rust toolchain and the bindings of ext-php-rs for every PHP version. It becomes an independent implementation in C whose specification is the PHP implementation `packages/template-php` and the conformance cases: its sources, `config.m4` and the stub of its classes are in `src/`, gen_stub.php generates the arginfo from the stub, and phpize, configure and make build it. The tasks add the parser, the renderer with JSON data, the binding of PHP values, and then replace the Rust extension in the targets, the runners and CI.
 
+## Wave 22 — Tag releases
+
+Dependencies: none. Every change reaches `main` through the merge queue with the required checks, so every commit of `main` passed the full suite, and a release is a tag of a commit of `main` that the maintainer sets after a version-bump pull request. The changelog held the entries of the tag `v0.0.1` under `## Unreleased`; the module path of `packages/template-go/go.mod` was `github.com/polyspec/template`, which `go get` does not resolve to that directory; the ruleset `main` named every job of `ci.yml`, so a new job was not required until the ruleset named it; and no workflow ran on a tag. Exit criteria: the changelog keeps `## Unreleased` above `## 0.0.1`, the module path is `github.com/polyspec/template/packages/template-go`, the ruleset requires exactly `push-gate` and `ci-passed`, and `.github/workflows/release.yml` creates the GitHub Release of a tag only for a commit of `main` whose checks passed, whose manifests carry the version of the tag and whose changelog has its section.
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -168,6 +172,7 @@ Dependencies: none. The PHP extension `packages/template-php-ext` wrapped the Ru
 | W19 | none | T19.1 → T19.15 in order; T19.6-1 after T19.11; T19.8-1 after T19.15 |
 | W20 | T20.1, T20.2, T20.3 | T20.3-1 after T20.3; T20.1-1 after T20.3-1; T20.1-2 after T20.1-1; T20.1-3 after T20.1-2; T20.1-4 after T20.1-3; T20.1-5 after T20.1-4; T20.1-6 after T20.1-5; T20.1-7 after T20.1-6; T20.1-8 after T20.1-7; T20.1-9 after T20.1-8; T20.1-10 after T20.1-9; T20.1-11 after T20.1-10; T20.1-12 after T20.1-11; T20.1-13 after T20.1-12 |
 | W21 | none | T21.1 → T21.2 → T21.3 → T21.4 → T21.4-1 → T21.4-2 |
+| W22 | none | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 |
 
 ## Definition of done
 
