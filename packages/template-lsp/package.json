@@ -1,6 +1,6 @@
 {
   "name": "@polyspec/template-lsp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Language Server Protocol server for template sources over standard input and output: diagnostics, semantic tokens, folding, matching tags, formatting and typing indentation from @polyspec/template-language",
   "license": "MIT",
   "type": "module",
@@ -25,7 +25,7 @@
     "node": ">=26"
   },
   "dependencies": {
-    "@polyspec/template-language": "0.0.1",
+    "@polyspec/template-language": "0.0.2",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15"
   }

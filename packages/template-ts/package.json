@@ -1,6 +1,6 @@
 {
   "name": "@polyspec/template",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Template language implementation: lexer, parser, renderer, functions and CLI",
   "license": "MIT",
   "type": "module",

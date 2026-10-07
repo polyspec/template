@@ -98,7 +98,8 @@ func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(da
 function checkRust() {
   const target = join(temporary, 'cargo-target');
   run(resolve(process.env.HOME, '.cargo/bin/cargo'), ['package', '--locked', '--allow-dirty', '--no-verify', '--manifest-path', join(root, 'packages/template-rust/Cargo.toml')], { env: { CARGO_TARGET_DIR: target } });
-  const archive = join(target, 'package/polyspec-template-0.0.1.crate');
+  const crate = `polyspec-template-${/^version\s*=\s*"([^"]+)"/m.exec(readFileSync(join(root, 'packages/template-rust/Cargo.toml'), 'utf8'))[1]}`;
+  const archive = join(target, `package/${crate}.crate`);
   const packages = join(temporary, 'cargo-packages');
   mkdirSync(packages);
   run('tar', ['-xzf', archive, '-C', packages]);
@@ -106,7 +107,7 @@ function checkRust() {
   mkdirSync(join(directory, 'src'), { recursive: true });
   stageScenario(directory);
   cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.rust'), join(directory, 'generated.rs'));
-  writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, 'polyspec-template-0.0.1'))}}\nserde={version="1",features=["derive"]}\nserde_json={version="1",features=["preserve_order","arbitrary_precision"]}\n`);
+  writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, crate))}}\nserde={version="1",features=["derive"]}\nserde_json={version="1",features=["preserve_order","arbitrary_precision"]}\n`);
   // The install project builds with the locked versions of the package and the toolchain of the checkout. Cargo does not
   // resolve the development dependencies of a path dependency for an install project.
   const manifest = readFileSync(join(root, 'packages/template-rust/Cargo.toml'), 'utf8');
