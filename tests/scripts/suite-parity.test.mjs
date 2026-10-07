@@ -87,6 +87,35 @@ test('the rule of the CI suite names a missing, a repeated and an extra target a
   ]);
 });
 
+// The targets that open a browser: their job installs the browsers in a step before the step that runs them.
+export const BROWSER_TARGETS = ['test-browser', 'test-scripts', 'test-codemirror'];
+
+// Each job of the workflow text that runs a target of BROWSER_TARGETS without a `make install-browsers` step before it.
+export function browserSetupViolations(text) {
+  const found = [];
+  for (const job of jobsOf(text)) {
+    let installed = false;
+    for (const step of job.steps) {
+      if (/\bmake (?:-\S+ )*install-browsers\b/.test(step)) installed = true;
+      for (const [, list] of step.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
+        for (const target of list.split(/\s+/).filter(target => BROWSER_TARGETS.includes(target))) {
+          if (!installed) found.push(`job ${job.name} runs ${target} without make install-browsers before it`);
+        }
+      }
+    }
+  }
+  return found;
+}
+
+test('a job that runs a browser target installs the browsers before it', () => {
+  assert.deepEqual(browserSetupViolations(read('.github/workflows/ci.yml')), []);
+  const workflow = runs => `name: CI\njobs:\n  one:\n    runs-on: ubuntu-24.04\n    steps:\n${runs.map(run => `      - run: ${run}\n`).join('')}`;
+  assert.deepEqual(browserSetupViolations(workflow(['make install-browsers', 'make ci-targets TARGETS="test-scripts lint-go"'])), []);
+  assert.deepEqual(browserSetupViolations(workflow(['make ci-targets TARGETS="test-scripts"', 'make install-browsers'])), [
+    'job one runs test-scripts without make install-browsers before it',
+  ]);
+});
+
 test('a verifying CI job runs every later step after a failing step, and a make with several targets keeps going', () => {
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
