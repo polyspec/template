@@ -1,19 +1,20 @@
 # Release: a tag push creates the GitHub Release of the tag (T22.1-4). Every change reaches main through the merge queue
 # with the required checks, so every commit of main passed the full suite; the maintainer releases by tagging a commit
 # of main vX.Y.Z after a version-bump pull request, or packages/template-go/vX.Y.Z for the Go module of that directory.
-# The steps run in order and stop at the first failure: make release-verify requires the tagged commit on origin/main
-# with the check runs push-gate and ci-passed concluded success, without running the tests again; make release-versions
-# requires the version of the tag in every manifest and its section in CHANGELOG.md; make release-assets builds the npm
-# packages and packs every package (npm pack, a zip of each Composer package, cargo package); make release-publish
-# creates the GitHub Release with the section as notes and the archives attached, and a Go tag creates it without
-# archives (scripts/release.mjs). TAG reaches the make targets through the environment, never as shell text. Each step
+# In a tag filter * does not match /, so '**/v*' covers the tag of a Go module at any depth (T22.1-5). The steps run in
+# order and stop at the first failure: make release-verify requires the tagged commit on origin/main with the check runs
+# push-gate and ci-passed concluded success, without running the tests again; make release-versions requires the
+# version of the tag in every manifest and its section in CHANGELOG.md; make release-assets builds the npm packages and
+# packs the npm tarballs and a zip of each Composer package (the Rust crate is not released as an archive and is
+# consumed by git tag); make release-publish creates the GitHub Release with the section as notes and the archives
+# attached, and a Go tag builds and attaches nothing (scripts/release.mjs). TAG reaches the make targets through the environment, never as shell text. Each step
 # runs a make target. The runner image and each action are exact releases, as in ci.yml. This workflow is not the job
 # release of ci.yml, which runs the full suite on every pull request and merge group.
 name: release
 
 on:
   push:
-    tags: ['v*', '*/v*']
+    tags: ['v*', '**/v*']
 
 permissions:
   contents: write
@@ -34,7 +35,7 @@ jobs:
         with:
           fetch-depth: 0
       # The toolchains of the job release of ci.yml: make install installs npm, Go, the npm dependencies, the Rust
-      # toolchain, the Composer packages and the crates that the archives are built from.
+      # toolchain, the Composer packages and the crates, as for every job of ci.yml.
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: .node-version

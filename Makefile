@@ -205,15 +205,15 @@ ci-passed: ## Fail unless every job of RESULTS, the JSON of needs of the job ci-
 
 # The steps of .github/workflows/release.yml for the tag TAG (scripts/release.mjs, T22.1-4), in this order: release-verify
 # requires the tagged commit on origin/main with the checks push-gate and ci-passed passed, release-versions the version
-# of the tag in every manifest and its section in CHANGELOG.md, release-assets builds the npm packages and packs every
-# package into var/release/assets, and release-publish creates the GitHub Release. The workflow sets TAG in the
-# environment, and the recipe passes it as "$$TAG", so the name of a tag never becomes shell text. These steps are not
-# the job release of ci.yml, which runs the full suite. scripts/release.mjs starts cargo, so every step checks the crates
-# first (T20.1-5).
-release-verify release-versions release-assets release-publish: cargo-downloads-check ## A step of the release of the tag TAG (release.yml)
+# of the tag in every manifest and its section in CHANGELOG.md, release-assets builds the npm packages and packs the npm
+# tarballs and Composer zips into var/release/assets, and release-publish creates the GitHub Release. The workflow sets
+# TAG in the environment, and the recipe passes it as "$$TAG", so the name of a tag never becomes shell text. A Go module
+# tag <directory>/vX.Y.Z builds and attaches nothing, so release-assets builds the npm packages only for a tag without /
+# (T22.1-5). These steps are not the job release of ci.yml, which runs the full suite.
+release-verify release-versions release-assets release-publish: ## A step of the release of the tag TAG (release.yml)
 	$(if $(TAG),,$(error make $@ needs TAG=<tag>, a tag vX.Y.Z or packages/template-go/vX.Y.Z))
 	node scripts/release.mjs $(@:release-%=%) "$$TAG"
-release-assets: build-ts build-language build-lsp build-codemirror
+release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror)
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium

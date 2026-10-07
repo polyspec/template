@@ -1,9 +1,9 @@
 // Tests the release of a tag (scripts/release.mjs, .github/workflows/release.yml, T22.1-4).
 //
 // Each case builds a Git repository in a temporary directory with the manifests of the release, a changelog, a branch
-// origin/main and the tag, and puts fakes of gh, npm and cargo first on PATH. The fake gh answers the check runs of the
-// GitHub API from a JSON state file and records each call; the fakes of npm and cargo write the archive that the real tool
-// writes. No case reaches GitHub or a registry.
+// origin/main and the tag, and puts fakes of gh and npm first on PATH. The fake gh answers the check runs of the GitHub
+// API from a JSON state file and records each call; the fake npm writes the archive that npm pack writes. No case reaches
+// GitHub or a registry.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { chmodSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -41,18 +41,6 @@ const manifest = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const name = manifest.name.replace(/^@/, '').replace('/', '-');
 fs.writeFileSync(path.join(args[args.indexOf('--pack-destination') + 1], name + '-' + manifest.version + '.tgz'), 'npm');
 `;
-const FAKE_CARGO = `
-const fs = require('node:fs');
-const path = require('node:path');
-const args = process.argv.slice(2);
-if (args.join(' ') !== 'package --no-verify --locked') process.exit(1);
-const text = fs.readFileSync('Cargo.toml', 'utf8');
-const name = /^name = "([^"]+)"/m.exec(text)[1];
-const version = /^version = "([^"]+)"/m.exec(text)[1];
-const folder = path.join(process.env.CARGO_TARGET_DIR, 'package');
-fs.mkdirSync(folder, { recursive: true });
-fs.writeFileSync(path.join(folder, name + '-' + version + '.crate'), 'crate');
-`;
 const CHANGELOG = `# Changelog
 
 ## Unreleased
@@ -79,12 +67,12 @@ function sandbox(t, { version = '0.0.1', changelog = CHANGELOG } = {}) {
   const state = path.join(folder, 'state.json');
   mkdirSync(root);
   mkdirSync(bin);
-  for (const [name, source] of [['gh', FAKE_GH], ['npm', FAKE_NPM], ['cargo', FAKE_CARGO]]) {
+  for (const [name, source] of [['gh', FAKE_GH], ['npm', FAKE_NPM]]) {
     writeFileSync(path.join(bin, name), `#!${process.execPath}\n${source}`);
     chmodSync(path.join(bin, name), 0o755);
   }
   const names = Object.fromEntries(release.PACKAGES.map(([, directory, name]) => [directory, name]));
-  for (const manifest of release.MANIFESTS) {
+  for (const manifest of Object.keys(release.MANIFESTS)) {
     const file = path.join(root, manifest);
     mkdirSync(path.dirname(file), { recursive: true });
     const name = names[path.dirname(manifest)] ?? '@polyspec/template-workspace';
@@ -240,11 +228,9 @@ test('without the repository the step fails before any request', t => {
 test('an asset is named after its package and version', () => {
   assert.equal(release.assetName('@polyspec/template', '0.0.1', 'tgz'), 'polyspec-template-0.0.1.tgz');
   assert.equal(release.assetName('polyspec/template-php-ext', '1.2.3', 'zip'), 'polyspec-template-php-ext-1.2.3.zip');
-  assert.equal(release.assetName('polyspec-template', '0.0.1', 'crate'), 'polyspec-template-0.0.1.crate');
   assert.deepEqual(release.assetNames('v0.0.1'), [
     'polyspec-template-0.0.1.tgz', 'polyspec-template-language-0.0.1.tgz', 'polyspec-template-lsp-0.0.1.tgz',
-    'polyspec-template-codemirror-0.0.1.tgz', 'polyspec-template-0.0.1.zip', 'polyspec-template-php-ext-0.0.1.zip',
-    'polyspec-template-0.0.1.crate']);
+    'polyspec-template-codemirror-0.0.1.tgz', 'polyspec-template-0.0.1.zip', 'polyspec-template-php-ext-0.0.1.zip']);
   assert.deepEqual(release.assetNames('packages/template-go/v0.0.1'), []);
 });
 
@@ -295,16 +281,28 @@ test('publish without the archives fails before any request', t => {
 test('the declarations cover every tracked manifest of the repository', () => {
   const tracked = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   const manifests = tracked.filter(file => ['package.json', 'composer.json', 'Cargo.toml', 'VERSION', 'pyproject.toml', 'go.mod'].includes(path.basename(file))).sort();
-  const declared = [...release.MANIFESTS, ...Object.keys(release.NOT_RELEASED), ...Object.keys(release.GO_MODULES).map(directory => `${directory}/go.mod`)].sort();
+  const declared = [...Object.keys(release.MANIFESTS), ...Object.keys(release.NOT_RELEASED), ...Object.keys(release.GO_MODULES).map(directory => `${directory}/go.mod`)].sort();
   assert.deepEqual(manifests, declared, 'a tracked manifest is neither released nor declared as not released');
   for (const [kind, directory, name] of release.PACKAGES) {
-    const manifest = path.join(ROOT, directory, { npm: 'package.json', composer: 'composer.json', cargo: 'Cargo.toml' }[kind]);
-    assert.ok(release.MANIFESTS.includes(path.relative(ROOT, manifest)), `${directory} is a package whose manifest is not in MANIFESTS`);
+    const manifest = path.join(ROOT, directory, { npm: 'package.json', composer: 'composer.json' }[kind]);
+    assert.equal(release.MANIFESTS[path.relative(ROOT, manifest)], release.ARCHIVE, `${directory} is a package whose manifest is not an archive of MANIFESTS`);
     const text = readFileSync(manifest, 'utf8');
-    const actual = kind === 'cargo' ? /^name = "([^"]+)"/m.exec(text)[1] : JSON.parse(text).name;
-    assert.equal(actual, name, directory);
+    assert.equal(JSON.parse(text).name, name, directory);
     if (kind === 'npm') assert.notEqual(JSON.parse(text).private, true, `${directory} is private, so npm does not publish it`);
   }
+});
+
+test('the assets are npm tarballs and Composer zips only, and a Rust crate is consumed by git tag', () => {
+  assert.deepEqual([...new Set(release.PACKAGES.map(([kind]) => kind))].sort(), ['composer', 'npm']);
+  const archived = release.PACKAGES.map(([kind, directory]) => `${directory}/${kind === 'npm' ? 'package.json' : 'composer.json'}`).sort();
+  assert.deepEqual(Object.entries(release.MANIFESTS).filter(([, how]) => how === release.ARCHIVE).map(([name]) => name).sort(), archived);
+  for (const [name, how] of Object.entries(release.MANIFESTS)) {
+    assert.ok([release.ARCHIVE, release.VERSION_ONLY, release.GIT_TAG].includes(how), `${name}: ${how}`);
+    if (path.basename(name) === 'Cargo.toml') assert.equal(how, 'not released as an archive; consumed by git tag', name);
+  }
+  const source = readFileSync(path.join(ROOT, 'scripts/release.mjs'), 'utf8');
+  assert.doesNotMatch(source, /'cargo', \['package'/);
+  assert.doesNotMatch(source, /\.crate/);
 });
 
 test('the released versions pass the version check', () => {
@@ -322,4 +320,9 @@ test('make runs each step with the tag of the environment and fails without it',
     assert.notEqual(missing.status, 0);
     assert.match(missing.stderr, new RegExp(`make release-${step} needs TAG=<tag>`));
   }
+  const npmBuilds = ['build-ts', 'build-language', 'build-lsp', 'build-codemirror'];
+  const prerequisites = tag => spawnSync('make', ['--no-print-directory', '-p', '-n', 'release-assets'], { cwd: ROOT, encoding: 'utf8', env: { ...environment, TAG: tag } })
+    .stdout.split('\n').find(line => line.startsWith('release-assets:')).replace(/^release-assets:\s*/, '').split(/\s+/).filter(Boolean);
+  assert.deepEqual(prerequisites('v0.0.1'), npmBuilds, 'a tag vX.Y.Z builds the npm packages before their archives');
+  assert.deepEqual(prerequisites('packages/template-go/v0.0.1'), [], 'a Go module tag builds nothing');
 });
