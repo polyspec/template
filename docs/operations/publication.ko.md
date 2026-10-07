@@ -9,7 +9,7 @@
 Go module:
 
 ```
-require github.com/polyspec/template/packages/template-go v0.0.2
+require github.com/polyspec/template/packages/template-go v0.0.3
 replace github.com/polyspec/template/packages/template-go => ../template/packages/template-go
 ```
 
@@ -37,7 +37,7 @@ polyspec-template = { path = "../template/packages/template-rust" }
 
 ## 버전
 
-모든 패키지는 버전 `0.0.2`를 선언한다. 버전은 모든 패키지와 `CHANGELOG.md`에서 함께 바뀌며, 릴리스된 버전 위의 section `## Unreleased`가 마지막 릴리스 뒤의 모든 변경 항목을 담는다.
+모든 패키지는 버전 `0.0.3`를 선언한다. 버전은 모든 패키지와 `CHANGELOG.md`에서 함께 바뀌며, 릴리스된 버전 위의 section `## Unreleased`가 마지막 릴리스 뒤의 모든 변경 항목을 담는다.
 
 ## Tag 릴리스
 

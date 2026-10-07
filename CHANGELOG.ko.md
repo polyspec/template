@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+## 0.0.3
+
+- 0.0.3을 릴리스했다(T22.3). `scripts/release.mjs`의 `MANIFESTS`의 모든 manifest, 각 `composer.json`의 `version`, npm 패키지 사이의 의존성, C extension의 버전, lock이 `0.0.3`을 선언한다. `make showcase`가 0.0.3의 compiler digest로 commit된 artifact를 다시 compile했고, `make dependency-review RECORD=1`이 바뀐 lock을 기록했다.
 - 릴리스 asset을 저장소 밖에서 설치되게 했다(T22.2-3). 각 발행 `composer.json`은 Composer의 `artifact` repository가 읽는 릴리스의 버전을 선언하고, `make release-versions`는 그 버전을 요구한다. 각 archive는 패키지의 manifest를 바꾸지 않고 담으며, `make release-assets`는 pack된 모든 manifest가 tag된 commit의 manifest와 같고 각 `@polyspec/*`와 `polyspec/*` 의존성을 경로, git source, URL, range, `@dev`가 아닌 정확한 버전으로 적고 `repositories`가 없을 때만 통과한다. `tests/scripts/release.test.mjs`는 tree의 발행 manifest에 같은 규칙을 적용하고, pack된 asset을 저장소 밖의 directory에 빈 cache의 `npm install`과 Composer로 설치한다. `docs/operations/publication.md`는 `file:` tarball과 `artifact` 또는 `package` repository로 릴리스 asset을 설치하는 방법과 개발 구성을 적는다.
 - 릴리스 notes를 GitHub의 한도 안에 두었다(T22.2-2). GitHub는 125000자를 넘는 release body를 거부하고, `make release-publish`는 `CHANGELOG.md`의 section `## X.Y.Z` 전체를 넘겼다. `scripts/release.mjs`의 `NOTES_LIMIT`(125000자)을 넘는 section은 tag의 `CHANGELOG.md` section을 가리키는 한 줄로 바뀌고, 한도의 section은 그대로 남는다. `tests/scripts/release.test.mjs`가 둘과 Go tag의 link를 검사한다.
 

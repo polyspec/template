@@ -1,6 +1,6 @@
 {
   "name": "@polyspec/template-codemirror",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "CodeMirror 6 extension for template sources: HTML language, template token classes, tag backgrounds, diagnostics, folding, matching tag highlights, indentation and formatting from @polyspec/template-language",
   "license": "MIT",
   "type": "module",
@@ -23,7 +23,7 @@
     "node": ">=26"
   },
   "dependencies": {
-    "@polyspec/template-language": "0.0.2"
+    "@polyspec/template-language": "0.0.3"
   },
   "peerDependencies": {
     "@codemirror/commands": "^6.11.1",
