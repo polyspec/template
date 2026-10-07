@@ -144,13 +144,14 @@ help: ## List targets
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-# The targets of the full suite, the one list of every runner: `make check`, `make release-test-matrix`, `make
-# release-check` in a clean checkout and the release job of the CI workflow run them through the guard
-# scripts/full-run.mjs, which refuses while a checklist task is [~], while tracked changes are uncommitted or when
-# var/full-run.json records a run of the current tree, runs each target with `make <target>` to its end and records its
-# result; `make rerun-failed` reruns the targets of the current tree that did not pass. The list stays on one line:
-# scripts/owner-check.mjs reads it.
-CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-all-modes delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+# The targets of the full suite, the one list of every runner: `make check`, `make release-test-matrix` and `make
+# release-check` in a clean checkout run them through the guard scripts/full-run.mjs, which refuses while a checklist
+# task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree, runs
+# each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
+# current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
+# ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-js and conformance-ts. The list
+# stays on one line: scripts/owner-check.mjs reads it.
+CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node scripts/full-run.mjs run $(CHECK_TARGETS)
@@ -209,7 +210,7 @@ ci-passed: ## Fail unless every job of RESULTS, the JSON of needs of the job ci-
 # tarballs and Composer zips into var/release/assets, and release-publish creates the GitHub Release. The workflow sets
 # TAG in the environment, and the recipe passes it as "$$TAG", so the name of a tag never becomes shell text. A Go module
 # tag <directory>/vX.Y.Z builds and attaches nothing, so release-assets builds the npm packages only for a tag without /
-# (T22.1-5). These steps are not the job release of ci.yml, which runs the full suite.
+# (T22.1-5).
 release-verify release-versions release-assets release-publish: ## A step of the release of the tag TAG (release.yml)
 	$(if $(TAG),,$(error make $@ needs TAG=<tag>, a tag vX.Y.Z or packages/template-go/vX.Y.Z))
 	node scripts/release.mjs $(@:release-%=%) "$$TAG"

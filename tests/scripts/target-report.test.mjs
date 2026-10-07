@@ -1,6 +1,7 @@
 // Tests the report of a run of make targets (T20.1-9): scripts/ci-targets.mjs runs every target to its end also after
 // a failed one, writes the whole output of each target to targets/<target>.log, and writes summary.md, also to the job
-// summary of GitHub Actions, with each failed target and its first failure lines; it ends with status 1.
+// summary of GitHub Actions, with each failed target and its first failure lines and the version of each toolchain of the
+// run, which toolchains.json holds too (T17.1-10); it ends with status 1.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -36,6 +37,12 @@ test('a run with a failing target keeps going and leaves the log of every target
   assert.match(summary, /\| report-probe-fail \| failed \| \d+\.\d s \|\n\| report-probe-pass \| passed \| \d+\.\d s \|/);
   assert.match(summary, /## report-probe-fail: failed\n\nLog: targets\/report-probe-fail\.log\n\n```\n✖ the probe failed: expected 1, actual 2\n/);
   assert.equal(readFileSync(summaryFile, 'utf8'), summary, 'the job summary is not the summary of the report');
+  // The report of each CI job records the toolchains of the job, the PHP patch that setup-php installed included.
+  const toolchains = JSON.parse(readFileSync(path.join(report, 'toolchains.json'), 'utf8'));
+  assert.deepEqual(Object.keys(toolchains), ['node', 'npm', 'go', 'cargo', 'php', 'composer']);
+  assert.equal(toolchains.node, process.version);
+  assert.match(toolchains.php, /^\d+\.\d+\.\d+$/, `the PHP version of the report is ${toolchains.php}, not a patch version`);
+  assert.match(summary, new RegExp(`\\| Toolchain \\| Version \\|\\n\\| --- \\| --- \\|\\n\\| node \\| ${process.version.replaceAll('.', '\\.')} \\|\\n`));
   assert.equal(existsSync(`${report}.lock`), false, 'the run left its lock');
 });
 

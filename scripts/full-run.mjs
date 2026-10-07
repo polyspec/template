@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 import { hooksIssue } from './git-hooks.mjs';
 import { acquire } from './holder-lock.mjs';
-import { runLogged, startReport, writeSummary } from './target-report.mjs';
+import { runLogged, startReport, toolchainVersions, writeSummary } from './target-report.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const USAGE = 'Usage: node scripts/full-run.mjs run <target>... | rerun-failed';
@@ -115,31 +115,6 @@ function alive(pid) {
   }
 }
 
-// The commands that print the version of each toolchain of a run.
-const VERSION_COMMANDS = {
-  node: ['node', ['--version']],
-  npm: ['npm', ['--version']],
-  go: ['go', ['env', 'GOVERSION']],
-  cargo: ['cargo', ['--version']],
-  php: ['php', ['-r', 'echo PHP_VERSION;']],
-  composer: ['composer', ['--version', '--no-ansi']],
-};
-
-/**
- * The version of each toolchain on PATH in `root`, as the commands print it, or `unavailable: <reason>`. The record of a
- * run keeps them as evidence of what the run ran on: config/toolchain.json pins PHP by its minor version, because
- * setup-php cannot pin a patch, so the patch of each run is recorded here (T19.2).
- */
-export function toolchainVersions(root = ROOT) {
-  const versions = {};
-  for (const [name, [command, args]] of Object.entries(VERSION_COMMANDS)) {
-    const run = spawnSync(command, args, { cwd: root, encoding: 'utf8' });
-    const line = (run.stdout ?? '').trim().split('\n')[0];
-    versions[name] = run.error ? `unavailable: ${run.error.message}` : run.status === 0 ? line : `unavailable: ${command} exited with ${run.status}`;
-  }
-  return versions;
-}
-
 const seconds = milliseconds => `${(milliseconds / 1000).toFixed(1)} s`;
 
 // The report of the run: the log of each target and a summary with the first failure lines of each failed target
@@ -206,7 +181,7 @@ async function guardedRun({ root, mode, targets, runTarget, print, environment }
   current.ended = now();
   if (rerun) Object.assign(rerun, { ended: current.ended, result: decision.targets.every(name => !failed.includes(name)) ? 'passed' : 'failed' });
   writeRecord(root, current);
-  writeSummary(path.join(root, REPORT), `make check of tree ${tree}`, current.targets);
+  writeSummary(path.join(root, REPORT), `make check of tree ${tree}`, current.targets, (rerun ?? current).environment);
   const summary = `${decision.targets.length - decision.targets.filter(name => failed.includes(name)).length} of ${decision.targets.length} targets passed in ${seconds(Date.now() - begin)}`;
   print(failed.length === 0
     ? `[full-run] result passed for tree ${tree}: ${summary}`
