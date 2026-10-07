@@ -1,12 +1,14 @@
 // The report of a run of make targets (T20.1-9), so that one CI run leaves the reason of every failure:
 //
 //   <directory>/targets/<target>.log   the whole output of `make -k <target>`
-//   <directory>/summary.md             each target with its result and time, and for each failed target its first
-//                                      failure lines and the path of its log; in CI also the job summary
+//   <directory>/summary.md             each target with its result and time, the version of each toolchain of the
+//                                      run, and for each failed target its first failure lines and the path of its
+//                                      log; in CI also the job summary
+//   <directory>/toolchains.json        the version of each toolchain of the run (toolchainVersions)
 //
 // `make check` (scripts/full-run.mjs) writes var/report/full-run and `make ci-targets` (scripts/ci-targets.mjs)
 // var/report/ci-targets, and every CI job uploads its report under `if: !cancelled()`.
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -16,6 +18,31 @@ export const FAILURE_LINES = 20;
 const FAILURE = /✖|\bnot ok\b|\*\*\*|\bError\b|\berror\b|\bFAIL|\bfailed\b|AssertionError|panicked/;
 
 export const logPath = (directory, target) => path.join(directory, 'targets', `${target}.log`);
+
+// The commands that print the version of each toolchain of a run.
+const VERSION_COMMANDS = {
+  node: ['node', ['--version']],
+  npm: ['npm', ['--version']],
+  go: ['go', ['env', 'GOVERSION']],
+  cargo: ['cargo', ['--version']],
+  php: ['php', ['-r', 'echo PHP_VERSION;']],
+  composer: ['composer', ['--version', '--no-ansi']],
+};
+
+/**
+ * The version of each toolchain on PATH in `root`, as the commands print it, or `unavailable: <reason>`. The report of
+ * each CI job and the record of a full run keep them as evidence of what the run ran on: config/toolchain.json pins PHP
+ * by its minor version, because setup-php cannot pin a patch, so the patch of each run is recorded here (T19.2).
+ */
+export function toolchainVersions(root) {
+  const versions = {};
+  for (const [name, [command, args]] of Object.entries(VERSION_COMMANDS)) {
+    const run = spawnSync(command, args, { cwd: root, encoding: 'utf8' });
+    const line = (run.stdout ?? '').trim().split('\n')[0];
+    versions[name] = run.error ? `unavailable: ${run.error.message}` : run.status === 0 ? line : `unavailable: ${command} exited with ${run.status}`;
+  }
+  return versions;
+}
 
 /** Starts the report of a run: the directory holds only the files of this run. */
 export function startReport(directory) {
@@ -52,13 +79,14 @@ export function failureLines(text) {
 const seconds = milliseconds => (milliseconds == null ? '-' : `${(milliseconds / 1000).toFixed(1)} s`);
 
 /**
- * Writes summary.md of `results` ({ name, status, elapsedMs }) and appends it to the job summary of GitHub Actions
- * when GITHUB_STEP_SUMMARY names one; returns the text.
+ * Writes summary.md of `results` ({ name, status, elapsedMs }) and of the toolchain versions `environment`, and appends
+ * it to the job summary of GitHub Actions when GITHUB_STEP_SUMMARY names one; returns the text.
  */
-export function writeSummary(directory, title, results) {
+export function writeSummary(directory, title, results, environment) {
   const failed = results.filter(result => result.status !== 'passed');
   const lines = [`# ${title}`, '', `${results.length - failed.length} of ${results.length} targets passed.`, '', '| Target | Result | Time |', '| --- | --- | --- |'];
   for (const result of results) lines.push(`| ${result.name} | ${result.status} | ${seconds(result.elapsedMs)} |`);
+  lines.push('', '| Toolchain | Version |', '| --- | --- |', ...Object.entries(environment).map(([name, version]) => `| ${name} | ${version} |`));
   for (const result of failed) {
     const log = logPath(directory, result.name);
     const text = existsSync(log) ? readFileSync(log, 'utf8') : '';

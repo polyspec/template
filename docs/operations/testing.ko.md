@@ -8,7 +8,7 @@
 make release-test-matrix
 ```
 
-이 명령은 `make check`의 전체 suite를 같은 guard `scripts/full-run.mjs`로 실행한다. `Makefile`의 `CHECK_TARGETS`에 있는 모든 target을 앞선 target의 실패와 상관없이 각각 `make <target>`으로 끝까지 실행하고, target마다 결과와 걸린 시간을 `var/full-run.json`에 기록한다. `CHECK_TARGETS`는 전체 suite의 유일한 목록이며 `make check`, `make release-test-matrix`, `make release-check`, CI workflow의 release job이 이를 실행하고, release job은 그 기록을 올린다. guard는 tree마다 한 번 실행하므로, 어떤 tree에서 `make check`를 실행한 뒤에는 `make release-test-matrix`가 그 tree를 그 실행을 밝히며 거부한다. `make rerun-failed`는 통과하지 못한 target을 다시 실행한다. target들은 일곱 계층을 다룬다.
+이 명령은 `make check`의 전체 suite를 같은 guard `scripts/full-run.mjs`로 실행한다. `Makefile`의 `CHECK_TARGETS`에 있는 모든 target을 앞선 target의 실패와 상관없이 각각 `make <target>`으로 끝까지 실행하고, target마다 결과와 걸린 시간을 `var/full-run.json`에 기록한다. `CHECK_TARGETS`는 전체 suite의 유일한 목록이며 `make check`, `make release-test-matrix`, `make release-check`가 이를 실행하고, CI workflow의 job들은 그 target을 각각 정확히 한 job에서 `make ci-targets`로 실행하고 report를 올린다. guard는 tree마다 한 번 실행하므로, 어떤 tree에서 `make check`를 실행한 뒤에는 `make release-test-matrix`가 그 tree를 그 실행을 밝히며 거부한다. `make rerun-failed`는 통과하지 못한 target을 다시 실행한다. target들은 일곱 계층을 다룬다.
 
 | 계층 | 범위 | 실패 근거 |
 | --- | --- | --- |

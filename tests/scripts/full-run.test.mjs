@@ -11,7 +11,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { activeItems, decide, fullRun, LOCK, RECORD, toolchainVersions } from '../../scripts/full-run.mjs';
+import { activeItems, decide, fullRun, LOCK, RECORD } from '../../scripts/full-run.mjs';
+import { toolchainVersions } from '../../scripts/target-report.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
