@@ -63,8 +63,10 @@ export function check(root) {
     const lock = readJson(root, lockPath);
     if (manifest.config?.platform?.php !== platform.php) add('platform', platform.manifest, `config.platform.php is ${manifest.config?.platform?.php ?? 'absent'}, the policy declares ${platform.php}`, `set config.platform.php to ${platform.php} and run composer update --lock in ${directory}`);
     if (lock['platform-overrides']?.php !== platform.php) add('platform', lockPath, `the lock was resolved for PHP ${lock['platform-overrides']?.php ?? 'without a platform override'}, the policy declares ${platform.php}`, `run composer update --lock in ${directory}`);
-    // composer validate reads the manifest and the lock; COMPOSER_DISABLE_NETWORK keeps it off the network.
-    const validate = spawnSync('composer', ['validate', '--strict', '--no-interaction', '--no-check-publish'], {
+    // composer validate reads the manifest and the lock; COMPOSER_DISABLE_NETWORK keeps it off the network. Each published
+    // composer.json declares its version, which an artifact repository of its release zip reads (scripts/release.mjs), so
+    // the warning on a version field is not reported.
+    const validate = spawnSync('composer', ['validate', '--strict', '--no-interaction', '--no-check-publish', '--no-check-version'], {
       cwd: join(root, directory), encoding: 'utf8', env: { ...process.env, COMPOSER_DISABLE_NETWORK: '1' },
     });
     if (validate.error || validate.status !== 0) {
