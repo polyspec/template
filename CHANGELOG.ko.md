@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 문서는 compiler의 `interface.json`과 `functions.json`을 저장소 위치로 링크하고, Rust compiler interface 테스트는 형식을 맞췄다(T22.3-4).
 - compiler를 npm 패키지 `@polyspec/template-compiler`로 발행했다(T22.3-3). `packages/template-compiler`는 compiler module, backend, `interface.json`, 함수 계약 `functions.json`을 담고 `compiler.mjs`, `ast-artifact.mjs`, `type-manifest.mjs`, `functions.json`을 export한다. 패키지는 `@polyspec/template`에 정확한 버전으로 의존하고, `ast-artifact.mjs`는 그 패키지에서 parser를 import한다. compiler digest는 패키지의 파일을 패키지 안의 경로로 적고, 설치된 곳에서는 설치된 `@polyspec/template`을 읽는다. `make release-assets`는 `polyspec-template-compiler-X.Y.Z.tgz`를 pack하고, `tests/fixtures/release-consumer`의 npm consumer project는 그것을 `npm ci`로 설치하고 진입점과 `functions.json`을 import하며 템플릿을 컴파일한다. 바뀐 lock의 dependency review가 `@codemirror/view`를 6.43.14로 올렸다. 6.13.0은 `@codemirror/streamparser`를 선언하지 않고 import하므로 `config/dependency-policy.json`은 `@codemirror/language`를 6.12.4로 유지한다.
 
 ## 0.0.3
