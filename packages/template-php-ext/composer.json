@@ -1,6 +1,6 @@
 {
     "name": "polyspec/template-php-ext",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "PHP extension that renders templates with an independent C implementation of the specification",
     "type": "php-ext",
     "license": "MIT",

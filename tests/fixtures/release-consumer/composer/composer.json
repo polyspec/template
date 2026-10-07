@@ -6,6 +6,6 @@
         { "packagist.org": false }
     ],
     "require": {
-        "polyspec/template": "0.0.3"
+        "polyspec/template": "0.0.4"
     }
 }

@@ -1,21 +1,21 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/dependency-review.mjs) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-07T12:39:02.369Z",
+  "reviewed": "2026-10-07T13:44:49.658Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "cc4e8194e14ba4e80c03764236f9e4791b4de5e4d5ad5644a6b893f66c2eea3b",
+      "sha256": "7177f1eb5cce69bfb50564ddb348108ffd444ecafd889d52a80f3108593582c4",
       "advisories": []
     },
     {
       "lock": "packages/template-php/composer.lock",
-      "sha256": "45ca9f563798b4ccfb42e4658f73be302fa5cb2dd98079f7b7e0bff0dff6f335",
+      "sha256": "68faa945200f8607b70f8ded0ac05347aad07b1bc858176714b90fc3ff28794c",
       "advisories": []
     },
     {
       "lock": "packages/template-php-ext/composer.lock",
-      "sha256": "de2af4de558a6f544e7305966c26888ebce71082b133960907253b55edcb4abe",
+      "sha256": "ef317cf44a9b6ee58dc3537dd9a19a7a61a2f907c01a6196e08b22b272623fa0",
       "advisories": []
     }
   ],
@@ -39,7 +39,7 @@
       "manifest": "package.json",
       "package": "@codemirror/language",
       "version": "6.12.4",
-      "latest": "6.13.0"
+      "latest": "6.13.1"
     },
     {
       "ecosystem": "npm",
