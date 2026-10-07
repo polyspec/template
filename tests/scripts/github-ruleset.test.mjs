@@ -122,7 +122,7 @@ function checkNames(file) {
   });
 }
 
-test('the declaration requires a pull request, the merge queue and every check of CI on main without a bypass actor (T17.1-7)', () => {
+test('the declaration requires a pull request, the merge queue and the checks push-gate and ci-passed on main without a bypass actor (T17.1-7, T22.1-3)', () => {
   const { ruleset, settings } = DECLARATION;
   assert.equal(REPOSITORY, 'polyspec/template');
   assert.deepEqual(settings, { allow_rebase_merge: true, allow_auto_merge: true, delete_branch_on_merge: true });
@@ -139,7 +139,11 @@ test('the declaration requires a pull request, the merge queue and every check o
   assert.equal(ruleset.rules.find(rule => rule.type === 'merge_queue').parameters.merge_method, 'REBASE');
   const checks = ruleset.rules.find(rule => rule.type === 'required_status_checks').parameters;
   // 15368 is the integration id of GitHub Actions, so a status of the same name from another integration does not satisfy the rule.
-  const expected = [...checkNames('.github/workflows/push-gate.yml'), ...checkNames('.github/workflows/ci.yml')];
+  // ci-passed, the last job of ci.yml, passes only when every other job of ci.yml passed (toolchain-files.test.mjs), so
+  // it stands for the whole workflow, and a job added to ci.yml is required once ci-passed needs it.
+  const ci = checkNames('.github/workflows/ci.yml');
+  assert.equal(ci.at(-1), 'ci-passed');
+  const expected = [...checkNames('.github/workflows/push-gate.yml'), 'ci-passed'];
   assert.deepEqual(checks.required_status_checks, expected.map(context => ({ context, integration_id: 15368 })));
   assert.equal(checks.strict_required_status_checks_policy, false);
 });

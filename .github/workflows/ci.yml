@@ -7,8 +7,10 @@
 # and installs with `make install`, which installs the npm and Go of the checkout into var/tools with the Go of setup-go
 # (T19.2). The workflow runs on every pull request, every merge group of the merge queue and every manual run
 # (workflow_dispatch, T17.1-9): the ruleset main of
-# .github/ruleset.json requires every job, and the queue moves main to the merge group commit only after they passed on
-# it, so the run of the merge group is the evidence of the commit that main receives (T17.1-7). A new push to a pull
+# .github/ruleset.json requires the job ci-passed, the last job, which passes only when every other job of this workflow
+# passed (T22.1-3), and the queue moves main to the merge group commit only after it passed on it, so the run of the
+# merge group is the evidence of the commit that main receives (T17.1-7). The job release runs the full suite and keeps
+# its record; .github/workflows/release.yml releases a tag. A new push to a pull
 # request cancels the run of its previous push; a merge group has a ref of its own, and its run is never cancelled.
 name: CI
 
@@ -238,3 +240,19 @@ jobs:
           name: report-php-${{ matrix.php }}
           path: var/report/ci-targets/
           if-no-files-found: error
+
+  # The check of this workflow that the ruleset main requires (T22.1-3). It runs after every other job, also after a
+  # failed, skipped or cancelled one (if: always()), and make ci-passed fails unless every job of needs has the result
+  # success, so a new job of this workflow is required once it is listed in needs. Its step has no condition of its own:
+  # a skipped step would pass the check. It installs nothing; make ci-passed needs only the Node.js of .node-version.
+  ci-passed:
+    if: ${{ always() }}
+    needs: [release, docs, typescript, browser, editor, go, rust, php]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: .node-version
+      - name: make ci-passed
+        run: make ci-passed RESULTS='${{ toJSON(needs) }}'
