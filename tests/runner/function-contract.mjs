@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import { lowerSourceGraph } from '../../tools/compiler/ir.mjs';
+import { lowerSourceGraph } from '../../packages/template-compiler/ir.mjs';
 
 function graph(name, call) {
   const ast = { type: 'Template', name, body: [{ type: 'Echo', expr: { type: 'Call', name: call.name, args: call.args, span: [0, 1] }, span: [0, 1] }] };

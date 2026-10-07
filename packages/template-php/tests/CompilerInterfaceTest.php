@@ -20,7 +20,7 @@ final class CompilerInterfaceTest extends TestCase
     /** Compares PHP declarations with the manifest through Reflection. */
     public function testRuntimeDeclarationsMatchManifest(): void
     {
-        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../../tools/compiler/interface.json';
+        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../template-compiler/interface.json';
         $manifest = json_decode((string) file_get_contents($manifestPath), true, flags: JSON_THROW_ON_ERROR);
         $contract = $manifest['runtimeContract'];
         $program = new \ReflectionClass(Program::class);
@@ -102,7 +102,7 @@ final class CompilerInterfaceTest extends TestCase
      */
     public function testBoundMapDeclarationsMatchManifest(): void
     {
-        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../../tools/compiler/interface.json';
+        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../template-compiler/interface.json';
         $manifest = json_decode((string) file_get_contents($manifestPath), true, flags: JSON_THROW_ON_ERROR);
         $mapping = $manifest['languages']['php']['boundMap'];
         $type = new \ReflectionClass($mapping['type']);

@@ -4,9 +4,10 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import ts from 'typescript';
 import { root } from '../../tests/runner/drivers.mjs';
-import { compileSource } from '../compiler/compiler.mjs';
-import { generatedCompilerDigest, typescriptDeliveryDigest } from '../compiler/compiler-digest.mjs';
-import { compileGeneratedArtifact } from '../compiler/generated-artifact.mjs';
+import { compileSource } from '../../packages/template-compiler/compiler.mjs';
+import { generatedCompilerDigest } from '../../packages/template-compiler/compiler-digest.mjs';
+import { typescriptDeliveryDigest } from './delivery-digest.mjs';
+import { compileGeneratedArtifact } from '../../packages/template-compiler/generated-artifact.mjs';
 import { showcasePhpNamespace } from './php-namespace.mjs';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');

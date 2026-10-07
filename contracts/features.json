@@ -792,7 +792,7 @@
         "tests/fixtures/typed-values"
       ],
       "tests": [
-        "tools/compiler/compiler.mjs",
+        "packages/template-compiler/compiler.mjs",
         "scripts/check-typed-generator.mjs",
         "tests/runner/conformance-generated-ts.mjs",
         "tests/runner/conformance-generated-go.mjs",
@@ -861,7 +861,7 @@
       },
       "fixtures": [
         "docs",
-        "tools/compiler/interface.json"
+        "packages/template-compiler/interface.json"
       ],
       "tests": [
         "scripts/check-documents.mjs",
@@ -1408,7 +1408,7 @@
         "typescript": "pass"
       },
       "fixtures": [
-        "contracts/functions.json"
+        "packages/template-compiler/functions.json"
       ],
       "tests": [
         "scripts/check-function-contract.mjs",

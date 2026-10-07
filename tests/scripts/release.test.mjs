@@ -86,6 +86,7 @@ function sandbox(t, { version = '0.0.1', changelog = CHANGELOG } = {}) {
     'packages/template-language': { dependencies: { '@polyspec/template': version } },
     'packages/template-lsp': { dependencies: { '@polyspec/template-language': version, other: '^1.0.0' } },
     'packages/template-codemirror': { dependencies: { '@polyspec/template-language': version }, peerDependencies: { other: '^1.0.0' } },
+    'packages/template-compiler': { dependencies: { '@polyspec/template': version } },
     'packages/template-php-ext': { require: { php: '^8.2', 'polyspec/template': version } },
   };
   for (const manifest of Object.keys(release.MANIFESTS)) {
@@ -247,7 +248,8 @@ test('an asset is named after its package and version', () => {
   assert.equal(release.assetName('polyspec/template-php-ext', '1.2.3', 'zip'), 'polyspec-template-php-ext-1.2.3.zip');
   assert.deepEqual(release.assetNames('v0.0.1'), [
     'polyspec-template-0.0.1.tgz', 'polyspec-template-language-0.0.1.tgz', 'polyspec-template-lsp-0.0.1.tgz',
-    'polyspec-template-codemirror-0.0.1.tgz', 'polyspec-template-0.0.1.zip', 'polyspec-template-php-ext-0.0.1.zip']);
+    'polyspec-template-codemirror-0.0.1.tgz', 'polyspec-template-compiler-0.0.1.tgz', 'polyspec-template-0.0.1.zip',
+    'polyspec-template-php-ext-0.0.1.zip']);
   assert.deepEqual(release.assetNames('packages/template-go/v0.0.1'), []);
 });
 
@@ -460,6 +462,21 @@ test('the npm consumer project installs every packed tarball with npm ci', t => 
     assert.equal(JSON.parse(readFileSync(path.join(project, 'node_modules', name, 'package.json'), 'utf8')).version, packed.version, name);
     assert.equal(lock[`node_modules/${name}`].resolved, spec, name);
   }
+  // The installed compiler loads its entry points and its function contract by the package name.
+  const script = [
+    "const compiler = await import('@polyspec/template-compiler/compiler.mjs');",
+    "const ast = await import('@polyspec/template-compiler/ast-artifact.mjs');",
+    "const types = await import('@polyspec/template-compiler/type-manifest.mjs');",
+    "const { default: functions } = await import('@polyspec/template-compiler/functions.json', { with: { type: 'json' } });",
+    "const fs = await import('node:fs');",
+    "fs.mkdirSync('templates');",
+    "fs.writeFileSync('templates/page.tpl', '<p>{=title}</p>\\n');",
+    "const graph = ast.compileAst({ root: 'templates', output: 'compiled', entry: 'page.tpl' });",
+    "console.log(JSON.stringify([typeof compiler.compileSource, typeof types.deriveTypeManifest, functions.canonical.length > 0, /^[0-9a-f]{64}$/.test(graph.compilerDigest)]));",
+  ].join('\n');
+  const loaded = spawnSync(process.execPath, ['--input-type=module', '-e', script], { cwd: project, encoding: 'utf8' });
+  assert.equal(loaded.status, 0, loaded.stderr);
+  assert.deepEqual(JSON.parse(loaded.stdout), ['function', 'function', true, true]);
 });
 
 test('the Composer consumer project installs the packed zips from an artifact repository', t => {

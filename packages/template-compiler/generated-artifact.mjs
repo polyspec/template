@@ -1,10 +1,9 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const projectRoot = resolve(fileURLToPath(new URL('../../', import.meta.url)));
-const contractPath = join(projectRoot, 'tools/compiler/interface.json');
+const contractPath = fileURLToPath(new URL('./interface.json', import.meta.url));
 const hash = value => createHash('sha256').update(value).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
 

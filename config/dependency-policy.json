@@ -34,6 +34,14 @@
       "reason": "vsce refuses to package an extension whose @types/vscode is newer than engines.vscode (^1.138.0): \"@types/vscode ^1.140.0 greater than engines.vscode ^1.138.0\". The extension uses no API added after VS Code 1.138, so raising engines.vscode would only exclude VS Code 1.138 and 1.139.",
       "removalCondition": "Remove the exception when engines.vscode is raised to the latest @types/vscode release, because the extension needs an API of that release, and make vscode-package test-vscode-integration passes.",
       "verification": ["make vscode-package", "make test-vscode-integration"]
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@codemirror/language",
+      "reason": "The latest stable release 6.13.0 imports @codemirror/streamparser, which its package.json does not declare, so npm does not install it and the CodeMirror adapter does not load.",
+      "removalCondition": "Remove the exception when a stable release declares every package that it imports and make test-codemirror passes with it.",
+      "verification": ["make test-codemirror"]
     }
   ]
 }

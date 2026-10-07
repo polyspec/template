@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { compileAst } from '../tools/compiler/ast-artifact.mjs';
+import { compileAst } from '../packages/template-compiler/ast-artifact.mjs';
 
 const directory = mkdtempSync(join(tmpdir(), 'template-ast-artifact-'));
 const source = join(directory, 'source');

@@ -48,6 +48,7 @@ export const PACKAGES = [
   ['npm', 'packages/template-language', '@polyspec/template-language'],
   ['npm', 'packages/template-lsp', '@polyspec/template-lsp'],
   ['npm', 'packages/template-codemirror', '@polyspec/template-codemirror'],
+  ['npm', 'packages/template-compiler', '@polyspec/template-compiler'],
   ['composer', 'packages/template-php', 'polyspec/template'],
   ['composer', 'packages/template-php-ext', 'polyspec/template-php-ext'],
 ];
@@ -64,6 +65,7 @@ export const MANIFESTS = {
   'packages/template-language/package.json': ARCHIVE,
   'packages/template-lsp/package.json': ARCHIVE,
   'packages/template-codemirror/package.json': ARCHIVE,
+  'packages/template-compiler/package.json': ARCHIVE,
   'packages/template-vscode/package.json': VERSION_ONLY,
   'packages/template-php/composer.json': ARCHIVE,
   'packages/template-php-ext/composer.json': ARCHIVE,

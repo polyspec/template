@@ -41,7 +41,7 @@ Every package declares version `0.0.3`. The version changes together in every pa
 
 ## Tag releases
 
-A release is a tag of a commit of `main` (AGENTS, T22.1-4): `vX.Y.Z` releases the npm packages `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp` and `@polyspec/template-codemirror`, and the Composer packages `polyspec/template` and `polyspec/template-php-ext` at version X.Y.Z, and `packages/template-go/vX.Y.Z` releases the Go module `github.com/polyspec/template/packages/template-go`. The Cargo package `polyspec-template` carries the version X.Y.Z but is not released as an archive; it is consumed by git tag, because `cargo package` rewrites git dependencies into crates.io requirements that do not resolve (T22.1-5). The push of the tag runs `.github/workflows/release.yml` (`on: push: tags: ['v*', '**/v*']`, permission `contents: write`; in a tag filter `*` does not match `/`, so `**/v*` covers the tag of a Go module at any depth), which is not the job `release` of `ci.yml`. After `make install`, its steps run `scripts/release.mjs` in this order and stop at the first failure:
+A release is a tag of a commit of `main` (AGENTS, T22.1-4): `vX.Y.Z` releases the npm packages `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror` and `@polyspec/template-compiler`, and the Composer packages `polyspec/template` and `polyspec/template-php-ext` at version X.Y.Z, and `packages/template-go/vX.Y.Z` releases the Go module `github.com/polyspec/template/packages/template-go`. The Cargo package `polyspec-template` carries the version X.Y.Z but is not released as an archive; it is consumed by git tag, because `cargo package` rewrites git dependencies into crates.io requirements that do not resolve (T22.1-5). The push of the tag runs `.github/workflows/release.yml` (`on: push: tags: ['v*', '**/v*']`, permission `contents: write`; in a tag filter `*` does not match `/`, so `**/v*` covers the tag of a Go module at any depth), which is not the job `release` of `ci.yml`. After `make install`, its steps run `scripts/release.mjs` in this order and stop at the first failure:
 
 ```sh
 make release-verify
@@ -61,7 +61,7 @@ The tag reaches the steps through the environment variable `TAG`. `tests/scripts
 
 No polyspec package is published to a registry before 0.1. A consumer downloads the archives of a GitHub Release, `https://github.com/polyspec/template/releases/download/vX.Y.Z/<archive>`, and installs them together; each archive names the polyspec packages it depends on by name and exact version, and the archive of that version beside it satisfies the dependency.
 
-npm: list every needed tarball as a `file:` dependency. `@polyspec/template-language`, `@polyspec/template-lsp` and `@polyspec/template-codemirror` depend on `@polyspec/template-language` or `@polyspec/template` at X.Y.Z, so the tarball of that package is listed too:
+npm: list every needed tarball as a `file:` dependency. `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror` and `@polyspec/template-compiler` depend on `@polyspec/template-language` or `@polyspec/template` at X.Y.Z, so the tarball of that package is listed too:
 
 ```json
 {

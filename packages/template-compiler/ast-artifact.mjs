@@ -3,11 +3,10 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { parse } from '@polyspec/template';
 import { astCompilerDigest } from './compiler-digest.mjs';
 
-const projectRoot = resolve(fileURLToPath(new URL('../../', import.meta.url)));
-const contractPath = join(projectRoot, 'tools/compiler/interface.json');
+const contractPath = fileURLToPath(new URL('./interface.json', import.meta.url));
 const hash = value => createHash('sha256').update(value).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
 const lineIndex = bytes => {

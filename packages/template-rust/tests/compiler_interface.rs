@@ -101,7 +101,7 @@ struct Operation {
 
 #[test]
 fn runtime_declarations_match_manifest() {
-    let manifest_path = std::env::var("TEMPLATE_INTERFACE_MANIFEST").unwrap_or_else(|_| "../../tools/compiler/interface.json".to_string());
+    let manifest_path = std::env::var("TEMPLATE_INTERFACE_MANIFEST").unwrap_or_else(|_| "../../packages/template-compiler/interface.json".to_string());
     let manifest: Manifest = serde_json::from_str(&fs::read_to_string(manifest_path).unwrap()).unwrap();
     let source = syn::parse_file(&fs::read_to_string("src/render/engine.rs").unwrap()).unwrap();
 
@@ -390,7 +390,7 @@ fn runtime_declarations_match_manifest() {
 /// that it declares for generated programs.
 #[test]
 fn bound_map_declarations_match_manifest() {
-    let manifest_path = std::env::var("TEMPLATE_INTERFACE_MANIFEST").unwrap_or_else(|_| "../../tools/compiler/interface.json".to_string());
+    let manifest_path = std::env::var("TEMPLATE_INTERFACE_MANIFEST").unwrap_or_else(|_| "../../packages/template-compiler/interface.json".to_string());
     let manifest: Manifest = serde_json::from_str(&fs::read_to_string(manifest_path).unwrap()).unwrap();
     let mapping = &manifest.languages.rust.bound_map;
     let source = syn::parse_file(&fs::read_to_string("src/value/bound.rs").unwrap()).unwrap();

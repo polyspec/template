@@ -9,7 +9,7 @@ import { listCases } from '../tests/runner/cases.mjs';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifestPath = process.env.TEMPLATE_INTERFACE_MANIFEST
   ? resolve(process.env.TEMPLATE_INTERFACE_MANIFEST)
-  : resolve(root, 'tools/compiler/interface.json');
+  : resolve(root, 'packages/template-compiler/interface.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 if (manifest.schema !== 2 || manifest.name !== 'TemplateCompiler') throw new Error('invalid compiler interface manifest');
 if (existsSync(resolve(root, 'tools/runtime/interface.json'))) throw new Error('runtime contract must not duplicate the compiler manifest');
@@ -17,7 +17,7 @@ if (existsSync(resolve(root, 'tools/showcase/adapters/interface.json'))) throw n
 if (manifest.showcaseAdapter?.name !== 'RenderAdapter' || manifest.showcaseAdapter?.schema !== 3) throw new Error('showcase adapter contract is missing');
 
 const evidence = manifest.evidence;
-if (!Array.isArray(evidence?.readingOrder) || evidence.readingOrder[0] !== 'tools/compiler/interface.json' ||
+if (!Array.isArray(evidence?.readingOrder) || evidence.readingOrder[0] !== 'packages/template-compiler/interface.json' ||
     !evidence.readingOrder.every(path => existsSync(resolve(root, path)))) {
   throw new Error('compiler interface reading order is incomplete');
 }
@@ -51,7 +51,7 @@ for (const [owner, names] of Object.entries(expectedOperations)) {
 
 const backendDirectory = process.env.TEMPLATE_BACKEND_DIRECTORY
   ? resolve(process.env.TEMPLATE_BACKEND_DIRECTORY)
-  : resolve(root, 'tools/compiler/backends');
+  : resolve(root, 'packages/template-compiler/backends');
 const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.mjs', php: 'php.mjs' };
 const backendOperations = manifest.components.LanguageBackend.operations;
 for (const [language, filename] of Object.entries(backendFiles)) {

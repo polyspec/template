@@ -59,7 +59,7 @@ type runtimeManifest struct {
 func TestCompilerRuntimeInterface(t *testing.T) {
 	manifestPath := os.Getenv("TEMPLATE_INTERFACE_MANIFEST")
 	if manifestPath == "" {
-		manifestPath = "../../tools/compiler/interface.json"
+		manifestPath = "../../packages/template-compiler/interface.json"
 	}
 	manifestBytes, err := os.ReadFile(manifestPath)
 	if err != nil {
@@ -327,7 +327,7 @@ type boundMapManifest struct {
 func TestBoundMapInterface(t *testing.T) {
 	manifestPath := os.Getenv("TEMPLATE_INTERFACE_MANIFEST")
 	if manifestPath == "" {
-		manifestPath = "../../tools/compiler/interface.json"
+		manifestPath = "../../packages/template-compiler/interface.json"
 	}
 	manifestBytes, err := os.ReadFile(manifestPath)
 	if err != nil {

@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parse } from '../packages/template-ts/dist/index.mjs';
 import { listCases, typeDefinitions } from '../tests/runner/cases.mjs';
-import { deriveTypeManifest } from '../tools/compiler/type-manifest.mjs';
+import { deriveTypeManifest } from '../packages/template-compiler/type-manifest.mjs';
 
 const cases = listCases();
 const parseableCases = cases.filter((testCase) => testCase.expectedAst !== null);

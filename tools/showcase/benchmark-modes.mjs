@@ -6,8 +6,8 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSy
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compileAst } from '../compiler/ast-artifact.mjs';
-import { compileSource } from '../compiler/compiler.mjs';
+import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
+import { compileSource } from '../../packages/template-compiler/compiler.mjs';
 import { publishBuild } from '../../scripts/publish-build.mjs';
 import { showcasePhpNamespace } from './php-namespace.mjs';
 

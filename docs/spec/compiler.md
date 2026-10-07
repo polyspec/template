@@ -4,18 +4,18 @@
 
 The compiler owns template parsing, validation, lowering and artifact emission. Runtime packages execute an already compiled program. They do not parse source or invoke a host compiler in a render request.
 
-The single compiler and runtime contract source is [`tools/compiler/interface.json`](../../tools/compiler/interface.json). Generated declarations and Mermaid diagrams must match that manifest. TypeScript, Go, Rust and PHP mappings may change spelling and error transport; they may not change ownership, field order, operation placement or state transitions.
+The single compiler and runtime contract source is [`packages/template-compiler/interface.json`](../../packages/template-compiler/interface.json). Generated declarations and Mermaid diagrams must match that manifest. TypeScript, Go, Rust and PHP mappings may change spelling and error transport; they may not change ownership, field order, operation placement or state transitions.
 
 The manifest's `evidence` section is the machine-readable reading map for this contract. It links the specification order, conformance fixtures, executable examples, generated artifacts and required verification commands. A checker rejects missing links so a reader can follow the contract to executable proof without relying on a duplicated summary.
 
 ## Pipeline
 
 ```mermaid
-<!--@include: ../../tools/compiler/generated/compiler-architecture.mmd-->
+<!--@include: ../../packages/template-compiler/generated/compiler-architecture.mmd-->
 ```
 
 ```mermaid
-<!--@include: ../../tools/compiler/generated/compiler-classes.mmd-->
+<!--@include: ../../packages/template-compiler/generated/compiler-classes.mmd-->
 ```
 
 One source graph and one explicit type manifest are lowered to one typed program. `ast` emits a language-neutral canonical AST artifact. `gen` sends the same typed program to the selected TypeScript, Go, Rust or PHP backend. JavaScript ESM is a delivery artifact produced from the TypeScript backend, not a separate semantic implementation.
@@ -74,7 +74,7 @@ Compilation mode and artifact refresh are independent build settings.
 - `true` computes source, type, contract and compiler-implementation digests and emits only when a digest changed.
 - `false` reads no template source and emits nothing. It validates and uses the deployed artifact.
 
-Generated files are completed in a temporary location and replaced atomically. An artifact manifest records its mode, target, entry, source digest, type digest, contract digest, compiler digest and files. The compiler digest covers the parser/compiler modules that produced that target, so a compiler implementation change invalidates an otherwise unchanged artifact. It is computed from tracked sources: for AST artifacts the sources and build configuration of `packages/template-ts`, `package-lock.json` and the artifact writer, for generated artifacts the modules of `tools/compiler`, so a check reads it without a build (`make artifact-digest-check`). A missing, corrupt or incompatible artifact fails before runtime startup.
+Generated files are completed in a temporary location and replaced atomically. An artifact manifest records its mode, target, entry, source digest, type digest, contract digest, compiler digest and files. The compiler digest covers the parser/compiler modules that produced that target, so a compiler implementation change invalidates an otherwise unchanged artifact. It is computed from tracked sources: for AST artifacts the sources and build configuration of `packages/template-ts`, `package-lock.json` and the artifact writer, for generated artifacts the modules of `packages/template-compiler`, so a check reads it without a build (`make artifact-digest-check`). A missing, corrupt or incompatible artifact fails before runtime startup.
 
 ## Implementation status
 

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
-const contract = JSON.parse(readFileSync(resolve(root, 'contracts/functions.json'), 'utf8'));
+const contract = JSON.parse(readFileSync(resolve(root, 'packages/template-compiler/functions.json'), 'utf8'));
 assert.equal(contract.schema, 1, 'function contract schema must be 1');
 assert.equal(contract.contractVersion, '0.0.1', 'function contract version must be 0.0.1');
 assert.deepEqual(Object.keys(contract), ['schema', 'contractVersion', 'syntax', 'canonical'], 'the function contract holds only its schema, version, syntax and canonical functions');

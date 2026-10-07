@@ -3,7 +3,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { root } from '../../tests/runner/drivers.mjs';
-import { compileAst } from '../compiler/ast-artifact.mjs';
+import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
 const argv = process.argv.slice(2);

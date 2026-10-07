@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const original = JSON.parse(readFileSync(resolve(root, 'tools/compiler/interface.json'), 'utf8'));
+const original = JSON.parse(readFileSync(resolve(root, 'packages/template-compiler/interface.json'), 'utf8'));
 const directory = mkdtempSync(join(tmpdir(), 'template-interface-mutation-'));
 
 try {
@@ -44,7 +44,7 @@ try {
   const backendDirectory = join(directory, 'backends');
   mkdirSync(backendDirectory);
   for (const filename of ['typescript.mjs', 'go.mjs', 'rust.mjs', 'php.mjs']) {
-    copyFileSync(resolve(root, 'tools/compiler/backends', filename), join(backendDirectory, filename));
+    copyFileSync(resolve(root, 'packages/template-compiler/backends', filename), join(backendDirectory, filename));
   }
   const rustBackend = join(backendDirectory, 'rust.mjs');
   writeFileSync(rustBackend, readFileSync(rustBackend, 'utf8').replace('export function emitEntry', 'function emitEntry'));

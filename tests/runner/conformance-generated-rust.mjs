@@ -4,10 +4,10 @@
 // test with its elapsed time and stops a test that outlives its own timeout.
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { compileAst } from '../../tools/compiler/ast-artifact.mjs';
-import { rustString } from '../../tools/compiler/backend-support.mjs';
-import { compileSource } from '../../tools/compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../tools/compiler/type-manifest.mjs';
+import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
+import { rustString } from '../../packages/template-compiler/backend-support.mjs';
+import { compileSource } from '../../packages/template-compiler/compiler.mjs';
+import { deriveTypeManifest } from '../../packages/template-compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { caseTestFailures, firstDifference, generatedCases, runCaseTests, typeDefinitions } from './cases.mjs';
 import { stepProgress } from './bounded.mjs';

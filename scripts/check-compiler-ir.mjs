@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { lowerSourceGraph } from '../tools/compiler/ir.mjs';
+import { lowerSourceGraph } from '../packages/template-compiler/ir.mjs';
 
 const span = [0, 0];
 const literal = (kind, value) => ({ type: 'Literal', kind, value, span });
