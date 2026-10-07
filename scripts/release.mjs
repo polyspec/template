@@ -15,11 +15,13 @@
 // --is-ancestor`) and reads the check runs of the commit from the GitHub API (`gh api
 // repos/<repository>/commits/<sha>/check-runs`, the repository of GITHUB_REPOSITORY): the latest run of each of push-gate
 // and ci-passed must be completed with the conclusion success. `versions` compares X.Y.Z with the version of every
-// manifest of MANIFESTS (a composer.json without a `version` field takes its version from the tag, as Composer does) and
-// requires the section `## X.Y.Z` in CHANGELOG.md; for a Go tag it requires the module path of the go.mod of the
+// manifest of MANIFESTS and requires the section `## X.Y.Z` in CHANGELOG.md; for a Go tag it requires the module path of the go.mod of the
 // directory. `assets` builds one archive per package, named `<package name>-<version>.<ext>` with `@scope/` written as
 // `scope-` and `vendor/` as `vendor-`: `npm pack` (.tgz) of a built package and a zip of the directory of a Composer
-// package from `git archive` of the tagged commit (.zip). The Rust crate is not released as an archive; it is consumed by
+// package from `git archive` of the tagged commit (.zip). Each archive carries the manifest of its package unchanged; a
+// consumer downloads the archives and installs them together, so `checkAssets` fails unless every packed manifest equals
+// its manifest at the tagged commit, names each polyspec dependency by its name and exact version and, for Composer,
+// declares the version of the tag and no `repositories`. The Rust crate is not released as an archive; it is consumed by
 // git tag, because `cargo package` rewrites git dependencies into crates.io requirements that do not resolve. A Go tag
 // builds and attaches nothing. `publish` runs `gh release create TAG --verify-tag --title TAG --notes-file <the section
 // X.Y.Z>` with the archives of `assets`; a section over NOTES_LIMIT characters, the limit of a release body on GitHub,
@@ -134,15 +136,11 @@ export function verify(root, tag, repository) {
   return [commit, [...CHECKS]];
 }
 
-/** The version that a manifest declares, or null for a composer.json without one. */
+/** The version that a manifest declares, or null without one. */
 export function manifestVersion(file) {
   const text = readFileSync(file, 'utf8');
   const name = path.basename(file);
-  if (name === 'package.json' || name === 'composer.json') {
-    const data = JSON.parse(text);
-    if (name === 'composer.json' && !('version' in data)) return null;
-    return data.version ?? null;
-  }
+  if (name === 'package.json' || name === 'composer.json') return JSON.parse(text).version ?? null;
   if (name === 'Cargo.toml') {
     const section = /^\[package\]\s*$([\s\S]*?)(?=^\[|(?![\s\S]))/m.exec(text);
     return /^version\s*=\s*"([^"]*)"/m.exec(section?.[1] ?? '')?.[1] ?? null;
@@ -181,7 +179,7 @@ export function versions(root, tag) {
   if (directory === null) {
     for (const name of Object.keys(MANIFESTS)) {
       const declared = manifestVersion(path.join(root, name));
-      if (declared !== null && declared !== version) problems.push(`${name}: version ${declared}, the tag ${tag} is ${version}`);
+      if (declared !== version) problems.push(`${name}: version ${declared ?? 'none'}, the tag ${tag} is ${version}`);
     }
   } else {
     const module = /^module\s+(\S+)\s*$/m.exec(readFileSync(path.join(root, directory, 'go.mod'), 'utf8'))?.[1] ?? null;
@@ -209,7 +207,88 @@ export function assetNames(tag) {
   return PACKAGES.map(([kind, , name]) => assetName(name, version, extensions[kind]));
 }
 
-/** Build the archive of every package of the tag into ASSETS: the names of the archives. */
+// The fields of a packed package.json whose dependencies a consumer installs.
+export const NPM_DEPENDENCY_FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
+const EXACT_VERSION = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/;
+
+/** The form of a dependency spec of a polyspec package that is not an exact version. */
+function sourceForm(spec) {
+  if (/^(?:file|link|workspace):/.test(spec)) return 'a path of the repository';
+  if (/^(?:git(?:\+[a-z]+)?:|github:|ssh:|git@)/.test(spec) || /\.git(?:#|$)/.test(spec)) return 'a git source';
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(spec)) return 'a URL';
+  if (spec.startsWith('dev-') || spec.endsWith('@dev')) return 'a development version';
+  if (EXACT_VERSION.test(spec)) return 'another version';
+  return 'a range';
+}
+
+/**
+ * The problems of a packed manifest of the tag. A consumer downloads the release assets and installs them together, so
+ * a polyspec dependency is its name and an exact version: an npm package.json names every `@polyspec/*` dependency of
+ * NPM_DEPENDENCY_FIELDS, and a composer.json every `polyspec/*` package of `require`, at an exact version, a package of
+ * this repository at the version of the tag; a composer.json also declares the version of the tag, which an artifact
+ * repository reads, and no `repositories`.
+ */
+export function manifestProblems(kind, manifest, tag) {
+  const [, version] = parseTag(tag);
+  const problems = [];
+  const ours = new Set(PACKAGES.filter(([packageKind]) => packageKind === kind).map(([, , name]) => name));
+  const exact = (where, name, spec) => {
+    const expected = ours.has(name) ? version : null;
+    if (expected === null ? !EXACT_VERSION.test(spec) : spec !== expected) {
+      problems.push(`${where} ${name}: ${spec} is ${sourceForm(spec)}, not ${expected ?? 'an exact version'}`);
+    }
+  };
+  if (kind === 'npm') {
+    for (const field of NPM_DEPENDENCY_FIELDS) {
+      for (const [name, spec] of Object.entries(manifest[field] ?? {})) if (name.startsWith('@polyspec/')) exact(field, name, spec);
+    }
+  } else {
+    if (manifest.version !== version) problems.push(`version: ${manifest.version ?? 'none'}, not ${version}`);
+    if ('repositories' in manifest) problems.push(`repositories: ${JSON.stringify(manifest.repositories)}; a release zip declares none`);
+    for (const [name, spec] of Object.entries(manifest.require ?? {})) if (name.startsWith('polyspec/')) exact('require', name, spec);
+  }
+  return problems;
+}
+
+/** The manifest packed in an archive: package/package.json of a tarball, composer.json of a zip. */
+export function packedManifest(file) {
+  const tarball = file.endsWith('.tgz');
+  const text = tarball ? run('tar', ['-xzOf', file, 'package/package.json'], path.dirname(file)) : run('unzip', ['-p', file, 'composer.json'], path.dirname(file));
+  return JSON.parse(text);
+}
+
+/**
+ * Every archive of the tag in the directory carries the manifest of its package at the tagged commit unchanged, and that
+ * manifest passes manifestProblems.
+ */
+export function checkAssets(root, commit, directory, tag) {
+  const problems = [];
+  const names = assetNames(tag);
+  PACKAGES.forEach(([kind, directoryOfPackage], index) => {
+    const manifest = kind === 'npm' ? 'package.json' : 'composer.json';
+    const source = JSON.parse(run('git', ['show', `${commit}:${directoryOfPackage}/${manifest}`], root));
+    const packed = packedManifest(path.join(directory, names[index]));
+    if (JSON.stringify(packed) !== JSON.stringify(source)) {
+      problems.push(`${names[index]}: the packed ${manifest} differs from ${directoryOfPackage}/${manifest}`);
+    }
+    for (const problem of manifestProblems(kind, packed, tag)) problems.push(`${names[index]}: ${problem}`);
+  });
+  if (problems.length) throw new Stop(`the release assets of ${tag} do not install outside the repository: ${problems.join('; ')}`);
+}
+
+/** The problems of the manifest of every package of PACKAGES in the tree, at the version of the root package.json. */
+export function treeManifestProblems(root) {
+  const { version } = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
+  return PACKAGES.flatMap(([kind, directory]) => {
+    const manifest = `${directory}/${kind === 'npm' ? 'package.json' : 'composer.json'}`;
+    return manifestProblems(kind, JSON.parse(readFileSync(path.join(root, manifest), 'utf8')), `v${version}`).map(problem => `${manifest}: ${problem}`);
+  });
+}
+
+/**
+ * Build the archive of every package of the tag into ASSETS and check with checkAssets that each installs outside the
+ * repository: the names of the archives.
+ */
 export function assets(root, tag) {
   const [directory] = parseTag(tag);
   const target = path.join(root, ASSETS);
@@ -219,17 +298,18 @@ export function assets(root, tag) {
   const commit = taggedCommit(root, tag);
   const names = assetNames(tag);
   PACKAGES.forEach(([kind, directoryOfPackage], index) => {
-    const expected = names[index];
+    const expected = path.join(target, names[index]);
     if (kind === 'npm') {
       run('npm', ['pack', '--pack-destination', target], path.join(root, directoryOfPackage));
     } else {
-      run('git', ['archive', '--format=zip', `--output=${path.join(target, expected)}`, `${commit}:${directoryOfPackage}`], root);
+      run('git', ['archive', '--format=zip', `--output=${expected}`, `${commit}:${directoryOfPackage}`], root);
     }
   });
   const present = readdirSync(target).sort();
   if (JSON.stringify(present) !== JSON.stringify([...names].sort())) {
     throw new Stop(`${ASSETS} holds [${present.join(', ')}], not the archives [${[...names].sort().join(', ')}]`);
   }
+  checkAssets(root, commit, target, tag);
   return names;
 }
 

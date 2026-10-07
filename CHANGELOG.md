@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- Made the release assets install outside the repository (T22.2-3). Each published `composer.json` declares the version of the release, which an `artifact` repository of Composer reads, and `make release-versions` requires it. Each archive carries the manifest of its package unchanged, and `make release-assets` fails unless every packed manifest equals its manifest at the tagged commit and names each `@polyspec/*` and `polyspec/*` dependency by an exact version, not a path, a git source, a URL, a range or `@dev`, with no `repositories`; `tests/scripts/release.test.mjs` applies the same rules to the published manifests of the tree and installs the packed assets in a directory outside the repository with `npm install` from an empty cache and with Composer. `docs/operations/publication.md` states the install from the release assets with `file:` tarballs and with an `artifact` or `package` repository, and the development layout.
 - Kept the release notes within the limit of GitHub (T22.2-2). GitHub refuses a release body over 125000 characters, and `make release-publish` passed the whole section `## X.Y.Z` of `CHANGELOG.md`; a section over `NOTES_LIMIT` (125000 characters) of `scripts/release.mjs` is replaced by one line that links the section of `CHANGELOG.md` at the tag, and a section at the limit stays whole. `tests/scripts/release.test.mjs` checks both and the link of a Go tag.
 
 ## 0.0.2

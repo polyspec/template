@@ -51,11 +51,60 @@ make release-publish
 ```
 
 1. `make release-verify` requires the tagged commit to be an ancestor of `origin/main` (`git merge-base --is-ancestor`) and the latest check runs `push-gate` and `ci-passed` of that commit (`gh api repos/<repository>/commits/<sha>/check-runs`) to be completed with the conclusion `success`; it names a missing or failed check and does not run the tests again.
-2. `make release-versions` requires X.Y.Z in every manifest of `MANIFESTS` (a `composer.json` without a `version` field takes the version from the tag, as Composer does) and the section `## X.Y.Z` in `CHANGELOG.md`, and names each file with its version and the version of the tag; for `packages/template-go/vX.Y.Z` it requires the module path of `packages/template-go/go.mod` and the section.
-3. `make release-assets` builds the npm packages and writes `var/release/assets`: `npm pack` of each npm package (`.tgz`), and `git archive` of the directory of each Composer package of the tagged commit (`.zip`): the release assets are npm tarballs and Composer zips only. An archive is named `<package name>-<version>.<ext>`, with `@scope/` and `vendor/` written as `scope-` and `vendor-`. A Go tag builds and attaches nothing: `release-assets` builds the npm packages only for a tag without `/`.
+2. `make release-versions` requires X.Y.Z in every manifest of `MANIFESTS`, the `version` field of each `composer.json` included, and the section `## X.Y.Z` in `CHANGELOG.md`, and names each file with its version and the version of the tag; for `packages/template-go/vX.Y.Z` it requires the module path of `packages/template-go/go.mod` and the section.
+3. `make release-assets` builds the npm packages and writes `var/release/assets`: `npm pack` of each npm package (`.tgz`), and `git archive` of the directory of each Composer package of the tagged commit (`.zip`): the release assets are npm tarballs and Composer zips only. An archive is named `<package name>-<version>.<ext>`, with `@scope/` and `vendor/` written as `scope-` and `vendor-`. A Go tag builds and attaches nothing: `release-assets` builds the npm packages only for a tag without `/`. Each archive carries the manifest of its package unchanged: the published manifests of the tree are the published packages. The step then fails unless every packed manifest equals its manifest at the tagged commit and names each `@polyspec/*` dependency of `dependencies`, `peerDependencies` and `optionalDependencies`, and each `polyspec/*` package of `require`, by an exact version, a package of this repository by X.Y.Z, and unless each `composer.json` declares the version X.Y.Z, which an `artifact` repository reads, and no `repositories` (`checkAssets`): a path (`file:`, `link:`, `workspace:`), a git source (`git`, `github:`, ssh), a URL, a range or `@dev` installs only inside the repository.
 4. `make release-publish` runs `gh release create <tag> --verify-tag --title <tag> --notes-file <the notes>` with the archives. The notes are the section `## X.Y.Z` of `CHANGELOG.md` when it has at most 125000 characters (`NOTES_LIMIT`), the limit of a release body on GitHub; a longer section is replaced by one line, `The changes of X.Y.Z are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/<tag>/CHANGELOG.md#XYZ).`, whose anchor is the version without its dots.
 
-The tag reaches the steps through the environment variable `TAG`. `tests/scripts/release.test.mjs` runs each step against fakes of `gh` and `npm`, requires every tracked manifest to be in `MANIFESTS` with how the tag releases it (the Rust crate as not released as an archive; consumed by git tag) or declared in `NOT_RELEASED` with its reason, and fails on a Cargo archive, and `tests/scripts/toolchain-files.test.mjs` requires the trigger, the permission and the order of the steps.
+The tag reaches the steps through the environment variable `TAG`. `tests/scripts/release.test.mjs` runs each step against fakes of `gh` and `npm`, fails on a packed manifest that differs from its source and on each form of a dependency that installs only inside the repository, requires the published manifests of the tree to pass the same rules, installs the packed assets of the manifests of the tree in a directory outside the repository with `npm install` from an empty cache and with an `artifact` repository of Composer, requires every tracked manifest to be in `MANIFESTS` with how the tag releases it (the Rust crate as not released as an archive; consumed by git tag) or declared in `NOT_RELEASED` with its reason, and fails on a Cargo archive, and `tests/scripts/toolchain-files.test.mjs` requires the trigger, the permission and the order of the steps.
+
+## Installing the release assets
+
+No polyspec package is published to a registry before 0.1. A consumer downloads the archives of a GitHub Release, `https://github.com/polyspec/template/releases/download/vX.Y.Z/<archive>`, and installs them together; each archive names the polyspec packages it depends on by name and exact version, and the archive of that version beside it satisfies the dependency.
+
+npm: list every needed tarball as a `file:` dependency. `@polyspec/template-language`, `@polyspec/template-lsp` and `@polyspec/template-codemirror` depend on `@polyspec/template-language` or `@polyspec/template` at X.Y.Z, so the tarball of that package is listed too:
+
+```json
+{
+  "dependencies": {
+    "@polyspec/template": "file:vendor/polyspec-template-X.Y.Z.tgz",
+    "@polyspec/template-language": "file:vendor/polyspec-template-language-X.Y.Z.tgz"
+  }
+}
+```
+
+`npm install` installs the polyspec packages from the tarballs alone; the other dependencies of `@polyspec/template-lsp` and `@polyspec/template-codemirror` come from the npm registry.
+
+Composer: either an `artifact` repository, the directory that holds the downloaded zips,
+
+```json
+{
+  "repositories": [{ "type": "artifact", "url": "vendor/polyspec" }],
+  "require": { "polyspec/template": "X.Y.Z" }
+}
+```
+
+or one `package` repository entry per zip URL, with the name, version and `dist` of the zip:
+
+```json
+{
+  "repositories": [{
+    "type": "package",
+    "package": {
+      "name": "polyspec/template",
+      "version": "X.Y.Z",
+      "type": "library",
+      "require": { "php": "^8.2", "ext-mbstring": "*" },
+      "autoload": { "psr-4": { "Polyspec\\Template\\": "src/" } },
+      "dist": { "type": "zip", "url": "https://github.com/polyspec/template/releases/download/vX.Y.Z/polyspec-template-X.Y.Z.zip" }
+    }
+  }],
+  "require": { "polyspec/template": "X.Y.Z" }
+}
+```
+
+A `package` entry replaces the `composer.json` of the zip, so it repeats its `require` and `autoload`. Composer installs no package of the type `php-ext`: the zip of `polyspec/template-php-ext` is the source that PIE builds the extension from.
+
+In the repository, the private root `package.json`, which is not published, resolves the npm packages of the repository: its `dependencies` and `overrides` name each of them by its directory (`file:packages/<package>`), and npm installs each as a copy (`.npmrc`). The published `package.json` and `composer.json` of each package name the polyspec packages they depend on by exact version only, and each `composer.json` declares its version, which every release sets with the other manifests. No package of the repository depends on a polyspec package of another repository, so no release tag of another repository is recorded.
 
 ## Documentation site
 
