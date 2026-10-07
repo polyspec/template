@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "ac217e7a741baac9f7fd375f7d6ad7b41067ba7b35f1ec464f87bc3300a7126a",
+  "contractDigest": "eed59d98b336203ccec1176da1c11bc19e344e5dd89e9fd3c439b397ea8e2d84",
+  "compilerDigest": "56d13e90e07ecf85965bd1c301a05c00f4a9df9e27e1581dccfd7f9f9e4398df",
   "files": {
     "scope-precedence.php": {
       "path": "scope-precedence.php",

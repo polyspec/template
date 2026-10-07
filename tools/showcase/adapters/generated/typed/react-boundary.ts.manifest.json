@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
-  "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "c2ed471a93b6b3bf64afd662464e64a27538bb64e0489ebf20b61519fc0dedd6",
+  "contractDigest": "eed59d98b336203ccec1176da1c11bc19e344e5dd89e9fd3c439b397ea8e2d84",
+  "compilerDigest": "378e1917439ff1675a39f3780520ef40d55ddc0ceff077b9c6d4f16a342be8ab",
   "files": {
     "react-boundary.ts": {
       "path": "react-boundary.ts",

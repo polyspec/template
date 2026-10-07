@@ -76,7 +76,7 @@ W0 foundation ──► W1 specification (parallel docs) ──► W1.11 spec re
 
 T6.2를 완료했다. `scripts/check-doc-coverage.mjs`는 `make doc-coverage`와 `make docs-check`에서 실행한다. 검사기는 문서화된 공개 심볼과 파일 250개를 보고한다(template-ts 55개, template-go 58개, template-php 25개, template-rust 1개, 파일 111개).
 
-T6.7은 공통 레이아웃, 중첩 파셜과 반복문, define 데이터와 scope 우선순위, HTML 슬롯, 없는 define을 다룬다. RT-43–RT-53에 따라 모든 시나리오는 모든 구현에서 같은 JSON 형태의 assign과 직접 경로 대응 define 레지스트리를 사용하며 모든 렌더는 `layout` target에서 시작한다. 어댑터 타입, 필드, 연산과 상태 전이는 `tools/compiler/interface.json`에 선언하고 생성기가 언어별 선언부와 Mermaid 원본을 만든다. `make contract-check`가 매핑된 구현과 실패 후 복구를 검증한다. `make showcase`가 5개 구현의 원시 출력과 반복 렌더 해시를 비교하고 AST program과 제품 compiler artifact를 대조하며 HTML·JSON·동일 조건 모드 벤치마크 결과물을 쓴다. `make showcase-check`가 결과물과 정적 HTML 페이지를 검증한다. 예제는 컨트롤러나 서비스에 의존하지 않는다.
+T6.7은 공통 레이아웃, 중첩 파셜과 반복문, define 데이터와 scope 우선순위, HTML 슬롯, 없는 define을 다룬다. RT-43–RT-53에 따라 모든 시나리오는 모든 구현에서 같은 JSON 형태의 assign과 직접 경로 대응 define 레지스트리를 사용하며 모든 렌더는 `layout` target에서 시작한다. 어댑터 타입, 필드, 연산과 상태 전이는 `packages/template-compiler/interface.json`에 선언하고 생성기가 언어별 선언부와 Mermaid 원본을 만든다. `make contract-check`가 매핑된 구현과 실패 후 복구를 검증한다. `make showcase`가 5개 구현의 원시 출력과 반복 렌더 해시를 비교하고 AST program과 제품 compiler artifact를 대조하며 HTML·JSON·동일 조건 모드 벤치마크 결과물을 쓴다. `make showcase-check`가 결과물과 정적 HTML 페이지를 검증한다. 예제는 컨트롤러나 서비스에 의존하지 않는다.
 
 T6.6을 완료했다. 2026-09-11에 `make check`가 통과했다. `make test-ext`가 PHP 확장을 빌드하고 적합성 216건 중 216건과 확장 테스트 236개를 통과했다. `make showcase`가 출력 동일성과 반복 렌더 검사를 통과했다. 기능 상태와 변경 기록에 이 결과를 기록했다.
 

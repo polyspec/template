@@ -10,7 +10,7 @@ import { tsc } from './tools.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const adapterRoot = join(root, 'tools', 'showcase', 'adapters');
 const scenariosRoot = join(root, 'examples', 'site', 'scenarios');
-const manifest = JSON.parse(readFileSync(join(root, 'tools', 'compiler', 'interface.json'), 'utf8')).showcaseAdapter;
+const manifest = JSON.parse(readFileSync(join(root, 'packages', 'template-compiler', 'interface.json'), 'utf8')).showcaseAdapter;
 const operationNames = manifest.operations.map(operation => operation.name);
 const languageNames = ['typescript', 'javascript', 'go', 'rust', 'php'];
 const requiredSupportLevels = ['core-runtime', 'source-compiler', 'artifact-runtime', 'generated-compiler'];

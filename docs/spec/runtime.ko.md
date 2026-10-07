@@ -42,13 +42,13 @@ PageCache.getOrSet(key, ttl, render)
 - **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. build coordinator는 `dev`에서 compiler 호출마다 생성하고, `true`에서 digest가 바뀐 뒤 생성하며, `false`에서 소스를 읽지 않는다. `false`에서 배포 산출물이 없거나 오래되거나 손상되면 오류다.
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
-- **RT-67** 준비된 렌더 계약은 단일 제품 manifest인 [`tools/compiler/interface.json`](../../tools/compiler/interface.json)에 선언한다. 인터페이스 검사는 필요한 언어 매핑, 지원 수준, 연산이 하나라도 없으면 실패한다.
+- **RT-67** 준비된 렌더 계약은 단일 제품 manifest인 [`packages/template-compiler/interface.json`](../../packages/template-compiler/interface.json)에 선언한다. 인터페이스 검사는 필요한 언어 매핑, 지원 수준, 연산이 하나라도 없으면 실패한다.
 - **RT-69** `Engine`은 `Program` 하나만 소유한다. generated 실행은 AST 자리표시자, parser, AST renderer를 만들거나 보유하지 않고, AST 실행은 생성 코드를 보유하지 않는다. mode 선택이 engine 안으로 돌아오면 네 runtime의 인터페이스 검사가 실패해야 한다.
 
 program 도표는 단일 제품 manifest에서 생성한다.
 
 ```mermaid
-<!--@include: ../../tools/compiler/generated/compiler-architecture.mmd-->
+<!--@include: ../../packages/template-compiler/generated/compiler-architecture.mmd-->
 ```
 
 ```mermaid
@@ -60,7 +60,7 @@ compiler manifest는 공개 `Program`, `Engine`, `AstProgram`, generated program
 
 ## 언어 간 렌더 계약
 
-실행 가능한 showcase의 어댑터 경계는 공통 [compiler interface manifest](../../tools/compiler/interface.json)에 포함한다. 이 manifest는 타입, 필드 순서, nullable 여부, 필수 필드, 소유 관계, 생성자, 연산, 오류, 전제조건, 상태 전이와 언어별 이름 매핑을 선언한다. 각 언어의 native 타입은 이 계약을 표현하며 계약을 다시 설계하지 않는다.
+실행 가능한 showcase의 어댑터 경계는 공통 [compiler interface manifest](../../packages/template-compiler/interface.json)에 포함한다. 이 manifest는 타입, 필드 순서, nullable 여부, 필수 필드, 소유 관계, 생성자, 연산, 오류, 전제조건, 상태 전이와 언어별 이름 매핑을 선언한다. 각 언어의 native 타입은 이 계약을 표현하며 계약을 다시 설계하지 않는다.
 
 ```mermaid
 flowchart LR

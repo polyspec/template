@@ -41,7 +41,7 @@ polyspec-template = { path = "../template/packages/template-rust" }
 
 ## Tag 릴리스
 
-릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, Composer 패키지 `polyspec/template`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/template-go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/template-go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. `cargo package`는 git 의존성을 해석되지 않는 crates.io 요구로 바꾸기 때문이다(T22.1-5). tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. `make install` 뒤에 그 step은 다음 순서로 `scripts/release.mjs`를 실행하고 첫 실패에서 멈춘다.
+릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`, Composer 패키지 `polyspec/template`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/template-go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/template-go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. `cargo package`는 git 의존성을 해석되지 않는 crates.io 요구로 바꾸기 때문이다(T22.1-5). tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. `make install` 뒤에 그 step은 다음 순서로 `scripts/release.mjs`를 실행하고 첫 실패에서 멈춘다.
 
 ```sh
 make release-verify
@@ -61,7 +61,7 @@ tag는 환경 변수 `TAG`로 step에 전달된다. `tests/scripts/release.test.
 
 0.1 전에는 어떤 polyspec 패키지도 registry에 발행하지 않는다. 사용자는 GitHub Release의 archive `https://github.com/polyspec/template/releases/download/vX.Y.Z/<archive>`를 내려받아 함께 설치한다. 각 archive는 의존하는 polyspec 패키지를 이름과 정확한 버전으로 적고, 옆에 둔 그 버전의 archive가 의존성을 만족한다.
 
-npm: 필요한 모든 tarball을 `file:` 의존성으로 적는다. `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`는 X.Y.Z의 `@polyspec/template-language` 또는 `@polyspec/template`에 의존하므로 그 패키지의 tarball도 적는다.
+npm: 필요한 모든 tarball을 `file:` 의존성으로 적는다. `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`는 X.Y.Z의 `@polyspec/template-language` 또는 `@polyspec/template`에 의존하므로 그 패키지의 tarball도 적는다.
 
 ```json
 {

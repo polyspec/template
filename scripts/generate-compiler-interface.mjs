@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const manifest = JSON.parse(readFileSync(resolve(root, 'tools/compiler/interface.json'), 'utf8'));
+const manifest = JSON.parse(readFileSync(resolve(root, 'packages/template-compiler/interface.json'), 'utf8'));
 const check = process.argv.includes('--check');
 const operation = name => manifest.operations.find(item => item.name === name);
 const fields = name => manifest.types[name].fields.join(' + ');
@@ -72,8 +72,8 @@ classes.push(
 );
 
 for (const [relative, content] of [
-  ['tools/compiler/generated/compiler-architecture.mmd', flow],
-  ['tools/compiler/generated/compiler-classes.mmd', classes.join('\n')],
+  ['packages/template-compiler/generated/compiler-architecture.mmd', flow],
+  ['packages/template-compiler/generated/compiler-classes.mmd', classes.join('\n')],
 ]) {
   const path = resolve(root, relative);
   if (check) {

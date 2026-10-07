@@ -1,0 +1,26 @@
+{
+  "name": "@polyspec/template-compiler",
+  "version": "0.0.3",
+  "description": "Build-time compiler of template sources: canonical AST artifacts, type manifests and generated TypeScript, Go, Rust and PHP programs",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./compiler.mjs": "./compiler.mjs",
+    "./ast-artifact.mjs": "./ast-artifact.mjs",
+    "./type-manifest.mjs": "./type-manifest.mjs",
+    "./functions.json": "./functions.json"
+  },
+  "files": [
+    "*.mjs",
+    "backends",
+    "interface.json",
+    "functions.json"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=26"
+  },
+  "dependencies": {
+    "@polyspec/template": "0.0.3"
+  }
+}

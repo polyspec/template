@@ -55,7 +55,7 @@
       "name": "showcase-interface-contract",
       "rules": ["RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53"],
       "verification": "make contract-check",
-      "files": ["scripts/check-showcase-contract.mjs", "tools/compiler/interface.json"]
+      "files": ["scripts/check-showcase-contract.mjs", "packages/template-compiler/interface.json"]
     },
     {
       "name": "compiler-artifact-contract",

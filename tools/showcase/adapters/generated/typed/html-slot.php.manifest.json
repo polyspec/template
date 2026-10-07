@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "ac217e7a741baac9f7fd375f7d6ad7b41067ba7b35f1ec464f87bc3300a7126a",
+  "contractDigest": "eed59d98b336203ccec1176da1c11bc19e344e5dd89e9fd3c439b397ea8e2d84",
+  "compilerDigest": "56d13e90e07ecf85965bd1c301a05c00f4a9df9e27e1581dccfd7f9f9e4398df",
   "files": {
     "html-slot.php": {
       "path": "html-slot.php",

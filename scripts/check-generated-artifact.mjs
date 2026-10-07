@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { compileGeneratedArtifact, generatedManifestPath } from '../tools/compiler/generated-artifact.mjs';
-import { loadSourceGraph } from '../tools/compiler/ir.mjs';
+import { compileGeneratedArtifact, generatedManifestPath } from '../packages/template-compiler/generated-artifact.mjs';
+import { loadSourceGraph } from '../packages/template-compiler/ir.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const fixture = join(root, 'examples/site/scenarios/empty-state');

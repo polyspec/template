@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Published the compiler as the npm package `@polyspec/template-compiler` (T22.3-3). `packages/template-compiler` holds the compiler modules, the backends, `interface.json` and the function contract `functions.json`, and exports `compiler.mjs`, `ast-artifact.mjs`, `type-manifest.mjs` and `functions.json`; it depends on `@polyspec/template` by exact version, and `ast-artifact.mjs` imports the parser from it. The compiler digest names the files of the package by their paths in the package and, installed, reads the installed `@polyspec/template`. `make release-assets` packs `polyspec-template-compiler-X.Y.Z.tgz`, and the npm consumer project of `tests/fixtures/release-consumer` installs it with `npm ci`, imports its entry points and `functions.json` and compiles a template with it. The dependency review of the changed lock raised `@codemirror/view` to 6.43.14; `config/dependency-policy.json` keeps `@codemirror/language` at 6.12.4, because 6.13.0 imports `@codemirror/streamparser` without declaring it.
+
 ## 0.0.3
 
 - Installed every npm package of the release from the built archives (T22.3-2). The npm consumer project of `tests/fixtures/release-consumer` installs `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp` and `@polyspec/template-codemirror` with `npm ci`, and its lock pins their registry dependencies by exact version and integrity; `scripts/release-consumer.mjs` packs the built packages of the tree with the step of `make release-assets`, and the locks record the archives under test by name and version only. AGENTS and the Makefile state that a registry query whose result depends on time never runs in a check and that a download pinned by a lock is installation, which a check may run.

@@ -6,9 +6,9 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { compileAst } from '../tools/compiler/ast-artifact.mjs';
-import { compileSource } from '../tools/compiler/compiler.mjs';
-import { goString, phpString, rustString } from '../tools/compiler/backend-support.mjs';
+import { compileAst } from '../packages/template-compiler/ast-artifact.mjs';
+import { compileSource } from '../packages/template-compiler/compiler.mjs';
+import { goString, phpString, rustString } from '../packages/template-compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';

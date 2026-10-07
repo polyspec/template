@@ -4,7 +4,7 @@
   "purpose": "Define one compiler, artifact and program contract followed by every core language.",
   "evidence": {
     "readingOrder": [
-      "tools/compiler/interface.json",
+      "packages/template-compiler/interface.json",
       "docs/spec/lexical.md",
       "docs/spec/grammar.md",
       "docs/spec/expressions.md",
@@ -29,7 +29,7 @@
       "make release-test-matrix"
     ],
     "generatedEvidence": [
-      "tools/compiler/generated",
+      "packages/template-compiler/generated",
       "tools/showcase/adapters/generated",
       "examples/site/data"
     ]

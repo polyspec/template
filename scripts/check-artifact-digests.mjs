@@ -9,7 +9,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { astCompilerDigest, generatedCompilerDigest, typescriptDeliveryDigest } from '../tools/compiler/compiler-digest.mjs';
+import { astCompilerDigest, generatedCompilerDigest } from '../packages/template-compiler/compiler-digest.mjs';
+import { typescriptDeliveryDigest } from '../tools/showcase/delivery-digest.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 

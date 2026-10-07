@@ -2,7 +2,7 @@ import { posix } from 'node:path';
 import { readFileSync } from 'node:fs';
 
 const functionContracts = new Map(
-  JSON.parse(readFileSync(new URL('../../contracts/functions.json', import.meta.url), 'utf8'))
+  JSON.parse(readFileSync(new URL('./functions.json', import.meta.url), 'utf8'))
     .canonical
     .map(signature => [signature.name, signature]),
 );
