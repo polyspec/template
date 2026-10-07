@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	template "github.com/polyspec/template"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/value"
+	template "github.com/polyspec/template/packages/template-go"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 // Loader failures (RT-9, RT-10, ERR-6, ERR-9) and JSON text that is not one document (VAL-12).

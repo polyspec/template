@@ -7,12 +7,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/polyspec/template/ast"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/loader"
-	"github.com/polyspec/template/parser"
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/ast"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/loader"
+	"github.com/polyspec/template/packages/template-go/parser"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 // ParseFunc parses source text into a template; nil in a render-only engine.

@@ -8,7 +8,7 @@ import (
 	"io/fs"
 	"strings"
 
-	"github.com/polyspec/template/ast"
+	"github.com/polyspec/template/packages/template-go/ast"
 )
 
 // Result is a loaded template: source text or a parsed AST, and a version.

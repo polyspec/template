@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"github.com/polyspec/template/errs"
+	"github.com/polyspec/template/packages/template-go/errs"
 )
 
 // Source is a validated template source.

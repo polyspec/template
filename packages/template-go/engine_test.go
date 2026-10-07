@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	template "github.com/polyspec/template"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/render"
+	template "github.com/polyspec/template/packages/template-go"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/render"
 )
 
 func TestEngineRender(t *testing.T) {

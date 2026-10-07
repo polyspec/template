@@ -1,9 +1,9 @@
 package render
 
 import (
-	"github.com/polyspec/template/ast"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/ast"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 // Evaluator evaluates expressions (docs/spec/expressions.md).

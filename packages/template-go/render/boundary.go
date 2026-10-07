@@ -1,7 +1,7 @@
 package render
 
 import (
-	"github.com/polyspec/template/errs"
+	"github.com/polyspec/template/packages/template-go/errs"
 )
 
 // Guard runs one public parse, prepare or render operation and reports a panic as E_INTERNAL for

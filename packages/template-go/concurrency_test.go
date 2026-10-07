@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	template "github.com/polyspec/template"
+	template "github.com/polyspec/template/packages/template-go"
 )
 
 // Concurrent renders may share one program after its functions are registered (RT-62a, T16.1):

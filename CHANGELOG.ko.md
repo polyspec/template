@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- Go module의 이름을 그 directory로 정했다(T22.1-2). `packages/template-go/go.mod`는 `github.com/polyspec/template`을 선언했고, `go get`은 그 module을 `go.mod`가 없는 저장소의 root에서 찾는다. module은 `github.com/polyspec/template/packages/template-go`이고, 모든 import, compiler의 Go backend, generated Go program과 그 manifest, example page, 문서가 그 경로를 쓰며, tag `packages/template-go/vX.Y.Z`가 그 module을 릴리스한다. `tests/scripts/toolchain-files.test.mjs`는 domain이 있는 추적 `go.mod`가 그 directory를 적지 않으면 실패한다.
 - 릴리스된 버전 위에 section `## Unreleased`를 두었다(T22.1-1). tag `v0.0.1`의 항목은 section `## 0.0.1`을 이루고, 그 뒤의 항목은 `## Unreleased` 아래에 남으며, 모든 변경은 항목을 그곳에 추가한다. changelog의 언어 link는 제목 아래에 있다.
 - 각 workflow의 trigger를 정확히 선언했다(T17.1-9). `ci.yml`은 모든 pull request, merge group, 수동 실행(`workflow_dispatch`)에서 실행되고, `pages.yml`은 `main` push와 수동 실행에서 문서 site를 배포한다.
 

@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	template "github.com/polyspec/template"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/value"
+	template "github.com/polyspec/template/packages/template-go"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 // Host binding of Go values and native objects (VAL-2, VAL-15, VAL-17 to VAL-20, FUN-46, ERR-13).

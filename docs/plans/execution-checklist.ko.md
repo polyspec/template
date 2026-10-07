@@ -74,7 +74,7 @@
 
 ## Wave 4 — Go, Rust, PHP 구현 (병렬 트랙 3개)
 
-### 트랙 G — Go (`packages/template-go`, 모듈 `github.com/polyspec/template`)
+### 트랙 G — Go (`packages/template-go`, 모듈 `github.com/polyspec/template/packages/template-go`)
 
 | ID | 작업 | 산출물 | 테스트 | 검증 | 완료 |
 | --- | --- | --- | --- | --- | --- |
@@ -357,3 +357,4 @@
 | --- | --- | --- | --- |
 | T22.1 | `main`의 tag된 commit을 릴리스: 모든 변경은 필수 check와 함께 merge queue로 `main`에 도달하고, 메인테이너는 버전 올림 pull request 뒤에 `main`의 commit에 `vX.Y.Z`(Go module은 `packages/template-go/vX.Y.Z`) tag를 붙여 릴리스한다. changelog는 릴리스된 버전 위에 `## Unreleased`를 두고, Go module 경로는 그 directory와 맞으며, `ci.yml`의 job `ci-passed`는 다른 모든 job이 통과했을 때만 통과하고 ruleset `main`은 정확히 `push-gate`와 `ci-passed`를 요구하며, `.github/workflows/release.yml`은 tag된 commit을 검사하고 package archive와 함께 GitHub Release를 만든다(T22.1-1, T22.1-2, T22.1-3, T22.1-4) | `node scripts/run-tests.mjs node -- tests/scripts/toolchain-files.test.mjs tests/scripts/github-ruleset.test.mjs tests/scripts/release.test.mjs`, `make docs-check` | [ ] |
 | T22.1-1 | `CHANGELOG.md`와 `CHANGELOG.ko.md`에서 릴리스된 버전 위에 `## Unreleased` 유지: 최신 항목은 언어 link 위에 heading 없이 있었고, `## Unreleased`는 tag `v0.0.1`의 항목을 포함한 가장 오래된 항목을 담았다. 언어 link는 제목 아래에 있고, `v0.0.1`의 항목은 `## 0.0.1`을 이루며, 그 뒤의 항목은 `## Unreleased` 아래에 남고, 모든 변경은 항목을 그곳에 추가한다 | `make docs-check` | [o] |
+| T22.1-2 | Go module의 이름을 그 directory로 정함: `packages/template-go/go.mod`는 module `github.com/polyspec/template`을 선언했고, `go get`은 그 module을 `go.mod`가 없는 저장소의 root에서 찾는다. module은 `github.com/polyspec/template/packages/template-go`이고, package와 test의 모든 import, showcase adapter, compiler의 Go backend와 generated program과 그 manifest, example page, generated check, 문서가 그 경로를 쓰며, tag `packages/template-go/vX.Y.Z`가 그 module을 릴리스한다. `tests/scripts/toolchain-files.test.mjs`는 module 경로에 domain이 있는 추적 `go.mod`가 `github.com/polyspec/template/<그 directory>`를 적지 않으면 실패한다 | `node scripts/run-tests.mjs node -- tests/scripts/toolchain-files.test.mjs`, `make artifact-digest-check` | [o] |

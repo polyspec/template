@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 func TestDate(t *testing.T) {

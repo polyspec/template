@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/polyspec/template/ast"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/lexer"
-	"github.com/polyspec/template/loader"
-	"github.com/polyspec/template/parser"
-	"github.com/polyspec/template/render"
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/ast"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/lexer"
+	"github.com/polyspec/template/packages/template-go/loader"
+	"github.com/polyspec/template/packages/template-go/parser"
+	"github.com/polyspec/template/packages/template-go/render"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 // Error is the error object of the errors document.

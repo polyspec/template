@@ -98,6 +98,19 @@ test('every recipe line runs npm and go of var/tools/bin, with every make on PAT
   assert.deepEqual(simple, [], 'recipe lines without shell syntax that start npm, go or gofmt with the PATH that make started with');
 });
 
+test('the path of every Go module that go get resolves names its directory in the repository (T22.1-2)', () => {
+  // go get github.com/polyspec/template/<directory> finds the module only in that directory of the repository; a module
+  // path without a dot in its first element is local to the repository and is never resolved.
+  const modules = spawnSync('git', ['ls-files', '*go.mod'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  assert.ok(modules.length > 0, 'git ls-files listed no go.mod');
+  for (const file of modules) {
+    const module = /^module (\S+)$/m.exec(read(file))?.[1];
+    assert.ok(module, `${file} declares no module`);
+    if (!module.split('/')[0].includes('.')) continue;
+    assert.equal(module, `github.com/polyspec/template/${path.dirname(file)}`, `${file}: module ${module}, expected the path of its directory`);
+  }
+});
+
 test('Go is the version of the go directive of packages/template-go/go.mod, and go downloads no other toolchain', () => {
   const expected = `go${/^go (\S+)$/m.exec(read('packages/template-go/go.mod'))[1]}`;
   for (const tool of ['go', 'gofmt']) assert.equal(recipe(`command -v ${tool} || true`), path.join(ROOT, `var/tools/bin/${tool}`), `${tool} of the recipes is not the one of var/tools/bin; run make install-tools`);

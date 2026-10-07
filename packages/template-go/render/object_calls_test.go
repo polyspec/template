@@ -3,9 +3,9 @@ package render
 import (
 	"testing"
 
-	"github.com/polyspec/template/ast"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/ast"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 type testOrder struct{ Total float64 }

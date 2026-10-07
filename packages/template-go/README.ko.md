@@ -1,4 +1,4 @@
-# github.com/polyspec/template
+# github.com/polyspec/template/packages/template-go
 
 [English](README.md).
 
@@ -7,7 +7,7 @@
 ## 설치
 
 ```sh
-go get github.com/polyspec/template
+go get github.com/polyspec/template/packages/template-go
 ```
 
 ## 렌더
@@ -19,8 +19,8 @@ import (
   "fmt"
   "os"
 
-  template "github.com/polyspec/template"
-  "github.com/polyspec/template/functions"
+  template "github.com/polyspec/template/packages/template-go"
+  "github.com/polyspec/template/packages/template-go/functions"
 )
 
 func main() {
