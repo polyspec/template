@@ -4,7 +4,7 @@
 
 The compiler owns template parsing, validation, lowering and artifact emission. Runtime packages execute an already compiled program. They do not parse source or invoke a host compiler in a render request.
 
-The single compiler and runtime contract source is [`packages/template-compiler/interface.json`](../../packages/template-compiler/interface.json). Generated declarations and Mermaid diagrams must match that manifest. TypeScript, Go, Rust and PHP mappings may change spelling and error transport; they may not change ownership, field order, operation placement or state transitions.
+The single compiler and runtime contract source is [`packages/template-compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/template-compiler/interface.json). Generated declarations and Mermaid diagrams must match that manifest. TypeScript, Go, Rust and PHP mappings may change spelling and error transport; they may not change ownership, field order, operation placement or state transitions.
 
 The manifest's `evidence` section is the machine-readable reading map for this contract. It links the specification order, conformance fixtures, executable examples, generated artifacts and required verification commands. A checker rejects missing links so a reader can follow the contract to executable proof without relying on a duplicated summary.
 

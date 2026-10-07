@@ -43,7 +43,7 @@ engine.
 - **RT-64** Artifact refresh is `dev`, `true` or `false`. Build coordination regenerates on every compiler invocation in `dev`, after a digest change in `true`, and never reads source under `false`. Missing, stale or corrupt deployed artifacts under `false` are errors.
 - **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-66** `getOrSet` returns the cached HTML on a hit without calling `render`; on a miss it calls `render` once, stores the returned HTML with the TTL, and returns it.
-- **RT-67** The prepared render contract is declared in the single product manifest, [`packages/template-compiler/interface.json`](../../packages/template-compiler/interface.json). Interface checks fail when any required language mapping, support level or operation is missing.
+- **RT-67** The prepared render contract is declared in the single product manifest, [`packages/template-compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/template-compiler/interface.json). Interface checks fail when any required language mapping, support level or operation is missing.
 - **RT-69** `Engine` owns exactly one `Program`. Generated execution never creates or retains an AST placeholder, parser or AST renderer, and AST execution never retains generated code. The four runtimes must fail the interface gate if mode selection returns to the engine.
 
 The program diagrams are generated from the single product manifest:
@@ -61,7 +61,7 @@ The compiler manifest also fixes the public `Program`, `Engine`, `AstProgram` an
 
 ## Cross-language render contract
 
-The executable showcase adapter boundary is part of the shared [compiler interface manifest](../../packages/template-compiler/interface.json). It declares the types, field order, nullability, required fields, ownership, constructor, operations, errors, preconditions, state transitions and language name mappings. Native types express that contract in each language; they do not redefine it.
+The executable showcase adapter boundary is part of the shared [compiler interface manifest](https://github.com/polyspec/template/blob/main/packages/template-compiler/interface.json). It declares the types, field order, nullability, required fields, ownership, constructor, operations, errors, preconditions, state transitions and language name mappings. Native types express that contract in each language; they do not redefine it.
 
 ```mermaid
 flowchart LR
