@@ -9,7 +9,7 @@ No package has been published to a registry. Each package installs from a local 
 Go module:
 
 ```
-require github.com/polyspec/template/packages/template-go v0.0.3
+require github.com/polyspec/template/packages/template-go v0.0.4
 replace github.com/polyspec/template/packages/template-go => ../template/packages/template-go
 ```
 
@@ -37,7 +37,7 @@ polyspec-template = { path = "../template/packages/template-rust" }
 
 ## Version
 
-Every package declares version `0.0.3`. The version changes together in every package, in the consumer projects of `tests/fixtures/release-consumer` with the locks that `make release-consumer-lock` writes, and in `CHANGELOG.md`, whose section `## Unreleased` above the released versions holds the entries of every change since the last release.
+Every package declares version `0.0.4`. The version changes together in every package, in the consumer projects of `tests/fixtures/release-consumer` with the locks that `make release-consumer-lock` writes, and in `CHANGELOG.md`, whose section `## Unreleased` above the released versions holds the entries of every change since the last release.
 
 ## Tag releases
 

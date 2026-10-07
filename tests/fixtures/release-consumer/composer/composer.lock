@@ -4,14 +4,14 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "53290ae33b62fbeb4730b1118d2fd434",
+    "content-hash": "917f5868dd867ef22c074276f24b6168",
     "packages": [
         {
             "name": "polyspec/template",
-            "version": "0.0.3",
+            "version": "0.0.4",
             "dist": {
                 "type": "zip",
-                "url": "artifacts/polyspec-template-0.0.3.zip",
+                "url": "artifacts/polyspec-template-0.0.4.zip",
                 "shasum": ""
             },
             "require": {
