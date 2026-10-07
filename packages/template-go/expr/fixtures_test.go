@@ -8,12 +8,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/expr"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/lexer"
-	"github.com/polyspec/template/render"
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/expr"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/lexer"
+	"github.com/polyspec/template/packages/template-go/render"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 type exprCase struct {

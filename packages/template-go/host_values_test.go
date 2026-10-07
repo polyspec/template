@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	template "github.com/polyspec/template"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/value"
+	template "github.com/polyspec/template/packages/template-go"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 // Host argument form (VAL-21) and native object equality (EXP-39) with the shared fixture of

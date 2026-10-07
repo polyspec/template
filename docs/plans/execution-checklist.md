@@ -74,7 +74,7 @@
 
 ## Wave 4 — Go, Rust and PHP implementations (three parallel tracks)
 
-### Track G — Go (`packages/template-go`, module `github.com/polyspec/template`)
+### Track G — Go (`packages/template-go`, module `github.com/polyspec/template/packages/template-go`)
 
 | ID | Task | Deliverables | Tests | Verification | Done |
 | --- | --- | --- | --- | --- | --- |
@@ -357,3 +357,4 @@
 | --- | --- | --- | --- |
 | T22.1 | Release a tagged commit of `main`: every change reaches `main` through the merge queue with the required checks, and the maintainer releases by tagging a commit of `main` `vX.Y.Z` (the Go module `packages/template-go/vX.Y.Z`) after a version-bump pull request. The changelog keeps `## Unreleased` above the released versions, the Go module path matches its directory, the job `ci-passed` of `ci.yml` passes only when every other job passed and the ruleset `main` requires exactly `push-gate` and `ci-passed`, and `.github/workflows/release.yml` checks the tagged commit and creates the GitHub Release with the package archives (T22.1-1, T22.1-2, T22.1-3, T22.1-4) | `node scripts/run-tests.mjs node -- tests/scripts/toolchain-files.test.mjs tests/scripts/github-ruleset.test.mjs tests/scripts/release.test.mjs`, `make docs-check` | [ ] |
 | T22.1-1 | Keep `## Unreleased` above the released versions in `CHANGELOG.md` and `CHANGELOG.ko.md`: the newest entries stood without a heading above the language link, and `## Unreleased` held the oldest entries, including those of the tag `v0.0.1`. The language link stands below the title, the entries of `v0.0.1` form `## 0.0.1`, the entries after it stay under `## Unreleased`, and every change adds its entry there | `make docs-check` | [o] |
+| T22.1-2 | Name the Go module after its directory: `packages/template-go/go.mod` declared the module `github.com/polyspec/template`, which `go get` looks for at the root of the repository, where no `go.mod` is. The module is `github.com/polyspec/template/packages/template-go`, every import of the package, its tests, the showcase adapter, the Go backend of the compiler with the generated programs and their manifests, the example page, the generated checks and the documents use that path, and a tag `packages/template-go/vX.Y.Z` releases it. `tests/scripts/toolchain-files.test.mjs` fails when a tracked `go.mod` whose module path has a domain does not name `github.com/polyspec/template/<its directory>` | `node scripts/run-tests.mjs node -- tests/scripts/toolchain-files.test.mjs`, `make artifact-digest-check` | [o] |

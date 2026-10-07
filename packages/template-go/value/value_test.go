@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 func TestNumberToString(t *testing.T) {

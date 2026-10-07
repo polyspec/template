@@ -9,10 +9,10 @@ import (
 	"sync"
 	"testing"
 
-	template "github.com/polyspec/template"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/functions"
-	"github.com/polyspec/template/value"
+	template "github.com/polyspec/template/packages/template-go"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/functions"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 // Bound data (VAL-22, ERR-14, RT-61) with the shared fixture of tests/fixtures/bound-data/cases.json.

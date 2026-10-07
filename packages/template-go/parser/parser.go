@@ -5,10 +5,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/polyspec/template/ast"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/expr"
-	"github.com/polyspec/template/lexer"
+	"github.com/polyspec/template/packages/template-go/ast"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/expr"
+	"github.com/polyspec/template/packages/template-go/lexer"
 )
 
 var reserved = map[string]bool{"true": true, "false": true, "null": true, "in": true}

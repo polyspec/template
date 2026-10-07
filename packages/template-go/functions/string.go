@@ -3,7 +3,7 @@ package functions
 import (
 	"strings"
 
-	"github.com/polyspec/template/value"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 func asciiUpper(text string) string {

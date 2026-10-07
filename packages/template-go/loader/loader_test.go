@@ -5,7 +5,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/polyspec/template/loader"
+	"github.com/polyspec/template/packages/template-go/loader"
 )
 
 func TestResolvePath(t *testing.T) {

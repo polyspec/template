@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/polyspec/template/errs"
+	"github.com/polyspec/template/packages/template-go/errs"
 )
 
 // MaxDepth is the nesting depth limit of lists and maps (VAL-20).

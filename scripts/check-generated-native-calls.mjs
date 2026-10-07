@@ -103,7 +103,7 @@ for (const [target, expectedCode] of Object.entries(hostValues.errors)) { let ac
         writeFileSync(goSource, compileSource(graphManifest, join(fixture, 'types.json'), 'go'));
         const goPassing = Object.entries(passing).map(([target, output]) => `${goString(target)}: ${goString(output)}`).join(', ');
         writeFileSync(join(goDir, 'generated_test.go'), `package generated
-import ("testing"; "fmt"; "strconv"; "strings"; template "github.com/polyspec/template"; "github.com/polyspec/template/functions"; "github.com/polyspec/template/value")
+import ("testing"; "fmt"; "strconv"; "strings"; template "github.com/polyspec/template/packages/template-go"; "github.com/polyspec/template/packages/template-go/functions"; "github.com/polyspec/template/packages/template-go/value")
 type Order struct { Label string }
 func (o Order) StatusLabel(prefix string) (string, error) { return prefix + ":12", nil }
 func (o Order) Fail(prefix string) (string, error) { return "", fmt.Errorf("failed member") }

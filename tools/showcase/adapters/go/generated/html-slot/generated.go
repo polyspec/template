@@ -1,6 +1,6 @@
 // Generated.
 package generated
-import ("bytes"; "encoding/json"; "errors"; "fmt"; "time"; "unicode/utf8"; template "github.com/polyspec/template"; "github.com/polyspec/template/ast"; "github.com/polyspec/template/errs"; "github.com/polyspec/template/functions"; "github.com/polyspec/template/render"; "github.com/polyspec/template/value")
+import ("bytes"; "encoding/json"; "errors"; "fmt"; "time"; "unicode/utf8"; template "github.com/polyspec/template/packages/template-go"; "github.com/polyspec/template/packages/template-go/ast"; "github.com/polyspec/template/packages/template-go/errs"; "github.com/polyspec/template/packages/template-go/functions"; "github.com/polyspec/template/packages/template-go/render"; "github.com/polyspec/template/packages/template-go/value")
 
 type Assign struct {
 	Heading string `json:"heading"`

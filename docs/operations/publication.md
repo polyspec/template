@@ -9,8 +9,8 @@ No package has been published. Each package installs from a local checkout as fo
 Go module:
 
 ```
-require github.com/polyspec/template v0.0.1
-replace github.com/polyspec/template => ../template/packages/template-go
+require github.com/polyspec/template/packages/template-go v0.0.1
+replace github.com/polyspec/template/packages/template-go => ../template/packages/template-go
 ```
 
 npm package:

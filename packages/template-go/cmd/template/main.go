@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	template "github.com/polyspec/template"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/value"
+	template "github.com/polyspec/template/packages/template-go"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/value"
 )
 
 func usage(message string) int {

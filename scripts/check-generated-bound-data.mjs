@@ -57,7 +57,7 @@ check(program.render('define.tpl', cases.assign, { define: { part: { template: '
       try {
         writeFileSync(join(goDir, 'generated.go'), source('go'));
         const goHeader = `package generated
-import ("testing"; template "github.com/polyspec/template")
+import ("testing"; template "github.com/polyspec/template/packages/template-go")
 func fixture(t *testing.T, text string) template.Value { t.Helper(); parsed, err := template.ParseJSON([]byte(text)); if err != nil { t.Fatal(err) }; return parsed }
 func bound(t *testing.T, text string) template.BoundMap { t.Helper(); result, err := template.Bind(fixture(t, text)); if err != nil { t.Fatal(err) }; return result }
 `;
@@ -69,7 +69,7 @@ func TestGeneratedBoundAssign(t *testing.T) { program, err := NewGeneratedProgra
   check(template.Merge(bound(t, ${goString(json(cases.assign))}), bound(t, ${goString(json(cases.second))})), ${goString(cases.outputs.merged)}, "merged assign") }
 `);
         writeFileSync(join(goDir, 'definition_test.go'), `package generated
-import ("testing"; template "github.com/polyspec/template")
+import ("testing"; template "github.com/polyspec/template/packages/template-go")
 func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }
   options := template.RenderOptions{Define: map[string]template.DefineInput{"part": {Template: "part.tpl", Data: bound(t, ${goString(json(cases.definitionData))})}}}
   actual, err := program.Render("define.tpl", fixture(t, ${goString(json(cases.assign))}), options); if err != nil || actual != ${goString(cases.outputs.define)} { t.Fatalf("bound definition data: %q %v", actual, err) } }

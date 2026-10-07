@@ -100,8 +100,8 @@ import (
   "errors"
   "os"
   "testing"
-  template "github.com/polyspec/template"
-  "github.com/polyspec/template/value"
+  template "github.com/polyspec/template/packages/template-go"
+  "github.com/polyspec/template/packages/template-go/value"
 )
 func TestGeneratedProgram(t *testing.T) {
   assignBytes, err := os.ReadFile(${JSON.stringify(join(scenarioRoot, id, 'data.json'))}); if err != nil { t.Fatal(err) }

@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- Named the Go module after its directory (T22.1-2). `packages/template-go/go.mod` declared `github.com/polyspec/template`, which `go get` looks for at the root of the repository, where no `go.mod` is; the module is `github.com/polyspec/template/packages/template-go`, every import, the Go backend of the compiler, the generated Go programs with their manifests, the example page and the documents use it, and a tag `packages/template-go/vX.Y.Z` releases it. `tests/scripts/toolchain-files.test.mjs` fails when a tracked `go.mod` with a domain does not name its directory.
 - Kept the section `## Unreleased` above the released versions (T22.1-1). The entries of the tag `v0.0.1` form the section `## 0.0.1`, the entries after it stay under `## Unreleased`, and every change adds its entry there; the language link of the changelog stands below its title.
 - Declared the triggers of each workflow exactly (T17.1-9). `ci.yml` runs on every pull request, merge group and manual run (`workflow_dispatch`), and `pages.yml` deploys the documentation site on a push to `main` and on a manual run.
 

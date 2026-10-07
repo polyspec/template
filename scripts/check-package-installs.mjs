@@ -62,10 +62,10 @@ assert.equal(ast, expected); assert.equal(generated, expected); assert.equal(ast
 
 function checkGo() {
   const version = 'v0.0.1';
-  const module = 'github.com/polyspec/template';
+  const module = 'github.com/polyspec/template/packages/template-go';
   const goVersion = /^go (\S+)$/m.exec(readFileSync(join(root, 'packages/template-go/go.mod'), 'utf8'))[1];
   const proxy = join(temporary, 'go-proxy');
-  const endpoint = join(proxy, 'github.com/polyspec/template/@v');
+  const endpoint = join(proxy, module, '@v');
   const zipRoot = join(temporary, 'go-zip', `${module}@${version}`);
   mkdirSync(endpoint, { recursive: true });
   mkdirSync(zipRoot, { recursive: true });
@@ -86,7 +86,7 @@ function checkGo() {
   cpSync(join(root, 'tools/showcase/adapters/go/generated/scope-precedence/generated.go'), join(directory, 'generated/generated.go'));
   writeFileSync(join(directory, 'go.mod'), `module installcheck\n\ngo ${goVersion}\n\nrequire ${module} ${version}\n`);
   writeFileSync(join(directory, 'main.go'), `package main
-import ("encoding/json"; "fmt"; "os"; template "github.com/polyspec/template"; "installcheck/generated")
+import ("encoding/json"; "fmt"; "os"; template "github.com/polyspec/template/packages/template-go"; "installcheck/generated")
 func definitions(data []byte) map[string]template.DefineInput { var raw map[string]json.RawMessage; if err:=json.Unmarshal(data,&raw);err!=nil{panic(err)}; out:=map[string]template.DefineInput{}; for name,value:=range raw { var path string; if json.Unmarshal(value,&path)==nil { out[name]=template.DefineInput{Template:path}; continue }; var entry struct{Template string \`json:"template"\`;Data any \`json:"data"\`;HTML *string \`json:"html"\`}; if err:=json.Unmarshal(value,&entry);err!=nil{panic(err)}; out[name]=template.DefineInput{Template:entry.Template,Data:entry.Data,HTML:entry.HTML} }; return out }
 func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(data);if err!=nil{panic(err)}; defineBytes,_:=os.ReadFile("define.json"); options:=template.RenderOptions{Define:definitions(defineBytes)}; expected,_:=os.ReadFile("expected.html"); astProgram,err:=template.NewAstProgram(template.Options{Loader:template.NewFSLoader(os.DirFS("templates"))});if err!=nil{panic(err)}; ast,err:=astProgram.Render("layout",assign,options);if err!=nil{panic(err)}; generatedProgram,err:=generated.NewGeneratedProgram(template.Options{});if err!=nil{panic(err)}; direct,err:=generatedProgram.Render("layout",assign,options);if err!=nil{panic(err)}; for _,result:=range []struct{name,actual string}{{"AST program",ast},{"generated program",direct}}{ if result.actual!=string(expected){fmt.Fprintf(os.Stderr,"Go %s output differs\\nexpected: %q\\nactual:   %q\\n",result.name,string(expected),result.actual);os.Exit(1)} };fmt.Print("ok")}
 `);

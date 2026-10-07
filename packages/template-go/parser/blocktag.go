@@ -5,10 +5,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/polyspec/template/ast"
-	"github.com/polyspec/template/errs"
-	"github.com/polyspec/template/expr"
-	"github.com/polyspec/template/lexer"
+	"github.com/polyspec/template/packages/template-go/ast"
+	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/expr"
+	"github.com/polyspec/template/packages/template-go/lexer"
 )
 
 var identPattern = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)

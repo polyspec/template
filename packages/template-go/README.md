@@ -1,4 +1,4 @@
-# github.com/polyspec/template
+# github.com/polyspec/template/packages/template-go
 
 [한국어](README.ko.md).
 
@@ -7,7 +7,7 @@ Go implementation of the template language: lexer, parser, renderer, built-in fu
 ## Install
 
 ```sh
-go get github.com/polyspec/template
+go get github.com/polyspec/template/packages/template-go
 ```
 
 ## Render
@@ -19,8 +19,8 @@ import (
   "fmt"
   "os"
 
-  template "github.com/polyspec/template"
-  "github.com/polyspec/template/functions"
+  template "github.com/polyspec/template/packages/template-go"
+  "github.com/polyspec/template/packages/template-go/functions"
 )
 
 func main() {
