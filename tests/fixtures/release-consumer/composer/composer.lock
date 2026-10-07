@@ -1,0 +1,62 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "53290ae33b62fbeb4730b1118d2fd434",
+    "packages": [
+        {
+            "name": "polyspec/template",
+            "version": "0.0.3",
+            "dist": {
+                "type": "zip",
+                "url": "artifacts/polyspec-template-0.0.3.zip",
+                "shasum": "4065dfdebf8dd6a48174b0aa26a6e5e75a8a93ac"
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "phpunit/phpunit": "^11.5"
+            },
+            "bin": [
+                "bin/template.php"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Polyspec\\Template\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Polyspec\\Template\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "lint": [
+                    "pint --test"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Template language implementation: lexer, parser, renderer, functions and CLI"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

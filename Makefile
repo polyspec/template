@@ -49,7 +49,7 @@ MAKEFLAGS += -k
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
 	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers ci-targets cargo-downloads-check uninstall-cli rerun-failed \
 	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit github-ruleset github-ruleset-check ci-passed \
-	release-verify release-versions release-assets release-publish
+	release-verify release-versions release-assets release-publish release-consumer-lock
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -215,6 +215,11 @@ release-verify release-versions release-assets release-publish: ## A step of the
 	$(if $(TAG),,$(error make $@ needs TAG=<tag>, a tag vX.Y.Z or packages/template-go/vX.Y.Z))
 	node scripts/release.mjs $(@:release-%=%) "$$TAG"
 release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror)
+
+# The locks of the consumer projects of tests/fixtures/release-consumer, written from their manifests and the archives of
+# the manifests of the tree (scripts/release-consumer.mjs, T22.3-1); a release that changes the version runs it.
+release-consumer-lock: ## Write the locks of the consumer projects of the release assets
+	node scripts/release-consumer.mjs lock
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium

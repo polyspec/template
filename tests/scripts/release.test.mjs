@@ -3,16 +3,18 @@
 // Each case builds a Git repository in a temporary directory with the manifests of the release, a changelog, a branch
 // origin/main and the tag, and puts fakes of gh and npm first on PATH. The fake gh answers the check runs of the GitHub
 // API from a JSON state file and records each call; the fake npm packs package.json of its directory into the tarball that
-// npm pack writes. The cases of the packed assets run the npm and Composer of the run against the manifests of the tree
-// and install the assets in a directory outside the repository with an empty cache. No case reaches GitHub or a registry.
+// npm pack writes. The consumer projects of tests/fixtures/release-consumer install the archives of the manifests of the
+// tree with npm ci and composer install in a directory outside the repository from empty caches. No case reaches GitHub
+// or a registry.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import * as consumer from '../../scripts/release-consumer.mjs';
 import * as release from '../../scripts/release.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -259,6 +261,108 @@ test('assets builds one archive per package', t => {
   assert.deepEqual(listed.stdout.split('\n').filter(Boolean).sort(), ['composer.json', 'src/', 'src/Engine.php']);
 });
 
+test('a Go tag builds no archive', t => {
+  const box = sandbox(t);
+  assert.deepEqual(release.assets(box.root, box.tag('packages/template-go/v0.0.1')), []);
+  assert.deepEqual(readdirSync(path.join(box.root, release.ASSETS)), []);
+});
+
+test('publish creates the release with the notes and the archives', t => {
+  const box = sandbox(t);
+  const tag = box.tag('v0.0.1');
+  release.assets(box.root, tag);
+  assert.deepEqual(release.publish(box.root, tag), release.assetNames(tag));
+  const { calls, notes } = box.recorded();
+  const call = calls.at(-1);
+  const notesFile = call[call.indexOf('--notes-file') + 1];
+  assert.deepEqual(call, ['release', 'create', 'v0.0.1', '--verify-tag', '--title', 'v0.0.1', '--notes-file', notesFile,
+    ...release.assetNames(tag).map(name => path.join(box.root, release.ASSETS, name))]);
+  assert.equal(notes, '- The first entry of 0.0.1.\n- The second entry of 0.0.1.\n');
+});
+
+test('a Go tag creates a release without archives', t => {
+  const box = sandbox(t);
+  const tag = box.tag('packages/template-go/v0.0.1');
+  assert.deepEqual(release.publish(box.root, tag), []);
+  const call = box.recorded().calls.at(-1);
+  assert.deepEqual(call.slice(0, 7), ['release', 'create', tag, '--verify-tag', '--title', tag, '--notes-file']);
+  assert.equal(call.length, 8);
+});
+
+test('publish without the archives fails before any request', t => {
+  const box = sandbox(t);
+  stops(() => release.publish(box.root, box.tag('v0.0.1')), /^var\/release\/assets lacks \[.*\]; make release-assets builds them$/);
+  assert.deepEqual(box.recorded().calls, []);
+});
+
+test('the declarations cover every tracked manifest of the repository', () => {
+  const tracked = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  const manifests = tracked.filter(file => ['package.json', 'composer.json', 'Cargo.toml', 'VERSION', 'pyproject.toml', 'go.mod'].includes(path.basename(file))).sort();
+  const declared = [...Object.keys(release.MANIFESTS), ...Object.keys(release.NOT_RELEASED), ...Object.keys(release.GO_MODULES).map(directory => `${directory}/go.mod`)].sort();
+  assert.deepEqual(manifests, declared, 'a tracked manifest is neither released nor declared as not released');
+  for (const [kind, directory, name] of release.PACKAGES) {
+    const manifest = path.join(ROOT, directory, { npm: 'package.json', composer: 'composer.json' }[kind]);
+    assert.equal(release.MANIFESTS[path.relative(ROOT, manifest)], release.ARCHIVE, `${directory} is a package whose manifest is not an archive of MANIFESTS`);
+    const text = readFileSync(manifest, 'utf8');
+    assert.equal(JSON.parse(text).name, name, directory);
+    if (kind === 'npm') assert.notEqual(JSON.parse(text).private, true, `${directory} is private, so npm does not publish it`);
+  }
+});
+
+test('the assets are npm tarballs and Composer zips only, and a Rust crate is consumed by git tag', () => {
+  assert.deepEqual([...new Set(release.PACKAGES.map(([kind]) => kind))].sort(), ['composer', 'npm']);
+  const archived = release.PACKAGES.map(([kind, directory]) => `${directory}/${kind === 'npm' ? 'package.json' : 'composer.json'}`).sort();
+  assert.deepEqual(Object.entries(release.MANIFESTS).filter(([, how]) => how === release.ARCHIVE).map(([name]) => name).sort(), archived);
+  for (const [name, how] of Object.entries(release.MANIFESTS)) {
+    assert.ok([release.ARCHIVE, release.VERSION_ONLY, release.GIT_TAG].includes(how), `${name}: ${how}`);
+    if (path.basename(name) === 'Cargo.toml') assert.equal(how, 'not released as an archive; consumed by git tag', name);
+  }
+  const source = readFileSync(path.join(ROOT, 'scripts/release.mjs'), 'utf8');
+  assert.doesNotMatch(source, /'cargo', \['package'/);
+  assert.doesNotMatch(source, /\.crate/);
+});
+
+test('the version of the tree passes the version check', () => {
+  const { version } = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  assert.equal(release.versions(ROOT, `v${version}`), version);
+  assert.equal(release.versions(ROOT, `packages/template-go/v${version}`), version);
+});
+
+test('make runs each step with the tag of the environment and fails without it', () => {
+  const environment = Object.fromEntries(Object.entries(process.env).filter(([name]) => !['MAKEFLAGS', 'MFLAGS', 'MAKELEVEL', 'TAG'].includes(name)));
+  for (const step of ['verify', 'versions', 'assets', 'publish']) {
+    const listed = spawnSync('make', ['--no-print-directory', '-n', `release-${step}`], { cwd: ROOT, encoding: 'utf8', env: { ...environment, TAG: 'v0.0.1' } });
+    assert.equal(listed.status, 0, listed.stderr);
+    assert.equal(listed.stdout.trim().split('\n').at(-1), `node scripts/release.mjs ${step} "$TAG"`);
+    const missing = spawnSync('make', ['--no-print-directory', '-n', `release-${step}`], { cwd: ROOT, encoding: 'utf8', env: environment });
+    assert.notEqual(missing.status, 0);
+    assert.match(missing.stderr, new RegExp(`make release-${step} needs TAG=<tag>`));
+  }
+  const npmBuilds = ['build-ts', 'build-language', 'build-lsp', 'build-codemirror'];
+  const prerequisites = tag => spawnSync('make', ['--no-print-directory', '-p', '-n', 'release-assets'], { cwd: ROOT, encoding: 'utf8', env: { ...environment, TAG: tag } })
+    .stdout.split('\n').find(line => line.startsWith('release-assets:')).replace(/^release-assets:\s*/, '').split(/\s+/).filter(Boolean);
+  assert.deepEqual(prerequisites('v0.0.1'), npmBuilds, 'a tag vX.Y.Z builds the npm packages before their archives');
+  assert.deepEqual(prerequisites('packages/template-go/v0.0.1'), [], 'a Go module tag builds nothing');
+});
+
+test('a section over the limit of GitHub becomes a link to the changelog, and a section at the limit stays whole', t => {
+  assert.equal(release.NOTES_LIMIT, 125000);
+  const link = 'The changes of 0.0.1 are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/v0.0.1/CHANGELOG.md#001).\n';
+  const entry = '- é\n';
+  const atLimit = entry.repeat(release.NOTES_LIMIT / [...entry].length);
+  assert.equal([...atLimit].length, release.NOTES_LIMIT);
+  assert.equal(release.releaseNotes('v0.0.1', '0.0.1', atLimit), atLimit);
+  assert.equal(release.releaseNotes('v0.0.1', '0.0.1', `${atLimit}x`), link);
+  assert.equal(release.releaseNotes('packages/template-go/v1.2.3', '1.2.3', `${atLimit}x`),
+    'The changes of 1.2.3 are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/packages/template-go/v1.2.3/CHANGELOG.md#123).\n');
+
+  const box = sandbox(t, { changelog: CHANGELOG.replace('- The second entry of 0.0.1.\n', `- The second entry of 0.0.1.\n${atLimit}`) });
+  const tag = box.tag('v0.0.1');
+  release.assets(box.root, tag);
+  release.publish(box.root, tag);
+  assert.equal(box.recorded().notes, link);
+});
+
 test('each archive carries the manifest of its package unchanged', t => {
   const box = sandbox(t);
   const directory = path.join(box.root, release.ASSETS);
@@ -329,76 +433,50 @@ test('a packed manifest with a polyspec dependency that is not an exact version 
     ['require polyspec/template: 0.0.2 is another version, not 0.0.1']);
 });
 
-// A repository with the manifests of the packages of the tree, a file for each path that a package.json names, and the
-// tag of the version of the tree.
-function treeSandbox(t) {
+// The consumer projects of tests/fixtures/release-consumer install the archives of the manifests of the tree with their
+// committed locks in a directory outside the repository, from empty caches (scripts/release-consumer.mjs).
+function packedTree(t) {
   const folder = mkdtempSync(path.join(tmpdir(), 'template-release-install-'));
-  const root = path.join(folder, 'repository');
   t.after(() => rmSync(folder, { recursive: true, force: true }));
-  const { version } = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-  for (const [kind, directory] of release.PACKAGES) {
-    const manifest = kind === 'npm' ? 'package.json' : 'composer.json';
-    const data = JSON.parse(readFileSync(path.join(ROOT, directory, manifest), 'utf8'));
-    mkdirSync(path.join(root, directory), { recursive: true });
-    writeFileSync(path.join(root, directory, manifest), readFileSync(path.join(ROOT, directory, manifest)));
-    const files = kind === 'npm' ? [...Object.values(data.bin ?? {}), 'dist/index.mjs'] : [...(data.bin ?? []), 'src/Placeholder.php'];
-    for (const file of files) {
-      mkdirSync(path.dirname(path.join(root, directory, file)), { recursive: true });
-      writeFileSync(path.join(root, directory, file), kind === 'npm' ? 'export {};\n' : '<?php\n');
-    }
-  }
-  git(root, 'init', '--quiet', '--initial-branch=main');
-  git(root, 'add', '-A');
-  git(root, 'commit', '--quiet', '-m', 'release');
-  git(root, 'tag', '-a', `v${version}`, '-m', `v${version}`);
-  return { folder, root, version, tag: `v${version}` };
+  return { folder, packed: consumer.packTreeAssets(folder) };
 }
 
-function install(command, args, cwd, env = {}) {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env } });
-  assert.equal(result.status, 0, `${command} ${args.join(' ')}: ${result.stdout}${result.stderr}`);
-}
-
-test('an npm project outside the repository installs the packed tarballs', t => {
-  const box = treeSandbox(t);
-  const names = release.assets(box.root, box.tag);
-  const directory = path.join(box.root, release.ASSETS);
-  const project = path.join(box.folder, 'npm-project');
-  mkdirSync(project);
-  // @polyspec/template-language depends on @polyspec/template; the other dependencies of the LSP server and the CodeMirror
-  // package are packages of the npm registry, which a check does not read.
-  const tarballs = names.filter(name => /^polyspec-template-(?:language-)?\d.*\.tgz$/.test(name));
-  assert.deepEqual(tarballs, [`polyspec-template-${box.version}.tgz`, `polyspec-template-language-${box.version}.tgz`]);
-  const packages = tarballs.map(name => release.packedManifest(path.join(directory, name)).name);
-  for (const name of tarballs) copyFileSync(path.join(directory, name), path.join(project, name));
-  writeFileSync(path.join(project, 'package.json'), JSON.stringify({
-    private: true,
-    dependencies: Object.fromEntries(packages.map((name, index) => [name, `file:${tarballs[index]}`])),
-  }));
-  // An empty cache and an unreachable registry for the scope @polyspec: the polyspec packages come only from the tarballs.
-  install('npm', ['install', '--cache', path.join(box.folder, 'npm-cache'), '--@polyspec:registry=http://127.0.0.1:9/', '--ignore-scripts', '--no-audit', '--no-fund'], project);
-  for (const name of packages) {
-    assert.equal(JSON.parse(readFileSync(path.join(project, 'node_modules', name, 'package.json'), 'utf8')).version, box.version, name);
+test('the npm consumer project installs the packed tarballs with npm ci', t => {
+  const { folder, packed } = packedTree(t);
+  const project = path.join(folder, 'npm-project');
+  consumer.consumerProject('npm', project, packed);
+  const manifest = JSON.parse(readFileSync(path.join(project, 'package.json'), 'utf8'));
+  assert.deepEqual(manifest.dependencies, {
+    '@polyspec/template': `file:polyspec-template-${packed.version}.tgz`,
+    '@polyspec/template-language': `file:polyspec-template-language-${packed.version}.tgz`,
+  }, 'the consumer project names the tarballs of the version of the tree; make release-consumer-lock writes its lock');
+  consumer.install('npm', project, folder);
+  for (const [name, spec] of Object.entries(manifest.dependencies)) {
+    assert.equal(JSON.parse(readFileSync(path.join(project, 'node_modules', name, 'package.json'), 'utf8')).version, packed.version, name);
+    assert.equal(JSON.parse(readFileSync(path.join(project, 'package-lock.json'), 'utf8')).packages[`node_modules/${name}`].resolved, spec, name);
   }
-  const lock = JSON.parse(readFileSync(path.join(project, 'package-lock.json'), 'utf8')).packages;
-  packages.forEach((name, index) => assert.equal(lock[`node_modules/${name}`].resolved, `file:${tarballs[index]}`, name));
 });
 
-test('a Composer project outside the repository installs the packed zips from an artifact repository', t => {
-  const box = treeSandbox(t);
-  release.assets(box.root, box.tag);
-  const project = path.join(box.folder, 'composer-project');
-  mkdirSync(project);
-  writeFileSync(path.join(project, 'composer.json'), JSON.stringify({
-    repositories: [{ type: 'artifact', url: path.join(box.root, release.ASSETS) }, { 'packagist.org': false }],
-    require: { 'polyspec/template': box.version },
-  }));
-  const environment = { COMPOSER_HOME: path.join(box.folder, 'composer-home'), COMPOSER_CACHE_DIR: path.join(box.folder, 'composer-cache') };
-  install('composer', ['install', '--no-interaction', '--no-progress', '--no-plugins', '--no-scripts'], project, environment);
+test('the Composer consumer project installs the packed zips from an artifact repository', t => {
+  const { folder, packed } = packedTree(t);
+  const project = path.join(folder, 'composer-project');
+  consumer.consumerProject('composer', project, packed);
+  assert.deepEqual(JSON.parse(readFileSync(path.join(project, 'composer.json'), 'utf8')).require, { 'polyspec/template': packed.version },
+    'the consumer project requires the version of the tree; make release-consumer-lock writes its lock');
+  consumer.install('composer', project, folder);
   const installed = JSON.parse(readFileSync(path.join(project, 'vendor/composer/installed.json'), 'utf8')).packages;
-  assert.deepEqual(installed.map(entry => [entry.name, entry.version]), [['polyspec/template', box.version]]);
+  assert.deepEqual(installed.map(entry => [entry.name, entry.version]), [['polyspec/template', packed.version]]);
   // Composer installs no package of the type php-ext, which PIE builds; the artifact repository reads its zip.
-  const shown = spawnSync('composer', ['show', '--available', '--format=json', 'polyspec/template-php-ext'], { cwd: project, encoding: 'utf8', env: { ...process.env, ...environment } });
+  const shown = spawnSync('composer', ['show', '--available', '--format=json', 'polyspec/template-php-ext'], { cwd: project, encoding: 'utf8',
+    env: { ...process.env, COMPOSER_HOME: path.join(folder, 'composer-home'), COMPOSER_CACHE_DIR: path.join(folder, 'composer-cache') } });
   assert.equal(shown.status, 0, shown.stderr);
-  assert.deepEqual([JSON.parse(shown.stdout).type, JSON.parse(shown.stdout).versions], ['php-ext', [box.version]]);
+  assert.deepEqual([JSON.parse(shown.stdout).type, JSON.parse(shown.stdout).versions], ['php-ext', [packed.version]]);
+});
+
+test('the zips of a tag are the same bytes on every run', t => {
+  const first = packedTree(t);
+  const second = packedTree(t);
+  for (const name of first.packed.names) {
+    assert.ok(readFileSync(path.join(first.packed.directory, name)).equals(readFileSync(path.join(second.packed.directory, name))), name);
+  }
 });

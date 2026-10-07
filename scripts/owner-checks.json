@@ -22,7 +22,7 @@
     { "paths": ["scripts/push-gate.mjs", ".githooks/pre-push", ".github/workflows/push-gate.yml"], "tests": ["tests/scripts/push-gate.test.mjs", "tests/scripts/github-ruleset.test.mjs"] },
     { "paths": ["scripts/github-ruleset.mjs", ".github/ruleset.json"], "tests": ["tests/scripts/github-ruleset.test.mjs"] },
     { "paths": ["scripts/ci-passed.mjs"], "tests": ["tests/scripts/ci-passed.test.mjs"] },
-    { "paths": ["scripts/release.mjs", ".github/workflows/release.yml", "Makefile", "CHANGELOG.md", "package.json", "packages/*/package.json", "packages/*/composer.json", "packages/template-rust/Cargo.toml", "packages/template-go/go.mod"], "tests": ["tests/scripts/release.test.mjs"] },
+    { "paths": ["scripts/release.mjs", "scripts/release-consumer.mjs", "tests/fixtures/release-consumer/**", ".github/workflows/release.yml", "Makefile", "CHANGELOG.md", "package.json", "packages/*/package.json", "packages/*/composer.json", "packages/template-rust/Cargo.toml", "packages/template-go/go.mod"], "tests": ["tests/scripts/release.test.mjs"] },
     { "paths": ["scripts/process-group.mjs"], "targets": ["conformance-generated-ts", "conformance-generated-php", "test-vscode-integration"], "tests": ["tests/scripts/process-group.test.mjs", "tests/scripts/long-steps.test.mjs", "tests/scripts/process-group-callers.test.mjs"] },
     { "paths": ["scripts/build-package.mjs"], "tests": ["tests/scripts/build-package.test.mjs"] },
     { "paths": ["scripts/check-artifact-digests.mjs"], "targets": ["artifact-digest-check"], "tests": ["tests/scripts/artifact-digests.test.mjs", "tests/scripts/push-gate.test.mjs"] },
