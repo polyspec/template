@@ -1,6 +1,14 @@
 # 변경 기록
 
+[English](CHANGELOG.md).
+
+## Unreleased
+
+- 릴리스된 버전 위에 section `## Unreleased`를 두었다(T22.1-1). tag `v0.0.1`의 항목은 section `## 0.0.1`을 이루고, 그 뒤의 항목은 `## Unreleased` 아래에 남으며, 모든 변경은 항목을 그곳에 추가한다. changelog의 언어 link는 제목 아래에 있다.
 - 각 workflow의 trigger를 정확히 선언했다(T17.1-9). `ci.yml`은 모든 pull request, merge group, 수동 실행(`workflow_dispatch`)에서 실행되고, `pages.yml`은 `main` push와 수동 실행에서 문서 site를 배포한다.
+
+## 0.0.1
+
 - 모든 변경을 pull request와 merge queue로 게시하게 했다(T17.1-7). ruleset `main`은 bypass actor 없이 승인 없는 pull request, `REBASE` merge queue, 선형 history, check `push-gate`와 CI의 모든 job을 요구하고, 선언은 auto-merge의 저장소 설정을 정한다.
 - 오래된 compiled artifact를 `main` 전에 잡게 했다(T17.1-6). AST compiler digest는 build 대신 `packages/template-ts`의 추적 source로 계산하고, `make artifact-digest-check`는 commit된 artifact가 다른 compiler의 digest를 기록하면 각 manifest와 `make showcase`를 밝히며 실패한다. job `push-gate`와 `showcase-check`가 이를 실행한다. artifact 30개와 page는 새 digest로 다시 compile했다.
 - T8.5-1 뒤에 showcase artifact를 다시 만들었다(T8.5-2). AST artifact manifest는 template-ts build의 digest를 기록하고 T8.5-1이 그것을 바꿨으므로, release job이 `examples/site/index.html`을 오래된 것으로 판정했다. manifest 다섯 개와 page를 다시 썼고 digest만 바뀐다.
@@ -127,10 +135,6 @@
 - Pages 구성, artifact 업로드, 배포 action을 현재 안정 major로 갱신했다.
 - Go 패키지에 외부 모듈과 checksum 파일이 없으므로 CI의 Go 의존성 캐시를 끄고 잘못된 루트 모듈 탐색을 제거했다.
 - 정적 Pages 발행을 전체 CI matrix 뒤로 옮기고 병렬 문서 workflow와 중복 문서·showcase 검사를 제거했다.
-
-[English](CHANGELOG.md).
-
-## 미발행
 
 - 호스트 인자의 형태를 명세하고(VAL-21) 모든 구현을 이에 맞췄다. 호스트 함수, 논리 class 함수와 instance method는 자기 언어의 일반 값을 받는다. safe 문자열은 문자열, list는 새 list, map은 새 순서 보존 map(TypeScript `Map`, Go `*value.OrderedMap`, Rust `Value::Map`, 항목 순서의 PHP 배열), number는 PHP `float`, native object는 원본 객체다. PHP AST 런타임은 `MapValue`와 `SafeString` 객체를, PHP 확장은 배열과 문자열을 넘겼다. TypeScript, Go, Rust는 safe 문자열을 넘겼고, TypeScript와 Go는 템플릿 자신의 list와 map을 넘겨 호스트 함수가 템플릿이 나중에 읽는 값을 바꿀 수 있었다. Go는 nil을 받는 method 파라미터의 `null` 인자를 거부했고, PHP 확장은 map 키 `-0`을 정수 키 `0`으로 바꿨다.
 - native object의 동등성을 명세했다(EXP-39). 두 native object는 같은 호스트 객체일 때 같고, native object의 순서 비교는 `E_RUNTIME_COMPARE`이다. TypeScript는 wrapper를 비교해 두 번 바인딩한 같은 인스턴스가 다르다고 했고, Go와 Rust는 같다고 보고하지 않았으며, PHP AST 런타임은 `E_INTERNAL`로 실패했고, PHP 확장은 PHP 객체를 바인딩할 때마다 새로 감쌌다. Rust native object의 동일성은 `TemplateObject::identity`가 보고하며 확장은 PHP 객체를 보고한다.
