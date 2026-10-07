@@ -48,7 +48,8 @@ MAKEFLAGS += -k
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
 	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers ci-targets cargo-downloads-check uninstall-cli rerun-failed \
-	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit github-ruleset github-ruleset-check ci-passed
+	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit github-ruleset github-ruleset-check ci-passed \
+	release-verify release-versions release-assets release-publish
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -201,6 +202,18 @@ ci-targets: ## Run TARGETS past failures and write their logs and summary to var
 # becomes shell text.
 ci-passed: ## Fail unless every job of RESULTS, the JSON of needs of the job ci-passed, has the result success
 	node scripts/ci-passed.mjs
+
+# The steps of .github/workflows/release.yml for the tag TAG (scripts/release.mjs, T22.1-4), in this order: release-verify
+# requires the tagged commit on origin/main with the checks push-gate and ci-passed passed, release-versions the version
+# of the tag in every manifest and its section in CHANGELOG.md, release-assets builds the npm packages and packs every
+# package into var/release/assets, and release-publish creates the GitHub Release. The workflow sets TAG in the
+# environment, and the recipe passes it as "$$TAG", so the name of a tag never becomes shell text. These steps are not
+# the job release of ci.yml, which runs the full suite. scripts/release.mjs starts cargo, so every step checks the crates
+# first (T20.1-5).
+release-verify release-versions release-assets release-publish: cargo-downloads-check ## A step of the release of the tag TAG (release.yml)
+	$(if $(TAG),,$(error make $@ needs TAG=<tag>, a tag vX.Y.Z or packages/template-go/vX.Y.Z))
+	node scripts/release.mjs $(@:release-%=%) "$$TAG"
+release-assets: build-ts build-language build-lsp build-codemirror
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium

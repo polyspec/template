@@ -14,7 +14,10 @@
 // - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
 // - the last job of ci.yml is ci-passed, the check of ci.yml that the ruleset main requires: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
-//   needs, so it passes only when every other job passed (T22.1-3).
+//   needs, so it passes only when every other job passed (T22.1-3);
+// - release.yml runs on the push of a tag vX.Y.Z or <directory>/vX.Y.Z with the permission contents: write, in one job
+//   release with the tag in its environment, the whole history checked out and the release steps last and in order
+//   (T22.1-4); it is not the job release of ci.yml.
 // make itself is not pinned: the recipes use no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1
 // print the same commands for every target (T17.1-4).
 import assert from 'node:assert/strict';
@@ -44,6 +47,32 @@ function jobsOf(text) {
 // runs no check of the suite and writes no report.
 const CI_PASSED = 'ci-passed';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
+
+// The steps of release.yml in their order (scripts/release.mjs): verify the tagged commit, check the versions, build the
+// archives, create the release (T22.1-4).
+const RELEASE_STEPS = ['make release-verify', 'make release-versions', 'make release-assets', 'make release-publish'];
+
+// Each broken rule of the text of release.yml (T22.1-4).
+export function releaseViolations(text) {
+  const found = [];
+  if (!/\npermissions:\n {2}contents: write\n(?! )/.test(text)) found.push('release.yml: the permissions are not exactly contents: write, which gh release create needs');
+  const all = jobsOf(text);
+  if (JSON.stringify(all.map(job => job.name)) !== JSON.stringify(['release'])) {
+    found.push(`release.yml: the jobs are ${all.map(job => job.name).join(', ')}, not the one job release`);
+    return found;
+  }
+  const [job] = all;
+  if (!/\n {4}env:\n(?: {6}.*\n)*? {6}TAG: \$\{\{ github\.ref_name \}\}\n/.test(job.text)) found.push('release.yml: the job release does not set TAG: ${{ github.ref_name }} in its environment');
+  const steps = job.text.split(/\n(?= {6}- )/).slice(1);
+  if (!/^ {6}- uses: actions\/checkout@/.test(steps[0] ?? '') || !/\n {10}fetch-depth: 0(\n|$)/.test(steps[0] ?? '')) {
+    found.push('release.yml: the first step is not actions/checkout with fetch-depth: 0; the ancestry check needs origin/main');
+  }
+  const runs = [...job.text.matchAll(/^ {6}(?:- )? {0,2}run: (.*)$/gm)].map(match => match[1]);
+  if (JSON.stringify(runs.slice(-RELEASE_STEPS.length)) !== JSON.stringify(RELEASE_STEPS)) {
+    found.push(`release.yml: the steps run [${runs.join(', ')}], not the release steps [${RELEASE_STEPS.join(', ')}] last and in order`);
+  }
+  return found;
+}
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
 export function ciPassedViolations(text) {
@@ -325,12 +354,13 @@ test('a new push to a pull request cancels the running CI of its workflow and re
   }
 });
 
-test('each workflow declares exactly its triggers: CI on every pull request, merge group and manual run, the push gate also on the pushed branches outside the queue, the site on main (T17.1-7, T17.1-9)', () => {
+test('each workflow declares exactly its triggers: CI on every pull request, merge group and manual run, the push gate also on the pushed branches outside the queue, the site on main, the release on a tag (T17.1-7, T17.1-9, T22.1-4)', () => {
   const triggers = {
     '.github/workflows/ci.yml': 'on:\n  pull_request:\n  merge_group:\n  workflow_dispatch:\n',
     '.github/workflows/push-gate.yml': "on:\n  push:\n    branches-ignore: ['gh-readonly-queue/**']\n  pull_request:\n  merge_group:\n",
     '.github/workflows/pages.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
     '.github/workflows/dependency-review.yml': "on:\n  schedule:\n    - cron: '17 3 * * *'\n  workflow_dispatch:\n",
+    '.github/workflows/release.yml': "on:\n  push:\n    tags: ['v*', '*/v*']\n",
   };
   assert.deepEqual([...WORKFLOWS].sort(), Object.keys(triggers).sort());
   for (const [file, block] of Object.entries(triggers)) {
@@ -356,6 +386,23 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
   for (const [name, [brokenText, message]] of Object.entries(broken)) {
     assert.notEqual(brokenText, text, name);
     const found = ciPassedViolations(brokenText);
+    assert.ok(found.some(issue => issue.includes(message)), `${name}: ${found.join('; ')}`);
+  }
+});
+
+test('release.yml runs its steps in order with the tag and the permission to release (T22.1-4)', () => {
+  const text = read('.github/workflows/release.yml');
+  assert.deepEqual(releaseViolations(text), []);
+  const broken = {
+    order: [text.replace('run: make release-versions', 'run: make release-swap').replace('run: make release-verify', 'run: make release-versions').replace('run: make release-swap', 'run: make release-verify'), 'not the release steps'],
+    'read only': [text.replace('  contents: write\n', '  contents: read\n'), 'not exactly contents: write'],
+    'no tag': [text.replace('      TAG: ${{ github.ref_name }}\n', ''), 'does not set TAG'],
+    shallow: [text.replace('          fetch-depth: 0\n', '          fetch-depth: 1\n'), 'fetch-depth: 0'],
+    'two jobs': [`${text}\n  other:\n    runs-on: ubuntu-24.04\n`, 'not the one job release'],
+  };
+  for (const [name, [brokenText, message]] of Object.entries(broken)) {
+    assert.notEqual(brokenText, text, name);
+    const found = releaseViolations(brokenText);
     assert.ok(found.some(issue => issue.includes(message)), `${name}: ${found.join('; ')}`);
   }
 });
