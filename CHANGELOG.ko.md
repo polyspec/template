@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- 릴리스 notes를 GitHub의 한도 안에 두었다(T22.2-2). GitHub는 125000자를 넘는 release body를 거부하고, `make release-publish`는 `CHANGELOG.md`의 section `## X.Y.Z` 전체를 넘겼다. `scripts/release.mjs`의 `NOTES_LIMIT`(125000자)을 넘는 section은 tag의 `CHANGELOG.md` section을 가리키는 한 줄로 바뀌고, 한도의 section은 그대로 남는다. `tests/scripts/release.test.mjs`가 둘과 Go tag의 link를 검사한다.
+
 ## 0.0.2
 
 - 0.0.2를 위해 commit된 artifact를 다시 compile하고 의존성을 다시 검토했다(T22.2-1). compiler digest는 `packages/template-ts`의 버전을 포함하므로 `make showcase`가 AST와 JavaScript manifest를 다시 compile했다. review record는 `package-lock.json`의 sha256을 적으므로 `make dependency-review UPDATE=1`이 `typescript-eslint`를 8.71.1로, advisory GHSA-68fv-2mgg-jv7q를 고친 `source-map-js`를 1.2.2로 올리고 검토를 기록했다. `scripts/dependency-review.mjs`는 `npm view --json`을 한 object로 읽었고 npm 12는 여러 field를 object 하나의 array로 출력하므로, 모든 npm 의존성이 stable release 없음으로 실패했다. review는 두 형식을 모두 읽고, `tests/scripts/dependency-policy.test.mjs`의 npm stub은 npm 12의 형식으로 답한다. gate test는 `packages/template-lsp`의 버전을 tree와 다른 버전으로 바꾼다.
