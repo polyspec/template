@@ -29,7 +29,8 @@ const registry = JSON.parse(readFileSync(process.env.STUB_REGISTRY, 'utf8'));
 if (args[0] === 'view') {
   const versions = registry.npm[args[1]];
   if (!versions) { console.error('404 ' + args[1]); process.exit(1); }
-  console.log(JSON.stringify({ 'dist-tags': { latest: versions[versions.length - 1] }, versions }));
+  // npm 12, the npm of package.json, prints several fields of \`npm view --json\` as an array of one object.
+  console.log(JSON.stringify([{ 'dist-tags': { latest: versions[versions.length - 1] }, versions }]));
 } else if (args[0] === 'audit') {
   console.log(JSON.stringify(registry.npmAudit ?? { vulnerabilities: {} }));
   process.exit(Object.keys(registry.npmAudit?.vulnerabilities ?? {}).length ? 1 : 0);
@@ -173,8 +174,11 @@ test('the gate reports every finding with its rule and fix in one run', (t) => {
   editJson(root, 'packages/template-php/composer.lock', (lock) => {
     lock['packages-dev'].find(item => item.name === 'phpunit/phpunit').version = '11.5.1';
   });
+  // A version that no release of the package has, so the lock records another version than the manifest.
+  let locked;
   editJson(root, 'packages/template-lsp/package.json', (manifest) => {
-    manifest.version = '0.0.2';
+    locked = manifest.version;
+    manifest.version = '999.0.0';
   });
   const result = run(CHECK, ['--root', root], stub.env);
   assert.equal(result.status, 1, result.stdout + result.stderr);
@@ -185,7 +189,7 @@ test('the gate reports every finding with its rule and fix in one run', (t) => {
     /^\[dependency-policy\] packages\/template-php-ext\/composer\.lock phpunit\/phpunit 11\.5\.57: the review of .+ found advisory PKSA-test-0001 \(high\) Test advisory https:\/\/example\.invalid\/PKSA-test-0001\. Rule: .+\. Fix: make dependency-review UPDATE=1, .+\.$/m,
     /^\[dependency-policy\] packages\/template-php\/composer\.lock: the lock changed after the review of .+: its sha256 is [0-9a-f]{64}, the review recorded [0-9a-f]{64}\. Rule: .+\. Fix: make dependency-review RECORD=1\.$/m,
     /^\[dependency-policy\] packages\/template-php\/composer\.json phpunit\/phpunit: the lock holds 11\.5\.1, the review of .+ recorded 11\.5\.57\. Rule: .+\. Fix: make dependency-review RECORD=1\.$/m,
-    /^\[dependency-policy\] package\.json @polyspec\/template-lsp: the lock records version 0\.0\.1, packages\/template-lsp has version 0\.0\.2\. Rule: .+\. Fix: run npm install\.$/m,
+    new RegExp(`^\\[dependency-policy\\] package\\.json @polyspec\\/template-lsp: the lock records version ${locked.replaceAll('.', '\\.')}, packages\\/template-lsp has version 999\\.0\\.0\\. Rule: .+\\. Fix: run npm install\\.$`, 'm'),
     /^\[dependency-policy\] 7 findings; the check reads only the files of the checkout and queries no registry$/m,
   ];
   for (const pattern of expected) assert.match(result.stderr, pattern);

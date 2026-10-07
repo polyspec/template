@@ -47,8 +47,10 @@ function latestReleases(root, state) {
         latest.set(key, { error: answer.error });
         continue;
       }
-      const tag = answer.value['dist-tags']?.latest;
-      const stable = tag && !isPrerelease(tag) ? tag : highestStable(answer.value.versions ?? []);
+      // npm 12 prints the fields of `npm view` with several fields as an array of one object.
+      const view = Array.isArray(answer.value) ? answer.value[0] ?? {} : answer.value;
+      const tag = view['dist-tags']?.latest;
+      const stable = tag && !isPrerelease(tag) ? tag : highestStable(view.versions ?? []);
       latest.set(key, stable ? { latest: stable } : { error: `npm view ${dependency.package} reported no stable release` });
       continue;
     }
