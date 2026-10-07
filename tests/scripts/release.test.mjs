@@ -305,9 +305,10 @@ test('the assets are npm tarballs and Composer zips only, and a Rust crate is co
   assert.doesNotMatch(source, /\.crate/);
 });
 
-test('the released versions pass the version check', () => {
-  assert.equal(release.versions(ROOT, 'v0.0.1'), '0.0.1');
-  assert.equal(release.versions(ROOT, 'packages/template-go/v0.0.1'), '0.0.1');
+test('the version of the tree passes the version check', () => {
+  const { version } = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  assert.equal(release.versions(ROOT, `v${version}`), version);
+  assert.equal(release.versions(ROOT, `packages/template-go/v${version}`), version);
 });
 
 test('make runs each step with the tag of the environment and fails without it', () => {

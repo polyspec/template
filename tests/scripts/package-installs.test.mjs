@@ -30,10 +30,13 @@ const env = Object.fromEntries(['GOPROXY', 'GOSUMDB', 'GONOSUMDB', 'GOTOOLCHAIN'
 const files = { 'go.mod': file('go.mod'), 'Cargo.toml': file('Cargo.toml'), 'Cargo.lock': file('Cargo.lock'), 'rust-toolchain.toml': file('rust-toolchain.toml'), 'composer.json': file('composer.json') };
 fs.appendFileSync(process.env.STUB_LOG, JSON.stringify({ name, args, cwd: process.cwd(), env, files }) + '\\n');
 if (name === 'npm' && args[0] === 'pack') {
+  // npm names the archive after the name and the version of the packed package.
   const destination = args[args.indexOf('--pack-destination') + 1];
-  fs.writeFileSync(path.join(destination, 'polyspec-template-0.0.1.tgz'), '');
+  const packed = JSON.parse(fs.readFileSync(path.join(args[1], 'package.json'), 'utf8'));
+  const archive = packed.name.replace(/^@/, '').replace('/', '-') + '-' + packed.version + '.tgz';
+  fs.writeFileSync(path.join(destination, archive), '');
   // npm may print notices after the name of the archive; the check computes the name (T19.11).
-  process.stdout.write('polyspec-template-0.0.1.tgz\\nnpm notice New minor version of npm available\\n');
+  process.stdout.write(archive + '\\nnpm notice New minor version of npm available\\n');
 }
 if (name === 'npm' && args[0] === 'install' && !fs.existsSync(args.at(-1))) {
   process.stderr.write('npm error enoent ' + args.at(-1) + '\\n');
@@ -41,11 +44,14 @@ if (name === 'npm' && args[0] === 'install' && !fs.existsSync(args.at(-1))) {
 }
 if (name === 'go' && args[0] === 'env') process.stdout.write('go1.0.0\\n');
 if (name === 'cargo' && args[0] === 'package') {
+  // cargo names the package after the name and the version of the [package] section of the manifest.
   const target = path.join(process.env.CARGO_TARGET_DIR, 'package');
-  const source = path.join(target, 'polyspec-template-0.0.1');
+  const manifest = fs.readFileSync(args[args.indexOf('--manifest-path') + 1], 'utf8');
+  const crate = /^name\\s*=\\s*"([^"]+)"/m.exec(manifest)[1] + '-' + /^version\\s*=\\s*"([^"]+)"/m.exec(manifest)[1];
+  const source = path.join(target, crate);
   fs.mkdirSync(source, { recursive: true });
   fs.writeFileSync(path.join(source, 'Cargo.toml'), '');
-  execFileSync('tar', ['-czf', path.join(target, 'polyspec-template-0.0.1.crate'), '-C', target, 'polyspec-template-0.0.1']);
+  execFileSync('tar', ['-czf', path.join(target, crate + '.crate'), '-C', target, crate]);
 }
 `;
 

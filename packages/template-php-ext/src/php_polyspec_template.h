@@ -5,7 +5,7 @@
 extern zend_module_entry polyspec_template_module_entry;
 #define phpext_polyspec_template_ptr &polyspec_template_module_entry
 
-#define PHP_POLYSPEC_TEMPLATE_VERSION "0.0.1"
+#define PHP_POLYSPEC_TEMPLATE_VERSION "0.0.2"
 
 #if defined(ZTS) && defined(COMPILE_DL_POLYSPEC_TEMPLATE)
 ZEND_TSRMLS_CACHE_EXTERN()
