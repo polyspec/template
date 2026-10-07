@@ -172,7 +172,7 @@ Dependencies: none. Every change reaches `main` through the merge queue with the
 | W19 | none | T19.1 → T19.15 in order; T19.6-1 after T19.11; T19.8-1 after T19.15 |
 | W20 | T20.1, T20.2, T20.3 | T20.3-1 after T20.3; T20.1-1 after T20.3-1; T20.1-2 after T20.1-1; T20.1-3 after T20.1-2; T20.1-4 after T20.1-3; T20.1-5 after T20.1-4; T20.1-6 after T20.1-5; T20.1-7 after T20.1-6; T20.1-8 after T20.1-7; T20.1-9 after T20.1-8; T20.1-10 after T20.1-9; T20.1-11 after T20.1-10; T20.1-12 after T20.1-11; T20.1-13 after T20.1-12 |
 | W21 | none | T21.1 → T21.2 → T21.3 → T21.4 → T21.4-1 → T21.4-2 |
-| W22 | none | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 → T22.2 → T22.2-1 → T22.2-2 → T22.2-3 → T22.3 → T22.3-1 |
+| W22 | none | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 → T22.2 → T22.2-1 → T22.2-2 → T22.2-3 → T22.3 → T22.3-1 → T22.3-2 |
 
 ## Definition of done
 

@@ -288,6 +288,24 @@ export function treeManifestProblems(root) {
 }
 
 /**
+ * Pack the archive of every package of PACKAGES for the tag into target: `npm pack` of the built package and `git archive`
+ * of the directory of a Composer package at the commit. git archive of a tree writes the current time into a zip; the
+ * time of the commit makes the zip reproducible. The names of the archives.
+ */
+export function packArchives(root, commit, tag, target) {
+  const names = assetNames(tag);
+  const time = run('git', ['show', '-s', '--format=%ct', commit], root).trim();
+  PACKAGES.forEach(([kind, directoryOfPackage], index) => {
+    if (kind === 'npm') {
+      run('npm', ['pack', '--pack-destination', target], path.join(root, directoryOfPackage));
+    } else {
+      run('git', ['archive', '--format=zip', `--mtime=@${time}`, `--output=${path.join(target, names[index])}`, `${commit}:${directoryOfPackage}`], root);
+    }
+  });
+  return names;
+}
+
+/**
  * Build the archive of every package of the tag into ASSETS and check with checkAssets that each installs outside the
  * repository: the names of the archives.
  */
@@ -298,17 +316,7 @@ export function assets(root, tag) {
   mkdirSync(target, { recursive: true });
   if (directory !== null) return [];
   const commit = taggedCommit(root, tag);
-  const names = assetNames(tag);
-  // git archive of a tree writes the current time into a zip; the time of the tagged commit makes the zip reproducible.
-  const time = run('git', ['show', '-s', '--format=%ct', commit], root).trim();
-  PACKAGES.forEach(([kind, directoryOfPackage], index) => {
-    const expected = path.join(target, names[index]);
-    if (kind === 'npm') {
-      run('npm', ['pack', '--pack-destination', target], path.join(root, directoryOfPackage));
-    } else {
-      run('git', ['archive', '--format=zip', `--mtime=@${time}`, `--output=${expected}`, `${commit}:${directoryOfPackage}`], root);
-    }
-  });
+  const names = packArchives(root, commit, tag, target);
   const present = readdirSync(target).sort();
   if (JSON.stringify(present) !== JSON.stringify([...names].sort())) {
     throw new Stop(`${ASSETS} holds [${present.join(', ')}], not the archives [${[...names].sort().join(', ')}]`);

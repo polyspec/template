@@ -12,7 +12,7 @@
             "dist": {
                 "type": "zip",
                 "url": "artifacts/polyspec-template-0.0.3.zip",
-                "shasum": "4065dfdebf8dd6a48174b0aa26a6e5e75a8a93ac"
+                "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
