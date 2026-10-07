@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Updated `@codemirror/language` to 6.13.1 (T22.3-6). 6.13.1 declares `@codemirror/streamparser`, which 6.13.0 imported without declaring it, so `config/dependency-policy.json` no longer keeps 6.12.4 with an exception; `make dependency-review UPDATE=1 RECORD=1` updated `package.json` and `package-lock.json` and recorded the review, and `make showcase` compiled the committed artifacts again for the lock.
+
 ## 0.0.4
 
 - Released 0.0.4 (T22.3-5). Every manifest of `MANIFESTS` of `scripts/release.mjs`, `@polyspec/template-compiler` included, the `version` of each `composer.json`, the dependencies between the npm packages, the version of the C extension, the locks and the consumer projects of `tests/fixtures/release-consumer` declare `0.0.4`; `make showcase` compiled the committed artifacts again for the compiler digest of 0.0.4, `make release-consumer-lock` wrote the locks of the consumer projects and `make dependency-review RECORD=1` recorded the changed locks.

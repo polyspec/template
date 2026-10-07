@@ -212,7 +212,7 @@ test('the gate fails on a stale Composer lock without a registry', (t) => {
 test('the review reports newer stable releases and advisories with the fix command', (t) => {
   const stub = registries(t);
   const root = fixture(t);
-  const data = currentRegistry(root, { 'npm:eslint': '99.0.0', 'npm:esbuild': '0.99.0', 'npm:typescript': '99.0.0', 'npm:@codemirror/language': '6.99.0', 'composer:template-php:phpunit/phpunit': '11.99.0' });
+  const data = currentRegistry(root, { 'npm:eslint': '99.0.0', 'npm:esbuild': '0.99.0', 'npm:typescript': '99.0.0', 'composer:template-php:phpunit/phpunit': '11.99.0' });
   data.npm.vitest.push('99.0.0-beta.1');
   data.composerAudit = { 'template-php-ext': { advisories: { 'phpunit/phpunit': [{ advisoryId: 'PKSA-test-0002', title: 'Test advisory', link: 'https://example.invalid/PKSA-test-0002', severity: 'medium', cve: null }] }, abandoned: [] } };
   stub.registry(data);
@@ -226,7 +226,7 @@ test('the review reports newer stable releases and advisories with the fix comma
   assert.match(result.stdout, /^\[dependency-review\] package\.json @types\/vscode \S+: the exception of config\/dependency-policy\.json is stale, \S+ is the latest stable release\. Fix: remove the exception from config\/dependency-policy\.json\.$/m);
   assert.match(result.stdout, /^\[dependency-review\] 4 findings$/m);
 
-  stub.registry(currentRegistry(root, { 'npm:esbuild': '0.99.0', 'npm:typescript': '99.0.0', 'npm:@types/vscode': '1.999.0', 'npm:@codemirror/language': '6.99.0' }));
+  stub.registry(currentRegistry(root, { 'npm:esbuild': '0.99.0', 'npm:typescript': '99.0.0', 'npm:@types/vscode': '1.999.0' }));
   const current = run(REVIEW, ['--root', root], stub.env);
   assert.equal(current.status, 0, current.stdout + current.stderr);
   assert.match(current.stdout, /^\[dependency-review\] no newer stable release without an exception and no advisory$/m);
@@ -236,7 +236,7 @@ test('the review records what it reviewed, and the gate accepts the record witho
   const stub = registries(t);
   const root = fixture(t);
   rmSync(path.join(root, 'config/dependency-review.json'));
-  const data = currentRegistry(root, { 'npm:esbuild': '0.99.0', 'npm:typescript': '99.0.0', 'npm:@types/vscode': '1.999.0', 'npm:@codemirror/language': '6.99.0' });
+  const data = currentRegistry(root, { 'npm:esbuild': '0.99.0', 'npm:typescript': '99.0.0', 'npm:@types/vscode': '1.999.0' });
   stub.registry(data);
   const recorded = run(REVIEW, ['--root', root, '--record'], stub.env);
   assert.equal(recorded.status, 0, recorded.stdout + recorded.stderr);

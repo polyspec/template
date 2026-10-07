@@ -28,7 +28,7 @@
   "devDependencies": {
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-html": "^6.4.12",
-    "@codemirror/language": "^6.12.4",
+    "@codemirror/language": "^6.13.1",
     "@codemirror/lint": "^6.9.7",
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.14",

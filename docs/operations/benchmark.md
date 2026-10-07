@@ -24,14 +24,14 @@ The current 21-sample run produced these medians:
 <!-- benchmark-results:start -->
 | Language | Mode | Cold process | Full render | Prepared render | Persistent RSS |
 | --- | --- | ---: | ---: | ---: | ---: |
-| TypeScript | AST | 83.69 ms | 0.0056 ms | 0.0017 ms | 90.59 MiB |
-| TypeScript | generated | 87.18 ms | 0.0053 ms | 0.0009 ms | 88.88 MiB |
-| Go | AST | 4.40 ms | 0.0025 ms | 0.0013 ms | 11.27 MiB |
-| Go | generated | 4.20 ms | 0.0034 ms | 0.0007 ms | 10.61 MiB |
-| Rust | AST | 3.53 ms | 0.0051 ms | 0.0024 ms | 2.73 MiB |
-| Rust | generated | 3.35 ms | 0.0043 ms | 0.0018 ms | 2.38 MiB |
-| Php | AST | 58.83 ms | 0.0146 ms | 0.0090 ms | 28.03 MiB |
-| Php | generated | 58.72 ms | 0.0122 ms | 0.0043 ms | 28.25 MiB |
+| TypeScript | AST | 83.45 ms | 0.0057 ms | 0.0017 ms | 91.06 MiB |
+| TypeScript | generated | 86.18 ms | 0.0054 ms | 0.0009 ms | 89.47 MiB |
+| Go | AST | 4.98 ms | 0.0026 ms | 0.0014 ms | 11.25 MiB |
+| Go | generated | 4.55 ms | 0.0034 ms | 0.0007 ms | 10.69 MiB |
+| Rust | AST | 3.64 ms | 0.0051 ms | 0.0024 ms | 2.73 MiB |
+| Rust | generated | 3.79 ms | 0.0043 ms | 0.0018 ms | 2.38 MiB |
+| Php | AST | 59.69 ms | 0.0144 ms | 0.0088 ms | 28.03 MiB |
+| Php | generated | 64.81 ms | 0.0119 ms | 0.0043 ms | 28.27 MiB |
 <!-- benchmark-results:end -->
 
 Generated mode improves prepared rendering in all four implementations. Go and Rust show that request binding can dominate a very small page: Go generated full render is slower than AST even though its prepared renderer is faster, while Rust is approximately equal at full-render scale. Keep both measurements when choosing a mode; a prepared-render number alone does not describe complete request cost.
