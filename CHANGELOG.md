@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Kept the release notes within the limit of GitHub (T22.2-2). GitHub refuses a release body over 125000 characters, and `make release-publish` passed the whole section `## X.Y.Z` of `CHANGELOG.md`; a section over `NOTES_LIMIT` (125000 characters) of `scripts/release.mjs` is replaced by one line that links the section of `CHANGELOG.md` at the tag, and a section at the limit stays whole. `tests/scripts/release.test.mjs` checks both and the link of a Go tag.
+
 ## 0.0.2
 
 - Compiled the committed artifacts and reviewed the dependencies again for 0.0.2 (T22.2-1). The compiler digest covers the version of `packages/template-ts`, so `make showcase` compiled the AST and JavaScript manifests again; the review record names the sha256 of `package-lock.json`, so `make dependency-review UPDATE=1` raised `typescript-eslint` to 8.71.1 and `source-map-js` to 1.2.2, which fixes advisory GHSA-68fv-2mgg-jv7q, and recorded the review. `scripts/dependency-review.mjs` read `npm view --json` as one object, and npm 12 prints several fields as an array of one object, so every npm dependency failed with no stable release; the review reads both forms, and the npm stub of `tests/scripts/dependency-policy.test.mjs` answers in the form of npm 12. The gate test changes the version of `packages/template-lsp` to a version that differs from the tree.

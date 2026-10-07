@@ -327,3 +327,21 @@ test('make runs each step with the tag of the environment and fails without it',
   assert.deepEqual(prerequisites('v0.0.1'), npmBuilds, 'a tag vX.Y.Z builds the npm packages before their archives');
   assert.deepEqual(prerequisites('packages/template-go/v0.0.1'), [], 'a Go module tag builds nothing');
 });
+
+test('a section over the limit of GitHub becomes a link to the changelog, and a section at the limit stays whole', t => {
+  assert.equal(release.NOTES_LIMIT, 125000);
+  const link = 'The changes of 0.0.1 are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/v0.0.1/CHANGELOG.md#001).\n';
+  const entry = '- é\n';
+  const atLimit = entry.repeat(release.NOTES_LIMIT / [...entry].length);
+  assert.equal([...atLimit].length, release.NOTES_LIMIT);
+  assert.equal(release.releaseNotes('v0.0.1', '0.0.1', atLimit), atLimit);
+  assert.equal(release.releaseNotes('v0.0.1', '0.0.1', `${atLimit}x`), link);
+  assert.equal(release.releaseNotes('packages/template-go/v1.2.3', '1.2.3', `${atLimit}x`),
+    'The changes of 1.2.3 are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/packages/template-go/v1.2.3/CHANGELOG.md#123).\n');
+
+  const box = sandbox(t, { changelog: CHANGELOG.replace('- The second entry of 0.0.1.\n', `- The second entry of 0.0.1.\n${atLimit}`) });
+  const tag = box.tag('v0.0.1');
+  release.assets(box.root, tag);
+  release.publish(box.root, tag);
+  assert.equal(box.recorded().notes, link);
+});
