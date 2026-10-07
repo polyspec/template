@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
-      # The toolchains of the job release of ci.yml: make install installs npm, Go, the npm dependencies, the Rust
+      # The toolchains of the suite: make install installs npm, Go, the npm dependencies, the Rust
       # toolchain, the Composer packages and the crates, as for every job of ci.yml.
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
