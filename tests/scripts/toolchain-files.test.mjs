@@ -275,10 +275,18 @@ test('a new push to a pull request cancels the running CI of its workflow and re
   }
 });
 
-test('CI runs on every pull request and merge group, and the push gate also on the pushed branches outside the queue (T17.1-7)', () => {
-  assert.match(read('.github/workflows/ci.yml'), /\non:\n {2}pull_request:\n {2}merge_group:\n\n/);
-  assert.match(read('.github/workflows/push-gate.yml'), /\non:\n {2}push:\n {4}branches-ignore: \['gh-readonly-queue\/\*\*'\]\n {2}pull_request:\n {2}merge_group:\n\n/);
-  assert.match(read('.github/workflows/pages.yml'), /\non:\n {2}push:\n {4}branches: \[main\]\n\n/);
+test('each workflow declares exactly its triggers: CI on every pull request, merge group and manual run, the push gate also on the pushed branches outside the queue, the site on main (T17.1-7, T17.1-9)', () => {
+  const triggers = {
+    '.github/workflows/ci.yml': 'on:\n  pull_request:\n  merge_group:\n  workflow_dispatch:\n',
+    '.github/workflows/push-gate.yml': "on:\n  push:\n    branches-ignore: ['gh-readonly-queue/**']\n  pull_request:\n  merge_group:\n",
+    '.github/workflows/pages.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
+    '.github/workflows/dependency-review.yml': "on:\n  schedule:\n    - cron: '17 3 * * *'\n  workflow_dispatch:\n",
+  };
+  assert.deepEqual([...WORKFLOWS].sort(), Object.keys(triggers).sort());
+  for (const [file, block] of Object.entries(triggers)) {
+    const [, declared = ''] = /\n(on:\n(?: .*\n)+)/.exec(`\n${read(file)}`) ?? [];
+    assert.equal(declared, block, `${file} declares other triggers`);
+  }
 });
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {

@@ -5,7 +5,8 @@
 # job uploads its report under `!cancelled()`, the release job also its record var/full-run.json (T20.1-9). A verifying
 # job runs every step after a failing step (`!cancelled()`). Every job runs on ubuntu-24.04, pins its actions by commit
 # and installs with `make install`, which installs the npm and Go of the checkout into var/tools with the Go of setup-go
-# (T19.2). The workflow runs on every pull request and every merge group of the merge queue: the ruleset main of
+# (T19.2). The workflow runs on every pull request, every merge group of the merge queue and every manual run
+# (workflow_dispatch, T17.1-9): the ruleset main of
 # .github/ruleset.json requires every job, and the queue moves main to the merge group commit only after they passed on
 # it, so the run of the merge group is the evidence of the commit that main receives (T17.1-7). A new push to a pull
 # request cancels the run of its previous push; a merge group has a ref of its own, and its run is never cancelled.
@@ -14,6 +15,7 @@ name: CI
 on:
   pull_request:
   merge_group:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

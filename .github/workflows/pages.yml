@@ -1,5 +1,6 @@
 # The documentation site of main (T17.1-7). The merge queue moves main to a commit only after CI passed on its merge
-# group, so this workflow builds and publishes the site of every commit that main receives. It publishes, so it stops
+# group, so this workflow builds and publishes the site of every commit that main receives, and also on a manual run
+# (workflow_dispatch, T17.1-9); it runs on no pull request and no merge group. It publishes, so it stops
 # at its first failure; it pins its actions by commit and runs on ubuntu-24.04. A newer commit of main does not cancel
 # the deployment of the previous one.
 name: Pages
@@ -7,6 +8,7 @@ name: Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
