@@ -1,5 +1,6 @@
 # Changelog
 
+- Declared the triggers of each workflow exactly (T17.1-9). `ci.yml` runs on every pull request, merge group and manual run (`workflow_dispatch`), and `pages.yml` deploys the documentation site on a push to `main` and on a manual run.
 - Published every change through a pull request and the merge queue (T17.1-7).
 - Caught stale compiled artifacts before `main` (T17.1-6). The AST compiler digest is computed from the tracked sources of `packages/template-ts` instead of its build, and `make artifact-digest-check` fails, naming each manifest and `make showcase`, when a committed artifact records the digest of another compiler; the job `push-gate` and `showcase-check` run it. The 30 artifacts and the page are compiled again for the new digest.
 - Regenerated the showcase artifacts after T8.5-1 (T8.5-2). The AST artifact manifests record a digest of the template-ts build, which T8.5-1 changed, so the release job found `examples/site/index.html` stale; the five manifests and the page are written again, and only the digests change.
