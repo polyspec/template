@@ -6,7 +6,7 @@
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "69a6c7c5576ff1ee496b097920039ae5952320c0583a9c8e5aa55f454be3067f",
-  "compilerDigest": "b20c98af85edbaef17bae26a28f558e2ed800f79f94d1696bf29720bf99e5880",
+  "compilerDigest": "13b53103319090f26019276db8ad6c104b53f4536cfe6d6881eda3b93c1199ad",
   "files": {
     "scope-precedence.js": {
       "path": "scope-precedence.js",
