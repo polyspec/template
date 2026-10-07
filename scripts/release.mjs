@@ -18,7 +18,7 @@
 // manifest of MANIFESTS and requires the section `## X.Y.Z` in CHANGELOG.md; for a Go tag it requires the module path of the go.mod of the
 // directory. `assets` builds one archive per package, named `<package name>-<version>.<ext>` with `@scope/` written as
 // `scope-` and `vendor/` as `vendor-`: `npm pack` (.tgz) of a built package and a zip of the directory of a Composer
-// package from `git archive` of the tagged commit (.zip). Each archive carries the manifest of its package unchanged; a
+// package from `git archive` of the tagged commit at the time of the commit (.zip). Each archive carries the manifest of its package unchanged; a
 // consumer downloads the archives and installs them together, so `checkAssets` fails unless every packed manifest equals
 // its manifest at the tagged commit, names each polyspec dependency by its name and exact version and, for Composer,
 // declares the version of the tag and no `repositories`. The Rust crate is not released as an archive; it is consumed by
@@ -74,6 +74,8 @@ export const NOT_RELEASED = {
   'packages/template-vscode/tests/integration/harness/package.json': 'the harness of the VS Code integration test',
   'tools/showcase/adapters/rust/Cargo.toml': 'the Rust adapter of the showcase',
   'tools/showcase/adapters/go/go.mod': 'the Go adapter of the showcase, a module local to the repository',
+  'tests/fixtures/release-consumer/npm/package.json': 'the npm consumer project of the install test of the release assets',
+  'tests/fixtures/release-consumer/composer/composer.json': 'the Composer consumer project of the install test of the release assets',
 };
 // The Go modules: a tag <directory>/vX.Y.Z releases the module of that directory.
 export const GO_MODULES = { 'packages/template-go': 'github.com/polyspec/template/packages/template-go' };
@@ -297,12 +299,14 @@ export function assets(root, tag) {
   if (directory !== null) return [];
   const commit = taggedCommit(root, tag);
   const names = assetNames(tag);
+  // git archive of a tree writes the current time into a zip; the time of the tagged commit makes the zip reproducible.
+  const time = run('git', ['show', '-s', '--format=%ct', commit], root).trim();
   PACKAGES.forEach(([kind, directoryOfPackage], index) => {
     const expected = path.join(target, names[index]);
     if (kind === 'npm') {
       run('npm', ['pack', '--pack-destination', target], path.join(root, directoryOfPackage));
     } else {
-      run('git', ['archive', '--format=zip', `--output=${expected}`, `${commit}:${directoryOfPackage}`], root);
+      run('git', ['archive', '--format=zip', `--mtime=@${time}`, `--output=${expected}`, `${commit}:${directoryOfPackage}`], root);
     }
   });
   const present = readdirSync(target).sort();

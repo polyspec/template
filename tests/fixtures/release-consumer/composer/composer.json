@@ -1,0 +1,11 @@
+{
+    "name": "polyspec/release-consumer",
+    "type": "project",
+    "repositories": [
+        { "type": "artifact", "url": "artifacts" },
+        { "packagist.org": false }
+    ],
+    "require": {
+        "polyspec/template": "0.0.3"
+    }
+}
