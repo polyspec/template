@@ -49,6 +49,8 @@ jobs:
           tools: composer:2.10.3
       - run: make install
         if: ${{ !cancelled() }}
+      - run: make install-browsers
+        if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="test-scripts install-check dependency-audit language-test-matrix function-contract-check function-inventory-check feature-check benchmark-check lint-go lint-rust"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
