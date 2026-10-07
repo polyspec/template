@@ -18,12 +18,14 @@
 // manifest of MANIFESTS (a composer.json without a `version` field takes its version from the tag, as Composer does) and
 // requires the section `## X.Y.Z` in CHANGELOG.md; for a Go tag it requires the module path of the go.mod of the
 // directory. `assets` builds one archive per package, named `<package name>-<version>.<ext>` with `@scope/` written as
-// `scope-` and `vendor/` as `vendor-`: `npm pack` (.tgz) of a built package, a zip of the directory of a Composer package
-// from `git archive` of the tagged commit (.zip) and `cargo package --no-verify --locked` (.crate). `publish` runs `gh
-// release create TAG --verify-tag --title TAG --notes-file <the section X.Y.Z>` with the archives of `assets`. Each
-// failure names the tag, the file or check and both values, and exits with status 1.
+// `scope-` and `vendor/` as `vendor-`: `npm pack` (.tgz) of a built package and a zip of the directory of a Composer
+// package from `git archive` of the tagged commit (.zip). The Rust crate is not released as an archive; it is consumed by
+// git tag, because `cargo package` rewrites git dependencies into crates.io requirements that do not resolve. A Go tag
+// builds and attaches nothing. `publish` runs `gh release create TAG --verify-tag --title TAG --notes-file <the section
+// X.Y.Z>` with the archives of `assets`. Each failure names the tag, the file or check and both values, and exits with
+// status 1.
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,7 +35,8 @@ export const MAIN = 'origin/main';
 export const CHECKS = ['push-gate', 'ci-passed'];
 export const CHANGELOG = 'CHANGELOG.md';
 export const ASSETS = 'var/release/assets';
-// The packages that a tag vX.Y.Z releases, one archive each: [kind, directory, package name].
+// The packages that a tag vX.Y.Z releases as archives, one archive each: [kind, directory, package name]. The release
+// assets are npm tarballs and Composer zips only.
 export const PACKAGES = [
   ['npm', 'packages/template-ts', '@polyspec/template'],
   ['npm', 'packages/template-language', '@polyspec/template-language'],
@@ -41,21 +44,25 @@ export const PACKAGES = [
   ['npm', 'packages/template-codemirror', '@polyspec/template-codemirror'],
   ['composer', 'packages/template-php', 'polyspec/template'],
   ['composer', 'packages/template-php-ext', 'polyspec/template-php-ext'],
-  ['cargo', 'packages/template-rust', 'polyspec-template'],
 ];
-// The manifests whose version a tag vX.Y.Z sets: those of the packages, the workspace of the repository root and the VS
-// Code extension, which are released together with them.
-export const MANIFESTS = [
-  'package.json',
-  'packages/template-ts/package.json',
-  'packages/template-language/package.json',
-  'packages/template-lsp/package.json',
-  'packages/template-codemirror/package.json',
-  'packages/template-vscode/package.json',
-  'packages/template-php/composer.json',
-  'packages/template-php-ext/composer.json',
-  'packages/template-rust/Cargo.toml',
-];
+export const ARCHIVE = 'released as an archive';
+export const VERSION_ONLY = 'carries the version of the release without an archive';
+export const GIT_TAG = 'not released as an archive; consumed by git tag';
+// The manifests whose version a tag vX.Y.Z sets, each with how the tag releases it: the archive of its package; the
+// workspace of the repository root and the VS Code extension, which carry the version without an archive; and the Rust
+// crate, which is consumed by git tag because `cargo package` rewrites git dependencies into crates.io requirements that
+// do not resolve.
+export const MANIFESTS = {
+  'package.json': VERSION_ONLY,
+  'packages/template-ts/package.json': ARCHIVE,
+  'packages/template-language/package.json': ARCHIVE,
+  'packages/template-lsp/package.json': ARCHIVE,
+  'packages/template-codemirror/package.json': ARCHIVE,
+  'packages/template-vscode/package.json': VERSION_ONLY,
+  'packages/template-php/composer.json': ARCHIVE,
+  'packages/template-php-ext/composer.json': ARCHIVE,
+  'packages/template-rust/Cargo.toml': GIT_TAG,
+};
 // The tracked manifests that no tag releases, with the reason.
 export const NOT_RELEASED = {
   'packages/template-vscode/tests/integration/harness/package.json': 'the harness of the VS Code integration test',
@@ -158,7 +165,7 @@ export function versions(root, tag) {
   const [directory, version] = parseTag(tag);
   const problems = [];
   if (directory === null) {
-    for (const name of MANIFESTS) {
+    for (const name of Object.keys(MANIFESTS)) {
       const declared = manifestVersion(path.join(root, name));
       if (declared !== null && declared !== version) problems.push(`${name}: version ${declared}, the tag ${tag} is ${version}`);
     }
@@ -184,7 +191,7 @@ export function assetName(name, version, extension) {
 export function assetNames(tag) {
   const [directory, version] = parseTag(tag);
   if (directory !== null) return [];
-  const extensions = { npm: 'tgz', composer: 'zip', cargo: 'crate' };
+  const extensions = { npm: 'tgz', composer: 'zip' };
   return PACKAGES.map(([kind, , name]) => assetName(name, version, extensions[kind]));
 }
 
@@ -201,21 +208,8 @@ export function assets(root, tag) {
     const expected = names[index];
     if (kind === 'npm') {
       run('npm', ['pack', '--pack-destination', target], path.join(root, directoryOfPackage));
-    } else if (kind === 'composer') {
-      run('git', ['archive', '--format=zip', `--output=${path.join(target, expected)}`, `${commit}:${directoryOfPackage}`], root);
     } else {
-      const build = mkdtempSync(path.join(tmpdir(), 'template-release-cargo-'));
-      try {
-        run('cargo', ['package', '--no-verify', '--locked'], path.join(root, directoryOfPackage), { ...process.env, CARGO_TARGET_DIR: build });
-        const built = path.join(build, 'package', expected);
-        if (!existsSync(built)) {
-          const found = existsSync(path.join(build, 'package')) ? readdirSync(path.join(build, 'package')).filter(name => name.endsWith('.crate')).sort() : [];
-          throw new Stop(`cargo package in ${directoryOfPackage} wrote [${found.join(', ')}], not ${expected}`);
-        }
-        copyFileSync(built, path.join(target, expected));
-      } finally {
-        rmSync(build, { recursive: true, force: true });
-      }
+      run('git', ['archive', '--format=zip', `--output=${path.join(target, expected)}`, `${commit}:${directoryOfPackage}`], root);
     }
   });
   const present = readdirSync(target).sort();

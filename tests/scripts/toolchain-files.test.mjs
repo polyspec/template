@@ -15,7 +15,8 @@
 // - the last job of ci.yml is ci-passed, the check of ci.yml that the ruleset main requires: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
-// - release.yml runs on the push of a tag vX.Y.Z or <directory>/vX.Y.Z with the permission contents: write, in one job
+// - release.yml runs on the push of a tag vX.Y.Z or <directory>/vX.Y.Z at any depth (**/v*: in a tag filter * does not
+//   match /, T22.1-5) with the permission contents: write, in one job
 //   release with the tag in its environment, the whole history checked out and the release steps last and in order
 //   (T22.1-4); it is not the job release of ci.yml.
 // make itself is not pinned: the recipes use no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1
@@ -360,13 +361,15 @@ test('each workflow declares exactly its triggers: CI on every pull request, mer
     '.github/workflows/push-gate.yml': "on:\n  push:\n    branches-ignore: ['gh-readonly-queue/**']\n  pull_request:\n  merge_group:\n",
     '.github/workflows/pages.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
     '.github/workflows/dependency-review.yml': "on:\n  schedule:\n    - cron: '17 3 * * *'\n  workflow_dispatch:\n",
-    '.github/workflows/release.yml': "on:\n  push:\n    tags: ['v*', '*/v*']\n",
+    '.github/workflows/release.yml': "on:\n  push:\n    tags: ['v*', '**/v*']\n",
   };
   assert.deepEqual([...WORKFLOWS].sort(), Object.keys(triggers).sort());
   for (const [file, block] of Object.entries(triggers)) {
     const [, declared = ''] = /\n(on:\n(?: .*\n)+)/.exec(`\n${read(file)}`) ?? [];
     assert.equal(declared, block, `${file} declares other triggers`);
   }
+  // In a tag filter * does not match /, so */v* misses the Go module tag packages/template-go/vX.Y.Z (T22.1-5).
+  assert.doesNotMatch(read('.github/workflows/release.yml'), /'\*\/v\*'/, 'release.yml uses */v*, which misses a Go module tag of two levels');
 });
 
 test('ci-passed is the last job of ci.yml, runs always, needs every other job and runs make ci-passed (T22.1-3)', () => {
