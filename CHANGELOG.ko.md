@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- `@codemirror/language`를 6.13.1로 올렸다(T22.3-6). 6.13.1은 6.13.0이 선언하지 않고 import한 `@codemirror/streamparser`를 선언하므로, `config/dependency-policy.json`은 더 이상 exception으로 6.12.4를 유지하지 않는다. `make dependency-review UPDATE=1 RECORD=1`이 `package.json`과 `package-lock.json`을 올리고 review를 기록했으며, `make showcase`가 lock에 맞춰 commit된 artifact를 다시 compile했다.
+
 ## 0.0.4
 
 - 0.0.4를 릴리스했다(T22.3-5). `@polyspec/template-compiler`를 포함한 `scripts/release.mjs`의 `MANIFESTS`의 모든 manifest, 각 `composer.json`의 `version`, npm 패키지 사이의 의존성, C extension의 버전, lock, `tests/fixtures/release-consumer`의 consumer project가 `0.0.4`를 선언한다. `make showcase`가 0.0.4의 compiler digest로 commit된 artifact를 다시 compile했고, `make release-consumer-lock`이 consumer project의 lock을 썼으며, `make dependency-review RECORD=1`이 바뀐 lock을 기록했다.
