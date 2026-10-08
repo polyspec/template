@@ -5,6 +5,7 @@
 ## Unreleased
 
 - The language test matrix in `contracts/features.json` lists the four languages that `scripts/check-language-test-matrix.mjs` requires; Python joins it when the CI merge-group run of T22.4-7 passes (T22.4-13).
+- Declared the `py.typed` marker of `polyspec.template` under its package name in `packages/template-python/pyproject.toml`; the key `template` named no package under `src`. `tests/test_package_data.py` checks every package-data key and runs in `make test-python` (T22.4-14).
 - `tests/scripts/toolchain-files.test.mjs` fails when the `python` job matrix of `ci.yml` omits 3.11 or the minor of `.python-version` (T22.4-12).
 - Reformatted the Python package unit test file `packages/template-python/tests/test_api.py` with no change to its statements (T22.4-11).
 - `polyspec.template.__all__` exports `ParseOptions`, `analyze` and `analyze_prefix`, lists `PreparedRender` once, and exports every name that the documents import (T22.4-10).
