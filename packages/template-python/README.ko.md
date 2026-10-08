@@ -6,11 +6,13 @@ template 언어의 Python 구현: lexer, parser, renderer, 내장 함수, 명령
 
 ## 설치
 
-이 저장소의 tag에서 설치합니다:
+이 저장소의 tag에서 설치합니다. `vX.Y.Z`를 `packages/template-python`을 담은 첫 release tag로 바꿉니다:
 
 ```sh
-pip install "polyspec-template @ git+https://github.com/polyspec/template@v0.0.4#subdirectory=packages/template-python"
+pip install "polyspec-template @ git+https://github.com/polyspec/template@vX.Y.Z#subdirectory=packages/template-python"
 ```
+
+이 package를 담은 release tag는 아직 없습니다. 이 저장소의 체크아웃에서는 `pip install ./packages/template-python`으로 설치합니다.
 
 ## 렌더링
 

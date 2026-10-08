@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- Documented the Python package in `README.md`, `docs/guide.md` and the package README (T22.4-6). The
+  README lists Python among the implementations, the guide gives a render example that uses the
+  names of `polyspec.template`, and the package README names `vX.Y.Z` as the install tag until a
+  release tag contains `packages/template-python`.
 - Added a Python implementation (T22.4). `packages/template-python` holds the engine, the built-in
   functions and the command line interface as the package `polyspec-template` under the import name
   `polyspec.template`; the conformance and parity runners, the delimiter matrix, the function
