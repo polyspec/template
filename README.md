@@ -2,7 +2,7 @@
 
 [한국어](README.ko.md).
 
-Template is a template language defined by one specification. Implementations in TypeScript, Go, Rust and PHP are included, with a native PHP extension for the same engine. Each implementation renders a template from its AST, and the typed compiler turns templates into generated programs in the four languages that render the same output. Current status is in [Feature status](docs/features.md).
+Template is a template language defined by one specification. Implementations in TypeScript, Go, Rust, PHP and Python are included, with a native PHP extension for the same engine. Each implementation renders a template from its AST, and the typed compiler turns templates into generated programs in the five languages that render the same output. Current status is in [Feature status](docs/features.md).
 
 A template consists of text and tags. A tag starts with `{` followed by one of the symbols `= @ ? :? : / + # ?# * %`, or with `{` followed by an assignment. Any other `{` is text.
 

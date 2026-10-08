@@ -335,7 +335,17 @@ options.define.insert("content".to_string(), DefineInput { template: Some("pages
 let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 ```
 
-전체 API는 각 패키지 문서에 있다: [TypeScript](https://github.com/polyspec/template/tree/main/packages/template-ts), [Go](https://github.com/polyspec/template/tree/main/packages/template-go), [Rust](https://github.com/polyspec/template/tree/main/packages/template-rust), [PHP](https://github.com/polyspec/template/tree/main/packages/template-php).
+```python
+from polyspec.template import AstProgram, Engine, EngineOptions, FsLoader, RenderOptions
+
+engine = Engine(AstProgram(EngineOptions(loader=FsLoader('templates'))))
+html = engine.render('layout', assign, RenderOptions(
+    define={'layout': 'page.tpl', 'content': 'pages/list.tpl'},
+    env={'timezone': '+09:00', 'now': 1789084800},
+))
+```
+
+전체 API는 각 패키지 문서에 있다: [TypeScript](https://github.com/polyspec/template/tree/main/packages/template-ts), [Go](https://github.com/polyspec/template/tree/main/packages/template-go), [Rust](https://github.com/polyspec/template/tree/main/packages/template-rust), [PHP](https://github.com/polyspec/template/tree/main/packages/template-php), [Python](https://github.com/polyspec/template/tree/main/packages/template-python).
 
 ## 같은 데이터로 여러 번 렌더
 
