@@ -10,6 +10,7 @@
 - Ran the three Python unit tests of `make test-python` in one loop that keeps the failure of each test, so the target runs one command as `tests/scripts/failure-accumulation.test.mjs` requires (T22.4-16).
 - Regenerated the compiled AST manifests, the generated manifests and `examples/site/index.html` after the contract change, so their contract digests match the contract (T22.4-17).
 - Removed `python` from the core support level of `packages/template-compiler/interface.json`, because the level named python without its language mapping; the core interface check and the bound map mutation check of the `showcase` job pass again (T22.4-23).
+- Regenerated the compiled AST manifests, the generated manifests and `examples/site/index.html` after the interface change, so their contract digests match the contract (T22.4-25).
 - `tests/scripts/toolchain-files.test.mjs` fails when the `python` job matrix of `ci.yml` omits 3.11 or the minor of `.python-version` (T22.4-12).
 - Reformatted the Python package unit test file `packages/template-python/tests/test_api.py` with no change to its statements (T22.4-11).
 - `polyspec.template.__all__` exports `ParseOptions`, `analyze` and `analyze_prefix`, lists `PreparedRender` once, and exports every name that the documents import (T22.4-10).
