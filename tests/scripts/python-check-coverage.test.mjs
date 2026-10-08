@@ -13,6 +13,7 @@ const checks = [
   'scripts/check-generated-typed-values.mjs',
   'scripts/check-generated-arguments.mjs',
   'scripts/check-generated-bound-data.mjs',
+  'scripts/check-generated-native-calls.mjs',
 ];
 
 for (const check of checks) {
