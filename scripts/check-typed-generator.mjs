@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
 import { checkLanguages } from './language-checks.mjs';
+import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 
@@ -18,7 +19,7 @@ const scenarios = ['compiler-coverage', 'empty-state', 'html-slot', 'react-bound
 
 function generatedSource(id, language) {
   if (language === 'go') return join(root, 'tools/showcase/adapters/go/generated', id, 'generated.go');
-  const extension = language === 'rust' ? 'rust' : language;
+  const extension = { rust: 'rust', python: 'py' }[language] ?? language;
   return join(generated, `${id}.${extension}`);
 }
 
@@ -199,10 +200,56 @@ function checkPhp() {
   }
 }
 
+function checkPython() {
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'python'), 'utf8');
+  assert.match(coverageSource, /RuntimeBindings\(context\)/);
+  assert.match(coverageSource, /_runtime\.binary\(/);
+  assert.match(coverageSource, /_runtime\.call\(/);
+  for (const duplicate of ['def _truthy(', 'def _generated_truthy(', 'def _generated_default(', 'def _generated_in(', 'def _stringify(', 'def _escape(', 'def _index(', 'def _entries(']) {
+    assert.equal(coverageSource.includes(duplicate), false, `Python generated source duplicates runtime semantics: ${duplicate}`);
+  }
+  // One Python process per scenario renders it through Engine like the other languages and expects the output limit to
+  // keep a positioned template error. The compile builtin parses the generated source and writes no bytecode.
+  const directory = join(temporary, 'python');
+  mkdirSync(directory);
+  const runner = join(directory, 'check.py');
+  writeFileSync(runner, `import importlib.util
+import sys
+from pathlib import Path
+
+from polyspec.template import Engine, RenderOptions, RuntimeEnvironment, TemplateError, parse_json_bytes
+
+generated, scenario, target, limited = sys.argv[1], Path(sys.argv[2]), sys.argv[3], sys.argv[4] == 'limited'
+compile(Path(generated).read_bytes(), generated, 'exec')
+spec = importlib.util.spec_from_file_location('generated_program', generated)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+assign = parse_json_bytes((scenario / 'data.json').read_bytes())
+define = parse_json_bytes((scenario / 'define.json').read_bytes())
+env = parse_json_bytes((scenario / 'env.json').read_bytes()) if (scenario / 'env.json').is_file() else None
+options = RenderOptions(define=define, env=env)
+actual = Engine(module.GeneratedProgram()).render(target, assign, options)
+expected = (scenario / 'expected.html').read_text(encoding='utf-8')
+if actual != expected:
+    sys.exit('generated output differs: ' + repr(actual))
+if limited:
+    try:
+        Engine(module.GeneratedProgram(RuntimeEnvironment({'outputBytes': 1}))).render(target, assign, options)
+    except TemplateError as error:
+        if error.code != 'E_RUNTIME_LIMIT' or error.line < 1 or error.col < 1:
+            sys.exit('generated output limit reported ' + repr(error.to_object()))
+    else:
+        sys.exit('generated output limit lost its positioned template error')
+`);
+  for (const id of scenarios) {
+    run(pythonCommand(), [runner, generatedSource(id, 'python'), join(scenarioRoot, id), target(id), id === scenarios[0] ? 'limited' : 'plain'], { env: pythonEnvironment() });
+  }
+}
+
 try {
-  checkLanguages('compiler', { TypeScript: checkTypeScript, Go: checkGo, Rust: checkRust, PHP: checkPhp });
+  checkLanguages('compiler', { TypeScript: checkTypeScript, Go: checkGo, Rust: checkRust, PHP: checkPhp, Python: checkPython });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write('compiler: TypeScript, Go, Rust and PHP GeneratedProgram implementations rendered all five scenarios identically\n');
+process.stdout.write('compiler: TypeScript, Go, Rust, PHP and Python GeneratedProgram implementations rendered all five scenarios identically\n');

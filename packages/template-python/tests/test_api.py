@@ -239,6 +239,16 @@ class ValuesAndErrors(unittest.TestCase):
             render('{= length(1) }')
         self.assertEqual(caught.exception.code, 'E_RUNTIME_TYPE')
 
+    def test_output_limit_is_a_positioned_template_error(self):
+        program = AstProgram(EngineOptions(loader=MapLoader({'main.tpl': 'abc'}),
+                                           limits={'outputBytes': 1}))
+        with self.assertRaises(TE) as caught:
+            render('abc', engine=program)
+        error = caught.exception.to_object()
+        self.assertEqual(error['code'], 'E_RUNTIME_LIMIT')
+        self.assertGreater(error['line'], 0)
+        self.assertGreater(error['col'], 0)
+
     def test_cycle_and_not_found(self):
         engine = Engine(AstProgram(EngineOptions(
             loader=MapLoader({'a.tpl': '{+ "a.tpl" }'}))))
