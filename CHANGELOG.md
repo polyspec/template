@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T22.4-34: `scripts/check-function-contract.mjs` reads the Python registry with either quote and a line break after `BuiltIn(`. `ruff format` (T22.4-21) wrote the keys in double quotes, so the checker found no Python function and `make function-contract-registries-check` failed in the CI job `scripts`.
 - T22.4-33: `make install` installs npm and Go only (`install-tools TOOLS="npm go"`), the CI job `showcase` installs ruff after `setup-python`, `make dependency-review` installs the Rust toolchain before cargo-audit, its workflow sets up Python, and `make test-python` runs the `python3` of `PATH` again. The run of the push `a142548` failed in every job: ruff needed `python3.14` in jobs without `setup-python`, and cargo-audit needed the Rust toolchain before `make install` had installed it.
 - T22.4-32: the shared tools are the vendored copy of `polyspec/kit` v0.0.8, whose `make install-tools TOOLS="npm go"` installs only the named tools.
 - T22.4-31: the shared tools are the vendored copy of `polyspec/kit` v0.0.7, whose dependency gate accepts a local npm package required as `file:<its directory>`.
