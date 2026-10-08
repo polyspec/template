@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: eca9285be0636f2ce29bcfa6ea204af7fbf53887d065ed7aa39f67de970c9335 -->
+<!-- source-sha256: b69fceea69b1e0da0012c9ed0a7e457f70076e533b95e76972bc78e984d2d9e6 -->
 # 발행
 
 [English](/operations/publication).
@@ -64,6 +64,8 @@ make release-publish
 4. `make release-publish`는 archive와 함께 `gh release create <tag> --verify-tag --title <tag> --notes-file <notes>`를 실행한다. notes는 `CHANGELOG.md`의 section `## X.Y.Z`가 GitHub release body의 한도인 125000자(`NOTES_LIMIT`) 이하이면 그 section이다. 더 긴 section은 한 줄 `The changes of X.Y.Z are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/<tag>/CHANGELOG.md#XYZ).`로 바뀌며, anchor는 점을 뺀 버전이다.
 
 tag는 환경 변수 `TAG`로 step에 전달된다. `tests/kit/release.test.mjs`와 `tests/kit/release-consumer.test.mjs`는 kit의 step을 fixture 저장소에서 test한다. `make release-consumer TAG=vX.Y.Z`는 `var/release/assets`의 archive를 저장소 밖의 directory에 `tests/fixtures/release-consumer`의 consumer project로 설치하고(`scripts/kit/release-consumer.mjs`, `config/release.json`의 `consumers`: 빈 cache와 연결되지 않는 `@polyspec` scope registry로 모든 npm 패키지의 `npm ci`, 빈 `COMPOSER_HOME`과 cache와 zip의 `artifact` repository로 `polyspec/template`의 `composer install`) 각 패키지의 smoke 명령을 실행한다. commit된 lock은 각 registry 패키지를 정확한 버전과 integrity로 고정하고 매 실행 build하는 test 대상 archive를 `integrity` 없이 또는 빈 `shasum`으로 이름과 버전만 기록하며, `make release-consumer-lock TAG=vX.Y.Z`가 그 tag의 archive로 lock을 쓰므로 lock은 버전이나 의존성과 함께만 바뀐다. `make release-coverage`는 모든 추적 manifest가 tag의 릴리스 방식(`archive`, `version`, Rust crate와 Python 패키지처럼 git tag로 사용하는 `git-tag`)과 함께 `config/release.json`의 `manifests`에 있거나 이유와 함께 `notReleased`에 있기를 요구하고, `tests/scripts/toolchain-files.test.mjs`는 trigger, 권한, step의 순서를 요구한다.
+
+릴리스가 만들어진 뒤 `make release-proof TAG=vX.Y.Z`(online, `scripts/kit/release-proof.mjs`)가 checkout 밖에서 릴리스를 증명하며, 이 명령은 어떤 검사에도 속하지 않는다. GitHub Release의 asset이 그 버전의 archive와 정확히 같고 consumer project에 함께 설치되며, Python 패키지가 tag에서 `pip install "polyspec-template @ git+https://github.com/polyspec/template@vX.Y.Z#subdirectory=packages/template-python"`로 새 virtual environment에 설치되어 `python -c "import polyspec.template"`가 통과하고, Rust crate `polyspec-template`가 새 crate의 git 의존성으로 build되며, `go list -m`이 Go module을 그 tag에서 해석한다. `tests/scripts/release-config.test.mjs`는 `config/release.json`이 이 패키지들을 manifest가 선언한 대로 적었는지 검사한다.
 
 ## 릴리스 asset 설치
 
