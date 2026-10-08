@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- T22.4-19-1: Python coverage 검사가 Python 실행을 선언한 검증 명령(`contracts/features.json`의 `"python": true`)을 읽으며, Makefile과 스크립트의 단어를 읽지 않습니다. `template-function-contract`는 Python을 실행하지 않는 명령이므로 python을 unsupported로 선언합니다.
 - 기능 페이지가 모든 기능의 Python 상태를 보입니다. `scripts/features/build.mjs`와 `check.mjs`의 client 목록에 `python`이 들어가, `docs/features.md`와 `docs/features.ko.md`에 Python 열이 생겼습니다 (T22.4-19).
 - `contracts/features.json`의 언어 test matrix는 `scripts/check-language-test-matrix.mjs`가 요구하는 네 언어를 담습니다. Python은 T22.4-7의 CI merge group 실행이 통과하면 들어갑니다 (T22.4-13).
 - `packages/template-python/pyproject.toml`에서 `polyspec.template`의 `py.typed` 표식을 패키지 이름 아래에 선언했습니다. 기존 key `template`은 `src`에 없는 패키지를 가리켰습니다. `tests/test_package_data.py`가 모든 package-data key를 검사하고 `make test-python`이 실행합니다 (T22.4-14).
