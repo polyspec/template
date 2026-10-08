@@ -40,7 +40,8 @@
         "typescript",
         "go",
         "rust",
-        "php"
+        "php",
+        "python"
       ],
       "compileModes": [
         "ast",
@@ -1091,6 +1092,66 @@
         "generatedOperations": [
           "Bind::map",
           "Bind::data"
+        ]
+      }
+    },
+    "python": {
+      "backend": "PythonBackend",
+      "program": [
+        "AstProgram",
+        "GeneratedProgram"
+      ],
+      "error": "TemplateError",
+      "runtimeBindingOperationNames": {
+        "memberCall": "member_call",
+        "classCall": "class_call",
+        "listSpread": "list_spread",
+        "mapSpread": "map_spread"
+      },
+      "runtimeServices": "RuntimeServices",
+      "runtimeServiceOperationNames": {
+        "limits": "limits",
+        "hostFunction": "host_function",
+        "classFunction": "class_function"
+      },
+      "runtimeEnvironmentFields": [
+        "_limits",
+        "_host_functions",
+        "_class_functions"
+      ],
+      "runtimeEnvironmentOperations": [
+        "register",
+        "limits",
+        "host_function",
+        "register_class",
+        "class_function"
+      ],
+      "frameFields": [
+        "name",
+        "lines",
+        "context"
+      ],
+      "scopeFields": [
+        "locals",
+        "loops"
+      ],
+      "scopeOperations": [
+        "lookup",
+        "loop_meta"
+      ],
+      "boundMap": {
+        "type": "BoundMap",
+        "operations": {
+          "bind": "bind",
+          "merge": "merge"
+        },
+        "assign": {
+          "prepare": "prepare",
+          "render": "render"
+        },
+        "generatedOperations": [
+          "bind_map",
+          "bind_data"
         ]
       }
     },

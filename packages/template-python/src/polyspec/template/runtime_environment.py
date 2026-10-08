@@ -3,12 +3,25 @@
 from __future__ import annotations
 
 import re
+from typing import Protocol
 
 from .context import DEFAULT_LIMITS
 from .functions import BUILTINS
 
 
-class RuntimeEnvironment:
+class RuntimeServices(Protocol):
+    """The lookups that a render context needs from the runtime: the resource
+    limits and the host functions. AST and generated programs expose the same
+    three operations without coupling render state to an AST loader."""
+
+    def limits(self) -> dict: ...
+
+    def host_function(self, name: str): ...
+
+    def class_function(self, class_name: str, method: str): ...
+
+
+class RuntimeEnvironment(RuntimeServices):
     """Host functions and resource limits shared by AST and generated programs."""
 
     def __init__(self, limits: 'dict | None' = None, functions: 'dict | None' = None):
