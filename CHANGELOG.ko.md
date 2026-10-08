@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 34a713fee61e1e5a30358fe24b88e81263fe52d056a236662daa95b2cfe1fb51 -->
+<!-- source-sha256: d54294a97fb6576473d2aabc0fb2b6d1cb9ea882c99ffb226f8b5566b6064b57 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T22.4-34: `scripts/check-function-contract.mjs`는 Python registry를 두 따옴표와 `BuiltIn(` 뒤의 줄바꿈으로 읽습니다. `ruff format`(T22.4-21)이 key를 큰따옴표로 써서 검사기가 Python 함수를 찾지 못하고 `make function-contract-registries-check`가 CI job `scripts`에서 실패했습니다.
 - T22.4-33: `make install`은 npm과 Go만 설치하고(`install-tools TOOLS="npm go"`), CI job `showcase`는 `setup-python` 뒤에 ruff를 설치하며, `make dependency-review`는 cargo-audit 전에 Rust toolchain을 설치하고 그 workflow는 Python을 준비하며, `make test-python`은 다시 `PATH`의 `python3`로 실행합니다. push `a142548`의 실행은 모든 job이 실패했습니다. `setup-python`이 없는 job에서 ruff가 `python3.14`를 필요로 했고, cargo-audit가 `make install`이 Rust toolchain을 설치하기 전에 그것을 필요로 했습니다.
 - T22.4-32: 공유 도구는 `polyspec/kit` v0.0.8의 vendored 복사본이며, `make install-tools TOOLS="npm go"`는 이름을 준 도구만 설치합니다.
 - T22.4-31: 공유 도구는 `polyspec/kit` v0.0.7의 vendored 복사본이며, 의존성 gate가 `file:<자기 directory>`로 요구하는 로컬 npm 패키지를 받아들입니다.

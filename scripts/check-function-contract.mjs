@@ -37,7 +37,7 @@ const patterns = {
   go: [/"([a-z][a-z0-9_]*)":\s*\{\s*(\d+)\s*,\s*(-?\d+)/gs],
   rust: [/"([a-z][a-z0-9_]*)"\s*,\s*BuiltIn\s*\{\s*min:\s*(\d+),\s*max:\s*([^,}]+)/gs],
   php: [/'([a-z][a-z0-9_]*)'\s*=>\s*\['min'\s*=>\s*(\d+),\s*'max'\s*=>\s*(PHP_INT_MAX|-?\d+)/gs],
-  python: [/\'(\w+)\':\s*BuiltIn\((\d+),\s*(math\.inf|-?\d+)/g],
+  python: [/['"](\w+)['"]:\s*BuiltIn\(\s*(\d+),\s*(math\.inf|-?\d+)/g],
 };
 
 for (const [language, paths] of Object.entries(files)) {
