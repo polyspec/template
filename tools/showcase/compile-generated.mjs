@@ -27,7 +27,7 @@ const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
 export function generatedOutput(id, language) {
   if (language === 'go') return join(adapterRoot, 'go/generated', id, 'generated.go');
   if (language === 'js') return join(adapterRoot, 'generated/javascript', `${id}.js`);
-  const extension = language === 'rust' ? 'rust' : language;
+  const extension = { rust: 'rust', python: 'py' }[language] ?? language;
   return join(adapterRoot, 'generated/typed', `${id}.${extension}`);
 }
 
@@ -35,7 +35,7 @@ for (const id of scenarios) {
   const scenario = join(scenariosRoot, id);
   const graph = join(scenario, 'compiled/ast/manifest.json');
   const manifest = join(scenario, 'types.json');
-  for (const language of ['ts', 'go', 'rust', 'php']) {
+  for (const language of ['ts', 'go', 'rust', 'php', 'python']) {
     const output = generatedOutput(id, language);
     compileGeneratedArtifact({
       graphPath: graph,
@@ -64,4 +64,4 @@ for (const id of scenarios) {
   });
 }
 
-process.stdout.write(`${check ? 'checked' : refresh === 'false' ? 'loaded' : 'compiled'} ${scenarios.length * 5} generated showcase artifacts\n`);
+process.stdout.write(`${check ? 'checked' : refresh === 'false' ? 'loaded' : 'compiled'} ${scenarios.length * 6} generated showcase artifacts\n`);

@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -12,7 +13,7 @@ const adapterRoot = join(root, 'tools', 'showcase', 'adapters');
 const scenariosRoot = join(root, 'examples', 'site', 'scenarios');
 const manifest = JSON.parse(readFileSync(join(root, 'packages', 'template-compiler', 'interface.json'), 'utf8')).showcaseAdapter;
 const operationNames = manifest.operations.map(operation => operation.name);
-const languageNames = ['typescript', 'javascript', 'go', 'rust', 'php'];
+const languageNames = ['typescript', 'javascript', 'go', 'rust', 'php', 'python'];
 const requiredSupportLevels = ['core-runtime', 'source-compiler', 'artifact-runtime', 'generated-compiler'];
 
 function escapeRegExp(value) {
@@ -75,6 +76,7 @@ function checkGeneratedEngineRoute() {
     go: [/program, err = generatedProgram/, /engine := template\.NewEngine\(program\)/],
     rust: [/generated_engine\([\s\S]*?Engine::new\(generated::/],
     php: [/generatedProgram\(\$root\)/, /new Engine\(\$program\)/],
+    python: [/generated_program\(root\)/, /Engine\(program\)/],
   };
   for (const [language, patterns] of Object.entries(checks)) {
     const source = readContractFile(manifest.languages[language].file);
@@ -95,6 +97,7 @@ function checkGeneratedEngineRoute() {
     go: id => [`go/generated/${id}/generated.go`, /type GeneratedProgram struct[\s\S]*?func \(p \*GeneratedProgram\) Prepare/],
     rust: id => [`generated/typed/${id}.rust`, /pub struct GeneratedProgram[\s\S]*?impl Program for GeneratedProgram/],
     php: id => [`generated/typed/${id}.php`, /final class GeneratedProgram implements Program/],
+    python: id => [`generated/typed/${id}.py`, /class GeneratedProgram\(Program\):/],
   };
   for (const [language, generatedCheck] of Object.entries(generatedChecks)) {
     for (const scenario of scenarios) {
@@ -162,6 +165,7 @@ function runtimeCommand(language, scenarioPath, mode = 'ast') {
     const cargo = join(process.env.HOME ?? '', '.cargo', 'bin', 'cargo');
     return [existsSync(cargo) ? cargo : 'cargo', ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root, env];
   }
+  if (language === 'python') return [pythonCommand(), [source, scenarioPath], root, { ...env, ...pythonEnvironment() }];
   return ['php', [source, scenarioPath], root, env];
 }
 
@@ -172,7 +176,9 @@ function checkStaticImplementation(language) {
   const constructorName = definition.constructorName;
   const constructorPattern = language === 'typescript' || language === 'javascript'
     ? /\bconstructor\s*\(/
-    : new RegExp(`(?:func|fn|function)\\s+${escapeRegExp(constructorName)}\\s*\\(`);
+    : language === 'python'
+      ? new RegExp(`\\bdef\\s+${escapeRegExp(constructorName)}\\s*\\(`)
+      : new RegExp(`(?:func|fn|function)\\s+${escapeRegExp(constructorName)}\\s*\\(`);
   assert(constructorPattern.test(source), `${language} does not declare constructor ${constructorName}`);
   for (const owned of manifest.constructor.owns) {
     const field = owned.split('.').pop();
@@ -196,6 +202,7 @@ function checkStaticImplementation(language) {
   if (language === 'go') assert(/type Adapter struct\s*\{/.test(source) && /var _ RenderAdapter = \(\*Adapter\)\(nil\)/.test(source), 'Go Adapter does not assert RenderAdapter');
   if (language === 'rust') assert(/struct Adapter\s*\{/.test(source) && /impl RenderAdapter for Adapter/.test(source), 'Rust Adapter does not implement RenderAdapter');
   if (language === 'php') assert(/final class Adapter implements RenderAdapter/.test(source), 'PHP Adapter does not implement RenderAdapter');
+  if (language === 'python') assert(/class Adapter\(RenderAdapter\):/.test(source), 'Python Adapter does not implement RenderAdapter');
 }
 
 async function checkRuntimeAssertionHelpers() {
@@ -267,6 +274,10 @@ async function main() {
   run('PHP generated declaration syntax', 'php', ['-l', join(adapterRoot, manifest.languages.php.generated)]);
   run('PHP adapter syntax', 'php', ['-l', join(adapterRoot, manifest.languages.php.file)]);
   checkPhpReflection();
+  // The compile builtin parses the sources and writes no bytecode into the checkout.
+  for (const file of [manifest.languages.python.file, manifest.languages.python.generated]) {
+    run(`Python syntax of ${file}`, pythonCommand(), ['-c', 'import sys; compile(open(sys.argv[1], "rb").read(), sys.argv[1], "exec")', join(adapterRoot, file)]);
+  }
   await checkRuntimeAssertionHelpers();
 
   const scenarioIds = readdirSync(scenariosRoot, { withFileTypes: true })

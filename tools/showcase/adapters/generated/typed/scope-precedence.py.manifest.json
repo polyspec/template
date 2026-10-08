@@ -1,16 +1,16 @@
 {
   "schema": 3,
   "mode": "gen",
-  "target": "rust",
+  "target": "python",
   "entry": "layout.tpl",
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "1a79a3749a363e97d4df70e8d14b96219179964a50df59d3dc844f49c8a38363",
-  "compilerDigest": "c76ed42a2565bba34471be1c907d95a715a689afd67918bce517f5aae0096c1a",
+  "compilerDigest": "cf67b8ad1e3ac40a194a2c78b58ddf168f30719d1b2fa62d7b58eb3b0d7f03e1",
   "files": {
-    "scope-precedence.rust": {
-      "path": "scope-precedence.rust",
-      "artifactDigest": "3512c496d5211a70e403e4627f769ae9c732e5b86d979bcc6796b0c62848ec18"
+    "scope-precedence.py": {
+      "path": "scope-precedence.py",
+      "artifactDigest": "bd22312fd097790f646101dfe841e91da9391dc457cc69a26cb5fbfe8295617d"
     }
   }
 }

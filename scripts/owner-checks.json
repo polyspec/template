@@ -725,7 +725,8 @@
         "delimiter-matrix",
         "generated-native-check",
         "typed-generator-compile-check",
-        "install-check"
+        "install-check",
+        "contract-check"
       ]
     },
     {
@@ -775,7 +776,8 @@
       "targets": [
         "generated-native-check",
         "typed-generator-compile-check",
-        "install-check"
+        "install-check",
+        "contract-check"
       ],
       "tests": [
         "tests/scripts/python-toolchain.test.mjs"
@@ -898,7 +900,10 @@
     ],
     "contract-check": [
       "scripts/check-showcase-contract.mjs",
-      "tools/showcase/adapters/**"
+      "tools/showcase/adapters/**",
+      "scripts/python-toolchain.mjs",
+      "packages/template-python/**",
+      ".python-version"
     ],
     "function-contract-registries-check": [
       "packages/template-compiler/functions.json",

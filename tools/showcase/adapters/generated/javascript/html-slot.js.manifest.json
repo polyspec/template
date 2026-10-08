@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "2cbd08aa1a86837f69e7891584eaacf6acd21afeb664148fc0a51714cdb87b72",
-  "compilerDigest": "7437a0140595ab9c6a918772db7b483f8d9d57ad82a8ca29e0da5f29c6ba8dc7",
+  "contractDigest": "1a79a3749a363e97d4df70e8d14b96219179964a50df59d3dc844f49c8a38363",
+  "compilerDigest": "d0719f771a36bfd4135922257bbc57f22d853ba43bb30a8bb7ba55ad4bb5872b",
   "files": {
     "html-slot.js": {
       "path": "html-slot.js",

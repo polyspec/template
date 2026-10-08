@@ -31,3 +31,8 @@ flowchart TB
   php --> source_compiler
   php --> artifact_runtime
   php --> generated_compiler
+  python["python: core-runtime, source-compiler, artifact-runtime, generated-compiler"]
+  python --> core_runtime
+  python --> source_compiler
+  python --> artifact_runtime
+  python --> generated_compiler

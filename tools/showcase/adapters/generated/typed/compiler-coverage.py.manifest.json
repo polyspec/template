@@ -1,16 +1,16 @@
 {
   "schema": 3,
   "mode": "gen",
-  "target": "go",
+  "target": "python",
   "entry": "layout.tpl",
   "sourceDigest": "936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
   "contractDigest": "1a79a3749a363e97d4df70e8d14b96219179964a50df59d3dc844f49c8a38363",
-  "compilerDigest": "fc3ca6f68411213edeeb4c7f2f6efadfef12eae93beb68659f19345e844ef82a",
+  "compilerDigest": "cf67b8ad1e3ac40a194a2c78b58ddf168f30719d1b2fa62d7b58eb3b0d7f03e1",
   "files": {
-    "generated.go": {
-      "path": "generated.go",
-      "artifactDigest": "da82568843442fe7d443ac85d4315abeb62f07afb4cda0b5655eb232c7cf7689"
+    "compiler-coverage.py": {
+      "path": "compiler-coverage.py",
+      "artifactDigest": "785237dd0801713954336593732b4f2808889f0a7a1c50fed643a3a14feb8f02"
     }
   }
 }

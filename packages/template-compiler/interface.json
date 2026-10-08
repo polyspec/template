@@ -1700,6 +1700,25 @@
           "renderTwice": "renderTwice"
         },
         "checker": "ReflectionClass"
+      },
+      "python": {
+        "supportLevels": [
+          "core-runtime",
+          "source-compiler",
+          "artifact-runtime",
+          "generated-compiler"
+        ],
+        "file": "python.py",
+        "generated": "generated/render_adapter.py",
+        "type": "Adapter",
+        "constructorName": "__init__",
+        "operationNames": {
+          "loadScenario": "load_scenario",
+          "buildRequest": "build_request",
+          "render": "render",
+          "renderTwice": "render_twice"
+        },
+        "checker": "compile"
       }
     }
   }
