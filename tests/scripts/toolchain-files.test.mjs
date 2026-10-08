@@ -231,7 +231,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // Only the commands that download leave the offline settings of the recipes (T20.1-2).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const fetches = locks.map(lock => `${online} ${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/kit/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches, `${online} node scripts/python-wheelhouse.mjs`]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/kit/install-tools.mjs npm go`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches, `${online} node scripts/python-wheelhouse.mjs`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
@@ -449,4 +449,28 @@ test('the python job of ci.yml runs the Python suites and ci-passed needs it (T2
   const needs = text.match(/^  ci-passed:[\s\S]*?needs: \[([^\]]*)\]/m);
   assert.ok(needs, 'ci.yml has no ci-passed job with needs');
   assert.ok(needs[1].split(',').map(name => name.trim()).includes('python'), `ci-passed needs ${needs[1]}, expected python among them`);
+});
+
+// ruff needs the Python of .python-version, which only a job with setup-python provides, so make install installs npm and Go
+// only and the job that runs lint-python installs ruff itself after setup-python (T22.4-33).
+test('the job that runs lint-python sets up Python and installs ruff before it, and make install installs no ruff', () => {
+  for (const job of jobs('.github/workflows/ci.yml')) {
+    if (!/\bTARGETS="[^"]*\blint-python\b/.test(job.text)) continue;
+    const setup = job.text.indexOf('uses: actions/setup-python@');
+    const ruff = job.text.indexOf('run: make install-tools TOOLS=ruff');
+    const lint = job.text.indexOf('lint-python');
+    assert.ok(setup !== -1 && setup < ruff && ruff < lint, `job ${job.name} runs lint-python without setup-python and make install-tools TOOLS=ruff before it`);
+  }
+  assert.match(read('Makefile'), /^install: TOOLS := npm go$/m, 'make install installs every declared tool, also those whose runtime the job lacks');
+});
+
+test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up Python for ruff', () => {
+  const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  assert.equal(recipe[0], 'rustup toolchain install --no-self-update');
+  assert.match(recipe[1], /install-tools\.mjs $/);
+  assert.match(read('.github/workflows/dependency-review.yml'), /uses: actions\/setup-python@\S+.*\n\s+with:\n\s+python-version-file: \.python-version\n/);
+});
+
+test('the unit tests of the Python package run with the python3 of the job, which the matrix of the job python sets', () => {
+  assert.match(read('Makefile'), /^PYTHON \?= python3$/m);
 });
