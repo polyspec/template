@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- `polyspec.template.__all__` exports `ParseOptions`, `analyze` and `analyze_prefix`, lists `PreparedRender` once, and exports every name that the documents import (T22.4-10).
 - Set the Python support of each feature in `contracts/features.json` from the Python coverage of its verification commands: 18 features are `unsupported`, and the 5 features whose commands run Python are `partial` until the CI merge-group run of T22.4-7 passes (T22.4-9).
 - Pinned `actions/setup-python` in the `python` job of `ci.yml` to the commit of its `v6.3.0` tag, and added `tests/scripts/action-pins.test.mjs`, which checks every action pin of every workflow against the commit of its version comment (T22.4-8).
 - Documented the Python package in `README.md`, `docs/guide.md` and the package README (T22.4-6). The

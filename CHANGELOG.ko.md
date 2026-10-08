@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- `polyspec.template.__all__`이 `ParseOptions`, `analyze`, `analyze_prefix`를 export하고, `PreparedRender`를 한 번만 나열하며, 문서가 가져오는 모든 이름을 export합니다 (T22.4-10).
 - `contracts/features.json`의 기능별 Python 지원을 검증 명령이 실행하는 Python 범위에 맞췄습니다. 18개 기능은 `unsupported`이고, Python을 실행하는 명령을 가진 5개 기능은 T22.4-7의 CI merge group 실행이 통과할 때까지 `partial`입니다 (T22.4-9).
 - `ci.yml`의 `python` job이 `actions/setup-python`을 `v6.3.0` tag의 commit으로 고정하도록 고쳤고, 모든 workflow의 모든 action 고정 값을 version 주석의 commit과 대조하는 `tests/scripts/action-pins.test.mjs`를 추가했습니다 (T22.4-8).
 - Python 패키지를 `README.md`, `docs/guide.ko.md`와 패키지 README에 문서화했습니다 (T22.4-6). README는 구현 목록에 Python을 넣고, 가이드는 `polyspec.template`의 이름을 쓰는 렌더 예제를 담으며, 패키지 README는 `packages/template-python`을 담은 release tag가 생기기 전까지 설치 tag를 `vX.Y.Z`로 적습니다.
