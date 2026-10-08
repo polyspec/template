@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 009a69d7074139bf12c633818cef11e3d18b668472c1d9fd942d5889c3b08c61 -->
+<!-- source-sha256: 12b369b419af47faac83b7e90447ddc57550d8697d3415aef738daf81b05bf81 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T22.4-28: `config/dependency-policy.json`이 kit의 형식을 가지고, `config/toolchain.json`이 `cargoAudit` 0.22.2와 `govulncheck` 1.8.0을 선언하며, `@playwright/test`가 1.64.0이고, `config/dependency-review.json`이 npm, Composer, Cargo lock과 `setuptools==84.0.0`의 review를 기록합니다. `make dependency-policy-mutation-check`는 통과합니다. `make dependency-policy-check`는 `package.json`이 `file:` 의존성으로 요구하는 이 저장소의 패키지마다 finding 하나, 모두 여섯 개를 보고합니다. `scripts/kit/dependency-state.mjs`가 lock 항목에 `link: true`가 있을 때만 그런 패키지를 받아들이는데 `install-links=true`는 이를 쓰지 않기 때문입니다. kit이 복사본을 읽을 때까지 이 작업은 우회 상태입니다.
 - T22.4-27: 공유 도구는 `polyspec/kit` v0.0.4의 vendored 복사본(`scripts/kit/`, `tests/kit/`, `kit.json`, `.kit/kit.lock.json`)입니다. 의존성 review와 gate, push gate, full-run guard, owner check, release, consumer 설치, `install-tools`, `ci-targets`, `ci-passed`, `target-report`, `run-tests`, `check-documents`, `holder-lock`, `git-hooks`, `github-ruleset`, `check-cargo-downloads`의 저장소 복사본과 그 test를 지우고 `config/`가 kit의 선언을 담습니다. 모든 문서 쌍이 `doc-id`를 가지고 한글 파일이 영어 파일의 `source-sha256`을 가집니다. 버전 0.x에는 pull request, merge queue, ruleset이 없습니다. `.github/ruleset.json`과 `push-gate.yml`을 지우고, `ci.yml`은 `main`에 대한 push와 수동 실행에서 실행되며, `release.yml`은 check `ci-passed`를 요구합니다. `config/release.json`이 릴리스의 패키지를 나열하고, asset 이름은 `<package>-<language>-<version>.<ext>`입니다.
 - T22.4-20-9: 기능 페이지와 showcase 산출물을 다시 생성해, commit된 산출물의 계약 digest가 tree의 compiler를 가리킵니다.
 - T22.4-7: `tests/scripts/toolchain-files.test.mjs`의 단위 테스트가 `ci.yml`의 `python` job이 `test-python`, `conformance-python`, `conformance-generated-python`을 실행하고 `ci-passed`가 이 job을 need로 가짐을 검사합니다. T22.4-19와 T22.4-19-1은 각자의 명령으로 검증됩니다.
