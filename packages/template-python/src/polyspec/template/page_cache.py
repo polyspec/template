@@ -30,7 +30,7 @@ class PageCache:
     def set(self, key: str, html: str, ttl: PageCacheTTL) -> None:
         """Stores a page; None and zero TTL values never expire."""
         if ttl is not None and (not math.isfinite(ttl) or ttl < 0):
-            raise ValueError('page cache ttl must be None or a non-negative number')
+            raise ValueError("page cache ttl must be None or a non-negative number")
         expires = None if ttl is None or ttl == 0 else self._now() + ttl
         self._entries[key] = (html, expires)
 

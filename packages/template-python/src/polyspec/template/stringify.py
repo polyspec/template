@@ -8,16 +8,16 @@ from .values import SafeString, Value
 
 class StringifyError(Exception):
     def __init__(self):
-        super().__init__('a list or map cannot be converted to text')
-        self.name = 'StringifyError'
+        super().__init__("a list or map cannot be converted to text")
+        self.name = "StringifyError"
 
 
 def stringify(value: Value) -> str:
     """The text of a value, or StringifyError for a list or map."""
     if value is None:
-        return ''
+        return ""
     if isinstance(value, bool):
-        return 'true' if value else 'false'
+        return "true" if value else "false"
     if isinstance(value, (float, int)):
         return number_to_string(float(value))
     if isinstance(value, str):

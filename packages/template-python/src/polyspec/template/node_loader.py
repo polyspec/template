@@ -19,7 +19,7 @@ class FsLoader:
     def load(self, name: str):
         """Returns the file of a name, or None when the name does not exist or
         leaves the directory."""
-        path = os.path.abspath(os.path.join(self.root, *name.split('/')))
+        path = os.path.abspath(os.path.join(self.root, *name.split("/")))
         if path != self.root and not path.startswith(self.root + os.sep):
             return None
         try:
@@ -28,10 +28,10 @@ class FsLoader:
             return None
         if not os.path.isfile(path):
             return None
-        with open(path, 'rb') as handle:
+        with open(path, "rb") as handle:
             data = handle.read()
-        return LoadedSource(data, f'{stats.st_mtime}:{stats.st_size}')
+        return LoadedSource(data, f"{stats.st_mtime}:{stats.st_size}")
 
     def path_of(self, name: str) -> str:
         """The file system path of a template name."""
-        return os.path.join(self.root, *name.split('/'))
+        return os.path.join(self.root, *name.split("/"))

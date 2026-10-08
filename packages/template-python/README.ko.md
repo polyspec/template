@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-python-readme -->
-<!-- source-sha256: 1956de7ee1617521d9cbfd68ec2ea50c958294134d42747c792a2082e1acf592 -->
+<!-- source-sha256: ef38b19ef77a689ee34f8bda54be367910a9e4f1a80c05ef2c5416b1d9388f98 -->
 # polyspec-template
 
 [English](README.md)
@@ -22,15 +22,21 @@ pip install "polyspec-template @ git+https://github.com/polyspec/template@vX.Y.Z
 from polyspec.template import AstProgram, Engine, EngineOptions, RenderOptions
 from polyspec.template import FsLoader
 
-program = AstProgram(EngineOptions(loader=FsLoader('templates')))
-program.register('greet', lambda args, context: 'Hello, ' + args[0])
+program = AstProgram(EngineOptions(loader=FsLoader("templates")))
+program.register("greet", lambda args, context: "Hello, " + args[0])
 engine = Engine(program)
-assign = {'title': 'Home'}
-html = engine.render('layout', assign, RenderOptions(
-    define={'layout': {'template': 'layout.tpl'},
-            'content': {'template': 'pages/home.tpl'}},
-    env={'timezone': '+09:00', 'now': 1700000000},
-))
+assign = {"title": "Home"}
+html = engine.render(
+    "layout",
+    assign,
+    RenderOptions(
+        define={
+            "layout": {"template": "layout.tpl"},
+            "content": {"template": "pages/home.tpl"},
+        },
+        env={"timezone": "+09:00", "now": 1700000000},
+    ),
+)
 ```
 
 assign 데이터는 Python 값입니다. `dict`는 map, `list`와 `tuple`은 list, `int`와 `float`은 double의 안전 정수 범위 안에서 binding되고 `None`은 빈 map입니다. JSON 입력은 `parse_json`과 `parse_json_bytes`로 받아 object key 순서를 유지합니다.
@@ -40,8 +46,8 @@ assign 데이터는 Python 값입니다. `dict`는 map, `list`와 `tuple`은 lis
 ```python
 from polyspec.template import analyze, parse
 
-ast = parse(source, 'layout.tpl')
-tags_and_tokens = analyze(source, 'layout.tpl')
+ast = parse(source, "layout.tpl")
+tags_and_tokens = analyze(source, "layout.tpl")
 ```
 
 파싱된 template은 `render()`에 전달하거나 `MapLoader`에 둘 수 있습니다.

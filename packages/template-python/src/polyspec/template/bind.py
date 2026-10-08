@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import math
 import types
-from typing import Any, Optional
+from typing import Any
 
 from .number import MAX_SAFE
 from .values import NativeObject, SafeString, Value
@@ -13,8 +13,14 @@ from .values import NativeObject, SafeString, Value
 # The nesting depth limit of lists and maps (VAL-20).
 MAX_DEPTH = 64
 
-BIND_ERROR_CODES = ('E_DATA_NUMBER_RANGE', 'E_DATA_NUMBER_NOT_FINITE', 'E_DATA_UNSUPPORTED_TYPE',
-                    'E_DATA_INVALID_UTF8', 'E_DATA_DEPTH', 'E_DATA_INVALID_JSON')
+BIND_ERROR_CODES = (
+    "E_DATA_NUMBER_RANGE",
+    "E_DATA_NUMBER_NOT_FINITE",
+    "E_DATA_UNSUPPORTED_TYPE",
+    "E_DATA_INVALID_UTF8",
+    "E_DATA_DEPTH",
+    "E_DATA_INVALID_JSON",
+)
 
 
 class BindError(Exception):
@@ -22,23 +28,27 @@ class BindError(Exception):
 
     def __init__(self, code: str, message: str):
         super().__init__(message)
-        self.name = 'BindError'
+        self.name = "BindError"
         self.code = code
 
 
-def check_number(value: 'int | float') -> float:
+def check_number(value: "int | float") -> float:
     """VAL-2, VAL-3: a number is accepted when it is finite and its magnitude is
     at most 2^53 - 1."""
     number = float(value)
     if not math.isfinite(number):
-        raise BindError('E_DATA_NUMBER_NOT_FINITE', 'number is not finite')
+        raise BindError("E_DATA_NUMBER_NOT_FINITE", "number is not finite")
     if abs(number) > MAX_SAFE:
-        raise BindError('E_DATA_NUMBER_RANGE', f'number {number_to_text(number)} is outside the safe range')
+        raise BindError(
+            "E_DATA_NUMBER_RANGE",
+            f"number {number_to_text(number)} is outside the safe range",
+        )
     return number
 
 
 def number_to_text(value: float) -> str:
     from .number import number_to_string
+
     return number_to_string(value)
 
 
@@ -48,14 +58,18 @@ def check_text(text: str) -> str:
     index = 0
     while index < len(text):
         code = ord(text[index])
-        if 0xd800 <= code <= 0xdbff:
+        if 0xD800 <= code <= 0xDBFF:
             following = ord(text[index + 1]) if index + 1 < len(text) else 0
-            if 0xdc00 <= following <= 0xdfff:
+            if 0xDC00 <= following <= 0xDFFF:
                 index += 2
                 continue
-            raise BindError('E_DATA_INVALID_UTF8', 'string contains an unpaired surrogate')
-        if 0xdc00 <= code <= 0xdfff:
-            raise BindError('E_DATA_INVALID_UTF8', 'string contains an unpaired surrogate')
+            raise BindError(
+                "E_DATA_INVALID_UTF8", "string contains an unpaired surrogate"
+            )
+        if 0xDC00 <= code <= 0xDFFF:
+            raise BindError(
+                "E_DATA_INVALID_UTF8", "string contains an unpaired surrogate"
+            )
         index += 1
     return text
 
@@ -65,7 +79,9 @@ def check_level(level: int) -> None:
     the limit; `level` counts the enclosing lists and maps, including the one
     being entered."""
     if level > MAX_DEPTH:
-        raise BindError('E_DATA_DEPTH', f'lists and maps nest deeper than {MAX_DEPTH} levels')
+        raise BindError(
+            "E_DATA_DEPTH", f"lists and maps nest deeper than {MAX_DEPTH} levels"
+        )
 
 
 def bind_value(value: Any) -> Value:
@@ -82,7 +98,9 @@ def _bind_at(value: Any, level: int) -> Value:
         # A Python int covers the whole integer range; the binding rule accepts
         # only the safe range of the double and keeps every number a float.
         if value > MAX_SAFE or value < -MAX_SAFE:
-            raise BindError('E_DATA_NUMBER_RANGE', f'integer {value} is outside the safe range')
+            raise BindError(
+                "E_DATA_NUMBER_RANGE", f"integer {value} is outside the safe range"
+            )
         return float(value)
     if isinstance(value, float):
         return check_number(value)
@@ -93,8 +111,10 @@ def _bind_at(value: Any, level: int) -> Value:
     if isinstance(value, NativeObject):
         return value
     if isinstance(value, BoundMap):
-        raise BindError('E_DATA_UNSUPPORTED_TYPE',
-                        'a bound map is accepted only as assign and as definition data')
+        raise BindError(
+            "E_DATA_UNSUPPORTED_TYPE",
+            "a bound map is accepted only as assign and as definition data",
+        )
     if isinstance(value, (list, tuple)):
         check_level(level + 1)
         return [_bind_at(item, level + 1) for item in value]
@@ -103,22 +123,32 @@ def _bind_at(value: Any, level: int) -> Value:
         bound: dict[str, Value] = {}
         for key, item in value.items():
             if not isinstance(key, str):
-                raise BindError('E_DATA_UNSUPPORTED_TYPE', 'map key is not a string')
+                raise BindError("E_DATA_UNSUPPORTED_TYPE", "map key is not a string")
             bound[check_text(key)] = _bind_at(item, level + 1)
         return bound
     if _is_host_object(value):
         return NativeObject(value)
-    raise BindError('E_DATA_UNSUPPORTED_TYPE', f'a {type(value).__name__} value has no binding')
+    raise BindError(
+        "E_DATA_UNSUPPORTED_TYPE", f"a {type(value).__name__} value has no binding"
+    )
 
 
 def _is_host_object(value: Any) -> bool:
     """VAL-18, VAL-19: an instance of a class that code outside the interpreter defines is a
     native object. Built-in types without a binding (set, bytes, complex, range,
     generators), functions, methods, classes and modules are not template values."""
-    if isinstance(value, (types.FunctionType, types.MethodType, types.BuiltinFunctionType,
-                          types.ModuleType, type)):
+    if isinstance(
+        value,
+        (
+            types.FunctionType,
+            types.MethodType,
+            types.BuiltinFunctionType,
+            types.ModuleType,
+            type,
+        ),
+    ):
         return False
-    return type(value).__module__ != 'builtins'
+    return type(value).__module__ != "builtins"
 
 
 def bind_map(value: Any) -> dict[str, Value]:
@@ -131,7 +161,7 @@ def bind_map(value: Any) -> dict[str, Value]:
         return value.entries
     bound = bind_value(value)
     if not isinstance(bound, dict):
-        raise BindError('E_DATA_UNSUPPORTED_TYPE', 'assign is not a map')
+        raise BindError("E_DATA_UNSUPPORTED_TYPE", "assign is not a map")
     return bound
 
 
@@ -171,7 +201,7 @@ def host_argument(value: Value) -> Any:
 class BoundMap:
     """A map that passed host binding (VAL-22); `bind` and `merge` create it."""
 
-    __slots__ = ('entries',)
+    __slots__ = ("entries",)
 
     def __init__(self, entries: dict[str, Value]):
         self.entries = entries

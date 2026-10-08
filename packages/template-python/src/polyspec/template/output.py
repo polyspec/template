@@ -22,4 +22,4 @@ class Output:
         self._chunks.append(text)
 
     def text(self) -> str:
-        return ''.join(self._chunks)
+        return "".join(self._chunks)
