@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const original = JSON.parse(readFileSync(resolve(root, 'packages/template-compiler/interface.json'), 'utf8'));
+let rejected = 0;
 const directory = mkdtempSync(join(tmpdir(), 'template-interface-mutation-'));
 
 try {
@@ -27,6 +28,11 @@ try {
     ['renamed Go BoundMap operation', manifest => { manifest.languages.go.boundMap.operations.merge = 'Combine'; }],
     ['renamed Rust bound assign operation', manifest => { manifest.languages.rust.boundMap.assign.render = 'render_map'; }],
     ['renamed PHP BoundMap operation', manifest => { manifest.languages.php.boundMap.operations.bind = 'create'; }],
+    ['missing Python mapping', manifest => { delete manifest.languages.python; }],
+    ['missing Python RuntimeEnvironment field', manifest => manifest.languages.python.runtimeEnvironmentFields.pop()],
+    ['renamed Python RuntimeEnvironment operation', manifest => { manifest.languages.python.runtimeEnvironmentOperations[1] = 'get_limits'; }],
+    ['renamed Python Scope operation', manifest => { manifest.languages.python.scopeOperations[1] = 'loopMeta'; }],
+    ['renamed Python BoundMap operation', manifest => { manifest.languages.python.boundMap.operations.merge = 'combine'; }],
   ];
   for (const [name, mutate] of mutations) {
     const manifest = structuredClone(original);
@@ -40,10 +46,11 @@ try {
       maxBuffer: 16 * 1024 * 1024,
     });
     if (result.status === 0) throw new Error(`${name} was accepted`);
+    rejected++;
   }
   const backendDirectory = join(directory, 'backends');
   mkdirSync(backendDirectory);
-  for (const filename of ['typescript.mjs', 'go.mjs', 'rust.mjs', 'php.mjs']) {
+  for (const filename of ['typescript.mjs', 'go.mjs', 'rust.mjs', 'php.mjs', 'python.mjs']) {
     copyFileSync(resolve(root, 'packages/template-compiler/backends', filename), join(backendDirectory, filename));
   }
   const rustBackend = join(backendDirectory, 'rust.mjs');
@@ -55,6 +62,7 @@ try {
     maxBuffer: 16 * 1024 * 1024,
   });
   if (backendResult.status === 0) throw new Error('missing backend operation was accepted');
+  rejected++;
   // VAL-22: a public operation added to the TypeScript bound map class is rejected.
   const boundSource = join(directory, 'bound.ts');
   writeFileSync(boundSource, readFileSync(resolve(root, 'packages/template-ts/src/value/bound.ts'), 'utf8').replace('  static {', '  entries(): number {\n    return 0;\n  }\n\n  static {'));
@@ -65,8 +73,9 @@ try {
     maxBuffer: 16 * 1024 * 1024,
   });
   if (boundResult.status === 0 || !boundResult.stderr.includes('BoundMap has the undeclared member entries')) throw new Error('a public bound map operation was accepted');
+  rejected++;
 } finally {
   rmSync(directory, { recursive: true, force: true });
 }
 
-process.stdout.write('compiler interface: 17 structural mutations rejected\n');
+process.stdout.write(`compiler interface: ${rejected} structural mutations rejected\n`);

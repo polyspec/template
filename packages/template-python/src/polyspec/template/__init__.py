@@ -15,7 +15,7 @@ from .number import MAX_SAFE
 from .page_cache import PageCache
 from .parser import PrefixAnalysis, TemplateAnalysis, analyze_template, analyze_template_prefix, \
     parse_template
-from .runtime_environment import RuntimeEnvironment
+from .runtime_environment import RuntimeEnvironment, RuntimeServices
 from .runtime_bindings import RuntimeBindings
 from .scanner import DEFAULT_DELIMITERS, parse_delimiters
 from .source import Source
@@ -28,7 +28,8 @@ __all__ = [
     'Frame', 'FsLoader', 'FunctionContext', 'HostFunction', 'LoadedAst', 'LoadedSource',
     'MapLoader', 'NativeObject', 'PageCache', 'ParseOptions', 'PathError', 'PreparedRender', 'PrefixAnalysis',
     'RenderContext', 'RenderOptions', 'Renderer', 'RuntimeBindings',
-    'RuntimeEnvironment', 'SafeString', 'Scope', 'Source', 'TemplateAnalysis', 'TemplateError',
+    'RuntimeEnvironment', 'RuntimeServices', 'SafeString', 'Scope', 'Source', 'TemplateAnalysis',
+    'TemplateError',
     'analyze', 'analyze_prefix', 'analyze_template', 'analyze_template_prefix', 'bind', 'bind_data', 'bind_map', 'bind_value',
     'check_text', 'internal_boundary', 'merge', 'parse', 'parse_delimiters', 'parse_json',
     'parse_json_bytes', 'parse_template', 'resolve_path',

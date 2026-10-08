@@ -52,7 +52,7 @@ for (const [owner, names] of Object.entries(expectedOperations)) {
 const backendDirectory = process.env.TEMPLATE_BACKEND_DIRECTORY
   ? resolve(process.env.TEMPLATE_BACKEND_DIRECTORY)
   : resolve(root, 'packages/template-compiler/backends');
-const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.mjs', php: 'php.mjs' };
+const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.mjs', php: 'php.mjs', python: 'python.mjs' };
 const backendOperations = manifest.components.LanguageBackend.operations;
 for (const [language, filename] of Object.entries(backendFiles)) {
   const path = resolve(backendDirectory, filename);
@@ -70,7 +70,7 @@ for (const [language, filename] of Object.entries(backendFiles)) {
 }
 
 const core = manifest.supportLevels?.core;
-if (core?.languages?.join(',') !== 'typescript,go,rust,php') throw new Error('core languages are missing or reordered');
+if (core?.languages?.join(',') !== 'typescript,go,rust,php,python') throw new Error('core languages are missing or reordered');
 if (core?.compileModes?.join(',') !== 'ast,gen' || core.conformanceCases !== listCases().length) throw new Error('core support level is incomplete');
 for (const language of core.languages) {
   const mapping = manifest.languages?.[language];
@@ -230,5 +230,6 @@ function run(label, command, args, cwd) {
 run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'packages/template-go'));
 run('rust interface AST check', resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/template-rust'));
 run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/template-php'));
+run('python interface check', 'python3', ['tests/test_compiler_interface.py'], resolve(root, 'packages/template-python'));
 
-process.stdout.write('compiler interface: manifest and TypeScript, Go, Rust, PHP runtime declarations passed\n');
+process.stdout.write('compiler interface: manifest and TypeScript, Go, Rust, PHP, Python runtime declarations passed\n');
