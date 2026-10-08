@@ -35,13 +35,19 @@ Cargo crate:
 polyspec-template = { path = "../template/packages/template-rust" }
 ```
 
+Python 패키지:
+
+```sh
+pip install ../template/packages/template-python
+```
+
 ## 버전
 
 모든 패키지는 버전 `0.0.4`을 선언한다. 버전은 모든 패키지, `make release-consumer-lock`이 쓰는 lock과 함께 `tests/fixtures/release-consumer`의 consumer project, `CHANGELOG.md`에서 함께 바뀌며, 릴리스된 버전 위의 section `## Unreleased`가 마지막 릴리스 뒤의 모든 변경 항목을 담는다.
 
 ## Tag 릴리스
 
-릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`, Composer 패키지 `polyspec/template`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/template-go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/template-go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. `cargo package`는 git 의존성을 해석되지 않는 crates.io 요구로 바꾸기 때문이다(T22.1-5). tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. `make install` 뒤에 그 step은 다음 순서로 `scripts/release.mjs`를 실행하고 첫 실패에서 멈춘다.
+릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`, Composer 패키지 `polyspec/template`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/template-go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/template-go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. `cargo package`는 git 의존성을 해석되지 않는 crates.io 요구로 바꾸기 때문이다(T22.1-5). Python 패키지 `polyspec-template`(`packages/template-python/pyproject.toml`)도 버전 X.Y.Z를 가지며 같은 방식으로 git tag에서 설치한다. registry에 올리지 않기 때문이다(T22.4-15): `pip install "polyspec-template @ git+https://github.com/polyspec/template@vX.Y.Z#subdirectory=packages/template-python"`. tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. `make install` 뒤에 그 step은 다음 순서로 `scripts/release.mjs`를 실행하고 첫 실패에서 멈춘다.
 
 ```sh
 make release-verify
