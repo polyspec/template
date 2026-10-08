@@ -26,10 +26,10 @@ __all__ = [
     'MAX_SAFE', 'BUILTINS', 'DEFAULT_DELIMITERS', 'ERROR_CODES',
     'AstProgram', 'BindError', 'BoundMap', 'Engine', 'EngineOptions', 'Env', 'Evaluator',
     'Frame', 'FsLoader', 'FunctionContext', 'HostFunction', 'LoadedAst', 'LoadedSource',
-    'MapLoader', 'NativeObject', 'PageCache', 'PathError', 'PreparedRender', 'PrefixAnalysis',
-    'PreparedRender', 'RenderContext', 'RenderOptions', 'Renderer', 'RuntimeBindings',
+    'MapLoader', 'NativeObject', 'PageCache', 'ParseOptions', 'PathError', 'PreparedRender', 'PrefixAnalysis',
+    'RenderContext', 'RenderOptions', 'Renderer', 'RuntimeBindings',
     'RuntimeEnvironment', 'SafeString', 'Scope', 'Source', 'TemplateAnalysis', 'TemplateError',
-    'analyze_template', 'analyze_template_prefix', 'bind', 'bind_data', 'bind_map', 'bind_value',
+    'analyze', 'analyze_prefix', 'analyze_template', 'analyze_template_prefix', 'bind', 'bind_data', 'bind_map', 'bind_value',
     'check_text', 'internal_boundary', 'merge', 'parse', 'parse_delimiters', 'parse_json',
     'parse_json_bytes', 'parse_template', 'resolve_path',
 ]
