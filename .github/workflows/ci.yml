@@ -5,23 +5,20 @@
 # CHECK_TARGETS, the full suite of `make check`, runs in exactly one job, and the jobs run no other target
 # (T17.1-10). A verifying job runs every step after a failing step (`!cancelled()`). Every job runs on ubuntu-24.04,
 # pins its actions by commit and installs with `make install`, which installs the npm and Go of the checkout into
-# var/tools with the Go of setup-go (T19.2). The workflow runs on every pull request, every merge group of the merge
-# queue and every manual run (workflow_dispatch, T17.1-9): the ruleset main of
-# .github/ruleset.json requires the job ci-passed, the last job, which passes only when every other job of this workflow
-# passed (T22.1-3), and the queue moves main to the merge group commit only after it passed on it, so the run of the
-# merge group is the evidence of the commit that main receives (T17.1-7); .github/workflows/release.yml releases a tag.
-# A new push to a pull request cancels the run of its previous push; a merge group has a ref of its own, and its run is
-# never cancelled.
+# var/tools with the Go of setup-go (T19.2). The workflow runs on every push to main and every manual run
+# (workflow_dispatch): the job ci-passed, the last job, passes only when every other job of this workflow passed
+# (T22.1-3), and a release requires its check run on the tagged commit of main; .github/workflows/release.yml
+# releases a tag. A newer push to a branch does not cancel the run of an earlier push.
 name: CI
 
 on:
-  pull_request:
-  merge_group:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -54,7 +51,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-browsers
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="test-scripts install-check dependency-audit language-test-matrix function-contract-check function-inventory-check feature-check benchmark-check lint-go lint-rust"
+      - run: make ci-targets TARGETS="kit-test test-scripts install-check dependency-audit language-test-matrix function-contract-check function-inventory-check feature-check benchmark-check lint-go lint-rust"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -164,7 +161,7 @@ jobs:
           cache: false
       - run: make install
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="docs-check rules-check"
+      - run: make ci-targets TARGETS="push-gate-commit docs-check rules-check kit-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -357,7 +354,7 @@ jobs:
           path: var/report/ci-targets/
           if-no-files-found: error
 
-  # The check of this workflow that the ruleset main requires (T22.1-3). It runs after every other job, also after a
+  # The check of this workflow that a release requires (T22.1-3). It runs after every other job, also after a
   # failed, skipped or cancelled one (if: always()), and make ci-passed fails unless every job of needs has the result
   # success, so a new job of this workflow is required once it is listed in needs. Its step has no condition of its own:
   # a skipped step would pass the check. It installs nothing; make ci-passed needs only the Node.js of .node-version.

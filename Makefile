@@ -1,9 +1,9 @@
 # Build, test and documentation targets. Every target is idempotent.
 
-# make install-tools installs the npm of packageManager in package.json and the Go of packages/template-go/go.mod into
-# var/tools (scripts/install-tools.mjs); their wrappers in var/tools/bin come first, so every recipe uses the tools of
-# the checkout and never the npm or Go of the machine (T19.2). GOTOOLCHAIN=local keeps go from downloading another
-# toolchain at run time.
+# make install-tools (scripts/kit/install-tools.mjs) installs the npm of packageManager in package.json, the Go of
+# packages/template-go/go.mod and the ruff of packages/template-python/pyproject.toml into var/tools; their wrappers in
+# var/tools/bin come first, so every recipe uses the tools of the checkout and never the npm or Go of the machine (T19.2).
+# GOTOOLCHAIN=local keeps go from downloading another toolchain at run time.
 export PATH := $(CURDIR)/var/tools/bin:$(HOME)/.cargo/bin:$(PATH)
 export GOTOOLCHAIN := local
 # go builds into the build cache of the checkout, never into a cache that other checkouts and runs share (T19.14).
@@ -25,33 +25,32 @@ unexport CARGO_TARGET_DIR
 # integrity (AGENTS): make install downloads what the checks read, and every recipe and the scripts that it starts run
 # cargo, go, npm and Composer offline, so a missing download fails at once instead of reaching a registry in one run and
 # not in another (T20.1-2). The targets that resolve or download, install, install-tools, dependency-review and
-# release-consumer-lock, run their commands with $(ONLINE); the install test of the release assets runs npm ci of its
-# committed lock online (scripts/release-consumer.mjs).
+# release-consumer-lock, run their commands with $(ONLINE); make release-consumer installs the archives of a release with
+# its committed locks online (scripts/kit/release-consumer.mjs).
 export CARGO_NET_OFFLINE := true
 export GOPROXY := off
 export npm_config_offline := true
 export COMPOSER_DISABLE_NETWORK := 1
 ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK
 
-# Git runs the hooks of core.hooksPath. Every make invocation sets it to the tracked hooks in .githooks, whose pre-push
-# hook runs the push gate scripts/push-gate.mjs (T17.1-3); `make hooks` installs and checks it.
-ifneq ($(shell git config core.hooksPath),.githooks)
-$(shell git config core.hooksPath .githooks)
-endif
-
 .DEFAULT_GOAL := help
 # make keeps going after a failed target and fails at the end, so one run reports every failure (T19.8). A target that
 # runs several checks names them as prerequisites of one command each, because make stops a recipe at its first
 # failed command; a prerequisite that fails keeps the targets that depend on it from running.
 MAKEFLAGS += -k
+
+# The shared targets of kit (kit-sync, kit-check, kit-test, hooks, push-gate-commit, rerun-failed, documents-check, owner-check,
+# ci-targets, ci-passed, release-*, dependency-*, install-tools, toolchain-check, cargo-downloads-check, lint-python),
+# vendored from polyspec/kit with .kit/kit.lock.json. Only config/*.json differ between repositories.
+include scripts/kit/kit.mk
+
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
 	conformance delimiter-matrix parity test-browser ext ext-arginfo test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
-	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-policy-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install install-tools lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers ci-targets cargo-downloads-check uninstall-cli rerun-failed \
-	owner-check conformance-cases function-inventory-check dependency-review hooks hooks-check push-gate-commit github-ruleset github-ruleset-check ci-passed \
-	release-verify release-versions release-assets release-publish release-consumer-lock
+	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-audit release-test-matrix release-check docs-static-check clean \
+	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
+	conformance-cases function-inventory-check
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -89,19 +88,12 @@ TMGRAMMAR  := node $(CURDIR)/node_modules/vscode-tmgrammar-test/dist/unit.js
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  check                  The full suite through scripts/full-run.mjs: once per tree, when no checklist task is [~]"
-	@echo "  rerun-failed           Rerun the targets of check that did not pass on the current tree"
-	@echo "  hooks                  Set core.hooksPath to .githooks and check the pre-push hook of the push gate"
-	@echo "  hooks-check            Fail while core.hooksPath is not .githooks or .githooks/pre-push is not executable"
-	@echo "  push-gate-commit       The push gate of CI on COMMIT (HEAD): fail while it has a task [~] or no executable pre-push hook"
-	@echo "  github-ruleset         Change the GitHub ruleset and repository settings of .github/ruleset.json where they differ"
-	@echo "  github-ruleset-check   Fail when the live GitHub ruleset or repository settings differ from .github/ruleset.json"
-	@echo "  owner-check            The owner checks of the changed paths (scripts/owner-checks.json); PATHS or BASE select the paths"
+	@echo "  check                  The full suite through scripts/kit/full-run.mjs: once per tree, when no checklist task is [~]"
+	@echo "  kit-sync|kit-check|kit-test|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|documents-check|ci-targets|install-tools|dependency-policy-check|dependency-review|lint-python|release-*   Targets of scripts/kit/kit.mk"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
 	@echo "  lint-js                eslint on the TypeScript sources"
 	@echo "  install                install-tools; npm ci: every dependency as a copy, no bin links; the Rust toolchain of rust-toolchain.toml"
-	@echo "  install-tools          npm of package.json packageManager and Go of go.mod into var/tools, first on PATH"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  test-scripts           Tests of the test runner and the conformance runners"
@@ -126,9 +118,7 @@ help: ## List targets
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  release-test-matrix    The full suite of make check through the same guard"
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
-	@echo "  dependency-audit       The dependency gate, which also rejects a lock with an advisory at its review"
-	@echo "  dependency-policy-check Check manifests and locks against the policy and the review record, without a network"
-	@echo "  dependency-review      Ask the registries for newer stable releases and advisories; RECORD=1 records the review, UPDATE=1 updates first"
+	@echo "  dependency-audit       The dependency gate and its mutation check, which also reject a lock with an advisory at its review"
 	@echo "  build-language           Build the formatter library and the template-fmt CLI"
 	@echo "  test-language            Formatter, safety invariant and CLI tests, type check"
 	@echo "  build-lsp              Build the language server template-lsp"
@@ -147,19 +137,16 @@ help: ## List targets
 	@echo "  clean                  Remove build outputs"
 
 # The targets of the full suite, the one list of every runner: `make check`, `make release-test-matrix` and `make
-# release-check` in a clean checkout run them through the guard scripts/full-run.mjs, which refuses while a checklist
+# release-check` in a clean checkout run them through the guard scripts/kit/full-run.mjs, which refuses while a checklist
 # task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree, runs
 # each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-js and conformance-ts. The list
-# stays on one line: scripts/owner-check.mjs reads it.
-CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+# stays on one line: scripts/kit/owner-check.mjs reads it.
+CHECK_TARGETS := push-gate-commit kit-check kit-test docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
-	node scripts/full-run.mjs run $(CHECK_TARGETS)
-
-rerun-failed: ## Rerun only the targets of make check that did not pass on the current tree
-	node scripts/full-run.mjs rerun-failed
+	node scripts/kit/full-run.mjs run $(CHECK_TARGETS)
 
 lint: lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php ## Lint every package
 
@@ -195,43 +182,13 @@ install: install-tools ## Install the tools of the checkout, the npm dependencie
 install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
 	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
 
-# The CI jobs run their targets with make ci-targets: each target runs to its end also after a failure, and the report
-# in var/report/ci-targets holds the log of each target and a summary of the failures, which the job uploads (T20.1-9).
-ci-targets: ## Run TARGETS past failures and write their logs and summary to var/report/ci-targets
-	node scripts/ci-targets.mjs $(CURDIR)/var/report/ci-targets $(TARGETS)
-
-# ci-passed is the step of the job ci-passed, the last job of .github/workflows/ci.yml and its check that the ruleset main
-# requires: it fails unless every job of RESULTS, the JSON of needs, has the result success (T22.1-3). make passes a
-# variable of its command line to the environment of the recipe, so the script reads RESULTS there and the JSON never
-# becomes shell text.
-ci-passed: ## Fail unless every job of RESULTS, the JSON of needs of the job ci-passed, has the result success
-	node scripts/ci-passed.mjs
-
-# The steps of .github/workflows/release.yml for the tag TAG (scripts/release.mjs, T22.1-4), in this order: release-verify
-# requires the tagged commit on origin/main with the checks push-gate and ci-passed passed, release-versions the version
-# of the tag in every manifest and its section in CHANGELOG.md, release-assets builds the npm packages and packs the npm
-# tarballs and Composer zips into var/release/assets, and release-publish creates the GitHub Release. The workflow sets
-# TAG in the environment, and the recipe passes it as "$$TAG", so the name of a tag never becomes shell text. A Go module
-# tag <directory>/vX.Y.Z builds and attaches nothing, so release-assets builds the npm packages only for a tag without /
-# (T22.1-5).
-release-verify release-versions release-assets release-publish: ## A step of the release of the tag TAG (release.yml)
-	$(if $(TAG),,$(error make $@ needs TAG=<tag>, a tag vX.Y.Z or packages/template-go/vX.Y.Z))
-	node scripts/release.mjs $(@:release-%=%) "$$TAG"
+# The release steps and the consumer locks are the targets of scripts/kit/kit.mk (config/release.json). The archives are built
+# from the built npm packages, so the targets that build or lock them run those builds first.
 release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror)
-
-# The locks of the consumer projects of tests/fixtures/release-consumer, written from their manifests and the archives of
-# the built packages of the tree (scripts/release-consumer.mjs, T22.3-1); a release that changes the version runs it.
-release-consumer-lock: build-ts build-language build-lsp build-codemirror ## Write the locks of the consumer projects of the release assets
-	$(ONLINE) node scripts/release-consumer.mjs lock
+release-consumer release-consumer-lock: build-ts build-language build-lsp build-codemirror
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
-
-cargo-downloads-check: ## Check that the crates of every Cargo.lock are downloaded; names make install otherwise
-	node scripts/check-cargo-downloads.mjs
-
-install-tools: ## Install npm and Go of the checkout into var/tools; skipped when the exact versions are present
-	$(ONLINE) node scripts/install-tools.mjs
 
 build-ts: ## Build the TypeScript package
 	node scripts/build-package.mjs --package template-ts --install
@@ -249,7 +206,7 @@ test-ts: test-ts-unit test-ts-types test-ts-types-node ## TypeScript unit tests 
 
 .PHONY: test-ts-unit test-ts-types test-ts-types-node
 test-ts-unit: build-ts
-	node scripts/run-tests.mjs vitest --cwd $(TS_DIR)
+	node scripts/kit/run-tests.mjs vitest --cwd $(TS_DIR)
 test-ts-types: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json
 test-ts-types-node: build-ts
@@ -261,7 +218,7 @@ test-go: test-go-vet test-go-unit ## Go unit tests
 test-go-vet:
 	cd $(GO_DIR) && go vet ./...
 test-go-unit:
-	node scripts/run-tests.mjs go --cwd $(GO_DIR) -- -race ./...
+	node scripts/kit/run-tests.mjs go --cwd $(GO_DIR) -- -race ./...
 
 test-rust: test-rust-clippy test-rust-unit ## Rust clippy and tests
 
@@ -269,13 +226,13 @@ test-rust: test-rust-clippy test-rust-unit ## Rust clippy and tests
 test-rust-clippy: cargo-downloads-check
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
 test-rust-unit: cargo-downloads-check
-	node scripts/run-tests.mjs cargo --cwd $(RUST_DIR) -- --locked
+	node scripts/kit/run-tests.mjs cargo --cwd $(RUST_DIR) -- --locked
 
 test-php: build-php ## PHP unit tests
-	node scripts/run-tests.mjs phpunit --cwd $(PHP_DIR)
+	node scripts/kit/run-tests.mjs phpunit --cwd $(PHP_DIR)
 
 test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php ## Tests of the test runner and the conformance runners
-	node scripts/run-tests.mjs node -- tests/scripts/
+	node scripts/kit/run-tests.mjs node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
 	node scripts/build-package.mjs --package template-language --install
@@ -284,7 +241,7 @@ test-language: test-language-unit test-language-types ## Formatter, safety invar
 
 .PHONY: test-language-unit test-language-types
 test-language-unit: build-language
-	node scripts/run-tests.mjs vitest --cwd $(LANGUAGE_DIR)
+	node scripts/kit/run-tests.mjs vitest --cwd $(LANGUAGE_DIR)
 test-language-types: build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
@@ -295,7 +252,7 @@ test-lsp: test-lsp-unit test-lsp-types ## Language server protocol tests against
 
 .PHONY: test-lsp-unit test-lsp-types
 test-lsp-unit: build-lsp
-	node scripts/run-tests.mjs vitest --cwd $(LSP_DIR)
+	node scripts/kit/run-tests.mjs vitest --cwd $(LSP_DIR)
 test-lsp-types: build-lsp
 	$(TSC) --noEmit -p $(LSP_DIR)/tsconfig.json
 
@@ -313,7 +270,7 @@ test-codemirror: test-codemirror-unit test-codemirror-browser test-codemirror-ty
 
 .PHONY: test-codemirror-unit test-codemirror-browser test-codemirror-types
 test-codemirror-unit: build-codemirror
-	node scripts/run-tests.mjs vitest --cwd $(CODEMIRROR_DIR)
+	node scripts/kit/run-tests.mjs vitest --cwd $(CODEMIRROR_DIR)
 test-codemirror-browser: build-codemirror
 	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
 test-codemirror-types: build-codemirror
@@ -334,7 +291,7 @@ test-vscode: test-vscode-grammar test-vscode-unit test-vscode-types ## Grammar t
 test-vscode-grammar: build-vscode
 	cd $(VSCODE_DIR) && $(TMGRAMMAR) --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json "tests/grammar/*.tpl"
 test-vscode-unit: build-vscode
-	node scripts/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
+	node scripts/kit/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
 test-vscode-types: build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
@@ -393,34 +350,6 @@ conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
 	node tests/runner/function-inventory.mjs
 
-hooks: ## Set core.hooksPath to .githooks and check the pre-push hook of the push gate
-	git config core.hooksPath .githooks
-	node scripts/push-gate.mjs hooks-check
-
-hooks-check: ## Fail while core.hooksPath is not .githooks or .githooks/pre-push is not executable
-	node scripts/push-gate.mjs hooks-check
-
-# The job push-gate of .github/workflows/push-gate.yml runs this target on the pushed commit (T17.1-3).
-COMMIT ?= HEAD
-push-gate-commit: ## Fail while COMMIT (HEAD) has a checklist task [~] or does not track an executable pre-push hook
-	node scripts/push-gate.mjs commit $(COMMIT)
-
-# The GitHub CLI of the machine, authenticated with administration access to the repository; only the targets
-# github-ruleset and github-ruleset-check start it.
-GH := gh
-# The GitHub ruleset main and the repository settings of .github/ruleset.json (scripts/github-ruleset.mjs): main receives
-# a change only through a pull request and the merge queue, after every required check passed on the merge group, and no
-# target of this repository pushes main (T17.1-7). These targets reach the GitHub API, so no target of the full suite
-# runs them.
-github-ruleset: ## Change the repository settings and create or update the ruleset of .github/ruleset.json where they differ, then compare again
-	node scripts/github-ruleset.mjs apply --gh $(GH)
-
-github-ruleset-check: ## Fail when the live repository settings or ruleset differ from .github/ruleset.json, naming each field
-	node scripts/github-ruleset.mjs check --gh $(GH)
-
-owner-check: hooks-check ## Run the owner checks of the changed paths: PATHS, the paths since BASE, or the uncommitted changes
-	node scripts/owner-check.mjs $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base "$(BASE)")
-
 install-check: install-workspace-check package-installs-check ## Install immutable package artifacts in isolated install projects
 
 .PHONY: install-workspace-check package-installs-check
@@ -454,7 +383,7 @@ build-ext-php:
 test-ext-conformance: cargo-downloads-check ext
 	node tests/runner/conformance.mjs --langs php-ext
 test-ext-unit: ext build-ext-php
-	node scripts/run-tests.mjs phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
+	node scripts/kit/run-tests.mjs phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
 rules-check: ## Check case.json rule identifiers against the specification
 	node scripts/check-rules.mjs
@@ -465,18 +394,9 @@ editor-boundary-check: ## Check that adapters do not use the parser and the lang
 # The dependency gate reads only the files of the checkout: the manifests, the locks, config/dependency-policy.json and
 # the review record config/dependency-review.json, so one tree gives one result at any time. make dependency-review asks
 # the registries; it is a developer command and a scheduled workflow, not a step of make check or of the gating CI jobs.
-dependency-policy-check: dependency-policy-state-check dependency-policy-mutation-check ## Check manifests and locks against the policy and the review record, without a network
+dependency-audit: dependency-policy-check dependency-policy-mutation-check ## The dependency gate and its mutation check, which also reject a lock with an advisory at its review
 
-.PHONY: dependency-policy-state-check dependency-policy-mutation-check
-dependency-policy-state-check:
-	node scripts/check-dependency-policy.mjs
-dependency-policy-mutation-check:
-	node scripts/check-dependency-policy-mutation.mjs
-
-dependency-audit: dependency-policy-check ## The dependency gate, which also rejects a lock with an advisory at its review
-
-dependency-review: install-tools ## Ask the registries for newer stable releases and advisories; RECORD=1 records the review, UPDATE=1 updates first
-	$(ONLINE) node scripts/dependency-review.mjs $(if $(RECORD),--record) $(if $(UPDATE),--update)
+dependency-review: install-tools
 
 doc-coverage: ## Check that public symbols carry documentation comments
 	node scripts/check-doc-coverage.mjs
@@ -491,15 +411,13 @@ schema-mutations-check:
 
 docs-check: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check schema-check doc-coverage benchmark-docs-check feature-check ## Document checks
 
-.PHONY: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check benchmark-docs-check feature-pages-check feature-contracts-check
+.PHONY: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check benchmark-docs-check feature-pages-check feature-contracts-check
 runtime-interface-diagrams-check:
 	node scripts/generate-runtime-interface.mjs --check
 compiler-interface-diagrams-check:
 	node scripts/generate-compiler-interface.mjs --check
 showcase-contract-diagrams-check:
 	node scripts/generate-showcase-contract.mjs --check
-documents-check:
-	node scripts/check-documents.mjs
 benchmark-docs-check:
 	node scripts/update-benchmark-docs.mjs --check
 
@@ -589,7 +507,7 @@ language-test-matrix-mutations-check:
 	node scripts/check-language-test-matrix-mutations.mjs
 
 release-test-matrix: ## The full suite of make check through the same guard: every target of CHECK_TARGETS to its end
-	node scripts/full-run.mjs run $(CHECK_TARGETS)
+	node scripts/kit/full-run.mjs run $(CHECK_TARGETS)
 
 release-check: ## Install and run the release matrix in an isolated clean worktree
 	node scripts/check-clean-release.mjs
@@ -648,4 +566,3 @@ typed-generator-compile-check: cargo-downloads-check build-php compiler-ir-check
 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
-

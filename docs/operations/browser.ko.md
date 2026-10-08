@@ -1,3 +1,5 @@
+<!-- doc-id: docs-operations-browser -->
+<!-- source-sha256: a00a9f6592e188ca07fd85b6d05ffe898df166d6c9ed03041f0c02cdcf7185d9 -->
 # 브라우저 렌더링
 
 [English](/operations/browser).

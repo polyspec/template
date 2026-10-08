@@ -1,10 +1,10 @@
 // Tests that a failure names what failed with the expected and the actual value or the fix (T19.10):
 // - the generated Go and Rust conformance runners name each failed case instead of "the failed cases are listed above";
-// - scripts/run-tests.mjs names a tool that cannot start, with its command and the install fix, instead of an unhandled
+// - scripts/kit/run-tests.mjs names a tool that cannot start, with its command and the install fix, instead of an unhandled
 //   `error` event;
 // - a CLI call of the conformance drivers that outlives its limit names the limit and the command;
 // - the Go and PHP install projects print the expected and the actual output;
-// - the PHP extension tests run through scripts/run-tests.mjs, which prints each test with its elapsed time.
+// - the PHP extension tests run through scripts/kit/run-tests.mjs, which prints each test with its elapsed time.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -39,7 +39,7 @@ test('the generated runners name each case whose generated test failed', async (
 test('a tool that cannot start fails with its command and the install fix', (t) => {
   // An empty directory as PATH: go cannot start; the runner itself starts with the path of node.
   const bin = directory(t, 'template-no-go-');
-  const run = spawnSync(process.execPath, [path.join(ROOT, 'scripts/run-tests.mjs'), 'go', '--cwd', bin, '--', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
+  const run = spawnSync(process.execPath, [path.join(ROOT, 'scripts/kit/run-tests.mjs'), 'go', '--cwd', bin, '--', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
   assert.match(run.stdout, /✖ go .*: cannot start go: spawn go ENOENT; run make install-tools, which installs Go into var\/tools/);
@@ -67,9 +67,9 @@ test('the Go and PHP install projects print the expected and the actual output',
   assert.match(source, /"PHP \$name output differs\\\\nexpected: "\.json_encode\(\$expected\)\."\\\\nactual: {3}"\.json_encode\(\$actual\)/);
 });
 
-test('the PHP extension tests run through scripts/run-tests.mjs', () => {
+test('the PHP extension tests run through scripts/kit/run-tests.mjs', () => {
   const run = spawnSync('make', ['--no-print-directory', '-n', 'test-ext-unit'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /^node scripts\/run-tests\.mjs phpunit --php-extension var\/build\/polyspec_template\.so --cwd packages\/template-php-ext$/m);
+  assert.match(run.stdout, /^node scripts\/kit\/run-tests\.mjs phpunit --php-extension var\/build\/polyspec_template\.so --cwd packages\/template-php-ext$/m);
   assert.doesNotMatch(run.stdout, /run-tests\.sh/);
 });

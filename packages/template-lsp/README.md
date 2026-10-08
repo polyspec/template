@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-lsp-readme -->
 # @polyspec/template-lsp
 
 [한국어](README.ko.md).

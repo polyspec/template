@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-data-model -->
 # Data model
 
 [한국어](/ko/spec/data-model).

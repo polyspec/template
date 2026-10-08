@@ -1,3 +1,5 @@
+<!-- doc-id: docs-operations-template-functions -->
+<!-- source-sha256: c6d3e8ac49e0dd751f49952860511e73e993a60df6f5b5990fb34f5cdeff1e23 -->
 # 템플릿 함수 inventory
 
 inventory 도구는 명시적으로 전달한 source tree의 추적된 `.tpl` 파일만 읽는다. 호출 형태를 category별로 기록하며 일반 JavaScript, CSS, comment와 raw PHP block은 제외한다.

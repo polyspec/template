@@ -10,6 +10,9 @@
       "php": "8.2.0"
     }
   ],
+  "pythonManifests": [
+    "packages/template-python/pyproject.toml"
+  ],
   "exceptions": [
     {
       "ecosystem": "npm",

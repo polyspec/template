@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-ast -->
 # AST
 
 [한국어](/ko/spec/ast).

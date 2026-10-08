@@ -1,3 +1,4 @@
+<!-- doc-id: docs-operations-documentation -->
 # Documentation
 
 [한국어](/ko/operations/documentation).
@@ -22,11 +23,12 @@ Every document has a `.ko.md` file with the same information.
 - A document describes current behavior. A part that is specified but not implemented is marked as such in the specification and in `docs/features.md`.
 - Feature rows use the values `not-started`, `in-progress`, `implemented` for implementation; `pending`, `passed`, `failed` for verification; `not-deployed`, `deployed` for deployment; and a relative link as evidence.
 - Code blocks are identical in the English and the Korean file.
+- Both files of a pair hold the same `<!-- doc-id: <id> -->` once, and the Korean file holds `<!-- source-sha256: <sha256 of the English file> -->` once, which is updated after the translation is reviewed.
 
 ## Checker
 
 ```sh
-node scripts/check-documents.mjs
+node scripts/kit/check-documents.mjs
 ```
 
 The checker fails when a document has no translation pair, a relative link does not resolve, a link is absolute, code blocks differ between the two languages, a feature row has an invalid status or no evidence link, a task row of the checklist `docs/plans/execution-checklist.md` has an invalid state or differs between the two languages, or the checklist holds a line other than a heading, its title included, or a task table row, or a state marker or task list marker anywhere other than the start of the last cell of a task row; it reports such a line or marker with the file, the line and the column. `make docs-check` runs the checker.

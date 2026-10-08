@@ -1,3 +1,4 @@
+<!-- doc-id: schema-readme -->
 # Schema
 
 [한국어](README.ko.md).

@@ -1,3 +1,5 @@
+<!-- doc-id: docs-operations-benchmark -->
+<!-- source-sha256: e498dcdc4b3816603aafd2afd3c3088520b204bc467ef3e266c255ca3873d90e -->
 # 성능 측정
 
 제품 산출물 벤치마크는 다음 명령으로 실행한다.

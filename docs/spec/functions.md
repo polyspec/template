@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-functions -->
 # Functions
 
 [한국어](/ko/spec/functions).

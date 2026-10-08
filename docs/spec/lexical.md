@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-lexical -->
 # Lexical rules
 
 [한국어](/ko/spec/lexical).

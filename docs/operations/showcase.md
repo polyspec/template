@@ -1,3 +1,4 @@
+<!-- doc-id: docs-operations-showcase -->
 # Example site
 
 [한국어](/ko/operations/showcase).

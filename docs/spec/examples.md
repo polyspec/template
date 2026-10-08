@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-examples -->
 # Examples
 
 [한국어](/ko/spec/examples).

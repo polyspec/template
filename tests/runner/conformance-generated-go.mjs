@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Go generated conformance: compiles every case into its own Go package and runs the packages with
-// scripts/run-tests.mjs, which prints each case test with its elapsed time and stops a test that
+// scripts/kit/run-tests.mjs, which prints each case test with its elapsed time and stops a test that
 // outlives its own timeout.
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

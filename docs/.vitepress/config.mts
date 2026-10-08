@@ -139,7 +139,7 @@ const rewrites = Object.fromEntries(koreanDocuments().map((source) => {
 }));
 
 // The site renders the Markdown documents of docs/ plus the top-level README and CHANGELOG.
-// Relative links to files outside docs/ resolve on the file system; scripts/check-documents.mjs
+// Relative links to files outside docs/ resolve on the file system; scripts/kit/check-documents.mjs
 // verifies every link, so the site does not repeat that check.
 export default defineConfig({
   base,

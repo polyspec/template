@@ -1,5 +1,5 @@
 // Tests that the unit tests of the TypeScript packages and of the VS Code extension run through
-// scripts/run-tests.mjs, which prints each test with its elapsed time and gives it its own timeout.
+// scripts/kit/run-tests.mjs, which prints each test with its elapsed time and gives it its own timeout.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -20,16 +20,16 @@ function commands(target) {
 const RUNS_TESTS_DIRECTLY = /\bnpm (?:test|run test:extension)\b|\bvitest\b(?! --cwd)|\bnode --test\b/;
 
 for (const [target, runner] of [
-  ['test-ts', 'node scripts/run-tests.mjs vitest --cwd packages/template-ts'],
-  ['test-language', 'node scripts/run-tests.mjs vitest --cwd packages/template-language'],
-  ['test-lsp', 'node scripts/run-tests.mjs vitest --cwd packages/template-lsp'],
-  ['test-codemirror', 'node scripts/run-tests.mjs vitest --cwd packages/template-codemirror'],
-  ['test-vscode', 'node scripts/run-tests.mjs node --cwd packages/template-vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs'],
+  ['test-ts', 'node scripts/kit/run-tests.mjs vitest --cwd packages/template-ts'],
+  ['test-language', 'node scripts/kit/run-tests.mjs vitest --cwd packages/template-language'],
+  ['test-lsp', 'node scripts/kit/run-tests.mjs vitest --cwd packages/template-lsp'],
+  ['test-codemirror', 'node scripts/kit/run-tests.mjs vitest --cwd packages/template-codemirror'],
+  ['test-vscode', 'node scripts/kit/run-tests.mjs node --cwd packages/template-vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs'],
 ]) {
-  test(`${target} runs its unit tests through scripts/run-tests.mjs`, () => {
+  test(`${target} runs its unit tests through scripts/kit/run-tests.mjs`, () => {
     const lines = commands(target);
     assert.ok(lines.includes(runner), lines.join('\n'));
-    assert.deepEqual(lines.filter(line => !line.startsWith('node scripts/run-tests.mjs') && RUNS_TESTS_DIRECTLY.test(line)), []);
+    assert.deepEqual(lines.filter(line => !line.startsWith('node scripts/kit/run-tests.mjs') && RUNS_TESTS_DIRECTLY.test(line)), []);
   });
 }
 
@@ -44,7 +44,7 @@ for (const [target, reader] of [
   ['showcase', 'tools/showcase/build.mjs runs tools/showcase/adapters/php.php'],
   ['typed-generator-compile-check', 'scripts/check-typed-generator.mjs'],
   ['compiler-interface-check', 'scripts/check-compiler-interface.mjs'],
-  ['test-php', 'scripts/run-tests.mjs phpunit'],
+  ['test-php', 'scripts/kit/run-tests.mjs phpunit'],
 ]) {
   test(`${target} installs the Composer packages of template-php before ${reader}`, () => {
     const lines = commands(target);

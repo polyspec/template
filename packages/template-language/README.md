@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-language-readme -->
 # @polyspec/template-language
 
 [한국어](README.ko.md).

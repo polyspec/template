@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-expressions -->
+<!-- source-sha256: 5cff4143ad2ac7c8dece4b5f6936e145ef17616bad4b4c638e6bb233b6a54449 -->
 # 표현식
 
 [English](/spec/expressions).

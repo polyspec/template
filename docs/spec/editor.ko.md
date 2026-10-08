@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-editor -->
+<!-- source-sha256: fffed03638ccd30d673c9b2a8354ae0a54b98ae48404047fd3f89b982b10dbb0 -->
 # 에디터 지원
 
 [English](/spec/editor).

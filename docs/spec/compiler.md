@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-compiler -->
 # Compiler contract
 
 [한국어](/ko/spec/compiler).

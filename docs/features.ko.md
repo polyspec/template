@@ -1,3 +1,5 @@
+<!-- doc-id: docs-features -->
+<!-- source-sha256: 5a6790a54e827e1a18996fe4c9b81e80e7bc72d23467f91d115205cd84a6f15e -->
 # 기능 상태
 
 실행 정본은 [contracts/features.json](../contracts/features.json)이다. 각 항목은 input, output, 상태 전이, 오류, client 지원 상태, fixture, test, 검증 명령과 paired document를 정의한다.

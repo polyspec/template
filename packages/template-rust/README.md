@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-rust-readme -->
 # polyspec-template
 
 [한국어](README.ko.md).

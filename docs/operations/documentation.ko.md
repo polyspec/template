@@ -1,3 +1,5 @@
+<!-- doc-id: docs-operations-documentation -->
+<!-- source-sha256: 3d53fe2791f24cc3486678bc678ab95d3d8838d8354b2d66d391f9ab42939334 -->
 # 문서
 
 [English](/operations/documentation).
@@ -21,12 +23,13 @@
 - `docs/spec/`의 규칙은 `LEX-1`과 같은 식별자를 가진다. 픽스처와 테스트는 식별자를 인용한다.
 - 문서는 현재 동작을 서술한다. 명세되었지만 구현되지 않은 부분은 명세와 `docs/features.md`에 그렇게 표시한다.
 - 기능 행은 구현에 `not-started`, `in-progress`, `implemented`, 검증에 `pending`, `passed`, `failed`, 배포에 `not-deployed`, `deployed` 값과 근거로 상대 링크를 사용한다.
-- 코드 블록은 영어 파일과 한국어 파일에서 동일하다.
+- 코드 블록은 영어 파일과 한글 파일에서 같다.
+- 쌍의 두 파일은 같은 `<!-- doc-id: <id> -->`를 한 번 가지고, 한글 파일은 `<!-- source-sha256: <영어 파일의 sha256> -->`를 한 번 가지며, 이 값은 번역을 검토한 뒤에 갱신한다.
 
 ## 검사기
 
 ```sh
-node scripts/check-documents.mjs
+node scripts/kit/check-documents.mjs
 ```
 
 검사기는 문서에 번역 쌍이 없거나, 상대 링크가 해석되지 않거나, 링크가 절대 경로이거나, 두 언어의 코드 블록이 다르거나, 기능 행의 상태가 유효하지 않거나 근거 링크가 없거나, checklist `docs/plans/execution-checklist.md`의 작업 행 상태가 유효하지 않거나 두 언어 사이에 다르거나, checklist에 heading(제목 포함)이나 작업 표 행이 아닌 줄이 있거나, 상태 표시나 task list 표시가 작업 행 마지막 칸의 시작이 아닌 곳에 있으면 실패하고, 그런 줄과 표시는 file, 줄, 열과 함께 보고한다. `make docs-check`가 검사기를 실행한다.

@@ -1,3 +1,5 @@
+<!-- doc-id: tests-fixtures-expr-readme -->
+<!-- source-sha256: 2cd155bf12f5920cdfad292b372737c74e63ed1aaa457e3af59287704496b034 -->
 # 표현식 픽스처
 
 [English](README.md).

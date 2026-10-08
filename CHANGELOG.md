@@ -1,9 +1,11 @@
+<!-- doc-id: changelog -->
 # Changelog
 
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
 
+- T22.4-27: the shared tools are the vendored copy of `polyspec/kit` v0.0.4 (`scripts/kit/`, `tests/kit/`, `kit.json`, `.kit/kit.lock.json`). The repository copies of the dependency review and gate, the push gate, the full-run guard, the owner check, the release, the consumer install, `install-tools`, `ci-targets`, `ci-passed`, `target-report`, `run-tests`, `check-documents`, `holder-lock`, `git-hooks`, `github-ruleset` and `check-cargo-downloads` and their tests are removed, and `config/` holds the declarations of kit. Every document pair holds a `doc-id`, and the Korean file holds the `source-sha256` of the English file. Version 0.x has no pull request, merge queue or ruleset: `.github/ruleset.json` and `push-gate.yml` are removed, `ci.yml` runs on a push to `main` and a manual run, and `release.yml` requires the check `ci-passed`. `config/release.json` lists the packages of the release, whose assets are named `<package>-<language>-<version>.<ext>`.
 - T22.4-20-9: the features pages and the showcase artifacts are regenerated, so the contract digests of the committed artifacts name the compiler of the tree.
 - T22.4-7: a unit test of `tests/scripts/toolchain-files.test.mjs` checks that the `python` job of `ci.yml` runs `test-python`, `conformance-python` and `conformance-generated-python` and that `ci-passed` needs it; T22.4-19 and T22.4-19-1 are verified by their commands.
 - Regenerated the compiled AST manifests, the generated manifests and `examples/site/index.html` after the interface change, so their contract digests match the contract (T22.4-24-1).

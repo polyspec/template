@@ -1,3 +1,4 @@
+<!-- doc-id: docs-operations-testing -->
 # Release testing
 
 [한국어](/ko/operations/testing).
@@ -8,7 +9,7 @@ The release gate runs with:
 make release-test-matrix
 ```
 
-It runs the full suite of `make check` through the same guard `scripts/full-run.mjs`: every target of `CHECK_TARGETS` in the `Makefile`, each with `make <target>` to its end, whether an earlier target failed or not, and it records the result of each target with its elapsed time in `var/full-run.json`. `CHECK_TARGETS` is the one list of the full suite; `make check`, `make release-test-matrix` and `make release-check` run it, and the jobs of the CI workflow run each of its targets in exactly one job with `make ci-targets` and upload their reports. The guard runs once per tree, so after `make check` on a tree `make release-test-matrix` refuses that tree and names its run; `make rerun-failed` reruns the targets that did not pass. The targets cover seven layers:
+It runs the full suite of `make check` through the same guard `scripts/kit/full-run.mjs`: every target of `CHECK_TARGETS` in the `Makefile`, each with `make <target>` to its end, whether an earlier target failed or not, and it records the result of each target with its elapsed time in `var/full-run.json`. `CHECK_TARGETS` is the one list of the full suite; `make check`, `make release-test-matrix` and `make release-check` run it, and the jobs of the CI workflow run each of its targets in exactly one job with `make ci-targets` and upload their reports. The guard runs once per tree, so after `make check` on a tree `make release-test-matrix` refuses that tree and names its run; `make rerun-failed` reruns the targets that did not pass. The targets cover seven layers:
 
 | Layer | Scope | Failure evidence |
 | --- | --- | --- |

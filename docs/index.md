@@ -1,3 +1,4 @@
+<!-- doc-id: docs-index -->
 # Documents
 
 [한국어](/ko/).

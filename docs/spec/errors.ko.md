@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-errors -->
+<!-- source-sha256: c665580a6ddbf69540cd85a98a22fa5ee8f6f5d4fd1a9424e56979188793ac5c -->
 # 오류
 
 [English](/spec/errors).

@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-codemirror-readme -->
+<!-- source-sha256: 983a1db371b34cc9cafe8cefcb72b61627d27e4f4a3c27611c93faa983c2a55c -->
 # @polyspec/template-codemirror
 
 [English](README.md).

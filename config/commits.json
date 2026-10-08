@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "comment": "The commit message rules of AGENTS.md: type(scope): Subject (#task), a blank line, then a body wrapped at 72 characters.",
+  "types": ["feat", "fix", "docs", "style", "refactor", "test", "chore"],
+  "subjectMax": 50,
+  "bodyMax": 72
+}

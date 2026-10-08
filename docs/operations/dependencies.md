@@ -1,3 +1,4 @@
+<!-- doc-id: docs-operations-dependencies -->
 # Dependency policy
 
 [한국어](/ko/operations/dependencies).
@@ -29,7 +30,7 @@ Run it when a dependency is chosen or updated; a change of a manifest or a lock 
 - a Composer manifest or lock that does not resolve for the declared minimum PHP, and a lock that `composer validate --strict` finds stale, run with `COMPOSER_DISABLE_NETWORK=1`;
 - a package of this repository locked at another directory or version, and a `package-lock.json` that records other dependencies than `package.json`.
 
-Its mutation gate `scripts/check-dependency-policy-mutation.mjs` copies the dependency files and proves that the check rejects an outdated dependency without an exception, a Composer platform other than the declared minimum, a lock changed without a review and a lock with an advisory. `tests/scripts/dependency-policy.test.mjs` runs the gate and the review against stub registries.
+Its mutation gate `scripts/kit/check-dependency-policy-mutation.mjs` (`make dependency-policy-mutation-check`) copies the dependency files and proves that the check rejects an outdated dependency without an exception, a Composer platform other than the declared minimum, a lock changed without a review and a lock with an advisory. `tests/kit/dependency-policy.test.mjs` runs the gate and the review against stub registries.
 
 ## Exceptions
 

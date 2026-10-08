@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-language-readme -->
+<!-- source-sha256: 99d9a1e532c2deed98f28eb9fff0557dc2936a23476af9394fa42b78731ba71f -->
 # @polyspec/template-language
 
 [English](README.md).

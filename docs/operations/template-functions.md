@@ -1,3 +1,4 @@
+<!-- doc-id: docs-operations-template-functions -->
 # Template function inventory
 
 The inventory tool reads only tracked `.tpl` files from an explicitly supplied source tree. It records function-shaped calls by category and excludes ordinary JavaScript, CSS, comments and raw PHP blocks.

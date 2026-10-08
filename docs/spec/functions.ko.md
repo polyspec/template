@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-functions -->
+<!-- source-sha256: 256f35c2932849d4327e1f0e4207737d98ef3c3c279f6d0928e92b770af6ae44 -->
 # 함수
 
 [English](/spec/functions).

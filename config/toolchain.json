@@ -1,9 +1,15 @@
 {
-  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor versions that the suite runs on: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each run records the patch it ran on in var/full-run.json. composer is the exact Composer version of every run. python is the Python minor version of the suite: setup-python installs the latest patch of a minor, so the minor is the pin.",
+  "schema": 1,
+  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor versions that the suite runs on: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run. python is the Python minor version of the suite: setup-python installs the latest patch of a minor, so the minor is the pin. go names the go.mod whose go directive is the Go version of every run.",
   "php": [
     "8.2",
     "8.5"
   ],
-  "composer": "2.10.3",
-  "python": "3.14"
+  "composer": {
+    "version": "2.10.3"
+  },
+  "python": "3.14",
+  "go": {
+    "mod": "packages/template-go/go.mod"
+  }
 }

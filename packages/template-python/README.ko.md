@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-python-readme -->
+<!-- source-sha256: 1956de7ee1617521d9cbfd68ec2ea50c958294134d42747c792a2082e1acf592 -->
 # polyspec-template
 
 [English](README.md)

@@ -1,0 +1,1382 @@
+{
+  "schema": 1,
+  "comment": "The owner checks of the repository paths, read by scripts/kit/owner-check.mjs: make owner-check runs the targets and node test files of the rules whose globs match a changed path. Every tracked path matches a rule; always lists the tests that run for every change. A rule with variable passes the matched paths to its targets in that make variable. Globs: * within one path segment, ** across segments, {a,b} either alternative. inputs declares, for a check, the globs of the paths that it reads; owner-check fails when a rule of such a path does not select the check or a target that runs it as a prerequisite.",
+  "always": [
+    "tests/scripts/editorconfig.test.mjs",
+    "tests/scripts/toolchain-files.test.mjs",
+    "tests/scripts/device-paths.test.mjs"
+  ],
+  "owners": [
+    {
+      "paths": [
+        "docs/**",
+        "*.md",
+        "schema/*.md",
+        "packages/*/README*.md"
+      ],
+      "targets": [
+        "docs-check",
+        "docs-static-check"
+      ]
+    },
+    {
+      "paths": [
+        "contracts/features.json",
+        "scripts/features/**"
+      ],
+      "tests": [
+        "tests/scripts/feature-python-coverage.test.mjs"
+      ],
+      "targets": [
+        "feature-check",
+        "docs-check"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-compiler/functions.json",
+        "tests/runner/function-contract.mjs",
+        "scripts/check-function-contract.mjs"
+      ],
+      "targets": [
+        "function-contract-check"
+      ]
+    },
+    {
+      "paths": [
+        "config/dependency-policy.json",
+        "config/dependency-review.json",
+        "package.json",
+        "package-lock.json",
+        "packages/*/composer.{json,lock}"
+      ],
+      "targets": [
+        "artifact-digest-check",
+        "dependency-policy-check",
+        "dependency-policy-mutation-check"
+      ]
+    },
+    {
+      "paths": [
+        "schema/ast.schema.json",
+        "scripts/check-schema*.mjs",
+        "scripts/conformance-case-files.mjs"
+      ],
+      "targets": [
+        "schema-check"
+      ]
+    },
+    {
+      "paths": [
+        "tests/rule-evidence.json",
+        "scripts/check-rules.mjs"
+      ],
+      "targets": [
+        "rules-check"
+      ]
+    },
+    {
+      "paths": [
+        "tests/cases/**"
+      ],
+      "targets": [
+        "conformance-cases"
+      ],
+      "variable": "CASES"
+    },
+    {
+      "paths": [
+        "tests/cases/**"
+      ],
+      "targets": [
+        "rules-check",
+        "schema-check"
+      ]
+    },
+    {
+      "paths": [
+        "tests/fixtures/{bound-data,expr,native-object}/**"
+      ],
+      "targets": [
+        "test-ts",
+        "test-go",
+        "test-rust",
+        "test-php",
+        "test-ext",
+        "generated-native-check"
+      ]
+    },
+    {
+      "paths": [
+        "tests/fixtures/{typed-arguments,typed-values}/**",
+        "scripts/check-generated-{arguments,typed-values,native-calls,bound-data}.mjs"
+      ],
+      "targets": [
+        "generated-native-check"
+      ]
+    },
+    {
+      "paths": [
+        "tests/fixtures/function-inventory/**",
+        "tests/runner/function-inventory.mjs",
+        "scripts/inventory-template-functions.mjs"
+      ],
+      "targets": [
+        "function-inventory-check"
+      ]
+    },
+    {
+      "paths": [
+        "tests/browser/**",
+        "playwright.config.ts"
+      ],
+      "targets": [
+        "test-browser"
+      ],
+      "tests": [
+        "tests/scripts/browser-port.test.mjs",
+        "tests/scripts/browser-server.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "tests/runner/{bounded,cases,drivers,conformance,delimiter-matrix,generated-ts-render,parity}.mjs",
+        "tests/runner/conformance-generated-*.mjs"
+      ],
+      "targets": [
+        "conformance",
+        "conformance-generated-go",
+        "conformance-generated-php",
+        "conformance-generated-python",
+        "conformance-generated-rust",
+        "conformance-generated-ts",
+        "conformance-python",
+        "delimiter-matrix",
+        "test-ext"
+      ],
+      "tests": [
+        "tests/scripts/process-group-callers.test.mjs",
+        "tests/scripts/failure-messages.test.mjs",
+        "tests/scripts/drivers.test.mjs",
+        "tests/scripts/no-silent-skips.test.mjs",
+        "tests/scripts/conformance-progress.test.mjs",
+        "tests/scripts/delimiter-matrix-progress.test.mjs",
+        "tests/scripts/generated-conformance.test.mjs",
+        "tests/scripts/long-steps.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "tests/scripts/*.test.mjs"
+      ],
+      "tests": [
+        "$path"
+      ]
+    },
+    {
+      "paths": [
+        "tests/scripts/slow-command.mjs",
+        "scripts/test-progress/**",
+        "scripts/tools.mjs"
+      ],
+      "tests": [
+        "tests/scripts/failure-messages.test.mjs",
+        "tests/scripts/test-targets.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "Makefile"
+      ],
+      "tests": [
+        "tests/scripts/failure-accumulation.test.mjs",
+        "tests/scripts/atomic-publish.test.mjs",
+        "tests/scripts/no-silent-skips.test.mjs",
+        "tests/scripts/test-targets.test.mjs",
+        "tests/scripts/cargo-target.test.mjs",
+        "tests/scripts/build-package.test.mjs",
+        "tests/scripts/conformance-cases.test.mjs",
+        "tests/scripts/suite-parity.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        ".githooks/pre-push"
+      ],
+      "targets": [
+        "hooks-check",
+        "push-gate-commit"
+      ]
+    },
+    {
+      "paths": [
+        ".github/workflows/release.yml",
+        "Makefile",
+        "CHANGELOG.md",
+        "package.json",
+        "packages/*/package.json",
+        "packages/*/composer.json",
+        "packages/template-rust/Cargo.toml",
+        "packages/template-go/go.mod",
+        "config/release.json",
+        "tests/fixtures/release-consumer/**"
+      ],
+      "targets": [
+        "release-coverage"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/process-group.mjs"
+      ],
+      "targets": [
+        "conformance-generated-ts",
+        "conformance-generated-php",
+        "test-vscode-integration"
+      ],
+      "tests": [
+        "tests/scripts/process-group.test.mjs",
+        "tests/scripts/long-steps.test.mjs",
+        "tests/scripts/process-group-callers.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/build-package.mjs"
+      ],
+      "tests": [
+        "tests/scripts/build-package.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-artifact-digests.mjs"
+      ],
+      "targets": [
+        "artifact-digest-check"
+      ],
+      "tests": [
+        "tests/scripts/artifact-digests.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/build-php-extension.mjs"
+      ],
+      "targets": [
+        "test-ext"
+      ],
+      "tests": [
+        "tests/scripts/build-php-extension.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/conformance-cases.mjs"
+      ],
+      "tests": [
+        "tests/scripts/conformance-cases.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/install-vscode.mjs",
+        "packages/template-vscode/tests/integration/run.mjs"
+      ],
+      "targets": [
+        "test-vscode-integration"
+      ],
+      "tests": [
+        "tests/scripts/install-vscode.test.mjs",
+        "tests/scripts/toolchain-files.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/composer-install.mjs"
+      ],
+      "targets": [
+        "test-php",
+        "test-ext"
+      ],
+      "tests": [
+        "tests/scripts/test-targets.test.mjs",
+        "tests/scripts/toolchain-files.test.mjs",
+        "tests/scripts/drivers.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/publish-build.mjs"
+      ],
+      "targets": [
+        "benchmark-smoke",
+        "conformance",
+        "conformance-python",
+        "delimiter-matrix",
+        "test-ext"
+      ],
+      "tests": [
+        "tests/scripts/publish-build.test.mjs",
+        "tests/scripts/drivers.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/install-cli.mjs"
+      ],
+      "tests": [
+        "tests/scripts/install-cli.test.mjs",
+        "tests/scripts/atomic-publish.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "tools/showcase/benchmark-modes.mjs"
+      ],
+      "tests": [
+        "tests/scripts/atomic-publish.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "config/toolchain.json"
+      ],
+      "tests": [
+        "tests/scripts/toolchain-files.test.mjs"
+      ],
+      "targets": [
+        "toolchain-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-docs-static.mjs"
+      ],
+      "targets": [
+        "docs-static-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-doc-coverage.mjs",
+        "scripts/update-benchmark-docs.mjs"
+      ],
+      "targets": [
+        "docs-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/generate-runtime-interface.mjs",
+        "scripts/check-runtime-interface.mjs"
+      ],
+      "targets": [
+        "runtime-interface-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/generate-compiler-interface.mjs",
+        "scripts/check-compiler-interface*.mjs"
+      ],
+      "targets": [
+        "compiler-interface-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/generate-showcase-contract.mjs",
+        "scripts/check-showcase-contract.mjs"
+      ],
+      "targets": [
+        "contract-check",
+        "docs-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-showcase-html.mjs",
+        "tools/showcase/**",
+        "examples/site/**"
+      ],
+      "targets": [
+        "showcase-check",
+        "benchmark-check",
+        "benchmark-smoke",
+        "lint-showcase-format",
+        "lint-showcase-warnings"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-ast-artifact.mjs",
+        "scripts/check-generated-artifact.mjs",
+        "scripts/check-compiler-ir.mjs",
+        "scripts/check-conformance-type-manifest.mjs"
+      ],
+      "targets": [
+        "compiler-ir-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-typed-generator.mjs"
+      ],
+      "targets": [
+        "typed-generator-compile-check"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/language-checks.mjs"
+      ],
+      "targets": [
+        "generated-native-check",
+        "typed-generator-compile-check",
+        "install-check"
+      ],
+      "tests": [
+        "tests/scripts/failure-accumulation.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/temporary-workspace.mjs"
+      ],
+      "targets": [
+        "generated-native-check",
+        "typed-generator-compile-check"
+      ],
+      "tests": [
+        "tests/scripts/temporary-files.test.mjs",
+        "tests/scripts/generated-conformance.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-language-test-matrix*.mjs"
+      ],
+      "targets": [
+        "language-test-matrix"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-editor-boundaries.mjs",
+        "scripts/editor-fixtures.mjs"
+      ],
+      "targets": [
+        "editor-boundary-check",
+        "test-language",
+        "test-lsp",
+        "test-codemirror"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-install-workspace.mjs",
+        "scripts/install-workspace.mjs",
+        "scripts/check-package-installs.mjs"
+      ],
+      "targets": [
+        "install-check"
+      ],
+      "tests": [
+        "tests/scripts/failure-messages.test.mjs",
+        "tests/scripts/long-steps.test.mjs",
+        "tests/scripts/package-installs.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-benchmark-results.mjs",
+        "scripts/check-benchmark-smoke.mjs"
+      ],
+      "targets": [
+        "benchmark-check",
+        "benchmark-smoke"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/check-clean-release.mjs"
+      ],
+      "tests": [
+        "tests/scripts/clean-release.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-compiler/**"
+      ],
+      "targets": [
+        "artifact-digest-check",
+        "compiler-interface-check",
+        "compiler-ir-check",
+        "conformance-generated-go",
+        "conformance-generated-php",
+        "conformance-generated-python",
+        "conformance-generated-rust",
+        "conformance-generated-ts",
+        "contract-check",
+        "generated-native-check",
+        "showcase-check",
+        "typed-generator-compile-check"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-ts/**"
+      ],
+      "targets": [
+        "artifact-digest-check",
+        "test-ts",
+        "lint-js",
+        "conformance",
+        "conformance-generated-ts",
+        "delimiter-matrix",
+        "install-check",
+        "test-language",
+        "test-lsp",
+        "test-codemirror",
+        "test-vscode",
+        "test-browser"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-language/**"
+      ],
+      "targets": [
+        "test-language",
+        "format-check",
+        "lint-js",
+        "test-lsp",
+        "test-codemirror",
+        "test-vscode"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-lsp/**"
+      ],
+      "targets": [
+        "test-lsp",
+        "lint-js",
+        "test-vscode",
+        "test-vscode-integration"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-codemirror/**"
+      ],
+      "targets": [
+        "test-codemirror",
+        "lint-js"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-vscode/**"
+      ],
+      "targets": [
+        "test-vscode",
+        "lint-js",
+        "test-vscode-integration"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-go/**"
+      ],
+      "targets": [
+        "test-go",
+        "lint-go",
+        "conformance",
+        "conformance-generated-go",
+        "delimiter-matrix",
+        "install-check"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-rust/**"
+      ],
+      "targets": [
+        "test-rust",
+        "lint-rust",
+        "conformance",
+        "conformance-generated-rust",
+        "delimiter-matrix",
+        "install-check"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-php/**"
+      ],
+      "targets": [
+        "test-php",
+        "lint-php",
+        "conformance",
+        "conformance-generated-php",
+        "delimiter-matrix",
+        "install-check"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-python/**"
+      ],
+      "targets": [
+        "conformance",
+        "test-python",
+        "conformance-python",
+        "conformance-generated-python",
+        "delimiter-matrix",
+        "generated-native-check",
+        "typed-generator-compile-check",
+        "install-check",
+        "contract-check"
+      ]
+    },
+    {
+      "paths": [
+        "packages/template-php-ext/**"
+      ],
+      "targets": [
+        "test-ext"
+      ],
+      "tests": [
+        "tests/scripts/build-php-extension.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "eslint.config.mjs"
+      ],
+      "targets": [
+        "lint-js"
+      ]
+    },
+    {
+      "paths": [
+        ".npmrc"
+      ],
+      "tests": [
+        "tests/scripts/no-symlinks.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        ".node-version",
+        ".python-version",
+        "rust-toolchain.toml",
+        ".github/workflows/*.yml",
+        "packages/template-go/go.mod"
+      ],
+      "tests": [
+        "tests/scripts/toolchain-files.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        ".python-version",
+        "scripts/python-toolchain.mjs"
+      ],
+      "targets": [
+        "generated-native-check",
+        "typed-generator-compile-check",
+        "install-check",
+        "contract-check"
+      ],
+      "tests": [
+        "tests/scripts/python-toolchain.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/python-wheelhouse.mjs",
+        "packages/template-python/build-requirements.json"
+      ],
+      "targets": [
+        "install-check"
+      ],
+      "tests": [
+        "tests/scripts/python-wheelhouse.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        ".github/workflows/*.yml",
+        "config/toolchain.json"
+      ],
+      "tests": [
+        "tests/scripts/suite-parity.test.mjs",
+        "tests/scripts/action-pins.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        ".gitignore"
+      ],
+      "tests": [
+        "tests/scripts/ignored-files.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        ".editorconfig"
+      ],
+      "tests": [
+        "tests/scripts/editorconfig.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/kit/**",
+        "tests/kit/**",
+        "kit.json",
+        ".kit/**"
+      ],
+      "targets": [
+        "kit-check",
+        "kit-test"
+      ]
+    },
+    {
+      "paths": [
+        "config/owner-checks.json"
+      ],
+      "targets": [
+        "owner-validate"
+      ]
+    },
+    {
+      "paths": [
+        "config/checklist.json",
+        "config/documents.json"
+      ],
+      "targets": [
+        "documents-check"
+      ]
+    },
+    {
+      "paths": [
+        "config/commits.json"
+      ],
+      "targets": [
+        "commits-check"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "check": "make documents-check",
+      "paths": [
+        "docs/**",
+        "*.md",
+        "schema/*.md",
+        "packages/*/README*.md",
+        "config/documents.json",
+        "config/checklist.json"
+      ]
+    },
+    {
+      "check": "make runtime-interface-diagrams-check",
+      "paths": [
+        "scripts/generate-runtime-interface.mjs"
+      ]
+    },
+    {
+      "check": "make compiler-interface-diagrams-check",
+      "paths": [
+        "scripts/generate-compiler-interface.mjs"
+      ]
+    },
+    {
+      "check": "make showcase-contract-diagrams-check",
+      "paths": [
+        "scripts/generate-showcase-contract.mjs"
+      ]
+    },
+    {
+      "check": "make schema-fixtures-check",
+      "paths": [
+        "schema/ast.schema.json",
+        "scripts/check-schema.mjs",
+        "scripts/conformance-case-files.mjs"
+      ]
+    },
+    {
+      "check": "make schema-mutations-check",
+      "paths": [
+        "schema/ast.schema.json",
+        "scripts/check-schema-mutations.mjs"
+      ]
+    },
+    {
+      "check": "make doc-coverage",
+      "paths": [
+        "scripts/check-doc-coverage.mjs"
+      ]
+    },
+    {
+      "check": "make benchmark-docs-check",
+      "paths": [
+        "scripts/update-benchmark-docs.mjs"
+      ]
+    },
+    {
+      "check": "make feature-pages-check",
+      "paths": [
+        "contracts/features.json",
+        "scripts/features/**"
+      ]
+    },
+    {
+      "check": "make feature-contracts-check",
+      "paths": [
+        "contracts/features.json",
+        "scripts/features/**"
+      ]
+    },
+    {
+      "check": "make docs-static-check",
+      "paths": [
+        "scripts/check-docs-static.mjs"
+      ]
+    },
+    {
+      "check": "make rules-check",
+      "paths": [
+        "tests/rule-evidence.json",
+        "scripts/check-rules.mjs"
+      ]
+    },
+    {
+      "check": "make editor-boundary-check",
+      "paths": [
+        "scripts/check-editor-boundaries.mjs",
+        "scripts/editor-fixtures.mjs"
+      ]
+    },
+    {
+      "check": "make runtime-interface-runtimes-check",
+      "paths": [
+        "scripts/check-runtime-interface.mjs"
+      ]
+    },
+    {
+      "check": "make compiler-interface-languages-check",
+      "paths": [
+        "scripts/check-compiler-interface.mjs"
+      ]
+    },
+    {
+      "check": "make compiler-interface-mutations-check",
+      "paths": [
+        "scripts/check-compiler-interface-mutations.mjs"
+      ]
+    },
+    {
+      "check": "make dependency-policy-check",
+      "paths": [
+        "config/dependency-policy.json",
+        "config/dependency-review.json",
+        "package.json",
+        "package-lock.json",
+        "packages/*/composer.{json,lock}"
+      ]
+    },
+    {
+      "check": "make dependency-policy-mutation-check",
+      "paths": [
+        "config/dependency-policy.json",
+        "config/dependency-review.json",
+        "package.json",
+        "package-lock.json",
+        "packages/*/composer.{json,lock}"
+      ]
+    },
+    {
+      "check": "make language-test-matrix-manifest-check",
+      "paths": [
+        "scripts/check-language-test-matrix.mjs"
+      ]
+    },
+    {
+      "check": "make language-test-matrix-mutations-check",
+      "paths": [
+        "scripts/check-language-test-matrix-mutations.mjs"
+      ]
+    },
+    {
+      "check": "make contract-check",
+      "paths": [
+        "scripts/check-showcase-contract.mjs",
+        "tools/showcase/adapters/**",
+        "scripts/python-toolchain.mjs",
+        "packages/template-python/**",
+        ".python-version"
+      ]
+    },
+    {
+      "check": "make function-contract-registries-check",
+      "paths": [
+        "packages/template-compiler/functions.json",
+        "scripts/check-function-contract.mjs"
+      ]
+    },
+    {
+      "check": "make function-contract-runtimes-check",
+      "paths": [
+        "packages/template-compiler/functions.json",
+        "tests/runner/function-contract.mjs"
+      ]
+    },
+    {
+      "check": "make function-inventory-check",
+      "paths": [
+        "tests/fixtures/function-inventory/**",
+        "tests/runner/function-inventory.mjs",
+        "scripts/inventory-template-functions.mjs"
+      ]
+    },
+    {
+      "check": "make benchmark-results-check",
+      "paths": [
+        "scripts/check-benchmark-results.mjs",
+        "examples/site/data/**"
+      ]
+    },
+    {
+      "check": "make lint-js",
+      "paths": [
+        "packages/template-{ts,language,lsp,codemirror,vscode}/src/**",
+        "eslint.config.mjs"
+      ]
+    },
+    {
+      "check": "make lint-go",
+      "paths": [
+        "packages/template-go/**"
+      ]
+    },
+    {
+      "check": "make lint-rust",
+      "paths": [
+        "packages/template-rust/**"
+      ]
+    },
+    {
+      "check": "make lint-showcase-format",
+      "paths": [
+        "tools/showcase/adapters/rust/**"
+      ]
+    },
+    {
+      "check": "make lint-showcase-warnings",
+      "paths": [
+        "tools/showcase/adapters/rust/**"
+      ]
+    },
+    {
+      "check": "make lint-php",
+      "paths": [
+        "packages/template-php/**"
+      ]
+    },
+    {
+      "check": "make test-ts-unit",
+      "paths": [
+        "packages/template-ts/**",
+        "tests/fixtures/{bound-data,expr,native-object}/**"
+      ]
+    },
+    {
+      "check": "make test-ts-types",
+      "paths": [
+        "packages/template-ts/**"
+      ]
+    },
+    {
+      "check": "make test-ts-types-node",
+      "paths": [
+        "packages/template-ts/**"
+      ]
+    },
+    {
+      "check": "make test-language-unit",
+      "paths": [
+        "packages/template-language/**",
+        "packages/template-ts/src/**",
+        "scripts/editor-fixtures.mjs"
+      ]
+    },
+    {
+      "check": "make test-language-types",
+      "paths": [
+        "packages/template-language/**"
+      ]
+    },
+    {
+      "check": "make format-check",
+      "paths": [
+        "packages/template-language/**"
+      ]
+    },
+    {
+      "check": "make test-lsp-unit",
+      "paths": [
+        "packages/template-lsp/**",
+        "packages/template-language/src/**",
+        "packages/template-ts/src/**",
+        "scripts/editor-fixtures.mjs"
+      ]
+    },
+    {
+      "check": "make test-lsp-types",
+      "paths": [
+        "packages/template-lsp/**"
+      ]
+    },
+    {
+      "check": "make test-codemirror-unit",
+      "paths": [
+        "packages/template-codemirror/**",
+        "packages/template-language/src/**",
+        "scripts/editor-fixtures.mjs"
+      ]
+    },
+    {
+      "check": "make test-codemirror-browser",
+      "paths": [
+        "packages/template-codemirror/**"
+      ]
+    },
+    {
+      "check": "make test-codemirror-types",
+      "paths": [
+        "packages/template-codemirror/**"
+      ]
+    },
+    {
+      "check": "make test-vscode-grammar",
+      "paths": [
+        "packages/template-vscode/**"
+      ]
+    },
+    {
+      "check": "make test-vscode-unit",
+      "paths": [
+        "packages/template-vscode/**",
+        "packages/template-lsp/src/**"
+      ]
+    },
+    {
+      "check": "make test-vscode-types",
+      "paths": [
+        "packages/template-vscode/**"
+      ]
+    },
+    {
+      "check": "make test-vscode-integration",
+      "paths": [
+        "packages/template-vscode/**",
+        "packages/template-lsp/src/**",
+        "scripts/install-vscode.mjs"
+      ]
+    },
+    {
+      "check": "make test-go-vet",
+      "paths": [
+        "packages/template-go/**"
+      ]
+    },
+    {
+      "check": "make test-go-unit",
+      "paths": [
+        "packages/template-go/**",
+        "tests/fixtures/{bound-data,expr,native-object}/**"
+      ]
+    },
+    {
+      "check": "make test-rust-clippy",
+      "paths": [
+        "packages/template-rust/**"
+      ]
+    },
+    {
+      "check": "make test-rust-unit",
+      "paths": [
+        "packages/template-rust/**",
+        "tests/fixtures/{bound-data,expr,native-object}/**"
+      ]
+    },
+    {
+      "check": "make test-php",
+      "paths": [
+        "packages/template-php/**",
+        "tests/fixtures/{bound-data,expr,native-object}/**",
+        "scripts/composer-install.mjs"
+      ]
+    },
+    {
+      "check": "make conformance",
+      "paths": [
+        "packages/template-{ts,go,rust,php,python}/**",
+        "tests/runner/{conformance,cases,drivers}.mjs",
+        "scripts/publish-build.mjs"
+      ]
+    },
+    {
+      "check": "make conformance-cases",
+      "paths": [
+        "tests/cases/**"
+      ]
+    },
+    {
+      "check": "make conformance-generated-ts",
+      "paths": [
+        "packages/template-ts/**",
+        "packages/template-compiler/**",
+        "tests/runner/{conformance-generated-ts,generated-ts-render,bounded,cases}.mjs"
+      ]
+    },
+    {
+      "check": "make conformance-generated-go",
+      "paths": [
+        "packages/template-go/**",
+        "packages/template-compiler/**",
+        "tests/runner/{conformance-generated-go,bounded,cases}.mjs"
+      ]
+    },
+    {
+      "check": "make conformance-generated-rust",
+      "paths": [
+        "packages/template-rust/**",
+        "packages/template-compiler/**",
+        "tests/runner/{conformance-generated-rust,bounded,cases}.mjs"
+      ]
+    },
+    {
+      "check": "make conformance-generated-php",
+      "paths": [
+        "packages/template-php/**",
+        "packages/template-compiler/**",
+        "tests/runner/{conformance-generated-php,bounded,cases}.mjs"
+      ]
+    },
+    {
+      "check": "make delimiter-matrix",
+      "paths": [
+        "packages/template-{ts,go,rust,php}/**",
+        "tests/runner/delimiter-matrix.mjs"
+      ]
+    },
+    {
+      "check": "make generated-native-calls-check",
+      "paths": [
+        "tests/fixtures/native-object/**",
+        "packages/template-compiler/**",
+        "scripts/check-generated-native-calls.mjs",
+        "scripts/language-checks.mjs",
+        "scripts/python-toolchain.mjs",
+        "packages/template-python/**",
+        ".python-version"
+      ]
+    },
+    {
+      "check": "make generated-typed-values-check",
+      "paths": [
+        "tests/fixtures/typed-values/**",
+        "packages/template-compiler/**",
+        "scripts/check-generated-typed-values.mjs",
+        "scripts/language-checks.mjs",
+        "scripts/python-toolchain.mjs",
+        "packages/template-python/**",
+        ".python-version"
+      ]
+    },
+    {
+      "check": "make generated-arguments-check",
+      "paths": [
+        "tests/fixtures/typed-arguments/**",
+        "packages/template-compiler/**",
+        "scripts/check-generated-arguments.mjs",
+        "scripts/language-checks.mjs",
+        "scripts/python-toolchain.mjs",
+        "packages/template-python/**",
+        ".python-version"
+      ]
+    },
+    {
+      "check": "make generated-bound-data-check",
+      "paths": [
+        "tests/fixtures/bound-data/**",
+        "packages/template-compiler/**",
+        "scripts/check-generated-bound-data.mjs",
+        "scripts/language-checks.mjs",
+        "scripts/python-toolchain.mjs",
+        "packages/template-python/**",
+        ".python-version"
+      ]
+    },
+    {
+      "check": "make test-ext-conformance",
+      "paths": [
+        "packages/template-php-ext/**",
+        "scripts/build-php-extension.mjs",
+        "tests/runner/{conformance,cases,drivers}.mjs"
+      ]
+    },
+    {
+      "check": "make test-ext-unit",
+      "paths": [
+        "packages/template-php-ext/**",
+        "scripts/build-php-extension.mjs"
+      ]
+    },
+    {
+      "check": "make typed-generator-compile-check",
+      "paths": [
+        "packages/template-compiler/**",
+        "scripts/check-typed-generator.mjs",
+        "scripts/language-checks.mjs",
+        "scripts/python-toolchain.mjs",
+        "packages/template-python/**",
+        ".python-version"
+      ]
+    },
+    {
+      "check": "make ast-artifact-check",
+      "paths": [
+        "packages/template-compiler/**",
+        "scripts/check-ast-artifact.mjs"
+      ]
+    },
+    {
+      "check": "make generated-artifact-check",
+      "paths": [
+        "packages/template-compiler/**",
+        "scripts/check-generated-artifact.mjs"
+      ]
+    },
+    {
+      "check": "make compiler-ir-rules-check",
+      "paths": [
+        "packages/template-compiler/**",
+        "scripts/check-compiler-ir.mjs"
+      ]
+    },
+    {
+      "check": "make conformance-type-manifest-check",
+      "paths": [
+        "packages/template-compiler/**",
+        "scripts/check-conformance-type-manifest.mjs"
+      ]
+    },
+    {
+      "check": "make typed-generator-check",
+      "paths": [
+        "packages/template-compiler/**",
+        "tools/showcase/compile-generated.mjs"
+      ]
+    },
+    {
+      "check": "make install-workspace-check",
+      "paths": [
+        "scripts/check-install-workspace.mjs",
+        "scripts/install-workspace.mjs"
+      ]
+    },
+    {
+      "check": "make package-installs-check",
+      "paths": [
+        "scripts/check-package-installs.mjs",
+        "scripts/install-workspace.mjs",
+        "scripts/language-checks.mjs",
+        "packages/template-{ts,go,rust,php}/**",
+        "scripts/python-toolchain.mjs",
+        "packages/template-python/**",
+        ".python-version",
+        "scripts/python-wheelhouse.mjs",
+        "packages/template-python/build-requirements.json"
+      ]
+    },
+    {
+      "check": "make test-browser",
+      "paths": [
+        "tests/browser/**",
+        "playwright.config.ts",
+        "packages/template-ts/**"
+      ]
+    },
+    {
+      "check": "make showcase-build-check",
+      "paths": [
+        "tools/showcase/**",
+        "examples/site/**",
+        "packages/template-compiler/**"
+      ]
+    },
+    {
+      "check": "make showcase-site-check",
+      "paths": [
+        "tools/showcase/build-site.mjs",
+        "examples/site/**"
+      ]
+    },
+    {
+      "check": "make artifact-digest-check",
+      "paths": [
+        "scripts/check-artifact-digests.mjs",
+        "packages/template-compiler/**",
+        "packages/template-ts/**",
+        "package-lock.json",
+        "examples/site/**",
+        "tools/showcase/**"
+      ]
+    },
+    {
+      "check": "make showcase-html-check",
+      "paths": [
+        "scripts/check-showcase-html.mjs",
+        "examples/site/**"
+      ]
+    },
+    {
+      "check": "make benchmark-smoke",
+      "paths": [
+        "scripts/check-benchmark-smoke.mjs",
+        "tools/showcase/benchmark-modes.mjs",
+        "tools/showcase/adapters/**"
+      ]
+    },
+    {
+      "check": "make test-python",
+      "paths": [
+        "packages/template-python/**"
+      ]
+    },
+    {
+      "check": "make conformance-python",
+      "paths": [
+        "packages/template-python/**",
+        "tests/runner/{conformance,cases,drivers}.mjs",
+        "scripts/publish-build.mjs"
+      ]
+    },
+    {
+      "check": "make conformance-generated-python",
+      "paths": [
+        "packages/template-python/**",
+        "packages/template-compiler/**",
+        "tests/runner/{conformance-generated-python,bounded,cases}.mjs"
+      ]
+    }
+  ]
+}

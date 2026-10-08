@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-python-agents -->
 # Development
 
 The required checks of the repository root apply to this package. Development runs unit tests only: run `python3 tests/test_api.py` while a change is in progress, with the RED case first and the same case to GREEN. The conformance and parity runners of the repository run this package through its command line interface in CI; no rule requires a local run before a commit or a push.

@@ -1,5 +1,5 @@
 // Tests that one run reports every failure (T19.8): make keeps going after a failed target (`MAKEFLAGS += -k` in the
-// Makefile, and `make -k` in scripts/full-run.mjs), every target of the full suite and of its prerequisites runs at
+// Makefile, and `make -k` in scripts/kit/full-run.mjs, which tests/kit/full-run.test.mjs checks), every target of the full suite and of its prerequisites runs at
 // most one command, so that a failed command does not hide the commands after it, and the check scripts that check
 // each language run every language to its end and name every language that failed.
 import assert from 'node:assert/strict';
@@ -47,7 +47,7 @@ test('every target of the full suite and of its prerequisites runs at most one c
   assert.deepEqual(several, [], 'targets whose later commands do not run after a failed command');
 });
 
-test('make keeps going after a failed target, and the full run starts make with -k', (t) => {
+test('make keeps going after a failed target', (t) => {
   assert.match(MAKEFILE, /^MAKEFLAGS \+= -k$/m);
   // A second makefile with two failing targets: both run. It is a file of the run, not the device path of standard
   // input, which Linux cannot open when it is the socket of `input` (T19.8-1).
@@ -58,10 +58,6 @@ test('make keeps going after a failed target, and the full run starts make with 
   const run = spawnSync('make', ['--no-print-directory', '-f', 'Makefile', '-f', probe, 'accumulation-probe'], { cwd: ROOT, encoding: 'utf8' });
   assert.deepEqual(run.stdout.split('\n').filter(Boolean), ['a', 'b'], `make did not run the probe targets of ${probe}; stderr: ${run.stderr}`);
   assert.notEqual(run.status, 0);
-  // The full run and make ci-targets run each target through runLogged of scripts/target-report.mjs (T20.1-9).
-  assert.match(readFileSync(path.join(ROOT, 'scripts/target-report.mjs'), 'utf8'), /spawn\('make', \['-k', target\]/);
-  assert.match(readFileSync(path.join(ROOT, 'scripts/full-run.mjs'), 'utf8'), /runTarget = name => runLogged\(root, name, /);
-  assert.match(readFileSync(path.join(ROOT, 'scripts/ci-targets.mjs'), 'utf8'), /await runLogged\(root, name, report\)/);
 });
 
 test('checkLanguages runs every language and names each language that failed', () => {

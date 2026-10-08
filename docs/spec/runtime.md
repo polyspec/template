@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-runtime -->
 # Runtime
 
 [한국어](/ko/spec/runtime).
