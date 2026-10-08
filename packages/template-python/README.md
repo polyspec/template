@@ -6,11 +6,13 @@ Python implementation of the template language: lexer, parser, renderer, built-i
 
 ## Install
 
-The package installs from a tag of this repository:
+The package installs from a tag of this repository. Replace `vX.Y.Z` with the first release tag that contains `packages/template-python`:
 
 ```sh
-pip install "polyspec-template @ git+https://github.com/polyspec/template@v0.0.4#subdirectory=packages/template-python"
+pip install "polyspec-template @ git+https://github.com/polyspec/template@vX.Y.Z#subdirectory=packages/template-python"
 ```
+
+No release tag contains this package yet. From a checkout of this repository, install it with `pip install ./packages/template-python`.
 
 ## Render
 

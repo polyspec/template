@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- Python 패키지를 `README.md`, `docs/guide.ko.md`와 패키지 README에 문서화했습니다 (T22.4-6). README는 구현 목록에 Python을 넣고, 가이드는 `polyspec.template`의 이름을 쓰는 렌더 예제를 담으며, 패키지 README는 `packages/template-python`을 담은 release tag가 생기기 전까지 설치 tag를 `vX.Y.Z`로 적습니다.
 - Python 구현을 추가했습니다 (T22.4). `packages/template-python`이 engine, 내장 함수, 명령줄
   인터페이스를 패키지 `polyspec-template`(import 이름 `polyspec.template`)로 담습니다.
   conformance·parity runner, delimiter matrix, function contract, CI가 다른 언어와 같이 다루고
