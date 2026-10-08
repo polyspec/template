@@ -722,7 +722,10 @@
         "test-python",
         "conformance-python",
         "conformance-generated-python",
-        "delimiter-matrix"
+        "delimiter-matrix",
+        "generated-native-check",
+        "typed-generator-compile-check",
+        "install-check"
       ]
     },
     {
@@ -762,6 +765,20 @@
       ],
       "tests": [
         "tests/scripts/toolchain-files.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        ".python-version",
+        "scripts/python-toolchain.mjs"
+      ],
+      "targets": [
+        "generated-native-check",
+        "typed-generator-compile-check",
+        "install-check"
+      ],
+      "tests": [
+        "tests/scripts/python-toolchain.test.mjs"
       ]
     },
     {
@@ -1030,25 +1047,37 @@
       "tests/fixtures/native-object/**",
       "packages/template-compiler/**",
       "scripts/check-generated-native-calls.mjs",
-      "scripts/language-checks.mjs"
+      "scripts/language-checks.mjs",
+      "scripts/python-toolchain.mjs",
+      "packages/template-python/**",
+      ".python-version"
     ],
     "generated-typed-values-check": [
       "tests/fixtures/typed-values/**",
       "packages/template-compiler/**",
       "scripts/check-generated-typed-values.mjs",
-      "scripts/language-checks.mjs"
+      "scripts/language-checks.mjs",
+      "scripts/python-toolchain.mjs",
+      "packages/template-python/**",
+      ".python-version"
     ],
     "generated-arguments-check": [
       "tests/fixtures/typed-arguments/**",
       "packages/template-compiler/**",
       "scripts/check-generated-arguments.mjs",
-      "scripts/language-checks.mjs"
+      "scripts/language-checks.mjs",
+      "scripts/python-toolchain.mjs",
+      "packages/template-python/**",
+      ".python-version"
     ],
     "generated-bound-data-check": [
       "tests/fixtures/bound-data/**",
       "packages/template-compiler/**",
       "scripts/check-generated-bound-data.mjs",
-      "scripts/language-checks.mjs"
+      "scripts/language-checks.mjs",
+      "scripts/python-toolchain.mjs",
+      "packages/template-python/**",
+      ".python-version"
     ],
     "test-ext-conformance": [
       "packages/template-php-ext/**",
@@ -1062,7 +1091,10 @@
     "typed-generator-compile-check": [
       "packages/template-compiler/**",
       "scripts/check-typed-generator.mjs",
-      "scripts/language-checks.mjs"
+      "scripts/language-checks.mjs",
+      "scripts/python-toolchain.mjs",
+      "packages/template-python/**",
+      ".python-version"
     ],
     "ast-artifact-check": [
       "packages/template-compiler/**",
@@ -1092,7 +1124,10 @@
       "scripts/check-package-installs.mjs",
       "scripts/install-workspace.mjs",
       "scripts/language-checks.mjs",
-      "packages/template-{ts,go,rust,php}/**"
+      "packages/template-{ts,go,rust,php}/**",
+      "scripts/python-toolchain.mjs",
+      "packages/template-python/**",
+      ".python-version"
     ],
     "test-browser": [
       "tests/browser/**",
