@@ -100,14 +100,14 @@ fn kind<T, E: std::fmt::Debug>(result: Result<T, E>) -> String { match result { 
       writeFileSync(join(pythonDir, 'generated.py'), compileSource(graphManifest, types, 'python'));
       writeFileSync(join(pythonDir, 'expected.html'), expected);
       writeFileSync(join(pythonDir, 'check.py'), `import sys
-from polyspec.template import RuntimeEnvironment, TemplateError
+from polyspec.template import Engine, RenderOptions, RuntimeEnvironment, TemplateError
 from generated import GeneratedProgram
 
-program = GeneratedProgram(RuntimeEnvironment())
+program = Engine(GeneratedProgram(RuntimeEnvironment()))
 
 
 def card(name):
-    return {'define': {'card': {'template': 'part.tpl', 'data': {'name': name}}}}
+    return RenderOptions(define={'card': {'template': 'part.tpl', 'data': {'name': name}}})
 
 
 def kind(request):

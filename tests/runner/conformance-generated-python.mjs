@@ -49,6 +49,7 @@ writeFileSync(runner, `import importlib.util
 import json
 import sys
 
+from polyspec.template import RenderOptions
 from polyspec.template.json_parse import parse_json_bytes
 
 spec = importlib.util.spec_from_file_location('generated_case', sys.argv[1])
@@ -67,12 +68,7 @@ try:
     assign = read_json(sys.argv[2])
     define = read_json(sys.argv[3])
     env = read_json(sys.argv[4])
-    options = {}
-    if define is not None:
-        options['define'] = define
-    if env is not None:
-        options['env'] = env
-    html = module.GeneratedProgram().render('input.tpl', assign, options)
+    html = module.GeneratedProgram().render('input.tpl', assign, RenderOptions(define=define, env=env))
     print(json.dumps({'html': html}))
 except module.TemplateError as error:
     fields = error.to_object()
