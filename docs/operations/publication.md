@@ -35,13 +35,19 @@ Cargo crate:
 polyspec-template = { path = "../template/packages/template-rust" }
 ```
 
+Python package:
+
+```sh
+pip install ../template/packages/template-python
+```
+
 ## Version
 
 Every package declares version `0.0.4`. The version changes together in every package, in the consumer projects of `tests/fixtures/release-consumer` with the locks that `make release-consumer-lock` writes, and in `CHANGELOG.md`, whose section `## Unreleased` above the released versions holds the entries of every change since the last release.
 
 ## Tag releases
 
-A release is a tag of a commit of `main` (AGENTS, T22.1-4): `vX.Y.Z` releases the npm packages `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror` and `@polyspec/template-compiler`, and the Composer packages `polyspec/template` and `polyspec/template-php-ext` at version X.Y.Z, and `packages/template-go/vX.Y.Z` releases the Go module `github.com/polyspec/template/packages/template-go`. The Cargo package `polyspec-template` carries the version X.Y.Z but is not released as an archive; it is consumed by git tag, because `cargo package` rewrites git dependencies into crates.io requirements that do not resolve (T22.1-5). The push of the tag runs `.github/workflows/release.yml` (`on: push: tags: ['v*', '**/v*']`, permission `contents: write`; in a tag filter `*` does not match `/`, so `**/v*` covers the tag of a Go module at any depth), which is not the job `release` of `ci.yml`. After `make install`, its steps run `scripts/release.mjs` in this order and stop at the first failure:
+A release is a tag of a commit of `main` (AGENTS, T22.1-4): `vX.Y.Z` releases the npm packages `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror` and `@polyspec/template-compiler`, and the Composer packages `polyspec/template` and `polyspec/template-php-ext` at version X.Y.Z, and `packages/template-go/vX.Y.Z` releases the Go module `github.com/polyspec/template/packages/template-go`. The Cargo package `polyspec-template` carries the version X.Y.Z but is not released as an archive; it is consumed by git tag, because `cargo package` rewrites git dependencies into crates.io requirements that do not resolve (T22.1-5). The Python package `polyspec-template` (`packages/template-python/pyproject.toml`) carries the version X.Y.Z and is consumed by git tag the same way, because no registry holds it (T22.4-15): `pip install "polyspec-template @ git+https://github.com/polyspec/template@vX.Y.Z#subdirectory=packages/template-python"`. The push of the tag runs `.github/workflows/release.yml` (`on: push: tags: ['v*', '**/v*']`, permission `contents: write`; in a tag filter `*` does not match `/`, so `**/v*` covers the tag of a Go module at any depth), which is not the job `release` of `ci.yml`. After `make install`, its steps run `scripts/release.mjs` in this order and stop at the first failure:
 
 ```sh
 make release-verify
