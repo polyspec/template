@@ -11,6 +11,6 @@
         }
     ],
     "require": {
-        "polyspec/template": "0.0.4"
+        "polyspec/template": "0.0.5"
     }
 }

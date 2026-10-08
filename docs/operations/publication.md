@@ -10,7 +10,7 @@ No package has been published to a registry. Each package installs from a local 
 Go module:
 
 ```
-require github.com/polyspec/template/packages/template-go v0.0.4
+require github.com/polyspec/template/packages/template-go v0.0.5
 replace github.com/polyspec/template/packages/template-go => ../template/packages/template-go
 ```
 
@@ -44,7 +44,7 @@ pip install ../template/packages/template-python
 
 ## Version
 
-Every package declares version `0.0.4`. The version changes together in every package, in the consumer projects of `tests/fixtures/release-consumer` with the locks that `make release-consumer-lock TAG=vX.Y.Z` writes, and in `CHANGELOG.md`, whose section `## Unreleased` above the released versions holds the entries of every change since the last release.
+Every package declares version `0.0.5`. The version changes together in every package, in the consumer projects of `tests/fixtures/release-consumer` with the locks that `make release-consumer-lock TAG=vX.Y.Z` writes, and in `CHANGELOG.md`, whose section `## Unreleased` above the released versions holds the entries of every change since the last release.
 
 ## Tag releases
 
@@ -61,6 +61,8 @@ make release-publish
 2. `make release-versions` requires X.Y.Z in every manifest of `manifests` in `config/release.json`, the `version` field of each `composer.json` included, and the section `## X.Y.Z` in `CHANGELOG.md` and `CHANGELOG.ko.md`, and names each file with its version and the version of the tag; for `packages/template-go/vX.Y.Z` it requires the module path of `packages/template-go/go.mod` and the section.
 3. `make release-assets` builds the npm packages and writes `var/release/assets`: `npm pack` of each npm package (`.tgz`), and `git archive` of the directory of each Composer package of the tagged commit at the time of the commit (`.zip`): the release assets are npm tarballs and Composer zips only. An archive is named `<package>-<language>-<version>.<ext>`, with `@scope/` and `vendor/` written as `scope-` and `vendor-` and the language `npm` or `php`: `polyspec-template-npm-X.Y.Z.tgz` is `@polyspec/template`, `polyspec-template-language-npm-X.Y.Z.tgz` is `@polyspec/template-language`, `polyspec-template-php-X.Y.Z.zip` is `polyspec/template` and `polyspec-template-php-ext-php-X.Y.Z.zip` is `polyspec/template-php-ext`. A Go tag builds and attaches nothing: `release-assets` builds the npm packages only for a tag without `/`. Each archive carries the manifest of its package unchanged: the published manifests of the tree are the published packages. The step then fails unless every packed manifest equals its manifest at the tagged commit and names each dependency of a scope of this repository by an exact version, a package of this repository by X.Y.Z, declares no `overrides`, and unless each `composer.json` declares the version X.Y.Z, which an `artifact` repository reads, and no `repositories` (`manifestProblems`): a path (`file:`, `link:`, `workspace:`), a git source (`git`, `github:`, ssh), a URL, a range or a development version installs only inside the repository.
 4. `make release-publish` runs `gh release create <tag> --verify-tag --title <tag> --notes-file <the notes>` with the archives. The notes are the section `## X.Y.Z` of `CHANGELOG.md` when it has at most 125000 characters (`NOTES_LIMIT`), the limit of a release body on GitHub; a longer section is replaced by one line, `The changes of X.Y.Z are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/<tag>/CHANGELOG.md#XYZ).`, whose anchor is the version without its dots.
+
+The release workflow runs once for each pushed tag. `make release-verify` of the tag `vX.Y.Z` requires the tag `packages/template-go/vX.Y.Z` at the same commit, so the maintainer pushes the Go tag before the tag `vX.Y.Z`, or in the same push; the run of the Go tag builds no archive and creates a GitHub Release without assets.
 
 The tag reaches the steps through the environment variable `TAG`. `tests/kit/release.test.mjs` and `tests/kit/release-consumer.test.mjs` test the steps of kit against a fixture repository. `make release-consumer TAG=vX.Y.Z` installs the archives of `var/release/assets` in a directory outside the repository with the consumer projects of `tests/fixtures/release-consumer` (`scripts/kit/release-consumer.mjs`, `consumers` in `config/release.json`): `npm ci` of every npm package with an empty cache and the scope `@polyspec` on an unreachable registry, and `composer install` of `polyspec/template` with an empty `COMPOSER_HOME` and cache and an `artifact` repository of the zips, and runs the smoke command of each package. Their committed locks pin each registry package by exact version and integrity and record the archives under test, which each run builds, by name and version only, without `integrity` or with an empty `shasum`; `make release-consumer-lock TAG=vX.Y.Z` writes them from the archives of that tag, so they change only with a version or a dependency. `make release-coverage` requires every tracked manifest to be in `manifests` of `config/release.json` with how the tag releases it (`archive`, `version`, or `git-tag` for the Rust crate and the Python package, which are consumed by git tag) or in `notReleased` with its reason, and `tests/scripts/toolchain-files.test.mjs` requires the trigger, the permission and the order of the steps.
 
