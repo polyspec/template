@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a4409504adb80dc7c5ea246a0ff83813354248471aa316e5a3524af91006785a -->
+<!-- source-sha256: 11a482b0873ef82479f291ad8853c7889f391089730391f2bb71dd9334aa6661 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T22.4-29: 컴파일된 AST manifest, generated JavaScript manifest와 `examples/site/index.html`을 다시 생성합니다. compiler digest가 `package-lock.json`을 포함하는데 `@playwright/test` 1.64.0이 이를 바꿨기 때문입니다(T22.4-28).
 - T22.4-22: `config/release.json`은 Python 패키지를 git tag로 릴리스하고 tag에서의 설치(새 virtual environment에 `polyspec-template`을 `pip install`하고 `polyspec.template`을 import)를 선언하며, 이것은 릴리스가 만들어진 뒤 `make release-proof`가 실행합니다. `tests/scripts/release-config.test.mjs`는 설정의 패키지 이름을 manifest와 대조합니다. `tests/fixtures/release-consumer`의 consumer project와 lock은 `make release-consumer-lock TAG=v0.0.4`가 쓴 archive 이름 `<package>-<language>-<version>.<ext>`(`polyspec-template-npm-0.0.4.tgz`, `polyspec-template-php-0.0.4.zip`)를 가리킵니다.
 - T22.4-21: `make lint-python`은 `packages/template-python`에 `ruff==0.16.10`으로 `ruff check`와 `ruff format --check`를 실행합니다. ruff는 `pyproject.toml`의 `dev` extra에 pin하고 `config/toolchain.json`의 `ruff.pyproject`가 선언하며, `lint-python`은 `CHECK_TARGETS`와 CI job `showcase`에 있습니다. 패키지에 쓰지 않는 import 21개와 `ruff format`이 바꾸는 파일 36개가 있었고 둘 다 문장을 바꾸지 않고 고쳤습니다. `make test-python`은 `.python-version`의 interpreter로 실행합니다. 검토 기록이 `ruff==0.16.10`을 담습니다.
 - T22.4-28: `config/dependency-policy.json`이 kit의 형식을 가지고, `config/toolchain.json`이 `cargoAudit` 0.22.2와 `govulncheck` 1.8.0을 선언하며, `@playwright/test`가 1.64.0이고, `config/dependency-review.json`이 npm, Composer, Cargo lock과 `setuptools==84.0.0`의 review를 기록합니다. `make dependency-policy-mutation-check`는 통과합니다. `make dependency-policy-check`는 `package.json`이 `file:` 의존성으로 요구하는 이 저장소의 패키지마다 finding 하나, 모두 여섯 개를 보고합니다. `scripts/kit/dependency-state.mjs`가 lock 항목에 `link: true`가 있을 때만 그런 패키지를 받아들이는데 `install-links=true`는 이를 쓰지 않기 때문입니다. kit이 복사본을 읽을 때까지 이 작업은 우회 상태입니다.
