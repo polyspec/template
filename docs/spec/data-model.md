@@ -79,7 +79,7 @@ This document defines the value types that templates operate on, the safe string
 
 ## Host binding
 
-**VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host. A bound map (VAL-22) has passed binding, so `render` uses it as `assign` or as definition data without binding it again (RT-61).
+**VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 and VAL-23 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host. A bound map (VAL-22) has passed binding, so `render` uses it as `assign` or as definition data without binding it again (RT-61).
 
 **VAL-12** JSON text is the reference form of assign data. Every implementation accepts JSON text and produces the same values. Each implementation parses JSON text with a parser that preserves document order and applies the number rule of VAL-2 and the depth limit of VAL-20; the TypeScript implementation provides this parser in the package and does not use `JSON.parse` for assign data.
 
@@ -164,9 +164,24 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 
 A bound map (VAL-22) is a type of its own that none of these inputs can hold, so `render` receives it only as `assign` and as definition `data`.
 
+**VAL-23** Python.
+
+| Input | Value |
+| --- | --- |
+| `None` | null |
+| `bool` | bool |
+| `int` | number under VAL-2; an integer outside the safe range is E_DATA_NUMBER_RANGE |
+| `float` | number under VAL-2 |
+| `str` | string; a value that contains an unpaired surrogate code point is E_DATA_INVALID_UTF8 |
+| `list`, `tuple` | list |
+| `dict` | map, in insertion order; a key follows the `str` row, and a key that is not a `str` is E_DATA_UNSUPPORTED_TYPE |
+| bound map (VAL-22) | E_DATA_UNSUPPORTED_TYPE, except as `assign` and as definition `data` (VAL-22) |
+| instance of a class that is not defined by the interpreter itself, that is, whose type is not in the module `builtins` | object (VAL-19); the original instance is retained |
+| function, method, class, module and every other instance of a type in `builtins`, such as `set`, `bytes`, `complex`, `range` and a generator | E_DATA_UNSUPPORTED_TYPE |
+
 **VAL-17** Map keys are strings in every host. A host map whose key is not a string is converted only where a table above defines the conversion; otherwise it is E_DATA_UNSUPPORTED_TYPE. A key is checked like a string value: a key that is not valid UTF-8, or in TypeScript a key that is not well-formed UTF-16, is E_DATA_INVALID_UTF8.
 
-**VAL-18** Binding preserves an assigned native object reference without copying it. A native object that a template passes as an argument to a host function, a logical class function or an instance method, directly or inside a list or map argument, arrives as the original host object: the same PHP object, the same JavaScript instance, the same Go value, and in Rust the same `TemplateObject`, which the host recovers with `Value::downcast_object`. VAL-21 defines the form of every other argument value. Resource handles and functions, including PHP closures, are not template values; binding rejects them with E_DATA_UNSUPPORTED_TYPE. Rendering reads values and never writes back to host data.
+**VAL-18** Binding preserves an assigned native object reference without copying it. A native object that a template passes as an argument to a host function, a logical class function or an instance method, directly or inside a list or map argument, arrives as the original host object: the same PHP object, the same JavaScript instance, the same Go value, the same Python object, and in Rust the same `TemplateObject`, which the host recovers with `Value::downcast_object`. VAL-21 defines the form of every other argument value. Resource handles and functions, including PHP closures, are not template values; binding rejects them with E_DATA_UNSUPPORTED_TYPE. Rendering reads values and never writes back to host data.
 
 **VAL-19** A native object is an opaque template value. It is truthy and cannot be stringified, iterated, spread or written as JSON (FUN-26).
 
@@ -180,6 +195,7 @@ A bound map (VAL-22) is a type of its own that none of these inputs can hold, so
 | PHP | an entry of `get_mangled_object_vars()` whose name is not mangled; `__get` is not consulted | a method that the class or an ancestor declares public, static or not; `__call` is not consulted |
 | Go | an exported struct field whose name equals the key ignoring case, or whose `json` tag name equals the key | an exported method of the value's method set whose name is the key or the key converted from snake case to camel case |
 | Rust | the value that `TemplateObject::member` returns | `TemplateObject::call` |
+| Python | an attribute whose name does not start with `_` and whose value is not callable; a callable attribute is not a field and reads as `null` | a callable attribute whose name does not start with `_` |
 
 **VAL-20** The depth of a list or a map is one more than the largest depth of its elements or values; an empty list or map has depth 1. Every other value has depth 0, including a native object, whose members are bound only when a template reads them. No template value has a depth greater than 64.
 
@@ -190,26 +206,26 @@ A bound map (VAL-22) is a type of its own that none of these inputs can hold, so
 
 **VAL-21** A host function, a logical class function and an instance method receive every argument as a host value of the following form. The form is the same in the AST program and in every generated program, and it applies to the elements of a list and to the values of a map at every depth.
 
-| Template value | TypeScript | PHP | Go | Rust |
-| --- | --- | --- | --- | --- |
-| null | `null` | `null` | `nil` | `Value::Null` |
-| bool | `boolean` | `bool` | `bool` | `Value::Bool` |
-| number | `number` | `float` | `float64` | `Value::Number` |
-| string, safe string | `string` | `string` | `string` | `Value::Str` |
-| list | `Array` | `array` for which `array_is_list()` is true | `value.List` (`[]any`) | `Value::List` |
-| map | `Map` with string keys, in entry order | `array` with the entries in entry order | `*value.OrderedMap`, in entry order | `Value::Map`, in entry order |
-| native object | the original instance | the original object | the original value | the same `TemplateObject` |
+| Template value | TypeScript | PHP | Go | Rust | Python |
+| --- | --- | --- | --- | --- | --- |
+| null | `null` | `null` | `nil` | `Value::Null` | `None` |
+| bool | `boolean` | `bool` | `bool` | `Value::Bool` | `bool` |
+| number | `number` | `float` | `float64` | `Value::Number` | `float` |
+| string, safe string | `string` | `string` | `string` | `Value::Str` | `str` |
+| list | `Array` | `array` for which `array_is_list()` is true | `value.List` (`[]any`) | `Value::List` | `list` |
+| map | `Map` with string keys, in entry order | `array` with the entries in entry order | `*value.OrderedMap`, in entry order | `Value::Map`, in entry order | `dict`, in entry order |
+| native object | the original instance | the original object | the original value | the same `TemplateObject` | the original instance |
 
 - A safe string arrives as a plain string. The safe mark exists only inside a render (VAL-6, VAL-7); a host function whose result must be written without escaping returns text, and the template applies `raw` (FUN-48).
 - A list or a map arrives as a new host value that the host owns. A change that the host makes to a received list or map changes no template value: a later read of the same template value in the render returns the value it had before the call. A native object is not copied (VAL-18).
 - In PHP, a map arrives as an array, so the key conversion of PHP arrays applies: a key that is the decimal text of an integer in the PHP integer range, without a sign `+`, without leading zeros and other than `-0`, becomes an integer key. A PHP array cannot distinguish an empty map from an empty list, or a map whose keys are `"0"` to `"n-1"` in that order from a list; such a map arrives as that array, and binding the array again (VAL-14) produces a list. The PHP AST program and the PHP extension produce the same arrays.
-- Reason: every host receives plain values of its own language that its binding table (VAL-13 to VAL-16) accepts, so host code needs no implementation class to read an argument and can return an argument without converting it. An internal representation, such as a safe string wrapper or the PHP class `MapValue`, never reaches host code, and the two PHP implementations pass the same values.
+- Reason: every host receives plain values of its own language that its binding table (VAL-13 to VAL-16 and VAL-23) accepts, so host code needs no implementation class to read an argument and can return an argument without converting it. An internal representation, such as a safe string wrapper or the PHP class `MapValue`, never reaches host code, and the two PHP implementations pass the same values.
 
 ## Bound data
 
-**VAL-22** A host binds data once with `bind` and renders it many times as a bound map. Every implementation provides the bound map type and two operations; their names in each language are listed in [`packages/template-compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/template-compiler/interface.json) (RT-67). An implementation is one package: the TypeScript package with all its entry points and module formats, including the browser entry `@polyspec/template/render` (`typescript` and `javascript-esm` in `supportLevels`), the Go module, the Rust crate, the PHP package, and the PHP extension. Every entry point and module format of one implementation accepts the bound maps that the others create.
+**VAL-22** A host binds data once with `bind` and renders it many times as a bound map. Every implementation provides the bound map type and two operations; their names in each language are listed in [`packages/template-compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/template-compiler/interface.json) (RT-67). An implementation is one package: the TypeScript package with all its entry points and module formats, including the browser entry `@polyspec/template/render` (`typescript` and `javascript-esm` in `supportLevels`), the Go module, the Rust crate, the PHP package, the PHP extension and the Python package. Every entry point and module format of one implementation accepts the bound maps that the others create.
 
-- `bind(value)` accepts every host value that host binding (VAL-13 to VAL-16) turns into a map, and the values that `render` uses as an empty map (RT-4); it does not take JSON text. A host binds JSON text by parsing it with the JSON parser of the package (VAL-12) and passing the result to `bind`. `bind` applies host binding (VAL-11 to VAL-20) and returns a bound map. A value that `render` uses as an empty map returns an empty bound map. A bound map of the same implementation is returned unchanged, because it is immutable and already checked. Any other value that binding does not turn into a map fails with E_DATA_UNSUPPORTED_TYPE. A failure is the error of ERR-14. `packages/template-compiler/interface.json` names the operation or parameter type through which each implementation passes a bound map to `render` and `prepare`, such as the Rust `prepare_bound` and `render_bound` and the PHP extension `render`; an operation that takes JSON text, such as the PHP extension `render_json`, does not accept a bound map.
+- `bind(value)` accepts every host value that host binding (VAL-13 to VAL-16 and VAL-23) turns into a map, and the values that `render` uses as an empty map (RT-4); it does not take JSON text. A host binds JSON text by parsing it with the JSON parser of the package (VAL-12) and passing the result to `bind`. `bind` applies host binding (VAL-11 to VAL-20) and returns a bound map. A value that `render` uses as an empty map returns an empty bound map. A bound map of the same implementation is returned unchanged, because it is immutable and already checked. Any other value that binding does not turn into a map fails with E_DATA_UNSUPPORTED_TYPE. A failure is the error of ERR-14. `packages/template-compiler/interface.json` names the operation or parameter type through which each implementation passes a bound map to `render` and `prepare`, such as the Rust `prepare_bound` and `render_bound` and the PHP extension `render`; an operation that takes JSON text, such as the PHP extension `render_json`, does not accept a bound map.
 - `merge(first, second)` returns a bound map with the entries of `first` and `second` by the precedence of RT-26: an entry of `second` replaces the entry of `first` with the same key and keeps the position of `first`; the other entries of `second` follow in their order. It reads no value again.
 
 In TypeScript, PHP and the PHP extension the parameters of `bind` and `merge` accept any value, so the check runs inside the operation: an argument of `merge` that is not a bound map of the same implementation fails with E_DATA_UNSUPPORTED_TYPE. In Go and Rust the parameter type of `merge` is the bound map type, so the compiler rejects another value.

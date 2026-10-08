@@ -234,8 +234,9 @@ class RuntimeBindings:
         builtin = BUILTINS.get(name)
         if builtin is not None:
             if len(args) < builtin.minimum or len(args) > builtin.maximum:
+                maximum = 'Infinity' if math.isinf(builtin.maximum) else int(builtin.maximum)
                 accepts = (str(builtin.minimum) if builtin.minimum == builtin.maximum
-                           else f'{builtin.minimum} to {int(builtin.maximum)}')
+                           else f'{builtin.minimum} to {maximum}')
                 raise self.error(frame, span, 'E_RUNTIME_ARITY',
                                  f'{name} accepts {accepts} arguments, got {len(args)}')
             try:

@@ -1,9 +1,10 @@
-"""Host binding of Python values (VAL-13), the number rule (VAL-2, VAL-3) and the
+"""Host binding of Python values (VAL-23), the number rule (VAL-2, VAL-3) and the
 depth limit (VAL-20)."""
 
 from __future__ import annotations
 
 import math
+import types
 from typing import Any, Optional
 
 from .number import MAX_SAFE
@@ -105,7 +106,19 @@ def _bind_at(value: Any, level: int) -> Value:
                 raise BindError('E_DATA_UNSUPPORTED_TYPE', 'map key is not a string')
             bound[check_text(key)] = _bind_at(item, level + 1)
         return bound
+    if _is_host_object(value):
+        return NativeObject(value)
     raise BindError('E_DATA_UNSUPPORTED_TYPE', f'a {type(value).__name__} value has no binding')
+
+
+def _is_host_object(value: Any) -> bool:
+    """VAL-18, VAL-19: an instance of a class that code outside the interpreter defines is a
+    native object. Built-in types without a binding (set, bytes, complex, range,
+    generators), functions, methods, classes and modules are not template values."""
+    if isinstance(value, (types.FunctionType, types.MethodType, types.BuiltinFunctionType,
+                          types.ModuleType, type)):
+        return False
+    return type(value).__module__ != 'builtins'
 
 
 def bind_map(value: Any) -> dict[str, Value]:

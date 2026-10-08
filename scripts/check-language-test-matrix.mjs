@@ -2,14 +2,14 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
-const languages = ['typescript', 'go', 'rust', 'php'];
+const languages = ['typescript', 'go', 'rust', 'php', 'python'];
 const modes = ['ast', 'gen'];
 export function checkManifest(manifest, projectRoot = root) {
   const failures = [];
   const matrix = manifest.verification_matrix;
 
   if (!matrix || JSON.stringify(matrix.languages) !== JSON.stringify(languages)) {
-    failures.push('manifest verification_matrix.languages must cover TypeScript, Go, Rust and PHP in order');
+    failures.push('manifest verification_matrix.languages must cover TypeScript, Go, Rust, PHP and Python in order');
   }
   if (!matrix || JSON.stringify(matrix.modes) !== JSON.stringify(modes)) {
     failures.push('manifest verification_matrix.modes must cover ast and gen in order');
