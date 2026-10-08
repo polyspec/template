@@ -5,6 +5,7 @@
 ## Unreleased
 
 - `contracts/features.json`의 언어 test matrix는 `scripts/check-language-test-matrix.mjs`가 요구하는 네 언어를 담습니다. Python은 T22.4-7의 CI merge group 실행이 통과하면 들어갑니다 (T22.4-13).
+- `packages/template-python/pyproject.toml`에서 `polyspec.template`의 `py.typed` 표식을 패키지 이름 아래에 선언했습니다. 기존 key `template`은 `src`에 없는 패키지를 가리켰습니다. `tests/test_package_data.py`가 모든 package-data key를 검사하고 `make test-python`이 실행합니다 (T22.4-14).
 - `tests/scripts/toolchain-files.test.mjs`는 `ci.yml`의 `python` job matrix가 3.11 또는 `.python-version`의 minor를 빠뜨리면 실패합니다 (T22.4-12).
 - Python 패키지 단위 test 파일 `packages/template-python/tests/test_api.py`의 서식을 고쳤습니다. 문장은 바꾸지 않았습니다 (T22.4-11).
 - `polyspec.template.__all__`이 `ParseOptions`, `analyze`, `analyze_prefix`를 export하고, `PreparedRender`를 한 번만 나열하며, 문서가 가져오는 모든 이름을 export합니다 (T22.4-10).
