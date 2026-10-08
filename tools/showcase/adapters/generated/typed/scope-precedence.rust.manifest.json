@@ -6,7 +6,7 @@
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "eed59d98b336203ccec1176da1c11bc19e344e5dd89e9fd3c439b397ea8e2d84",
-  "compilerDigest": "31de7008b402c7f440b3fe428cb3e10420074de4867c5b18dc28a379ec1010f5",
+  "compilerDigest": "c76ed42a2565bba34471be1c907d95a715a689afd67918bce517f5aae0096c1a",
   "files": {
     "scope-precedence.rust": {
       "path": "scope-precedence.rust",

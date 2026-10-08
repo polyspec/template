@@ -15,7 +15,7 @@ for (const fn of contract.canonical) {
   assert.ok(!expected.has(fn.name), `duplicate canonical function ${fn.name}`);
   assert.ok(Number.isInteger(fn.minArgs) && fn.minArgs >= 0, `${fn.name} has invalid minArgs`);
   assert.ok(Number.isInteger(fn.maxArgs) && (fn.maxArgs === -1 || fn.maxArgs >= fn.minArgs), `${fn.name} has invalid maxArgs`);
-  for (const language of ['typescript', 'go', 'rust', 'php']) {
+  for (const language of ['typescript', 'go', 'rust', 'php', 'python']) {
     assert.deepEqual(fn.support?.[language], { ast: 'pass', gen: 'pass' }, `${fn.name} lacks complete ${language} support`);
   }
   expected.set(fn.name, [fn.minArgs, fn.maxArgs]);
@@ -30,19 +30,21 @@ const files = {
   go: ['packages/template-go/functions/encoding.go', 'packages/template-go/functions/string.go', 'packages/template-go/functions/collection.go', 'packages/template-go/functions/number.go', 'packages/template-go/functions/date.go'],
   rust: ['packages/template-rust/src/functions/encoding.rs', 'packages/template-rust/src/functions/string.rs', 'packages/template-rust/src/functions/collection.rs', 'packages/template-rust/src/functions/number.rs', 'packages/template-rust/src/functions/date.rs'],
   php: ['packages/template-php/src/Functions/Encoding.php', 'packages/template-php/src/Functions/Strings.php', 'packages/template-php/src/Functions/Collection.php', 'packages/template-php/src/Functions/Numbers.php', 'packages/template-php/src/Functions/Dates.php'],
+  python: ['packages/template-python/src/polyspec/template/functions.py'],
 };
 const patterns = {
   typescript: [/([a-z][a-z0-9_]*):\s*\{\s*min:\s*(\d+),\s*max:\s*(Infinity|-?\d+)/gs],
   go: [/"([a-z][a-z0-9_]*)":\s*\{\s*(\d+)\s*,\s*(-?\d+)/gs],
   rust: [/"([a-z][a-z0-9_]*)"\s*,\s*BuiltIn\s*\{\s*min:\s*(\d+),\s*max:\s*([^,}]+)/gs],
   php: [/'([a-z][a-z0-9_]*)'\s*=>\s*\['min'\s*=>\s*(\d+),\s*'max'\s*=>\s*(PHP_INT_MAX|-?\d+)/gs],
+  python: [/\'(\w+)\':\s*BuiltIn\((\d+),\s*(math\.inf|-?\d+)/g],
 };
 
 for (const [language, paths] of Object.entries(files)) {
   const source = paths.map(path => readFileSync(resolve(root, path), 'utf8')).join('\n');
   const found = new Map();
   for (const pattern of patterns[language]) {
-    for (const [name, min, rawMax] of pairs(source, pattern, value => (value.trim() === 'Infinity' || (language === 'rust' && value.trim() === 'usize::MAX') || (language === 'php' && (value.trim() === 'PHP_INT_MAX' || Number(value) > 1000000))) ? -1 : Number(value))) {
+    for (const [name, min, rawMax] of pairs(source, pattern, value => (value.trim() === 'Infinity' || (language === 'rust' && value.trim() === 'usize::MAX') || (language === 'php' && (value.trim() === 'PHP_INT_MAX' || Number(value) > 1000000)) || (language === 'python' && value.trim() === 'math.inf')) ? -1 : Number(value))) {
       assert.ok(!found.has(name), `${language} duplicates ${name}`);
       found.set(name, [min, rawMax]);
     }
@@ -51,4 +53,4 @@ for (const [language, paths] of Object.entries(files)) {
   for (const [name, arity] of expected) assert.deepEqual(found.get(name), arity, `${language}.${name} arity differs from contract`);
 }
 
-process.stdout.write(`function contract: ${expected.size} canonical functions, four-language registry parity passed\n`);
+process.stdout.write(`function contract: ${expected.size} canonical functions, five-language registry parity passed\n`);
