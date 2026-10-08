@@ -381,6 +381,7 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 test-python: ## Unit tests of the Python package
 	python3 packages/template-python/tests/test_api.py
 	python3 packages/template-python/tests/test_exports.py
+	python3 packages/template-python/tests/test_package_data.py
 
 conformance-generated-python: build-ts ## Python generated compiler conformance suite
 	node tests/runner/conformance-generated-python.mjs
