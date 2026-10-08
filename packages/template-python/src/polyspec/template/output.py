@@ -7,6 +7,7 @@ from .escape import utf8_length
 
 class Output:
     def __init__(self, limit: int, on_limit):
+        # `on_limit` returns the template error that a write beyond `limit` raises (RT-35).
         self._limit = limit
         self._on_limit = on_limit
         self._chunks: list[str] = []
@@ -17,7 +18,7 @@ class Output:
             return
         self._bytes += utf8_length(text)
         if self._bytes > self._limit:
-            self._on_limit()
+            raise self._on_limit()
         self._chunks.append(text)
 
     def text(self) -> str:
