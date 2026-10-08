@@ -420,3 +420,16 @@ test('every action of a workflow is pinned by its commit and every job runs on u
     for (const match of text.matchAll(/runs-on: (\S+)/g)) assert.equal(match[1], 'ubuntu-24.04', `${file}: runs-on ${match[1]}, expected ubuntu-24.04`);
   }
 });
+
+// The python job of ci.yml sets up the Python minors of its matrix, which holds 3.11 (the floor of requires-python) and the
+// minor of .python-version (T22.4-12). The job cannot read .python-version through a matrix, so the test fails when the
+// matrix omits that minor.
+test('the python job of ci.yml sets up 3.11 and the minor of .python-version (T22.4-12)', () => {
+  const minor = read('.python-version').trim();
+  assert.match(minor, /^3\.\d+$/, `.python-version ${minor} is not a Python minor release`);
+  const matrix = read('.github/workflows/ci.yml').match(/^  python:[\s\S]*?matrix:\s*\n\s*python: \[([^\]]*)\]/m);
+  assert.ok(matrix, 'ci.yml has no python job with a python matrix; the check verified nothing');
+  const versions = matrix[1].split(',').map(version => version.trim().replace(/['"]/g, ''));
+  assert.ok(versions.includes('3.11'), `ci.yml python matrix ${versions.join(', ')} lacks 3.11, the floor of requires-python`);
+  assert.ok(versions.includes(minor), `ci.yml python matrix ${versions.join(', ')} lacks ${minor}, the minor of .python-version`);
+});

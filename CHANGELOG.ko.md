@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- `tests/scripts/toolchain-files.test.mjs`는 `ci.yml`의 `python` job matrix가 3.11 또는 `.python-version`의 minor를 빠뜨리면 실패합니다 (T22.4-12).
 - Python 패키지 단위 test 파일 `packages/template-python/tests/test_api.py`의 서식을 고쳤습니다. 문장은 바꾸지 않았습니다 (T22.4-11).
 - `polyspec.template.__all__`이 `ParseOptions`, `analyze`, `analyze_prefix`를 export하고, `PreparedRender`를 한 번만 나열하며, 문서가 가져오는 모든 이름을 export합니다 (T22.4-10).
 - `contracts/features.json`의 기능별 Python 지원을 검증 명령이 실행하는 Python 범위에 맞췄습니다. 18개 기능은 `unsupported`이고, Python을 실행하는 명령을 가진 5개 기능은 T22.4-7의 CI merge group 실행이 통과할 때까지 `partial`입니다 (T22.4-9).

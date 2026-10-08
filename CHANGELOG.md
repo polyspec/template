@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- `tests/scripts/toolchain-files.test.mjs` fails when the `python` job matrix of `ci.yml` omits 3.11 or the minor of `.python-version` (T22.4-12).
 - Reformatted the Python package unit test file `packages/template-python/tests/test_api.py` with no change to its statements (T22.4-11).
 - `polyspec.template.__all__` exports `ParseOptions`, `analyze` and `analyze_prefix`, lists `PreparedRender` once, and exports every name that the documents import (T22.4-10).
 - Set the Python support of each feature in `contracts/features.json` from the Python coverage of its verification commands: 18 features are `unsupported`, and the 5 features whose commands run Python are `partial` until the CI merge-group run of T22.4-7 passes (T22.4-9).
