@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const checks = [
   'scripts/check-generated-typed-values.mjs',
+  'scripts/check-generated-arguments.mjs',
 ];
 
 for (const check of checks) {
