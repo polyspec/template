@@ -375,7 +375,7 @@ conformance-generated-rust: cargo-downloads-check build-ts ## Rust generated com
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
 	node tests/runner/conformance-generated-php.mjs
 
-conformance-python: build-ts ## Conformance suite of TypeScript and Python
+conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
 	node tests/runner/conformance.mjs --langs ts,python
 
 test-python: ## Unit tests of the Python package
