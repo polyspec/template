@@ -9,6 +9,7 @@
 - Python 배포 형식을 문서화했습니다. 패키지 `polyspec-template`는 Rust crate처럼 git tag로 소비하며, `AGENTS.md`는 버전 올림 manifest로 그 `pyproject.toml`을 나열합니다 (T22.4-15).
 - `make test-python`이 Python unit test 세 개를 각 실패를 남기는 loop 하나로 실행하게 했습니다. 이로써 target은 `tests/scripts/failure-accumulation.test.mjs`가 요구하는 명령 하나를 실행합니다 (T22.4-16).
 - 계약 변경 뒤 컴파일된 AST manifest, generated manifest와 `examples/site/index.html`을 다시 생성해 계약 digest가 계약과 맞게 했습니다 (T22.4-17).
+- `packages/template-compiler/interface.json`의 core support level에서 `python`을 뺐습니다. 이 level은 language mapping이 없는 python을 적었습니다. 그래서 core interface 검사와 bound map mutation 검사가 `showcase` job에서 다시 통과합니다 (T22.4-23).
 - `tests/scripts/toolchain-files.test.mjs`는 `ci.yml`의 `python` job matrix가 3.11 또는 `.python-version`의 minor를 빠뜨리면 실패합니다 (T22.4-12).
 - Python 패키지 단위 test 파일 `packages/template-python/tests/test_api.py`의 서식을 고쳤습니다. 문장은 바꾸지 않았습니다 (T22.4-11).
 - `polyspec.template.__all__`이 `ParseOptions`, `analyze`, `analyze_prefix`를 export하고, `PreparedRender`를 한 번만 나열하며, 문서가 가져오는 모든 이름을 export합니다 (T22.4-10).
