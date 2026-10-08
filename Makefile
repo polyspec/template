@@ -181,13 +181,14 @@ lint-js: ## Lint the TypeScript sources with eslint
 # make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
-install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages and the crates of every Cargo.lock
+install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages, the crates of every Cargo.lock and the Python build requirements
 	$(ONLINE) $(NPM) ci
 	rustup toolchain install --no-self-update
 	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
 	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
 	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
+	$(ONLINE) node scripts/python-wheelhouse.mjs
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).

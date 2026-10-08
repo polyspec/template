@@ -4,13 +4,16 @@
 // resolves modules only from the proxy of the run, verifies no checksum against a database of the network and runs the
 // installed Go toolchain of the go directive of packages/template-go/go.mod; the Rust install project builds with the toolchain
 // of rust-toolchain.toml and a lock derived from packages/template-rust/Cargo.lock; the PHP install project reads only the
-// package of the run.
+// package of the run; the Python install project builds the wheel of the package with the build requirements of
+// var/python/wheelhouse (scripts/python-wheelhouse.mjs), reads no index and installs only that wheel.
 // Each command is a step without a time limit that prints its start, its output and its result with
 // its elapsed time on standard error and is judged by its exit status.
 import assert from 'node:assert/strict';
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { installCargoLock, createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mjs';
+import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
+import { buildRequirements, requireWheelhouse, wheelhouse } from './python-wheelhouse.mjs';
 import { checkLanguages } from './language-checks.mjs';
 import { runStepSync } from './test-progress/step.mjs';
 
@@ -144,10 +147,49 @@ $assign=Json::parse(file_get_contents(__DIR__.'/data.json')); $raw=Json::parse(f
   run('php', ['check.php'], { cwd: directory });
 }
 
+function checkPython() {
+  // pip builds in the directory it is given and writes build/ and egg-info there, so it builds a copy of the tracked files.
+  const source = join(temporary, 'python-source');
+  for (const path of run('git', ['ls-files', 'packages/template-python']).split('\n').filter(Boolean)) {
+    const destination = join(source, relative('packages/template-python', path));
+    mkdirSync(resolve(destination, '..'), { recursive: true });
+    cpSync(join(root, path), destination);
+  }
+  const python = pythonCommand();
+  const pip = { ...pythonEnvironment(), PIP_NO_INDEX: '1', PIP_DISABLE_PIP_VERSION_CHECK: '1' };
+  const version = /^version = "([^"]+)"$/m.exec(readFileSync(join(source, 'pyproject.toml'), 'utf8'))[1];
+  const archive = join(artifacts, `polyspec_template-${version}-py3-none-any.whl`);
+  run(python, ['-m', 'pip', 'wheel', '--no-deps', '--no-index', '--find-links', requireWheelhouse(buildRequirements(), wheelhouse), '--wheel-dir', artifacts, source], { env: pip });
+  assert.ok(existsSync(archive), `pip wheel wrote no ${archive} into ${artifacts}`);
+  const directory = join(temporary, 'python');
+  mkdirSync(directory);
+  run(python, ['-m', 'venv', join(directory, 'venv')]);
+  const installed = join(directory, 'venv/bin/python');
+  run(installed, ['-m', 'pip', 'install', '--no-deps', '--no-index', archive], { env: pip });
+  stageScenario(directory);
+  cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.py'), join(directory, 'generated.py'));
+  writeFileSync(join(directory, 'check.py'), `import json
+from pathlib import Path
+
+from polyspec.template import AstProgram, Engine, EngineOptions, FsLoader, RenderOptions, parse_json_bytes
+from generated import GeneratedProgram
+
+assign = parse_json_bytes(Path('data.json').read_bytes())
+options = RenderOptions(define=json.loads(Path('define.json').read_text(encoding='utf-8')))
+expected = Path('expected.html').read_text(encoding='utf-8')
+ast = Engine(AstProgram(EngineOptions(loader=FsLoader('templates')))).render('layout', assign, options)
+generated = Engine(GeneratedProgram()).render('layout', assign, options)
+assert ast == expected, ast
+assert generated == expected, generated
+assert ast == generated
+`);
+  run(installed, ['check.py'], { cwd: directory, env: pythonEnvironment() });
+}
+
 let failure;
 try {
   assert.equal(Buffer.byteLength(expected), 177);
-  checkLanguages('package installs', { TypeScript: checkTypeScript, Go: checkGo, Rust: checkRust, PHP: checkPhp });
+  checkLanguages('package installs', { TypeScript: checkTypeScript, Go: checkGo, Rust: checkRust, PHP: checkPhp, Python: checkPython });
 } catch (error) {
   failure = error;
 }
@@ -157,4 +199,4 @@ try {
   failure = failure ? new AggregateError([failure, error], 'the package install check failed and its workspace removal failed') : error;
 }
 if (failure) throw failure;
-process.stdout.write('package installs: TypeScript, Go, Rust and PHP AST/generated output passed\n');
+process.stdout.write('package installs: TypeScript, Go, Rust, PHP and Python AST/generated output passed\n');

@@ -15,6 +15,7 @@ const checks = [
   'scripts/check-generated-bound-data.mjs',
   'scripts/check-generated-native-calls.mjs',
   'scripts/check-typed-generator.mjs',
+  'scripts/check-package-installs.mjs',
 ];
 
 for (const check of checks) {
