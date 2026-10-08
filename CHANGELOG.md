@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- T22.4-20-9: the features pages and the showcase artifacts are regenerated, so the contract digests of the committed artifacts name the compiler of the tree.
 - T22.4-7: a unit test of `tests/scripts/toolchain-files.test.mjs` checks that the `python` job of `ci.yml` runs `test-python`, `conformance-python` and `conformance-generated-python` and that `ci-passed` needs it; T22.4-19 and T22.4-19-1 are verified by their commands.
 - Regenerated the compiled AST manifests, the generated manifests and `examples/site/index.html` after the interface change, so their contract digests match the contract (T22.4-24-1).
 - T22.4-24: `packages/template-compiler/interface.json` declares the Python language mapping (backend, program, error, runtime services, `RuntimeEnvironment` fields and operations, `Frame` and `Scope` fields and operations, and the bound map) and `python` is again in `supportLevels.core`. `packages/template-python/tests/test_compiler_interface.py` compares these declarations with the package, `scripts/check-compiler-interface.mjs` runs it and checks `backends/python.mjs`, and `scripts/check-compiler-interface-mutations.mjs` rejects five Python mapping mutations. The package gains `RuntimeServices`, the class that `RuntimeEnvironment` implements. `docs/spec/compiler.md` names Python among the generated backends.
