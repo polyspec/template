@@ -9,8 +9,9 @@ import * as typescript from './backends/typescript.mjs';
 import * as go from './backends/go.mjs';
 import * as rust from './backends/rust.mjs';
 import * as php from './backends/php.mjs';
+import * as python from './backends/python.mjs';
 
-const backends = new Map([typescript, go, rust, php].map(backend => [backend.language, backend]));
+const backends = new Map([typescript, go, rust, php, python].map(backend => [backend.language, backend]));
 const backendOperations = ['emitDeclarations', 'emitRuntime', 'emitTemplates', 'emitEntry'];
 
 // A PHP namespace is one or more identifiers separated by a backslash (docs/spec/compiler.md).
@@ -41,7 +42,7 @@ function main(args) {
   const phpNamespace = value('--php-namespace');
   const check = args.includes('--check');
   if (!graph || !manifest || !language || !output || !refresh) {
-    throw new Error('usage: compiler.mjs --graph MANIFEST --manifest FILE --lang ts|go|rust|php --output FILE --refresh dev|true|false [--php-namespace NAMESPACE] [--check]');
+    throw new Error('usage: compiler.mjs --graph MANIFEST --manifest FILE --lang ts|go|rust|php|python --output FILE --refresh dev|true|false [--php-namespace NAMESPACE] [--check]');
   }
   compileGeneratedArtifact({
     graphPath: graph,

@@ -23,3 +23,5 @@ packages/template-php/.phpunit.result.cache
 .vscode-test.lock
 
 /var/
+__pycache__/
+*.pyc

@@ -5,7 +5,11 @@
     "call": "identifier(args...)",
     "memberCall": "object.method(args...)",
     "classCall": "Class::function(args...)",
-    "rejected": ["qualified namespace call", "constructor", "undeclared member"]
+    "rejected": [
+      "qualified namespace call",
+      "constructor",
+      "undeclared member"
+    ]
   },
   "canonical": [
     {
@@ -28,6 +32,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -55,6 +63,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -78,6 +90,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -105,6 +121,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -128,6 +148,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -155,6 +179,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -178,6 +206,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -205,6 +237,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -228,6 +264,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -255,6 +295,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -278,6 +322,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -305,6 +353,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -328,6 +380,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -355,6 +411,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -378,6 +438,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -405,6 +469,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -428,6 +496,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -455,6 +527,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -478,6 +554,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -505,6 +585,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -528,6 +612,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -555,6 +643,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -578,6 +670,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -605,6 +701,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -628,6 +728,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -655,6 +759,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -678,6 +786,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -705,6 +817,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -728,6 +844,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -755,6 +875,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -778,6 +902,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -805,6 +933,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -828,6 +960,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -855,6 +991,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -878,6 +1018,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }
@@ -905,6 +1049,10 @@
         "php": {
           "ast": "pass",
           "gen": "pass"
+        },
+        "python": {
+          "ast": "pass",
+          "gen": "pass"
         }
       }
     },
@@ -928,6 +1076,10 @@
           "gen": "pass"
         },
         "php": {
+          "ast": "pass",
+          "gen": "pass"
+        },
+        "python": {
           "ast": "pass",
           "gen": "pass"
         }

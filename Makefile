@@ -153,7 +153,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-js and conformance-ts. The list
 # stays on one line: scripts/owner-check.mjs reads it.
-CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node scripts/full-run.mjs run $(CHECK_TARGETS)
@@ -350,7 +350,7 @@ conformance: cargo-downloads-check build-ts build-go build-rust build-php ext ##
 	node tests/runner/conformance.mjs
 
 # The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
-.PHONY: conformance-ts conformance-go conformance-rust conformance-php
+.PHONY: conformance-ts conformance-go conformance-rust conformance-php conformance-python
 conformance-ts: cargo-downloads-check build-ts ## Conformance suite of TypeScript
 	node tests/runner/conformance.mjs --langs ts
 conformance-go: cargo-downloads-check build-ts build-go ## Conformance suite of TypeScript and Go
@@ -375,9 +375,18 @@ conformance-generated-rust: cargo-downloads-check build-ts ## Rust generated com
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
 	node tests/runner/conformance-generated-php.mjs
 
-conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php ## AST and generated conformance in all four languages
+conformance-python: build-ts ## Conformance suite of TypeScript and Python
+	node tests/runner/conformance.mjs --langs ts,python
 
-conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php ext ## AST and generated conformance in all four languages for the cases of CASES only
+test-python: ## Unit tests of the Python package
+	python3 packages/template-python/tests/test_api.py
+
+conformance-generated-python: build-ts ## Python generated compiler conformance suite
+	node tests/runner/conformance-generated-python.mjs
+
+conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
+
+conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php ext ## AST and generated conformance in every language for the cases of CASES only
 	node scripts/conformance-cases.mjs $(CASES)
 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
