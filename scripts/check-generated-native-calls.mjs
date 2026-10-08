@@ -172,7 +172,7 @@ fn render_host_value(target: &str) -> Result<String, RequestError> { let order =
       writeFileSync(join(pythonDir, 'expectations.json'), JSON.stringify({ expected, passing, errorCases, hostValues }));
       writeFileSync(join(pythonDir, 'check.py'), `import json
 import sys
-from polyspec.template import NativeObject, RuntimeEnvironment, TemplateError
+from polyspec.template import Engine, NativeObject, RenderOptions, RuntimeEnvironment, TemplateError
 from generated import GeneratedProgram
 
 with open('expectations.json', encoding='utf-8') as handle:
@@ -198,12 +198,12 @@ def failing_class_function(_args, _context):
 runtime = RuntimeEnvironment()
 runtime.register_class('Order', 'suffix', lambda args, _context: 'done' + args[0])
 runtime.register_class('Order', 'fail', failing_class_function)
-program = GeneratedProgram(runtime)
+program = Engine(GeneratedProgram(runtime))
 order = NativeObject(Order())
 actual = program.render('input.tpl', {'order': order})
 if actual != expectations['expected']:
     sys.exit('Python generated native output differs: ' + repr(actual))
-define = {'define': {'card': {'template': 'part.tpl', 'data': {'o': order}}}}
+define = RenderOptions(define={'card': {'template': 'part.tpl', 'data': {'o': order}}})
 for target, output in expectations['passing'].items():
     rendered = program.render(target, {'order': order}, define)
     if rendered != output:
@@ -264,7 +264,7 @@ def render_host_value(target):
     values_runtime.register('pick', lambda args, _context: NativeObject(args[0]) if isinstance(args[0], ValueOrder) else args[0])
     values_runtime.register_class('Order', 'describe', lambda args, _context: describe_arguments(args, value_order))
     assign = {'order': NativeObject(value_order), 'same': NativeObject(value_order), 'other': NativeObject(ValueOrder()), 'items': [1]}
-    return GeneratedProgram(values_runtime).render(target, assign)
+    return Engine(GeneratedProgram(values_runtime)).render(target, assign)
 
 
 for target, output in expectations['hostValues']['outputs'].items():

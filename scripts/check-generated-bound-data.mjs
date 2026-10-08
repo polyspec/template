@@ -133,7 +133,7 @@ $check($program->render('define.tpl', $cases['assign'], ['define' => ['part' => 
       writeFileSync(join(pythonDir, 'cases.json'), json(cases));
       writeFileSync(join(pythonDir, 'check.py'), `import json
 import sys
-from polyspec.template import RuntimeEnvironment, bind, merge
+from polyspec.template import Engine, RenderOptions, RuntimeEnvironment, bind, merge
 from generated import GeneratedProgram
 
 with open('cases.json', encoding='utf-8') as handle:
@@ -145,13 +145,13 @@ def check(actual, expected, label):
         sys.exit('Python generated ' + label + ': ' + repr(actual))
 
 
-program = GeneratedProgram(RuntimeEnvironment())
+program = Engine(GeneratedProgram(RuntimeEnvironment()))
 check(program.render('page.tpl', bind(cases['assign'])), cases['outputs']['page'], 'bound assign')
 check(program.render('page.tpl', cases['assign']), cases['outputs']['page'], 'host assign')
 prepared = program.prepare('page.tpl', bind(cases['assign']))
 check(prepared.render() + prepared.render(), cases['outputs']['page'] * 2, 'prepared bound assign')
 check(program.render('page.tpl', merge(bind(cases['assign']), bind(cases['second']))), cases['outputs']['merged'], 'merged assign')
-definition = {'define': {'part': {'template': 'part.tpl', 'data': bind(cases['definitionData'])}}}
+definition = RenderOptions(define={'part': {'template': 'part.tpl', 'data': bind(cases['definitionData'])}})
 check(program.render('define.tpl', cases['assign'], definition), cases['outputs']['define'], 'bound definition data')
 `);
       run(pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
