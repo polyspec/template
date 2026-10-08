@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- Pinned `actions/setup-python` in the `python` job of `ci.yml` to the commit of its `v6.3.0` tag, and added `tests/scripts/action-pins.test.mjs`, which checks every action pin of every workflow against the commit of its version comment (T22.4-8).
 - Documented the Python package in `README.md`, `docs/guide.md` and the package README (T22.4-6). The
   README lists Python among the implementations, the guide gives a render example that uses the
   names of `polyspec.template`, and the package README names `vX.Y.Z` as the install tag until a
