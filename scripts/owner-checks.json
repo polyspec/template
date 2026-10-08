@@ -24,6 +24,9 @@
         "contracts/features.json",
         "scripts/features/**"
       ],
+      "tests": [
+        "tests/scripts/feature-python-coverage.test.mjs"
+      ],
       "targets": [
         "feature-check",
         "docs-check"
