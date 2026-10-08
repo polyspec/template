@@ -785,6 +785,18 @@
     },
     {
       "paths": [
+        "scripts/python-wheelhouse.mjs",
+        "packages/template-python/build-requirements.json"
+      ],
+      "targets": [
+        "install-check"
+      ],
+      "tests": [
+        "tests/scripts/python-wheelhouse.test.mjs"
+      ]
+    },
+    {
+      "paths": [
         ".github/workflows/*.yml",
         "config/toolchain.json"
       ],
@@ -1132,7 +1144,9 @@
       "packages/template-{ts,go,rust,php}/**",
       "scripts/python-toolchain.mjs",
       "packages/template-python/**",
-      ".python-version"
+      ".python-version",
+      "scripts/python-wheelhouse.mjs",
+      "packages/template-python/build-requirements.json"
     ],
     "test-browser": [
       "tests/browser/**",

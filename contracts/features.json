@@ -744,7 +744,7 @@
         "php": "pass",
         "rust": "pass",
         "typescript": "pass",
-        "python": "unsupported"
+        "python": "partial"
       },
       "fixtures": [
         "examples/site/scenarios",
@@ -758,7 +758,8 @@
       "verification": [
         {
           "id": "check-1",
-          "command": "make showcase-check"
+          "command": "make showcase-check",
+          "python": true
         },
         {
           "id": "check-2",
@@ -837,7 +838,8 @@
       "verification": [
         {
           "id": "check-1",
-          "command": "make typed-generator-compile-check"
+          "command": "make typed-generator-compile-check",
+          "python": true
         },
         {
           "id": "check-2",
@@ -1549,7 +1551,8 @@
       "verification": [
         {
           "id": "check-1",
-          "command": "make generated-native-check"
+          "command": "make generated-native-check",
+          "python": true
         },
         {
           "id": "check-2",
@@ -1623,7 +1626,7 @@
         "php": "pass",
         "rust": "pass",
         "typescript": "pass",
-        "python": "unsupported"
+        "python": "partial"
       },
       "fixtures": [
         "tests/fixtures/bound-data/cases.json"
@@ -1644,7 +1647,8 @@
         },
         {
           "id": "check-2",
-          "command": "make generated-native-check"
+          "command": "make generated-native-check",
+          "python": true
         },
         {
           "id": "check-3",
