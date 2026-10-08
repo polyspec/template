@@ -5,7 +5,7 @@
   "entry": "layout.tpl",
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "1a79a3749a363e97d4df70e8d14b96219179964a50df59d3dc844f49c8a38363",
+  "contractDigest": "1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e",
   "compilerDigest": "fc3ca6f68411213edeeb4c7f2f6efadfef12eae93beb68659f19345e844ef82a",
   "files": {
     "generated.go": {

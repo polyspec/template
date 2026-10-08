@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- T22.4-20-9: 기능 페이지와 showcase 산출물을 다시 생성해, commit된 산출물의 계약 digest가 tree의 compiler를 가리킵니다.
 - T22.4-7: `tests/scripts/toolchain-files.test.mjs`의 단위 테스트가 `ci.yml`의 `python` job이 `test-python`, `conformance-python`, `conformance-generated-python`을 실행하고 `ci-passed`가 이 job을 need로 가짐을 검사합니다. T22.4-19와 T22.4-19-1은 각자의 명령으로 검증됩니다.
 - interface 변경 뒤 컴파일된 AST manifest, generated manifest와 `examples/site/index.html`을 다시 생성해 계약 digest가 계약과 맞게 했습니다 (T22.4-24-1).
 - T22.4-24: `packages/template-compiler/interface.json`이 Python language mapping(backend, program, error, runtime services, `RuntimeEnvironment`의 field와 operation, `Frame`과 `Scope`의 field와 operation, bound map)을 선언하고 `python`이 다시 `supportLevels.core`에 들어갑니다. `packages/template-python/tests/test_compiler_interface.py`가 이 선언을 package와 비교하고, `scripts/check-compiler-interface.mjs`가 이를 실행하며 `backends/python.mjs`를 검사하고, `scripts/check-compiler-interface-mutations.mjs`가 Python mapping 변형 다섯 개를 거부합니다. package에 `RuntimeEnvironment`가 구현하는 class `RuntimeServices`가 추가됩니다. `docs/spec/compiler.md`가 generated backend에 Python을 포함합니다.
