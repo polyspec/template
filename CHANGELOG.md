@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+- Added a Python implementation (T22.4). `packages/template-python` holds the engine, the built-in
+  functions and the command line interface as the package `polyspec-template` under the import name
+  `polyspec.template`; the conformance and parity runners, the delimiter matrix, the function
+  contract and the CI cover it like every other language, and the compiler emits Python for a
+  generated program. The Python job of the CI runs the unit tests, the conformance and the
+  generated conformance on 3.11 and the pinned minor release, and the release version check reads
+  `packages/template-python/pyproject.toml` with the other manifests.
 - Updated `@codemirror/language` to 6.13.1 (T22.3-6). 6.13.1 declares `@codemirror/streamparser`, which 6.13.0 imported without declaring it, so `config/dependency-policy.json` no longer keeps 6.12.4 with an exception; `make dependency-review UPDATE=1 RECORD=1` updated `package.json` and `package-lock.json` and recorded the review, and `make showcase` compiled the committed artifacts again for the lock.
 
 ## 0.0.4
