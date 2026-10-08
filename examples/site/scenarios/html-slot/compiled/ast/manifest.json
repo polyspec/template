@@ -6,7 +6,7 @@
   "delimiters": null,
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
-  "contractDigest": "897a479a68cb79e05b5da3bb1b669b26cffe73e0b4f371d0b3b6239bb1ce74e6",
+  "contractDigest": "80ba2a43cf93a4a385351a05f1424ded740fc2a04a29352a9819c3b356b0ec34",
   "compilerDigest": "554bf778ac154cd2b8a0acde176c2f4d80c267c4e0061650805100654a6ff200",
   "files": {
     "layout.tpl": {
