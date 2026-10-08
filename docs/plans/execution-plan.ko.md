@@ -1,3 +1,5 @@
+<!-- doc-id: docs-plans-execution-plan -->
+<!-- source-sha256: c6269c68c811d1488eb58f98e3e745795f53d929d1c3f3798600dd45cecaed39 -->
 # 실행 계획
 
 [English](/plans/execution-plan).

@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-conformance -->
 # Conformance
 
 [한국어](/ko/spec/conformance).

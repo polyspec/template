@@ -1,3 +1,5 @@
+<!-- doc-id: docs-operations-showcase -->
+<!-- source-sha256: 6e103fd0da1c5ca42aa18933f69c159d508b24f64cfa9dfefab0f7d22b6479b3 -->
 # 예제 사이트
 
 [English](/operations/showcase).

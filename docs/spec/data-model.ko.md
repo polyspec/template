@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-data-model -->
+<!-- source-sha256: 228ded7f9fb3b4821df474beb57a512174ca47ca05cd2eddd166ee711e8ca0e8 -->
 # 데이터 모델
 
 [English](/spec/data-model).

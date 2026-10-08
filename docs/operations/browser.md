@@ -1,3 +1,4 @@
+<!-- doc-id: docs-operations-browser -->
 # Browser rendering
 
 [한국어](/ko/operations/browser).

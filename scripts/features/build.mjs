@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -12,8 +13,10 @@ const docLink = (feature, ko) => {
   return doc || '.';
 };
 const table = (ko) => manifest.features.map(feature => `| ${feature.id} | ${ko ? feature.title_ko : feature.title} | ${feature.status} | ${clients.map(client => `${client}: ${feature.clients[client]}`).join('<br>')} | [${ko ? '근거' : 'Evidence'}](${docLink(feature, ko)}) |`).join('\n');
-const body = `# Feature status\n\nThe executable source is [contracts/features.json](../contracts/features.json). Each entry defines inputs, outputs, state transitions, errors, client support, fixtures, tests, verification commands and paired documentation.\n\n| ID | Feature | Status | Client support | Evidence |\n|---|---|---|---|---|\n${table(false)}\n\nRun \`make feature-check\` to validate every contract and referenced path. An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.\n`;
-const korean = `# 기능 상태\n\n실행 정본은 [contracts/features.json](../contracts/features.json)이다. 각 항목은 input, output, 상태 전이, 오류, client 지원 상태, fixture, test, 검증 명령과 paired document를 정의한다.\n\n| ID | 기능 | 상태 | Client 지원 | 근거 |\n|---|---|---|---|---|\n${table(true)}\n\n\`make feature-check\`로 모든 계약과 참조 경로를 검사한다. implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.\n`;
+const body = `<!-- doc-id: docs-features -->\n# Feature status\n\nThe executable source is [contracts/features.json](../contracts/features.json). Each entry defines inputs, outputs, state transitions, errors, client support, fixtures, tests, verification commands and paired documentation.\n\n| ID | Feature | Status | Client support | Evidence |\n|---|---|---|---|---|\n${table(false)}\n\nRun \`make feature-check\` to validate every contract and referenced path. An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.\n`;
+// The Korean page names the sha256 of the English page it translates (scripts/kit/check-documents.mjs, rule revision).
+const revision = `<!-- doc-id: docs-features -->\n<!-- source-sha256: ${createHash('sha256').update(body).digest('hex')} -->\n`;
+const korean = `${revision}# 기능 상태\n\n실행 정본은 [contracts/features.json](../contracts/features.json)이다. 각 항목은 input, output, 상태 전이, 오류, client 지원 상태, fixture, test, 검증 명령과 paired document를 정의한다.\n\n| ID | 기능 | 상태 | Client 지원 | 근거 |\n|---|---|---|---|---|\n${table(true)}\n\n\`make feature-check\`로 모든 계약과 참조 경로를 검사한다. implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.\n`;
 const outputs = [['docs/features.md', body], ['docs/features.ko.md', korean]];
 if (process.argv.includes('--check')) {
   for (const [relative, expected] of outputs) {

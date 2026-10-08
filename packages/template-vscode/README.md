@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-vscode-readme -->
 # Polyspec Template for VS Code
 
 [한국어](README.ko.md).

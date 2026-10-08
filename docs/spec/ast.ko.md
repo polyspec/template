@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-ast -->
+<!-- source-sha256: 1f64f93f3b5936fee1390974dad890b28acc58e6dd0eb2c385a355323547d2a6 -->
 # AST
 
 [English](/spec/ast).

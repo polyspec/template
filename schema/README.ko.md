@@ -1,3 +1,5 @@
+<!-- doc-id: schema-readme -->
+<!-- source-sha256: 854fa171d911b42b52a94f69fff0864449b404126626cec14d82cd204368b662 -->
 # 스키마
 
 [English](README.md).

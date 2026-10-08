@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-ts-readme -->
+<!-- source-sha256: e020df895c5e0135498429f94fb96933325ffa7db342e1d195eceae171127047 -->
 # @polyspec/template
 
 [English](README.md).

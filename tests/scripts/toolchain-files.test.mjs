@@ -12,7 +12,7 @@
 // - PHP is one of the minor versions of config/toolchain.json and Composer its exact version: setup-php cannot pin a
 //   patch, so the minor is the pin and var/full-run.json records the patch of each run;
 // - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
-// - the last job of ci.yml is ci-passed, the check of ci.yml that the ruleset main requires: it runs after every other
+// - the last job of ci.yml is ci-passed, the check of ci.yml that a release requires: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
 // - release.yml runs on the push of a tag vX.Y.Z or <directory>/vX.Y.Z at any depth (**/v*: in a tag filter * does not
@@ -49,7 +49,7 @@ function jobsOf(text) {
 const CI_PASSED = 'ci-passed';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
 
-// The steps of release.yml in their order (scripts/release.mjs): verify the tagged commit, check the versions, build the
+// The steps of release.yml in their order (scripts/kit/release.mjs): verify the tagged commit, check the versions, build the
 // archives, create the release (T22.1-4).
 const RELEASE_STEPS = ['make release-verify', 'make release-versions', 'make release-assets', 'make release-publish'];
 
@@ -79,7 +79,7 @@ export function releaseViolations(text) {
 export function ciPassedViolations(text) {
   const all = jobsOf(text);
   const job = all.find(entry => entry.name === CI_PASSED);
-  if (!job) return [`ci.yml: the job ${CI_PASSED} is missing; the ruleset main requires it as the check of ci.yml`];
+  if (!job) return [`ci.yml: the job ${CI_PASSED} is missing; a release requires it as the check of ci.yml`];
   const found = [];
   const others = all.filter(entry => entry.name !== CI_PASSED);
   const key = (entry, name) => new RegExp(`^ {4}${name}: (.*)$`, 'm').exec(entry.text)?.[1].trim() ?? '';
@@ -167,7 +167,8 @@ test('every recipe line runs npm and go of var/tools/bin, with every make on PAT
 test('the path of every Go module that go get resolves names its directory in the repository (T22.1-2)', () => {
   // go get github.com/polyspec/template/<directory> finds the module only in that directory of the repository; a module
   // path without a dot in its first element is local to the repository and is never resolved.
-  const modules = spawnSync('git', ['ls-files', '*go.mod'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  // The fixture of tests/kit is a repository of its own, which the copy of kit tests; it is not a module or a lock of this one.
+  const modules = spawnSync('git', ['ls-files', '*go.mod', ':!tests/kit'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.ok(modules.length > 0, 'git ls-files listed no go.mod');
   for (const file of modules) {
     const module = /^module (\S+)$/m.exec(read(file))?.[1];
@@ -210,12 +211,12 @@ test('PHP is a minor version of config/toolchain.json and Composer its exact ver
   const actual = recipe('cd . && php -r "echo PHP_MAJOR_VERSION, \'.\', PHP_MINOR_VERSION;"');
   assert.ok(TOOLCHAIN.php.includes(actual), `php of the recipes: expected a minor version of ${TOOLCHAIN.php.join(', ')} (config/toolchain.json), actual ${actual}`);
   const composer = /Composer version (\S+)/.exec(recipe('composer --version --no-ansi 2>/dev/null'))?.[1];
-  assert.equal(composer, TOOLCHAIN.composer, `composer of the recipes: expected ${TOOLCHAIN.composer} (config/toolchain.json), actual ${composer}`);
+  assert.equal(composer, TOOLCHAIN.composer.version, `composer of the recipes: expected ${TOOLCHAIN.composer.version} (config/toolchain.json), actual ${composer}`);
   for (const file of WORKFLOWS) {
     const text = read(file);
     for (const match of text.matchAll(/php-version: '([^']*)'/g)) assert.ok(TOOLCHAIN.php.includes(match[1]), `${file}: php-version ${match[1]}, expected one of ${TOOLCHAIN.php.join(', ')}`);
     for (const match of text.matchAll(/php: \[([^\]]*)\]/g)) assert.deepEqual(JSON.parse(`[${match[1].replaceAll("'", '"')}]`), TOOLCHAIN.php, `${file}: the PHP matrix differs from config/toolchain.json`);
-    for (const match of text.matchAll(/tools: (\S+)/g)) assert.equal(match[1], `composer:${TOOLCHAIN.composer}`, `${file}: tools ${match[1]}, expected composer:${TOOLCHAIN.composer}`);
+    for (const match of text.matchAll(/tools: (\S+)/g)) assert.equal(match[1], `composer:${TOOLCHAIN.composer.version}`, `${file}: tools ${match[1]}, expected composer:${TOOLCHAIN.composer.version}`);
   }
 });
 
@@ -224,13 +225,13 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   assert.equal(install.status, 0, install.stderr);
   // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1).
   const cargo = process.env.CARGO ?? path.join(process.env.HOME, '.cargo/bin/cargo');
-  const locks = spawnSync('git', ['ls-files', '*Cargo.lock'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  const locks = spawnSync('git', ['ls-files', '*Cargo.lock', ':!tests/kit'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.ok(locks.length > 0, 'git ls-files listed no Cargo.lock');
   // The build requirements of the Python package go to var/python/wheelhouse, which the package install check reads (T22.4-20-5).
   // Only the commands that download leave the offline settings of the recipes (T20.1-2).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const fetches = locks.map(lock => `${online} ${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches, `${online} node scripts/python-wheelhouse.mjs`]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/kit/install-tools.mjs`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches, `${online} node scripts/python-wheelhouse.mjs`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
@@ -344,22 +345,20 @@ test('a job of a matrix runs every combination to its end, also after another co
   }
 });
 
-test('a new push to a pull request cancels the running CI of its workflow and ref, and no other run is cancelled (T17.1-7)', () => {
-  // A merge group has a ref of its own and its run decides whether main receives the commit, so only pull request runs
-  // are cancelled.
+test('no push cancels the running CI of an earlier push (T17.1-7)', () => {
+  // The run of a push to main is the evidence of the commit that a release tags, so a newer push does not replace it.
   for (const file of WORKFLOWS) {
     const text = read(file);
     const [, triggers = ''] = /\non:\n((?: {2}.*\n|\s*\n)+)/.exec(`\n${text}`) ?? [];
     // A tag push runs a release, which no later push replaces.
-    if (!/^ {2}(?:push|pull_request|merge_group):/m.test(triggers) || /^ {4}tags:/m.test(triggers)) continue;
-    assert.match(text, /\nconcurrency:\n {2}group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: \$\{\{ github\.event_name == 'pull_request' \}\}\n/, `${file} has no concurrency group of its workflow and ref that cancels only the run of a pull request`);
+    if (!/^ {2}push:/m.test(triggers) || /^ {4}tags:/m.test(triggers)) continue;
+    assert.match(text, /\nconcurrency:\n {2}group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: false\n/, `${file} has no concurrency group of its workflow and ref that cancels no run`);
   }
 });
 
-test('each workflow declares exactly its triggers: CI on every pull request, merge group and manual run, the push gate also on the pushed branches outside the queue, the site on main, the release on a tag (T17.1-7, T17.1-9, T22.1-4)', () => {
+test('each workflow declares exactly its triggers: CI and the site on a push to main and on a manual run, the release on a tag (T17.1-7, T17.1-9, T22.1-4)', () => {
   const triggers = {
-    '.github/workflows/ci.yml': 'on:\n  pull_request:\n  merge_group:\n  workflow_dispatch:\n',
-    '.github/workflows/push-gate.yml': "on:\n  push:\n    branches-ignore: ['gh-readonly-queue/**']\n  pull_request:\n  merge_group:\n",
+    '.github/workflows/ci.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
     '.github/workflows/pages.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
     '.github/workflows/dependency-review.yml': "on:\n  schedule:\n    - cron: '17 3 * * *'\n  workflow_dispatch:\n",
     '.github/workflows/release.yml': "on:\n  push:\n    tags: ['v*', '**/v*']\n",

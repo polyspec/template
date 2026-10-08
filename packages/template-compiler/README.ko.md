@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-compiler-readme -->
+<!-- source-sha256: 3fb9f99dc5ac58bdaa52240a0ee027c1db094698d5ade76b19cc5340071daa5e -->
 # @polyspec/template-compiler
 
 [English](README.md).

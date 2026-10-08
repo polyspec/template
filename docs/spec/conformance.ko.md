@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-conformance -->
+<!-- source-sha256: d77c90e9b0c0837ffb6282ab76134136619177509c28470ef0e1de9314b831cc -->
 # 적합성
 
 [English](/spec/conformance).

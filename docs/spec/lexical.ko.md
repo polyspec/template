@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-lexical -->
+<!-- source-sha256: 27a3b365c4243ddd1da8097f3ac8fdf8d5e02237e8df354ba3e7137397484938 -->
 # 렉시컬 규칙
 
 [English](/spec/lexical).

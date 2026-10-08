@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-lsp-readme -->
+<!-- source-sha256: 4a18812b6eb4f7ef0858a8848984c328cb489574d26e38eac277447697018e83 -->
 # @polyspec/template-lsp
 
 [English](README.md).

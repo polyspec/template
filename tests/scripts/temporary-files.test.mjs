@@ -31,12 +31,19 @@ function firstArgument(text, index) {
 // A directory of the checkout: built from a path of the checkout, the current directory or a relative path.
 const IN_CHECKOUT = /\b(?:root|ROOT|repoRoot|crate|goRoot|packages|__dirname)\b|process\.cwd\(\)|^['"`](?!\/)/;
 
+// The one exception: the installer of the vendored tools of kit builds a tool beside its install prefix in var/tools, the
+// cache of the checkout that no test reads, and renames it into place. The exception names the file and the exact
+// argument, so any other call of that file fails. Removal condition: kit builds a tool in the system temporary
+// directory.
+const EXCEPTIONS = { 'scripts/kit/install-tool.mjs': ['`${prefix}.next-`'] };
+
 test('no mkdtemp of a tracked script makes its directory in the checkout', () => {
   const inCheckout = [];
   for (const file of SOURCES) {
     const text = readFileSync(path.join(ROOT, file), 'utf8');
     for (const call of text.matchAll(/\bmkdtemp(?:Sync)?\(/g)) {
       const argument = firstArgument(text, call.index + call[0].length);
+      if (EXCEPTIONS[file]?.includes(argument)) continue;
       if (IN_CHECKOUT.test(argument)) inCheckout.push(`${file}:${text.slice(0, call.index).split('\n').length}: mkdtemp(${argument})`);
     }
   }

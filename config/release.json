@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "repositoryUrl": "https://github.com/polyspec/template",
+  "changelog": "CHANGELOG.md",
+  "changelogTranslations": [
+    "CHANGELOG.ko.md"
+  ],
+  "checks": [
+    "ci-passed"
+  ],
+  "packages": [
+    {
+      "kind": "npm",
+      "directory": "packages/template-ts",
+      "name": "@polyspec/template"
+    },
+    {
+      "kind": "npm",
+      "directory": "packages/template-language",
+      "name": "@polyspec/template-language"
+    },
+    {
+      "kind": "npm",
+      "directory": "packages/template-lsp",
+      "name": "@polyspec/template-lsp"
+    },
+    {
+      "kind": "npm",
+      "directory": "packages/template-codemirror",
+      "name": "@polyspec/template-codemirror"
+    },
+    {
+      "kind": "npm",
+      "directory": "packages/template-compiler",
+      "name": "@polyspec/template-compiler"
+    },
+    {
+      "kind": "composer",
+      "directory": "packages/template-php",
+      "name": "polyspec/template"
+    },
+    {
+      "kind": "composer",
+      "directory": "packages/template-php-ext",
+      "name": "polyspec/template-php-ext"
+    }
+  ],
+  "manifests": {
+    "package.json": "version",
+    "packages/template-ts/package.json": "archive",
+    "packages/template-language/package.json": "archive",
+    "packages/template-lsp/package.json": "archive",
+    "packages/template-codemirror/package.json": "archive",
+    "packages/template-compiler/package.json": "archive",
+    "packages/template-vscode/package.json": "version",
+    "packages/template-php/composer.json": "archive",
+    "packages/template-php-ext/composer.json": "archive",
+    "packages/template-rust/Cargo.toml": "git-tag",
+    "packages/template-python/pyproject.toml": "git-tag"
+  },
+  "notReleased": {
+    "packages/template-vscode/tests/integration/harness/package.json": "the harness of the VS Code integration test",
+    "tools/showcase/adapters/rust/Cargo.toml": "the Rust adapter of the showcase",
+    "tools/showcase/adapters/go/go.mod": "the Go adapter of the showcase, a module local to the repository",
+    "tests/fixtures/release-consumer/npm/package.json": "the npm consumer project of the release archives",
+    "tests/fixtures/release-consumer/composer/composer.json": "the Composer consumer project of the release archives"
+  },
+  "goModules": {
+    "packages/template-go": "github.com/polyspec/template/packages/template-go"
+  },
+  "consumers": {
+    "npm": {
+      "directory": "tests/fixtures/release-consumer/npm",
+      "smoke": {
+        "@polyspec/template": [
+          "node",
+          "--input-type=module",
+          "-e",
+          "await import('@polyspec/template');"
+        ],
+        "@polyspec/template-language": [
+          "node",
+          "--input-type=module",
+          "-e",
+          "await import('@polyspec/template-language');"
+        ],
+        "@polyspec/template-lsp": [
+          "node",
+          "--input-type=module",
+          "-e",
+          "await import('@polyspec/template-lsp');"
+        ],
+        "@polyspec/template-codemirror": [
+          "node",
+          "--input-type=module",
+          "-e",
+          "await import('@polyspec/template-codemirror');"
+        ],
+        "@polyspec/template-compiler": [
+          "node",
+          "--input-type=module",
+          "-e",
+          "const compiler = await import('@polyspec/template-compiler/compiler.mjs');\nconst ast = await import('@polyspec/template-compiler/ast-artifact.mjs');\nconst types = await import('@polyspec/template-compiler/type-manifest.mjs');\nconst { default: functions } = await import('@polyspec/template-compiler/functions.json', { with: { type: 'json' } });\nconst fs = await import('node:fs');\nfs.mkdirSync('templates');\nfs.writeFileSync('templates/page.tpl', '<p>{=title}</p>\\n');\nconst graph = ast.compileAst({ root: 'templates', output: 'compiled', entry: 'page.tpl' });\nif (JSON.stringify([typeof compiler.compileSource, typeof types.deriveTypeManifest, functions.canonical.length > 0, /^[0-9a-f]{64}$/.test(graph.compilerDigest)]) !== '[\"function\",\"function\",true,true]') process.exit(1);"
+        ]
+      }
+    },
+    "composer": {
+      "directory": "tests/fixtures/release-consumer/composer",
+      "smoke": {
+        "polyspec/template": [
+          "php",
+          "-r",
+          "require 'vendor/autoload.php'; exit(class_exists('Polyspec\\\\Template\\\\Engine') ? 0 : 1);"
+        ]
+      }
+    }
+  },
+  "proof": {
+    "gitTag": {
+      "packages/template-python/pyproject.toml": {
+        "kind": "python",
+        "name": "polyspec-template",
+        "smoke": [
+          "python",
+          "-c",
+          "import polyspec.template"
+        ]
+      },
+      "packages/template-rust/Cargo.toml": {
+        "kind": "rust",
+        "name": "polyspec-template",
+        "smoke": [
+          "cargo",
+          "check"
+        ]
+      }
+    }
+  }
+}

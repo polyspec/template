@@ -1,5 +1,5 @@
 // Tests that the full suite is one list that every runner shares (T17.1-2): `make check` and `make release-test-matrix`
-// run the targets of `CHECK_TARGETS` through the guard scripts/full-run.mjs, which runs every target to its end, and the
+// run the targets of `CHECK_TARGETS` through the guard scripts/kit/full-run.mjs, which runs every target to its end, and the
 // jobs of the CI workflow run each target of `CHECK_TARGETS` in exactly one job with `make ci-targets` and no other
 // target (T17.1-10); and that a verifying CI job runs its later steps after a failing step, so one CI run reports every
 // failure. Only a job that publishes stops at its first failure.
@@ -39,7 +39,7 @@ function jobsOf(text) {
 const CHECK_TARGETS = read('Makefile').match(/^CHECK_TARGETS := (.*)$/m)[1].split(/\s+/).filter(Boolean);
 
 test('make release-test-matrix runs the targets of make check through the same guard', () => {
-  const guard = `node scripts/full-run.mjs run ${CHECK_TARGETS.join(' ')}`;
+  const guard = `node scripts/kit/full-run.mjs run ${CHECK_TARGETS.join(' ')}`;
   assert.deepEqual(dryRun('check'), [guard]);
   assert.deepEqual(dryRun('release-test-matrix'), [guard]);
 });
@@ -120,7 +120,7 @@ test('a verifying CI job runs every later step after a failing step, and a make 
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
       // A job that publishes stops at its first failure. The step of the job ci-passed of ci.yml runs also after a
-      // cancelled job: a skipped step would pass the check that the ruleset main requires (T22.1-3).
+      // cancelled job: a skipped step would pass the check that a release requires (T22.1-3).
       const publishes = job.steps.some(step => /uses: actions\/deploy-pages@|run: make release-publish\b/.test(step))
         || (file.endsWith('/ci.yml') && job.name === 'ci-passed');
       for (const step of job.steps) {

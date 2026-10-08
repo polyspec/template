@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "comment": "The documents of template: every English document has a Korean twin, the pages under docs/ are rendered by VitePress, and docs/features.md holds the feature status table.",
+  "include": [
+    "README.md",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "docs/**/*.md",
+    "schema/**/*.md",
+    "packages/**/*.md",
+    "tests/fixtures/**/*.md"
+  ],
+  "siteLinks": true,
+  "interpolation": ["docs/**/*.md"],
+  "statusTables": [
+    {
+      "path": "docs/features.md",
+      "idPattern": "[a-z][a-z0-9-]*",
+      "cells": 5,
+      "columns": [
+        { "index": 2, "enum": ["planned", "partial", "implemented"] },
+        { "index": 3, "pattern": "(?:go|php|rust|typescript):" },
+        { "index": 4, "pattern": "\\]\\([^)]+\\)" }
+      ]
+    }
+  ],
+  "changelogs": ["CHANGELOG.md"]
+}

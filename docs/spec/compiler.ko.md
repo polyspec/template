@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-compiler -->
+<!-- source-sha256: ad0311426ff011ca5108eb2f4a9b6f8f971e7a2b8e098800fb7b8006f2b8fc4e -->
 # Compiler 계약
 
 [English](/spec/compiler).

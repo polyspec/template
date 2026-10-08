@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-vscode-readme -->
+<!-- source-sha256: a149c0891af3557384ebb3ae842325640fe6cd50ee1de0b4ab2021697efba871 -->
 # VS Code용 Polyspec Template
 
 [English](README.md).

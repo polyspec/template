@@ -1,3 +1,4 @@
+<!-- doc-id: docs-features -->
 # Feature status
 
 The executable source is [contracts/features.json](../contracts/features.json). Each entry defines inputs, outputs, state transitions, errors, client support, fixtures, tests, verification commands and paired documentation.

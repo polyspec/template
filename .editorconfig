@@ -24,7 +24,7 @@ indent_size = 4
 [packages/template-php-ext/src/*_arginfo.h]
 indent_style = unset
 
-[Makefile]
+[{Makefile,*.mk}]
 indent_style = tab
 
 [*.tpl]

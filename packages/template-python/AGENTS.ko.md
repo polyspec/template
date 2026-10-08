@@ -1,3 +1,5 @@
+<!-- doc-id: packages-template-python-agents -->
+<!-- source-sha256: 5cf87ba54e73beaa7ce9a9cdfdc4219b38c923a2e46ee92251ad674ce7b8bca7 -->
 # 개발
 
 저장소 루트의 필수 검사가 이 패키지에 적용됩니다. 개발 중에는 단위 test만 실행합니다. 변경 진행 중에는 `python3 tests/test_api.py`로 RED 사례를 먼저 실행하고 같은 사례를 GREEN으로 확인합니다. 저장소의 conformance·parity runner는 이 패키지를 명령줄 인터페이스로 CI에서 실행합니다. commit이나 push 전 로컬 실행을 요구하는 규칙은 없습니다.

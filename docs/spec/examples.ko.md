@@ -1,3 +1,5 @@
+<!-- doc-id: docs-spec-examples -->
+<!-- source-sha256: 49ce69a1ec548ecf9a988c16b185788ad41ee875e2988260ccdf698c11b86638 -->
 # 예제
 
 [English](/spec/examples).

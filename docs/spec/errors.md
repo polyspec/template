@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-errors -->
 # Errors
 
 [한국어](/ko/spec/errors).

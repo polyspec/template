@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-compiler-readme -->
 # @polyspec/template-compiler
 
 [한국어](README.ko.md).

@@ -1,3 +1,4 @@
+<!-- doc-id: docs-spec-editor -->
 # Editor support
 
 [한국어](/ko/spec/editor).

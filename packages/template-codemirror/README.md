@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-codemirror-readme -->
 # @polyspec/template-codemirror
 
 [한국어](README.ko.md).

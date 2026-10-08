@@ -901,7 +901,7 @@
         "packages/template-compiler/interface.json"
       ],
       "tests": [
-        "scripts/check-documents.mjs",
+        "scripts/kit/check-documents.mjs",
         "scripts/check-doc-coverage.mjs",
         "scripts/generate-compiler-interface.mjs"
       ],
@@ -1399,9 +1399,9 @@
         "config/dependency-review.json"
       ],
       "tests": [
-        "scripts/check-dependency-policy.mjs",
-        "scripts/check-dependency-policy-mutation.mjs",
-        "tests/scripts/dependency-policy.test.mjs"
+        "scripts/kit/check-dependency-policy.mjs",
+        "scripts/kit/check-dependency-policy-mutation.mjs",
+        "tests/kit/dependency-policy.test.mjs"
       ],
       "verification": [
         {

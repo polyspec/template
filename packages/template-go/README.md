@@ -1,3 +1,4 @@
+<!-- doc-id: packages-template-go-readme -->
 # github.com/polyspec/template/packages/template-go
 
 [한국어](README.ko.md).

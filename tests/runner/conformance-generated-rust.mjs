@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Rust generated conformance: compiles every case into a module of one integration test file whose
-// tests are named after the cases, and runs it with scripts/run-tests.mjs, which prints each case
+// tests are named after the cases, and runs it with scripts/kit/run-tests.mjs, which prints each case
 // test with its elapsed time and stops a test that outlives its own timeout.
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';

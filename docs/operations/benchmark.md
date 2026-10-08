@@ -1,3 +1,4 @@
+<!-- doc-id: docs-operations-benchmark -->
 # Performance measurements
 
 Run the production-artifact benchmark with:

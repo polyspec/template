@@ -1,3 +1,5 @@
+<!-- doc-id: readme -->
+<!-- source-sha256: 11ea6e70ab5d7cbfdd263f1a8ae8e8d8a29214816e1802d778c942d0352ca8d0 -->
 # Template
 
 [English](README.md).
