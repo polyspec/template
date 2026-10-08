@@ -223,6 +223,9 @@
       ],
       "targets": [
         "release-coverage"
+      ],
+      "tests": [
+        "tests/scripts/release-config.test.mjs"
       ]
     },
     {
