@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 25318c4a0ad48d1d1ed63d7b81684a6c486ab2f61620f578352cd1c93bc8911c -->
+<!-- source-sha256: 8364b6bb9a1c0ae5d2209d5987c01953b570257611afc4353a943307ea344fa7 -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -417,3 +417,4 @@
 | T22.4-29 | T22.4-28의 lock 변경 뒤 commit된 컴파일 산출물을 다시 생성합니다. compiler digest가 `package-lock.json`을 포함하므로 컴파일된 AST manifest, generated JavaScript manifest와 `examples/site/index.html`이 `@playwright/test` 1.64.0 이전 compiler의 digest를 기록해 `node scripts/check-artifact-digests.mjs`가 실패했습니다. 재생성은 `make showcase-compile`, `make typed-generator`, `node tools/showcase/build-site.mjs`로 씁니다 | `examples/site`, `tools/showcase/adapters/generated/javascript` | `node scripts/check-artifact-digests.mjs` | [o] |
 | T22.4-30 | `polyspec/kit` v0.0.6을 사용합니다(`make kit-sync KIT_TAG=v0.0.6`, 두 번째 실행은 `unchanged`). 의존성 gate가 이 저장소의 패키지를 복사본인 `file:` lock 항목에서 읽고, `make documents-stamp`가 한글 파일의 `source-sha256`을 씁니다 | `scripts/kit`, `tests/kit`, `kit.json`, `.kit/kit.lock.json` | `make kit-check` | [o] |
 | T22.4-31 | `polyspec/kit` v0.0.7을 사용합니다(`make kit-sync KIT_TAG=v0.0.7`, 두 번째 실행은 `unchanged`). 의존성 gate가 manifest가 `file:<자기 directory>`로 요구하는 로컬 npm 패키지를 받아들입니다 | `scripts/kit`, `tests/kit`, `kit.json`, `.kit/kit.lock.json` | `make kit-check` | [o] |
+| T22.4-32 | `polyspec/kit` v0.0.8을 사용합니다(`make kit-sync KIT_TAG=v0.0.8`, 두 번째 실행은 `unchanged`). `make install-tools TOOLS="npm go"`는 이름을 준 도구만 설치합니다 | `scripts/kit`, `tests/kit`, `kit.json`, `.kit/kit.lock.json` | `make kit-check` | [o] |
