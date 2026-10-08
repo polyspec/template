@@ -12,6 +12,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const checks = [
   'scripts/check-generated-typed-values.mjs',
   'scripts/check-generated-arguments.mjs',
+  'scripts/check-generated-bound-data.mjs',
 ];
 
 for (const check of checks) {

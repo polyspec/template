@@ -12,6 +12,7 @@ import { goString, phpString, rustString } from '../packages/template-compiler/b
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
+import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/bound-data');
@@ -124,9 +125,40 @@ $check($program->render('page.tpl', $cases['assign']), $cases['outputs']['page']
 $check($program->render('page.tpl', BoundMap::merge(BoundMap::bind($cases['assign']), BoundMap::bind($cases['second']))), $cases['outputs']['merged'], 'merged assign');
 $check($program->render('define.tpl', $cases['assign'], ['define' => ['part' => ['template' => 'part.tpl', 'data' => BoundMap::bind($cases['definitionData'])]]]), $cases['outputs']['define'], 'bound definition data');`], root);
     },
+    Python: () => {
+      // Python: bind and merge of the package build the bound maps (VAL-22).
+      const pythonDir = join(temporary, 'python');
+      mkdirSync(pythonDir);
+      writeFileSync(join(pythonDir, 'generated.py'), source('python'));
+      writeFileSync(join(pythonDir, 'cases.json'), json(cases));
+      writeFileSync(join(pythonDir, 'check.py'), `import json
+import sys
+from polyspec.template import RuntimeEnvironment, bind, merge
+from generated import GeneratedProgram
+
+with open('cases.json', encoding='utf-8') as handle:
+    cases = json.load(handle)
+
+
+def check(actual, expected, label):
+    if actual != expected:
+        sys.exit('Python generated ' + label + ': ' + repr(actual))
+
+
+program = GeneratedProgram(RuntimeEnvironment())
+check(program.render('page.tpl', bind(cases['assign'])), cases['outputs']['page'], 'bound assign')
+check(program.render('page.tpl', cases['assign']), cases['outputs']['page'], 'host assign')
+prepared = program.prepare('page.tpl', bind(cases['assign']))
+check(prepared.render() + prepared.render(), cases['outputs']['page'] * 2, 'prepared bound assign')
+check(program.render('page.tpl', merge(bind(cases['assign']), bind(cases['second']))), cases['outputs']['merged'], 'merged assign')
+definition = {'define': {'part': {'template': 'part.tpl', 'data': bind(cases['definitionData'])}}}
+check(program.render('define.tpl', cases['assign'], definition), cases['outputs']['define'], 'bound definition data')
+`);
+      run(pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+    },
   });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write('generated bound data: TypeScript, Go, Rust and PHP generated programs rendered bound maps with the bytes of the host maps\n');
+process.stdout.write('generated bound data: TypeScript, Go, Rust, PHP and Python generated programs rendered bound maps with the bytes of the host maps\n');
