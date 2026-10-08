@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "comment": "Written by make dependency-review RECORD=1 (scripts/dependency-review.mjs) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-07T14:48:18.267Z",
+  "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mjs) from the registries; make dependency-policy-check compares the checkout with it without a network.",
+  "reviewed": "2026-10-08T21:34:16.083Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "b96a37d54f10d2cac1ebbb6520d6b62abd7852accece1796fcd11bb0e899bcbc",
+      "sha256": "d3ce9e36eefc71a9f26c50dd7b6ee19fc11e3ce0195c0e5bf95020f4ec6a7a56",
       "advisories": []
     },
     {
@@ -16,6 +16,16 @@
     {
       "lock": "packages/template-php-ext/composer.lock",
       "sha256": "ef317cf44a9b6ee58dc3537dd9a19a7a61a2f907c01a6196e08b22b272623fa0",
+      "advisories": []
+    },
+    {
+      "lock": "packages/template-rust/Cargo.lock",
+      "sha256": "850a05012c8d443ffc4d2e59bf8d413a9b219d9acec9f77d768fc2eae82499cb",
+      "advisories": []
+    },
+    {
+      "lock": "tools/showcase/adapters/rust/Cargo.lock",
+      "sha256": "8fded17845666f2fb83bf06b0ddb2bd3f1dbdfba4bc66dd6e47d115ccb4a3299",
       "advisories": []
     }
   ],
@@ -73,8 +83,8 @@
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "@playwright/test",
-      "version": "1.63.0",
-      "latest": "1.63.0"
+      "version": "1.64.0",
+      "latest": "1.64.0"
     },
     {
       "ecosystem": "npm",
@@ -208,6 +218,13 @@
       "package": "phpunit/phpunit",
       "version": "11.5.57",
       "latest": "11.5.57"
+    },
+    {
+      "ecosystem": "pypi",
+      "manifest": "packages/template-python/pyproject.toml",
+      "package": "setuptools",
+      "version": "84.0.0",
+      "latest": "84.0.0"
     }
   ]
 }
