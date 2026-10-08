@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "role": "package",
+  "documents": [
+    {
+      "id": "overview",
+      "kind": "usage",
+      "en": "README.md",
+      "ko": "README.ko.md"
+    },
+    {
+      "id": "development",
+      "kind": "procedure",
+      "en": "AGENTS.md",
+      "ko": "AGENTS.ko.md"
+    },
+    {
+      "id": "changelog",
+      "kind": "history",
+      "en": "CHANGELOG.md",
+      "ko": "CHANGELOG.ko.md"
+    }
+  ]
+}

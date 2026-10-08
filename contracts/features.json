@@ -3,8 +3,17 @@
   "contract_version": "0.0.1",
   "source": "contracts/features.json",
   "verification_matrix": {
-    "languages": ["typescript", "go", "rust", "php"],
-    "modes": ["ast", "gen"],
+    "languages": [
+      "typescript",
+      "go",
+      "rust",
+      "php",
+      "python"
+    ],
+    "modes": [
+      "ast",
+      "gen"
+    ],
     "semantic_features": [
       "spec",
       "ast-schema",
@@ -65,7 +74,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "tests/cases",
@@ -138,7 +148,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "schema",
@@ -206,7 +217,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "tests/cases",
@@ -276,7 +288,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "tests/cases"
@@ -338,7 +351,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "tests/browser"
@@ -396,7 +410,8 @@
         "go": "pass",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "unsupported"
+        "typescript": "unsupported",
+        "python": "pass"
       },
       "fixtures": [
         "tests/cases"
@@ -460,7 +475,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "pass",
-        "typescript": "unsupported"
+        "typescript": "unsupported",
+        "python": "pass"
       },
       "fixtures": [
         "tests/cases"
@@ -524,7 +540,8 @@
         "go": "unsupported",
         "php": "pass",
         "rust": "unsupported",
-        "typescript": "unsupported"
+        "typescript": "unsupported",
+        "python": "pass"
       },
       "fixtures": [
         "tests/cases"
@@ -586,7 +603,8 @@
         "go": "unsupported",
         "php": "pass",
         "rust": "unsupported",
-        "typescript": "unsupported"
+        "typescript": "unsupported",
+        "python": "pass"
       },
       "fixtures": [
         "tests/cases"
@@ -648,7 +666,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "examples/site/data/mode-benchmark.json"
@@ -714,7 +733,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "examples/site/scenarios",
@@ -785,7 +805,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "examples/site/scenarios",
@@ -857,7 +878,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "docs",
@@ -926,7 +948,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "Makefile",
@@ -996,7 +1019,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "tests/fixtures/function-inventory/source.tpl"
@@ -1064,7 +1088,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "packages/template-language/tests/fixtures",
@@ -1137,7 +1162,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "packages/template-vscode/tests/grammar"
@@ -1215,7 +1241,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "packages/template-language/tests/editor"
@@ -1283,7 +1310,8 @@
         "go": "unsupported",
         "php": "unsupported",
         "rust": "unsupported",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "packages/template-language/tests/editor"
@@ -1345,7 +1373,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "package-lock.json",
@@ -1405,7 +1434,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "packages/template-compiler/functions.json"
@@ -1472,7 +1502,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "tests/fixtures/expr/cases.json",
@@ -1564,7 +1595,8 @@
         "go": "pass",
         "php": "pass",
         "rust": "pass",
-        "typescript": "pass"
+        "typescript": "pass",
+        "python": "pass"
       },
       "fixtures": [
         "tests/fixtures/bound-data/cases.json"

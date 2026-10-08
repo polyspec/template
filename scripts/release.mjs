@@ -70,6 +70,7 @@ export const MANIFESTS = {
   'packages/template-php/composer.json': ARCHIVE,
   'packages/template-php-ext/composer.json': ARCHIVE,
   'packages/template-rust/Cargo.toml': GIT_TAG,
+  'packages/template-python/pyproject.toml': GIT_TAG,
 };
 // The tracked manifests that no tag releases, with the reason.
 export const NOT_RELEASED = {
@@ -147,6 +148,10 @@ export function manifestVersion(file) {
   if (name === 'package.json' || name === 'composer.json') return JSON.parse(text).version ?? null;
   if (name === 'Cargo.toml') {
     const section = /^\[package\]\s*$([\s\S]*?)(?=^\[|(?![\s\S]))/m.exec(text);
+    return /^version\s*=\s*"([^"]*)"/m.exec(section?.[1] ?? '')?.[1] ?? null;
+  }
+  if (name === 'pyproject.toml') {
+    const section = /^\[project\]\s*$([\s\S]*?)(?=^\[|(?![\s\S]))/m.exec(text);
     return /^version\s*=\s*"([^"]*)"/m.exec(section?.[1] ?? '')?.[1] ?? null;
   }
   throw new Stop(`${name}: not a manifest of a release`);

@@ -96,6 +96,7 @@ function sandbox(t, { version = '0.0.1', changelog = CHANGELOG } = {}) {
     const declared = dependencies[path.dirname(manifest)] ?? {};
     if (manifest.endsWith('package.json')) writeFileSync(file, JSON.stringify({ name, version, ...declared }));
     else if (manifest.endsWith('composer.json')) writeFileSync(file, JSON.stringify({ name, version, ...declared }));
+    else if (manifest.endsWith('pyproject.toml')) writeFileSync(file, `[project]\nname = "${name}"\nversion = "${version}"\n`);
     else writeFileSync(file, `[package]\nname = "${name}"\nversion = "${version}"\n\n[dependencies]\n`);
   }
   mkdirSync(path.join(root, 'packages/template-php/src'));
