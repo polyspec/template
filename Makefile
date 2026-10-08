@@ -169,6 +169,10 @@ lint-js: ## Lint the TypeScript sources with eslint
 # make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
+# The jobs of CI install npm and Go: ruff needs the Python 3.14 that only the job showcase sets up, which installs it with
+# make install-tools TOOLS=ruff, and cargo-audit and govulncheck serve the dependency review, which make dependency-review
+# installs (a local make install-tools installs every declared tool).
+install: TOOLS := npm go
 install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages, the crates of every Cargo.lock and the Python build requirements
 	$(ONLINE) $(NPM) ci
 	rustup toolchain install --no-self-update
@@ -337,10 +341,9 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
 	node tests/runner/conformance.mjs --langs ts,python
 
-# The Python interpreter of the Python recipes is the minor release of .python-version, so a recipe runs the version the
-# repository declares; PYTHON can be given on the command line.
-PYTHON_MINOR := $(shell cat .python-version)
-PYTHON ?= python$(PYTHON_MINOR)
+# The unit tests of the Python package run with the python3 of PATH, which the matrix of the CI job python sets to each
+# Python release it covers; PYTHON can be given on the command line, such as PYTHON=python3.14.
+PYTHON ?= python3
 
 test-python: ## Unit tests of the Python package
 	status=0; for test in packages/template-python/tests/test_api.py packages/template-python/tests/test_exports.py packages/template-python/tests/test_package_data.py packages/template-python/tests/test_object_calls.py packages/template-python/tests/test_expr_fixtures.py packages/template-python/tests/test_function_contract.py packages/template-python/tests/test_compiler_interface.py; do $(PYTHON) $$test || status=1; done; exit $$status
@@ -402,7 +405,12 @@ editor-boundary-check: ## Check that adapters do not use the parser and the lang
 # the registries; it is a developer command and a scheduled workflow, not a step of make check or of the gating CI jobs.
 dependency-audit: dependency-policy-check dependency-policy-mutation-check ## The dependency gate and its mutation check, which also reject a lock with an advisory at its review
 
-dependency-review: install-tools
+# cargo-audit is built with the Rust toolchain of rust-toolchain.toml, so the review installs it first.
+.PHONY: rust-toolchain
+rust-toolchain:
+	rustup toolchain install --no-self-update
+
+dependency-review: rust-toolchain install-tools
 
 doc-coverage: ## Check that public symbols carry documentation comments
 	node scripts/check-doc-coverage.mjs

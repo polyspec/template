@@ -138,6 +138,9 @@ jobs:
           python-version-file: .python-version
       - run: make install
         if: ${{ !cancelled() }}
+      # ruff needs the Python 3.14 of this job; make install installs npm and Go only.
+      - run: make install-tools TOOLS=ruff
+        if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="showcase-check contract-check benchmark-smoke lint-php lint-python lint-showcase-format lint-showcase-warnings runtime-interface-check compiler-interface-check docs-static-check docs-verify-idempotent"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
