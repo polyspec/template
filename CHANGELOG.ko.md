@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7b927f8ce4b1f61eb16c239cfcd6ae0fc6cfdb1bf8dcaad057743a2e92450b21 -->
+<!-- source-sha256: eac5c9926e7ac45265fd62e2415aa806c4c42b6c952e966428096efd55131f79 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T22.4-32: 공유 도구는 `polyspec/kit` v0.0.8의 vendored 복사본이며, `make install-tools TOOLS="npm go"`는 이름을 준 도구만 설치합니다.
 - T22.4-31: 공유 도구는 `polyspec/kit` v0.0.7의 vendored 복사본이며, 의존성 gate가 `file:<자기 directory>`로 요구하는 로컬 npm 패키지를 받아들입니다.
 - T22.4-30: 공유 도구는 `polyspec/kit` v0.0.6의 vendored 복사본입니다.
 - T22.4-29: 컴파일된 AST manifest, generated JavaScript manifest와 `examples/site/index.html`을 다시 생성합니다. compiler digest가 `package-lock.json`을 포함하는데 `@playwright/test` 1.64.0이 이를 바꿨기 때문입니다(T22.4-28).

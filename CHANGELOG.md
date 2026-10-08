@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T22.4-32: the shared tools are the vendored copy of `polyspec/kit` v0.0.8, whose `make install-tools TOOLS="npm go"` installs only the named tools.
 - T22.4-31: the shared tools are the vendored copy of `polyspec/kit` v0.0.7, whose dependency gate accepts a local npm package required as `file:<its directory>`.
 - T22.4-30: the shared tools are the vendored copy of `polyspec/kit` v0.0.6.
 - T22.4-29: the compiled AST manifests, the generated JavaScript manifests and `examples/site/index.html` are regenerated, because the compiler digest covers `package-lock.json`, which `@playwright/test` 1.64.0 changed (T22.4-28).
