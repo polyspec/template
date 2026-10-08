@@ -6,6 +6,8 @@ const root = resolve(import.meta.dirname, '..');
 const original = JSON.parse(readFileSync(resolve(root, 'contracts/features.json'), 'utf8'));
 const cases = [
   ['missing language support', (manifest) => { manifest.features.find((feature) => feature.id === 'object-and-class-calls').clients.go = 'unsupported'; }],
+  ['missing python support', (manifest) => { manifest.features.find((feature) => feature.id === 'object-and-class-calls').clients.python = 'partial'; }],
+  ['missing python language', (manifest) => { manifest.verification_matrix.languages = ['typescript', 'go', 'rust', 'php']; }],
   ['missing test path', (manifest) => { manifest.features.find((feature) => feature.id === 'object-and-class-calls').tests = []; }],
   ['missing compiler mode', (manifest) => { manifest.verification_matrix.modes = ['ast']; }],
 ];
