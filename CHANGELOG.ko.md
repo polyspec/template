@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+- Python 구현을 추가했습니다 (T22.4). `packages/template-python`이 engine, 내장 함수, 명령줄
+  인터페이스를 패키지 `polyspec-template`(import 이름 `polyspec.template`)로 담습니다.
+  conformance·parity runner, delimiter matrix, function contract, CI가 다른 언어와 같이 다루고
+  compiler가 generated program을 Python으로 내보냅니다. CI의 Python job이 단위 test, conformance,
+  generated conformance를 3.11과 핀된 minor release에서 실행하고, release version 검사가 다른
+  manifest와 함께 `packages/template-python/pyproject.toml`을 읽습니다.
 - `@codemirror/language`를 6.13.1로 올렸다(T22.3-6). 6.13.1은 6.13.0이 선언하지 않고 import한 `@codemirror/streamparser`를 선언하므로, `config/dependency-policy.json`은 더 이상 exception으로 6.12.4를 유지하지 않는다. `make dependency-review UPDATE=1 RECORD=1`이 `package.json`과 `package-lock.json`을 올리고 review를 기록했으며, `make showcase`가 lock에 맞춰 commit된 artifact를 다시 compile했다.
 
 ## 0.0.4
