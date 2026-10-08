@@ -34,7 +34,10 @@ export function pythonCommand(env = process.env) {
   return command;
 }
 
-/** The environment of a Python program that imports `polyspec.template` from the checkout. */
+/**
+ * The environment of a Python program that imports `polyspec.template` from the checkout. It writes no bytecode, so a
+ * run leaves no `__pycache__` in the sources of the checkout (AGENTS, Idempotency: Shared state).
+ */
 export function pythonEnvironment() {
-  return { PYTHONPATH: pythonSources };
+  return { PYTHONPATH: pythonSources, PYTHONDONTWRITEBYTECODE: '1' };
 }

@@ -3,7 +3,7 @@
 // implementation, never recorded as unsupported. Each check is listed when its row of docs/plans/execution-checklist.md
 // is done.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -41,4 +41,18 @@ test('each CI job that runs a Python check target sets up the Python of .python-
   for (const job of needing) {
     assert.match(job, /uses: actions\/setup-python@[0-9a-f]{40} # v[\d.]+\n\s+with:\n\s+python-version-file: \.python-version\n/, `the job ${job.split('\n')[0].trim()} runs a Python check target and does not set up python-version-file: .python-version`);
   }
+});
+
+// The showcase contract has a Python implementation: the manifest maps Python, scripts/check-showcase-contract.mjs runs it
+// in both execution modes, and the generated Python programs of the scenarios are committed beside the other languages.
+test('the showcase contract checks a Python adapter and the generated Python programs of every scenario', () => {
+  const manifest = JSON.parse(readFileSync(join(root, 'packages/template-compiler/interface.json'), 'utf8')).showcaseAdapter;
+  const python = manifest.languages.python;
+  assert.ok(python, 'interface.json showcaseAdapter.languages names no python');
+  assert.match(readFileSync(join(root, 'scripts/check-showcase-contract.mjs'), 'utf8'), /const languageNames = \[[^\]]*'python'/, 'check-showcase-contract.mjs does not run python');
+  const adapters = join(root, 'tools/showcase/adapters');
+  for (const file of [python.file, python.generated]) assert.ok(existsSync(join(adapters, file)), `tools/showcase/adapters/${file} is missing`);
+  const scenarios = readdirSync(join(root, 'examples/site/scenarios'), { withFileTypes: true }).filter(entry => entry.isDirectory() && existsSync(join(root, 'examples/site/scenarios', entry.name, 'scenario.json'))).map(entry => entry.name);
+  assert.ok(scenarios.length >= 5, `found ${scenarios.length} showcase scenarios, expected at least 5`);
+  for (const id of scenarios) assert.ok(existsSync(join(adapters, 'generated/typed', `${id}.py`)), `generated/typed/${id}.py is missing`);
 });
