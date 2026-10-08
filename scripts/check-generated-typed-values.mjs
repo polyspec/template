@@ -12,6 +12,7 @@ import { goString, phpString, rustString } from '../packages/template-compiler/b
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
+import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/typed-values');
@@ -105,9 +106,47 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
       writeFileSync(phpSource, compileSource(graphManifest, types, 'php', { phpNamespace }));
       run('php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; require ${phpString(phpSource)}; function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
     },
+    Python: () => {
+      // Python: the generated module imports the package from its sources (scripts/python-toolchain.mjs).
+      const pythonDir = join(temporary, 'python');
+      mkdirSync(pythonDir);
+      writeFileSync(join(pythonDir, 'generated.py'), compileSource(graphManifest, types, 'python'));
+      writeFileSync(join(pythonDir, 'expected.html'), expected);
+      writeFileSync(join(pythonDir, 'check.py'), `import sys
+from polyspec.template import RuntimeEnvironment
+from generated import GeneratedProgram
+
+
+def describe_value(value):
+    if value is None:
+        return 'null'
+    if isinstance(value, bool):
+        return 'bool(' + ('true' if value else 'false') + ')'
+    if isinstance(value, (int, float)):
+        return 'number(' + (str(int(value)) if value == int(value) else repr(value)) + ')'
+    if isinstance(value, str):
+        return 'string(' + value + ')'
+    if isinstance(value, list):
+        return 'list(' + ','.join(describe_value(item) for item in value) + ')'
+    if isinstance(value, dict):
+        return 'map(' + ','.join(key + '=' + describe_value(item) for key, item in value.items()) + ')'
+    return 'unexpected(' + type(value).__name__ + ')'
+
+
+runtime = RuntimeEnvironment()
+runtime.register('describe', lambda args, _context: ','.join(describe_value(item) for item in args))
+assign = {'page': {'title': 'T', 'count': 2}, 'rows': [{'name': 'a'}, {'name': 'b'}], 'tags': {'x': 1}}
+actual = GeneratedProgram(runtime).render('input.tpl', assign)
+with open('expected.html', encoding='utf-8', newline='') as handle:
+    expected = handle.read()
+if actual != expected:
+    sys.exit('Python generated typed values differ: ' + repr(actual))
+`);
+      run(pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+    },
   });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write('generated typed values: TypeScript, Go, Rust and PHP outputs matched the AST program\n');
+process.stdout.write('generated typed values: TypeScript, Go, Rust, PHP and Python outputs matched the AST program\n');

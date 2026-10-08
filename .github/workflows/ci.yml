@@ -47,6 +47,9 @@ jobs:
         with:
           php-version: '8.5'
           tools: composer:2.10.3
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version-file: .python-version
       - run: make install
         if: ${{ !cancelled() }}
       - run: make install-browsers
@@ -76,6 +79,9 @@ jobs:
         with:
           php-version: '8.5'
           tools: composer:2.10.3
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version-file: .python-version
       - run: make install
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php generated-native-check typed-generator-compile-check"
@@ -130,6 +136,9 @@ jobs:
         with:
           php-version: '8.5'
           tools: composer:2.10.3
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version-file: .python-version
       - run: make install
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="showcase-check contract-check benchmark-smoke lint-php lint-showcase-format lint-showcase-warnings runtime-interface-check compiler-interface-check docs-static-check docs-verify-idempotent"
