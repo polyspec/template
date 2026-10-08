@@ -433,3 +433,20 @@ test('the python job of ci.yml sets up 3.11 and the minor of .python-version (T2
   assert.ok(versions.includes('3.11'), `ci.yml python matrix ${versions.join(', ')} lacks 3.11, the floor of requires-python`);
   assert.ok(versions.includes(minor), `ci.yml python matrix ${versions.join(', ')} lacks ${minor}, the minor of .python-version`);
 });
+
+// The python job of ci.yml runs the unit tests, the conformance suite and the generated conformance suite of Python, and
+// ci-passed needs the job, so a failing Python run fails the check that the release requires (T22.4-7).
+test('the python job of ci.yml runs the Python suites and ci-passed needs it (T22.4-7)', () => {
+  const text = read('.github/workflows/ci.yml');
+  const job = text.match(/^  python:\n([\s\S]*?)(?=^  [a-z-]+:\n)/m);
+  assert.ok(job, 'ci.yml has no python job; the check verified nothing');
+  const targets = job[1].match(/make ci-targets TARGETS="([^"]*)"/);
+  assert.ok(targets, 'the python job runs no make ci-targets step');
+  const run = targets[1].split(/\s+/);
+  for (const target of ['test-python', 'conformance-python', 'conformance-generated-python']) {
+    assert.ok(run.includes(target), `the python job runs ${run.join(' ')}, expected ${target} among them`);
+  }
+  const needs = text.match(/^  ci-passed:[\s\S]*?needs: \[([^\]]*)\]/m);
+  assert.ok(needs, 'ci.yml has no ci-passed job with needs');
+  assert.ok(needs[1].split(',').map(name => name.trim()).includes('python'), `ci-passed needs ${needs[1]}, expected python among them`);
+});
