@@ -10,6 +10,7 @@ import { goString, phpString, rustString } from '../packages/template-compiler/b
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
+import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/native-object');
@@ -163,10 +164,128 @@ fn render_host_value(target: &str) -> Result<String, RequestError> { let order =
       const phpRunner = `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; final class GeneratedProgram {} final class Assign {} function render_template(): void {} require ${phpString(phpSource)}; require ${phpString(secondSource)}; class Order { public string $label = 'Order 12'; public function status_label(mixed $prefix): string { if (!is_string($prefix)) throw new RuntimeException('invalid status_label'); return $prefix . ':12'; } public function fail(mixed $prefix): string { throw new RuntimeException('failed member'); } } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->registerClass('Order', 'suffix', static fn (array $args, array $env): string => 'done' . $args[0]); $runtime->registerClass('Order', 'fail', static function (array $args, array $env): string { throw new RuntimeException('failed class'); }); $program = new \\${phpNamespace}\\GeneratedProgram($runtime); $order = new Order(); $actual = $program->render('input.tpl', ['order' => $order]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated native output differs'); $second = (new \\${secondNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['order' => $order]); if ($second !== ${phpString(expected)}) throw new RuntimeException('second PHP generated program output differs'); $define = ['card' => ['template' => 'part.tpl', 'data' => ['o' => $order]]]; foreach ([${phpPassing}] as $target => $output) { $rendered = $program->render($target, ['order' => $order], ['define' => $define]); if ($rendered !== $output) throw new RuntimeException('PHP generated ' . $target . ' differs: ' . $rendered); } $expectedCodes = json_decode(${phpString(JSON.stringify(errorCases))}, true); foreach ($expectedCodes as $target => $expectedCode) { try { $program->render($target, ['order' => new Order()]); throw new RuntimeException('PHP native error did not fail: ' . $target); } catch (Polyspec\\Template\\TemplateError $error) { if ($error->errorCode !== $expectedCode) throw new RuntimeException('PHP native error ' . $target . ' = ' . $error->errorCode . ', want ' . $expectedCode); } } final class ValueOrder { public function describe(mixed ...$args): string { return value_describe_arguments($args, $this); } } function value_describe(mixed $value, object $order): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . value_describe_arguments($value, $order) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . value_describe($item, $order); return 'map(' . implode(',', $parts) . ')'; } return $value === $order ? 'object(order)' : 'unexpected'; } function value_describe_arguments(array $args, object $order): string { return implode(',', array_map(static fn (mixed $item): string => value_describe($item, $order), $args)); } function render_host_value(string $target): string { $valueOrder = new ValueOrder(); $valuesRuntime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $valuesRuntime->register('describe', static fn (array $args): string => value_describe_arguments($args, $valueOrder)); $valuesRuntime->register('mutate', static function (array $args): mixed { $args[0][0] = 'changed'; $args[1]['k'] = 'changed'; $args[2][] = 'added'; return null; }); $valuesRuntime->register('pick', static fn (array $args): mixed => $args[0]); $valuesRuntime->registerClass('Order', 'describe', static fn (array $args): string => value_describe_arguments($args, $valueOrder)); return (new \\${phpNamespace}\\GeneratedProgram($valuesRuntime))->render($target, ['order' => $valueOrder, 'same' => $valueOrder, 'other' => new ValueOrder(), 'items' => [1]]); } $hostValues = json_decode(${phpString(JSON.stringify(hostValues))}, true); foreach ($hostValues['outputs'] as $target => $output) { $rendered = render_host_value($target); if ($rendered !== $output) throw new RuntimeException('PHP generated ' . $target . ' differs: ' . $rendered); } foreach ($hostValues['errors'] as $target => $expectedCode) { try { render_host_value($target); throw new RuntimeException('PHP generated ' . $target . ' did not fail'); } catch (Polyspec\\Template\\TemplateError $error) { if ($error->errorCode !== $expectedCode) throw new RuntimeException('PHP generated ' . $target . ' = ' . $error->errorCode); } }`;
       run('php', ['-r', phpRunner], root);
     },
+    Python: () => {
+      // Python: an assigned host object is wrapped in NativeObject; the fixture classes are plain Python classes.
+      const pythonDir = join(temporary, 'python');
+      mkdirSync(pythonDir);
+      writeFileSync(join(pythonDir, 'generated.py'), compileSource(graphManifest, join(fixture, 'types.json'), 'python'));
+      writeFileSync(join(pythonDir, 'expectations.json'), JSON.stringify({ expected, passing, errorCases, hostValues }));
+      writeFileSync(join(pythonDir, 'check.py'), `import json
+import sys
+from polyspec.template import NativeObject, RuntimeEnvironment, TemplateError
+from generated import GeneratedProgram
+
+with open('expectations.json', encoding='utf-8') as handle:
+    expectations = json.load(handle)
+
+
+class Order:
+    label = 'Order 12'
+
+    def status_label(self, prefix):
+        if not isinstance(prefix, str):
+            raise ValueError('invalid status_label')
+        return prefix + ':12'
+
+    def fail(self, prefix):
+        raise RuntimeError('failed member')
+
+
+def failing_class_function(_args, _context):
+    raise RuntimeError('failed class')
+
+
+runtime = RuntimeEnvironment()
+runtime.register_class('Order', 'suffix', lambda args, _context: 'done' + args[0])
+runtime.register_class('Order', 'fail', failing_class_function)
+program = GeneratedProgram(runtime)
+order = NativeObject(Order())
+actual = program.render('input.tpl', {'order': order})
+if actual != expectations['expected']:
+    sys.exit('Python generated native output differs: ' + repr(actual))
+define = {'define': {'card': {'template': 'part.tpl', 'data': {'o': order}}}}
+for target, output in expectations['passing'].items():
+    rendered = program.render(target, {'order': order}, define)
+    if rendered != output:
+        sys.exit('Python generated ' + target + ' differs: ' + repr(rendered))
+
+
+def code(target):
+    try:
+        program.render(target, {'order': NativeObject(Order())})
+    except TemplateError as error:
+        return error.code
+    return 'OK'
+
+
+observed = {target: code(target) == expected_code for target, expected_code in expectations['errorCases'].items()}
+if not all(observed.values()):
+    sys.exit('Python native error matrix differs: ' + json.dumps(observed))
+
+
+def describe_value(value, order_object):
+    if value is None:
+        return 'null'
+    if isinstance(value, bool):
+        return 'bool(' + ('true' if value else 'false') + ')'
+    if isinstance(value, (int, float)):
+        return 'number(' + (str(int(value)) if value == int(value) else repr(value)) + ')'
+    if isinstance(value, str):
+        return 'string(' + value + ')'
+    if isinstance(value, list):
+        return 'list(' + ','.join(describe_value(item, order_object) for item in value) + ')'
+    if isinstance(value, dict):
+        return 'map(' + ','.join(key + '=' + describe_value(item, order_object) for key, item in value.items()) + ')'
+    return 'object(order)' if value is order_object else 'unexpected'
+
+
+def describe_arguments(args, order_object):
+    return ','.join(describe_value(item, order_object) for item in args)
+
+
+class ValueOrder:
+    def describe(self, *args):
+        return describe_arguments(args, self)
+
+
+def mutate(args, _context):
+    args[0][0] = 'changed'
+    args[1]['k'] = 'changed'
+    args[2].append('added')
+    return None
+
+
+def render_host_value(target):
+    value_order = ValueOrder()
+    values_runtime = RuntimeEnvironment()
+    values_runtime.register('describe', lambda args, _context: describe_arguments(args, value_order))
+    values_runtime.register('mutate', mutate)
+    # A host function hands a host object back to the template wrapped in NativeObject, like an assigned object.
+    values_runtime.register('pick', lambda args, _context: NativeObject(args[0]) if isinstance(args[0], ValueOrder) else args[0])
+    values_runtime.register_class('Order', 'describe', lambda args, _context: describe_arguments(args, value_order))
+    assign = {'order': NativeObject(value_order), 'same': NativeObject(value_order), 'other': NativeObject(ValueOrder()), 'items': [1]}
+    return GeneratedProgram(values_runtime).render(target, assign)
+
+
+for target, output in expectations['hostValues']['outputs'].items():
+    rendered = render_host_value(target)
+    if rendered != output:
+        sys.exit('Python generated ' + target + ' differs: ' + repr(rendered))
+for target, expected_code in expectations['hostValues']['errors'].items():
+    try:
+        render_host_value(target)
+        actual_code = 'OK'
+    except TemplateError as error:
+        actual_code = error.code
+    if actual_code != expected_code:
+        sys.exit('Python generated ' + target + ' = ' + actual_code)
+`);
+      run(pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+    },
   });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
 assert.ok(true);
-process.stdout.write('generated native calls and host values: TypeScript, Go, Rust and PHP outputs matched\n');
+process.stdout.write('generated native calls and host values: TypeScript, Go, Rust, PHP and Python outputs matched\n');
