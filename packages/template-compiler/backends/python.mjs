@@ -236,7 +236,9 @@ class GeneratedProgram:
         options = options or {}
         if not isinstance(target, str):
             raise ValueError('generated target must be a template name')
-        return internal_boundary(target, lambda: self._prepare_bound(target, assign, options))
+        # A request that does not match the declared types raises a ValueError before rendering starts; it is the
+        # argument error of Python and no template error (ERR-13), so it passes the boundary of render only.
+        return self._prepare_bound(target, assign, options)
 
     def _prepare_bound(self, target, assign, options):
         try:

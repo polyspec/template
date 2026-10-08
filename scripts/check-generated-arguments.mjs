@@ -3,7 +3,7 @@
 // that a request whose `assign` or definition `data` does not match the declared types fails with the
 // argument error of the host language, which passes to the host unchanged and is not an ERR-1 error
 // (ERR-13): an `Error` of TypeScript that is not a `TemplateError` or a built-in subclass, a Go error
-// that is not an `*errs.Error`, `RequestError::Argument` of Rust and `\InvalidArgumentException` of PHP.
+// that is not an `*errs.Error`, `RequestError::Argument` of Rust, `\InvalidArgumentException` of PHP and `ValueError` of Python.
 // A request that matches the declared types renders `T|N`.
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -14,6 +14,7 @@ import { phpString, rustString } from '../packages/template-compiler/backend-sup
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
+import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/typed-arguments');
@@ -92,9 +93,49 @@ fn kind<T, E: std::fmt::Debug>(result: Result<T, E>) -> String { match result { 
       writeFileSync(phpSource, compileSource(graphManifest, types, 'php', { phpNamespace }));
       run('PHP', 'php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; require ${phpString(phpSource)}; $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $card = static fn (mixed $name): array => ['define' => ['card' => ['template' => 'part.tpl', 'data' => ['name' => $name]]]]; $rendered = $program->render('input.tpl', ['title' => 'T'], $card('N')); if ($rendered !== ${phpString(expected)}) throw new RuntimeException('PHP renders ' . $rendered); $kind = static function (callable $request): string { try { $request(); return 'rendered'; } catch (Polyspec\\Template\\TemplateError $error) { return 'template ' . $error->errorCode; } catch (InvalidArgumentException) { return 'argument'; } catch (Throwable $error) { return 'other ' . $error::class; } }; $kinds = [$kind(static fn () => $program->render('input.tpl', ['title' => 1], $card('N'))), $kind(static fn () => $program->render('input.tpl', ['title' => 'T'], $card(2)))]; if ($kinds !== ['argument', 'argument']) throw new RuntimeException('PHP reports ' . implode(', ', $kinds));`], root);
     },
+    Python: () => {
+      // Python: the argument error is a ValueError, which no template error is (ERR-13).
+      const pythonDir = join(temporary, 'python');
+      mkdirSync(pythonDir);
+      writeFileSync(join(pythonDir, 'generated.py'), compileSource(graphManifest, types, 'python'));
+      writeFileSync(join(pythonDir, 'expected.html'), expected);
+      writeFileSync(join(pythonDir, 'check.py'), `import sys
+from polyspec.template import RuntimeEnvironment, TemplateError
+from generated import GeneratedProgram
+
+program = GeneratedProgram(RuntimeEnvironment())
+
+
+def card(name):
+    return {'define': {'card': {'template': 'part.tpl', 'data': {'name': name}}}}
+
+
+def kind(request):
+    try:
+        request()
+    except TemplateError as error:
+        return 'template ' + error.code
+    except ValueError:
+        return 'argument'
+    except Exception as error:  # noqa: BLE001  any other exception names its class in the failure
+        return 'other ' + type(error).__name__
+    return 'rendered'
+
+
+with open('expected.html', encoding='utf-8', newline='') as handle:
+    expected = handle.read()
+rendered = program.render('input.tpl', {'title': 'T'}, card('N'))
+if rendered != expected:
+    sys.exit('Python renders ' + repr(rendered))
+kinds = [kind(lambda: program.render('input.tpl', {'title': 1}, card('N'))), kind(lambda: program.render('input.tpl', {'title': 'T'}, card(2)))]
+if kinds != ['argument', 'argument']:
+    sys.exit('Python reports ' + ', '.join(kinds))
+`);
+      run('Python', pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+    },
   });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write('generated arguments: TypeScript, Go, Rust and PHP report a request that does not match the declared types as an argument error of the language\n');
+process.stdout.write('generated arguments: TypeScript, Go, Rust, PHP and Python report a request that does not match the declared types as an argument error of the language\n');
