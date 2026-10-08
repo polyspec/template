@@ -9,7 +9,7 @@ const errors = [];
 const ids = new Set();
 const statuses = new Set(['planned', 'partial', 'implemented']);
 const clientStatuses = new Set(['planned', 'partial', 'pass', 'unsupported']);
-const clients = ['go', 'php', 'rust', 'typescript'];
+const clients = ['go', 'php', 'rust', 'typescript', 'python'];
 const required = ['title', 'title_ko', 'description', 'description_ko', 'inputs', 'outputs', 'state', 'errors', 'clients', 'fixtures', 'tests', 'verification', 'docs'];
 
 async function exists(relative) {

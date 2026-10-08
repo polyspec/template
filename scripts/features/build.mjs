@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 const root = resolve(new URL('../..', import.meta.url).pathname);
 const manifest = JSON.parse(await readFile(resolve(root, 'contracts/features.json'), 'utf8'));
-const clients = ['go', 'php', 'rust', 'typescript'];
+const clients = ['go', 'php', 'rust', 'typescript', 'python'];
 const docLink = (feature, ko) => {
   let doc = feature.docs[0] ?? '';
   if (ko && doc.endsWith('.md')) doc = doc.replace(/\.md$/, '.ko.md');

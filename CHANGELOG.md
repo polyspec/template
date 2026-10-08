@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- The features page shows the Python status of every feature: `scripts/features/build.mjs` and `check.mjs` list `python` among the clients, so `docs/features.md` and `docs/features.ko.md` carry the Python column (T22.4-19).
 - The language test matrix in `contracts/features.json` lists the four languages that `scripts/check-language-test-matrix.mjs` requires; Python joins it when the CI merge-group run of T22.4-7 passes (T22.4-13).
 - Declared the `py.typed` marker of `polyspec.template` under its package name in `packages/template-python/pyproject.toml`; the key `template` named no package under `src`. `tests/test_package_data.py` checks every package-data key and runs in `make test-python` (T22.4-14).
 - Documented the Python release form: the package `polyspec-template` is consumed by git tag like the Rust crate, and `AGENTS.md` lists its `pyproject.toml` among the version-bump manifests (T22.4-15).

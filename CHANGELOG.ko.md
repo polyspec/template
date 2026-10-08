@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 기능 페이지가 모든 기능의 Python 상태를 보입니다. `scripts/features/build.mjs`와 `check.mjs`의 client 목록에 `python`이 들어가, `docs/features.md`와 `docs/features.ko.md`에 Python 열이 생겼습니다 (T22.4-19).
 - `contracts/features.json`의 언어 test matrix는 `scripts/check-language-test-matrix.mjs`가 요구하는 네 언어를 담습니다. Python은 T22.4-7의 CI merge group 실행이 통과하면 들어갑니다 (T22.4-13).
 - `packages/template-python/pyproject.toml`에서 `polyspec.template`의 `py.typed` 표식을 패키지 이름 아래에 선언했습니다. 기존 key `template`은 `src`에 없는 패키지를 가리켰습니다. `tests/test_package_data.py`가 모든 package-data key를 검사하고 `make test-python`이 실행합니다 (T22.4-14).
 - Python 배포 형식을 문서화했습니다. 패키지 `polyspec-template`는 Rust crate처럼 git tag로 소비하며, `AGENTS.md`는 버전 올림 manifest로 그 `pyproject.toml`을 나열합니다 (T22.4-15).
