@@ -91,7 +91,8 @@ help: ## List targets
 	@echo "  check                  The full suite through scripts/kit/full-run.mjs: once per tree, when no checklist task is [~]"
 	@echo "  kit-sync|kit-check|kit-test|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|documents-check|ci-targets|install-tools|dependency-policy-check|dependency-review|lint-python|release-*   Targets of scripts/kit/kit.mk"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
-	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test"
+	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test, ruff check and ruff format --check"
+	@echo "  lint-python            ruff check and ruff format --check of the Python package (scripts/kit/lint-python.mjs)"
 	@echo "  lint-js                eslint on the TypeScript sources"
 	@echo "  install                install-tools; npm ci: every dependency as a copy, no bin links; the Rust toolchain of rust-toolchain.toml"
 	@echo "  build-ts|go|rust|php   Build one package"
@@ -143,12 +144,12 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-js and conformance-ts. The list
 # stays on one line: scripts/kit/owner-check.mjs reads it.
-CHECK_TARGETS := push-gate-commit kit-check kit-test docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check kit-test lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node scripts/kit/full-run.mjs run $(CHECK_TARGETS)
 
-lint: lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php ## Lint every package
+lint: lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php lint-python ## Lint every package
 
 .PHONY: lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php
 lint-go:
@@ -336,8 +337,13 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
 	node tests/runner/conformance.mjs --langs ts,python
 
+# The Python interpreter of the Python recipes is the minor release of .python-version, so a recipe runs the version the
+# repository declares; PYTHON can be given on the command line.
+PYTHON_MINOR := $(shell cat .python-version)
+PYTHON ?= python$(PYTHON_MINOR)
+
 test-python: ## Unit tests of the Python package
-	status=0; for test in packages/template-python/tests/test_api.py packages/template-python/tests/test_exports.py packages/template-python/tests/test_package_data.py packages/template-python/tests/test_object_calls.py packages/template-python/tests/test_expr_fixtures.py packages/template-python/tests/test_function_contract.py packages/template-python/tests/test_compiler_interface.py; do python3 $$test || status=1; done; exit $$status
+	status=0; for test in packages/template-python/tests/test_api.py packages/template-python/tests/test_exports.py packages/template-python/tests/test_package_data.py packages/template-python/tests/test_object_calls.py packages/template-python/tests/test_expr_fixtures.py packages/template-python/tests/test_function_contract.py packages/template-python/tests/test_compiler_interface.py; do $(PYTHON) $$test || status=1; done; exit $$status
 
 conformance-generated-python: build-ts ## Python generated compiler conformance suite
 	node tests/runner/conformance-generated-python.mjs

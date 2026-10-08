@@ -15,6 +15,7 @@ def bind(value) -> BoundMap:
 
     None gives the empty bound map (RT-4); a bound map is returned unchanged.
     """
+
     def run() -> BoundMap:
         if isinstance(value, BoundMap):
             return value
@@ -23,13 +24,14 @@ def bind(value) -> BoundMap:
         try:
             bound = bind_value(value)
         except BindError as error:
-            raise error_without_position(error.code, '', str(error)) from None
+            raise error_without_position(error.code, "", str(error)) from None
         if not isinstance(bound, dict):
-            raise error_without_position('E_DATA_UNSUPPORTED_TYPE', '',
-                                         'bind takes a value that binds to a map')
+            raise error_without_position(
+                "E_DATA_UNSUPPORTED_TYPE", "", "bind takes a value that binds to a map"
+            )
         return BoundMap(bound)
 
-    return internal_boundary('', run)
+    return internal_boundary("", run)
 
 
 def merge(first, second) -> BoundMap:
@@ -39,13 +41,15 @@ def merge(first, second) -> BoundMap:
     position, and the other entries of `second` follow (RT-26). It reads no value
     again.
     """
+
     def run() -> BoundMap:
         if not isinstance(first, BoundMap) or not isinstance(second, BoundMap):
-            raise error_without_position('E_DATA_UNSUPPORTED_TYPE', '',
-                                         'merge takes two bound maps')
+            raise error_without_position(
+                "E_DATA_UNSUPPORTED_TYPE", "", "merge takes two bound maps"
+            )
         entries = dict(first.entries)
         for key, value in second.entries.items():
             entries[key] = value
         return BoundMap(entries)
 
-    return internal_boundary('', run)
+    return internal_boundary("", run)

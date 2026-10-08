@@ -21,15 +21,21 @@ No release tag contains this package yet. From a checkout of this repository, in
 from polyspec.template import AstProgram, Engine, EngineOptions, RenderOptions
 from polyspec.template import FsLoader
 
-program = AstProgram(EngineOptions(loader=FsLoader('templates')))
-program.register('greet', lambda args, context: 'Hello, ' + args[0])
+program = AstProgram(EngineOptions(loader=FsLoader("templates")))
+program.register("greet", lambda args, context: "Hello, " + args[0])
 engine = Engine(program)
-assign = {'title': 'Home'}
-html = engine.render('layout', assign, RenderOptions(
-    define={'layout': {'template': 'layout.tpl'},
-            'content': {'template': 'pages/home.tpl'}},
-    env={'timezone': '+09:00', 'now': 1700000000},
-))
+assign = {"title": "Home"}
+html = engine.render(
+    "layout",
+    assign,
+    RenderOptions(
+        define={
+            "layout": {"template": "layout.tpl"},
+            "content": {"template": "pages/home.tpl"},
+        },
+        env={"timezone": "+09:00", "now": 1700000000},
+    ),
+)
 ```
 
 Assign data is a Python value: a `dict` is a map, a `list` or `tuple` is a list, `int` and `float` bind within the safe integer range of the double, and `None` is the empty map. JSON input goes through `parse_json` and `parse_json_bytes`, which keep object key order.
@@ -39,8 +45,8 @@ Assign data is a Python value: a `dict` is a map, a `list` or `tuple` is a list,
 ```python
 from polyspec.template import analyze, parse
 
-ast = parse(source, 'layout.tpl')
-tags_and_tokens = analyze(source, 'layout.tpl')
+ast = parse(source, "layout.tpl")
+tags_and_tokens = analyze(source, "layout.tpl")
 ```
 
 A parsed template can be passed to `render()` or stored in a `MapLoader`.

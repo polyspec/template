@@ -9,6 +9,10 @@ description = "Templates with document order, typed data and HTML rendering"
 readme = "README.md"
 requires-python = ">=3.11"
 
+[project.optional-dependencies]
+# The linter and formatter of the Python sources (make lint-python), pinned to the latest stable release.
+dev = ["ruff==0.16.10"]
+
 [project.scripts]
 template = "polyspec.template.cli:main"
 
@@ -21,3 +25,11 @@ namespaces = true
 
 [tool.setuptools.package-data]
 "polyspec.template" = ["py.typed"]
+
+[tool.ruff]
+# The rules and the target of the package are declared here, so the lint of one checkout does not depend on the ruff
+# configuration of the machine (ruff reads the nearest pyproject.toml and no user file once it finds one).
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

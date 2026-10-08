@@ -346,7 +346,8 @@
         "tests/scripts/toolchain-files.test.mjs"
       ],
       "targets": [
-        "toolchain-check"
+        "toolchain-check",
+        "lint-python"
       ]
     },
     {
@@ -632,6 +633,7 @@
       ],
       "targets": [
         "conformance",
+        "lint-python",
         "test-python",
         "conformance-python",
         "conformance-generated-python",
@@ -1376,6 +1378,13 @@
         "packages/template-python/**",
         "packages/template-compiler/**",
         "tests/runner/{conformance-generated-python,bounded,cases}.mjs"
+      ]
+    },
+    {
+      "check": "make lint-python",
+      "paths": [
+        "packages/template-python/**",
+        "config/toolchain.json"
       ]
     }
   ]

@@ -4,21 +4,20 @@ validation (LEX-21)."""
 from __future__ import annotations
 
 import re
-from typing import Optional
 
 # The characters that open and close a tag (LEX-20); the default pair is `{` and `}`.
-DEFAULT_DELIMITERS = ('{', '}')
+DEFAULT_DELIMITERS = ("{", "}")
 
-SIGILS = ('?#', ':?', '=', '@', '?', ':', '/', '+', '#', '*', '%')
+SIGILS = ("?#", ":?", "=", "@", "?", ":", "/", "+", "#", "*", "%")
 
 WRAPPERS = (
     ('"', '"'),
     ("'", "'"),
-    ('/*', '*/'),
-    ('<!--', '-->'),
+    ("/*", "*/"),
+    ("<!--", "-->"),
 )
 
-_LOOP_FORM = re.compile(r'[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=')
+_LOOP_FORM = re.compile(r"[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=")
 
 
 def is_horizontal_space(code: int) -> bool:
@@ -31,7 +30,7 @@ def skip_horizontal_space(text: str, index: int) -> int:
     return index
 
 
-def sigil_after(text: str, open_index: int) -> 'str | None':
+def sigil_after(text: str, open_index: int) -> "str | None":
     """The sigil that follows the open delimiter at `open_index`, or None (sigil form, LEX-5)."""
     index = skip_horizontal_space(text, open_index + 1)
     for sigil in SIGILS:
@@ -50,14 +49,22 @@ def starts_tag(text: str, open_index: int, delimiters: tuple[str, str]) -> bool:
     if sigil is None:
         return False
     after = skip_horizontal_space(text, open_index + 1) + len(sigil)
-    if sigil == '/':
-        return text[skip_horizontal_space(text, after):skip_horizontal_space(text, after) + 1] == delimiters[1]
-    if sigil == '@':
+    if sigil == "/":
+        return (
+            text[
+                skip_horizontal_space(text, after) : skip_horizontal_space(text, after)
+                + 1
+            ]
+            == delimiters[1]
+        )
+    if sigil == "@":
         return _LOOP_FORM.match(text, after, after + 80) is not None
     return True
 
 
-def wrapped_tag_at(text: str, index: int, delimiters: tuple[str, str]) -> 'tuple[str, str] | None':
+def wrapped_tag_at(
+    text: str, index: int, delimiters: tuple[str, str]
+) -> "tuple[str, str] | None":
     """The wrapper whose opener starts at `index` and is followed by a wrapped tag
     start (LEX-18), or None."""
     open_char = delimiters[0]
@@ -65,8 +72,11 @@ def wrapped_tag_at(text: str, index: int, delimiters: tuple[str, str]) -> 'tuple
         if not text.startswith(wrapper[0], index):
             continue
         after = skip_horizontal_space(text, index + len(wrapper[0]))
-        if (text[after:after + 1] == open_char and text[after + 1:after + 2] == open_char
-                and starts_tag(text, after + 1, delimiters)):
+        if (
+            text[after : after + 1] == open_char
+            and text[after + 1 : after + 2] == open_char
+            and starts_tag(text, after + 1, delimiters)
+        ):
             return wrapper
         return None
     return None
@@ -78,14 +88,14 @@ def is_delimiter_char(char: str) -> bool:
     if len(char) != 1:
         return False
     code = ord(char)
-    if code <= 0x20 or code >= 0x7f:
+    if code <= 0x20 or code >= 0x7F:
         return False
-    if 0x30 <= code <= 0x39 or 0x41 <= code <= 0x5a or 0x61 <= code <= 0x7a:
+    if 0x30 <= code <= 0x39 or 0x41 <= code <= 0x5A or 0x61 <= code <= 0x7A:
         return False
-    return code != 0x5f and code != 0x5c
+    return code != 0x5F and code != 0x5C
 
 
-def parse_delimiters(value: str) -> 'tuple[str, str] | None':
+def parse_delimiters(value: str) -> "tuple[str, str] | None":
     if len(value) != 2:
         return None
     if not is_delimiter_char(value[0]) or not is_delimiter_char(value[1]):

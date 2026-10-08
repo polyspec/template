@@ -18,7 +18,7 @@ class SafeString:
     The functions `raw` and `escape` produce one.
     """
 
-    __slots__ = ('text',)
+    __slots__ = ("text",)
 
     def __init__(self, text: str):
         self.text = text
@@ -27,7 +27,7 @@ class SafeString:
 class NativeObject:
     """A native assigned object whose public members and methods are visible to templates."""
 
-    __slots__ = ('target',)
+    __slots__ = ("target",)
 
     def __init__(self, target: object):
         self.target = target
@@ -35,18 +35,18 @@ class NativeObject:
 
 def type_of(value: Value) -> str:
     if value is None:
-        return 'null'
+        return "null"
     if isinstance(value, bool):
-        return 'bool'
+        return "bool"
     if isinstance(value, float) or isinstance(value, int):
-        return 'number'
+        return "number"
     if isinstance(value, str) or isinstance(value, SafeString):
-        return 'string'
+        return "string"
     if isinstance(value, list):
-        return 'list'
+        return "list"
     if isinstance(value, NativeObject):
-        return 'object'
-    return 'map'
+        return "object"
+    return "map"
 
 
 def is_number(value: Value) -> bool:
@@ -57,7 +57,7 @@ def is_string(value: Value) -> bool:
     return isinstance(value, str) or isinstance(value, SafeString)
 
 
-def text_of(value: 'str | SafeString') -> str:
+def text_of(value: "str | SafeString") -> str:
     return value if isinstance(value, str) else value.text
 
 
@@ -82,20 +82,25 @@ def combine_surrogate_pairs(text: str) -> str:
     The reference binding keeps UTF-16 text, where an escaped pair and the
     character it spells are the same string; a Python string holds the character.
     """
-    if not any('\ud800' <= char <= '\udfff' for char in text):
+    if not any("\ud800" <= char <= "\udfff" for char in text):
         return text
     out = []
     index = 0
     while index < len(text):
         code = ord(text[index])
-        if (0xd800 <= code <= 0xdbff and index + 1 < len(text)
-                and 0xdc00 <= ord(text[index + 1]) <= 0xdfff):
-            out.append(chr(0x10000 + ((code - 0xd800) << 10) + ord(text[index + 1]) - 0xdc00))
+        if (
+            0xD800 <= code <= 0xDBFF
+            and index + 1 < len(text)
+            and 0xDC00 <= ord(text[index + 1]) <= 0xDFFF
+        ):
+            out.append(
+                chr(0x10000 + ((code - 0xD800) << 10) + ord(text[index + 1]) - 0xDC00)
+            )
             index += 2
             continue
         out.append(text[index])
         index += 1
-    return ''.join(out)
+    return "".join(out)
 
 
 def is_truthy(value: Value) -> bool:
@@ -117,11 +122,11 @@ def is_truthy(value: Value) -> bool:
     return len(value) > 0
 
 
-_NUMBER_GRAMMAR = re.compile(r'[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?\Z')
-_ASCII_SPACE = ' \t\r\n'
+_NUMBER_GRAMMAR = re.compile(r"[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?\Z")
+_ASCII_SPACE = " \t\r\n"
 
 
-def parse_numeric_string(text: str) -> 'float | None':
+def parse_numeric_string(text: str) -> "float | None":
     """The numeric value of a string under the conversion grammar of EXP-23, or None."""
     trimmed = text.strip(_ASCII_SPACE)
     if not _NUMBER_GRAMMAR.match(trimmed):
@@ -135,10 +140,10 @@ def loose_equals(a: Value, b: Value) -> bool:
     ta, tb = type_of(a), type_of(b)
     if ta == tb:
         return _same_type_equals(a, b, ta)
-    if ta == 'number' and tb == 'string':
+    if ta == "number" and tb == "string":
         number = parse_numeric_string(text_of(b))
         return number is not None and number == a
-    if ta == 'string' and tb == 'number':
+    if ta == "string" and tb == "number":
         number = parse_numeric_string(text_of(a))
         return number is not None and number == b
     return False
@@ -151,15 +156,17 @@ def strict_equals(a: Value, b: Value) -> bool:
 
 
 def _same_type_equals(a: Value, b: Value, kind: str) -> bool:
-    if kind == 'null':
+    if kind == "null":
         return True
-    if kind in ('bool', 'number'):
+    if kind in ("bool", "number"):
         return a == b
-    if kind == 'string':
+    if kind == "string":
         return text_of(a) == text_of(b)
-    if kind == 'list':
-        return len(a) == len(b) and all(loose_equals(item, other) for item, other in zip(a, b))
-    if kind == 'map':
+    if kind == "list":
+        return len(a) == len(b) and all(
+            loose_equals(item, other) for item, other in zip(a, b)
+        )
+    if kind == "map":
         if len(a) != len(b):
             return False
         for key, value in a.items():
@@ -170,11 +177,10 @@ def _same_type_equals(a: Value, b: Value, kind: str) -> bool:
     return a.target is b.target
 
 
-def compare_values(a: Value, b: Value) -> 'float | None':
+def compare_values(a: Value, b: Value) -> "float | None":
     """EXP-38: a negative, zero or positive number, or None when the pair has no order."""
     if is_number(a) and is_number(b):
         return -1 if a < b else (1 if a > b else 0)
     if is_string(a) and is_string(b):
         return compare_code_points(text_of(a), text_of(b))
     return None
-

@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-_REPLACEMENTS = {0x26: '&amp;', 0x3c: '&lt;', 0x3e: '&gt;', 0x22: '&quot;', 0x27: '&#39;'}
+_REPLACEMENTS = {
+    0x26: "&amp;",
+    0x3C: "&lt;",
+    0x3E: "&gt;",
+    0x22: "&quot;",
+    0x27: "&#39;",
+}
 
 
 def escape_html(text: str) -> str:
@@ -15,17 +21,19 @@ def escape_html(text: str) -> str:
         result.append(text[last:index])
         result.append(replacement)
         last = index + 1
-    return text if last == 0 else ''.join(result) + text[last:]
+    return text if last == 0 else "".join(result) + text[last:]
 
 
 def utf8_length(text: str) -> int:
     """The number of UTF-8 bytes of a string."""
     try:
-        return len(text.encode('utf-8'))
+        return len(text.encode("utf-8"))
     except UnicodeEncodeError:
         # An unpaired surrogate has no UTF-8 form; the value rules reject it before here.
-        return sum(4 if 0xd800 <= ord(char) <= 0xdfff else len(char.encode('utf-8'))
-                   for char in text)
+        return sum(
+            4 if 0xD800 <= ord(char) <= 0xDFFF else len(char.encode("utf-8"))
+            for char in text
+        )
 
 
 def first_invalid_utf8(data: bytes) -> int:
@@ -36,11 +44,11 @@ def first_invalid_utf8(data: bytes) -> int:
         if lead < 0x80:
             index += 1
             continue
-        if 0xc2 <= lead <= 0xdf:
-            need, minimum, mask = 1, 0x80, 0x1f
-        elif 0xe0 <= lead <= 0xef:
-            need, minimum, mask = 2, 0x800, 0x0f
-        elif 0xf0 <= lead <= 0xf4:
+        if 0xC2 <= lead <= 0xDF:
+            need, minimum, mask = 1, 0x80, 0x1F
+        elif 0xE0 <= lead <= 0xEF:
+            need, minimum, mask = 2, 0x800, 0x0F
+        elif 0xF0 <= lead <= 0xF4:
             need, minimum, mask = 3, 0x10000, 0x07
         else:
             return index
@@ -49,10 +57,10 @@ def first_invalid_utf8(data: bytes) -> int:
             if index + step >= length:
                 return index
             byte = data[index + step]
-            if byte & 0xc0 != 0x80:
+            if byte & 0xC0 != 0x80:
                 return index
-            code = code << 6 | (byte & 0x3f)
-        if code < minimum or code > 0x10ffff or 0xd800 <= code <= 0xdfff:
+            code = code << 6 | (byte & 0x3F)
+        if code < minimum or code > 0x10FFFF or 0xD800 <= code <= 0xDFFF:
             return index
         index += need + 1
     return -1

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor versions that the suite runs on: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run. python is the Python minor version of the suite: setup-python installs the latest patch of a minor, so the minor is the pin. go names the go.mod whose go directive is the Go version of every run. cargoAudit and govulncheck are the releases that make dependency-review installs into var/tools for the advisories of the Cargo.lock files and the Go modules.",
+  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor versions that the suite runs on: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run. python is the Python minor version of the suite: setup-python installs the latest patch of a minor, so the minor is the pin. go names the go.mod whose go directive is the Go version of every run. cargoAudit and govulncheck are the releases that make dependency-review installs into var/tools for the advisories of the Cargo.lock files and the Go modules. ruff names the pyproject.toml of the Python package that make lint-python checks and whose ruff pin make install-tools installs.",
   "php": [
     "8.2",
     "8.5"
@@ -13,5 +13,8 @@
     "mod": "packages/template-go/go.mod"
   },
   "cargoAudit": "0.22.2",
-  "govulncheck": "1.8.0"
+  "govulncheck": "1.8.0",
+  "ruff": {
+    "pyproject": "packages/template-python/pyproject.toml"
+  }
 }
