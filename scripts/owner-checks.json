@@ -768,7 +768,8 @@
       ],
       "tests": [
         "tests/scripts/suite-parity.test.mjs",
-        "tests/scripts/github-ruleset.test.mjs"
+        "tests/scripts/github-ruleset.test.mjs",
+        "tests/scripts/action-pins.test.mjs"
       ]
     },
     {
