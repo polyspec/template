@@ -87,11 +87,13 @@
       "verification": [
         {
           "id": "check-1",
-          "command": "make conformance-all-modes"
+          "command": "make conformance-all-modes",
+          "python": true
         },
         {
           "id": "check-2",
-          "command": "make delimiter-matrix"
+          "command": "make delimiter-matrix",
+          "python": true
         }
       ],
       "docs": [
@@ -235,7 +237,8 @@
       "verification": [
         {
           "id": "check-1",
-          "command": "make conformance-all-modes"
+          "command": "make conformance-all-modes",
+          "python": true
         },
         {
           "id": "check-2",
@@ -828,7 +831,8 @@
         },
         {
           "id": "check-2",
-          "command": "make conformance-all-modes"
+          "command": "make conformance-all-modes",
+          "python": true
         }
       ],
       "docs": [
@@ -963,7 +967,8 @@
       "verification": [
         {
           "id": "check-1",
-          "command": "make release-test-matrix"
+          "command": "make release-test-matrix",
+          "python": true
         },
         {
           "id": "check-2",
@@ -1434,7 +1439,7 @@
         "php": "pass",
         "rust": "pass",
         "typescript": "pass",
-        "python": "partial"
+        "python": "unsupported"
       },
       "fixtures": [
         "packages/template-compiler/functions.json"

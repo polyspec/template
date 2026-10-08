@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- T22.4-19-1: the Python coverage check reads the verification commands that declare a Python run (`"python": true` in `contracts/features.json`), not the words of the Makefile and the scripts; `template-function-contract` declares python unsupported, since its command runs no Python.
 - The features page shows the Python status of every feature: `scripts/features/build.mjs` and `check.mjs` list `python` among the clients, so `docs/features.md` and `docs/features.ko.md` carry the Python column (T22.4-19).
 - The language test matrix in `contracts/features.json` lists the four languages that `scripts/check-language-test-matrix.mjs` requires; Python joins it when the CI merge-group run of T22.4-7 passes (T22.4-13).
 - Declared the `py.typed` marker of `polyspec.template` under its package name in `packages/template-python/pyproject.toml`; the key `template` named no package under `src`. `tests/test_package_data.py` checks every package-data key and runs in `make test-python` (T22.4-14).
