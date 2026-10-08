@@ -1,6 +1,6 @@
 {
   "name": "@polyspec/template-workspace",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "description": "Template language with one specification and TypeScript, Go, Rust and PHP implementations",
   "type": "module",
