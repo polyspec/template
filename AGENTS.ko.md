@@ -80,7 +80,7 @@ gh pr merge <branch> --auto --rebase
 ## 릴리스
 
 - 모든 변경은 필수 check와 함께 merge queue로 `main`에 도달하므로, `main`의 모든 commit은 전체 suite를 통과했다. 릴리스는 `main`의 commit에 붙인 tag이고, tag를 만들고 옮기고 push하는 것은 메인테이너뿐이다. tag는 pull request로 올리지 않는다(T22.1-4).
-- 버전 올림 pull request `chore(release): Release X.Y.Z (#task)`는 `scripts/release.mjs`의 `MANIFESTS`가 적은 모든 manifest(루트 `package.json`, npm 패키지, VS Code 확장, Rust crate와 `package-lock.json`, `packages/template-rust/Cargo.lock`. `composer.json`에는 `version` field가 없고 버전을 tag에서 받는다)의 버전을 X.Y.Z로 정하고, `CHANGELOG.md`와 `CHANGELOG.ko.md`의 `## Unreleased`를 `## X.Y.Z`로 바꾸며 그 위에 비어 있는 새 `## Unreleased`를 둔다.
+- 버전 올림 pull request `chore(release): Release X.Y.Z (#task)`는 `scripts/release.mjs`의 `MANIFESTS`가 적은 모든 manifest(루트 `package.json`, npm 패키지, VS Code 확장, Rust crate와 Python 패키지(`packages/template-python/pyproject.toml`), `package-lock.json`, `packages/template-rust/Cargo.lock`. `composer.json`에는 `version` field가 없고 버전을 tag에서 받는다)의 버전을 X.Y.Z로 정하고, `CHANGELOG.md`와 `CHANGELOG.ko.md`의 `## Unreleased`를 `## X.Y.Z`로 바꾸며 그 위에 비어 있는 새 `## Unreleased`를 둔다.
 - 메인테이너는 merge된 `main`의 commit에 `vX.Y.Z` tag를, Go module에는 `packages/template-go/vX.Y.Z` tag를 붙이고 tag를 push한다. tag push는 `.github/workflows/release.yml`을 실행한다. 이 workflow는 tag된 commit이 `main`에 있고 check `push-gate`와 `ci-passed`를 통과했는지, 모든 manifest에 tag의 버전이 있고 `CHANGELOG.md`에 section `## X.Y.Z`가 있는지 확인하고, 패키지 archive를 만들어 GitHub Release를 생성한다(`docs/operations/publication.md`).
 
 ## Checklist
