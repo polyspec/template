@@ -5,7 +5,7 @@
 
 ## Unreleased
 
-- T22.5-10: the leader of `tests/scripts/process-group-callers.test.mjs` and `tests/scripts/process-group-exit-window.test.mjs` writes the pid of the member it spawns into the pid file before it continues, in place of the member writing its own pid after it starts. The member starts running after `MEMBER_START_MS` (5 s) in both tests, so the old design failed with ENOENT before the assertions. No wait, timer or limit is added.
+- T22.5-10: the leader of `tests/scripts/process-group-callers.test.mjs` and `tests/scripts/process-group-exit-window.test.mjs` writes the pid of the member it spawns into the pid file before it continues, in place of the member writing its own pid after it starts. The member starts running after `MEMBER_START_MS` (5 s) in both tests, so the old design failed with ENOENT before the assertions. The case after its deadline starts `/bin/sh` as its leader, which writes the member pid at fork time, so the file exists before the deadline. Its deadline is 10 s, about 100 times the time the leader needs before the file exists. No wait or timer is added.
 
 ## 0.0.6
 

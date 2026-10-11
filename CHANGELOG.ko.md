@@ -1,12 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0d134516abd2bcdaff0f5b77d590fe37152f2d02b71bf77da7a15775dd6bc699 -->
+<!-- source-sha256: cfd2bb1957cbe32fa86b8d7139959a6938692638e3ccad96c0c214a27faf4a98 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
-- T22.5-10: `tests/scripts/process-group-callers.test.mjs`와 `tests/scripts/process-group-exit-window.test.mjs`의 leader는 spawn한 멤버의 pid를 계속 실행하기 전에 pid 파일에 씁니다. 멤버가 실행을 시작한 뒤 스스로 pid를 쓰는 방식을 대체합니다. 두 테스트에서 멤버는 `MEMBER_START_MS`(5 s) 뒤에 실행을 시작하므로, 이전 방식은 assertion 전에 ENOENT로 실패했습니다. wait, timer, 제한은 추가하지 않습니다.
+- T22.5-10: `tests/scripts/process-group-callers.test.mjs`와 `tests/scripts/process-group-exit-window.test.mjs`의 leader는 spawn한 멤버의 pid를 계속 실행하기 전에 pid 파일에 씁니다. 멤버가 실행을 시작한 뒤 스스로 pid를 쓰는 방식을 대체합니다. 두 테스트에서 멤버는 `MEMBER_START_MS`(5 s) 뒤에 실행을 시작하므로, 이전 방식은 assertion 전에 ENOENT로 실패했습니다. deadline 이후 case의 leader는 `/bin/sh`이며, pid를 fork 시점에 씁니다. 그래서 deadline 전에 파일이 존재합니다. 이 case의 deadline은 10 s로, leader가 파일이 생기기 전까지 필요한 시간의 약 100배입니다. wait나 timer는 추가하지 않습니다.
 
 ## 0.0.6
 
