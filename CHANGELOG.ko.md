@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 140aa6945cc8afe5a12189889c5c33406c67294642cfb87469243cb6ce9cf584 -->
+<!-- source-sha256: 8a99127e80c72be8b2ca53824691d3b6456eccac733d1b63275b1635607314b8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T22.5-2: 공유 tool은 `polyspec/kit` v0.0.21의 vendored 사본입니다. `config/toolchain.json`은 sha256 값과 함께 `pythonBuild`(Python 3.14.8, release 20261009), `pythonBackend`(`setuptools==84.0.0`), `ruff`(0.16.10)를 선언하고, `config/dependency-policy.json`은 kit schema가 요구하는 `npmLocks`를 선언합니다.
 ## 0.0.5
 
 - T22.5-1: 0.0.5를 릴리스합니다. `config/release.json`의 모든 manifest가 0.0.5를 선언하고, lock, 컴파일 산출물, 의존성 review, 릴리스 asset의 consumer project가 이를 기록합니다.

@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T22.5-2: the shared tools are the vendored copy of `polyspec/kit` v0.0.21. `config/toolchain.json` declares `pythonBuild` (Python 3.14.8, release 20261009), `pythonBackend` (`setuptools==84.0.0`) and `ruff` (0.16.10) with their sha256 values, and `config/dependency-policy.json` names its `npmLocks`, which the kit schema requires.
 ## 0.0.5
 
 - T22.5-1: release 0.0.5. Every manifest of `config/release.json` declares 0.0.5, and the locks, the compiled artifacts, the dependency review and the consumer projects of the release assets record it.

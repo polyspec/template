@@ -343,7 +343,8 @@
     },
     {
       "paths": [
-        "config/toolchain.json"
+        "config/toolchain.json",
+        "ruff.toml"
       ],
       "tests": [
         "tests/scripts/toolchain-files.test.mjs"
