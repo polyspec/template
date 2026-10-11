@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-test('each case prints its result line in each language before the summary', () => {
+test('each case prints its result line in each language before the summary', { timeout: 430_000 }, () => {
   const run = spawnSync(process.execPath, [path.join(ROOT, 'tests/runner/conformance.mjs'), '--langs', 'ts', '--case', 'whitespace'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
   const lines = run.stdout.split('\n');

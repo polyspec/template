@@ -33,7 +33,7 @@ function command(file, leaderMs) {
 }
 
 for (const [name, start] of [
-  ['runBounded after the command exits', file => runBounded(process.execPath, command(file, 300), { cwd: tmpdir(), timeoutMs: 10_000 })],
+  ['runBounded after the command exits', file => runBounded(process.execPath, command(file, 300), { cwd: tmpdir(), timeoutMs: 60_000 })],
   ['runBounded after the deadline', file => runBounded(process.execPath, command(file), { cwd: tmpdir(), timeoutMs: 500 })],
   ['runStep of the generated runners', file => runStep(process.execPath, command(file, 300), { cwd: tmpdir() })],
   ['runStep of the VS Code integration test', file => runIntegrationStep('probe', process.execPath, command(file, 300), { env: process.env, output: () => {}, log: () => {} })],

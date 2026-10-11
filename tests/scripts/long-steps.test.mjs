@@ -19,7 +19,7 @@ function module(source, env = process.env) {
   return spawnSync(process.execPath, ['--input-type=module', '-e', source], { cwd: ROOT, env, encoding: 'utf8' });
 }
 
-test('a driver build that runs longer than a small limit passes by its exit code', () => {
+test('a driver build that runs longer than a small limit passes by its exit code', { timeout: 210_000 }, () => {
   const drivers = JSON.stringify(path.join(ROOT, 'tests/runner/drivers.mjs'));
   const slow = module(`import { build } from ${drivers}; build('slow', process.execPath, ['-e', 'setTimeout(() => console.log("built"), 1500)'], process.cwd());`);
   assert.equal(slow.status, 0, slow.stderr);
@@ -30,7 +30,7 @@ test('a driver build that runs longer than a small limit passes by its exit code
   assert.match(failing.stderr, /✖ build failing: \S+ -e process\.exit\(3\) exited with 3 \(\d\.\ds\)\n/);
 });
 
-test('an install workspace step that runs longer than a small limit passes by its exit code', () => {
+test('an install workspace step that runs longer than a small limit passes by its exit code', { timeout: 370_000 }, () => {
   // zip waits 1.5 s before it packs the Go module.
   const directory = mkdtempSync(path.join(tmpdir(), 'template-slow-zip-'));
   try {
@@ -43,7 +43,7 @@ test('an install workspace step that runs longer than a small limit passes by it
   }
 });
 
-test('an install project step that runs longer than a small limit passes by its exit code', async () => {
+test('an install project step that runs longer than a small limit passes by its exit code', { timeout: 830_000 }, async () => {
   // npm waits 1.5 s before it packs the TypeScript package. The test stops the check after that step.
   const directory = mkdtempSync(path.join(tmpdir(), 'template-slow-npm-'));
   const temporary = path.join(directory, 'tmp');

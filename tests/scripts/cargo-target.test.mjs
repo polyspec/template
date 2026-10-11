@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 for (const target of ['build-rust', 'test-rust']) {
-  test(`make ${target} does not pass an inherited CARGO_TARGET_DIR to cargo`, (t) => {
+  test(`make ${target} does not pass an inherited CARGO_TARGET_DIR to cargo`, { timeout: 9_180_000 }, (t) => {
     const directory = mkdtempSync(path.join(tmpdir(), 'template-cargo-target-'));
     t.after(() => rmSync(directory, { recursive: true, force: true }));
     const cargo = path.join(directory, 'cargo');

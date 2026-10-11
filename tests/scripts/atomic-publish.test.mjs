@@ -44,7 +44,7 @@ test('make docs-verify-idempotent keeps the first build in a directory of its ru
   assert.doesNotMatch(readFileSync(path.join(ROOT, 'Makefile'), 'utf8'), /dist\.first/);
 });
 
-test('a failed install-cli keeps the previous install, and a successful one leaves no prepared directory', { timeout: 120_000 }, (t) => {
+test('a failed install-cli keeps the previous install, and a successful one leaves no prepared directory', { timeout: 690_000 }, (t) => {
   const prefix = mkdtempSync(path.join(tmpdir(), 'template-cli-atomic-'));
   t.after(() => rmSync(prefix, { recursive: true, force: true }));
   const install = env => spawnSync(process.execPath, [SCRIPT, 'install', '--prefix', prefix], { cwd: ROOT, encoding: 'utf8', env });

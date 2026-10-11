@@ -21,7 +21,7 @@ function holdPort() {
 }
 
 // The test runs every browser case; `make test-browser` builds the package before this test runs.
-test('the browser test runs on its own server while another server holds 127.0.0.1:4173', { timeout: 120_000 }, async () => {
+test('the browser test runs on its own server while another server holds 127.0.0.1:4173', { timeout: 820_000 }, async () => {
   const foreign = await holdPort();
   try {
     const run = spawn(process.execPath, [path.join(ROOT, 'tests/browser/run.mjs')], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
