@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: fd2d5d0cdb35589fb9d4a9a28f688bdfcc9d7fad7bcf65df4b8a512bd20fb6a5 -->
+<!-- source-sha256: d4b829428507239a6f22dd6762c300e17c3dd4f20434b22cc64f0853dfbec0df -->
 # 개발
 
 [English](/operations/development).
@@ -15,7 +15,7 @@
 | PHP | 8.2 또는 8.5 | `config/toolchain.json`의 minor version; 각 실행의 patch는 각 CI job의 report에 기록 |
 | Composer | 2.10.3 | `config/toolchain.json` |
 | Python | 3.14 | `.python-version`의 minor version; `make install`은 `config/toolchain.json`의 `pythonBuild` 중 그 minor의 Python release를 설치하고, Python을 실행하는 모든 검사는 wrapper `var/tools/bin/python3`(`scripts/python-toolchain.mjs`)를 실행하며, `PATH`의 `python3`는 실행하지 않음; CI job은 자체 Python을 설정하지 않고, CI job `python`은 그 minor만 실행하며 이는 `requires-python`이 명시 |
-| ruff | 0.16.10 | `packages/template-python/pyproject.toml`의 `dev` extra에 있는 `ruff==` pin(`config/toolchain.json`의 `ruff`); `make install-tools`가 `var/tools/python`에 설치하고, 그 파일의 `[tool.ruff]`가 규칙과 target version을 선언 |
+| ruff | 0.17.0 | `config/toolchain.json`의 `ruff`(플랫폼별 wheel의 sha256 포함); `make install-tools TOOLS="python ruff"`가 `var/tools/bin/python3` 위에서 `var/tools/python`에 설치하며, `packages/template-python/pyproject.toml`의 `[tool.ruff]`가 규칙과 target version을 선언 |
 | make | 고정하지 않음 | GNU Make 3.81 이상 |
 
 `make install-tools`(`scripts/kit/install-tools.mjs`)는 machine의 npm으로 npm을 `var/tools/npm`에 설치하고, machine의 Go로 Go를 module `golang.org/toolchain@v0.0.1-go<version>.<os>-<arch>`로서 module cache `var/tools/go`에 내려받는다. `var/tools/bin`에는 symbolic link가 아닌 wrapper script를 쓰고, 정확한 version이 있으면 설치를 건너뛴다. 또한 `pythonBuild`의 Python release(archive를 sha256으로 확인)를 `var/tools/python-build`에 설치하고 wrapper `var/tools/bin/python3`를 쓰며, 그 Python에 ruff를 설치한다. recipe는 machine의 Python을 실행하지 않는다. machine의 npm, Go와 Python은 바꾸지 않는다. Makefile은 `var/tools/bin`을 `PATH`의 맨 앞에 두고 `GOTOOLCHAIN=local`을 export하므로 go는 다른 toolchain을 내려받지 않고, `GOCACHE=var/go/cache`를 export하므로 go는 다른 checkout이나 실행과 함께 쓰는 cache가 아니라 checkout의 build cache에 build한다. GNU Make 3.81은 shell 문법이 없는 recipe 줄을 직접 시작하고, `SHELL`이 다른 shell을 가리켜도 export된 `PATH`가 아니라 make가 시작할 때의 `PATH`로 program을 찾는다. 그래서 recipe는 npm을 wrapper의 경로인 `$(NPM)`으로 시작하고, go와 gofmt는 shell 문법이 있는 줄에서만 시작하며, shell은 export된 `PATH`로 그것을 찾는다. `make owner-check`가 모든 변경에 실행하는 `tests/scripts/toolchain-files.test.mjs`는 recipe의 Node.js, npm, Go, Rust, PHP minor version, Composer가 이 파일들과 다르면 기대값과 실제값을 적어 실패한다.

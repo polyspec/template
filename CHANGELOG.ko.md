@@ -1,16 +1,17 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: b4a7a06b3d9daf64f38f0929e6461beb851f4f8f86423559c053a0770d707cc9 -->
+<!-- source-sha256: c16d0f93b3e5d68889a616545e822704df42e544e77d087394e44b0fe1f0e50c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
-- T22.5-5: 모든 Python 검사는 `PATH`의 `python3.14`가 아니라 `config/toolchain.json`의 `pythonBuild` release인 pinned interpreter `var/tools/bin/python3`를 실행합니다. 대상은 `scripts/python-toolchain.mjs`, conformance driver, `scripts/check-compiler-interface.mjs`, Makefile의 `PYTHON`입니다. `make install`은 npm, Go와 그 Python을 설치하고, `make install-tools TOOLS="python ruff"`는 그 Python에 ruff를 설치하며, 어떤 workflow도 `actions/setup-python`으로 Python을 설정하지 않습니다. 이전에는 `make install-tools TOOLS=ruff`가 `var/tools/bin/python3`가 없는 checkout에서 실패했습니다.
-
 ## 0.0.6
 
+- T22.5-6: 0.0.6 기록을 바로잡습니다. ruff 0.17.0 선언은 T22.5-4 아래에 기록하고, T22.5-5 항목은 `## Unreleased`에서 이 section으로 옮깁니다. changelog 검사가 첫 section으로 요구하므로 `## Unreleased`는 위에 빈 채로 남습니다. `docs/operations/development.md`와 그 한국어 파일은 ruff를 0.16.10과 `dev` extra 대신 `config/toolchain.json`에 선언된 0.17.0으로 적고, 설치는 `var/tools/bin/python3` 위의 `make install-tools TOOLS="python ruff"`, 규칙과 target은 `packages/template-python/pyproject.toml`의 `[tool.ruff]`라고 적습니다. 이 파일에는 `dev` extra가 없습니다.
+- T22.5-5: 모든 Python 검사는 `PATH`의 `python3.14`가 아니라 `config/toolchain.json`의 `pythonBuild` release인 pinned interpreter `var/tools/bin/python3`를 실행합니다. 대상은 `scripts/python-toolchain.mjs`, conformance driver, `scripts/check-compiler-interface.mjs`, Makefile의 `PYTHON`입니다. `make install`은 npm, Go와 그 Python을 설치하고, `make install-tools TOOLS="python ruff"`는 그 Python에 ruff를 설치하며, 어떤 workflow도 `actions/setup-python`으로 Python을 설정하지 않습니다. 이전에는 `make install-tools TOOLS=ruff`가 `var/tools/bin/python3`가 없는 checkout에서 실패했습니다.
 - T22.5-4: 0.0.6을 릴리스합니다. `config/release.json`의 모든 manifest가 0.0.6을 선언하고, lock, 컴파일 산출물, 의존성 review, 릴리스 asset의 consumer project가 이를 기록합니다.
+- T22.5-4: `config/toolchain.json`은 `ruff`를 0.17.0으로 선언합니다(이전 0.16.10). 네 플랫폼(darwin-arm64, darwin-x64, linux-arm64, linux-x64)의 wheel sha256 값을 함께 선언하며, `make install-tools TOOLS="python ruff"`가 이를 설치합니다.
 - T22.5-3: Python 패키지를 wheel `polyspec_template-0.0.6-py3-none-any.whl`(PEP 427)로 릴리스합니다. wheel은 `config/release.json`의 `buildBackend`(`setuptools==84.0.0`, sha256 확인)로 build하고, `consumers.wheel`이 import `polyspec.template`로 검사합니다. 변경 전 `make release-assets TAG=v0.0.6`은 `config/release.json: proof.gitTag.packages/template-python/pyproject.toml.kind is "python", the allowed values are rust`로 실패했고, 변경 후에는 asset에 wheel이 있으며 `make release-consumer TAG=v0.0.6`이 이를 설치하고 import합니다. 이 package는 의존성을 선언하지 않아 wheel에 Requires-Dist가 없습니다. `requires-python`은 `.python-version`의 minor인 `>=3.14`이며, CI job `python`은 그 minor만 실행하고, ruff pin은 `config/toolchain.json`에 있습니다.
 - T22.5-2: 공유 tool은 `polyspec/kit` v0.0.21의 vendored 사본입니다. `config/toolchain.json`은 sha256 값과 함께 `pythonBuild`(Python 3.14.8, release 20261009), `pythonBackend`(`setuptools==84.0.0`), `ruff`(0.16.10)를 선언하고, `config/dependency-policy.json`은 kit schema가 요구하는 `npmLocks`를 선언합니다.
 ## 0.0.5
