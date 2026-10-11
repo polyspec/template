@@ -2,6 +2,7 @@
 // command in its own group (`detached: true`) and removes the command's directory afterwards must wait: SIGKILL ends
 // the processes of the group soon, not at once, and a process that is still running writes into the directory while it
 // is removed, which fails with ENOTEMPTY.
+import { spawnSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 // A group whose probe answers EPERM has a member in exit, which the kernel refuses to signal; the group ends when that
@@ -29,11 +30,29 @@ export function signalGroup(pgid, signal, kill = signalProcess) {
 }
 
 /**
+ * Lists the processes whose process group is `pgid`, one ps line each, with the pid, parent, group, state, elapsed
+ * time and command. A group that the probe still sees is listed here, so a group whose members this process did not
+ * start can be told apart from its own members. A failing ps is reported in the text, not hidden.
+ */
+export function groupMembers(pgid) {
+  const result = spawnSync('ps', ['-A', '-o', 'pid=,ppid=,pgid=,stat=,etime=,command='], { encoding: 'utf8' });
+  if (result.error || result.status !== 0) {
+    return `ps could not list the processes (${result.error?.message ?? `exit status ${result.status}: ${result.stderr}`.trim()})`;
+  }
+  const lines = result.stdout.split('\n').filter(line => line.trim().split(/\s+/)[2] === String(pgid));
+  return lines.length > 0 ? lines.join('\n') : `ps lists no process of group ${pgid}`;
+}
+
+/**
  * Sends `signal` to the process group of `child`, whose process leads it, and resolves when `child` has exited and the
  * group has ended (ESRCH). The group is probed until ESRCH because no event reports the end of a group of processes
- * that are not children of this process. While it waits longer than a second it says so once on stderr. A group that
- * stays 'exiting' longer than `exitingDeadlineMs` rejects with an error that names its pgid, the errno and the elapsed
- * time. `kill` sends the signal (`process.kill` by default).
+ * that are not children of this process. While the probe answers 'sent', the loop sends `signal` to the group again on
+ * each probe, so a member that was created while the first signal was delivered, and so missed it, is signaled too. A
+ * process group id is not reused while one of its members exists, and the loop stops sending once the probe answers
+ * ESRCH; the only window is between a successful probe and the next signal, in which the last member may exit and a new
+ * group may take the id. While it waits longer than a second it says so once on stderr, with the processes of the group
+ * that ps lists. A group that stays 'exiting' longer than `exitingDeadlineMs` rejects with an error that names its pgid,
+ * the errno and the elapsed time. `kill` sends the signal (`process.kill` by default).
  */
 export async function stopProcessGroup(child, signal = 'SIGKILL', kill = signalProcess, exitingDeadlineMs = EXITING_DEADLINE_MS) {
   const exited = child.exitCode !== null || child.signalCode !== null ? Promise.resolve() : new Promise(resolve => child.once('exit', resolve));
@@ -54,8 +73,9 @@ export async function stopProcessGroup(child, signal = 'SIGKILL', kill = signalP
         throw error;
       }
     }
+    if (state === 'sent') signalGroup(child.pid, signal, kill);
     if (!said && now - started > 1000) {
-      process.stderr.write(`waiting for the processes of group ${child.pid} to exit\n`);
+      process.stderr.write(`waiting for the processes of group ${child.pid} to exit\n${groupMembers(child.pid)}\n`);
       said = true;
     }
     await sleep(10);
