@@ -24,12 +24,17 @@ const alive = (pid) => {
   }
 };
 
-// A node command that starts a background process of its group, which writes its process ID into `file` and runs on,
-// then waits `leaderMs` and exits, or runs on without an end.
+// The background process starts running only after this delay, as a member does under load, so the leader may exit or
+// reach its deadline before the member runs.
+const MEMBER_START_MS = 5_000;
+
+// A node command that starts a background process of its group. The leader writes the process ID of that member into
+// `file` before it continues, so the file exists whatever the start of the member, then waits `leaderMs` and exits, or
+// runs on without an end.
 function command(file, leaderMs) {
-  const background = `require('node:fs').writeFileSync(${JSON.stringify(file)}, String(process.pid)); setInterval(() => {}, 1000)`;
+  const background = `setTimeout(() => setInterval(() => {}, 1000), ${MEMBER_START_MS})`;
   const leader = leaderMs === undefined ? 'setInterval(() => {}, 1000)' : `setTimeout(() => process.exit(0), ${leaderMs})`;
-  return ['-e', `require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(background)}], { stdio: 'ignore' }); ${leader}`];
+  return ['-e', `const member = require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(background)}], { stdio: 'ignore' }); require('node:fs').writeFileSync(${JSON.stringify(file)}, String(member.pid)); ${leader}`];
 }
 
 for (const [name, start] of [
