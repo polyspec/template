@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.5-10: the leader of `tests/scripts/process-group-callers.test.mjs` and `tests/scripts/process-group-exit-window.test.mjs` writes the pid of the member it spawns into the pid file before it continues, in place of the member writing its own pid after it starts. The member starts running after `MEMBER_START_MS` (5 s) in both tests, so the old design failed with ENOENT before the assertions. No wait, timer or limit is added.
+
 ## 0.0.6
 
 - T22.5-9: the tag v0.0.6 is created on the commit that holds T22.5-5-1, T22.5-7 and T22.5-8, so their entries move from `## Unreleased` into this section.
