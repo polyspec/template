@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { listCases } from '../tests/runner/cases.mjs';
+import { pythonCommand } from './python-toolchain.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifestPath = process.env.TEMPLATE_INTERFACE_MANIFEST
@@ -230,6 +231,6 @@ function run(label, command, args, cwd) {
 run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'packages/template-go'));
 run('rust interface AST check', resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/template-rust'));
 run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/template-php'));
-run('python interface check', 'python3', ['tests/test_compiler_interface.py'], resolve(root, 'packages/template-python'));
+run('python interface check', pythonCommand(), ['tests/test_compiler_interface.py'], resolve(root, 'packages/template-python'));
 
 process.stdout.write('compiler interface: manifest and TypeScript, Go, Rust, PHP, Python runtime declarations passed\n');

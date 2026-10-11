@@ -1,7 +1,8 @@
 # Build, test and documentation targets. Every target is idempotent.
 
 # make install-tools (scripts/kit/install-tools.mjs) installs the npm of packageManager in package.json, the Go of
-# packages/template-go/go.mod and the ruff of packages/template-python/pyproject.toml into var/tools; their wrappers in
+# packages/template-go/go.mod, the Python of config/toolchain.json pythonBuild and the ruff of config/toolchain.json (on that
+# Python) into var/tools; their wrappers in
 # var/tools/bin come first, so every recipe uses the tools of the checkout and never the npm or Go of the machine (T19.2).
 # GOTOOLCHAIN=local keeps go from downloading another toolchain at run time.
 export PATH := $(CURDIR)/var/tools/bin:$(HOME)/.cargo/bin:$(PATH)
@@ -169,10 +170,11 @@ lint-js: ## Lint the TypeScript sources with eslint
 # make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
-# The jobs of CI install npm and Go: ruff needs the Python 3.14 that only the job showcase sets up, which installs it with
-# make install-tools TOOLS=ruff, and cargo-audit and govulncheck serve the dependency review, which make dependency-review
-# installs (a local make install-tools installs every declared tool).
-install: TOOLS := npm go
+# make install installs npm, Go and the pinned Python: every Python check runs var/tools/bin/python3, so every job has that
+# interpreter after make install and no job sets up a Python of its own. ruff is installed on that Python by make
+# install-tools TOOLS=ruff, which lint-python needs; cargo-audit and govulncheck serve the dependency review, which make
+# dependency-review installs (a local make install-tools installs every declared tool).
+install: TOOLS := npm go python
 install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages, the crates of every Cargo.lock and the Python build requirements
 	$(ONLINE) $(NPM) ci
 	rustup toolchain install --no-self-update
@@ -341,9 +343,9 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
 	node tests/runner/conformance.mjs --langs ts,python
 
-# The unit tests of the Python package run with the python3 of PATH, which the matrix of the CI job python sets to each
-# Python release it covers; PYTHON can be given on the command line, such as PYTHON=python3.14.
-PYTHON ?= python3
+# The unit tests of the Python package run with the pinned interpreter of var/tools (make install-tools TOOLS=python), the
+# Python release of .python-version; PYTHON is never the python3 of PATH.
+PYTHON := $(CURDIR)/var/tools/bin/python3
 
 test-python: ## Unit tests of the Python package
 	status=0; for test in packages/template-python/tests/test_api.py packages/template-python/tests/test_exports.py packages/template-python/tests/test_package_data.py packages/template-python/tests/test_object_calls.py packages/template-python/tests/test_expr_fixtures.py packages/template-python/tests/test_function_contract.py packages/template-python/tests/test_compiler_interface.py; do $(PYTHON) $$test || status=1; done; exit $$status

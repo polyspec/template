@@ -31,8 +31,5 @@ jobs:
         with:
           php-version: '8.5'
           tools: composer:2.10.3
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
-        with:
-          python-version-file: .python-version
       - run: make dependency-review
         if: ${{ !cancelled() }}

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 3b190c7e6fdf8a21ae0a498e76a6b38f3d3bea82ea7ab8b0695325064a773d0d -->
+<!-- source-sha256: fd2d5d0cdb35589fb9d4a9a28f688bdfcc9d7fad7bcf65df4b8a512bd20fb6a5 -->
 # 개발
 
 [English](/operations/development).
@@ -14,11 +14,11 @@
 | Rust | rustfmt와 clippy를 포함한 1.98.1 | `rust-toolchain.toml`; rustup으로 설치, Makefile이 `~/.cargo/bin`을 `PATH`에 추가 |
 | PHP | 8.2 또는 8.5 | `config/toolchain.json`의 minor version; 각 실행의 patch는 각 CI job의 report에 기록 |
 | Composer | 2.10.3 | `config/toolchain.json` |
-| Python | 3.14 | `.python-version`의 minor version; Python을 실행하는 검사는 `python3.14`를 시작하고(`scripts/python-toolchain.mjs`), 없으면 명령과 해결 방법을 적고 실패 ; CI job `python`은 그 minor만 실행하며, `requires-python`이 이를 명시 |
+| Python | 3.14 | `.python-version`의 minor version; `make install`은 `config/toolchain.json`의 `pythonBuild` 중 그 minor의 Python release를 설치하고, Python을 실행하는 모든 검사는 wrapper `var/tools/bin/python3`(`scripts/python-toolchain.mjs`)를 실행하며, `PATH`의 `python3`는 실행하지 않음; CI job은 자체 Python을 설정하지 않고, CI job `python`은 그 minor만 실행하며 이는 `requires-python`이 명시 |
 | ruff | 0.16.10 | `packages/template-python/pyproject.toml`의 `dev` extra에 있는 `ruff==` pin(`config/toolchain.json`의 `ruff`); `make install-tools`가 `var/tools/python`에 설치하고, 그 파일의 `[tool.ruff]`가 규칙과 target version을 선언 |
 | make | 고정하지 않음 | GNU Make 3.81 이상 |
 
-`make install-tools`(`scripts/kit/install-tools.mjs`)는 machine의 npm으로 npm을 `var/tools/npm`에 설치하고, machine의 Go로 Go를 module `golang.org/toolchain@v0.0.1-go<version>.<os>-<arch>`로서 module cache `var/tools/go`에 내려받는다. `var/tools/bin`에는 symbolic link가 아닌 wrapper script를 쓰고, 정확한 version이 있으면 설치를 건너뛴다. machine의 npm과 Go는 바꾸지 않는다. Makefile은 `var/tools/bin`을 `PATH`의 맨 앞에 두고 `GOTOOLCHAIN=local`을 export하므로 go는 다른 toolchain을 내려받지 않고, `GOCACHE=var/go/cache`를 export하므로 go는 다른 checkout이나 실행과 함께 쓰는 cache가 아니라 checkout의 build cache에 build한다. GNU Make 3.81은 shell 문법이 없는 recipe 줄을 직접 시작하고, `SHELL`이 다른 shell을 가리켜도 export된 `PATH`가 아니라 make가 시작할 때의 `PATH`로 program을 찾는다. 그래서 recipe는 npm을 wrapper의 경로인 `$(NPM)`으로 시작하고, go와 gofmt는 shell 문법이 있는 줄에서만 시작하며, shell은 export된 `PATH`로 그것을 찾는다. `make owner-check`가 모든 변경에 실행하는 `tests/scripts/toolchain-files.test.mjs`는 recipe의 Node.js, npm, Go, Rust, PHP minor version, Composer가 이 파일들과 다르면 기대값과 실제값을 적어 실패한다.
+`make install-tools`(`scripts/kit/install-tools.mjs`)는 machine의 npm으로 npm을 `var/tools/npm`에 설치하고, machine의 Go로 Go를 module `golang.org/toolchain@v0.0.1-go<version>.<os>-<arch>`로서 module cache `var/tools/go`에 내려받는다. `var/tools/bin`에는 symbolic link가 아닌 wrapper script를 쓰고, 정확한 version이 있으면 설치를 건너뛴다. 또한 `pythonBuild`의 Python release(archive를 sha256으로 확인)를 `var/tools/python-build`에 설치하고 wrapper `var/tools/bin/python3`를 쓰며, 그 Python에 ruff를 설치한다. recipe는 machine의 Python을 실행하지 않는다. machine의 npm, Go와 Python은 바꾸지 않는다. Makefile은 `var/tools/bin`을 `PATH`의 맨 앞에 두고 `GOTOOLCHAIN=local`을 export하므로 go는 다른 toolchain을 내려받지 않고, `GOCACHE=var/go/cache`를 export하므로 go는 다른 checkout이나 실행과 함께 쓰는 cache가 아니라 checkout의 build cache에 build한다. GNU Make 3.81은 shell 문법이 없는 recipe 줄을 직접 시작하고, `SHELL`이 다른 shell을 가리켜도 export된 `PATH`가 아니라 make가 시작할 때의 `PATH`로 program을 찾는다. 그래서 recipe는 npm을 wrapper의 경로인 `$(NPM)`으로 시작하고, go와 gofmt는 shell 문법이 있는 줄에서만 시작하며, shell은 export된 `PATH`로 그것을 찾는다. `make owner-check`가 모든 변경에 실행하는 `tests/scripts/toolchain-files.test.mjs`는 recipe의 Node.js, npm, Go, Rust, PHP minor version, Composer가 이 파일들과 다르면 기대값과 실제값을 적어 실패한다.
 
 PHP는 minor version으로 고정한다. CI에서 PHP를 설치하는 setup-php는 minor version의 최신 patch를 설치하고 patch를 고정할 수 없다. `make ci-targets`의 각 실행은 자기가 실행된 version을 PHP patch까지 report의 `record.json`과 `summary.md`에 기록하고 모든 CI job이 그 report를 upload한다. Composer는 정확히 고정한다(workflow의 `composer:2.10.3`). make는 고정하지 않는다. Makefile은 GNU Make 3.81보다 새로운 구문을 쓰지 않고, make 3.81과 GNU Make 4.4.1은 모든 target에 같은 명령을 출력했다(T17.1-4). CI job은 `ubuntu-24.04`에서 실행되고, 모든 action을 commit으로 고정하며, `make install`로 설치한다. setup-go는 `make install-tools`를 bootstrap하는 Go를 제공한다.
 

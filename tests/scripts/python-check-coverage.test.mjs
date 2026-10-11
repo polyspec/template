@@ -28,11 +28,11 @@ for (const check of checks) {
   });
 }
 
-// The checks run `python<minor>` of .python-version (scripts/python-toolchain.mjs), which a CI job has only after
-// actions/setup-python installed it. A job that runs one of these targets sets Python up from .python-version.
+// The checks run the pinned interpreter var/tools/bin/python3 (scripts/python-toolchain.mjs), which `make install` installs
+// (T22.5-5). A job that runs one of these targets runs make install, and no job sets up a Python of its own.
 const pythonTargets = ['test-scripts', 'install-check', 'generated-native-check', 'typed-generator-compile-check', 'showcase-check'];
 
-test('each CI job that runs a Python check target sets up the Python of .python-version', () => {
+test('each CI job that runs a Python check target runs make install and sets up no Python of PATH', () => {
   const workflow = readFileSync(join(root, '.github/workflows/ci.yml'), 'utf8');
   const jobs = workflow.slice(workflow.indexOf('\njobs:')).split(/\n(?=  [a-z][a-z-]*:\n)/).slice(1);
   const needing = jobs.filter(job => {
@@ -41,8 +41,9 @@ test('each CI job that runs a Python check target sets up the Python of .python-
   });
   assert.ok(needing.length >= 3, `found ${needing.length} jobs that run a Python check target, expected at least 3`);
   for (const job of needing) {
-    assert.match(job, /uses: actions\/setup-python@[0-9a-f]{40} # v[\d.]+\n\s+with:\n\s+python-version-file: \.python-version\n/, `the job ${job.split('\n')[0].trim()} runs a Python check target and does not set up python-version-file: .python-version`);
+    assert.ok(/run: make install\n/.test(job), `the job ${job.split('\n')[0].trim()} runs a Python check target and does not run make install, which installs the pinned Python`);
   }
+  assert.ok(!/actions\/setup-python/.test(workflow), 'a workflow sets up a Python of PATH; the checks run the pinned interpreter of make install');
 });
 
 // The showcase contract has a Python implementation: the manifest maps Python, scripts/check-showcase-contract.mjs runs it

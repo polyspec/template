@@ -9,6 +9,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { publishBuild } from '../../scripts/publish-build.mjs';
+import { pythonCommand } from '../../scripts/python-toolchain.mjs';
 import { runStepSync } from '../../scripts/test-progress/step.mjs';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -76,10 +77,10 @@ export const drivers = {
   python: {
     dir: join(packages, 'template-python'),
     build() {
-      build('python', 'python3', ['-m', 'compileall', '-q', join(packages, 'template-python', 'src')], root);
+      build('python', pythonCommand(), ['-m', 'compileall', '-q', join(packages, 'template-python', 'src')], root);
     },
     command(args) {
-      return ['python3', ['-m', 'polyspec.template.cli', ...args]];
+      return [pythonCommand(), ['-m', 'polyspec.template.cli', ...args]];
     },
     env: { PYTHONPATH: join(packages, 'template-python', 'src') },
   },
