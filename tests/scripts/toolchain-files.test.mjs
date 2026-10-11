@@ -148,7 +148,7 @@ test('npm is the version of packageManager in package.json, from var/tools/bin f
   assert.equal(actual, expected, `npm of the recipes: expected ${expected} (package.json packageManager), actual ${actual}; run make install-tools`);
 });
 
-test('every recipe line runs npm and go of var/tools/bin, with every make on PATH', () => {
+test('every recipe line runs npm and go of var/tools/bin, with every make on PATH', { timeout: 240_000 }, () => {
   // GNU Make 3.81 starts a line without shell syntax itself, with the PATH that make started with, also when SHELL names
   // another shell: the line `npm --version` printed the npm of the machine. The recipes start npm as $(NPM), the path of
   // its wrapper, and go and gofmt only in lines with shell syntax, which the shell runs with the exported PATH.

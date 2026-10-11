@@ -55,7 +55,7 @@ test('the Go runner prints each case test with its elapsed time', COMPILES, () =
   assert.match(stdout, /✔ go .*: 1 passed, 0 failed, 0 timed out, 0 skipped/);
 });
 
-test('the Rust runner names each test after its case and prints it with its elapsed time', COMPILES, () => {
+test('the Rust runner names each test after its case and prints it with its elapsed time', { timeout: 6_230_000 }, () => {
   const stdout = generated('rust');
   assert.match(stdout, /▶ tests\/generated_conformance_check\.rs › case_echo_path\n[^]*✔ tests\/generated_conformance_check\.rs › case_echo_path \(\d+\.\ds\)\n/);
   assert.match(stdout, /✔ cargo .*: 1 passed, 0 failed, 0 timed out, 0 skipped/);

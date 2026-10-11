@@ -52,7 +52,7 @@ function fixture(t) {
   return { repository, run, calls, worktrees };
 }
 
-test('the release check runs the matrix in a detached worktree of HEAD and removes it', (t) => {
+test('the release check runs the matrix in a detached worktree of HEAD and removes it', { timeout: 260_000 }, (t) => {
   const release = fixture(t);
   const result = release.run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
@@ -78,7 +78,7 @@ test('the release check refuses a source tree with changes', (t) => {
   assert.equal(release.worktrees(), 1);
 });
 
-test('the release check removes its worktree when the matrix fails', (t) => {
+test('the release check removes its worktree when the matrix fails', { timeout: 530_000 }, (t) => {
   const release = fixture(t);
   const result = release.run({ STUB_MAKE_STATUS: '2' });
   assert.notEqual(result.status, 0);

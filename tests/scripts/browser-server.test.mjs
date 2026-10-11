@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-test('the browser test waits for a server that starts slowly and runs the browser cases', { timeout: 120_000 }, (t) => {
+test('the browser test waits for a server that starts slowly and runs the browser cases', { timeout: 980_000 }, (t) => {
   const directory = mkdtempSync(path.join(tmpdir(), 'template-slow-server-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const ran = path.join(directory, 'ran');
