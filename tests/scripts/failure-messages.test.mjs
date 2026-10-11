@@ -7,13 +7,14 @@
 // - the PHP extension tests run through scripts/kit/run-tests.mjs, which prints each test with its elapsed time.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { caseTestFailures, runCaseTests } from '../runner/cases.mjs';
+import { copyDriverFiles } from './driver-fixture.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = file => readFileSync(path.join(ROOT, file), 'utf8');
@@ -47,10 +48,7 @@ test('a tool that cannot start fails with its command and the install fix', (t) 
 
 test('a CLI call of the drivers that outlives its limit names the limit and the command', async (t) => {
   const copy = directory(t, 'template-drivers-limit-');
-  for (const file of ['tests/runner/drivers.mjs', 'scripts/publish-build.mjs', 'scripts/test-progress/step.mjs']) {
-    mkdirSync(path.dirname(path.join(copy, file)), { recursive: true });
-    copyFileSync(path.join(ROOT, file), path.join(copy, file));
-  }
+  copyDriverFiles(copy);
   const { drivers, invoke } = await import(pathToFileURL(path.join(copy, 'tests/runner/drivers.mjs')).href);
   drivers.go.command = () => ['sleep', ['5']];
   const result = invoke('go', [], copy, { timeoutMs: 200 });

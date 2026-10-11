@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c16d0f93b3e5d68889a616545e822704df42e544e77d087394e44b0fe1f0e50c -->
+<!-- source-sha256: 966c75cecbb26d4e28d5aac8ed9f69cfafdf5745b1240bacefdf1657a2aea7e2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.5-5-1: 드라이버 테스트는 `tests/runner/drivers.mjs`가 import하는 모든 모듈, `scripts/python-toolchain.mjs`를 포함하여 `tests/scripts/driver-fixture.mjs`의 한 목록에서 복사합니다. `make test-scripts`가 다시 통과합니다.
 
 ## 0.0.6
 
