@@ -5,8 +5,8 @@
 # tagged commit on origin/main with the check run ci-passed concluded success, without running the tests again; make
 # release-versions requires the version of the tag in every manifest and its section in CHANGELOG.md; make
 # release-assets builds the npm packages and packs the npm tarballs and a zip of each Composer package, named
-# <package>-<language>-<version>.<ext> (the Rust crate and the Python package are not released as an archive and are
-# consumed by git tag); make release-publish creates the GitHub Release with the section as notes and the archives
+# <package>-<language>-<version>.<ext>, and the Python package as its PEP 427 wheel (the Rust crate is consumed by git tag);
+# make release-publish creates the GitHub Release with the section as notes and the archives
 # attached, and a Go tag builds and attaches nothing (scripts/kit/release.mjs, config/release.json). TAG reaches the make
 # targets through the environment. Each step runs a make target. The runner image and each action are exact releases, as
 # in ci.yml. This workflow is not a job of ci.yml, which runs the full suite on every push to main.
@@ -49,6 +49,8 @@ jobs:
           php-version: '8.5'
           tools: composer:2.10.3
       - run: make install
+      - name: install the Python toolchain of the wheel
+        run: make install-tools TOOLS="python pythonBackend"
       - name: verify the tagged commit
         run: make release-verify
       - name: check the versions

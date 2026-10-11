@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 0e5fc0e7b1e7c9dc6651b29bcb5d7a5b49f73d098d3fa126e1bc40ead1b7cdd4 -->
+<!-- source-sha256: 3b190c7e6fdf8a21ae0a498e76a6b38f3d3bea82ea7ab8b0695325064a773d0d -->
 # 개발
 
 [English](/operations/development).
@@ -14,7 +14,7 @@
 | Rust | rustfmt와 clippy를 포함한 1.98.1 | `rust-toolchain.toml`; rustup으로 설치, Makefile이 `~/.cargo/bin`을 `PATH`에 추가 |
 | PHP | 8.2 또는 8.5 | `config/toolchain.json`의 minor version; 각 실행의 patch는 각 CI job의 report에 기록 |
 | Composer | 2.10.3 | `config/toolchain.json` |
-| Python | 3.14 | `.python-version`의 minor version; Python을 실행하는 검사는 `python3.14`를 시작하고(`scripts/python-toolchain.mjs`), 없으면 명령과 해결 방법을 적고 실패; CI job `python`은 `requires-python`의 하한인 3.11도 실행 |
+| Python | 3.14 | `.python-version`의 minor version; Python을 실행하는 검사는 `python3.14`를 시작하고(`scripts/python-toolchain.mjs`), 없으면 명령과 해결 방법을 적고 실패 ; CI job `python`은 그 minor만 실행하며, `requires-python`이 이를 명시 |
 | ruff | 0.16.10 | `packages/template-python/pyproject.toml`의 `dev` extra에 있는 `ruff==` pin(`config/toolchain.json`의 `ruff`); `make install-tools`가 `var/tools/python`에 설치하고, 그 파일의 `[tool.ruff]`가 규칙과 target version을 선언 |
 | make | 고정하지 않음 | GNU Make 3.81 이상 |
 

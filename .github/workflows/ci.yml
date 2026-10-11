@@ -223,10 +223,6 @@ jobs:
 
   python:
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ['3.11', '3.14']
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
@@ -239,7 +235,7 @@ jobs:
           cache: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          python-version: ${{ matrix.python }}
+          python-version-file: .python-version
       - run: make install
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="test-python conformance-python conformance-generated-python"
@@ -247,7 +243,7 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
-          name: report-python-${{ matrix.python }}
+          name: report-python
           path: var/report/ci-targets/
           if-no-files-found: error
 
