@@ -3,11 +3,13 @@
 // and fail on an absent package, no recipe of the Makefile skips its command when a directory or file is absent, and no
 // test of the packages skips itself on a missing build.
 import assert from 'node:assert/strict';
-import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { copyDriverFiles } from './driver-fixture.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -16,10 +18,7 @@ test('the conformance runners select every language when no option names them, a
   // directory existed, so a missing package dropped its language without a message.
   const directory = mkdtempSync(path.join(tmpdir(), 'template-drivers-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
-  for (const file of ['tests/runner/drivers.mjs', 'scripts/publish-build.mjs', 'scripts/test-progress/step.mjs']) {
-    mkdirSync(path.dirname(path.join(directory, file)), { recursive: true });
-    copyFileSync(path.join(ROOT, file), path.join(directory, file));
-  }
+  copyDriverFiles(directory);
   const { drivers, prepare, selectLanguages } = await import(pathToFileURL(path.join(directory, 'tests/runner/drivers.mjs')).href);
   assert.deepEqual(selectLanguages(undefined), Object.keys(drivers));
   assert.deepEqual(selectLanguages('go,php'), ['go', 'php']);

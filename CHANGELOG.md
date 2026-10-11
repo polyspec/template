@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.5-5-1: the driver tests copy every module that `tests/runner/drivers.mjs` imports, including `scripts/python-toolchain.mjs`, from one list in `tests/scripts/driver-fixture.mjs`; `make test-scripts` passes again.
+
 ## 0.0.6
 
 - T22.5-6: correct the records of 0.0.6. The ruff 0.17.0 declaration is recorded under T22.5-4, and the T22.5-5 entry moves from `## Unreleased` into this section; `## Unreleased` stays above it, empty, because the changelog check requires it as the first section. `docs/operations/development.md` names ruff 0.17.0 as declared in `config/toolchain.json` (installed by `make install-tools TOOLS="python ruff"` on `var/tools/bin/python3`, with the rules and target of `[tool.ruff]` in `packages/template-python/pyproject.toml`) in place of 0.16.10 and the `dev` extra, which the file does not have.

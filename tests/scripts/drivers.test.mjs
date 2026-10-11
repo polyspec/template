@@ -2,21 +2,34 @@
 // language every time, also when a binary is present, because the binary may be built from older sources; each build
 // does nothing when its inputs are unchanged. The drivers are copied into a directory whose packages hold a binary.
 import assert from 'node:assert/strict';
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { DRIVER_FILES, copyDriverFiles } from './driver-fixture.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+test('the driver fixture lists every module that the drivers import', () => {
+  const pending = ['tests/runner/drivers.mjs'];
+  const reached = new Set();
+  while (pending.length > 0) {
+    const file = pending.pop();
+    if (reached.has(file)) continue;
+    reached.add(file);
+    const source = readFileSync(path.join(ROOT, file), 'utf8');
+    for (const [, specifier] of source.matchAll(/^import [^;]*?from '(\.[^']+)';/gm)) pending.push(path.normalize(path.join(path.dirname(file), specifier)));
+  }
+  assert.ok(reached.has('scripts/python-toolchain.mjs'), 'the import walk did not reach the Python toolchain');
+  assert.deepEqual([...reached].filter(file => !DRIVER_FILES.includes(file)), []);
+});
 
 test('prepare builds the CLI of a language also when its binary is present', async (t) => {
   const directory = mkdtempSync(path.join(tmpdir(), 'template-drivers-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
-  for (const file of ['tests/runner/drivers.mjs', 'scripts/publish-build.mjs', 'scripts/test-progress/step.mjs']) {
-    mkdirSync(path.dirname(path.join(directory, file)), { recursive: true });
-    copyFileSync(path.join(ROOT, file), path.join(directory, file));
-  }
+  copyDriverFiles(directory);
   mkdirSync(path.join(directory, 'packages/template-go'), { recursive: true });
   writeFileSync(path.join(directory, 'packages/template-go/template'), 'a binary built from older sources\n');
   const { drivers, prepare } = await import(pathToFileURL(path.join(directory, 'tests/runner/drivers.mjs')).href);
