@@ -4,7 +4,7 @@
 // does not end fails by its name instead of stopping the run.
 import { spawn } from 'node:child_process';
 import { Worker } from 'node:worker_threads';
-import { stopProcessGroup } from '../../scripts/process-group.mjs';
+import { signalGroup, stopProcessGroup } from '../../scripts/process-group.mjs';
 import { createProgress } from '../../scripts/test-progress/progress.mjs';
 
 /** Progress lines on standard output: start, a line every 5 s while running, result with elapsed time. */
@@ -42,7 +42,7 @@ function run(command, args, { cwd, env, timeoutMs, stdio }) {
     let timedOut = false;
     const timer = timeoutMs === undefined ? undefined : setTimeout(() => {
       timedOut = true;
-      try { process.kill(-child.pid, 'SIGKILL'); } catch { /* the group has ended */ }
+      signalGroup(child.pid, 'SIGKILL');
     }, timeoutMs);
     child.on('error', error => { clearTimeout(timer); reject(error); });
     child.on('close', (status) => {
