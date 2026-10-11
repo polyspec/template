@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4c2b4d7859f7f9b913743d0668ec076f745dcb434b7fb99248ee1510159194f3 -->
+<!-- source-sha256: b4a7a06b3d9daf64f38f0929e6461beb851f4f8f86423559c053a0770d707cc9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.5-5: 모든 Python 검사는 `PATH`의 `python3.14`가 아니라 `config/toolchain.json`의 `pythonBuild` release인 pinned interpreter `var/tools/bin/python3`를 실행합니다. 대상은 `scripts/python-toolchain.mjs`, conformance driver, `scripts/check-compiler-interface.mjs`, Makefile의 `PYTHON`입니다. `make install`은 npm, Go와 그 Python을 설치하고, `make install-tools TOOLS="python ruff"`는 그 Python에 ruff를 설치하며, 어떤 workflow도 `actions/setup-python`으로 Python을 설정하지 않습니다. 이전에는 `make install-tools TOOLS=ruff`가 `var/tools/bin/python3`가 없는 checkout에서 실패했습니다.
 
 ## 0.0.6
 

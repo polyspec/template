@@ -17,7 +17,6 @@ const VERIFIED = [
   { action: 'actions/deploy-pages', version: 'v5.0.1', commit: '368f82528645a54fb793d4d04e342629a3f51346' },
   { action: 'actions/setup-go', version: 'v6.5.0', commit: '924ae3a1cded613372ab5595356fb5720e22ba16' },
   { action: 'actions/setup-node', version: 'v6.5.0', commit: '249970729cb0ef3589644e2896645e5dc5ba9c38' },
-  { action: 'actions/setup-python', version: 'v6.3.0', commit: 'ece7cb06caefa5fff74198d8649806c4678c61a1' },
   { action: 'actions/upload-artifact', version: 'v7.0.1', commit: '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' },
   { action: 'actions/upload-pages-artifact', version: 'v5.0.0', commit: 'fc324d3547104276b827a68afc52ff2a11cc49c9' },
   { action: 'shivammathur/setup-php', version: '2.37.2', commit: 'f3e473d116dcccaddc5834248c87452386958240' },

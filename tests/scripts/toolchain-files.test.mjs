@@ -231,7 +231,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // Only the commands that download leave the offline settings of the recipes (T20.1-2).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const fetches = locks.map(lock => `${online} ${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/kit/install-tools.mjs npm go`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches, `${online} node scripts/python-wheelhouse.mjs`]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/kit/install-tools.mjs npm go python`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches, `${online} node scripts/python-wheelhouse.mjs`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
@@ -422,14 +422,16 @@ test('every action of a workflow is pinned by its commit and every job runs on u
 });
 
 // The python job of ci.yml runs one interpreter, the minor of .python-version (T22.4-12): requires-python is that minor
-// (python-requires.test.mjs), so the job has no matrix and no floor job on another interpreter.
-test('the python job of ci.yml sets up the interpreter of .python-version and has no matrix (T22.4-12)', () => {
+// (python-requires.test.mjs), so the job has no matrix and no floor job on another interpreter. The interpreter is the
+// pinned Python that make install installs (T22.5-5), so the job sets up no Python of its own.
+test('the python job of ci.yml runs make install for the pinned interpreter and has no matrix (T22.4-12, T22.5-5)', () => {
   const minor = read('.python-version').trim();
   assert.match(minor, /^3\.\d+$/, `.python-version ${minor} is not a Python minor release`);
   const job = read('.github/workflows/ci.yml').match(/^  python:\n([\s\S]*?)(?=^  [a-z-]+:\n)/m)?.[1];
   assert.ok(job, 'ci.yml has no python job; the check verified nothing');
   assert.ok(!/^\s+matrix:/m.test(job), 'the python job of ci.yml has a matrix; it runs the minor of .python-version only');
-  assert.ok(job.includes('python-version-file: .python-version'), 'the python job sets up Python from .python-version');
+  assert.ok(job.includes('run: make install\n'), 'the python job runs make install, which installs the pinned Python');
+  assert.ok(!job.includes('actions/setup-python'), 'the python job sets up a Python of PATH; it runs the pinned interpreter');
 });
 
 // The python job of ci.yml runs the unit tests, the conformance suite and the generated conformance suite of Python, and
@@ -449,26 +451,26 @@ test('the python job of ci.yml runs the Python suites and ci-passed needs it (T2
   assert.ok(needs[1].split(',').map(name => name.trim()).includes('python'), `ci-passed needs ${needs[1]}, expected python among them`);
 });
 
-// ruff needs the Python of .python-version, which only a job with setup-python provides, so make install installs npm and Go
-// only and the job that runs lint-python installs ruff itself after setup-python (T22.4-33).
-test('the job that runs lint-python sets up Python and installs ruff before it, and make install installs no ruff', () => {
+// ruff is installed on the pinned Python of var/tools (install-ruff.mjs). make install installs that Python (T22.5-5), and
+// the job that runs lint-python installs ruff after it with make install-tools TOOLS="python ruff" (T22.4-33, T22.5-5).
+test('the job that runs lint-python installs the pinned Python and ruff before it, with no setup-python', () => {
   for (const job of jobs('.github/workflows/ci.yml')) {
     if (!/\bTARGETS="[^"]*\blint-python\b/.test(job.text)) continue;
-    const setup = job.text.indexOf('uses: actions/setup-python@');
-    const ruff = job.text.indexOf('run: make install-tools TOOLS=ruff');
+    const ruff = job.text.indexOf('run: make install-tools TOOLS="python ruff"');
     const lint = job.text.indexOf('lint-python');
-    assert.ok(setup !== -1 && setup < ruff && ruff < lint, `job ${job.name} runs lint-python without setup-python and make install-tools TOOLS=ruff before it`);
+    assert.ok(ruff !== -1 && ruff < lint, `job ${job.name} runs lint-python without make install-tools TOOLS="python ruff" before it`);
+    assert.ok(!job.text.includes('actions/setup-python'), `job ${job.name} sets up a Python of PATH for ruff`);
   }
-  assert.match(read('Makefile'), /^install: TOOLS := npm go$/m, 'make install installs every declared tool, also those whose runtime the job lacks');
+  assert.match(read('Makefile'), /^install: TOOLS := npm go python$/m, 'make install installs npm, Go and the pinned Python, which every Python check runs');
 });
 
-test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up Python for ruff', () => {
+test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up no Python of PATH', () => {
   const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.equal(recipe[0], 'rustup toolchain install --no-self-update');
   assert.match(recipe[1], /install-tools\.mjs $/);
-  assert.match(read('.github/workflows/dependency-review.yml'), /uses: actions\/setup-python@\S+.*\n\s+with:\n\s+python-version-file: \.python-version\n/);
+  assert.ok(!read('.github/workflows/dependency-review.yml').includes('actions/setup-python'), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 
-test('the unit tests of the Python package run with the python3 of the job, which the matrix of the job python sets', () => {
-  assert.match(read('Makefile'), /^PYTHON \?= python3$/m);
+test('the unit tests of the Python package run with the pinned interpreter of var/tools', () => {
+  assert.match(read('Makefile'), /^PYTHON := \$\(CURDIR\)\/var\/tools\/bin\/python3$/m);
 });

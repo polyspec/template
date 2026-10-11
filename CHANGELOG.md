@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.5-5: every Python check runs the pinned interpreter `var/tools/bin/python3` of the `pythonBuild` release in `config/toolchain.json`, not the `python3.14` of `PATH`: `scripts/python-toolchain.mjs`, the conformance drivers, `scripts/check-compiler-interface.mjs` and the `PYTHON` of the Makefile. `make install` installs npm, Go and that Python, `make install-tools TOOLS="python ruff"` installs ruff on it, and no workflow sets up a Python with `actions/setup-python`. Before this change, `make install-tools TOOLS=ruff` failed on a checkout without `var/tools/bin/python3`.
+
 ## 0.0.6
 
 - T22.5-4: release 0.0.6. Every manifest of `config/release.json` declares 0.0.6, and the locks, the compiled artifacts, the dependency review and the consumer projects of the release assets record it.

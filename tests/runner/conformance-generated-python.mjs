@@ -14,6 +14,7 @@ import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { runBounded, seconds, stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mjs';
+import { pythonCommand } from '../../scripts/python-toolchain.mjs';
 
 // The time limit of one Python process of a case.
 const PROCESS_TIMEOUT_MS = 30_000;
@@ -87,7 +88,8 @@ const progress = stepProgress();
 
 // Runs one Python process of a case; a process that outlives its deadline fails the case.
 async function python(args, step) {
-  const result = await runBounded('python3', args, {
+  const interpreter = pythonCommand();
+  const result = await runBounded(interpreter, args, {
     cwd: root,
     timeoutMs: PROCESS_TIMEOUT_MS,
     env: { ...process.env, PYTHONPATH: join(root, 'packages', 'template-python', 'src') },
@@ -115,7 +117,7 @@ try {
         testCase.hasData ? join(testCase.dir, 'data.json') : '',
         testCase.hasDefine ? join(testCase.dir, 'define.json') : '',
         testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], 'the case process');
-      if (result.status !== 0) throw new Error(result.stderr || `python3 exited with ${result.status}`);
+      if (result.status !== 0) throw new Error(result.stderr || `${interpreter} exited with ${result.status}`);
       let actual;
       try { actual = JSON.parse(result.stdout); }
       catch { throw new Error(`invalid Python result: ${result.stdout}`); }
