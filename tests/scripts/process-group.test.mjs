@@ -31,3 +31,29 @@ test('a stopped process group writes nothing into a directory that is then remov
   }
   assert.deepEqual(failures, [], 'a process of the stopped group still wrote into the directory');
 });
+
+// A member that a signal sent to the group missed, because it was created while the group was signaled, keeps running
+// after the leader has exited. Through the kill seam the group answers the probe until the member ends, and a second
+// SIGKILL to the group ends it. The stop must send that second signal; the fake member ends after 200 probes so that a
+// stop without the second signal fails with an assertion, not a hang.
+test('stopProcessGroup signals the group again while a member is still running', { timeout: 30_000 }, async () => {
+  const pgid = 4242;
+  const sent = [];
+  let probes = 0;
+  let alive = true;
+  const kill = (pid, signal) => {
+    assert.equal(pid, -pgid, 'the signal goes to the process group');
+    if (signal === 0) {
+      probes += 1;
+      if (probes >= 200) alive = false;
+      if (!alive) throw Object.assign(new Error('no process of the group'), { code: 'ESRCH' });
+      return true;
+    }
+    sent.push(signal);
+    if (sent.length >= 2) alive = false;
+    return true;
+  };
+  const child = { pid: pgid, exitCode: 0, signalCode: null };
+  await stopProcessGroup(child, 'SIGKILL', kill);
+  assert.deepEqual(sent, ['SIGKILL', 'SIGKILL'], 'the group of a member that is still running received no second SIGKILL');
+});

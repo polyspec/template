@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cfd2bb1957cbe32fa86b8d7139959a6938692638e3ccad96c0c214a27faf4a98 -->
+<!-- source-sha256: 3b59217f539db83f7c743d1f24f16306146d2c50f730687c62ed22604ac5e3b8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T22.5-11: `scripts/process-group.mjs`의 `stopProcessGroup`은 그룹이 응답하는 동안 probe마다 signal을 보내며, 한 번만 보내지 않습니다. 첫 SIGKILL이 전달되는 동안 fork된 멤버는 그 signal을 받지 못하고 살아남았고, 그러면 stop은 그룹이 끝나기를 영원히 기다렸습니다. 그 결과 `a stopped process group writes nothing into a directory that is then removed`가 300 s 뒤 timeout으로 실패했습니다. 프로세스 그룹 id는 구성원이 있는 동안 재사용되지 않으므로, 반복된 signal은 stop의 그룹에만 닿습니다. 남는 구간은 성공한 probe와 다음 signal 사이입니다. 1초를 넘게 기다리면 stop은 `ps`가 보이는 그룹의 구성원을 나열합니다.
 - T22.5-10: `tests/scripts/process-group-callers.test.mjs`와 `tests/scripts/process-group-exit-window.test.mjs`의 leader는 spawn한 멤버의 pid를 계속 실행하기 전에 pid 파일에 씁니다. 멤버가 실행을 시작한 뒤 스스로 pid를 쓰는 방식을 대체합니다. 두 테스트에서 멤버는 `MEMBER_START_MS`(5 s) 뒤에 실행을 시작하므로, 이전 방식은 assertion 전에 ENOENT로 실패했습니다. deadline 이후 case의 leader는 `/bin/sh`이며, pid를 fork 시점에 씁니다. 그래서 deadline 전에 파일이 존재합니다. 이 case의 deadline은 10 s로, leader가 파일이 생기기 전까지 필요한 시간의 약 100배입니다. wait나 timer는 추가하지 않습니다.
 
 ## 0.0.6
