@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 966c75cecbb26d4e28d5aac8ed9f69cfafdf5745b1240bacefdf1657a2aea7e2 -->
+<!-- source-sha256: 39d10ae064c3376c0c7d8445e105c76aeb30955782c6763150bb61fa47984b28 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T22.5-7: EPERM은 프로세스 그룹 probe에서 그 그룹이 종료되었거나 다른 사용자가 소유한다는 뜻이 아니라, 구성원이 종료 중이라는 뜻입니다. `scripts/process-group.mjs`의 `signalGroup`은 EPERM에 `exiting`을 반환하고 더 이상 signal을 보내지 않습니다. `stopProcessGroup`은 ESRCH까지 기다리며, EPERM이 10 s를 넘게 지속되면 pgid, errno, 경과 시간을 담아 거부합니다. 이 변경 전에는 첫 EPERM에서 대기가 끝나서 구성원이 여전히 `kill(pid, 0)`에 응답하는 동안 호출자가 멈췄고, 부하가 큰 기기에서 `process-group-callers`가 실패했습니다. `tests/runner/bounded.mjs`와 VS Code 통합 step은 `signalGroup`으로 signal을 보냅니다. kit의 `run-tests` 시간 초과 signal은 vendored kit에 남습니다.
 - T22.5-5-1: 드라이버 테스트는 `tests/runner/drivers.mjs`가 import하는 모든 모듈, `scripts/python-toolchain.mjs`를 포함하여 `tests/scripts/driver-fixture.mjs`의 한 목록에서 복사합니다. `make test-scripts`가 다시 통과합니다.
 
 ## 0.0.6

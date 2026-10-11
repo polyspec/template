@@ -3,7 +3,7 @@
 // elapsed time, and is judged by its exit code or by the result of its suite.
 import { spawn } from 'node:child_process';
 
-import { stopProcessGroup } from '../../../../scripts/process-group.mjs';
+import { signalGroup, stopProcessGroup } from '../../../../scripts/process-group.mjs';
 
 // VS Code 1.138 sometimes takes minutes to exit after the suite has ended and printed its result. The result of a
 // launch is the result of its suite, so VS Code gets this long to exit after the suite line before it is killed.
@@ -25,7 +25,7 @@ export function runStep(step, command, args, { env, output, settle = () => undef
     let settled;
     let grace;
     const heartbeat = setInterval(() => log(`[integration] … ${step} still running (${seconds(Date.now() - started)})`), heartbeatMs);
-    const kill = () => { try { process.kill(-child.pid, 'SIGKILL'); } catch { /* the group has ended */ } };
+    const kill = () => { signalGroup(child.pid, 'SIGKILL'); };
     const read = (data, stream) => {
       output(data, stream);
       if (settled !== undefined) return;

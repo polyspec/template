@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T22.5-7: EPERM from a process group probe means a member is in exit, not that the group ended or that another user owns its ID. `signalGroup` in `scripts/process-group.mjs` returns `exiting` for EPERM and sends no further signal; `stopProcessGroup` waits until ESRCH, and rejects with the pgid, errno and elapsed time when EPERM persists past 10 s. Before this change the wait ended at the first EPERM, so the callers stopped while a member still answered `kill(pid, 0)`, which made `process-group-callers` fail on a loaded machine. `tests/runner/bounded.mjs` and the VS Code integration step signal through `signalGroup`; the `run-tests` timeout signal remains in the vendored kit.
 - T22.5-5-1: the driver tests copy every module that `tests/runner/drivers.mjs` imports, including `scripts/python-toolchain.mjs`, from one list in `tests/scripts/driver-fixture.mjs`; `make test-scripts` passes again.
 
 ## 0.0.6
