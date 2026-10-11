@@ -3,17 +3,17 @@
 
 [한국어](README.ko.md)
 
-Python implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. Python 3.11 or later is required and no external package is needed.
+Python implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. Python 3.14 is required and no external package is needed.
 
 ## Install
 
-The package installs from a tag of this repository. Replace `vX.Y.Z` with the first release tag that contains `packages/template-python`:
+The package installs from its wheel in the assets of a GitHub release. Replace `vX.Y.Z` with the release tag, and download `polyspec_template-X.Y.Z-py3-none-any.whl` from `https://github.com/polyspec/template/releases/download/vX.Y.Z/`:
 
 ```sh
-pip install "polyspec-template @ git+https://github.com/polyspec/template@vX.Y.Z#subdirectory=packages/template-python"
+pip install ./polyspec_template-X.Y.Z-py3-none-any.whl
 ```
 
-No release tag contains this package yet. From a checkout of this repository, install it with `pip install ./packages/template-python`.
+The wheel requires Python 3.14 and no other package. From a checkout of this repository, install the package with `pip install ./packages/template-python`.
 
 ## Render
 

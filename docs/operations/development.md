@@ -13,7 +13,7 @@
 | Rust | 1.98.1 with rustfmt and clippy | `rust-toolchain.toml`; installed with rustup, `~/.cargo/bin` is added to `PATH` by the Makefile |
 | PHP | 8.2 or 8.5 | `config/toolchain.json`, the minor version; the patch of each run is recorded in the report of each CI job |
 | Composer | 2.10.3 | `config/toolchain.json` |
-| Python | 3.14 | `.python-version`, the minor version; the checks that run Python start `python3.14` (`scripts/python-toolchain.mjs`) and fail with the command and the fix when it is missing; the CI job `python` also runs 3.11, the floor of `requires-python` |
+| Python | 3.14 | `.python-version`, the minor version; the checks that run Python start `python3.14` (`scripts/python-toolchain.mjs`) and fail with the command and the fix when it is missing ; the CI job `python` runs that minor only, which `requires-python` states |
 | ruff | 0.16.10 | the `ruff==` pin of the `dev` extra of `packages/template-python/pyproject.toml` (`ruff` of `config/toolchain.json`); `make install-tools` installs it into `var/tools/python`, and `[tool.ruff]` of that file declares the rules and the target version |
 | make | not pinned | GNU Make 3.81 or later |
 

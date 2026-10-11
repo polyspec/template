@@ -421,17 +421,15 @@ test('every action of a workflow is pinned by its commit and every job runs on u
   }
 });
 
-// The python job of ci.yml sets up the Python minors of its matrix, which holds 3.11 (the floor of requires-python) and the
-// minor of .python-version (T22.4-12). The job cannot read .python-version through a matrix, so the test fails when the
-// matrix omits that minor.
-test('the python job of ci.yml sets up 3.11 and the minor of .python-version (T22.4-12)', () => {
+// The python job of ci.yml runs one interpreter, the minor of .python-version (T22.4-12): requires-python is that minor
+// (python-requires.test.mjs), so the job has no matrix and no floor job on another interpreter.
+test('the python job of ci.yml sets up the interpreter of .python-version and has no matrix (T22.4-12)', () => {
   const minor = read('.python-version').trim();
   assert.match(minor, /^3\.\d+$/, `.python-version ${minor} is not a Python minor release`);
-  const matrix = read('.github/workflows/ci.yml').match(/^  python:[\s\S]*?matrix:\s*\n\s*python: \[([^\]]*)\]/m);
-  assert.ok(matrix, 'ci.yml has no python job with a python matrix; the check verified nothing');
-  const versions = matrix[1].split(',').map(version => version.trim().replace(/['"]/g, ''));
-  assert.ok(versions.includes('3.11'), `ci.yml python matrix ${versions.join(', ')} lacks 3.11, the floor of requires-python`);
-  assert.ok(versions.includes(minor), `ci.yml python matrix ${versions.join(', ')} lacks ${minor}, the minor of .python-version`);
+  const job = read('.github/workflows/ci.yml').match(/^  python:\n([\s\S]*?)(?=^  [a-z-]+:\n)/m)?.[1];
+  assert.ok(job, 'ci.yml has no python job; the check verified nothing');
+  assert.ok(!/^\s+matrix:/m.test(job), 'the python job of ci.yml has a matrix; it runs the minor of .python-version only');
+  assert.ok(job.includes('python-version-file: .python-version'), 'the python job sets up Python from .python-version');
 });
 
 // The python job of ci.yml runs the unit tests, the conformance suite and the generated conformance suite of Python, and
