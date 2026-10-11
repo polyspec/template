@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 6c8327789ab79559e58b1e6f80e1cd5e9c5b93ed86051654f081b7a4f6edd6d2 -->
+<!-- source-sha256: 510aabe05989d0b13c87aff317cfd2bdb9a9694ebb6b46584dd21186c0a7b7d3 -->
 # 발행
 
 [English](/operations/publication).
@@ -11,7 +11,7 @@
 Go module:
 
 ```
-require github.com/polyspec/template/packages/template-go v0.0.5
+require github.com/polyspec/template/packages/template-go v0.0.6
 replace github.com/polyspec/template/packages/template-go => ../template/packages/template-go
 ```
 
@@ -45,7 +45,7 @@ pip install ./polyspec_template-X.Y.Z-py3-none-any.whl
 
 ## 버전
 
-모든 패키지는 버전 `0.0.5`을 선언한다. 버전은 모든 패키지, `make release-consumer-lock TAG=vX.Y.Z`가 쓰는 lock과 함께 `tests/fixtures/release-consumer`의 consumer project, `CHANGELOG.md`에서 함께 바뀌며, 릴리스된 버전 위의 section `## Unreleased`가 마지막 릴리스 뒤의 모든 변경 항목을 담는다.
+모든 패키지는 버전 `0.0.6`을 선언한다. 버전은 모든 패키지, `make release-consumer-lock TAG=vX.Y.Z`가 쓰는 lock과 함께 `tests/fixtures/release-consumer`의 consumer project, `CHANGELOG.md`에서 함께 바뀌며, 릴리스된 버전 위의 section `## Unreleased`가 마지막 릴리스 뒤의 모든 변경 항목을 담는다.
 
 ## Tag 릴리스
 
