@@ -3,8 +3,7 @@
 // use, and `runStep` of the VS Code integration test, whose caller removes the profile directories next. A command
 // that starts a background process and exits, or that is killed at its deadline, left that process running.
 import assert from 'node:assert/strict';
-import { readFileSync, rmSync } from 'node:fs';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -28,18 +27,30 @@ const alive = (pid) => {
 // reach its deadline before the member runs.
 const MEMBER_START_MS = 5_000;
 
+// The code of the background process, which runs on after MEMBER_START_MS.
+const background = `setTimeout(() => setInterval(() => {}, 1000), ${MEMBER_START_MS})`;
+
 // A node command that starts a background process of its group. The leader writes the process ID of that member into
 // `file` before it continues, so the file exists whatever the start of the member, then waits `leaderMs` and exits, or
 // runs on without an end.
 function command(file, leaderMs) {
-  const background = `setTimeout(() => setInterval(() => {}, 1000), ${MEMBER_START_MS})`;
   const leader = leaderMs === undefined ? 'setInterval(() => {}, 1000)' : `setTimeout(() => process.exit(0), ${leaderMs})`;
   return ['-e', `const member = require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(background)}], { stdio: 'ignore' }); require('node:fs').writeFileSync(${JSON.stringify(file)}, String(member.pid)); ${leader}`];
 }
 
+// The shell leader of the case after its deadline: the shell forks the member and writes its pid at fork time, then
+// execs sleep, so the leader runs until the deadline. Arguments: the node executable, the background code and the pid
+// file. The deadline of that case is 10 s, about 100 times the time the leader needs before the file exists (up to
+// 98.5 ms under load 40). It protects that the member exists before the deadline fires, so the test can read its pid.
+const SHELL_LEADER = '"$0" -e "$1" & echo $! > "$2"; exec sleep 600';
+const DEADLINE_MS = 10_000;
+function deadlineCommand(file) {
+  return ['-c', SHELL_LEADER, process.execPath, background, file];
+}
+
 for (const [name, start] of [
   ['runBounded after the command exits', file => runBounded(process.execPath, command(file, 300), { cwd: tmpdir(), timeoutMs: 60_000 })],
-  ['runBounded after the deadline', file => runBounded(process.execPath, command(file), { cwd: tmpdir(), timeoutMs: 500 })],
+  ['runBounded after the deadline', file => runBounded('/bin/sh', deadlineCommand(file), { cwd: tmpdir(), timeoutMs: DEADLINE_MS })],
   ['runStep of the generated runners', file => runStep(process.execPath, command(file, 300), { cwd: tmpdir() })],
   ['runStep of the VS Code integration test', file => runIntegrationStep('probe', process.execPath, command(file, 300), { env: process.env, output: () => {}, log: () => {} })],
 ]) {
