@@ -8,6 +8,7 @@
 ## 0.0.6
 
 - T22.5-4: release 0.0.6. Every manifest of `config/release.json` declares 0.0.6, and the locks, the compiled artifacts, the dependency review and the consumer projects of the release assets record it.
+- T22.5-3: the Python package is released as its wheel `polyspec_template-0.0.6-py3-none-any.whl` (PEP 427), built with the build backend of `buildBackend` in `config/release.json` (`setuptools==84.0.0`, sha256 checked) and installed by `consumers.wheel` with the import `polyspec.template`. Before this change, `make release-assets TAG=v0.0.6` failed with `config/release.json: proof.gitTag.packages/template-python/pyproject.toml.kind is "python", the allowed values are rust`; after it, the assets hold the wheel and `make release-consumer TAG=v0.0.6` installs and imports it. The package declares no dependency, so the wheel has no Requires-Dist. `requires-python` is `>=3.14`, the minor of `.python-version`; the CI job `python` runs that minor only, and the ruff pin is in `config/toolchain.json`.
 - T22.5-2: the shared tools are the vendored copy of `polyspec/kit` v0.0.21. `config/toolchain.json` declares `pythonBuild` (Python 3.14.8, release 20261009), `pythonBackend` (`setuptools==84.0.0`) and `ruff` (0.16.10) with their sha256 values, and `config/dependency-policy.json` names its `npmLocks`, which the kit schema requires.
 ## 0.0.5
 
