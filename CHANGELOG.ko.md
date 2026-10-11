@@ -1,17 +1,17 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cedab6700c9596783719ba3207e8e5be4f2176f13a07c3c89eba483e369f3f8b -->
+<!-- source-sha256: 7105f2627d051fe9901e54ada3d35f8e62a7d2df16a6658d91ad28513bf240a3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+## 0.0.6
+
+- T22.5-9: tag v0.0.6은 T22.5-5-1, T22.5-7, T22.5-8을 담은 commit에 만들므로, 그 항목을 `## Unreleased`에서 이 section으로 옮깁니다.
 - T22.5-8: `tests/scripts`의 시간 제한은 그 테스트의 예상 시간의 약 100배이며, 20배 미만인 제한은 없습니다. template-ts reader 테스트는 runner 기본값 30 s를 받았고, 부하에서 측정한 28.6 s에서 37.9 s가 그 제한에 가까웠습니다. 제한은 단독 실행 세 번의 평균의 100배인 3,300 s입니다. 측정 시간의 20배 미만인 나머지 제한은 고칩니다: `atomic-publish` 690 s(측정 6.9 s), `browser-port` 820 s(8.2 s), `browser-server` 980 s(9.8 s), `package-installs` 4,980 s(49.8 s), `generated-conformance`의 Rust runner 6,230 s(62.3 s), `cargo-target`의 `make test-rust` 9,180 s(91.8 s), `clean-release` 260 s와 530 s(2.6 s와 5.3 s), `conformance-progress` 430 s(4.2 s), `toolchain-files` 240 s(2.4 s), `long-steps` 210 s, 370 s, 830 s(2.1 s, 3.7 s, 8.3 s), build 패키지의 reader와 unchanged 테스트 `template-language`(1,670 s와 650 s), `template-lsp`(600 s와 340 s), `template-codemirror`(1,110 s와 1,110 s), `template-ts`의 unchanged(1,160 s), `process-group-callers`의 명령 deadline 60 s(0.6 s)입니다. 테스트가 발동하기를 기대하는 deadline은 통과 제한이 아니므로 값을 유지합니다.
 - T22.5-7: EPERM은 프로세스 그룹 probe에서 그 그룹이 종료되었거나 다른 사용자가 소유한다는 뜻이 아니라, 구성원이 종료 중이라는 뜻입니다. `scripts/process-group.mjs`의 `signalGroup`은 EPERM에 `exiting`을 반환하고 더 이상 signal을 보내지 않습니다. `stopProcessGroup`은 ESRCH까지 기다리며, EPERM이 10 s를 넘게 지속되면 pgid, errno, 경과 시간을 담아 거부합니다. 이 변경 전에는 첫 EPERM에서 대기가 끝나서 구성원이 여전히 `kill(pid, 0)`에 응답하는 동안 호출자가 멈췄고, 부하가 큰 기기에서 `process-group-callers`가 실패했습니다. `tests/runner/bounded.mjs`와 VS Code 통합 step은 `signalGroup`으로 signal을 보냅니다. kit의 `run-tests` 시간 초과 signal은 vendored kit에 남습니다.
 - T22.5-5-1: 드라이버 테스트는 `tests/runner/drivers.mjs`가 import하는 모든 모듈, `scripts/python-toolchain.mjs`를 포함하여 `tests/scripts/driver-fixture.mjs`의 한 목록에서 복사합니다. `make test-scripts`가 다시 통과합니다.
-
-## 0.0.6
-
 - T22.5-6: 0.0.6 기록을 바로잡습니다. ruff 0.17.0 선언은 T22.5-4 아래에 기록하고, T22.5-5 항목은 `## Unreleased`에서 이 section으로 옮깁니다. changelog 검사가 첫 section으로 요구하므로 `## Unreleased`는 위에 빈 채로 남습니다. `docs/operations/development.md`와 그 한국어 파일은 ruff를 0.16.10과 `dev` extra 대신 `config/toolchain.json`에 선언된 0.17.0으로 적고, 설치는 `var/tools/bin/python3` 위의 `make install-tools TOOLS="python ruff"`, 규칙과 target은 `packages/template-python/pyproject.toml`의 `[tool.ruff]`라고 적습니다. 이 파일에는 `dev` extra가 없습니다.
 - T22.5-5: 모든 Python 검사는 `PATH`의 `python3.14`가 아니라 `config/toolchain.json`의 `pythonBuild` release인 pinned interpreter `var/tools/bin/python3`를 실행합니다. 대상은 `scripts/python-toolchain.mjs`, conformance driver, `scripts/check-compiler-interface.mjs`, Makefile의 `PYTHON`입니다. `make install`은 npm, Go와 그 Python을 설치하고, `make install-tools TOOLS="python ruff"`는 그 Python에 ruff를 설치하며, 어떤 workflow도 `actions/setup-python`으로 Python을 설정하지 않습니다. 이전에는 `make install-tools TOOLS=ruff`가 `var/tools/bin/python3`가 없는 checkout에서 실패했습니다.
 - T22.5-4: 0.0.6을 릴리스합니다. `config/release.json`의 모든 manifest가 0.0.6을 선언하고, lock, 컴파일 산출물, 의존성 review, 릴리스 asset의 consumer project가 이를 기록합니다.
