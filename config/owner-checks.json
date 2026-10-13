@@ -289,7 +289,6 @@
     },
     {
       "paths": [
-        "scripts/install-vscode.mjs",
         "packages/template-vscode/tests/integration/run.mjs"
       ],
       "targets": [
@@ -478,7 +477,7 @@
     },
     {
       "paths": [
-        "scripts/check-editor-boundaries.mjs",
+        "config/editor-boundaries.json",
         "scripts/editor-fixtures.mjs"
       ],
       "targets": [
@@ -928,7 +927,7 @@
     {
       "check": "make editor-boundary-check",
       "paths": [
-        "scripts/check-editor-boundaries.mjs",
+        "config/editor-boundaries.json",
         "scripts/editor-fixtures.mjs"
       ]
     },
@@ -1181,8 +1180,7 @@
       "check": "make test-vscode-integration",
       "paths": [
         "packages/template-vscode/**",
-        "packages/template-lsp/src/**",
-        "scripts/install-vscode.mjs"
+        "packages/template-lsp/src/**"
       ]
     },
     {

@@ -91,7 +91,7 @@
       "name": "editor-layer-boundaries",
       "rules": ["EDT-1", "EDT-2", "EDT-3"],
       "verification": "make editor-boundary-check",
-      "files": ["scripts/check-editor-boundaries.mjs"]
+      "files": ["config/editor-boundaries.json"]
     },
     {
       "name": "editor-language-service",

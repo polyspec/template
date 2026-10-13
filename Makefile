@@ -71,7 +71,7 @@ LANGUAGE_DIR := packages/template-language
 LSP_DIR      := packages/template-lsp
 VSCODE_DIR := packages/template-vscode
 CODEMIRROR_DIR := packages/template-codemirror
-# The VS Code build of the integration test, installed by make install-vscode (scripts/install-vscode.mjs) after make
+# The VS Code build of the integration test, installed by make install-vscode (the VS Code installer of kit) after make
 # install and only read by the test, which never downloads (T20.1-4). Only a run of the test needs it (T20.1-6).
 VSCODE_TOOLS := $(CURDIR)/var/tools/vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
@@ -189,7 +189,7 @@ install: install-tools rust-toolchain cargo-downloads-fetch ## After make instal
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
 install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
-	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
+	$(ONLINE) node $(KIT)/install-vscode.$(KIT_EXT) $(VSCODE_DIR) $(VSCODE_TOOLS)
 
 # The release steps and the consumer locks are the targets of the kit.mk of @polyspec/kit (config/release.json). The archives are built
 # from the built npm packages, so the targets that build or lock them run those builds first.
@@ -401,8 +401,9 @@ test-ext-unit: ext build-ext-php
 rules-check: ## Check case.json rule identifiers against the specification
 	node scripts/check-rules.mjs
 
+# The editor boundary checker of kit reads the boundaries of config/editor-boundaries.json (EDT-2, EDT-3, T23.4).
 editor-boundary-check: ## Check that adapters do not use the parser and the language service uses no editor, Node.js or DOM module
-	node scripts/check-editor-boundaries.mjs
+	node $(KIT)/check-editor-boundaries.$(KIT_EXT)
 
 # The dependency gate reads only the files of the checkout: the manifests, the locks, config/dependency-policy.json and
 # the review record config/dependency-review.json, so one tree gives one result at any time. make dependency-review asks
