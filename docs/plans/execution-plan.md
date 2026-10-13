@@ -153,6 +153,10 @@ Dependencies: none. Every change reaches `main` through the merge queue with the
 
 Dependencies: T23.4 waits for the kit item T128-K, which waits for kit K71 (kit as a TS package). The orm plan `docs/plans/editor-stack.md` makes syntax analysis and formatting standards of every runtime and found template short of it: `template-language` restates lexical tables beside the parser, the VS Code extension carries a hand-written TextMate grammar for tags, `format()` exists only in TS, and a tool without a host has no declared root to resolve include paths against. Exit criteria: the parser is the only grammar, every runtime analyzes and formats with the conformance and parity runners comparing both, the VS Code extension holds no tag grammar, the shared editor tools come from kit, and the host-less tools resolve against `template-root.json`.
 
+## Wave 24 — The shared tools as the package @polyspec/kit
+
+Dependencies: T24.1 waits for the release of `@polyspec/kit` that turns kit into an npm package (kit K71, K79); T24.2 to T24.7 and T23.4 follow T24.1 on the same branch, and the second kit release (kit K127: the tools that mise installs from a committed `mise.toml` and `mise.lock`) follows on that branch before it merges. template held kit as vendored copies (`scripts/kit/`, `tests/kit/`, `kit.json`, `.kit/kit.lock.json`); kit is now the package `@polyspec/kit`, which a repository installs with `make install-tools TOOLS=npm` and `make install-packages` and whose `kit.copies` files it holds as copies. The `.npmrc` keys `install-links` and `bin-links` blocked the links of npm, which kit's toolchain check refuses, and forced the `file:` dependencies, the reinstall of each built package and the tool paths of the recipes; the toolchain floors were below the pins of kit; the showcase Go adapter resolved the Go package by a `replace`; the Python package held its own ruff configuration; eslint linted the TypeScript; and template kept a feature registry of its own. Exit criteria: `make kit-check`, `make toolchain-check`, `make layout-check`, `make documents-check` and `make owner-validate` pass or are registered with their cause, and every other check that fails after the switch is a task of this wave.
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -179,6 +183,7 @@ Dependencies: T23.4 waits for the kit item T128-K, which waits for kit K71 (kit 
 | W21 | none | T21.1 → T21.2 → T21.3 → T21.4 → T21.4-1 → T21.4-2 |
 | W22 | none | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 → T22.2 → T22.2-1 → T22.2-2 → T22.2-3 → T22.3 → T22.3-1 → T22.3-2 → T22.3-3 → T22.3-4 → T22.3-5 → T22.3-6 |
 | W23 | T23.1, T23.3, T23.5 | T23.2 after T23.1; T23.4 after the kit item T128-K |
+| W24 | none | T24.1 → T24.2 → T24.3 → T24.4 → T24.5 → T23.4 → T24.6 → T24.7 |
 
 ## Definition of done
 

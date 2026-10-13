@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: b2e295e439d3fe1186805498bb495c63de8d6409bff82c18c17b3f1b6958d8d5 -->
+<!-- source-sha256: 64571435685e19852896779fb375a1f003460611c85451e57273202f34ccb602 -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -442,3 +442,15 @@
 | T23.3 | VS Code extension에 grammar를 두지 않는다. tmLanguage는 HTML host(`text.html.basic`과 embedded CSS, JS)만 남긴다; tag injection rule을 지우고 tag는 extension이 이미 대응시킨 semantic token으로 색칠한다; `configurationDefaults`가 semantic highlighting을 켠다; grammar test(`vscode-tmgrammar-test`, attribute 값 안 tag의 `captureSyntaxTokens`)를 semantic token 단언으로 다시 쓴다; `docs/operations/editor-tools.md`(+ko)를 고친다. 근거: regex grammar는 parser 문맥이 없어 `analyze`와 어긋난다. | vscode integration test가 tag의 semantic token을 attribute 값 안에서도 단언한다; tmLanguage에 tag rule이 남지 않는다 | [ ] |
 | T23.4 | kit의 editor tool을 받아들인다. editor boundary checker와 VS Code installer를 kit에서 받고(kit 항목 T128-K, kit K71이 kit을 TS package로 만든 뒤), `scripts/check-editor-boundaries.mjs`와 `scripts/install-vscode.mjs`를 지우며, template의 rule(`@polyspec/template`, `src/cli`)을 config에 선언한다. 근거: 두 repository가 필요한 tool은 copy가 아니라 kit에 둔다. | boundary check와 vscode integration이 kit tool로 돈다; 두 script가 없다 | [ ] |
 | T23.5 | host 없는 tool은 선언된 root marker로 include 경로를 해석한다. `template-root.json`(`{"schema": 1}`)은 가장 가까운 조상으로 root를 표시하며, root를 지정하는 호출자가 없는 tool만 쓴다: language service, LSP, 그리고 option을 통한 CodeMirror host. compiler는 `root` 인자를, filesystem loader는 자기 root를 유지하고, map과 artifact loader는 바뀌지 않으며, conformance CLI는 `--root`(CNF-2)를 유지한다. 잘못된 marker(잘못된 JSON, 다른 schema, 모르는 key)는 marker URI의 diagnostic이다. marker가 없으면 모든 include 경로와 path token을 가진 모든 block 경로가 "no template root declared (template-root.json)" diagnostic을 받는다. language service는 경로가 root 아래 regular file이 아닌 include와 path token을 가진 block을 진단한다; id만 가진 block과 `define`이 공급하는 target은 runtime(RT-24)으로 남는다. 경로는 RT-8의 정규화를 따른다; file identity로 중복을 찾는 것과 symlink 거부는 고친 RT-10 rule이며 모든 runtime에 conformance case가 있다. language service는 주입된 host로 해석하므로 node 없이 남는다(EDT-3). EDT rule은 editor가 marker로 해석하며 host의 loader root는 검사하지 않는다고 적는다. | marker vector가 받아들이고 거부한다; language service가 없는 include와 없는 marker를 보고한다; RT-10 conformance case가 모든 runtime에서 통과한다 | [ ] |
+
+## Wave 24 — package @polyspec/kit인 공유 tool
+
+| ID | 작업 | 검증 | 완료 |
+| --- | --- | --- | --- |
+| T24.1 | 공유 tool을 npm package `@polyspec/kit`으로 설치한다. Makefile은 vendored `scripts/kit/kit.mk` 대신 `scripts/kit/kit-bootstrap.mk`를 include한다. `kit.copies`의 copy는 `make kit-sync`가 쓴다. vendored `scripts/kit/*`, `tests/kit/*`, `.kit/kit.lock.json`, `kit.json`과 그것을 가리키는 모든 참조를 지운다. recipe는 kit의 tool을 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. pre-push hook은 `make push-gate-hook`을 호출한다. CI는 `make install-tools TOOLS=npm`과 `make install-packages`로 설치한다. `@polyspec/kit`은 release asset과 integrity로 고정한 devDependency다. | `make kit-check` | [ ] |
+| T24.2 | npm이 link를 쓰게 한다. `.npmrc`의 key `install-links`와 `bin-links`, 그리고 그것이 강요한 우회를 지운다: root `package.json`은 JavaScript package를 override가 붙은 `file:` 의존성 대신 npm workspace로 선언하고, `scripts/build-package.mjs`는 build한 package를 다시 설치하지 않으며, recipe와 script는 tool을 `node_modules/.bin`에서 시작하고, `tests/scripts/no-symlinks.test.mjs`를 지운다. | `make toolchain-check` | [ ] |
+| T24.3 | toolchain floor를 kit의 pin으로 올린다: `.node-version` 26.11.1과 `engines.node` `>=26.11.1`, Composer `require.php` `>=8.5`와 `config.platform.php` `8.5`, `requires-python` `>=3.14`, toolchain 줄 없는 go.mod `go 1.27.2`, Cargo `rust-version` 1.99.0, `rust-toolchain.toml` 1.99.0, `typescript` 7.0.2. | `make toolchain-check` | [ ] |
+| T24.4 | showcase adapter의 Go package를 `go.mod`의 `replace` 대신 `go.work`로 해석한다. | `make layout-check` | [ ] |
+| T24.5 | Python은 kit의 root `ruff.toml`로만 lint한다: `packages/template-python/pyproject.toml`의 `[tool.ruff]`를 지운다. | `make layout-check` | [ ] |
+| T24.6 | TypeScript는 eslint와 typescript-eslint 대신 kit의 oxlint, oxlint-tsgolint, knip 설정으로 lint한다(`make lint-ts`). `eslint.config.mjs`, `make lint-js`, eslint package를 지운다. | `make lint-ts` | [ ] |
+| T24.7 | template의 implementation과 feature unit을 `config/parity.json`(kit parity의 schema)에 선언하고 `make parity-declarations-check`와 `make parity-check`를 실행한다. template의 feature registry를 지운다: `contracts/features.json`, `scripts/features/`, `tests/runner/parity.mjs`와 그 target. | `make parity-declarations-check` | [ ] |

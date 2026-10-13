@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-plan -->
-<!-- source-sha256: 3b782efd9fd16076b14cd8157c568f07345b1b26bd9488ff4b3216bdc4ef28cc -->
+<!-- source-sha256: 849530e61879bfd8cff983df3c78ca9172bb63fdc6ee3ec64b0266e2d940e125 -->
 # 실행 계획
 
 [English](/plans/execution-plan).
@@ -154,6 +154,10 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 의존성: T23.4는 kit 항목 T128-K를 기다리며, T128-K는 kit K71(kit을 TS package로)을 기다린다. orm 계획 `docs/plans/editor-stack.md`는 구문 분석과 formatting을 모든 runtime의 표준으로 정하며, template이 그에 못 미친다는 것을 찾았다: `template-language`는 parser 옆에 lexical table을 다시 적고, VS Code extension은 tag용 수기 TextMate grammar를 가지며, `format()`은 TS에만 있고, host 없는 tool은 include 경로를 해석할 선언된 root가 없다. 종료 조건: parser가 유일한 grammar이고, 모든 runtime이 분석하고 format하며 conformance와 parity runner가 둘을 비교하고, VS Code extension에 tag grammar가 없고, 공유 editor tool은 kit에서 오며, host 없는 tool은 `template-root.json`으로 해석한다.
 
+## Wave 24 — package @polyspec/kit인 공유 tool
+
+의존성: T24.1은 kit을 npm package로 만드는 `@polyspec/kit` release(kit K71, K79)를 기다린다. T24.2부터 T24.7과 T23.4는 같은 branch에서 T24.1 뒤에 오고, 두 번째 kit release(kit K127: commit된 `mise.toml`과 `mise.lock`에서 mise가 설치하는 tool)가 merge 전에 그 branch에 온다. template은 kit을 vendored copy(`scripts/kit/`, `tests/kit/`, `kit.json`, `.kit/kit.lock.json`)로 가졌다. 이제 kit은 package `@polyspec/kit`이며, repository는 `make install-tools TOOLS=npm`과 `make install-packages`로 그것을 설치하고 `kit.copies`의 file을 copy로 가진다. `.npmrc`의 key `install-links`와 `bin-links`는 kit의 toolchain check가 거부하는 npm의 link를 막았고, `file:` 의존성, build한 package의 재설치, recipe의 tool 경로를 강요했다. toolchain floor는 kit의 pin보다 낮았고, showcase Go adapter는 Go package를 `replace`로 해석했으며, Python package는 자기 ruff 설정을 가졌고, eslint가 TypeScript를 lint했으며, template은 자기 feature registry를 가졌다. 종료 조건: `make kit-check`, `make toolchain-check`, `make layout-check`, `make documents-check`, `make owner-validate`가 통과하거나 원인과 함께 등록되고, 전환 뒤 실패하는 다른 모든 check는 이 wave의 task다.
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -180,6 +184,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W21 | 없음 | T21.1 → T21.2 → T21.3 → T21.4 → T21.4-1 → T21.4-2 |
 | W22 | 없음 | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 → T22.2 → T22.2-1 → T22.2-2 → T22.2-3 → T22.3 → T22.3-1 → T22.3-2 → T22.3-3 → T22.3-4 → T22.3-5 → T22.3-6 |
 | W23 | T23.1, T23.3, T23.5 | T23.2는 T23.1 뒤; T23.4는 kit 항목 T128-K 뒤 |
+| W24 | 없음 | T24.1 → T24.2 → T24.3 → T24.4 → T24.5 → T23.4 → T24.6 → T24.7 |
 
 ## 완료 정의
 
