@@ -106,7 +106,7 @@ or one `package` repository entry per zip URL, with the name, version and `dist`
       "name": "polyspec/template",
       "version": "X.Y.Z",
       "type": "library",
-      "require": { "php": "^8.2", "ext-mbstring": "*" },
+      "require": { "php": ">=8.5", "ext-mbstring": "*" },
       "autoload": { "psr-4": { "Polyspec\\Template\\": "src/" } },
       "dist": { "type": "zip", "url": "https://github.com/polyspec/template/releases/download/vX.Y.Z/polyspec-template-X.Y.Z.zip" }
     }

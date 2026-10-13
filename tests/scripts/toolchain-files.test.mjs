@@ -90,12 +90,11 @@ function recipe(command, env = {}, make = 'make') {
   }
 }
 
-test('Node.js is the version of .node-version, which names the major version of the engines of package.json', () => {
+test('Node.js is the version of .node-version, which engines.node of package.json names as its floor', () => {
   const version = read('.node-version').trim();
   const engines = JSON.parse(read('package.json')).engines.node;
-  const major = /^>=(\d+)$/.exec(engines)?.[1];
-  assert.ok(major, `package.json engines.node ${engines} is not >=<major>`);
-  assert.equal(version.split('.')[0], major, `.node-version ${version} differs from the major version of engines.node ${engines}`);
+  // The floor equals the pin of kit, which .node-version declares (T24.3); make toolchain-check checks every manifest.
+  assert.equal(engines, `>=${version}`, `package.json engines.node ${engines} is not >=${version} (.node-version)`);
   const actual = recipe('cd . && node --version');
   assert.equal(actual, `v${version}`, `node of the recipes: expected v${version} (.node-version), actual ${actual}`);
 });

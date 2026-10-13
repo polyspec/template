@@ -2,6 +2,7 @@
 name = "polyspec-template"
 version = "0.0.6"
 edition = "2024"
+rust-version = "1.99.0"
 description = "Template language implementation: lexer, parser, renderer, functions and CLI"
 license = "MIT"
 publish = false

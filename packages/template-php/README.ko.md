@@ -1,10 +1,10 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: eab07827169a77216e949b475604a11fd3a919beda0d44983e023d6321a97fb0 -->
+<!-- source-sha256: a9f4c1ae66d618d9fbfffdd16777725ce0e0132c289706268d3ea0110cf903d1 -->
 # polyspec/template
 
 [English](README.md).
 
-템플릿 언어의 PHP 구현: 렉서, 파서, 렌더러, 내장 함수, 명령줄 인터페이스. `mbstring` 확장을 가진 PHP 8.2 이상이 필요하다.
+템플릿 언어의 PHP 구현: 렉서, 파서, 렌더러, 내장 함수, 명령줄 인터페이스. `mbstring` 확장을 가진 PHP 8.5 이상이 필요하다.
 
 ## 설치
 

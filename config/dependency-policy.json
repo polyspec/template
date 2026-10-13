@@ -3,11 +3,11 @@
   "composerPlatforms": [
     {
       "manifest": "packages/template-php/composer.json",
-      "php": "8.2.0"
+      "php": "8.5"
     },
     {
       "manifest": "packages/template-php-ext/composer.json",
-      "php": "8.2.0"
+      "php": "8.5"
     }
   ],
   "pythonManifests": [
@@ -27,16 +27,6 @@
       "verification": [
         "make test-ts",
         "make docs-verify-idempotent"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
-      "package": "typescript",
-      "reason": "The latest stable release is outside the current lint peer contract and breaks declaration generation.",
-      "removalCondition": "Remove the pin when the lint peer contract accepts the release and make test-ts passes with declaration output enabled.",
-      "verification": [
-        "make test-ts"
       ]
     },
     {

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: c6224d62020919d7a8ed4ad356843c1a194d8dc9b6bffce06562d7a18b9df04f -->
+<!-- source-sha256: 1271a95030d5d7995e75008b7bad2677cccc5d9a51ecec328664f94cf85ac6e5 -->
 # 발행
 
 [English](/operations/publication).
@@ -107,7 +107,7 @@ Composer: 내려받은 zip을 담은 directory인 `artifact` repository,
       "name": "polyspec/template",
       "version": "X.Y.Z",
       "type": "library",
-      "require": { "php": "^8.2", "ext-mbstring": "*" },
+      "require": { "php": ">=8.5", "ext-mbstring": "*" },
       "autoload": { "psr-4": { "Polyspec\\Template\\": "src/" } },
       "dist": { "type": "zip", "url": "https://github.com/polyspec/template/releases/download/vX.Y.Z/polyspec-template-X.Y.Z.zip" }
     }

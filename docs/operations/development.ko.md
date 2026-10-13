@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 13f61b6168af1a461c3bf81ac231206c2b1ff9563e5e0997593c2fc5d93b7137 -->
+<!-- source-sha256: ed07639e22f7ca6a81fdfbd7e85f7566c7b23b6b615c0f226893b1f8d5705566 -->
 # 개발
 
 [English](/operations/development).
@@ -8,11 +8,11 @@
 
 | 도구 | 버전 | 출처 |
 | --- | --- | --- |
-| Node.js | 26.8.1 | `.node-version` |
+| Node.js | 26.11.1 | kit의 pin인 `.node-version`; 모든 `package.json`의 `engines.node`는 `>=26.11.1` |
 | npm | 12.2.0 | `package.json`의 `packageManager`; `make install-tools`가 `var/tools`에 설치 |
-| Go | 1.27.1 | `packages/template-go/go.mod`의 go directive; `make install-tools`가 `var/tools`에 설치 |
-| Rust | rustfmt와 clippy를 포함한 1.98.1 | `rust-toolchain.toml`; rustup으로 설치, Makefile이 `~/.cargo/bin`을 `PATH`에 추가 |
-| PHP | 8.2 또는 8.5 | `config/toolchain.json`의 minor version; 각 실행의 patch는 각 CI job의 report에 기록 |
+| Go | 1.27.2 | 모든 `go.mod`의 go directive가 toolchain 줄 없이 같아야 하는 kit의 pin; `make install-tools`가 `var/tools`에 설치 |
+| Rust | rustfmt와 clippy를 포함한 1.99.0 | 모든 Cargo package의 `rust-version`이 같아야 하는 kit의 pin인 `rust-toolchain.toml`; rustup으로 설치, Makefile이 `~/.cargo/bin`을 `PATH`에 추가 |
+| PHP | 8.5 | kit의 pin인 `config/toolchain.json`의 minor version; 모든 `composer.json`의 `require.php`는 `>=8.5`, `config.platform.php`는 `8.5`; 각 실행의 patch는 각 CI job의 report에 기록 |
 | Composer | 2.10.3 | `config/toolchain.json` |
 | Python | 3.14 | `.python-version`의 minor version; `make install`은 `config/toolchain.json`의 `pythonBuild` 중 그 minor의 Python release를 설치하고, Python을 실행하는 모든 검사는 wrapper `var/tools/bin/python3`(`scripts/python-toolchain.mjs`)를 실행하며, `PATH`의 `python3`는 실행하지 않음; CI job은 자체 Python을 설정하지 않고, CI job `python`은 그 minor만 실행하며 이는 `requires-python`이 명시 |
 | ruff | 0.17.0 | `config/toolchain.json`의 `ruff`(플랫폼별 wheel의 sha256 포함); `make install-tools TOOLS="python ruff"`가 `var/tools/bin/python3` 위에서 `var/tools/python`에 설치하며, `packages/template-python/pyproject.toml`의 `[tool.ruff]`가 규칙과 target version을 선언 |
