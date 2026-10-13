@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: d77c90e9b0c0837ffb6282ab76134136619177509c28470ef0e1de9314b831cc -->
+<!-- source-sha256: e5afa2ef1226eee9b4f0a3c76a3c1acabf8a010fc29f86bbac68536a9d7de847 -->
 # 적합성
 
 [English](/spec/conformance).
@@ -73,7 +73,7 @@
 | `--list` | 실행하지 않고 케이스 id와 건수를 출력한다. |
 | `--update ast\|html\|error` | 지정한 종류의 기대 파일을 `ts` 구현의 결과로 쓴다. `ts`가 선택된 구현에 포함되어야 한다. |
 
-**CNF-11** `tests/runner/parity.mjs`는 선택된 모든 구현을 모든 케이스에 실행하고 구현들의 출력을 서로 비교한다. 기대 파일을 읽지 않는다. 출력이 다른 케이스를 보고하고 하나라도 다르면 상태 1로 종료한다.
+**CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스와 `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다.
 
 ## 표현식 픽스처
 

@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The conformance cases of tests/cases and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools.",
+  "implementations": [
+    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "roots": ["packages/template-ts"], "tests": ["packages/template-ts/tests/**/*.test.ts"] },
+    { "name": "go", "runner": "go", "prose": ["Go"], "roots": ["packages/template-go"], "tests": ["packages/template-go/**/*_test.go"] },
+    { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/template-rust"], "tests": ["packages/template-rust/tests/*.rs"], "support": ["packages/template-rust/tests/common/*.rs"] },
+    { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/template-php"], "tests": ["packages/template-php/tests/**/*Test.php"] },
+    { "name": "php-ext", "runner": "php", "prose": ["PHP extension"], "roots": ["packages/template-php-ext"], "tests": ["packages/template-php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"] },
+    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/template-python"], "tests": ["packages/template-python/tests/test_*.py"] }
+  ],
+  "profiles": [
+    { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] }
+  ],
+  "suites": ["tests/fixtures/expr/cases.json"],
+  "comparators": ["tests/runner", "tests/browser", "tools/showcase"],
+  "tools": [
+    { "root": "packages/template-language", "reason": "The language service and the formatter are TypeScript tools of the editors (docs/spec/editor.md); no other implementation holds them." },
+    { "root": "packages/template-lsp", "reason": "The language server is a TypeScript tool of the editors." },
+    { "root": "packages/template-codemirror", "reason": "The CodeMirror adapter is a TypeScript tool of the editors." },
+    { "root": "packages/template-vscode", "reason": "The VS Code extension is a TypeScript tool of the editors." },
+    { "root": "packages/template-compiler", "reason": "The compiler generates the programs of every language from one TypeScript implementation." },
+    { "root": "tests/scripts", "reason": "The tests of the build, check and release scripts of the repository." }
+  ],
+  "testPatterns": [
+    { "runner": "vitest", "globs": ["**/*.test.ts"] },
+    { "runner": "go", "globs": ["**/*_test.go"] },
+    { "runner": "cargo", "globs": ["**/tests/*.rs"] },
+    { "runner": "php", "globs": ["**/*Test.php"] },
+    { "runner": "python", "globs": ["**/test_*.py"] }
+  ],
+  "units": [
+    {
+      "id": "conformance",
+      "kind": "suite",
+      "profile": "runtime",
+      "file": "tests/cases",
+      "cases": "*/*",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/template-ts/tests/conformance.test.ts" },
+        { "implementation": "go", "test": "packages/template-go/conformance_test.go", "symbol": "TestConformanceCases" },
+        { "implementation": "rust", "test": "packages/template-rust/tests/conformance.rs", "symbol": "conformance" },
+        { "implementation": "php", "test": "packages/template-php/tests/ConformanceTest.php" },
+        { "implementation": "php-ext", "test": "packages/template-php-ext/tests/ExtConformanceTest.php" }
+      ]
+    },
+    {
+      "id": "expressions",
+      "kind": "suite",
+      "profile": "runtime",
+      "file": "tests/fixtures/expr/cases.json",
+      "cases": "$[*].name",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/template-ts/tests/expr/fixtures.test.ts" },
+        { "implementation": "go", "test": "packages/template-go/expr/fixtures_test.go", "symbol": "TestExpressionFixtures" },
+        { "implementation": "rust", "test": "packages/template-rust/tests/expr_fixtures.rs", "symbol": "expressions" },
+        { "implementation": "php", "test": "packages/template-php/tests/ExprFixturesTest.php" },
+        { "implementation": "python", "test": "packages/template-python/tests/test_expr_fixtures.py" }
+      ]
+    }
+  ],
+  "exclusions": [
+    { "unit": "conformance", "implementation": "python", "reason": "The Python package runs the conformance cases only through the comparator tests/runner/conformance.mjs; it has no native test that reports each case.", "item": "T24.8" },
+    { "unit": "expressions", "implementation": "php-ext", "reason": "The PHP extension has no native test of the expression vectors.", "item": "T24.8" }
+  ]
+}

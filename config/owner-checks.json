@@ -21,19 +21,6 @@
     },
     {
       "paths": [
-        "contracts/features.json",
-        "scripts/features/**"
-      ],
-      "tests": [
-        "tests/scripts/feature-python-coverage.test.mjs"
-      ],
-      "targets": [
-        "feature-check",
-        "docs-check"
-      ]
-    },
-    {
-      "paths": [
         "packages/template-compiler/functions.json",
         "tests/runner/function-contract.mjs",
         "scripts/check-function-contract.mjs"
@@ -80,7 +67,8 @@
         "tests/cases/**"
       ],
       "targets": [
-        "conformance-cases"
+        "conformance-cases",
+        "parity-check"
       ],
       "variable": "CASES"
     },
@@ -90,7 +78,8 @@
       ],
       "targets": [
         "rules-check",
-        "schema-check"
+        "schema-check",
+        "parity-check"
       ]
     },
     {
@@ -140,7 +129,7 @@
     },
     {
       "paths": [
-        "tests/runner/{bounded,cases,drivers,conformance,delimiter-matrix,generated-ts-render,parity}.mjs",
+        "tests/runner/{bounded,cases,drivers,conformance,delimiter-matrix,generated-ts-render}.mjs",
         "tests/runner/conformance-generated-*.mjs"
       ],
       "targets": [
@@ -469,14 +458,6 @@
     },
     {
       "paths": [
-        "scripts/check-language-test-matrix*.mjs"
-      ],
-      "targets": [
-        "language-test-matrix"
-      ]
-    },
-    {
-      "paths": [
         "config/editor-boundaries.json",
         "scripts/editor-fixtures.mjs"
       ],
@@ -557,7 +538,8 @@
         "test-lsp",
         "test-codemirror",
         "test-vscode",
-        "test-browser"
+        "test-browser",
+        "parity-check"
       ]
     },
     {
@@ -614,7 +596,8 @@
         "conformance",
         "conformance-generated-go",
         "delimiter-matrix",
-        "install-check"
+        "install-check",
+        "parity-check"
       ]
     },
     {
@@ -628,7 +611,8 @@
         "conformance",
         "conformance-generated-rust",
         "delimiter-matrix",
-        "install-check"
+        "install-check",
+        "parity-check"
       ]
     },
     {
@@ -642,7 +626,8 @@
         "conformance",
         "conformance-generated-php",
         "delimiter-matrix",
-        "install-check"
+        "install-check",
+        "parity-check"
       ]
     },
     {
@@ -659,7 +644,8 @@
         "generated-native-check",
         "typed-generator-compile-check",
         "install-check",
-        "contract-check"
+        "contract-check",
+        "parity-check"
       ]
     },
     {
@@ -668,7 +654,8 @@
       ],
       "targets": [
         "test-ext",
-        "lint-php"
+        "lint-php",
+        "parity-check"
       ],
       "tests": [
         "tests/scripts/build-php-extension.test.mjs"
@@ -838,6 +825,16 @@
         "test-go",
         "showcase-check"
       ]
+    },
+    {
+      "paths": [
+        "config/parity.json",
+        "tests/fixtures/expr/**"
+      ],
+      "targets": [
+        "parity-declarations-check",
+        "parity-check"
+      ]
     }
   ],
   "inputs": [
@@ -898,20 +895,6 @@
       ]
     },
     {
-      "check": "make feature-pages-check",
-      "paths": [
-        "contracts/features.json",
-        "scripts/features/**"
-      ]
-    },
-    {
-      "check": "make feature-contracts-check",
-      "paths": [
-        "contracts/features.json",
-        "scripts/features/**"
-      ]
-    },
-    {
       "check": "make docs-static-check",
       "paths": [
         "scripts/check-docs-static.mjs"
@@ -967,18 +950,6 @@
         "package.json",
         "package-lock.json",
         "packages/*/composer.{json,lock}"
-      ]
-    },
-    {
-      "check": "make language-test-matrix-manifest-check",
-      "paths": [
-        "scripts/check-language-test-matrix.mjs"
-      ]
-    },
-    {
-      "check": "make language-test-matrix-mutations-check",
-      "paths": [
-        "scripts/check-language-test-matrix-mutations.mjs"
       ]
     },
     {
@@ -1477,6 +1448,15 @@
         "packages/template-python/**",
         "config/toolchain.json",
         "ruff.toml"
+      ]
+    },
+    {
+      "check": "make parity-check",
+      "paths": [
+        "config/parity.json",
+        "tests/cases/**",
+        "tests/fixtures/expr/**",
+        "packages/template-{ts,go,rust,php,php-ext,python}/**"
       ]
     }
   ]

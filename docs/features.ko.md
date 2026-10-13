@@ -1,8 +1,8 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: 5a6790a54e827e1a18996fe4c9b81e80e7bc72d23467f91d115205cd84a6f15e -->
+<!-- source-sha256: 598a203aa84649bc86fc0b884b1cd67ba9d9e5a4344652206937fa32be64d6fb -->
 # 기능 상태
 
-실행 정본은 [contracts/features.json](../contracts/features.json)이다. 각 항목은 input, output, 상태 전이, 오류, client 지원 상태, fixture, test, 검증 명령과 paired document를 정의한다.
+표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
 
 | ID | 기능 | 상태 | Client 지원 | 근거 |
 |---|---|---|---|---|
@@ -30,4 +30,4 @@
 | object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [근거](spec/ast) |
 | bound-data | 여러 render를 위한 bound data | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [근거](spec/data-model) |
 
-`make feature-check`로 모든 계약과 참조 경로를 검사한다. implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.
+implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.

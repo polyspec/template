@@ -1,7 +1,7 @@
 <!-- doc-id: docs-features -->
 # Feature status
 
-The executable source is [contracts/features.json](../contracts/features.json). Each entry defines inputs, outputs, state transitions, errors, client support, fixtures, tests, verification commands and paired documentation.
+The table records the status of each feature. The implementations and the units that each holds are declared in `config/parity.json`, which `make parity-check` checks against the tree (CNF-11).
 
 | ID | Feature | Status | Client support | Evidence |
 |---|---|---|---|---|
@@ -29,4 +29,4 @@ The executable source is [contracts/features.json](../contracts/features.json). 
 | object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/ast) |
 | bound-data | Bound data for several renders | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [Evidence](spec/data-model) |
 
-Run `make feature-check` to validate every contract and referenced path. An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
+An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
