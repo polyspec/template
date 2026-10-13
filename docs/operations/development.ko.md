@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: ed07639e22f7ca6a81fdfbd7e85f7566c7b23b6b615c0f226893b1f8d5705566 -->
+<!-- source-sha256: e8f5545f853b93233b1c5fb682010639dfab6e16c795db0edeb9dd87848ca86f -->
 # 개발
 
 [English](/operations/development).
@@ -15,7 +15,7 @@
 | PHP | 8.5 | kit의 pin인 `config/toolchain.json`의 minor version; 모든 `composer.json`의 `require.php`는 `>=8.5`, `config.platform.php`는 `8.5`; 각 실행의 patch는 각 CI job의 report에 기록 |
 | Composer | 2.10.3 | `config/toolchain.json` |
 | Python | 3.14 | `.python-version`의 minor version; `make install`은 `config/toolchain.json`의 `pythonBuild` 중 그 minor의 Python release를 설치하고, Python을 실행하는 모든 검사는 wrapper `var/tools/bin/python3`(`scripts/python-toolchain.mjs`)를 실행하며, `PATH`의 `python3`는 실행하지 않음; CI job은 자체 Python을 설정하지 않고, CI job `python`은 그 minor만 실행하며 이는 `requires-python`이 명시 |
-| ruff | 0.17.0 | `config/toolchain.json`의 `ruff`(플랫폼별 wheel의 sha256 포함); `make install-tools TOOLS="python ruff"`가 `var/tools/bin/python3` 위에서 `var/tools/python`에 설치하며, `packages/template-python/pyproject.toml`의 `[tool.ruff]`가 규칙과 target version을 선언 |
+| ruff | 0.17.0 | `config/toolchain.json`의 `ruff`(플랫폼별 wheel의 sha256 포함); `make install-tools TOOLS=ruff`가 Python `var/tools/bin/python3`의 environment에 설치하며, kit이 복사하는 root `ruff.toml`이 규칙과 target version을 선언; 어떤 package도 자기 ruff 설정을 갖지 않음(T24.5) |
 | make | 고정하지 않음 | GNU Make 3.81 이상 |
 
 공유 도구는 npm package `@polyspec/kit`에서 온다. `make install-tools TOOLS=npm`은 kit이 `scripts/kit/bootstrap/`에 복사하는 bootstrap installer를 실행한다. 이것은 `packageManager`의 npm을 `var/tools/npm`에 설치하고 wrapper script `var/tools/bin/npm`과 `var/tools/bin/npx`를 쓴다. `make install-packages`는 그 npm으로 `@polyspec/kit`을 포함한 `package-lock.json`을 설치하며, 복사본 `scripts/kit/kit-bootstrap.mk`가 그 package의 `kit.mk`를 include한다. package가 설치되기 전에는 이 두 target만 실행된다. 그 뒤 `make install`은 `make install-tools TOOLS="go uv python"`(`node_modules/@polyspec/kit/dist/install-tools.mjs`)을 실행하며, 이것은 kit pin의 Go를 sha256으로 확인한 archive에서, uv를 release archive에서 설치하고, 그 uv로 `pythonBuild`의 Python release를 wrapper `var/tools/bin/python3`와 함께 설치한다. `make install-tools TOOLS=ruff`는 그 Python의 environment에 ruff를 설치한다. 설치는 `var/tools/bin`에 wrapper script를 쓰고 정확한 version이 있는 도구는 건너뛴다. recipe는 machine의 Python을 실행하지 않고, machine의 npm, Go, Python은 바꾸지 않는다. Makefile은 `var/tools/bin`을 `PATH`의 맨 앞에 두고 `GOTOOLCHAIN=local`을 export하므로 go는 다른 toolchain을 내려받지 않고, `GOCACHE=var/go/cache`를 export하므로 go는 다른 checkout이나 실행과 함께 쓰는 cache가 아니라 checkout의 build cache에 build한다. GNU Make 3.81은 shell 문법이 없는 recipe 줄을 직접 시작하고, `SHELL`이 다른 shell을 가리켜도 export된 `PATH`가 아니라 make가 시작할 때의 `PATH`로 program을 찾는다. 그래서 recipe는 npm을 wrapper의 경로인 `$(NPM)`으로 시작하고, go와 gofmt는 shell 문법이 있는 줄에서만 시작하며, shell은 export된 `PATH`로 그것을 찾는다. `make owner-check`가 모든 변경에 실행하는 `tests/scripts/toolchain-files.test.mjs`는 recipe의 Node.js, npm, Go, Rust, PHP minor version, Composer가 이 파일들과 다르면 기대값과 실제값을 적어 실패한다.
