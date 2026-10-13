@@ -10,9 +10,10 @@ No package has been published to a registry. Each package installs from a local 
 Go module:
 
 ```
-require github.com/polyspec/template/packages/template-go v0.0.6
-replace github.com/polyspec/template/packages/template-go => ../template/packages/template-go
+go work init . ../template/packages/template-go
 ```
+
+A Go module resolves the checkout through a `go.work` of the consumer, never a `replace` of its `go.mod`, which a released module would not see.
 
 npm package:
 

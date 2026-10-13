@@ -1,0 +1,4 @@
+go 1.27.2
+
+use ./packages/template-go
+use ./tools/showcase/adapters/go
