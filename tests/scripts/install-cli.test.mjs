@@ -15,7 +15,7 @@ const SCRIPT = path.join(ROOT, 'scripts/install-cli.mjs');
 
 before(() => {
   for (const name of ['template-ts', 'template-language']) {
-    const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', name, '--install'], { cwd: ROOT, encoding: 'utf8' });
+    const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', name], { cwd: ROOT, encoding: 'utf8' });
     assert.equal(build.status, 0, `the build of ${name} failed:\n${build.stdout}${build.stderr}`);
   }
 });

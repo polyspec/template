@@ -78,16 +78,15 @@ VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 # The prefix of `make install-cli`: the formatter copy in $(CLI_PREFIX)/lib and the script in $(CLI_PREFIX)/bin.
 CLI_PREFIX ?= $(HOME)/.local
 
-# npm installs every dependency, also every package of this repository, as a copy and writes no bin link
-# (.npmrc, T18.4), so the recipes start each tool with the file of its package.
-TSC        := node $(CURDIR)/node_modules/typescript/bin/tsc
-# The esbuild package replaces bin/esbuild with the executable of the platform when it installs.
-ESLINT     := node $(CURDIR)/node_modules/eslint/bin/eslint.js
-VITEPRESS  := node $(CURDIR)/node_modules/vitepress/bin/vitepress.js
-VITEST     := node $(CURDIR)/node_modules/vitest/vitest.mjs
-PLAYWRIGHT := node $(CURDIR)/node_modules/@playwright/test/cli.js
-VSCE       := node $(CURDIR)/node_modules/@vscode/vsce/vsce
-TMGRAMMAR  := node $(CURDIR)/node_modules/vscode-tmgrammar-test/dist/unit.js
+# npm links the workspace packages of this repository into node_modules and the commands of the packages into
+# node_modules/.bin (T24.2); the recipes start each tool there.
+TSC        := $(CURDIR)/node_modules/.bin/tsc
+ESLINT     := $(CURDIR)/node_modules/.bin/eslint
+VITEPRESS  := $(CURDIR)/node_modules/.bin/vitepress
+VITEST     := $(CURDIR)/node_modules/.bin/vitest
+PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
+VSCE       := $(CURDIR)/node_modules/.bin/vsce
+TMGRAMMAR  := $(CURDIR)/node_modules/.bin/vscode-tmgrammar-test
 
 help: ## List targets
 	@echo "Targets:"
@@ -198,7 +197,7 @@ install-browsers: ## Install the Chromium of Playwright and its system packages,
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
 
 build-ts: ## Build the TypeScript package
-	node scripts/build-package.mjs --package template-ts --install
+	node scripts/build-package.mjs --package template-ts
 
 build-go: ## Build the Go CLI
 	cd $(GO_DIR) && go build -o template ./cmd/template && cd $(CURDIR) && node scripts/publish-build.mjs $(GO_DIR)/template var/build/template-go
@@ -242,7 +241,7 @@ test-scripts: cargo-downloads-check build-ts build-language build-lsp build-code
 	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
-	node scripts/build-package.mjs --package template-language --install
+	node scripts/build-package.mjs --package template-language
 
 test-language: test-language-unit test-language-types ## Formatter, safety invariant and CLI tests, type check
 
@@ -253,7 +252,7 @@ test-language-types: build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
 build-lsp: build-language ## Build the language server template-lsp
-	node scripts/build-package.mjs --package template-lsp --install
+	node scripts/build-package.mjs --package template-lsp
 
 test-lsp: test-lsp-unit test-lsp-types ## Language server protocol tests against the editor fixtures, type check
 
@@ -271,7 +270,7 @@ format-external-check: build-language ## Run the formatter safety invariant on a
 	cd $(LANGUAGE_DIR) && TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" $(VITEST) run tests/invariant.test.ts
 
 build-codemirror: build-language ## Build the CodeMirror 6 adapter
-	node scripts/build-package.mjs --package template-codemirror --install
+	node scripts/build-package.mjs --package template-codemirror
 
 test-codemirror: test-codemirror-unit test-codemirror-browser test-codemirror-types ## CodeMirror adapter tests against the editor fixtures, browser test, type check
 

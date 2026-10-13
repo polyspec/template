@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 7c56f186915d3ab7ff452b3a17439b2501d6666378981226f8bac92c9996b14c -->
+<!-- source-sha256: c6224d62020919d7a8ed4ad356843c1a194d8dc9b6bffce06562d7a18b9df04f -->
 # 발행
 
 [English](/operations/publication).
@@ -118,7 +118,7 @@ Composer: 내려받은 zip을 담은 directory인 `artifact` repository,
 
 `package` 항목은 zip의 `composer.json`을 대신하므로 그 `require`와 `autoload`를 다시 적는다. Composer는 type `php-ext`의 패키지를 설치하지 않는다. `polyspec/template-php-ext`의 zip은 PIE가 extension을 build하는 source다.
 
-저장소에서는 발행하지 않는 private root `package.json`이 저장소의 npm 패키지를 해석한다. 그 `dependencies`와 `overrides`는 각 패키지를 directory(`file:packages/<package>`)로 적고, npm은 각각을 copy로 설치한다(`.npmrc`). 각 패키지의 발행 `package.json`과 `composer.json`은 의존하는 polyspec 패키지를 정확한 버전으로만 적고, 각 `composer.json`은 모든 릴리스가 다른 manifest와 함께 정하는 버전을 선언한다. 저장소의 어떤 패키지도 다른 저장소의 polyspec 패키지에 의존하지 않으므로 다른 저장소의 릴리스 tag는 기록하지 않는다.
+저장소에서는 발행하지 않는 private root `package.json`이 저장소의 npm 패키지를 해석한다. 그 `workspaces`는 각 패키지의 directory를 적고, npm은 각각을 `node_modules`에 link한다. 각 패키지의 발행 `package.json`과 `composer.json`은 의존하는 polyspec 패키지를 정확한 버전으로만 적고, 각 `composer.json`은 모든 릴리스가 다른 manifest와 함께 정하는 버전을 선언한다. 저장소의 어떤 패키지도 다른 저장소의 polyspec 패키지에 의존하지 않으므로 다른 저장소의 릴리스 tag는 기록하지 않는다.
 
 ## 문서 사이트
 

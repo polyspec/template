@@ -60,7 +60,7 @@ try {
   if (!serverCommand) throw new Error('--server-command needs a command');
   const started = await startServer(serverCommand);
   server = started.server;
-  // npm writes no bin links (.npmrc), so Playwright starts by the path of its package.
+  // Playwright starts by its command in node_modules/.bin.
   const tests = spawn(process.execPath, [playwright, 'test', ...args], {
     cwd: root,
     env: { ...process.env, TEMPLATE_BROWSER_URL: started.url },

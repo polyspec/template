@@ -18,7 +18,7 @@ const COMPILES = { timeout: 300_000 };
 // The runners compile with the build of template-ts and run PHP with the Composer packages of template-php. The test
 // builds and installs them itself, which does nothing when their inputs are unchanged (T19.6).
 before(() => {
-  const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', 'template-ts', '--install'], { cwd: ROOT, encoding: 'utf8' });
+  const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', 'template-ts'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(build.status, 0, `the build of template-ts failed:\n${build.stdout}${build.stderr}`);
   const composer = spawnSync(process.execPath, [path.join(ROOT, 'scripts/composer-install.mjs'), 'packages/template-php'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(composer.status, 0, `${composer.stdout}${composer.stderr}`);

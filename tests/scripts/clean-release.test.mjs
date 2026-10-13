@@ -57,8 +57,8 @@ test('the release check runs the matrix in a detached worktree of HEAD and remov
   const result = release.run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
   const calls = release.calls();
-  assert.deepEqual(calls.map(call => call.command.split(' ')[0] === 'node' ? 'node playwright install chromium' : call.command), ['make install', 'node playwright install chromium', 'make release-test-matrix']);
-  assert.match(calls[1].command, /^node \S+\/node_modules\/@playwright\/test\/cli\.js install chromium$/);
+  assert.deepEqual(calls.map(call => call.command.split(' ')[0] === 'node' ? 'node playwright install chromium' : call.command), ['make install-tools TOOLS=npm', 'make install-packages', 'make install', 'node playwright install chromium', 'make release-test-matrix']);
+  assert.match(calls[3].command, /^node \S+\/node_modules\/\.bin\/playwright install chromium$/);
   for (const call of calls) {
     assert.notEqual(call.directory, release.repository, `${call.command} ran in the source tree`);
     assert.deepEqual(call.files, ['committed.txt', 'scripts'], `${call.command} ran in a checkout without the committed files`);

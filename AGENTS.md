@@ -21,7 +21,7 @@
 - Keep code and tests in separate directories inside each package. Core tests are in the core package. Extension tests are in the extension package.
 - Handle a defect by adding a failing test that reproduces it, fixing the code, and keeping the test.
 - Use repository-relative paths. Require explicit paths for external inputs.
-- Do not use symbolic links. npm installs every dependency, also a package of this repository, as a copy and writes no bin link (`.npmrc`); a recipe or script starts a tool with the file of its package.
+- Do not create symbolic links. The links that npm writes (the workspace packages in `node_modules` and the commands in `node_modules/.bin`) and those that uv writes are the behavior of those tools and are accepted; a recipe or script starts a tool from `node_modules/.bin`.
 - Each checkout builds its Rust crates into their own target. Do not point `CARGO_TARGET_DIR` at the target of another checkout: cargo judges freshness by modification times, so it takes binaries built from the sources of another checkout as fresh. The Makefile does not pass an inherited `CARGO_TARGET_DIR` to cargo, and a worktree removes its target when it is removed. A test reads the files of the checkout from the `CARGO_MANIFEST_DIR` that cargo sets when it runs the test, not from a path compiled into the binary.
 
 ## Idempotency
