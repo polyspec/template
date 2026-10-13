@@ -23,7 +23,7 @@ It runs the full suite of `make check` through the same guard `node_modules/@pol
 
 The complete mode matrix contains 1,984 core cells: 248 cases × two compiler modes × four languages. Success cases compare exact UTF-8 bytes. Failure cases compare the error code, message, template name and source position. Generated execution is also checked for parser, AST interpreter and fallback references before its host source is accepted.
 
-The language test matrix is declared in `contracts/features.json`. Its semantic features must declare pass support for TypeScript, Go, Rust, PHP and Python, and its required checks must cover both `ast` and `gen`. `make language-test-matrix` rejects a missing feature, language declaration or test path; `make conformance-all-modes`, `make function-contract-check` and `make generated-native-check` provide the executable coverage.
+The implementations and the shared suites are declared in `config/parity.json` (CNF-11): TypeScript, Go, Rust, PHP, the PHP extension and Python hold the conformance cases and the expression vectors. `make parity-declarations-check` checks the declaration without running anything, and `make parity-check` runs the native test of each implementation that binds a suite; `make conformance-all-modes`, `make function-contract-check` and `make generated-native-check` provide the coverage of both modes.
 
 Mutation tests are required evidence. They damage an interface operation, an artifact digest or an output hash and require the corresponding validator to fail. A validator that accepts its mutation fails the release gate.
 

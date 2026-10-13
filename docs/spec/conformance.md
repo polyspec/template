@@ -72,7 +72,7 @@ Conformance is verified by fixture cases that every implementation renders throu
 | `--list` | Print the case ids and the count without running. |
 | `--update ast\|html\|error` | Write the expected file of the given kind from the `ts` implementation. `ts` must be among the selected implementations. |
 
-**CNF-11** `tests/runner/parity.mjs` runs every selected implementation on every case and compares the outputs of the implementations with each other. It does not read expected files. It reports the cases whose outputs differ and exits with status 1 when any case differs.
+**CNF-11** `config/parity.json` declares the implementations and the shared suites: the conformance cases of `tests/cases` and the expression vectors of `tests/fixtures/expr/cases.json`. `make parity-check` of kit runs the native test of each implementation that binds a suite and fails unless every case of the suite passed in every implementation of its profile; an exclusion fails until the task that it names removes it.
 
 ## Expression fixtures
 

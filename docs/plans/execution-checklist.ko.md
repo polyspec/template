@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 64571435685e19852896779fb375a1f003460611c85451e57273202f34ccb602 -->
+<!-- source-sha256: ba1ef8da7d0e18658a1cb7a9a14ccb20a61226a72b901cb50013edd3f34cff69 -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -454,3 +454,4 @@
 | T24.5 | Python은 kit의 root `ruff.toml`로만 lint한다: `packages/template-python/pyproject.toml`의 `[tool.ruff]`를 지운다. | `make layout-check` | [ ] |
 | T24.6 | TypeScript는 eslint와 typescript-eslint 대신 kit의 oxlint, oxlint-tsgolint, knip 설정으로 lint한다(`make lint-ts`). `eslint.config.mjs`, `make lint-js`, eslint package를 지운다. | `make lint-ts` | [ ] |
 | T24.7 | template의 implementation과 feature unit을 `config/parity.json`(kit parity의 schema)에 선언하고 `make parity-declarations-check`와 `make parity-check`를 실행한다. template의 feature registry를 지운다: `contracts/features.json`, `scripts/features/`, `tests/runner/parity.mjs`와 그 target. | `make parity-declarations-check` | [ ] |
+| T24.8 | 모든 구현의 native test를 `config/parity.json`에 연결한다: 각 suite binding은 각 case를 runner의 이름으로 보고하고(Go의 subtest `TestX/<case>`, cargo의 test `<symbol>::<case>`, vitest의 top-level test `<case>`, PHPUnit과 unittest의 test method `test_<case>`), Python은 적합성 케이스의 native test를, PHP 확장은 표현식 vector의 native test를 가져 두 exclusion을 지우며, 구현의 다른 모든 test file은 feature unit으로 bind한다. RED: `make parity-declarations-check`가 finding 67개를 보고하며, 그중 65개는 R5 undeclared-test, 두 개는 R8 exclusion이다. | `make parity-declarations-check`, `make parity-check` | [ ] |
