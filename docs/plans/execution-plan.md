@@ -149,6 +149,10 @@ Dependencies: none. The PHP extension `packages/template-php-ext` wrapped the Ru
 
 Dependencies: none. Every change reaches `main` through the merge queue with the required checks, so every commit of `main` passed the full suite, and a release is a tag of a commit of `main` that the maintainer sets after a version-bump pull request. The changelog held the entries of the tag `v0.0.1` under `## Unreleased`; the module path of `packages/template-go/go.mod` was `github.com/polyspec/template`, which `go get` does not resolve to that directory; the ruleset `main` named every job of `ci.yml`, so a new job was not required until the ruleset named it; and no workflow ran on a tag. Exit criteria: the changelog keeps `## Unreleased` above `## 0.0.1`, the module path is `github.com/polyspec/template/packages/template-go`, the ruleset requires exactly `push-gate` and `ci-passed`, and `.github/workflows/release.yml` creates the GitHub Release of a tag only for a commit of `main` whose checks passed, whose manifests carry the version of the tag and whose changelog has its section.
 
+## Wave 23 — The editor stack as a standard
+
+Dependencies: T23.4 waits for the kit item T128-K, which waits for kit K71 (kit as a TS package). The orm plan `docs/plans/editor-stack.md` makes syntax analysis and formatting standards of every runtime and found template short of it: `template-language` restates lexical tables beside the parser, the VS Code extension carries a hand-written TextMate grammar for tags, `format()` exists only in TS, and a tool without a host has no declared root to resolve include paths against. Exit criteria: the parser is the only grammar, every runtime analyzes and formats with the conformance and parity runners comparing both, the VS Code extension holds no tag grammar, the shared editor tools come from kit, and the host-less tools resolve against `template-root.json`.
+
 ## Parallelism summary
 
 | Wave | Parallel groups | Sequential constraints |
@@ -174,6 +178,7 @@ Dependencies: none. Every change reaches `main` through the merge queue with the
 | W20 | T20.1, T20.2, T20.3 | T20.3-1 after T20.3; T20.1-1 after T20.3-1; T20.1-2 after T20.1-1; T20.1-3 after T20.1-2; T20.1-4 after T20.1-3; T20.1-5 after T20.1-4; T20.1-6 after T20.1-5; T20.1-7 after T20.1-6; T20.1-8 after T20.1-7; T20.1-9 after T20.1-8; T20.1-10 after T20.1-9; T20.1-11 after T20.1-10; T20.1-12 after T20.1-11; T20.1-13 after T20.1-12 |
 | W21 | none | T21.1 → T21.2 → T21.3 → T21.4 → T21.4-1 → T21.4-2 |
 | W22 | none | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 → T22.2 → T22.2-1 → T22.2-2 → T22.2-3 → T22.3 → T22.3-1 → T22.3-2 → T22.3-3 → T22.3-4 → T22.3-5 → T22.3-6 |
+| W23 | T23.1, T23.3, T23.5 | T23.2 after T23.1; T23.4 after the kit item T128-K |
 
 ## Definition of done
 
