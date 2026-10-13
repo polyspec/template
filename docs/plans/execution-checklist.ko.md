@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: ba1ef8da7d0e18658a1cb7a9a14ccb20a61226a72b901cb50013edd3f34cff69 -->
+<!-- source-sha256: 0f606a1ac20dfc5422bad1cb48c9b11b34ddc8d2220efe8a07b50e93345b1f06 -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -455,3 +455,4 @@
 | T24.6 | TypeScript는 eslint와 typescript-eslint 대신 kit의 oxlint, oxlint-tsgolint, knip 설정으로 lint한다(`make lint-ts`). `eslint.config.mjs`, `make lint-js`, eslint package를 지운다. | `make lint-ts` | [ ] |
 | T24.7 | template의 implementation과 feature unit을 `config/parity.json`(kit parity의 schema)에 선언하고 `make parity-declarations-check`와 `make parity-check`를 실행한다. template의 feature registry를 지운다: `contracts/features.json`, `scripts/features/`, `tests/runner/parity.mjs`와 그 target. | `make parity-declarations-check` | [ ] |
 | T24.8 | 모든 구현의 native test를 `config/parity.json`에 연결한다: 각 suite binding은 각 case를 runner의 이름으로 보고하고(Go의 subtest `TestX/<case>`, cargo의 test `<symbol>::<case>`, vitest의 top-level test `<case>`, PHPUnit과 unittest의 test method `test_<case>`), Python은 적합성 케이스의 native test를, PHP 확장은 표현식 vector의 native test를 가져 두 exclusion을 지우며, 구현의 다른 모든 test file은 feature unit으로 bind한다. RED: `make parity-declarations-check`가 finding 67개를 보고하며, 그중 65개는 R5 undeclared-test, 두 개는 R8 exclusion이다. | `make parity-declarations-check`, `make parity-check` | [ ] |
+| T24.9 | `config/owner-checks.json`에서 `tests/scripts/driver-fixture.mjs`를 소유한다: 그것으로 driver를 복사하는 test(`tests/scripts/drivers.test.mjs`, `tests/scripts/failure-messages.test.mjs`, `tests/scripts/no-silent-skips.test.mjs`)가 그것이 바뀔 때 실행된다. RED: `make owner-validate`가 `tests/scripts/driver-fixture.mjs: the path matches no owner`로 실패한다. | `make owner-validate` | [ ] |

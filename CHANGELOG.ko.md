@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 95f74f6728e5310193d974b75b7e0236c6b8940cd2efdee4bcbd6d643eb33800 -->
+<!-- source-sha256: 63b75321040794af87ca62405f540a96639987350bf4af76b3c82d7495b82b13 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.9: `config/owner-checks.json`은 `tests/scripts/driver-fixture.mjs`를 그것으로 driver를 복사하는 test `tests/scripts/drivers.test.mjs`, `tests/scripts/failure-messages.test.mjs`, `tests/scripts/no-silent-skips.test.mjs`와 함께 소유합니다. RED: `make owner-validate`가 `tests/scripts/driver-fixture.mjs: the path matches no owner in config/owner-checks.json`으로 실패했습니다. GREEN: 설정이 추적되는 모든 경로를 소유한다고 보고합니다.
 - T24.7: `config/parity.json`은 template의 구현 여섯 개(TypeScript, Go, Rust, PHP, PHP 확장, Python), profile `runtime`, 공유 suite(`tests/cases`의 적합성 케이스와 `tests/fixtures/expr/cases.json`의 표현식 vector)와 그것을 bind하는 각 구현의 native test, comparator와 단일 언어 tool, 그리고 Python 적합성 binding과 PHP 확장 표현식 binding의 exclusion을 그 task T24.8과 함께 선언합니다. kit의 `make parity-declarations-check`와 `make parity-check`가 template의 feature registry를 대신합니다: `contracts/features.json`, `scripts/features/`, `make feature-check`, mutation check를 포함한 `scripts/check-language-test-matrix.mjs`와 `make language-test-matrix`, `make parity`를 포함한 `tests/runner/parity.mjs`, `tests/scripts/feature-python-coverage.test.mjs`를 지웠습니다. CNF-11은 공유 suite의 parity를 말하고, `docs/features.md`는 generator 없이 상태 표를 유지합니다. `make parity-declarations-check`는 finding 67개를 보고하며, T24.8이 그것을 지웁니다.
 - T23.4: editor boundary checker와 VS Code installer는 kit에서 옵니다. `make editor-boundary-check`는 kit의 checker를 `config/editor-boundaries.json`으로 실행하며, 이 파일은 EDT-2(adapter `template-lsp`, `template-codemirror`, `template-vscode`는 `@polyspec/template`을 선언하지도 import하지도 않음)와 EDT-3(language service는 `src/cli` 밖에서 Node.js, editor, CodeMirror module과 DOM global을 쓰지 않음)의 규칙을 선언합니다. `make install-vscode`는 `packages/template-vscode`에 대해 kit의 installer를 실행하고, integration 실행은 `@polyspec/kit/install-vscode`의 `installedExecutable`로 사본을 읽습니다. `scripts/check-editor-boundaries.mjs`와 `scripts/install-vscode.mjs`를 지웠고, `tests/scripts/install-vscode.test.mjs`는 integration 실행의 case를 유지합니다. RED: 삭제 뒤 `node --test tests/scripts/install-vscode.test.mjs`가 `ERR_MODULE_NOT_FOUND`로 실패했고, `make editor-boundary-check`가 `config/editor-boundaries.json` 없이 실패했습니다. GREEN: test가 통과하고, check가 `4 packages of 2 boundaries passed, 29 files checked`를 보고합니다.
 - T24.5: Python은 kit이 복사하는 root `ruff.toml`로만 lint합니다. editor나 그냥 실행한 ruff는 가장 가까운 설정을 적용하므로 `packages/template-python/pyproject.toml`의 `[tool.ruff]`를 지웠습니다. `config/toolchain.json`은 `make layout-check`가 실행하는 alint를 선언합니다. RED: `make layout-check`가 `packages/template-python/pyproject.toml: error: lint-ruff-nested`를 보고했습니다. GREEN: ruff finding을 보고하지 않습니다.
