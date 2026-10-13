@@ -7,5 +7,8 @@
     "@polyspec/template-compiler": "file:polyspec-template-compiler-npm-0.0.6.tgz",
     "@polyspec/template-language": "file:polyspec-template-language-npm-0.0.6.tgz",
     "@polyspec/template-lsp": "file:polyspec-template-lsp-npm-0.0.6.tgz"
+  },
+  "engines": {
+    "node": ">=26.11.1"
   }
 }

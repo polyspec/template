@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-ext-readme -->
-<!-- source-sha256: e4dbad917af0aed0ddd2c074346e150f468584f4eb19b59c6834eb3a239ae92c -->
+<!-- source-sha256: 911004ec372bd72aab4a822ed0ba06259a5fdb89d13e506a3ae23e2a3e995648 -->
 # polyspec_template PHP 확장
 
 [English](README.md).
@@ -8,7 +8,7 @@ C로 독립 구현해 템플릿을 렌더하는 PHP 확장이다. 클래스 `Pol
 
 ## 빌드
 
-source, `config.m4`, stub `polyspec_template.stub.php`는 `src/`에 있다. 빌드에는 C 컴파일러와, 확장을 로드할 PHP 8.2 이상의 phpize와 php-config가 필요하다.
+source, `config.m4`, stub `polyspec_template.stub.php`는 `src/`에 있다. 빌드에는 C 컴파일러와, 확장을 로드할 PHP 8.5 이상의 phpize와 php-config가 필요하다.
 
 ```sh
 make ext

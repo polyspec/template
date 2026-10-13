@@ -12,6 +12,7 @@
     "directory": "packages/template-vscode"
   },
   "engines": {
+    "node": ">=26.11.1",
     "vscode": "^1.138.0"
   },
   "categories": [

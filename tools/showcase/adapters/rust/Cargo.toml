@@ -2,6 +2,7 @@
 name = "showcase-adapter-rust"
 version = "0.0.1"
 edition = "2024"
+rust-version = "1.99.0"
 publish = false
 
 [dependencies]

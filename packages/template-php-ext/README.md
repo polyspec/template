@@ -7,7 +7,7 @@ PHP extension that renders templates with an independent implementation in C. It
 
 ## Build
 
-The sources, `config.m4` and the stub `polyspec_template.stub.php` are in `src/`. The build needs a C compiler and phpize and php-config of the PHP that will load the extension, PHP 8.2 or later.
+The sources, `config.m4` and the stub `polyspec_template.stub.php` are in `src/`. The build needs a C compiler and phpize and php-config of the PHP that will load the extension, PHP 8.5 or later.
 
 ```sh
 make ext

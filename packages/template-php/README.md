@@ -3,7 +3,7 @@
 
 [한국어](README.ko.md).
 
-PHP implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. PHP 8.2 or later with the `mbstring` extension is required.
+PHP implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. PHP 8.5 or later with the `mbstring` extension is required.
 
 ## Install
 

@@ -7,11 +7,11 @@
 
 | Tool | Version | Source |
 | --- | --- | --- |
-| Node.js | 26.8.1 | `.node-version` |
+| Node.js | 26.11.1 | `.node-version`, the pin of kit; `engines.node` of every `package.json` is `>=26.11.1` |
 | npm | 12.2.0 | `packageManager` of `package.json`; `make install-tools` installs it into `var/tools` |
-| Go | 1.27.1 | the go directive of `packages/template-go/go.mod`; `make install-tools` installs it into `var/tools` |
-| Rust | 1.98.1 with rustfmt and clippy | `rust-toolchain.toml`; installed with rustup, `~/.cargo/bin` is added to `PATH` by the Makefile |
-| PHP | 8.2 or 8.5 | `config/toolchain.json`, the minor version; the patch of each run is recorded in the report of each CI job |
+| Go | 1.27.2 | the pin of kit, which the go directive of every `go.mod` equals with no toolchain line; `make install-tools` installs it into `var/tools` |
+| Rust | 1.99.0 with rustfmt and clippy | `rust-toolchain.toml`, the pin of kit, which `rust-version` of every Cargo package equals; installed with rustup, `~/.cargo/bin` is added to `PATH` by the Makefile |
+| PHP | 8.5 | `config/toolchain.json`, the minor version and the pin of kit; `require.php` of every `composer.json` is `>=8.5` and `config.platform.php` is `8.5`; the patch of each run is recorded in the report of each CI job |
 | Composer | 2.10.3 | `config/toolchain.json` |
 | Python | 3.14 | `.python-version`, the minor version; `make install` installs the Python release of `pythonBuild` in `config/toolchain.json` for that minor, and every check that runs Python runs its wrapper `var/tools/bin/python3` (`scripts/python-toolchain.mjs`), never the `python3` of `PATH`; no CI job sets up a Python of its own, and the CI job `python` runs that minor only, which `requires-python` states |
 | ruff | 0.17.0 | `config/toolchain.json` (`ruff`, with the sha256 of its wheel by platform); `make install-tools TOOLS="python ruff"` installs it into `var/tools/python` on the Python `var/tools/bin/python3`, and `[tool.ruff]` of `packages/template-python/pyproject.toml` declares the rules and the target version |

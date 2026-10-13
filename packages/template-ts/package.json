@@ -33,6 +33,6 @@
   },
   "sideEffects": false,
   "engines": {
-    "node": ">=26"
+    "node": ">=26.11.1"
   }
 }

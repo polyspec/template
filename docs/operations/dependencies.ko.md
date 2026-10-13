@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-dependencies -->
-<!-- source-sha256: 9349044d6a16d3628937dcb6897d491c165b97a0d932213981acbb38f16a509a -->
+<!-- source-sha256: 0b71317f4bfafe8e47f1747ce923a0c9085f58ebf421839d81448eb5f771782e -->
 # 의존성 정책
 
 [English](/operations/dependencies).
@@ -37,6 +37,6 @@ mutation gate `node_modules/@polyspec/kit/dist/check-dependency-policy-mutation.
 
 이전 안정 release를 사용하려면 `config/dependency-policy.json`에 근거가 있어야 한다. 각 항목은 manifest(루트 `package.json` 또는 Composer manifest)로 지정한 registry 의존성, 재현한 비호환성, 고정을 해제할 조건, 그 조건을 보호하는 test를 기록한다.
 
-이 정책은 도구뿐 아니라 지원 runtime에도 적용한다. Test 의존성이 package가 지원한다고 선언한 runtime보다 새 버전을 요구할 수 없다. 두 Composer manifest는 `config.platform.php`를 `8.2.0`으로 지정해 lockfile을 해석하며, gate는 오래된 lock 또는 선언한 최저 버전과 다른 platform override를 거부한다. CI는 PHP package와 확장을 PHP 8.2와 현재 release 환경에서 검사한다.
+이 정책은 도구뿐 아니라 지원 runtime에도 적용한다. Test 의존성이 package가 지원한다고 선언한 runtime보다 새 버전을 요구할 수 없다. 두 Composer manifest는 `config.platform.php`를 kit의 PHP pin인 `8.5`로 지정해 lockfile을 해석하며, gate는 오래된 lock 또는 선언한 최저 버전과 다른 platform override를 거부한다. CI는 PHP package와 확장을 PHP 8.5에서 검사한다.
 
 Version 변경은 한 순서를 따른다. 호환성과 보안 조건을 먼저 정하고 `make dependency-review UPDATE=1`로 manifest와 lock을 함께 갱신한 뒤 변경된 package test와 문서 build, `make dependency-audit`, clean-checkout release gate를 실행한다. Review가 통과해도 build 실패를 허용하지 않으며 build가 통과해도 알려진 취약점이나 설명 없는 구버전 고정을 허용하지 않는다.
