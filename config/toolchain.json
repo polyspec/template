@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run. python is the Python minor version of the suite: the pythonBuild release of that minor, which the uv of uv installs, is the interpreter of every Python check (var/tools/bin/python3), so no job sets up a Python of its own. go names the go.mod whose go directive is the Go version of every run. cargoAudit and govulncheck are the releases that make dependency-review installs into var/tools for the advisories of the Cargo.lock files and the Go modules. ruff is the ruff release that make lint-python runs and make install-tools installs, with the sha256 of its wheel of each platform. vulture, golangciLint and deadcode are the releases of the lint tools of kit that make lint-python and make lint-go run and make install-tools installs.",
+  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run. python is the Python minor version of the suite: the pythonBuild release of that minor, which the uv of uv installs, is the interpreter of every Python check (var/tools/bin/python3), so no job sets up a Python of its own. go names the go.mod whose go directive is the Go version of every run. cargoAudit and govulncheck are the releases that make dependency-review installs into var/tools for the advisories of the Cargo.lock files and the Go modules. ruff is the ruff release that make lint-python runs and make install-tools installs, with the sha256 of its wheel of each platform. vulture, golangciLint and deadcode are the releases of the lint tools of kit that make lint-python and make lint-go run and make install-tools installs. alint is the release that make layout-check runs on config/layout.yml and make install-tools installs, with the sha256 of its archive of each platform.",
   "php": [
     "8.5"
   ],
@@ -32,6 +32,15 @@
       "darwin-x64": "4fa82e37cb94767661f532b001e470b67a186c7260e305bd84ddb78fd545c0b6",
       "linux-arm64": "5231be65f496304623895dacdbf1de8504fec90303684bdf05805aa34414dd21",
       "linux-x64": "b4dfaef47d491a7296981f8374a4595f55dbf84e8937c8ecd2983574d8bb3da6"
+    }
+  },
+  "alint": {
+    "version": "0.18.2",
+    "sha256": {
+      "darwin-arm64": "ccfb4d13c6001b6ee5d31f2e139ce3e9710df54ba75c5601ef2a96be9ad8d4b2",
+      "darwin-x64": "23dc62149aacc8168f922e35e067a244d3c715725182322dcc3564129968dd8c",
+      "linux-arm64": "133ae54580b1c84d6aa1641d72448267241064ee9c5be119bb649f6acad9e005",
+      "linux-x64": "ce1f182bf3205aceab62fad40dbdd7502de638ed89cbb4fef10320803384ff9b"
     }
   },
   "pythonBackend": {

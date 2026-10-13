@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: dd4a6a5e67baf982885ad9669e21de7e7ea2ecbc21da019c3f3376900e404f08 -->
+<!-- source-sha256: 913217730aa15c29950ff395c0b7c0d8713b2ca04fd7d128a2546fff912ae22d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.5: Python은 kit이 복사하는 root `ruff.toml`로만 lint합니다. editor나 그냥 실행한 ruff는 가장 가까운 설정을 적용하므로 `packages/template-python/pyproject.toml`의 `[tool.ruff]`를 지웠습니다. `config/toolchain.json`은 `make layout-check`가 실행하는 alint를 선언합니다. RED: `make layout-check`가 `packages/template-python/pyproject.toml: error: lint-ruff-nested`를 보고했습니다. GREEN: ruff finding을 보고하지 않습니다.
 - T24.4: showcase Go adapter는 template의 Go package를 `go.mod`의 `replace` 대신 `packages/template-go`와 `tools/showcase/adapters/go`를 use하는 root `go.work`로 해석합니다. `docs/operations/publication.md`는 소비자에게 같은 방법을 소비자 자신의 `go.work`로 보여 줍니다. RED: `make lint-go`가 `tools/showcase/adapters/go/go.mod:7:1: local replacement are not allowed`(`.golangci.yml`의 gomoddirectives)로 실패했습니다. GREEN: gomoddirectives는 아무것도 보고하지 않고, workspace mode에서 adapter가 build되며 `packages/template-go`의 `go vet ./...`가 통과합니다.
 - T24.3: toolchain floor는 kit의 pin입니다. `.node-version`은 26.11.1이고 모든 `package.json`의 `engines.node`는 `>=26.11.1`입니다. 모든 `composer.json`의 `require.php`는 `>=8.5`, `config.platform.php`는 `8.5`이며, Composer lock의 content hash는 Composer가 계산하고, suite와 CI는 PHP 8.5만 실행합니다(`config/toolchain.json`의 `php`, dependency policy). `requires-python`은 `>=3.14`로 남습니다. 두 `go.mod`의 `go` 줄은 toolchain 줄 없이 1.27.2입니다. `rust-toolchain.toml`과 두 Cargo package의 `rust-version`은 1.99.0입니다. `typescript`는 7.0.2이며, typescript-eslint의 lint peer 범위 때문에 TypeScript 6을 지키던 의존성 예외도 함께 지웠습니다. RED: `make toolchain-check`가 kit의 pin과 다른 manifest floor 21개와 declaration 2개로 실패했습니다. GREEN: floor와 declaration finding이 없고, Node.js case가 이제 `engines.node` `>=` `.node-version`을 기대하는 `node --test tests/scripts/toolchain-files.test.mjs`가 통과합니다.
 - T24.6: TypeScript는 TypeScript 7을 지원하지 않는 typescript-eslint와 eslint 대신 kit의 `make lint-ts`, 곧 oxlint-tsgolint와 함께 oxlint(`.oxlintrc.json`)와 knip(`knip.json`)으로 lint합니다. `eslint.config.mjs`, `make lint-js`, package `eslint`, `@eslint/js`, `typescript-eslint`를 지웠습니다. kit의 lint target `lint-go`, `lint-rust`, `lint-php`가 같은 이름의 template target을 대신하고, template의 target은 format check `lint-go-format`(gofmt), `lint-rust-format`(`cargo fmt --check`), `lint-php-format`(Pint)이 됩니다. `config/toolchain.json`은 kit의 lint target이 실행하는 vulture, golangci-lint, deadcode를 선언합니다. 전체 suite와 CI job은 새 target을 실행하고, `config/owner-checks.json`이 그것을 적습니다. `make lint-ts`가 실행되며, 그 finding은 이 wave의 task입니다.
