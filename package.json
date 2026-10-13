@@ -16,14 +16,14 @@
     "node": ">=26"
   },
   "packageManager": "npm@12.2.0",
-  "dependencies": {
-    "@polyspec/template": "file:packages/template-ts",
-    "@polyspec/template-codemirror": "file:packages/template-codemirror",
-    "@polyspec/template-compiler": "file:packages/template-compiler",
-    "@polyspec/template-language": "file:packages/template-language",
-    "@polyspec/template-lsp": "file:packages/template-lsp",
-    "polyspec-template": "file:packages/template-vscode"
-  },
+  "workspaces": [
+    "packages/template-ts",
+    "packages/template-language",
+    "packages/template-lsp",
+    "packages/template-codemirror",
+    "packages/template-compiler",
+    "packages/template-vscode"
+  ],
   "devDependencies": {
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-html": "^6.4.12",
@@ -60,9 +60,6 @@
   "overrides": {
     "vitepress": {
       "vite": "6.4.3"
-    },
-    "@polyspec/template": "file:packages/template-ts",
-    "@polyspec/template-language": "file:packages/template-language",
-    "@polyspec/template-lsp": "file:packages/template-lsp"
+    }
   }
 }

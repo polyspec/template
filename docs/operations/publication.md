@@ -117,7 +117,7 @@ or one `package` repository entry per zip URL, with the name, version and `dist`
 
 A `package` entry replaces the `composer.json` of the zip, so it repeats its `require` and `autoload`. Composer installs no package of the type `php-ext`: the zip of `polyspec/template-php-ext` is the source that PIE builds the extension from.
 
-In the repository, the private root `package.json`, which is not published, resolves the npm packages of the repository: its `dependencies` and `overrides` name each of them by its directory (`file:packages/<package>`), and npm installs each as a copy (`.npmrc`). The published `package.json` and `composer.json` of each package name the polyspec packages they depend on by exact version only, and each `composer.json` declares its version, which every release sets with the other manifests. No package of the repository depends on a polyspec package of another repository, so no release tag of another repository is recorded.
+In the repository, the private root `package.json`, which is not published, resolves the npm packages of the repository: its `workspaces` name the directory of each of them, and npm links each into `node_modules`. The published `package.json` and `composer.json` of each package name the polyspec packages they depend on by exact version only, and each `composer.json` declares its version, which every release sets with the other manifests. No package of the repository depends on a polyspec package of another repository, so no release tag of another repository is recorded.
 
 ## Documentation site
 

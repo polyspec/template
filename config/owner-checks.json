@@ -670,14 +670,6 @@
     },
     {
       "paths": [
-        ".npmrc"
-      ],
-      "tests": [
-        "tests/scripts/no-symlinks.test.mjs"
-      ]
-    },
-    {
-      "paths": [
         ".node-version",
         ".python-version",
         "rust-toolchain.toml",
