@@ -1,0 +1,3 @@
+# The programs that `make showcase` generates: their indentation follows the generator.
+[*/generated/**]
+indent_style = unset

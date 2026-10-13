@@ -1,8 +1,8 @@
 # Build, test and documentation targets. Every target is idempotent.
 
-# make install-tools (scripts/kit/install-tools.mjs) installs the npm of packageManager in package.json, the Go of
-# packages/template-go/go.mod, the Python of config/toolchain.json pythonBuild and the ruff of config/toolchain.json (on that
-# Python) into var/tools; their wrappers in
+# make install-tools (the install-tools tool of @polyspec/kit) installs the npm of packageManager in package.json, the Go of
+# the kit pin, the uv and the Python of config/toolchain.json and the ruff of config/toolchain.json into var/tools; their
+# wrappers in
 # var/tools/bin come first, so every recipe uses the tools of the checkout and never the npm or Go of the machine (T19.2).
 # GOTOOLCHAIN=local keeps go from downloading another toolchain at run time.
 export PATH := $(CURDIR)/var/tools/bin:$(HOME)/.cargo/bin:$(PATH)
@@ -27,7 +27,7 @@ unexport CARGO_TARGET_DIR
 # cargo, go, npm and Composer offline, so a missing download fails at once instead of reaching a registry in one run and
 # not in another (T20.1-2). The targets that resolve or download, install, install-tools, dependency-review and
 # release-consumer-lock, run their commands with $(ONLINE); make release-consumer installs the archives of a release with
-# its committed locks online (scripts/kit/release-consumer.mjs).
+# its committed locks online (the release-consumer tool of @polyspec/kit).
 export CARGO_NET_OFFLINE := true
 export GOPROXY := off
 export npm_config_offline := true
@@ -40,10 +40,12 @@ ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_
 # failed command; a prerequisite that fails keeps the targets that depend on it from running.
 MAKEFLAGS += -k
 
-# The shared targets of kit (kit-sync, kit-check, kit-test, hooks, push-gate-commit, rerun-failed, documents-check, owner-check,
-# ci-targets, ci-passed, release-*, dependency-*, install-tools, toolchain-check, cargo-downloads-check, lint-python),
-# vendored from polyspec/kit with .kit/kit.lock.json. Only config/*.json differ between repositories.
-include scripts/kit/kit.mk
+# The shared targets of kit (kit-sync, kit-check, hooks, push-gate-commit, rerun-failed, documents-check, owner-check,
+# ci-targets, ci-passed, release-*, dependency-*, install-tools, install-packages, toolchain-check, layout-check,
+# cargo-downloads-check, lint-*) come from the npm package @polyspec/kit: scripts/kit/kit-bootstrap.mk, a copy that make
+# kit-sync writes, includes the kit.mk of the installed package and runs its tools as node $(KIT)/<tool>.$(KIT_EXT). Only
+# config/*.json differ between repositories.
+include scripts/kit/kit-bootstrap.mk
 
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check feature-check \
 	conformance delimiter-matrix parity test-browser ext ext-arginfo test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
@@ -89,13 +91,13 @@ TMGRAMMAR  := node $(CURDIR)/node_modules/vscode-tmgrammar-test/dist/unit.js
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  check                  The full suite through scripts/kit/full-run.mjs: once per tree, when no checklist task is [~]"
-	@echo "  kit-sync|kit-check|kit-test|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|documents-check|ci-targets|install-tools|dependency-policy-check|dependency-review|lint-python|release-*   Targets of scripts/kit/kit.mk"
+	@echo "  check                  The full suite through the full-run tool of @polyspec/kit: once per tree, when no checklist task is [~]"
+	@echo "  kit-sync|kit-check|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|owner-validate|documents-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|dependency-policy-check|dependency-review|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test, ruff check and ruff format --check"
-	@echo "  lint-python            ruff check and ruff format --check of the Python package (scripts/kit/lint-python.mjs)"
+	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
 	@echo "  lint-js                eslint on the TypeScript sources"
-	@echo "  install                install-tools; npm ci: every dependency as a copy, no bin links; the Rust toolchain of rust-toolchain.toml"
+	@echo "  install                After make install-tools TOOLS=npm and make install-packages: Go, uv and Python, the Rust toolchain of rust-toolchain.toml, the crates, the Composer packages and the Python build requirements"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  test-scripts           Tests of the test runner and the conformance runners"
@@ -139,16 +141,16 @@ help: ## List targets
 	@echo "  clean                  Remove build outputs"
 
 # The targets of the full suite, the one list of every runner: `make check`, `make release-test-matrix` and `make
-# release-check` in a clean checkout run them through the guard scripts/kit/full-run.mjs, which refuses while a checklist
+# release-check` in a clean checkout run them through the guard of the full-run tool of @polyspec/kit, which refuses while a checklist
 # task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree, runs
 # each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-js and conformance-ts. The list
-# stays on one line: scripts/kit/owner-check.mjs reads it.
-CHECK_TARGETS := push-gate-commit kit-check kit-test lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+# stays on one line: the owner-check tool of @polyspec/kit reads it.
+CHECK_TARGETS := push-gate-commit kit-check lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
-	node scripts/kit/full-run.mjs run $(CHECK_TARGETS)
+	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
 
 lint: lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php lint-python ## Lint every package
 
@@ -167,21 +169,19 @@ lint-php: build-php
 lint-js: ## Lint the TypeScript sources with eslint
 	$(ESLINT) packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src
 
-# make install also downloads the crates of every Cargo.lock into the registry of CARGO_HOME: the generated checks and
+# make install-tools TOOLS=npm installs the npm of packageManager and make install-packages installs package-lock.json with
+# it, @polyspec/kit included, whose kit.mk has the other targets (T24.1); make install then installs the rest. It downloads
+# the crates of every Cargo.lock into the registry of CARGO_HOME with cargo-downloads-fetch of kit: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
-# make install installs npm, Go and the pinned Python: every Python check runs var/tools/bin/python3, so every job has that
+# make install installs Go, uv and the pinned Python: every Python check runs var/tools/bin/python3, so every job has that
 # interpreter after make install and no job sets up a Python of its own. ruff is installed on that Python by make
 # install-tools TOOLS=ruff, which lint-python needs; cargo-audit and govulncheck serve the dependency review, which make
 # dependency-review installs (a local make install-tools installs every declared tool).
-install: TOOLS := npm go python
-install: install-tools ## Install the tools of the checkout, the npm dependencies as copies without bin links (.npmrc), the Rust toolchain of rust-toolchain.toml, the Composer packages, the crates of every Cargo.lock and the Python build requirements
-	$(ONLINE) $(NPM) ci
-	rustup toolchain install --no-self-update
+install: TOOLS := go uv python
+install: install-tools rust-toolchain cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install Go, uv and Python, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
 	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
 	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
-	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(RUST_DIR)/Cargo.toml
-	$(ONLINE) $(CARGO) fetch --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml
 	$(ONLINE) node scripts/python-wheelhouse.mjs
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
@@ -189,7 +189,7 @@ install: install-tools ## Install the tools of the checkout, the npm dependencie
 install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
 	$(ONLINE) node scripts/install-vscode.mjs $(VSCODE_TOOLS)
 
-# The release steps and the consumer locks are the targets of scripts/kit/kit.mk (config/release.json). The archives are built
+# The release steps and the consumer locks are the targets of the kit.mk of @polyspec/kit (config/release.json). The archives are built
 # from the built npm packages, so the targets that build or lock them run those builds first.
 release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror)
 release-consumer release-consumer-lock: build-ts build-language build-lsp build-codemirror
@@ -213,7 +213,7 @@ test-ts: test-ts-unit test-ts-types test-ts-types-node ## TypeScript unit tests 
 
 .PHONY: test-ts-unit test-ts-types test-ts-types-node
 test-ts-unit: build-ts
-	node scripts/kit/run-tests.mjs vitest --cwd $(TS_DIR)
+	node $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(TS_DIR)
 test-ts-types: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json
 test-ts-types-node: build-ts
@@ -225,7 +225,7 @@ test-go: test-go-vet test-go-unit ## Go unit tests
 test-go-vet:
 	cd $(GO_DIR) && go vet ./...
 test-go-unit:
-	node scripts/kit/run-tests.mjs go --cwd $(GO_DIR) -- -race ./...
+	node $(KIT)/run-tests.$(KIT_EXT) go --cwd $(GO_DIR) -- -race ./...
 
 test-rust: test-rust-clippy test-rust-unit ## Rust clippy and tests
 
@@ -233,13 +233,13 @@ test-rust: test-rust-clippy test-rust-unit ## Rust clippy and tests
 test-rust-clippy: cargo-downloads-check
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
 test-rust-unit: cargo-downloads-check
-	node scripts/kit/run-tests.mjs cargo --cwd $(RUST_DIR) -- --locked
+	node $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked
 
 test-php: build-php ## PHP unit tests
-	node scripts/kit/run-tests.mjs phpunit --cwd $(PHP_DIR)
+	node $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
 test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php ## Tests of the test runner and the conformance runners
-	node scripts/kit/run-tests.mjs node -- tests/scripts/
+	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
 	node scripts/build-package.mjs --package template-language --install
@@ -248,7 +248,7 @@ test-language: test-language-unit test-language-types ## Formatter, safety invar
 
 .PHONY: test-language-unit test-language-types
 test-language-unit: build-language
-	node scripts/kit/run-tests.mjs vitest --cwd $(LANGUAGE_DIR)
+	node $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LANGUAGE_DIR)
 test-language-types: build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
@@ -259,7 +259,7 @@ test-lsp: test-lsp-unit test-lsp-types ## Language server protocol tests against
 
 .PHONY: test-lsp-unit test-lsp-types
 test-lsp-unit: build-lsp
-	node scripts/kit/run-tests.mjs vitest --cwd $(LSP_DIR)
+	node $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LSP_DIR)
 test-lsp-types: build-lsp
 	$(TSC) --noEmit -p $(LSP_DIR)/tsconfig.json
 
@@ -277,7 +277,7 @@ test-codemirror: test-codemirror-unit test-codemirror-browser test-codemirror-ty
 
 .PHONY: test-codemirror-unit test-codemirror-browser test-codemirror-types
 test-codemirror-unit: build-codemirror
-	node scripts/kit/run-tests.mjs vitest --cwd $(CODEMIRROR_DIR)
+	node $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(CODEMIRROR_DIR)
 test-codemirror-browser: build-codemirror
 	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
 test-codemirror-types: build-codemirror
@@ -298,7 +298,7 @@ test-vscode: test-vscode-grammar test-vscode-unit test-vscode-types ## Grammar t
 test-vscode-grammar: build-vscode
 	cd $(VSCODE_DIR) && $(TMGRAMMAR) --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json "tests/grammar/*.tpl"
 test-vscode-unit: build-vscode
-	node scripts/kit/run-tests.mjs node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
+	node $(KIT)/run-tests.$(KIT_EXT) node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
 test-vscode-types: build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
@@ -394,7 +394,7 @@ build-ext-php:
 test-ext-conformance: cargo-downloads-check ext
 	node tests/runner/conformance.mjs --langs php-ext
 test-ext-unit: ext build-ext-php
-	node scripts/kit/run-tests.mjs phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
+	node $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
 rules-check: ## Check case.json rule identifiers against the specification
 	node scripts/check-rules.mjs
@@ -523,7 +523,7 @@ language-test-matrix-mutations-check:
 	node scripts/check-language-test-matrix-mutations.mjs
 
 release-test-matrix: ## The full suite of make check through the same guard: every target of CHECK_TARGETS to its end
-	node scripts/kit/full-run.mjs run $(CHECK_TARGETS)
+	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
 
 release-check: ## Install and run the release matrix in an isolated clean worktree
 	node scripts/check-clean-release.mjs

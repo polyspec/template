@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-documentation -->
-<!-- source-sha256: 3d53fe2791f24cc3486678bc678ab95d3d8838d8354b2d66d391f9ab42939334 -->
+<!-- source-sha256: e2d7629c5853b0453d8dc190616b38ce6a47cf209212c8eb5a0c70edfba359e2 -->
 # 문서
 
 [English](/operations/documentation).
@@ -29,7 +29,7 @@
 ## 검사기
 
 ```sh
-node scripts/kit/check-documents.mjs
+make documents-check
 ```
 
 검사기는 문서에 번역 쌍이 없거나, 상대 링크가 해석되지 않거나, 링크가 절대 경로이거나, 두 언어의 코드 블록이 다르거나, 기능 행의 상태가 유효하지 않거나 근거 링크가 없거나, checklist `docs/plans/execution-checklist.md`의 작업 행 상태가 유효하지 않거나 두 언어 사이에 다르거나, checklist에 heading(제목 포함)이나 작업 표 행이 아닌 줄이 있거나, 상태 표시나 task list 표시가 작업 행 마지막 칸의 시작이 아닌 곳에 있으면 실패하고, 그런 줄과 표시는 file, 줄, 열과 함께 보고한다. `make docs-check`가 검사기를 실행한다.

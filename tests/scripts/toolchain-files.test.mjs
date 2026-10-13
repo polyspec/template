@@ -15,10 +15,7 @@
 // - the last job of ci.yml is ci-passed, the check of ci.yml that a release requires: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
-// - release.yml runs on the push of a tag vX.Y.Z or <directory>/vX.Y.Z at any depth (**/v*: in a tag filter * does not
-//   match /, T22.1-5) with the permission contents: write, in one job
-//   release with the tag in its environment, the whole history checked out and the release steps last and in order
-//   (T22.1-4); it is not the job release of ci.yml.
+// - release.yml is the release workflow that kit copies (T24.1); kit tests it and make kit-check compares the copy.
 // make itself is not pinned: the recipes use no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1
 // print the same commands for every target (T17.1-4).
 import assert from 'node:assert/strict';
@@ -31,7 +28,9 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = file => readFileSync(path.join(ROOT, file), 'utf8');
-const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`);
+// The workflows of template; a workflow that kit copies (kit.copies of @polyspec/kit) is kit's, and make kit-check compares it.
+const KIT_COPIES = new Set(Object.keys(JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json')), 'utf8')).kit.copies));
+const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
 const TOOLCHAIN = JSON.parse(read('config/toolchain.json'));
 
 // The jobs of a workflow with their text.
@@ -48,32 +47,6 @@ function jobsOf(text) {
 // runs no check of the suite and writes no report.
 const CI_PASSED = 'ci-passed';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
-
-// The steps of release.yml in their order (scripts/kit/release.mjs): verify the tagged commit, check the versions, build the
-// archives, create the release (T22.1-4).
-const RELEASE_STEPS = ['make release-verify', 'make release-versions', 'make release-assets', 'make release-publish'];
-
-// Each broken rule of the text of release.yml (T22.1-4).
-export function releaseViolations(text) {
-  const found = [];
-  if (!/\npermissions:\n {2}contents: write\n(?! )/.test(text)) found.push('release.yml: the permissions are not exactly contents: write, which gh release create needs');
-  const all = jobsOf(text);
-  if (JSON.stringify(all.map(job => job.name)) !== JSON.stringify(['release'])) {
-    found.push(`release.yml: the jobs are ${all.map(job => job.name).join(', ')}, not the one job release`);
-    return found;
-  }
-  const [job] = all;
-  if (!/\n {4}env:\n(?: {6}.*\n)*? {6}TAG: \$\{\{ github\.ref_name \}\}\n/.test(job.text)) found.push('release.yml: the job release does not set TAG: ${{ github.ref_name }} in its environment');
-  const steps = job.text.split(/\n(?= {6}- )/).slice(1);
-  if (!/^ {6}- uses: actions\/checkout@/.test(steps[0] ?? '') || !/\n {10}fetch-depth: 0(\n|$)/.test(steps[0] ?? '')) {
-    found.push('release.yml: the first step is not actions/checkout with fetch-depth: 0; the ancestry check needs origin/main');
-  }
-  const runs = [...job.text.matchAll(/^ {6}(?:- )? {0,2}run: (.*)$/gm)].map(match => match[1]);
-  if (JSON.stringify(runs.slice(-RELEASE_STEPS.length)) !== JSON.stringify(RELEASE_STEPS)) {
-    found.push(`release.yml: the steps run [${runs.join(', ')}], not the release steps [${RELEASE_STEPS.join(', ')}] last and in order`);
-  }
-  return found;
-}
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
 export function ciPassedViolations(text) {
@@ -168,7 +141,7 @@ test('the path of every Go module that go get resolves names its directory in th
   // go get github.com/polyspec/template/<directory> finds the module only in that directory of the repository; a module
   // path without a dot in its first element is local to the repository and is never resolved.
   // The fixture of tests/kit is a repository of its own, which the copy of kit tests; it is not a module or a lock of this one.
-  const modules = spawnSync('git', ['ls-files', '*go.mod', ':!tests/kit'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  const modules = spawnSync('git', ['ls-files', '*go.mod'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.ok(modules.length > 0, 'git ls-files listed no go.mod');
   for (const file of modules) {
     const module = /^module (\S+)$/m.exec(read(file))?.[1];
@@ -223,15 +196,14 @@ test('PHP is a minor version of config/toolchain.json and Composer its exact ver
 test('make install installs the tools of the checkout, the Rust toolchain and the crates of every Cargo.lock, and no make or CI job lets rustup install it on the first cargo', () => {
   const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(install.status, 0, install.stderr);
-  // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1).
-  const cargo = process.env.CARGO ?? path.join(process.env.HOME, '.cargo/bin/cargo');
-  const locks = spawnSync('git', ['ls-files', '*Cargo.lock', ':!tests/kit'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
-  assert.ok(locks.length > 0, 'git ls-files listed no Cargo.lock');
-  // The build requirements of the Python package go to var/python/wheelhouse, which the package install check reads (T22.4-20-5).
-  // Only the commands that download leave the offline settings of the recipes (T20.1-2).
+  // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1)
+  // with cargo-downloads-fetch of kit. The build requirements of the Python package go to var/python/wheelhouse, which the
+  // package install check reads (T22.4-20-5). Only the commands that download leave the offline settings of the recipes
+  // (T20.1-2). npm and the packages of package-lock.json are installed before, by make install-tools TOOLS=npm and make
+  // install-packages, which install @polyspec/kit (T24.1).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
-  const fetches = locks.map(lock => `${online} ${cargo} fetch --locked --manifest-path ${path.dirname(lock)}/Cargo.toml`);
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node scripts/kit/install-tools.mjs npm go python`, `${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`, 'rustup toolchain install --no-self-update', `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, ...fetches, `${online} node scripts/python-wheelhouse.mjs`]);
+  const kit = 'node_modules/@polyspec/kit/dist';
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node ${kit}/install-tools.mjs go uv python`, 'rustup toolchain install --no-self-update', `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, `${online} node scripts/python-wheelhouse.mjs`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
@@ -249,15 +221,16 @@ test('every recipe runs cargo, go, npm and Composer offline, so no check reaches
   assert.equal(go, 'off', `go of the recipes: expected GOPROXY off, actual ${go}`);
 });
 
-test('every CI job installs with make install and bootstraps the tools of the checkout with Go', () => {
+test('every CI job installs with make install-tools TOOLS=npm, make install-packages and make install, and sets up no Go', () => {
   for (const file of WORKFLOWS) {
     const text = read(file);
     const direct = /- run: (npm ci|npm install|rustup )[^\n]*/.exec(text);
     assert.equal(direct?.[0], undefined, `${file} installs without make install`);
     for (const job of jobs(file)) {
       if (!/- run: .*\bmake /.test(job.text) || (file.endsWith('/ci.yml') && job.name === CI_PASSED)) continue;
-      assert.match(job.text, /uses: actions\/setup-go@\S+.*\n\s+with:\n\s+go-version-file: packages\/template-go\/go\.mod\n/, `${file} job ${job.name} has no Go to bootstrap make install-tools`);
-      if (file.endsWith('/ci.yml')) assert.match(job.text, /- run: make install\n/, `${file} job ${job.name} does not install with make install`);
+      // make install-tools installs the Go of the kit pin from its archive, so no job sets up a Go of its own (T24.1).
+      assert.doesNotMatch(job.text, /uses: actions\/setup-go@/, `${file} job ${job.name} sets up a Go of PATH; make install-tools installs the Go of the kit pin`);
+      if (file.endsWith('/ci.yml')) assert.match(job.text, /- run: make install-tools TOOLS=npm\n(?:.*\n)*?\s+- run: make install-packages\n(?:.*\n)*?\s+- run: make install\n/, `${file} job ${job.name} does not install with make install-tools TOOLS=npm, make install-packages and make install`);
     }
   }
 });
@@ -314,7 +287,7 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-vscode', 'install-browsers']);
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'install-vscode', 'install-browsers']);
   const REPORTS = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
   const problems = [];
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
@@ -356,20 +329,17 @@ test('no push cancels the running CI of an earlier push (T17.1-7)', () => {
   }
 });
 
-test('each workflow declares exactly its triggers: CI and the site on a push to main and on a manual run, the release on a tag (T17.1-7, T17.1-9, T22.1-4)', () => {
+test('each workflow of template declares exactly its triggers: CI and the site on a push to main and on a manual run (T17.1-7, T17.1-9)', () => {
   const triggers = {
     '.github/workflows/ci.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
     '.github/workflows/pages.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
     '.github/workflows/dependency-review.yml': "on:\n  schedule:\n    - cron: '17 3 * * *'\n  workflow_dispatch:\n",
-    '.github/workflows/release.yml': "on:\n  push:\n    tags: ['v*', '**/v*']\n",
   };
   assert.deepEqual([...WORKFLOWS].sort(), Object.keys(triggers).sort());
   for (const [file, block] of Object.entries(triggers)) {
     const [, declared = ''] = /\n(on:\n(?: .*\n)+)/.exec(`\n${read(file)}`) ?? [];
     assert.equal(declared, block, `${file} declares other triggers`);
   }
-  // In a tag filter * does not match /, so */v* misses the Go module tag packages/template-go/vX.Y.Z (T22.1-5).
-  assert.doesNotMatch(read('.github/workflows/release.yml'), /'\*\/v\*'/, 'release.yml uses */v*, which misses a Go module tag of two levels');
 });
 
 test('ci-passed is the last job of ci.yml, runs always, needs every other job and runs make ci-passed (T22.1-3)', () => {
@@ -389,23 +359,6 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
   for (const [name, [brokenText, message]] of Object.entries(broken)) {
     assert.notEqual(brokenText, text, name);
     const found = ciPassedViolations(brokenText);
-    assert.ok(found.some(issue => issue.includes(message)), `${name}: ${found.join('; ')}`);
-  }
-});
-
-test('release.yml runs its steps in order with the tag and the permission to release (T22.1-4)', () => {
-  const text = read('.github/workflows/release.yml');
-  assert.deepEqual(releaseViolations(text), []);
-  const broken = {
-    order: [text.replace('run: make release-versions', 'run: make release-swap').replace('run: make release-verify', 'run: make release-versions').replace('run: make release-swap', 'run: make release-verify'), 'not the release steps'],
-    'read only': [text.replace('  contents: write\n', '  contents: read\n'), 'not exactly contents: write'],
-    'no tag': [text.replace('      TAG: ${{ github.ref_name }}\n', ''), 'does not set TAG'],
-    shallow: [text.replace('          fetch-depth: 0\n', '          fetch-depth: 1\n'), 'fetch-depth: 0'],
-    'two jobs': [`${text}\n  other:\n    runs-on: ubuntu-24.04\n`, 'not the one job release'],
-  };
-  for (const [name, [brokenText, message]] of Object.entries(broken)) {
-    assert.notEqual(brokenText, text, name);
-    const found = releaseViolations(brokenText);
     assert.ok(found.some(issue => issue.includes(message)), `${name}: ${found.join('; ')}`);
   }
 });
@@ -451,17 +404,18 @@ test('the python job of ci.yml runs the Python suites and ci-passed needs it (T2
   assert.ok(needs[1].split(',').map(name => name.trim()).includes('python'), `ci-passed needs ${needs[1]}, expected python among them`);
 });
 
-// ruff is installed on the pinned Python of var/tools (install-ruff.mjs). make install installs that Python (T22.5-5), and
-// the job that runs lint-python installs ruff after it with make install-tools TOOLS="python ruff" (T22.4-33, T22.5-5).
+// ruff is installed into an environment of the pinned Python of var/tools, which uv makes. make install installs uv and that
+// Python (T22.5-5, T24.1), and the job that runs lint-python installs ruff after it with make install-tools TOOLS=ruff
+// (T22.4-33).
 test('the job that runs lint-python installs the pinned Python and ruff before it, with no setup-python', () => {
   for (const job of jobs('.github/workflows/ci.yml')) {
     if (!/\bTARGETS="[^"]*\blint-python\b/.test(job.text)) continue;
-    const ruff = job.text.indexOf('run: make install-tools TOOLS="python ruff"');
+    const ruff = job.text.indexOf('run: make install-tools TOOLS=ruff\n');
     const lint = job.text.indexOf('lint-python');
-    assert.ok(ruff !== -1 && ruff < lint, `job ${job.name} runs lint-python without make install-tools TOOLS="python ruff" before it`);
+    assert.ok(ruff !== -1 && ruff < lint, `job ${job.name} runs lint-python without make install-tools TOOLS=ruff before it`);
     assert.ok(!job.text.includes('actions/setup-python'), `job ${job.name} sets up a Python of PATH for ruff`);
   }
-  assert.match(read('Makefile'), /^install: TOOLS := npm go python$/m, 'make install installs npm, Go and the pinned Python, which every Python check runs');
+  assert.match(read('Makefile'), /^install: TOOLS := go uv python$/m, 'make install installs Go, uv and the pinned Python, which every Python check runs');
 });
 
 test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up no Python of PATH', () => {

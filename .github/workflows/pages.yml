@@ -35,11 +35,9 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
-        with:
-          go-version-file: packages/template-go/go.mod
-          cache: false
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - run: make install-tools TOOLS=npm
+      - run: make install-packages
       - run: make install
       - run: make ci-targets TARGETS="docs-static-check build-ts"
         env:

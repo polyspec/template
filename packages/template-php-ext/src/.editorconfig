@@ -1,0 +1,3 @@
+# The arginfo header that gen_stub.php generates from the stub of the C extension: its indentation follows the generator.
+[*_arginfo.h]
+indent_style = unset

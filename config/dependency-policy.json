@@ -13,6 +13,7 @@
   "pythonManifests": [
     "packages/template-python/pyproject.toml"
   ],
+  "pythonLocks": [],
   "npmLocks": [
     "package-lock.json"
   ],

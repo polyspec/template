@@ -219,7 +219,8 @@
         "packages/template-rust/Cargo.toml",
         "packages/template-go/go.mod",
         "config/release.json",
-        "tests/fixtures/release-consumer/**"
+        "tests/fixtures/release-consumer/**",
+        "packages/template-python/pylock.wheel.toml"
       ],
       "targets": [
         "release-coverage"
@@ -734,7 +735,7 @@
     },
     {
       "paths": [
-        ".editorconfig"
+        "**/.editorconfig"
       ],
       "tests": [
         "tests/scripts/editorconfig.test.mjs"
@@ -743,13 +744,25 @@
     {
       "paths": [
         "scripts/kit/**",
-        "tests/kit/**",
-        "kit.json",
-        ".kit/**"
+        ".github/workflows/release.yml",
+        "PRINCIPLES.md",
+        "PRINCIPLES.ko.md",
+        "config/layout.kit.yml",
+        "ruff.toml",
+        "phpcs.xml.dist",
+        "phpstan.dist.neon",
+        ".golangci.yml",
+        ".oxlintrc.json",
+        "knip.json",
+        ".editorconfig",
+        "config/api-extractor.kit.json",
+        "config/*.schema.json",
+        "config/php-lint/**",
+        "package.json",
+        "package-lock.json"
       ],
       "targets": [
-        "kit-check",
-        "kit-test"
+        "kit-check"
       ]
     },
     {
@@ -775,6 +788,15 @@
       ],
       "targets": [
         "commits-check"
+      ]
+    },
+    {
+      "paths": [
+        "config/layout.yml",
+        "config/layout.kit.yml"
+      ],
+      "targets": [
+        "layout-check"
       ]
     }
   ],

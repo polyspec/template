@@ -40,7 +40,7 @@ test('the generated runners name each case whose generated test failed', async (
 test('a tool that cannot start fails with its command and the install fix', (t) => {
   // An empty directory as PATH: go cannot start; the runner itself starts with the path of node.
   const bin = directory(t, 'template-no-go-');
-  const run = spawnSync(process.execPath, [path.join(ROOT, 'scripts/kit/run-tests.mjs'), 'go', '--cwd', bin, '--', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
+  const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'go', '--cwd', bin, '--', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
   assert.match(run.stdout, /✖ go .*: cannot start go: spawn go ENOENT; run make install-tools, which installs Go into var\/tools/);
@@ -65,9 +65,9 @@ test('the Go and PHP install projects print the expected and the actual output',
   assert.match(source, /"PHP \$name output differs\\\\nexpected: "\.json_encode\(\$expected\)\."\\\\nactual: {3}"\.json_encode\(\$actual\)/);
 });
 
-test('the PHP extension tests run through scripts/kit/run-tests.mjs', () => {
+test('the PHP extension tests run through the run-tests tool of @polyspec/kit', () => {
   const run = spawnSync('make', ['--no-print-directory', '-n', 'test-ext-unit'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(run.status, 0, run.stderr);
-  assert.match(run.stdout, /^node scripts\/kit\/run-tests\.mjs phpunit --php-extension var\/build\/polyspec_template\.so --cwd packages\/template-php-ext$/m);
+  assert.match(run.stdout, /^node node_modules\/@polyspec\/kit\/dist\/run-tests\.mjs phpunit --php-extension var\/build\/polyspec_template\.so --cwd packages\/template-php-ext$/m);
   assert.doesNotMatch(run.stdout, /run-tests\.sh/);
 });
