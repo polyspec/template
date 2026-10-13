@@ -52,7 +52,7 @@ include scripts/kit/kit-bootstrap.mk
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile language-test-matrix \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install lint-js build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
+	install build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
 	conformance-cases function-inventory-check
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
@@ -81,7 +81,6 @@ CLI_PREFIX ?= $(HOME)/.local
 # npm links the workspace packages of this repository into node_modules and the commands of the packages into
 # node_modules/.bin (T24.2); the recipes start each tool there.
 TSC        := $(CURDIR)/node_modules/.bin/tsc
-ESLINT     := $(CURDIR)/node_modules/.bin/eslint
 VITEPRESS  := $(CURDIR)/node_modules/.bin/vitepress
 VITEST     := $(CURDIR)/node_modules/.bin/vitest
 PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
@@ -93,9 +92,9 @@ help: ## List targets
 	@echo "  check                  The full suite through the full-run tool of @polyspec/kit: once per tree, when no checklist task is [~]"
 	@echo "  kit-sync|kit-check|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|owner-validate|documents-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|dependency-policy-check|dependency-review|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
-	@echo "  lint                   eslint, gofmt, cargo fmt --check, Rust showcase warnings, pint --test, ruff check and ruff format --check"
+	@echo "  lint                   The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
-	@echo "  lint-js                eslint on the TypeScript sources"
+	@echo "  lint-ts                oxlint with oxlint-tsgolint and knip on the TypeScript (the lint-ts tool of @polyspec/kit)"
 	@echo "  install                After make install-tools TOOLS=npm and make install-packages: Go, uv and Python, the Rust toolchain of rust-toolchain.toml, the crates, the Composer packages and the Python build requirements"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
@@ -144,29 +143,33 @@ help: ## List targets
 # task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree, runs
 # each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
-# ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-js and conformance-ts. The list
+# ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check feature-check dependency-audit language-test-matrix contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
 
-lint: lint-js lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php lint-python ## Lint every package
+lint: lint-ts lint-go lint-rust lint-php lint-python lint-go-format lint-rust-format lint-php-format lint-showcase-format lint-showcase-warnings ## Lint every package: the lint targets of kit and the format checks of template
 
-.PHONY: lint-go lint-rust lint-showcase-format lint-showcase-warnings lint-php
-lint-go:
+# The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python) run oxlint with oxlint-tsgolint and knip,
+# golangci-lint and deadcode, clippy, phpcs and PHPStan, and ruff and vulture with the configuration that kit copies (T24.6).
+# They read the installed Composer packages and the crates, which these prerequisites provide. The format checks are
+# template's.
+lint-php: build-php build-ext-php
+lint-rust: cargo-downloads-check
+
+.PHONY: lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php-format
+lint-go-format:
 	@out=$$(gofmt -l $(GO_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
-lint-rust:
+lint-rust-format:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
 lint-showcase-format:
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
 lint-showcase-warnings: cargo-downloads-check
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
-lint-php: build-php
+lint-php-format: build-php
 	$(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
-
-lint-js: ## Lint the TypeScript sources with eslint
-	$(ESLINT) packages/template-ts/src packages/template-language/src packages/template-lsp/src packages/template-codemirror/src packages/template-vscode/src
 
 # make install-tools TOOLS=npm installs the npm of packageManager and make install-packages installs package-lock.json with
 # it, @polyspec/kit included, whose kit.mk has the other targets (T24.1); make install then installs the rest. It downloads

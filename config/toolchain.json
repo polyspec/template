@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor versions that the suite runs on: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run. python is the Python minor version of the suite: the pythonBuild release of that minor, which the uv of uv installs, is the interpreter of every Python check (var/tools/bin/python3), so no job sets up a Python of its own. go names the go.mod whose go directive is the Go version of every run. cargoAudit and govulncheck are the releases that make dependency-review installs into var/tools for the advisories of the Cargo.lock files and the Go modules. ruff is the ruff release that make lint-python runs and make install-tools installs, with the sha256 of its wheel of each platform.",
+  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor versions that the suite runs on: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run. python is the Python minor version of the suite: the pythonBuild release of that minor, which the uv of uv installs, is the interpreter of every Python check (var/tools/bin/python3), so no job sets up a Python of its own. go names the go.mod whose go directive is the Go version of every run. cargoAudit and govulncheck are the releases that make dependency-review installs into var/tools for the advisories of the Cargo.lock files and the Go modules. ruff is the ruff release that make lint-python runs and make install-tools installs, with the sha256 of its wheel of each platform. vulture, golangciLint and deadcode are the releases of the lint tools of kit that make lint-python and make lint-go run and make install-tools installs.",
   "php": [
     "8.2",
     "8.5"
@@ -38,5 +38,19 @@
   "pythonBackend": {
     "requirement": "setuptools==84.0.0",
     "sha256": "51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670"
-  }
+  },
+  "vulture": {
+    "version": "2.16",
+    "sha256": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee"
+  },
+  "golangciLint": {
+    "version": "2.14.0",
+    "sha256": {
+      "darwin-arm64": "5ef5f36a7147e91dc58ef9ef4d11bb7bad5ead0c76eb6c01327a73c641d1dcc3",
+      "darwin-x64": "a5667c1c3536be1740133213e1e822bfb8f0d98ea12903174d6d5f635e4ed68d",
+      "linux-arm64": "ee7ec5f3453d15ddf106fae5a4d6c71737712348a979d1fe9cd52ec7ea299bae",
+      "linux-x64": "ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab"
+    }
+  },
+  "deadcode": "0.52.0"
 }
