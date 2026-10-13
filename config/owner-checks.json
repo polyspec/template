@@ -835,6 +835,16 @@
         "parity-declarations-check",
         "parity-check"
       ]
+    },
+    {
+      "paths": [
+        "tests/scripts/driver-fixture.mjs"
+      ],
+      "tests": [
+        "tests/scripts/drivers.test.mjs",
+        "tests/scripts/failure-messages.test.mjs",
+        "tests/scripts/no-silent-skips.test.mjs"
+      ]
     }
   ],
   "inputs": [
