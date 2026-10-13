@@ -12,7 +12,9 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = file => readFileSync(path.join(ROOT, file), 'utf8');
-const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`);
+// The workflows of template; a workflow that kit copies (kit.copies of @polyspec/kit) is kit's, and make kit-check compares it.
+const KIT_COPIES = new Set(Object.keys(JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json')), 'utf8')).kit.copies));
+const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
 
 // The commands that make prints for `target` without running them. A make started by another make, as `make check`
 // starts `make test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
@@ -39,7 +41,7 @@ function jobsOf(text) {
 const CHECK_TARGETS = read('Makefile').match(/^CHECK_TARGETS := (.*)$/m)[1].split(/\s+/).filter(Boolean);
 
 test('make release-test-matrix runs the targets of make check through the same guard', () => {
-  const guard = `node scripts/kit/full-run.mjs run ${CHECK_TARGETS.join(' ')}`;
+  const guard = `node node_modules/@polyspec/kit/dist/full-run.mjs run ${CHECK_TARGETS.join(' ')}`;
   assert.deepEqual(dryRun('check'), [guard]);
   assert.deepEqual(dryRun('release-test-matrix'), [guard]);
 });

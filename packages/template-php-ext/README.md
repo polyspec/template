@@ -82,4 +82,4 @@ composer install
 make test-ext
 ```
 
-`make test-ext` runs the conformance cases through the command line interface and the suite in `tests/` with PHPUnit through `scripts/kit/run-tests.mjs phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. The templates of the unit tests are in `tests/templates`.
+`make test-ext` runs the conformance cases through the command line interface and the suite in `tests/` with PHPUnit through `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. The templates of the unit tests are in `tests/templates`.

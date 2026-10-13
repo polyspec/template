@@ -9,13 +9,14 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`);
+// The workflows of template; a workflow that kit copies (kit.copies of @polyspec/kit) is kit's, and make kit-check compares it.
+const KIT_COPIES = new Set(Object.keys(JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json')), 'utf8')).kit.copies));
+const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
 
 const VERIFIED = [
   { action: 'actions/checkout', version: 'v6.1.0', commit: 'd23441a48e516b6c34aea4fa41551a30e30af803' },
   { action: 'actions/configure-pages', version: 'v6.0.0', commit: '45bfe0192ca1faeb007ade9deae92b16b8254a0d' },
   { action: 'actions/deploy-pages', version: 'v5.0.1', commit: '368f82528645a54fb793d4d04e342629a3f51346' },
-  { action: 'actions/setup-go', version: 'v6.5.0', commit: '924ae3a1cded613372ab5595356fb5720e22ba16' },
   { action: 'actions/setup-node', version: 'v6.5.0', commit: '249970729cb0ef3589644e2896645e5dc5ba9c38' },
   { action: 'actions/upload-artifact', version: 'v7.0.1', commit: '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' },
   { action: 'actions/upload-pages-artifact', version: 'v5.0.0', commit: 'fc324d3547104276b827a68afc52ff2a11cc49c9' },

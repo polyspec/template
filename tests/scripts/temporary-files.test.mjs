@@ -12,7 +12,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SOURCES = spawnSync('git', ['ls-files', '*.mjs', '*.js', '*.ts', '*.cjs'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+const SOURCES = spawnSync('git', ['ls-files', '*.mjs', '*.mts', '*.js', '*.ts', '*.cjs'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
 
 // The first argument of a call that starts at `index` of `text`, up to its top-level comma or closing parenthesis.
 function firstArgument(text, index) {
@@ -31,11 +31,11 @@ function firstArgument(text, index) {
 // A directory of the checkout: built from a path of the checkout, the current directory or a relative path.
 const IN_CHECKOUT = /\b(?:root|ROOT|repoRoot|crate|goRoot|packages|__dirname)\b|process\.cwd\(\)|^['"`](?!\/)/;
 
-// The one exception: the installer of the vendored tools of kit builds a tool beside its install prefix in var/tools, the
-// cache of the checkout that no test reads, and renames it into place. The exception names the file and the exact
-// argument, so any other call of that file fails. Removal condition: kit builds a tool in the system temporary
+// The one exception: the bootstrap installer that kit copies (kit.copies) builds a tool beside its install prefix in
+// var/tools, the cache of the checkout that no test reads, and renames it into place. The exception names the file and the
+// exact argument, so any other call of that file fails. Removal condition: kit builds a tool in the system temporary
 // directory.
-const EXCEPTIONS = { 'scripts/kit/install-tool.mjs': ['`${prefix}.next-`'] };
+const EXCEPTIONS = { 'scripts/kit/bootstrap/install-tool.mts': ['`${prefix}.next-`'] };
 
 test('no mkdtemp of a tracked script makes its directory in the checkout', () => {
   const inCheckout = [];

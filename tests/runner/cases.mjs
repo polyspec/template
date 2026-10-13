@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import readline from 'node:readline';
+import { fileURLToPath } from 'node:url';
 import { root } from './drivers.mjs';
 
 export const casesDir = join(root, 'tests', 'cases');
@@ -154,13 +155,13 @@ export function describeText(expected, actual) {
 }
 
 /**
- * Runs `node scripts/kit/run-tests.mjs <args>` on the generated tests of the cases, prints its output as it arrives and
+ * Runs the run-tests tool of @polyspec/kit with `<args>` on the generated tests of the cases, prints its output as it arrives and
  * resolves its exit status, the ids of the cases whose test failed and its last line (T19.10). A case is found in a
  * failure line (`✖`) by the name of its test or package, `case_<name>`, which `names` maps to the case id.
  */
 export function runCaseTests(args, { cwd, env }, names) {
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(process.execPath, [join(root, 'scripts/kit/run-tests.mjs'), ...args], { cwd, env, stdio: ['ignore', 'pipe', 'inherit'] });
+    const child = spawn(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), ...args], { cwd, env, stdio: ['ignore', 'pipe', 'inherit'] });
     const failed = new Set();
     let last = '';
     readline.createInterface({ input: child.stdout }).on('line', (line) => {

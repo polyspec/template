@@ -1,0 +1,7 @@
+# Byte-exact inputs and expected outputs of tests: an editor keeps their bytes. EditorConfig applies this file after the
+# root .editorconfig that kit copies. It lies above the case directories, which hold the cases only.
+[{cases,fixtures}/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

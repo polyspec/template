@@ -1,0 +1,3 @@
+# The page that `make showcase` writes: its indentation follows the generator.
+[index.html]
+indent_style = unset

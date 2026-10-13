@@ -1,3 +1,7 @@
+# The EditorConfig of every polyspec repository, copied by kit; change it in kit, never in a copy. Each language follows the
+# indentation of its formatter: gofmt, cargo fmt, ruff format and the PSR-12 of phpcs. A folder whose files keep their bytes,
+# such as the inputs and expected outputs of tests, holds a .editorconfig of its own that unsets these properties, as
+# EditorConfig applies the nearest file last.
 root = true
 
 [*]
@@ -11,32 +15,8 @@ trim_trailing_whitespace = true
 [*.go]
 indent_style = tab
 
-[*.php]
+[*.{php,rs,py,c,h}]
 indent_size = 4
-
-[*.rs]
-indent_size = 4
-
-[*.{c,h}]
-indent_size = 4
-
-# The arginfo header that gen_stub.php generates from the stub of the C extension: its indentation follows the generator.
-[packages/template-php-ext/src/*_arginfo.h]
-indent_style = unset
 
 [{Makefile,*.mk}]
 indent_style = tab
-
-[*.tpl]
-trim_trailing_whitespace = false
-
-# Byte-exact inputs and expected outputs of tests: an editor keeps their bytes.
-[{tests/cases,tests/fixtures}/**]
-charset = unset
-end_of_line = unset
-insert_final_newline = unset
-trim_trailing_whitespace = unset
-
-# Files that `make showcase` writes: their indentation follows the generator.
-[{examples/site/index.html,tools/showcase/adapters/*/generated/**}]
-indent_style = unset

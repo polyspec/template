@@ -130,7 +130,11 @@
           "-c",
           "import polyspec.template"
         ]
-      }
+      },
+      "lock": {
+        "polyspec-template": "packages/template-python/pylock.wheel.toml"
+      },
+      "polyspec": {}
     }
   },
   "proof": {
