@@ -829,6 +829,16 @@
       "targets": [
         "lint-php"
       ]
+    },
+    {
+      "paths": [
+        "go.work"
+      ],
+      "targets": [
+        "lint-go",
+        "test-go",
+        "showcase-check"
+      ]
     }
   ],
   "inputs": [

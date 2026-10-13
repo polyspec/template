@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 1271a95030d5d7995e75008b7bad2677cccc5d9a51ecec328664f94cf85ac6e5 -->
+<!-- source-sha256: 28f8e7954be5fc96e9d179dd30e4306c7899a76336dd2b5a26526098c3fdc78a -->
 # 발행
 
 [English](/operations/publication).
@@ -11,9 +11,10 @@
 Go module:
 
 ```
-require github.com/polyspec/template/packages/template-go v0.0.6
-replace github.com/polyspec/template/packages/template-go => ../template/packages/template-go
+go work init . ../template/packages/template-go
 ```
+
+Go module은 checkout을 소비자의 `go.work`로 해석하며, 릴리스된 module이 보지 못하는 `go.mod`의 `replace`는 쓰지 않는다.
 
 npm package:
 
