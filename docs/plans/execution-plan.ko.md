@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-plan -->
-<!-- source-sha256: c6269c68c811d1488eb58f98e3e745795f53d929d1c3f3798600dd45cecaed39 -->
+<!-- source-sha256: 3b782efd9fd16076b14cd8157c568f07345b1b26bd9488ff4b3216bdc4ef28cc -->
 # 실행 계획
 
 [English](/plans/execution-plan).
@@ -150,6 +150,10 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 의존성: 없음. 모든 변경은 필수 check와 함께 merge queue로 `main`에 도달하므로 `main`의 모든 commit은 전체 suite를 통과했고, 릴리스는 메인테이너가 버전 올림 pull request 뒤에 `main`의 commit에 붙이는 tag다. changelog는 tag `v0.0.1`의 항목을 `## Unreleased` 아래에 두었고, `packages/template-go/go.mod`의 module 경로는 `go get`이 그 directory로 해석하지 않는 `github.com/polyspec/template`이었으며, ruleset `main`은 `ci.yml`의 모든 job을 적었으므로 새 job은 ruleset이 이름을 적기 전까지 요구되지 않았고, tag에서 실행되는 workflow가 없었다. 종료 조건: changelog는 `## 0.0.1` 위에 `## Unreleased`를 두고, module 경로는 `github.com/polyspec/template/packages/template-go`이며, ruleset은 정확히 `push-gate`와 `ci-passed`를 요구하고, `.github/workflows/release.yml`은 check를 통과했고 manifest가 tag의 버전을 담으며 changelog에 그 section이 있는 `main`의 commit에 대해서만 tag의 GitHub Release를 만든다.
 
+## Wave 23 — 표준으로서의 editor stack
+
+의존성: T23.4는 kit 항목 T128-K를 기다리며, T128-K는 kit K71(kit을 TS package로)을 기다린다. orm 계획 `docs/plans/editor-stack.md`는 구문 분석과 formatting을 모든 runtime의 표준으로 정하며, template이 그에 못 미친다는 것을 찾았다: `template-language`는 parser 옆에 lexical table을 다시 적고, VS Code extension은 tag용 수기 TextMate grammar를 가지며, `format()`은 TS에만 있고, host 없는 tool은 include 경로를 해석할 선언된 root가 없다. 종료 조건: parser가 유일한 grammar이고, 모든 runtime이 분석하고 format하며 conformance와 parity runner가 둘을 비교하고, VS Code extension에 tag grammar가 없고, 공유 editor tool은 kit에서 오며, host 없는 tool은 `template-root.json`으로 해석한다.
+
 ## 병렬성 요약
 
 | 웨이브 | 병렬 그룹 | 순차 제약 |
@@ -175,6 +179,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 | W20 | T20.1, T20.2, T20.3 | T20.3-1은 T20.3 뒤, T20.1-1은 T20.3-1 뒤, T20.1-2는 T20.1-1 뒤, T20.1-3은 T20.1-2 뒤, T20.1-4는 T20.1-3 뒤, T20.1-5는 T20.1-4 뒤, T20.1-6은 T20.1-5 뒤, T20.1-7은 T20.1-6 뒤, T20.1-8은 T20.1-7 뒤, T20.1-9는 T20.1-8 뒤, T20.1-10은 T20.1-9 뒤, T20.1-11은 T20.1-10 뒤, T20.1-12는 T20.1-11 뒤, T20.1-13은 T20.1-12 뒤 |
 | W21 | 없음 | T21.1 → T21.2 → T21.3 → T21.4 → T21.4-1 → T21.4-2 |
 | W22 | 없음 | T22.1-1 → T22.1-2 → T22.1-3 → T22.1-4 → T22.1 → T22.2 → T22.2-1 → T22.2-2 → T22.2-3 → T22.3 → T22.3-1 → T22.3-2 → T22.3-3 → T22.3-4 → T22.3-5 → T22.3-6 |
+| W23 | T23.1, T23.3, T23.5 | T23.2는 T23.1 뒤; T23.4는 kit 항목 T128-K 뒤 |
 
 ## 완료 정의
 
