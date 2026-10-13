@@ -171,7 +171,8 @@
       ],
       "tests": [
         "$path"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -182,7 +183,8 @@
       "tests": [
         "tests/scripts/failure-messages.test.mjs",
         "tests/scripts/test-targets.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -197,7 +199,8 @@
         "tests/scripts/build-package.test.mjs",
         "tests/scripts/conformance-cases.test.mjs",
         "tests/scripts/suite-parity.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -250,7 +253,8 @@
       ],
       "tests": [
         "tests/scripts/build-package.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -280,7 +284,8 @@
       ],
       "tests": [
         "tests/scripts/conformance-cases.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -332,7 +337,8 @@
       "tests": [
         "tests/scripts/install-cli.test.mjs",
         "tests/scripts/atomic-publish.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -340,7 +346,8 @@
       ],
       "tests": [
         "tests/scripts/atomic-publish.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -411,7 +418,9 @@
         "benchmark-check",
         "benchmark-smoke",
         "lint-showcase-format",
-        "lint-showcase-warnings"
+        "lint-showcase-warnings",
+        "lint-go",
+        "lint-rust"
       ]
     },
     {
@@ -510,7 +519,8 @@
       ],
       "tests": [
         "tests/scripts/clean-release.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -528,7 +538,8 @@
         "contract-check",
         "generated-native-check",
         "showcase-check",
-        "typed-generator-compile-check"
+        "typed-generator-compile-check",
+        "lint-ts"
       ]
     },
     {
@@ -538,7 +549,7 @@
       "targets": [
         "artifact-digest-check",
         "test-ts",
-        "lint-js",
+        "lint-ts",
         "conformance",
         "conformance-generated-ts",
         "delimiter-matrix",
@@ -557,7 +568,7 @@
       "targets": [
         "test-language",
         "format-check",
-        "lint-js",
+        "lint-ts",
         "test-lsp",
         "test-codemirror",
         "test-vscode"
@@ -569,7 +580,7 @@
       ],
       "targets": [
         "test-lsp",
-        "lint-js",
+        "lint-ts",
         "test-vscode",
         "test-vscode-integration"
       ]
@@ -580,7 +591,7 @@
       ],
       "targets": [
         "test-codemirror",
-        "lint-js"
+        "lint-ts"
       ]
     },
     {
@@ -589,7 +600,7 @@
       ],
       "targets": [
         "test-vscode",
-        "lint-js",
+        "lint-ts",
         "test-vscode-integration"
       ]
     },
@@ -600,6 +611,7 @@
       "targets": [
         "test-go",
         "lint-go",
+        "lint-go-format",
         "conformance",
         "conformance-generated-go",
         "delimiter-matrix",
@@ -613,6 +625,7 @@
       "targets": [
         "test-rust",
         "lint-rust",
+        "lint-rust-format",
         "conformance",
         "conformance-generated-rust",
         "delimiter-matrix",
@@ -626,6 +639,7 @@
       "targets": [
         "test-php",
         "lint-php",
+        "lint-php-format",
         "conformance",
         "conformance-generated-php",
         "delimiter-matrix",
@@ -654,18 +668,11 @@
         "packages/template-php-ext/**"
       ],
       "targets": [
-        "test-ext"
+        "test-ext",
+        "lint-php"
       ],
       "tests": [
         "tests/scripts/build-php-extension.test.mjs"
-      ]
-    },
-    {
-      "paths": [
-        "eslint.config.mjs"
-      ],
-      "targets": [
-        "lint-js"
       ]
     },
     {
@@ -678,7 +685,8 @@
       ],
       "tests": [
         "tests/scripts/toolchain-files.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -715,7 +723,8 @@
       "tests": [
         "tests/scripts/suite-parity.test.mjs",
         "tests/scripts/action-pins.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -723,7 +732,8 @@
       ],
       "tests": [
         "tests/scripts/ignored-files.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -731,7 +741,8 @@
       ],
       "tests": [
         "tests/scripts/editorconfig.test.mjs"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -789,6 +800,34 @@
       ],
       "targets": [
         "layout-check"
+      ]
+    },
+    {
+      "paths": [
+        ".oxlintrc.json",
+        "knip.json",
+        "config/api-extractor.kit.json"
+      ],
+      "targets": [
+        "lint-ts"
+      ]
+    },
+    {
+      "paths": [
+        ".golangci.yml"
+      ],
+      "targets": [
+        "lint-go"
+      ]
+    },
+    {
+      "paths": [
+        "phpcs.xml.dist",
+        "phpstan.dist.neon",
+        "config/php-lint/**"
+      ],
+      "targets": [
+        "lint-php"
       ]
     }
   ],
@@ -973,22 +1012,38 @@
       ]
     },
     {
-      "check": "make lint-js",
+      "check": "make lint-ts",
       "paths": [
-        "packages/template-{ts,language,lsp,codemirror,vscode}/src/**",
-        "eslint.config.mjs"
+        "packages/template-{ts,language,lsp,codemirror,compiler,vscode}/**",
+        ".oxlintrc.json",
+        "knip.json"
       ]
     },
     {
-      "check": "make lint-go",
+      "check": "make lint-go-format",
       "paths": [
         "packages/template-go/**"
       ]
     },
     {
-      "check": "make lint-rust",
+      "check": "make lint-go",
+      "paths": [
+        "packages/template-go/**",
+        "tools/showcase/adapters/go/**",
+        ".golangci.yml"
+      ]
+    },
+    {
+      "check": "make lint-rust-format",
       "paths": [
         "packages/template-rust/**"
+      ]
+    },
+    {
+      "check": "make lint-rust",
+      "paths": [
+        "packages/template-rust/**",
+        "tools/showcase/adapters/rust/**"
       ]
     },
     {
@@ -1004,9 +1059,19 @@
       ]
     },
     {
-      "check": "make lint-php",
+      "check": "make lint-php-format",
       "paths": [
         "packages/template-php/**"
+      ]
+    },
+    {
+      "check": "make lint-php",
+      "paths": [
+        "packages/template-php/**",
+        "packages/template-php-ext/**",
+        "phpcs.xml.dist",
+        "phpstan.dist.neon",
+        "config/php-lint/**"
       ]
     },
     {
@@ -1402,7 +1467,8 @@
       "check": "make lint-python",
       "paths": [
         "packages/template-python/**",
-        "config/toolchain.json"
+        "config/toolchain.json",
+        "ruff.toml"
       ]
     }
   ]
