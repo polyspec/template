@@ -19,7 +19,7 @@
       "require": "./dist/render.cjs"
     },
     "./node": {
-      "types": "./dist/node.d.ts",
+      "types": "./dist/node/index.d.ts",
       "import": "./dist/node.mjs",
       "require": "./dist/node.cjs"
     }

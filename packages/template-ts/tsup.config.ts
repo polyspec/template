@@ -14,7 +14,6 @@ export default defineConfig((options) => ({
   // entry creates, such as a bound map (VAL-22), is an instance of the class that every other entry
   // checks.
   format: ['esm'],
-  dts: { compilerOptions: { types: ['node'] } },
   clean: true,
   sourcemap: true,
   platform: 'neutral',
