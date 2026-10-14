@@ -344,7 +344,7 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 PYTHON := $(CURDIR)/var/tools/mise/shims/python3
 
 test-python: ## Unit tests of the Python package
-	status=0; for test in packages/template-python/tests/test_api.py packages/template-python/tests/test_exports.py packages/template-python/tests/test_package_data.py packages/template-python/tests/test_object_calls.py packages/template-python/tests/test_expr_fixtures.py packages/template-python/tests/test_function_contract.py packages/template-python/tests/test_compiler_interface.py; do $(PYTHON) $$test || status=1; done; exit $$status
+	PYTHONPATH=packages/template-python/src $(PYTHON) -m unittest discover -s packages/template-python/tests -t packages/template-python/tests
 
 conformance-generated-python: build-ts ## Python generated compiler conformance suite
 	node tests/runner/conformance-generated-python.mjs
