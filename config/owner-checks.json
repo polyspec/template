@@ -45,7 +45,7 @@
     },
     {
       "paths": [
-        "schema/ast.schema.json",
+        "schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema*.mjs",
         "scripts/conformance-case-files.mjs"
       ],
@@ -133,6 +133,16 @@
       "tests": [
         "tests/scripts/browser-port.test.mjs",
         "tests/scripts/browser-server.test.mjs"
+      ]
+    },
+    {
+      "paths": [
+        "tests/runner/case-list.{mjs,d.mts}"
+      ],
+      "targets": [
+        "conformance",
+        "test-language",
+        "test-ts"
       ]
     },
     {
@@ -892,7 +902,7 @@
     {
       "check": "make schema-fixtures-check",
       "paths": [
-        "schema/ast.schema.json",
+        "schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema.mjs",
         "scripts/conformance-case-files.mjs"
       ]
@@ -900,7 +910,7 @@
     {
       "check": "make schema-mutations-check",
       "paths": [
-        "schema/ast.schema.json",
+        "schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema-mutations.mjs"
       ]
     },
