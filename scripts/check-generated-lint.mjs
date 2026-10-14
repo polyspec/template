@@ -73,6 +73,8 @@ function checkPhp() {
   // The PHP program of a scenario is a directory of PSR-4 files (T25.1).
   const files = scenarios.flatMap(id => readdirSync(join(root, showcasePhpDirectory(id))).map(name => join(root, showcasePhpDirectory(id), name)));
   run(join(root, 'packages/template-php/vendor/bin/pint'), ['--test', '--preset', 'psr12', ...files]);
+  // T25.2: --warning-severity=0 hides the line length warnings of PSR-12 until the PHP emitter keeps lines within 120
+  // columns; remove it then.
   run('phpcs', ['--standard=phpcs.xml.dist', '--warning-severity=0', ...files]);
 }
 
