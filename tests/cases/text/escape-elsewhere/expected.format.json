@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "\\{ a }\nvar re = /\\{\\d+\\}/;\n"
+  },
+  "keep": {
+    "text": "\\{ a }\nvar re = /\\{\\d+\\}/;\n"
+  }
+}

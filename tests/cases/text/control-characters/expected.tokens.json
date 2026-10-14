@@ -1,0 +1,18 @@
+[
+  [29,30,"delimiter"],
+  [30,31,"keyword"],
+  [32,80,"string"],
+  [81,82,"operator"],
+  [83,86,"function"],
+  [86,87,"delimiter"],
+  [88,89,"delimiter"],
+  [89,90,"keyword"],
+  [91,115,"string"],
+  [116,117,"operator"],
+  [118,121,"function"],
+  [121,122,"delimiter"],
+  [123,124,"delimiter"],
+  [124,125,"keyword"],
+  [126,146,"string"],
+  [146,147,"delimiter"]
+]

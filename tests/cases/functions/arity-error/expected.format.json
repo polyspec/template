@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= upper('a', 'b')}\n"
+  },
+  "keep": {
+    "text": "{= upper('a', 'b')}\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= truncate('abcdef', 3)}\n{= truncate('abc', 3)}\n{= truncate('😀😀😀😀', 2, '…')}\n"
+  },
+  "keep": {
+    "text": "{= truncate('abcdef', 3)}\n{= truncate('abc', 3)}\n{= truncate('😀😀😀😀', 2, '…')}\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<ul>\n  /* {{@ i = items}} */\n    <li>/*{{= i}}*/</li>\n  /* {{:}} */\n    <li>none</li>\n  /* {{/}} */\n</ul>\n"
+  },
+  "keep": {
+    "text": "<ul>\n/* {{@ i = items}} */\n<li>/*{{= i}}*/</li>\n/* {{:}} */\n<li>none</li>\n/* {{/}} */\n</ul>\n"
+  }
+}

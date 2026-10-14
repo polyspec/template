@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<style>\n/* {{= css}} */\n</style>\n"
+  },
+  "keep": {
+    "text": "<style>\n/* {{= css}} */\n</style>\n"
+  }
+}

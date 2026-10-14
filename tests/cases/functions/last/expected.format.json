@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= last(l)}\n{= last('héllo')}\n{= json(last('')) | raw}\n"
+  },
+  "keep": {
+    "text": "{= last(l)}\n{= last('héllo')}\n{= json(last('')) | raw}\n"
+  }
+}

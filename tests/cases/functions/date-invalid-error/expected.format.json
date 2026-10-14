@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= date('nope', 'Y')}\n"
+  },
+  "keep": {
+    "text": "{= date('nope', 'Y')}\n"
+  }
+}

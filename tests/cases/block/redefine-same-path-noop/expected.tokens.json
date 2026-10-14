@@ -1,0 +1,12 @@
+[
+  [0,1,"delimiter"],
+  [1,2,"keyword"],
+  [3,7,"path"],
+  [8,13,"path"],
+  [13,14,"delimiter"],
+  [15,16,"delimiter"],
+  [16,17,"keyword"],
+  [18,22,"path"],
+  [23,28,"path"],
+  [28,29,"delimiter"]
+]

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{? on}\n  yes\n{/}\n{? off}\n  no\n{/}\nend\n"
+  },
+  "keep": {
+    "text": "{? on}\nyes\n{/}\n{? off}\nno\n{/}\nend\n"
+  }
+}

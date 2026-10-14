@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= items.1}|{= items['1']}|{= m.2}\n"
+  },
+  "keep": {
+    "text": "{= items.1}|{= items['1']}|{= m.2}\n"
+  }
+}

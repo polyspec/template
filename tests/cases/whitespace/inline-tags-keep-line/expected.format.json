@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<span>{? on}on{:}off{/}</span>\n"
+  },
+  "keep": {
+    "text": "<span>{? on}on{:}off{/}</span>\n"
+  }
+}

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Conformance runner: runs every fixture case through the selected language CLIs
-// and compares the AST, the HTML output and the error fields with the expected files.
+// and compares the AST, the HTML output, the error fields, the tokens and the formatted text with the expected files
+// (CNF-9). A case whose input parses (expected.ast.json) compares tokens and formatted text in every language; an
+// implementation without the subcommand fails the case.
 // Each case prints `<case> [<lang>] pass|fail (<ms> ms)` when it finishes in a language; the
 // summary table follows the last case. Each CLI call has its own timeout (drivers.mjs).
 //
@@ -8,11 +10,15 @@
 //   --langs ts,go,rust,php,php-ext   languages to run (default: every language whose package exists)
 //   --case group/name | group        run one case or one group
 //   --list                           print the cases and exit
-//   --update ast|html|error          write the expected file from the ts implementation
+//   --update ast|html|error|tokens|format
+//                                    write the expected file from the ts implementation
 import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { invoke, prepare, selectLanguages } from './drivers.mjs';
-import { describeText, filesystemCases, firstDifference, listCases, parseArgs, parseErrorOutput, renderArgs } from './cases.mjs';
+import {
+  describeText, filesystemCases, firstDifference, FORMAT_MODES, formatArgs, formatOutcome, listCases, parseArgs, parseErrorOutput, renderArgs, tokensArgs,
+  tokensText,
+} from './cases.mjs';
 
 const options = { langs: null, case: null, list: false, update: null };
 const argv = process.argv.slice(2);
@@ -23,7 +29,7 @@ for (let i = 0; i < argv.length; i++) {
     case '--list': options.list = true; break;
     case '--update': options.update = argv[++i]; break;
     case '--help':
-      process.stdout.write('usage: conformance.mjs [--langs a,b] [--case group/name] [--list] [--update ast|html|error]\n');
+      process.stdout.write('usage: conformance.mjs [--langs a,b] [--case group/name] [--list] [--update ast|html|error|tokens|format]\n');
       process.exit(0);
       break;
     default:
@@ -56,7 +62,7 @@ if (!languages.length) {
 for (const language of languages) prepare(language);
 
 if (options.update) {
-  if (!['ast', 'html', 'error'].includes(options.update)) {
+  if (!['ast', 'html', 'error', 'tokens', 'format'].includes(options.update)) {
     process.stderr.write(`invalid --update value: ${options.update}\n`);
     process.exit(1);
   }
@@ -66,8 +72,34 @@ if (options.update) {
   }
   const language = 'ts';
   let written = 0;
+  let failedUpdates = 0;
   for (const testCase of fixtureCases) {
-    if (options.update === 'ast') {
+    if (options.update === 'tokens' || options.update === 'format') {
+      // Only a case whose input parses has tokens and a formatted text (CNF-2).
+      if (testCase.expectedAst === null) continue;
+      if (options.update === 'tokens') {
+        const result = invoke(language, tokensArgs(testCase), testCase.dir);
+        if (result.status !== 0) {
+          process.stderr.write(`${testCase.id}: tokens failed (exit ${result.status})\n${result.stderr}`);
+          failedUpdates++;
+          continue;
+        }
+        writeFileSync(join(testCase.dir, 'expected.tokens.json'), tokensText(JSON.parse(result.stdout)));
+      } else {
+        const expected = {};
+        for (const mode of Object.keys(FORMAT_MODES)) {
+          const result = invoke(language, formatArgs(testCase, mode), testCase.dir);
+          expected[mode] = formatOutcome(result);
+          if (expected[mode] === null) process.stderr.write(`${testCase.id}: format ${mode} failed (exit ${result.status})\n${result.stderr}`);
+        }
+        if (expected.indent === null || expected.keep === null) {
+          failedUpdates++;
+          continue;
+        }
+        writeFileSync(join(testCase.dir, 'expected.format.json'), JSON.stringify(expected, null, 2) + '\n');
+      }
+      written++;
+    } else if (options.update === 'ast') {
       const result = invoke(language, parseArgs(testCase), testCase.dir);
       if (result.status !== 0) {
         process.stderr.write(`${testCase.id}: parse failed\n${result.stderr}`);
@@ -90,7 +122,7 @@ if (options.update) {
     }
   }
   process.stdout.write(`${written} expected ${options.update} files written from ${language}\n`);
-  process.exit(0);
+  process.exit(failedUpdates ? 1 : 0);
 }
 
 const failures = [];
@@ -114,6 +146,41 @@ for (const testCase of cases) {
         if (ast) {
           const diff = firstDifference(testCase.expectedAst, ast);
           if (diff) problems.push(`ast ${diff}`);
+        }
+      }
+    }
+    if (testCase.expectedAst) {
+      // CNF-9: the token array and the formatted text or error fields of both modes equal the expected files exactly.
+      if (testCase.expectedTokens === null) problems.push('case has no expected.tokens.json');
+      else {
+        const result = invoke(language, tokensArgs(testCase), testCase.dir);
+        let tokens;
+        if (result.status !== 0) problems.push(`tokens exit ${result.status}: ${result.stderr.trim()}`);
+        else {
+          try {
+            tokens = JSON.parse(result.stdout);
+          } catch (error) {
+            problems.push(`tokens output is not JSON: ${error.message}`);
+          }
+        }
+        if (tokens !== undefined) {
+          const diff = firstDifference(testCase.expectedTokens, tokens);
+          if (diff) problems.push(`tokens ${diff}`);
+        }
+      }
+      if (testCase.expectedFormat === null) problems.push('case has no expected.format.json');
+      else {
+        for (const mode of Object.keys(FORMAT_MODES)) {
+          const expected = testCase.expectedFormat[mode];
+          const result = invoke(language, formatArgs(testCase, mode), testCase.dir);
+          const actual = formatOutcome(result);
+          if (actual === null) problems.push(`format ${mode} exit ${result.status}: ${result.stderr.trim()}`);
+          else if (typeof expected.text === 'string' && typeof actual.text === 'string') {
+            if (actual.text !== expected.text) problems.push(`format ${mode} ${describeText(expected.text, actual.text)}`);
+          } else {
+            const diff = firstDifference(expected, actual, `format ${mode}`);
+            if (diff) problems.push(diff);
+          }
         }
       }
     }

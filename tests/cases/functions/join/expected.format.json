@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= join(l)}\n{= join(l, ' - ')}\n[{= join([], ',')}]\n"
+  },
+  "keep": {
+    "text": "{= join(l)}\n{= join(l, ' - ')}\n[{= join([], ',')}]\n"
+  }
+}

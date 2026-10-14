@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= url('a b/c?d=1&e=2')}\n{= url('é~-_.')}\n{= url('%')}\n"
+  },
+  "keep": {
+    "text": "{= url('a b/c?d=1&e=2')}\n{= url('é~-_.')}\n{= url('%')}\n"
+  }
+}

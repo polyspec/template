@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= '😀' == '\\uD83D\\uDE00'}\n{= length('\\uD83D\\uDE00')}\n{= 'é' == '\\u00e9'}\n"
+  },
+  "keep": {
+    "text": "{= '😀' == '\\uD83D\\uDE00'}\n{= length('\\uD83D\\uDE00')}\n{= 'é' == '\\u00e9'}\n"
+  }
+}

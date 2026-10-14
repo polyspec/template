@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= number(1234.5)}\n{= number(1234.567, 2)}\n{= number(1234.5, 2, ',', '.')}\n{= number('12.5')}\n{= number(0)}\n{= number(-1234)}\n{= 1234.5 | number}\n"
+  },
+  "keep": {
+    "text": "{= number(1234.5)}\n{= number(1234.567, 2)}\n{= number(1234.5, 2, ',', '.')}\n{= number('12.5')}\n{= number(0)}\n{= number(-1234)}\n{= 1234.5 | number}\n"
+  }
+}

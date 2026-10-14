@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "text\n{*\n  note\n*}\nafter\n"
+  },
+  "keep": {
+    "text": "text\n{*\n  note\n*}\nafter\n"
+  }
+}

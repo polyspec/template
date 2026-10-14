@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= contains('abc', 'bc')}\n{= contains('abc', 'x')}\n{= contains(l, 2)}\n{= contains(l, null)}\n"
+  },
+  "keep": {
+    "text": "{= contains('abc', 'bc')}\n{= contains('abc', 'x')}\n{= contains(l, 2)}\n{= contains(l, null)}\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= 'a' | upper}\n{= 'abc' | slice(1)}\n{= 3 | number(2)}\n"
+  },
+  "keep": {
+    "text": "{= 'a' | upper}\n{= 'abc' | slice(1)}\n{= 3 | number(2)}\n"
+  }
+}
