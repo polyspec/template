@@ -5,8 +5,7 @@
 
 Language support for `.tpl` template files:
 
-- syntax highlighting of template tags in HTML text, attribute values, CSS, JavaScript and HTML comments, with HTML, CSS and JavaScript highlighting kept around the tags;
-- a scope for each tag kind and for the tokens of expressions;
+- HTML highlighting with embedded CSS and JavaScript, and highlighting of the template tags in HTML text, attribute values, CSS, JavaScript and HTML comments by the semantic tokens of the language server, which the extension enables for the language;
 - comment toggling with `{* *}` and bracket pairs for the delimiters;
 - a client of the bundled language server `template-lsp` (`@polyspec/template-lsp`), which runs the template language service in a Node.js process of VS Code: parse diagnostics at the parser position, semantic tokens of template tags, a background on every tag, highlights of the tags of one block construct, folding of multi-line constructs and the command Go to Matching Template Tag (`Cmd+Alt+\` on macOS, `Ctrl+Alt+\` on Windows and Linux);
 - document and range formatting, which changes whitespace inside tags and the indentation of lines with the editor indent unit, and returns no edits when the formatted AST would differ from the source AST or the HTML structure is not balanced. The setting `polyspec-template.format.templateBlocks` (`indent` or `flat`) sets whether template blocks add an indentation level;
@@ -27,4 +26,4 @@ make vscode-package
 make vscode-install
 ```
 
-The grammar uses the default delimiters `{` and `}`; the semantic tokens of the server also follow a `{% delimiter ..}` directive. Scopes, formatting rules and limits are described in [Formatter, language server and editors](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.md).
+The semantic tokens of the server follow a `{% delimiter ..}` directive. Semantic tokens, formatting rules and limits are described in [Formatter, language server and editors](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.md).

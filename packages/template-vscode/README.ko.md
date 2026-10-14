@@ -1,13 +1,12 @@
 <!-- doc-id: packages-template-vscode-readme -->
-<!-- source-sha256: a149c0891af3557384ebb3ae842325640fe6cd50ee1de0b4ab2021697efba871 -->
+<!-- source-sha256: 78fb8f1176207d20564651777aced8d5c114060d5de99f4d4bb90de01e65116d -->
 # VS Code용 Polyspec Template
 
 [English](README.md).
 
 `.tpl` 템플릿 파일을 위한 언어 지원:
 
-- HTML 텍스트, 속성 값, CSS, JavaScript, HTML 주석 안의 템플릿 태그를 강조하고, 태그 주변의 HTML, CSS, JavaScript 강조를 유지한다.
-- 태그 종류마다, 그리고 표현식 토큰마다 scope를 준다.
+- CSS와 JavaScript를 포함한 HTML을 강조하고, HTML 텍스트, 속성 값, CSS, JavaScript, HTML 주석 안의 템플릿 태그는 확장이 이 언어에서 켜는 언어 서버의 시맨틱 토큰으로 강조한다.
 - `{* *}`로 주석을 토글하고 구분자에 괄호 쌍을 적용한다.
 - 확장 안에 포함한 언어 서버 `template-lsp`(`@polyspec/template-lsp`)에 연결해 동작한다. 서버는 VS Code의 Node.js 프로세스에서 템플릿 언어 서비스를 실행한다. 파서 위치의 파싱 진단, 템플릿 태그의 시맨틱 토큰, 모든 태그의 배경, 한 블록 구성의 태그 강조, 여러 줄 구성의 접기, 명령 Go to Matching Template Tag(macOS `Cmd+Alt+\`, Windows와 Linux `Ctrl+Alt+\`)를 제공한다.
 - 문서 포맷과 범위 포맷을 한다. 태그 안의 공백과 줄의 들여쓰기를 편집기의 들여쓰기 단위로 바꾸고, 포맷한 AST가 소스 AST와 다르거나 HTML 구조의 짝이 맞지 않으면 편집을 돌려주지 않는다. 설정 `polyspec-template.format.templateBlocks`(`indent` 또는 `flat`)가 템플릿 블록이 들여쓰기 단계를 더할지 정한다.
@@ -28,4 +27,4 @@ make vscode-package
 make vscode-install
 ```
 
-문법은 기본 구분자 `{`와 `}`를 사용한다. 서버의 시맨틱 토큰은 `{% delimiter ..}` 지시문도 따른다. scope, 포맷 규칙, 한계는 [포매터, 언어 서버, 에디터](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.ko.md)에 설명되어 있다.
+서버의 시맨틱 토큰은 `{% delimiter ..}` 지시문을 따른다. 시맨틱 토큰, 포맷 규칙, 한계는 [포매터, 언어 서버, 에디터](https://github.com/polyspec/template/blob/main/docs/operations/editor-tools.ko.md)에 설명되어 있다.

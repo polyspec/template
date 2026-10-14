@@ -48,8 +48,20 @@ async function typeInto(editor, text) {
   await vscode.commands.executeCommand('type', { text });
 }
 
-function scopesOf(tokens, content, scope) {
-  return tokens.filter(token => token.c === content && token.t.split(' ').includes(scope));
+// The semantic tokens of the server for a document, decoded as [line, text, type].
+async function semanticTokensOf(document) {
+  const legend = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokensLegend', document.uri), () => `the semantic token legend of ${document.uri}`);
+  const tokens = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokens', document.uri), () => `the semantic tokens of ${document.uri}`);
+  const decoded = [];
+  let line = 0;
+  let character = 0;
+  for (let index = 0; index < tokens.data.length; index += 5) {
+    const [deltaLine, deltaStart, length, type] = tokens.data.slice(index, index + 4);
+    line += deltaLine;
+    character = deltaLine === 0 ? character + deltaStart : deltaStart;
+    decoded.push([line, document.getText(new vscode.Range(line, character, line, character + length)), legend.tokenTypes[type]]);
+  }
+  return decoded;
 }
 
 const common = [
@@ -71,16 +83,8 @@ const enabled = [
     await extension.activate();
     assert.equal(extension.isActive, true);
   }],
-  ['the grammar gives a tag inside an attribute value the template scopes', async () => {
-    const document = await open('page.tpl');
-    const tokens = await vscode.commands.executeCommand('_workbench.captureSyntaxTokens', document.uri);
-    const line = tokens.map(token => `${JSON.stringify(token.c)} ${token.t}`).join('\n');
-    const echoStart = scopesOf(tokens, '{', 'meta.template.echo.polyspec-template');
-    assert.ok(echoStart.length > 0 && echoStart[0].t.split(' ').includes('string.quoted.double.html'), line);
-    assert.ok(echoStart[0].t.split(' ').includes('keyword.control.tag.begin.polyspec-template'), line);
-    assert.ok(scopesOf(tokens, 'post', 'variable.other.readwrite.polyspec-template').length > 0, line);
-    assert.ok(scopesOf(tokens, '?', 'keyword.control.if.polyspec-template').length > 0, line);
-    assert.ok(scopesOf(tokens, 'tr', 'entity.name.tag.html').length > 0, line);
+  ['semantic highlighting is enabled for the language', async () => {
+    assert.equal(vscode.workspace.getConfiguration('editor', { languageId: 'polyspec-template' }).get('semanticHighlighting.enabled'), true);
   }],
   ['the extension starts the bundled language server', async () => {
     const extension = vscode.extensions.getExtension(extensionId);
@@ -96,19 +100,12 @@ const enabled = [
     assert.deepEqual((await eventually(() => api.tagRanges(broken), () => 'the tag ranges of broken.tpl')).map(range => broken.getText(range)), ['{? a}']);
   }],
   ['semantic tokens of the server classify the template tags', async () => {
-    const document = await open('blocks.tpl');
-    const legend = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokensLegend', document.uri), () => 'the semantic token legend of blocks.tpl');
-    const tokens = await eventually(() => vscode.commands.executeCommand('vscode.provideDocumentSemanticTokens', document.uri), () => 'the semantic tokens of blocks.tpl');
-    const decoded = [];
-    let line = 0;
-    let character = 0;
-    for (let index = 0; index < tokens.data.length; index += 5) {
-      const [deltaLine, deltaStart, length, type] = tokens.data.slice(index, index + 4);
-      line += deltaLine;
-      character = deltaLine === 0 ? character + deltaStart : deltaStart;
-      decoded.push([document.getText(new vscode.Range(line, character, line, character + length)), legend.tokenTypes[type]]);
-    }
-    assert.deepEqual(decoded.slice(0, 6), [['{', 'delimiter'], ['@', 'keyword'], ['item', 'variable'], ['=', 'operator'], ['items', 'variable'], ['}', 'delimiter']]);
+    const decoded = await semanticTokensOf(await open('blocks.tpl'));
+    assert.deepEqual(decoded.slice(0, 6).map(([, text, type]) => [text, type]), [['{', 'delimiter'], ['@', 'keyword'], ['item', 'variable'], ['=', 'operator'], ['items', 'variable'], ['}', 'delimiter']]);
+  }],
+  ['semantic tokens of the server classify a tag inside an attribute value', async () => {
+    const decoded = await semanticTokensOf(await open('page.tpl'));
+    assert.deepEqual(decoded.filter(([line]) => line === 0).slice(0, 5).map(([, text, type]) => [text, type]), [['{', 'delimiter'], ['=', 'keyword'], ['post', 'variable'], ['.id', 'property'], ['}', 'delimiter']]);
   }],
   ['format on type is enabled for the language and indents a line after } and after Enter', async () => {
     assert.equal(vscode.workspace.getConfiguration('editor', { languageId: 'polyspec-template' }).get('formatOnType'), true);
