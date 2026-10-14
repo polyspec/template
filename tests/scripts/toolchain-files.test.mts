@@ -6,7 +6,7 @@
 //   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); kit.mk puts both directories first on
 //   PATH, and the Makefile exports GOTOOLCHAIN=local, so go never downloads another toolchain;
 // - Rust is the toolchain of `rust-toolchain.toml` with the components that `make lint` and `make test-rust` use,
-//   installed by one explicit step, never by rustup on the first cargo: several processes that start cargo at once, as
+//   installed by install-tools of kit, never by rustup on the first cargo: several processes that start cargo at once, as
 //   the files of one `node --test` run do, each installed it and broke the installs of the others (T18.7-1);
 // - make install downloads the crates of every Cargo.lock, which the checks resolve with cargo --offline (T20.1-1), and
 //   every other recipe runs cargo, go and npm offline (T20.1-2);
@@ -251,7 +251,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const kit = 'node_modules/@polyspec/kit/dist';
   // make prints the empty TOOLS of install-tools of kit as a trailing space.
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, 'rustup toolchain install --no-self-update', `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts packages/php`, `${online} node scripts/composer-install.mts packages/php-ext`, `${online} node scripts/python-wheelhouse.mts`]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts packages/php`, `${online} node scripts/composer-install.mts packages/php-ext`, `${online} node scripts/python-wheelhouse.mts`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const env = workflowOf(read(file), file).env;
@@ -480,9 +480,10 @@ test('the job that runs lint-python installs the tools of mise.toml before it, w
 
 test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up no Python of PATH', () => {
   const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
-  assert.equal(recipe[0], 'rustup toolchain install --no-self-update');
-  assert.ok(recipe[1] !== undefined, 'make -n dependency-review prints one command');
-  assert.match(recipe[1], /install-tools\.mjs $/);
+  // install-tools of kit installs the toolchain of rust-toolchain.toml with rustup before cargo-audit runs.
+  assert.ok(recipe[0] !== undefined && recipe[1] !== undefined, 'make -n dependency-review prints its two commands');
+  assert.match(recipe[0], /install-tools\.mjs $/);
+  assert.match(recipe[1], /dependency-review\.mjs +$/);
   assert.ok(!jobs('.github/workflows/dependency-review.yml').some(job => usesOf(job, 'actions/setup-python@').length > 0), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 
