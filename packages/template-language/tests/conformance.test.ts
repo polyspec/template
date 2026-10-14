@@ -3,7 +3,7 @@
 // parse has no such file and formats to the parse error.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import { format, type FormatOptions, type FormatResult } from '../src/index.js';
 import { repositoryRoot } from './helpers.js';
 
@@ -24,10 +24,10 @@ function outcome(result: FormatResult): Expected {
   return { error: { reason, code, line, col } };
 }
 
-describe('conformance cases', () => {
-  for (const id of caseIds()) {
-    const dir = join(casesDir, id);
-    it(`${id} format`, () => {
+// Each case is a top-level test named by its id, as the suite unit formatting of config/parity.json reads the results.
+for (const id of caseIds()) {
+  const dir = join(casesDir, id);
+  it(id, () => {
       const optionsPath = join(dir, 'options.json');
       const delimiters = existsSync(optionsPath) ? (JSON.parse(readFileSync(optionsPath, 'utf8')) as { delimiters?: string }).delimiters : undefined;
       const options: FormatOptions = delimiters === undefined ? { name: 'input.tpl' } : { name: 'input.tpl', delimiters };
@@ -49,6 +49,5 @@ describe('conformance cases', () => {
       }
       const expected = JSON.parse(readFileSync(expectedPath, 'utf8')) as { indent: Expected; keep: Expected };
       expect({ indent: outcome(indent), keep: outcome(keep) }).toEqual(expected);
-    });
-  }
-});
+  });
+}
