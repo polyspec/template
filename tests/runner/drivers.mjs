@@ -42,52 +42,52 @@ const published = {
 /** @public the tests of tests/scripts import a copy of this module by a computed path, which knip does not resolve. */
 export const drivers = {
   ts: {
-    dir: join(packages, 'template-ts'),
+    dir: join(packages, 'ts'),
     // make build-language builds the template package first and then the formatter package.
     build() {
       build('ts', 'make', ['build-language'], root);
     },
-    // The formatter of TypeScript is the package template-language, which depends on the template package, so its
+    // The formatter of TypeScript is the package packages/language, which depends on the template package, so its
     // command template-language runs `format` and the command template runs the other subcommands (CNF-5).
     command(args) {
-      if (args[0] === 'format') return ['node', [join(packages, 'template-language', 'bin', 'template-language.mjs'), ...args]];
-      return ['node', [join(packages, 'template-ts', 'bin', 'template.mjs'), ...args]];
+      if (args[0] === 'format') return ['node', [join(packages, 'language', 'bin', 'template-language.mjs'), ...args]];
+      return ['node', [join(packages, 'ts', 'bin', 'template.mjs'), ...args]];
     },
   },
   go: {
-    dir: join(packages, 'template-go'),
+    dir: join(packages, 'go'),
     build() {
-      build('go', 'go', ['build', '-o', 'template', './cmd/template'], join(packages, 'template-go'));
-      publishBuild(join(packages, 'template-go', 'template'), published.go);
+      build('go', 'go', ['build', '-o', 'template', './cmd/template'], join(packages, 'go'));
+      publishBuild(join(packages, 'go', 'template'), published.go);
     },
     command(args) {
       return [published.go, args];
     },
   },
   rust: {
-    dir: join(packages, 'template-rust'),
+    dir: join(packages, 'rust'),
     build() {
-      build('rust', 'cargo', ['build', '--locked', '--release', '--bin', 'template'], join(packages, 'template-rust'));
-      publishBuild(join(packages, 'template-rust', 'target', 'release', 'template'), published.rust);
+      build('rust', 'cargo', ['build', '--locked', '--release', '--bin', 'template'], join(packages, 'rust'));
+      publishBuild(join(packages, 'rust', 'target', 'release', 'template'), published.rust);
     },
     command(args) {
       return [published.rust, args];
     },
   },
   php: {
-    dir: join(packages, 'template-php'),
+    dir: join(packages, 'php'),
     build() {
-      build('php', process.execPath, [join(root, 'scripts/composer-install.mjs'), join(packages, 'template-php')], root);
+      build('php', process.execPath, [join(root, 'scripts/composer-install.mjs'), join(packages, 'php')], root);
     },
     command(args) {
-      return ['php', [join(packages, 'template-php', 'bin', 'template.php'), ...args]];
+      return ['php', [join(packages, 'php', 'bin', 'template.php'), ...args]];
     },
   },
-  // The command is the python of var/python/venv, where make python-package installs packages/template-python editable, so
+  // The command is the python of var/python/venv, where make python-package installs packages/python editable, so
   // it imports polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). The build is make
   // python-package, which makes that environment and does nothing when it is current.
   python: {
-    dir: join(packages, 'template-python'),
+    dir: join(packages, 'python'),
     build() {
       build('python', 'make', ['python-package'], root);
     },
@@ -96,13 +96,13 @@ export const drivers = {
     },
   },
   'php-ext': {
-    dir: join(packages, 'template-php-ext'),
+    dir: join(packages, 'php-ext'),
     build() {
       // The C extension builds with phpize, configure and make and publishes its library itself (T21.4).
-      build('php-ext', process.execPath, [join(root, 'scripts/build-php-extension.mjs'), join(packages, 'template-php-ext', 'src'), published['php-ext']], root);
+      build('php-ext', process.execPath, [join(root, 'scripts/build-php-extension.mjs'), join(packages, 'php-ext', 'src'), published['php-ext']], root);
     },
     command(args) {
-      return ['php', [`-dextension=${published['php-ext']}`, join(packages, 'template-php-ext', 'bin', 'template-ext.php'), ...args]];
+      return ['php', [`-dextension=${published['php-ext']}`, join(packages, 'php-ext', 'bin', 'template-ext.php'), ...args]];
     },
   },
 };

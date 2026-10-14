@@ -17,12 +17,12 @@
   },
   "packageManager": "npm@12.2.0",
   "workspaces": [
-    "packages/template-ts",
-    "packages/template-language",
-    "packages/template-lsp",
-    "packages/template-codemirror",
-    "packages/template-compiler",
-    "packages/template-vscode"
+    "packages/ts",
+    "packages/language",
+    "packages/lsp",
+    "packages/codemirror",
+    "packages/compiler",
+    "packages/vscode"
   ],
   "devDependencies": {
     "@codemirror/commands": "^6.11.1",

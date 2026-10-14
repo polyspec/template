@@ -4,11 +4,11 @@
 // test with its elapsed time and stops a test that outlives its own timeout.
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
-import { rustString } from '../../packages/template-compiler/backend-support.mjs';
-import { compileSource } from '../../packages/template-compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../packages/template-compiler/type-manifest.mjs';
-import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
+import { rustString } from '../../packages/compiler/backend-support.mjs';
+import { compileSource } from '../../packages/compiler/compiler.mjs';
+import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { parse } from '../../packages/ts/dist/index.mjs';
 import { caseTestFailures, firstDifference, generatedCases, runCaseTests, typeDefinitions } from './cases.mjs';
 import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
@@ -17,7 +17,7 @@ import { rustWorkspace } from '../../scripts/temporary-workspace.mjs';
 // The time limit of one generated case test.
 const CASE_TIMEOUT_SECONDS = 30;
 
-// A crate of the system temporary directory that depends on packages/template-rust; it holds the generated cases and
+// A crate of the system temporary directory that depends on packages/rust; it holds the generated cases and
 // their integration test.
 const workspace = rustWorkspace('generated-conformance-rust');
 const temporary = workspace.directory;

@@ -21,7 +21,7 @@ function directory(t) {
 }
 
 test('the pinned requirements are the build-system requirements of pyproject.toml', () => {
-  const pyproject = readFileSync(join(root, 'packages/template-python/pyproject.toml'), 'utf8');
+  const pyproject = readFileSync(join(root, 'packages/python/pyproject.toml'), 'utf8');
   const required = /^requires = \[(.*)\]$/m.exec(pyproject)[1].split(',').map(item => item.trim().replace(/^"|"$/g, ''));
   assert.deepEqual(buildRequirements().map(item => `${item.name}==${item.version}`), required);
   for (const item of buildRequirements()) {

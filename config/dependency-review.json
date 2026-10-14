@@ -18,17 +18,17 @@
       ]
     },
     {
-      "lock": "packages/template-php/composer.lock",
+      "lock": "packages/php/composer.lock",
       "sha256": "12ec5fe4bb4d825112a4ca8d40ec065f86dd0e44e71391055e62dbbd4faecbe8",
       "advisories": []
     },
     {
-      "lock": "packages/template-php-ext/composer.lock",
+      "lock": "packages/php-ext/composer.lock",
       "sha256": "7d2d7e5e6c23b37e2f478a97b207d7a6baba2bcff31b297fb959272f4d98fc28",
       "advisories": []
     },
     {
-      "lock": "packages/template-rust/Cargo.lock",
+      "lock": "packages/rust/Cargo.lock",
       "sha256": "9829fc088859f80f805f6b6e680f7d02ee22bb5cec70d7c1e1983a935f835ec8",
       "advisories": []
     },
@@ -195,56 +195,56 @@
     },
     {
       "ecosystem": "npm",
-      "manifest": "packages/template-lsp/package.json",
+      "manifest": "packages/lsp/package.json",
       "package": "vscode-languageserver",
       "version": "10.1.2",
       "latest": "10.1.2"
     },
     {
       "ecosystem": "npm",
-      "manifest": "packages/template-lsp/package.json",
+      "manifest": "packages/lsp/package.json",
       "package": "vscode-languageserver-textdocument",
       "version": "1.0.15",
       "latest": "1.0.15"
     },
     {
       "ecosystem": "npm",
-      "manifest": "packages/template-vscode/package.json",
+      "manifest": "packages/vscode/package.json",
       "package": "vscode-languageclient",
       "version": "10.1.2",
       "latest": "10.1.2"
     },
     {
       "ecosystem": "composer",
-      "manifest": "packages/template-php/composer.json",
+      "manifest": "packages/php/composer.json",
       "package": "symfony/console",
       "version": "v8.1.9",
       "latest": "v8.1.9"
     },
     {
       "ecosystem": "composer",
-      "manifest": "packages/template-php/composer.json",
+      "manifest": "packages/php/composer.json",
       "package": "laravel/pint",
       "version": "v1.30.4",
       "latest": "v1.32.1"
     },
     {
       "ecosystem": "composer",
-      "manifest": "packages/template-php/composer.json",
+      "manifest": "packages/php/composer.json",
       "package": "phpunit/phpunit",
       "version": "11.5.57",
       "latest": "13.4.2"
     },
     {
       "ecosystem": "composer",
-      "manifest": "packages/template-php-ext/composer.json",
+      "manifest": "packages/php-ext/composer.json",
       "package": "phpunit/phpunit",
       "version": "11.5.57",
       "latest": "13.4.2"
     },
     {
       "ecosystem": "pypi",
-      "manifest": "packages/template-python/pyproject.toml",
+      "manifest": "packages/python/pyproject.toml",
       "package": "setuptools",
       "version": "84.0.0",
       "latest": "84.0.0"

@@ -5,11 +5,11 @@
 import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
-import { compileFiles } from '../../packages/template-compiler/compiler.mjs';
+import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
+import { compileFiles } from '../../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from '../../scripts/php-program.mjs';
-import { deriveTypeManifest } from '../../packages/template-compiler/type-manifest.mjs';
-import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { parse } from '../../packages/ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { runBounded, seconds, stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
@@ -99,7 +99,7 @@ try {
       const programFiles = writePhpProgram(programDirectory, compileFiles(join(graphPath, 'manifest.json'), typePath, 'php', { phpNamespace: namespace }));
       const lint = await php(['-l', ...programFiles], 'php -l');
       if (lint.status !== 0) throw new Error(`${lint.stdout}${lint.stderr}`);
-      const result = await php([runner, join(root, 'packages/template-php/vendor/autoload.php'), programDirectory,
+      const result = await php([runner, join(root, 'packages/php/vendor/autoload.php'), programDirectory,
         testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], 'the case process');
       if (result.status !== 0) throw new Error(result.stderr || `PHP exited with ${result.status}`);
       let actual;

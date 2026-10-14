@@ -3,7 +3,7 @@
 // PSR-4 autoload of Composer: the class loader that vendor/autoload.php returns maps the namespace to the directory.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { phpString } from '../packages/template-compiler/backend-support.mjs';
+import { phpString } from '../packages/compiler/backend-support.mjs';
 
 /** Writes `files`, by their paths under `directory`, and returns the path of every file. */
 export function writePhpProgram(directory, files) {

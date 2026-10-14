@@ -9,7 +9,7 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { runBounded, runStep } from '../runner/bounded.mjs';
-import { runStep as runIntegrationStep } from '../../packages/template-vscode/tests/integration/step.mjs';
+import { runStep as runIntegrationStep } from '../../packages/vscode/tests/integration/step.mjs';
 
 const alive = (pid) => {
   try {

@@ -11,71 +11,71 @@
   "packages": [
     {
       "kind": "npm",
-      "directory": "packages/template-ts",
+      "directory": "packages/ts",
       "name": "@polyspec/template"
     },
     {
       "kind": "npm",
-      "directory": "packages/template-language",
+      "directory": "packages/language",
       "name": "@polyspec/template-language"
     },
     {
       "kind": "npm",
-      "directory": "packages/template-lsp",
+      "directory": "packages/lsp",
       "name": "@polyspec/template-lsp"
     },
     {
       "kind": "npm",
-      "directory": "packages/template-codemirror",
+      "directory": "packages/codemirror",
       "name": "@polyspec/template-codemirror"
     },
     {
       "kind": "npm",
-      "directory": "packages/template-compiler",
+      "directory": "packages/compiler",
       "name": "@polyspec/template-compiler"
     },
     {
       "kind": "composer",
-      "directory": "packages/template-php",
+      "directory": "packages/php",
       "name": "polyspec/template"
     },
     {
       "kind": "composer",
-      "directory": "packages/template-php-ext",
+      "directory": "packages/php-ext",
       "name": "polyspec/template-php-ext"
     },
     {
       "kind": "wheel",
-      "directory": "packages/template-python",
+      "directory": "packages/python",
       "name": "polyspec-template"
     }
   ],
   "manifests": {
     "package.json": "version",
-    "packages/template-ts/package.json": "archive",
-    "packages/template-language/package.json": "archive",
-    "packages/template-lsp/package.json": "archive",
-    "packages/template-codemirror/package.json": "archive",
-    "packages/template-compiler/package.json": "archive",
-    "packages/template-vscode/package.json": "version",
-    "packages/template-php/composer.json": "archive",
-    "packages/template-php-ext/composer.json": "archive",
-    "packages/template-rust/Cargo.toml": "git-tag",
-    "packages/template-python/pyproject.toml": "archive"
+    "packages/ts/package.json": "archive",
+    "packages/language/package.json": "archive",
+    "packages/lsp/package.json": "archive",
+    "packages/codemirror/package.json": "archive",
+    "packages/compiler/package.json": "archive",
+    "packages/vscode/package.json": "version",
+    "packages/php/composer.json": "archive",
+    "packages/php-ext/composer.json": "archive",
+    "packages/rust/Cargo.toml": "git-tag",
+    "packages/python/pyproject.toml": "archive"
   },
   "buildBackend": {
     "requirement": "setuptools==84.0.0",
     "sha256": "51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670"
   },
   "notReleased": {
-    "packages/template-vscode/tests/integration/harness/package.json": "the harness of the VS Code integration test",
+    "packages/vscode/tests/integration/harness/package.json": "the harness of the VS Code integration test",
     "tools/showcase/adapters/rust/Cargo.toml": "the Rust adapter of the showcase",
     "tools/showcase/adapters/go/go.mod": "the Go adapter of the showcase, a module local to the repository",
     "tests/fixtures/release-consumer/npm/package.json": "the npm consumer project of the release archives",
     "tests/fixtures/release-consumer/composer/composer.json": "the Composer consumer project of the release archives"
   },
   "goModules": {
-    "packages/template-go": "github.com/polyspec/template/packages/template-go"
+    "packages/go": "github.com/polyspec/template/packages/go"
   },
   "consumers": {
     "npm": {
@@ -132,14 +132,14 @@
         ]
       },
       "lock": {
-        "polyspec-template": "packages/template-python/pylock.wheel.toml"
+        "polyspec-template": "packages/python/pylock.wheel.toml"
       },
       "polyspec": {}
     }
   },
   "proof": {
     "gitTag": {
-      "packages/template-rust/Cargo.toml": {
+      "packages/rust/Cargo.toml": {
         "kind": "rust",
         "name": "polyspec-template",
         "smoke": [

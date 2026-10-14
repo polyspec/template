@@ -1,0 +1,302 @@
+package render
+
+import (
+	"errors"
+	"fmt"
+	"sync"
+	"time"
+	"unicode/utf8"
+
+	"github.com/polyspec/template/packages/go/ast"
+	"github.com/polyspec/template/packages/go/errs"
+	"github.com/polyspec/template/packages/go/functions"
+	"github.com/polyspec/template/packages/go/loader"
+	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/value"
+)
+
+// ParseFunc parses source text into a template; nil in a render-only engine.
+type ParseFunc func(source []byte, name string, delimiters parser.Delimiters) (*ParsedTemplate, error)
+
+// ArtifactRefresh controls when compiled template artifacts are refreshed.
+type ArtifactRefresh string
+
+const (
+	ArtifactRefreshDev   ArtifactRefresh = "dev"
+	ArtifactRefreshTrue  ArtifactRefresh = "true"
+	ArtifactRefreshFalse ArtifactRefresh = "false"
+)
+
+// Options configure an engine (RT-1, RT-6, RT-42).
+type Options struct {
+	Loader          loader.Loader
+	Functions       map[string]functions.HostFunction
+	Limits          *Limits
+	Delimiters      string
+	Parse           ParseFunc
+	ArtifactRefresh ArtifactRefresh
+}
+
+// DefineInput is a template definition given to Render (RT-24).
+type DefineInput struct {
+	Template string
+	Data     any
+	HTML     *string
+}
+
+// RenderOptions are the per-render options.
+type RenderOptions struct {
+	Define map[string]DefineInput
+	Env    *functions.Env
+}
+
+// Engine loads, caches and renders templates.
+type Engine struct {
+	loader          loader.Loader
+	runtime         *RuntimeEnvironment
+	delimiters      parser.Delimiters
+	parse           ParseFunc
+	artifactRefresh ArtifactRefresh
+	// cacheLock guards cache, which concurrent renders of one program read and write (RT-62a).
+	cacheLock sync.Mutex
+	cache     map[string]cached
+	now       func() float64
+}
+
+type preparedExecution interface {
+	render() (string, error)
+}
+
+type astPreparedExecution struct {
+	engine     *Engine
+	root       *value.OrderedMap
+	registry   map[string]*DefineEntry
+	env        functions.Env
+	targetName string
+	template   *ParsedTemplate
+}
+
+// Prepared is a reusable prepared render operation.
+type Prepared interface {
+	Render() (string, error)
+}
+
+// PreparedRender stores one AST execution for repeated renders.
+type PreparedRender struct {
+	name      string
+	execution preparedExecution
+}
+
+type cached struct {
+	version  string
+	template *ParsedTemplate
+}
+
+// NewEngine creates an engine.
+func NewEngine(options Options, now func() float64) (*Engine, error) {
+	refresh := options.ArtifactRefresh
+	if refresh == "" {
+		refresh = ArtifactRefreshTrue
+	}
+	if refresh != ArtifactRefreshDev && refresh != ArtifactRefreshTrue && refresh != ArtifactRefreshFalse {
+		return nil, fmt.Errorf("%q is not an artifact refresh policy", refresh)
+	}
+	runtime, err := NewRuntimeEnvironment(options.Limits, options.Functions)
+	if err != nil {
+		return nil, err
+	}
+	e := &Engine{loader: options.Loader, runtime: runtime, delimiters: parser.DefaultDelimiters, parse: options.Parse, artifactRefresh: refresh, cache: map[string]cached{}, now: now}
+	if e.now == nil {
+		e.now = func() float64 { return float64(time.Now().Unix()) }
+	}
+	if e.loader == nil {
+		e.loader = loader.NewMapLoader(nil)
+	}
+	if options.Delimiters != "" {
+		d, ok := parser.ParseDelimiters(options.Delimiters)
+		if !ok {
+			return nil, fmt.Errorf("%q is not a delimiter pair", options.Delimiters)
+		}
+		e.delimiters = d
+	}
+	return e, nil
+}
+
+// Register adds a host function (FUN-43, FUN-44).
+func (e *Engine) Register(name string, fn functions.HostFunction) error {
+	return e.runtime.Register(name, fn)
+}
+
+// RegisterClass adds a logical class function used by Class::method(...).
+func (e *Engine) RegisterClass(className, method string, fn functions.HostFunction) error {
+	return e.runtime.RegisterClass(className, method, fn)
+}
+
+// HostFunction returns one registered host function.
+func (e *Engine) HostFunction(name string) (functions.HostFunction, bool) {
+	return e.runtime.HostFunction(name)
+}
+
+// ClassFunction returns one registered logical class function.
+func (e *Engine) ClassFunction(className, method string) (functions.HostFunction, bool) {
+	return e.runtime.ClassFunction(className, method)
+}
+
+// Limits implements RuntimeServices.
+func (e *Engine) Limits() Limits { return e.runtime.Limits() }
+
+// LoadTemplate loads an AST template (RT-9, RT-40).
+func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*ParsedTemplate, error) {
+	fail := func(code errs.Code, message string) error {
+		if from != nil && span != nil {
+			return errs.At(code, from.Name, from.Lines, errs.Span{span[0], span[1]}, message)
+		}
+		return errs.WithoutPosition(code, name, message)
+	}
+	loaded, ok, err := e.loader.Load(name)
+	if err != nil {
+		return nil, fail(errs.LoadFailed, "template "+name+" cannot be loaded: "+err.Error())
+	}
+	if !ok {
+		return nil, fail(errs.LoadNotFound, "template "+name+" does not exist")
+	}
+	e.cacheLock.Lock()
+	c, ok := e.cache[name]
+	e.cacheLock.Unlock()
+	if ok && (e.artifactRefresh == ArtifactRefreshFalse || (e.artifactRefresh == ArtifactRefreshTrue && c.version == loaded.Version)) {
+		return c.template, nil
+	}
+	var template *ParsedTemplate
+	if loaded.AST != nil {
+		template = &ParsedTemplate{AST: loaded.AST}
+	} else {
+		if e.parse == nil {
+			return nil, errors.New("this engine renders parsed templates only; the loader returned source text")
+		}
+		parsed, err := e.parse(loaded.Source, name, e.delimiters)
+		if err != nil {
+			return nil, err
+		}
+		template = parsed
+	}
+	e.cacheLock.Lock()
+	e.cache[name] = cached{version: loaded.Version, template: template}
+	e.cacheLock.Unlock()
+	return template, nil
+}
+
+// Prepare binds request data and resolves the target template once. A panic is E_INTERNAL (ERR-13).
+func (e *Engine) Prepare(target any, assign any, options RenderOptions) (Prepared, error) {
+	var name string
+	var parsedTarget *ParsedTemplate
+	switch t := target.(type) {
+	case string:
+		name = t
+	case *ast.Template:
+		name = t.Name
+		parsedTarget = &ParsedTemplate{AST: t}
+	default:
+		return nil, fmt.Errorf("render target must be a name or a template")
+	}
+	return Guard(name, func() (Prepared, error) { return e.prepare(name, parsedTarget, assign, options) })
+}
+
+func (e *Engine) prepare(name string, parsedTarget *ParsedTemplate, assign any, options RenderOptions) (Prepared, error) {
+	root, err := value.BindMap(assign)
+	if err != nil {
+		return nil, bindFailure(name, err)
+	}
+	registry, err := e.bindDefines(options.Define)
+	if err != nil {
+		return nil, bindFailure(name, err)
+	}
+	env := functions.Env{Timezone: "Z", Now: e.now()}
+	if options.Env != nil {
+		if options.Env.Timezone != "" {
+			env.Timezone = options.Env.Timezone
+		}
+		env.Now = options.Env.Now
+	}
+	targetName := name
+	if entry, ok := registry[name]; ok && entry.HTML == nil {
+		targetName = entry.Template
+	}
+	template := parsedTarget
+	if template == nil {
+		if template, err = e.LoadTemplate(targetName, nil, nil); err != nil {
+			return nil, err
+		}
+	}
+	return &PreparedRender{name: name, execution: &astPreparedExecution{engine: e, root: root, registry: registry, env: env, targetName: targetName, template: template}}, nil
+}
+
+// Render renders a template by name or AST (RT-3, RT-4).
+func (e *Engine) Render(target any, assign any, options RenderOptions) (string, error) {
+	prepared, err := e.Prepare(target, assign, options)
+	if err != nil {
+		return "", err
+	}
+	return prepared.Render()
+}
+
+// Render renders the prepared request. A panic is E_INTERNAL (ERR-13).
+func (p *PreparedRender) Render() (string, error) {
+	return Guard(p.name, p.execution.render)
+}
+
+func (p *astPreparedExecution) render() (string, error) {
+	context := NewContext(p.engine, p.root, p.env, p.targetName)
+	for id, entry := range p.registry {
+		context.Registry[id] = entry
+	}
+	if err := context.Enter(p.targetName, nil, nil); err != nil {
+		return "", err
+	}
+	if err := NewRenderer(context, p.engine).RenderNodes(p.template.AST.Body, NewFrame(p.template.AST.Name, p.template.Lines, p.root), NewScope()); err != nil {
+		return "", err
+	}
+	return context.Output(), nil
+}
+
+func bindFailure(name string, err error) error {
+	var be *value.BindError
+	if errors.As(err, &be) {
+		return errs.WithoutPosition(be.Code, name, be.Message)
+	}
+	return err
+}
+
+func (e *Engine) bindDefines(defines map[string]DefineInput) (map[string]*DefineEntry, error) {
+	registry := map[string]*DefineEntry{}
+	for id, input := range defines {
+		if !utf8.ValidString(id) {
+			return nil, &value.BindError{Code: errs.DataInvalidUTF8, Message: "a define id is not valid UTF-8"}
+		}
+		switch {
+		case input.HTML != nil:
+			html := *input.HTML
+			registry[id] = &DefineEntry{HTML: &html}
+		case input.Template != "":
+			name, err := loader.ResolvePath("", input.Template)
+			if err != nil {
+				return nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": " + err.Error()}
+			}
+			entry := &DefineEntry{Template: name}
+			if input.Data != nil {
+				bound, err := value.BindData(input.Data)
+				if err != nil {
+					return nil, err
+				}
+				m, ok := bound.(*value.OrderedMap)
+				if !ok {
+					return nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": data is not a map"}
+				}
+				entry.Data = m
+			}
+			registry[id] = entry
+		default:
+			return nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": entry needs \"template\" or \"html\""}
+		}
+	}
+	return registry, nil
+}

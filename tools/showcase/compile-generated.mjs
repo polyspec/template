@@ -4,10 +4,10 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { transformSync } from 'esbuild';
 import { root } from '../../tests/runner/drivers.mjs';
-import { compileFiles, compileSource } from '../../packages/template-compiler/compiler.mjs';
-import { generatedCompilerDigest } from '../../packages/template-compiler/compiler-digest.mjs';
+import { compileFiles, compileSource } from '../../packages/compiler/compiler.mjs';
+import { generatedCompilerDigest } from '../../packages/compiler/compiler-digest.mjs';
 import { typescriptDeliveryDigest } from './delivery-digest.mjs';
-import { compileGeneratedArtifact } from '../../packages/template-compiler/generated-artifact.mjs';
+import { compileGeneratedArtifact } from '../../packages/compiler/generated-artifact.mjs';
 import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mjs';
 import { showcasePythonModule } from './python-module.mjs';
 

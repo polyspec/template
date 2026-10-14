@@ -1,7 +1,7 @@
 // Tests that the package install check (scripts/check-package-installs.mjs, T19.1) gives the same result at any time
 // and on any machine: the Go install project resolves modules only from the proxy of the run, verifies no checksum against a
 // database of the network and uses the installed Go toolchain; the Rust install project builds with the toolchain of
-// rust-toolchain.toml and with a lock derived from packages/template-rust/Cargo.lock; the PHP install project reads no
+// rust-toolchain.toml and with a lock derived from packages/rust/Cargo.lock; the PHP install project reads no
 // repository other than the package of the run. The commands npm, node, go, composer, php and cargo are stubs that
 // record their arguments, their environment and the files of their working directory; nothing is built or downloaded.
 import assert from 'node:assert/strict';
@@ -79,12 +79,12 @@ test('the install projects read no network source and use the pinned toolchains 
 
   const goCalls = calls.filter(call => call.name === 'go');
   assert.ok(goCalls.length > 0, 'the check started no go command');
-  const goVersion = /^go (\S+)$/m.exec(read('packages/template-go/go.mod'))[1];
+  const goVersion = /^go (\S+)$/m.exec(read('packages/go/go.mod'))[1];
   for (const call of goCalls) {
     assert.match(call.env.GOPROXY ?? '', /^file:\/\/[^,|]+$/, `go ${call.args.join(' ')} has GOPROXY ${call.env.GOPROXY}, expected only the file proxy of the run`);
     assert.equal(call.env.GOSUMDB, 'off', `go ${call.args.join(' ')} has GOSUMDB ${call.env.GOSUMDB}`);
     assert.equal(call.env.GOTOOLCHAIN, 'local', `go ${call.args.join(' ')} has GOTOOLCHAIN ${call.env.GOTOOLCHAIN}`);
-    assert.match(call.files['go.mod'] ?? '', new RegExp(`^go ${goVersion.replaceAll('.', '\\.')}$`, 'm'), `the install project go.mod names another Go version than packages/template-go/go.mod (${goVersion}):\n${call.files['go.mod']}`);
+    assert.match(call.files['go.mod'] ?? '', new RegExp(`^go ${goVersion.replaceAll('.', '\\.')}$`, 'm'), `the install project go.mod names another Go version than packages/go/go.mod (${goVersion}):\n${call.files['go.mod']}`);
   }
 
   const cargoRun = calls.filter(call => call.name === 'cargo' && call.args.includes('run'));
@@ -93,24 +93,24 @@ test('the install projects read no network source and use the pinned toolchains 
   assert.ok(project.args.includes('--locked'), `cargo ${project.args.join(' ')} runs without --locked`);
   assert.equal(project.files['rust-toolchain.toml'], read('rust-toolchain.toml'), 'the Rust install project does not build with the toolchain of rust-toolchain.toml');
   assert.ok(project.files['Cargo.lock'], 'the Rust install project has no Cargo.lock');
-  const pinned = new Map(parseCargoLock(read('packages/template-rust/Cargo.lock')).packages.map(item => [`${item.name} ${item.version}`, item.checksum ?? null]));
+  const pinned = new Map(parseCargoLock(read('packages/rust/Cargo.lock')).packages.map(item => [`${item.name} ${item.version}`, item.checksum ?? null]));
   for (const item of parseCargoLock(project.files['Cargo.lock']).packages.filter(entry => entry.name !== 'install-check')) {
-    assert.ok(pinned.has(`${item.name} ${item.version}`), `the install project lock holds ${item.name} ${item.version}, which packages/template-rust/Cargo.lock does not`);
+    assert.ok(pinned.has(`${item.name} ${item.version}`), `the install project lock holds ${item.name} ${item.version}, which packages/rust/Cargo.lock does not`);
     assert.equal(item.checksum ?? null, pinned.get(`${item.name} ${item.version}`), `the checksum of ${item.name} ${item.version} differs`);
   }
 
   const composer = calls.find(call => call.name === 'composer' && call.args[0] === 'install');
   assert.ok(composer, 'the check started no composer install');
   // The archive is installed by its own composer.json, so its require cannot drift from the manifest; the dependencies
-  // resolve from the packages of packages/template-php/composer.lock, not from Packagist, and their archives come from
+  // resolve from the packages of packages/php/composer.lock, not from Packagist, and their archives come from
   // the Composer cache that make install filled, with the network disabled.
   const installProject = JSON.parse(composer.files['composer.json']);
   assert.equal(composer.env.COMPOSER_DISABLE_NETWORK, '1', 'the PHP install project may read the network');
-  const lockPackages = JSON.parse(read('packages/template-php/composer.lock')).packages;
+  const lockPackages = JSON.parse(read('packages/php/composer.lock')).packages;
   assert.deepEqual(installProject.repositories.map(repository => repository.type ?? Object.keys(repository)), [['packagist.org'], 'artifact', 'package'], `the PHP install project reads ${JSON.stringify(installProject.repositories)}, not only the archive of the run and the locked packages`);
   assert.equal(installProject.repositories[0]['packagist.org'], false, 'the PHP install project reads Packagist');
-  assert.deepEqual(installProject.repositories[2].package, lockPackages, 'the package repository is not the packages of packages/template-php/composer.lock');
-  const manifest = JSON.parse(read('packages/template-php/composer.json'));
+  assert.deepEqual(installProject.repositories[2].package, lockPackages, 'the package repository is not the packages of packages/php/composer.lock');
+  const manifest = JSON.parse(read('packages/php/composer.json'));
   const locked = Object.fromEntries(lockPackages.map(item => [item.name, item.version]));
   assert.deepEqual(installProject.require, { [manifest.name]: manifest.version, ...locked });
 });
@@ -158,7 +158,7 @@ dependencies = [
  "dev",
 ]
 `;
-  const derived = installCargoLock(lock, { name: 'install-check', version: '0.0.1', dependencies: ['lib', 'a'], removed: { lib: ['dev'] }, lockPath: 'packages/template-rust/Cargo.lock' });
+  const derived = installCargoLock(lock, { name: 'install-check', version: '0.0.1', dependencies: ['lib', 'a'], removed: { lib: ['dev'] }, lockPath: 'packages/rust/Cargo.lock' });
   assert.equal(derived, `# This file is automatically @generated by Cargo.
 # It is not intended for manual editing.
 version = 4
@@ -193,5 +193,5 @@ dependencies = [
  "a",
 ]
 `);
-  assert.throws(() => installCargoLock(lock, { name: 'install-check', version: '0.0.1', dependencies: ['missing'], removed: {}, lockPath: 'packages/template-rust/Cargo.lock' }), /missing: packages\/template-rust\/Cargo\.lock holds no package of that name/);
+  assert.throws(() => installCargoLock(lock, { name: 'install-check', version: '0.0.1', dependencies: ['missing'], removed: {}, lockPath: 'packages/rust/Cargo.lock' }), /missing: packages\/rust\/Cargo\.lock holds no package of that name/);
 });

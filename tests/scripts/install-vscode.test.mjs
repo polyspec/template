@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { vscodeCopy } from '@polyspec/kit/install-vscode';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const EXTENSION = path.join(ROOT, 'packages/template-vscode');
+const EXTENSION = path.join(ROOT, 'packages/vscode');
 
 function directory(t) {
   const created = mkdtempSync(path.join(tmpdir(), 'template-install-vscode-'));

@@ -50,7 +50,7 @@ test('each CI job that runs a Python check target runs make install and sets up 
 // The showcase contract has a Python implementation: the manifest maps Python, scripts/check-showcase-contract.mjs runs it
 // in both execution modes, and the generated Python programs of the scenarios are committed beside the other languages.
 test('the showcase contract checks a Python adapter and the generated Python programs of every scenario', () => {
-  const manifest = JSON.parse(readFileSync(join(root, 'packages/template-compiler/interface.json'), 'utf8')).showcaseAdapter;
+  const manifest = JSON.parse(readFileSync(join(root, 'packages/compiler/interface.json'), 'utf8')).showcaseAdapter;
   const python = manifest.languages.python;
   assert.ok(python, 'interface.json showcaseAdapter.languages names no python');
   assert.match(readFileSync(join(root, 'scripts/check-showcase-contract.mjs'), 'utf8'), /const languageNames = \[[^\]]*'python'/, 'check-showcase-contract.mjs does not run python');

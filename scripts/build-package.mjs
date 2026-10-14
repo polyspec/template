@@ -16,8 +16,8 @@
 // builds, for example an entry of the previous build whose chunk the new build removed. Two builds of the same inputs
 // write the same files, so a rebuild of unchanged inputs gives a reader the same contents.
 //
-// Usage: node scripts/build-package.mjs --package <template-ts|template-language|template-lsp|template-codemirror|
-//        template-vscode> [--dist <directory>] [--force] [--print-inputs]
+// Usage: node scripts/build-package.mjs --package <ts|language|lsp|codemirror|
+//        vscode> [--dist <directory>] [--force] [--print-inputs]
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
@@ -36,11 +36,11 @@ const typescript = projects => next => [
 ];
 // The build commands of each package, writing into `next`, run in order in the directory of the package.
 const BUILDS = {
-  'template-ts': typescript(['tsconfig.json', 'tsconfig.node.json']),
-  'template-language': typescript(['tsconfig.build.json']),
-  'template-lsp': typescript(['tsconfig.build.json']),
-  'template-codemirror': typescript(['tsconfig.build.json']),
-  'template-vscode': next => [[process.execPath, [join(root, 'scripts/build-package.mjs'), '--esbuild-vscode', next]]],
+  'ts': typescript(['tsconfig.json', 'tsconfig.node.json']),
+  'language': typescript(['tsconfig.build.json']),
+  'lsp': typescript(['tsconfig.build.json']),
+  'codemirror': typescript(['tsconfig.build.json']),
+  'vscode': next => [[process.execPath, [join(root, 'scripts/build-package.mjs'), '--esbuild-vscode', next]]],
 };
 // The sources and configuration of a package that its build reads, besides src/.
 const CONFIGURATION = ['tsup.config.ts', 'package.json', 'tsconfig.json', 'tsconfig.node.json', 'tsconfig.build.json'];
@@ -62,8 +62,8 @@ function run(command, args, options) {
 if (values['esbuild-vscode']) {
   const next = values['esbuild-vscode'];
   const common = ['--bundle', '--platform=node', '--format=cjs', '--target=node24'];
-  run(ESBUILD, ['src/extension.ts', ...common, '--external:vscode', `--outfile=${join(next, 'extension.cjs')}`], { cwd: join(root, 'packages/template-vscode') });
-  run(ESBUILD, ['@polyspec/template-lsp/server', ...common, `--outfile=${join(next, 'server.cjs')}`], { cwd: join(root, 'packages/template-vscode') });
+  run(ESBUILD, ['src/extension.ts', ...common, '--external:vscode', `--outfile=${join(next, 'extension.cjs')}`], { cwd: join(root, 'packages/vscode') });
+  run(ESBUILD, ['@polyspec/template-lsp/server', ...common, `--outfile=${join(next, 'server.cjs')}`], { cwd: join(root, 'packages/vscode') });
   process.exit(0);
 }
 

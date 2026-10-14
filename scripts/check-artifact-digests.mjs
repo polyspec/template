@@ -2,14 +2,14 @@
 // Checks that every committed compiled artifact records the digest of the compiler that the tree holds (T17.1-6): the AST
 // artifacts of examples/site/scenarios/*/compiled/ast record astCompilerDigest, the generated programs of
 // tools/showcase/adapters record generatedCompilerDigest of their language and the JavaScript delivery
-// typescriptDeliveryDigest. A change of the compiler, such as a change of packages/template-ts/src, leaves them stale
+// typescriptDeliveryDigest. A change of the compiler, such as a change of packages/ts/src, leaves them stale
 // until `make showcase` writes them again; a stale artifact is found here, from the tracked sources alone and without a
 // build, so the job push-gate runs this check.
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { astCompilerDigest, generatedCompilerDigest } from '../packages/template-compiler/compiler-digest.mjs';
+import { astCompilerDigest, generatedCompilerDigest } from '../packages/compiler/compiler-digest.mjs';
 import { typescriptDeliveryDigest } from '../tools/showcase/delivery-digest.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');

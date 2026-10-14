@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-documentation -->
-<!-- source-sha256: e2d7629c5853b0453d8dc190616b38ce6a47cf209212c8eb5a0c70edfba359e2 -->
+<!-- source-sha256: 1c463a4af661c89ad4fedf1529e2c10791cec54b5304ca8f765d07bfe8c4d5ec -->
 # 문서
 
 [English](/operations/documentation).
@@ -40,10 +40,10 @@ make documents-check
 
 | 패키지 | 공개 진입 표면 |
 | --- | --- |
-| `template-ts` | `src/index.ts`, `src/render.ts`, `src/node/index.ts`가 다시 내보내는 심볼과 그중 클래스의 공개 멤버 |
-| `template-go` | 모듈 루트 패키지의 공개 식별자, 그 선언이 지칭하는 하위 패키지 타입, 그 타입의 공개 메서드 |
-| `template-php` | 패키지 README의 API 표에 있는 클래스와 그 공개 메서드 |
-| `template-rust` | 모든 공개 항목. 크레이트 속성 `#![deny(missing_docs)]`이 컴파일러로 검사한다 |
+| `packages/ts` | `src/index.ts`, `src/render.ts`, `src/node/index.ts`가 다시 내보내는 심볼과 그중 클래스의 공개 멤버 |
+| `packages/go` | 모듈 루트 패키지의 공개 식별자, 그 선언이 지칭하는 하위 패키지 타입, 그 타입의 공개 메서드 |
+| `packages/php` | 패키지 README의 API 표에 있는 클래스와 그 공개 메서드 |
+| `packages/rust` | 모든 공개 항목. 크레이트 속성 `#![deny(missing_docs)]`이 컴파일러로 검사한다 |
 
 같은 패키지의 다른 파일이 쓰도록 내보내기만 한 심볼은 내부용이며 문서 주석을 갖지 않는다. 모든 소스 파일은 그 파일이 무엇을 구현하는지 밝히는 주석으로 시작한다. Go 패키지는 그 주석을 패키지의 파일 하나에 둔다.
 

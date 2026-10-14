@@ -2,7 +2,7 @@
 // with the expected and the actual version on failure:
 // - Node.js is the version of `.node-version`, and every CI job takes Node.js from it;
 // - npm is the version of `packageManager` in package.json, installed by `make install-tools TOOLS=npm` into var/tools/bin,
-//   and Go the go of mise.toml, which the go directive of packages/template-go/go.mod equals, installed by `make
+//   and Go the go of mise.toml, which the go directive of packages/go/go.mod equals, installed by `make
 //   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); kit.mk puts both directories first on
 //   PATH, and the Makefile exports GOTOOLCHAIN=local, so go never downloads another toolchain;
 // - Rust is the toolchain of `rust-toolchain.toml` with the components that `make lint` and `make test-rust` use,
@@ -134,10 +134,10 @@ test('every recipe line runs the npm of var/tools/bin and the go of mise, with e
   // gmake is GNU Make 4 where it is installed beside make 3.81.
   const makes = ['make', ...(spawnSync('gmake', ['--version']).status === 0 ? ['gmake'] : [])];
   const npm = JSON.parse(read('package.json')).packageManager.replace('npm@', '');
-  const go = `go${/^go (\S+)$/m.exec(read('packages/template-go/go.mod'))[1]}`;
+  const go = `go${/^go (\S+)$/m.exec(read('packages/go/go.mod'))[1]}`;
   for (const make of makes) {
     assert.equal(recipe('$(NPM) --version', {}, make), npm, `${make}: the recipe line $(NPM) --version runs another npm than ${npm} of var/tools/bin`);
-    assert.equal(recipe('cd packages/template-go && go env GOVERSION', {}, make), go, `${make}: a shell line with go runs another go than ${go} of the shims of mise`);
+    assert.equal(recipe('cd packages/go && go env GOVERSION', {}, make), go, `${make}: a shell line with go runs another go than ${go} of the shims of mise`);
   }
   const simple = read('Makefile').split('\n').filter(line => /^\t@?(npm|go|gofmt)\b/.test(line) && !/[;&|<>$`'"(){}*?[\]\\#=~]/.test(line));
   assert.deepEqual(simple, [], 'recipe lines without shell syntax that start npm, go or gofmt with the PATH that make started with');
@@ -157,12 +157,12 @@ test('the path of every Go module that go get resolves names its directory in th
   }
 });
 
-test('Go is the go of mise.toml, which the go directive of packages/template-go/go.mod equals, and go downloads no other toolchain', () => {
-  const expected = `go${/^go (\S+)$/m.exec(read('packages/template-go/go.mod'))[1]}`;
-  assert.equal(`go${MISE_TOOLS.go}`, expected, 'the go of mise.toml differs from the go directive of packages/template-go/go.mod');
+test('Go is the go of mise.toml, which the go directive of packages/go/go.mod equals, and go downloads no other toolchain', () => {
+  const expected = `go${/^go (\S+)$/m.exec(read('packages/go/go.mod'))[1]}`;
+  assert.equal(`go${MISE_TOOLS.go}`, expected, 'the go of mise.toml differs from the go directive of packages/go/go.mod');
   for (const tool of ['go', 'gofmt']) assert.equal(recipe(`command -v ${tool} || true`), path.join(SHIMS, tool), `${tool} of the recipes is not the shim of mise; run make install-tools`);
   const actual = recipe('cd . && go env GOVERSION', { GOTOOLCHAIN: 'auto' });
-  assert.equal(actual, expected, `go of the recipes: expected ${expected} (packages/template-go/go.mod), actual ${actual}; run make install-tools`);
+  assert.equal(actual, expected, `go of the recipes: expected ${expected} (packages/go/go.mod), actual ${actual}; run make install-tools`);
   assert.equal(recipe('echo "$GOTOOLCHAIN"', { GOTOOLCHAIN: 'auto' }), 'local', 'the recipes of the Makefile let go download a toolchain');
 });
 
@@ -215,7 +215,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const kit = 'node_modules/@polyspec/kit/dist';
   // make prints the empty TOOLS of install-tools of kit as a trailing space.
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, 'rustup toolchain install --no-self-update', `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, `${online} node scripts/python-wheelhouse.mjs`]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, 'rustup toolchain install --no-self-update', `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mjs packages/php`, `${online} node scripts/composer-install.mjs packages/php-ext`, `${online} node scripts/python-wheelhouse.mjs`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);

@@ -24,7 +24,7 @@ function commands(target) {
 }
 
 before(() => {
-  for (const name of ['template-ts', 'template-language']) {
+  for (const name of ['ts', 'language']) {
     const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', name], { cwd: ROOT, encoding: 'utf8' });
     assert.equal(build.status, 0, `the build of ${name} failed:\n${build.stdout}${build.stderr}`);
   }
@@ -60,7 +60,7 @@ test('a failed install-cli keeps the previous install, and a successful one leav
   assert.notEqual(failed.status, 0);
   const command = path.join(prefix, 'bin', 'template-fmt');
   assert.ok(existsSync(command), 'the failed install removed the previous template-fmt');
-  const check = spawnSync(command, ['--check', path.join(ROOT, 'packages/template-language/tests/fixtures/expected')], { encoding: 'utf8' });
+  const check = spawnSync(command, ['--check', path.join(ROOT, 'packages/language/tests/fixtures/expected')], { encoding: 'utf8' });
   assert.equal(check.status, 0, `the previous install does not run after the failed install: ${check.stdout}${check.stderr}`);
   assert.deepEqual(readdirSync(path.join(prefix, 'lib')), ['polyspec-template-fmt'], 'the failed install left its prepared directory');
 });

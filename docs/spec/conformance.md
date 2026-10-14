@@ -52,12 +52,12 @@ The runner passes each option as one argument, `--name=value`, so that a value t
 
 | Implementation | Command |
 | --- | --- |
-| ts | `node packages/template-ts/bin/template.mjs`; `format`: `node packages/template-language/bin/template-language.mjs` |
-| go | `packages/template-go/template` |
-| rust | `packages/template-rust/target/release/template` |
-| php | `php packages/template-php/bin/template.php` |
-| php-ext | `php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php` |
-| python | `var/python/venv/bin/python -m polyspec.template.cli` (`make python-package` installs `packages/template-python` into `var/python/venv`) |
+| ts | `node packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
+| go | `packages/go/template` |
+| rust | `packages/rust/target/release/template` |
+| php | `php packages/php/bin/template.php` |
+| php-ext | `php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php` |
+| python | `var/python/venv/bin/python -m polyspec.template.cli` (`make python-package` installs `packages/python` into `var/python/venv`) |
 
 The formatter of TypeScript is the package `@polyspec/template-language`, which depends on `@polyspec/template`, so its command `template-language` provides `format` and the command `template` the other subcommands.
 

@@ -2,12 +2,12 @@
   "schema": 1,
   "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The conformance cases of tests/cases, their tokens and format results and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools.",
   "implementations": [
-    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "roots": ["packages/template-ts", "packages/template-language"], "tests": ["packages/template-ts/tests/**/*.test.ts", "packages/template-language/tests/**/*.test.ts"] },
-    { "name": "go", "runner": "go", "prose": ["Go"], "roots": ["packages/template-go"], "tests": ["packages/template-go/**/*_test.go"] },
-    { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/template-rust"], "tests": ["packages/template-rust/tests/*.rs"], "support": ["packages/template-rust/tests/common/*.rs"] },
-    { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/template-php"], "tests": ["packages/template-php/tests/**/*Test.php"] },
-    { "name": "php-ext", "runner": "php", "prose": ["PHP extension"], "roots": ["packages/template-php-ext"], "tests": ["packages/template-php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"] },
-    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/template-python"], "tests": ["packages/template-python/tests/test_*.py"], "command": "var/python/venv/bin/python" }
+    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"] },
+    { "name": "go", "runner": "go", "prose": ["Go"], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"] },
+    { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs"], "support": ["packages/rust/tests/common/*.rs"] },
+    { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"] },
+    { "name": "php-ext", "runner": "php", "prose": ["PHP extension"], "roots": ["packages/php-ext"], "tests": ["packages/php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"] },
+    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/python"], "tests": ["packages/python/tests/test_*.py"], "command": "var/python/venv/bin/python" }
   ],
   "profiles": [
     { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] }
@@ -15,10 +15,10 @@
   "suites": ["tests/fixtures/expr/cases.json"],
   "comparators": ["tests/runner", "tests/browser", "tools/showcase"],
   "tools": [
-    { "root": "packages/template-lsp", "reason": "The language server is a TypeScript tool of the editors." },
-    { "root": "packages/template-codemirror", "reason": "The CodeMirror adapter is a TypeScript tool of the editors." },
-    { "root": "packages/template-vscode", "reason": "The VS Code extension is a TypeScript tool of the editors." },
-    { "root": "packages/template-compiler", "reason": "The compiler generates the programs of every language from one TypeScript implementation." },
+    { "root": "packages/lsp", "reason": "The language server is a TypeScript tool of the editors." },
+    { "root": "packages/codemirror", "reason": "The CodeMirror adapter is a TypeScript tool of the editors." },
+    { "root": "packages/vscode", "reason": "The VS Code extension is a TypeScript tool of the editors." },
+    { "root": "packages/compiler", "reason": "The compiler generates the programs of every language from one TypeScript implementation." },
     { "root": "tests/scripts", "reason": "The tests of the build, check and release scripts of the repository." }
   ],
   "testPatterns": [
@@ -36,11 +36,11 @@
       "file": "tests/cases",
       "cases": "*/*",
       "bindings": [
-        { "implementation": "ts", "test": "packages/template-ts/tests/conformance.test.ts" },
-        { "implementation": "go", "test": "packages/template-go/conformance_test.go", "symbol": "TestConformanceCases" },
-        { "implementation": "rust", "test": "packages/template-rust/tests/conformance.rs", "symbol": "conformance" },
-        { "implementation": "php", "test": "packages/template-php/tests/ConformanceTest.php" },
-        { "implementation": "php-ext", "test": "packages/template-php-ext/tests/ExtConformanceTest.php" }
+        { "implementation": "ts", "test": "packages/ts/tests/conformance.test.ts" },
+        { "implementation": "go", "test": "packages/go/conformance_test.go", "symbol": "TestConformanceCases" },
+        { "implementation": "rust", "test": "packages/rust/tests/conformance.rs", "symbol": "conformance" },
+        { "implementation": "php", "test": "packages/php/tests/ConformanceTest.php" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/ExtConformanceTest.php" }
       ]
     },
     {
@@ -50,12 +50,12 @@
       "file": "tests/cases",
       "cases": "*/*",
       "bindings": [
-        { "implementation": "ts", "test": "packages/template-ts/tests/tokens.test.ts" },
-        { "implementation": "go", "test": "packages/template-go/parser/analyze_test.go", "symbol": "TestConformanceTokens" },
-        { "implementation": "rust", "test": "packages/template-rust/tests/cases.rs", "symbol": "tokens" },
-        { "implementation": "php", "test": "packages/template-php/tests/ConformanceTest.php", "symbol": "Polyspec\\Template\\Tests\\ConformanceTest::testTokens" },
-        { "implementation": "php-ext", "test": "packages/template-php-ext/tests/AnalyzeTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\AnalyzeTest::testEqualsTheAnalysisOfThePhpPackage" },
-        { "implementation": "python", "test": "packages/template-python/tests/test_case_tokens.py" }
+        { "implementation": "ts", "test": "packages/ts/tests/tokens.test.ts" },
+        { "implementation": "go", "test": "packages/go/parser/analyze_test.go", "symbol": "TestConformanceTokens" },
+        { "implementation": "rust", "test": "packages/rust/tests/cases.rs", "symbol": "tokens" },
+        { "implementation": "php", "test": "packages/php/tests/ConformanceTest.php", "symbol": "Polyspec\\Template\\Tests\\ConformanceTest::testTokens" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/AnalyzeTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\AnalyzeTest::testEqualsTheAnalysisOfThePhpPackage" },
+        { "implementation": "python", "test": "packages/python/tests/test_case_tokens.py" }
       ]
     },
     {
@@ -65,12 +65,12 @@
       "file": "tests/cases",
       "cases": "*/*",
       "bindings": [
-        { "implementation": "ts", "test": "packages/template-language/tests/conformance.test.ts" },
-        { "implementation": "go", "test": "packages/template-go/format/format_test.go", "symbol": "TestConformanceFormat" },
-        { "implementation": "rust", "test": "packages/template-rust/tests/cases.rs", "symbol": "formatting" },
-        { "implementation": "php", "test": "packages/template-php/tests/ConformanceTest.php", "symbol": "Polyspec\\Template\\Tests\\ConformanceTest::testFormat" },
-        { "implementation": "php-ext", "test": "packages/template-php-ext/tests/FormatTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\FormatTest::testFormatsTheCase" },
-        { "implementation": "python", "test": "packages/template-python/tests/test_case_format.py" }
+        { "implementation": "ts", "test": "packages/language/tests/conformance.test.ts" },
+        { "implementation": "go", "test": "packages/go/format/format_test.go", "symbol": "TestConformanceFormat" },
+        { "implementation": "rust", "test": "packages/rust/tests/cases.rs", "symbol": "formatting" },
+        { "implementation": "php", "test": "packages/php/tests/ConformanceTest.php", "symbol": "Polyspec\\Template\\Tests\\ConformanceTest::testFormat" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/FormatTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\FormatTest::testFormatsTheCase" },
+        { "implementation": "python", "test": "packages/python/tests/test_case_format.py" }
       ]
     },
     {
@@ -80,11 +80,11 @@
       "file": "tests/fixtures/expr/cases.json",
       "cases": "$[*].name",
       "bindings": [
-        { "implementation": "ts", "test": "packages/template-ts/tests/expr/fixtures.test.ts" },
-        { "implementation": "go", "test": "packages/template-go/expr/fixtures_test.go", "symbol": "TestExpressionFixtures" },
-        { "implementation": "rust", "test": "packages/template-rust/tests/expr_fixtures.rs", "symbol": "expressions" },
-        { "implementation": "php", "test": "packages/template-php/tests/ExprFixturesTest.php" },
-        { "implementation": "python", "test": "packages/template-python/tests/test_expr_fixtures.py" }
+        { "implementation": "ts", "test": "packages/ts/tests/expr/fixtures.test.ts" },
+        { "implementation": "go", "test": "packages/go/expr/fixtures_test.go", "symbol": "TestExpressionFixtures" },
+        { "implementation": "rust", "test": "packages/rust/tests/expr_fixtures.rs", "symbol": "expressions" },
+        { "implementation": "php", "test": "packages/php/tests/ExprFixturesTest.php" },
+        { "implementation": "python", "test": "packages/python/tests/test_expr_fixtures.py" }
       ]
     }
   ],

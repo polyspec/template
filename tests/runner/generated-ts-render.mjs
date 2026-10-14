@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parentPort, workerData } from 'node:worker_threads';
-import { parseJsonBytes } from '../../packages/template-ts/dist/index.mjs';
+import { parseJsonBytes } from '../../packages/ts/dist/index.mjs';
 
 function plain(value) {
   if (value instanceof Map) return Object.fromEntries([...value].map(([key, item]) => [key, plain(item)]));

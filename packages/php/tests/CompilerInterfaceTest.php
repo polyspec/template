@@ -1,0 +1,155 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Polyspec\Template\Tests;
+
+use PHPUnit\Framework\TestCase;
+use Polyspec\Template\AstProgram;
+use Polyspec\Template\Engine;
+use Polyspec\Template\Program;
+use Polyspec\Template\Render\RuntimeBindings;
+use Polyspec\Template\Render\Frame;
+use Polyspec\Template\Render\RuntimeEnvironment;
+use Polyspec\Template\Render\RuntimeServices;
+use Polyspec\Template\Render\Scope;
+
+/** Verifies public runtime declarations against the common compiler manifest. */
+final class CompilerInterfaceTest extends TestCase
+{
+    /** Compares PHP declarations with the manifest through Reflection. */
+    public function testRuntimeDeclarationsMatchManifest(): void
+    {
+        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__ . '/../../compiler/interface.json';
+        $manifest = Support::readJson($manifestPath);
+        $contract = $manifest['runtimeContract'];
+        $program = new \ReflectionClass(Program::class);
+        self::assertTrue($program->isInterface());
+        self::assertSame(array_column($contract['Program']['operations'], 'name'), array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            $program->getMethods(\ReflectionMethod::IS_PUBLIC),
+        ));
+        foreach ($contract['Program']['operations'] as $operation) {
+            self::assertSame(
+                count($operation['parameters']),
+                $program->getMethod($operation['name'])->getNumberOfParameters(),
+            );
+        }
+
+        $engine = new \ReflectionClass(Engine::class);
+        self::assertTrue($engine->implementsInterface(Program::class));
+        self::assertSame($contract['Engine']['owns'], array_map(
+            static fn (\ReflectionProperty $property): string => $property->getName(),
+            $engine->getProperties(),
+        ));
+        self::assertSame($contract['Engine']['operations'], array_values(array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            array_filter(
+                $engine->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
+        )));
+
+        $ast = new \ReflectionClass(AstProgram::class);
+        self::assertFalse($ast->isAbstract());
+        self::assertTrue($ast->implementsInterface(Program::class));
+        self::assertTrue($ast->hasProperty('runtime'));
+
+        $bindings = new \ReflectionClass(RuntimeBindings::class);
+        self::assertFalse($bindings->isAbstract());
+        self::assertSame(array_column($contract['RuntimeBindings']['operations'], 'name'), array_values(array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            array_filter(
+                $bindings->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
+        )));
+        foreach ($contract['RuntimeBindings']['operations'] as $operation) {
+            self::assertSame(
+                count($operation['parameters']),
+                $bindings->getMethod($operation['name'])->getNumberOfParameters(),
+            );
+        }
+
+        $services = new \ReflectionClass(RuntimeServices::class);
+        self::assertTrue($services->isInterface());
+        self::assertSame(array_column($contract['RuntimeServices']['operations'], 'name'), array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            $services->getMethods(\ReflectionMethod::IS_PUBLIC),
+        ));
+        foreach ($contract['RuntimeServices']['operations'] as $operation) {
+            self::assertSame(
+                count($operation['parameters']),
+                $services->getMethod($operation['name'])->getNumberOfParameters(),
+            );
+        }
+
+        $runtime = new \ReflectionClass(RuntimeEnvironment::class);
+        self::assertFalse($runtime->isAbstract());
+        self::assertTrue($runtime->implementsInterface(RuntimeServices::class));
+        self::assertSame($manifest['languages']['php']['runtimeEnvironmentFields'], array_map(
+            static fn (\ReflectionProperty $property): string => $property->getName(),
+            $runtime->getProperties(),
+        ));
+        self::assertSame($manifest['languages']['php']['runtimeEnvironmentOperations'], array_values(array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            array_filter(
+                $runtime->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
+        )));
+        foreach ($contract['RuntimeEnvironment']['operations'] as $operation) {
+            self::assertSame(
+                count($operation['parameters']),
+                $runtime->getMethod($operation['name'])->getNumberOfParameters(),
+            );
+        }
+        foreach ([Frame::class => 'frameFields', Scope::class => 'scopeFields'] as $class => $mapping) {
+            self::assertSame($manifest['languages']['php'][$mapping], array_map(
+                static fn (\ReflectionProperty $property): string => $property->getName(),
+                (new \ReflectionClass($class))->getProperties(\ReflectionProperty::IS_PUBLIC),
+            ));
+        }
+        $scope = new \ReflectionClass(Scope::class);
+        self::assertSame($manifest['languages']['php']['scopeOperations'], array_values(array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            array_filter(
+                $scope->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
+        )));
+    }
+
+    /**
+     * VAL-22: the bound map class is final and has exactly the static operations of the manifest;
+     * `__unserialize` is public because PHP calls it, and it fails.
+     */
+    public function testBoundMapDeclarationsMatchManifest(): void
+    {
+        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__ . '/../../compiler/interface.json';
+        $manifest = Support::readJson($manifestPath);
+        $mapping = $manifest['languages']['php']['boundMap'];
+        $type = new \ReflectionClass($mapping['type']);
+        self::assertTrue($type->isFinal());
+        self::assertFalse($type->isInstantiable());
+        self::assertFalse($type->isCloneable());
+        $public = array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            $type->getMethods(\ReflectionMethod::IS_PUBLIC),
+        );
+        sort($public);
+        $expected = [...array_values($mapping['operations']), '__unserialize'];
+        sort($expected);
+        self::assertSame($expected, $public);
+        foreach ($mapping['operations'] as $name) {
+            self::assertTrue($type->getMethod($name)->isStatic());
+        }
+        self::assertSame(
+            [],
+            array_map(
+                static fn (\ReflectionProperty $property): string => $property->getName(),
+                $type->getProperties(\ReflectionProperty::IS_PUBLIC),
+            ),
+        );
+    }
+}

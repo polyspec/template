@@ -6,10 +6,10 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { compileAst } from '../packages/template-compiler/ast-artifact.mjs';
-import { compileFiles, compileSource } from '../packages/template-compiler/compiler.mjs';
+import { compileAst } from '../packages/compiler/ast-artifact.mjs';
+import { compileFiles, compileSource } from '../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mjs';
-import { goString, phpString, rustString } from '../packages/template-compiler/backend-support.mjs';
+import { goString, phpString, rustString } from '../packages/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
@@ -60,7 +60,7 @@ check(program.render('define.tpl', cases.assign, { define: { part: { template: '
       try {
         writeFileSync(join(goDir, 'generated.go'), source('go'));
         const goHeader = `package generated
-import ("testing"; template "github.com/polyspec/template/packages/template-go")
+import ("testing"; template "github.com/polyspec/template/packages/go")
 func fixture(t *testing.T, text string) template.Value { t.Helper(); parsed, err := template.ParseJSON([]byte(text)); if err != nil { t.Fatal(err) }; return parsed }
 func bound(t *testing.T, text string) template.BoundMap { t.Helper(); result, err := template.Bind(fixture(t, text)); if err != nil { t.Fatal(err) }; return result }
 `;
@@ -72,7 +72,7 @@ func TestGeneratedBoundAssign(t *testing.T) { program, err := NewGeneratedProgra
   check(template.Merge(bound(t, ${goString(json(cases.assign))}), bound(t, ${goString(json(cases.second))})), ${goString(cases.outputs.merged)}, "merged assign") }
 `);
         writeFileSync(join(goDir, 'definition_test.go'), `package generated
-import ("testing"; template "github.com/polyspec/template/packages/template-go")
+import ("testing"; template "github.com/polyspec/template/packages/go")
 func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }
   options := template.RenderOptions{Define: map[string]template.DefineInput{"part": {Template: "part.tpl", Data: bound(t, ${goString(json(cases.definitionData))})}}}
   actual, err := program.Render("define.tpl", fixture(t, ${goString(json(cases.assign))}), options); if err != nil || actual != ${goString(cases.outputs.define)} { t.Fatalf("bound definition data: %q %v", actual, err) } }
@@ -116,7 +116,7 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
       // PHP.
       const phpNamespace = 'Polyspec\\Generated\\BoundData';
       writePhpProgram(join(temporary, 'php'), files('php', { phpNamespace }));
-      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/template-php/vendor/autoload.php')), phpNamespace, phpString(join(temporary, 'php')))}
+      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/php/vendor/autoload.php')), phpNamespace, phpString(join(temporary, 'php')))}
 use Polyspec\\Template\\BoundMap;
 $cases = json_decode(${phpString(json(cases))}, true, flags: JSON_THROW_ON_ERROR);
 $check = static function (string $actual, string $expected, string $label): void { if ($actual !== $expected) throw new RuntimeException('PHP generated ' . $label . ': ' . $actual); };
