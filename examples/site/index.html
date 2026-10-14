@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Template execution lab</title><link rel="stylesheet" href="./styles.css"></head>
 <body><header class="hero"><p class="eyebrow">TEMPLATE · STATIC RENDER PROOF</p><h1>Template execution lab</h1><p class="lede">The shared source is parsed before this page is built. AST mode executes the committed nodes; generated mode lowers those same nodes into host-language renderers. Both modes use the same assign, define and output contract.</p><div class="status-grid"><div class="status-card"><span>Cross-language proof</span><strong class="pass">PASS</strong></div><div class="status-card"><span>AST mode</span><strong class="pass">IMPLEMENTED</strong></div><div class="status-card"><span>Generated mode</span><strong class="pass">5 LANGUAGES</strong></div><div class="status-card"><span>Page validation</span><strong class="pass">HTML</strong></div></div></header>
-<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · NATIVE VALUES</p><h2>Assign keeps the host instance</h2></div><p>A class instance passed through assign stays that instance. The template reads a public field, calls the instance method and calls a separately registered logical class function.</p></div><div class="native-proof"><details open><summary>template</summary><pre class="template-files">&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.label</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">order</span><span class="syntax-variable">.status_label</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;ready&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">Order</span><span class="syntax-operator">::</span><span class="syntax-variable">suffix</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;!&quot;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
+<main><section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · NATIVE VALUES</p><h2>Assign keeps the host instance</h2></div><p>A class instance passed through assign stays that instance. The template reads a public field, calls the instance method and calls a separately registered logical class function.</p></div><div class="native-proof"><details open><summary>template</summary><pre class="template-files">&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">order</span><span class="syntax-property">.label</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">order</span><span class="syntax-function">.status_label</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;ready&quot;</span><span class="syntax-operator">)</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">Order</span><span class="syntax-operator">::</span><span class="syntax-function">suffix</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;!&quot;</span><span class="syntax-operator">)</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
 </pre></details><details open><summary>host assign</summary><pre>class Order { public label = &#39;Order 12&#39;; public status_label(prefix) { return prefix + &#39;:12&#39;; } }
 const assign = { order: new Order() };</pre></details><p class="output-label">Rendered output · 64 bytes · 5f94e0e9fe74…</p><pre>&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;Order 12&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;ready:12&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;done!&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
 </pre></div></section><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>351</td><td>f9e5af2122de…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
@@ -40,35 +40,35 @@ const assign = { order: new Order() };</pre></details><p class="output-label">Re
     }
   }
 }</pre></details><details open><summary>templates · parser ranges</summary><pre class="template-files">--- card.tpl
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;card&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">label</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;card&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">label</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
 
 
 --- layout.tpl
-<span class="syntax-template syntax-assignment">{: values = <span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">,</span> <span class="syntax-operator">...</span><span class="syntax-variable">numbers</span><span class="syntax-operator">]</span>}</span>
-<span class="syntax-template syntax-assignment">{: merged = <span class="syntax-operator">[</span><span class="syntax-operator">...</span><span class="syntax-variable">lookup</span><span class="syntax-operator">,</span> <span class="syntax-string">&#39;z&#39;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&#39;Z&#39;</span><span class="syntax-operator">]</span>}</span>
+<span class="syntax-template syntax-assignment"><span class="syntax-delimiter">{</span><span class="syntax-keyword">:</span> <span class="syntax-variable">values</span> <span class="syntax-operator">=</span> <span class="syntax-operator">[</span><span class="syntax-number">0</span><span class="syntax-operator">,</span> <span class="syntax-operator">...</span><span class="syntax-variable">numbers</span><span class="syntax-operator">]</span><span class="syntax-delimiter">}</span></span>
+<span class="syntax-template syntax-assignment"><span class="syntax-delimiter">{</span><span class="syntax-keyword">:</span> <span class="syntax-variable">merged</span> <span class="syntax-operator">=</span> <span class="syntax-operator">[</span><span class="syntax-operator">...</span><span class="syntax-variable">lookup</span><span class="syntax-operator">,</span> <span class="syntax-string">&#39;z&#39;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&#39;Z&#39;</span><span class="syntax-operator">]</span><span class="syntax-delimiter">}</span></span>
 &lt;<span class="syntax-tag">section</span>&gt;
-&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">page</span><span class="syntax-variable">.title</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;escaped&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">dangerous</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;logical&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">flag</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-string">&#39;x&#39;</span>}</span>|<span class="syntax-template syntax-echo">{= <span class="syntax-keyword">false</span> <span class="syntax-operator">||</span> <span class="syntax-number">2</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty-truthiness&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">empty_list</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-variable">flag</span>}</span>|<span class="syntax-template syntax-echo">{= <span class="syntax-variable">empty_map</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-variable">flag</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
-&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">values</span><span class="syntax-operator">[</span><span class="syntax-number">1</span><span class="syntax-operator">]</span>}</span>|<span class="syntax-template syntax-echo">{= <span class="syntax-variable">merged</span><span class="syntax-operator">[</span><span class="syntax-string">&#39;z&#39;</span><span class="syntax-operator">]</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
-<span class="syntax-template syntax-if">{? <span class="syntax-variable">flag</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-variable">page</span><span class="syntax-variable">.title</span> <span class="syntax-operator">==</span> <span class="syntax-string">&#39;Guide&#39;</span>}</span>&lt;<span class="syntax-tag">strong</span>&gt;matched&lt;/<span class="syntax-tag">strong</span>&gt;<span class="syntax-template syntax-else">{:}</span>&lt;<span class="syntax-tag">strong</span>&gt;missed&lt;/<span class="syntax-tag">strong</span>&gt;<span class="syntax-template syntax-close">{/}</span>
-&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">flag</span> <span class="syntax-operator">?</span> <span class="syntax-string">&#39;yes&#39;</span> <span class="syntax-operator">:</span> <span class="syntax-string">&#39;no&#39;</span>}</span>|<span class="syntax-template syntax-echo">{= <span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span>}</span>|<span class="syntax-template syntax-echo">{= <span class="syntax-string">&#39;&#39;</span> <span class="syntax-operator">|</span> <span class="syntax-variable">default</span><span class="syntax-operator">(</span><span class="syntax-string">&#39;fallback&#39;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">page</span><span class="syntax-property">.title</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">h1</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;escaped&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">dangerous</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;logical&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">flag</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-string">&#39;x&#39;</span><span class="syntax-delimiter">}</span></span>|<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-keyword">false</span> <span class="syntax-operator">||</span> <span class="syntax-number">2</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty-truthiness&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">empty_list</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-variable">flag</span><span class="syntax-delimiter">}</span></span>|<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">empty_map</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-variable">flag</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">values</span><span class="syntax-operator">[</span><span class="syntax-number">1</span><span class="syntax-operator">]</span><span class="syntax-delimiter">}</span></span>|<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">merged</span><span class="syntax-operator">[</span><span class="syntax-string">&#39;z&#39;</span><span class="syntax-operator">]</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
+<span class="syntax-template syntax-if"><span class="syntax-delimiter">{</span><span class="syntax-keyword">?</span> <span class="syntax-variable">flag</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-variable">page</span><span class="syntax-property">.title</span> <span class="syntax-operator">==</span> <span class="syntax-string">&#39;Guide&#39;</span><span class="syntax-delimiter">}</span></span>&lt;<span class="syntax-tag">strong</span>&gt;matched&lt;/<span class="syntax-tag">strong</span>&gt;<span class="syntax-template syntax-else"><span class="syntax-delimiter">{</span><span class="syntax-keyword">:</span><span class="syntax-delimiter">}</span></span>&lt;<span class="syntax-tag">strong</span>&gt;missed&lt;/<span class="syntax-tag">strong</span>&gt;<span class="syntax-template syntax-close"><span class="syntax-delimiter">{</span><span class="syntax-keyword">/</span><span class="syntax-delimiter">}</span></span>
+&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">flag</span> <span class="syntax-operator">?</span> <span class="syntax-string">&#39;yes&#39;</span> <span class="syntax-operator">:</span> <span class="syntax-string">&#39;no&#39;</span><span class="syntax-delimiter">}</span></span>|<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-delimiter">}</span></span>|<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-string">&#39;&#39;</span> <span class="syntax-operator">|</span> <span class="syntax-function">default</span><span class="syntax-operator">(</span><span class="syntax-string">&#39;fallback&#39;</span><span class="syntax-operator">)</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;<span class="syntax-tag">ul</span>&gt;
-<span class="syntax-template syntax-for">{@ row = <span class="syntax-variable">rows</span>}</span>
-&lt;<span class="syntax-tag">li</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">row</span><span class="syntax-variable">.index_</span>}</span>/<span class="syntax-template syntax-echo">{= <span class="syntax-variable">row</span><span class="syntax-variable">.size_</span>}</span>:<span class="syntax-template syntax-echo">{= <span class="syntax-variable">row</span><span class="syntax-variable">.name</span>}</span>:<span class="syntax-template syntax-echo">{= <span class="syntax-variable">row</span><span class="syntax-variable">.first_</span>}</span>:<span class="syntax-template syntax-echo">{= <span class="syntax-variable">row</span><span class="syntax-variable">.last_</span>}</span>&lt;/<span class="syntax-tag">li</span>&gt;
-<span class="syntax-template syntax-else">{:}</span>
+<span class="syntax-template syntax-for"><span class="syntax-delimiter">{</span><span class="syntax-keyword">@</span> <span class="syntax-variable">row</span> <span class="syntax-operator">=</span> <span class="syntax-variable">rows</span><span class="syntax-delimiter">}</span></span>
+&lt;<span class="syntax-tag">li</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">row</span><span class="syntax-property">.index_</span><span class="syntax-delimiter">}</span></span>/<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">row</span><span class="syntax-property">.size_</span><span class="syntax-delimiter">}</span></span>:<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">row</span><span class="syntax-property">.name</span><span class="syntax-delimiter">}</span></span>:<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">row</span><span class="syntax-property">.first_</span><span class="syntax-delimiter">}</span></span>:<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">row</span><span class="syntax-property">.last_</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">li</span>&gt;
+<span class="syntax-template syntax-else"><span class="syntax-delimiter">{</span><span class="syntax-keyword">:</span><span class="syntax-delimiter">}</span></span>
 &lt;<span class="syntax-tag">li</span>&gt;empty&lt;/<span class="syntax-tag">li</span>&gt;
-<span class="syntax-template syntax-close">{/}</span>
+<span class="syntax-template syntax-close"><span class="syntax-delimiter">{</span><span class="syntax-keyword">/</span><span class="syntax-delimiter">}</span></span>
 &lt;/<span class="syntax-tag">ul</span>&gt;
-<span class="syntax-template syntax-include">{+ partial.tpl}</span>
-<span class="syntax-template syntax-ifblock">{?# <span class="syntax-variable">content</span>}</span>&lt;<span class="syntax-tag">p</span>&gt;defined&lt;/<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-else">{:}</span>&lt;<span class="syntax-tag">p</span>&gt;missing&lt;/<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-close">{/}</span>
-<span class="syntax-template syntax-block">{# content label:page.title}</span>
+<span class="syntax-template syntax-include"><span class="syntax-delimiter">{</span><span class="syntax-keyword">+</span> <span class="syntax-path">partial.tpl</span><span class="syntax-delimiter">}</span></span>
+<span class="syntax-template syntax-ifblock"><span class="syntax-delimiter">{</span><span class="syntax-keyword">?#</span> <span class="syntax-variable">content</span><span class="syntax-delimiter">}</span></span>&lt;<span class="syntax-tag">p</span>&gt;defined&lt;/<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-else"><span class="syntax-delimiter">{</span><span class="syntax-keyword">:</span><span class="syntax-delimiter">}</span></span>&lt;<span class="syntax-tag">p</span>&gt;missing&lt;/<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-close"><span class="syntax-delimiter">{</span><span class="syntax-keyword">/</span><span class="syntax-delimiter">}</span></span>
+<span class="syntax-template syntax-block"><span class="syntax-delimiter">{</span><span class="syntax-keyword">#</span> <span class="syntax-path">content</span> <span class="syntax-path">label:page.title</span><span class="syntax-delimiter">}</span></span>
 &lt;/<span class="syntax-tag">section</span>&gt;
 
 
 --- partial.tpl
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;included&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">values</span><span class="syntax-operator">[</span><span class="syntax-number">2</span><span class="syntax-operator">]</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;included&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">values</span><span class="syntax-operator">[</span><span class="syntax-number">2</span><span class="syntax-operator">]</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
 </pre></details><details open><summary>compiled artifacts</summary><pre class="long-code">ast/manifest.json
 {
   &quot;schema&quot;: 3,
@@ -78,8 +78,8 @@ const assign = { order: new Order() };</pre></details><p class="output-label">Re
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;f01ee54ad166d9abd5707f556c51fa07a9cc50924241f5116726e4657cbbce60&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;f1f3fb8848d4316f24e8600d0c69c409f9854c0e5358df08e6b65d1c8800fc74&quot;,
   &quot;files&quot;: {
     &quot;card.tpl&quot;: {
       &quot;path&quot;: &quot;card.tpl.ast.json&quot;,
@@ -1122,7 +1122,7 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;64b1df31de86c51b7668b3687e3edf135d0ca80feb6151351ae9b1eb7c75cfd1&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
@@ -1288,306 +1288,351 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;5e881a261390f362b3d33dcc8c4292db584b155909296b1ab037535a69f0f7fb&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;db64d2da8abdf1d38ce0e1a5fbd2032af0256739fa405b35db120ae1077dade5&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
-      &quot;artifactDigest&quot;: &quot;0eb5da24520166fcf0611028bef06cf09db5114055d7292cfa28531b46c49831&quot;
+      &quot;artifactDigest&quot;: &quot;c95a5809209b527560190890952d0bb847c6b23f4d478185a1eba503187a9dbc&quot;
     }
   }
 }
 
-// Generated.
-import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &#39;@polyspec/template&#39;;
+import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &quot;@polyspec/template&quot;;
 const generatedRecords = { &quot;Page&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } }, &quot;Row&quot;: { &quot;name&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } }, &quot;Slot&quot;: { &quot;template&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;html&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } } };
 const generatedAssign = { &quot;flag&quot;: { &quot;kind&quot;: &quot;boolean&quot;, &quot;optional&quot;: false }, &quot;dangerous&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;empty_list&quot;: { &quot;kind&quot;: &quot;list&quot;, &quot;item&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;empty_map&quot;: { &quot;kind&quot;: &quot;map&quot;, &quot;key&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;value&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;page&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Page&quot;, &quot;optional&quot;: false }, &quot;numbers&quot;: { &quot;kind&quot;: &quot;list&quot;, &quot;item&quot;: { &quot;kind&quot;: &quot;number&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;lookup&quot;: { &quot;kind&quot;: &quot;map&quot;, &quot;key&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;value&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false }, &quot;rows&quot;: { &quot;kind&quot;: &quot;list&quot;, &quot;item&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Row&quot;, &quot;optional&quot;: false }, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: &quot;card.tpl&quot;, &quot;html&quot;: true, &quot;input&quot;: { &quot;label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } } }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
-function generatedObject(value, path) { if (value instanceof Map)
-    return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value, type, path) { if (value === null || value === undefined) {
-    if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return null;
-    throw new Error(path + &#39; is required&#39;);
-} if (type.kind === &#39;any&#39;)
-    return value; if (type.kind === &#39;null&#39;) {
-    if (value !== null)
-        throw new Error(path + &#39; is not null&#39;);
+function generatedObject(value, path) {
+  if (value instanceof Map) return value;
+  throw new Error(path + &quot; is not an object&quot;);
+}
+function generatedBindType(value, type, path) {
+  if (value === null || value === void 0) {
+    if (type.optional || type.kind === &quot;null&quot; || type.kind === &quot;any&quot;) return null;
+    throw new Error(path + &quot; is required&quot;);
+  }
+  if (type.kind === &quot;any&quot;) return value;
+  if (type.kind === &quot;null&quot;) {
+    if (value !== null) throw new Error(path + &quot; is not null&quot;);
     return null;
-} if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) {
-    if (typeof value !== type.kind)
-        throw new Error(path + &#39; is not a &#39; + type.kind);
+  }
+  if (type.kind === &quot;string&quot; || type.kind === &quot;number&quot; || type.kind === &quot;boolean&quot;) {
+    if (typeof value !== type.kind) throw new Error(path + &quot; is not a &quot; + type.kind);
     return value;
-} if (type.kind === &#39;list&#39;) {
-    if (!Array.isArray(value))
-        throw new Error(path + &#39; is not a list&#39;);
-    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &#39;[&#39; + index + &#39;]&#39;));
-} if (type.kind === &#39;map&#39;) {
+  }
+  if (type.kind === &quot;list&quot;) {
+    if (!Array.isArray(value)) throw new Error(path + &quot; is not a list&quot;);
+    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &quot;[&quot; + index + &quot;]&quot;));
+  }
+  if (type.kind === &quot;map&quot;) {
     const object = generatedObject(value, path);
-    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &#39;.key&#39;), generatedBindType(item, type.value, path + &#39;.&#39; + key)]));
-} if (type.kind === &#39;record&#39;)
-    return generatedBindRecord(value, generatedRecords[type.name], path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedToValue(value, type) { if (value === null || value === undefined)
-    return null; if (type.kind === &#39;record&#39;) {
-    if (value instanceof Map)
-        return value;
+    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &quot;.key&quot;), generatedBindType(item, type.value, path + &quot;.&quot; + key)]));
+  }
+  if (type.kind === &quot;record&quot;) return generatedBindRecord(value, generatedRecords[type.name], path);
+  throw new Error(path + &quot; has an unknown generated type&quot;);
+}
+function generatedToValue(value, type) {
+  if (value === null || value === void 0) return null;
+  if (type.kind === &quot;record&quot;) {
+    if (value instanceof Map) return value;
     const fields = generatedRecords[type.name];
     return new Map(Object.entries(fields).map(([name, field]) =&gt; [name, generatedToValue(value[name], field)]));
-} if (type.kind === &#39;list&#39;)
-    return value.map(item =&gt; generatedToValue(item, type.item)); if (type.kind === &#39;map&#39;)
-    return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)])); return value; }
-function generatedBindRecord(value, fields, path, partial = false) { const object = generatedObject(value, path); const result = {}; for (const [name, type] of Object.entries(fields)) {
+  }
+  if (type.kind === &quot;list&quot;) return value.map((item) =&gt; generatedToValue(item, type.item));
+  if (type.kind === &quot;map&quot;) return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)]));
+  return value;
+}
+function generatedBindRecord(value, fields, path, partial = false) {
+  const object = generatedObject(value, path);
+  const result = {};
+  for (const [name, type] of Object.entries(fields)) {
     if (!object.has(name)) {
-        if (!partial &amp;&amp; !type.optional)
-            throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
-        if (!partial)
-            result[name] = null;
-        continue;
+      if (!partial &amp;&amp; !type.optional) throw new Error(path + &quot;.&quot; + name + &quot; is required&quot;);
+      if (!partial) result[name] = null;
+      continue;
     }
-    result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
-} return result; }
-function generatedBindAssign(value) { const root = bindMap(value ?? new Map()); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
-function generatedBindDefinitions(input) { const definitions = {}; const targets = new Map(); for (const [id, raw] of Object.entries(input ?? {})) {
+    result[name] = generatedBindType(object.get(name), type, path + &quot;.&quot; + name);
+  }
+  return result;
+}
+function generatedBindAssign(value) {
+  const root = bindMap(value ?? /* @__PURE__ */ new Map());
+  return { assign: generatedBindRecord(root, generatedAssign, &quot;assign&quot;), root };
+}
+function generatedBindDefinitions(input) {
+  const definitions = {};
+  const targets = /* @__PURE__ */ new Map();
+  for (const [id, raw] of Object.entries(input ?? {})) {
     checkText(id);
     const spec = generatedDefinitionSpecs[id];
-    if (spec === undefined)
-        throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;);
-    if (typeof raw === &#39;string&#39;) {
-        if (spec.target === null || raw !== spec.target)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-        definitions[spec.field] = { template: spec.target };
-        targets.set(id, { target: spec.target });
-        continue;
+    if (spec === void 0) throw new Error(&quot;define.&quot; + id + &quot; is not declared&quot;);
+    if (typeof raw === &quot;string&quot;) {
+      if (spec.target === null || raw !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+      definitions[spec.field] = { template: spec.target };
+      targets.set(id, { target: spec.target });
+      continue;
     }
-    if (typeof raw !== &#39;object&#39; || raw === null)
-        throw new Error(&#39;define.&#39; + id + &#39; is not an object&#39;);
+    if (typeof raw !== &quot;object&quot; || raw === null) throw new Error(&quot;define.&quot; + id + &quot; is not an object&quot;);
     const template = raw.template;
     const html = raw.html;
-    const data = raw.data === undefined ? undefined : bindData(raw.data);
-    if (typeof html === &#39;string&#39;) {
-        if (!spec.html || template !== undefined || data !== undefined)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;);
-        definitions[spec.field] = { html };
-        targets.set(id, { target: null, html });
-        continue;
+    const data = raw.data === void 0 ? void 0 : bindData(raw.data);
+    if (typeof html === &quot;string&quot;) {
+      if (!spec.html || template !== void 0 || data !== void 0) throw new Error(&quot;define.&quot; + id + &quot; has an invalid html entry&quot;);
+      definitions[spec.field] = { html };
+      targets.set(id, { target: null, html });
+      continue;
     }
-    if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target)
-        throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-    const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true);
+    if (typeof template !== &quot;string&quot; || spec.target === null || template !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+    const boundData = data === void 0 ? {} : generatedBindRecord(data, spec.input, &quot;define.&quot; + id + &quot;.data&quot;, true);
     definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
-} return { definitions: definitions, targets }; }
+  }
+  return { definitions, targets };
+}
 function render_card_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;card.tpl&quot;, [0, 30], rootData);
-    scope.locals.set(&quot;label&quot;, input.label);
-    context.at(frame, [0, 16]);
-    context.output.write(&quot;&lt;p class=\&quot;card\&quot;&gt;&quot;);
-    context.at(frame, [16, 25]);
-    context.output.write(runtime.escape(scope.lookup(frame, &quot;label&quot;), frame, [19, 24]));
-    context.at(frame, [25, 30]);
-    context.output.write(&quot;&lt;/p&gt;\n&quot;);
+  const frame = new Frame(&quot;card.tpl&quot;, [0, 30], rootData);
+  scope.locals.set(&quot;label&quot;, input.label);
+  context.at(frame, [0, 16]);
+  context.output.write(&#39;&lt;p class=&quot;card&quot;&gt;&#39;);
+  context.at(frame, [16, 25]);
+  context.output.write(runtime.escape(scope.lookup(frame, &quot;label&quot;), frame, [19, 24]));
+  context.at(frame, [25, 30]);
+  context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;layout.tpl&quot;, [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], rootData);
-    scope.locals.set(&quot;values&quot;, runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16, 26])], frame, [12, 27]));
-    scope.locals.set(&quot;merged&quot;, runtime.depth(new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify(&quot;z&quot;, frame, [53, 56]), &quot;Z&quot;]]), frame, [41, 64]));
-    context.at(frame, [66, 80]);
-    context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
-    context.at(frame, [80, 94]);
-    context.output.write(runtime.escape((assign.page)?.title, frame, [83, 93]));
-    context.at(frame, [94, 119]);
-    context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
-    context.at(frame, [119, 132]);
-    context.output.write(runtime.escape(assign.dangerous, frame, [122, 131]));
-    context.at(frame, [132, 156]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;logical\&quot;&gt;&quot;);
-    context.at(frame, [156, 171]);
-    context.output.write(runtime.escape((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(&quot;x&quot;) : false; })(), frame, [159, 170]));
-    context.at(frame, [171, 172]);
-    context.output.write(&quot;|&quot;);
-    context.at(frame, [172, 186]);
-    context.output.write(runtime.escape((() =&gt; { const left = false; return runtime.truthy(left) ? true : runtime.truthy(2); })(), frame, [175, 185]));
-    context.at(frame, [186, 219]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;empty-truthiness\&quot;&gt;&quot;);
-    context.at(frame, [219, 241]);
-    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_list; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [222, 240]));
-    context.at(frame, [241, 242]);
-    context.output.write(&quot;|&quot;);
-    context.at(frame, [242, 263]);
-    context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [245, 262]));
-    context.at(frame, [263, 271]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
-    context.at(frame, [271, 284]);
-    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;), 1, frame, [274, 283]), frame, [274, 283]));
-    context.at(frame, [284, 285]);
-    context.output.write(&quot;|&quot;);
-    context.at(frame, [285, 300]);
-    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;merged&quot;), &quot;z&quot;, frame, [288, 299]), frame, [288, 299]));
-    context.at(frame, [300, 305]);
-    context.output.write(&quot;&lt;/p&gt;\n&quot;);
-    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(runtime.binary(&quot;==&quot;, (assign.page)?.title, &quot;Guide&quot;, frame, [316, 337])) : false; })())) {
-        context.at(frame, [338, 362]);
-        context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);
-    }
-    else {
-        context.at(frame, [365, 388]);
-        context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
-    }
-    context.at(frame, [391, 395]);
-    context.output.write(&quot;\n&lt;p&gt;&quot;);
-    context.at(frame, [395, 418]);
-    context.output.write(runtime.escape((runtime.truthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;), frame, [398, 417]));
-    context.at(frame, [418, 419]);
-    context.output.write(&quot;|&quot;);
-    context.at(frame, [419, 429]);
-    context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1, frame, [422, 424]), 3, frame, [422, 428]), frame, [422, 428]));
-    context.at(frame, [429, 430]);
-    context.output.write(&quot;|&quot;);
-    context.at(frame, [430, 458]);
-    context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [433, 457]), frame, [433, 457]));
-    context.at(frame, [458, 468]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
-    {
-        const row_entries = runtime.entries(assign.rows, frame, [468, 585]);
-        const row_size = row_entries.length;
-        const row_last_index = row_size - 1;
-        const row_had = scope.locals.has(&quot;row&quot;);
-        const row_previous = scope.locals.get(&quot;row&quot;);
-        try {
-            for (let row_index = 0; row_index &lt; row_size; row_index += 1) {
-                const [row_key, row_value] = row_entries[row_index];
-                scope.locals.set(&quot;row&quot;, row_value);
-                const row_first = row_index === 0;
-                const row_last = row_index === row_last_index;
-                context.iterations += 1;
-                runtime.limit(&#39;iteration&#39;, context.iterations, frame, [468, 585]);
-                context.at(frame, [483, 487]);
-                context.output.write(&quot;&lt;li&gt;&quot;);
-                context.at(frame, [487, 501]);
-                context.output.write(runtime.escape(row_index, frame, [490, 500]));
-                context.at(frame, [501, 502]);
-                context.output.write(&quot;/&quot;);
-                context.at(frame, [502, 515]);
-                context.output.write(runtime.escape(row_size, frame, [505, 514]));
-                context.at(frame, [515, 516]);
-                context.output.write(&quot;:&quot;);
-                context.at(frame, [516, 528]);
-                context.output.write(runtime.escape(scope.lookup(frame, &quot;row&quot;)?.name, frame, [519, 527]));
-                context.at(frame, [528, 529]);
-                context.output.write(&quot;:&quot;);
-                context.at(frame, [529, 543]);
-                context.output.write(runtime.escape(row_first, frame, [532, 542]));
-                context.at(frame, [543, 544]);
-                context.output.write(&quot;:&quot;);
-                context.at(frame, [544, 557]);
-                context.output.write(runtime.escape(row_last, frame, [547, 556]));
-                context.at(frame, [557, 563]);
-                context.output.write(&quot;&lt;/li&gt;\n&quot;);
-            }
-        }
-        finally {
-            if (row_had)
-                scope.locals.set(&quot;row&quot;, row_previous);
-            else
-                scope.locals.delete(&quot;row&quot;);
-        }
-        if (row_size === 0) {
-            context.at(frame, [567, 582]);
-            context.output.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
-        }
-    }
-    context.at(frame, [586, 592]);
-    context.output.write(&quot;&lt;/ul&gt;\n&quot;);
-    context.enter(&quot;partial.tpl&quot;, frame, [592, 607]);
+  const frame = new Frame(&quot;layout.tpl&quot;, [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], rootData);
+  scope.locals.set(&quot;values&quot;, runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16, 26])], frame, [12, 27]));
+  scope.locals.set(&quot;merged&quot;, runtime.depth(new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify(&quot;z&quot;, frame, [53, 56]), &quot;Z&quot;]]), frame, [41, 64]));
+  context.at(frame, [66, 80]);
+  context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
+  context.at(frame, [80, 94]);
+  context.output.write(runtime.escape(assign.page?.title, frame, [83, 93]));
+  context.at(frame, [94, 119]);
+  context.output.write(&#39;&lt;/h1&gt;\n&lt;p class=&quot;escaped&quot;&gt;&#39;);
+  context.at(frame, [119, 132]);
+  context.output.write(runtime.escape(assign.dangerous, frame, [122, 131]));
+  context.at(frame, [132, 156]);
+  context.output.write(&#39;&lt;/p&gt;\n&lt;p class=&quot;logical&quot;&gt;&#39;);
+  context.at(frame, [156, 171]);
+  context.output.write(runtime.escape((() =&gt; {
+    const left = assign.flag;
+    return runtime.truthy(left) ? runtime.truthy(&quot;x&quot;) : false;
+  })(), frame, [159, 170]));
+  context.at(frame, [171, 172]);
+  context.output.write(&quot;|&quot;);
+  context.at(frame, [172, 186]);
+  context.output.write(runtime.escape((() =&gt; {
+    const left = false;
+    return runtime.truthy(left) ? true : runtime.truthy(2);
+  })(), frame, [175, 185]));
+  context.at(frame, [186, 219]);
+  context.output.write(&#39;&lt;/p&gt;\n&lt;p class=&quot;empty-truthiness&quot;&gt;&#39;);
+  context.at(frame, [219, 241]);
+  context.output.write(runtime.escape((() =&gt; {
+    const left = assign.empty_list;
+    return runtime.truthy(left) ? runtime.truthy(assign.flag) : false;
+  })(), frame, [222, 240]));
+  context.at(frame, [241, 242]);
+  context.output.write(&quot;|&quot;);
+  context.at(frame, [242, 263]);
+  context.output.write(runtime.escape((() =&gt; {
+    const left = assign.empty_map;
+    return runtime.truthy(left) ? runtime.truthy(assign.flag) : false;
+  })(), frame, [245, 262]));
+  context.at(frame, [263, 271]);
+  context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
+  context.at(frame, [271, 284]);
+  context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;), 1, frame, [274, 283]), frame, [274, 283]));
+  context.at(frame, [284, 285]);
+  context.output.write(&quot;|&quot;);
+  context.at(frame, [285, 300]);
+  context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;merged&quot;), &quot;z&quot;, frame, [288, 299]), frame, [288, 299]));
+  context.at(frame, [300, 305]);
+  context.output.write(&quot;&lt;/p&gt;\n&quot;);
+  if (runtime.truthy((() =&gt; {
+    const left = assign.flag;
+    return runtime.truthy(left) ? runtime.truthy(runtime.binary(&quot;==&quot;, assign.page?.title, &quot;Guide&quot;, frame, [316, 337])) : false;
+  })())) {
+    context.at(frame, [338, 362]);
+    context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);
+  } else {
+    context.at(frame, [365, 388]);
+    context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
+  }
+  context.at(frame, [391, 395]);
+  context.output.write(&quot;\n&lt;p&gt;&quot;);
+  context.at(frame, [395, 418]);
+  context.output.write(runtime.escape(runtime.truthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;, frame, [398, 417]));
+  context.at(frame, [418, 419]);
+  context.output.write(&quot;|&quot;);
+  context.at(frame, [419, 429]);
+  context.output.write(runtime.escape(runtime.binary(&quot;+&quot;, runtime.unary(&quot;-&quot;, 1, frame, [422, 424]), 3, frame, [422, 428]), frame, [422, 428]));
+  context.at(frame, [429, 430]);
+  context.output.write(&quot;|&quot;);
+  context.at(frame, [430, 458]);
+  context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [433, 457]), frame, [433, 457]));
+  context.at(frame, [458, 468]);
+  context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
+  {
+    const row_entries = runtime.entries(assign.rows, frame, [468, 585]);
+    const row_size = row_entries.length;
+    const row_last_index = row_size - 1;
+    const row_had = scope.locals.has(&quot;row&quot;);
+    const row_previous = scope.locals.get(&quot;row&quot;);
     try {
-        render_partial_tpl(assign, definitions, { values: scope.lookup(frame, &quot;values&quot;) }, context, runtime, rootData, scope);
+      for (let row_index = 0; row_index &lt; row_size; row_index += 1) {
+        const [row_key, row_value] = row_entries[row_index];
+        scope.locals.set(&quot;row&quot;, row_value);
+        const row_first = row_index === 0;
+        const row_last = row_index === row_last_index;
+        context.iterations += 1;
+        runtime.limit(&quot;iteration&quot;, context.iterations, frame, [468, 585]);
+        context.at(frame, [483, 487]);
+        context.output.write(&quot;&lt;li&gt;&quot;);
+        context.at(frame, [487, 501]);
+        context.output.write(runtime.escape(row_index, frame, [490, 500]));
+        context.at(frame, [501, 502]);
+        context.output.write(&quot;/&quot;);
+        context.at(frame, [502, 515]);
+        context.output.write(runtime.escape(row_size, frame, [505, 514]));
+        context.at(frame, [515, 516]);
+        context.output.write(&quot;:&quot;);
+        context.at(frame, [516, 528]);
+        context.output.write(runtime.escape(scope.lookup(frame, &quot;row&quot;)?.name, frame, [519, 527]));
+        context.at(frame, [528, 529]);
+        context.output.write(&quot;:&quot;);
+        context.at(frame, [529, 543]);
+        context.output.write(runtime.escape(row_first, frame, [532, 542]));
+        context.at(frame, [543, 544]);
+        context.output.write(&quot;:&quot;);
+        context.at(frame, [544, 557]);
+        context.output.write(runtime.escape(row_last, frame, [547, 556]));
+        context.at(frame, [557, 563]);
+        context.output.write(&quot;&lt;/li&gt;\n&quot;);
+      }
+    } finally {
+      if (row_had) scope.locals.set(&quot;row&quot;, row_previous);
+      else scope.locals.delete(&quot;row&quot;);
     }
-    finally {
+    if (row_size === 0) {
+      context.at(frame, [567, 582]);
+      context.output.write(&quot;&lt;li&gt;empty&lt;/li&gt;\n&quot;);
+    }
+  }
+  context.at(frame, [586, 592]);
+  context.output.write(&quot;&lt;/ul&gt;\n&quot;);
+  context.enter(&quot;partial.tpl&quot;, frame, [592, 607]);
+  try {
+    render_partial_tpl(assign, definitions, { values: scope.lookup(frame, &quot;values&quot;) }, context, runtime, rootData, scope);
+  } finally {
+    context.leave();
+  }
+  if (definitions.content !== void 0) {
+    context.at(frame, [620, 634]);
+    context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
+  } else {
+    context.at(frame, [637, 651]);
+    context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
+  }
+  context.at(frame, [654, 655]);
+  context.output.write(&quot;\n&quot;);
+  {
+    let definition = definitions.content;
+    if (definition === void 0) throw runtime.error(frame, [655, 683], &quot;E_RUNTIME_BLOCK_UNDEFINED&quot;, &quot;define content is not registered&quot;);
+    if (definition?.html !== void 0) {
+      context.at(frame, [655, 683]);
+      context.output.write(definition.html);
+    } else {
+      const input2 = Object.assign({}, definition?.data ?? {}, { label: assign.page?.title });
+      const blockScope = new Scope();
+      context.enter(&quot;card.tpl&quot;, frame, [655, 683]);
+      try {
+        render_card_tpl(assign, definitions, input2, context, runtime, rootData, blockScope);
+      } finally {
         context.leave();
+      }
     }
-    if (definitions.content !== undefined) {
-        context.at(frame, [620, 634]);
-        context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
-    }
-    else {
-        context.at(frame, [637, 651]);
-        context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
-    }
-    context.at(frame, [654, 655]);
-    context.output.write(&quot;\n&quot;);
-    {
-        let definition = definitions.content;
-        if (definition === undefined)
-            throw runtime.error(frame, [655, 683], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-        if (definition?.html !== undefined) {
-            context.at(frame, [655, 683]);
-            context.output.write(definition.html);
-        }
-        else {
-            const input = Object.assign({}, definition?.data ?? {}, { label: (assign.page)?.title });
-            const blockScope = new Scope();
-            context.enter(&quot;card.tpl&quot;, frame, [655, 683]);
-            try {
-                render_card_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
-            }
-            finally {
-                context.leave();
-            }
-        }
-    }
-    context.at(frame, [684, 695]);
-    context.output.write(&quot;&lt;/section&gt;\n&quot;);
+  }
+  context.at(frame, [684, 695]);
+  context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
 function render_partial_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;partial.tpl&quot;, [0, 38], rootData);
-    scope.locals.set(&quot;values&quot;, input.values);
-    context.at(frame, [0, 20]);
-    context.output.write(&quot;&lt;p class=\&quot;included\&quot;&gt;&quot;);
-    context.at(frame, [20, 33]);
-    context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;), 2, frame, [23, 32]), frame, [23, 32]));
-    context.at(frame, [33, 38]);
-    context.output.write(&quot;&lt;/p&gt;\n&quot;);
+  const frame = new Frame(&quot;partial.tpl&quot;, [0, 38], rootData);
+  scope.locals.set(&quot;values&quot;, input.values);
+  context.at(frame, [0, 20]);
+  context.output.write(&#39;&lt;p class=&quot;included&quot;&gt;&#39;);
+  context.at(frame, [20, 33]);
+  context.output.write(runtime.escape(runtime.index(scope.lookup(frame, &quot;values&quot;), 2, frame, [23, 32]), frame, [23, 32]));
+  context.at(frame, [33, 38]);
+  context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
 function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
-    switch (target) {
-        case &quot;layout.tpl&quot;:
-            render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
-            return;
-        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
-    }
+  switch (target) {
+    case &quot;layout.tpl&quot;:
+      render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
+      return;
+    default:
+      throw context.fail(&quot;E_LOAD_NOT_FOUND&quot;, null, null, &quot;template &quot; + target + &quot; does not exist&quot;);
+  }
 }
-function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.now is not a number&#39;); return { timezone, now }; }
+function generatedEnv(input) {
+  const timezone = input?.timezone ?? &quot;Z&quot;;
+  const now = input?.now ?? Math.floor(Date.now() / 1e3);
+  if (typeof timezone !== &quot;string&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.timezone is not a string&quot;);
+  if (typeof now !== &quot;number&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.now is not a number&quot;);
+  return { timezone, now };
+}
 class GeneratedPreparedRender {
-    name;
-    execute;
-    constructor(name, execute) { this.name = name; this.execute = execute; }
-    render() { return internalBoundary(this.name, this.execute); }
+  name;
+  execute;
+  constructor(name, execute) {
+    this.name = name;
+    this.execute = execute;
+  }
+  render() {
+    return internalBoundary(this.name, this.execute);
+  }
 }
 export class GeneratedProgram {
-    runtime;
-    constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
-    prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options)); }
-    prepareBound(target, assign, options) { let boundAssign; let bound; let env; try {
-        boundAssign = generatedBindAssign(assign);
-        bound = generatedBindDefinitions(options.define);
-        env = generatedEnv(options.env);
+  runtime;
+  constructor(runtime = new RuntimeEnvironment()) {
+    this.runtime = runtime;
+  }
+  prepare(target, assign, options = {}) {
+    if (typeof target !== &quot;string&quot;) throw new Error(&quot;generated target must be a template name&quot;);
+    return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options));
+  }
+  prepareBound(target, assign, options) {
+    let boundAssign;
+    let bound;
+    let env;
+    try {
+      boundAssign = generatedBindAssign(assign);
+      bound = generatedBindDefinitions(options.define);
+      env = generatedEnv(options.env);
+    } catch (error) {
+      if (error instanceof BindError) throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
+      throw error;
     }
-    catch (error) {
-        if (error instanceof BindError)
-            throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
-        throw error;
-    } const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(target, () =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(target, () =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try {
+    const registered = bound.targets.get(target);
+    if (registered?.html !== void 0) return new GeneratedPreparedRender(target, () =&gt; registered.html);
+    const targetName = registered?.target ?? target;
+    return new GeneratedPreparedRender(target, () =&gt; {
+      const context = new RenderContext(this.runtime, boundAssign.root, env, targetName);
+      const runtime = new RuntimeBindings(context);
+      const scope = new Scope();
+      context.enter(targetName, null, null);
+      try {
         renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope);
         return context.output.toString();
-    }
-    finally {
+      } finally {
         context.leave();
-    } }); }
-    render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
+      }
+    });
+  }
+  render(target, assign, options = {}) {
+    return this.prepare(target, assign, options).render();
+  }
 }
 
 
@@ -1599,7 +1644,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;fc3ca6f68411213edeeb4c7f2f6efadfef12eae93beb68659f19345e844ef82a&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -1804,7 +1849,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;c76ed42a2565bba34471be1c907d95a715a689afd67918bce517f5aae0096c1a&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
@@ -1991,7 +2036,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;b1fd5549b79e4c648eeb49bade24eeebb4908263b8d0ff9b515d6b6df204ded4&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.php&quot;: {
@@ -2194,11 +2239,11 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;layout&quot;: &quot;layout.tpl&quot;
 }</pre></details><details open><summary>templates · parser ranges</summary><pre class="template-files">--- layout.tpl
 &lt;<span class="syntax-tag">main</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty-page&quot;</span>&gt;
-<span class="syntax-template syntax-ifblock">{?# <span class="syntax-variable">content</span>}</span>
-<span class="syntax-template syntax-block">{# content}</span>
-<span class="syntax-template syntax-else">{:}</span>
+<span class="syntax-template syntax-ifblock"><span class="syntax-delimiter">{</span><span class="syntax-keyword">?#</span> <span class="syntax-variable">content</span><span class="syntax-delimiter">}</span></span>
+<span class="syntax-template syntax-block"><span class="syntax-delimiter">{</span><span class="syntax-keyword">#</span> <span class="syntax-path">content</span><span class="syntax-delimiter">}</span></span>
+<span class="syntax-template syntax-else"><span class="syntax-delimiter">{</span><span class="syntax-keyword">:</span><span class="syntax-delimiter">}</span></span>
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty&quot;</span>&gt;No content definition.&lt;/<span class="syntax-tag">p</span>&gt;
-<span class="syntax-template syntax-close">{/}</span>
+<span class="syntax-template syntax-close"><span class="syntax-delimiter">{</span><span class="syntax-keyword">/</span><span class="syntax-delimiter">}</span></span>
 &lt;/<span class="syntax-tag">main</span>&gt;
 </pre></details><details open><summary>compiled artifacts</summary><pre class="long-code">ast/manifest.json
 {
@@ -2209,8 +2254,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;f01ee54ad166d9abd5707f556c51fa07a9cc50924241f5116726e4657cbbce60&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;f1f3fb8848d4316f24e8600d0c69c409f9854c0e5358df08e6b65d1c8800fc74&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2292,7 +2337,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;64b1df31de86c51b7668b3687e3edf135d0ca80feb6151351ae9b1eb7c75cfd1&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
@@ -2363,155 +2408,192 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;5e881a261390f362b3d33dcc8c4292db584b155909296b1ab037535a69f0f7fb&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;db64d2da8abdf1d38ce0e1a5fbd2032af0256739fa405b35db120ae1077dade5&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
       &quot;path&quot;: &quot;empty-state.js&quot;,
-      &quot;artifactDigest&quot;: &quot;75a18a1543c3c741f366f584b1094b4942a8a1c1244771d1d89e625998a5c007&quot;
+      &quot;artifactDigest&quot;: &quot;cf7422b9f0efd8e812946efad30649bf8483137899eec8f5f22bdde31c3d6575&quot;
     }
   }
 }
 
-// Generated.
-import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &#39;@polyspec/template&#39;;
+import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &quot;@polyspec/template&quot;;
 const generatedRecords = {};
 const generatedAssign = { &quot;page&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: null, &quot;html&quot;: true, &quot;input&quot;: {} }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
-function generatedObject(value, path) { if (value instanceof Map)
-    return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value, type, path) { if (value === null || value === undefined) {
-    if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return null;
-    throw new Error(path + &#39; is required&#39;);
-} if (type.kind === &#39;any&#39;)
-    return value; if (type.kind === &#39;null&#39;) {
-    if (value !== null)
-        throw new Error(path + &#39; is not null&#39;);
+function generatedObject(value, path) {
+  if (value instanceof Map) return value;
+  throw new Error(path + &quot; is not an object&quot;);
+}
+function generatedBindType(value, type, path) {
+  if (value === null || value === void 0) {
+    if (type.optional || type.kind === &quot;null&quot; || type.kind === &quot;any&quot;) return null;
+    throw new Error(path + &quot; is required&quot;);
+  }
+  if (type.kind === &quot;any&quot;) return value;
+  if (type.kind === &quot;null&quot;) {
+    if (value !== null) throw new Error(path + &quot; is not null&quot;);
     return null;
-} if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) {
-    if (typeof value !== type.kind)
-        throw new Error(path + &#39; is not a &#39; + type.kind);
+  }
+  if (type.kind === &quot;string&quot; || type.kind === &quot;number&quot; || type.kind === &quot;boolean&quot;) {
+    if (typeof value !== type.kind) throw new Error(path + &quot; is not a &quot; + type.kind);
     return value;
-} if (type.kind === &#39;list&#39;) {
-    if (!Array.isArray(value))
-        throw new Error(path + &#39; is not a list&#39;);
-    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &#39;[&#39; + index + &#39;]&#39;));
-} if (type.kind === &#39;map&#39;) {
+  }
+  if (type.kind === &quot;list&quot;) {
+    if (!Array.isArray(value)) throw new Error(path + &quot; is not a list&quot;);
+    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &quot;[&quot; + index + &quot;]&quot;));
+  }
+  if (type.kind === &quot;map&quot;) {
     const object = generatedObject(value, path);
-    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &#39;.key&#39;), generatedBindType(item, type.value, path + &#39;.&#39; + key)]));
-} if (type.kind === &#39;record&#39;)
-    return generatedBindRecord(value, generatedRecords[type.name], path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedToValue(value, type) { if (value === null || value === undefined)
-    return null; if (type.kind === &#39;record&#39;) {
-    if (value instanceof Map)
-        return value;
+    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &quot;.key&quot;), generatedBindType(item, type.value, path + &quot;.&quot; + key)]));
+  }
+  if (type.kind === &quot;record&quot;) return generatedBindRecord(value, generatedRecords[type.name], path);
+  throw new Error(path + &quot; has an unknown generated type&quot;);
+}
+function generatedToValue(value, type) {
+  if (value === null || value === void 0) return null;
+  if (type.kind === &quot;record&quot;) {
+    if (value instanceof Map) return value;
     const fields = generatedRecords[type.name];
     return new Map(Object.entries(fields).map(([name, field]) =&gt; [name, generatedToValue(value[name], field)]));
-} if (type.kind === &#39;list&#39;)
-    return value.map(item =&gt; generatedToValue(item, type.item)); if (type.kind === &#39;map&#39;)
-    return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)])); return value; }
-function generatedBindRecord(value, fields, path, partial = false) { const object = generatedObject(value, path); const result = {}; for (const [name, type] of Object.entries(fields)) {
+  }
+  if (type.kind === &quot;list&quot;) return value.map((item) =&gt; generatedToValue(item, type.item));
+  if (type.kind === &quot;map&quot;) return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)]));
+  return value;
+}
+function generatedBindRecord(value, fields, path, partial = false) {
+  const object = generatedObject(value, path);
+  const result = {};
+  for (const [name, type] of Object.entries(fields)) {
     if (!object.has(name)) {
-        if (!partial &amp;&amp; !type.optional)
-            throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
-        if (!partial)
-            result[name] = null;
-        continue;
+      if (!partial &amp;&amp; !type.optional) throw new Error(path + &quot;.&quot; + name + &quot; is required&quot;);
+      if (!partial) result[name] = null;
+      continue;
     }
-    result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
-} return result; }
-function generatedBindAssign(value) { const root = bindMap(value ?? new Map()); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
-function generatedBindDefinitions(input) { const definitions = {}; const targets = new Map(); for (const [id, raw] of Object.entries(input ?? {})) {
+    result[name] = generatedBindType(object.get(name), type, path + &quot;.&quot; + name);
+  }
+  return result;
+}
+function generatedBindAssign(value) {
+  const root = bindMap(value ?? /* @__PURE__ */ new Map());
+  return { assign: generatedBindRecord(root, generatedAssign, &quot;assign&quot;), root };
+}
+function generatedBindDefinitions(input) {
+  const definitions = {};
+  const targets = /* @__PURE__ */ new Map();
+  for (const [id, raw] of Object.entries(input ?? {})) {
     checkText(id);
     const spec = generatedDefinitionSpecs[id];
-    if (spec === undefined)
-        throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;);
-    if (typeof raw === &#39;string&#39;) {
-        if (spec.target === null || raw !== spec.target)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-        definitions[spec.field] = { template: spec.target };
-        targets.set(id, { target: spec.target });
-        continue;
+    if (spec === void 0) throw new Error(&quot;define.&quot; + id + &quot; is not declared&quot;);
+    if (typeof raw === &quot;string&quot;) {
+      if (spec.target === null || raw !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+      definitions[spec.field] = { template: spec.target };
+      targets.set(id, { target: spec.target });
+      continue;
     }
-    if (typeof raw !== &#39;object&#39; || raw === null)
-        throw new Error(&#39;define.&#39; + id + &#39; is not an object&#39;);
+    if (typeof raw !== &quot;object&quot; || raw === null) throw new Error(&quot;define.&quot; + id + &quot; is not an object&quot;);
     const template = raw.template;
     const html = raw.html;
-    const data = raw.data === undefined ? undefined : bindData(raw.data);
-    if (typeof html === &#39;string&#39;) {
-        if (!spec.html || template !== undefined || data !== undefined)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;);
-        definitions[spec.field] = { html };
-        targets.set(id, { target: null, html });
-        continue;
+    const data = raw.data === void 0 ? void 0 : bindData(raw.data);
+    if (typeof html === &quot;string&quot;) {
+      if (!spec.html || template !== void 0 || data !== void 0) throw new Error(&quot;define.&quot; + id + &quot; has an invalid html entry&quot;);
+      definitions[spec.field] = { html };
+      targets.set(id, { target: null, html });
+      continue;
     }
-    if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target)
-        throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-    const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true);
+    if (typeof template !== &quot;string&quot; || spec.target === null || template !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+    const boundData = data === void 0 ? {} : generatedBindRecord(data, spec.input, &quot;define.&quot; + id + &quot;.data&quot;, true);
     definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
-} return { definitions: definitions, targets }; }
+  }
+  return { definitions, targets };
+}
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;layout.tpl&quot;, [0, 26, 39, 51, 55, 99, 103, 111], rootData);
-    context.at(frame, [0, 26]);
-    context.output.write(&quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;);
-    if (definitions.content !== undefined) {
-        {
-            const definition = definitions.content;
-            if (definition?.html === undefined)
-                throw runtime.error(frame, [39, 50], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-            context.at(frame, [39, 50]);
-            context.output.write(definition.html);
-        }
+  const frame = new Frame(&quot;layout.tpl&quot;, [0, 26, 39, 51, 55, 99, 103, 111], rootData);
+  context.at(frame, [0, 26]);
+  context.output.write(&#39;&lt;main class=&quot;empty-page&quot;&gt;\n&#39;);
+  if (definitions.content !== void 0) {
+    {
+      const definition = definitions.content;
+      if (definition?.html === void 0) throw runtime.error(frame, [39, 50], &quot;E_RUNTIME_BLOCK_UNDEFINED&quot;, &quot;define content is not registered&quot;);
+      context.at(frame, [39, 50]);
+      context.output.write(definition.html);
     }
-    else {
-        context.at(frame, [55, 99]);
-        context.output.write(&quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;);
-    }
-    context.at(frame, [103, 111]);
-    context.output.write(&quot;&lt;/main&gt;\n&quot;);
+  } else {
+    context.at(frame, [55, 99]);
+    context.output.write(&#39;&lt;p class=&quot;empty&quot;&gt;No content definition.&lt;/p&gt;\n&#39;);
+  }
+  context.at(frame, [103, 111]);
+  context.output.write(&quot;&lt;/main&gt;\n&quot;);
 }
 function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
-    switch (target) {
-        case &quot;layout.tpl&quot;:
-            render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
-            return;
-        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
-    }
+  switch (target) {
+    case &quot;layout.tpl&quot;:
+      render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
+      return;
+    default:
+      throw context.fail(&quot;E_LOAD_NOT_FOUND&quot;, null, null, &quot;template &quot; + target + &quot; does not exist&quot;);
+  }
 }
-function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.now is not a number&#39;); return { timezone, now }; }
+function generatedEnv(input) {
+  const timezone = input?.timezone ?? &quot;Z&quot;;
+  const now = input?.now ?? Math.floor(Date.now() / 1e3);
+  if (typeof timezone !== &quot;string&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.timezone is not a string&quot;);
+  if (typeof now !== &quot;number&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.now is not a number&quot;);
+  return { timezone, now };
+}
 class GeneratedPreparedRender {
-    name;
-    execute;
-    constructor(name, execute) { this.name = name; this.execute = execute; }
-    render() { return internalBoundary(this.name, this.execute); }
+  name;
+  execute;
+  constructor(name, execute) {
+    this.name = name;
+    this.execute = execute;
+  }
+  render() {
+    return internalBoundary(this.name, this.execute);
+  }
 }
 export class GeneratedProgram {
-    runtime;
-    constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
-    prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options)); }
-    prepareBound(target, assign, options) { let boundAssign; let bound; let env; try {
-        boundAssign = generatedBindAssign(assign);
-        bound = generatedBindDefinitions(options.define);
-        env = generatedEnv(options.env);
+  runtime;
+  constructor(runtime = new RuntimeEnvironment()) {
+    this.runtime = runtime;
+  }
+  prepare(target, assign, options = {}) {
+    if (typeof target !== &quot;string&quot;) throw new Error(&quot;generated target must be a template name&quot;);
+    return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options));
+  }
+  prepareBound(target, assign, options) {
+    let boundAssign;
+    let bound;
+    let env;
+    try {
+      boundAssign = generatedBindAssign(assign);
+      bound = generatedBindDefinitions(options.define);
+      env = generatedEnv(options.env);
+    } catch (error) {
+      if (error instanceof BindError) throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
+      throw error;
     }
-    catch (error) {
-        if (error instanceof BindError)
-            throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
-        throw error;
-    } const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(target, () =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(target, () =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try {
+    const registered = bound.targets.get(target);
+    if (registered?.html !== void 0) return new GeneratedPreparedRender(target, () =&gt; registered.html);
+    const targetName = registered?.target ?? target;
+    return new GeneratedPreparedRender(target, () =&gt; {
+      const context = new RenderContext(this.runtime, boundAssign.root, env, targetName);
+      const runtime = new RuntimeBindings(context);
+      const scope = new Scope();
+      context.enter(targetName, null, null);
+      try {
         renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope);
         return context.output.toString();
-    }
-    finally {
+      } finally {
         context.leave();
-    } }); }
-    render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
+      }
+    });
+  }
+  render(target, assign, options = {}) {
+    return this.prepare(target, assign, options).render();
+  }
 }
 
 
@@ -2523,7 +2605,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;fc3ca6f68411213edeeb4c7f2f6efadfef12eae93beb68659f19345e844ef82a&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -2627,7 +2709,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;c76ed42a2565bba34471be1c907d95a715a689afd67918bce517f5aae0096c1a&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
@@ -2710,7 +2792,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;b1fd5549b79e4c648eeb49bade24eeebb4908263b8d0ff9b515d6b6df204ded4&quot;,
   &quot;files&quot;: {
     &quot;empty-state.php&quot;: {
@@ -2799,8 +2881,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   }
 }</pre></details><details open><summary>templates · parser ranges</summary><pre class="template-files">--- layout.tpl
 &lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;notice&quot;</span>&gt;
-&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">heading</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
-<span class="syntax-template syntax-block">{# content}</span>
+&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">heading</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">h1</span>&gt;
+<span class="syntax-template syntax-block"><span class="syntax-delimiter">{</span><span class="syntax-keyword">#</span> <span class="syntax-path">content</span><span class="syntax-delimiter">}</span></span>
 &lt;/<span class="syntax-tag">section</span>&gt;
 </pre></details><details open><summary>compiled artifacts</summary><pre class="long-code">ast/manifest.json
 {
@@ -2811,8 +2893,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;f01ee54ad166d9abd5707f556c51fa07a9cc50924241f5116726e4657cbbce60&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;f1f3fb8848d4316f24e8600d0c69c409f9854c0e5358df08e6b65d1c8800fc74&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -2894,7 +2976,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;64b1df31de86c51b7668b3687e3edf135d0ca80feb6151351ae9b1eb7c75cfd1&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
@@ -2963,153 +3045,191 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;5e881a261390f362b3d33dcc8c4292db584b155909296b1ab037535a69f0f7fb&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;db64d2da8abdf1d38ce0e1a5fbd2032af0256739fa405b35db120ae1077dade5&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
       &quot;path&quot;: &quot;html-slot.js&quot;,
-      &quot;artifactDigest&quot;: &quot;5fdedd5681f16000a99d88be33de94c98fd5a90c038f21f92f4e3c2875b930a0&quot;
+      &quot;artifactDigest&quot;: &quot;701691c0acbdd2d3e5dfd905aa2a56e881bb5eb020cc0a9a2b1e2491b0469d09&quot;
     }
   }
 }
 
-// Generated.
-import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &#39;@polyspec/template&#39;;
+import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &quot;@polyspec/template&quot;;
 const generatedRecords = {};
 const generatedAssign = { &quot;heading&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: null, &quot;html&quot;: true, &quot;input&quot;: {} }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
-function generatedObject(value, path) { if (value instanceof Map)
-    return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value, type, path) { if (value === null || value === undefined) {
-    if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return null;
-    throw new Error(path + &#39; is required&#39;);
-} if (type.kind === &#39;any&#39;)
-    return value; if (type.kind === &#39;null&#39;) {
-    if (value !== null)
-        throw new Error(path + &#39; is not null&#39;);
+function generatedObject(value, path) {
+  if (value instanceof Map) return value;
+  throw new Error(path + &quot; is not an object&quot;);
+}
+function generatedBindType(value, type, path) {
+  if (value === null || value === void 0) {
+    if (type.optional || type.kind === &quot;null&quot; || type.kind === &quot;any&quot;) return null;
+    throw new Error(path + &quot; is required&quot;);
+  }
+  if (type.kind === &quot;any&quot;) return value;
+  if (type.kind === &quot;null&quot;) {
+    if (value !== null) throw new Error(path + &quot; is not null&quot;);
     return null;
-} if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) {
-    if (typeof value !== type.kind)
-        throw new Error(path + &#39; is not a &#39; + type.kind);
+  }
+  if (type.kind === &quot;string&quot; || type.kind === &quot;number&quot; || type.kind === &quot;boolean&quot;) {
+    if (typeof value !== type.kind) throw new Error(path + &quot; is not a &quot; + type.kind);
     return value;
-} if (type.kind === &#39;list&#39;) {
-    if (!Array.isArray(value))
-        throw new Error(path + &#39; is not a list&#39;);
-    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &#39;[&#39; + index + &#39;]&#39;));
-} if (type.kind === &#39;map&#39;) {
+  }
+  if (type.kind === &quot;list&quot;) {
+    if (!Array.isArray(value)) throw new Error(path + &quot; is not a list&quot;);
+    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &quot;[&quot; + index + &quot;]&quot;));
+  }
+  if (type.kind === &quot;map&quot;) {
     const object = generatedObject(value, path);
-    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &#39;.key&#39;), generatedBindType(item, type.value, path + &#39;.&#39; + key)]));
-} if (type.kind === &#39;record&#39;)
-    return generatedBindRecord(value, generatedRecords[type.name], path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedToValue(value, type) { if (value === null || value === undefined)
-    return null; if (type.kind === &#39;record&#39;) {
-    if (value instanceof Map)
-        return value;
+    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &quot;.key&quot;), generatedBindType(item, type.value, path + &quot;.&quot; + key)]));
+  }
+  if (type.kind === &quot;record&quot;) return generatedBindRecord(value, generatedRecords[type.name], path);
+  throw new Error(path + &quot; has an unknown generated type&quot;);
+}
+function generatedToValue(value, type) {
+  if (value === null || value === void 0) return null;
+  if (type.kind === &quot;record&quot;) {
+    if (value instanceof Map) return value;
     const fields = generatedRecords[type.name];
     return new Map(Object.entries(fields).map(([name, field]) =&gt; [name, generatedToValue(value[name], field)]));
-} if (type.kind === &#39;list&#39;)
-    return value.map(item =&gt; generatedToValue(item, type.item)); if (type.kind === &#39;map&#39;)
-    return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)])); return value; }
-function generatedBindRecord(value, fields, path, partial = false) { const object = generatedObject(value, path); const result = {}; for (const [name, type] of Object.entries(fields)) {
+  }
+  if (type.kind === &quot;list&quot;) return value.map((item) =&gt; generatedToValue(item, type.item));
+  if (type.kind === &quot;map&quot;) return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)]));
+  return value;
+}
+function generatedBindRecord(value, fields, path, partial = false) {
+  const object = generatedObject(value, path);
+  const result = {};
+  for (const [name, type] of Object.entries(fields)) {
     if (!object.has(name)) {
-        if (!partial &amp;&amp; !type.optional)
-            throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
-        if (!partial)
-            result[name] = null;
-        continue;
+      if (!partial &amp;&amp; !type.optional) throw new Error(path + &quot;.&quot; + name + &quot; is required&quot;);
+      if (!partial) result[name] = null;
+      continue;
     }
-    result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
-} return result; }
-function generatedBindAssign(value) { const root = bindMap(value ?? new Map()); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
-function generatedBindDefinitions(input) { const definitions = {}; const targets = new Map(); for (const [id, raw] of Object.entries(input ?? {})) {
+    result[name] = generatedBindType(object.get(name), type, path + &quot;.&quot; + name);
+  }
+  return result;
+}
+function generatedBindAssign(value) {
+  const root = bindMap(value ?? /* @__PURE__ */ new Map());
+  return { assign: generatedBindRecord(root, generatedAssign, &quot;assign&quot;), root };
+}
+function generatedBindDefinitions(input) {
+  const definitions = {};
+  const targets = /* @__PURE__ */ new Map();
+  for (const [id, raw] of Object.entries(input ?? {})) {
     checkText(id);
     const spec = generatedDefinitionSpecs[id];
-    if (spec === undefined)
-        throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;);
-    if (typeof raw === &#39;string&#39;) {
-        if (spec.target === null || raw !== spec.target)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-        definitions[spec.field] = { template: spec.target };
-        targets.set(id, { target: spec.target });
-        continue;
+    if (spec === void 0) throw new Error(&quot;define.&quot; + id + &quot; is not declared&quot;);
+    if (typeof raw === &quot;string&quot;) {
+      if (spec.target === null || raw !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+      definitions[spec.field] = { template: spec.target };
+      targets.set(id, { target: spec.target });
+      continue;
     }
-    if (typeof raw !== &#39;object&#39; || raw === null)
-        throw new Error(&#39;define.&#39; + id + &#39; is not an object&#39;);
+    if (typeof raw !== &quot;object&quot; || raw === null) throw new Error(&quot;define.&quot; + id + &quot; is not an object&quot;);
     const template = raw.template;
     const html = raw.html;
-    const data = raw.data === undefined ? undefined : bindData(raw.data);
-    if (typeof html === &#39;string&#39;) {
-        if (!spec.html || template !== undefined || data !== undefined)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;);
-        definitions[spec.field] = { html };
-        targets.set(id, { target: null, html });
-        continue;
+    const data = raw.data === void 0 ? void 0 : bindData(raw.data);
+    if (typeof html === &quot;string&quot;) {
+      if (!spec.html || template !== void 0 || data !== void 0) throw new Error(&quot;define.&quot; + id + &quot; has an invalid html entry&quot;);
+      definitions[spec.field] = { html };
+      targets.set(id, { target: null, html });
+      continue;
     }
-    if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target)
-        throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-    const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true);
+    if (typeof template !== &quot;string&quot; || spec.target === null || template !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+    const boundData = data === void 0 ? {} : generatedBindRecord(data, spec.input, &quot;define.&quot; + id + &quot;.data&quot;, true);
     definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
-} return { definitions: definitions, targets }; }
+  }
+  return { definitions, targets };
+}
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;layout.tpl&quot;, [0, 25, 46, 58, 69], rootData);
-    context.at(frame, [0, 29]);
-    context.output.write(&quot;&lt;section class=\&quot;notice\&quot;&gt;\n&lt;h1&gt;&quot;);
-    context.at(frame, [29, 40]);
-    context.output.write(runtime.escape(assign.heading, frame, [32, 39]));
-    context.at(frame, [40, 46]);
-    context.output.write(&quot;&lt;/h1&gt;\n&quot;);
-    {
-        const definition = definitions.content;
-        if (definition?.html === undefined)
-            throw runtime.error(frame, [46, 57], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-        context.at(frame, [46, 57]);
-        context.output.write(definition.html);
-    }
-    context.at(frame, [58, 69]);
-    context.output.write(&quot;&lt;/section&gt;\n&quot;);
+  const frame = new Frame(&quot;layout.tpl&quot;, [0, 25, 46, 58, 69], rootData);
+  context.at(frame, [0, 29]);
+  context.output.write(&#39;&lt;section class=&quot;notice&quot;&gt;\n&lt;h1&gt;&#39;);
+  context.at(frame, [29, 40]);
+  context.output.write(runtime.escape(assign.heading, frame, [32, 39]));
+  context.at(frame, [40, 46]);
+  context.output.write(&quot;&lt;/h1&gt;\n&quot;);
+  {
+    const definition = definitions.content;
+    if (definition?.html === void 0) throw runtime.error(frame, [46, 57], &quot;E_RUNTIME_BLOCK_UNDEFINED&quot;, &quot;define content is not registered&quot;);
+    context.at(frame, [46, 57]);
+    context.output.write(definition.html);
+  }
+  context.at(frame, [58, 69]);
+  context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
 function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
-    switch (target) {
-        case &quot;layout.tpl&quot;:
-            render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
-            return;
-        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
-    }
+  switch (target) {
+    case &quot;layout.tpl&quot;:
+      render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
+      return;
+    default:
+      throw context.fail(&quot;E_LOAD_NOT_FOUND&quot;, null, null, &quot;template &quot; + target + &quot; does not exist&quot;);
+  }
 }
-function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.now is not a number&#39;); return { timezone, now }; }
+function generatedEnv(input) {
+  const timezone = input?.timezone ?? &quot;Z&quot;;
+  const now = input?.now ?? Math.floor(Date.now() / 1e3);
+  if (typeof timezone !== &quot;string&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.timezone is not a string&quot;);
+  if (typeof now !== &quot;number&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.now is not a number&quot;);
+  return { timezone, now };
+}
 class GeneratedPreparedRender {
-    name;
-    execute;
-    constructor(name, execute) { this.name = name; this.execute = execute; }
-    render() { return internalBoundary(this.name, this.execute); }
+  name;
+  execute;
+  constructor(name, execute) {
+    this.name = name;
+    this.execute = execute;
+  }
+  render() {
+    return internalBoundary(this.name, this.execute);
+  }
 }
 export class GeneratedProgram {
-    runtime;
-    constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
-    prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options)); }
-    prepareBound(target, assign, options) { let boundAssign; let bound; let env; try {
-        boundAssign = generatedBindAssign(assign);
-        bound = generatedBindDefinitions(options.define);
-        env = generatedEnv(options.env);
+  runtime;
+  constructor(runtime = new RuntimeEnvironment()) {
+    this.runtime = runtime;
+  }
+  prepare(target, assign, options = {}) {
+    if (typeof target !== &quot;string&quot;) throw new Error(&quot;generated target must be a template name&quot;);
+    return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options));
+  }
+  prepareBound(target, assign, options) {
+    let boundAssign;
+    let bound;
+    let env;
+    try {
+      boundAssign = generatedBindAssign(assign);
+      bound = generatedBindDefinitions(options.define);
+      env = generatedEnv(options.env);
+    } catch (error) {
+      if (error instanceof BindError) throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
+      throw error;
     }
-    catch (error) {
-        if (error instanceof BindError)
-            throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
-        throw error;
-    } const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(target, () =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(target, () =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try {
+    const registered = bound.targets.get(target);
+    if (registered?.html !== void 0) return new GeneratedPreparedRender(target, () =&gt; registered.html);
+    const targetName = registered?.target ?? target;
+    return new GeneratedPreparedRender(target, () =&gt; {
+      const context = new RenderContext(this.runtime, boundAssign.root, env, targetName);
+      const runtime = new RuntimeBindings(context);
+      const scope = new Scope();
+      context.enter(targetName, null, null);
+      try {
         renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope);
         return context.output.toString();
-    }
-    finally {
+      } finally {
         context.leave();
-    } }); }
-    render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
+      }
+    });
+  }
+  render(target, assign, options = {}) {
+    return this.prepare(target, assign, options).render();
+  }
 }
 
 
@@ -3121,7 +3241,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;fc3ca6f68411213edeeb4c7f2f6efadfef12eae93beb68659f19345e844ef82a&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -3223,7 +3343,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;c76ed42a2565bba34471be1c907d95a715a689afd67918bce517f5aae0096c1a&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
@@ -3304,7 +3424,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;b1fd5549b79e4c648eeb49bade24eeebb4908263b8d0ff9b515d6b6df204ded4&quot;,
   &quot;files&quot;: {
     &quot;html-slot.php&quot;: {
@@ -3391,14 +3511,14 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;content&quot;: &quot;content.tpl&quot;
 }</pre></details><details open><summary>templates · parser ranges</summary><pre class="template-files">--- content.tpl
 &lt;<span class="syntax-tag">section</span> data-react-island <span class="syntax-attr">id</span>=<span class="syntax-string">&quot;counter&quot;</span>&gt;
-&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">island_label</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">island_label</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">section</span>&gt;
 
 
 --- layout.tpl
 &lt;<span class="syntax-tag">main</span>&gt;
-&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">title</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
-<span class="syntax-template syntax-block">{# content}</span>
+&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">title</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">h1</span>&gt;
+<span class="syntax-template syntax-block"><span class="syntax-delimiter">{</span><span class="syntax-keyword">#</span> <span class="syntax-path">content</span><span class="syntax-delimiter">}</span></span>
 &lt;/<span class="syntax-tag">main</span>&gt;
 </pre></details><details open><summary>integration source</summary><pre class="template-files">--- react-host.tsx
 import { createRoot } from &#39;react-dom/client&#39;;
@@ -3417,8 +3537,8 @@ createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;f01ee54ad166d9abd5707f556c51fa07a9cc50924241f5116726e4657cbbce60&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;f1f3fb8848d4316f24e8600d0c69c409f9854c0e5358df08e6b65d1c8800fc74&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -3552,7 +3672,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;64b1df31de86c51b7668b3687e3edf135d0ca80feb6151351ae9b1eb7c75cfd1&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
@@ -3642,178 +3762,214 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;5e881a261390f362b3d33dcc8c4292db584b155909296b1ab037535a69f0f7fb&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;db64d2da8abdf1d38ce0e1a5fbd2032af0256739fa405b35db120ae1077dade5&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
       &quot;path&quot;: &quot;react-boundary.js&quot;,
-      &quot;artifactDigest&quot;: &quot;6eaab286786910579051284855a6af8f47097da0e6d9b522a01ca770956a07d3&quot;
+      &quot;artifactDigest&quot;: &quot;7c5f9d4bd1292f20ef996e1d6e965714512457efd1164e5e57cb7c10e2ce804e&quot;
     }
   }
 }
 
-// Generated.
-import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &#39;@polyspec/template&#39;;
+import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &quot;@polyspec/template&quot;;
 const generatedRecords = { &quot;Page&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } }, &quot;Slot&quot;: { &quot;template&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;html&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } } };
 const generatedAssign = { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;heading&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;island_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;root_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;defined_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true }, &quot;page&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Page&quot;, &quot;optional&quot;: true } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: &quot;content.tpl&quot;, &quot;html&quot;: true, &quot;input&quot;: {} }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
-function generatedObject(value, path) { if (value instanceof Map)
-    return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value, type, path) { if (value === null || value === undefined) {
-    if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return null;
-    throw new Error(path + &#39; is required&#39;);
-} if (type.kind === &#39;any&#39;)
-    return value; if (type.kind === &#39;null&#39;) {
-    if (value !== null)
-        throw new Error(path + &#39; is not null&#39;);
+function generatedObject(value, path) {
+  if (value instanceof Map) return value;
+  throw new Error(path + &quot; is not an object&quot;);
+}
+function generatedBindType(value, type, path) {
+  if (value === null || value === void 0) {
+    if (type.optional || type.kind === &quot;null&quot; || type.kind === &quot;any&quot;) return null;
+    throw new Error(path + &quot; is required&quot;);
+  }
+  if (type.kind === &quot;any&quot;) return value;
+  if (type.kind === &quot;null&quot;) {
+    if (value !== null) throw new Error(path + &quot; is not null&quot;);
     return null;
-} if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) {
-    if (typeof value !== type.kind)
-        throw new Error(path + &#39; is not a &#39; + type.kind);
+  }
+  if (type.kind === &quot;string&quot; || type.kind === &quot;number&quot; || type.kind === &quot;boolean&quot;) {
+    if (typeof value !== type.kind) throw new Error(path + &quot; is not a &quot; + type.kind);
     return value;
-} if (type.kind === &#39;list&#39;) {
-    if (!Array.isArray(value))
-        throw new Error(path + &#39; is not a list&#39;);
-    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &#39;[&#39; + index + &#39;]&#39;));
-} if (type.kind === &#39;map&#39;) {
+  }
+  if (type.kind === &quot;list&quot;) {
+    if (!Array.isArray(value)) throw new Error(path + &quot; is not a list&quot;);
+    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &quot;[&quot; + index + &quot;]&quot;));
+  }
+  if (type.kind === &quot;map&quot;) {
     const object = generatedObject(value, path);
-    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &#39;.key&#39;), generatedBindType(item, type.value, path + &#39;.&#39; + key)]));
-} if (type.kind === &#39;record&#39;)
-    return generatedBindRecord(value, generatedRecords[type.name], path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedToValue(value, type) { if (value === null || value === undefined)
-    return null; if (type.kind === &#39;record&#39;) {
-    if (value instanceof Map)
-        return value;
+    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &quot;.key&quot;), generatedBindType(item, type.value, path + &quot;.&quot; + key)]));
+  }
+  if (type.kind === &quot;record&quot;) return generatedBindRecord(value, generatedRecords[type.name], path);
+  throw new Error(path + &quot; has an unknown generated type&quot;);
+}
+function generatedToValue(value, type) {
+  if (value === null || value === void 0) return null;
+  if (type.kind === &quot;record&quot;) {
+    if (value instanceof Map) return value;
     const fields = generatedRecords[type.name];
     return new Map(Object.entries(fields).map(([name, field]) =&gt; [name, generatedToValue(value[name], field)]));
-} if (type.kind === &#39;list&#39;)
-    return value.map(item =&gt; generatedToValue(item, type.item)); if (type.kind === &#39;map&#39;)
-    return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)])); return value; }
-function generatedBindRecord(value, fields, path, partial = false) { const object = generatedObject(value, path); const result = {}; for (const [name, type] of Object.entries(fields)) {
+  }
+  if (type.kind === &quot;list&quot;) return value.map((item) =&gt; generatedToValue(item, type.item));
+  if (type.kind === &quot;map&quot;) return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)]));
+  return value;
+}
+function generatedBindRecord(value, fields, path, partial = false) {
+  const object = generatedObject(value, path);
+  const result = {};
+  for (const [name, type] of Object.entries(fields)) {
     if (!object.has(name)) {
-        if (!partial &amp;&amp; !type.optional)
-            throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
-        if (!partial)
-            result[name] = null;
-        continue;
+      if (!partial &amp;&amp; !type.optional) throw new Error(path + &quot;.&quot; + name + &quot; is required&quot;);
+      if (!partial) result[name] = null;
+      continue;
     }
-    result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
-} return result; }
-function generatedBindAssign(value) { const root = bindMap(value ?? new Map()); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
-function generatedBindDefinitions(input) { const definitions = {}; const targets = new Map(); for (const [id, raw] of Object.entries(input ?? {})) {
+    result[name] = generatedBindType(object.get(name), type, path + &quot;.&quot; + name);
+  }
+  return result;
+}
+function generatedBindAssign(value) {
+  const root = bindMap(value ?? /* @__PURE__ */ new Map());
+  return { assign: generatedBindRecord(root, generatedAssign, &quot;assign&quot;), root };
+}
+function generatedBindDefinitions(input) {
+  const definitions = {};
+  const targets = /* @__PURE__ */ new Map();
+  for (const [id, raw] of Object.entries(input ?? {})) {
     checkText(id);
     const spec = generatedDefinitionSpecs[id];
-    if (spec === undefined)
-        throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;);
-    if (typeof raw === &#39;string&#39;) {
-        if (spec.target === null || raw !== spec.target)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-        definitions[spec.field] = { template: spec.target };
-        targets.set(id, { target: spec.target });
-        continue;
+    if (spec === void 0) throw new Error(&quot;define.&quot; + id + &quot; is not declared&quot;);
+    if (typeof raw === &quot;string&quot;) {
+      if (spec.target === null || raw !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+      definitions[spec.field] = { template: spec.target };
+      targets.set(id, { target: spec.target });
+      continue;
     }
-    if (typeof raw !== &#39;object&#39; || raw === null)
-        throw new Error(&#39;define.&#39; + id + &#39; is not an object&#39;);
+    if (typeof raw !== &quot;object&quot; || raw === null) throw new Error(&quot;define.&quot; + id + &quot; is not an object&quot;);
     const template = raw.template;
     const html = raw.html;
-    const data = raw.data === undefined ? undefined : bindData(raw.data);
-    if (typeof html === &#39;string&#39;) {
-        if (!spec.html || template !== undefined || data !== undefined)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;);
-        definitions[spec.field] = { html };
-        targets.set(id, { target: null, html });
-        continue;
+    const data = raw.data === void 0 ? void 0 : bindData(raw.data);
+    if (typeof html === &quot;string&quot;) {
+      if (!spec.html || template !== void 0 || data !== void 0) throw new Error(&quot;define.&quot; + id + &quot; has an invalid html entry&quot;);
+      definitions[spec.field] = { html };
+      targets.set(id, { target: null, html });
+      continue;
     }
-    if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target)
-        throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-    const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true);
+    if (typeof template !== &quot;string&quot; || spec.target === null || template !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+    const boundData = data === void 0 ? {} : generatedBindRecord(data, spec.input, &quot;define.&quot; + id + &quot;.data&quot;, true);
     definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
-} return { definitions: definitions, targets }; }
+  }
+  return { definitions, targets };
+}
 function render_content_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;content.tpl&quot;, [0, 41, 65, 76], rootData);
-    context.at(frame, [0, 44]);
-    context.output.write(&quot;&lt;section data-react-island id=\&quot;counter\&quot;&gt;\n&lt;p&gt;&quot;);
-    context.at(frame, [44, 60]);
-    context.output.write(runtime.escape(assign.island_label, frame, [47, 59]));
-    context.at(frame, [60, 76]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
+  const frame = new Frame(&quot;content.tpl&quot;, [0, 41, 65, 76], rootData);
+  context.at(frame, [0, 44]);
+  context.output.write(&#39;&lt;section data-react-island id=&quot;counter&quot;&gt;\n&lt;p&gt;&#39;);
+  context.at(frame, [44, 60]);
+  context.output.write(runtime.escape(assign.island_label, frame, [47, 59]));
+  context.at(frame, [60, 76]);
+  context.output.write(&quot;&lt;/p&gt;\n&lt;/section&gt;\n&quot;);
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;layout.tpl&quot;, [0, 7, 26, 38, 46], rootData);
-    context.at(frame, [0, 11]);
-    context.output.write(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
-    context.at(frame, [11, 20]);
-    context.output.write(runtime.escape(assign.title, frame, [14, 19]));
-    context.at(frame, [20, 26]);
-    context.output.write(&quot;&lt;/h1&gt;\n&quot;);
-    {
-        let definition = definitions.content;
-        if (definition === undefined)
-            throw runtime.error(frame, [26, 37], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-        if (definition?.html !== undefined) {
-            context.at(frame, [26, 37]);
-            context.output.write(definition.html);
-        }
-        else {
-            const input = Object.assign({}, definition?.data ?? {}, {});
-            const blockScope = new Scope();
-            context.enter(&quot;content.tpl&quot;, frame, [26, 37]);
-            try {
-                render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
-            }
-            finally {
-                context.leave();
-            }
-        }
+  const frame = new Frame(&quot;layout.tpl&quot;, [0, 7, 26, 38, 46], rootData);
+  context.at(frame, [0, 11]);
+  context.output.write(&quot;&lt;main&gt;\n&lt;h1&gt;&quot;);
+  context.at(frame, [11, 20]);
+  context.output.write(runtime.escape(assign.title, frame, [14, 19]));
+  context.at(frame, [20, 26]);
+  context.output.write(&quot;&lt;/h1&gt;\n&quot;);
+  {
+    let definition = definitions.content;
+    if (definition === void 0) throw runtime.error(frame, [26, 37], &quot;E_RUNTIME_BLOCK_UNDEFINED&quot;, &quot;define content is not registered&quot;);
+    if (definition?.html !== void 0) {
+      context.at(frame, [26, 37]);
+      context.output.write(definition.html);
+    } else {
+      const input2 = Object.assign({}, definition?.data ?? {}, {});
+      const blockScope = new Scope();
+      context.enter(&quot;content.tpl&quot;, frame, [26, 37]);
+      try {
+        render_content_tpl(assign, definitions, input2, context, runtime, rootData, blockScope);
+      } finally {
+        context.leave();
+      }
     }
-    context.at(frame, [38, 46]);
-    context.output.write(&quot;&lt;/main&gt;\n&quot;);
+  }
+  context.at(frame, [38, 46]);
+  context.output.write(&quot;&lt;/main&gt;\n&quot;);
 }
 function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
-    switch (target) {
-        case &quot;content.tpl&quot;:
-            render_content_tpl(assign, definitions, {}, context, runtime, rootData, scope);
-            return;
-        case &quot;layout.tpl&quot;:
-            render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
-            return;
-        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
-    }
+  switch (target) {
+    case &quot;content.tpl&quot;:
+      render_content_tpl(assign, definitions, {}, context, runtime, rootData, scope);
+      return;
+    case &quot;layout.tpl&quot;:
+      render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
+      return;
+    default:
+      throw context.fail(&quot;E_LOAD_NOT_FOUND&quot;, null, null, &quot;template &quot; + target + &quot; does not exist&quot;);
+  }
 }
-function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.now is not a number&#39;); return { timezone, now }; }
+function generatedEnv(input) {
+  const timezone = input?.timezone ?? &quot;Z&quot;;
+  const now = input?.now ?? Math.floor(Date.now() / 1e3);
+  if (typeof timezone !== &quot;string&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.timezone is not a string&quot;);
+  if (typeof now !== &quot;number&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.now is not a number&quot;);
+  return { timezone, now };
+}
 class GeneratedPreparedRender {
-    name;
-    execute;
-    constructor(name, execute) { this.name = name; this.execute = execute; }
-    render() { return internalBoundary(this.name, this.execute); }
+  name;
+  execute;
+  constructor(name, execute) {
+    this.name = name;
+    this.execute = execute;
+  }
+  render() {
+    return internalBoundary(this.name, this.execute);
+  }
 }
 export class GeneratedProgram {
-    runtime;
-    constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
-    prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options)); }
-    prepareBound(target, assign, options) { let boundAssign; let bound; let env; try {
-        boundAssign = generatedBindAssign(assign);
-        bound = generatedBindDefinitions(options.define);
-        env = generatedEnv(options.env);
+  runtime;
+  constructor(runtime = new RuntimeEnvironment()) {
+    this.runtime = runtime;
+  }
+  prepare(target, assign, options = {}) {
+    if (typeof target !== &quot;string&quot;) throw new Error(&quot;generated target must be a template name&quot;);
+    return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options));
+  }
+  prepareBound(target, assign, options) {
+    let boundAssign;
+    let bound;
+    let env;
+    try {
+      boundAssign = generatedBindAssign(assign);
+      bound = generatedBindDefinitions(options.define);
+      env = generatedEnv(options.env);
+    } catch (error) {
+      if (error instanceof BindError) throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
+      throw error;
     }
-    catch (error) {
-        if (error instanceof BindError)
-            throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
-        throw error;
-    } const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(target, () =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(target, () =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try {
+    const registered = bound.targets.get(target);
+    if (registered?.html !== void 0) return new GeneratedPreparedRender(target, () =&gt; registered.html);
+    const targetName = registered?.target ?? target;
+    return new GeneratedPreparedRender(target, () =&gt; {
+      const context = new RenderContext(this.runtime, boundAssign.root, env, targetName);
+      const runtime = new RuntimeBindings(context);
+      const scope = new Scope();
+      context.enter(targetName, null, null);
+      try {
         renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope);
         return context.output.toString();
-    }
-    finally {
+      } finally {
         context.leave();
-    } }); }
-    render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
+      }
+    });
+  }
+  render(target, assign, options = {}) {
+    return this.prepare(target, assign, options).render();
+  }
 }
 
 
@@ -3825,7 +3981,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;fc3ca6f68411213edeeb4c7f2f6efadfef12eae93beb68659f19345e844ef82a&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -3954,7 +4110,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;c76ed42a2565bba34471be1c907d95a715a689afd67918bce517f5aae0096c1a&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
@@ -4062,7 +4218,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;b1fd5549b79e4c648eeb49bade24eeebb4908263b8d0ff9b515d6b6df204ded4&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.php&quot;: {
@@ -4188,17 +4344,17 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   }
 }</pre></details><details open><summary>templates · parser ranges</summary><pre class="template-files">--- content.tpl
 &lt;<span class="syntax-tag">article</span>&gt;
-&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">title</span>}</span>&lt;/<span class="syntax-tag">h1</span>&gt;
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;root&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">root_label</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;defined&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">defined_label</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
-&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;local&quot;</span>&gt;<span class="syntax-template syntax-echo">{= <span class="syntax-variable">layout_local</span> <span class="syntax-operator">|</span> <span class="syntax-variable">default</span><span class="syntax-operator">(</span><span class="syntax-string">&#39;missing&#39;</span><span class="syntax-operator">)</span>}</span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">title</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">h1</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;root&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">root_label</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;defined&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">defined_label</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
+&lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;local&quot;</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">layout_local</span> <span class="syntax-operator">|</span> <span class="syntax-function">default</span><span class="syntax-operator">(</span><span class="syntax-string">&#39;missing&#39;</span><span class="syntax-operator">)</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">article</span>&gt;
 
 
 --- layout.tpl
-<span class="syntax-template syntax-assignment">{: layout_local = <span class="syntax-string">&#39;visible only in layout&#39;</span>}</span>
+<span class="syntax-template syntax-assignment"><span class="syntax-delimiter">{</span><span class="syntax-keyword">:</span> <span class="syntax-variable">layout_local</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#39;visible only in layout&#39;</span><span class="syntax-delimiter">}</span></span>
 &lt;<span class="syntax-tag">section</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;scope&quot;</span>&gt;
-<span class="syntax-template syntax-block">{# content title:page.title}</span>
+<span class="syntax-template syntax-block"><span class="syntax-delimiter">{</span><span class="syntax-keyword">#</span> <span class="syntax-path">content</span> <span class="syntax-path">title:page.title</span><span class="syntax-delimiter">}</span></span>
 &lt;/<span class="syntax-tag">section</span>&gt;
 </pre></details><details open><summary>compiled artifacts</summary><pre class="long-code">ast/manifest.json
 {
@@ -4209,8 +4365,8 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
   &quot;delimiters&quot;: null,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;f01ee54ad166d9abd5707f556c51fa07a9cc50924241f5116726e4657cbbce60&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;f1f3fb8848d4316f24e8600d0c69c409f9854c0e5358df08e6b65d1c8800fc74&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -4449,7 +4605,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;64b1df31de86c51b7668b3687e3edf135d0ca80feb6151351ae9b1eb7c75cfd1&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
@@ -4539,188 +4695,224 @@ javascript · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
-  &quot;compilerDigest&quot;: &quot;5e881a261390f362b3d33dcc8c4292db584b155909296b1ab037535a69f0f7fb&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
+  &quot;compilerDigest&quot;: &quot;db64d2da8abdf1d38ce0e1a5fbd2032af0256739fa405b35db120ae1077dade5&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
-      &quot;artifactDigest&quot;: &quot;ecdbbb317bdbcc7f4a66c82377221dfbab2b52a78947eba01ecafe90e950db78&quot;
+      &quot;artifactDigest&quot;: &quot;3ecf65402129146948cfac428953629db43fb7aa715bae514a882e0e9f5a8908&quot;
     }
   }
 }
 
-// Generated.
-import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &#39;@polyspec/template&#39;;
+import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from &quot;@polyspec/template&quot;;
 const generatedRecords = { &quot;Page&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } } };
 const generatedAssign = { &quot;page&quot;: { &quot;kind&quot;: &quot;record&quot;, &quot;name&quot;: &quot;Page&quot;, &quot;optional&quot;: false }, &quot;root_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;defined_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false } };
 const generatedDefinitionSpecs = { &quot;content&quot;: { &quot;field&quot;: &quot;content&quot;, &quot;target&quot;: &quot;content.tpl&quot;, &quot;html&quot;: true, &quot;input&quot;: { &quot;title&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;root_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;defined_label&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: false }, &quot;layout_local&quot;: { &quot;kind&quot;: &quot;string&quot;, &quot;optional&quot;: true } } }, &quot;layout&quot;: { &quot;field&quot;: &quot;layout&quot;, &quot;target&quot;: &quot;layout.tpl&quot;, &quot;html&quot;: false, &quot;input&quot;: {} } };
-function generatedObject(value, path) { if (value instanceof Map)
-    return value; throw new Error(path + &#39; is not an object&#39;); }
-function generatedBindType(value, type, path) { if (value === null || value === undefined) {
-    if (type.optional || type.kind === &#39;null&#39; || type.kind === &#39;any&#39;)
-        return null;
-    throw new Error(path + &#39; is required&#39;);
-} if (type.kind === &#39;any&#39;)
-    return value; if (type.kind === &#39;null&#39;) {
-    if (value !== null)
-        throw new Error(path + &#39; is not null&#39;);
+function generatedObject(value, path) {
+  if (value instanceof Map) return value;
+  throw new Error(path + &quot; is not an object&quot;);
+}
+function generatedBindType(value, type, path) {
+  if (value === null || value === void 0) {
+    if (type.optional || type.kind === &quot;null&quot; || type.kind === &quot;any&quot;) return null;
+    throw new Error(path + &quot; is required&quot;);
+  }
+  if (type.kind === &quot;any&quot;) return value;
+  if (type.kind === &quot;null&quot;) {
+    if (value !== null) throw new Error(path + &quot; is not null&quot;);
     return null;
-} if (type.kind === &#39;string&#39; || type.kind === &#39;number&#39; || type.kind === &#39;boolean&#39;) {
-    if (typeof value !== type.kind)
-        throw new Error(path + &#39; is not a &#39; + type.kind);
+  }
+  if (type.kind === &quot;string&quot; || type.kind === &quot;number&quot; || type.kind === &quot;boolean&quot;) {
+    if (typeof value !== type.kind) throw new Error(path + &quot; is not a &quot; + type.kind);
     return value;
-} if (type.kind === &#39;list&#39;) {
-    if (!Array.isArray(value))
-        throw new Error(path + &#39; is not a list&#39;);
-    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &#39;[&#39; + index + &#39;]&#39;));
-} if (type.kind === &#39;map&#39;) {
+  }
+  if (type.kind === &quot;list&quot;) {
+    if (!Array.isArray(value)) throw new Error(path + &quot; is not a list&quot;);
+    return value.map((item, index) =&gt; generatedBindType(item, type.item, path + &quot;[&quot; + index + &quot;]&quot;));
+  }
+  if (type.kind === &quot;map&quot;) {
     const object = generatedObject(value, path);
-    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &#39;.key&#39;), generatedBindType(item, type.value, path + &#39;.&#39; + key)]));
-} if (type.kind === &#39;record&#39;)
-    return generatedBindRecord(value, generatedRecords[type.name], path); throw new Error(path + &#39; has an unknown generated type&#39;); }
-function generatedToValue(value, type) { if (value === null || value === undefined)
-    return null; if (type.kind === &#39;record&#39;) {
-    if (value instanceof Map)
-        return value;
+    return new Map([...object].map(([key, item]) =&gt; [generatedBindType(key, type.key, path + &quot;.key&quot;), generatedBindType(item, type.value, path + &quot;.&quot; + key)]));
+  }
+  if (type.kind === &quot;record&quot;) return generatedBindRecord(value, generatedRecords[type.name], path);
+  throw new Error(path + &quot; has an unknown generated type&quot;);
+}
+function generatedToValue(value, type) {
+  if (value === null || value === void 0) return null;
+  if (type.kind === &quot;record&quot;) {
+    if (value instanceof Map) return value;
     const fields = generatedRecords[type.name];
     return new Map(Object.entries(fields).map(([name, field]) =&gt; [name, generatedToValue(value[name], field)]));
-} if (type.kind === &#39;list&#39;)
-    return value.map(item =&gt; generatedToValue(item, type.item)); if (type.kind === &#39;map&#39;)
-    return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)])); return value; }
-function generatedBindRecord(value, fields, path, partial = false) { const object = generatedObject(value, path); const result = {}; for (const [name, type] of Object.entries(fields)) {
+  }
+  if (type.kind === &quot;list&quot;) return value.map((item) =&gt; generatedToValue(item, type.item));
+  if (type.kind === &quot;map&quot;) return new Map([...value].map(([key, item]) =&gt; [key, generatedToValue(item, type.value)]));
+  return value;
+}
+function generatedBindRecord(value, fields, path, partial = false) {
+  const object = generatedObject(value, path);
+  const result = {};
+  for (const [name, type] of Object.entries(fields)) {
     if (!object.has(name)) {
-        if (!partial &amp;&amp; !type.optional)
-            throw new Error(path + &#39;.&#39; + name + &#39; is required&#39;);
-        if (!partial)
-            result[name] = null;
-        continue;
+      if (!partial &amp;&amp; !type.optional) throw new Error(path + &quot;.&quot; + name + &quot; is required&quot;);
+      if (!partial) result[name] = null;
+      continue;
     }
-    result[name] = generatedBindType(object.get(name), type, path + &#39;.&#39; + name);
-} return result; }
-function generatedBindAssign(value) { const root = bindMap(value ?? new Map()); return { assign: generatedBindRecord(root, generatedAssign, &#39;assign&#39;), root }; }
-function generatedBindDefinitions(input) { const definitions = {}; const targets = new Map(); for (const [id, raw] of Object.entries(input ?? {})) {
+    result[name] = generatedBindType(object.get(name), type, path + &quot;.&quot; + name);
+  }
+  return result;
+}
+function generatedBindAssign(value) {
+  const root = bindMap(value ?? /* @__PURE__ */ new Map());
+  return { assign: generatedBindRecord(root, generatedAssign, &quot;assign&quot;), root };
+}
+function generatedBindDefinitions(input) {
+  const definitions = {};
+  const targets = /* @__PURE__ */ new Map();
+  for (const [id, raw] of Object.entries(input ?? {})) {
     checkText(id);
     const spec = generatedDefinitionSpecs[id];
-    if (spec === undefined)
-        throw new Error(&#39;define.&#39; + id + &#39; is not declared&#39;);
-    if (typeof raw === &#39;string&#39;) {
-        if (spec.target === null || raw !== spec.target)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-        definitions[spec.field] = { template: spec.target };
-        targets.set(id, { target: spec.target });
-        continue;
+    if (spec === void 0) throw new Error(&quot;define.&quot; + id + &quot; is not declared&quot;);
+    if (typeof raw === &quot;string&quot;) {
+      if (spec.target === null || raw !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+      definitions[spec.field] = { template: spec.target };
+      targets.set(id, { target: spec.target });
+      continue;
     }
-    if (typeof raw !== &#39;object&#39; || raw === null)
-        throw new Error(&#39;define.&#39; + id + &#39; is not an object&#39;);
+    if (typeof raw !== &quot;object&quot; || raw === null) throw new Error(&quot;define.&quot; + id + &quot; is not an object&quot;);
     const template = raw.template;
     const html = raw.html;
-    const data = raw.data === undefined ? undefined : bindData(raw.data);
-    if (typeof html === &#39;string&#39;) {
-        if (!spec.html || template !== undefined || data !== undefined)
-            throw new Error(&#39;define.&#39; + id + &#39; has an invalid html entry&#39;);
-        definitions[spec.field] = { html };
-        targets.set(id, { target: null, html });
-        continue;
+    const data = raw.data === void 0 ? void 0 : bindData(raw.data);
+    if (typeof html === &quot;string&quot;) {
+      if (!spec.html || template !== void 0 || data !== void 0) throw new Error(&quot;define.&quot; + id + &quot; has an invalid html entry&quot;);
+      definitions[spec.field] = { html };
+      targets.set(id, { target: null, html });
+      continue;
     }
-    if (typeof template !== &#39;string&#39; || spec.target === null || template !== spec.target)
-        throw new Error(&#39;define.&#39; + id + &#39; has an invalid template&#39;);
-    const boundData = data === undefined ? {} : generatedBindRecord(data, spec.input, &#39;define.&#39; + id + &#39;.data&#39;, true);
+    if (typeof template !== &quot;string&quot; || spec.target === null || template !== spec.target) throw new Error(&quot;define.&quot; + id + &quot; has an invalid template&quot;);
+    const boundData = data === void 0 ? {} : generatedBindRecord(data, spec.input, &quot;define.&quot; + id + &quot;.data&quot;, true);
     definitions[spec.field] = { template: spec.target, data: boundData };
     targets.set(id, { target: spec.target });
-} return { definitions: definitions, targets }; }
+  }
+  return { definitions, targets };
+}
 function render_content_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;content.tpl&quot;, [0, 10, 29, 64, 105, 164, 175], rootData);
-    scope.locals.set(&quot;title&quot;, input.title);
-    scope.locals.set(&quot;root_label&quot;, input.root_label);
-    scope.locals.set(&quot;defined_label&quot;, input.defined_label);
-    scope.locals.set(&quot;layout_local&quot;, (input.layout_local ?? null));
-    context.at(frame, [0, 14]);
-    context.output.write(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;);
-    context.at(frame, [14, 23]);
-    context.output.write(runtime.escape(scope.lookup(frame, &quot;title&quot;), frame, [17, 22]));
-    context.at(frame, [23, 45]);
-    context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;);
-    context.at(frame, [45, 59]);
-    context.output.write(runtime.escape(scope.lookup(frame, &quot;root_label&quot;), frame, [48, 58]));
-    context.at(frame, [59, 83]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;);
-    context.at(frame, [83, 100]);
-    context.output.write(runtime.escape(scope.lookup(frame, &quot;defined_label&quot;), frame, [86, 99]));
-    context.at(frame, [100, 122]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;);
-    context.at(frame, [122, 159]);
-    context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [scope.lookup(frame, &quot;layout_local&quot;), &quot;missing&quot;], frame, [125, 158]), frame, [125, 158]));
-    context.at(frame, [159, 175]);
-    context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
+  const frame = new Frame(&quot;content.tpl&quot;, [0, 10, 29, 64, 105, 164, 175], rootData);
+  scope.locals.set(&quot;title&quot;, input.title);
+  scope.locals.set(&quot;root_label&quot;, input.root_label);
+  scope.locals.set(&quot;defined_label&quot;, input.defined_label);
+  scope.locals.set(&quot;layout_local&quot;, input.layout_local ?? null);
+  context.at(frame, [0, 14]);
+  context.output.write(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;);
+  context.at(frame, [14, 23]);
+  context.output.write(runtime.escape(scope.lookup(frame, &quot;title&quot;), frame, [17, 22]));
+  context.at(frame, [23, 45]);
+  context.output.write(&#39;&lt;/h1&gt;\n&lt;p class=&quot;root&quot;&gt;&#39;);
+  context.at(frame, [45, 59]);
+  context.output.write(runtime.escape(scope.lookup(frame, &quot;root_label&quot;), frame, [48, 58]));
+  context.at(frame, [59, 83]);
+  context.output.write(&#39;&lt;/p&gt;\n&lt;p class=&quot;defined&quot;&gt;&#39;);
+  context.at(frame, [83, 100]);
+  context.output.write(runtime.escape(scope.lookup(frame, &quot;defined_label&quot;), frame, [86, 99]));
+  context.at(frame, [100, 122]);
+  context.output.write(&#39;&lt;/p&gt;\n&lt;p class=&quot;local&quot;&gt;&#39;);
+  context.at(frame, [122, 159]);
+  context.output.write(runtime.escape(runtime.call(&quot;default&quot;, [scope.lookup(frame, &quot;layout_local&quot;), &quot;missing&quot;], frame, [125, 158]), frame, [125, 158]));
+  context.at(frame, [159, 175]);
+  context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
-    const frame = new Frame(&quot;layout.tpl&quot;, [0, 44, 68, 97, 108], rootData);
-    scope.locals.set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
-    context.at(frame, [44, 68]);
-    context.output.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
-    {
-        let definition = definitions.content;
-        if (definition === undefined)
-            throw runtime.error(frame, [68, 96], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-        if (definition?.html !== undefined) {
-            context.at(frame, [68, 96]);
-            context.output.write(definition.html);
-        }
-        else {
-            const input = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: (assign.page)?.title });
-            const blockScope = new Scope();
-            context.enter(&quot;content.tpl&quot;, frame, [68, 96]);
-            try {
-                render_content_tpl(assign, definitions, input, context, runtime, rootData, blockScope);
-            }
-            finally {
-                context.leave();
-            }
-        }
+  const frame = new Frame(&quot;layout.tpl&quot;, [0, 44, 68, 97, 108], rootData);
+  scope.locals.set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
+  context.at(frame, [44, 68]);
+  context.output.write(&#39;&lt;section class=&quot;scope&quot;&gt;\n&#39;);
+  {
+    let definition = definitions.content;
+    if (definition === void 0) throw runtime.error(frame, [68, 96], &quot;E_RUNTIME_BLOCK_UNDEFINED&quot;, &quot;define content is not registered&quot;);
+    if (definition?.html !== void 0) {
+      context.at(frame, [68, 96]);
+      context.output.write(definition.html);
+    } else {
+      const input2 = Object.assign({ root_label: assign.root_label, defined_label: assign.defined_label }, definition?.data ?? {}, { title: assign.page?.title });
+      const blockScope = new Scope();
+      context.enter(&quot;content.tpl&quot;, frame, [68, 96]);
+      try {
+        render_content_tpl(assign, definitions, input2, context, runtime, rootData, blockScope);
+      } finally {
+        context.leave();
+      }
     }
-    context.at(frame, [97, 108]);
-    context.output.write(&quot;&lt;/section&gt;\n&quot;);
+  }
+  context.at(frame, [97, 108]);
+  context.output.write(&quot;&lt;/section&gt;\n&quot;);
 }
 function renderTemplate(target, assign, definitions, context, runtime, rootData, scope) {
-    switch (target) {
-        case &quot;layout.tpl&quot;:
-            render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
-            return;
-        default: throw context.fail(&#39;E_LOAD_NOT_FOUND&#39;, null, null, &#39;template &#39; + target + &#39; does not exist&#39;);
-    }
+  switch (target) {
+    case &quot;layout.tpl&quot;:
+      render_layout_tpl(assign, definitions, {}, context, runtime, rootData, scope);
+      return;
+    default:
+      throw context.fail(&quot;E_LOAD_NOT_FOUND&quot;, null, null, &quot;template &quot; + target + &quot; does not exist&quot;);
+  }
 }
-function generatedEnv(input) { const timezone = input?.timezone ?? &#39;Z&#39;; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== &#39;string&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.timezone is not a string&#39;); if (typeof now !== &#39;number&#39;)
-    throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;env.now is not a number&#39;); return { timezone, now }; }
+function generatedEnv(input) {
+  const timezone = input?.timezone ?? &quot;Z&quot;;
+  const now = input?.now ?? Math.floor(Date.now() / 1e3);
+  if (typeof timezone !== &quot;string&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.timezone is not a string&quot;);
+  if (typeof now !== &quot;number&quot;) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;env.now is not a number&quot;);
+  return { timezone, now };
+}
 class GeneratedPreparedRender {
-    name;
-    execute;
-    constructor(name, execute) { this.name = name; this.execute = execute; }
-    render() { return internalBoundary(this.name, this.execute); }
+  name;
+  execute;
+  constructor(name, execute) {
+    this.name = name;
+    this.execute = execute;
+  }
+  render() {
+    return internalBoundary(this.name, this.execute);
+  }
 }
 export class GeneratedProgram {
-    runtime;
-    constructor(runtime = new RuntimeEnvironment()) { this.runtime = runtime; }
-    prepare(target, assign, options = {}) { if (typeof target !== &#39;string&#39;)
-        throw new Error(&#39;generated target must be a template name&#39;); return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options)); }
-    prepareBound(target, assign, options) { let boundAssign; let bound; let env; try {
-        boundAssign = generatedBindAssign(assign);
-        bound = generatedBindDefinitions(options.define);
-        env = generatedEnv(options.env);
+  runtime;
+  constructor(runtime = new RuntimeEnvironment()) {
+    this.runtime = runtime;
+  }
+  prepare(target, assign, options = {}) {
+    if (typeof target !== &quot;string&quot;) throw new Error(&quot;generated target must be a template name&quot;);
+    return internalBoundary(target, () =&gt; this.prepareBound(target, assign, options));
+  }
+  prepareBound(target, assign, options) {
+    let boundAssign;
+    let bound;
+    let env;
+    try {
+      boundAssign = generatedBindAssign(assign);
+      bound = generatedBindDefinitions(options.define);
+      env = generatedEnv(options.env);
+    } catch (error) {
+      if (error instanceof BindError) throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
+      throw error;
     }
-    catch (error) {
-        if (error instanceof BindError)
-            throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message });
-        throw error;
-    } const registered = bound.targets.get(target); if (registered?.html !== undefined)
-        return new GeneratedPreparedRender(target, () =&gt; registered.html); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(target, () =&gt; { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try {
+    const registered = bound.targets.get(target);
+    if (registered?.html !== void 0) return new GeneratedPreparedRender(target, () =&gt; registered.html);
+    const targetName = registered?.target ?? target;
+    return new GeneratedPreparedRender(target, () =&gt; {
+      const context = new RenderContext(this.runtime, boundAssign.root, env, targetName);
+      const runtime = new RuntimeBindings(context);
+      const scope = new Scope();
+      context.enter(targetName, null, null);
+      try {
         renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope);
         return context.output.toString();
-    }
-    finally {
+      } finally {
         context.leave();
-    } }); }
-    render(target, assign, options = {}) { return this.prepare(target, assign, options).render(); }
+      }
+    });
+  }
+  render(target, assign, options = {}) {
+    return this.prepare(target, assign, options).render();
+  }
 }
 
 
@@ -4732,7 +4924,7 @@ go · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;fc3ca6f68411213edeeb4c7f2f6efadfef12eae93beb68659f19345e844ef82a&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
@@ -4866,7 +5058,7 @@ rust · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;c76ed42a2565bba34471be1c907d95a715a689afd67918bce517f5aae0096c1a&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
@@ -4982,7 +5174,7 @@ php · product generated program
   &quot;entry&quot;: &quot;layout.tpl&quot;,
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
-  &quot;contractDigest&quot;: &quot;1986127a06e6eeabe1c8e91e5d7f366f844b036c13af7ac01a7616e1960d9d8e&quot;,
+  &quot;contractDigest&quot;: &quot;d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e&quot;,
   &quot;compilerDigest&quot;: &quot;b1fd5549b79e4c648eeb49bade24eeebb4908263b8d0ff9b515d6b6df204ded4&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.php&quot;: {
@@ -5096,5 +5288,5 @@ final class GeneratedProgram implements Program { public readonly RuntimeEnviron
 </pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article></div></section>
-<section class="panel"><div class="section-heading"><div><p class="eyebrow">04 · PERFORMANCE</p><h2>Same request, two execution modes</h2></div><p>Independent samples use production artifacts with the page cache disabled. Cold includes process startup and loading. Full render includes request binding; prepared render reuses one normalized request. Every row must match the same UTF-8 bytes before it is recorded.</p></div><div class="table-wrap"><table><thead><tr><th>Language</th><th>Mode</th><th>Cold median</th><th>Full render</th><th>Prepared render</th><th>RSS median</th><th>Bytes</th><th>Output</th></tr></thead><tbody><tr><td>typescript</td><td>ast</td><td>83.45 ms</td><td>0.0057 ms</td><td>0.0017 ms</td><td>91.06 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>typescript</td><td>generated</td><td>86.18 ms</td><td>0.0054 ms</td><td>0.0009 ms</td><td>89.47 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>ast</td><td>4.98 ms</td><td>0.0026 ms</td><td>0.0014 ms</td><td>11.25 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>generated</td><td>4.55 ms</td><td>0.0034 ms</td><td>0.0007 ms</td><td>10.69 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>ast</td><td>3.64 ms</td><td>0.0051 ms</td><td>0.0024 ms</td><td>2.73 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>generated</td><td>3.79 ms</td><td>0.0043 ms</td><td>0.0018 ms</td><td>2.38 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>ast</td><td>59.69 ms</td><td>0.0144 ms</td><td>0.0088 ms</td><td>28.03 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>generated</td><td>64.81 ms</td><td>0.0119 ms</td><td>0.0043 ms</td><td>28.27 MiB</td><td>177</td><td>7b160d439d3d…</td></tr></tbody></table></div><details><summary>Package throughput samples</summary><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr></tbody></table></div></details></section></main>
+<section class="panel"><div class="section-heading"><div><p class="eyebrow">04 · PERFORMANCE</p><h2>Same request, two execution modes</h2></div><p>Independent samples use production artifacts with the page cache disabled. Cold includes process startup and loading. Full render includes request binding; prepared render reuses one normalized request. Every row must match the same UTF-8 bytes before it is recorded.</p></div><div class="table-wrap"><table><thead><tr><th>Language</th><th>Mode</th><th>Cold median</th><th>Full render</th><th>Prepared render</th><th>RSS median</th><th>Bytes</th><th>Output</th></tr></thead><tbody><tr><td>typescript</td><td>ast</td><td>228.62 ms</td><td>0.0130 ms</td><td>0.0033 ms</td><td>94.36 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>typescript</td><td>generated</td><td>166.19 ms</td><td>0.0126 ms</td><td>0.0021 ms</td><td>92.27 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>ast</td><td>16.66 ms</td><td>0.0047 ms</td><td>0.0027 ms</td><td>11.23 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>generated</td><td>13.96 ms</td><td>0.0073 ms</td><td>0.0008 ms</td><td>11.00 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>ast</td><td>12.24 ms</td><td>0.0077 ms</td><td>0.0029 ms</td><td>2.83 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>generated</td><td>11.30 ms</td><td>0.0059 ms</td><td>0.0026 ms</td><td>2.58 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>ast</td><td>200.91 ms</td><td>0.0310 ms</td><td>0.0194 ms</td><td>28.05 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>generated</td><td>107.24 ms</td><td>0.0188 ms</td><td>0.0056 ms</td><td>28.27 MiB</td><td>177</td><td>7b160d439d3d…</td></tr></tbody></table></div><details><summary>Package throughput samples</summary><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr></tbody></table></div></details></section></main>
 <footer class="footer"><a href="../../spec/runtime.html">Runtime specification</a><a href="../../spec/ast.html">AST specification</a><a href="../../operations/showcase.html">Showcase procedure</a></footer></body></html>
