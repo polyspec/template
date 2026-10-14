@@ -44,7 +44,7 @@ async function untitled(content, line, character) {
 
 // Types into `editor`: the command `type` types into the focused editor, so it waits until `editor` is the active one.
 async function typeInto(editor, text) {
-  await eventually(() => vscode.window.activeTextEditor?.document === editor.document, () => `the editor of ${editor.document.uri} to be active; the active editor shows ${vscode.window.activeTextEditor?.document.uri ?? 'no document'}`);
+  await eventually(() => vscode.window.activeTextEditor?.document === editor.document, () => `the editor of ${editor.document.uri} to be active; the active editor shows ${vscode.window.activeTextEditor?.document.uri.toString() ?? 'no document'}`);
   await vscode.commands.executeCommand('type', { text });
 }
 
@@ -204,14 +204,14 @@ async function run() {
   assert.ok(checks.length > common.length, `unknown POLYSPEC_TEMPLATE_EXPECT ${expect}`);
   const failures = [];
   for (const [name, check] of checks) {
-    console.log(`[suite] start - ${name}`);
+    console.log(`[suite] start - ${String(name)}`);
     const started = Date.now();
     try {
       await bounded(name, check);
-      console.log(`[suite] ok - ${name} (${Date.now() - started} ms)`);
+      console.log(`[suite] ok - ${String(name)} (${Date.now() - started} ms)`);
     } catch (error) {
       failures.push(name);
-      console.log(`[suite] not ok - ${name} (${Date.now() - started} ms)\n${error && error.stack ? error.stack : error}`);
+      console.log(`[suite] not ok - ${String(name)} (${Date.now() - started} ms)\n${error && error.stack ? error.stack : error}`);
     }
   }
   console.log(`[suite] ${checks.length - failures.length} of ${checks.length} checks passed`);

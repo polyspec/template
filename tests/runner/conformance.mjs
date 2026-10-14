@@ -63,7 +63,7 @@ for (const language of languages) prepare(language);
 
 if (options.update) {
   if (!['ast', 'html', 'error', 'tokens', 'format'].includes(options.update)) {
-    process.stderr.write(`invalid --update value: ${options.update}\n`);
+    process.stderr.write(`invalid --update value: ${String(options.update)}\n`);
     process.exit(1);
   }
   if (!languages.includes('ts')) {
@@ -117,11 +117,11 @@ if (options.update) {
         writeFileSync(join(testCase.dir, 'expected.error.json'), JSON.stringify(error, null, 2) + '\n');
         written++;
       } else {
-        process.stderr.write(`${testCase.id}: no ${options.update} result (exit ${result.status})\n`);
+        process.stderr.write(`${testCase.id}: no ${String(options.update)} result (exit ${result.status})\n`);
       }
     }
   }
-  process.stdout.write(`${written} expected ${options.update} files written from ${language}\n`);
+  process.stdout.write(`${written} expected ${String(options.update)} files written from ${language}\n`);
   process.exit(failedUpdates ? 1 : 0);
 }
 

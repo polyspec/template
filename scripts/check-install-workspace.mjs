@@ -63,10 +63,10 @@ let failed = 0;
 for (const [name, test] of [['a run removes its Go module cache', removesGoModuleCache], ['a failed removal fails with its path', failedRemovalNamesPath]]) {
   try {
     test();
-    process.stdout.write(`[install workspace] pass: ${name}\n`);
+    process.stdout.write(`[install workspace] pass: ${String(name)}\n`);
   } catch (error) {
     failed += 1;
-    process.stdout.write(`[install workspace] fail: ${name}\n${error.stack}\n`);
+    process.stdout.write(`[install workspace] fail: ${String(name)}\n${error.stack}\n`);
   }
 }
 if (failed) process.exit(1);

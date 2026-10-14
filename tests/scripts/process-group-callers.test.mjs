@@ -54,7 +54,7 @@ for (const [name, start] of [
   ['runStep of the generated runners', file => runStep(process.execPath, command(file, 300), { cwd: tmpdir() })],
   ['runStep of the VS Code integration test', file => runIntegrationStep('probe', process.execPath, command(file, 300), { env: process.env, output: () => {}, log: () => {} })],
 ]) {
-  test(`${name} leaves no process of the group`, async (t) => {
+  test(`${String(name)} leaves no process of the group`, async (t) => {
     const directory = mkdtempSync(path.join(tmpdir(), 'template-group-callers-'));
     t.after(() => rmSync(directory, { recursive: true, force: true }));
     const file = path.join(directory, 'background.pid');
@@ -62,6 +62,6 @@ for (const [name, start] of [
     const pid = Number(readFileSync(file, 'utf8'));
     const running = alive(pid);
     if (running) process.kill(pid, 'SIGKILL');
-    assert.equal(running, false, `the background process ${pid} of the group still ran when ${name} resolved`);
+    assert.equal(running, false, `the background process ${pid} of the group still ran when ${String(name)} resolved`);
   });
 }
