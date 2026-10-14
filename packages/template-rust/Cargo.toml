@@ -15,12 +15,19 @@ path = "src/lib.rs"
 name = "template"
 path = "src/bin/template.rs"
 
+# The tokens and format results of the conformance cases, one test per case through libtest-mimic.
+[[test]]
+name = "cases"
+path = "tests/cases.rs"
+harness = false
+
 [dependencies]
 same-file = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
 
 [dev-dependencies]
+libtest-mimic = "0.8.2"
 syn = { version = "3", features = ["full"] }
 
 [profile.release]
