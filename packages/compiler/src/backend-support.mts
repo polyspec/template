@@ -3,7 +3,6 @@ import type { TypeManifest } from './documents.mts';
 import { scalarKinds, type Expr, type ExprOf, type Node, type NodeOf, type Program, type ValueType, type VariableExpr } from './ir.mts';
 
 const scalarTypes = {
-  ts: { string: 'string', number: 'number', boolean: 'boolean', any: 'unknown', null: 'null', Template: 'string' },
   go: { string: 'string', number: 'float64', boolean: 'bool', any: 'any', null: 'any', Template: 'string' },
   rust: { string: 'String', number: 'f64', boolean: 'bool', any: 'GeneratedValue', null: 'GeneratedValue', Template: 'String' },
   php: { string: 'string', number: 'float', boolean: 'bool', any: 'mixed', null: 'mixed', Template: 'string' },
@@ -99,11 +98,9 @@ export function descriptor(source: string): Descriptor {
 /** The descriptors of a map of types by name. */
 export const descriptors = (fields: Record<string, string>): Record<string, Descriptor> => Object.fromEntries(Object.entries(fields).map(([field, type]) => [field, descriptor(type)]));
 
-export const tsType = (type: string): string => genericType(type, scalarTypes.ts, item => `Array<${item}>`, (key, value) => `Map<${key}, ${value}>`);
 export const goType = (type: string): string => (optional(type) && typeName(type) !== 'any' ? '*' : '') + genericType(type, scalarTypes.go, item => `[]${item}`, (key, value) => `OrderedMap[${key}, ${value}]`);
 export const rustType = (type: string): string => `${optional(type) ? 'Option<' : ''}${genericType(type, scalarTypes.rust, item => `Vec<${item}>`, (key, value) => `OrderedMap<${key}, ${value}>`)}${optional(type) ? '>' : ''}`;
 export const phpType = (type: string): string => genericType(type, scalarTypes.php, () => 'array', () => 'MapValue');
-export const tsField = (name: string, type: string): string => `${name}${optional(type) ? '?' : ''}: ${tsType(type)};`;
 
 /**
  * A definition of generated code that the program keeps only when the code it keeps uses it (T25.1): `name` is the
@@ -205,7 +202,7 @@ export interface Target {
   literal(value: ExprOf<'literal'>['value'], type: ValueType): string;
   toValue(value: string, type: ValueType, node: ExprOf<'to-value'>): string;
   var(name: string, type: string, node: VariableExpr): string;
-  local(name: string, type: string): string;
+  local(name: string, type: string, node: VariableExpr): string;
   loopMeta(loop: string, field: ExprOf<'loop-meta'>['field'], node: ExprOf<'loop-meta'>): string;
   member(object: string, key: string, owner: ValueType, node: ExprOf<'member'>): string;
   memberCall(object: string, method: string, args: string[], node: ExprOf<'member-call'>): string;
@@ -232,7 +229,7 @@ export function emitExpression(node: Expr, target: Target): string {
     case 'literal': return target.literal(node.value, node.valueType);
     case 'to-value': return target.toValue(emitExpression(node.value, target), node.value.valueType, node);
     case 'root': return target.var(fieldName(node.name), node.valueType.source, node);
-    case 'local': return target.local(fieldName(node.name), node.valueType.source);
+    case 'local': return target.local(fieldName(node.name), node.valueType.source, node);
     case 'loop-meta': return target.loopMeta(node.loop, node.field, node);
     case 'member': return target.member(emitExpression(node.object, target), fieldName(node.key), node.object.valueType, node);
     case 'member-call': return target.memberCall(emitExpression(node.object, target), node.method, node.args.map(item => emitExpression(item, target)), node);

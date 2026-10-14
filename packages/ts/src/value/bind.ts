@@ -55,7 +55,7 @@ export function bindValue(input: unknown): Value {
 
 // Whether an object is a plain object: its prototype is `Object.prototype` or null, so its own
 // enumerable string keys are its entries.
-function isPlainObject(input: object): input is Record<string, unknown> {
+export function isPlainObject(input: object): input is Record<string, unknown> {
   const prototype = Reflect.getPrototypeOf(input);
   return prototype === Object.prototype || prototype === null;
 }

@@ -74,10 +74,12 @@ function checkTypeScript() {
   for (const duplicate of ['generatedTruthy', 'generatedDefault', 'generatedIn', 'function stringify(', 'function escape(']) {
     assert.equal(coverageSource.includes(duplicate), false, `TypeScript generated source duplicates runtime semantics: ${duplicate}`);
   }
-  run('node', [tsc, '--ignoreConfig', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', ...sources]);
+  // The generated program type checks with the strict options of the TypeScript of this repository.
+  const options = ['--ignoreConfig', '--strict', '--noUncheckedIndexedAccess', '--exactOptionalPropertyTypes', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext'];
+  run('node', [tsc, ...options, '--noEmit', ...sources]);
   const output = join(temporary, 'typescript');
   mkdirSync(output);
-  run('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output, ...sources]);
+  run('node', [tsc, ...options, '--outDir', output, ...sources]);
   const imports = `import { RuntimeEnvironment } from '@polyspec/template';\n` + scenarios.map((id, index) => `import { GeneratedProgram as Program${index} } from './${id}.js';`).join('\n');
   const cases = scenarios.map((id, index) => `{
     const actual = new Program${index}().render(${JSON.stringify(target(id))}, ${fixture(id, 'data.json')}, { define: ${fixture(id, 'define.json')}${fixtureExists(id, 'env.json') ? `, env: ${fixture(id, 'env.json')}` : ''} });
