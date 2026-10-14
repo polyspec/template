@@ -30,6 +30,8 @@ final class Lexer
     private ?Token $previous = null;
     private ?Token $lookahead = null;
     private int $nestingDepth = 0;
+    /** @var list<Token> tokens consumed by the parser, including the closing delimiter */
+    private array $consumed = [];
     private readonly bool $closeIsExpressionChar;
 
     /**
@@ -73,8 +75,19 @@ final class Lexer
         if ($token->type === 'RPAREN' || $token->type === 'RBRACKET') {
             $this->nestingDepth--;
         }
+        $this->consumed[] = $token;
 
         return $token;
+    }
+
+    /**
+     * Tokens consumed by the parser, including the closing delimiter.
+     *
+     * @return list<Token>
+     */
+    public function consumed(): array
+    {
+        return $this->consumed;
     }
 
     /**

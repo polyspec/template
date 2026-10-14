@@ -90,15 +90,40 @@ final class AstProgram implements Program, RuntimeServices
      */
     public static function parse(string $source, string $name, array $options = []): array
     {
-        $delimiters = ['{', '}'];
-        if (isset($options['delimiters'])) {
-            $delimiters = Scanner::parseDelimiters($options['delimiters']);
-            if ($delimiters === null) {
-                throw new \InvalidArgumentException(json_encode($options['delimiters']) . ' is not a delimiter pair');
-            }
-        }
+        $delimiters = self::delimitersOf($options);
 
         return InternalBoundary::run($name, static fn (): array => Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]));
+    }
+
+    /**
+     * Parses one template source once and returns its AST with the accepted tags and the EDT-8 tokens of their
+     * parts. Offsets are UTF-8 byte offsets after a leading byte order mark (LEX-2, EDT-8).
+     *
+     * @param array{delimiters?: string} $options
+     * @return array{ast: array<string, mixed>, tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>, tokens: list<array{start: int, end: int, kind: string}>}
+     */
+    public static function analyze(string $source, string $name, array $options = []): array
+    {
+        $delimiters = self::delimitersOf($options);
+
+        return InternalBoundary::run($name, static fn (): array => Parser::analyze(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]));
+    }
+
+    /**
+     * @param array{delimiters?: string} $options
+     * @return array{0: string, 1: string}
+     */
+    private static function delimitersOf(array $options): array
+    {
+        if (!isset($options['delimiters'])) {
+            return ['{', '}'];
+        }
+        $delimiters = Scanner::parseDelimiters($options['delimiters']);
+        if ($delimiters === null) {
+            throw new \InvalidArgumentException(json_encode($options['delimiters']) . ' is not a delimiter pair');
+        }
+
+        return $delimiters;
     }
 
     /**

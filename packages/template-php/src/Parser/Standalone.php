@@ -12,7 +12,7 @@ final class Standalone
     /**
      * Returns the byte ranges [start, end) that standalone line groups remove from the output.
      *
-     * @param list<array{start: int, end: int, echo: bool}> $tags
+     * @param list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}> $tags
      * @return list<array{0: int, 1: int}>
      */
     public static function ranges(string $text, array $tags): array
@@ -78,7 +78,7 @@ final class Standalone
     }
 
     /**
-     * @param list<array{start: int, end: int, echo: bool}> $tags
+     * @param list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}> $tags
      */
     private static function onlyWhitespaceOutside(string $text, int $start, int $end, array $tags): bool
     {
