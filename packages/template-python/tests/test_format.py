@@ -252,8 +252,12 @@ class Fixtures(Case):
         self.assertTrue(names)
         for name in names:
             with self.subTest(name=name):
-                source = (LANGUAGE_FIXTURES / "input" / name).read_text("utf-8")
-                expected = (LANGUAGE_FIXTURES / "expected" / name).read_text("utf-8")
+                source = (
+                    (LANGUAGE_FIXTURES / "input" / name).read_bytes().decode("utf-8")
+                )
+                expected = (
+                    (LANGUAGE_FIXTURES / "expected" / name).read_bytes().decode("utf-8")
+                )
                 self.assertEqual(
                     self.formatted(source, FormatOptions(name=name)), expected
                 )
