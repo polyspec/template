@@ -48,6 +48,8 @@ $json = Ast::toJson($ast);
 | 멤버 | 설명 |
 | --- | --- |
 | `AstProgram::parse(string $source, string $name, array $options = [])` | 템플릿 하나를 AST(중첩 배열)로 파싱한다. `$options['delimiters']`가 구분자를 선택한다. |
+| `AstProgram::analyze(string $source, string $name, array $options = [])` | 템플릿 하나를 한 번 파싱해 `ast`, 받아들인 `tags`(`kind`, `start`, `end`, `bodyStart`, `bodyEnd`), 태그의 모든 부분에 대한 EDT-8 `tokens`(`start`, `end`, `kind`)를 반환한다. 오프셋은 앞의 바이트 순서 표시를 뺀 UTF-8 바이트 오프셋이다. |
+| `Formatter::format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer())` | `Polyspec\Template\Format`: 태그 안의 공백과 줄 들여쓰기를 정리하고, 텍스트를 담은 `FormatResult` 또는 `FormatError`(`reason`은 `parse`, `invariant`, `html`, 그리고 `code`, `line`, `col`, `message`)를 반환한다. 옵션은 `name`, `delimiters`, `range`, `indent`(공백 묶음 또는 탭 하나, 기본은 공백 두 칸, null이면 모든 줄의 들여쓰기를 유지), `templateBlocks`(`indent` 또는 `flat`)이다. 결과는 span을 뺀 AST(줄을 들여쓸 때는 줄 들여쓰기도 뺀 AST)가 같을 때만 반환되며, 다시 포맷해도 바뀌지 않는다. `Analyzer`는 PHP 확장의 파서 같은 다른 파서를 제공한다. |
 | `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | AST program을 생성한다. 옵션: `functions`, `limits`, `delimiters`. |
 | `new Engine(Program $program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | 템플릿 이름 또는 파싱된 템플릿을 렌더한다. `$assign`은 변수를 담고 옵션은 `define`, `env`다. 바인딩은 VAL-14를 따른다. closure와 리소스는 `E_DATA_UNSUPPORTED_TYPE`, 유효한 UTF-8이 아닌 키는 `E_DATA_INVALID_UTF8`, 64단계보다 깊게 중첩된 list와 map은 `E_DATA_DEPTH`이다. 호출자의 class scope와 무관하게 객체의 public 프로퍼티와 method만 보인다. |
@@ -64,9 +66,11 @@ $json = Ast::toJson($ast);
 ```sh
 php bin/template.php parse FILE [--root DIR] [--delimiters OC]
 php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+php bin/template.php tokens FILE [--root DIR] [--delimiters OC]
+php bin/template.php format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
+`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 포맷된 텍스트를 줄바꿈을 덧붙이지 않고 출력한다(들여쓰기 단위는 공백 `N`칸(1~8), `tab`, 또는 모든 줄의 들여쓰기를 유지하는 `none`이며 기본은 공백 두 칸). 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
 ## 개발
 
 ```sh

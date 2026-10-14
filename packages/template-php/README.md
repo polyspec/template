@@ -47,6 +47,8 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 | Member | Description |
 | --- | --- |
 | `AstProgram::parse(string $source, string $name, array $options = [])` | Parses one template into its AST (nested arrays). `$options['delimiters']` selects the delimiters. |
+| `AstProgram::analyze(string $source, string $name, array $options = [])` | Parses one template once and returns `ast`, the accepted `tags` (`kind`, `start`, `end`, `bodyStart`, `bodyEnd`) and the EDT-8 `tokens` (`start`, `end`, `kind`) of every part of a tag. Offsets are UTF-8 byte offsets after a leading byte order mark. |
+| `Formatter::format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer())` | `Polyspec\Template\Format`: formats the whitespace inside tags and the indentation of lines, and returns a `FormatResult` with the text, or a `FormatError` (`reason` `parse`, `invariant` or `html`, `code`, `line`, `col`, `message`). Options: `name`, `delimiters`, `range`, `indent` (a run of spaces or one tab, two spaces by default, null keeps every line's indentation) and `templateBlocks` (`indent` or `flat`). The result is returned only when it parses to the same AST without spans (and without line indentation when lines are indented); formatting it again changes nothing. An `Analyzer` supplies another parser, such as the one of the PHP extension. |
 | `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | Creates an AST program. Options: `functions`, `limits`, `delimiters`. |
 | `new Engine(Program $program)` | Creates an engine that delegates to one AST or generated program. |
 | `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | Renders a template name or a parsed template. `$assign` contains variables; options are `define` and `env`. Binding follows VAL-14: a closure or a resource is `E_DATA_UNSUPPORTED_TYPE`, a key that is not valid UTF-8 is `E_DATA_INVALID_UTF8`, and lists and maps nested deeper than 64 levels are `E_DATA_DEPTH`. Only public properties and methods of an object are visible, whatever the class scope of the caller. |
@@ -63,9 +65,11 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 ```sh
 php bin/template.php parse FILE [--root DIR] [--delimiters OC]
 php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+php bin/template.php tokens FILE [--root DIR] [--delimiters OC]
+php bin/template.php format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
+`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. `format` prints the formatted text without adding a newline (indent unit `N` spaces from 1 to 8, `tab`, or `none` to keep every line's indentation; two spaces by default); a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
 ## Development
 
 ```sh

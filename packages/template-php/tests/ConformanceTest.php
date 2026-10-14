@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
+use Polyspec\Template\Format\Formatter;
 use Polyspec\Template\Loader\FilesystemLoader;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\BindError;
@@ -61,6 +62,38 @@ final class ConformanceTest extends TestCase
         $ast = AstProgram::parse((string) file_get_contents("{$dir}/input.tpl"), 'input.tpl', self::options($dir));
         $expected = json_decode((string) file_get_contents("{$dir}/expected.ast.json"), true);
         self::assertSame(Support::normalize($expected), Support::normalize(json_decode(\Polyspec\Template\Ast::toJson($ast), true)));
+    }
+
+    #[DataProvider('cases')]
+    public function testTokens(string $dir): void
+    {
+        if (!is_file("{$dir}/expected.tokens.json")) {
+            $this->expectNotToPerformAssertions();
+
+            return;
+        }
+        $analysis = AstProgram::analyze((string) file_get_contents("{$dir}/input.tpl"), 'input.tpl', self::options($dir));
+        $tokens = array_map(static fn (array $token): array => [$token['start'], $token['end'], $token['kind']], $analysis['tokens']);
+        self::assertSame(json_decode((string) file_get_contents("{$dir}/expected.tokens.json"), true), $tokens);
+    }
+
+    #[DataProvider('cases')]
+    public function testFormat(string $dir): void
+    {
+        if (!is_file("{$dir}/expected.format.json")) {
+            $this->expectNotToPerformAssertions();
+
+            return;
+        }
+        $source = (string) file_get_contents("{$dir}/input.tpl");
+        $actual = [];
+        foreach (['indent' => [], 'keep' => ['indent' => null]] as $mode => $options) {
+            $result = Formatter::format($source, ['name' => 'input.tpl'] + $options + self::options($dir));
+            $actual[$mode] = $result->error === null
+                ? ['text' => $result->text]
+                : ['error' => ['reason' => $result->error->reason, 'code' => $result->error->code, 'line' => $result->error->line, 'col' => $result->error->col]];
+        }
+        self::assertSame(json_decode((string) file_get_contents("{$dir}/expected.format.json"), true), $actual);
     }
 
     #[DataProvider('cases')]
