@@ -12,7 +12,7 @@ const bin = join(repoRoot, 'packages', 'ts', 'bin', 'template.mjs');
 // scripts/build-package.mts does nothing when its inputs are unchanged. The build is a long-running step and has no
 // time limit (timeout 0).
 beforeAll(() => {
-  const build = spawnSync(process.execPath, [join(repoRoot, 'scripts', 'build-package.mjs'), '--package', 'ts'], { cwd: repoRoot, stdio: 'inherit' });
+  const build = spawnSync(process.execPath, [join(repoRoot, 'scripts', 'build-package.mts'), '--package', 'ts'], { cwd: repoRoot, stdio: 'inherit' });
   if (build.status !== 0) throw new Error(`node scripts/build-package.mts --package ts failed with status ${build.status}`);
 }, 0);
 
