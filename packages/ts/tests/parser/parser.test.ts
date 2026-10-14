@@ -36,16 +36,10 @@ describe('delimiters', () => {
   });
   it('rejects a delimiter option that is not a delimiter pair with an argument error (ERR-13)', () => {
     for (const run of [() => parse('x', 't.tpl', { delimiters: '[' }), () => new AstProgram({ delimiters: '[[[' })]) {
-      let thrown: unknown;
-      try {
-        run();
-      } catch (error) {
-        thrown = error;
-      }
-      expect(thrown).toBeInstanceOf(Error);
-      expect(thrown).not.toBeInstanceOf(TemplateError);
-      expect(thrown).not.toBeInstanceOf(TypeError);
-      expect(thrown).not.toBeInstanceOf(RangeError);
+      expect(run).toThrow(/is not a delimiter pair/);
+      expect(run).not.toThrow(TemplateError);
+      expect(run).not.toThrow(TypeError);
+      expect(run).not.toThrow(RangeError);
     }
   });
 });
