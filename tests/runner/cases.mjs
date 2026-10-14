@@ -1,7 +1,8 @@
 // Fixture case enumeration and comparison helpers shared by the runners.
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, relative } from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { root } from './drivers.mjs';
@@ -41,6 +42,45 @@ export function listCases(filter) {
     }
   }
   return cases.sort((a, b) => a.id.localeCompare(b.id));
+}
+
+export const filesystemCasesFile = join(root, 'tests', 'fixtures', 'filesystem', 'cases.json');
+
+/**
+ * Writes the file trees of the filesystem cases (CNF-16) into one new directory of the system temporary directory and
+ * returns the cases that `filter` selects in the form of `listCases`, with the id `filesystem/<name>`, and
+ * the directory, which the caller removes. A file tree holds symbolic and hard links, which a checkout does not hold.
+ */
+export function filesystemCases(filter) {
+  // The real path, because a CLI compares the root with its working directory, which the system reports resolved.
+  const directory = realpathSync(mkdtempSync(join(tmpdir(), 'template-filesystem-cases-')));
+  const cases = [];
+  for (const entry of JSON.parse(readFileSync(filesystemCasesFile, 'utf8'))) {
+    const id = `filesystem/${entry.name}`;
+    if (filter && id !== filter && filter !== 'filesystem') continue;
+    const dir = join(directory, entry.name);
+    for (const [name, text] of Object.entries(entry.files)) {
+      mkdirSync(dirname(join(dir, name)), { recursive: true });
+      writeFileSync(join(dir, name), text);
+    }
+    for (const [name, target] of Object.entries(entry.symbolicLinks ?? {})) symlinkSync(target, join(dir, name));
+    for (const [name, target] of Object.entries(entry.hardLinks ?? {})) linkSync(join(dir, target), join(dir, name));
+    cases.push({
+      id,
+      dir,
+      relative: id,
+      input: 'input.tpl',
+      hasData: false,
+      hasDefine: false,
+      hasEnv: false,
+      options: {},
+      meta: { rules: entry.rules, stage: 3 },
+      expectedHtml: entry.expected.html ?? null,
+      expectedError: entry.expected.error ?? null,
+      expectedAst: null,
+    });
+  }
+  return { directory, cases };
 }
 
 function readIf(path) {

@@ -26,6 +26,8 @@ Conformance is verified by fixture cases that every implementation renders throu
 
 **CNF-15** `scripts/check-schema.mjs` checks the presence of `expected.ast.json` in every case directory. It fails when a case has no `expected.ast.json` and its `expected.error.json` does not name an `E_LEX_*` or `E_PARSE_*` code with `template` equal to `input.tpl`, and when a case has an `expected.ast.json` although its `expected.error.json` names such an error. `make schema-check` and `make docs-check` run it, so `make check` fails for a missing AST file. Reason: CNF-9 compares the parse result of every case, and a case without its AST file would otherwise pass without that comparison.
 
+**CNF-16** `tests/fixtures/filesystem/cases.json` lists the filesystem cases of the filesystem loader (RT-10), which a case directory cannot hold because a checkout holds no symbolic or hard link. Each case has `name`, `rules`, `files` (a template name mapped to its text, `input.tpl` among them), optional `symbolicLinks` and `hardLinks` (a name mapped to the name of its target), and `expected` with `html` or `error` (`{code, template, line, col}`). `tests/runner/conformance.mjs` writes the tree of each case into a directory of the system temporary directory, runs `render input.tpl --root <directory>` of every selected implementation as the case `filesystem/<name>` and compares the result by CNF-7 and CNF-8; `--case filesystem` selects them.
+
 **CNF-3** `scripts/check-rules.mjs` collects every rule identifier defined in `docs/spec/*.md` and every identifier listed in `case.json` files. It fails when a `case.json` names a rule that no document defines, and it reports the rules that no case covers. `make check` runs it.
 
 ## Command line contract

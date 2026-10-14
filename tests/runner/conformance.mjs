@@ -9,10 +9,10 @@
 //   --case group/name | group        run one case or one group
 //   --list                           print the cases and exit
 //   --update ast|html|error          write the expected file from the ts implementation
-import { writeFileSync } from 'node:fs';
+import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { invoke, prepare, selectLanguages } from './drivers.mjs';
-import { describeText, firstDifference, listCases, parseArgs, parseErrorOutput, renderArgs } from './cases.mjs';
+import { describeText, filesystemCases, firstDifference, listCases, parseArgs, parseErrorOutput, renderArgs } from './cases.mjs';
 
 const options = { langs: null, case: null, list: false, update: null };
 const argv = process.argv.slice(2);
@@ -32,7 +32,12 @@ for (let i = 0; i < argv.length; i++) {
   }
 }
 
-const cases = listCases(options.case);
+// The filesystem cases (CNF-16) run after the fixture cases, from file trees in a temporary directory; --update writes
+// only the expected files of fixture cases.
+const fixtureCases = listCases(options.case);
+const filesystem = filesystemCases(options.case);
+process.once('exit', () => rmSync(filesystem.directory, { recursive: true, force: true }));
+const cases = [...fixtureCases, ...filesystem.cases];
 if (options.list) {
   for (const testCase of cases) process.stdout.write(`${testCase.id}  stage ${testCase.meta.stage}  ${testCase.meta.rules.join(' ')}\n`);
   process.stdout.write(`${cases.length} cases\n`);
@@ -61,7 +66,7 @@ if (options.update) {
   }
   const language = 'ts';
   let written = 0;
-  for (const testCase of cases) {
+  for (const testCase of fixtureCases) {
     if (options.update === 'ast') {
       const result = invoke(language, parseArgs(testCase), testCase.dir);
       if (result.status !== 0) {

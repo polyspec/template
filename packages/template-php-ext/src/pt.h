@@ -343,6 +343,7 @@ typedef struct pt_engine {
     HashTable functions; /* name => callable */
     HashTable classes;   /* "Class::method" => callable */
     HashTable cache;     /* name => pt_template* */
+    HashTable files;     /* "device:inode" => the name under which the loader read the file (RT-10) */
 } pt_engine;
 
 typedef struct pt_env {

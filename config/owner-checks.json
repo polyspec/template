@@ -64,6 +64,14 @@
     },
     {
       "paths": [
+        "tests/fixtures/filesystem/**"
+      ],
+      "targets": [
+        "conformance"
+      ]
+    },
+    {
+      "paths": [
         "tests/cases/**"
       ],
       "targets": [
@@ -1197,6 +1205,7 @@
       "paths": [
         "packages/template-{ts,go,rust,php,python}/**",
         "tests/runner/{conformance,cases,drivers}.mjs",
+        "tests/fixtures/filesystem/**",
         "scripts/publish-build.mjs"
       ]
     },

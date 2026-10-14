@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"hash/fnv"
 	"io/fs"
+	"os"
 	"strings"
+	"sync"
 
 	"github.com/polyspec/template/packages/template-go/ast"
 )
@@ -61,32 +63,68 @@ func (l *MapLoader) Load(name string) (Result, bool, error) {
 	return r, ok, nil
 }
 
-// FSLoader reads templates from a file system.
+// FSLoader reads templates from a file system. It never follows a symbolic link and gives each file one name
+// (RT-10).
 type FSLoader struct {
-	fsys fs.FS
+	fsys  fs.FS
+	mutex sync.Mutex
+	// files holds the file of each name that the loader read; a name whose file is the file of another name fails.
+	files map[string]fs.FileInfo
 }
 
-// NewFSLoader creates a loader over a file system rooted at the loader root.
+// NewFSLoader creates a loader over a file system rooted at the loader root. A file system that implements
+// fs.ReadLinkFS, such as os.DirFS, reports its symbolic links; os.SameFile judges the identity of two files.
 func NewFSLoader(fsys fs.FS) *FSLoader {
-	return &FSLoader{fsys: fsys}
+	return &FSLoader{fsys: fsys, files: map[string]fs.FileInfo{}}
 }
 
 // Load implements Loader; the version is the modification time and size (RT-10). A name for
-// which no regular file can be found does not exist; a regular file that cannot be read is a
-// failure.
+// which no regular file can be found does not exist. A symbolic link at any component of the name,
+// a regular file that cannot be read and a file that the loader read under another name are failures.
 func (l *FSLoader) Load(name string) (Result, bool, error) {
 	if !fs.ValidPath(name) {
 		return Result{}, false, nil
 	}
-	info, err := fs.Stat(l.fsys, name)
-	if err != nil || !info.Mode().IsRegular() {
+	segments := strings.Split(name, "/")
+	var info fs.FileInfo
+	for index := range segments {
+		component := strings.Join(segments[:index+1], "/")
+		var err error
+		info, err = fs.Lstat(l.fsys, component)
+		if err != nil {
+			return Result{}, false, nil
+		}
+		if info.Mode()&fs.ModeSymlink != 0 {
+			return Result{}, false, fmt.Errorf("%s is a symbolic link", component)
+		}
+		if index < len(segments)-1 && !info.IsDir() {
+			return Result{}, false, nil
+		}
+	}
+	if !info.Mode().IsRegular() {
 		return Result{}, false, nil
+	}
+	if err := l.claim(name, info); err != nil {
+		return Result{}, false, err
 	}
 	data, err := fs.ReadFile(l.fsys, name)
 	if err != nil {
 		return Result{}, false, err
 	}
 	return Result{Source: data, Version: fmt.Sprintf("%d:%d", info.ModTime().UnixNano(), info.Size())}, true, nil
+}
+
+// claim records the file of a name and fails when another name holds the same file.
+func (l *FSLoader) claim(name string, info fs.FileInfo) error {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+	for other, file := range l.files {
+		if other != name && os.SameFile(file, info) {
+			return fmt.Errorf("%s is the file of %s", name, other)
+		}
+	}
+	l.files[name] = info
+	return nil
 }
 
 // ErrOutsideRoot is returned when a path leaves the loader root.

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: e5afa2ef1226eee9b4f0a3c76a3c1acabf8a010fc29f86bbac68536a9d7de847 -->
+<!-- source-sha256: 7f92966cd0b7e2f93a5051792221efadd6a3628d8893df425f814bbb4cf070e4 -->
 # 적합성
 
 [English](/spec/conformance).
@@ -26,6 +26,8 @@
 | `expected.error.json` | 둘 중 하나 | 기대 오류의 `{"code", "template", "line", "col"}`. |
 
 **CNF-15** `scripts/check-schema.mjs`는 모든 케이스 디렉터리에서 `expected.ast.json`이 있는지 검사한다. 케이스에 `expected.ast.json`이 없고 그 `expected.error.json`이 `template`이 `input.tpl`인 `E_LEX_*` 또는 `E_PARSE_*` 코드를 지정하지 않으면 실패하고, `expected.error.json`이 그런 오류를 지정하는데 `expected.ast.json`이 있어도 실패한다. `make schema-check`와 `make docs-check`가 이를 실행하므로 AST 파일이 없으면 `make check`가 실패한다. 이유: CNF-9는 모든 케이스의 파싱 결과를 비교하며, AST 파일이 없는 케이스는 그렇지 않으면 그 비교 없이 통과한다.
+
+**CNF-16** `tests/fixtures/filesystem/cases.json`은 파일시스템 로더(RT-10)의 filesystem 케이스를 나열한다. checkout은 symbolic link와 hard link를 담지 않으므로 케이스 디렉터리는 이 케이스를 담을 수 없다. 각 케이스는 `name`, `rules`, `files`(template 이름에서 그 텍스트로의 map, `input.tpl` 포함), 선택적 `symbolicLinks`와 `hardLinks`(이름에서 대상 이름으로의 map), 그리고 `html` 또는 `error`(`{code, template, line, col}`)를 가진 `expected`를 가진다. `tests/runner/conformance.mjs`는 각 케이스의 tree를 시스템 임시 디렉터리의 한 디렉터리에 쓰고, 선택된 모든 구현의 `render input.tpl --root <directory>`를 케이스 `filesystem/<name>`으로 실행해 결과를 CNF-7과 CNF-8로 비교한다. `--case filesystem`이 이 케이스들을 선택한다.
 
 **CNF-3** `scripts/check-rules.mjs`는 `docs/spec/*.md`에 정의된 모든 규칙 식별자와 `case.json` 파일에 나열된 모든 식별자를 수집한다. 어떤 문서도 정의하지 않은 규칙을 `case.json`이 지정하면 실패하고, 어떤 케이스도 다루지 않는 규칙을 보고한다. `make check`가 이를 실행한다.
 

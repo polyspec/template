@@ -172,13 +172,44 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
         /* The filesystem functions of PHP reject such a path with an error, a failure of the loader. */
         PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: the path contains a NUL byte", name.s);
     }
+    /* Each component below the root is examined without following a symbolic link (RT-10). */
     zend_stat_t info;
-    if (VCWD_STAT(file.s, &info) != 0 || !S_ISREG(info.st_mode)) {
+    size_t component = ZSTR_LEN(engine->root) + 1;
+    for (;;) {
+        const char *slash = memchr(file.s + component, '/', file.n - component);
+        size_t until = slash != NULL ? (size_t)(slash - file.s) : file.n;
+        char *prefix = estrndup(file.s, until);
+        int missing = VCWD_LSTAT(prefix, &info) != 0;
+        efree(prefix);
+        if (missing) {
+            PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
+        }
+        if (S_ISLNK(info.st_mode)) {
+            PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: %.*s is a symbolic link", name.s,
+                (int)(until - ZSTR_LEN(engine->root) - 1), file.s + ZSTR_LEN(engine->root) + 1);
+        }
+        if (slash == NULL) {
+            break;
+        }
+        if (!S_ISDIR(info.st_mode)) {
+            PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
+        }
+        component = until + 1;
+    }
+    if (!S_ISREG(info.st_mode)) {
         PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
     }
-    char real[MAXPATHLEN];
-    if (!VCWD_REALPATH(file.s, real) || strncmp(real, ZSTR_VAL(engine->root), ZSTR_LEN(engine->root)) != 0 || real[ZSTR_LEN(engine->root)] != '/') {
-        PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
+    /* One file has one name: the device and inode number identify the file. */
+    zend_string *identity = zend_strpprintf(0, "%llu:%llu", (unsigned long long)info.st_dev, (unsigned long long)info.st_ino);
+    zval *owner = zend_hash_find(&engine->files, identity);
+    if (owner == NULL) {
+        zval named;
+        ZVAL_STRINGL(&named, name.s, name.n);
+        zend_hash_add_new(&engine->files, identity, &named);
+    }
+    zend_string_release(identity);
+    if (owner != NULL && (Z_STRLEN_P(owner) != name.n || memcmp(Z_STRVAL_P(owner), name.s, name.n) != 0)) {
+        PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: %s is the file of %s", name.s, name.s, Z_STRVAL_P(owner));
     }
     if (VCWD_ACCESS(file.s, R_OK) != 0) {
         PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: %s cannot be read", name.s, name.s);

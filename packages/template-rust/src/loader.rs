@@ -2,7 +2,9 @@
 
 use crate::ast::Template;
 use std::collections::HashMap;
+use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
 /// A loaded template: source bytes or a parsed AST, with a version.
 #[derive(Debug, Clone)]
@@ -85,10 +87,13 @@ impl Loader for MapLoader {
     }
 }
 
-/// Filesystem loader rooted at a directory (RT-10).
-#[derive(Debug, Clone)]
+/// Filesystem loader rooted at a directory (RT-10). It never follows a symbolic link and gives each
+/// file, identified by its device and inode number, one name.
+#[derive(Debug)]
 pub struct FsLoader {
     root: PathBuf,
+    /// The name of each file that the loader read, by device and inode number.
+    files: Mutex<HashMap<(u64, u64), String>>,
 }
 
 impl FsLoader {
@@ -96,6 +101,7 @@ impl FsLoader {
     pub fn new(root: impl AsRef<Path>) -> FsLoader {
         FsLoader {
             root: root.as_ref().to_path_buf(),
+            files: Mutex::new(HashMap::new()),
         }
     }
 
@@ -109,16 +115,36 @@ impl FsLoader {
     }
 }
 
-/// RT-10: a name for which no regular file can be found does not exist; a regular file that cannot
-/// be read is a failure.
+/// RT-10: a name for which no regular file can be found does not exist; a symbolic link at any
+/// component of the name, a regular file that cannot be read and a file that the loader read under
+/// another name are failures.
 impl Loader for FsLoader {
     fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
-        let path = self.path_of(name);
-        let Ok(metadata) = std::fs::metadata(&path) else {
+        let segments: Vec<&str> = name.split('/').collect();
+        let mut path = self.root.clone();
+        let mut found = None;
+        for (index, segment) in segments.iter().enumerate() {
+            path.push(segment);
+            let Ok(metadata) = std::fs::symlink_metadata(&path) else {
+                return Ok(None);
+            };
+            if metadata.file_type().is_symlink() {
+                return Err(format!("{} is a symbolic link", segments[..=index].join("/")));
+            }
+            if index + 1 < segments.len() && !metadata.is_dir() {
+                return Ok(None);
+            }
+            found = Some(metadata);
+        }
+        let Some(metadata) = found.filter(|metadata| metadata.is_file()) else {
             return Ok(None);
         };
-        if !metadata.is_file() {
-            return Ok(None);
+        {
+            let mut files = self.files.lock().map_err(|error| error.to_string())?;
+            let owner = files.entry((metadata.dev(), metadata.ino())).or_insert_with(|| name.to_string());
+            if owner != name {
+                return Err(format!("{name} is the file of {owner}"));
+            }
         }
         let bytes = std::fs::read(&path).map_err(|error| format!("{}: {error}", path.display()))?;
         let modified = metadata
