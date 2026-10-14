@@ -23,9 +23,13 @@ harness = false
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
-same-file = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+
+# The volume serial number and file index of an open file, the identity of a file of FsLoader on Windows; the standard
+# library offers them only behind the unstable feature windows_by_handle.
+[target.'cfg(windows)'.dependencies]
+winapi-util = "0.1.11"
 
 [dev-dependencies]
 libtest-mimic = "0.8.2"
