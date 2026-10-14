@@ -2,33 +2,13 @@
 
 mod common;
 
-use common::{json_equal, repo_root};
+use common::{case_delimiters, cases, json_equal};
 use polyspec_template::{
     AstProgram, Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
     defines_from_json, env_from_json, parse,
 };
 use std::fs;
-use std::path::{Path, PathBuf};
-
-fn cases() -> Vec<(String, PathBuf)> {
-    let root = repo_root().join("tests").join("cases");
-    let mut cases = Vec::new();
-    for group in fs::read_dir(&root).expect("cases directory").flatten() {
-        if !group.path().is_dir() {
-            continue;
-        }
-        for entry in fs::read_dir(group.path()).expect("group").flatten() {
-            if entry.path().is_dir() {
-                cases.push((
-                    format!("{}/{}", group.file_name().to_string_lossy(), entry.file_name().to_string_lossy()),
-                    entry.path(),
-                ));
-            }
-        }
-    }
-    cases.sort();
-    cases
-}
+use std::path::Path;
 
 fn read_json(path: &Path) -> Option<Result<serde_json::Value, ErrorCode>> {
     let bytes = fs::read(path).ok()?;
@@ -36,11 +16,6 @@ fn read_json(path: &Path) -> Option<Result<serde_json::Value, ErrorCode>> {
         return Some(Err(ErrorCode::E_DATA_INVALID_UTF8));
     };
     Some(polyspec_template::read_json(text).map_err(|error| error.code))
-}
-
-fn delimiters_of(dir: &Path) -> Option<String> {
-    let options = read_json(&dir.join("options.json"))?.ok()?;
-    options.get("delimiters").and_then(|v| v.as_str()).map(str::to_string)
 }
 
 enum Outcome {
@@ -54,7 +29,7 @@ fn render_case(dir: &Path) -> Outcome {
             loader: Some(Box::new(FsLoader::new(dir))),
             functions: Default::default(),
             limits: None,
-            delimiters: delimiters_of(dir),
+            delimiters: case_delimiters(dir),
             artifact_refresh: Default::default(),
         })
         .expect("valid engine options"),
@@ -94,7 +69,7 @@ fn every_case_matches_its_expected_files() {
                 &source,
                 "input.tpl",
                 &ParseOptions {
-                    delimiters: delimiters_of(dir),
+                    delimiters: case_delimiters(dir),
                 },
             ) {
                 Ok(ast) => {

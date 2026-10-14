@@ -4,40 +4,11 @@
 
 mod common;
 
-use common::repo_root;
+use common::{case_delimiters, cases};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{FormatError, FormatOptions, Formatted, IndentUnit, ParseOptions, analyze, format};
 use std::fs;
-use std::path::{Path, PathBuf};
-
-/// The id `<group>/<name>` and the directory of every case under tests/cases, sorted by id.
-fn cases() -> Vec<(String, PathBuf)> {
-    let root = repo_root().join("tests").join("cases");
-    let mut cases = Vec::new();
-    for group in fs::read_dir(&root).expect("cases directory").flatten() {
-        if !group.path().is_dir() {
-            continue;
-        }
-        for entry in fs::read_dir(group.path()).expect("case group").flatten() {
-            if entry.path().is_dir() {
-                cases.push((
-                    format!("{}/{}", group.file_name().to_string_lossy(), entry.file_name().to_string_lossy()),
-                    entry.path(),
-                ));
-            }
-        }
-    }
-    cases.sort();
-    cases
-}
-
-fn delimiters(dir: &Path) -> Result<Option<String>, Failed> {
-    let Ok(text) = fs::read_to_string(dir.join("options.json")) else {
-        return Ok(None);
-    };
-    let options: serde_json::Value = serde_json::from_str(&text).map_err(|error| format!("options.json: {error}"))?;
-    Ok(options.get("delimiters").and_then(|value| value.as_str()).map(str::to_string))
-}
+use std::path::Path;
 
 /// The content of an expected file of a case whose input parses, or None after checking that a case without
 /// expected.ast.json has no such file.
@@ -63,7 +34,7 @@ fn tokens(dir: &Path) -> Result<(), Failed> {
         &source,
         "input.tpl",
         &ParseOptions {
-            delimiters: delimiters(dir)?,
+            delimiters: case_delimiters(dir),
         },
     )
     .map_err(|error| format!("{error:?}"))?;
@@ -95,7 +66,7 @@ fn formatting(dir: &Path) -> Result<(), Failed> {
         return Ok(());
     };
     let source = fs::read_to_string(dir.join("input.tpl")).map_err(|error| format!("input.tpl: {error}"))?;
-    let delimiters = delimiters(dir)?;
+    let delimiters = case_delimiters(dir);
     let run = |indent: Option<IndentUnit>| {
         result_json(format(
             &source,
