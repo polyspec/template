@@ -19,15 +19,35 @@ FAIL_CODES = (
 )
 
 
+class IncludePath:
+    """The path of an include tag, its range and whether it is a quoted string."""
+
+    __slots__ = ("path", "start", "end", "quoted")
+
+    def __init__(self, path: str, start: int, end: int, quoted: bool):
+        self.path = path
+        self.start = start
+        self.end = end
+        self.quoted = quoted
+
+
 class BlockBody:
-    __slots__ = ("id", "path", "scope", "end")
+    __slots__ = ("id", "path", "scope", "words", "end")
 
     def __init__(
-        self, id: "str | None", path: "str | None", scope: list[dict], end: int
+        self,
+        id: "str | None",
+        path: "str | None",
+        scope: list[dict],
+        words: list[tuple[int, int, bool]],
+        end: int,
     ):
         self.id = id
         self.path = path
         self.scope = scope
+        # The words of the body as (start, end, quoted): the id, the path and
+        # each scope item with its value.
+        self.words = words
         self.end = end
 
 
@@ -54,18 +74,30 @@ class RawTagReader:
         char = self.text[index]
         if char in ('"', "'"):
             decoded, end = lex_string_literal(self.source, index, self.template)
-            return {"kind": "path", "value": decoded, "start": index, "end": end}
+            return {
+                "kind": "path",
+                "value": decoded,
+                "start": index,
+                "end": end,
+                "quoted": True,
+            }
         end = index
         while end < len(self.text) and _PATH_CHARS.match(self.text[end]):
             end += 1
         value = self.text[index:end]
         if "." in value or "/" in value:
-            return {"kind": "path", "value": value, "start": index, "end": end}
+            return {
+                "kind": "path",
+                "value": value,
+                "start": index,
+                "end": end,
+                "quoted": False,
+            }
         if _IDENT.match(value):
             return {"kind": "ident", "value": value, "start": index, "end": end}
         return {"kind": "ident", "value": "", "start": index, "end": index + 1}
 
-    def read_include_path(self, index: int) -> tuple[str, int]:
+    def read_include_path(self, index: int) -> IncludePath:
         """GRM-12: `+ path`."""
         token = self._read_token(index)
         if token is None or token["value"] == "":
@@ -80,13 +112,26 @@ class RawTagReader:
                 token["end"],
                 f"{json_text(token['value'])} is not a path",
             )
-        return token["value"], token["end"]
+        return IncludePath(
+            token["value"], token["start"], token["end"], token["quoted"]
+        )
 
     def read_block_body(self, index: int) -> BlockBody:
         """GRM-13 to GRM-15: `# [id] [path] {scope_item}`."""
         id: "str | None" = None
         path: "str | None" = None
         scope: list[dict] = []
+        words: list[tuple[int, int, bool]] = []
+
+        def word(item: dict, end: "int | None" = None) -> None:
+            words.append(
+                (
+                    item["start"],
+                    item["end"] if end is None else end,
+                    item.get("quoted", False),
+                )
+            )
+
         cursor = index
         token = self._read_token(cursor)
         if token is None or token["value"] == "":
@@ -100,13 +145,16 @@ class RawTagReader:
         if token["kind"] == "path":
             path = token["value"]
             cursor = token["end"]
+            word(token)
         else:
             id = token["value"]
             cursor = token["end"]
+            word(token)
             token = self._read_token(cursor)
             if token is not None and token["kind"] == "path":
                 path = token["value"]
                 cursor = token["end"]
+                word(token)
         while True:
             token = self._read_token(cursor)
             if token is None:
@@ -143,7 +191,9 @@ class RawTagReader:
                 expr = parser.parse_postfix(True)
                 scope.append({"name": token["value"], "expr": expr})
                 cursor = parser.end
+                word(token, cursor)
             else:
+                word(token)
                 scope.append(
                     {
                         "name": token["value"],
@@ -154,7 +204,7 @@ class RawTagReader:
                         },
                     }
                 )
-        return BlockBody(id, path, scope, cursor)
+        return BlockBody(id, path, scope, words, cursor)
 
 
 def json_text(value: str) -> str:

@@ -47,6 +47,14 @@ _TAG_KINDS = {
 
 
 class TemplateAnalysis:
+    """The AST of a template with the accepted tags and their tokens.
+
+    Each tag is a dict with `kind`, `echo`, `start`, `end`, `body_start` and
+    `body_end`; each token a dict with `start`, `end` and the EDT-8 `kind`.
+    Every range is a code point index into the source string after a byte
+    order mark is removed; `Source.byte_at` maps it to a UTF-8 byte offset.
+    """
+
     __slots__ = ("ast", "tags", "tokens")
 
     def __init__(self, ast: dict, tags: list[dict], tokens: list[dict]):
@@ -56,6 +64,9 @@ class TemplateAnalysis:
 
 
 class PrefixAnalysis:
+    """The tags a parse accepted before its first error, their tokens, and that
+    error (EDT-6). Ranges are those of `TemplateAnalysis`."""
+
     __slots__ = ("tags", "tokens", "error")
 
     def __init__(
@@ -81,31 +92,55 @@ def analyze_template(
 def analyze_template_prefix(
     source: Source, delimiters: tuple[str, str] = DEFAULT_DELIMITERS
 ) -> PrefixAnalysis:
-    """The tag ranges and expression tokens a parse accepted before its first
-    error, and that error (EDT-6)."""
+    """The tags a parse accepted before its first error, the tokens of those
+    tags, and that error (EDT-6)."""
     parser = _TemplateParser(source, delimiters)
     try:
         analysis = parser.parse()
         return PrefixAnalysis(analysis.tags, analysis.tokens, None)
     except TemplateError as error:
-        return PrefixAnalysis(parser._tags, parser._consumed_tokens(), error)
+        return PrefixAnalysis(parser._tags, parser._tokens, error)
 
 
-def _syntax_token(token: Token) -> dict:
-    keywords = frozenset(("NULL", "TRUE", "FALSE"))
-    variables = frozenset(("IDENT", "DOT_IDENT", "DOT_INDEX"))
-    kind = (
-        "string"
-        if token.type == "STRING"
-        else "number"
-        if token.type == "NUMBER"
-        else "keyword"
-        if token.type in keywords
-        else "variable"
-        if token.type in variables
-        else "operator"
-    )
-    return {"start": token.start, "end": token.end, "kind": kind}
+def _expression_kind(
+    token: Token, previous: "Token | None", following: "Token | None"
+) -> str:
+    """The EDT-8 class of an expression token, which depends on its neighbours
+    for names."""
+    if token.type == "STRING":
+        return "string"
+    if token.type == "NUMBER":
+        return "number"
+    if token.type in ("NULL", "TRUE", "FALSE", "IN"):
+        return "keyword"
+    if token.type == "IDENT":
+        called = following is not None and following.type == "LPAREN"
+        piped = previous is not None and previous.type == "PIPE"
+        return "function" if called or piped else "variable"
+    if token.type == "DOT_IDENT":
+        called = following is not None and following.type == "LPAREN"
+        return "function" if called else "property"
+    if token.type == "DOT_INDEX":
+        return "property"
+    return "operator"
+
+
+def _expression_tokens(parser: ExpressionParser) -> list[dict]:
+    tokens = [
+        token for token in parser.lexer.consumed if token.type not in ("CLOSE", "EOF")
+    ]
+    return [
+        {
+            "start": token.start,
+            "end": token.end,
+            "kind": _expression_kind(
+                token,
+                tokens[index - 1] if index > 0 else None,
+                tokens[index + 1] if index + 1 < len(tokens) else None,
+            ),
+        }
+        for index, token in enumerate(tokens)
+    ]
 
 
 class _Frame:
@@ -139,8 +174,12 @@ class _TemplateParser:
         self._root: list = []
         self._frames: list[_Frame] = []
         self._tags: list[dict] = []
+        self._tokens: list[dict] = []
         self._comments: list[dict] = []
-        self._expression_parsers: list[ExpressionParser] = []
+        # The expression parsers and the tokens outside expressions of the tag
+        # being parsed.
+        self._tag_parsers: list[ExpressionParser] = []
+        self._tag_tokens: list[dict] = []
         self._saw_tag = False
         self._text_before_first_tag_is_whitespace = True
 
@@ -176,17 +215,11 @@ class _TemplateParser:
                 "comments": self._comments,
             },
             self._tags,
-            self._consumed_tokens(),
+            self._tokens,
         )
 
-    def _consumed_tokens(self) -> list[dict]:
-        return [
-            mapped
-            for parser in self._expression_parsers
-            for token in parser.lexer.consumed
-            if token.type not in ("CLOSE", "EOF")
-            for mapped in (_syntax_token(token),)
-        ]
+    def _mark(self, start: int, end: int, kind: str) -> None:
+        self._tag_tokens.append({"start": start, "end": end, "kind": kind})
 
     # Pass 1: text scanning and tag parsing.
     def _scan(self) -> None:
@@ -251,6 +284,8 @@ class _TemplateParser:
         is_directive = sigil == "%"
         first_tag = not self._saw_tag
         self._saw_tag = True
+        self._tag_parsers = []
+        self._tag_tokens = []
 
         echo = False
         if sigil == "*":
@@ -371,18 +406,25 @@ class _TemplateParser:
             self._items.append(frame.node)
         elif sigil == "+":
             reader = self._raw_reader(context)
-            path, path_end = reader.read_include_path(body_start)
-            end = self._finish_tag(context, self._expect_close_raw(context, path_end))
+            include = reader.read_include_path(body_start)
+            self._mark(
+                include.start, include.end, "string" if include.quoted else "path"
+            )
+            end = self._finish_tag(
+                context, self._expect_close_raw(context, include.end)
+            )
             self._items.append(
                 {
                     "type": "Include",
-                    "path": path,
+                    "path": include.path,
                     "span": self.source.span(context.start, end),
                 }
             )
         elif sigil == "#":
             reader = self._raw_reader(context)
             body_result = reader.read_block_body(body_start)
+            for word_start, word_end, quoted in body_result.words:
+                self._mark(word_start, word_end, "string" if quoted else "path")
             end = self._finish_tag(
                 context, self._expect_close_raw(context, body_result.end)
             )
@@ -410,10 +452,44 @@ class _TemplateParser:
             )
         assignment = sigil == ":" and _ASSIGN_HEAD.match(text, body_start) is not None
         kind = "assignment" if assignment else _TAG_KINDS[sigil]
+        tag_body_start = context.open + 1
+        tag_body_end = self._close_start(context, end)
         self._tags.append(
-            {"start": context.start, "end": end, "echo": echo, "kind": kind}
+            {
+                "start": context.start,
+                "end": end,
+                "echo": echo,
+                "kind": kind,
+                "body_start": tag_body_start,
+                "body_end": tag_body_end,
+            }
         )
+        if kind == "comment":
+            self._tokens.append({"start": context.start, "end": end, "kind": "comment"})
+            return end
+        self._tokens.append(
+            {"start": context.start, "end": tag_body_start, "kind": "delimiter"}
+        )
+        sigil_start = skip_horizontal_space(text, tag_body_start)
+        self._tokens.append(
+            {"start": sigil_start, "end": sigil_start + len(sigil), "kind": "keyword"}
+        )
+        self._tokens.extend(self._tag_tokens)
+        for parser in self._tag_parsers:
+            self._tokens.extend(_expression_tokens(parser))
+        self._tokens.append({"start": tag_body_end, "end": end, "kind": "delimiter"})
         return end
+
+    def _close_start(self, context: _TagContext, end: int) -> int:
+        """The code point index of the close delimiters of the tag that ends at
+        `end`: before the wrapper closer and the horizontal whitespace in front
+        of it (LEX-19)."""
+        tail = end
+        if context.wrapper is not None:
+            tail -= len(context.wrapper[1])
+            while is_horizontal_space(ord(self.text[tail - 1])):
+                tail -= 1
+        return tail - context.close_count
 
     def _expression_parser(self, context: _TagContext, start: int) -> ExpressionParser:
         parser = ExpressionParser(
@@ -426,7 +502,7 @@ class _TemplateParser:
             ),
             self._name,
         )
-        self._expression_parsers.append(parser)
+        self._tag_parsers.append(parser)
         return parser
 
     def _raw_reader(self, context: _TagContext):
@@ -511,6 +587,8 @@ class _TemplateParser:
                 name_start + len(name),
                 f"{name} is a reserved word",
             )
+        self._mark(name_start, name_start + len(name), "variable")
+        self._mark(head.end() - 1, head.end(), "operator")
         parser = self._expression_parser(context, head.end())
         iter_expr = parser.parse_expression()
         end = self._finish_tag(context, parser.expect_close())
@@ -547,6 +625,8 @@ class _TemplateParser:
             "span": self.source.span(body_start, body_start + len(name)),
         }
         after_operator = head.end()
+        self._mark(body_start, body_start + len(name), "variable")
+        self._mark(after_operator - len(operator), after_operator, "operator")
         if operator in ("++", "--"):
             end = self._finish_tag(
                 context, self._expect_close_raw(context, after_operator)
@@ -602,7 +682,9 @@ class _TemplateParser:
         index = skip_horizontal_space(self.text, body_start)
         if not self.text.startswith("delimiter", index):
             raise invalid('directive is not "delimiter"')
+        self._mark(index, index + len("delimiter"), "keyword")
         index = skip_horizontal_space(self.text, index + len("delimiter"))
+        value_start = index
         value = ""
         while (
             index < len(self.text)
@@ -616,6 +698,7 @@ class _TemplateParser:
         delimiters = parse_delimiters(value)
         if delimiters is None:
             raise invalid(f"{json_text(value)} is not a delimiter pair")
+        self._mark(value_start, index, "string")
         end = self._finish_tag(context, self._expect_close_raw(context, index))
         self.delimiters = delimiters
         return end
