@@ -6,7 +6,7 @@
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
-  "compilerDigest": "f4658428c3025c08f3f2b5d2fb9924a2c805fa5a92372eeb540863d83db90304",
+  "compilerDigest": "daf2bea1e39b775667ce8dda882c311cbe8cccf95fdd9af00126a778427d3dd2",
   "files": {
     "generated.go": {
       "path": "generated.go",

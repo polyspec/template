@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 126829cf74298c8f34bd21ffda57ef39d5d2c6677d0bee19541f7236c6cdac50 -->
+<!-- source-sha256: 6fc81dfe444173e076451e07641e682f8a984df3ea009bee2b9dd2fd56fa7c9c -->
 # 런타임
 
 [English](/spec/runtime).
@@ -165,9 +165,9 @@ sequenceDiagram
 - **RT-47** 어댑터는 공통 JSON을 해석해 native API 값을 만들 수 있지만 컨트롤러 데이터 추가, 필드 이름 변경, 필터 적용, 그 밖의 요청 재구성을 해서는 안 된다.
 - **RT-48** 성공한 일치성 검사는 완전한 UTF-8 출력 바이트를 비교한 뒤 같은 요청을 다시 렌더해 반복 바이트도 비교한다.
 - **RT-49** manifest는 `Adapter`, `Scenario`, `RenderRequest`, `DefineEntry`, `Environment`, `RepeatResult`의 설계 원본이다. record 필드와 union variant는 선언한 순서를 유지하며 소유 관계와 `from` 연결은 `Scenario`에서 `RenderRequest`로 어떤 값이 전달되는지 설명한다.
-- **RT-50** [계약 생성기](../../scripts/generate-showcase-contract.mjs)는 TypeScript, JavaScript, Go, Rust 선언부, PHP 선언부와 Mermaid 원본을 생성한다. 생성 파일이 manifest와 다르면 계약 게이트가 실패한다.
+- **RT-50** [계약 생성기](../../scripts/generate-showcase-contract.mts)는 TypeScript, JavaScript, Go, Rust 선언부, PHP 선언부와 Mermaid 원본을 생성한다. 생성 파일이 manifest와 다르면 계약 게이트가 실패한다.
 - **RT-51** 언어 문법은 각 언어의 관례를 따를 수 있다(`NewAdapter`, `Adapter::new`, `__construct`는 생성자 이름이다). manifest 매핑을 통해 concrete type, 생성자 인자, 메서드 순서, 인자 타입, 반환 타입과 요청 필드는 동일하게 유지한다.
-- **RT-52** [계약 검사기](../../scripts/check-showcase-contract.mjs)는 소스 선언, TypeScript 컴파일, Go 인터페이스 대입과 포맷, Rust trait 컴파일, PHP 문법과 `ReflectionClass`, 생성된 런타임 assertion, 모든 showcase 시나리오에 대한 다섯 어댑터 실행을 검사한다.
+- **RT-52** [계약 검사기](../../scripts/check-showcase-contract.mts)는 소스 선언, TypeScript 컴파일, Go 인터페이스 대입과 포맷, Rust trait 컴파일, PHP 문법과 `ReflectionClass`, 생성된 런타임 assertion, 모든 showcase 시나리오에 대한 다섯 어댑터 실행을 검사한다.
 - **RT-53** 상태 증명은 `constructor -> loadScenario -> buildRequest -> renderTwice`를 실행하고, 잘못된 target 오류를 관찰하고, 원래 요청을 다시 렌더한 뒤 첫 번째·두 번째·복구 UTF-8 해시를 비교한다. 오류와 복구 과정에서 요청은 바뀌지 않는다.
 - **RT-60** Native object instance는 `assign`에 직접 넣을 수 있다. Runtime은 원본 instance를 유지하고 member lookup으로 public field를 노출하며 `object.method(args...)`로 public instance method를 호출한다. 논리 class function은 `Class::method`로 등록하고 `Class::method(args...)`로 호출한다.
 
@@ -207,8 +207,8 @@ flowchart LR
 생성과 검증 명령은 다음과 같다.
 
 ```sh
-node scripts/generate-showcase-contract.mjs --check
-node scripts/check-showcase-contract.mjs
+node scripts/generate-showcase-contract.mts --check
+node scripts/check-showcase-contract.mts
 ```
 
 지원 레벨 도표도 언어별 선언부와 같은 manifest에서 생성한다.

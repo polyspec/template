@@ -12,7 +12,7 @@ Definitions: `Span`, `Template`, `NodeList`, `Node`, `Text`, `Echo`, `IfBranch`,
 Validation:
 
 ```sh
-node scripts/check-schema.mjs
+node scripts/check-schema.mts
 ```
 
-The script validates the three schemas against the draft-07 meta-schema, every `tests/cases/**/expected.ast.json` against `Template`, every `ast` field of `tests/fixtures/expr/cases.json` against `Expr`, and every `expected.tokens.json` and `expected.format.json` against their schemas. It also checks what JSON Schema cannot express: the tokens are sorted and do not overlap. `node scripts/check-schema-mutations.mjs` proves that the schemas and that check reject altered files. It exits with status 1 and prints one line per failure on stderr.
+The script validates the three schemas against the draft-07 meta-schema, every `tests/cases/**/expected.ast.json` against `Template`, every `ast` field of `tests/fixtures/expr/cases.json` against `Expr`, and every `expected.tokens.json` and `expected.format.json` against their schemas. It also checks what JSON Schema cannot express: the tokens are sorted and do not overlap. `node scripts/check-schema-mutations.mts` proves that the schemas and that check reject altered files. It exits with status 1 and prints one line per failure on stderr.

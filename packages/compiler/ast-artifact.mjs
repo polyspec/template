@@ -63,7 +63,10 @@ function verify(output, contractDigest) {
   return manifest;
 }
 
-/** Compiles one source directory into a canonical AST graph outside request handling. */
+/**
+ * Compiles one source directory into a canonical AST graph outside request handling.
+ * @param {{ root: string, output: string, entry: string, refresh?: string, typeManifest?: string | null, delimiters?: string | null }} options
+ */
 export function compileAst({ root, output, entry, refresh = 'true', typeManifest = null, delimiters = null }) {
   root = resolve(root);
   output = resolve(output);

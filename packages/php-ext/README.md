@@ -13,7 +13,7 @@ The sources, `config.m4` and the stub `polyspec_template.stub.php` are in `src/`
 make ext
 ```
 
-`make ext` runs `scripts/build-php-extension.mjs`, which builds the extension with phpize, configure and make in a temporary directory, with every compiler warning as an error, and publishes the shared library to `var/build/polyspec_template.so` of the repository. It builds nothing when the sources and the PHP build are unchanged, and it fails when php-config and php of `PATH` are not one PHP. Load the library with the `extension` setting of `php.ini` or with `-d extension=<path>` on the command line.
+`make ext` runs `scripts/build-php-extension.mts`, which builds the extension with phpize, configure and make in a temporary directory, with every compiler warning as an error, and publishes the shared library to `var/build/polyspec_template.so` of the repository. It builds nothing when the sources and the PHP build are unchanged, and it fails when php-config and php of `PATH` are not one PHP. Load the library with the `extension` setting of `php.ini` or with `-d extension=<path>` on the command line.
 
 ```sh
 php -d extension=var/build/polyspec_template.so -r 'var_dump(extension_loaded("polyspec_template"));'

@@ -53,7 +53,7 @@ include scripts/kit/kit-bootstrap.mk
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-audit release-test-matrix release-check docs-static-check clean \
 	install build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
-	conformance-cases function-inventory-check
+	conformance-cases function-inventory-check typecheck
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
@@ -62,7 +62,7 @@ GO_DIR   := packages/go
 RUST_DIR := packages/rust
 PHP_DIR  := packages/php
 EXT_DIR  := packages/php-ext
-# The builds that the checks run, published by scripts/publish-build.mjs only when their bytes change: cargo links
+# The builds that the checks run, published by scripts/publish-build.mts only when their bytes change: cargo links
 # target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1). The C PHP
 # extension is built by phpize as polyspec_template.so on every platform (T21.4).
 EXT_LIBRARY := var/build/polyspec_template.so
@@ -98,7 +98,8 @@ help: ## List targets
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  test-scripts           Tests of the test runner and the conformance runners"
-	@echo "  conformance            Cross-language conformance suite (tests/runner/conformance.mjs)"
+	@echo "  typecheck              Type check of the TypeScript infrastructure (tsconfig.json, S9)"
+	@echo "  conformance            Cross-language conformance suite (tests/runner/conformance.mts)"
 	@echo "  test-browser           Browser rendering test (Playwright)"
 	@echo "  ext / test-ext         Build and test the PHP extension"
 	@echo "  ext-arginfo            Generate the arginfo header of the C extension from its stub with gen_stub.php"
@@ -143,7 +144,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check layout-check typecheck lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
@@ -178,9 +179,9 @@ lint-php-format: build-php
 # var/tools/mise/shims/python3 of the python of mise.toml, so every job has that interpreter after make install and no job
 # sets up a Python of its own (T24.12).
 install: install-tools rust-toolchain cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
-	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
-	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
-	$(ONLINE) node scripts/python-wheelhouse.mjs
+	$(ONLINE) node scripts/composer-install.mts $(PHP_DIR)
+	$(ONLINE) node scripts/composer-install.mts $(EXT_DIR)
+	$(ONLINE) node scripts/python-wheelhouse.mts
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
@@ -196,16 +197,16 @@ install-browsers: ## Install the Chromium of Playwright and its system packages,
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
 
 build-ts: ## Build the TypeScript package
-	node scripts/build-package.mjs --package ts
+	node scripts/build-package.mts --package ts
 
 build-go: ## Build the Go CLI
-	cd $(GO_DIR) && go build -o template ./cmd/template && cd $(CURDIR) && node scripts/publish-build.mjs $(GO_DIR)/template var/build/template-go
+	cd $(GO_DIR) && go build -o template ./cmd/template && cd $(CURDIR) && node scripts/publish-build.mts $(GO_DIR)/template var/build/template-go
 
 build-rust: cargo-downloads-check ## Build the Rust CLI
-	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && node scripts/publish-build.mjs $(RUST_DIR)/target/release/template var/build/template-rust
+	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && node scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust
 
 build-php: ## Install PHP dependencies
-	node scripts/composer-install.mjs $(PHP_DIR)
+	node scripts/composer-install.mts $(PHP_DIR)
 
 test-ts: test-ts-unit test-ts-types test-ts-types-node ## TypeScript unit tests and type check
 
@@ -239,8 +240,14 @@ test-php: build-php ## PHP unit tests
 test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
+# The infrastructure of scripts/, tests/runner, tests/scripts and the browser test of packages/ts is TypeScript, which Node.js
+# runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
+# packages/ts and packages/language, whose declarations tsc reads.
+typecheck: build-ts build-language ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
+	$(TSC) -p tsconfig.json
+
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
-	node scripts/build-package.mjs --package language
+	node scripts/build-package.mts --package language
 
 test-language: test-language-unit test-language-types ## Formatter, safety invariant and CLI tests, type check
 
@@ -251,7 +258,7 @@ test-language-types: build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
 build-lsp: build-language ## Build the language server template-lsp
-	node scripts/build-package.mjs --package lsp
+	node scripts/build-package.mts --package lsp
 
 test-lsp: test-lsp-unit test-lsp-types ## Language server protocol tests against the editor fixtures, type check
 
@@ -269,7 +276,7 @@ format-external-check: build-language ## Run the formatter safety invariant on a
 	cd $(LANGUAGE_DIR) && TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" $(VITEST) run tests/invariant.test.ts
 
 build-codemirror: build-language ## Build the CodeMirror 6 adapter
-	node scripts/build-package.mjs --package codemirror
+	node scripts/build-package.mts --package codemirror
 
 test-codemirror: test-codemirror-unit test-codemirror-browser test-codemirror-types ## CodeMirror adapter tests against the editor fixtures, browser test, type check
 
@@ -282,13 +289,13 @@ test-codemirror-types: build-codemirror
 	$(TSC) --noEmit -p $(CODEMIRROR_DIR)/tsconfig.json
 
 install-cli: build-language ## Install a copy of the formatter and the script $(CLI_PREFIX)/bin/template-fmt
-	node scripts/install-cli.mjs install --prefix $(CLI_PREFIX)
+	node scripts/install-cli.mts install --prefix $(CLI_PREFIX)
 
 uninstall-cli: ## Remove the formatter copy and the script template-fmt of $(CLI_PREFIX)
-	node scripts/install-cli.mjs uninstall --prefix $(CLI_PREFIX)
+	node scripts/install-cli.mts uninstall --prefix $(CLI_PREFIX)
 
 build-vscode: build-lsp ## Bundle the VS Code extension
-	node scripts/build-package.mjs --package vscode
+	node scripts/build-package.mts --package vscode
 
 test-vscode: test-vscode-unit test-vscode-types ## Extension tests and type check
 
@@ -308,40 +315,40 @@ vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
 
 conformance: cargo-downloads-check build-ts build-go build-rust build-php ext ## Cross-language conformance suite (builds every implementation first)
-	node tests/runner/conformance.mjs
+	node tests/runner/conformance.mts
 
 # The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
 .PHONY: conformance-ts conformance-go conformance-rust conformance-php conformance-python
 conformance-ts: cargo-downloads-check build-ts ## Conformance suite of TypeScript
-	node tests/runner/conformance.mjs --langs ts
+	node tests/runner/conformance.mts --langs ts
 conformance-go: cargo-downloads-check build-ts build-go ## Conformance suite of TypeScript and Go
-	node tests/runner/conformance.mjs --langs ts,go
+	node tests/runner/conformance.mts --langs ts,go
 conformance-rust: cargo-downloads-check build-ts build-rust ## Conformance suite of TypeScript and Rust
-	node tests/runner/conformance.mjs --langs ts,rust
+	node tests/runner/conformance.mts --langs ts,rust
 conformance-php: cargo-downloads-check build-ts build-php ## Conformance suite of TypeScript and PHP
-	node tests/runner/conformance.mjs --langs ts,php
+	node tests/runner/conformance.mts --langs ts,php
 
 delimiter-matrix: cargo-downloads-check build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
-	node tests/runner/delimiter-matrix.mjs
+	node tests/runner/delimiter-matrix.mts
 
 conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
-	node tests/runner/conformance-generated-ts.mjs
+	node tests/runner/conformance-generated-ts.mts
 
 conformance-generated-go: build-ts ## Go generated compiler conformance suite
-	node tests/runner/conformance-generated-go.mjs
+	node tests/runner/conformance-generated-go.mts
 
 conformance-generated-rust: cargo-downloads-check build-ts ## Rust generated compiler conformance suite
-	node tests/runner/conformance-generated-rust.mjs
+	node tests/runner/conformance-generated-rust.mts
 
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
-	node tests/runner/conformance-generated-php.mjs
+	node tests/runner/conformance-generated-php.mts
 
 conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
-	node tests/runner/conformance.mjs --langs ts,python
+	node tests/runner/conformance.mts --langs ts,python
 
 # The Python package is installed, editable, into the virtual environment PYTHON_VENV, the environment of the command of
-# the implementation python of config/parity.json (scripts/python-venv.mjs), so its tests, the conformance
-# driver (tests/runner/drivers.mjs) and the parity check (config/parity.json) import polyspec.template from the sources of
+# the implementation python of config/parity.json (scripts/python-venv.mts), so its tests, the conformance
+# driver (tests/runner/drivers.mts) and the parity check (config/parity.json) import polyspec.template from the sources of
 # the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
 # python of mise.toml, and the uv of mise.toml installs the package into it offline, with its build requirement from
 # var/python/wheelhouse (make install). The stamp is remade when the project or its build requirements change; a change of
@@ -349,9 +356,9 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 # tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
 # runs one test file by its path.
 PYTHON_PACKAGE := packages/python
-PYTHON_VENV := $(shell node scripts/python-venv.mjs)
+PYTHON_VENV := $(shell node scripts/python-venv.mts)
 ifeq ($(PYTHON_VENV),)
-$(error scripts/python-venv.mjs read no environment of the implementation python from config/parity.json)
+$(error scripts/python-venv.mts read no environment of the implementation python from config/parity.json)
 endif
 UV := $(CURDIR)/var/tools/mise/shims/uv
 
@@ -368,54 +375,54 @@ test-python: python-package ## Unit tests of the Python package
 	node $(KIT)/run-tests.$(KIT_EXT) python --venv $(PYTHON_VENV) -- discover -s $(PYTHON_PACKAGE)/tests -t $(PYTHON_PACKAGE)
 
 conformance-generated-python: build-ts python-package ## Python generated compiler conformance suite
-	node tests/runner/conformance-generated-python.mjs
+	node tests/runner/conformance-generated-python.mts
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
 
 conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php ext ## AST and generated conformance in every language for the cases of CASES only
-	node scripts/conformance-cases.mjs $(CASES)
+	node scripts/conformance-cases.mts $(CASES)
 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
-	node tests/runner/function-inventory.mjs
+	node tests/runner/function-inventory.mts
 
 install-check: install-workspace-check package-installs-check ## Install immutable package artifacts in isolated install projects
 
 .PHONY: install-workspace-check package-installs-check
 install-workspace-check:
-	node scripts/check-install-workspace.mjs
+	node scripts/check-install-workspace.mts
 package-installs-check: cargo-downloads-check typed-generator
-	node scripts/check-package-installs.mjs
+	node scripts/check-package-installs.mts
 
 # parity-check and parity-declarations-check of kit read config/parity.json (T24.7): parity-check runs the native test of each
 # implementation that binds a shared suite, which reads the installed Composer packages, the PHP extension and the crates.
 parity-check: cargo-downloads-check build-php build-ext-php ext python-package
 
 test-browser: build-ts ## Browser rendering test
-	node packages/ts/tests/browser/run.mjs
+	node packages/ts/tests/browser/run.mts
 
-# The PHP extension is a C implementation in $(EXT_DIR)/src: scripts/build-php-extension.mjs builds it with phpize,
+# The PHP extension is a C implementation in $(EXT_DIR)/src: scripts/build-php-extension.mts builds it with phpize,
 # configure and make of the php-config of PATH in a temporary directory, with every compiler warning as an error, and
 # publishes the library by rename when its bytes change; it does nothing for unchanged inputs (T21.1, T21.4).
 ext: ## Build the PHP extension
-	node scripts/build-php-extension.mjs $(EXT_DIR)/src $(EXT_LIBRARY)
+	node scripts/build-php-extension.mts $(EXT_DIR)/src $(EXT_LIBRARY)
 
 test-ext: test-ext-conformance test-ext-unit ## Test the PHP extension
 
 # The C extension in $(EXT_DIR)/src declares its PHP classes in polyspec_template.stub.php; gen_stub.php of the PHP
 # build generates polyspec_template_arginfo.h from it, which is committed for builds from the package (T21.1).
 ext-arginfo: ## Generate the arginfo header of the C extension from its stub with gen_stub.php
-	node scripts/build-php-extension.mjs --arginfo $(EXT_DIR)/src
+	node scripts/build-php-extension.mts --arginfo $(EXT_DIR)/src
 
 .PHONY: build-ext-php test-ext-conformance test-ext-unit
 build-ext-php:
-	node scripts/composer-install.mjs $(EXT_DIR)
+	node scripts/composer-install.mts $(EXT_DIR)
 test-ext-conformance: cargo-downloads-check ext
-	node tests/runner/conformance.mjs --langs php-ext
+	node tests/runner/conformance.mts --langs php-ext
 test-ext-unit: ext build-ext-php
 	node $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
 rules-check: ## Check case.json rule identifiers against the specification
-	node scripts/check-rules.mjs
+	node scripts/check-rules.mts
 
 # The editor boundary checker of kit reads the boundaries of config/editor-boundaries.json (EDT-2, EDT-3, T23.4).
 editor-boundary-check: ## Check that adapters do not use the parser and the language service uses no editor, Node.js or DOM module
@@ -434,47 +441,47 @@ rust-toolchain:
 dependency-review: rust-toolchain install-tools
 
 doc-coverage: ## Check that public symbols carry documentation comments
-	node scripts/check-doc-coverage.mjs
+	node scripts/check-doc-coverage.mts
 
 schema-check: schema-fixtures-check schema-mutations-check ## Validate the AST schema and fixtures
 
 .PHONY: schema-fixtures-check schema-mutations-check
 schema-fixtures-check:
-	node scripts/check-schema.mjs
+	node scripts/check-schema.mts
 schema-mutations-check:
-	node scripts/check-schema-mutations.mjs
+	node scripts/check-schema-mutations.mts
 
 docs-check: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check schema-check doc-coverage benchmark-docs-check ## Document checks
 
 .PHONY: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check benchmark-docs-check
 runtime-interface-diagrams-check:
-	node scripts/generate-runtime-interface.mjs --check
+	node scripts/generate-runtime-interface.mts --check
 compiler-interface-diagrams-check:
-	node scripts/generate-compiler-interface.mjs --check
+	node scripts/generate-compiler-interface.mts --check
 showcase-contract-diagrams-check:
-	node scripts/generate-showcase-contract.mjs --check
+	node scripts/generate-showcase-contract.mts --check
 benchmark-docs-check:
-	node scripts/update-benchmark-docs.mjs --check
+	node scripts/update-benchmark-docs.mts --check
 
 runtime-interface-generate: ## Generate the runtime prepared-execution Mermaid diagrams
-	node scripts/generate-runtime-interface.mjs
+	node scripts/generate-runtime-interface.mts
 
 runtime-interface-check: runtime-interface-diagrams-check runtime-interface-runtimes-check ## Verify the prepared render interface in every runtime
 
 .PHONY: runtime-interface-runtimes-check
 runtime-interface-runtimes-check: build-php
-	node scripts/check-runtime-interface.mjs
+	node scripts/check-runtime-interface.mts
 
 compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
-	node scripts/generate-compiler-interface.mjs
+	node scripts/generate-compiler-interface.mts
 
 compiler-interface-check: compiler-interface-diagrams-check compiler-interface-languages-check compiler-interface-mutations-check ## Verify the typed generated module structure in every language
 
 .PHONY: compiler-interface-languages-check compiler-interface-mutations-check
 compiler-interface-languages-check: cargo-downloads-check build-php python-package
-	node scripts/check-compiler-interface.mjs
+	node scripts/check-compiler-interface.mts
 compiler-interface-mutations-check: cargo-downloads-check build-php python-package
-	node scripts/check-compiler-interface-mutations.mjs
+	node scripts/check-compiler-interface-mutations.mts
 
 docs: ## Build the documentation site
 	$(VITEPRESS) build docs
@@ -485,53 +492,53 @@ docs-verify-idempotent: docs ## Build the documentation site twice and compare
 	@first=$$(mktemp -d) || exit 1; cp -R docs/.vitepress/dist "$$first/dist" && $(VITEPRESS) build docs && diff -r "$$first/dist" docs/.vitepress/dist; status=$$?; rm -rf "$$first"; exit $$status
 
 docs-static-check: docs ## Build the documentation site as static files
-	node scripts/check-docs-static.mjs
+	node scripts/check-docs-static.mts
 
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
-	node scripts/generate-showcase-contract.mjs
+	node scripts/generate-showcase-contract.mts
 
 contract-check: cargo-downloads-check build-ts build-php python-package ## Verify generated declarations, implementations and runtime state recovery
-	node scripts/check-showcase-contract.mjs
+	node scripts/check-showcase-contract.mts
 
 showcase: cargo-downloads-check typed-generator build-php python-package ## Build the executable example site and its result artifacts
 	node examples/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
-	node scripts/check-showcase-contract.mjs
+	node scripts/check-showcase-contract.mts
 	node examples/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
-	node scripts/check-benchmark-results.mjs
-	node scripts/update-benchmark-docs.mjs
+	node scripts/check-benchmark-results.mts
+	node scripts/update-benchmark-docs.mts
 	node examples/showcase/build-site.mjs
 
 bench: cargo-downloads-check typed-generator build-php ## Measure production AST and generated artifacts
 	node examples/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
-	node scripts/check-benchmark-results.mjs
-	node scripts/update-benchmark-docs.mjs
+	node scripts/check-benchmark-results.mts
+	node scripts/update-benchmark-docs.mts
 
 benchmark-check: benchmark-results-check benchmark-docs-check ## Verify committed benchmark structure and equal output
 
 .PHONY: benchmark-results-check
 benchmark-results-check:
-	node scripts/check-benchmark-results.mjs
+	node scripts/check-benchmark-results.mts
 
 benchmark-smoke: cargo-downloads-check typed-generator build-php ## Measure a fresh short equal-output sample without changing committed results
-	node scripts/check-benchmark-smoke.mjs
+	node scripts/check-benchmark-smoke.mts
 
 template-function-inventory: ## Inventory function-shaped calls in an explicit external template tree
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
-	node scripts/inventory-template-functions.mjs --root "$(TEMPLATE_SOURCE_ROOT)"
+	node scripts/inventory-template-functions.mts --root "$(TEMPLATE_SOURCE_ROOT)"
 
 function-contract-check: function-contract-registries-check function-contract-runtimes-check ## Check the canonical function contract against all language registries
 
 .PHONY: function-contract-registries-check function-contract-runtimes-check
 function-contract-registries-check:
-	node scripts/check-function-contract.mjs
+	node scripts/check-function-contract.mts
 function-contract-runtimes-check:
-	node tests/runner/function-contract.mjs
+	node tests/runner/function-contract.mts
 
 release-test-matrix: ## The full suite of make check through the same guard: every target of CHECK_TARGETS to its end
 	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
 
 release-check: ## Install and run the release matrix in an isolated clean worktree
-	node scripts/check-clean-release.mjs
+	node scripts/check-clean-release.mts
 
 showcase-check: artifact-digest-check typed-generator-compile-check showcase-build-check contract-check showcase-site-check showcase-html-check ## Verify example-site parity, repeatability and browser output
 
@@ -539,7 +546,7 @@ showcase-check: artifact-digest-check typed-generator-compile-check showcase-bui
 # The committed artifacts record the digest of the compiler that built them; the check reads only tracked sources, so the
 # job push-gate runs it (T17.1-6).
 artifact-digest-check: ## Fail when a committed compiled artifact records the digest of another compiler; names make showcase
-	node scripts/check-artifact-digests.mjs
+	node scripts/check-artifact-digests.mts
 showcase-ast-check: build-ts
 	node examples/showcase/compile.mjs --refresh false
 showcase-build-check: cargo-downloads-check showcase-ast-check build-php
@@ -547,7 +554,7 @@ showcase-build-check: cargo-downloads-check showcase-ast-check build-php
 showcase-site-check: build-ts
 	node examples/showcase/build-site.mjs --check
 showcase-html-check: build-ts
-	node scripts/check-showcase-html.mjs
+	node scripts/check-showcase-html.mts
 
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
 	node examples/showcase/compile.mjs --refresh true
@@ -556,13 +563,13 @@ generated-native-check: generated-native-calls-check generated-typed-values-chec
 
 .PHONY: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check
 generated-native-calls-check: cargo-downloads-check build-ts build-php python-package
-	node scripts/check-generated-native-calls.mjs
+	node scripts/check-generated-native-calls.mts
 generated-typed-values-check: cargo-downloads-check build-ts build-php python-package
-	node scripts/check-generated-typed-values.mjs
+	node scripts/check-generated-typed-values.mts
 generated-arguments-check: cargo-downloads-check build-ts build-php python-package
-	node scripts/check-generated-arguments.mjs
+	node scripts/check-generated-arguments.mts
 generated-bound-data-check: cargo-downloads-check build-ts build-php python-package
-	node scripts/check-generated-bound-data.mjs
+	node scripts/check-generated-bound-data.mts
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
 	node examples/showcase/compile-generated.mjs --refresh true
@@ -574,20 +581,20 @@ compiler-ir-check: ast-artifact-check generated-artifact-check compiler-ir-rules
 
 .PHONY: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check
 ast-artifact-check: build-ts
-	node scripts/check-ast-artifact.mjs
+	node scripts/check-ast-artifact.mts
 generated-artifact-check: build-ts
-	node scripts/check-generated-artifact.mjs
+	node scripts/check-generated-artifact.mts
 compiler-ir-rules-check: build-ts
-	node scripts/check-compiler-ir.mjs
+	node scripts/check-compiler-ir.mts
 conformance-type-manifest-check: build-ts
-	node scripts/check-conformance-type-manifest.mjs
+	node scripts/check-conformance-type-manifest.mts
 
 typed-generator-compile-check: cargo-downloads-check build-php python-package compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
-	node scripts/check-typed-generator.mjs
+	node scripts/check-typed-generator.mts
 
 .PHONY: generated-lint-check
 generated-lint-check: cargo-downloads-check build-php ## Lint the generated Go, Rust, TypeScript and PHP programs as code of a consumer: formatter and unused code
-	node scripts/check-generated-lint.mjs
+	node scripts/check-generated-lint.mts
 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go

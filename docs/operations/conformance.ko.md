@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: 86e00a0d6b9937ad283b016866ade98f0f41638bcb918b7b7ab5f3fd5e2ce99d -->
+<!-- source-sha256: 12593be922d8397eadec3aa103096569ced20ee882a9b600ac358bc77e25b3e6 -->
 # 적합성
 
 [English](/operations/conformance).
@@ -10,12 +10,12 @@
 
 ```sh
 make conformance
-node tests/runner/conformance.mjs --langs ts,go
-node tests/runner/conformance.mjs --case loop/meta-fields
+node tests/runner/conformance.mts --langs ts,go
+node tests/runner/conformance.mts --case loop/meta-fields
 make parity-check
 ```
 
-`make conformance`는 모든 패키지를 빌드하고 모든 케이스를 실행하며, 없는 패키지는 실행을 실패시킨다. 러너는 한 구현에서 케이스가 끝날 때마다 `<case> [<lang>] pass|fail (<ms> ms)`을 출력하고, 그 뒤 케이스와 구현마다 한 행인 요약 표를 출력하며, 비교가 실패하면 상태 1로 종료한다. `make parity-check`는 `config/parity.json`의 공유 suite를 bind하는 각 구현의 native test를 실행한다(CNF-11). 러너는 케이스 전에 각 구현의 CLI를 build한다(`tests/runner/drivers.mjs`). binary가 있어도 더 오래된 source로 build되었을 수 있으므로 build하며, 입력이 바뀌지 않았으면 build는 아무것도 하지 않는다. runner는 Go와 Rust CLI를 실행하고 PHP extension을 `var/build`에서 로드하며, `scripts/publish-build.mjs`는 build의 byte가 바뀔 때에만 그곳에 게시한다. cargo는 build할 때마다 `target/release`를 다시 link하고, go build는 새 파일을 쓰며, macOS는 새 실행 파일을 처음 실행할 때 검사한다. 부하가 큰 machine에서 이 검사는 Rust CLI에 29.8 s가 걸려 호출의 10 s 제한을 넘겼다. `make build-go`, `make build-rust`, `make ext`도 같은 파일에 게시한다. build는 시간 제한 없는 단계이고, 이 단계는 시작, build 출력, 경과 시간이 붙은 결과를 standard error에 출력하며 build가 0이 아닌 status로 종료하면 실패한다. CLI 호출마다 10 s timeout이 있다. `make delimiter-matrix`는 모든 유효한 ASCII 구분자 쌍과 따옴표 안 구분자 문자로 template을 모든 언어에서 render하고, 한 언어에서 쌍이 끝날 때마다 `<pair> [<lang>] pass|fail (<ms> ms)`를 출력하며, 끝에 check 수를 출력한다.
+`make conformance`는 모든 패키지를 빌드하고 모든 케이스를 실행하며, 없는 패키지는 실행을 실패시킨다. 러너는 한 구현에서 케이스가 끝날 때마다 `<case> [<lang>] pass|fail (<ms> ms)`을 출력하고, 그 뒤 케이스와 구현마다 한 행인 요약 표를 출력하며, 비교가 실패하면 상태 1로 종료한다. `make parity-check`는 `config/parity.json`의 공유 suite를 bind하는 각 구현의 native test를 실행한다(CNF-11). 러너는 케이스 전에 각 구현의 CLI를 build한다(`tests/runner/drivers.mts`). binary가 있어도 더 오래된 source로 build되었을 수 있으므로 build하며, 입력이 바뀌지 않았으면 build는 아무것도 하지 않는다. runner는 Go와 Rust CLI를 실행하고 PHP extension을 `var/build`에서 로드하며, `scripts/publish-build.mts`는 build의 byte가 바뀔 때에만 그곳에 게시한다. cargo는 build할 때마다 `target/release`를 다시 link하고, go build는 새 파일을 쓰며, macOS는 새 실행 파일을 처음 실행할 때 검사한다. 부하가 큰 machine에서 이 검사는 Rust CLI에 29.8 s가 걸려 호출의 10 s 제한을 넘겼다. `make build-go`, `make build-rust`, `make ext`도 같은 파일에 게시한다. build는 시간 제한 없는 단계이고, 이 단계는 시작, build 출력, 경과 시간이 붙은 결과를 standard error에 출력하며 build가 0이 아닌 status로 종료하면 실패한다. CLI 호출마다 10 s timeout이 있다. `make delimiter-matrix`는 모든 유효한 ASCII 구분자 쌍과 따옴표 안 구분자 문자로 template을 모든 언어에서 render하고, 한 언어에서 쌍이 끝날 때마다 `<pair> [<lang>] pass|fail (<ms> ms)`를 출력하며, 끝에 check 수를 출력한다.
 
 `make conformance-generated-ts`, `make conformance-generated-go`, `make conformance-generated-rust`, `make conformance-generated-php`, `make conformance-generated-python`는 모든 케이스의 generated program을 실행한다. `--case <group>/<name>`이나 `--case <group>`으로 케이스를 고른다. 각 케이스는 시작과 결과를 경과 시간과 함께 출력하고 30 s의 자기 deadline을 가진다. Go와 Rust 러너는 케이스 test를 `node_modules/@polyspec/kit/dist/run-tests.mjs`로 실행한다. Go 케이스는 package `case_<case id>`이고 Rust 케이스는 test `case_<case id>`이며, 문자와 숫자가 아닌 글자가 이어진 부분은 `_` 하나로 쓴다. PHP 러너는 `php -l`과 케이스 process를 deadline에서 멈춘다. Python 러너는 `python3 -m py_compile`과 케이스 process를 deadline에서 멈춘다. TypeScript 러너는 `tsc`를 시간 제한 없는 단계로 한 번 실행하여 시작, 실행 중 5 s마다 한 줄, 경과 시간이 붙은 결과를 출력하고, `tsc`가 0이 아닌 code로 종료하면 실패하며, 각 케이스를 worker에서 render한다.
 
@@ -26,14 +26,14 @@ make parity-check
 3. TypeScript 구현으로 `expected.ast.json`을 생성하고 검토한다:
 
 ```sh
-node tests/runner/conformance.mjs --langs ts --case <group>/<name> --update ast
-node scripts/check-schema.mjs
-node scripts/check-rules.mjs
+node tests/runner/conformance.mts --langs ts --case <group>/<name> --update ast
+node scripts/check-schema.mts
+node scripts/check-rules.mts
 ```
 
 4. 모든 구현에 대해 스위트를 실행한다.
 
-`scripts/check-schema.mjs`는 `input.tpl`이 파싱되는 케이스에 `expected.ast.json`이 없거나, `input.tpl`의 렉시컬 또는 파싱 오류를 기대하는 케이스에 그 파일이 있으면 실패한다(CNF-15). `make schema-check`와 `make docs-check`가 이를 실행하므로 `make check`도 실행한다.
+`scripts/check-schema.mts`는 `input.tpl`이 파싱되는 케이스에 `expected.ast.json`이 없거나, `input.tpl`의 렉시컬 또는 파싱 오류를 기대하는 케이스에 그 파일이 있으면 실패한다(CNF-15). `make schema-check`와 `make docs-check`가 이를 실행하므로 `make check`도 실행한다.
 
 `--update html`과 `--update error`는 TypeScript 구현의 결과로 기대 파일을 쓴다. 생성된 파일은 커밋 전에 명세와 대조해 검토한다.
 

@@ -73,7 +73,7 @@ The `Literal` `null` produced for a trailing `??` has an empty span at the end o
 
 **AST-7** The AST serializes to JSON. Object key order has no meaning; comparison is structural. `span` is present on every node other than `Template`. A number literal serializes as a JSON number, so `1e3` serializes as `1000` and `1.50` as `1.5`. A string literal serializes as the decoded string. `null` fields are written as JSON `null`, not omitted.
 
-**AST-8** Every serialized AST validates against `contracts/schema/ast.schema.json`. `scripts/check-schema.mjs` validates the schema and every `expected.ast.json` in `tests/cases/`.
+**AST-8** Every serialized AST validates against `contracts/schema/ast.schema.json`. `scripts/check-schema.mts` validates the schema and every `expected.ast.json` in `tests/cases/`.
 
 ## Example
 

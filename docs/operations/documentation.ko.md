@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-documentation -->
-<!-- source-sha256: 1c463a4af661c89ad4fedf1529e2c10791cec54b5304ca8f765d07bfe8c4d5ec -->
+<!-- source-sha256: dbe33a1faf4b1800af6953f61afaba490f4715d247b32a8e210b729666b3ff23 -->
 # 문서
 
 [English](/operations/documentation).
@@ -50,7 +50,7 @@ make documents-check
 주석은 그 심볼이 무엇을 위한 것인지 자기 말로 서술한다. 명세 규칙이 동작을 정의하는 경우 주석은 그 내용을 되풀이하지 않고 `AST-3`처럼 규칙을 지칭한다.
 
 ```sh
-node scripts/check-doc-coverage.mjs
+node scripts/check-doc-coverage.mts
 ```
 
 검사기는 문서화되지 않은 심볼이나 파일마다 한 행을 보고하고 실패한다. `make docs-check`가 이를 실행한다.

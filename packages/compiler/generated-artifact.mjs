@@ -59,6 +59,11 @@ function expectedMetadata(graphPath, typeManifestPath) {
   return { entry: graph.entry, sourceDigest: graph.sourceDigest, typeDigest, contractDigest };
 }
 
+/**
+ * Writes, verifies or checks the generated artifact of a target by its refresh policy; the false policy needs no compiler
+ * digest, since it only verifies the committed artifact.
+ * @param {{ graphPath: string, typeManifestPath: string, target: string, output: string, refresh: string, compilerDigest?: string, compile: () => string | Record<string, string>, check?: boolean }} options
+ */
 export function compileGeneratedArtifact({ graphPath, typeManifestPath, target, output, refresh, compilerDigest, compile, check = false }) {
   output = resolve(output);
   if (refresh === 'false') {

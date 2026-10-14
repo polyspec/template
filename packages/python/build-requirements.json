@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "comment": "The build requirements of pyproject.toml by exact version, file and SHA-256 digest. make install downloads them into var/python/wheelhouse with scripts/python-wheelhouse.mjs; the package install check builds the wheel offline from that directory.",
+  "comment": "The build requirements of pyproject.toml by exact version, file and SHA-256 digest. make install downloads them into var/python/wheelhouse with scripts/python-wheelhouse.mts; the package install check builds the wheel offline from that directory.",
   "requirements": [
     {
       "name": "setuptools",

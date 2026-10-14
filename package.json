@@ -5,10 +5,10 @@
   "description": "Template language with one specification and TypeScript, Go, Rust and PHP implementations",
   "type": "module",
   "scripts": {
-    "test": "node tests/runner/conformance.mjs",
-    "test:browser": "node packages/ts/tests/browser/run.mjs",
-    "schema:check": "node scripts/check-schema.mjs",
-    "docs:coverage": "node scripts/check-doc-coverage.mjs"
+    "test": "node tests/runner/conformance.mts",
+    "test:browser": "node packages/ts/tests/browser/run.mts",
+    "schema:check": "node scripts/check-schema.mts",
+    "docs:coverage": "node scripts/check-doc-coverage.mts"
   },
   "license": "MIT",
   "engines": {
@@ -33,6 +33,7 @@
     "@playwright/test": "^1.64.0",
     "@polyspec/kit": "https://github.com/polyspec/kit/releases/download/v0.0.43/polyspec-kit-npm-0.0.43.tgz",
     "@types/node": "^26.6.5",
+    "@types/picomatch": "^4.0.3",
     "@types/vscode": "^1.138.0",
     "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^4.0.0",

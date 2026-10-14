@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-ext-readme -->
-<!-- source-sha256: b6eabf751a36f24a478327802991a2da49b90d80d279412d6d2bf1173480304f -->
+<!-- source-sha256: b8497bf6fa64232f8f69cec882e0af817d6617c00f693623aacb4f07e2a5d6fe -->
 # polyspec_template PHP 확장
 
 [English](README.md).
@@ -14,7 +14,7 @@ source, `config.m4`, stub `polyspec_template.stub.php`는 `src/`에 있다. 빌�
 make ext
 ```
 
-`make ext`는 `scripts/build-php-extension.mjs`를 실행한다. 이 script는 임시 디렉터리에서 모든 컴파일러 경고를 오류로 하여 phpize, configure, make로 확장을 빌드하고, 공유 라이브러리를 저장소의 `var/build/polyspec_template.so`에 게시한다. source와 PHP build가 바뀌지 않았으면 아무것도 빌드하지 않고, `PATH`의 php-config와 php가 같은 PHP가 아니면 실패한다. `php.ini`의 `extension` 설정이나 명령줄의 `-d extension=<경로>`로 로드한다.
+`make ext`는 `scripts/build-php-extension.mts`를 실행한다. 이 script는 임시 디렉터리에서 모든 컴파일러 경고를 오류로 하여 phpize, configure, make로 확장을 빌드하고, 공유 라이브러리를 저장소의 `var/build/polyspec_template.so`에 게시한다. source와 PHP build가 바뀌지 않았으면 아무것도 빌드하지 않고, `PATH`의 php-config와 php가 같은 PHP가 아니면 실패한다. `php.ini`의 `extension` 설정이나 명령줄의 `-d extension=<경로>`로 로드한다.
 
 ```sh
 php -d extension=var/build/polyspec_template.so -r 'var_dump(extension_loaded("polyspec_template"));'

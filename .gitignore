@@ -25,3 +25,5 @@ packages/php/.phpunit.result.cache
 /var/
 __pycache__/
 *.pyc
+# The cache of ruff, which make lint-python runs from the root.
+.ruff_cache/

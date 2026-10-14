@@ -1,5 +1,5 @@
 <!-- doc-id: schema-readme -->
-<!-- source-sha256: 18af53b83f7fe2e2bfa7081f23e7046c6189b313defade093c7ac46bc9bced68 -->
+<!-- source-sha256: 256c4ea4c41092ebc29ede1b3438b2c2f6c80b1bd5c0de144f49e8df2326ab65 -->
 # 스키마
 
 [English](README.md).
@@ -13,7 +13,7 @@
 검증:
 
 ```sh
-node scripts/check-schema.mjs
+node scripts/check-schema.mts
 ```
 
-스크립트는 세 스키마를 draft-07 메타스키마로, `tests/cases/**/expected.ast.json` 전부를 `Template`으로, `tests/fixtures/expr/cases.json`의 모든 `ast` 필드를 `Expr`로, 모든 `expected.tokens.json`과 `expected.format.json`을 각 스키마로 검증한다. JSON Schema로 표현할 수 없는 것, 곧 토큰이 정렬되어 있고 겹치지 않는지도 검사한다. `node scripts/check-schema-mutations.mjs`는 스키마와 그 검사가 변형된 파일을 거부함을 증명한다. 실패마다 stderr에 한 줄을 출력하고 상태 1로 종료한다.
+스크립트는 세 스키마를 draft-07 메타스키마로, `tests/cases/**/expected.ast.json` 전부를 `Template`으로, `tests/fixtures/expr/cases.json`의 모든 `ast` 필드를 `Expr`로, 모든 `expected.tokens.json`과 `expected.format.json`을 각 스키마로 검증한다. JSON Schema로 표현할 수 없는 것, 곧 토큰이 정렬되어 있고 겹치지 않는지도 검사한다. `node scripts/check-schema-mutations.mts`는 스키마와 그 검사가 변형된 파일을 거부함을 증명한다. 실패마다 stderr에 한 줄을 출력하고 상태 1로 종료한다.

@@ -37,13 +37,26 @@ function compileParts(graphPath, manifestPath, language, options) {
   return backendOperations.flatMap(operation => backend[operation](context));
 }
 
-/** The source of a target that writes one file. */
+/**
+ * The source of a target that writes one file.
+ * @param {string} graphPath
+ * @param {string} manifestPath
+ * @param {string} language
+ * @param {{ phpNamespace?: string }} [options]
+ * @returns {string}
+ */
 export function compileSource(graphPath, manifestPath, language, options = {}) {
   if (FILE_PER_CLASS_TARGETS.includes(language)) throw new Error(`compiler: the ${language} target writes one file per class; compileFiles returns them`);
   return `${usedCode(compileParts(graphPath, manifestPath, language, options))}\n`;
 }
 
-/** The files of a target that writes one file per class, by their paths under the output directory. */
+/**
+ * The files of a target that writes one file per class, by their paths under the output directory.
+ * @param {string} graphPath
+ * @param {string} manifestPath
+ * @param {string} language
+ * @param {{ phpNamespace?: string }} [options]
+ */
 export function compileFiles(graphPath, manifestPath, language, options = {}) {
   if (!FILE_PER_CLASS_TARGETS.includes(language)) throw new Error(`compiler: the ${language} target writes one file; compileSource returns it`);
   return usedFiles(compileParts(graphPath, manifestPath, language, options));

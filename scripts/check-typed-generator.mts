@@ -1,0 +1,263 @@
+#!/usr/bin/env node
+// Compiles each generated artifact in an install project and exercises its Program implementation.
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import assert from 'node:assert/strict';
+import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mjs';
+import { showcasePythonModule } from '../examples/showcase/python-module.mjs';
+import { checkLanguages } from './language-checks.mts';
+import { phpString } from '../packages/compiler/backend-support.mjs';
+import { phpProgramAutoload } from './php-program.mts';
+import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
+import { tsc } from './tools.mts';
+import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+
+const root = resolve(new URL('..', import.meta.url).pathname);
+const generated = resolve(root, 'examples/showcase/adapters/generated/typed');
+const scenarioRoot = resolve(root, 'examples/site/scenarios');
+// The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
+const temporary = nodeWorkspace('generated-program');
+const scenarios: [string, ...string[]] = ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'];
+
+function generatedSource(id: string, language: string): string {
+  if (language === 'go') return join(root, 'examples/showcase/adapters/go/generated', id, 'generated.go');
+  if (language === 'php') return join(root, showcasePhpDirectory(id));
+  if (language === 'python') return join(generated, `${showcasePythonModule(id)}.py`);
+  return join(generated, `${id}.${language}`);
+}
+
+function run(command: string, args: string[], options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}): string {
+  const result = spawnSync(command, args, {
+    cwd: options.cwd ?? root,
+    encoding: 'utf8',
+    env: { ...process.env, ...options.env },
+    maxBuffer: 32 * 1024 * 1024,
+  });
+  if (result.error || result.status !== 0) {
+    process.stderr.write(result.stdout ?? '');
+    process.stderr.write(result.stderr ?? '');
+    throw result.error ?? new Error(`${command} exited with ${result.status}`);
+  }
+  return result.stdout;
+}
+
+function fixture(id: string, name: string): string {
+  return readFileSync(join(scenarioRoot, id, name), 'utf8');
+}
+
+function fixtureExists(id: string, name: string): boolean {
+  try {
+    fixture(id, name);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function expected(id: string): string {
+  return fixture(id, 'expected.html');
+}
+
+function target(id: string): string {
+  return (JSON.parse(fixture(id, 'scenario.json')) as { target: string }).target;
+}
+
+function checkTypeScript() {
+  const sources = scenarios.map(id => generatedSource(id, 'ts'));
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'ts'), 'utf8');
+  assert.match(coverageSource, /new RuntimeBindings\(context\)/);
+  assert.match(coverageSource, /runtime\.binary\(/);
+  assert.match(coverageSource, /runtime\.call\(/);
+  for (const duplicate of ['generatedTruthy', 'generatedDefault', 'generatedIn', 'function stringify(', 'function escape(']) {
+    assert.equal(coverageSource.includes(duplicate), false, `TypeScript generated source duplicates runtime semantics: ${duplicate}`);
+  }
+  run('node', [tsc, '--ignoreConfig', '--noEmit', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', ...sources]);
+  const output = join(temporary, 'typescript');
+  mkdirSync(output);
+  run('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output, ...sources]);
+  const imports = `import { RuntimeEnvironment } from '@polyspec/template';\n` + scenarios.map((id, index) => `import { GeneratedProgram as Program${index} } from './${id}.js';`).join('\n');
+  const cases = scenarios.map((id, index) => `{
+    const actual = new Program${index}().render(${JSON.stringify(target(id))}, ${fixture(id, 'data.json')}, { define: ${fixture(id, 'define.json')}${fixtureExists(id, 'env.json') ? `, env: ${fixture(id, 'env.json')}` : ''} });
+    if (actual !== ${JSON.stringify(expected(id))}) throw new Error(${JSON.stringify(`${id}: TypeScript GeneratedProgram output differs`)});
+  }`).join('\n');
+  const runner = join(output, 'check.mjs');
+  const limit = `{ let failed = false; try { new Program0(new RuntimeEnvironment({ outputBytes: 1 })).render(${JSON.stringify(target(scenarios[0]))}, ${fixture(scenarios[0], 'data.json')}, { define: ${fixture(scenarios[0], 'define.json')} }); } catch (error) { failed = error?.code === 'E_RUNTIME_LIMIT' && error?.line > 0 && error?.col > 0; } if (!failed) throw new Error('TypeScript generated output limit did not preserve a positioned template error'); }`;
+  writeFileSync(runner, `${imports}\n${cases}\n${limit}\n`);
+  run(process.execPath, [runner]);
+}
+
+function checkGo() {
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'go'), 'utf8');
+  assert.match(coverageSource, /render\.NewRuntimeBindings\(context\)/);
+  assert.match(coverageSource, /runtime\.Binary\(/);
+  assert.match(coverageSource, /runtime\.Call\(/);
+  for (const duplicate of ['"reflect"', 'generatedDefault(', 'generatedMapGet(', 'generatedListGet(', 'fmt.Sprint(left)', 'fmt.Sprint(right)']) {
+    assert.equal(coverageSource.includes(duplicate), false, `Go generated source duplicates runtime semantics: ${duplicate}`);
+  }
+  for (const id of scenarios) {
+    const directory = goWorkspace(`generated-program-go-${id}`);
+    try {
+      copyFileSync(generatedSource(id, 'go'), join(directory, 'generated.go'));
+      writeFileSync(join(directory, 'generated_test.go'), `package generated
+import (
+  "encoding/json"
+  "errors"
+  "os"
+  "testing"
+  template "github.com/polyspec/template/packages/go"
+  "github.com/polyspec/template/packages/go/value"
+)
+func TestGeneratedProgram(t *testing.T) {
+  assignBytes, err := os.ReadFile(${JSON.stringify(join(scenarioRoot, id, 'data.json'))}); if err != nil { t.Fatal(err) }
+  assign, err := value.ParseJSON(assignBytes); if err != nil { t.Fatal(err) }
+  defineBytes, err := os.ReadFile(${JSON.stringify(join(scenarioRoot, id, 'define.json'))}); if err != nil { t.Fatal(err) }
+  var raw map[string]json.RawMessage
+  if err := json.Unmarshal(defineBytes, &raw); err != nil { t.Fatal(err) }
+  definitions := map[string]template.DefineInput{}
+  for name, encoded := range raw {
+    var path string
+    if err := json.Unmarshal(encoded, &path); err == nil { definitions[name] = template.DefineInput{Template: path}; continue }
+    var entry struct { Template string \`json:"template"\`; Data any \`json:"data"\`; HTML *string \`json:"html"\` }
+    if err := json.Unmarshal(encoded, &entry); err != nil { t.Fatal(err) }
+    definitions[name] = template.DefineInput{Template: entry.Template, Data: entry.Data, HTML: entry.HTML}
+  }
+  options := template.RenderOptions{Define: definitions}
+  ${fixtureExists(id, 'env.json') ? `envBytes, err := os.ReadFile(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}); if err != nil { t.Fatal(err) }; var env template.Env; if err := json.Unmarshal(envBytes, &env); err != nil { t.Fatal(err) }; options.Env = &env` : ''}
+  program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }
+  actual, err := program.Render(${JSON.stringify(target(id))}, assign, options); if err != nil { t.Fatal(err) }
+  if actual != ${JSON.stringify(expected(id))} { t.Fatalf("generated output differs: %q", actual) }
+  ${id === scenarios[0] ? `limited, err := NewGeneratedProgram(template.Options{Limits: &template.Limits{Iterations: 1000000, Depth: 32, OutputBytes: 1, ExpressionDepth: 64}}); if err != nil { t.Fatal(err) }
+  _, err = limited.Render(${JSON.stringify(target(id))}, assign, options)
+  var templateError *template.Error
+  if !errors.As(err, &templateError) || templateError.Code != "E_RUNTIME_LIMIT" || templateError.Line < 1 || templateError.Col < 1 { t.Fatalf("generated output limit lost positioned error: %#v", err) }` : '_ = errors.As'}
+}
+`);
+      run('go', ['test', '.'], { cwd: directory });
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  }
+}
+
+function checkRust() {
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'rust'), 'utf8');
+  assert.match(coverageSource, /RuntimeBindings::new\(\)/);
+  assert.match(coverageSource, /runtime\.binary\(/);
+  assert.match(coverageSource, /runtime\.call\(/);
+  for (const duplicate of ['trait GeneratedTruthy', 'trait GeneratedContains', 'fn generated_in(', 'fn escape(', 'catch_unwind']) {
+    assert.equal(coverageSource.includes(duplicate), false, `Rust generated source duplicates or flattens runtime semantics: ${duplicate}`);
+  }
+  const rust = rustWorkspace('generated-program-rust');
+  const test = rust.test('generated_program_check');
+  const modules = scenarios.map((id, index) => `mod generated_${index} {
+    include!(${JSON.stringify(generatedSource(id, 'rust'))});
+    pub fn execute(target: &str, assign: serde_json::Value, options: polyspec_template::RenderOptions) -> String {
+        use polyspec_template::Program;
+        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
+        program.render(polyspec_template::RenderTarget::Name(target), &assign, &options).unwrap()
+    }
+    ${index === 0 ? `pub fn execute_limited(target: &str, assign: &serde_json::Value, options: &polyspec_template::RenderOptions) -> Result<String, polyspec_template::RequestError> {
+        use polyspec_template::Program;
+        let mut limits = polyspec_template::Limits::default();
+        limits.output_bytes = 1;
+        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(Some(limits), std::collections::HashMap::new()));
+        program.render(polyspec_template::RenderTarget::Name(target), assign, options)
+    }` : ''}
+}`).join('\n');
+  const cases = scenarios.map((id, index) => `#[test]
+fn generated_${index}_matches() {
+    let assign: serde_json::Value = serde_json::from_str(${JSON.stringify(fixture(id, 'data.json'))}).unwrap();
+    let define: serde_json::Value = serde_json::from_str(${JSON.stringify(fixture(id, 'define.json'))}).unwrap();
+    let mut options = polyspec_template::RenderOptions::default();
+    options.define = polyspec_template::defines_from_json(&define).unwrap();
+    ${fixtureExists(id, 'env.json') ? `options.env = Some(serde_json::from_str(${JSON.stringify(fixture(id, 'env.json'))}).unwrap());` : ''}
+    assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, assign.clone(), options.clone()), ${JSON.stringify(expected(id))});
+    ${index === 0 ? `let polyspec_template::RequestError::Template(error) = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err() else { panic!("expected a template error") };
+    assert_eq!(error.code, polyspec_template::ErrorCode::E_RUNTIME_LIMIT);
+    assert!(error.line > 0 && error.col > 0);` : ''}
+}`).join('\n');
+  writeFileSync(test, `${modules}\n${cases}\n`);
+  try {
+    const home = process.env.HOME;
+    if (!home) throw new Error('HOME is not set; the Rust check runs $HOME/.cargo/bin/cargo');
+    run(resolve(home, '.cargo/bin/cargo'), ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_program_check'], { env: { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' } });
+  } finally {
+    rmSync(rust.directory, { recursive: true, force: true });
+  }
+}
+
+function checkPhp() {
+  const autoload = join(root, 'packages/php/vendor/autoload.php');
+  const phpFiles = (id: string): string[] => readdirSync(generatedSource(id, 'php')).filter(name => name.endsWith('.php')).map(name => join(generatedSource(id, 'php'), name));
+  const coverageSource = phpFiles(scenarios[0]).map(path => readFileSync(path, 'utf8')).join('\n');
+  assert.match(coverageSource, /new RuntimeBindings\(\$context\)/);
+  assert.match(coverageSource, /\$runtime->binary\(/);
+  assert.match(coverageSource, /\$runtime->call\(/);
+  for (const duplicate of ['generated_truthy', 'generated_default', 'generated_in', 'generated_escape', 'generated_index', 'generated_entries']) {
+    assert.equal(coverageSource.includes(duplicate), false, `PHP generated source duplicates runtime semantics: ${duplicate}`);
+  }
+  for (const id of scenarios) {
+    // The generated program of a scenario is declared in the namespace of examples/showcase/php-namespace.mjs.
+    const phpClass = `\\${showcasePhpNamespace(id)}\\GeneratedProgram`;
+    const limit = id === scenarios[0] ? ` $limited = new ${phpClass}(new Polyspec\\Template\\Render\\RuntimeEnvironment(['outputBytes' => 1])); $failed = false; try { $limited->render(${JSON.stringify(target(id))}, $assign, $options); } catch (Polyspec\\Template\\TemplateError $error) { $failed = $error->errorCode === 'E_RUNTIME_LIMIT' && $error->errorLine > 0 && $error->errorCol > 0; } if (!$failed) throw new RuntimeException('PHP generated output limit did not preserve a positioned template error');` : '';
+    // Composer loads the classes of the program from its PSR-4 directory (T25.1).
+    const probe = `${phpProgramAutoload(phpString(autoload), showcasePhpNamespace(id), phpString(generatedSource(id, 'php')))} $assign = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'data.json'))})); $defineValue = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'define.json'))})); $define = []; foreach ($defineValue->entries() as $name => $entry) { if (is_string($entry)) { $define[$name] = $entry; continue; } $item = []; foreach ($entry->entries() as $key => $value) $item[$key] = $value; $define[$name] = $item; } $options = ['define' => $define]; ${fixtureExists(id, 'env.json') ? `$options['env'] = json_decode(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}), true, flags: JSON_THROW_ON_ERROR);` : ''} $actual = (new ${phpClass}())->render(${JSON.stringify(target(id))}, $assign, $options); if ($actual !== ${JSON.stringify(expected(id))}) throw new RuntimeException(${JSON.stringify(`${id}: PHP GeneratedProgram output differs`)});${limit}`;
+    for (const path of phpFiles(id)) run('php', ['-l', path]);
+    run('php', ['-r', probe]);
+  }
+}
+
+function checkPython() {
+  const coverageSource = readFileSync(generatedSource(scenarios[0], 'python'), 'utf8');
+  assert.match(coverageSource, /RuntimeBindings\(context\)/);
+  assert.match(coverageSource, /_runtime\.binary\(/);
+  assert.match(coverageSource, /_runtime\.call\(/);
+  for (const duplicate of ['def _truthy(', 'def _generated_truthy(', 'def _generated_default(', 'def _generated_in(', 'def _stringify(', 'def _escape(', 'def _index(', 'def _entries(']) {
+    assert.equal(coverageSource.includes(duplicate), false, `Python generated source duplicates runtime semantics: ${duplicate}`);
+  }
+  // One Python process per scenario renders it through Engine like the other languages and expects the output limit to
+  // keep a positioned template error. The compile builtin parses the generated source and writes no bytecode.
+  const directory = join(temporary, 'python');
+  mkdirSync(directory);
+  const runner = join(directory, 'check.py');
+  writeFileSync(runner, `import importlib.util
+import sys
+from pathlib import Path
+
+from polyspec.template import Engine, RenderOptions, RuntimeEnvironment, TemplateError, parse_json_bytes
+
+generated, scenario, target, limited = sys.argv[1], Path(sys.argv[2]), sys.argv[3], sys.argv[4] == 'limited'
+compile(Path(generated).read_bytes(), generated, 'exec')
+spec = importlib.util.spec_from_file_location('generated_program', generated)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+assign = parse_json_bytes((scenario / 'data.json').read_bytes())
+define = parse_json_bytes((scenario / 'define.json').read_bytes())
+env = parse_json_bytes((scenario / 'env.json').read_bytes()) if (scenario / 'env.json').is_file() else None
+options = RenderOptions(define=define, env=env)
+actual = Engine(module.GeneratedProgram()).render(target, assign, options)
+expected = (scenario / 'expected.html').read_text(encoding='utf-8')
+if actual != expected:
+    sys.exit('generated output differs: ' + repr(actual))
+if limited:
+    try:
+        Engine(module.GeneratedProgram(RuntimeEnvironment({'outputBytes': 1}))).render(target, assign, options)
+    except TemplateError as error:
+        if error.code != 'E_RUNTIME_LIMIT' or error.line < 1 or error.col < 1:
+            sys.exit('generated output limit reported ' + repr(error.to_object()))
+    else:
+        sys.exit('generated output limit lost its positioned template error')
+`);
+  for (const id of scenarios) {
+    run(pythonPackageCommand(), [runner, generatedSource(id, 'python'), join(scenarioRoot, id), target(id), id === scenarios[0] ? 'limited' : 'plain'], { env: pythonEnvironment() });
+  }
+}
+
+try {
+  checkLanguages('compiler', { TypeScript: checkTypeScript, Go: checkGo, Rust: checkRust, PHP: checkPhp, Python: checkPython });
+} finally {
+  rmSync(temporary, { recursive: true, force: true });
+}
+
+process.stdout.write('compiler: TypeScript, Go, Rust, PHP and Python GeneratedProgram implementations rendered all five scenarios identically\n');

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
-import { caseIds, casesDir } from '../../../tests/runner/case-list.mjs';
+import { caseIds, casesDir } from '../../../tests/runner/case-list.mts';
 import { toJsonValue } from './helpers.js';
 
 interface Case {
