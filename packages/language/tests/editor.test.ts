@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error The fixture script is plain JavaScript without declarations.
-import { editorResults, fixtureDirectory, fixtureNames, fixtureOptions } from '../../../scripts/editor-fixtures.mjs';
+import { editorResults, fixtureDirectory, fixtureNames, fixtureOptions } from '../../../scripts/editor-fixtures.mts';
 import { openDocument, type DocumentOptions } from '../src/index.js';
 
 describe('editor fixtures', () => {

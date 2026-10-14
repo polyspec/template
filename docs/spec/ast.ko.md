@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-ast -->
-<!-- source-sha256: aa19ff9ebc51e6199e0dac4c75180d5fc6fc14190b95a56a8230a08060cb0070 -->
+<!-- source-sha256: c7f17798d6d7cf29a97836eaf3f1a4a76ed493bd2fde4b68cac83b8f64222176 -->
 # AST
 
 [English](/spec/ast).
@@ -74,7 +74,7 @@ AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 �
 
 **AST-7** AST는 JSON으로 직렬화한다. 객체 키 순서는 의미가 없고 비교는 구조적이다. `span`은 `Template` 이외의 모든 노드에 존재한다. 숫자 리터럴은 JSON 숫자로 직렬화하므로 `1e3`은 `1000`으로, `1.50`은 `1.5`로 직렬화한다. 문자열 리터럴은 해석된 문자열로 직렬화한다. `null` 필드는 생략하지 않고 JSON `null`로 쓴다.
 
-**AST-8** 직렬화된 모든 AST는 `contracts/schema/ast.schema.json` 검증을 통과한다. `scripts/check-schema.mjs`가 스키마와 `tests/cases/`의 모든 `expected.ast.json`을 검증한다.
+**AST-8** 직렬화된 모든 AST는 `contracts/schema/ast.schema.json` 검증을 통과한다. `scripts/check-schema.mts`가 스키마와 `tests/cases/`의 모든 `expected.ast.json`을 검증한다.
 
 ## 예제
 

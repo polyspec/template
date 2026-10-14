@@ -49,7 +49,7 @@ A symbol that a package exports only so that another file of the same package ca
 A comment says what the symbol is for in its own words. Where a specification rule defines the behavior, the comment names the rule, such as `AST-3`, instead of restating it.
 
 ```sh
-node scripts/check-doc-coverage.mjs
+node scripts/check-doc-coverage.mts
 ```
 
 The checker reports one line per undocumented symbol or file and fails. `make docs-check` runs it.

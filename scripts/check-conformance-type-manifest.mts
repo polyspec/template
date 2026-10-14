@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+import assert from 'node:assert/strict';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { parse } from '../packages/ts/dist/index.mjs';
+import { listCases, typeDefinitions } from '../tests/runner/cases.mts';
+import { deriveTypeManifest } from '../packages/compiler/type-manifest.mjs';
+
+// The parts of the manifest of deriveTypeManifest that this check reads.
+interface DerivedManifest {
+  schema: number;
+  root: string;
+  entry: string;
+  defines: Record<string, { optional: unknown; template?: unknown; html?: unknown }>;
+  templates: Record<string, Record<string, string> | undefined>;
+}
+
+const cases = listCases();
+const parseableCases = cases.filter((testCase) => testCase.expectedAst !== null);
+let checked = 0;
+for (const testCase of parseableCases) {
+  const templates = new Map();
+  const pending = [testCase.dir];
+  while (pending.length > 0) {
+    const directory = pending.pop();
+    if (directory === undefined) break;
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) pending.push(path);
+      else if (entry.isFile() && entry.name.endsWith('.tpl')) {
+        const name = relative(testCase.dir, path).split('\\').join('/');
+        try {
+          templates.set(name, parse(readFileSync(path), name, testCase.options));
+        } catch (error) {
+          if (name === 'input.tpl') throw error;
+        }
+      }
+    }
+  }
+  const manifest: DerivedManifest = deriveTypeManifest(templates, typeDefinitions(testCase));
+  assert.equal(manifest.schema, 3);
+  assert.equal(manifest.root, 'any');
+  assert.equal(manifest.entry, 'input.tpl');
+  for (const definition of Object.values(manifest.defines)) {
+    assert.equal(typeof definition.optional, 'boolean');
+    assert.ok(typeof definition.template === 'string' || definition.html === true);
+  }
+  if (testCase.id === 'include/shares-locals') {
+    assert.equal(manifest.templates['part.tpl']?.x, 'any');
+  }
+  if (testCase.id === 'include/include-in-loop') {
+    assert.equal(manifest.templates['li.tpl']?.item, 'any');
+  }
+  checked++;
+}
+assert.equal(checked, parseableCases.length);
+process.stdout.write(`compiler: derived dynamic type contracts for ${checked} parseable conformance cases\n`);

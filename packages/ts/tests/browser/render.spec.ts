@@ -61,7 +61,7 @@ function loadCases(): BrowserCase[] {
 }
 
 test('renders every fixture case in the browser', async ({ page, baseURL }) => {
-  expect(baseURL, 'TEMPLATE_BROWSER_URL names the static server; run the browser test with packages/ts/tests/browser/run.mjs').toBeTruthy();
+  expect(baseURL, 'TEMPLATE_BROWSER_URL names the static server; run the browser test with packages/ts/tests/browser/run.mts').toBeTruthy();
   const cases = loadCases();
   await page.goto('/packages/ts/tests/browser/index.html');
   const results = (await page.evaluate(async items => (window as unknown as { renderCases: (c: unknown) => Promise<unknown> }).renderCases(items), cases)) as {

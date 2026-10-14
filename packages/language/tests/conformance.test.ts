@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
-import { caseIds, caseOptions, casesDir } from '../../../tests/runner/case-list.mjs';
+import { caseIds, caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
 import { formatBytes } from '../src/cli/main.js';
 import type { FormatOptions, FormatResult } from '../src/index.js';
 

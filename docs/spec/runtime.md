@@ -165,9 +165,9 @@ The logical request has this JSON shape:
 - **RT-47** An adapter may decode the shared JSON and construct the native API values, but it must not add controller data, rename fields, apply filters or otherwise reshape the request.
 - **RT-48** A successful parity check compares the complete UTF-8 output bytes and then renders the same request again to compare the repeated bytes.
 - **RT-49** The manifest is the design source for `Adapter`, `Scenario`, `RenderRequest`, `DefineEntry`, `Environment` and `RepeatResult`. Its record fields and union variants keep their declared order; ownership and `from` links describe which values are transferred from `Scenario` into `RenderRequest`.
-- **RT-50** [The contract generator](../../scripts/generate-showcase-contract.mjs) produces the TypeScript, JavaScript, Go and Rust declarations, the PHP declarations and the Mermaid sources. A generated file that differs from the manifest fails the contract gate.
+- **RT-50** [The contract generator](../../scripts/generate-showcase-contract.mts) produces the TypeScript, JavaScript, Go and Rust declarations, the PHP declarations and the Mermaid sources. A generated file that differs from the manifest fails the contract gate.
 - **RT-51** Language syntax may follow local conventions (`NewAdapter`, `Adapter::new` and `__construct` are constructor names), while the concrete type, constructor parameter, method order, argument types, return types and request fields remain the same through the manifest mappings.
-- **RT-52** [The contract checker](../../scripts/check-showcase-contract.mjs) checks source declarations, TypeScript compilation, Go interface assignment and formatting, Rust trait compilation, PHP syntax and `ReflectionClass`, generated runtime assertions, and all five adapters on every showcase scenario.
+- **RT-52** [The contract checker](../../scripts/check-showcase-contract.mts) checks source declarations, TypeScript compilation, Go interface assignment and formatting, Rust trait compilation, PHP syntax and `ReflectionClass`, generated runtime assertions, and all five adapters on every showcase scenario.
 - **RT-53** The state proof performs `constructor -> loadScenario -> buildRequest -> renderTwice`, observes an invalid-target error, renders the original request again, and compares first, second and recovered UTF-8 hashes. The request remains unchanged across the failure and recovery path.
 - **RT-60** Native object instances may be placed directly in `assign`. The runtime retains the original instance, exposes public fields through member lookup and invokes public instance methods through `object.method(args...)`. Logical class functions are registered under `Class::method` and invoked through `Class::method(args...)`.
 
@@ -208,8 +208,8 @@ flowchart LR
 The generation and verification commands are:
 
 ```sh
-node scripts/generate-showcase-contract.mjs --check
-node scripts/check-showcase-contract.mjs
+node scripts/generate-showcase-contract.mts --check
+node scripts/check-showcase-contract.mts
 ```
 
 The support-level graph is generated from the same manifest as the language declarations:

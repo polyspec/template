@@ -2,7 +2,7 @@
 // Compiles each showcase source graph through the product AST compiler.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { root } from '../../tests/runner/drivers.mjs';
+import { root } from '../../tests/runner/drivers.mts';
 import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');

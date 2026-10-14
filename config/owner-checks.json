@@ -2,9 +2,9 @@
   "schema": 1,
   "comment": "The owner checks of the repository paths, read by scripts/kit/owner-check.mjs: make owner-check runs the targets and node test files of the rules whose globs match a changed path. Every tracked path matches a rule; always lists the tests that run for every change. A rule with variable passes the matched paths to its targets in that make variable. Globs: * within one path segment, ** across segments, {a,b} either alternative. inputs declares, for a check, the globs of the paths that it reads; owner-check fails when a rule of such a path does not select the check or a target that runs it as a prerequisite.",
   "always": [
-    "tests/scripts/editorconfig.test.mjs",
-    "tests/scripts/toolchain-files.test.mjs",
-    "tests/scripts/device-paths.test.mjs"
+    "tests/scripts/editorconfig.test.mts",
+    "tests/scripts/toolchain-files.test.mts",
+    "tests/scripts/device-paths.test.mts"
   ],
   "owners": [
     {
@@ -22,8 +22,8 @@
     {
       "paths": [
         "packages/compiler/functions.json",
-        "tests/runner/function-contract.mjs",
-        "scripts/check-function-contract.mjs"
+        "tests/runner/function-contract.mts",
+        "scripts/check-function-contract.mts"
       ],
       "targets": [
         "function-contract-check"
@@ -46,8 +46,8 @@
     {
       "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",
-        "scripts/check-schema*.mjs",
-        "scripts/conformance-case-files.mjs"
+        "scripts/check-schema*.mts",
+        "scripts/conformance-case-files.mts"
       ],
       "targets": [
         "schema-check"
@@ -56,7 +56,7 @@
     {
       "paths": [
         "tests/rule-evidence.json",
-        "scripts/check-rules.mjs"
+        "scripts/check-rules.mts"
       ],
       "targets": [
         "rules-check"
@@ -106,7 +106,7 @@
     {
       "paths": [
         "tests/fixtures/{typed-arguments,typed-values}/**",
-        "scripts/check-generated-{arguments,typed-values,native-calls,bound-data}.mjs"
+        "scripts/check-generated-{arguments,typed-values,native-calls,bound-data}.mts"
       ],
       "targets": [
         "generated-native-check"
@@ -115,8 +115,8 @@
     {
       "paths": [
         "tests/fixtures/function-inventory/**",
-        "tests/runner/function-inventory.mjs",
-        "scripts/inventory-template-functions.mjs"
+        "tests/runner/function-inventory.mts",
+        "scripts/inventory-template-functions.mts"
       ],
       "targets": [
         "function-inventory-check"
@@ -131,13 +131,13 @@
         "test-browser"
       ],
       "tests": [
-        "tests/scripts/browser-port.test.mjs",
-        "tests/scripts/browser-server.test.mjs"
+        "tests/scripts/browser-port.test.mts",
+        "tests/scripts/browser-server.test.mts"
       ]
     },
     {
       "paths": [
-        "tests/runner/case-list.{mjs,d.mts}"
+        "tests/runner/case-list.mts"
       ],
       "targets": [
         "conformance",
@@ -147,8 +147,8 @@
     },
     {
       "paths": [
-        "tests/runner/{bounded,cases,drivers,conformance,delimiter-matrix,generated-ts-render}.mjs",
-        "tests/runner/conformance-generated-*.mjs"
+        "tests/runner/{bounded,cases,drivers,conformance,delimiter-matrix,generated-ts-render}.mts",
+        "tests/runner/conformance-generated-*.mts"
       ],
       "targets": [
         "conformance",
@@ -162,19 +162,19 @@
         "test-ext"
       ],
       "tests": [
-        "tests/scripts/process-group-callers.test.mjs",
-        "tests/scripts/failure-messages.test.mjs",
-        "tests/scripts/drivers.test.mjs",
-        "tests/scripts/no-silent-skips.test.mjs",
-        "tests/scripts/conformance-progress.test.mjs",
-        "tests/scripts/delimiter-matrix-progress.test.mjs",
-        "tests/scripts/generated-conformance.test.mjs",
-        "tests/scripts/long-steps.test.mjs"
+        "tests/scripts/process-group-callers.test.mts",
+        "tests/scripts/failure-messages.test.mts",
+        "tests/scripts/drivers.test.mts",
+        "tests/scripts/no-silent-skips.test.mts",
+        "tests/scripts/conformance-progress.test.mts",
+        "tests/scripts/delimiter-matrix-progress.test.mts",
+        "tests/scripts/generated-conformance.test.mts",
+        "tests/scripts/long-steps.test.mts"
       ]
     },
     {
       "paths": [
-        "tests/scripts/*.test.mjs"
+        "tests/scripts/*.test.mts"
       ],
       "tests": [
         "$path"
@@ -183,22 +183,22 @@
     },
     {
       "paths": [
-        "scripts/compare-text.mjs"
+        "scripts/compare-text.mts"
       ],
       "tests": [
-        "tests/scripts/compare-text.test.mjs"
+        "tests/scripts/compare-text.test.mts"
       ],
       "targets": []
     },
     {
       "paths": [
-        "tests/scripts/slow-command.mjs",
+        "tests/scripts/slow-command.mts",
         "scripts/test-progress/**",
-        "scripts/tools.mjs"
+        "scripts/tools.mts"
       ],
       "tests": [
-        "tests/scripts/failure-messages.test.mjs",
-        "tests/scripts/test-targets.test.mjs"
+        "tests/scripts/failure-messages.test.mts",
+        "tests/scripts/test-targets.test.mts"
       ],
       "targets": []
     },
@@ -207,14 +207,14 @@
         "Makefile"
       ],
       "tests": [
-        "tests/scripts/failure-accumulation.test.mjs",
-        "tests/scripts/atomic-publish.test.mjs",
-        "tests/scripts/no-silent-skips.test.mjs",
-        "tests/scripts/test-targets.test.mjs",
-        "tests/scripts/cargo-target.test.mjs",
-        "tests/scripts/build-package.test.mjs",
-        "tests/scripts/conformance-cases.test.mjs",
-        "tests/scripts/suite-parity.test.mjs"
+        "tests/scripts/failure-accumulation.test.mts",
+        "tests/scripts/atomic-publish.test.mts",
+        "tests/scripts/no-silent-skips.test.mts",
+        "tests/scripts/test-targets.test.mts",
+        "tests/scripts/cargo-target.test.mts",
+        "tests/scripts/build-package.test.mts",
+        "tests/scripts/conformance-cases.test.mts",
+        "tests/scripts/suite-parity.test.mts"
       ],
       "targets": []
     },
@@ -245,12 +245,12 @@
         "release-coverage"
       ],
       "tests": [
-        "tests/scripts/release-config.test.mjs"
+        "tests/scripts/release-config.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/process-group.mjs"
+        "scripts/process-group.mts"
       ],
       "targets": [
         "conformance-generated-ts",
@@ -258,48 +258,48 @@
         "test-vscode-integration"
       ],
       "tests": [
-        "tests/scripts/process-group.test.mjs",
-        "tests/scripts/long-steps.test.mjs",
-        "tests/scripts/process-group-callers.test.mjs"
+        "tests/scripts/process-group.test.mts",
+        "tests/scripts/long-steps.test.mts",
+        "tests/scripts/process-group-callers.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/build-package.mjs"
+        "scripts/build-package.mts"
       ],
       "tests": [
-        "tests/scripts/build-package.test.mjs"
+        "tests/scripts/build-package.test.mts"
       ],
       "targets": []
     },
     {
       "paths": [
-        "scripts/check-artifact-digests.mjs"
+        "scripts/check-artifact-digests.mts"
       ],
       "targets": [
         "artifact-digest-check"
       ],
       "tests": [
-        "tests/scripts/artifact-digests.test.mjs"
+        "tests/scripts/artifact-digests.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/build-php-extension.mjs"
+        "scripts/build-php-extension.mts"
       ],
       "targets": [
         "test-ext"
       ],
       "tests": [
-        "tests/scripts/build-php-extension.test.mjs"
+        "tests/scripts/build-php-extension.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/conformance-cases.mjs"
+        "scripts/conformance-cases.mts"
       ],
       "tests": [
-        "tests/scripts/conformance-cases.test.mjs"
+        "tests/scripts/conformance-cases.test.mts"
       ],
       "targets": []
     },
@@ -311,27 +311,27 @@
         "test-vscode-integration"
       ],
       "tests": [
-        "tests/scripts/install-vscode.test.mjs",
-        "tests/scripts/toolchain-files.test.mjs"
+        "tests/scripts/install-vscode.test.mts",
+        "tests/scripts/toolchain-files.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/composer-install.mjs"
+        "scripts/composer-install.mts"
       ],
       "targets": [
         "test-php",
         "test-ext"
       ],
       "tests": [
-        "tests/scripts/test-targets.test.mjs",
-        "tests/scripts/toolchain-files.test.mjs",
-        "tests/scripts/drivers.test.mjs"
+        "tests/scripts/test-targets.test.mts",
+        "tests/scripts/toolchain-files.test.mts",
+        "tests/scripts/drivers.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/publish-build.mjs"
+        "scripts/publish-build.mts"
       ],
       "targets": [
         "benchmark-smoke",
@@ -341,17 +341,17 @@
         "test-ext"
       ],
       "tests": [
-        "tests/scripts/publish-build.test.mjs",
-        "tests/scripts/drivers.test.mjs"
+        "tests/scripts/publish-build.test.mts",
+        "tests/scripts/drivers.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/install-cli.mjs"
+        "scripts/install-cli.mts"
       ],
       "tests": [
-        "tests/scripts/install-cli.test.mjs",
-        "tests/scripts/atomic-publish.test.mjs"
+        "tests/scripts/install-cli.test.mts",
+        "tests/scripts/atomic-publish.test.mts"
       ],
       "targets": []
     },
@@ -360,7 +360,7 @@
         "examples/showcase/benchmark-modes.mjs"
       ],
       "tests": [
-        "tests/scripts/atomic-publish.test.mjs"
+        "tests/scripts/atomic-publish.test.mts"
       ],
       "targets": []
     },
@@ -372,7 +372,7 @@
         "ruff.toml"
       ],
       "tests": [
-        "tests/scripts/toolchain-files.test.mjs"
+        "tests/scripts/toolchain-files.test.mts"
       ],
       "targets": [
         "toolchain-check",
@@ -381,7 +381,7 @@
     },
     {
       "paths": [
-        "scripts/check-docs-static.mjs"
+        "scripts/check-docs-static.mts"
       ],
       "targets": [
         "docs-static-check"
@@ -389,8 +389,8 @@
     },
     {
       "paths": [
-        "scripts/check-doc-coverage.mjs",
-        "scripts/update-benchmark-docs.mjs"
+        "scripts/check-doc-coverage.mts",
+        "scripts/update-benchmark-docs.mts"
       ],
       "targets": [
         "docs-check"
@@ -398,8 +398,8 @@
     },
     {
       "paths": [
-        "scripts/generate-runtime-interface.mjs",
-        "scripts/check-runtime-interface.mjs"
+        "scripts/generate-runtime-interface.mts",
+        "scripts/check-runtime-interface.mts"
       ],
       "targets": [
         "runtime-interface-check"
@@ -407,8 +407,8 @@
     },
     {
       "paths": [
-        "scripts/generate-compiler-interface.mjs",
-        "scripts/check-compiler-interface*.mjs"
+        "scripts/generate-compiler-interface.mts",
+        "scripts/check-compiler-interface*.mts"
       ],
       "targets": [
         "compiler-interface-check"
@@ -416,8 +416,8 @@
     },
     {
       "paths": [
-        "scripts/generate-showcase-contract.mjs",
-        "scripts/check-showcase-contract.mjs"
+        "scripts/generate-showcase-contract.mts",
+        "scripts/check-showcase-contract.mts"
       ],
       "targets": [
         "contract-check",
@@ -426,7 +426,7 @@
     },
     {
       "paths": [
-        "scripts/check-showcase-html.mjs",
+        "scripts/check-showcase-html.mts",
         "examples/showcase/**",
         "examples/site/**"
       ],
@@ -442,10 +442,10 @@
     },
     {
       "paths": [
-        "scripts/check-ast-artifact.mjs",
-        "scripts/check-generated-artifact.mjs",
-        "scripts/check-compiler-ir.mjs",
-        "scripts/check-conformance-type-manifest.mjs"
+        "scripts/check-ast-artifact.mts",
+        "scripts/check-generated-artifact.mts",
+        "scripts/check-compiler-ir.mts",
+        "scripts/check-conformance-type-manifest.mts"
       ],
       "targets": [
         "compiler-ir-check"
@@ -453,7 +453,7 @@
     },
     {
       "paths": [
-        "scripts/php-program.mjs"
+        "scripts/php-program.mts"
       ],
       "targets": [
         "generated-native-check",
@@ -462,7 +462,7 @@
     },
     {
       "paths": [
-        "scripts/check-generated-lint.mjs"
+        "scripts/check-generated-lint.mts"
       ],
       "targets": [
         "generated-lint-check"
@@ -470,7 +470,7 @@
     },
     {
       "paths": [
-        "scripts/check-typed-generator.mjs"
+        "scripts/check-typed-generator.mts"
       ],
       "targets": [
         "typed-generator-compile-check"
@@ -478,7 +478,7 @@
     },
     {
       "paths": [
-        "scripts/language-checks.mjs"
+        "scripts/language-checks.mts"
       ],
       "targets": [
         "generated-native-check",
@@ -486,26 +486,26 @@
         "install-check"
       ],
       "tests": [
-        "tests/scripts/failure-accumulation.test.mjs"
+        "tests/scripts/failure-accumulation.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/temporary-workspace.mjs"
+        "scripts/temporary-workspace.mts"
       ],
       "targets": [
         "generated-native-check",
         "typed-generator-compile-check"
       ],
       "tests": [
-        "tests/scripts/temporary-files.test.mjs",
-        "tests/scripts/generated-conformance.test.mjs"
+        "tests/scripts/temporary-files.test.mts",
+        "tests/scripts/generated-conformance.test.mts"
       ]
     },
     {
       "paths": [
         "config/editor-boundaries.json",
-        "scripts/editor-fixtures.mjs"
+        "scripts/editor-fixtures.mts"
       ],
       "targets": [
         "editor-boundary-check",
@@ -516,23 +516,23 @@
     },
     {
       "paths": [
-        "scripts/check-install-workspace.mjs",
-        "scripts/install-workspace.mjs",
-        "scripts/check-package-installs.mjs"
+        "scripts/check-install-workspace.mts",
+        "scripts/install-workspace.mts",
+        "scripts/check-package-installs.mts"
       ],
       "targets": [
         "install-check"
       ],
       "tests": [
-        "tests/scripts/failure-messages.test.mjs",
-        "tests/scripts/long-steps.test.mjs",
-        "tests/scripts/package-installs.test.mjs"
+        "tests/scripts/failure-messages.test.mts",
+        "tests/scripts/long-steps.test.mts",
+        "tests/scripts/package-installs.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/check-benchmark-results.mjs",
-        "scripts/check-benchmark-smoke.mjs"
+        "scripts/check-benchmark-results.mts",
+        "scripts/check-benchmark-smoke.mts"
       ],
       "targets": [
         "benchmark-check",
@@ -541,10 +541,10 @@
     },
     {
       "paths": [
-        "scripts/check-clean-release.mjs"
+        "scripts/check-clean-release.mts"
       ],
       "tests": [
-        "tests/scripts/clean-release.test.mjs"
+        "tests/scripts/clean-release.test.mts"
       ],
       "targets": []
     },
@@ -705,7 +705,7 @@
         "parity-check"
       ],
       "tests": [
-        "tests/scripts/build-php-extension.test.mjs"
+        "tests/scripts/build-php-extension.test.mts"
       ]
     },
     {
@@ -719,15 +719,15 @@
         "packages/go/go.mod"
       ],
       "tests": [
-        "tests/scripts/toolchain-files.test.mjs"
+        "tests/scripts/toolchain-files.test.mts"
       ],
       "targets": []
     },
     {
       "paths": [
         "mise.toml",
-        "scripts/python-toolchain.mjs",
-        "scripts/python-venv.mjs"
+        "scripts/python-toolchain.mts",
+        "scripts/python-venv.mts"
       ],
       "targets": [
         "generated-native-check",
@@ -736,19 +736,19 @@
         "contract-check"
       ],
       "tests": [
-        "tests/scripts/python-toolchain.test.mjs"
+        "tests/scripts/python-toolchain.test.mts"
       ]
     },
     {
       "paths": [
-        "scripts/python-wheelhouse.mjs",
+        "scripts/python-wheelhouse.mts",
         "packages/python/build-requirements.json"
       ],
       "targets": [
         "install-check"
       ],
       "tests": [
-        "tests/scripts/python-wheelhouse.test.mjs"
+        "tests/scripts/python-wheelhouse.test.mts"
       ]
     },
     {
@@ -757,8 +757,8 @@
         "config/toolchain.json"
       ],
       "tests": [
-        "tests/scripts/suite-parity.test.mjs",
-        "tests/scripts/action-pins.test.mjs"
+        "tests/scripts/suite-parity.test.mts",
+        "tests/scripts/action-pins.test.mts"
       ],
       "targets": []
     },
@@ -767,7 +767,7 @@
         ".gitignore"
       ],
       "tests": [
-        "tests/scripts/ignored-files.test.mjs"
+        "tests/scripts/ignored-files.test.mts"
       ],
       "targets": []
     },
@@ -776,7 +776,7 @@
         "**/.editorconfig"
       ],
       "tests": [
-        "tests/scripts/editorconfig.test.mjs"
+        "tests/scripts/editorconfig.test.mts"
       ],
       "targets": []
     },
@@ -840,6 +840,19 @@
     },
     {
       "paths": [
+        "tsconfig.json",
+        "scripts/*.mts",
+        "scripts/test-progress/*.mts",
+        "tests/runner/*.mts",
+        "tests/scripts/*.mts",
+        "packages/ts/tests/browser/*.mts"
+      ],
+      "targets": [
+        "typecheck"
+      ]
+    },
+    {
+      "paths": [
         ".oxlintrc.json",
         "knip.json",
         "config/api-extractor.kit.json"
@@ -888,12 +901,12 @@
     },
     {
       "paths": [
-        "tests/scripts/driver-fixture.mjs"
+        "tests/scripts/driver-fixture.mts"
       ],
       "tests": [
-        "tests/scripts/drivers.test.mjs",
-        "tests/scripts/failure-messages.test.mjs",
-        "tests/scripts/no-silent-skips.test.mjs"
+        "tests/scripts/drivers.test.mts",
+        "tests/scripts/failure-messages.test.mts",
+        "tests/scripts/no-silent-skips.test.mts"
       ]
     }
   ],
@@ -912,84 +925,84 @@
     {
       "check": "make runtime-interface-diagrams-check",
       "paths": [
-        "scripts/generate-runtime-interface.mjs"
+        "scripts/generate-runtime-interface.mts"
       ]
     },
     {
       "check": "make compiler-interface-diagrams-check",
       "paths": [
-        "scripts/generate-compiler-interface.mjs"
+        "scripts/generate-compiler-interface.mts"
       ]
     },
     {
       "check": "make showcase-contract-diagrams-check",
       "paths": [
-        "scripts/generate-showcase-contract.mjs"
+        "scripts/generate-showcase-contract.mts"
       ]
     },
     {
       "check": "make schema-fixtures-check",
       "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",
-        "scripts/check-schema.mjs",
-        "scripts/conformance-case-files.mjs"
+        "scripts/check-schema.mts",
+        "scripts/conformance-case-files.mts"
       ]
     },
     {
       "check": "make schema-mutations-check",
       "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",
-        "scripts/check-schema-mutations.mjs"
+        "scripts/check-schema-mutations.mts"
       ]
     },
     {
       "check": "make doc-coverage",
       "paths": [
-        "scripts/check-doc-coverage.mjs"
+        "scripts/check-doc-coverage.mts"
       ]
     },
     {
       "check": "make benchmark-docs-check",
       "paths": [
-        "scripts/update-benchmark-docs.mjs"
+        "scripts/update-benchmark-docs.mts"
       ]
     },
     {
       "check": "make docs-static-check",
       "paths": [
-        "scripts/check-docs-static.mjs"
+        "scripts/check-docs-static.mts"
       ]
     },
     {
       "check": "make rules-check",
       "paths": [
         "tests/rule-evidence.json",
-        "scripts/check-rules.mjs"
+        "scripts/check-rules.mts"
       ]
     },
     {
       "check": "make editor-boundary-check",
       "paths": [
         "config/editor-boundaries.json",
-        "scripts/editor-fixtures.mjs"
+        "scripts/editor-fixtures.mts"
       ]
     },
     {
       "check": "make runtime-interface-runtimes-check",
       "paths": [
-        "scripts/check-runtime-interface.mjs"
+        "scripts/check-runtime-interface.mts"
       ]
     },
     {
       "check": "make compiler-interface-languages-check",
       "paths": [
-        "scripts/check-compiler-interface.mjs"
+        "scripts/check-compiler-interface.mts"
       ]
     },
     {
       "check": "make compiler-interface-mutations-check",
       "paths": [
-        "scripts/check-compiler-interface-mutations.mjs"
+        "scripts/check-compiler-interface-mutations.mts"
       ]
     },
     {
@@ -1015,9 +1028,9 @@
     {
       "check": "make contract-check",
       "paths": [
-        "scripts/check-showcase-contract.mjs",
+        "scripts/check-showcase-contract.mts",
         "examples/showcase/adapters/**",
-        "scripts/python-toolchain.mjs",
+        "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml"
       ]
@@ -1026,28 +1039,28 @@
       "check": "make function-contract-registries-check",
       "paths": [
         "packages/compiler/functions.json",
-        "scripts/check-function-contract.mjs"
+        "scripts/check-function-contract.mts"
       ]
     },
     {
       "check": "make function-contract-runtimes-check",
       "paths": [
         "packages/compiler/functions.json",
-        "tests/runner/function-contract.mjs"
+        "tests/runner/function-contract.mts"
       ]
     },
     {
       "check": "make function-inventory-check",
       "paths": [
         "tests/fixtures/function-inventory/**",
-        "tests/runner/function-inventory.mjs",
-        "scripts/inventory-template-functions.mjs"
+        "tests/runner/function-inventory.mts",
+        "scripts/inventory-template-functions.mts"
       ]
     },
     {
       "check": "make benchmark-results-check",
       "paths": [
-        "scripts/check-benchmark-results.mjs",
+        "scripts/check-benchmark-results.mts",
         "examples/site/data/**"
       ]
     },
@@ -1138,7 +1151,7 @@
       "paths": [
         "packages/language/**",
         "packages/ts/src/**",
-        "scripts/editor-fixtures.mjs"
+        "scripts/editor-fixtures.mts"
       ]
     },
     {
@@ -1159,7 +1172,7 @@
         "packages/lsp/**",
         "packages/language/src/**",
         "packages/ts/src/**",
-        "scripts/editor-fixtures.mjs"
+        "scripts/editor-fixtures.mts"
       ]
     },
     {
@@ -1173,7 +1186,7 @@
       "paths": [
         "packages/codemirror/**",
         "packages/language/src/**",
-        "scripts/editor-fixtures.mjs"
+        "scripts/editor-fixtures.mts"
       ]
     },
     {
@@ -1239,16 +1252,16 @@
       "paths": [
         "packages/php/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
-        "scripts/composer-install.mjs"
+        "scripts/composer-install.mts"
       ]
     },
     {
       "check": "make conformance",
       "paths": [
         "packages/{ts,go,rust,php,python}/**",
-        "tests/runner/{conformance,cases,drivers}.mjs",
+        "tests/runner/{conformance,cases,drivers}.mts",
         "tests/fixtures/filesystem/**",
-        "scripts/publish-build.mjs"
+        "scripts/publish-build.mts"
       ]
     },
     {
@@ -1262,7 +1275,7 @@
       "paths": [
         "packages/ts/**",
         "packages/compiler/**",
-        "tests/runner/{conformance-generated-ts,generated-ts-render,bounded,cases}.mjs"
+        "tests/runner/{conformance-generated-ts,generated-ts-render,bounded,cases}.mts"
       ]
     },
     {
@@ -1270,7 +1283,7 @@
       "paths": [
         "packages/go/**",
         "packages/compiler/**",
-        "tests/runner/{conformance-generated-go,bounded,cases}.mjs"
+        "tests/runner/{conformance-generated-go,bounded,cases}.mts"
       ]
     },
     {
@@ -1278,7 +1291,7 @@
       "paths": [
         "packages/rust/**",
         "packages/compiler/**",
-        "tests/runner/{conformance-generated-rust,bounded,cases}.mjs"
+        "tests/runner/{conformance-generated-rust,bounded,cases}.mts"
       ]
     },
     {
@@ -1286,14 +1299,14 @@
       "paths": [
         "packages/php/**",
         "packages/compiler/**",
-        "tests/runner/{conformance-generated-php,bounded,cases}.mjs"
+        "tests/runner/{conformance-generated-php,bounded,cases}.mts"
       ]
     },
     {
       "check": "make delimiter-matrix",
       "paths": [
         "packages/{ts,go,rust,php}/**",
-        "tests/runner/delimiter-matrix.mjs"
+        "tests/runner/delimiter-matrix.mts"
       ]
     },
     {
@@ -1301,9 +1314,9 @@
       "paths": [
         "tests/fixtures/native-object/**",
         "packages/compiler/**",
-        "scripts/check-generated-native-calls.mjs",
-        "scripts/language-checks.mjs",
-        "scripts/python-toolchain.mjs",
+        "scripts/check-generated-native-calls.mts",
+        "scripts/language-checks.mts",
+        "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml"
       ]
@@ -1313,9 +1326,9 @@
       "paths": [
         "tests/fixtures/typed-values/**",
         "packages/compiler/**",
-        "scripts/check-generated-typed-values.mjs",
-        "scripts/language-checks.mjs",
-        "scripts/python-toolchain.mjs",
+        "scripts/check-generated-typed-values.mts",
+        "scripts/language-checks.mts",
+        "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml"
       ]
@@ -1325,9 +1338,9 @@
       "paths": [
         "tests/fixtures/typed-arguments/**",
         "packages/compiler/**",
-        "scripts/check-generated-arguments.mjs",
-        "scripts/language-checks.mjs",
-        "scripts/python-toolchain.mjs",
+        "scripts/check-generated-arguments.mts",
+        "scripts/language-checks.mts",
+        "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml"
       ]
@@ -1337,9 +1350,9 @@
       "paths": [
         "tests/fixtures/bound-data/**",
         "packages/compiler/**",
-        "scripts/check-generated-bound-data.mjs",
-        "scripts/language-checks.mjs",
-        "scripts/python-toolchain.mjs",
+        "scripts/check-generated-bound-data.mts",
+        "scripts/language-checks.mts",
+        "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml"
       ]
@@ -1348,24 +1361,24 @@
       "check": "make test-ext-conformance",
       "paths": [
         "packages/php-ext/**",
-        "scripts/build-php-extension.mjs",
-        "tests/runner/{conformance,cases,drivers}.mjs"
+        "scripts/build-php-extension.mts",
+        "tests/runner/{conformance,cases,drivers}.mts"
       ]
     },
     {
       "check": "make test-ext-unit",
       "paths": [
         "packages/php-ext/**",
-        "scripts/build-php-extension.mjs"
+        "scripts/build-php-extension.mts"
       ]
     },
     {
       "check": "make typed-generator-compile-check",
       "paths": [
         "packages/compiler/**",
-        "scripts/check-typed-generator.mjs",
-        "scripts/language-checks.mjs",
-        "scripts/python-toolchain.mjs",
+        "scripts/check-typed-generator.mts",
+        "scripts/language-checks.mts",
+        "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml"
       ]
@@ -1374,28 +1387,28 @@
       "check": "make ast-artifact-check",
       "paths": [
         "packages/compiler/**",
-        "scripts/check-ast-artifact.mjs"
+        "scripts/check-ast-artifact.mts"
       ]
     },
     {
       "check": "make generated-artifact-check",
       "paths": [
         "packages/compiler/**",
-        "scripts/check-generated-artifact.mjs"
+        "scripts/check-generated-artifact.mts"
       ]
     },
     {
       "check": "make compiler-ir-rules-check",
       "paths": [
         "packages/compiler/**",
-        "scripts/check-compiler-ir.mjs"
+        "scripts/check-compiler-ir.mts"
       ]
     },
     {
       "check": "make conformance-type-manifest-check",
       "paths": [
         "packages/compiler/**",
-        "scripts/check-conformance-type-manifest.mjs"
+        "scripts/check-conformance-type-manifest.mts"
       ]
     },
     {
@@ -1408,21 +1421,21 @@
     {
       "check": "make install-workspace-check",
       "paths": [
-        "scripts/check-install-workspace.mjs",
-        "scripts/install-workspace.mjs"
+        "scripts/check-install-workspace.mts",
+        "scripts/install-workspace.mts"
       ]
     },
     {
       "check": "make package-installs-check",
       "paths": [
-        "scripts/check-package-installs.mjs",
-        "scripts/install-workspace.mjs",
-        "scripts/language-checks.mjs",
+        "scripts/check-package-installs.mts",
+        "scripts/install-workspace.mts",
+        "scripts/language-checks.mts",
         "packages/{ts,go,rust,php}/**",
-        "scripts/python-toolchain.mjs",
+        "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml",
-        "scripts/python-wheelhouse.mjs",
+        "scripts/python-wheelhouse.mts",
         "packages/python/build-requirements.json"
       ]
     },
@@ -1452,7 +1465,7 @@
     {
       "check": "make artifact-digest-check",
       "paths": [
-        "scripts/check-artifact-digests.mjs",
+        "scripts/check-artifact-digests.mts",
         "packages/compiler/**",
         "packages/ts/**",
         "package-lock.json",
@@ -1463,14 +1476,14 @@
     {
       "check": "make showcase-html-check",
       "paths": [
-        "scripts/check-showcase-html.mjs",
+        "scripts/check-showcase-html.mts",
         "examples/site/**"
       ]
     },
     {
       "check": "make benchmark-smoke",
       "paths": [
-        "scripts/check-benchmark-smoke.mjs",
+        "scripts/check-benchmark-smoke.mts",
         "examples/showcase/benchmark-modes.mjs",
         "examples/showcase/adapters/**"
       ]
@@ -1485,8 +1498,8 @@
       "check": "make conformance-python",
       "paths": [
         "packages/python/**",
-        "tests/runner/{conformance,cases,drivers}.mjs",
-        "scripts/publish-build.mjs"
+        "tests/runner/{conformance,cases,drivers}.mts",
+        "scripts/publish-build.mts"
       ]
     },
     {
@@ -1494,7 +1507,7 @@
       "paths": [
         "packages/python/**",
         "packages/compiler/**",
-        "tests/runner/{conformance-generated-python,bounded,cases}.mjs"
+        "tests/runner/{conformance-generated-python,bounded,cases}.mts"
       ]
     },
     {

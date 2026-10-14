@@ -3,7 +3,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { transformSync } from 'esbuild';
-import { root } from '../../tests/runner/drivers.mjs';
+import { root } from '../../tests/runner/drivers.mts';
 import { compileFiles, compileSource } from '../../packages/compiler/compiler.mjs';
 import { generatedCompilerDigest } from '../../packages/compiler/compiler-digest.mjs';
 import { typescriptDeliveryDigest } from './delivery-digest.mjs';

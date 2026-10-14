@@ -32,7 +32,7 @@ export function decodeTokens(text: TextDocument, data: readonly number[], legend
   return tokens;
 }
 
-/** The results of a document opened on the server, in the form of `editorResults()` of `scripts/editor-fixtures.mjs`. */
+/** The results of a document opened on the server, in the form of `editorResults()` of `scripts/editor-fixtures.mts`. */
 export async function serverResults(client: Client, uri: string, source: string, indexes: readonly number[]): Promise<unknown> {
   const text = TextDocument.create(uri, 'polyspec-template', 1, source);
   const textDocument = { uri };

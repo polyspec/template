@@ -8,7 +8,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { invoke, prepare, selectLanguages, root } from '../../tests/runner/drivers.mjs';
+import { invoke, prepare, selectLanguages, root } from '../../tests/runner/drivers.mts';
 
 const showcaseDir = join(root, 'examples', 'site');
 const scenariosDir = join(showcaseDir, 'scenarios');

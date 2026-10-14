@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-14T13:08:18.712Z",
+  "reviewed": "2026-10-14T15:00:23.446Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "5c4bdb3be470c092da8c24d0564f2c563182a5d4514e8e5590a87c1a017c10b9",
+      "sha256": "c85f90a9dffbb1bde6a5c769ad8ddb2d67b4eb2b89b9af6effb2834cf6d77f24",
       "advisories": [
         {
           "package": "sprintf-js",
@@ -24,17 +24,17 @@
     },
     {
       "lock": "packages/php-ext/composer.lock",
-      "sha256": "7d2d7e5e6c23b37e2f478a97b207d7a6baba2bcff31b297fb959272f4d98fc28",
-      "advisories": []
-    },
-    {
-      "lock": "packages/rust/Cargo.lock",
-      "sha256": "9829fc088859f80f805f6b6e680f7d02ee22bb5cec70d7c1e1983a935f835ec8",
+      "sha256": "a962cfb050f7591b983b91d3c7b56a7e62b75de192c5fb55e37afc7cc642eaa0",
       "advisories": []
     },
     {
       "lock": "examples/showcase/adapters/rust/Cargo.lock",
       "sha256": "4e7c210a37394bd2bb513515fbedaef69d4dcaa73f287b302f27a226a2beb1fe",
+      "advisories": []
+    },
+    {
+      "lock": "packages/rust/Cargo.lock",
+      "sha256": "9829fc088859f80f805f6b6e680f7d02ee22bb5cec70d7c1e1983a935f835ec8",
       "advisories": []
     }
   ],
@@ -94,6 +94,13 @@
       "package": "@types/node",
       "version": "26.6.5",
       "latest": "26.6.5"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@types/picomatch",
+      "version": "4.0.3",
+      "latest": "4.0.3"
     },
     {
       "ecosystem": "npm",
@@ -163,7 +170,7 @@
       "manifest": "package.json",
       "package": "tsup",
       "version": "8.5.1",
-      "latest": "8.5.1"
+      "latest": "9.0.0"
     },
     {
       "ecosystem": "npm",

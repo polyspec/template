@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { analyze, AstProgram, MapLoader } from '../../packages/ts/dist/index.mjs';
-import { root } from '../../tests/runner/drivers.mjs';
+import { root } from '../../tests/runner/drivers.mts';
 import { showcasePhpDirectory } from './php-namespace.mjs';
 
 const site = join(root, 'examples', 'site');

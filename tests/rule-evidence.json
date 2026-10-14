@@ -17,21 +17,21 @@
         "packages/rust/tests/bound.rs",
         "packages/php/tests/Value/BoundMapTest.php",
         "packages/php-ext/tests/BoundMapTest.php",
-        "scripts/check-generated-bound-data.mjs",
-        "scripts/check-compiler-interface-mutations.mjs"
+        "scripts/check-generated-bound-data.mts",
+        "scripts/check-compiler-interface-mutations.mts"
       ]
     },
     {
       "name": "serialized-ast-schema",
       "rules": ["AST-8", "CNF-15"],
       "verification": "make schema-check",
-      "files": ["scripts/check-schema.mjs", "scripts/conformance-case-files.mjs", "scripts/check-schema-mutations.mjs"]
+      "files": ["scripts/check-schema.mts", "scripts/conformance-case-files.mts", "scripts/check-schema-mutations.mts"]
     },
     {
       "name": "conformance-protocol",
       "rules": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-17", "CNF-18", "ERR-1", "ERR-3", "ERR-4", "ERR-6"],
       "verification": "make conformance-all-modes",
-      "files": ["tests/runner/conformance.mjs", "config/parity.json"]
+      "files": ["tests/runner/conformance.mts", "config/parity.json"]
     },
     {
       "name": "lexer-parser-units",
@@ -55,19 +55,19 @@
       "name": "showcase-interface-contract",
       "rules": ["RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53"],
       "verification": "make contract-check",
-      "files": ["scripts/check-showcase-contract.mjs", "packages/compiler/interface.json"]
+      "files": ["scripts/check-showcase-contract.mts", "packages/compiler/interface.json"]
     },
     {
       "name": "compiler-artifact-contract",
       "rules": ["RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69"],
       "verification": "make typed-generator-compile-check",
-      "files": ["scripts/check-ast-artifact.mjs", "scripts/check-generated-artifact.mjs", "scripts/check-compiler-ir.mjs", "scripts/check-typed-generator.mjs", "scripts/check-generated-native-calls.mjs"]
+      "files": ["scripts/check-ast-artifact.mts", "scripts/check-generated-artifact.mts", "scripts/check-compiler-ir.mts", "scripts/check-typed-generator.mts", "scripts/check-generated-native-calls.mts"]
     },
     {
       "name": "native-object-call-contract",
       "rules": ["VAL-19"],
       "verification": "make generated-native-check",
-      "files": ["scripts/check-generated-native-calls.mjs", "tests/fixtures/native-object/input.tpl"]
+      "files": ["scripts/check-generated-native-calls.mts", "tests/fixtures/native-object/input.tpl"]
     },
     {
       "name": "internal-error-boundary",
@@ -85,7 +85,7 @@
       "name": "host-arguments-and-native-equality",
       "rules": ["VAL-21", "EXP-39"],
       "verification": "make test-ts test-go test-rust test-php test-ext test-python generated-native-check",
-      "files": ["tests/fixtures/native-object/host-values.json", "packages/python/tests/test_object_calls.py", "packages/ts/tests/render/host-values.test.ts", "packages/go/host_values_test.go", "packages/rust/tests/host_values.rs", "packages/php/tests/Value/HostValuesTest.php", "packages/php-ext/tests/HostValuesTest.php", "scripts/check-generated-native-calls.mjs", "tests/fixtures/typed-values/input.tpl", "scripts/check-generated-typed-values.mjs"]
+      "files": ["tests/fixtures/native-object/host-values.json", "packages/python/tests/test_object_calls.py", "packages/ts/tests/render/host-values.test.ts", "packages/go/host_values_test.go", "packages/rust/tests/host_values.rs", "packages/php/tests/Value/HostValuesTest.php", "packages/php-ext/tests/HostValuesTest.php", "scripts/check-generated-native-calls.mts", "tests/fixtures/typed-values/input.tpl", "scripts/check-generated-typed-values.mts"]
     },
     {
       "name": "editor-layer-boundaries",
@@ -103,7 +103,7 @@
       "name": "editor-language-service",
       "rules": ["EDT-4", "EDT-5", "EDT-6", "EDT-7", "EDT-8", "EDT-9", "EDT-10", "EDT-11", "EDT-12", "EDT-13", "EDT-17"],
       "verification": "make test-ts test-language",
-      "files": ["packages/ts/tests/parser/parser.test.ts", "packages/language/tests/document.test.ts", "packages/language/tests/editor.test.ts", "packages/language/tests/indent.test.ts", "scripts/editor-fixtures.mjs"]
+      "files": ["packages/ts/tests/parser/parser.test.ts", "packages/language/tests/document.test.ts", "packages/language/tests/editor.test.ts", "packages/language/tests/indent.test.ts", "scripts/editor-fixtures.mts"]
     },
     {
       "name": "editor-language-server",
@@ -133,7 +133,7 @@
       "name": "filesystem-conformance",
       "rules": ["CNF-16"],
       "verification": "make conformance",
-      "files": ["tests/fixtures/filesystem/cases.json", "tests/runner/cases.mjs", "tests/runner/conformance.mjs"]
+      "files": ["tests/fixtures/filesystem/cases.json", "tests/runner/cases.mts", "tests/runner/conformance.mts"]
     },
     {
       "name": "editor-template-root",

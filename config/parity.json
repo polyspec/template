@@ -89,7 +89,7 @@
     }
   ],
   "exclusions": [
-    { "unit": "conformance", "implementation": "python", "reason": "The Python package runs the conformance cases only through the comparator tests/runner/conformance.mjs; it has no native test that reports each case.", "item": "T24.8" },
+    { "unit": "conformance", "implementation": "python", "reason": "The Python package runs the conformance cases only through the comparator tests/runner/conformance.mts; it has no native test that reports each case.", "item": "T24.8" },
     { "unit": "expressions", "implementation": "php-ext", "reason": "The PHP extension has no native test of the expression vectors.", "item": "T24.8" }
   ]
 }

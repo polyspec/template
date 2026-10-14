@@ -8,7 +8,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
 import { compileFiles, compileSource } from '../../packages/compiler/compiler.mjs';
-import { publishBuild } from '../../scripts/publish-build.mjs';
+import { publishBuild } from '../../scripts/publish-build.mts';
 import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mjs';
 
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
