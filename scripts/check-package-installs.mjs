@@ -18,6 +18,7 @@ import { buildRequirements, requireWheelhouse, wheelhouse } from './python-wheel
 import { checkLanguages } from './language-checks.mjs';
 import { runStepSync } from './test-progress/step.mjs';
 import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -135,7 +136,8 @@ function checkPhp() {
   const directory = join(temporary, 'php');
   mkdirSync(directory);
   stageScenario(directory);
-  cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.php'), join(directory, 'generated.php'));
+  // The generated program is a directory of PSR-4 files, which the install project autoloads (T25.1).
+  cpSync(join(root, showcasePhpDirectory('scope-precedence')), join(directory, 'generated'), { recursive: true });
   // The artifact repository reads the composer.json of the archive, so the install takes the require of the manifest
   // itself. Its dependencies come from the Composer cache that make install filled, with the network disabled, at the
   // versions of packages/template-php/composer.lock, which the install project requires exactly.
@@ -144,10 +146,11 @@ function checkPhp() {
   writeFileSync(join(directory, 'composer.json'), JSON.stringify({
     repositories: [{ type: 'artifact', url: artifacts }],
     require: { [manifest.name]: manifest.version, ...Object.fromEntries(locked) }, config: { 'allow-plugins': false },
+    autoload: { 'psr-4': { [`${showcasePhpNamespace('scope-precedence')}\\`]: 'generated/' } },
   }));
   run('composer', ['install', '--no-interaction', '--no-progress', '--prefer-dist'], { cwd: directory, env: offline });
   writeFileSync(join(directory, 'check.php'), `<?php declare(strict_types=1);
-require __DIR__.'/vendor/autoload.php'; require __DIR__.'/generated.php';
+require __DIR__.'/vendor/autoload.php';
 use Polyspec\\Template\\AstProgram; use Polyspec\\Template\\Engine; use Polyspec\\Template\\Loader\\FilesystemLoader; use Polyspec\\Template\\Value\\Json; use Polyspec\\Template\\Value\\MapValue;
 $assign=Json::parse(file_get_contents(__DIR__.'/data.json')); $raw=Json::parse(file_get_contents(__DIR__.'/define.json')); $define=[]; foreach($raw->entries() as $id=>$entry){ if(is_string($entry)){$define[$id]=$entry;continue;} $item=[];foreach($entry->entries() as $key=>$value)$item[$key]=$value;$define[$id]=$item;} $options=['define'=>$define];$expected=file_get_contents(__DIR__.'/expected.html');$ast=(new Engine(new AstProgram(new FilesystemLoader(__DIR__.'/templates'))))->render('layout',$assign,$options);$direct=(new \\Polyspec\\Showcase\\Generated\\ScopePrecedence\\GeneratedProgram())->render('layout',$assign,$options);foreach(['AST program'=>$ast,'generated program'=>$direct] as $name=>$actual){if($actual!==$expected){fwrite(STDERR,"PHP $name output differs\\nexpected: ".json_encode($expected)."\\nactual:   ".json_encode($actual)."\\n");exit(1);}}
 `);

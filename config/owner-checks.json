@@ -453,6 +453,15 @@
     },
     {
       "paths": [
+        "scripts/php-program.mjs"
+      ],
+      "targets": [
+        "generated-native-check",
+        "conformance-generated-php"
+      ]
+    },
+    {
+      "paths": [
         "scripts/check-generated-lint.mjs"
       ],
       "targets": [

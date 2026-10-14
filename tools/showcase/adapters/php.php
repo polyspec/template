@@ -12,18 +12,21 @@ use Polyspec\Template\Value\Json;
 use Polyspec\Template\Value\MapValue;
 
 $root = dirname(__DIR__, 3);
-require $root . '/packages/template-php/vendor/autoload.php';
+$loader = require $root . '/packages/template-php/vendor/autoload.php';
 require __DIR__ . '/generated/render_adapter.php';
 
 function generatedProgram(string $scenarioRoot): Program
 {
+    global $loader;
     $scenario = basename($scenarioRoot);
     if (!in_array($scenario, ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'], true)) {
         throw new RuntimeException('generated program is missing for scenario ' . $scenario);
     }
-    require __DIR__ . '/generated/typed/' . $scenario . '.php';
-    // The namespace rule of tools/showcase/php-namespace.mjs: compiler-coverage becomes CompilerCoverage.
-    $class = 'Polyspec\\Showcase\\Generated\\' . str_replace(' ', '', ucwords(str_replace('-', ' ', $scenario))) . '\\GeneratedProgram';
+    // The rules of tools/showcase/php-namespace.mjs: compiler-coverage becomes the namespace CompilerCoverage, whose
+    // classes are the PSR-4 files of generated/php/compiler-coverage, which the autoload of Composer loads.
+    $namespace = 'Polyspec\\Showcase\\Generated\\' . str_replace(' ', '', ucwords(str_replace('-', ' ', $scenario)));
+    $loader->addPsr4($namespace . '\\', __DIR__ . '/generated/php/' . $scenario);
+    $class = $namespace . '\\GeneratedProgram';
 
     return new $class();
 }

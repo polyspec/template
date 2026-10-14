@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { analyze, AstProgram, MapLoader } from '../../packages/template-ts/dist/index.mjs';
 import { root } from '../../tests/runner/drivers.mjs';
+import { showcasePhpDirectory } from './php-namespace.mjs';
 
 const site = join(root, 'examples', 'site');
 const data = JSON.parse(readFileSync(join(site, 'data', 'scenarios.json'), 'utf8'));
@@ -67,8 +68,9 @@ function scenarioCard(scenario, result) {
     ['javascript', join(root, 'tools', 'showcase', 'adapters', 'generated', 'javascript', `${scenario.id}.js`)],
     ['go', join(root, 'tools', 'showcase', 'adapters', 'go', 'generated', scenario.id, 'generated.go')],
     ['rust', join(root, 'tools', 'showcase', 'adapters', 'generated', 'typed', `${scenario.id}.rust`)],
-    ['php', join(root, 'tools', 'showcase', 'adapters', 'generated', 'typed', `${scenario.id}.php`)],
-  ].map(([language, path]) => `${language} · product generated program\n${readFileSync(`${path}.manifest.json`, 'utf8')}\n${readFileSync(path, 'utf8')}`).join('\n\n');
+    // The PHP program is a directory of PSR-4 files (T25.1); the page shows its templates.
+    ['php', join(root, showcasePhpDirectory(scenario.id)), 'GeneratedTemplates.php'],
+  ].map(([language, path, shown]) => `${language} · product generated program\n${readFileSync(`${path}.manifest.json`, 'utf8')}\n${readFileSync(shown ? join(path, shown) : path, 'utf8')}`).join('\n\n');
   const artifactFiles = Object.entries(artifact.files).map(([name, entry]) => {
     const source = readFileSync(join(artifactRoot, entry.path), 'utf8');
     return `ast/${entry.path} · ${name}\n${source}`;

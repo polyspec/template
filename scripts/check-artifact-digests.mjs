@@ -21,7 +21,7 @@ export function artifactManifests(base = root) {
   for (const id of readdirSync(scenarios).sort()) {
     manifests.push({ path: `examples/site/scenarios/${id}/compiled/ast/manifest.json`, expected: astCompilerDigest() });
   }
-  for (const directory of ['tools/showcase/adapters/generated/typed', 'tools/showcase/adapters/generated/javascript']) {
+  for (const directory of ['tools/showcase/adapters/generated/typed', 'tools/showcase/adapters/generated/javascript', 'tools/showcase/adapters/generated/php']) {
     for (const name of readdirSync(join(base, directory)).filter(file => file.endsWith('.manifest.json')).sort()) {
       manifests.push({ path: `${directory}/${name}` });
     }

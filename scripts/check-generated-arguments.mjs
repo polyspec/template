@@ -9,7 +9,8 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../packages/template-compiler/ast-artifact.mjs';
-import { compileSource } from '../packages/template-compiler/compiler.mjs';
+import { compileFiles, compileSource } from '../packages/template-compiler/compiler.mjs';
+import { phpProgramAutoload, writePhpProgram } from './php-program.mjs';
 import { phpString, rustString } from '../packages/template-compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
@@ -89,9 +90,9 @@ fn kind<T, E: std::fmt::Debug>(result: Result<T, E>) -> String { match result { 
     PHP: () => {
       // PHP.
       const phpNamespace = 'Polyspec\\Generated\\TypedArguments';
-      const phpSource = join(temporary, 'typed.php');
-      writeFileSync(phpSource, compileSource(graphManifest, types, 'php', { phpNamespace }));
-      run('PHP', 'php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; require ${phpString(phpSource)}; $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $card = static fn (mixed $name): array => ['define' => ['card' => ['template' => 'part.tpl', 'data' => ['name' => $name]]]]; $rendered = $program->render('input.tpl', ['title' => 'T'], $card('N')); if ($rendered !== ${phpString(expected)}) throw new RuntimeException('PHP renders ' . $rendered); $kind = static function (callable $request): string { try { $request(); return 'rendered'; } catch (Polyspec\\Template\\TemplateError $error) { return 'template ' . $error->errorCode; } catch (InvalidArgumentException) { return 'argument'; } catch (Throwable $error) { return 'other ' . $error::class; } }; $kinds = [$kind(static fn () => $program->render('input.tpl', ['title' => 1], $card('N'))), $kind(static fn () => $program->render('input.tpl', ['title' => 'T'], $card(2)))]; if ($kinds !== ['argument', 'argument']) throw new RuntimeException('PHP reports ' . implode(', ', $kinds));`], root);
+      const phpDirectory = join(temporary, 'php');
+      writePhpProgram(phpDirectory, compileFiles(graphManifest, types, 'php', { phpNamespace }));
+      run('PHP', 'php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/template-php/vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $card = static fn (mixed $name): array => ['define' => ['card' => ['template' => 'part.tpl', 'data' => ['name' => $name]]]]; $rendered = $program->render('input.tpl', ['title' => 'T'], $card('N')); if ($rendered !== ${phpString(expected)}) throw new RuntimeException('PHP renders ' . $rendered); $kind = static function (callable $request): string { try { $request(); return 'rendered'; } catch (Polyspec\\Template\\TemplateError $error) { return 'template ' . $error->errorCode; } catch (InvalidArgumentException) { return 'argument'; } catch (Throwable $error) { return 'other ' . $error::class; } }; $kinds = [$kind(static fn () => $program->render('input.tpl', ['title' => 1], $card('N'))), $kind(static fn () => $program->render('input.tpl', ['title' => 'T'], $card(2)))]; if ($kinds !== ['argument', 'argument']) throw new RuntimeException('PHP reports ' . implode(', ', $kinds));`], root);
     },
     Python: () => {
       // Python: the argument error is a ValueError, which no template error is (ERR-13).
