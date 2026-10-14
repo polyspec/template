@@ -320,6 +320,7 @@ static zend_object *pt_engine_create(zend_class_entry *class_type)
     zend_hash_init(&engine->functions, 8, NULL, ZVAL_PTR_DTOR, 0);
     zend_hash_init(&engine->classes, 8, NULL, ZVAL_PTR_DTOR, 0);
     zend_hash_init(&engine->cache, 8, NULL, pt_cache_dtor, 0);
+    zend_hash_init(&engine->files, 8, NULL, ZVAL_PTR_DTOR, 0);
     return &object->std;
 }
 
@@ -329,6 +330,7 @@ static void pt_engine_free(zend_object *object)
     zend_hash_destroy(&engine->functions);
     zend_hash_destroy(&engine->classes);
     zend_hash_destroy(&engine->cache);
+    zend_hash_destroy(&engine->files);
     if (engine->root) {
         zend_string_release(engine->root);
     }
@@ -388,6 +390,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, __construct)
         }
     }
     zend_hash_clean(&engine->cache);
+    zend_hash_clean(&engine->files);
 }
 
 typedef struct pt_parse_input {
