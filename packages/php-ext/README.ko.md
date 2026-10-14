@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-ext-readme -->
-<!-- source-sha256: d8ac9c864d0cb98bf16234f35bbd5b9cfc4d77484730d2e2db7fdab7b26613d9 -->
+<!-- source-sha256: c600e112bea135c1cee4d1aaf00e8246938a55e9adb67ea5cb149bcad4cb1e45 -->
 # polyspec_template PHP 확장
 
 [English](README.md).
@@ -72,15 +72,15 @@ try {
 ## 명령줄
 
 ```sh
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php parse [--root DIR] [--delimiters OC] FILE
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php tokens [--root DIR] [--delimiters OC] FILE
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php format [--indent none|tab|N] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php parse [--root DIR] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php tokens [--root DIR] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
-`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. 명령은 PHP 패키지의 명령(`Polyspec\Template\Cli\CommandLine`)이며 네이티브 엔진을 런타임으로 쓰는 `Polyspec\Template\Native\NativeRuntime` 위에서 실행된다. `format`은 PHP 패키지의 포매터를 네이티브 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
+`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. 명령 `bin/template-ext.php`는 PHP 패키지 `polyspec/template`의 것이고, 그 Composer proxy는 `vendor/bin/template-ext.php`다. 그 명령(`Polyspec\Template\Cli\CommandLine`)은 네이티브 엔진을 런타임으로 쓰는 그 패키지의 `Polyspec\Template\Native\NativeRuntime` 위에서 실행된다. `format`은 PHP 패키지의 포매터를 네이티브 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
 
-이 패키지는 포매터를 가진 PHP 패키지 `polyspec/template`을 같은 버전으로 요구하므로(`composer.json`의 `require`) `composer install --no-dev` 뒤에도 `format`이 실행된다. 릴리스는 그것을 버전으로만 적고 `repositories`를 선언하지 않는다(`docs/operations/publication.md`). 패키지는 자기 lock을 갖지 않는다. Composer는 `php-ext` type의 패키지를 설치하지 않으므로, 이 저장소에서는 발행하지 않는 root `composer.json`이 `path` repository로 `polyspec/template`을 `packages/php`로 해석하고 `php/`의 class와 `tests/`의 test를 map한다. root에서 실행한 `composer install`이 그것들을 root `vendor/`에 설치하고 `bin/template-ext.php`가 그것을 로드한다.
+패키지는 C 확장뿐이다. Composer는 `php-ext` type의 패키지를 설치하지 않고 PIE는 확장만 빌드해 설치하므로, 패키지는 PHP class도 명령도 갖지 않는다. Composer로 `polyspec/template`을 요구하고 PIE로 확장을 설치한 프로젝트는 둘 다 갖는다. 패키지는 자기 lock을 갖지 않는다. 이 저장소에서는 발행하지 않는 root `composer.json`이 `tests/`의 test를 map하고, root에서 실행한 `composer install`이 `polyspec/template`을 root `vendor/`에 설치한다.
 
 ## 테스트
 

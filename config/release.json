@@ -116,7 +116,7 @@
         "polyspec/template": [
           "php",
           "-r",
-          "require 'vendor/autoload.php'; exit(class_exists('Polyspec\\\\Template\\\\Engine') ? 0 : 1);"
+          "require 'vendor/autoload.php';\nif (!class_exists('Polyspec\\\\Template\\\\Engine')) { fwrite(STDERR, \"Polyspec\\\\Template\\\\Engine is not autoloaded\\n\"); exit(1); }\nfile_put_contents('smoke.tpl', \"<p>{=title}</p>\\n\");\n$run = static function (string $command): array { $process = proc_open([PHP_BINARY, 'vendor/bin/' . $command, 'parse', 'smoke.tpl'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes); $out = stream_get_contents($pipes[1]); $err = stream_get_contents($pipes[2]); return [proc_close($process), $out, $err]; };\n[$status, $out] = $run('template.php');\nif ($status !== 0 || json_decode($out, true)['type'] !== 'Template') { fwrite(STDERR, \"vendor/bin/template.php parse failed with status $status\\n\"); exit(1); }\n[$status, , $err] = $run('template-ext.php');\nif (extension_loaded('polyspec_template') || $status !== 1 || !str_contains($err, 'pie install polyspec/template-php-ext')) { fwrite(STDERR, \"vendor/bin/template-ext.php without the extension exited with $status: $err\"); exit(1); }"
         ]
       }
     },

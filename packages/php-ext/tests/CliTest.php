@@ -12,6 +12,18 @@ use PHPUnit\Framework\TestCase;
 final class CliTest extends TestCase
 {
     /**
+     * The proxy of bin/template-ext.php of polyspec/template in the vendor/bin of the Composer project that runs PHPUnit,
+     * which Composer names in $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of that project.
+     */
+    private static function command(): string
+    {
+        $binDir = $GLOBALS['_composer_bin_dir'] ?? null;
+        self::assertIsString($binDir, 'PHPUnit runs without the proxy of vendor/bin/phpunit');
+
+        return $binDir . '/template-ext.php';
+    }
+
+    /**
      * @param list<string> $arguments
      * @return array{status: int, stdout: string, stderr: string}
      */
@@ -20,7 +32,7 @@ final class CliTest extends TestCase
         // The library that make ext publishes (T21.4).
         $library = Support::repositoryRoot() . '/var/build/polyspec_template.so';
         $command = array_merge(
-            [PHP_BINARY, '-d', 'extension=' . $library, dirname(__DIR__) . '/bin/template-ext.php'],
+            [PHP_BINARY, '-d', 'extension=' . $library, self::command()],
             $arguments,
         );
         $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: 87bde3a9bf767ec7d8b99ac8ad249239d643cf18eed8a7113f5263c0ae19bb39 -->
+<!-- source-sha256: 308e88a95949f298a4a3f1d8f981d2e5393d2ad2791375c9c799bf36dc3d483d -->
 # 적합성
 
 [English](/spec/conformance).
@@ -57,7 +57,7 @@
 | go | `packages/go/template` |
 | rust | `packages/rust/target/release/template` |
 | php | `php vendor/bin/template.php` |
-| php-ext | `php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php` |
+| php-ext | `php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php` |
 | python | `var/python/venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/python`을 `var/python/venv`에 설치한다) |
 
 TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@polyspec/template-language`이므로, 그 명령 `template-language`가 `format`을 제공하고 명령 `template`이 나머지 하위 명령을 제공한다.
