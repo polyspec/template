@@ -12,8 +12,15 @@ use Polyspec\Template\Value\MapValue;
 final class GeneratedRuntime
 {
     private const RECORDS_SCHEMA = 'eyJQYWdlIjp7InRpdGxlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9fX0=';
-    private const ASSIGN_SCHEMA = 'eyJwYWdlIjp7ImtpbmQiOiJyZWNvcmQiLCJuYW1lIjoiUGFnZSIsIm9wdGlvbmFsIjpmYWxzZX0sInJvb3RfbGFiZWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjpmYWxzZX0sImRlZmluZWRfbGFiZWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjpmYWxzZX19';
-    private const DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6ImNvbnRlbnQudHBsIiwiaHRtbCI6dHJ1ZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YUNvbnRlbnRUcGwiLCJpbnB1dCI6eyJ0aXRsZSI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOmZhbHNlfSwicm9vdF9sYWJlbCI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOmZhbHNlfSwiZGVmaW5lZF9sYWJlbCI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOmZhbHNlfSwibGF5b3V0X2xvY2FsIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX19fSwibGF5b3V0Ijp7ImZpZWxkIjoibGF5b3V0IiwidGFyZ2V0IjoibGF5b3V0LnRwbCIsImh0bWwiOmZhbHNlLCJjbGFzcyI6IkRlZmluaXRpb25EYXRhTGF5b3V0VHBsIiwiaW5wdXQiOnt9fX0=';
+    private const ASSIGN_SCHEMA = 'eyJwYWdlIjp7ImtpbmQiOiJyZWNvcmQiLCJuYW1lIjoiUGFnZSIsIm9wdGlvbmFsIjpmYWxzZX0sInJvb3R'
+        . 'fbGFiZWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjpmYWxzZX0sImRlZmluZWRfbGFiZWwiOnsia2luZCI6InN0cmluZyI'
+        . 'sIm9wdGlvbmFsIjpmYWxzZX19';
+    private const DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6ImNvbnRlbnQudHBsIiwiaHRtbCI'
+        . '6dHJ1ZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YUNvbnRlbnRUcGwiLCJpbnB1dCI6eyJ0aXRsZSI6eyJraW5kIjoic3RyaW5nIiw'
+        . 'ib3B0aW9uYWwiOmZhbHNlfSwicm9vdF9sYWJlbCI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOmZhbHNlfSwiZGVmaW5lZF9'
+        . 'sYWJlbCI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOmZhbHNlfSwibGF5b3V0X2xvY2FsIjp7ImtpbmQiOiJzdHJpbmciLCJ'
+        . 'vcHRpb25hbCI6dHJ1ZX19fSwibGF5b3V0Ijp7ImZpZWxkIjoibGF5b3V0IiwidGFyZ2V0IjoibGF5b3V0LnRwbCIsImh0bWwiOmZ'
+        . 'hbHNlLCJjbGFzcyI6IkRlZmluaXRpb25EYXRhTGF5b3V0VHBsIiwiaW5wdXQiOnt9fX0=';
 
     public static function schema(string $encoded): array
     {

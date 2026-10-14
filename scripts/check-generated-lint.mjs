@@ -8,8 +8,8 @@
 // - Rust: clippy with -D warnings on a library crate whose public modules include the programs, so the public API of a
 //   program is used and only what the program does not use is dead code.
 // - TypeScript: oxlint `no-unused-vars`.
-// - PHP: `pint --test --preset psr12` and phpcs with phpcs.xml.dist (PSR-12); the soft limit of 120 columns, which phpcs
-//   reports as a warning, waits for T25.2.
+// - PHP: `pint --test --preset psr12` and phpcs with phpcs.xml.dist (PSR-12), whose warnings, such as a line of more
+//   than 120 columns, fail the check as its errors do.
 import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -73,9 +73,7 @@ function checkPhp() {
   // The PHP program of a scenario is a directory of PSR-4 files (T25.1).
   const files = scenarios.flatMap(id => readdirSync(join(root, showcasePhpDirectory(id))).map(name => join(root, showcasePhpDirectory(id), name)));
   run(join(root, 'packages/template-php/vendor/bin/pint'), ['--test', '--preset', 'psr12', ...files]);
-  // T25.2: --warning-severity=0 hides the line length warnings of PSR-12 until the PHP emitter keeps lines within 120
-  // columns; remove it then.
-  run('phpcs', ['--standard=phpcs.xml.dist', '--warning-severity=0', ...files]);
+  run('phpcs', ['--standard=phpcs.xml.dist', ...files]);
 }
 
 checkLanguages('generated lint', { Go: checkGo, Rust: checkRust, TypeScript: checkTypeScript, PHP: checkPhp });

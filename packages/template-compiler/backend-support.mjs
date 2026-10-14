@@ -18,12 +18,14 @@ const escapeControls = (value, escape) => [...value].map(char => {
 }).join('');
 export const goString = value => `"${escapeControls(value, code => `\\u${code.toString(16).padStart(4, '0')}`)}"`;
 export const rustString = value => `"${escapeControls(value, code => `\\u{${code.toString(16)}}`)}"`;
-// A PHP string is single-quoted text with only \ and ' escaped. A line break is written as the
-// double-quoted literal "\n" or "\r" and joined with `.`, so no literal spans two source lines and
-// indentation of the generated source cannot change the text.
+// A PHP string is single-quoted text with only \ and ' escaped. A control character is written as a
+// double-quoted escape ("\n", "\r" or "\xHH") joined with `.`, so no literal spans two source lines,
+// indentation of the generated source cannot change the text, and the source holds no control
+// character, which the PHP backend uses to mark its argument lists (T25.2).
 const phpQuoted = value => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
 export const phpString = value => {
-  const parts = value.split(/(\r|\n)/).filter(part => part !== '').map(part => part === '\n' ? '"\\n"' : part === '\r' ? '"\\r"' : phpQuoted(part));
+  const control = part => part === '\n' ? '"\\n"' : part === '\r' ? '"\\r"' : `"\\x${part.charCodeAt(0).toString(16).padStart(2, '0')}"`;
+  const parts = value.split(/([\u0000-\u001f\u007f])/).filter(part => part !== '').map(part => /^[\u0000-\u001f\u007f]$/.test(part) ? control(part) : phpQuoted(part));
   if (parts.length === 0) return "''";
   return parts.length === 1 ? parts[0] : `(${parts.join(' . ')})`;
 };

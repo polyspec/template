@@ -13,7 +13,9 @@ final class GeneratedRuntime
 {
     private const RECORDS_SCHEMA = 'e30=';
     private const ASSIGN_SCHEMA = 'eyJwYWdlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6ZmFsc2V9fQ==';
-    private const DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6bnVsbCwiaHRtbCI6dHJ1ZSwiY2xhc3MiOm51bGwsImlucHV0Ijp7fX0sImxheW91dCI6eyJmaWVsZCI6ImxheW91dCIsInRhcmdldCI6ImxheW91dC50cGwiLCJodG1sIjpmYWxzZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YUxheW91dFRwbCIsImlucHV0Ijp7fX19';
+    private const DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6bnVsbCwiaHRtbCI6dHJ1ZSwiY2x'
+        . 'hc3MiOm51bGwsImlucHV0Ijp7fX0sImxheW91dCI6eyJmaWVsZCI6ImxheW91dCIsInRhcmdldCI6ImxheW91dC50cGwiLCJodG1'
+        . 'sIjpmYWxzZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YUxheW91dFRwbCIsImlucHV0Ijp7fX19';
 
     public static function schema(string $encoded): array
     {
