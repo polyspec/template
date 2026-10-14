@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 23435f3c26075e616a26120c4e54179fd53290c28dff2aa4bc2150f27ceacb26 -->
+<!-- source-sha256: 9d31987be78d1bd0de65c88a4b72829bda6d0e3095ebdd795f5248b5306dff4b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.3: `tests/scripts/process-group-exit-window.test.mjs`는 최대 300 s 동안 40번 실행하며 probe 결과를 집계하던 실험이 아니라 테스트입니다. 한 번의 실행으로 leader가 끝난 group의 member가 사라진 뒤에만 `stopProcessGroup`이 반환함을 확인하고, 기록했지만 사라짐을 확인하지 못한 모든 pid를 `t.after`에서 종료하며, member는 영원히 실행되지 않고 60 s 뒤 스스로 끝납니다. 실험의 결과는 파일 머리말에 남깁니다.
 - T23.2: TypeScript, Go, PHP, Python, PHP 확장은 LEX-5와 Rust처럼 `@` 뒤의 loop 형식을 텍스트의 나머지 전체에서 판단합니다. 각 구현은 처음 80 byte에서만 맞추었기 때문에 약 78 byte보다 긴 loop 변수 이름은 loop tag를 텍스트로 만들었습니다. Case `lexical/loop-head-long-name`이 모든 구현에 이를 요구하고, 바뀐 parser에 맞추어 showcase artifact를 다시 compile했습니다.
 - T23.2: Go 테스트는 `parser/analyze_test.go`, `format/format_test.go`, `conformance_test.go`의 세 복사본 대신 내부 test helper `internal/casetest` 하나로 적합성 case를 나열하고 `options.json`을 읽습니다. 이 helper는 `go.mod`의 directory에서 `tests/cases`를 찾고 목록이 비면 실패하며, 이전 테스트는 case를 200개 이상 요구했습니다. Python format 테스트는 200개 초과 대신 비어 있지 않은 template 목록을 요구합니다.
 - T23.2: `make schema-check`는 `scripts/check-schema.mjs`와 `scripts/conformance-case-files.mjs`에 복사된 직접 작성한 `describe` 대신 `ajv.errorsText`로 schema 오류를 설명합니다.

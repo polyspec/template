@@ -1,48 +1,61 @@
-// Records what the group probe returns while a member of a process group is in exit (T22.5-7), and asserts the
-// criterion of stopProcessGroup: it resolves only after kill(pid, 0) fails for the member. The window is rare, so the
-// test does not require it to occur; the output names the probe results observed on this platform.
-// Observed on macOS in this item (60 runs of this experiment): 58 runs with the group probe at ESRCH and kill(pid, 0)
-// at ESRCH; 2 runs with the group probe at EPERM, kill(pid, 0) still succeeding and the pid absent from `ps`. No run
-// showed the member in state Z. Linux: not observed in this item; this output records the result on the platform that
-// runs it.
+// Tests that stopProcessGroup resolves only after the member of a group whose leader has exited is gone (T22.5-7,
+// T24.3): kill(pid, 0) fails for the member once it resolves. The test records the pid of the leader and of the member
+// and kills in t.after every recorded pid that it has not seen gone, so a failing or cancelled run leaves no process
+// behind and a pid that another process may have taken since is not signaled; the member ends by itself after
+// MEMBER_LIFE_MS in any case.
+// Finding of the experiment that this test replaces (60 runs on macOS, T22.5-7): before the stop, the group probe
+// answered ESRCH in 58 runs and EPERM in 2, in which the member, absent from `ps` and never in state Z, still answered
+// kill(pid, 0). scripts/process-group.mjs therefore treats EPERM as a member in exit and waits for ESRCH, which
+// tests/scripts/process-group-gone.test.mjs holds with an injected kill.
 import assert from 'node:assert/strict';
-import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { spawn } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
 import { stopProcessGroup } from '../../scripts/process-group.mjs';
 
-const RUNS = 40;
-// The member starts running only after this delay, as a member does under load, so the leader may exit before it runs.
-const MEMBER_START_MS = 5_000;
+// The member outlives its leader by far, so the group still has it when the test stops the group.
+const MEMBER_LIFE_MS = 60_000;
 
-const probe = pgid => { try { process.kill(-pgid, 0); return 'ok'; } catch (error) { return error.code; } };
-const memberSignal = pid => { try { process.kill(pid, 0); return 'ok'; } catch (error) { return error.code; } };
-
-test('stopProcessGroup resolves only after kill(pid, 0) fails for the member, whatever the probe returns', { timeout: 300_000 }, async (t) => {
-  const tally = {};
-  for (let run = 0; run < RUNS; run += 1) {
-    const directory = mkdtempSync(path.join(tmpdir(), 'template-exit-window-'));
-    try {
-      const file = path.join(directory, 'member.pid');
-      // The leader starts a member in its group and writes the member's pid before it exits after 300 ms; the member
-      // starts running after MEMBER_START_MS.
-      const member = `setTimeout(() => setInterval(() => {}, 1000), ${MEMBER_START_MS})`;
-      const leader = `const member = require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(member)}], { stdio: 'ignore' }); require('node:fs').writeFileSync(${JSON.stringify(file)}, String(member.pid)); setTimeout(() => process.exit(0), 300)`;
-      const child = spawn(process.execPath, ['-e', leader], { detached: true, stdio: 'ignore' });
-      await new Promise(resolve => child.once('close', resolve));
-      const pid = Number(readFileSync(file, 'utf8'));
-      const before = probe(child.pid);
-      await stopProcessGroup(child);
-      const after = memberSignal(pid);
-      const key = `probe before stop: ${before}; kill(pid, 0) after stop: ${after}`;
-      tally[key] = (tally[key] ?? 0) + 1;
-      assert.notEqual(after, 'ok', `the member ${pid} still answers kill(pid, 0) after stopProcessGroup resolved`);
-    } finally {
-      rmSync(directory, { recursive: true, force: true });
-    }
+const answers = pid => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    if (error.code === 'ESRCH') return false;
+    throw error;
   }
-  t.diagnostic(`${process.platform}, ${RUNS} runs: ${JSON.stringify(tally)}`);
+};
+
+const killIfRunning = pid => {
+  try {
+    process.kill(pid, 'SIGKILL');
+  } catch (error) {
+    if (error.code !== 'ESRCH') throw error;
+  }
+};
+
+test('stopProcessGroup resolves only after the member of a group whose leader exited is gone', { timeout: 30_000 }, async t => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'template-exit-window-'));
+  const pids = [];
+  t.after(() => {
+    for (const pid of pids) killIfRunning(pid);
+    rmSync(directory, { recursive: true, force: true });
+  });
+  const file = path.join(directory, 'member.pid');
+  // The leader starts a member in its group, writes the member's pid and exits after 300 ms.
+  const member = `setTimeout(() => {}, ${MEMBER_LIFE_MS})`;
+  const leader = `const member = require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(member)}], { stdio: 'ignore' }); require('node:fs').writeFileSync(${JSON.stringify(file)}, String(member.pid)); setTimeout(() => process.exit(0), 300)`;
+  const child = spawn(process.execPath, ['-e', leader], { detached: true, stdio: 'ignore' });
+  pids.push(child.pid);
+  await new Promise(resolve => child.once('close', resolve));
+  const memberPid = Number(readFileSync(file, 'utf8'));
+  pids.push(memberPid);
+  assert.equal(answers(memberPid), true, `the member ${memberPid} ended before the group was stopped`);
+  await stopProcessGroup(child);
+  assert.equal(answers(memberPid), false, `the member ${memberPid} still answers kill(pid, 0) after stopProcessGroup resolved`);
+  // Both are gone: the leader was reaped before stopProcessGroup resolved, and the member no longer answers.
+  pids.length = 0;
 });
