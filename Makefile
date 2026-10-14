@@ -1,9 +1,9 @@
 # Build, test and documentation targets. Every target is idempotent.
 
-# make install-tools (the install-tools tool of @polyspec/kit) installs the npm of packageManager in package.json, the Go of
-# the kit pin, the uv and the Python of config/toolchain.json and the ruff of config/toolchain.json into var/tools; their
-# wrappers in
-# var/tools/bin come first, so every recipe uses the tools of the checkout and never the npm or Go of the machine (T19.2).
+# make install-tools TOOLS=npm installs the npm of packageManager in package.json and mise into var/tools/bin, and make
+# install-tools (the install-tools tool of @polyspec/kit) installs the tools of mise.toml, Go and Python among them, at the
+# digests of mise.lock into var/tools/mise (T24.12); var/tools/bin and the shims of mise come first, so every recipe uses
+# the tools of the checkout and never the npm, Go or Python of the machine (T19.2).
 # GOTOOLCHAIN=local keeps go from downloading another toolchain at run time.
 export PATH := $(CURDIR)/var/tools/bin:$(HOME)/.cargo/bin:$(PATH)
 export GOTOOLCHAIN := local
@@ -94,7 +94,7 @@ help: ## List targets
 	@echo "  lint                   The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
 	@echo "  lint-ts                oxlint with oxlint-tsgolint and knip on the TypeScript (the lint-ts tool of @polyspec/kit)"
-	@echo "  install                After make install-tools TOOLS=npm and make install-packages: Go, uv and Python, the Rust toolchain of rust-toolchain.toml, the crates, the Composer packages and the Python build requirements"
+	@echo "  install                After make install-tools TOOLS=npm and make install-packages: the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates, the Composer packages and the Python build requirements"
 	@echo "  build-ts|go|rust|php   Build one package"
 	@echo "  test-ts|go|rust|php    Unit tests of one package"
 	@echo "  test-scripts           Tests of the test runner and the conformance runners"
@@ -174,12 +174,10 @@ lint-php-format: build-php
 # the crates of every Cargo.lock into the registry of CARGO_HOME with cargo-downloads-fetch of kit: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
 # downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
-# make install installs Go, uv and the pinned Python: every Python check runs var/tools/bin/python3, so every job has that
-# interpreter after make install and no job sets up a Python of its own. ruff is installed on that Python by make
-# install-tools TOOLS=ruff, which lint-python needs; cargo-audit and govulncheck serve the dependency review, which make
-# dependency-review installs (a local make install-tools installs every declared tool).
-install: TOOLS := go uv python
-install: install-tools rust-toolchain cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install Go, uv and Python, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
+# make install installs every tool of mise.lock with make install-tools: every Python check runs the shim
+# var/tools/mise/shims/python3 of the python of mise.toml, so every job has that interpreter after make install and no job
+# sets up a Python of its own (T24.12).
+install: install-tools rust-toolchain cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
 	$(ONLINE) node scripts/composer-install.mjs $(PHP_DIR)
 	$(ONLINE) node scripts/composer-install.mjs $(EXT_DIR)
 	$(ONLINE) node scripts/python-wheelhouse.mjs
@@ -341,9 +339,9 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
 	node tests/runner/conformance.mjs --langs ts,python
 
-# The unit tests of the Python package run with the pinned interpreter of var/tools (make install-tools TOOLS=python), the
-# Python release of .python-version; PYTHON is never the python3 of PATH.
-PYTHON := $(CURDIR)/var/tools/bin/python3
+# The unit tests of the Python package run with the shim of the python of mise.toml (make install-tools), by its absolute
+# path, because make looks up a recipe line on its own PATH; PYTHON is never the python3 of the machine.
+PYTHON := $(CURDIR)/var/tools/mise/shims/python3
 
 test-python: ## Unit tests of the Python package
 	status=0; for test in packages/template-python/tests/test_api.py packages/template-python/tests/test_exports.py packages/template-python/tests/test_package_data.py packages/template-python/tests/test_object_calls.py packages/template-python/tests/test_expr_fixtures.py packages/template-python/tests/test_function_contract.py packages/template-python/tests/test_compiler_interface.py; do $(PYTHON) $$test || status=1; done; exit $$status

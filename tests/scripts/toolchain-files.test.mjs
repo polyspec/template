@@ -1,16 +1,18 @@
 // Tests that the toolchains of the recipes are the ones that the files of the checkout declare (T13.1-4, T19.2), each
 // with the expected and the actual version on failure:
 // - Node.js is the version of `.node-version`, and every CI job takes Node.js from it;
-// - npm is the version of `packageManager` in package.json and Go the version of the go directive of
-//   packages/template-go/go.mod, both installed by `make install-tools` into var/tools, whose wrappers the Makefile puts
-//   first on PATH; the Makefile exports GOTOOLCHAIN=local, so go never downloads another toolchain;
+// - npm is the version of `packageManager` in package.json, installed by `make install-tools TOOLS=npm` into var/tools/bin,
+//   and Go the go of mise.toml, which the go directive of packages/template-go/go.mod equals, installed by `make
+//   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); kit.mk puts both directories first on
+//   PATH, and the Makefile exports GOTOOLCHAIN=local, so go never downloads another toolchain;
 // - Rust is the toolchain of `rust-toolchain.toml` with the components that `make lint` and `make test-rust` use,
 //   installed by one explicit step, never by rustup on the first cargo: several processes that start cargo at once, as
 //   the files of one `node --test` run do, each installed it and broke the installs of the others (T18.7-1);
 // - make install downloads the crates of every Cargo.lock, which the checks resolve with cargo --offline (T20.1-1), and
 //   every other recipe runs cargo, go and npm offline (T20.1-2);
-// - PHP is one of the minor versions of config/toolchain.json and Composer its exact version: setup-php cannot pin a
-//   patch, so the minor is the pin and var/full-run.json records the patch of each run;
+// - PHP is one of the minor versions of config/toolchain.json: setup-php cannot pin a patch, so the minor is the pin and
+//   var/full-run.json records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
+//   no tools;
 // - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
 // - the last job of ci.yml is ci-passed, the check of ci.yml that a release requires: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
@@ -32,6 +34,7 @@ const read = file => readFileSync(path.join(ROOT, file), 'utf8');
 const KIT_COPIES = new Set(Object.keys(JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json')), 'utf8')).kit.copies));
 const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
 const TOOLCHAIN = JSON.parse(read('config/toolchain.json'));
+const SHIMS = path.join(ROOT, 'var/tools/mise/shims');
 
 // The jobs of a workflow with their text.
 function jobs(file) {
@@ -120,7 +123,7 @@ test('npm is the version of packageManager in package.json, from var/tools/bin f
   assert.equal(actual, expected, `npm of the recipes: expected ${expected} (package.json packageManager), actual ${actual}; run make install-tools`);
 });
 
-test('every recipe line runs npm and go of var/tools/bin, with every make on PATH', { timeout: 240_000 }, () => {
+test('every recipe line runs the npm of var/tools/bin and the go of mise, with every make on PATH', { timeout: 240_000 }, () => {
   // GNU Make 3.81 starts a line without shell syntax itself, with the PATH that make started with, also when SHELL names
   // another shell: the line `npm --version` printed the npm of the machine. The recipes start npm as $(NPM), the path of
   // its wrapper, and go and gofmt only in lines with shell syntax, which the shell runs with the exported PATH.
@@ -130,7 +133,7 @@ test('every recipe line runs npm and go of var/tools/bin, with every make on PAT
   const go = `go${/^go (\S+)$/m.exec(read('packages/template-go/go.mod'))[1]}`;
   for (const make of makes) {
     assert.equal(recipe('$(NPM) --version', {}, make), npm, `${make}: the recipe line $(NPM) --version runs another npm than ${npm} of var/tools/bin`);
-    assert.equal(recipe('cd packages/template-go && go env GOVERSION', {}, make), go, `${make}: a shell line with go runs another go than ${go} of var/tools/bin`);
+    assert.equal(recipe('cd packages/template-go && go env GOVERSION', {}, make), go, `${make}: a shell line with go runs another go than ${go} of the shims of mise`);
   }
   const simple = read('Makefile').split('\n').filter(line => /^\t@?(npm|go|gofmt)\b/.test(line) && !/[;&|<>$`'"(){}*?[\]\\#=~]/.test(line));
   assert.deepEqual(simple, [], 'recipe lines without shell syntax that start npm, go or gofmt with the PATH that make started with');
@@ -150,9 +153,10 @@ test('the path of every Go module that go get resolves names its directory in th
   }
 });
 
-test('Go is the version of the go directive of packages/template-go/go.mod, and go downloads no other toolchain', () => {
+test('Go is the go of mise.toml, which the go directive of packages/template-go/go.mod equals, and go downloads no other toolchain', () => {
   const expected = `go${/^go (\S+)$/m.exec(read('packages/template-go/go.mod'))[1]}`;
-  for (const tool of ['go', 'gofmt']) assert.equal(recipe(`command -v ${tool} || true`), path.join(ROOT, `var/tools/bin/${tool}`), `${tool} of the recipes is not the one of var/tools/bin; run make install-tools`);
+  assert.equal(`go${/^go = "([^"]+)"$/m.exec(read('mise.toml'))?.[1]}`, expected, 'the go of mise.toml differs from the go directive of packages/template-go/go.mod');
+  for (const tool of ['go', 'gofmt']) assert.equal(recipe(`command -v ${tool} || true`), path.join(SHIMS, tool), `${tool} of the recipes is not the shim of mise; run make install-tools`);
   const actual = recipe('cd . && go env GOVERSION', { GOTOOLCHAIN: 'auto' });
   assert.equal(actual, expected, `go of the recipes: expected ${expected} (packages/template-go/go.mod), actual ${actual}; run make install-tools`);
   assert.equal(recipe('echo "$GOTOOLCHAIN"', { GOTOOLCHAIN: 'auto' }), 'local', 'the recipes of the Makefile let go download a toolchain');
@@ -161,7 +165,8 @@ test('Go is the version of the go directive of packages/template-go/go.mod, and 
 test('go builds into the build cache of the checkout, and no script names another one', () => {
   // T19.14: the generated checks set GOCACHE to the fixed /tmp/template-go-cache, which every checkout and run shared.
   assert.equal(recipe('echo "$GOCACHE"', { GOCACHE: '/tmp/elsewhere' }), path.join(ROOT, 'var/go/cache'), 'the recipes of the Makefile use another Go build cache');
-  const named = spawnSync('git', ['grep', '-n', 'GOCACHE', '--', 'scripts', 'tests/runner', 'tools'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  // The copies of kit under scripts/kit are kit's: its mise bootstrap keeps the Go cache of mise under var/tools.
+  const named = spawnSync('git', ['grep', '-n', 'GOCACHE', '--', 'scripts', 'tests/runner', 'tools', ':!scripts/kit'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.deepEqual(named, [], 'scripts that set their own Go build cache');
 });
 
@@ -179,16 +184,19 @@ test('rust-toolchain.toml names the toolchain and the components that cargo of t
   }
 });
 
-test('PHP is a minor version of config/toolchain.json and Composer its exact version, also in every CI job', () => {
+test('PHP is a minor version of config/toolchain.json, also in every CI job, and Composer the release of mise.toml', () => {
   const actual = recipe('cd . && php -r "echo PHP_MAJOR_VERSION, \'.\', PHP_MINOR_VERSION;"');
   assert.ok(TOOLCHAIN.php.includes(actual), `php of the recipes: expected a minor version of ${TOOLCHAIN.php.join(', ')} (config/toolchain.json), actual ${actual}`);
+  const declared = /^"http:composer" = \{ version = "([^"]+)"/m.exec(read('mise.toml'))?.[1];
+  assert.equal(recipe('command -v composer || true'), path.join(SHIMS, 'composer'), 'composer of the recipes is not the shim of mise; run make install-tools');
   const composer = /Composer version (\S+)/.exec(recipe('composer --version --no-ansi 2>/dev/null'))?.[1];
-  assert.equal(composer, TOOLCHAIN.composer.version, `composer of the recipes: expected ${TOOLCHAIN.composer.version} (config/toolchain.json), actual ${composer}`);
+  assert.equal(composer, declared, `composer of the recipes: expected ${declared} (mise.toml), actual ${composer}`);
   for (const file of WORKFLOWS) {
     const text = read(file);
     for (const match of text.matchAll(/php-version: '([^']*)'/g)) assert.ok(TOOLCHAIN.php.includes(match[1]), `${file}: php-version ${match[1]}, expected one of ${TOOLCHAIN.php.join(', ')}`);
     for (const match of text.matchAll(/php: \[([^\]]*)\]/g)) assert.deepEqual(JSON.parse(`[${match[1].replaceAll("'", '"')}]`), TOOLCHAIN.php, `${file}: the PHP matrix differs from config/toolchain.json`);
-    for (const match of text.matchAll(/tools: (\S+)/g)) assert.equal(match[1], `composer:${TOOLCHAIN.composer.version}`, `${file}: tools ${match[1]}, expected composer:${TOOLCHAIN.composer.version}`);
+    // Composer is a tool of mise.toml, so setup-php installs no tools of its own (T24.12).
+    for (const match of text.matchAll(/tools: (\S+)/g)) assert.equal(match[1], 'none', `${file}: setup-php installs tools ${match[1]}; make install-tools installs Composer from mise.toml`);
   }
 });
 
@@ -202,7 +210,8 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // install-packages, which install @polyspec/kit (T24.1).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const kit = 'node_modules/@polyspec/kit/dist';
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean), [`${online} node ${kit}/install-tools.mjs go uv python`, 'rustup toolchain install --no-self-update', `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, `${online} node scripts/python-wheelhouse.mjs`]);
+  // make prints the empty TOOLS of install-tools of kit as a trailing space.
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, 'rustup toolchain install --no-self-update', `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mjs packages/template-php`, `${online} node scripts/composer-install.mjs packages/template-php-ext`, `${online} node scripts/python-wheelhouse.mjs`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const text = read(file);
@@ -227,8 +236,8 @@ test('every CI job installs with make install-tools TOOLS=npm, make install-pack
     assert.equal(direct?.[0], undefined, `${file} installs without make install`);
     for (const job of jobs(file)) {
       if (!/- run: .*\bmake /.test(job.text) || (file.endsWith('/ci.yml') && job.name === CI_PASSED)) continue;
-      // make install-tools installs the Go of the kit pin from its archive, so no job sets up a Go of its own (T24.1).
-      assert.doesNotMatch(job.text, /uses: actions\/setup-go@/, `${file} job ${job.name} sets up a Go of PATH; make install-tools installs the Go of the kit pin`);
+      // make install-tools installs the Go and the Python of mise.toml, so no job sets up a Go or a Python of its own (T24.1, T24.12).
+      assert.doesNotMatch(job.text, /uses: actions\/setup-(go|python)@/, `${file} job ${job.name} sets up a Go or a Python of PATH; make install-tools installs those of mise.toml`);
       if (file.endsWith('/ci.yml')) assert.match(job.text, /- run: make install-tools TOOLS=npm\n(?:.*\n)*?\s+- run: make install-packages\n(?:.*\n)*?\s+- run: make install\n/, `${file} job ${job.name} does not install with make install-tools TOOLS=npm, make install-packages and make install`);
     }
   }
@@ -373,15 +382,13 @@ test('every action of a workflow is pinned by its commit and every job runs on u
   }
 });
 
-// The python job of ci.yml runs one interpreter, the minor of .python-version (T22.4-12): requires-python is that minor
+// The python job of ci.yml runs one interpreter, the python of mise.toml (T22.4-12, T24.12): requires-python is its minor
 // (python-requires.test.mjs), so the job has no matrix and no floor job on another interpreter. The interpreter is the
 // pinned Python that make install installs (T22.5-5), so the job sets up no Python of its own.
 test('the python job of ci.yml runs make install for the pinned interpreter and has no matrix (T22.4-12, T22.5-5)', () => {
-  const minor = read('.python-version').trim();
-  assert.match(minor, /^3\.\d+$/, `.python-version ${minor} is not a Python minor release`);
   const job = read('.github/workflows/ci.yml').match(/^  python:\n([\s\S]*?)(?=^  [a-z-]+:\n)/m)?.[1];
   assert.ok(job, 'ci.yml has no python job; the check verified nothing');
-  assert.ok(!/^\s+matrix:/m.test(job), 'the python job of ci.yml has a matrix; it runs the minor of .python-version only');
+  assert.ok(!/^\s+matrix:/m.test(job), 'the python job of ci.yml has a matrix; it runs the python of mise.toml only');
   assert.ok(job.includes('run: make install\n'), 'the python job runs make install, which installs the pinned Python');
   assert.ok(!job.includes('actions/setup-python'), 'the python job sets up a Python of PATH; it runs the pinned interpreter');
 });
@@ -403,18 +410,16 @@ test('the python job of ci.yml runs the Python suites and ci-passed needs it (T2
   assert.ok(needs[1].split(',').map(name => name.trim()).includes('python'), `ci-passed needs ${needs[1]}, expected python among them`);
 });
 
-// ruff is installed into an environment of the pinned Python of var/tools, which uv makes. make install installs uv and that
-// Python (T22.5-5, T24.1), and the job that runs lint-python installs ruff after it with make install-tools TOOLS=ruff
-// (T22.4-33).
-test('the job that runs lint-python installs the pinned Python and ruff before it, with no setup-python', () => {
+// ruff and vulture are tools of mise.toml, which make install installs with the Python of mise.toml (T22.4-33, T24.12),
+// so the job that runs lint-python runs make install before it.
+test('the job that runs lint-python installs the tools of mise.toml before it, with no setup-python', () => {
   for (const job of jobs('.github/workflows/ci.yml')) {
     if (!/\bTARGETS="[^"]*\blint-python\b/.test(job.text)) continue;
-    const ruff = job.text.indexOf('run: make install-tools TOOLS=ruff\n');
+    const install = job.text.indexOf('run: make install\n');
     const lint = job.text.indexOf('lint-python');
-    assert.ok(ruff !== -1 && ruff < lint, `job ${job.name} runs lint-python without make install-tools TOOLS=ruff before it`);
+    assert.ok(install !== -1 && install < lint, `job ${job.name} runs lint-python without make install before it`);
     assert.ok(!job.text.includes('actions/setup-python'), `job ${job.name} sets up a Python of PATH for ruff`);
   }
-  assert.match(read('Makefile'), /^install: TOOLS := go uv python$/m, 'make install installs Go, uv and the pinned Python, which every Python check runs');
 });
 
 test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up no Python of PATH', () => {
@@ -424,6 +429,6 @@ test('make dependency-review installs the Rust toolchain before cargo-audit and 
   assert.ok(!read('.github/workflows/dependency-review.yml').includes('actions/setup-python'), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 
-test('the unit tests of the Python package run with the pinned interpreter of var/tools', () => {
-  assert.match(read('Makefile'), /^PYTHON := \$\(CURDIR\)\/var\/tools\/bin\/python3$/m);
+test('the unit tests of the Python package run with the shim of the python of mise.toml', () => {
+  assert.match(read('Makefile'), /^PYTHON := \$\(CURDIR\)\/var\/tools\/mise\/shims\/python3$/m);
 });

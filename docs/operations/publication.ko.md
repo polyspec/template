@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 28f8e7954be5fc96e9d179dd30e4306c7899a76336dd2b5a26526098c3fdc78a -->
+<!-- source-sha256: 8776f58f013f5699c4f8165de13efad9929e4fb82c4d13ea67402ba7e3d5b5a9 -->
 # 발행
 
 [English](/operations/publication).
@@ -64,7 +64,7 @@ make release-publish
 3. `make release-assets`는 npm 패키지를 build하고 `var/release/assets`를 쓴다. 각 npm 패키지의 `npm pack`(`.tgz`), tag된 commit의 시각으로 만든 각 Composer 패키지 directory의 `git archive`(`.zip`)이다. Python 패키지의 wheel(`.whl`)도 만든다. `pip wheel --no-deps --no-index`를 `var/tools/wheels`의 고정된 build backend와 함께 실행하고, `SOURCE_DATE_EPOCH`는 commit의 시각이다. wheel의 METADATA는 패키지 이름과 tag의 버전을 담고 `name==version` Requires-Dist만 담아야 한다. 릴리스 asset은 npm tarball, Composer zip과 wheel이다. archive 이름은 `<package>-<language>-<version>.<ext>`이고 `@scope/`와 `vendor/`는 `scope-`와 `vendor-`로 쓰며 language는 `npm` 또는 `php`다. `polyspec-template-npm-X.Y.Z.tgz`는 `@polyspec/template`, `polyspec-template-language-npm-X.Y.Z.tgz`는 `@polyspec/template-language`, `polyspec-template-php-X.Y.Z.zip`은 `polyspec/template`, `polyspec-template-php-ext-php-X.Y.Z.zip`은 `polyspec/template-php-ext`이다. Go tag는 아무것도 만들거나 첨부하지 않는다. `release-assets`는 `/`가 없는 tag에서만 npm 패키지를 build한다. 각 archive는 패키지의 manifest를 바꾸지 않고 담는다. tree의 발행 manifest가 발행되는 패키지다. 이어서 step은 pack된 모든 manifest가 tag된 commit의 manifest와 같고, 이 저장소의 scope에 속한 각 의존성을 정확한 버전으로, 이 저장소의 패키지를 X.Y.Z로 적으며, `overrides`를 선언하지 않고, 각 `composer.json`이 `artifact` repository가 읽는 버전 X.Y.Z를 선언하고 `repositories`를 선언하지 않을 때만 통과한다(`manifestProblems`). 경로(`file:`, `link:`, `workspace:`), git source(`git`, `github:`, ssh), URL, range, 개발 버전은 저장소 안에서만 설치된다.
 4. `make release-publish`는 archive와 함께 `gh release create <tag> --verify-tag --title <tag> --notes-file <notes>`를 실행한다. notes는 `CHANGELOG.md`의 section `## X.Y.Z`가 GitHub release body의 한도인 125000자(`NOTES_LIMIT`) 이하이면 그 section이다. 더 긴 section은 한 줄 `The changes of X.Y.Z are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/<tag>/CHANGELOG.md#XYZ).`로 바뀌며, anchor는 점을 뺀 버전이다.
 
-release workflow는 `make release-assets` 전에 `make install-tools TOOLS="python pythonBackend"`를 실행한다. wheel은 `config/toolchain.json`의 `pythonBuild` Python으로 build하기 때문이다.
+release workflow는 `make release-assets` 전에 `make release-tools`를 실행하며, 이것은 `mise.toml`의 Python과 `config/toolchain.json`의 build backend `pythonBackend`를 설치한다. wheel은 그 Python으로 build하기 때문이다.
 
 release workflow는 push된 tag마다 한 번 실행된다. tag `vX.Y.Z`의 `make release-verify`는 같은 commit의 tag `packages/template-go/vX.Y.Z`를 요구하므로, 메인테이너는 Go tag를 tag `vX.Y.Z`보다 먼저, 또는 같은 push로 push한다. Go tag의 실행은 archive를 만들지 않고 asset 없는 GitHub Release를 만든다.
 

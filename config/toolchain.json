@@ -1,67 +1,13 @@
 {
   "schema": 1,
-  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. composer is the exact Composer version of every run, with the sha256 of its phar, which make install-tools installs into var/tools for the PHP lint of kit. python is the Python minor version of the suite: the pythonBuild release of that minor, which the uv of uv installs, is the interpreter of every Python check (var/tools/bin/python3), so no job sets up a Python of its own. go names the go.mod whose go directive is the Go version of every run. cargoAudit and govulncheck are the releases that make dependency-review installs into var/tools for the advisories of the Cargo.lock files and the Go modules. ruff is the ruff release that make lint-python runs and make install-tools installs, with the sha256 of its wheel of each platform. vulture, golangciLint and deadcode are the releases of the lint tools of kit that make lint-python and make lint-go run and make install-tools installs. alint is the release that make layout-check runs on config/layout.yml and make install-tools installs, with the sha256 of its archive of each platform.",
+  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. pythonBackend is the build backend of the Python wheel, which make install-tools installs by the sha256 of its wheel. mise is the release that make install-tools TOOLS=npm installs with the sha256 of each platform; mise.toml declares the tools it installs (Go, Python with uv, ruff, vulture, alint, golangci-lint, deadcode, govulncheck, cargo-audit and Composer) and mise.lock locks them for every platform of the bootstrap (T24.12).",
   "php": [
     "8.5"
   ],
-  "composer": {
-    "version": "2.10.3",
-    "sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6"
-  },
-  "python": "3.14",
-  "go": {
-    "mod": "packages/template-go/go.mod"
-  },
-  "cargoAudit": "0.22.2",
-  "govulncheck": "1.8.0",
-  "ruff": {
-    "version": "0.17.0",
-    "sha256": {
-      "darwin-arm64": "cbf7149e0927dc3295d5d64679a4765576eef71b00782b2ae969ef82274d6bb9",
-      "darwin-x64": "5f0ca4a40f81403689c04f12966e22f44e329ae362072d8f1587b7bda87f603b",
-      "linux-arm64": "13ee90156522998c3037059d8f66885c8adeeaf7643bdce2caceee196ecd23e0",
-      "linux-x64": "bc73e7c133e82d55b5f15897b2a442d72c0cb4a0c886c46801ce3c247150b60c"
-    }
-  },
-  "pythonBuild": {
-    "version": "3.14.8"
-  },
-  "uv": {
-    "version": "0.12.24",
-    "sha256": {
-      "darwin-arm64": "0c4346de7abdb49495b393b9ec809fe387aa43e586be20fecb972216c1e71732",
-      "darwin-x64": "4fa82e37cb94767661f532b001e470b67a186c7260e305bd84ddb78fd545c0b6",
-      "linux-arm64": "5231be65f496304623895dacdbf1de8504fec90303684bdf05805aa34414dd21",
-      "linux-x64": "b4dfaef47d491a7296981f8374a4595f55dbf84e8937c8ecd2983574d8bb3da6"
-    }
-  },
-  "alint": {
-    "version": "0.18.2",
-    "sha256": {
-      "darwin-arm64": "ccfb4d13c6001b6ee5d31f2e139ce3e9710df54ba75c5601ef2a96be9ad8d4b2",
-      "darwin-x64": "23dc62149aacc8168f922e35e067a244d3c715725182322dcc3564129968dd8c",
-      "linux-arm64": "133ae54580b1c84d6aa1641d72448267241064ee9c5be119bb649f6acad9e005",
-      "linux-x64": "ce1f182bf3205aceab62fad40dbdd7502de638ed89cbb4fef10320803384ff9b"
-    }
-  },
   "pythonBackend": {
     "requirement": "setuptools==84.0.0",
     "sha256": "51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670"
   },
-  "vulture": {
-    "version": "2.16",
-    "sha256": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee"
-  },
-  "golangciLint": {
-    "version": "2.14.0",
-    "sha256": {
-      "darwin-arm64": "5ef5f36a7147e91dc58ef9ef4d11bb7bad5ead0c76eb6c01327a73c641d1dcc3",
-      "darwin-x64": "a5667c1c3536be1740133213e1e822bfb8f0d98ea12903174d6d5f635e4ed68d",
-      "linux-arm64": "ee7ec5f3453d15ddf106fae5a4d6c71737712348a979d1fe9cd52ec7ea299bae",
-      "linux-x64": "ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab"
-    }
-  },
-  "deadcode": "0.52.0",
   "exceptions": [
     {
       "tool": "node",
@@ -70,5 +16,14 @@
       "reason": "VS Code 1.138, the minimum of engines.vscode, runs the extension and its server on the Node.js 24.18.1 of its Electron 42.10.0, so the floor of the extension is that Node.js",
       "retry": "when the minimum engines.vscode of the extension ships an Electron with Node.js 26.11.1 or later"
     }
-  ]
+  ],
+  "mise": {
+    "version": "2026.10.8",
+    "sha256": {
+      "darwin-arm64": "8228699f316dc17931beb86f7a1aac70e4685535430441492ff4e857c72535ad",
+      "darwin-x64": "28c924c5703c6344489bc73227c59da2194eaf7fd962c5f3d233b9524b7419e9",
+      "linux-x64": "e908ea27810ae358c9a9a7d897ea10197bdc38d39839243e1b36acc31cbef868",
+      "linux-arm64": "88aea77e41c2a3c45a9cbd64df9516ba887017442846213b3de178acbd3c9a46"
+    }
+  }
 }

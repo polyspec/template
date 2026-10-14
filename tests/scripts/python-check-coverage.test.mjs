@@ -28,8 +28,8 @@ for (const check of checks) {
   });
 }
 
-// The checks run the pinned interpreter var/tools/bin/python3 (scripts/python-toolchain.mjs), which `make install` installs
-// (T22.5-5). A job that runs one of these targets runs make install, and no job sets up a Python of its own.
+// The checks run the pinned interpreter var/tools/mise/shims/python3 (scripts/python-toolchain.mjs), the python of mise.toml
+// that `make install` installs (T22.5-5, T24.12). A job that runs one of these targets runs make install, and no job sets up a Python of its own.
 const pythonTargets = ['test-scripts', 'install-check', 'generated-native-check', 'typed-generator-compile-check', 'showcase-check'];
 
 test('each CI job that runs a Python check target runs make install and sets up no Python of PATH', () => {
