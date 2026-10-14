@@ -11,6 +11,7 @@ This document defines the engine API, template names and loading, scope, loops, 
 
 ```
 parse(source, name, { delimiters }) -> Template
+decodeTemplate(json) -> Template
 Engine(options: { loader, functions, limits, delimiters })
 engine.register(name, fn)
 engine.render(target: name | Template, assign, { define, env }) -> string

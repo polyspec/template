@@ -44,16 +44,20 @@ document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
 `@polyspec/template/render` exports an engine that accepts parsed templates (AST JSON) and does not include the lexer and parser.
 
 ```ts
-import { AstProgram, Engine, MapLoader } from '@polyspec/template/render';
+import { AstProgram, Engine, MapLoader, decodeTemplate } from '@polyspec/template/render';
 
+const cardAst = decodeTemplate(cardAstJson);
 const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': cardAst }) }));
 ```
+
+`decodeTemplate` validates every node of the AST JSON against the AST schema and fails with an `AstDecodeError` whose `path` is the JSON Pointer of the first invalid node (AST-10).
 
 ## API
 
 | Export | Description |
 | --- | --- |
 | `parse(source, name, { delimiters })` | Parses one template into its AST. `source` is a string or UTF-8 bytes. |
+| `decodeTemplate(json)` | Reads the AST JSON, as text or as its parsed value, into a `Template`, validated against `contracts/schema/ast.schema.json`; an `AstDecodeError` names the JSON Pointer of the first invalid node in `path` (AST-10). Also exported by `@polyspec/template/render`. |
 | `analyze(source, name, { delimiters })` | Parses once and returns the AST plus parser tag ranges and consumed expression-token ranges. |
 | `new AstProgram({ loader, functions, limits, delimiters })` | Creates an AST program. `loader` defaults to an empty `MapLoader`. |
 | `new Engine(program)` | Creates an engine that delegates to one AST or generated program. |

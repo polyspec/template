@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-ast -->
-<!-- source-sha256: c7f17798d6d7cf29a97836eaf3f1a4a76ed493bd2fde4b68cac83b8f64222176 -->
+<!-- source-sha256: f0e92b2e5a396d6c868ab8b0d24763c8d0c290098fc8850eaa7db02bbadcf7b0 -->
 # AST
 
 [English](/spec/ast).
@@ -75,6 +75,8 @@ AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 �
 **AST-7** AST는 JSON으로 직렬화한다. 객체 키 순서는 의미가 없고 비교는 구조적이다. `span`은 `Template` 이외의 모든 노드에 존재한다. 숫자 리터럴은 JSON 숫자로 직렬화하므로 `1e3`은 `1000`으로, `1.50`은 `1.5`로 직렬화한다. 문자열 리터럴은 해석된 문자열로 직렬화한다. `null` 필드는 생략하지 않고 JSON `null`로 쓴다.
 
 **AST-8** 직렬화된 모든 AST는 `contracts/schema/ast.schema.json` 검증을 통과한다. `scripts/check-schema.mts`가 스키마와 `tests/cases/`의 모든 `expected.ast.json`을 검증한다.
+
+**AST-10** AST가 자기 타입을 가진 런타임은 AST JSON을 그 타입으로 읽는 decode를 공개한다: TypeScript는 패키지 entry와 render 전용 entry의 `decodeTemplate`, Go는 `ast.DecodeTemplate`, Rust는 `decode_template`이다. decode는 정규 JSON(AST-7)의 모든 노드를 읽고, 템플릿 AST가 아닌 JSON에서는 위치를 말하는 오류로 실패한다: TypeScript는 `contracts/schema/ast.schema.json`으로 검증해 가장 안쪽의 잘못된 노드의 JSON Pointer를 말하고, Rust는 어느 노드의 모르는 필드나 빠진 필드도 거부하며 잘못된 값을 담은 문장 노드까지의 경로를 말하고, Go는 빠진 필드나 모르는 노드 타입을 말한다. PHP와 Python의 AST는 자기 타입이 없는 배열과 dict이므로 이 런타임은 decode를 공개하지 않는다. 이유: 파싱된 템플릿을 AST JSON으로 저장하는 호스트(RT-41), 예를 들어 그것을 브라우저로 보내는 서버는 그것을 cast하지 않고 검사된 AST로 다시 읽는다.
 
 ## 예제
 

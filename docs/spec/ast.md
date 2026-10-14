@@ -75,6 +75,8 @@ The `Literal` `null` produced for a trailing `??` has an empty span at the end o
 
 **AST-8** Every serialized AST validates against `contracts/schema/ast.schema.json`. `scripts/check-schema.mts` validates the schema and every `expected.ast.json` in `tests/cases/`.
 
+**AST-10** A runtime whose AST has types of its own publishes the decode of the AST JSON into them: `decodeTemplate` in TypeScript, from the package entry and the render-only entry, `ast.DecodeTemplate` in Go and `decode_template` in Rust. A decode reads every node of the canonical JSON (AST-7) and fails on JSON that is not a template AST with an error that names where: TypeScript validates against `contracts/schema/ast.schema.json` and names the JSON Pointer of the innermost invalid node, Rust rejects an unknown or missing field of any node and names the path up to the statement node that holds the invalid value, and Go names the missing field or the unknown node type. The PHP and Python ASTs are arrays and dicts with no type of their own, so these runtimes publish no decode. Reason: a host that stores a parsed template as its AST JSON (RT-41), such as a server that sends it to a browser, reads it back as a checked AST instead of casting it.
+
 ## Example
 
 Source `<b>{= product.price | number}</b>` with template name `x.tpl`:

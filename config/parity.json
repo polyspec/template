@@ -356,9 +356,9 @@
       "kind": "feature",
       "profile": "manifest",
       "bindings": [
-        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › renders a parsed AST through the render-only entry" },
+        { "implementation": "ts", "test": "packages/ts/tests/decode.test.ts", "id": "decodeTemplate › renders a decoded template without its source through the render-only entry (RT-41)" },
         { "implementation": "go", "test": "packages/go/ast/json_test.go", "id": "TestADecodedTemplateRendersWithoutItsSource" },
-        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "engine_renders_a_parsed_template_and_reparses_new_versions" },
+        { "implementation": "rust", "test": "packages/rust/tests/decode.rs", "id": "a_decoded_template_renders_without_its_source" },
         { "implementation": "php", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testRendersAParsedAst" },
         { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_renders_a_parsed_ast" }
       ]

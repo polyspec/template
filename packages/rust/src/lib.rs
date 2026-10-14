@@ -19,7 +19,7 @@ pub mod render;
 pub mod source;
 pub mod value;
 
-pub use ast::{Comment, Expr, Node, Template};
+pub use ast::{AstDecodeError, Comment, Expr, Node, Template, decode_template};
 pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_boundary};
 pub use format::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};

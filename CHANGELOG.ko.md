@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6b5dfcf837b26d8bbc5e41e8a02137302e357555a580b2c7d147e06cc71fb669 -->
+<!-- source-sha256: d27d3cb8f177821e2cd139a39cfd60d563ea759ac8e50b69127c80c108345238 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T25.6: TypeScript는 `@polyspec/template`과 `@polyspec/template/render`에서 `decodeTemplate(json)`을, Rust는 `decode_template(json)`을 공개합니다. 각각 Go의 `ast.DecodeTemplate`처럼 AST JSON을 패키지의 `Template`으로 읽고, 첫 번째 잘못된 노드의 경로를 말하는 `AstDecodeError`로 실패합니다(AST-10). TypeScript는 build가 함께 묶는 `contracts/schema/ast.schema.json`으로 ajv가 검증하며 ajv를 runtime dependency로 갖고, Rust는 serde로 모든 노드의 모르는 필드와 빠진 필드를 거부하며 serde_path_to_error로 경로를 말합니다. parity unit `parsed-ast`는 Go의 것처럼 program이 decode한 AST를 렌더하는 TypeScript와 Rust의 decode test를 bind합니다.
 - T25.7: `date`는 `+25:00`이나 `+05:60`처럼 범위를 벗어난 오프셋을 가진 날짜 문자열에서 `E_RUNTIME_TYPE`으로 실패한다(FUN-37, FUN-38). 이 문자열은 날짜 pattern에 맞고 오프셋 parser는 그 오프셋을 거부했는데, TypeScript, Go, PHP, PHP 확장은 문자열을 오프셋 0으로 읽었고 Python은 `E_INTERNAL`로 실패했다. Rust는 이미 `E_RUNTIME_TYPE`으로 실패했으며, 이제 오프셋을 다시 parse하지 않고 parse한 값을 그대로 쓴다. FUN-37이 오프셋의 범위를 명시하고, case `functions/date-offset-hour-error`와 `functions/date-offset-minute-error`가 모든 runtime에서 이를 검사한다.
 - T25.4: Go backend가 그대로 쓰는 Go인 `OrderedMap`과 helper 25개는 `packages/compiler/backends/go/`의 Go 파일에 정의마다 하나씩 gofmt 형식으로 있고, `backends/go.mjs`는 파일의 package clause와 import 뒤의 선언을 읽습니다. template literal의 두 칸 들여쓰기를 tab으로 바꾸던 tag `gofmt`는 삭제되었습니다. `make lint-go-format`은 이 folder에 `gofmt -l`을, `make test-go-backend-vet`은 `go vet`을 실행하며, Go의 compiler digest는 이 파일들을 포함합니다. Generated program은 byte 단위로 같고, 커밋된 manifest와 `examples/site/index.html`은 새 compiler digest를 기록합니다.
 - T24.14: template은 `@polyspec/kit` 0.0.45를 고정하고, `make kit-sync`가 그 복사본(knip.json, ruff.toml, bootstrap script)을 썼습니다. `make install-tools`가 Rust toolchain을 설치하므로 target `rust-toolchain`은 사라지고, ruff는 `.ruff_cache` 대신 var/ruff에 cache를 둡니다. `config/knip-entries.json`은 layout entry 밖에서 make가 실행하는 파일, workspace `packages/ts`, `packages/codemirror`, `packages/vscode`의 entry, `gmake`를 적고, CodeMirror peer는 `packages/codemirror`의, vsce는 `make vscode-package`가 실행하는 script `package:vsix`를 가진 `packages/vscode`의 development dependency입니다.

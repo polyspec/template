@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-14T20:22:35.797Z",
+  "reviewed": "2026-10-14T22:41:24.936Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "4afa09d8d318517c8b51261ff1f91af907619620c666fa5ca1243db25f4ffdfc",
+      "sha256": "f03f36a206a83d9397e4f3b515dc1fbd4d16cafd555368f20a3d77bddf786f9b",
       "advisories": [
         {
           "package": "sprintf-js",
@@ -29,12 +29,12 @@
     },
     {
       "lock": "examples/showcase/adapters/rust/Cargo.lock",
-      "sha256": "4e7c210a37394bd2bb513515fbedaef69d4dcaa73f287b302f27a226a2beb1fe",
+      "sha256": "05121ccd1a8d9ef35a5daa6ffd3b7c6093cf6419be60e6d3a8963d78f5f9c02e",
       "advisories": []
     },
     {
       "lock": "packages/rust/Cargo.lock",
-      "sha256": "9829fc088859f80f805f6b6e680f7d02ee22bb5cec70d7c1e1983a935f835ec8",
+      "sha256": "caf866a501662db254620290450dfe237894dbc0e354c0571644396c9cd6a8ca",
       "advisories": []
     }
   ],
@@ -213,6 +213,13 @@
       "package": "vscode-languageserver-textdocument",
       "version": "1.0.15",
       "latest": "1.0.15"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/ts/package.json",
+      "package": "ajv",
+      "version": "8.20.0",
+      "latest": "8.20.0"
     },
     {
       "ecosystem": "npm",

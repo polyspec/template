@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: cbf20b202be519e70e18ae8c25d9853f5c64bf37f39e6bca15e3f2a9f124fb53 -->
+<!-- source-sha256: 5e42bdc22279aee260c3431fef39616b292aa98749075e0ae7f9ec430380f859 -->
 # polyspec-template
 
 [English](README.md).
@@ -28,6 +28,7 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 | 항목 | 설명 |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | 선택적인 구분자로 UTF-8 템플릿 하나를 AST로 파싱한다. |
+| `decode_template(json)` | AST JSON 텍스트를 어느 노드에도 모르는 필드와 빠진 필드가 없는 `Template`으로 읽는다. `AstDecodeError`는 첫 번째 잘못된 값의 경로를 담으며, 그 경로는 값을 담은 문장 노드에서 끝나고 메시지가 필드를 말한다(AST-10). |
 | `analyze(source, name, &ParseOptions)` | `parse`처럼 파싱하고, 받아들인 모든 태그(`TagKind`, 범위, 본문 범위)와 그 모든 부분의 EDT-8 분류(`SyntaxToken`)를 앞의 BOM을 뺀 바이트 오프셋으로 함께 반환한다. |
 | `format(source, &FormatOptions)` | 태그 안의 공백과, HTML 요소와 템플릿 블록에 따른 줄 들여쓰기를 정리한다. `FormatOptions`는 들여쓰기 단위(`IndentUnit`, 기본값 공백 두 칸; `None`은 모든 줄을 유지), `TemplateBlocks::Indent` 또는 `Flat`, 구분자, 바이트 범위를 정한다. 결과가 같은 AST로 파싱될 때만 텍스트를 돌려주고, 아니면 reason이 `parse`, `invariant`, `html`인 `FormatError`를 돌려준다. |
 | `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. 구분자 쌍이 아닌 구분자 옵션에는 `ArgumentError`를 돌려준다. |

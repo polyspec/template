@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: fe196d50ab7fbe19256dadbfc5c5d7da18af339b2b8e6d4c4470ffabdb0755da -->
+<!-- source-sha256: b16f3494d2bec7de1fd2e7c777cb906424e47dae3a3a1286fa27ee62abd4e372 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -12,6 +12,7 @@
 
 ```
 parse(source, name, { delimiters }) -> Template
+decodeTemplate(json) -> Template
 Engine(options: { loader, functions, limits, delimiters })
 engine.register(name, fn)
 engine.render(target: name | Template, assign, { define, env }) -> string
