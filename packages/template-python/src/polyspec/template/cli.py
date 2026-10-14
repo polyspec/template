@@ -1,113 +1,142 @@
 """Command line interface as defined in docs/spec/conformance.md (CNF-4).
 
-template parse FILE [--root DIR] [--delimiters OC]
-template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+template parse [--root DIR] [--delimiters OC] FILE
+template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+template tokens [--root DIR] [--delimiters OC] FILE
+template format [--indent none|tab|N] [--delimiters OC] FILE
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
-from typing import Optional
+from typing import NoReturn
 
 from .bind import BindError
-from .engine import AstProgram, Engine, RenderOptions
+from .engine import AstProgram, Engine, EngineOptions, RenderOptions
 from .errors import TemplateError
+from .formatter import FormatOptions, format_template
 from .json_parse import parse_json_bytes
 from .node_loader import FsLoader
-from .parser import parse_template
-from .scanner import parse_delimiters
+from .number import number_to_string
+from .parser import analyze_template, parse_template
+from .scanner import DEFAULT_DELIMITERS, parse_delimiters
 from .source import Source
 
-USAGE = (
-    "usage: template parse FILE [--root DIR] [--delimiters OC]\n"
-    "       template render FILE [--data F] [--define F] [--env F] [--root DIR] "
-    "[--delimiters OC]\n"
-)
+
+class _Parser(argparse.ArgumentParser):
+    """An argument parser whose usage errors exit with status 1 (CNF-4)."""
+
+    def error(self, message: str) -> NoReturn:
+        self.print_usage(sys.stderr)
+        self.exit(1, f"{self.prog}: error: {message}\n")
 
 
-def usage(message: str) -> "SystemExit":
-    sys.stderr.write(f"{message}\n{USAGE}")
-    return SystemExit(1)
+def _delimiters(value: str) -> str:
+    if parse_delimiters(value) is None:
+        raise argparse.ArgumentTypeError(
+            f"{value!r} is not two different delimiter characters"
+        )
+    return value
+
+
+def _indent(value: str) -> "str | None":
+    if value == "none":
+        return None
+    if value == "tab":
+        return "\t"
+    if value.isdecimal() and 1 <= int(value) <= 8:
+        return " " * int(value)
+    raise argparse.ArgumentTypeError("requires a number from 1 to 8, tab or none")
+
+
+def _arguments() -> _Parser:
+    parser = _Parser(prog="template")
+    commands = parser.add_subparsers(
+        dest="command", required=True, parser_class=_Parser
+    )
+    parse = commands.add_parser("parse")
+    render = commands.add_parser("render")
+    tokens = commands.add_parser("tokens")
+    format_ = commands.add_parser("format")
+    for option in ("--data", "--define", "--env"):
+        render.add_argument(option, metavar="F")
+    for command in (parse, render, tokens):
+        command.add_argument("--root", metavar="DIR")
+    format_.add_argument("--indent", type=_indent, default="2", metavar="none|tab|N")
+    for command in (parse, render, tokens, format_):
+        command.add_argument("--delimiters", type=_delimiters, metavar="OC")
+        command.add_argument("file", metavar="FILE")
+    return parser
 
 
 def main(argv: "list[str] | None" = None) -> int:
-    arguments = list(sys.argv[1:] if argv is None else argv)
-    if len(arguments) < 2 or arguments[0] not in ("parse", "render"):
-        usage("command and FILE are required")
-        return 1
-    command, file_name = arguments[0], arguments[1]
-    rest = arguments[2:]
+    parser = _arguments()
+    arguments = parser.parse_args(argv)
 
-    keys = ("data", "define", "env", "root", "delimiters")
-    options: dict[str, Optional[str]] = {key: None for key in keys}
-    index = 0
-    while index < len(rest):
-        flag = rest[index]
-        if not flag.startswith("--") or index + 1 >= len(rest):
-            usage(f"invalid option {flag}")
-            return 1
-        key = flag[2:]
-        if key not in keys:
-            usage(f"unknown option {flag}")
-            return 1
-        options[key] = rest[index + 1]
-        index += 2
+    def usage(message: str) -> NoReturn:
+        parser.error(message)
 
-    file_path = os.path.abspath(file_name)
-    root = os.path.abspath(options["root"] or os.path.dirname(file_path))
+    def read(path: str) -> bytes:
+        # CNF-4: a file that cannot be read is a usage error.
+        try:
+            with open(path, "rb") as handle:
+                return handle.read()
+        except OSError as error:
+            usage(f"cannot read {path}: {error.strerror}")
+
+    if arguments.command == "format":
+        return _format(read(arguments.file), arguments)
+
+    file_path = os.path.abspath(arguments.file)
+    root = os.path.abspath(arguments.root or os.path.dirname(file_path))
     name = os.path.relpath(file_path, root).replace(os.sep, "/")
     if name.startswith(".."):
         usage("FILE is outside of --root")
-        return 1
+    delimiters = (
+        DEFAULT_DELIMITERS
+        if arguments.delimiters is None
+        else parse_delimiters(arguments.delimiters)
+    )
 
     def read_json(path: str):
-        # CNF-4: a file that cannot be read is a usage error; its content is data (VAL-12).
-        try:
-            with open(os.path.join(root, path), "rb") as handle:
-                data = handle.read()
-        except OSError:
-            usage(f"cannot read {path}")
-            raise SystemExit(1) from None
-        return parse_json_bytes(data)
-
-    def to_plain(value):
-        if isinstance(value, dict):
-            return {key: to_plain(item) for key, item in value.items()}
-        if isinstance(value, list):
-            return [to_plain(item) for item in value]
-        return value
+        # Its content is data (VAL-12).
+        return parse_json_bytes(read(os.path.join(root, path)))
 
     try:
-        engine_options: dict = {"loader": FsLoader(root)}
-        if options["delimiters"] is not None:
-            engine_options["delimiters"] = options["delimiters"]
-        if command == "parse":
-            try:
-                with open(file_path, "rb") as handle:
-                    data = handle.read()
-            except OSError:
-                usage(f"cannot read {file_name}")
-                return 1
-            delimiters = (
-                parse_delimiters(options["delimiters"])
-                if options["delimiters"]
-                else ("{", "}")
-            )
-            ast = parse_template(Source.from_bytes(name, data), delimiters)
+        if arguments.command == "parse":
+            source = Source.from_bytes(name, read(file_path))
+            ast = parse_template(source, delimiters)
             sys.stdout.write(json.dumps(_json_plain(ast), ensure_ascii=False))
+        elif arguments.command == "tokens":
+            # EDT-8 tokens as [start, end, type] with UTF-8 byte offsets counted
+            # after the byte order mark, as AST spans count them (LEX-2, FMT-2).
+            source = Source.from_bytes(name, read(file_path))
+            analysis = analyze_template(source, delimiters)
+            tokens = [
+                [source.byte_at(t["start"]), source.byte_at(t["end"]), t["kind"]]
+                for t in analysis.tokens
+            ]
+            sys.stdout.write(json.dumps(tokens, separators=(",", ":")))
         else:
-            engine = Engine(AstProgram(_engine_options(engine_options)))
+            engine = Engine(
+                AstProgram(
+                    EngineOptions(
+                        loader=FsLoader(root), delimiters=arguments.delimiters
+                    )
+                )
+            )
             render_options = RenderOptions()
             assign: dict = {}
             try:
-                if options["data"] is not None:
-                    assign = read_json(options["data"])
-                if options["define"] is not None:
-                    render_options.define = to_plain(read_json(options["define"]))
-                if options["env"] is not None:
-                    render_options.env = to_plain(read_json(options["env"]))
+                if arguments.data is not None:
+                    assign = read_json(arguments.data)
+                if arguments.define is not None:
+                    render_options.define = _to_plain(read_json(arguments.define))
+                if arguments.env is not None:
+                    render_options.env = _to_plain(read_json(arguments.env))
             except BindError as error:
                 raise TemplateError(error.code, name, 0, 0, 0, 0, str(error)) from None
             sys.stdout.write(engine.render(name, assign, render_options))
@@ -117,24 +146,57 @@ def main(argv: "list[str] | None" = None) -> int:
     return 0
 
 
+def _format(data: bytes, arguments: argparse.Namespace) -> int:
+    """Formats the bytes of FILE: invalid UTF-8 is the parse error of the
+    parser (E_LEX_INVALID_UTF8 at its position), and every other result is the
+    one of format_template (FMT-14)."""
+    try:
+        Source.from_bytes(arguments.file, data)
+    except TemplateError as error:
+        return _format_error("parse", error.code, error.line, error.col, error.message)
+    result = format_template(
+        data.decode("utf-8"),
+        FormatOptions(
+            name=arguments.file,
+            indent=arguments.indent,
+            delimiters=arguments.delimiters,
+        ),
+    )
+    if not result.ok:
+        error = result.error
+        return _format_error(
+            error.reason, error.code, error.line, error.col, error.message
+        )
+    sys.stdout.write(result.text)
+    return 0
+
+
+def _format_error(
+    reason: str, code: "str | None", line: int, col: int, message: str
+) -> int:
+    error = {"reason": reason, "code": code, "line": line, "col": col}
+    sys.stderr.write(json.dumps({**error, "message": message}, ensure_ascii=False))
+    return 2
+
+
+def _to_plain(value):
+    if isinstance(value, dict):
+        return {key: _to_plain(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_to_plain(item) for item in value]
+    return value
+
+
 def _json_plain(value):
     """The JSON form of a value: an integral float prints without a fraction
     part, as the reference binding prints it."""
     if isinstance(value, float) and value == int(value) and abs(value) < 1e21:
-        from .number import number_to_string
-
         return int(number_to_string(value))
     if isinstance(value, dict):
         return {key: _json_plain(item) for key, item in value.items()}
     if isinstance(value, list):
         return [_json_plain(item) for item in value]
     return value
-
-
-def _engine_options(values: dict):
-    from .engine import EngineOptions
-
-    return EngineOptions(loader=values["loader"], delimiters=values.get("delimiters"))
 
 
 if __name__ == "__main__":
