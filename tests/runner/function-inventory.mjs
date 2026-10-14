@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { root } from './drivers.mjs';
 
 const report = JSON.parse(await new Promise((resolveReport, reject) => {

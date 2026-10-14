@@ -60,12 +60,6 @@ function numberField(object, name) {
   return value;
 }
 
-function booleanField(object, name) {
-  const value = object.get(name);
-  if (typeof value !== 'boolean') throw new Error(name + ' must be a boolean');
-  return value;
-}
-
 function defineValue(value) {
   const object = objectValue(value, 'define.json');
   const define = new Map();
