@@ -1,11 +1,10 @@
-//! Command line interface (CNF-4): `<subcommand> [options] FILE`, the options before the operand.
+//! Command line interface (CNF-4): `<subcommand> [options] FILE`; clap parses the arguments.
 //!   parse [--root DIR] [--delimiters OC] FILE
 //!   render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
 //!   tokens [--root DIR] [--delimiters OC] FILE
 //!   format [--indent none|tab|N] [--delimiters OC] FILE
 
-use clap::error::ErrorKind;
-use clap::{Args, CommandFactory, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use polyspec_template::{
     ArgumentError, AstProgram, BindError, Engine, EngineOptions, FormatOptions, IndentUnit, ParseOptions, RenderOptions, RenderTarget,
     RequestError, TemplateError, analyze, defines_from_json, env_from_json, format_bytes, parse, read_json as parse_json_text,
@@ -24,19 +23,16 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// Print the AST JSON of FILE.
-    #[command(override_usage = "template parse [--root DIR] [--delimiters OC] FILE")]
     Parse {
         #[command(flatten)]
         input: Input,
     },
     /// Print the tokens of FILE as a JSON array of [start, end, type].
-    #[command(override_usage = "template tokens [--root DIR] [--delimiters OC] FILE")]
     Tokens {
         #[command(flatten)]
         input: Input,
     },
     /// Print the formatted text of FILE.
-    #[command(override_usage = "template format [--indent none|tab|N] [--delimiters OC] FILE")]
     Format {
         /// Indent unit: none, tab or a number of spaces from 1 to 8; the default is two spaces.
         #[arg(long, value_name = "none|tab|N", value_parser = indent)]
@@ -44,11 +40,11 @@ enum Command {
         /// Delimiter pair of two characters.
         #[arg(long, value_name = "OC")]
         delimiters: Option<String>,
-        #[command(flatten)]
-        file: Operand,
+        /// The template file.
+        #[arg(value_name = "FILE")]
+        file: String,
     },
     /// Print the HTML that FILE renders.
-    #[command(override_usage = "template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE")]
     Render {
         /// JSON file of the data, relative to the root.
         #[arg(long, value_name = "F")]
@@ -73,37 +69,9 @@ struct Input {
     /// Delimiter pair of two characters.
     #[arg(long, value_name = "OC")]
     delimiters: Option<String>,
-    #[command(flatten)]
-    file: Operand,
-}
-
-/// The operand FILE. Options come before it: clap reads every argument from FILE on as an operand, and
-/// [`Operand::file`] rejects any argument after FILE.
-#[derive(Args)]
-struct Operand {
     /// The template file.
-    #[arg(value_name = "FILE", required = true, num_args = 1.., trailing_var_arg = true)]
-    operands: Vec<String>,
-}
-
-impl Operand {
-    /// FILE, or a usage error of the subcommand when an argument follows it.
-    fn file(&self, subcommand: &str) -> &str {
-        match self.operands.as_slice() {
-            [file] => file,
-            [_, after, ..] => {
-                let mut command = Cli::command();
-                let message = format!("unexpected argument {after:?} after FILE; options come before FILE");
-                usage_error(
-                    command
-                        .find_subcommand_mut(subcommand)
-                        .expect("subcommand")
-                        .error(ErrorKind::UnknownArgument, message),
-                )
-            }
-            [] => unreachable!("clap requires FILE"),
-        }
-    }
+    #[arg(value_name = "FILE")]
+    file: String,
 }
 
 /// The --indent value: `None` keeps the indentation of every line.
@@ -209,9 +177,8 @@ fn main() {
     let cli = Cli::try_parse().unwrap_or_else(|error| usage_error(error));
     match cli.command {
         Command::Format { indent, delimiters, file } => {
-            let file = file.file("format");
-            let (_, file_path, name) = locate(file, None);
-            let source = read_source(&file_path, file);
+            let (_, file_path, name) = locate(&file, None);
+            let source = read_source(&file_path, &file);
             let defaults = FormatOptions::default();
             let options = FormatOptions {
                 name,
@@ -228,7 +195,7 @@ fn main() {
             }
         }
         Command::Tokens { input } => {
-            let file = input.file.file("tokens");
+            let file = &input.file;
             let (_, file_path, name) = locate(file, input.root.as_deref());
             let source = read_source(&file_path, file);
             let parse_options = ParseOptions {
@@ -244,7 +211,7 @@ fn main() {
             }
         }
         Command::Parse { input } => {
-            let file = input.file.file("parse");
+            let file = &input.file;
             let (_, file_path, name) = locate(file, input.root.as_deref());
             let source = read_source(&file_path, file);
             let parse_options = ParseOptions {
@@ -257,7 +224,7 @@ fn main() {
             }
         }
         Command::Render { data, define, env, input } => {
-            let (root, _, name) = locate(input.file.file("render"), input.root.as_deref());
+            let (root, _, name) = locate(&input.file, input.root.as_deref());
             render(&root, &name, input.delimiters, data, define, env);
         }
     }
