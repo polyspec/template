@@ -122,6 +122,18 @@
       "rules": ["RT-70"],
       "verification": "make test-go",
       "files": ["packages/template-go/concurrency_test.go", "packages/template-go/bound_test.go"]
+    },
+    {
+      "name": "filesystem-conformance",
+      "rules": ["CNF-16"],
+      "verification": "make conformance",
+      "files": ["tests/fixtures/filesystem/cases.json", "tests/runner/cases.mjs", "tests/runner/conformance.mjs"]
+    },
+    {
+      "name": "editor-template-root",
+      "rules": ["EDT-18", "EDT-19", "EDT-20", "EDT-21"],
+      "verification": "make test-language test-lsp test-codemirror",
+      "files": ["packages/template-language/tests/root.test.ts", "packages/template-language/tests/root-marker/vectors.json", "packages/template-lsp/tests/server.test.ts", "packages/template-codemirror/tests/adapter.test.ts"]
     }
   ]
 }
