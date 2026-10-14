@@ -101,8 +101,14 @@ test('the install projects read no network source and use the pinned toolchains 
 
   const composer = calls.find(call => call.name === 'composer' && call.args[0] === 'install');
   assert.ok(composer, 'the check started no composer install');
-  const repositories = JSON.parse(composer.files['composer.json']).repositories;
-  assert.ok(repositories.some(repository => repository['packagist.org'] === false), `the PHP install project reads Packagist: ${JSON.stringify(repositories)}`);
+  // The archive is installed by its own composer.json, so its require cannot drift from the manifest; the dependencies
+  // resolve offline from the Composer cache at the versions of packages/template-php/composer.lock.
+  const installProject = JSON.parse(composer.files['composer.json']);
+  assert.equal(composer.env.COMPOSER_DISABLE_NETWORK, '1', 'the PHP install project may read the network');
+  assert.deepEqual(installProject.repositories.map(repository => repository.type), ['artifact'], `the PHP install project reads ${JSON.stringify(installProject.repositories)}, not only the archive of the run`);
+  const manifest = JSON.parse(read('packages/template-php/composer.json'));
+  const locked = Object.fromEntries(JSON.parse(read('packages/template-php/composer.lock')).packages.map(item => [item.name, item.version]));
+  assert.deepEqual(installProject.require, { [manifest.name]: manifest.version, ...locked });
 });
 
 test('the install project lock holds the packages that the install project reaches, in the text that cargo writes', () => {
