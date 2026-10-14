@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: e144f95f36243cb8c4a93017c655959b8fb87221b3ea7e8cedcc6f3f31287a91 -->
+<!-- source-sha256: fb7af6d6c92ac604d22c6c925264b9b47e2f1a8d3bbd0b66d31354c9517b8e72 -->
 # polyspec-template
 
 [English](README.md).

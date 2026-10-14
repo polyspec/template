@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: a9f4c1ae66d618d9fbfffdd16777725ce0e0132c289706268d3ea0110cf903d1 -->
+<!-- source-sha256: 1f38bc510d525ae8ed1253a6dcc886d36adf2b42f1e4b8780700f960178bad44 -->
 # polyspec/template
 
 [English](README.md).
