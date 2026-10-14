@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0af37479304042dd58901074e80b5e2fca63dada85e3782cde45303811f2dd4d -->
+<!-- source-sha256: aa5f557cffc918333c1bdc1446700c28c935201c3b052c2c958d204c17818d44 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.13: template은 `@polyspec/kit` 0.0.43을 고정하고 `make kit-sync`가 그 복사본(`.oxlintrc.json`, `knip.json`, `config/api-extractor.kit.json`, K138, K139, K142의 bootstrap script)을 썼습니다. `config/parity.json`의 tokens와 formatting suite는 data set이 case인 method에 묶입니다(K137): PHP package는 `ConformanceTest::testTokens`와 `ConformanceTest::testFormat`, PHP 확장은 `AnalyzeTest::testEqualsTheAnalysisOfThePhpPackage`와 `FormatTest::testFormatsTheCase`이며, kit 0.0.43을 기다리던 exclusion 네 개는 지워졌습니다.
 - T24.12: Python showcase adapter는 `ruff.toml`이 금지하는(S3) `importlib.util.spec_from_file_location` 대신 import 문 `from generated.typed import compiler_coverage, …`로 각 scenario의 generated program을 가져옵니다. Generated Python program은 `tools/showcase/python-module.mjs`에 따라 module 이름을 가집니다(`compiler-coverage`는 `generated/typed/compiler_coverage.py`). Showcase compiler, 그 검사, package install 검사가 이를 씁니다.
 - T23.5: Rust filesystem loader는 열린 `same_file::Handle`이 아니라 읽은 각 파일의 identity를 보관합니다. Unix에서는 `std::os::unix::fs::MetadataExt`의 device와 inode 번호, Windows에서는 `winapi-util`의 volume serial number와 file index이며, 읽기 위해 연 파일에서 읽습니다. 그래서 많은 template을 읽은 loader도 그 descriptor를 갖지 않습니다(EMFILE). Crate는 `same-file` 대신 Windows에서만 `winapi-util`에 의존합니다.
 - T24.3: `tests/scripts/process-group-exit-window.test.mjs`는 최대 300 s 동안 40번 실행하며 probe 결과를 집계하던 실험이 아니라 테스트입니다. 한 번의 실행으로 leader가 끝난 group의 member가 사라진 뒤에만 `stopProcessGroup`이 반환함을 확인하고, 기록했지만 사라짐을 확인하지 못한 모든 pid를 `t.after`에서 종료하며, member는 영원히 실행되지 않고 60 s 뒤 스스로 끝납니다. 실험의 결과는 파일 머리말에 남깁니다.
