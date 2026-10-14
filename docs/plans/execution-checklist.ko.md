@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: c067270cbb6d69c732ad2fe50c295ecadc9dec8e2c50a7ffdec96b7deca0bf6e -->
+<!-- source-sha256: f9c224e3167e2757a669f7d275be1deaaf61f974b2faaaccadb5cc7aa6c8aaa1 -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -460,6 +460,7 @@
 | T24.11 | 모든 test file을 parity unit에 묶는다(kit 0.0.38에서 K79가 기록한 red): `make parity-declarations-check`가 67개 finding을 보고하며 첫 줄은 `R5 undeclared-test ts packages/template-ts/tests/cli.test.ts: the test file of ts is the test of no binding, so no check runs it`이다. | `make parity-declarations-check` | [o] |
 | T24.12 | kit 0.0.42와 mise로 옮긴다(kit 0.0.38의 red): `make test-vscode-integration`과 `tests/scripts/install-vscode.test.mjs`는 `@polyspec/kit/install-vscode`에 대해 `ERR_PACKAGE_PATH_NOT_EXPORTED`로 실패하고, `make dependency-policy-check`는 workspace pattern `packages/template-ts`에서 중단되며, `make dependency-review RECORD=1`은 uv가 Python 3.14.8 설치 두 개를 보고해 install-tools에서 실패한다. Go, Python, uv, ruff, vulture, alint, golangci-lint, deadcode, govulncheck, cargo-audit, Composer는 `mise.lock`으로 잠근 `mise.toml`의 도구가 되고, `config/toolchain.json`은 php, pythonBackend, exceptions, mise만 남기며, `.python-version`을 지우고, Composer platform은 정책의 `8.5.0`이며, review 기록은 `make dependency-review RECORD=1`이 쓴다. | `make toolchain-check`, `make test-vscode-integration`, `make dependency-review RECORD=1`, `make dependency-policy-check` | [o] |
 | T24.13 | kit 0.0.43으로 옮긴다: 게시된 파일의 integrity로 `@polyspec/kit` 0.0.43을 고정하고 `make kit-sync`로 그 복사본을 쓴다(K138, K139, K142의 lint 설정). php와 php-ext의 tokens와 formatting suite를 data set이 case인 PHPUnit method에 묶는다(K137): PHP package의 `ConformanceTest::testTokens`와 `ConformanceTest::testFormat`, PHP 확장의 `AnalyzeTest::testEqualsTheAnalysisOfThePhpPackage`와 `FormatTest::testFormatsTheCase`이며, 이를 기다리던 `config/parity.json`의 exclusion 네 개를 지운다. | `make kit-check`; `make parity-declarations-check`가 php나 php-ext의 tokens 또는 formatting binding을 지적하지 않는다; 묶인 네 method가 `--filter`로 통과한다 | [o] |
+| T24.14 | kit 0.0.45로 옮긴다: 게시된 파일의 integrity로 `@polyspec/kit` 0.0.45를 고정하고 `make kit-sync`로 그 복사본(K147, K152의 knip.json과 ruff.toml, K150의 bootstrap 복사본)을 쓰며, target `rust-toolchain` 대신 `make install-tools`가 Rust toolchain을 설치하게 하고(K151), `.ruff_cache`를 지우며(K147), layout entry 밖에서 make가 실행하는 파일, `packages/ts`, `packages/codemirror`, `packages/vscode`의 workspace entry, system tool `gmake`를 `config/knip-entries.json`에 선언한다(K145, K152, K154). | `make kit-check`; `make toolchain-check`; `make layout-check` | [ ] |
 
 ## Wave 25 — 소비자의 코드인 generated program
 

@@ -14,9 +14,9 @@ export GOCACHE := $(CURDIR)/var/go/cache
 # recipe therefore starts npm by the path of its wrapper, $(NPM), and go and gofmt only in lines that the shell runs,
 # which finds them with the exported PATH (T19.2). A script that a recipe starts gets the exported PATH.
 NPM := $(CURDIR)/var/tools/bin/npm
-# make install installs the Rust toolchain of rust-toolchain.toml; rustup does not install it on the first cargo, which
-# several processes start at once in one run and whose installs then break each other (T18.7-1). A missing toolchain
-# fails with rustup's message, which names rustup toolchain install.
+# make install-tools installs the Rust toolchain of rust-toolchain.toml (kit K151); rustup does not install it on the
+# first cargo, which several processes start at once in one run and whose installs then break each other (T18.7-1). A
+# missing toolchain fails with rustup's message, which names rustup toolchain install.
 export RUSTUP_AUTO_INSTALL := 0
 CARGO ?= $(HOME)/.cargo/bin/cargo
 # Each checkout builds its Rust crates into their own target. A CARGO_TARGET_DIR inherited from the environment, such as
@@ -84,7 +84,6 @@ TSC        := $(CURDIR)/node_modules/.bin/tsc
 VITEPRESS  := $(CURDIR)/node_modules/.bin/vitepress
 VITEST     := $(CURDIR)/node_modules/.bin/vitest
 PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
-VSCE       := $(CURDIR)/node_modules/.bin/vsce
 
 help: ## List targets
 	@echo "Targets:"
@@ -178,7 +177,7 @@ lint-php-format: build-php
 # make install installs every tool of mise.lock with make install-tools: every Python check runs the shim
 # var/tools/mise/shims/python3 of the python of mise.toml, so every job has that interpreter after make install and no job
 # sets up a Python of its own (T24.12).
-install: install-tools rust-toolchain cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
+install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
 	$(ONLINE) node scripts/composer-install.mts $(PHP_DIR)
 	$(ONLINE) node scripts/composer-install.mts $(EXT_DIR)
 	$(ONLINE) node scripts/python-wheelhouse.mts
@@ -312,7 +311,7 @@ test-vscode-integration: vscode-package ## Run the extension inside the minimum 
 	cd $(VSCODE_DIR) && node tests/integration/run.mjs --vscode $(VSCODE_TOOLS)
 
 vscode-package: build-vscode ## Build the .vsix
-	cd $(VSCODE_DIR) && $(VSCE) package --no-dependencies --skip-license --out dist/polyspec-template.vsix
+	$(NPM) run package:vsix --workspace $(VSCODE_DIR)
 
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
@@ -436,12 +435,9 @@ editor-boundary-check: ## Check that adapters do not use the parser and the lang
 # the registries; it is a developer command and a scheduled workflow, not a step of make check or of the gating CI jobs.
 dependency-audit: dependency-policy-check dependency-policy-mutation-check ## The dependency gate and its mutation check, which also reject a lock with an advisory at its review
 
-# cargo-audit is built with the Rust toolchain of rust-toolchain.toml, so the review installs it first.
-.PHONY: rust-toolchain
-rust-toolchain:
-	rustup toolchain install --no-self-update
-
-dependency-review: rust-toolchain install-tools
+# cargo-audit is built with the Rust toolchain of rust-toolchain.toml, which make install-tools installs first (kit
+# K151).
+dependency-review: install-tools
 
 doc-coverage: ## Check that public symbols carry documentation comments
 	node scripts/check-doc-coverage.mts

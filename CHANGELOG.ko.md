@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 02d062ce6422fba97b0489298e5289a6a6cedfb4a274d8d55241d8d580845d06 -->
+<!-- source-sha256: 69000cca07a114152592a1678a3cd67eceb31d299c4e9dd7f8b7255fd789fc5d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.14: template은 `@polyspec/kit` 0.0.45를 고정하고, `make kit-sync`가 그 복사본(knip.json, ruff.toml, bootstrap script)을 썼습니다. `make install-tools`가 Rust toolchain을 설치하므로 target `rust-toolchain`은 사라지고, ruff는 `.ruff_cache` 대신 var/ruff에 cache를 둡니다. `config/knip-entries.json`은 layout entry 밖에서 make가 실행하는 파일, workspace `packages/ts`, `packages/codemirror`, `packages/vscode`의 entry, `gmake`를 적고, CodeMirror peer는 `packages/codemirror`의, vsce는 `make vscode-package`가 실행하는 script `package:vsix`를 가진 `packages/vscode`의 development dependency입니다.
 - T24.6: Go package가 golangci-lint와 deadcode를 통과합니다: 명령은 모든 메시지를 writer 하나로 보고하며 stderr에 쓸 수 없으면 status 1로 끝나고, 표현식 parser는 확인하지 않은 `Next` 대신 `Consume`으로 peek한 token을 소비하며, interface test는 deprecated `parser.ParseDir` 대신 go/build로 package의 파일을 읽고, 쓰이지 않는 함수 둘은 제거되며, test가 `Engine.Prepare`, `PageCache.Delete`와 `Clear`, `ast.DecodeTemplate`에 닿습니다. 그 test는 `DecodeTemplate`이 null branch를 빈 목록으로 decode하고 elvis 형식에서 실패함을 찾았고, 둘 다 고쳐집니다. parity unit `parsed-ast`는 program이 loader가 가진 AST를 렌더하는 test를 bind합니다(RT-40).
 - T24.6: compiler가 oxlint를 통과하고 Go backend는 `.editorconfig`의 들여쓰기를 지킵니다: helper의 Go source는 tag `gofmt` 아래 공백 두 칸으로 쓰이고, tag가 줄 앞의 공백 두 칸마다 gofmt의 tab으로 바꾸므로 생성되는 Go는 그대로입니다. `phpString`은 제어 문자 정규식 없이 제어 문자를 나누고, Python backend는 문자열을 펼치지 않고 따옴표를 셉니다. showcase의 PHP adapter는 PSR-1과 PSR-12를 따릅니다: 계약의 생성 선언은 `generated/php-adapter`에 파일마다 PSR-4 class 하나이고, adapter는 `php/`의 class `Polyspec\\Showcase\\Adapter\\Php\\Adapter`이며, `php.php`는 그것을 실행하기만 합니다.
 - T24.10: TypeScript 인프라는 읽는 문서를 cast하지 않고 검증합니다: `scripts/` 아래 JSON 문서마다 module 하나(compiler manifest, function contract, artifact manifest, package manifest와 lock, fixture, showcase 문서, benchmark 결과)가 type과 ajv validator를 갖고, `expected.error.json`은 schema 하나를 가지며, TOML은 smol-toml로, `.github/workflows`의 workflow는 yaml package로 읽고, `check-doc-coverage`는 TypeScript를 oxc-parser로 읽으며, 없는 값은 기본값 대신 `scripts/required.mts`로 실패하고, generated runner는 위치가 없는 오류를 실패시키며(`tests/runner/generated-errors.mts`), `conformance-cases`(이제 generated Python runner 포함), `check-function-contract`, delimiter matrix의 언어 목록은 `config/parity.json`, manifest, driver table에서 옵니다. `examples/showcase`의 script는 엄격한 `tsconfig.json` 아래의 `.mts`이고, `SHOWCASE_LANGS`는 Python을 포함합니다.
