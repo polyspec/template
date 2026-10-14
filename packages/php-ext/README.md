@@ -71,15 +71,15 @@ The accessors avoid `getCode()`, `getLine()` and `getFile()`, which `\Exception`
 ## Command line
 
 ```sh
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php parse [--root DIR] [--delimiters OC] FILE
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php tokens [--root DIR] [--delimiters OC] FILE
-php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php format [--indent none|tab|N] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php parse [--root DIR] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php tokens [--root DIR] [--delimiters OC] FILE
+php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
-`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. The commands are those of the PHP package (`Polyspec\Template\Cli\CommandLine`) over `Polyspec\Template\Native\NativeRuntime`, the native engine as their runtime. `format` runs the formatter of the PHP package over the native analysis and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
+`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. The command `bin/template-ext.php` is of the PHP package `polyspec/template`, whose Composer proxy is `vendor/bin/template-ext.php`: its commands (`Polyspec\Template\Cli\CommandLine`) run over `Polyspec\Template\Native\NativeRuntime` of that package, the native engine as their runtime. `format` runs the formatter of the PHP package over the native analysis and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
 
-The package requires the PHP package `polyspec/template` at the same version (`require` of `composer.json`), which holds the formatter, so `format` also runs after `composer install --no-dev`. A release names it by version only and declares no `repositories`, as `docs/operations/publication.md` requires. The package has no lock of its own. Composer installs no package of the type `php-ext`, so in this repository the root `composer.json`, which is not published, resolves `polyspec/template` to `packages/php` through its `path` repository and maps the classes of `php/` and the tests of `tests/`; `composer install` at the root installs them into the root `vendor/`, which `bin/template-ext.php` loads.
+The package is the C extension only: Composer installs no package of the type `php-ext`, and PIE builds and installs only the extension, so the package holds no PHP classes and no command. A project that requires `polyspec/template` with Composer and installs the extension with PIE has both. The package has no lock of its own; in this repository the root `composer.json`, which is not published, maps the tests of `tests/`, and `composer install` at the root installs `polyspec/template` into the root `vendor/`.
 
 ## Test
 

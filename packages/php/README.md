@@ -71,7 +71,9 @@ vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 
 `parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. `format` prints the formatted text without adding a newline (indent unit `N` spaces from 1 to 8, `tab`, or `none` to keep every line's indentation; two spaces by default); a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
 
-The command is a Symfony Console application (`Polyspec\Template\Cli\CommandLine`, the runtime dependency `symfony/console`), so the options come before FILE, an option takes its value as `--name value` or `--name=value`, and a usage error prints the usage of the command and exits with status 1. The PHP extension runs the same commands over its native engine.
+The command is a Symfony Console application (`Polyspec\Template\Cli\CommandLine`, the runtime dependency `symfony/console`), so the options come before FILE, an option takes its value as `--name value` or `--name=value`, and a usage error prints the usage of the command and exits with status 1.
+
+`vendor/bin/template-ext.php` runs the same commands over the native engine of the PHP extension `polyspec_template`, which PIE builds from the package `polyspec/template-php-ext` (`pie install polyspec/template-php-ext`): `Polyspec\Template\Native\NativeRuntime` is its runtime and `Polyspec\Template\Native\NativeAnalyzer` the analysis of its formatter. Without the extension, these classes throw `Polyspec\Template\Native\ExtensionNotLoaded` and the command prints its message, which names PIE, on stderr and exits with status 1; no other engine runs in its place.
 
 ## Development
 

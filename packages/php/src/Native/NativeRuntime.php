@@ -13,6 +13,12 @@ use Polyspec\Template\TemplateError as PackageTemplateError;
  */
 final class NativeRuntime implements Runtime
 {
+    /** @throws ExtensionNotLoaded when the extension is not loaded */
+    public function __construct()
+    {
+        ExtensionNotLoaded::check();
+    }
+
     public function parseJson(string $source, string $name, array $options): string
     {
         try {

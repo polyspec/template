@@ -14,26 +14,26 @@ use Polyspec\Template\Cli\PackageRuntime;
 final class CliTest extends TestCase
 {
     /**
-     * The proxy of bin/template.php in the vendor/bin of the Composer project that runs PHPUnit, which Composer names in
+     * The proxy of a command of bin/ in the vendor/bin of the Composer project that runs PHPUnit, which Composer names in
      * $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of that project.
      */
-    private static function command(): string
+    private static function command(string $name): string
     {
         $binDir = $GLOBALS['_composer_bin_dir'] ?? null;
         self::assertIsString($binDir, 'PHPUnit runs without the proxy of vendor/bin/phpunit');
 
-        return $binDir . '/template.php';
+        return $binDir . '/' . $name;
     }
 
     /**
      * @param list<string> $args
      * @return array{status: int, stdout: string, stderr: string}
      */
-    private static function runCli(array $args): array
+    private static function runCli(array $args, string $name = 'template.php'): array
     {
         $command = implode(
             ' ',
-            array_map('escapeshellarg', array_merge([PHP_BINARY, self::command()], $args)),
+            array_map('escapeshellarg', array_merge([PHP_BINARY, self::command($name)], $args)),
         );
         $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
         self::assertIsResource($process);
@@ -42,6 +42,19 @@ final class CliTest extends TestCase
         $status = proc_close($process);
 
         return ['status' => $status, 'stdout' => $stdout, 'stderr' => $stderr];
+    }
+
+    /**
+     * The command of the native engine needs the extension, which PIE installs; without it the command names PIE and
+     * runs no other engine.
+     */
+    public function testNativeCommandWithoutTheExtensionNamesPie(): void
+    {
+        self::assertFalse(extension_loaded('polyspec_template'), 'the PHP of the test loads the extension');
+        $result = self::runCli(['parse', Support::casesDir() . '/text/plain/input.tpl'], 'template-ext.php');
+        self::assertSame(1, $result['status']);
+        self::assertSame('', $result['stdout']);
+        self::assertStringContainsString('pie install polyspec/template-php-ext', $result['stderr']);
     }
 
     public function testParsePrintsAstJson(): void

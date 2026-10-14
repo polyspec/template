@@ -117,9 +117,9 @@ Composer: 내려받은 zip을 담은 directory인 `artifact` repository,
 }
 ```
 
-`package` 항목은 zip의 `composer.json`을 대신하므로 그 `require`와 `autoload`를 다시 적는다. Composer는 type `php-ext`의 패키지를 설치하지 않는다. `polyspec/template-php-ext`의 zip은 PIE가 extension을 build하는 source다.
+`package` 항목은 zip의 `composer.json`을 대신하므로 그 `require`와 `autoload`를 다시 적는다. Composer는 type `php-ext`의 패키지를 설치하지 않는다. `polyspec/template-php-ext`의 zip은 PIE가 extension을 build해 설치하는 C source이며 PHP class도 명령도 담지 않는다. 네이티브 엔진의 PHP 쪽인 `Polyspec\Template\Native\NativeRuntime`과 명령 `vendor/bin/template-ext.php`는 `polyspec/template`에 있고, extension이 로드되지 않았으면 PIE를 적은 오류로 실패한다.
 
-저장소에서는 발행하지 않는 private root `package.json`이 저장소의 npm 패키지를 해석한다. 그 `workspaces`는 각 패키지의 directory를 적고, npm은 각각을 `node_modules`에 link한다. 역시 발행하지 않는 root `composer.json`도 같은 방식으로 Composer 패키지를 해석한다. 그 `path` repository는 `packages/php`를 적고, Composer는 그것을 root `vendor/`에 link하며 root `composer.lock`이 그것을 기록한다. 그 autoload는 Composer가 설치하지 않는 `php-ext` type의 패키지인 `packages/php-ext`의 class와 test를 map한다. 각 패키지의 발행 `package.json`과 `composer.json`은 의존하는 polyspec 패키지를 정확한 버전으로만 적고, 각 `composer.json`은 모든 릴리스가 다른 manifest와 함께 정하는 버전을 선언한다. 라이브러리는 lock을 commit하지 않으므로 발행 `composer.json`은 `repositories`를 선언하지 않고 `composer.lock`을 갖지 않는다. 저장소의 어떤 패키지도 다른 저장소의 polyspec 패키지에 의존하지 않으므로 다른 저장소의 릴리스 tag는 기록하지 않는다.
+저장소에서는 발행하지 않는 private root `package.json`이 저장소의 npm 패키지를 해석한다. 그 `workspaces`는 각 패키지의 directory를 적고, npm은 각각을 `node_modules`에 link한다. 역시 발행하지 않는 root `composer.json`도 같은 방식으로 Composer 패키지를 해석한다. 그 `path` repository는 `packages/php`를 적고, Composer는 그것을 root `vendor/`에 link하며 root `composer.lock`이 그것을 기록한다. 그 autoload-dev는 Composer가 설치하지 않는 `php-ext` type의 패키지인 `packages/php-ext`의 test를 map한다. 각 패키지의 발행 `package.json`과 `composer.json`은 의존하는 polyspec 패키지를 정확한 버전으로만 적고, 각 `composer.json`은 모든 릴리스가 다른 manifest와 함께 정하는 버전을 선언한다. 라이브러리는 lock을 commit하지 않으므로 발행 `composer.json`은 `repositories`를 선언하지 않고 `composer.lock`을 갖지 않는다. 저장소의 어떤 패키지도 다른 저장소의 polyspec 패키지에 의존하지 않으므로 다른 저장소의 릴리스 tag는 기록하지 않는다.
 
 ## 문서 사이트
 

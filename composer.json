@@ -11,11 +11,6 @@
         "laravel/pint": "^1.0",
         "phpunit/phpunit": "^13.4"
     },
-    "autoload": {
-        "psr-4": {
-            "Polyspec\\Template\\Native\\": "packages/php-ext/php/"
-        }
-    },
     "autoload-dev": {
         "psr-4": {
             "Polyspec\\Template\\Tests\\": "packages/php/tests/",

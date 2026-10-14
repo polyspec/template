@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/php",
-                "reference": "590bd2e23c7653967b9400c0aabb8a02a9dc282d"
+                "reference": "80ce0ecf3777329490ce578299650ba39bfa2647"
             },
             "require": {
                 "ext-mbstring": "*",
@@ -24,7 +24,8 @@
                 "phpunit/phpunit": "^13.4"
             },
             "bin": [
-                "bin/template.php"
+                "bin/template.php",
+                "bin/template-ext.php"
             ],
             "type": "library",
             "autoload": {

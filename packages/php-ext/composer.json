@@ -1,27 +1,12 @@
 {
     "name": "polyspec/template-php-ext",
     "version": "0.0.6",
-    "description": "PHP extension that renders templates with an independent C implementation of the specification",
+    "description": "PHP extension, built by PIE, that renders templates with an independent C implementation of the specification",
     "type": "php-ext",
     "license": "MIT",
     "require": {
-        "php": ">=8.5",
-        "polyspec/template": "0.0.6"
+        "php": ">=8.5"
     },
-    "require-dev": {
-        "phpunit/phpunit": "^13.4"
-    },
-    "autoload": {
-        "psr-4": {
-            "Polyspec\\Template\\Native\\": "php/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Polyspec\\Template\\Native\\Tests\\": "tests/"
-        }
-    },
-    "bin": ["bin/template-ext.php"],
     "php-ext": {
         "extension-name": "polyspec_template",
         "build-path": "src"

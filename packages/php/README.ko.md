@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: a612926bc9375a23f81f918c2e1b3bbf876f1b653dab7c7beb5ad4c0fd01a2da -->
+<!-- source-sha256: b87d542c90ecca914d69186e69522dfc58a0f575d313df26465809ec6496eeb6 -->
 # polyspec/template
 
 [English](README.md).
@@ -72,7 +72,9 @@ vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 포맷된 텍스트를 줄바꿈을 덧붙이지 않고 출력한다(들여쓰기 단위는 공백 `N`칸(1~8), `tab`, 또는 모든 줄의 들여쓰기를 유지하는 `none`이며 기본은 공백 두 칸). 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
 
-명령은 Symfony Console 애플리케이션(`Polyspec\Template\Cli\CommandLine`, 런타임 의존성 `symfony/console`)이므로 옵션은 FILE 앞에 오고, 옵션 값은 `--name value` 또는 `--name=value`로 주며, 사용법 오류는 명령의 사용법을 출력하고 상태 1로 종료한다. PHP 확장은 같은 명령을 네이티브 엔진 위에서 실행한다.
+명령은 Symfony Console 애플리케이션(`Polyspec\Template\Cli\CommandLine`, 런타임 의존성 `symfony/console`)이므로 옵션은 FILE 앞에 오고, 옵션 값은 `--name value` 또는 `--name=value`로 주며, 사용법 오류는 명령의 사용법을 출력하고 상태 1로 종료한다.
+
+`vendor/bin/template-ext.php`는 PIE가 패키지 `polyspec/template-php-ext`에서 빌드하는 PHP 확장 `polyspec_template`의 네이티브 엔진 위에서 같은 명령을 실행한다(`pie install polyspec/template-php-ext`). `Polyspec\Template\Native\NativeRuntime`이 그 런타임이고 `Polyspec\Template\Native\NativeAnalyzer`가 그 포매터의 분석이다. 확장이 없으면 이 class들은 `Polyspec\Template\Native\ExtensionNotLoaded`를 던지고, 명령은 PIE를 적은 그 메시지를 stderr에 출력하고 상태 1로 종료한다. 다른 엔진이 대신 실행되지 않는다.
 
 ## 개발
 

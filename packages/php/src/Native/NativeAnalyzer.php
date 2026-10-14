@@ -13,6 +13,12 @@ use Polyspec\Template\TemplateError as PackageTemplateError;
  */
 final class NativeAnalyzer implements Analyzer
 {
+    /** @throws ExtensionNotLoaded when the extension is not loaded */
+    public function __construct()
+    {
+        ExtensionNotLoaded::check();
+    }
+
     public function analyze(string $source, string $name, array $options): array
     {
         try {
