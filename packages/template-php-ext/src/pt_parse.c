@@ -105,8 +105,16 @@ static bool pt_postfix_end(pt_token_type type)
     }
 }
 
+/* The tokens that the expression parsers of one tag consume, while a parse records them for the analysis. */
+typedef struct pt_record {
+    pt_arena *arena;
+    pt_token *v;
+    uint32_t count, capacity;
+} pt_record;
+
 typedef struct pt_lexer {
     pt_source *source;
+    pt_record *record; /* NULL unless the parser records the consumed tokens */
     size_t index;
     bool has_previous, has_lookahead;
     pt_token previous, lookahead;
@@ -376,6 +384,19 @@ static pt_token pt_next(pt_lexer *lexer)
     }
     if (token.type == T_RPAREN || token.type == T_RBRACKET) {
         lexer->nesting--;
+    }
+    pt_record *record = lexer->record;
+    if (record != NULL) {
+        if (record->count == record->capacity) {
+            uint32_t capacity = record->capacity ? record->capacity * 2 : 16;
+            pt_token *grown = pt_alloc(record->arena, sizeof(pt_token) * capacity);
+            if (record->count) {
+                memcpy(grown, record->v, sizeof(pt_token) * record->count);
+            }
+            record->v = grown;
+            record->capacity = capacity;
+        }
+        record->v[record->count++] = token;
     }
     return token;
 }
@@ -1106,7 +1127,15 @@ typedef struct pt_frame {
 typedef struct pt_tag {
     size_t start, end;
     bool echo;
+    const char *kind;
+    size_t body_start, body_end;
 } pt_tag;
+
+/* A growable list of syntax tokens in an arena. */
+typedef struct pt_tokens {
+    pt_syntax_token *v;
+    uint32_t count, capacity;
+} pt_tokens;
 
 typedef struct pt_tparser {
     pt_source *source;
@@ -1120,11 +1149,34 @@ typedef struct pt_tparser {
     uint32_t comment_count, comment_capacity;
     bool saw_tag;
     bool text_before_first_tag_is_whitespace;
+    /* The analysis (EDT-8): whether the parse records it, the expression tokens and the other tokens of the tag
+     * being parsed, and the tokens of the accepted tags. */
+    bool analyze;
+    pt_record record;
+    pt_tokens marks;
+    pt_tokens tokens;
 } pt_tparser;
 
 typedef struct pt_wrapper_info {
     int index; /* -1 without a wrapper */
 } pt_wrapper_info;
+
+static void pt_tokens_push(pt_arena *arena, pt_tokens *tokens, size_t start, size_t end, const char *kind)
+{
+    if (tokens->count == tokens->capacity) {
+        uint32_t capacity = tokens->capacity ? tokens->capacity * 2 : 16;
+        pt_syntax_token *grown = pt_alloc(arena, sizeof(pt_syntax_token) * capacity);
+        if (tokens->count) {
+            memcpy(grown, tokens->v, sizeof(pt_syntax_token) * tokens->count);
+        }
+        tokens->v = grown;
+        tokens->capacity = capacity;
+    }
+    tokens->v[tokens->count].start = start;
+    tokens->v[tokens->count].end = end;
+    tokens->v[tokens->count].kind = kind;
+    tokens->count++;
+}
 
 static void pt_items_push(pt_items *items, pt_item item)
 {
@@ -1326,10 +1378,28 @@ ZEND_NORETURN static void pt_reserved_fail(pt_tparser *parser, pt_s name, size_t
     pt_parse_fail(parser->source, "E_PARSE_RESERVED_NAME", start, start + name.n, zend_strpprintf(0, "%s is a reserved word", name.s));
 }
 
+/* Records a token of the tag being parsed outside its expressions (EDT-8). */
+static void pt_mark(pt_tparser *parser, size_t start, size_t end, const char *kind)
+{
+    if (parser->analyze) {
+        pt_tokens_push(parser->source->arena, &parser->marks, start, end, kind);
+    }
+}
+
+/* Starts the expression of a tag; the analysis records the tokens that it consumes. */
+static void pt_tag_expression(pt_tparser *parser, pt_eparser *expression, size_t start, int close_count, size_t open)
+{
+    pt_eparser_init(expression, parser->source, start, parser->close, close_count, true, open);
+    if (parser->analyze) {
+        expression->lexer.record = &parser->record;
+    }
+}
+
 /* ---- block tag bodies (GRM-3, GRM-12 to GRM-15) ---- */
 
 typedef struct pt_btoken {
     bool path;
+    bool quoted;
     pt_s value;
     size_t start, end;
 } pt_btoken;
@@ -1362,6 +1432,7 @@ static bool pt_read_btoken(pt_tparser *parser, size_t index, int close_count, pt
         size_t end;
         token->value = pt_string_literal(source, index, &end);
         token->path = true;
+        token->quoted = true;
         token->start = index;
         token->end = end;
         return true;
@@ -1373,6 +1444,7 @@ static bool pt_read_btoken(pt_tparser *parser, size_t index, int close_count, pt
     pt_s value = {source->text + index, end - index};
     if (memchr(value.s, '.', value.n) != NULL || memchr(value.s, '/', value.n) != NULL) {
         token->path = true;
+        token->quoted = false;
         token->value = pt_copy(parser, index, end);
         token->start = index;
         token->end = end;
@@ -1380,12 +1452,14 @@ static bool pt_read_btoken(pt_tparser *parser, size_t index, int close_count, pt
     }
     if (value.n > 0 && pt_ident_start((unsigned char)value.s[0])) {
         token->path = false;
+        token->quoted = false;
         token->value = pt_copy(parser, index, end);
         token->start = index;
         token->end = end;
         return true;
     }
     token->path = false;
+    token->quoted = false;
     token->value = (pt_s){"", 0};
     token->start = index;
     token->end = index + 1;
@@ -1406,6 +1480,7 @@ static pt_s pt_read_include_path(pt_tparser *parser, size_t index, int close_cou
         zend_string_release(quoted);
         pt_parse_fail(source, "E_PARSE_INVALID_PATH", token.start, token.end, message);
     }
+    pt_mark(parser, token.start, token.end, token.quoted ? "string" : "path");
     *after = token.end;
     return token.value;
 }
@@ -1419,6 +1494,8 @@ static size_t pt_read_block_body(pt_tparser *parser, size_t index, int close_cou
         size_t at = pt_skip_horizontal(source, cursor);
         pt_tfail(parser, "E_PARSE_INVALID_BLOCK_TAG", at, at + 1, "block tag requires an identifier or a path");
     }
+    /* The words of the body (EDT-8): the id, the path and each scope item with its value. */
+    pt_mark(parser, token.start, token.end, token.quoted ? "string" : "path");
     if (token.path) {
         node->has_path = true;
         node->path = token.value;
@@ -1432,6 +1509,7 @@ static size_t pt_read_block_body(pt_tparser *parser, size_t index, int close_cou
             node->has_path = true;
             node->path = next.value;
             cursor = next.end;
+            pt_mark(parser, next.start, next.end, next.quoted ? "string" : "path");
         }
     }
     pt_scope_item *scope = NULL;
@@ -1465,7 +1543,9 @@ static size_t pt_read_block_body(pt_tparser *parser, size_t index, int close_cou
             scope[count].name = token.value;
             scope[count].expr = pt_parse_postfix(&expression, true);
             cursor = pt_consumed_end(&expression.lexer);
+            pt_mark(parser, token.start, cursor, "path");
         } else {
+            pt_mark(parser, token.start, token.end, "path");
             pt_expr *variable = pt_expr_new(source, X_VAR, token.start, token.end);
             variable->name = token.value;
             scope[count].name = token.value;
@@ -1550,8 +1630,10 @@ static size_t pt_parse_loop(pt_tparser *parser, size_t start, size_t open, int c
     if (pt_reserved(name)) {
         pt_reserved_fail(parser, name, name_start);
     }
+    pt_mark(parser, name_start, name_end, "variable");
+    pt_mark(parser, i, i + 1, "operator");
     pt_eparser expression;
-    pt_eparser_init(&expression, source, i + 1, parser->close, close_count, true, open);
+    pt_tag_expression(parser, &expression, i + 1, close_count, open);
     pt_expr *iter = pt_parse_expression(&expression);
     size_t end = pt_finish_tag(parser, start, wrapper, pt_expect_close(&expression));
     pt_node *node = pt_node_new(parser, N_FOR, start, end);
@@ -1613,6 +1695,8 @@ static size_t pt_parse_assignment(pt_tparser *parser, size_t start, size_t open,
     }
     pt_expr *variable = pt_expr_new(source, X_VAR, name_start, name_start + name.n);
     variable->name = name;
+    pt_mark(parser, name_start, name_end, "variable");
+    pt_mark(parser, operator_start, operator_end, "operator");
     char operator = source->text[operator_start];
     size_t operator_length = operator_end - operator_start;
     size_t after_operator = operator_end;
@@ -1629,7 +1713,7 @@ static size_t pt_parse_assignment(pt_tparser *parser, size_t start, size_t open,
         expr->b = one;
     } else {
         pt_eparser expression;
-        pt_eparser_init(&expression, source, after_operator, parser->close, close_count, true, open);
+        pt_tag_expression(parser, &expression, after_operator, close_count, open);
         pt_expr *value = pt_parse_expression(&expression);
         end = pt_finish_tag(parser, start, wrapper, pt_expect_close(&expression));
         if (operator_length == 1) {
@@ -1666,7 +1750,9 @@ static size_t pt_parse_directive(pt_tparser *parser, size_t start, size_t open, 
     if (!pt_starts_with(source, index, "delimiter", 9)) {
         pt_tfail(parser, "E_PARSE_INVALID_DIRECTIVE", start, start + 1, "directive is not \"delimiter\"");
     }
+    pt_mark(parser, index, index + 9, "keyword");
     index = pt_skip_horizontal(source, index + 9);
+    size_t value_start = index;
     char value[4];
     size_t length = 0;
     while (index < source->length && !pt_horizontal((unsigned char)source->text[index]) && !pt_at_close(parser, index, close_count)) {
@@ -1683,10 +1769,88 @@ static size_t pt_parse_directive(pt_tparser *parser, size_t start, size_t open, 
         zend_string_release(quoted);
         pt_parse_fail(source, "E_PARSE_INVALID_DIRECTIVE", start, start + 1, message);
     }
+    pt_mark(parser, value_start, index, "string");
     size_t end = pt_finish_tag(parser, start, wrapper, pt_expect_close_raw(parser, open, close_count, index));
     parser->open = open_char;
     parser->close = close_char;
     return end;
+}
+
+/* The kind of an accepted tag with a sigil; `:` is an assignment when an assignment head follows it. */
+static const char *pt_tag_kind(const char *sigil)
+{
+    static const char *const kinds[][2] = {
+        {"*", "comment"}, {"=", "echo"}, {"@", "for"}, {"?", "if"}, {"?#", "ifblock"}, {":?", "elseif"},
+        {":", "else"}, {"/", "close"}, {"+", "include"}, {"#", "block"}, {"%", "directive"},
+    };
+    for (size_t k = 0; k < sizeof(kinds) / sizeof(kinds[0]); k++) {
+        if (strcmp(kinds[k][0], sigil) == 0) {
+            return kinds[k][1];
+        }
+    }
+    return NULL;
+}
+
+/* The byte index of the close delimiters of the tag that ends at `end`: before the wrapper closer and the
+ * horizontal whitespace in front of it (LEX-19). */
+static size_t pt_close_start(pt_tparser *parser, int wrapper, int close_count, size_t end)
+{
+    size_t tail = end;
+    if (wrapper >= 0) {
+        tail -= strlen(pt_wrappers[wrapper][1]);
+        while (tail > 0 && pt_horizontal((unsigned char)parser->source->text[tail - 1])) {
+            tail--;
+        }
+    }
+    return tail - (size_t)close_count;
+}
+
+/* The EDT-8 class of an expression token, which depends on its neighbours for names. */
+static const char *pt_expression_kind(const pt_token *token, const pt_token *previous, const pt_token *next)
+{
+    switch (token->type) {
+        case T_STRING: return "string";
+        case T_NUMBER: return "number";
+        case T_NULL: case T_TRUE: case T_FALSE: case T_IN: return "keyword";
+        case T_IDENT:
+            return (next != NULL && next->type == T_LPAREN) || (previous != NULL && previous->type == T_PIPE) ? "function" : "variable";
+        case T_DOT_IDENT: return next != NULL && next->type == T_LPAREN ? "function" : "property";
+        case T_DOT_INDEX: return "property";
+        default: return "operator";
+    }
+}
+
+/* Appends the tokens of an accepted tag: the whole tag for a comment; otherwise the open delimiter, the sigil, the
+ * tokens outside its expression, the tokens of its expression and the close delimiter. */
+static void pt_analyze_tag(pt_tparser *parser, const pt_tag *tag, const char *sigil)
+{
+    pt_arena *arena = parser->source->arena;
+    pt_tokens *tokens = &parser->tokens;
+    if (strcmp(tag->kind, "comment") == 0) {
+        pt_tokens_push(arena, tokens, tag->start, tag->end, "comment");
+        return;
+    }
+    pt_tokens_push(arena, tokens, tag->start, tag->body_start, "delimiter");
+    size_t sigil_start = pt_skip_horizontal(parser->source, tag->body_start);
+    pt_tokens_push(arena, tokens, sigil_start, sigil_start + strlen(sigil), "keyword");
+    for (uint32_t k = 0; k < parser->marks.count; k++) {
+        pt_syntax_token *mark = &parser->marks.v[k];
+        pt_tokens_push(arena, tokens, mark->start, mark->end, mark->kind);
+    }
+    /* The consumed tokens without the close and end tokens, in place. */
+    pt_record *record = &parser->record;
+    uint32_t count = 0;
+    for (uint32_t k = 0; k < record->count; k++) {
+        if (record->v[k].type != T_CLOSE && record->v[k].type != T_EOF) {
+            record->v[count++] = record->v[k];
+        }
+    }
+    for (uint32_t k = 0; k < count; k++) {
+        const pt_token *previous = k > 0 ? &record->v[k - 1] : NULL;
+        const pt_token *next = k + 1 < count ? &record->v[k + 1] : NULL;
+        pt_tokens_push(arena, tokens, record->v[k].start, record->v[k].end, pt_expression_kind(&record->v[k], previous, next));
+    }
+    pt_tokens_push(arena, tokens, tag->body_end, tag->end, "delimiter");
 }
 
 /* Parses one tag and returns the byte index after it. */
@@ -1697,7 +1861,10 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
     size_t body_start = sigil == NULL ? open + 1 : pt_skip_horizontal(source, pt_skip_horizontal(source, open + 1) + strlen(sigil));
     bool first_tag = !parser->saw_tag;
     parser->saw_tag = true;
+    parser->record.count = 0;
+    parser->marks.count = 0;
     bool echo = false;
+    bool assignment = false;
     size_t end;
     if (sigil == NULL) {
         pt_tfail(parser, "E_PARSE_UNEXPECTED_TOKEN", body_start, body_start + 1, "unknown tag");
@@ -1707,7 +1874,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
     } else if (strcmp(sigil, "=") == 0) {
         echo = true;
         pt_eparser expression;
-        pt_eparser_init(&expression, source, body_start, parser->close, close_count, true, open);
+        pt_tag_expression(parser, &expression, body_start, close_count, open);
         pt_expr *expr = pt_parse_expression(&expression);
         end = pt_finish_tag(parser, start, wrapper, pt_expect_close(&expression));
         pt_node *node = pt_node_new(parser, N_ECHO, start, end);
@@ -1717,7 +1884,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
         end = pt_parse_loop(parser, start, open, close_count, wrapper, body_start);
     } else if (strcmp(sigil, "?") == 0) {
         pt_eparser expression;
-        pt_eparser_init(&expression, source, body_start, parser->close, close_count, true, open);
+        pt_tag_expression(parser, &expression, body_start, close_count, open);
         pt_expr *test = pt_parse_expression(&expression);
         end = pt_finish_tag(parser, start, wrapper, pt_expect_close(&expression));
         pt_node *node = pt_node_new(parser, N_IF, start, end);
@@ -1726,7 +1893,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
         pt_raw_add_branch(parser, parser->frames[parser->frame_count - 1].raw);
     } else if (strcmp(sigil, "?#") == 0) {
         pt_eparser expression;
-        pt_eparser_init(&expression, source, body_start, parser->close, close_count, true, open);
+        pt_tag_expression(parser, &expression, body_start, close_count, open);
         pt_token id = pt_expect(&expression, T_IDENT);
         end = pt_finish_tag(parser, start, wrapper, pt_expect_close(&expression));
         pt_node *node = pt_node_new(parser, N_IF_BLOCK, start, end);
@@ -1744,7 +1911,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
             pt_tfail(parser, "E_PARSE_ELSEIF_AFTER_ELSE", start, start + 1, "\"{:?}\" after \"{:}\"");
         }
         pt_eparser expression;
-        pt_eparser_init(&expression, source, body_start, parser->close, close_count, true, open);
+        pt_tag_expression(parser, &expression, body_start, close_count, open);
         pt_expr *test = pt_parse_expression(&expression);
         end = pt_finish_tag(parser, start, wrapper, pt_expect_close(&expression));
         frame = &parser->frames[parser->frame_count - 1];
@@ -1755,6 +1922,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
     } else if (strcmp(sigil, ":") == 0) {
         size_t name_end, operator_start, operator_end;
         if (pt_assign_head(source, body_start, &name_end, &operator_start, &operator_end)) {
+            assignment = true;
             end = pt_parse_assignment(parser, start, open, close_count, wrapper, body_start);
         } else {
             if (parser->frame_count == 0) {
@@ -1805,10 +1973,16 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
         parser->tags = grown;
         parser->tag_capacity = capacity;
     }
-    parser->tags[parser->tag_count].start = start;
-    parser->tags[parser->tag_count].end = end;
-    parser->tags[parser->tag_count].echo = echo;
-    parser->tag_count++;
+    pt_tag *tag = &parser->tags[parser->tag_count++];
+    tag->start = start;
+    tag->end = end;
+    tag->echo = echo;
+    tag->kind = assignment ? "assignment" : pt_tag_kind(sigil);
+    tag->body_start = open + 1;
+    tag->body_end = pt_close_start(parser, wrapper, close_count, end);
+    if (parser->analyze) {
+        pt_analyze_tag(parser, tag, sigil);
+    }
     return end;
 }
 
@@ -2061,7 +2235,7 @@ static pt_body pt_finalize(pt_tparser *parser, pt_items *items, const pt_ranges 
 /* Entry                                                                                            */
 /* ----------------------------------------------------------------------------------------------- */
 
-pt_template *pt_parse(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close)
+static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close, pt_analysis *analysis)
 {
     size_t invalid = pt_utf8_first_invalid(bytes, length);
     if (invalid < length) {
@@ -2099,6 +2273,8 @@ pt_template *pt_parse(pt_run *run, const char *name, size_t name_length, const c
     parser.close = close;
     parser.root = pt_items_empty(arena);
     parser.text_before_first_tag_is_whitespace = true;
+    parser.analyze = analysis != NULL;
+    parser.record.arena = arena;
     pt_scan(&parser);
     if (parser.frame_count > 0) {
         size_t at = parser.frames[parser.frame_count - 1].open_start;
@@ -2108,8 +2284,28 @@ pt_template *pt_parse(pt_run *run, const char *name, size_t name_length, const c
     template->body = pt_finalize(&parser, &parser.root, &removed);
     template->comments = parser.comments;
     template->comment_count = parser.comment_count;
+    if (analysis != NULL) {
+        analysis->tag_count = parser.tag_count;
+        analysis->tags = pt_alloc(arena, sizeof(pt_syntax_tag) * (parser.tag_count ? parser.tag_count : 1));
+        for (uint32_t t = 0; t < parser.tag_count; t++) {
+            const pt_tag *tag = &parser.tags[t];
+            analysis->tags[t] = (pt_syntax_tag){tag->start, tag->end, tag->body_start, tag->body_end, tag->echo, tag->kind};
+        }
+        analysis->tokens = parser.tokens.v;
+        analysis->token_count = parser.tokens.count;
+    }
     run->parsing = NULL;
     return template;
+}
+
+pt_template *pt_parse(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close)
+{
+    return pt_parse_with(run, name, name_length, bytes, length, open, close, NULL);
+}
+
+pt_template *pt_analyze(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close, pt_analysis *analysis)
+{
+    return pt_parse_with(run, name, name_length, bytes, length, open, close, analysis);
 }
 
 void pt_template_release(pt_template *template)

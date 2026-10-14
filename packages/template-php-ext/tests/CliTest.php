@@ -54,6 +54,37 @@ final class CliTest extends TestCase
         $this->assertSame('input.tpl', $error['template']);
     }
 
+    public function testTokensPrintsTheTokensWithByteOffsets(): void
+    {
+        $directory = Support::casesDirectory() . '/echo/path';
+        $result = $this->invoke(['tokens', $directory . '/input.tpl', '--root', $directory]);
+        $this->assertSame(0, $result['status'], $result['stderr']);
+        $this->assertSame(json_decode((string) Support::read($directory . '/expected.tokens.json'), true), json_decode($result['stdout'], true));
+        $failed = $this->invoke(['tokens', Support::casesDirectory() . '/errors/unclosed-block/input.tpl']);
+        $this->assertSame(2, $failed['status']);
+        $this->assertSame('E_PARSE_UNCLOSED_BLOCK', json_decode(trim($failed['stderr']), true)['code']);
+    }
+
+    public function testFormatPrintsTheFormattedText(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'fmt');
+        $this->assertIsString($file);
+        file_put_contents($file, "<ul>\n<li>{=a}</li>\n</ul>");
+        try {
+            $this->assertSame(['status' => 0, 'stdout' => "<ul>\n  <li>{= a}</li>\n</ul>", 'stderr' => ''], $this->invoke(['format', $file]));
+            $this->assertSame("<ul>\n<li>{= a}</li>\n</ul>", $this->invoke(['format', $file, '--indent', 'none'])['stdout']);
+            file_put_contents($file, "<p>\n  {? a}\n</p>");
+            $failed = $this->invoke(['format', $file]);
+            $this->assertSame(2, $failed['status']);
+            $error = json_decode($failed['stderr'], true);
+            $this->assertIsArray($error);
+            $this->assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error['reason'], $error['code'], $error['line'], $error['col']]);
+            $this->assertSame(1, $this->invoke(['format', $file, '--indent', 'x'])['status']);
+        } finally {
+            unlink($file);
+        }
+    }
+
     public function testUsageErrorExitsWithStatusOne(): void
     {
         $this->assertSame(1, $this->invoke(['parse'])['status']);

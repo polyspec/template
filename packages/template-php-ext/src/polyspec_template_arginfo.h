@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a9a03919ce220ac92945cf45dc181868c81226df */
+ * Stub hash: 523a6e888f72072b004dd5e4bf995cde3275f4bc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_TemplateError_getErrorCode, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -28,6 +28,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_E
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Native_Engine_analyze arginfo_class_Polyspec_Template_Native_Engine_parse
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_parseToJson, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
@@ -77,6 +79,7 @@ ZEND_METHOD(Polyspec_Template_Native_TemplateError, getEnd);
 ZEND_METHOD(Polyspec_Template_Native_TemplateError, toArray);
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
+ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson);
 ZEND_METHOD(Polyspec_Template_Native_Engine, register);
 ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass);
@@ -99,6 +102,7 @@ static const zend_function_entry class_Polyspec_Template_Native_TemplateError_me
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, parse, arginfo_class_Polyspec_Template_Native_Engine_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Native_Engine, analyze, arginfo_class_Polyspec_Template_Native_Engine_analyze, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, parseToJson, arginfo_class_Polyspec_Template_Native_Engine_parseToJson, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, register, arginfo_class_Polyspec_Template_Native_Engine_register, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, registerClass, arginfo_class_Polyspec_Template_Native_Engine_registerClass, ZEND_ACC_PUBLIC)

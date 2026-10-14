@@ -64,6 +64,15 @@ final class Engine
     public static function parse(string $source, string $name, array $options = []): array {}
 
     /**
+     * Parses one template source once and returns its AST, the accepted tags and the EDT-8 tokens of every part of a
+     * tag. Offsets are UTF-8 byte offsets after a leading byte order mark.
+     *
+     * @param array{delimiters?: string} $options
+     * @return array{ast: array<string, mixed>, tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>, tokens: list<array{start: int, end: int, kind: string}>}
+     */
+    public static function analyze(string $source, string $name, array $options = []): array {}
+
+    /**
      * Parses one template source and returns the AST as JSON text.
      *
      * @param array{delimiters?: string} $options

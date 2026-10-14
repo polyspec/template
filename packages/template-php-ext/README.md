@@ -54,6 +54,7 @@ try {
 | `new Engine(?string $root, array $options)` | Creates an engine. `$root` is the loader root directory. `$options` accepts `delimiters` and `limits`. |
 | `Engine::parse(string $source, string $name, array $options): array` | Parses one template and returns the AST as nested arrays. |
 | `Engine::parseToJson(string $source, string $name, array $options): string` | Parses one template and returns the AST as JSON text. |
+| `Engine::analyze(string $source, string $name, array $options): array` | Parses one template once and returns `ast`, the accepted `tags` (`start`, `end`, `echo`, `kind`, `bodyStart`, `bodyEnd`) and the EDT-8 `tokens` (`start`, `end`, `kind`), equal to `AstProgram::analyze` of the PHP package. Offsets are UTF-8 byte offsets after a leading byte order mark. `Polyspec\Template\Native\NativeAnalyzer` passes it to the formatter of the PHP package, `Polyspec\Template\Format\Formatter::format($source, $options, new NativeAnalyzer())`, so the formatting is defined once. |
 | `$engine->register(string $name, callable $function): void` | Registers a host function `fn(array $args, array $env): mixed`. |
 | `$engine->registerClass(string $class, string $method, callable $function): void` | Registers the logical class function `Class::method` as `fn(array $args, array $env): mixed`. |
 | `$engine->render(string $name, mixed $assign, array $options): string` | Renders a template with PHP assign data. Arrays, `stdClass` and `JsonSerializable` values become template values, and other objects keep their instance with public properties and methods visible (VAL-14, RT-60). `$options` accepts `define` and `env`. |
@@ -72,9 +73,11 @@ The accessors avoid `getCode()`, `getLine()` and `getFile()`, which `\Exception`
 ```sh
 php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php parse FILE [--root DIR] [--delimiters OC]
 php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php tokens FILE [--root DIR] [--delimiters OC]
+php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
+`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. `format` runs the formatter of the PHP package (`packages/template-php`, loaded through the development autoloader of this package) over the native analysis and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
 ## Test
 
 ```sh

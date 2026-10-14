@@ -45,6 +45,19 @@ final class Support
         return $cases;
     }
 
+    /**
+     * The delimiters of the options.json of a case directory.
+     *
+     * @return array{delimiters?: string}
+     */
+    public static function delimiterOptions(string $directory): array
+    {
+        $json = self::read($directory . '/options.json');
+        $options = $json === null ? null : json_decode($json, true);
+
+        return is_array($options) && isset($options['delimiters']) && is_string($options['delimiters']) ? ['delimiters' => $options['delimiters']] : [];
+    }
+
     public static function read(string $path): ?string
     {
         if (!is_file($path)) {

@@ -55,6 +55,7 @@ try {
 | `new Engine(?string $root, array $options)` | 엔진을 생성한다. `$root`는 로더 루트 디렉터리다. `$options`는 `delimiters`와 `limits`를 받는다. |
 | `Engine::parse(string $source, string $name, array $options): array` | 템플릿 하나를 파싱해 AST를 중첩 배열로 반환한다. |
 | `Engine::parseToJson(string $source, string $name, array $options): string` | 템플릿 하나를 파싱해 AST를 JSON 텍스트로 반환한다. |
+| `Engine::analyze(string $source, string $name, array $options): array` | 템플릿 하나를 한 번 파싱해 `ast`, 받아들인 `tags`(`start`, `end`, `echo`, `kind`, `bodyStart`, `bodyEnd`), EDT-8 `tokens`(`start`, `end`, `kind`)를 반환하며, PHP 패키지의 `AstProgram::analyze`와 같다. 오프셋은 앞의 바이트 순서 표시를 뺀 UTF-8 바이트 오프셋이다. `Polyspec\Template\Native\NativeAnalyzer`가 이를 PHP 패키지의 포매터 `Polyspec\Template\Format\Formatter::format($source, $options, new NativeAnalyzer())`에 넘기므로 포맷 규칙은 한 곳에만 정의된다. |
 | `$engine->register(string $name, callable $function): void` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. |
 | `$engine->registerClass(string $class, string $method, callable $function): void` | 논리 클래스 함수 `Class::method`를 `fn(array $args, array $env): mixed`로 등록한다. |
 | `$engine->render(string $name, mixed $assign, array $options): string` | PHP assign 데이터로 템플릿을 렌더한다. 배열, `stdClass`, `JsonSerializable` 값은 템플릿 값이 되고, 그 밖의 객체는 공개 속성과 메서드가 보이는 인스턴스로 유지된다(VAL-14, RT-60). `$options`는 `define`과 `env`를 받는다. |
@@ -73,9 +74,11 @@ try {
 ```sh
 php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php parse FILE [--root DIR] [--delimiters OC]
 php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php tokens FILE [--root DIR] [--delimiters OC]
+php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
+`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 이 패키지의 개발용 오토로더로 불러온 PHP 패키지(`packages/template-php`)의 포매터를 네이티브 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
 ## 테스트
 
 ```sh
