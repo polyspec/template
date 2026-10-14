@@ -10,33 +10,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 6.157084,
-        "p95": 10.487375
+        "median": 3.093625,
+        "p95": 5.499791
       },
       "artifact_bytes": 4249,
       "cold_process_ms": {
-        "median": 132.972167,
-        "p95": 156.170042
+        "median": 137.412375,
+        "p95": 173.169209
       },
       "cold_rss_mib": {
-        "median": 86.09375,
-        "p95": 87.71875
+        "median": 85.6875,
+        "p95": 87.125
       },
       "render_ms": {
-        "median": 0.011323125,
-        "p95": 0.015933083
+        "median": 0.007987292,
+        "p95": 0.011801375
       },
       "prepared_render_ms": {
-        "median": 0.003374625,
-        "p95": 0.004235709
+        "median": 0.002002375,
+        "p95": 0.0037974999999999997
       },
       "persistent_process_ms_per_render": {
-        "median": 0.172030458,
-        "p95": 0.20682066699999999
+        "median": 0.129584125,
+        "p95": 0.176115625
       },
       "persistent_rss_mib": {
-        "median": 93.203125,
-        "p95": 97.140625
+        "median": 94.25,
+        "p95": 97.125
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
@@ -48,33 +48,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 5.483458,
-        "p95": 7.065041
+        "median": 3.637708,
+        "p95": 5.814291
       },
       "artifact_bytes": 12346,
       "cold_process_ms": {
-        "median": 163.04225,
-        "p95": 184.770541
+        "median": 131.646625,
+        "p95": 161.564125
       },
       "cold_rss_mib": {
-        "median": 85.15625,
-        "p95": 87.625
+        "median": 85.171875,
+        "p95": 86.640625
       },
       "render_ms": {
-        "median": 0.009995375,
-        "p95": 0.012301708
+        "median": 0.007296916,
+        "p95": 0.011324584
       },
       "prepared_render_ms": {
-        "median": 0.001611292,
-        "p95": 0.0026755
+        "median": 0.001009125,
+        "p95": 0.003068959
       },
       "persistent_process_ms_per_render": {
-        "median": 0.169116333,
-        "p95": 0.20734904199999998
+        "median": 0.130240833,
+        "p95": 0.14316520900000002
       },
       "persistent_rss_mib": {
-        "median": 91.96875,
-        "p95": 96.21875
+        "median": 92.96875,
+        "p95": 95.53125
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
@@ -86,33 +86,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 4.47175,
-        "p95": 6.720584
+        "median": 4.230166,
+        "p95": 6.840916
       },
       "artifact_bytes": 4249,
       "cold_process_ms": {
-        "median": 9.749375,
-        "p95": 12.5135
+        "median": 7.113834,
+        "p95": 12.087125
       },
       "cold_rss_mib": {
-        "median": 6.265625,
-        "p95": 6.5
+        "median": 6.25,
+        "p95": 6.40625
       },
       "render_ms": {
-        "median": 0.003522542,
-        "p95": 0.005164792
+        "median": 0.003033875,
+        "p95": 0.004376292
       },
       "prepared_render_ms": {
-        "median": 0.001840458,
-        "p95": 0.002691625
+        "median": 0.001635542,
+        "p95": 0.00263875
       },
       "persistent_process_ms_per_render": {
-        "median": 0.015381041,
-        "p95": 0.0194695
+        "median": 0.014060667,
+        "p95": 0.020187958
       },
       "persistent_rss_mib": {
-        "median": 11.28125,
-        "p95": 11.859375
+        "median": 11.34375,
+        "p95": 11.578125
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
@@ -124,33 +124,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 5.9905,
-        "p95": 8.034708
+        "median": 6.811291,
+        "p95": 9.084833
       },
       "artifact_bytes": 15052,
       "cold_process_ms": {
-        "median": 10.438542,
-        "p95": 13.076208
+        "median": 8.599333,
+        "p95": 10.526167
       },
       "cold_rss_mib": {
-        "median": 6.28125,
-        "p95": 6.421875
+        "median": 6.234375,
+        "p95": 6.328125
       },
       "render_ms": {
-        "median": 0.005047292,
-        "p95": 0.007661041
+        "median": 0.003849208,
+        "p95": 0.00608775
       },
       "prepared_render_ms": {
-        "median": 0.001101042,
-        "p95": 0.001788875
+        "median": 0.000808167,
+        "p95": 0.001715
       },
       "persistent_process_ms_per_render": {
-        "median": 0.016697708999999998,
-        "p95": 0.020182500000000003
+        "median": 0.013578792,
+        "p95": 0.017146833
       },
       "persistent_rss_mib": {
-        "median": 10.75,
-        "p95": 11.046875
+        "median": 10.703125,
+        "p95": 11.015625
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
@@ -162,33 +162,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 3.725042,
-        "p95": 6.656125
+        "median": 4.33025,
+        "p95": 8.088166
       },
       "artifact_bytes": 4249,
       "cold_process_ms": {
-        "median": 7.783333,
-        "p95": 9.149666
+        "median": 9.643416,
+        "p95": 12.99875
       },
       "cold_rss_mib": {
         "median": 2.40625,
-        "p95": 2.4375
+        "p95": 2.421875
       },
       "render_ms": {
-        "median": 0.006111417,
-        "p95": 0.008066
+        "median": 0.005078458,
+        "p95": 0.005685
       },
       "prepared_render_ms": {
-        "median": 0.002735125,
-        "p95": 0.00427725
+        "median": 0.002386541,
+        "p95": 0.002688083
       },
       "persistent_process_ms_per_render": {
-        "median": 0.017814708,
-        "p95": 0.022074166000000003
+        "median": 0.015016166999999999,
+        "p95": 0.019619167
       },
       "persistent_rss_mib": {
-        "median": 2.8125,
-        "p95": 2.84375
+        "median": 2.796875,
+        "p95": 2.8125
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
@@ -200,33 +200,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 4.999792,
-        "p95": 6.180333
+        "median": 3.559416,
+        "p95": 4.920125
       },
       "artifact_bytes": 17020,
       "cold_process_ms": {
-        "median": 7.413833,
-        "p95": 9.329792
+        "median": 5.807292,
+        "p95": 7.121958
       },
       "cold_rss_mib": {
         "median": 2.171875,
-        "p95": 2.1875
+        "p95": 2.171875
       },
       "render_ms": {
-        "median": 0.004505042,
-        "p95": 0.006729792
+        "median": 0.0042655,
+        "p95": 0.004858583
       },
       "prepared_render_ms": {
-        "median": 0.001782708,
-        "p95": 0.002726916
+        "median": 0.001743375,
+        "p95": 0.0023462920000000003
       },
       "persistent_process_ms_per_render": {
-        "median": 0.014384917,
-        "p95": 0.02023975
+        "median": 0.012494083,
+        "p95": 0.013983750000000001
       },
       "persistent_rss_mib": {
         "median": 2.53125,
-        "p95": 2.5625
+        "p95": 2.546875
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
@@ -238,33 +238,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 3.977208,
-        "p95": 6.873791
+        "median": 3.661917,
+        "p95": 4.569125
       },
       "artifact_bytes": 4249,
       "cold_process_ms": {
-        "median": 87.450208,
-        "p95": 104.600084
+        "median": 70.120333,
+        "p95": 83.242625
       },
       "cold_rss_mib": {
-        "median": 28.078125,
-        "p95": 28.171875
+        "median": 28,
+        "p95": 28.09375
       },
       "render_ms": {
-        "median": 0.020242666,
-        "p95": 0.028499917
+        "median": 0.01776675,
+        "p95": 0.0217625
       },
       "prepared_render_ms": {
-        "median": 0.013255875,
-        "p95": 0.020348125
+        "median": 0.010611583,
+        "p95": 0.014145833
       },
       "persistent_process_ms_per_render": {
-        "median": 0.13236525,
-        "p95": 0.15027025
+        "median": 0.113378792,
+        "p95": 0.12077525
       },
       "persistent_rss_mib": {
-        "median": 28.109375,
-        "p95": 28.28125
+        "median": 28.078125,
+        "p95": 28.234375
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
@@ -276,33 +276,33 @@
       "iterations": 1000,
       "warmup": 20,
       "compile_ms": {
-        "median": 9.419708,
-        "p95": 14.361208
+        "median": 9.975041,
+        "p95": 19.343667
       },
       "artifact_bytes": 23533,
       "cold_process_ms": {
-        "median": 84.686458,
-        "p95": 101.533
+        "median": 81.609917,
+        "p95": 101.855917
       },
       "cold_rss_mib": {
-        "median": 28.265625,
-        "p95": 28.40625
+        "median": 28.25,
+        "p95": 28.375
       },
       "render_ms": {
-        "median": 0.015581875,
-        "p95": 0.0228865
+        "median": 0.013036166,
+        "p95": 0.018792083
       },
       "prepared_render_ms": {
-        "median": 0.006337958,
-        "p95": 0.008899041
+        "median": 0.004487,
+        "p95": 0.006244667
       },
       "persistent_process_ms_per_render": {
-        "median": 0.11413158400000001,
-        "p95": 0.127578667
+        "median": 0.093016834,
+        "p95": 0.113678917
       },
       "persistent_rss_mib": {
-        "median": 28.28125,
-        "p95": 28.375
+        "median": 28.21875,
+        "p95": 28.359375
       },
       "output_bytes": 177,
       "output_sha256": "7b160d439d3d0d4de24ef8054d051db2fbbac9b457929a4adf2a73c0c71e2ae8"
