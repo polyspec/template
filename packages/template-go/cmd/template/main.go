@@ -16,7 +16,7 @@ import (
 )
 
 func usage(message string) int {
-	fmt.Fprintf(os.Stderr, "%s\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n", message)
+	fmt.Fprintf(os.Stderr, "%s\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template tokens FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n", message)
 	return 1
 }
 
@@ -25,11 +25,19 @@ func main() {
 }
 
 func run(args []string, stdout, stderr io.Writer) int {
-	if len(args) < 2 || (args[0] != "parse" && args[0] != "render") {
+	optionsOf := map[string][]string{
+		"parse":  {"root", "delimiters"},
+		"tokens": {"root", "delimiters"},
+		"render": {"data", "define", "env", "root", "delimiters"},
+	}
+	if len(args) < 2 || optionsOf[args[0]] == nil {
 		return usage("command and FILE are required")
 	}
 	command, file := args[0], args[1]
-	options := map[string]string{"data": "", "define": "", "env": "", "root": "", "delimiters": ""}
+	options := map[string]string{}
+	for _, key := range optionsOf[command] {
+		options[key] = ""
+	}
 	rest := args[2:]
 	for i := 0; i < len(rest); i++ {
 		flag := rest[i]
@@ -84,6 +92,26 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return v, nil
 	}
 
+	if command == "tokens" {
+		source, err := os.ReadFile(filePath)
+		if err != nil {
+			return usage(err.Error())
+		}
+		analysis, err := template.Analyze(source, name, template.ParseOptions{Delimiters: options["delimiters"]})
+		if err != nil {
+			return fail(err)
+		}
+		tokens := make([][3]any, len(analysis.Tokens))
+		for i, token := range analysis.Tokens {
+			tokens[i] = [3]any{token.Start, token.End, token.Kind}
+		}
+		out, err := json.Marshal(tokens)
+		if err != nil {
+			return fail(err)
+		}
+		_, _ = stdout.Write(out)
+		return 0
+	}
 	if command == "parse" {
 		source, err := os.ReadFile(filePath)
 		if err != nil {

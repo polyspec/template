@@ -18,10 +18,17 @@ func isPathChar(c byte) bool {
 }
 
 type rawToken struct {
-	kind  string // "path" or "ident"
-	value string
-	start int
-	end   int
+	kind   string // "path" or "ident"
+	value  string
+	start  int
+	end    int
+	quoted bool
+}
+
+// rawWord is the range of one word of a raw tag body and whether it is a quoted string.
+type rawWord struct {
+	start, end int
+	quoted     bool
 }
 
 // rawTagReader reads path tokens (GRM-3) and block tag bodies (GRM-13 to GRM-15).
@@ -54,7 +61,7 @@ func (r *rawTagReader) readToken(index int) (*rawToken, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &rawToken{kind: "path", value: literal.Decoded, start: index, end: literal.End}, nil
+		return &rawToken{kind: "path", value: literal.Decoded, start: index, end: literal.End, quoted: true}, nil
 	}
 	end := index
 	for end < len(text) && isPathChar(text[end]) {
@@ -71,25 +78,27 @@ func (r *rawTagReader) readToken(index int) (*rawToken, error) {
 }
 
 // readIncludePath implements GRM-12.
-func (r *rawTagReader) readIncludePath(index int) (string, int, error) {
+func (r *rawTagReader) readIncludePath(index int) (*rawToken, error) {
 	token, err := r.readToken(index)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
 	if token == nil || token.value == "" {
 		at := skipHorizontalSpace(r.text(), index)
-		return "", 0, r.fail(errs.ParseInvalidPath, at, at+1, "include requires a path")
+		return nil, r.fail(errs.ParseInvalidPath, at, at+1, "include requires a path")
 	}
 	if token.kind != "path" {
-		return "", 0, r.fail(errs.ParseInvalidPath, token.start, token.end, fmt.Sprintf("%q is not a path", token.value))
+		return nil, r.fail(errs.ParseInvalidPath, token.start, token.end, fmt.Sprintf("%q is not a path", token.value))
 	}
-	return token.value, token.end, nil
+	return token, nil
 }
 
 type blockBody struct {
 	id    *string
 	path  *string
 	scope []*ast.ScopeItem
+	// words are the id, the path and each scope item with its value.
+	words []rawWord
 	end   int
 }
 
@@ -105,14 +114,19 @@ func (r *rawTagReader) readBlockBody(index int) (*blockBody, error) {
 		at := skipHorizontalSpace(r.text(), cursor)
 		return nil, r.fail(errs.ParseInvalidBlockTag, at, at+1, "block tag requires an identifier or a path")
 	}
+	word := func(token *rawToken, end int) {
+		body.words = append(body.words, rawWord{start: token.start, end: end, quoted: token.quoted})
+	}
 	if token.kind == "path" {
 		v := token.value
 		body.path = &v
 		cursor = token.end
+		word(token, token.end)
 	} else {
 		v := token.value
 		body.id = &v
 		cursor = token.end
+		word(token, token.end)
 		token, err = r.readToken(cursor)
 		if err != nil {
 			return nil, err
@@ -121,6 +135,7 @@ func (r *rawTagReader) readBlockBody(index int) (*blockBody, error) {
 			p := token.value
 			body.path = &p
 			cursor = token.end
+			word(token, token.end)
 		}
 	}
 	for {
@@ -148,7 +163,9 @@ func (r *rawTagReader) readBlockBody(index int) (*blockBody, error) {
 			}
 			body.scope = append(body.scope, &ast.ScopeItem{Name: token.value, Expr: value})
 			cursor = parser.End()
+			word(token, cursor)
 		} else {
+			word(token, token.end)
 			body.scope = append(body.scope, &ast.ScopeItem{Name: token.value, Expr: &ast.Var{Type: "Var", Name: token.value, Span: ast.Span{token.start, token.end}}})
 		}
 	}

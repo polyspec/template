@@ -59,6 +59,7 @@ type Lexer struct {
 	lookahead    *Token
 	closeExpr    bool
 	nestingDepth int
+	consumed     []*Token
 }
 
 // NewLexer creates a lexer starting at a byte offset.
@@ -91,6 +92,7 @@ func (l *Lexer) Next() (*Token, error) {
 	}
 	l.lookahead = nil
 	l.previous = tok
+	l.consumed = append(l.consumed, tok)
 	if tok.Type == "LPAREN" || tok.Type == "LBRACKET" {
 		l.nestingDepth++
 	}
@@ -99,6 +101,9 @@ func (l *Lexer) Next() (*Token, error) {
 	}
 	return tok, nil
 }
+
+// Consumed returns the tokens consumed by the parser, including the close delimiter.
+func (l *Lexer) Consumed() []*Token { return l.consumed }
 
 // ConsumedEnd is the byte offset after the last consumed token.
 func (l *Lexer) ConsumedEnd() int {
