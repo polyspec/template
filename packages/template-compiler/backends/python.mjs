@@ -33,7 +33,7 @@ function descriptor(source) {
 const inputClass = name => `_${inputName(name)}`;
 
 function bindingSchema(context) {
-  const records = Object.fromEntries(Object.entries({ ...(context.manifest.records ?? {}), ...(context.manifest.recordsExtra ?? {}) })
+  const records = Object.fromEntries(Object.entries({ ...context.manifest.records, ...context.manifest.recordsExtra })
     .map(([name, fields]) => [name, Object.fromEntries(Object.entries(fields).map(([field, type]) => [field, descriptor(type)]))]));
   const assign = Object.fromEntries(Object.entries(context.manifest.fields ?? {}).map(([field, type]) => [field, descriptor(type)]));
   const definitions = Object.fromEntries([...context.program.definitions].map(([id, definition]) => [id, {
@@ -162,7 +162,6 @@ export function emitDeclarations(context) {
   const schema = bindingSchema(context);
   const inputClasses = context.templateBodies.map(template => {
     const typed = program.templates.get(template.name);
-    const members = [...typed.inputs].map(([name]) => `    ${fieldName(name)} = None`).join('\n');
     return `class ${inputClass(template.name)}:\n    def __init__(self, ${[...typed.inputs].map(([name]) => `${fieldName(name)}=None`).join(', ')}):\n${[...typed.inputs].map(([name]) => `        self.${fieldName(name)} = ${fieldName(name)}`).join('\n') || '        pass'}`;
   }).join('\n\n');
   const assignClass = `class Assign:\n    def __init__(self, ${Object.keys(fields).map(name => `${fieldName(name)}=None`).join(', ')}):\n${Object.keys(fields).map(name => `        self.${fieldName(name)} = ${fieldName(name)}`).join('\n') || '        pass'}`;

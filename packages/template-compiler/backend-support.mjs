@@ -146,7 +146,7 @@ export function emitExpression(node, target) {
   if (node.op === 'call') return target.call(node.name, node.args.map(item => emitExpression(item, target)), node);
   if (node.op === 'unary') return target.unary(node.operator, emitExpression(node.operand, target), node);
   if (node.op === 'binary') return target.binary(node.operator, emitExpression(node.left, target), emitExpression(node.right, target), node);
-  if (node.op === 'ternary') return target.ternary(emitExpression(node.test, target), emitExpression(node.then, target), emitExpression(node.otherwise, target), node);
+  if (node.op === 'ternary') return target.ternary(emitExpression(node.test, target), emitExpression(node.consequent, target), emitExpression(node.otherwise, target), node);
   if (node.op === 'list') return target.list(node.items.map(item => ({ spread: item.spread, value: emitExpression(item.value, target), node: item.value, span: item.span })), node.valueType, node);
   if (node.op === 'map') return target.map(node.entries.map(item => item.spread ? { spread: true, value: emitExpression(item.value, target), node: item.value, span: item.span } : { spread: false, value: [emitExpression(item.key, target), emitExpression(item.value, target)], node: item, span: item.span }), node.valueType, node);
   throw new Error(`compiler backend: unsupported IR expression ${node.op}`);

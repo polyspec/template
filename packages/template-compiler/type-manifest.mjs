@@ -126,7 +126,7 @@ export function deriveTypeManifest(templates, define = {}) {
   for (const definition of Object.values(state.defines)) {
     if (definition.template === undefined && definition.html !== true) definition.html = true;
   }
-  const functions = Object.fromEntries([...state.functions].sort().map(name => {
+  const functions = Object.fromEntries([...state.functions].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0)).map(name => {
     const contract = functionContracts.get(name);
     if (!contract) return [name, { implementation: 'builtin', args: [], minArgs: 0, maxArgs: -1, returns: 'any', runtimeArity: true }];
     return [name, {
