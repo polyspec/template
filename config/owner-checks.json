@@ -124,8 +124,8 @@
     },
     {
       "paths": [
-        "packages/ts/tests/browser/**",
-        "packages/ts/playwright.config.ts"
+        "tests/browser/**",
+        "tests/browser/playwright.config.ts"
       ],
       "targets": [
         "test-browser"
@@ -845,7 +845,7 @@
         "scripts/test-progress/*.mts",
         "tests/runner/*.mts",
         "tests/scripts/*.mts",
-        "packages/ts/tests/browser/*.mts"
+        "tests/browser/*.mts"
       ],
       "targets": [
         "typecheck"
@@ -1442,8 +1442,8 @@
     {
       "check": "make test-browser",
       "paths": [
-        "packages/ts/tests/browser/**",
-        "packages/ts/playwright.config.ts",
+        "tests/browser/**",
+        "tests/browser/playwright.config.ts",
         "packages/ts/**"
       ]
     },

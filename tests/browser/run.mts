@@ -6,17 +6,17 @@
 // TEMPLATE_BROWSER_URL, runs the cases, each with its own timeout (playwright.config.ts), and the
 // server is stopped.
 //
-//   node packages/ts/tests/browser/run.mts [--server-command <command>] [<playwright arguments>]
+//   node tests/browser/run.mts [--server-command <command>] [<playwright arguments>]
 //
-// The server runs as `<command> packages/ts/tests/browser/server.mts`; the command is the Node.js of this process unless
+// The server runs as `<command> tests/browser/server.mts`; the command is the Node.js of this process unless
 // --server-command names another, such as a test's wrapper that starts the server slowly (T20.2). No command is looked
 // up on PATH.
 import { type ChildProcess, spawn } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { playwright } from '../../../../scripts/tools.mts';
+import { playwright } from '../../scripts/tools.mts';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const READY = /^listening on (http:\/\/\S+)$/m;
 const seconds = (milliseconds: number): string => `${(milliseconds / 1000).toFixed(1)}s`;
 
@@ -25,7 +25,7 @@ function startServer(command: string): Promise<{ server: ChildProcess; url: stri
   const step = 'start the static server';
   process.stdout.write(`▶ ${step}\n`);
   const started = Date.now();
-  const server = spawn(command, [join(root, 'packages/ts/tests/browser/server.mts')], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+  const server = spawn(command, [join(root, 'tests/browser/server.mts')], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
   return new Promise((resolvePromise, reject) => {
     let output = '';
     let ready = false;
@@ -64,7 +64,7 @@ try {
   server = started.server;
   // Playwright starts by its command in node_modules/.bin.
   const tests = spawn(process.execPath, [playwright, 'test', ...args], {
-    cwd: join(root, 'packages/ts'),
+    cwd: join(root, 'tests/browser'),
     env: { ...process.env, TEMPLATE_BROWSER_URL: started.url },
     stdio: 'inherit',
   });

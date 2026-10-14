@@ -240,7 +240,7 @@ test-php: build-php ## PHP unit tests
 test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
-# The infrastructure of scripts/, tests/runner, tests/scripts and the browser test of packages/ts is TypeScript, which Node.js
+# The infrastructure of scripts/, tests/runner, tests/scripts and tests/browser is TypeScript, which Node.js
 # runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
 # packages/ts and packages/language, whose declarations tsc reads.
 typecheck: build-ts build-language ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
@@ -398,7 +398,7 @@ package-installs-check: cargo-downloads-check typed-generator
 parity-check: cargo-downloads-check build-php build-ext-php ext python-package
 
 test-browser: build-ts ## Browser rendering test
-	node packages/ts/tests/browser/run.mts
+	node tests/browser/run.mts
 
 # The PHP extension is a C implementation in $(EXT_DIR)/src: scripts/build-php-extension.mts builds it with phpize,
 # configure and make of the php-config of PATH in a temporary directory, with every compiler warning as an error, and

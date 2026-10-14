@@ -7,7 +7,7 @@ import { createServer } from 'node:http';
 import { dirname, extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.map': 'application/json' };
 
 const server = createServer((request, response) => {

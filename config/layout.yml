@@ -34,8 +34,9 @@ rules:
       - "!packages/codemirror"
       - "!packages/vscode"
 
-  # S7: the cross-language runners, data and tool tests of the root tests/: cases (the conformance cases that every
-  # implementation runs, CNF), fixtures (the vectors that the native tests of every implementation read, such as the
+  # S7: the cross-language runners, data and tool tests of the root tests/: browser (the comparator that renders the
+  # conformance cases in Chromium with the browser build and compares them with the expected files, a Playwright run
+  # that no runner of config/parity.json runs), cases (the conformance cases that every implementation runs, CNF), fixtures (the vectors that the native tests of every implementation read, such as the
   # expression, bound-data and host-value vectors, the inputs of the generated checks of every language and the
   # consumer projects of the release archives), runner (the conformance, generated and function-contract runners over
   # every implementation) and scripts (the tool tests of scripts/, the runners, the Makefile and the configuration).
@@ -43,6 +44,7 @@ rules:
     paths:
       - "tests/*"
       - "!tests/kit"
+      - "!tests/browser"
       - "!tests/cases"
       - "!tests/fixtures"
       - "!tests/runner"
