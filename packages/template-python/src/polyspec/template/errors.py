@@ -49,9 +49,6 @@ ERROR_CODES = (
     "E_INTERNAL",
 )
 
-# A code of a template error, one of ERROR_CODES.
-ErrorCode = str
-
 # A byte span, the pair [start, end).
 Span = tuple[int, int]
 

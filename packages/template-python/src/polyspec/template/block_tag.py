@@ -12,12 +12,6 @@ from .source import Source
 _PATH_CHARS = re.compile(r"[A-Za-z0-9_./-]\Z")
 _IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 
-FAIL_CODES = (
-    "E_PARSE_INVALID_PATH",
-    "E_PARSE_INVALID_BLOCK_TAG",
-    "E_PARSE_UNEXPECTED_TOKEN",
-)
-
 
 class IncludePath:
     """The path of an include tag, its range and whether it is a quoted string."""

@@ -61,10 +61,6 @@ def text_of(value: "str | SafeString") -> str:
     return value if isinstance(value, str) else value.text
 
 
-def code_point_length(text: str) -> int:
-    return len(text)
-
-
 def code_points(text: str) -> list[str]:
     return list(text)
 

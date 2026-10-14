@@ -13,15 +13,6 @@ from .values import NativeObject, SafeString, Value
 # The nesting depth limit of lists and maps (VAL-20).
 MAX_DEPTH = 64
 
-BIND_ERROR_CODES = (
-    "E_DATA_NUMBER_RANGE",
-    "E_DATA_NUMBER_NOT_FINITE",
-    "E_DATA_UNSUPPORTED_TYPE",
-    "E_DATA_INVALID_UTF8",
-    "E_DATA_DEPTH",
-    "E_DATA_INVALID_JSON",
-)
-
 
 class BindError(Exception):
     """The error that host binding raises for a value that has no template value (VAL-11)."""

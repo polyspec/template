@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from .errors import ErrorCode, TemplateError, error_at
+from .errors import TemplateError, error_at
 from .source import Source
 
 OPERATORS = (
@@ -118,9 +118,7 @@ def lex_string_literal(source: Source, start: int, template: str) -> tuple[str, 
     text = source.text
     quote = text[start]
 
-    def fail(
-        code: "ErrorCode", from_index: int, to_index: int, message: str
-    ) -> TemplateError:
+    def fail(code: str, from_index: int, to_index: int, message: str) -> TemplateError:
         return error_at(
             code, template, source.lines, source.span(from_index, to_index), message
         )
@@ -211,9 +209,7 @@ class ExpressionLexer:
     def position(self) -> int:
         return self.lookahead.start if self.lookahead else self.index
 
-    def error(
-        self, code: "ErrorCode", start: int, end: int, message: str
-    ) -> TemplateError:
+    def error(self, code: str, start: int, end: int, message: str) -> TemplateError:
         return error_at(
             code,
             self.template,

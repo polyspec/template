@@ -51,6 +51,6 @@ class CaseFormat(CaseTest):
 
 
 def load_tests(
-    loader: unittest.TestLoader, tests: unittest.TestSuite, pattern: "str | None"
+    _loader: unittest.TestLoader, _tests: unittest.TestSuite, _pattern: "str | None"
 ) -> unittest.TestSuite:
     return case_suite(CaseFormat)

@@ -297,7 +297,7 @@ class ValuesAndErrors(unittest.TestCase):
 
     def test_bind_rules(self):
         with self.assertRaises(BindError):
-            parse_json('{"a": NaN}' if False else '{"a": 1e999}')
+            parse_json('{"a": 1e999}')
         with self.assertRaises(BindError):
             parse_json_bytes(b'["\xff"]')
         with self.assertRaises(BindError):
@@ -306,14 +306,9 @@ class ValuesAndErrors(unittest.TestCase):
 
     def test_host_functions_and_limits(self):
         program = AstProgram(
-            EngineOptions(functions={"shout": lambda args, ctx: args[0] + "!"})
+            EngineOptions(functions={"shout": lambda args, _context: args[0] + "!"})
         )
-        self.assertEqual(
-            Engine(program).render("main.tpl", {}, RenderOptions())
-            if False
-            else shout_check(program),
-            "x!",
-        )
+        self.assertEqual(_shout(program), "x!")
         with self.assertRaises(TE) as caught:
             render('{= "x" + [1] }')
         self.assertEqual(caught.exception.code, "E_RUNTIME_STRINGIFY")
@@ -379,16 +374,6 @@ class ValuesAndErrors(unittest.TestCase):
         self.assertEqual(cache.get_or_set("n", 0, lambda: "new"), "new")
         clock["now"] = 200.0
         self.assertIsNone(cache.get("k"))
-
-
-def shout_check(program):
-    return (
-        Engine(program).render(
-            "main.tpl", {"x": "x"} if False else {}, RenderOptions(define={})
-        )
-        if False
-        else _shout(program)
-    )
 
 
 def _shout(program):
