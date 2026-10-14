@@ -398,15 +398,6 @@
     },
     {
       "paths": [
-        "scripts/generate-runtime-interface.mts",
-        "scripts/check-runtime-interface.mts"
-      ],
-      "targets": [
-        "runtime-interface-check"
-      ]
-    },
-    {
-      "paths": [
         "scripts/generate-compiler-interface.mts",
         "scripts/check-compiler-interface*.mts"
       ],
@@ -923,12 +914,6 @@
       ]
     },
     {
-      "check": "make runtime-interface-diagrams-check",
-      "paths": [
-        "scripts/generate-runtime-interface.mts"
-      ]
-    },
-    {
       "check": "make compiler-interface-diagrams-check",
       "paths": [
         "scripts/generate-compiler-interface.mts"
@@ -985,12 +970,6 @@
       "paths": [
         "config/editor-boundaries.json",
         "scripts/editor-fixtures.mts"
-      ]
-    },
-    {
-      "check": "make runtime-interface-runtimes-check",
-      "paths": [
-        "scripts/check-runtime-interface.mts"
       ]
     },
     {

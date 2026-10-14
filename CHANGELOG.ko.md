@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: b2908b530c5d9bae3e248740aa4eef42c4352788ae6c47451ae84ae55757e32c -->
+<!-- source-sha256: eae26e994f94d71de4491d37df755f11e4e837ce3f8b9e9a47b89d561852b63e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.10: `make runtime-interface-check`, `runtime-interface-generate`, `runtime-interface-diagrams-check`와 그 script `scripts/generate-runtime-interface.mts`, `scripts/check-runtime-interface.mts`는 제거됩니다: 각각 같은 역할의 compiler-interface script를 import하기만 했으므로 `make compiler-interface-check`를 반복했습니다. `scripts/check-compiler-interface.mts`는 layout-check와 단일 manifest가 자리를 남기지 않는 경로 `tools/runtime/interface.json`, `examples/showcase/adapters/interface.json`을 더 이상 지키지 않습니다.
 - T24.11: `config/parity.json`의 feature unit 안의 모든 구현은 같은 동작의 test를 bind합니다: unit `loaders`는 `map-loader`, `filesystem-loader-files`(filesystem loader가 파일을 열어 두지 않음, T23.5), `include-resolution`(RT-8) 세 unit이 되고, 구현에 없던 test를 더합니다: TypeScript(`loader.test.ts`), Rust(`loaders.rs`), PHP(`Loader/LoaderTest.php`), PHP extension(`LoaderTest.php`, include로), Go, Python의 loader와 path test, PHP extension의 date test(`FunctionsTest.php`), Rust의 JSON byte 안 잘못된 UTF-8, 공유 fixture로 하는 Python의 bound data test(`test_bound.py`)와 truthiness, span, 값으로 검사하는 수, output limit test입니다.
 - T24.11: Python program은 template cache를 lock으로 보호합니다: cache된 parse의 확인, parse, 저장이 한 단계이므로, version이 바뀌는 template을 load하는 동시 thread의 렌더는 refresh 정책 아래 그 parse 하나를 유지합니다(RT-70이 이제 Python을 적습니다). loader는 여전히 lock 밖에서 실행됩니다.
 - T24.11: 구현의 모든 test 파일은 `config/parity.json`의 unit의 native test입니다: feature unit 40개가 각 구현의 native test 하나를 bind하며, 모든 runtime의 profile이나 그보다 좁고 이유가 spec을 인용하는 profile에 속합니다(support level을 선언하지 않는 PHP extension을 뺀 `manifest`, interface gate의 선언 test인 `interface`, TypeScript와 Python의 `export-list`, TypeScript의 `language-service`, Go와 Python의 `concurrent-renders`). 구현에 없던 test를 더합니다: TypeScript와 PHP는 delimiter 쌍이 아닌 delimiter option이 그 언어의 argument error임을(ERR-13), Python은 artifact refresh 정책, 실패하는 loader, filesystem loader가 읽지 못하는 파일, 문서 하나가 아닌 JSON text, 잘못된 delimiter option(`test_loading.py`)과 thread에서 한 program과 한 bound map을 동시에 렌더하는 것(`test_concurrency.py`, RT-70)을 검사합니다. browser test는 comparator `tests/browser/`에 남으며, 그곳에서는 parity의 어느 runner도 그 Playwright spec을 `packages/ts`의 test로 세지 않습니다.
