@@ -122,7 +122,7 @@ help: ## List targets
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  release-test-matrix    The full suite of make check through the same guard"
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
-	@echo "  dependency-audit       The dependency gate and its mutation check, which also reject a lock with an advisory at its review"
+	@echo "  dependency-audit       The dependency gate and its mutation check, which also reject a lock with an advisory at its review, and the check of the Python lock"
 	@echo "  build-language           Build the formatter library and the template-fmt CLI"
 	@echo "  test-language            Formatter, safety invariant and CLI tests, type check"
 	@echo "  build-lsp              Build the language server template-lsp"
@@ -183,9 +183,10 @@ lint-php-format: build-php
 # make install installs every tool of mise.lock with make install-tools: every Python check runs the shim
 # var/tools/mise/shims/python3 of the python of mise.toml, so every job has that interpreter after make install and no job
 # sets up a Python of its own (T24.12).
-install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
+install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
 	$(ONLINE) node scripts/composer-install.mts .
 	$(ONLINE) node scripts/python-wheelhouse.mts
+	$(MAKE) python-package
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
@@ -374,9 +375,10 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 # the implementation python of config/parity.json (scripts/python-venv.mts), so its tests, the conformance
 # driver (tests/runner/drivers.mts) and the parity check (config/parity.json) import polyspec.template from the sources of
 # the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
-# python of mise.toml, and the uv of mise.toml installs the package into it offline, with its build requirement from
-# var/python/wheelhouse (make install). The stamp is remade when the project or its build requirements change; a change of
-# the sources needs no install. The tests are discovered with packages/python as the top level: the directory
+# python of mise.toml, and the uv of mise.toml installs into it the dependencies that packages/python/pylock.toml pins by
+# version and digest, then the package offline, with its build requirement from var/python/wheelhouse (make install).
+# make install makes the environment, so the locked dependencies are downloaded there (AGENTS, Idempotency: Network). The
+# stamp is remade when the project, its lock or its build requirements change; a change of the sources needs no install. The tests are discovered with packages/python as the top level: the directory
 # tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
 # runs one test file by its path.
 PYTHON_PACKAGE := packages/python
@@ -389,9 +391,10 @@ UV := $(CURDIR)/var/tools/mise/shims/uv
 .PHONY: python-package
 python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed editable; offline
 
-$(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/build-requirements.json
+$(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/pylock.toml $(PYTHON_PACKAGE)/build-requirements.json
 	rm -rf $(PYTHON_VENV)
 	$(MAKE) python-venv DIR=$(PYTHON_VENV)
+	$(UV) pip install --python $(PYTHON_VENV)/bin/python --link-mode copy -r $(PYTHON_PACKAGE)/pylock.toml
 	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links var/python/wheelhouse --link-mode copy --no-deps -e $(PYTHON_PACKAGE)
 	touch $@
 
@@ -453,7 +456,7 @@ editor-boundary-check: ## Check that adapters do not use the parser and the lang
 # The dependency gate reads only the files of the checkout: the manifests, the locks, config/dependency-policy.json and
 # the review record config/dependency-review.json, so one tree gives one result at any time. make dependency-review asks
 # the registries; it is a developer command and a scheduled workflow, not a step of make check or of the gating CI jobs.
-dependency-audit: dependency-policy-check dependency-policy-mutation-check ## The dependency gate and its mutation check, which also reject a lock with an advisory at its review
+dependency-audit: dependency-policy-check dependency-policy-mutation-check python-lock-check ## The dependency gate and its mutation check, which also reject a lock with an advisory at its review, and the check of the Python lock against its sources
 
 # cargo-audit is built with the Rust toolchain of rust-toolchain.toml, which make install-tools installs first (kit
 # K151).

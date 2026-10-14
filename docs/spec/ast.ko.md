@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-ast -->
-<!-- source-sha256: f0e92b2e5a396d6c868ab8b0d24763c8d0c290098fc8850eaa7db02bbadcf7b0 -->
+<!-- source-sha256: ffb520a288371701a55abd75c141caab81e6a84f2bff3207e155b3c0b4eebda8 -->
 # AST
 
 [English](/spec/ast).
@@ -76,7 +76,7 @@ AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 �
 
 **AST-8** 직렬화된 모든 AST는 `contracts/schema/ast.schema.json` 검증을 통과한다. `scripts/check-schema.mts`가 스키마와 `tests/cases/`의 모든 `expected.ast.json`을 검증한다.
 
-**AST-10** AST가 자기 타입을 가진 런타임은 AST JSON을 그 타입으로 읽는 decode를 공개한다: TypeScript는 패키지 entry와 render 전용 entry의 `decodeTemplate`, Go는 `ast.DecodeTemplate`, Rust는 `decode_template`이다. decode는 정규 JSON(AST-7)의 모든 노드를 읽고, 템플릿 AST가 아닌 JSON에서는 위치를 말하는 오류로 실패한다: TypeScript는 `contracts/schema/ast.schema.json`으로 검증해 가장 안쪽의 잘못된 노드의 JSON Pointer를 말하고, Rust는 어느 노드의 모르는 필드나 빠진 필드도 거부하며 잘못된 값을 담은 문장 노드까지의 경로를 말하고, Go는 빠진 필드나 모르는 노드 타입을 말한다. PHP와 Python의 AST는 자기 타입이 없는 배열과 dict이므로 이 런타임은 decode를 공개하지 않는다. 이유: 파싱된 템플릿을 AST JSON으로 저장하는 호스트(RT-41), 예를 들어 그것을 브라우저로 보내는 서버는 그것을 cast하지 않고 검사된 AST로 다시 읽는다.
+**AST-10** AST를 렌더링하는 모든 런타임은 AST JSON(AST-7)을 자기 `parse`가 반환하는 AST로 읽는 decode를 공개한다: TypeScript는 패키지 entry와 render 전용 entry의 `decodeTemplate`, Go는 `ast.DecodeTemplate`, Rust와 Python은 `decode_template`, PHP는 `AstProgram::decodeTemplate`이다. TypeScript, Go, Rust는 자기 AST 타입을 반환하고, PHP는 배열을, Python은 dict를 파서가 만드는 대로 반환한다: 숫자 리터럴은 float이고 Python에서 span은 tuple이다. decode는 JSON을 자기 생태계의 JSON Schema 검증기로 `contracts/schema/ast.schema.json`에 대해 검증한다: ajv, santhosh-tekuri/jsonschema, crate jsonschema, opis/json-schema, PyPI 패키지 jsonschema다. 스키마가 거부한 JSON은 경로가 잘못된 노드의 JSON Pointer(RFC 6901)인 오류로 실패한다: 검증기 오류들의 instance 위치 중 가장 깊은 것이며, 그 깊이에 여럿이면 code point 순서로 가장 작은 것이다. 스키마는 노드의 스키마를 `if`/`then`으로 그 `type`에 따라 고르므로 오류는 그 노드 자신의 값을 말하며, 모든 런타임은 `tests/fixtures/ast-decode/invalid.json`의 각 잘못된 AST에 같은 pointer를 말한다. JSON이 아닌 텍스트는 그 언어의 JSON 오류로 실패한다. Rust는 스키마가 받아들이지만 자기 타입이 담을 수 없는 값, 예를 들어 `usize`를 넘는 span offset에서도 그 값을 담은 노드의 pointer로 실패한다. 스키마는 한 파일이다: TypeScript의 빌드는 `contracts/schema/ast.schema.json`을 번들하고, Go(`ast/ast.schema.json`, `embed`), Rust(`src/ast.schema.json`, `include_str!`), Python(package data), PHP(`resources/ast.schema.json`)는 패키지의 테스트가 그 파일과 바이트 단위로 비교하는 사본을 가진다. PHP 확장은 decode를 공개하지 않는다: 확장은 디렉터리의 템플릿을 렌더링하고 AST를 받지 않으며, PHP 호스트는 PHP 패키지로 decode한다. 이유: 파싱된 템플릿을 AST JSON으로 저장하는 호스트(RT-41), 예를 들어 그것을 브라우저로 보내는 서버는 그것을 cast하지 않고 검사된 AST로 다시 읽는다.
 
 ## 예제
 

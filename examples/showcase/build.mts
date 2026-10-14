@@ -6,7 +6,6 @@
 // fails when any implementation disagrees with the expected bytes or changes its output on the
 // second render.
 import { createHash } from 'node:crypto';
-import { Ajv } from 'ajv';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import type { Engine as TemplateEngine, RenderOptions, Template } from '@polyspec/template';
@@ -69,16 +68,8 @@ function collectTemplates(dir: string, prefix = '', into: Record<string, string>
 function compiledTemplates(scenario: Scenario): Map<string, Template> {
   const artifactRoot = join(scenario.dir, 'compiled', 'ast');
   const files = manifestFiles(readJson(join(artifactRoot, 'manifest.json')), `${scenario.id}/compiled/ast/manifest.json`);
-  return new Map([...files].map(([name, path]): [string, Template] => [name, templateOf(readJson(join(artifactRoot, path)), `${scenario.id}/compiled/ast/${path}`)]));
-}
-
-// A compiled AST artifact holds one Template node of contracts/schema/ast.schema.json, which the TypeScript program
-// loads as it is; ajv checks each artifact against that schema.
-const validateTemplate = new Ajv({ strict: true }).compile<Template>(object(readJson(join(root, 'contracts/schema/ast.schema.json')), 'contracts/schema/ast.schema.json'));
-
-function templateOf(value: unknown, what: string): Template {
-  if (!validateTemplate(value)) throw new Error(`${what} is no Template of the AST schema: ${JSON.stringify(validateTemplate.errors)}`);
-  return value;
+  // decodeTemplate validates each artifact against contracts/schema/ast.schema.json (AST-10).
+  return new Map([...files].map(([name, path]): [string, Template] => [name, decodeTemplate(readFileSync(join(artifactRoot, path), 'utf8'))]));
 }
 
 // The showcase uses a direct key-to-template-path define contract. Object entries remain available
@@ -190,7 +181,7 @@ if (!languages.includes('ts')) {
 }
 for (const language of languages) prepare(language);
 
-const { AstProgram, Engine, MapLoader } = await import('@polyspec/template');
+const { AstProgram, Engine, MapLoader, decodeTemplate } = await import('@polyspec/template');
 const scenarios = listScenarios();
 if (!scenarios.length) {
   process.stderr.write('no showcase scenarios found\n');

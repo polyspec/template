@@ -245,13 +245,17 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   assert.equal(install.status, 0, install.stderr);
   // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1)
   // with cargo-downloads-fetch of kit. The build requirements of the Python package go to var/python/wheelhouse, which the
-  // package install check reads (T22.4-20-5). Only the commands that download leave the offline settings of the recipes
-  // (T20.1-2). npm and the packages of package-lock.json are installed before, by make install-tools TOOLS=npm and make
-  // install-packages, which install @polyspec/kit (T24.1).
+  // package install check reads (T22.4-20-5), and make python-package installs the dependencies of
+  // packages/python/pylock.toml, which the checks of the Python package read from the uv cache (T25.6-1). Only the
+  // commands that download leave the offline settings of the recipes (T20.1-2). npm and the packages of package-lock.json
+  // are installed before, by make install-tools TOOLS=npm and make install-packages, which install @polyspec/kit (T24.1).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const kit = 'node_modules/@polyspec/kit/dist';
-  // make prints the empty TOOLS of install-tools of kit as a trailing space.
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts .`, `${online} node scripts/python-wheelhouse.mts`]);
+  // make prints the empty TOOLS of install-tools of kit as a trailing space. make -n runs the recursive make of
+  // python-package, which prints its own recipe after its command line when the environment is out of date.
+  const lines = install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd());
+  assert.deepEqual(lines.slice(0, 4), [`${online} node ${kit}/install-tools.mjs`, `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts .`, `${online} node scripts/python-wheelhouse.mts`]);
+  assert.match(lines[4] ?? '', /\bmake python-package$/);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const env = workflowOf(read(file), file).env;

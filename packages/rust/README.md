@@ -27,7 +27,7 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 | Item | Description |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | Parses one UTF-8 template into its AST with optional delimiters. |
-| `decode_template(json)` | Reads the AST JSON text into a `Template`, with no unknown and no missing field in any node; an `AstDecodeError` names the path of the first invalid value, which ends at the statement node that holds it, and the message names the field (AST-10). |
+| `decode_template(json)` | Reads the AST JSON text into the `Template` that `parse` returns, validated with the crate jsonschema against `contracts/schema/ast.schema.json`, which the crate embeds; an `AstDecodeError::Invalid` names in `path()` the JSON Pointer of the invalid node, and text that is not JSON is `AstDecodeError::Json` (AST-10). |
 | `analyze(source, name, &ParseOptions)` | Parses like `parse` and also returns every accepted tag (`TagKind`, range, body range) and the EDT-8 class of every part of it (`SyntaxToken`), in byte offsets after a leading BOM. |
 | `format(source, &FormatOptions)` | Formats the whitespace inside tags and the indentation of lines by HTML elements and template blocks. `FormatOptions` sets the indent unit (`IndentUnit`, two spaces by default; `None` keeps every line), `TemplateBlocks::Indent` or `Flat`, delimiters and a byte range. The result is the text only when it parses to the same AST; otherwise a `FormatError` with reason `parse`, `invariant` or `html`. |
 | `AstProgram::new(EngineOptions)` | Creates an AST program with a loader, host functions, limits and delimiters, or returns an `ArgumentError` for a delimiter option that is not a delimiter pair. |

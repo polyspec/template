@@ -22,6 +22,7 @@ from polyspec.template import (
     EngineOptions,
     MapLoader,
     RenderOptions,
+    decode_template,
     parse_json_bytes,
 )
 
@@ -66,7 +67,7 @@ def artifact_templates(root: str) -> dict:
     base = Path(root) / "compiled" / "ast"
     manifest = json.loads((base / "manifest.json").read_text(encoding="utf-8"))
     return {
-        name: json.loads((base / entry["path"]).read_text(encoding="utf-8"))
+        name: decode_template((base / entry["path"]).read_text(encoding="utf-8"))
         for name, entry in manifest["files"].items()
     }
 

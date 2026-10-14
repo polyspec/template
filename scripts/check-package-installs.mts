@@ -7,7 +7,8 @@
 // archive of the run, by its own composer.json, and resolves its dependencies among the packages of
 // the composer.lock of the development root, not on Packagist, whose archives it takes from the Composer cache that make install
 // filled, with the network disabled; the Python install project builds the wheel of the package with the build requirements of
-// var/python/wheelhouse (scripts/python-wheelhouse.mts), reads no index and installs only that wheel.
+// var/python/wheelhouse (scripts/python-wheelhouse.mts), reads no index, and installs the dependencies of
+// packages/python/pylock.toml from the uv cache that make install filled, then that wheel.
 // Each command is a step without a time limit that prints its start, its output and its result with
 // its elapsed time on standard error and is judged by its exit status.
 import assert from 'node:assert/strict';
@@ -183,6 +184,9 @@ function checkPython() {
   mkdirSync(directory);
   run(python, ['-m', 'venv', join(directory, 'venv')]);
   const installed = join(directory, 'venv/bin/python');
+  // The dependencies that packages/python/pylock.toml pins, from the uv cache that make install filled (make
+  // python-package), then the wheel alone.
+  run(join(root, 'var/tools/mise/shims/uv'), ['pip', 'install', '--python', installed, '--offline', '--link-mode', 'copy', '-r', join(root, 'packages/python/pylock.toml')]);
   run(installed, ['-m', 'pip', 'install', '--no-deps', '--no-index', archive], { env: pip });
   stageScenario(directory);
   cpSync(join(root, 'examples/showcase/adapters/generated/typed', `${showcasePythonModule('scope-precedence')}.py`), join(directory, 'generated.py'));

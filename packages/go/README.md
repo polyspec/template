@@ -3,7 +3,7 @@
 
 [한국어](README.ko.md).
 
-Go implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. The module has no dependencies outside the standard library.
+Go implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. Its dependencies outside the standard library are `github.com/santhosh-tekuri/jsonschema/v6` and `golang.org/x/text`, with which `ast.DecodeTemplate` validates the AST JSON against the AST schema.
 
 ## Install
 
@@ -63,6 +63,7 @@ engine := template.NewEngine(program)
 | Symbol | Description |
 | --- | --- |
 | `Parse(source, name, ParseOptions)` | Parses one template into its AST. `ParseOptions.Delimiters` selects the delimiter pair. |
+| `ast.DecodeTemplate(json)` | Reads the AST JSON text into the AST that `Parse` returns, validated against `contracts/schema/ast.schema.json`, which the package embeds; JSON that the schema rejects fails with an `*ast.DecodeError` whose `Path` is the JSON Pointer of the invalid node (AST-10). |
 | `Analyze(source, name, ParseOptions)` | Parses one template once and returns its AST, the accepted `Tags` (kind, range and body range) and their EDT-8 `Tokens`. Offsets are UTF-8 byte offsets after a leading byte order mark. |
 | `Format(source, FormatOptions)` | Formats the whitespace inside tags and the indentation of lines. `FormatOptions` has `Name`, `Delimiters`, `Range`, `Indent` (a run of spaces or one tab, default two spaces), `KeepIndentation` and `TemplateBlocks` (`indent` or `flat`). The result is returned only when the formatted text parses to the same AST; otherwise the error is a `*FormatError` with `Reason` `parse`, `invariant` or `html`. |
 | `NewAstProgram(Options)` | Creates an AST program with `Loader`, `Functions`, `Limits` and `Delimiters`. |

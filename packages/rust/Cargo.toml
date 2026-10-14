@@ -49,7 +49,11 @@ allow_attributes_without_reason = "deny"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
-# The path of the first invalid value of a decoded AST (decode_template).
+# The validation of a decoded AST against contracts/schema/ast.schema.json (decode_template, AST-10), with the number
+# reading of serde_json under arbitrary_precision; no default feature, so no schema is fetched over HTTP or from a file.
+jsonschema = { version = "0.58.6", default-features = false, features = ["arbitrary-precision"] }
+# The JSON Pointer of a validated value that the AST types cannot hold, such as a span offset beyond usize
+# (decode_template).
 serde_path_to_error = "0.1.20"
 
 # The volume serial number and file index of an open file, the identity of a file of FsLoader on Windows; the standard

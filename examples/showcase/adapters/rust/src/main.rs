@@ -189,9 +189,9 @@ fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
     let mut loader = MapLoader::new();
     for (name, entry) in manifest.files {
         let path = base.join(entry.path);
-        let bytes =
-            std::fs::read(&path).map_err(|error| format!("compiled AST/{name}: {error}"))?;
-        let ast = serde_json::from_slice(&bytes)
+        let text = std::fs::read_to_string(&path)
+            .map_err(|error| format!("compiled AST/{name}: {error}"))?;
+        let ast = polyspec_template::decode_template(&text)
             .map_err(|error| format!("compiled AST/{name}: {error}"))?;
         loader.set_ast(&name, ast);
     }

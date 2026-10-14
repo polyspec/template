@@ -6,6 +6,7 @@ from .bind import BindError, bind_data, bind_map, bind_value, check_text
 from .bind import BoundMap
 from .bind_operations import bind, merge
 from .context import Frame, RenderContext, Scope
+from .decode import AstDecodeError, decode_template
 from .engine import AstProgram, Engine, EngineOptions, PreparedRender, RenderOptions
 from .errors import ERROR_CODES, TemplateError, internal_boundary
 from .formatter import FormatError, FormatOptions, FormatResult, format_template
@@ -33,6 +34,7 @@ __all__ = [
     "BUILTINS",
     "DEFAULT_DELIMITERS",
     "ERROR_CODES",
+    "AstDecodeError",
     "AstProgram",
     "BindError",
     "BoundMap",
@@ -76,6 +78,7 @@ __all__ = [
     "bind_map",
     "bind_value",
     "check_text",
+    "decode_template",
     "format_template",
     "internal_boundary",
     "merge",

@@ -49,47 +49,41 @@ fn a_decoded_template_renders_without_its_source() {
     assert_eq!(output, "3");
 }
 
-/// An invalid AST fails with the path of its first invalid value, which ends at the statement node that holds it, and
-/// a message that names the field.
+/// Every invalid AST of the shared fixture fails with the JSON Pointer of its invalid node (AST-10), which the message
+/// names.
 #[test]
-fn decode_fails_naming_the_path_of_the_first_invalid_value() {
-    for (json, path, reason) in [
-        (r#"{"type":"Template","name":"x","body":[]}"#, ".", "comments"),
-        (r#"{"type":"Text","name":"x","body":[],"comments":[]}"#, "type", "Template"),
-        (
-            r#"{"type":"Template","name":"x","body":[{"type":"Bogus","span":[0,1]}],"comments":[]}"#,
-            "body[0].type",
-            "Bogus",
-        ),
-        (
-            r#"{"type":"Template","name":"x","body":[{"type":"Text","value":"a","span":[0,1],"extra":1}],"comments":[]}"#,
-            "body[0]",
-            "extra",
-        ),
-        (
-            r#"{"type":"Template","name":"x","body":[{"type":"Echo","expr":{"type":"Var","name":"a"},"span":[0,1]}],"comments":[]}"#,
-            "body[0]",
-            "span",
-        ),
-        (
-            r#"{"type":"Template","name":"x","body":[{"type":"If","branches":[{"body":[],"span":[0,1]}],"span":[0,1]}],"comments":[]}"#,
-            "body[0]",
-            "test",
-        ),
-        (
-            r#"{"type":"Template","name":"x","body":[{"type":"If","branches":[],"span":[0,1]}],"comments":[]}"#,
-            "body[0]",
-            "else",
-        ),
-        (
-            r#"{"type":"Template","name":"x","body":[{"type":"Text","value":"a","span":[-1,1]}],"comments":[]}"#,
-            "body[0]",
-            "-1",
-        ),
-    ] {
-        let error = decode_template(json).expect_err(json);
-        assert_eq!(error.path(), path, "{json}: {error}");
-        let message = error.to_string();
-        assert!(message.contains(path) && message.contains(reason), "{json}: {message}");
+fn decode_fails_naming_the_json_pointer_of_the_invalid_node() {
+    let path = common::repo_root().join("tests/fixtures/ast-decode/invalid.json");
+    let fixture: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&path).expect("invalid.json")).expect("invalid.json is JSON");
+    let cases = fixture["cases"].as_array().expect("cases");
+    assert!(!cases.is_empty(), "invalid.json has no case");
+    for case in cases {
+        let name = case["name"].as_str().expect("name");
+        let pointer = case["path"].as_str().expect("path");
+        let json = serde_json::to_string(&case["ast"]).expect("encode");
+        let error = decode_template(&json).expect_err(name);
+        assert_eq!(error.path(), Some(pointer), "{name}: {error}");
+        let shown = if pointer.is_empty() { "the root" } else { pointer };
+        assert!(error.to_string().contains(shown), "{name}: {error}");
     }
+}
+
+/// The schema that the crate embeds, src/ast.schema.json, is contracts/schema/ast.schema.json byte for byte.
+#[test]
+fn the_embedded_schema_is_the_contract_schema() {
+    let root = common::repo_root();
+    let read = |path: &str| std::fs::read(root.join(path)).unwrap_or_else(|error| panic!("{path}: {error}"));
+    assert!(
+        read("packages/rust/src/ast.schema.json") == read("contracts/schema/ast.schema.json"),
+        "packages/rust/src/ast.schema.json differs from contracts/schema/ast.schema.json: copy the contract schema to it"
+    );
+}
+
+/// Text that is not JSON fails with the error of serde_json and no path.
+#[test]
+fn decode_fails_on_text_that_is_not_json() {
+    let error = decode_template("{").expect_err("{");
+    assert!(error.path().is_none(), "{error}");
+    assert!(matches!(error, polyspec_template::AstDecodeError::Json(_)), "{error}");
 }

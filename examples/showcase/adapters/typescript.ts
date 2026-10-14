@@ -3,11 +3,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { Ajv, type ValidateFunction } from 'ajv';
 import {
   AstProgram,
   Engine,
   MapLoader,
+  decodeTemplate,
   parseJsonBytes,
   type DefineInput,
   type Env,
@@ -55,22 +55,6 @@ function readJsonText(path: string): unknown {
   return value;
 }
 
-// A compiled AST artifact holds one Template node of contracts/schema/ast.schema.json, which the AST program loads as it
-// is; ajv checks each artifact against that schema. The validator is compiled on the first read, so the generated mode
-// does not read the schema.
-let validateTemplate: ValidateFunction<Template> | undefined;
-
-function templateOf(value: unknown, path: string): Template {
-  if (validateTemplate === undefined) {
-    const schemaPath = fileURLToPath(new URL('../../../contracts/schema/ast.schema.json', import.meta.url));
-    const schema = readJsonText(schemaPath);
-    if (!isRecord(schema)) throw new Error(schemaPath + ' is no JSON object');
-    validateTemplate = new Ajv({ strict: true }).compile<Template>(schema);
-  }
-  if (!validateTemplate(value)) throw new Error(path + ' is no Template of the AST schema: ' + JSON.stringify(validateTemplate.errors));
-  return value;
-}
-
 function readArtifactTemplates(root: string): Map<string, Template> {
   const artifactRoot = join(root, 'compiled', 'ast');
   const manifestPath = join(artifactRoot, 'manifest.json');
@@ -82,7 +66,8 @@ function readArtifactTemplates(root: string): Map<string, Template> {
     const path = isRecord(entry) ? entry.path : undefined;
     if (typeof path !== 'string') throw new Error(manifestPath + ': files.' + name + '.path must be a string');
     const templatePath = join(artifactRoot, path);
-    templates.set(name, templateOf(readJsonText(templatePath), templatePath));
+    // decodeTemplate validates the artifact against contracts/schema/ast.schema.json (AST-10).
+    templates.set(name, decodeTemplate(readFileSync(templatePath, 'utf8')));
   }
   return templates;
 }

@@ -5,6 +5,20 @@ import { describe, expect, it } from 'vitest';
 import { AstDecodeError, decodeTemplate, parse } from '../src/index.js';
 import { AstProgram, Engine, MapLoader, decodeTemplate as renderDecodeTemplate } from '../src/render.js';
 import { caseIds, casesDir } from '../../../tests/runner/case-list.mts';
+import { repoRoot } from './helpers.js';
+
+// The invalid ASTs that every runtime fails with the same JSON Pointer (AST-10).
+function invalidCases(): { name: string; ast: unknown; path: string }[] {
+  const fixture: unknown = JSON.parse(readFileSync(join(repoRoot, 'tests/fixtures/ast-decode/invalid.json'), 'utf8'));
+  const cases: unknown = typeof fixture === 'object' && fixture !== null && 'cases' in fixture ? fixture.cases : undefined;
+  if (!Array.isArray(cases)) throw new Error('tests/fixtures/ast-decode/invalid.json has no cases array');
+  return cases.map((entry: unknown) => {
+    if (typeof entry !== 'object' || entry === null || !('name' in entry) || !('ast' in entry) || !('path' in entry)) throw new Error(`invalid.json: ${JSON.stringify(entry)} is no case`);
+    const { name, ast, path } = entry;
+    if (typeof name !== 'string' || typeof path !== 'string') throw new Error(`invalid.json: ${JSON.stringify(entry)} has no string name and path`);
+    return { name, ast, path };
+  });
+}
 
 const echo = '{"type":"Template","name":"x.tpl","body":[{"type":"Echo","expr":{"type":"Binary","op":"+","left":{"type":"Var","name":"a","span":[3,4]},"right":{"type":"Literal","kind":"number","value":1,"span":[7,8]},"span":[3,8]},"span":[0,9]}],"comments":[]}';
 
@@ -39,21 +53,14 @@ describe('decodeTemplate', () => {
     expect(decodeTemplate(JSON.parse(echo))).toEqual(decodeTemplate(echo));
   });
 
-  it.each([
-    ['a missing field of the root', { type: 'Template', name: 'x', body: [] }, '', /comments/],
-    ['a root of another type', { type: 'Text', name: 'x', body: [], comments: [] }, '/type', /constant/],
-    ['an unknown node type', { type: 'Template', name: 'x', body: [{ type: 'Bogus', span: [0, 1] }], comments: [] }, '/body/0', /oneOf/],
-    ['a field of no node', { type: 'Template', name: 'x', body: [{ type: 'Text', value: 'a', span: [0, 1], extra: 1 }], comments: [] }, '/body/0', /additional properties: extra/],
-    ['a missing span of an expression', { type: 'Template', name: 'x', body: [{ type: 'Echo', expr: { type: 'Var', name: 'a' }, span: [0, 1] }], comments: [] }, '/body/0/expr', /'span'/],
-    ['an invalid identifier inside an expression', { type: 'Template', name: 'x', body: [{ type: 'Echo', expr: { type: 'Binary', op: '+', left: { type: 'Var', name: '1a', span: [0, 1] }, right: { type: 'Var', name: 'b', span: [0, 1] }, span: [0, 1] }, span: [0, 1] }], comments: [] }, '/body/0/expr/left/name', /pattern/],
-    ['a branch without its test', { type: 'Template', name: 'x', body: [{ type: 'If', branches: [{ body: [], span: [0, 1] }], else: null, span: [0, 1] }], comments: [] }, '/body/0/branches/0', /'test'/],
-    ['a literal whose value is not of its kind', { type: 'Template', name: 'x', body: [{ type: 'Echo', expr: { type: 'Literal', kind: 'number', value: '1', span: [0, 1] }, span: [0, 1] }], comments: [] }, '/body/0/expr/value', /number/],
-    ['a negative span offset', { type: 'Template', name: 'x', body: [{ type: 'Text', value: 'a', span: [-1, 1] }], comments: [] }, '/body/0/span/0', />= 0/],
-  ])('fails on %s, naming its JSON path', (_name, json, path, reason) => {
-    const error = failure(json);
-    expect(error.path).toBe(path);
-    expect(error.message).toContain(path === '' ? 'the root' : path);
-    expect(error.message).toMatch(reason);
+  it('fails on every invalid AST of the shared fixture with the JSON Pointer of its invalid node', () => {
+    const cases = invalidCases();
+    expect(cases.length).toBeGreaterThan(0);
+    for (const { name, ast, path } of cases) {
+      const error = failure(ast);
+      expect(error.path, name).toBe(path);
+      expect(error.message, name).toContain(path === '' ? 'the root' : path);
+    }
   });
 
   it('fails on text that is not JSON', () => {

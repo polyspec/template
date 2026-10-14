@@ -5,8 +5,13 @@ import (
 	"fmt"
 )
 
-// DecodeTemplate decodes the canonical AST artifact into the Go AST.
+// DecodeTemplate decodes the canonical JSON text of a template AST (AST-7) into the Go AST. The JSON is validated
+// against contracts/schema/ast.schema.json first (AST-10): text that is not JSON fails with the error of reading JSON,
+// and JSON that the schema rejects fails with a *DecodeError that names the JSON Pointer of the invalid node.
 func DecodeTemplate(data []byte) (*Template, error) {
+	if err := validate(data); err != nil {
+		return nil, err
+	}
 	var raw struct {
 		Type     string            `json:"type"`
 		Name     string            `json:"name"`

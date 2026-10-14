@@ -1,10 +1,10 @@
 <!-- doc-id: schema-readme -->
-<!-- source-sha256: 256c4ea4c41092ebc29ede1b3438b2c2f6c80b1bd5c0de144f49e8df2326ab65 -->
+<!-- source-sha256: 3056e8e630e1433e32913f21217fba5388964ec6ae50f583036f8bd99847bc96 -->
 # 스키마
 
 [English](README.md).
 
-`ast.schema.json`은 [`docs/spec/ast.md`](../../docs/spec/ast.ko.md)에 정의된 템플릿 AST의 JSON Schema(draft-07)다. 루트 정의는 `Template`이다. `Node`는 문장 노드의 합집합이고 `Expr`은 표현식 노드의 합집합이다.
+`ast.schema.json`은 [`docs/spec/ast.md`](../../docs/spec/ast.ko.md)에 정의된 템플릿 AST의 JSON Schema(draft-07)다. 루트 정의는 `Template`이다. `Node`는 문장 노드의 합집합이고 `Expr`은 표현식 노드의 합집합이다. 각각은 노드의 정의를 `if`/`then`으로 그 `type`에 따라 고르고, list item과 map entry는 `type`으로 `Spread`를 고르며, `Literal`은 `kind`로 `value`의 타입을 고르고, null이 될 수 있는 필드는 `if`로 null을 받고 `else`로 자기 정의를 따른다. 그래서 스키마에는 `oneOf`가 없고 검증기는 노드의 잘못된 값에서 오류를 보고하며, 모든 런타임의 decode는 그 JSON Pointer를 말한다(AST-10).
 
 정의: `Span`, `Template`, `NodeList`, `Node`, `Text`, `Echo`, `IfBranch`, `If`, `For`, `Set`, `Include`, `ScopeItem`, `Block`, `IfBlock`, `Identifier`, `Expr`, `Literal`, `Var`, `LoopMeta`, `Member`, `Index`, `Call`, `Unary`, `Binary`, `Ternary`, `Spread`, `List`, `MapEntry`, `Map`.
 

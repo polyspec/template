@@ -9,7 +9,15 @@
   "pythonManifests": [
     "packages/python/pyproject.toml"
   ],
-  "pythonLocks": [],
+  "pythonLocks": [
+    {
+      "lock": "packages/python/pylock.toml",
+      "source": {
+        "requirements": "packages/python/pyproject.toml",
+        "constraints": "packages/python/constraints.txt"
+      }
+    }
+  ],
   "npmLocks": [
     "package-lock.json"
   ],
