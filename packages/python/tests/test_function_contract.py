@@ -22,10 +22,7 @@ from polyspec.template.functions import Env
 
 CONTRACT = json.loads(
     (
-        Path(__file__).resolve().parents[3]
-        / "packages"
-        / "compiler"
-        / "functions.json"
+        Path(__file__).resolve().parents[3] / "packages" / "compiler" / "functions.json"
     ).read_text(encoding="utf-8")
 )
 
