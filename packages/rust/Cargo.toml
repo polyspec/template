@@ -21,6 +21,18 @@ name = "cases"
 path = "tests/cases.rs"
 harness = false
 
+# The conformance cases rendered in-process, one test per case through libtest-mimic.
+[[test]]
+name = "conformance"
+path = "tests/conformance.rs"
+harness = false
+
+# The expression vectors of tests/fixtures/expr/cases.json, one test per vector through libtest-mimic.
+[[test]]
+name = "expr_fixtures"
+path = "tests/expr_fixtures.rs"
+harness = false
+
 [lints]
 workspace = true
 

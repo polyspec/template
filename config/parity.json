@@ -39,8 +39,9 @@
         { "implementation": "ts", "test": "packages/ts/tests/conformance.test.ts" },
         { "implementation": "go", "test": "packages/go/conformance_test.go", "symbol": "TestConformanceCases" },
         { "implementation": "rust", "test": "packages/rust/tests/conformance.rs", "symbol": "conformance" },
-        { "implementation": "php", "test": "packages/php/tests/ConformanceTest.php" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/ExtConformanceTest.php" }
+        { "implementation": "php", "test": "packages/php/tests/ConformanceTest.php", "symbol": "Polyspec\\Template\\Tests\\ConformanceTest::testCase" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/ExtConformanceTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\ExtConformanceTest::testCase" },
+        { "implementation": "python", "test": "packages/python/tests/test_case_conformance.py" }
       ]
     },
     {
@@ -83,13 +84,10 @@
         { "implementation": "ts", "test": "packages/ts/tests/expr/fixtures.test.ts" },
         { "implementation": "go", "test": "packages/go/expr/fixtures_test.go", "symbol": "TestExpressionFixtures" },
         { "implementation": "rust", "test": "packages/rust/tests/expr_fixtures.rs", "symbol": "expressions" },
-        { "implementation": "php", "test": "packages/php/tests/ExprFixturesTest.php" },
+        { "implementation": "php", "test": "packages/php/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Tests\\ExprFixturesTest::testCase" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\ExprFixturesTest::testCase" },
         { "implementation": "python", "test": "packages/python/tests/test_expr_fixtures.py" }
       ]
     }
-  ],
-  "exclusions": [
-    { "unit": "conformance", "implementation": "python", "reason": "The Python package runs the conformance cases only through the comparator tests/runner/conformance.mts; it has no native test that reports each case.", "item": "T24.8" },
-    { "unit": "expressions", "implementation": "php-ext", "reason": "The PHP extension has no native test of the expression vectors.", "item": "T24.8" }
   ]
 }

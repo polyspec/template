@@ -39,22 +39,6 @@ final class ConformanceTest extends TestCase
     }
 
     #[DataProvider('cases')]
-    public function testAst(string $dir): void
-    {
-        if (!is_file("{$dir}/expected.ast.json")) {
-            $this->expectNotToPerformAssertions();
-
-            return;
-        }
-        $ast = AstProgram::parse(Support::read("{$dir}/input.tpl"), 'input.tpl', Support::delimiterOptions($dir));
-        $expected = Support::readJson("{$dir}/expected.ast.json");
-        self::assertSame(
-            Support::normalize($expected),
-            Support::normalize(Support::json(\Polyspec\Template\Ast::toJson($ast))),
-        );
-    }
-
-    #[DataProvider('cases')]
     public function testTokens(string $dir): void
     {
         if (!is_file("{$dir}/expected.ast.json")) {
@@ -100,9 +84,20 @@ final class ConformanceTest extends TestCase
         self::assertSame(Support::readJson("{$dir}/expected.format.json"), $actual);
     }
 
+    /**
+     * A case of the suite unit conformance of config/parity.json: the AST of a case with expected.ast.json, then the
+     * output or the error of its render.
+     */
     #[DataProvider('cases')]
-    public function testRender(string $dir): void
+    public function testCase(string $dir): void
     {
+        if (is_file("{$dir}/expected.ast.json")) {
+            $ast = AstProgram::parse(Support::read("{$dir}/input.tpl"), 'input.tpl', Support::delimiterOptions($dir));
+            self::assertSame(
+                Support::normalize(Support::readJson("{$dir}/expected.ast.json")),
+                Support::normalize(Support::json(\Polyspec\Template\Ast::toJson($ast))),
+            );
+        }
         $expectedError = is_file("{$dir}/expected.error.json") ? Support::readJson("{$dir}/expected.error.json") : null;
         $result = self::render($dir);
         if ($expectedError !== null) {

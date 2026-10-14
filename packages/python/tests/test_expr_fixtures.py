@@ -84,44 +84,67 @@ class ExpressionFixtures(unittest.TestCase):
     def test_the_fixture_file_holds_cases(self):
         self.assertGreater(len(CASES), 0)
 
-    def test_every_case(self):
-        for case in CASES:
-            with self.subTest(case=case["name"]):
-                source = Source.from_bytes("expression", case["expr"].encode("utf-8"))
-                if "error" in case:
-                    parser = ExpressionParser(source, 0, BARE, "expression")
-                    with self.assertRaises(TemplateError) as caught:
-                        parser.parse_expression()
-                        token = parser.peek()
-                        if token.type != "EOF":
-                            raise parser.unexpected(token)
-                    self.assertEqual(caught.exception.code, case["error"])
-                    continue
-                lexer = ExpressionLexer(source, 0, BARE, "expression")
-                tokens = []
-                while True:
-                    token = lexer.next()
-                    tokens.append({"type": token.type, "value": token.value})
-                    if token.type == "EOF":
-                        break
-                self.assertEqual(tokens, case["tokens"])
-                tree = to_json_value(
-                    ExpressionParser(source, 0, BARE, "expression").parse_expression()
-                )
-                self.assertEqual(tree, case["ast"])
-                for index, evaluation in enumerate(case.get("cases", [])):
-                    root = bind_map(evaluation["data"])
-                    context = RenderContext(
-                        AstProgram(EngineOptions()), root, Env("Z", 0.0), "expression"
-                    )
-                    result = Evaluator(context).evaluate(
-                        tree, Frame("expression", None, root), Scope()
-                    )
-                    self.assertTrue(
-                        same(plain(result), evaluation["value"]),
-                        f"case {index}: {plain(result)!r} != {evaluation['value']!r}",
-                    )
+
+class Vector(unittest.TestCase):
+    """One vector of the file, the test whose id and description are its name,
+    as the suite unit expressions of config/parity.json reads the results. The
+    test method is not named test_*, so the default loader makes no instance
+    without a vector."""
+
+    def __init__(self, case: dict) -> None:
+        super().__init__("run_vector")
+        self.case = case
+
+    def id(self) -> str:
+        return self.case["name"]
+
+    def __str__(self) -> str:
+        return self.id()
+
+    def shortDescription(self) -> None:
+        return None
+
+    def run_vector(self) -> None:
+        case = self.case
+        source = Source.from_bytes("expression", case["expr"].encode("utf-8"))
+        if "error" in case:
+            parser = ExpressionParser(source, 0, BARE, "expression")
+            with self.assertRaises(TemplateError) as caught:
+                parser.parse_expression()
+                token = parser.peek()
+                if token.type != "EOF":
+                    raise parser.unexpected(token)
+            self.assertEqual(caught.exception.code, case["error"])
+            return
+        lexer = ExpressionLexer(source, 0, BARE, "expression")
+        tokens = []
+        while True:
+            token = lexer.next()
+            tokens.append({"type": token.type, "value": token.value})
+            if token.type == "EOF":
+                break
+        self.assertEqual(tokens, case["tokens"])
+        tree = to_json_value(
+            ExpressionParser(source, 0, BARE, "expression").parse_expression()
+        )
+        self.assertEqual(tree, case["ast"])
+        for index, evaluation in enumerate(case.get("cases", [])):
+            root = bind_map(evaluation["data"])
+            context = RenderContext(
+                AstProgram(EngineOptions()), root, Env("Z", 0.0), "expression"
+            )
+            result = Evaluator(context).evaluate(
+                tree, Frame("expression", None, root), Scope()
+            )
+            self.assertTrue(
+                same(plain(result), evaluation["value"]),
+                f"case {index}: {plain(result)!r} != {evaluation['value']!r}",
+            )
 
 
-if __name__ == "__main__":
-    unittest.main()
+def load_tests(
+    loader: unittest.TestLoader, _tests: unittest.TestSuite, _pattern: "str | None"
+) -> unittest.TestSuite:
+    suite = loader.loadTestsFromTestCase(ExpressionFixtures)
+    suite.addTests(Vector(case) for case in CASES)
+    return suite
