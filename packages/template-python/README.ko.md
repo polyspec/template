@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-python-readme -->
-<!-- source-sha256: 6810d3184ae7aa80dcc95c5ea53d7a2bbbec482a28d6509d772f9b292c13e587 -->
+<!-- source-sha256: 408f2b83475ae19cb36c09940f2dd0f84e82df5d7334a1828b499ddbbfb61834 -->
 # polyspec-template
 
 [English](README.md)
@@ -55,11 +55,13 @@ tags_and_tokens = analyze(source, "layout.tpl")
 ## 명령줄
 
 ```sh
-python -m polyspec.template.cli parse FILE [--root DIR] [--delimiters OC]
-python -m polyspec.template.cli render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+python -m polyspec.template.cli parse [--root DIR] [--delimiters OC] FILE
+python -m polyspec.template.cli render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+python -m polyspec.template.cli tokens [--root DIR] [--delimiters OC] FILE
+python -m polyspec.template.cli format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
-`parse`는 AST를 JSON으로 출력합니다. template 오류는 그 필드를 JSON으로 표준 오류에 쓰고 상태 2로 끝납니다.
+옵션은 FILE 앞에 옵니다. `parse`는 AST를 JSON으로, `tokens`는 EDT-8 token을 UTF-8 byte offset의 `[start, end, type]` JSON 배열로 출력합니다. template 오류는 그 필드를 JSON으로 표준 오류에 쓰고 상태 2로 끝납니다. `format`은 정리한 text를 출력합니다(`--indent`: 1부터 8까지의 공백 수 `N`, 기본 2, `tab`, 또는 모든 줄을 유지하는 `none`). format 오류는 `{"reason", "code", "line", "col", "message"}`를 표준 오류에 쓰고 상태 2로 끝납니다. 사용법 오류는 상태 1로 끝납니다.
 
 ## API
 

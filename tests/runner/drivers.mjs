@@ -80,7 +80,7 @@ export const drivers = {
     },
   },
   // The command is the python of var/python/venv, where make python-package installs packages/template-python editable, so
-  // it imports polyspec.template from the sources of the checkout with no PYTHONPATH (PRINCIPLES S3). The build is make
+  // it imports polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). The build is make
   // python-package, which makes that environment and does nothing when it is current.
   python: {
     dir: join(packages, 'template-python'),

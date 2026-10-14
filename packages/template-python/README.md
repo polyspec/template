@@ -54,11 +54,13 @@ A parsed template can be passed to `render()` or stored in a `MapLoader`.
 ## Command line
 
 ```sh
-python -m polyspec.template.cli parse FILE [--root DIR] [--delimiters OC]
-python -m polyspec.template.cli render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+python -m polyspec.template.cli parse [--root DIR] [--delimiters OC] FILE
+python -m polyspec.template.cli render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+python -m polyspec.template.cli tokens [--root DIR] [--delimiters OC] FILE
+python -m polyspec.template.cli format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
-`parse` writes the AST as JSON; a template error writes its fields as JSON to standard error and exits with status 2.
+The options come before FILE. `parse` writes the AST as JSON and `tokens` the EDT-8 tokens as a JSON array of `[start, end, type]` with UTF-8 byte offsets; a template error writes its fields as JSON to standard error and exits with status 2. `format` writes the formatted text (`--indent`: `N` spaces from 1 to 8, default 2, `tab`, or `none` to keep every line); a format error writes `{"reason", "code", "line", "col", "message"}` to standard error and exits with status 2. A usage error exits with status 1.
 
 ## API
 
