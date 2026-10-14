@@ -3,10 +3,12 @@
 
 mod common;
 
-use common::repo_root;
-use polyspec_template::{FormatErrorReason, FormatOptions, Formatted, IndentUnit, ParseOptions, TemplateBlocks, format, parse};
+use common::{case_delimiters, repo_root, templates};
+use polyspec_template::format::invariant::{without_line_indentation, without_spans};
+use polyspec_template::{
+    FormatErrorReason, FormatOptions, Formatted, IndentUnit, ParseOptions, RequestError, TemplateBlocks, format, format_bytes, parse,
+};
 use std::fs;
-use std::path::{Path, PathBuf};
 
 fn options() -> FormatOptions {
     FormatOptions::default()
@@ -46,8 +48,7 @@ fn formats_the_fixtures_and_is_idempotent_on_them() {
     let fixtures = repo_root().join("packages/template-language/tests/fixtures");
     let mut names: Vec<String> = fs::read_dir(fixtures.join("input"))
         .expect("fixtures")
-        .flatten()
-        .map(|entry| entry.file_name().to_string_lossy().to_string())
+        .map(|entry| entry.expect("fixture entry").file_name().to_string_lossy().to_string())
         .filter(|name| name.ends_with(".tpl"))
         .collect();
     names.sort();
@@ -163,6 +164,16 @@ fn returns_the_parser_error_position_for_a_source_that_does_not_parse() {
     assert_eq!(error.reason, FormatErrorReason::Parse);
     assert_eq!(error.code.as_deref(), Some("E_PARSE_UNCLOSED_BLOCK"));
     assert_eq!((error.line, error.col), (2, 3));
+}
+
+/// A source given as bytes formats as its text; bytes that are not UTF-8 do not parse (LEX-1), and the error says where.
+#[test]
+fn formats_bytes_and_reports_bytes_that_are_not_utf8_as_a_parse_error() {
+    assert_eq!(format_bytes(b"{=a}", &options()).expect("format").text, "{= a}");
+    let error = format_bytes(b"<p>\n\xff</p>", &options()).expect_err("parse error");
+    assert_eq!(error.reason, FormatErrorReason::Parse);
+    assert_eq!(error.code.as_deref(), Some("E_LEX_INVALID_UTF8"));
+    assert_eq!((error.line, error.col), (2, 1));
 }
 
 const BOARD: &[&str] = &[
@@ -412,71 +423,6 @@ fn reports_an_html_structure_that_cannot_be_indented() {
     }
 }
 
-fn case_dirs(dir: &Path, found: &mut Vec<PathBuf>) {
-    for entry in fs::read_dir(dir).expect("cases directory").flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            case_dirs(&path, found);
-        } else if entry.file_name() == "input.tpl" {
-            found.push(dir.to_path_buf());
-        }
-    }
-}
-
-fn cases() -> Vec<PathBuf> {
-    let mut found = Vec::new();
-    case_dirs(&repo_root().join("tests").join("cases"), &mut found);
-    found.sort();
-    found
-}
-
-fn case_delimiters(dir: &Path) -> Option<String> {
-    let text = fs::read_to_string(dir.join("options.json")).ok()?;
-    let options: serde_json::Value = serde_json::from_str(&text).expect("options.json");
-    options.get("delimiters").and_then(|value| value.as_str()).map(str::to_string)
-}
-
-fn without_spans(value: &serde_json::Value) -> serde_json::Value {
-    match value {
-        serde_json::Value::Array(items) => serde_json::Value::Array(items.iter().map(without_spans).collect()),
-        serde_json::Value::Object(map) => serde_json::Value::Object(
-            map.iter()
-                .filter(|(key, _)| key.as_str() != "span")
-                .map(|(key, field)| (key.clone(), without_spans(field)))
-                .collect(),
-        ),
-        other => other.clone(),
-    }
-}
-
-// Text without the spaces and tabs at the start of its lines; Text nodes that become empty are removed.
-fn without_line_indentation(value: &serde_json::Value) -> serde_json::Value {
-    match value {
-        serde_json::Value::Array(items) => serde_json::Value::Array(
-            items
-                .iter()
-                .map(without_line_indentation)
-                .filter(|item| !(item["type"] == "Text" && item["value"] == ""))
-                .collect(),
-        ),
-        serde_json::Value::Object(map) => {
-            let text = map.get("type").is_some_and(|kind| kind == "Text");
-            serde_json::Value::Object(
-                map.iter()
-                    .map(|(key, field)| match (text && key == "value", field.as_str()) {
-                        (true, Some(value)) => {
-                            let lines: Vec<&str> = value.split('\n').map(|line| line.trim_start_matches([' ', '\t'])).collect();
-                            (key.clone(), serde_json::Value::String(lines.join("\n")))
-                        }
-                        _ => (key.clone(), without_line_indentation(field)),
-                    })
-                    .collect(),
-            )
-        }
-        other => other.clone(),
-    }
-}
-
 fn ast(source: &str, delimiters: &Option<String>) -> serde_json::Value {
     let options = ParseOptions {
         delimiters: delimiters.clone(),
@@ -490,17 +436,33 @@ fn ast(source: &str, delimiters: &Option<String>) -> serde_json::Value {
 #[test]
 fn holds_the_invariant_and_idempotence_over_every_case() {
     let mut checked = 0;
-    for dir in cases() {
-        let Ok(source) = fs::read_to_string(dir.join("input.tpl")) else {
-            continue;
-        };
-        let delimiters = case_delimiters(&dir);
+    for file in templates() {
+        let dir = file.parent().expect("case directory");
+        let bytes = fs::read(&file).unwrap_or_else(|error| panic!("{}: {error}", file.display()));
+        let delimiters = case_delimiters(dir);
         let parse_options = ParseOptions {
             delimiters: delimiters.clone(),
         };
-        if parse(source.as_bytes(), "input.tpl", &parse_options).is_err() {
+        // A source that does not parse, bytes that are not UTF-8 among them, is kept with the parse error in both modes.
+        if let Err(error) = parse(&bytes, "input.tpl", &parse_options) {
+            let RequestError::Template(error) = error else {
+                panic!("{}: {error:?}", file.display())
+            };
+            for indent in [unit("  "), None] {
+                let options = FormatOptions {
+                    indent,
+                    delimiters: delimiters.clone(),
+                    name: "input.tpl".to_string(),
+                    ..FormatOptions::default()
+                };
+                let failure = format_bytes(&bytes, &options).expect_err("parse error");
+                assert_eq!(failure.reason, FormatErrorReason::Parse, "{}", file.display());
+                assert_eq!(failure.code.as_deref(), Some(error.code.as_str()), "{}", file.display());
+                assert_eq!((failure.line, failure.col), (error.line, error.col), "{}", file.display());
+            }
             continue;
         }
+        let source = String::from_utf8(bytes).expect("a source that parses is UTF-8");
         for indent in [unit("  "), None] {
             let options = FormatOptions {
                 indent: indent.clone(),
@@ -514,7 +476,7 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
                     assert!(
                         error.reason == FormatErrorReason::Html && indent.is_some(),
                         "{}: {error:?}",
-                        dir.display()
+                        file.display()
                     );
                     continue;
                 }
@@ -525,14 +487,14 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
                     without_line_indentation(&before),
                     without_line_indentation(&after),
                     "{}",
-                    dir.display()
+                    file.display()
                 );
             } else {
-                assert_eq!(before, after, "{}", dir.display());
+                assert_eq!(before, after, "{}", file.display());
             }
             let twice = format(&once, &options).expect("second run");
-            assert_eq!(twice.text, once, "{}: idempotence", dir.display());
-            assert!(!twice.changed, "{}: idempotence", dir.display());
+            assert_eq!(twice.text, once, "{}: idempotence", file.display());
+            assert!(!twice.changed, "{}: idempotence", file.display());
             checked += 1;
         }
     }
