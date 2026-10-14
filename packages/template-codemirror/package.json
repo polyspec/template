@@ -16,7 +16,7 @@
   "files": [
     "dist/index.mjs",
     "dist/index.mjs.map",
-    "dist/index.d.ts"
+    "dist/**/*.d.ts"
   ],
   "sideEffects": false,
   "engines": {

@@ -21,23 +21,28 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const TSUP = (next) => [join(root, 'node_modules/.bin/tsup'), ['--out-dir', next]];
 const ESBUILD = join(root, 'node_modules/.bin/esbuild');
-// The build command of each package, writing into `next`, run in the directory of the package.
+// tsup bundles the modules; the TypeScript compiler writes the declarations of each project next to them, since the
+// declaration build of tsup calls the JavaScript API of the compiler, which TypeScript 7 does not have.
+const typescript = projects => next => [
+  [join(root, 'node_modules/.bin/tsup'), ['--out-dir', next]],
+  ...projects.map(project => [join(root, 'node_modules/.bin/tsc'), ['-p', project, '--noEmit', 'false', '--declaration', '--emitDeclarationOnly', '--rootDir', 'src', '--outDir', next]]),
+];
+// The build commands of each package, writing into `next`, run in order in the directory of the package.
 const BUILDS = {
-  'template-ts': TSUP,
-  'template-language': TSUP,
-  'template-lsp': TSUP,
-  'template-codemirror': TSUP,
-  'template-vscode': next => [process.execPath, [join(root, 'scripts/build-package.mjs'), '--esbuild-vscode', next]],
+  'template-ts': typescript(['tsconfig.json', 'tsconfig.node.json']),
+  'template-language': typescript(['tsconfig.build.json']),
+  'template-lsp': typescript(['tsconfig.build.json']),
+  'template-codemirror': typescript(['tsconfig.build.json']),
+  'template-vscode': next => [[process.execPath, [join(root, 'scripts/build-package.mjs'), '--esbuild-vscode', next]]],
 };
 // The sources and configuration of a package that its build reads, besides src/.
-const CONFIGURATION = ['tsup.config.ts', 'package.json', 'tsconfig.json', 'tsconfig.node.json'];
+const CONFIGURATION = ['tsup.config.ts', 'package.json', 'tsconfig.json', 'tsconfig.node.json', 'tsconfig.build.json'];
 
 const { values } = parseArgs({
   options: {
@@ -105,14 +110,15 @@ function inputs(list) {
   return hash.digest('hex');
 }
 
-// The files in the order of publication: a file after the relative modules it imports.
+// The files, as paths relative to `directory`, in the order of publication: a file after the relative modules it imports.
 function publicationOrder(directory, names) {
   const present = new Set(names);
   const imports = name => {
     if (!/\.(mjs|cjs|js|ts)$/.test(name)) return [];
     const text = readFileSync(join(directory, name), 'utf8');
-    return [...text.matchAll(/(?:from|import|require)\s*\(?\s*["']\.\/([^"']+)["']/g)]
-      .flatMap(match => [match[1], match[1].replace(/\.js$/, '.d.ts')])
+    return [...text.matchAll(/(?:from|import|require)\s*\(?\s*["'](\.\.?\/[^"']+)["']/g)]
+      .map(match => posix.join(posix.dirname(name), match[1]))
+      .flatMap(target => [target, target.replace(/\.js$/, '.d.ts')])
       .filter(target => present.has(target) && target !== name);
   };
   const order = [];
@@ -134,18 +140,16 @@ function build(hash) {
   rmSync(next, { recursive: true, force: true });
   mkdirSync(next, { recursive: true });
   console.log(`build-package: building ${values.package} into ${next}`);
-  const [command, args] = BUILDS[values.package](next);
-  run(command, args, { cwd: pkg });
-  const built = readdirSync(next, { withFileTypes: true });
-  const directory = built.find(entry => !entry.isFile());
-  if (directory) throw new Error(`${join(next, directory.name)}: the build wrote a directory; build-package publishes files only`);
-  const names = publicationOrder(next, built.map(entry => entry.name));
+  for (const [command, args] of BUILDS[values.package](next)) run(command, args, { cwd: pkg });
+  const names = publicationOrder(next, files(next).map(file => relative(next, file).split(sep).join('/')));
   if (names.length === 0) throw new Error(`${next}: the build wrote no file`);
-  mkdirSync(dist, { recursive: true });
-  for (const name of names) renameSync(join(next, name), join(dist, name));
+  for (const name of names) {
+    mkdirSync(dirname(join(dist, name)), { recursive: true });
+    renameSync(join(next, name), join(dist, name));
+  }
   const published = new Set(names);
   // Without a record of the previous build, every other file of `dist` belongs to it.
-  const previous = existsSync(stamp) ? JSON.parse(readFileSync(stamp, 'utf8')).files : readdirSync(dist);
+  const previous = existsSync(stamp) ? JSON.parse(readFileSync(stamp, 'utf8')).files : files(dist).map(file => relative(dist, file).split(sep).join('/'));
   const stale = previous.filter(name => !published.has(name) && existsSync(join(dist, name)));
   for (const name of stale) unlinkSync(join(dist, name));
   rmSync(next, { recursive: true });

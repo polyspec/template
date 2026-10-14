@@ -28,22 +28,30 @@ before(() => {
   }
 });
 
+// The files of `dist` and its subdirectories, as sorted paths relative to `dist` with `/`.
+function filesOf(dist) {
+  return readdirSync(dist, { recursive: true }).filter(name => statSync(path.join(dist, name)).isFile()).map(name => name.split(path.sep).join('/')).sort();
+}
+
 // The names and contents of the files of `dist`.
 function snapshot(dist) {
-  return Object.fromEntries(readdirSync(dist).sort().map(name => [name, readFileSync(path.join(dist, name), 'utf8')]));
+  return Object.fromEntries(filesOf(dist).map(name => [name, readFileSync(path.join(dist, name), 'utf8')]));
 }
 
 // The files that a reader of `dist` needs: the files of the previous build and the relative modules they import.
 function needed(dist, files) {
   const result = new Set(files);
-  for (const file of files.filter(name => /\.(mjs|cjs|js)$/.test(name))) {
+  for (const file of files.filter(name => /\.(mjs|cjs|js|ts)$/.test(name))) {
     let text;
     try {
       text = readFileSync(path.join(dist, file), 'utf8');
     } catch {
       continue;
     }
-    for (const match of text.matchAll(/(?:from|import|require)\s*\(?\s*["']\.\/([^"']+)["']/g)) result.add(match[1]);
+    for (const match of text.matchAll(/(?:from|import|require)\s*\(?\s*["'](\.\.?\/[^"']+)["']/g)) {
+      const target = path.posix.join(path.posix.dirname(file), match[1]);
+      result.add(file.endsWith('.d.ts') ? target.replace(/\.js$/, '.d.ts') : target);
+    }
   }
   return result;
 }
@@ -110,7 +118,7 @@ for (const name of PACKAGES) {
     const dist = temporary(t);
     const first = build(name, dist);
     assert.equal(first.status, 0, first.stdout + first.stderr);
-    const file = readdirSync(dist).find(entry => !entry.endsWith('.map'));
+    const file = filesOf(dist).find(entry => !entry.endsWith('.map'));
     const built = statSync(path.join(dist, file)).mtimeMs;
     const second = build(name, dist);
     assert.equal(second.status, 0, second.stdout + second.stderr);

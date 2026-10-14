@@ -6,7 +6,6 @@ export default defineConfig({
     main: 'src/main.ts',
   },
   format: ['esm'],
-  dts: { entry: { index: 'src/index.ts' }, compilerOptions: { types: ['node'] } },
   clean: true,
   sourcemap: true,
   platform: 'node',

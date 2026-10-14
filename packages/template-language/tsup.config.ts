@@ -6,7 +6,6 @@ export default defineConfig({
     cli: 'src/cli/main.ts',
   },
   format: ['esm'],
-  dts: { entry: { index: 'src/index.ts' }, compilerOptions: { types: ['node'] } },
   clean: true,
   sourcemap: true,
   platform: 'node',
