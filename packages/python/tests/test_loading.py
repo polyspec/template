@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Loading and its failures, as the other implementations test them: the
+"""Loading and its failures, as the other implementations test them: the map
+loader and the open files of the filesystem loader (RT-10, T23.5), the
 artifact refresh policies of a program (RT-64), a loader that fails (RT-9,
 ERR-6), the files that the filesystem loader cannot load (RT-10), JSON text that
 is not one document (VAL-12) and a delimiter option that is not a delimiter pair,
@@ -53,6 +54,27 @@ class Loading(unittest.TestCase):
         self.assertEqual(immutable.render("a.tpl", {}), "1")
         immutable_loader.set("a.tpl", "2")
         self.assertEqual(immutable.render("a.tpl", {}), "1")
+
+    def test_the_map_loader_returns_a_held_source_with_a_version(self):
+        loader = MapLoader({"a.tpl": "x"})
+        loaded = loader.load("a.tpl")
+        self.assertIsNotNone(loaded)
+        self.assertEqual(loaded.source, "x")
+        self.assertNotEqual(loaded.version, "")
+        self.assertIsNone(loader.load("b.tpl"))
+
+    def test_the_filesystem_loader_keeps_no_file_open(self):
+        # A loader that read many templates holds no descriptor of them, as
+        # the open descriptors of the process in /dev/fd show (T23.5).
+        with tempfile.TemporaryDirectory() as directory:
+            templates = 64
+            for index in range(templates):
+                Path(directory, f"t{index}.tpl").write_text("x")
+            loader = FsLoader(directory)
+            before = len(os.listdir("/dev/fd"))
+            for index in range(templates):
+                self.assertIsNotNone(loader.load(f"t{index}.tpl"))
+            self.assertLessEqual(len(os.listdir("/dev/fd")), before)
 
     def test_a_loader_error_is_a_load_failure(self):
         self.assertEqual(

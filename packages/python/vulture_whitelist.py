@@ -23,6 +23,7 @@ FunctionContract
 ObjectCalls
 Loading
 Concurrency
+BoundData
 
 # unittest runs the test method that the constructor of a case of tests/cases.py names, run_case, and of a vector of
 # tests/test_expr_fixtures.py, run_vector, and reads shortDescription of a test for its report.

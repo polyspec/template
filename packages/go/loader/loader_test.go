@@ -2,6 +2,9 @@ package loader_test
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"testing/fstest"
 
@@ -26,7 +29,9 @@ func TestResolvePath(t *testing.T) {
 	}
 }
 
-func TestLoaders(t *testing.T) {
+// TestMapLoader: a map loader returns the source of a name that it holds with a version, and no
+// template for another name (RT-10).
+func TestMapLoader(t *testing.T) {
 	m := loader.NewMapLoader(map[string]string{"a.tpl": "x"})
 	if r, ok, err := m.Load("a.tpl"); !ok || err != nil || string(r.Source) != "x" || r.Version == "" {
 		t.Error("map loader")
@@ -34,6 +39,11 @@ func TestLoaders(t *testing.T) {
 	if _, ok, err := m.Load("b.tpl"); ok || err != nil {
 		t.Error("missing name found")
 	}
+}
+
+// TestFSLoader: the filesystem loader reads root/name and loads no path that leaves the root and no
+// directory (RT-10).
+func TestFSLoader(t *testing.T) {
 	fs := loader.NewFSLoader(fstest.MapFS{"d/a.tpl": {Data: []byte("y")}})
 	if r, ok, err := fs.Load("d/a.tpl"); !ok || err != nil || string(r.Source) != "y" {
 		t.Error("fs loader")
@@ -43,5 +53,34 @@ func TestLoaders(t *testing.T) {
 	}
 	if _, ok, err := fs.Load("d"); ok || err != nil {
 		t.Error("directory loaded")
+	}
+}
+
+// TestFSLoaderKeepsNoFileOpen: a filesystem loader that read many templates holds no descriptor of
+// them, which the open descriptors of the process in /dev/fd show (T23.5).
+func TestFSLoaderKeepsNoFileOpen(t *testing.T) {
+	root := t.TempDir()
+	const templates = 64
+	for index := range templates {
+		if err := os.WriteFile(filepath.Join(root, fmt.Sprintf("t%d.tpl", index)), []byte("x"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	descriptors := func() int {
+		entries, err := os.ReadDir("/dev/fd")
+		if err != nil {
+			t.Fatal(err)
+		}
+		return len(entries)
+	}
+	fs := loader.NewFSLoader(os.DirFS(root))
+	before := descriptors()
+	for index := range templates {
+		if _, ok, err := fs.Load(fmt.Sprintf("t%d.tpl", index)); !ok || err != nil {
+			t.Fatalf("t%d.tpl: %v %v", index, ok, err)
+		}
+	}
+	if after := descriptors(); after > before {
+		t.Fatalf("the loader holds %d descriptors after %d loads", after-before, templates)
 	}
 }

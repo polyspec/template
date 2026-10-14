@@ -2,7 +2,7 @@
 
 use polyspec_template::value::number::{format_number, number_to_string, positional, round_number, shortest_digits};
 use polyspec_template::value::{Value, compare_values, loose_equals, strict_equals};
-use polyspec_template::{ErrorCode, bind_json, bind_value, parse_json};
+use polyspec_template::{ErrorCode, bind_json, bind_value, parse_json, parse_json_bytes};
 use std::cmp::Ordering;
 
 #[test]
@@ -135,4 +135,17 @@ fn binding_limits_the_nesting_depth() {
     assert_eq!(bind_value(&value).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
     assert!(!value.depth_within(64));
     assert!(value.depth_within(65));
+}
+
+/// JSON text whose bytes are not UTF-8, in a string or in a key, is E_DATA_INVALID_UTF8 (VAL-12, VAL-17): a Rust host
+/// gives text of that kind as bytes.
+#[test]
+fn json_bytes_that_are_not_utf8_are_invalid_utf8() {
+    for bytes in [&b"[\"\xff\"]"[..], &b"{\"\xff\": 1}"[..], &b"\"a\xc3\""[..]] {
+        assert_eq!(
+            parse_json_bytes(bytes).unwrap_err().code,
+            ErrorCode::E_DATA_INVALID_UTF8,
+            "{bytes:?}"
+        );
+    }
 }
