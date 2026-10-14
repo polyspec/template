@@ -60,7 +60,8 @@ function loadCases(): BrowserCase[] {
   return cases.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-test('renders every fixture case in the browser', async ({ page }) => {
+test('renders every fixture case in the browser', async ({ page, baseURL }) => {
+  expect(baseURL, 'TEMPLATE_BROWSER_URL names the static server; run the browser test with tests/browser/run.mjs').toBeTruthy();
   const cases = loadCases();
   await page.goto('/tests/browser/index.html');
   const results = (await page.evaluate(async items => (window as unknown as { renderCases: (c: unknown) => Promise<unknown> }).renderCases(items), cases)) as {
