@@ -69,10 +69,10 @@ try {
   }
   const backendDirectory = join(directory, 'backends');
   mkdirSync(backendDirectory);
-  for (const filename of ['typescript.mjs', 'go.mjs', 'rust.mjs', 'php.mjs', 'python.mjs']) {
-    copyFileSync(resolve(root, 'packages/compiler/backends', filename), join(backendDirectory, filename));
+  for (const filename of ['typescript.mts', 'go.mts', 'rust.mts', 'php.mts', 'python.mts']) {
+    copyFileSync(resolve(root, 'packages/compiler/src/backends', filename), join(backendDirectory, filename));
   }
-  const rustBackend = join(backendDirectory, 'rust.mjs');
+  const rustBackend = join(backendDirectory, 'rust.mts');
   writeFileSync(rustBackend, readFileSync(rustBackend, 'utf8').replace('export function emitEntry', 'function emitEntry'));
   const backendResult = spawnSync(process.execPath, ['scripts/check-compiler-interface.mts'], {
     cwd: root,

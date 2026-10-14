@@ -1,94 +1,89 @@
 import {
   baseTarget, definition, dependent, emitExpression, emitNodes, fieldName, functionName, indent, inputName,
-  quote, tsField, tsType,
-} from '../backend-support.mjs';
+  quote, tsField, tsType, type BackendContext, type Part, type Target,
+  descriptor, descriptors, type Descriptor,
+} from '../backend-support.mts';
+import { loweredTemplate, type Program, type ValueType } from '../ir.mts';
 
 export const language = 'ts';
 
-function descriptor(source) {
-  const optionalType = source.endsWith('?');
-  const value = optionalType ? source.slice(0, -1) : source;
-  const list = /^list<(.+)>$/.exec(value);
-  if (list) return { kind: 'list', item: descriptor(list[1]), optional: optionalType };
-  const map = /^map<([^,]+),(.+)>$/.exec(value);
-  if (map) return { kind: 'map', key: descriptor(map[1].trim()), value: descriptor(map[2].trim()), optional: optionalType };
-  if (['null', 'boolean', 'number', 'string', 'any'].includes(value)) return { kind: value, optional: optionalType };
-  return { kind: 'record', name: value, optional: optionalType };
-}
 
-function bindingSchema(context) {
+
+
+function bindingSchema(context: BackendContext): { records: Record<string, Record<string, Descriptor>>; assign: Record<string, Descriptor>; definitions: Record<string, unknown> } {
   const { manifest, program } = context;
-  const records = Object.fromEntries(Object.entries({ ...manifest.records, ...manifest.recordsExtra })
-    .map(([name, fields]) => [name, Object.fromEntries(Object.entries(fields).map(([field, type]) => [field, descriptor(type)]))]));
-  const assign = Object.fromEntries(Object.entries(manifest.fields ?? {}).map(([field, type]) => [field, descriptor(type)]));
+  const records = Object.fromEntries(Object.entries(manifest.records).map(([name, fields]) => [name, descriptors(fields)]));
+  const assign = descriptors(manifest.fields);
   const definitions = Object.fromEntries([...program.definitions].map(([id, definition]) => [id, {
     field: fieldName(id),
     target: definition.template,
     html: definition.html,
-    input: definition.template === null ? {} : Object.fromEntries([...program.templates.get(definition.template).inputs].map(([field, type]) => [field, descriptor(type.source)])),
+    input: definition.template === null ? {} : Object.fromEntries([...loweredTemplate(program, definition.template).inputs].map(([field, type]) => [field, descriptor(type.source)])),
   }]));
   return { records, assign, definitions };
 }
 
-export function createTarget({ program }) {
-  const target = baseTarget(language);
-  target.var = (name, _type, node) => program.dynamicRoot ? node.scope ? `scope.lookup(frame, ${quote(name)})` : `runtime.member(rootData, ${quote(name)}, frame, ${quote(node.span)})` : `assign.${name}`;
-  target.local = (name, type) => `scope.lookup(frame, ${quote(name)}) as unknown as ${tsType(type)}`;
-  target.set = (name, value, level) => indent(level, `scope.locals.set(${quote(name)}, ${value} as unknown as Value);`);
-  target.member = (object, key, owner, node) => owner.kind === 'any' ? `runtime.member(${object} as unknown as Value, ${quote(key)}, frame, ${quote(node.span)})` : `(${object})?.${key}`;
-  target.text = (value, level, node) => indent(level, `context.at(frame, ${quote(node.span)}); context.output.write(${quote(value)});`);
-  target.echo = (expression, level, node) => indent(level, `context.at(frame, ${quote(node.span)}); context.output.write(runtime.escape(${expression} as unknown as Value, frame, ${quote(node.expr.span)}));`);
-  target.block = (node, n) => {
+const literalType = (valueType: ValueType): string => valueType.kind === 'any' ? 'Value' : tsType(valueType.source);
+
+export function createTarget({ program }: { program: Program }): Target {
+  const target: Target = {
+  ...baseTarget(language),
+  var: (name, _type, node) => program.dynamicRoot ? node.scope ? `scope.lookup(frame, ${quote(name)})` : `runtime.member(rootData, ${quote(name)}, frame, ${quote(node.span)})` : `assign.${name}`,
+  local: (name, type) => `scope.lookup(frame, ${quote(name)}) as unknown as ${tsType(type)}`,
+  set: (name, value, level) => indent(level, `scope.locals.set(${quote(name)}, ${value} as unknown as Value);`),
+  member: (object, key, owner, node) => owner.kind === 'any' ? `runtime.member(${object} as unknown as Value, ${quote(key)}, frame, ${quote(node.span)})` : `(${object})?.${key}`,
+  text: (value, level, node) => indent(level, `context.at(frame, ${quote(node.span)}); context.output.write(${quote(value)});`),
+  echo: (expression, level, node) => indent(level, `context.at(frame, ${quote(node.span)}); context.output.write(runtime.escape(${expression} as unknown as Value, frame, ${quote(node.expr.span)}));`),
+  block: (node, n) => {
     if (node.target === null) return indent(n, `{ const definition = definitions.${fieldName(node.id)};\nif (definition?.html === undefined) throw runtime.error(frame, ${quote(node.span)}, 'E_RUNTIME_BLOCK_UNDEFINED', ${quote(`define ${node.id} is not registered`)});\ncontext.at(frame, ${quote(node.span)}); context.output.write(definition.html);\n}`);
-    const base = node.inputs.filter(item => item.root).map(item => `${fieldName(item.name)}: ${emitExpression(item.root, target)}`);
-    const scoped = node.inputs.filter(item => item.scope).map(item => `${fieldName(item.name)}: ${emitExpression(item.scope, target)}`);
+    const base = node.inputs.flatMap(item => item.root === null ? [] : [`${fieldName(item.name)}: ${emitExpression(item.root, target)}`]);
+    const scoped = node.inputs.flatMap(item => item.scope === null ? [] : [`${fieldName(item.name)}: ${emitExpression(item.scope, target)}`]);
     const call = `${functionName(node.target)}(assign, definitions, input, context, runtime, rootData, blockScope)`;
     if (node.id === null) return indent(n, `{ const input = Object.assign({ ${base.join(', ')} }, { ${scoped.join(', ')} }) as ${inputName(node.target)};\nconst blockScope = new Scope();\ncontext.enter(${quote(node.target)}, frame, ${quote(node.span)});\ntry { ${call}; } finally { context.leave(); }\n}`);
     const registration = node.path === null
       ? `if (definition === undefined) throw runtime.error(frame, ${quote(node.span)}, 'E_RUNTIME_BLOCK_UNDEFINED', ${quote(`define ${node.id} is not registered`)});`
       : `if (definition === undefined) { definition = { template: ${quote(node.target)} }; definitions.${fieldName(node.id)} = definition; } else if (definition.html !== undefined || definition.template !== ${quote(node.target)}) throw runtime.error(frame, ${quote(node.span)}, 'E_RUNTIME_BLOCK_REDEFINED', ${quote(`define ${node.id} is registered with a different template`)});`;
     return indent(n, `{ let definition = definitions.${fieldName(node.id)};\n${registration}\nif (definition?.html !== undefined) { context.at(frame, ${quote(node.span)}); context.output.write(definition.html); }\nelse { const input = Object.assign({ ${base.join(', ')} }, definition?.data ?? {}, { ${scoped.join(', ')} }) as ${inputName(node.target)}; const blockScope = new Scope(); context.enter(${quote(node.target)}, frame, ${quote(node.span)}); try { ${call}; } finally { context.leave(); } }\n}`);
-  };
-  target.ifBlock = (node, n) => indent(n, `if (definitions.${fieldName(node.id)} !== undefined) {\n${emitNodes(node.body, target, n + 1)}\n}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n}` : ''}`);
-  target.loopMeta = (loop, field) => `${fieldName(loop)}_${field.replace(/_$/, '')}`;
-  target.index = (object, index, _owner, node) => `runtime.index(${object} as unknown as Value, ${index} as unknown as Value, frame, ${quote(node.span)})`;
-  target.memberCall = (object, method, args, node) => `runtime.memberCall(${object} as unknown as Value, ${quote(method)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`;
-  target.classCall = (className, method, args, node) => `runtime.classCall(${quote(className)}, ${quote(method)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`;
-  target.toValue = (value, type) => `generatedToValue(${value}, ${JSON.stringify(descriptor(type.source))} as GeneratedType)`;
-  target.call = (name, args, node) => `runtime.call(${quote(name)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`;
-  target.unary = (operator, operand, node) => `runtime.unary(${quote(operator)}, ${operand} as unknown as Value, frame, ${quote(node.span)})`;
-  target.binary = (operator, left, right, node) => {
+  },
+  ifBlock: (node, n) => indent(n, `if (definitions.${fieldName(node.id)} !== undefined) {\n${emitNodes(node.body, target, n + 1)}\n}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n}` : ''}`),
+  loopMeta: (loop, field) => `${fieldName(loop)}_${field.replace(/_$/, '')}`,
+  index: (object, index, _owner, node) => `runtime.index(${object} as unknown as Value, ${index} as unknown as Value, frame, ${quote(node.span)})`,
+  memberCall: (object, method, args, node) => `runtime.memberCall(${object} as unknown as Value, ${quote(method)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`,
+  classCall: (className, method, args, node) => `runtime.classCall(${quote(className)}, ${quote(method)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`,
+  toValue: (value, type) => `generatedToValue(${value}, ${JSON.stringify(descriptor(type.source))} as GeneratedType)`,
+  call: (name, args, node) => `runtime.call(${quote(name)}, [${args.join(', ')}] as unknown as Value[], frame, ${quote(node.span)})`,
+  unary: (operator, operand, node) => `runtime.unary(${quote(operator)}, ${operand} as unknown as Value, frame, ${quote(node.span)})`,
+  binary: (operator, left, right, node) => {
     if (operator === '&&') return `(() => { const left = ${left}; return runtime.truthy(left as unknown as Value) ? runtime.truthy(${right} as unknown as Value) : false; })()`;
     if (operator === '||') return `(() => { const left = ${left}; return runtime.truthy(left as unknown as Value) ? true : runtime.truthy(${right} as unknown as Value); })()`;
     if (operator === '??') return `(() => { const left = ${left}; return left !== null ? left : ${right}; })()`;
     return `runtime.binary(${quote(operator)}, ${left} as unknown as Value, ${right} as unknown as Value, frame, ${quote(node.span)})`;
-  };
-  target.ternary = (test, thenValue, elseValue) => `(runtime.truthy(${test} as unknown as Value) ? ${thenValue} : ${elseValue})`;
-  const literalType = valueType => valueType.kind === 'any' ? 'Value' : tsType(valueType.source);
-  target.list = (items, valueType, node) => `(runtime.depth([${items.map(item => item.spread ? `...(runtime.listSpread(${item.value} as unknown as Value, frame, ${quote(item.span)}) as unknown as ${item.node.valueType.kind === 'any' ? 'Value[]' : tsType(item.node.valueType.source)})` : item.value).join(', ')}] as unknown as Value, frame, ${quote(node.span)}) as unknown as ${literalType(valueType)})`;
-  target.map = (entries, valueType, node) => `(runtime.depth(new Map<string, unknown>([${entries.map(item => item.spread ? `...(runtime.mapSpread(${item.value} as unknown as Value, frame, ${quote(item.span)}) as unknown as ${item.node.valueType.kind === 'any' ? 'Map<string, Value>' : tsType(item.node.valueType.source)})` : `[runtime.stringify(${item.value[0]} as unknown as Value, frame, ${quote(item.node.key.span)}), ${item.value[1]}]`).join(', ')}]) as unknown as Value, frame, ${quote(node.span)}) as unknown as ${literalType(valueType)})`;
-  target.ifNode = (node, n, scope = []) => node.branches.map((branch, index) => `${'    '.repeat(n)}${index ? '} else if' : 'if'} (runtime.truthy(${emitExpression(branch.test, target)} as unknown as Value)) {\n${emitNodes(branch.body, target, n + 1, scope)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1, scope)}\n${'    '.repeat(n)}}` : ''}`;
-  target.forNode = (node, n) => {
+  },
+  ternary: (test, thenValue, elseValue) => `(runtime.truthy(${test} as unknown as Value) ? ${thenValue} : ${elseValue})`,
+  list: (items, valueType, node) => `(runtime.depth([${items.map(item => item.spread ? `...(runtime.listSpread(${item.value} as unknown as Value, frame, ${quote(item.span)}) as unknown as ${item.node.valueType.kind === 'any' ? 'Value[]' : tsType(item.node.valueType.source)})` : item.value).join(', ')}] as unknown as Value, frame, ${quote(node.span)}) as unknown as ${literalType(valueType)})`,
+  map: (entries, valueType, node) => `(runtime.depth(new Map<string, unknown>([${entries.map(item => item.spread ? `...(runtime.mapSpread(${item.value} as unknown as Value, frame, ${quote(item.span)}) as unknown as ${item.node.valueType.kind === 'any' ? 'Map<string, Value>' : tsType(item.node.valueType.source)})` : `[runtime.stringify(${item.value[0]} as unknown as Value, frame, ${quote(item.node.key.span)}), ${item.value[1]}]`).join(', ')}]) as unknown as Value, frame, ${quote(node.span)}) as unknown as ${literalType(valueType)})`,
+  ifNode: (node, n) => node.branches.map((branch, index) => `${'    '.repeat(n)}${index ? '} else if' : 'if'} (runtime.truthy(${emitExpression(branch.test, target)} as unknown as Value)) {\n${emitNodes(branch.body, target, n + 1)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n${'    '.repeat(n)}}` : ''}`,
+  forNode: (node, n) => {
     const name = fieldName(node.name);
     const entries = `${name}_entries`;
     const iterable = emitExpression(node.iter, target);
     const body = emitNodes(node.body, target, n + 1);
     // The loop declares the metadata that its body reads, and no other.
-    const uses = meta => new RegExp(`\\b${name}_${meta}\\b`).test(body);
+    const uses = (meta: string): boolean => new RegExp(`\\b${name}_${meta}\\b`).test(body);
     const lastIndex = uses('last') ? ` const ${name}_last_index = ${name}_size - 1;` : '';
     const first = uses('first') ? `\n    const ${name}_first = ${name}_index === 0;` : '';
     const last = uses('last') ? `\n    const ${name}_last = ${name}_index === ${name}_last_index;` : '';
     return indent(n, `{ const ${entries} = runtime.entries(${iterable} as unknown as Value, frame, ${quote(node.span)});\nconst ${name}_size = ${entries}.length;${lastIndex}\nconst ${name}_had = scope.locals.has(${quote(node.name)}); const ${name}_previous = scope.locals.get(${quote(node.name)});\ntry {\nfor (let ${name}_index = 0; ${name}_index < ${name}_size; ${name}_index += 1) {\n    const [${uses('key') ? `${name}_key` : ''}, ${name}_value] = ${entries}[${name}_index]!;\n    scope.locals.set(${quote(node.name)}, ${name}_value);${first}${last}\n    context.iterations += 1;\n    runtime.limit('iteration', context.iterations, frame, ${quote(node.span)});\n${body}\n}\n} finally { if (${name}_had) scope.locals.set(${quote(node.name)}, ${name}_previous as Value); else scope.locals.delete(${quote(node.name)}); }${node.empty ? `\nif (${name}_size === 0) {\n${emitNodes(node.empty, target, n + 1)}\n}` : ''}\n}`);
+  },
+  include: (node, n) => indent(n, `context.enter(${quote(node.target)}, frame, ${quote(node.span)});\ntry { ${functionName(node.target)}(assign, definitions, { ${node.inputs.map(item => `${fieldName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')} }, context, runtime, rootData, scope); } finally { context.leave(); }`),
   };
-  target.include = (node, n) => indent(n, `context.enter(${quote(node.target)}, frame, ${quote(node.span)});\ntry { ${functionName(node.target)}(assign, definitions, { ${node.inputs.map(item => `${fieldName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')} }, context, runtime, rootData, scope); } finally { context.leave(); }`);
   return target;
 }
 
-export function emitDeclarations(context) {
+export function emitDeclarations(context: BackendContext): Part[] {
   const { program, manifest, templateBodies } = context;
-  const fields = manifest.fields ?? {};
-  const records = { ...manifest.records, ...manifest.recordsExtra };
-  const tsRecords = Object.entries(records).map(([name, members]) => `export interface ${name} {\n${Object.entries(members).map(([key, type]) => `  ${tsField(key, type)}`).join('\n')}\n}`).join('\n');
+  const fields = manifest.fields;
+  const tsRecords = Object.entries(manifest.records).map(([name, members]) => `export interface ${name} {\n${Object.entries(members).map(([key, type]) => `  ${tsField(key, type)}`).join('\n')}\n}`).join('\n');
   const assignType = program.dynamicRoot ? 'export type Assign = MapValue;' : `export interface Assign {\n${Object.entries(fields).map(([name, type]) => `  ${tsField(name, type)}`).join('\n')}\n}`;
   const inputTypes = templateBodies.map(template => `export interface ${template.input} { ${[...template.inputs].map(([name, type]) => tsField(name, type.source)).join(' ')} }`).join('\n');
   const definitionsType = `export type DefinitionData<T> = Partial<T>;\nexport interface Definition<T> { template?: string; html?: string; data?: DefinitionData<T>; }\nexport interface Definitions { ${[...program.definitions].map(([name, definition]) => `${fieldName(name)}?: Definition<${definition.template ? inputName(definition.template) : 'Record<never, never>'}>;`).join(' ')} }`;
@@ -98,7 +93,7 @@ export function emitDeclarations(context) {
   return ['// Generated.', imports, `${tsRecords}\n${assignType}\n${inputTypes}\n${definitionsType}\nexport interface ArtifactManifest { schema: number; mode: 'gen'; target: 'ts'; entry: string; sourceDigest: string; typeDigest: string; contractDigest: string; files: Record<string, string>; }`];
 }
 
-export function emitRuntime(context) {
+export function emitRuntime(context: BackendContext): Part[] {
   const schema = bindingSchema(context);
   const bindAssign = context.program.dynamicRoot
     ? `function generatedBindAssign(value: unknown): { assign: Assign; root: MapValue } { const root = bindMap(value ?? new Map()); return { assign: root, root }; }`
@@ -119,19 +114,19 @@ export function emitRuntime(context) {
   ];
 }
 
-export function emitTemplates(context) {
+export function emitTemplates(context: BackendContext): string {
   const { program, templateBodies } = context;
   return templateBodies.map(template => {
-    const typed = program.templates.get(template.name);
+    const typed = loweredTemplate(program, template.name);
     const body = `  const frame = new Frame(${quote(template.name)}, ${quote(typed.lines)}, rootData);\n${[...template.inputs].map(([name, type]) => `  scope.locals.set(${quote(name)}, ${type.optional ? `(input.${fieldName(name)} ?? null)` : `input.${fieldName(name)}`} as unknown as Value);`).join('\n')}\n${template.body}`;
     // A parameter that the body does not read is named with a leading `_`, the convention of an unused parameter.
-    const parameter = (name, type) => `${new RegExp(`\\b${name}\\b`).test(body) ? name : `_${name}`}: ${type}`;
-    const parameters = [['assign', 'Assign'], ['definitions', 'Definitions'], ['input', template.input], ['context', 'RenderContext'], ['runtime', 'RuntimeBindings'], ['rootData', 'MapValue'], ['scope', 'Scope']].map(([name, type]) => parameter(name, type)).join(', ');
+    const parameter = (name: string, type: string): string => `${new RegExp(`\\b${name}\\b`).test(body) ? name : `_${name}`}: ${type}`;
+    const parameters = ([['assign', 'Assign'], ['definitions', 'Definitions'], ['input', template.input], ['context', 'RenderContext'], ['runtime', 'RuntimeBindings'], ['rootData', 'MapValue'], ['scope', 'Scope']] satisfies [string, string][]).map(([name, type]) => parameter(name, type)).join(', ');
     return `function ${template.function}(${parameters}): void {\n${body}\n}`;
   }).join('\n');
 }
 
-export function emitEntry(context) {
+export function emitEntry(context: BackendContext): string {
   const { templateBodies } = context;
   const dispatch = templateBodies.filter(template => template.inputs.size === 0).map(template => `    case ${quote(template.name)}: ${template.function}(assign, definitions, {}, context, runtime, rootData, scope); return;`).join('\n');
   return `function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {\n  switch (target) {\n${dispatch}\n    default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');\n  }\n}\nfunction generatedEnv(input: RenderOptions['env']): { timezone: string; now: number } { const timezone = input?.timezone ?? 'Z'; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== 'string') throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string'); if (typeof now !== 'number') throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number'); return { timezone, now }; }\nclass GeneratedPreparedRender implements PreparedRender { private readonly name: string; private readonly execute: () => string; constructor(name: string, execute: () => string) { this.name = name; this.execute = execute; } render(): string { return internalBoundary(this.name, this.execute); } }\nexport class GeneratedProgram implements Program {\n  readonly runtime: RuntimeEnvironment;\n  constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }\n  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== 'string') throw new Error('generated target must be a template name'); return internalBoundary(target, () => this.prepareBound(target, assign, options)); }\n  private prepareBound(target: string, assign: unknown, options: RenderOptions): PreparedRender { let boundAssign: { assign: Assign; root: MapValue }; let bound: GeneratedBoundDefinitions; let env: { timezone: string; now: number }; try { boundAssign = generatedBindAssign(assign); bound = generatedBindDefinitions(options.define); env = generatedEnv(options.env); } catch (error) { if (error instanceof BindError) throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message }); throw error; } const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(target, () => registered.html as string); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(target, () => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope); return context.output.toString(); } finally { context.leave(); } }); }\n  render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }\n}`;

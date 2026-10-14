@@ -5,14 +5,23 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    "./compiler.mjs": "./compiler.mjs",
-    "./ast-artifact.mjs": "./ast-artifact.mjs",
-    "./type-manifest.mjs": "./type-manifest.mjs",
+    "./compiler.mjs": {
+      "types": "./dist/compiler.d.mts",
+      "import": "./dist/compiler.mjs"
+    },
+    "./ast-artifact.mjs": {
+      "types": "./dist/ast-artifact.d.mts",
+      "import": "./dist/ast-artifact.mjs"
+    },
+    "./type-manifest.mjs": {
+      "types": "./dist/type-manifest.d.mts",
+      "import": "./dist/type-manifest.mjs"
+    },
     "./functions.json": "./functions.json"
   },
   "files": [
-    "*.mjs",
-    "backends",
+    "dist",
+    "backends/go",
     "interface.json",
     "functions.json"
   ],
@@ -21,6 +30,7 @@
     "node": ">=26.11.1"
   },
   "dependencies": {
-    "@polyspec/template": "0.0.6"
+    "@polyspec/template": "0.0.6",
+    "ajv": "^8.20.0"
   }
 }

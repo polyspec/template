@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-compiler-readme -->
-<!-- source-sha256: 3fb9f99dc5ac58bdaa52240a0ee027c1db094698d5ade76b19cc5340071daa5e -->
+<!-- source-sha256: 0a22c38cd3cf9dbbbbe57ecfc5d92a8fe5cb3d962583d1066e3e0cf7350dab3e -->
 # @polyspec/template-compiler
 
 [English](README.md).
@@ -14,8 +14,8 @@
 | `@polyspec/template-compiler/functions.json` | 기계 판독 가능한 함수 계약([함수](../../docs/spec/functions.ko.md)) |
 
 ```sh
-node node_modules/@polyspec/template-compiler/compiler.mjs --graph compiled/ast/manifest.json --manifest types.json \
+node node_modules/@polyspec/template-compiler/dist/compiler.mjs --graph compiled/ast/manifest.json --manifest types.json \
   --lang go --output generated.go --refresh true
 ```
 
-parser는 같은 버전의 `@polyspec/template`이다. 각 artifact는 자신을 쓴 compiler의 digest를 기록하고, refresh는 그 digest가 바뀌면 artifact를 다시 컴파일한다.
+package는 strict TypeScript(`src/`)로 쓰였고, `make build-compiler`가 tsup으로 이를 `dist/`에 bundle하며 진입점은 declaration과 함께 이를 export한다. parser는 같은 버전의 `@polyspec/template`이고, compiler는 읽는 문서(AST artifact, 타입 manifest)를 ajv로 검증한다. 각 artifact는 자신을 쓴 compiler의 digest를 기록하고, refresh는 그 digest가 바뀌면 artifact를 다시 컴파일한다.

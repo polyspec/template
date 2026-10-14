@@ -8,7 +8,7 @@ import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase
 import { showcasePythonModule } from '../examples/showcase/python-module.mts';
 import { checkLanguages } from './language-checks.mts';
 import { scenarioMetadataDocument } from './showcase-documents.mts';
-import { phpString } from '../packages/compiler/backend-support.mjs';
+import { phpString } from '../packages/compiler/src/backend-support.mts';
 import { phpProgramAutoload } from './php-program.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';

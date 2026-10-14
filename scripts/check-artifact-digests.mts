@@ -9,7 +9,7 @@ import { readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { astCompilerDigest, generatedCompilerDigest } from '../packages/compiler/compiler-digest.mjs';
+import { astCompilerDigest, generatedCompilerDigest } from '../packages/compiler/src/compiler-digest.mts';
 import { typescriptDeliveryDigest } from '../examples/showcase/delivery-digest.mts';
 import { artifactManifestDocument } from './artifact-manifest.mts';
 import { scenarioIds } from './showcase-documents.mts';

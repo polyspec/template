@@ -52,7 +52,7 @@ include scripts/kit/kit-bootstrap.mk
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
+	install build-language test-language build-lsp test-lsp build-codemirror test-codemirror build-compiler test-compiler-types format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
 	conformance-cases function-inventory-check typecheck
 
 SHOWCASE_LANGS  ?= ts,go,rust,php,python
@@ -72,6 +72,7 @@ EXT_LIBRARY := var/build/polyspec_template.so
 SHOWCASE_RUST := examples/showcase/adapters/rust
 LANGUAGE_DIR := packages/language
 LSP_DIR      := packages/lsp
+COMPILER_DIR := packages/compiler
 VSCODE_DIR := packages/vscode
 CODEMIRROR_DIR := packages/codemirror
 # The VS Code build of the integration test, installed by make install-vscode (the VS Code installer of kit) after make
@@ -131,6 +132,8 @@ help: ## List targets
 	@echo "  install-cli            Install a copy of the formatter and the script template-fmt under CLI_PREFIX (~/.local)"
 	@echo "  uninstall-cli          Remove them"
 	@echo "  build-codemirror       Build the CodeMirror 6 adapter"
+	@echo "  build-compiler         Build the compiler package @polyspec/template-compiler"
+	@echo "  test-compiler-types    Build the compiler package and type check its sources"
 	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
 	@echo "  test-vscode            Extension tests and type check"
@@ -146,7 +149,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check layout-check typecheck lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check layout-check typecheck test-compiler-types lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
@@ -192,8 +195,8 @@ install-vscode: ## Install the VS Code of the integration test into var/tools/vs
 
 # The release steps and the consumer locks are the targets of the kit.mk of @polyspec/kit (config/release.json). The archives are built
 # from the built npm packages, so the targets that build or lock them run those builds first.
-release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror)
-release-consumer release-consumer-lock: build-ts build-language build-lsp build-codemirror
+release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror build-compiler)
+release-consumer release-consumer-lock: build-ts build-language build-lsp build-codemirror build-compiler
 
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
@@ -288,6 +291,14 @@ format-check: build-language ## Check that the formatter fixtures are formatted
 format-external-check: build-language ## Run the formatter safety invariant on an explicit external template tree
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
 	cd $(LANGUAGE_DIR) && TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" $(VITEST) run tests/invariant.test.ts
+
+# The repository runs the TypeScript of packages/compiler/src by type stripping; the published package ships the build of
+# dist/ that tsup bundles from it, with the declarations of tsc (S9).
+build-compiler: build-ts ## Build the compiler package @polyspec/template-compiler
+	node scripts/build-package.mts --package compiler
+
+test-compiler-types: build-compiler ## Build the compiler package and type check its sources
+	$(TSC) --noEmit -p $(COMPILER_DIR)/tsconfig.json
 
 build-codemirror: build-language ## Build the CodeMirror 6 adapter
 	node scripts/build-package.mts --package codemirror

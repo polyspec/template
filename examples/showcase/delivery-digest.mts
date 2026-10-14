@@ -1,7 +1,7 @@
 // Computes the digest of the TypeScript-to-JavaScript delivery compilation of the showcase, which artifact refresh records.
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { digestFiles, generatedCompilerFiles } from '../../packages/compiler/compiler-digest.mjs';
+import { digestFiles, generatedCompilerFiles } from '../../packages/compiler/src/compiler-digest.mts';
 
 const root = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 

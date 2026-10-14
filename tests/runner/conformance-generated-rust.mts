@@ -4,12 +4,12 @@
 // test with its elapsed time and stops a test that outlives its own timeout.
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
-import { rustString } from '../../packages/compiler/backend-support.mjs';
-import { compileSource } from '../../packages/compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
+import { rustString } from '../../packages/compiler/src/backend-support.mts';
+import { compileSource } from '../../packages/compiler/src/compiler.mts';
+import { deriveTypeManifest } from '../../packages/compiler/src/type-manifest.mts';
 import { parse } from '../../packages/ts/dist/index.mjs';
-import { caseTestFailures, errorField, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
+import { caseTestFailures, errorField, expectedHtml, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
 import { errorDifference } from './generated-errors.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
@@ -105,7 +105,7 @@ mod ${name} {
 
   const tests = runnable.map(({ testCase, name }) => testCase.expectedError === null
     ? `#[test]
-fn ${name}() { assert_eq!(${name}::execute().unwrap(), ${quote(testCase.expectedHtml)}); }`
+fn ${name}() { assert_eq!(${name}::execute().unwrap(), ${quote(expectedHtml(testCase))}); }`
     : `#[test]
 fn ${name}() { let actual = ${name}::execute().unwrap_err(); assert_eq!(actual, ActualError { code: ${quote(testCase.expectedError.code)}.to_string(), template: ${quote(testCase.expectedError.template)}.to_string(), line: ${testCase.expectedError.line}, col: ${testCase.expectedError.col} }); }`).join('\n');
 

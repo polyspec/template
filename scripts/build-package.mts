@@ -17,7 +17,7 @@
 // write the same files, so a rebuild of unchanged inputs gives a reader the same contents.
 //
 // Usage: node scripts/build-package.mts --package <ts|language|lsp|codemirror|
-//        vscode> [--dist <directory>] [--force] [--print-inputs]
+//        compiler|vscode> [--dist <directory>] [--force] [--print-inputs]
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
@@ -44,6 +44,7 @@ const BUILDS = new Map<string, (next: string) => Command[]>([
   ['language', typescript(['tsconfig.build.json'])],
   ['lsp', typescript(['tsconfig.build.json'])],
   ['codemirror', typescript(['tsconfig.build.json'])],
+  ['compiler', typescript(['tsconfig.json'])],
   ['vscode', next => [[process.execPath, [join(root, 'scripts/build-package.mts'), '--esbuild-vscode', next]]]],
 ]);
 // The sources and configuration of a package that its build reads, besides src/.

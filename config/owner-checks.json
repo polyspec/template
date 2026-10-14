@@ -566,7 +566,9 @@
         "generated-native-check",
         "showcase-check",
         "typed-generator-compile-check",
-        "lint-ts"
+        "lint-ts",
+        "test-compiler-types",
+        "typecheck"
       ]
     },
     {

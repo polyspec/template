@@ -97,8 +97,8 @@ for (const [owner, names] of Object.entries(expectedOperations)) {
 
 const backendDirectory = process.env.TEMPLATE_BACKEND_DIRECTORY
   ? resolve(process.env.TEMPLATE_BACKEND_DIRECTORY)
-  : resolve(root, 'packages/compiler/backends');
-const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.mjs', php: 'php.mjs', python: 'python.mjs' };
+  : resolve(root, 'packages/compiler/src/backends');
+const backendFiles = { typescript: 'typescript.mts', go: 'go.mts', rust: 'rust.mts', php: 'php.mts', python: 'python.mts' };
 const backendOperations = required(manifest.components.LanguageBackend, 'the component LanguageBackend of interface.json').operations;
 for (const [language, filename] of Object.entries(backendFiles)) {
   const path = resolve(backendDirectory, filename);
