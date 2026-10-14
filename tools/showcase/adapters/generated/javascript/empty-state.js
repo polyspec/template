@@ -31,17 +31,6 @@ function generatedBindType(value, type, path) {
   if (type.kind === "record") return generatedBindRecord(value, generatedRecords[type.name], path);
   throw new Error(path + " has an unknown generated type");
 }
-function generatedToValue(value, type) {
-  if (value === null || value === void 0) return null;
-  if (type.kind === "record") {
-    if (value instanceof Map) return value;
-    const fields = generatedRecords[type.name];
-    return new Map(Object.entries(fields).map(([name, field]) => [name, generatedToValue(value[name], field)]));
-  }
-  if (type.kind === "list") return value.map((item) => generatedToValue(item, type.item));
-  if (type.kind === "map") return new Map([...value].map(([key, item]) => [key, generatedToValue(item, type.value)]));
-  return value;
-}
 function generatedBindRecord(value, fields, path, partial = false) {
   const object = generatedObject(value, path);
   const result = {};
@@ -89,7 +78,7 @@ function generatedBindDefinitions(input) {
   }
   return { definitions, targets };
 }
-function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
+function render_layout_tpl(_assign, definitions, _input, context, runtime, rootData, _scope) {
   const frame = new Frame("layout.tpl", [0, 26, 39, 51, 55, 99, 103, 111], rootData);
   context.at(frame, [0, 26]);
   context.output.write('<main class="empty-page">\n');

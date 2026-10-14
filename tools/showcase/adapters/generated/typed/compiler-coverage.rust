@@ -1,6 +1,6 @@
 // Generated.
 use polyspec_template::{ArgumentError, ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, TemplateError, Value, internal_boundary};
-use polyspec_template::error::{LineIndex, Span};
+use polyspec_template::error::LineIndex;
 use polyspec_template::render::context::{Frame, RenderContext, Scope};
 use polyspec_template::render::runtime_bindings::RuntimeBindings;
 use serde_json::Value as JsonValue;
@@ -32,10 +32,10 @@ impl GeneratedConvert for Assign { fn from_value(input: &Value) -> Result<Self, 
 #[derive(Clone)] pub struct Definition<T> { pub template: Option<String>, pub html: Option<String>, pub data: Option<T> }
 #[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<DefinitionDataCardTpl>>, pub layout: Option<Definition<DefinitionDataLayoutTpl>> }
 pub struct ArtifactManifest { pub schema: u32, pub mode: String, pub target: String, pub entry: String, pub source_digest: String, pub type_digest: String, pub contract_digest: String, pub files: HashMap<String, String> }
-type GeneratedValue = Value;
 #[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }
 #[derive(Clone, Default)] pub struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }
-impl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } fn get(&self, key: &K) -> Option<&V> { self.entries.iter().find(|entry| &entry.key == key).map(|entry| &entry.value) } fn entries(&self) -> &Vec<OrderedEntry<K, V>> { &self.entries } }
+impl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } }
+impl<K: GeneratedConvert + PartialEq, V: GeneratedConvert> GeneratedConvert for OrderedMap<K, V> { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error("expected a map")); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&Value::text(key.clone()))?, V::from_value(value)?); } Ok(result) } fn to_value(&self) -> Value { let mut map = RuntimeOrderedMap::new(); for entry in &self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) } }
 fn generated_conversion_error(message: impl Into<String>) -> TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message) }
 pub trait GeneratedConvert: Sized { fn from_value(input: &Value) -> Result<Self, TemplateError>; fn to_value(&self) -> Value; }
 impl GeneratedConvert for Value { fn from_value(input: &Value) -> Result<Self, TemplateError> { Ok(input.clone()) } fn to_value(&self) -> Value { self.clone() } }
@@ -44,11 +44,10 @@ impl GeneratedConvert for f64 { fn from_value(input: &Value) -> Result<Self, Tem
 impl GeneratedConvert for bool { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Bool(value) => Ok(*value), _ => Err(generated_conversion_error("expected a boolean")) } } fn to_value(&self) -> Value { Value::Bool(*self) } }
 impl<T: GeneratedConvert> GeneratedConvert for Option<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Null => Ok(None), other => T::from_value(other).map(Some) } } fn to_value(&self) -> Value { self.as_ref().map_or(Value::Null, T::to_value) } }
 impl<T: GeneratedConvert> GeneratedConvert for Vec<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::List(items) => items.iter().map(T::from_value).collect(), _ => Err(generated_conversion_error("expected a list")) } } fn to_value(&self) -> Value { Value::list(self.iter().map(T::to_value).collect()) } }
-impl<K: GeneratedConvert + PartialEq, V: GeneratedConvert> GeneratedConvert for OrderedMap<K, V> { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error("expected a map")); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&Value::text(key.clone()))?, V::from_value(value)?); } Ok(result) } fn to_value(&self) -> Value { let mut map = RuntimeOrderedMap::new(); for entry in &self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) } }
 fn generated_field<T: GeneratedConvert>(map: &RuntimeOrderedMap, name: &str) -> Result<T, TemplateError> { T::from_value(map.get(name).unwrap_or(&Value::Null)).map_err(|error| generated_conversion_error(format!("{name}: {}", error.message))) }
 fn generated_value<T: GeneratedConvert>(input: &T) -> Result<Value, TemplateError> { Ok(input.to_value()) }
 fn generated_result<T: GeneratedConvert>(input: &Value) -> Result<T, TemplateError> { T::from_value(input) }
-fn generated_loop_meta(runtime: &RuntimeBindings, context: &RenderContext<'_>, scope: &Scope, frame: &Frame, span: Span, name: &str, field: &str) -> Result<Value, TemplateError> { let meta = scope.loop_meta(name).ok_or_else(|| runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} is not active")))?; Ok(match field { "index_" => Value::Number(meta.index as f64), "size_" => Value::Number(meta.size as f64), "first_" => Value::Bool(meta.first), "last_" => Value::Bool(meta.last), "key_" => meta.key.clone(), "value_" => meta.value.clone(), _ => return Err(runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} has no metadata {field}"))) }) }
+fn generated_loop_meta(runtime: &RuntimeBindings, context: &RenderContext<'_>, scope: &Scope, frame: &Frame, span: polyspec_template::error::Span, name: &str, field: &str) -> Result<Value, TemplateError> { let meta = scope.loop_meta(name).ok_or_else(|| runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} is not active")))?; Ok(match field { "index_" => Value::Number(meta.index as f64), "size_" => Value::Number(meta.size as f64), "first_" => Value::Bool(meta.first), "last_" => Value::Bool(meta.last), "key_" => meta.key.clone(), "value_" => meta.value.clone(), _ => return Err(runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} has no metadata {field}"))) }) }
 fn render_card_tpl(assign: &Assign, definitions: &mut Definitions, input: InputCardTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: "card.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 30])), context: Rc::clone(root_data) };
 scope.locals.insert("label".to_string(), generated_value(&input.label)?);
     context.write("<p class=\"card\">", &frame, [0, 16])?;
@@ -130,10 +129,7 @@ fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: Inpu
     let definition = definitions.content.clone();
     if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &frame, [655, 683])?; } else {
         let mut input = InputCardTpl::default();
-
-        if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) {
-            if let Some(value) = data.label.clone() { input.label = value; }
-        }
+        if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) && let Some(value) = data.label.clone() { input.label = value; }
         input.label = generated_result::<String>(&runtime.member(context, &generated_value(&assign.page)?, "title", &frame, [672, 682])?)?;
         let mut block_scope = Scope::default();
         context.enter("card.tpl", Some(&frame), Some([655, 683]))?;

@@ -143,7 +143,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
@@ -584,6 +584,10 @@ conformance-type-manifest-check: build-ts
 
 typed-generator-compile-check: cargo-downloads-check build-php python-package compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
+
+.PHONY: generated-lint-check
+generated-lint-check: cargo-downloads-check build-php ## Lint the generated Go, Rust, TypeScript and PHP programs as code of a consumer: formatter and unused code
+	node scripts/check-generated-lint.mjs
 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
