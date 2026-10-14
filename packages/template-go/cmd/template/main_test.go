@@ -75,3 +75,55 @@ func TestTokensCommand(t *testing.T) {
 		t.Fatalf("stderr %q", stderr.String())
 	}
 }
+
+func TestFormatCommand(t *testing.T) {
+	dir := t.TempDir()
+	write := func(text string) string {
+		file := filepath.Join(dir, "t.tpl")
+		if err := os.WriteFile(file, []byte(text), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		return file
+	}
+	cases := []struct {
+		source string
+		args   []string
+		want   string
+	}{
+		{"<ul>\n<li>{=a}</li>\n</ul>", nil, "<ul>\n  <li>{= a}</li>\n</ul>"},
+		{"<ul>\n<li>{=a}</li>\n</ul>", []string{"--indent", "tab"}, "<ul>\n\t<li>{= a}</li>\n</ul>"},
+		{"<ul>\n<li>{=a}</li>\n</ul>", []string{"--indent", "4"}, "<ul>\n    <li>{= a}</li>\n</ul>"},
+		{"<ul>\n<li>{=a}</li>\n</ul>", []string{"--indent", "none"}, "<ul>\n<li>{= a}</li>\n</ul>"},
+		{"<p>[=a]</p>", []string{"--delimiters", "[]"}, "<p>[= a]</p>"},
+		{"<p>{= a}</p>\n", nil, "<p>{= a}</p>\n"},
+	}
+	for _, c := range cases {
+		var stdout, stderr bytes.Buffer
+		if status := run(append([]string{"format", write(c.source)}, c.args...), &stdout, &stderr); status != 0 {
+			t.Fatalf("%q %v: status %d: %s", c.source, c.args, status, stderr.String())
+		}
+		if stdout.String() != c.want {
+			t.Errorf("%q %v: %q, want %q", c.source, c.args, stdout.String(), c.want)
+		}
+	}
+	var stdout, stderr bytes.Buffer
+	if status := run([]string{"format", write("<div>\n<p>a</div>")}, &stdout, &stderr); status != 2 {
+		t.Fatalf("html error status %d", status)
+	}
+	var failure map[string]any
+	if err := json.Unmarshal(stderr.Bytes(), &failure); err != nil || failure["reason"] != "html" || failure["code"] != nil || failure["line"] != 2.0 || failure["col"] != 5.0 || failure["message"] == "" {
+		t.Errorf("stderr %q", stderr.String())
+	}
+	stderr.Reset()
+	if status := run([]string{"format", write("{? a}")}, &stdout, &stderr); status != 2 {
+		t.Fatalf("parse error status %d", status)
+	}
+	if err := json.Unmarshal(stderr.Bytes(), &failure); err != nil || failure["reason"] != "parse" || failure["code"] != "E_PARSE_UNCLOSED_BLOCK" {
+		t.Errorf("stderr %q", stderr.String())
+	}
+	for _, indent := range []string{"0", "9", "x"} {
+		if status := run([]string{"format", write("<p></p>"), "--indent", indent}, &stdout, &stderr); status != 1 {
+			t.Errorf("--indent %s status %d", indent, status)
+		}
+	}
+}

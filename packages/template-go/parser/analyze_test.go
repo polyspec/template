@@ -1,6 +1,9 @@
 package parser_test
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -77,5 +80,44 @@ func TestAnalyzeGivesEachTagItsKindAndBodyRange(t *testing.T) {
 	}
 	if analysis.AST == nil || analysis.AST.Type != "Template" {
 		t.Error("analysis has no AST")
+	}
+}
+
+// Every conformance case with expected.tokens.json gives its expected tokens (CNF-2).
+func TestConformanceTokens(t *testing.T) {
+	expectedFiles, _ := filepath.Glob(filepath.Join("..", "..", "..", "tests", "cases", "*", "*", "expected.tokens.json"))
+	if len(expectedFiles) < 200 {
+		t.Fatalf("found %d expected.tokens.json files", len(expectedFiles))
+	}
+	for _, path := range expectedFiles {
+		dir := filepath.Dir(path)
+		data, _ := os.ReadFile(path)
+		var expected [][3]any
+		if err := json.Unmarshal(data, &expected); err != nil {
+			t.Fatalf("%s: %v", path, err)
+		}
+		delimiters := parser.DefaultDelimiters
+		if options, err := os.ReadFile(filepath.Join(dir, "options.json")); err == nil {
+			var value struct{ Delimiters string }
+			_ = json.Unmarshal(options, &value)
+			delimiters, _ = parser.ParseDelimiters(value.Delimiters)
+		}
+		input, _ := os.ReadFile(filepath.Join(dir, "input.tpl"))
+		source, err := lexer.FromBytes("input.tpl", input)
+		if err != nil {
+			t.Fatalf("%s: %v", dir, err)
+		}
+		analysis, err := parser.Analyze(source, delimiters)
+		if err != nil {
+			t.Errorf("%s: %v", dir, err)
+			continue
+		}
+		got := make([][3]any, len(analysis.Tokens))
+		for i, token := range analysis.Tokens {
+			got[i] = [3]any{float64(token.Start), float64(token.End), string(token.Kind)}
+		}
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("%s:\n got %v\nwant %v", dir, got, expected)
+		}
 	}
 }
