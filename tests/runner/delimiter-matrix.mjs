@@ -27,7 +27,7 @@ const quoted = [
   [';;', ';:a="2;;22";|;=a;', '|2;;22'],
   ['<>', '<:a=">{}<">|<=a>', '|&gt;{}&lt;'],
   ['!"', `!:a='x{}'"R!=a"E`, 'Rx{}E'],
-  ['{}', `{:a="x\\\"}{}{}"}|{=a}`, '|x&quot;}{}{}'],
+  ['{}', `{:a="x\\"}{}{}"}|{=a}`, '|x&quot;}{}{}'],
 ];
 
 // Renders input.tpl in `language` with the delimiter pair `pair` and prints the result line of `name`.

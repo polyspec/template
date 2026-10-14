@@ -80,7 +80,7 @@ export function createProgress({ write, heartbeatMs = 5000, timeoutMs, onTimeout
      */
     close(label, { exitCode = 0, errors = [], build = [] } = {}) {
       clearInterval(timer);
-      for (const id of [...running.keys()]) this.fail(id, undefined, 'the test did not finish');
+      for (const id of running.keys()) this.fail(id, undefined, 'the test did not finish');
       const tests = counts.passed + counts.failed + counts.timedOut + counts.skipped;
       // A run in which no test ran verified nothing and fails (T19.4).
       const none = tests === 0;
