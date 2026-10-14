@@ -1,8 +1,8 @@
-// Conformance cases rendered in-process (CNF-6 to CNF-9).
+// Conformance cases rendered in-process (CNF-6 to CNF-9, CNF-16).
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError } from '../src/index.js';
+import { analyze, AstProgram, BindError, Engine, parse, parseJsonBytes, Source, TemplateError } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
 import { casesDir, toJsonValue } from './helpers.js';
 
@@ -60,7 +60,16 @@ describe('conformance cases', () => {
     const optionsBytes = readIf(join(testCase.dir, 'options.json'));
     const options = (plain(optionsBytes) ?? {}) as { delimiters?: string };
 
+    const expectedTokens = readIf(join(testCase.dir, 'expected.tokens.json'));
     if (expectedAst) {
+      it(`${testCase.id} tokens`, () => {
+        const source = new Uint8Array(readFileSync(join(testCase.dir, 'input.tpl')));
+        const { tokens } = analyze(source, 'input.tpl', options.delimiters ? { delimiters: options.delimiters } : {});
+        const text = Source.fromBytes('input.tpl', source);
+        const actual = tokens.map(token => [text.byteAt(token.start), text.byteAt(token.end), token.kind]);
+        expect(expectedTokens, 'expected.tokens.json').not.toBeNull();
+        expect(actual).toEqual(JSON.parse(new TextDecoder().decode(expectedTokens as Uint8Array)));
+      });
       it(`${testCase.id} ast`, () => {
         const source = new Uint8Array(readFileSync(join(testCase.dir, 'input.tpl')));
         const ast = parse(source, 'input.tpl', options.delimiters ? { delimiters: options.delimiters } : {});

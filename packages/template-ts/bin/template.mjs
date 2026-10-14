@@ -76,7 +76,7 @@ try {
       process.stdout.write(JSON.stringify(parse(source, name, parseOptions)));
     } else {
       // EDT-8 tokens as [start, end, type] with UTF-8 byte offsets counted after the byte order mark, as AST spans
-      // count them (LEX-2, FMT-11); analyze returns string indexes of the same decoded source.
+      // count them (LEX-2, FMT-2); analyze returns string indexes of the same decoded source.
       const { tokens } = analyze(source, name, parseOptions);
       const text = Source.fromBytes(name, source);
       process.stdout.write(JSON.stringify(tokens.map(token => [text.byteAt(token.start), text.byteAt(token.end), token.kind])));
