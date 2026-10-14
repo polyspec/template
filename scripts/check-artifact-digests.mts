@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { astCompilerDigest, generatedCompilerDigest } from '../packages/compiler/compiler-digest.mjs';
 import { typescriptDeliveryDigest } from '../examples/showcase/delivery-digest.mts';
 import { artifactManifestDocument } from './artifact-manifest.mts';
+import { scenarioIds } from './showcase-documents.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -19,7 +20,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export function artifactManifests(base = root) {
   const manifests = [];
   const scenarios = join(base, 'examples/site/scenarios');
-  for (const id of readdirSync(scenarios).sort()) {
+  for (const id of scenarioIds(scenarios)) {
     manifests.push({ path: `examples/site/scenarios/${id}/compiled/ast/manifest.json`, expected: astCompilerDigest() });
   }
   for (const directory of ['examples/showcase/adapters/generated/typed', 'examples/showcase/adapters/generated/javascript', 'examples/showcase/adapters/generated/php']) {
