@@ -4,6 +4,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { compareText } from './compare-text.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const defined = new Set();
@@ -59,7 +60,7 @@ for (const group of evidence.groups ?? []) {
   }
 }
 
-const uncovered = [...defined].filter(rule => !covered.has(rule) && !evidenced.has(rule)).sort();
+const uncovered = [...defined].filter(rule => !covered.has(rule) && !evidenced.has(rule)).sort(compareText);
 if (errors.length) {
   for (const error of errors) process.stderr.write(`[rules] ${error}\n`);
   process.exitCode = 1;

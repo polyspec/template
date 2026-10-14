@@ -20,6 +20,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { compareText } from './compare-text.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const findings = [];
@@ -54,7 +55,7 @@ function sources(directory, extensions) {
     }
   };
   walk(absolute);
-  return files.sort();
+  return files.sort(compareText);
 }
 
 // True when a comment ends on the line directly above the declaration. Attribute and decorator

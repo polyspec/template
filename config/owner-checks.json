@@ -183,6 +183,15 @@
     },
     {
       "paths": [
+        "scripts/compare-text.mjs"
+      ],
+      "tests": [
+        "tests/scripts/compare-text.test.mjs"
+      ],
+      "targets": []
+    },
+    {
+      "paths": [
         "tests/scripts/slow-command.mjs",
         "scripts/test-progress/**",
         "scripts/tools.mjs"

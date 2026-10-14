@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { compareText } from './compare-text.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const contract = JSON.parse(readFileSync(resolve(root, 'packages/template-compiler/functions.json'), 'utf8'));
@@ -49,7 +50,7 @@ for (const [language, paths] of Object.entries(files)) {
       found.set(name, [min, rawMax]);
     }
   }
-  assert.deepEqual([...found.keys()].sort(), [...expected.keys()].sort(), `${language} function names differ from contract`);
+  assert.deepEqual([...found.keys()].sort(compareText), [...expected.keys()].sort(compareText), `${language} function names differ from contract`);
   for (const [name, arity] of expected) assert.deepEqual(found.get(name), arity, `${language}.${name} arity differs from contract`);
 }
 
