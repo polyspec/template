@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 59c20195bd4d3e4f09b6ac398d49b6fe8ff23bfa282d77c6526ae6d560a5e302 -->
+<!-- source-sha256: 387ced324c4dd01f040ffc2c4daa01d3b7393e3f840bfa8e7f284b6bb0bb8678 -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -454,7 +454,7 @@
 | T24.5 | Python은 kit의 root `ruff.toml`로만 lint한다: `packages/template-python/pyproject.toml`의 `[tool.ruff]`를 지운다. | `make layout-check` | [o] |
 | T24.6 | TypeScript는 eslint와 typescript-eslint 대신 kit의 oxlint, oxlint-tsgolint, knip 설정으로 lint한다(`make lint-ts`). `eslint.config.mjs`, `make lint-js`, eslint package를 지운다. | `make lint-ts` | [ ] |
 | T24.7 | template의 implementation과 feature unit을 `config/parity.json`(kit parity의 schema)에 선언하고 `make parity-declarations-check`와 `make parity-check`를 실행한다. template의 feature registry를 지운다: `contracts/features.json`, `scripts/features/`, `tests/runner/parity.mjs`와 그 target. | `make parity-declarations-check` | [ ] |
-| T24.8 | 모든 구현의 native test를 `config/parity.json`에 연결한다: 각 suite binding은 각 case를 runner의 이름으로 보고하고(Go의 subtest `TestX/<case>`, cargo의 test `<symbol>::<case>`, vitest의 top-level test `<case>`, PHPUnit과 unittest의 test method `test_<case>`), Python은 적합성 케이스의 native test를, PHP 확장은 표현식 vector의 native test를 가져 두 exclusion을 지우며, 구현의 다른 모든 test file은 feature unit으로 bind한다. RED: `make parity-declarations-check`가 finding 67개를 보고하며, 그중 65개는 R5 undeclared-test, 두 개는 R8 exclusion이다. | `make parity-declarations-check`, `make parity-check` | [ ] |
+| T24.8 | 모든 구현의 native test를 `config/parity.json`에 연결한다: 각 suite binding은 각 case를 runner의 이름으로 보고하고(Go의 subtest `TestX/<case>`, cargo의 test `<symbol>::<case>`, vitest의 top-level test `<case>`, PHPUnit과 unittest의 test method `test_<case>`), Python은 적합성 케이스의 native test를, PHP 확장은 표현식 vector의 native test를 가져 두 exclusion을 지우며, 구현의 다른 모든 test file은 feature unit으로 bind한다. RED: `make parity-declarations-check`가 finding 67개를 보고하며, 그중 65개는 R5 undeclared-test, 두 개는 R8 exclusion이다. | `make parity-declarations-check`, `make parity-check` | [o] |
 | T24.9 | `config/owner-checks.json`에서 `tests/scripts/driver-fixture.mjs`를 소유한다: 그것으로 driver를 복사하는 test(`tests/scripts/drivers.test.mjs`, `tests/scripts/failure-messages.test.mjs`, `tests/scripts/no-silent-skips.test.mjs`)가 그것이 바뀔 때 실행된다. RED: `make owner-validate`가 `tests/scripts/driver-fixture.mjs: the path matches no owner`로 실패한다. | `make owner-validate` | [o] |
 | T24.10 | 폴더를 kit layout의 S5와 S7에 맞춘다(kit 0.0.38에서 K79가 기록한 red): `make layout-check`가 141개 finding을 보고하며 첫 줄은 `schema: error: layout-root-folders: S5: the root holds only packages/, contracts/, docs/, scripts/, tests/, examples/, benchmarks/ and config/`이다. client 폴더 이름이 `packages/template-<runtime>`이고, 루트 `tests/`에 package test가 있으며, script 세 개가 `PYTHONPATH`를 설정하고, infrastructure script가 TypeScript가 아니다(S9). | `make layout-check` | [o] |
 | T24.11 | 모든 test file을 parity unit에 묶는다(kit 0.0.38에서 K79가 기록한 red): `make parity-declarations-check`가 67개 finding을 보고하며 첫 줄은 `R5 undeclared-test ts packages/template-ts/tests/cli.test.ts: the test file of ts is the test of no binding, so no check runs it`이다. | `make parity-declarations-check` | [ ] |
