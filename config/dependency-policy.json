@@ -3,11 +3,11 @@
   "composerPlatforms": [
     {
       "manifest": "packages/template-php/composer.json",
-      "php": "8.5"
+      "php": "8.5.0"
     },
     {
       "manifest": "packages/template-php-ext/composer.json",
-      "php": "8.5"
+      "php": "8.5.0"
     }
   ],
   "pythonManifests": [
