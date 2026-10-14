@@ -1,8 +1,8 @@
 //! Loader trait, map loader, filesystem loader and template name resolution (RT-7 to RT-10).
 
 use crate::ast::Template;
-use same_file::Handle;
 use std::collections::HashMap;
+use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -89,14 +89,49 @@ impl Loader for MapLoader {
 }
 
 /// Filesystem loader rooted at a directory (RT-10). It never follows a symbolic link and gives each
-/// file one name. A file is identified by a `same_file::Handle`, which compares the device and inode
-/// number on Unix and the volume serial number, file index and size on Windows; the loader keeps the
-/// handle, and so an open file, of each file that it read.
+/// file one name. A file is identified by the device and inode number on Unix and by the volume
+/// serial number and file index on Windows, which the loader reads from the file while it is open to
+/// be read; it keeps that identity, not the file, so it holds no file open after a load.
 #[derive(Debug)]
 pub struct FsLoader {
     root: PathBuf,
-    /// The name of each file that the loader read, by the handle of the file.
-    files: Mutex<HashMap<Handle, String>>,
+    /// The name of each file that the loader read, by the identity of the file.
+    files: Mutex<HashMap<FileIdentity, String>>,
+}
+
+/// The identity of an open file: its device and inode number (Unix).
+#[cfg(unix)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct FileIdentity {
+    device: u64,
+    inode: u64,
+}
+
+#[cfg(unix)]
+fn file_identity(file: &File) -> std::io::Result<FileIdentity> {
+    use std::os::unix::fs::MetadataExt;
+    let metadata = file.metadata()?;
+    Ok(FileIdentity {
+        device: metadata.dev(),
+        inode: metadata.ino(),
+    })
+}
+
+/// The identity of an open file: its volume serial number and file index (Windows).
+#[cfg(windows)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct FileIdentity {
+    volume: u64,
+    index: u64,
+}
+
+#[cfg(windows)]
+fn file_identity(file: &File) -> std::io::Result<FileIdentity> {
+    let information = winapi_util::file::information(file)?;
+    Ok(FileIdentity {
+        volume: information.volume_serial_number(),
+        index: information.file_index(),
+    })
 }
 
 impl FsLoader {
@@ -142,17 +177,17 @@ impl Loader for FsLoader {
         let Some(metadata) = found.filter(|metadata| metadata.is_file()) else {
             return Ok(None);
         };
-        let handle = Handle::from_path(&path).map_err(|error| format!("{}: {error}", path.display()))?;
+        let failure = |error: std::io::Error| format!("{}: {error}", path.display());
+        let mut file = File::open(&path).map_err(failure)?;
+        let identity = file_identity(&file).map_err(failure)?;
         let mut files = self.files.lock().map_err(|error| error.to_string())?;
-        if let Some(owner) = files.get(&handle).filter(|owner| owner.as_str() != name) {
+        if let Some(owner) = files.get(&identity).filter(|owner| owner.as_str() != name) {
             return Err(format!("{name} is the file of {owner}"));
         }
         let mut bytes = Vec::new();
-        handle
-            .as_file()
-            .read_to_end(&mut bytes)
-            .map_err(|error| format!("{}: {error}", path.display()))?;
-        files.entry(handle).or_insert_with(|| name.to_string());
+        file.read_to_end(&mut bytes).map_err(failure)?;
+        drop(file);
+        files.entry(identity).or_insert_with(|| name.to_string());
         drop(files);
         let modified = metadata
             .modified()
