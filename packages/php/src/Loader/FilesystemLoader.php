@@ -50,7 +50,8 @@ final class FilesystemLoader implements LoaderInterface
             }
             $type = $stats['mode'] & 0o170000;
             if ($type === 0o120000) {
-                throw new \RuntimeException(implode('/', array_slice($segments, 0, $index + 1)) . ' is a symbolic link');
+                $link = implode('/', array_slice($segments, 0, $index + 1));
+                throw new \RuntimeException($link . ' is a symbolic link');
             }
             if ($index < count($segments) - 1 && $type !== 0o040000) {
                 return null;

@@ -18,14 +18,31 @@ const escapeControls = (value, escape) => [...value].map(char => {
 }).join('');
 export const goString = value => `"${escapeControls(value, code => `\\u${code.toString(16).padStart(4, '0')}`)}"`;
 export const rustString = value => `"${escapeControls(value, code => `\\u{${code.toString(16)}}`)}"`;
+const phpQuoted = value => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
 // A PHP string is single-quoted text with only \ and ' escaped. A control character is written as a
 // double-quoted escape ("\n", "\r" or "\xHH") joined with `.`, so no literal spans two source lines,
 // indentation of the generated source cannot change the text, and the source holds no control
 // character, which the PHP backend uses to mark its argument lists (T25.2).
-const phpQuoted = value => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+/**
+ * @param {string} value
+ * @returns {string}
+ */
 export const phpString = value => {
   const control = part => part === '\n' ? '"\\n"' : part === '\r' ? '"\\r"' : `"\\x${part.charCodeAt(0).toString(16).padStart(2, '0')}"`;
-  const parts = value.split(/([\u0000-\u001f\u007f])/).filter(part => part !== '').map(part => /^[\u0000-\u001f\u007f]$/.test(part) ? control(part) : phpQuoted(part));
+  // A control character (U+0000 to U+001F and U+007F) is written by its escape, every other run of text quoted.
+  const isControl = character => character.charCodeAt(0) < 0x20 || character.charCodeAt(0) === 0x7f;
+  const parts = [];
+  let text = '';
+  for (const character of value) {
+    if (!isControl(character)) {
+      text += character;
+      continue;
+    }
+    if (text !== '') parts.push(phpQuoted(text));
+    text = '';
+    parts.push(control(character));
+  }
+  if (text !== '') parts.push(phpQuoted(text));
   if (parts.length === 0) return "''";
   return parts.length === 1 ? parts[0] : `(${parts.join(' . ')})`;
 };

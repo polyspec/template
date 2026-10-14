@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
-  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
-  "compilerDigest": "4cf83d2c9c994c4af214b49c8779e64ec159fefd25f4e7d711c5e772c2f3f047",
+  "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
+  "compilerDigest": "2fb6af4f2abe1cf1250dbec9ce543ef9880c4bc4f93846bfb8dd2a89b56001c2",
   "files": {
     "scope_precedence.py": {
       "path": "scope_precedence.py",
