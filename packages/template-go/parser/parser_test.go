@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/polyspec/template/packages/template-go/ast"
@@ -51,6 +52,41 @@ func TestAssignmentOperatorCaptureIsStable(t *testing.T) {
 		text += "}"
 		if _, err := parser.Parse(lexer.FromString("t.tpl", text), parser.DefaultDelimiters); err != nil {
 			t.Errorf("operator %q: %v", operator, err)
+		}
+	}
+}
+
+// LEX-6: an assignment operator = is not followed by = or >, and the head is matched on the whole
+// rest of the text. The codes and offsets are those of the TypeScript parser for the same input.
+func TestAssignmentHeadDecidesAsTypeScript(t *testing.T) {
+	long := strings.Repeat("a", 90)
+	edge := strings.Repeat("b", 79)
+	cases := []struct {
+		text   string
+		code   errs.Code
+		offset int
+		end    int
+	}{
+		{"{:x == 1}", errs.ParseElseOutsideBlock, 0, 1},
+		{"{:x => 1}", errs.ParseElseOutsideBlock, 0, 1},
+		{"{: x=>1}", errs.ParseElseOutsideBlock, 0, 1},
+		{"{:x\t==1}", errs.ParseElseOutsideBlock, 0, 1},
+		{"{? a}{:x == 1}{/}", errs.ParseUnexpectedToken, 7, 8},
+		{"{? a}{:x => 1}{/}", errs.ParseUnexpectedToken, 7, 8},
+		{"{:" + edge + "== 1}", errs.ParseElseOutsideBlock, 0, 1},
+		{"{? a}{:" + edge + "== 1}{/}", errs.ParseUnexpectedToken, 7, 8},
+		{"{:" + edge + "= }", errs.ParseUnexpectedToken, 83, 84},
+		{"{:" + long + " = }", errs.ParseUnexpectedToken, 95, 96},
+	}
+	for _, c := range cases {
+		_, err := parser.Parse(lexer.FromString("t.tpl", c.text), parser.DefaultDelimiters)
+		var te *errs.Error
+		if !errors.As(err, &te) {
+			t.Errorf("%q: expected %s, got %v", c.text, c.code, err)
+			continue
+		}
+		if te.Code != c.code || te.Offset != c.offset || te.End != c.end {
+			t.Errorf("%q: expected %s at %d-%d, got %s at %d-%d", c.text, c.code, c.offset, c.end, te.Code, te.Offset, te.End)
 		}
 	}
 }

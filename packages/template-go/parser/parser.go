@@ -13,6 +13,21 @@ import (
 
 var reserved = map[string]bool{"true": true, "false": true, "null": true, "in": true}
 var assignHead = regexp.MustCompile(`^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)`)
+
+// matchAssignHead returns the submatch indices of the assignment head at the start of rest, or nil
+// (LEX-6). Go regexp has no lookahead, so an operator = that = or > follows is rejected here, as
+// the (?![=>]) of the TypeScript ASSIGN_HEAD rejects it.
+func matchAssignHead(rest string) []int {
+	m := assignHead.FindStringSubmatchIndex(rest)
+	if m == nil {
+		return nil
+	}
+	if rest[m[4]:m[5]] == "=" && m[5] < len(rest) && (rest[m[5]] == '=' || rest[m[5]] == '>') {
+		return nil
+	}
+	return m
+}
+
 var loopHead = regexp.MustCompile(`^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=`)
 var whitespaceOnlyPattern = regexp.MustCompile(`^[ \t\r\n]*$`)
 
@@ -243,7 +258,7 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 	case ":?":
 		end, err = p.parseElseIf(c, bodyStart)
 	case ":":
-		if assignHead.MatchString(limit(text, bodyStart, 80)) {
+		if matchAssignHead(text[bodyStart:]) != nil {
 			end, err = p.parseAssignment(c, bodyStart)
 		} else {
 			end, err = p.parseElse(c, bodyStart)
@@ -439,7 +454,7 @@ func (p *templateParser) parseBlock(c tagContext, bodyStart int) (int, error) {
 }
 
 func (p *templateParser) parseAssignment(c tagContext, bodyStart int) (int, error) {
-	m := assignHead.FindStringSubmatchIndex(p.text[bodyStart:])
+	m := matchAssignHead(p.text[bodyStart:])
 	if m == nil {
 		return 0, p.fail(errs.ParseUnexpectedToken, bodyStart, bodyStart+1, "unknown tag")
 	}

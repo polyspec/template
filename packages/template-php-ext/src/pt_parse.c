@@ -1561,10 +1561,10 @@ static size_t pt_parse_loop(pt_tparser *parser, size_t start, size_t open, int c
     return end;
 }
 
-/* ^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>])) on at most `window` bytes. */
-static bool pt_assign_head(const pt_source *source, size_t index, size_t window, size_t *name_end, size_t *operator_start, size_t *operator_end)
+/* ^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>])) at `index`, on the rest of the source (LEX-6). */
+static bool pt_assign_head(const pt_source *source, size_t index, size_t *name_end, size_t *operator_start, size_t *operator_end)
 {
-    size_t limit = index + window < source->length ? index + window : source->length;
+    size_t limit = source->length;
     size_t i = index;
     if (i >= limit || !pt_ident_start((unsigned char)source->text[i])) {
         return false;
@@ -1603,7 +1603,7 @@ static size_t pt_parse_assignment(pt_tparser *parser, size_t start, size_t open,
 {
     pt_source *source = parser->source;
     size_t name_end, operator_start, operator_end;
-    if (!pt_assign_head(source, body_start, source->length - body_start, &name_end, &operator_start, &operator_end)) {
+    if (!pt_assign_head(source, body_start, &name_end, &operator_start, &operator_end)) {
         pt_tfail(parser, "E_PARSE_UNEXPECTED_TOKEN", body_start, body_start + 1, "unknown tag");
     }
     pt_s name = pt_copy(parser, body_start, name_end);
@@ -1754,7 +1754,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
         frame->items = pt_items_empty(source->arena);
     } else if (strcmp(sigil, ":") == 0) {
         size_t name_end, operator_start, operator_end;
-        if (pt_assign_head(source, body_start, 80, &name_end, &operator_start, &operator_end)) {
+        if (pt_assign_head(source, body_start, &name_end, &operator_start, &operator_end)) {
             end = pt_parse_assignment(parser, start, open, close_count, wrapper, body_start);
         } else {
             if (parser->frame_count == 0) {
