@@ -85,7 +85,6 @@ VITEPRESS  := $(CURDIR)/node_modules/.bin/vitepress
 VITEST     := $(CURDIR)/node_modules/.bin/vitest
 PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
 VSCE       := $(CURDIR)/node_modules/.bin/vsce
-TMGRAMMAR  := $(CURDIR)/node_modules/.bin/vscode-tmgrammar-test
 
 help: ## List targets
 	@echo "Targets:"
@@ -131,7 +130,7 @@ help: ## List targets
 	@echo "  build-codemirror       Build the CodeMirror 6 adapter"
 	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
 	@echo "  build-vscode           Bundle the VS Code extension"
-	@echo "  test-vscode            Grammar tests, extension tests and type check"
+	@echo "  test-vscode            Extension tests and type check"
 	@echo "  test-vscode-integration Run the extension inside the VS Code that make install-vscode installs into var/tools/vscode"
 	@echo "  vscode-package         Build the .vsix with vsce"
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
@@ -293,11 +292,9 @@ uninstall-cli: ## Remove the formatter copy and the script template-fmt of $(CLI
 build-vscode: build-lsp ## Bundle the VS Code extension
 	node scripts/build-package.mjs --package template-vscode
 
-test-vscode: test-vscode-grammar test-vscode-unit test-vscode-types ## Grammar tests, extension tests and type check
+test-vscode: test-vscode-unit test-vscode-types ## Extension tests and type check
 
-.PHONY: test-vscode-grammar test-vscode-unit test-vscode-types
-test-vscode-grammar: build-vscode
-	cd $(VSCODE_DIR) && $(TMGRAMMAR) --config package.json -g ../../node_modules/tm-grammars/grammars/html.json -g ../../node_modules/tm-grammars/grammars/css.json -g ../../node_modules/tm-grammars/grammars/javascript.json "tests/grammar/*.tpl"
+.PHONY: test-vscode-unit test-vscode-types
 test-vscode-unit: build-vscode
 	node $(KIT)/run-tests.$(KIT_EXT) node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
 test-vscode-types: build-vscode

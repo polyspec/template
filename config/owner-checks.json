@@ -1139,12 +1139,6 @@
       ]
     },
     {
-      "check": "make test-vscode-grammar",
-      "paths": [
-        "packages/template-vscode/**"
-      ]
-    },
-    {
       "check": "make test-vscode-unit",
       "paths": [
         "packages/template-vscode/**",

@@ -50,17 +50,18 @@ test('manifest contributes the language, the grammar and the language configurat
   assert.equal(grammar.language, 'polyspec-template');
   assert.equal(grammar.scopeName, 'text.html.polyspec-template');
   const syntax = JSON.parse(readFileSync(join(root, grammar.path), 'utf8'));
-  assert.equal(syntax.scopeName, grammar.scopeName);
+  // The grammar is only the HTML host; the semantic tokens of the server colour the template tags.
+  assert.deepEqual(syntax, { $schema: 'https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json', name: 'Polyspec Template', scopeName: grammar.scopeName, patterns: [{ include: 'text.html.basic' }] });
   const configuration = JSON.parse(readFileSync(join(root, language.configuration), 'utf8'));
   assert.deepEqual(configuration.comments.blockComment, ['{*', '*}']);
   assert.ok(configuration.brackets.some(([open, close]) => open === '{' && close === '}'));
 });
 
-test('manifest contributes the templateBlocks formatting setting and enables format on type for the language', () => {
+test('manifest contributes the templateBlocks formatting setting and enables format on type and semantic highlighting for the language', () => {
   const setting = manifest.contributes.configuration.properties['polyspec-template.format.templateBlocks'];
   assert.deepEqual(setting.enum, ['indent', 'flat']);
   assert.equal(setting.default, 'indent');
-  assert.deepEqual(manifest.contributes.configurationDefaults, { '[polyspec-template]': { 'editor.formatOnType': true } });
+  assert.deepEqual(manifest.contributes.configurationDefaults, { '[polyspec-template]': { 'editor.formatOnType': true, 'editor.semanticHighlighting.enabled': true } });
 });
 
 test('manifest supports untrusted and virtual workspaces and declares the Node.js of the Electron of its minimum VS Code', () => {
