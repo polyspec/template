@@ -4,6 +4,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { compareText } from './compare-text.mjs';
 
 const args = process.argv.slice(2);
 const valueFor = name => {
@@ -228,13 +229,13 @@ for (const file of files) scanSource(file, readFileSync(resolve(root, file), 'ut
 
 const sortedSymbols = [...symbols.values()]
   .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name))
-  .map(entry => ({ ...entry, files: [...entry.files].sort() }));
+  .map(entry => ({ ...entry, files: [...entry.files].sort(compareText) }));
 const report = {
   schema: 1,
   files: files.length,
   totals,
   symbols: sortedSymbols,
-  definitions: [...definitions].sort(),
+  definitions: [...definitions].sort(compareText),
 };
 const json = `${JSON.stringify(report, null, 2)}\n`;
 if (outputPath) writeFileSync(resolve(outputPath), json);

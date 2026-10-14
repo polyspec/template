@@ -28,6 +28,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'smol-toml';
+import { compareText } from '../../scripts/compare-text.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = file => readFileSync(path.join(ROOT, file), 'utf8');
@@ -68,7 +69,7 @@ export function ciPassedViolations(text) {
   if (JSON.stringify([...needs].sort()) !== JSON.stringify(others.map(entry => entry.name).sort())) {
     found.push(`ci.yml: the job ${CI_PASSED} needs [${needs.join(', ')}], not every other job [${others.map(entry => entry.name).join(', ')}]`);
   }
-  const runners = [...new Set(others.map(entry => key(entry, 'runs-on')))].sort();
+  const runners = [...new Set(others.map(entry => key(entry, 'runs-on')))].sort(compareText);
   if (JSON.stringify([key(job, 'runs-on')]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${key(job, 'runs-on')}', not on the runner of the other jobs ${runners.join(', ')}`);
   const runs = [...job.text.matchAll(/^ {6}(?:- )? {0,2}run: (.*)$/gm)].map(match => match[1]);
   const steps = job.text.split(/\n(?= {6}- )/).slice(1);

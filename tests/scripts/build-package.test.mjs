@@ -14,6 +14,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test, { before } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { compareText } from '../../scripts/compare-text.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const BUILD = path.join(ROOT, 'scripts/build-package.mjs');
@@ -30,7 +31,7 @@ before(() => {
 
 // The files of `dist` and its subdirectories, as sorted paths relative to `dist` with `/`.
 function filesOf(dist) {
-  return readdirSync(dist, { recursive: true }).filter(name => statSync(path.join(dist, name)).isFile()).map(name => name.split(path.sep).join('/')).sort();
+  return readdirSync(dist, { recursive: true }).filter(name => statSync(path.join(dist, name)).isFile()).map(name => name.split(path.sep).join('/')).sort(compareText);
 }
 
 // The names and contents of the files of `dist`.
@@ -76,7 +77,7 @@ function buildWhilePolling(name, dist, files, ...options) {
     child.on('error', reject);
     child.on('close', status => {
       clearInterval(poll);
-      resolve({ status, output, missing: [...missing].sort(), polls });
+      resolve({ status, output, missing: [...missing].sort(compareText), polls });
     });
   });
 }

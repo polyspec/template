@@ -24,6 +24,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameS
 import { dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { compareText } from './compare-text.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ESBUILD = join(root, 'node_modules/.bin/esbuild');
@@ -93,7 +94,7 @@ function workspacePackages(dependencies, seen = new Map()) {
     seen.set(name, directory);
     workspacePackages(JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')).dependencies, seen);
   }
-  return [...seen.values()].sort();
+  return [...seen.values()].sort(compareText);
 }
 
 // The input files of the build, sorted.
@@ -130,7 +131,7 @@ function publicationOrder(directory, names) {
     order.push(name);
     state.set(name, 'done');
   };
-  for (const name of [...names].sort()) visit(name);
+  for (const name of [...names].sort(compareText)) visit(name);
   // A source map follows the file it maps.
   return [...order.filter(name => name.endsWith('.map')), ...order.filter(name => !name.endsWith('.map'))];
 }
@@ -153,7 +154,7 @@ function build(hash) {
   const stale = previous.filter(name => !published.has(name) && existsSync(join(dist, name)));
   for (const name of stale) unlinkSync(join(dist, name));
   rmSync(next, { recursive: true });
-  writeFileSync(`${stamp}.${process.pid}`, `${JSON.stringify({ hash, files: [...names].sort() })}\n`);
+  writeFileSync(`${stamp}.${process.pid}`, `${JSON.stringify({ hash, files: [...names].sort(compareText) })}\n`);
   renameSync(`${stamp}.${process.pid}`, stamp);
   console.log(`build-package: published ${names.length} files into ${dist}${stale.length ? `; removed ${stale.length} files of the previous build: ${stale.join(' ')}` : ''}`);
 }
