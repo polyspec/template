@@ -58,7 +58,7 @@ def starts_tag(text: str, open_index: int, delimiters: tuple[str, str]) -> bool:
             == delimiters[1]
         )
     if sigil == "@":
-        return _LOOP_FORM.match(text, after, after + 80) is not None
+        return _LOOP_FORM.match(text, after) is not None
     return True
 
 
