@@ -17,11 +17,10 @@ import (
 	"github.com/polyspec/template/packages/template-go/value"
 )
 
-const usageText = `usage: template parse [--root DIR] [--delimiters OC] FILE
-       template tokens [--root DIR] [--delimiters OC] FILE
-       template format [--indent none|tab|N] [--delimiters OC] FILE
-       template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-`
+const usageText = "usage: template parse [--root DIR] [--delimiters OC] FILE\n" +
+	"       template tokens [--root DIR] [--delimiters OC] FILE\n" +
+	"       template format [--indent none|tab|N] [--delimiters OC] FILE\n" +
+	"       template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE\n"
 
 // usage reports a usage error of CNF-4: a message on stderr and exit status 1.
 func usage(stderr io.Writer, message string) int {
