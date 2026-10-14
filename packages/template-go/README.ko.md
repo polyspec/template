@@ -64,6 +64,8 @@ engine := template.NewEngine(program)
 | 심볼 | 설명 |
 | --- | --- |
 | `Parse(source, name, ParseOptions)` | 템플릿 하나를 AST로 파싱한다. `ParseOptions.Delimiters`는 구분자 쌍을 선택한다. |
+| `Analyze(source, name, ParseOptions)` | 템플릿을 한 번 파싱해 AST, 받아들인 `Tags`(종류, 범위, 본문 범위)와 그 EDT-8 `Tokens`를 돌려준다. 오프셋은 앞의 바이트 순서 표시를 뺀 UTF-8 바이트 오프셋이다. |
+| `Format(source, FormatOptions)` | 태그 안의 공백과 줄 들여쓰기를 정리한다. `FormatOptions`에는 `Name`, `Delimiters`, `Range`, `Indent`(공백 묶음 또는 탭 하나, 기본은 공백 두 개), `KeepIndentation`, `TemplateBlocks`(`indent` 또는 `flat`)가 있다. 정리한 텍스트가 같은 AST로 파싱될 때만 결과를 돌려주고, 아니면 `Reason`이 `parse`, `invariant`, `html`인 `*FormatError`를 돌려준다. |
 | `NewAstProgram(Options)` | `Loader`, `Functions`, `Limits`, `Delimiters`를 가진 AST program을 생성한다. |
 | `NewEngine(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `Define`은 템플릿 또는 HTML 항목을 제공한다. |
@@ -79,10 +81,12 @@ engine := template.NewEngine(program)
 ```sh
 go build -o template ./cmd/template
 ./template parse FILE [--root DIR] [--delimiters OC]
+./template tokens FILE [--root DIR] [--delimiters OC]
+./template format FILE [--indent none|tab|N] [--delimiters OC]
 ./template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
-`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
+`parse`는 AST JSON을 출력한다. `tokens`는 토큰을 `[start, end, type]` 세 값 배열로 출력한다. `format`은 정리한 텍스트를 출력하고, 정리 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
 ## 개발
 
 ```sh

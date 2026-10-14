@@ -63,6 +63,8 @@ engine := template.NewEngine(program)
 | Symbol | Description |
 | --- | --- |
 | `Parse(source, name, ParseOptions)` | Parses one template into its AST. `ParseOptions.Delimiters` selects the delimiter pair. |
+| `Analyze(source, name, ParseOptions)` | Parses one template once and returns its AST, the accepted `Tags` (kind, range and body range) and their EDT-8 `Tokens`. Offsets are UTF-8 byte offsets after a leading byte order mark. |
+| `Format(source, FormatOptions)` | Formats the whitespace inside tags and the indentation of lines. `FormatOptions` has `Name`, `Delimiters`, `Range`, `Indent` (a run of spaces or one tab, default two spaces), `KeepIndentation` and `TemplateBlocks` (`indent` or `flat`). The result is returned only when the formatted text parses to the same AST; otherwise the error is a `*FormatError` with `Reason` `parse`, `invariant` or `html`. |
 | `NewAstProgram(Options)` | Creates an AST program with `Loader`, `Functions`, `Limits` and `Delimiters`. |
 | `NewEngine(Program)` | Creates an engine that delegates to one AST or generated program. |
 | `(*Engine).Render(nameOrAST, assign, RenderOptions)` | Renders a template to a string. `assign` contains variables and `Define` supplies template or HTML entries. |
@@ -78,10 +80,12 @@ engine := template.NewEngine(program)
 ```sh
 go build -o template ./cmd/template
 ./template parse FILE [--root DIR] [--delimiters OC]
+./template tokens FILE [--root DIR] [--delimiters OC]
+./template format FILE [--indent none|tab|N] [--delimiters OC]
 ./template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 ```
 
-`parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
+`parse` prints the AST JSON. `tokens` prints the tokens as `[start, end, type]` triples. `format` prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
 ## Development
 
 ```sh

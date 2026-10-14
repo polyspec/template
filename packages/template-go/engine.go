@@ -7,6 +7,7 @@ import (
 
 	"github.com/polyspec/template/packages/template-go/ast"
 	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/format"
 	"github.com/polyspec/template/packages/template-go/functions"
 	"github.com/polyspec/template/packages/template-go/lexer"
 	"github.com/polyspec/template/packages/template-go/loader"
@@ -126,6 +127,22 @@ func Analyze(source []byte, name string, options ParseOptions) (*Analysis, error
 		return parser.Analyze(src, d)
 	})
 }
+
+// FormatOptions configure Format.
+type FormatOptions = format.Options
+
+// FormatResult is the formatted text and whether it differs from the source.
+type FormatResult = format.Result
+
+// FormatError is why Format kept the source: it does not parse, the formatted text parses to a different AST, or
+// the HTML structure cannot be indented.
+type FormatError = format.Error
+
+// FormatRange is a byte range of the source that Format limits itself to.
+type FormatRange = format.Range
+
+// Format formats the whitespace inside the tags of a template and the indentation of its lines; see package format.
+var Format = format.Format
 
 func parseWithLines(source []byte, name string, d parser.Delimiters) (*render.ParsedTemplate, error) {
 	src, err := lexer.FromBytes(name, source)

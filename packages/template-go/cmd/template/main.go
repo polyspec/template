@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	template "github.com/polyspec/template/packages/template-go"
@@ -16,7 +17,7 @@ import (
 )
 
 func usage(message string) int {
-	fmt.Fprintf(os.Stderr, "%s\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template tokens FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n", message)
+	fmt.Fprintf(os.Stderr, "%s\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template tokens FILE [--root DIR] [--delimiters OC]\n       template format FILE [--indent none|tab|N] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n", message)
 	return 1
 }
 
@@ -28,6 +29,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	optionsOf := map[string][]string{
 		"parse":  {"root", "delimiters"},
 		"tokens": {"root", "delimiters"},
+		"format": {"indent", "delimiters"},
 		"render": {"data", "define", "env", "root", "delimiters"},
 	}
 	if len(args) < 2 || optionsOf[args[0]] == nil {
@@ -92,6 +94,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return v, nil
 	}
 
+	if command == "format" {
+		return formatCommand(filePath, name, options, stdout, stderr)
+	}
 	if command == "tokens" {
 		source, err := os.ReadFile(filePath)
 		if err != nil {
@@ -166,6 +171,51 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return fail(err)
 	}
 	_, _ = io.WriteString(stdout, output)
+	return 0
+}
+
+// formatCommand writes the formatted text, or the format error as JSON with exit status 2.
+func formatCommand(filePath, name string, options map[string]string, stdout, stderr io.Writer) int {
+	formatOptions := template.FormatOptions{Name: name, Delimiters: options["delimiters"]}
+	switch indent := options["indent"]; indent {
+	case "":
+	case "none":
+		formatOptions.KeepIndentation = true
+	case "tab":
+		formatOptions.Indent = "\t"
+	default:
+		width, err := strconv.Atoi(indent)
+		if err != nil || width < 1 || width > 8 {
+			return usage("--indent is none, tab or a number of spaces from 1 to 8")
+		}
+		formatOptions.Indent = strings.Repeat(" ", width)
+	}
+	source, err := os.ReadFile(filePath)
+	if err != nil {
+		return usage(err.Error())
+	}
+	result, err := template.Format(string(source), formatOptions)
+	var failure *template.FormatError
+	if errors.As(err, &failure) {
+		var code *string
+		if failure.Code != "" {
+			value := string(failure.Code)
+			code = &value
+		}
+		out, _ := json.Marshal(struct {
+			Reason  string  `json:"reason"`
+			Code    *string `json:"code"`
+			Line    int     `json:"line"`
+			Col     int     `json:"col"`
+			Message string  `json:"message"`
+		}{string(failure.Reason), code, failure.Line, failure.Col, failure.Message})
+		fmt.Fprintln(stderr, string(out))
+		return 2
+	}
+	if err != nil {
+		return usage(err.Error())
+	}
+	_, _ = io.WriteString(stdout, result.Text)
 	return 0
 }
 
