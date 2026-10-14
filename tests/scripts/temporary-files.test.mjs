@@ -28,8 +28,14 @@ function firstArgument(text, index) {
   return text.slice(index).trim();
 }
 
-// A directory of the checkout: built from a path of the checkout, the current directory or a relative path.
-const IN_CHECKOUT = /\b(?:root|ROOT|repoRoot|crate|goRoot|packages|__dirname)\b|process\.cwd\(\)|^['"`](?!\/)/;
+// A directory of the checkout: built from a path of the checkout, the current directory or a relative path. The names
+// are read in the code of the argument, not in the text of its quoted strings, so a prefix such as
+// 'template-lsp-root-' under tmpdir() names no path of the checkout.
+const CHECKOUT_PATH = /\b(?:root|ROOT|repoRoot|crate|goRoot|packages|__dirname)\b|process\.cwd\(\)/;
+const RELATIVE_PATH = /^['"`](?!\/)/;
+function inCheckout(argument) {
+  return RELATIVE_PATH.test(argument) || CHECKOUT_PATH.test(argument.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, "''"));
+}
 
 // The one exception: the bootstrap installer that kit copies (kit.copies) builds a tool beside its install prefix in
 // var/tools, the cache of the checkout that no test reads, and renames it into place. The exception names the file and the
@@ -38,16 +44,25 @@ const IN_CHECKOUT = /\b(?:root|ROOT|repoRoot|crate|goRoot|packages|__dirname)\b|
 const EXCEPTIONS = { 'scripts/kit/bootstrap/install-tool.mts': ['`${prefix}.next-`'] };
 
 test('no mkdtemp of a tracked script makes its directory in the checkout', () => {
-  const inCheckout = [];
+  const found = [];
   for (const file of SOURCES) {
     const text = readFileSync(path.join(ROOT, file), 'utf8');
     for (const call of text.matchAll(/\bmkdtemp(?:Sync)?\(/g)) {
       const argument = firstArgument(text, call.index + call[0].length);
       if (EXCEPTIONS[file]?.includes(argument)) continue;
-      if (IN_CHECKOUT.test(argument)) inCheckout.push(`${file}:${text.slice(0, call.index).split('\n').length}: mkdtemp(${argument})`);
+      if (inCheckout(argument)) found.push(`${file}:${text.slice(0, call.index).split('\n').length}: mkdtemp(${argument})`);
     }
   }
-  assert.deepEqual(inCheckout, [], `these temporary directories are in the checkout:\n${inCheckout.join('\n')}`);
+  assert.deepEqual(found, [], `these temporary directories are in the checkout:\n${found.join('\n')}`);
+});
+
+test('a temporary directory is in the checkout by a path of the checkout, not by a word of its quoted prefix', () => {
+  assert.equal(inCheckout("join(root, 'template-')"), true);
+  assert.equal(inCheckout("path.join(process.cwd(), 'x-')"), true);
+  assert.equal(inCheckout("'var/tmp-'"), true);
+  assert.equal(inCheckout("`${ROOT}/x-`"), true);
+  assert.equal(inCheckout("join(tmpdir(), 'template-lsp-root-')"), false);
+  assert.equal(inCheckout('path.join(tmpdir(), "packages-")'), false);
 });
 
 test('no script writes a generated integration test into a crate of packages/', () => {
