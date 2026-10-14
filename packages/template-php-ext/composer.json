@@ -10,6 +10,11 @@
     "require-dev": {
         "phpunit/phpunit": "^11.5"
     },
+    "autoload": {
+        "psr-4": {
+            "Polyspec\\Template\\Native\\": "php/"
+        }
+    },
     "autoload-dev": {
         "psr-4": {
             "Polyspec\\Template\\Native\\Tests\\": "tests/",

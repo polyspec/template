@@ -322,6 +322,32 @@ struct pt_template {
 pt_template *pt_parse(pt_run *run, const char *name, size_t name_length, const char *source, size_t length, char open, char close);
 void pt_template_release(pt_template *template);
 
+/* An accepted tag (EDT-8): its kind, its byte range and the byte range of its body between the open and the close
+ * delimiters, sigil included. */
+typedef struct pt_syntax_tag {
+    size_t start, end, body_start, body_end;
+    bool echo;
+    const char *kind; /* "assignment", "block", "close", "comment", "directive", "echo", "else", ... */
+} pt_syntax_tag;
+
+/* A classified range of an accepted tag (EDT-8). */
+typedef struct pt_syntax_token {
+    size_t start, end;
+    const char *kind; /* "delimiter", "keyword", "variable", "property", "function", "string", ... */
+} pt_syntax_token;
+
+/* The accepted tags and their tokens in source order; the arrays live in the arena of the template. */
+typedef struct pt_analysis {
+    pt_syntax_tag *tags;
+    uint32_t tag_count;
+    pt_syntax_token *tokens;
+    uint32_t token_count;
+} pt_analysis;
+
+/* Parses a source like pt_parse and fills the accepted tags and their EDT-8 tokens, with byte offsets after a
+ * leading byte order mark. */
+pt_template *pt_analyze(pt_run *run, const char *name, size_t name_length, const char *source, size_t length, char open, char close, pt_analysis *analysis);
+
 /* LEX-21. */
 bool pt_parse_delimiters(const char *value, size_t length, char *open, char *close);
 

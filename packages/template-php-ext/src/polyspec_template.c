@@ -435,6 +435,71 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, parse)
     }
 }
 
+typedef struct pt_analyze_input {
+    zend_string *source, *name;
+    char open, close;
+    zval *result;
+} pt_analyze_input;
+
+static void pt_analyze_into(pt_run *run, void *context)
+{
+    pt_analyze_input *input = context;
+    pt_analysis analysis;
+    pt_template *template = pt_analyze(run, ZSTR_VAL(input->name), ZSTR_LEN(input->name), ZSTR_VAL(input->source), ZSTR_LEN(input->source), input->open, input->close, &analysis);
+    zval ast, tags, tokens;
+    pt_ast_to_zval(template, &ast);
+    array_init_size(&tags, analysis.tag_count);
+    for (uint32_t t = 0; t < analysis.tag_count; t++) {
+        const pt_syntax_tag *tag = &analysis.tags[t];
+        zval entry;
+        array_init_size(&entry, 6);
+        add_assoc_long_ex(&entry, "start", 5, (zend_long)tag->start);
+        add_assoc_long_ex(&entry, "end", 3, (zend_long)tag->end);
+        add_assoc_bool_ex(&entry, "echo", 4, tag->echo);
+        add_assoc_string_ex(&entry, "kind", 4, tag->kind);
+        add_assoc_long_ex(&entry, "bodyStart", 9, (zend_long)tag->body_start);
+        add_assoc_long_ex(&entry, "bodyEnd", 7, (zend_long)tag->body_end);
+        add_next_index_zval(&tags, &entry);
+    }
+    array_init_size(&tokens, analysis.token_count);
+    for (uint32_t t = 0; t < analysis.token_count; t++) {
+        const pt_syntax_token *token = &analysis.tokens[t];
+        zval entry;
+        array_init_size(&entry, 3);
+        add_assoc_long_ex(&entry, "start", 5, (zend_long)token->start);
+        add_assoc_long_ex(&entry, "end", 3, (zend_long)token->end);
+        add_assoc_string_ex(&entry, "kind", 4, token->kind);
+        add_next_index_zval(&tokens, &entry);
+    }
+    pt_template_release(template);
+    array_init_size(input->result, 3);
+    add_assoc_zval_ex(input->result, "ast", 3, &ast);
+    add_assoc_zval_ex(input->result, "tags", 4, &tags);
+    add_assoc_zval_ex(input->result, "tokens", 6, &tokens);
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, analyze)
+{
+    zend_string *source, *name;
+    HashTable *options = NULL;
+    ZEND_PARSE_PARAMETERS_START(2, 3)
+        Z_PARAM_STR(source)
+        Z_PARAM_STR(name)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ARRAY_HT(options)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_analyze_input input = {source, name, '{', '}', return_value};
+    if (!pt_option_delimiters(options, &input.open, &input.close)) {
+        RETURN_THROWS();
+    }
+    if (!pt_run_work(pt_analyze_into, &input)) {
+        zval_ptr_dtor(return_value);
+        ZVAL_NULL(return_value);
+        RETURN_THROWS();
+    }
+}
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson)
 {
     zend_string *source, *name;
