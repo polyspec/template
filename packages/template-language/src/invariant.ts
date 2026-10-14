@@ -2,7 +2,7 @@
 // and, for indented lines, after the spaces and tabs at the start of every line of text are removed.
 
 /** Returns a copy of an AST value without `span` fields. */
-export function withoutSpans(value: unknown): unknown {
+function withoutSpans(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(withoutSpans);
   if (value !== null && typeof value === 'object') {
     const result: Record<string, unknown> = {};

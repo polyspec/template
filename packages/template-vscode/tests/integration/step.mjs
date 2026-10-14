@@ -8,7 +8,7 @@ import { signalGroup, stopProcessGroup } from '../../../../scripts/process-group
 // VS Code 1.138 sometimes takes minutes to exit after the suite has ended and printed its result. The result of a
 // launch is the result of its suite, so VS Code gets this long to exit after the suite line before it is killed.
 // The grace starts after the result has been printed; it ends VS Code and does not decide the result.
-export const EXIT_GRACE_MS = 20_000;
+const EXIT_GRACE_MS = 20_000;
 
 const seconds = milliseconds => `${(milliseconds / 1000).toFixed(1)} s`;
 

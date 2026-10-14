@@ -8,7 +8,7 @@ export interface Delimiters {
 
 export const DEFAULT_DELIMITERS: Delimiters = { open: '{', close: '}' };
 
-export const SIGILS = ['?#', ':?', '=', '@', '?', ':', '/', '+', '#', '*', '%'] as const;
+const SIGILS = ['?#', ':?', '=', '@', '?', ':', '/', '+', '#', '*', '%'] as const;
 export type Sigil = (typeof SIGILS)[number];
 
 export interface Wrapper {
@@ -16,7 +16,7 @@ export interface Wrapper {
   closer: string;
 }
 
-export const WRAPPERS: readonly Wrapper[] = [
+const WRAPPERS: readonly Wrapper[] = [
   { opener: '"', closer: '"' },
   { opener: "'", closer: "'" },
   { opener: '/*', closer: '*/' },
@@ -71,7 +71,7 @@ export function wrappedTagAt(text: string, index: number, delimiters: Delimiters
 }
 
 // LEX-21: one ASCII character that is not a letter, a digit, `_`, `\`, a space or a control character.
-export function isDelimiterChar(char: string): boolean {
+function isDelimiterChar(char: string): boolean {
   if (char.length !== 1) return false;
   const code = char.charCodeAt(0);
   if (code <= 0x20 || code >= 0x7f) return false;

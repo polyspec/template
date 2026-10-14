@@ -5,7 +5,7 @@ import { type Env, type HostFunction } from '../functions/index.js';
 import { MapLoader, resolvePath, type Loader, type LoadResult, PathError } from '../loader.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from '../parser/scanner.js';
 import { BindError, bindData, bindMap, checkText } from '../value/bind.js';
-import type { MapValue, Value } from '../value/value.js';
+import type { MapValue } from '../value/value.js';
 import { Frame, RenderContext, Scope, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
 import { RuntimeEnvironment } from './runtime-environment.js';
 import { Renderer } from './statements.js';
@@ -242,5 +242,3 @@ export class AstProgramCore implements RuntimeServices, Program {
     return { timezone, now };
   }
 }
-
-export type { Value };

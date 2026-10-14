@@ -54,7 +54,7 @@ export function codePoints(text: string): string[] {
 }
 
 // Compares two strings by code point sequence; returns a negative, zero or positive number.
-export function compareCodePoints(a: string, b: string): number {
+function compareCodePoints(a: string, b: string): number {
   const ia = a[Symbol.iterator]();
   const ib = b[Symbol.iterator]();
   for (;;) {

@@ -9,7 +9,7 @@ import { isHorizontalSpace, skipHorizontalSpace } from './scanner.js';
 const PATH_CHARS = /[A-Za-z0-9_./-]/;
 const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
-export interface PathToken {
+interface PathToken {
   kind: 'path';
   value: string;
   start: number;
@@ -17,7 +17,7 @@ export interface PathToken {
   quoted: boolean;
 }
 
-export interface IdentToken {
+interface IdentToken {
   kind: 'ident';
   value: string;
   start: number;
@@ -27,7 +27,7 @@ export interface IdentToken {
 export type RawToken = PathToken | IdentToken;
 
 /** The range of one word of a raw tag body, and whether it is a quoted string. */
-export interface RawWord {
+interface RawWord {
   start: number;
   end: number;
   quoted: boolean;

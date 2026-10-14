@@ -1,8 +1,8 @@
 // keys, values, first, last, reverse, slice, sort, join, range, default (FUN-14, FUN-15, FUN-31 to FUN-36).
-import { compareValues, codePoints, isString, isTruthy, textOf, type MapValue, type Value } from '../value/value.js';
+import { compareValues, codePoints, isString, isTruthy, textOf, type Value } from '../value/value.js';
 import { argInteger, argList, argNumber, argString, stringifyArg, typeError, FunctionError, type BuiltIn } from './helpers.js';
 
-export const RANGE_LIMIT = 1_000_000;
+const RANGE_LIMIT = 1_000_000;
 
 function lookupPath(value: Value, path: string): Value {
   let current = value;
@@ -126,7 +126,3 @@ export const collectionFunctions: Record<string, BuiltIn> = {
   },
   default: { min: 2, max: 2, call: ([v, d]) => (isTruthy(v as Value) ? (v as Value) : (d as Value)) },
 };
-
-export function mapFromEntries(entries: Iterable<[string, Value]>): MapValue {
-  return new Map(entries);
-}
