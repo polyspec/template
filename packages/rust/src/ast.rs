@@ -121,7 +121,7 @@ impl BinaryOp {
 
 /// The root of a parsed template.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", rename = "Template")]
+#[serde(tag = "type", rename = "Template", from = "TemplateJson")]
 pub struct Template {
     /// Template name given to the parser.
     pub name: String,
@@ -133,7 +133,7 @@ pub struct Template {
 
 /// A comment of the template, listed in `Template::comments` (AST-9).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", rename = "Comment")]
+#[serde(tag = "type", rename = "Comment", from = "CommentJson")]
 pub struct Comment {
     /// Source text between the sigil `*` and the `*` of the terminator.
     pub value: String,
@@ -141,9 +141,59 @@ pub struct Comment {
     pub span: Span,
 }
 
+// The tag of a struct is written by Serialize but not read by Deserialize, so a decode reads the struct through a
+// mirror whose `type` field accepts only the name of the struct.
+#[derive(Deserialize)]
+enum TemplateType {
+    Template,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct TemplateJson {
+    #[serde(rename = "type")]
+    _type: TemplateType,
+    name: String,
+    body: Vec<Node>,
+    comments: Vec<Comment>,
+}
+
+impl From<TemplateJson> for Template {
+    fn from(json: TemplateJson) -> Template {
+        Template {
+            name: json.name,
+            body: json.body,
+            comments: json.comments,
+        }
+    }
+}
+
+#[derive(Deserialize)]
+enum CommentType {
+    Comment,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CommentJson {
+    #[serde(rename = "type")]
+    _type: CommentType,
+    value: String,
+    span: Span,
+}
+
+impl From<CommentJson> for Comment {
+    fn from(json: CommentJson) -> Comment {
+        Comment {
+            value: json.value,
+            span: json.span,
+        }
+    }
+}
+
 /// Statement nodes.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type")]
+#[serde(tag = "type", deny_unknown_fields)]
 pub enum Node {
     /// Literal text between tags (AST-1).
     Text {
@@ -164,7 +214,7 @@ pub enum Node {
         /// The branches in source order, each with its condition and body.
         branches: Vec<IfBranch>,
         /// The body of the `{:}` branch, or None.
-        #[serde(rename = "else")]
+        #[serde(rename = "else", deserialize_with = "Option::deserialize")]
         r#else: Option<Vec<Node>>,
         /// From the opening tag to the end of the closing tag.
         span: Span,
@@ -178,6 +228,7 @@ pub enum Node {
         /// The body rendered for each entry.
         body: Vec<Node>,
         /// The body rendered when the iterable has no entry, or None.
+        #[serde(deserialize_with = "Option::deserialize")]
         empty: Option<Vec<Node>>,
         /// From the opening tag to the end of the closing tag.
         span: Span,
@@ -201,8 +252,10 @@ pub enum Node {
     /// A block tag `{# id path scope}`.
     Block {
         /// The identifier of the template definition, or None.
+        #[serde(deserialize_with = "Option::deserialize")]
         id: Option<String>,
         /// The template path, or None.
+        #[serde(deserialize_with = "Option::deserialize")]
         path: Option<String>,
         /// The scope arguments of the tag.
         scope: Vec<ScopeItem>,
@@ -216,7 +269,7 @@ pub enum Node {
         /// The body rendered when the definition is registered.
         body: Vec<Node>,
         /// The body of the `{:}` branch, or None.
-        #[serde(rename = "else")]
+        #[serde(rename = "else", deserialize_with = "Option::deserialize")]
         r#else: Option<Vec<Node>>,
         /// From the opening tag to the end of the closing tag.
         span: Span,
@@ -241,6 +294,7 @@ impl Node {
 
 /// One branch of an `If` node.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct IfBranch {
     /// Condition.
     pub test: Expr,
@@ -252,6 +306,7 @@ pub struct IfBranch {
 
 /// A scope item of a block tag.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ScopeItem {
     /// Name bound inside the block.
     pub name: String,
@@ -260,8 +315,7 @@ pub struct ScopeItem {
 }
 
 /// Literal value of a `Literal` node.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(untagged)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum LiteralValue {
     /// `null`.
     Null,
@@ -271,6 +325,23 @@ pub enum LiteralValue {
     Number(f64),
     /// The decoded string.
     String(String),
+}
+
+impl<'de> Deserialize<'de> for LiteralValue {
+    // An untagged enum buffers its input, which reads a number of serde_json with arbitrary_precision as a map, so the
+    // value is read as a JSON value of serde_json, which reads that map back as a number.
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        match serde_json::Value::deserialize(deserializer)? {
+            serde_json::Value::Null => Ok(LiteralValue::Null),
+            serde_json::Value::Bool(value) => Ok(LiteralValue::Bool(value)),
+            serde_json::Value::Number(value) => value
+                .as_f64()
+                .map(LiteralValue::Number)
+                .ok_or_else(|| serde::de::Error::custom(format!("the number {value} has no 64-bit float"))),
+            serde_json::Value::String(value) => Ok(LiteralValue::String(value)),
+            _ => Err(serde::de::Error::custom("a literal value is null, a boolean, a number or a string")),
+        }
+    }
 }
 
 impl Serialize for LiteralValue {
@@ -329,7 +400,7 @@ impl LoopMetaField {
 
 /// Entry of a map literal.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
+#[serde(untagged, deny_unknown_fields)]
 pub enum MapEntry {
     /// An entry `key => value`.
     Entry {
@@ -344,7 +415,7 @@ pub enum MapEntry {
 
 /// Expression nodes. `Spread` appears only inside `List` items and `Map` entries.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type")]
+#[serde(tag = "type", deny_unknown_fields)]
 pub enum Expr {
     /// A literal.
     Literal {
@@ -446,6 +517,7 @@ pub enum Expr {
         /// The condition.
         test: Box<Expr>,
         /// The value when the condition is truthy, or None for `?:`.
+        #[serde(deserialize_with = "Option::deserialize")]
         then: Option<Box<Expr>>,
         /// The value when the condition is falsy.
         r#else: Box<Expr>,
@@ -495,4 +567,36 @@ impl Expr {
             | Expr::Spread { span, .. } => *span,
         }
     }
+}
+
+/// The failure of [`decode_template`]: the JSON is not a template AST of `contracts/schema/ast.schema.json`.
+#[derive(Debug)]
+pub struct AstDecodeError(serde_path_to_error::Error<serde_json::Error>);
+
+impl AstDecodeError {
+    /// The path of the first invalid value, such as `body[0]` or `comments`, or `.` for the root. A node reads its fields
+    /// through its `type` tag, so the path of a value inside a statement node ends at that node, and the message names
+    /// the field.
+    pub fn path(&self) -> String {
+        self.0.path().to_string()
+    }
+}
+
+impl std::fmt::Display for AstDecodeError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(formatter, "invalid template AST at {}: {}", self.0.path(), self.0.inner())
+    }
+}
+
+impl std::error::Error for AstDecodeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(self.0.inner())
+    }
+}
+
+/// Decodes the canonical JSON text of a template AST (AST-7) into the [`Template`] that `parse` returns, so a program
+/// renders it without parsing a source (RT-41). Every node is checked against its type, with no unknown field and no
+/// missing one (AST-10); the error names the path of the first invalid value ([`AstDecodeError::path`]).
+pub fn decode_template(json: &str) -> Result<Template, AstDecodeError> {
+    serde_path_to_error::deserialize(&mut serde_json::Deserializer::from_str(json)).map_err(AstDecodeError)
 }

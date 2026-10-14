@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-ts-readme -->
-<!-- source-sha256: bbd116e940e9e6140d66868c41c734a98e7d824ca05f8e4d0447bce4af70d851 -->
+<!-- source-sha256: 158e77441e19521917778b5a2e9d7e03a23740834cfab578a181572d728dadff -->
 # @polyspec/template
 
 [English](README.md).
@@ -45,16 +45,20 @@ document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
 `@polyspec/template/render`는 파싱된 템플릿(AST JSON)을 받는 엔진을 내보내며 렉서와 파서를 포함하지 않는다.
 
 ```ts
-import { AstProgram, Engine, MapLoader } from '@polyspec/template/render';
+import { AstProgram, Engine, MapLoader, decodeTemplate } from '@polyspec/template/render';
 
+const cardAst = decodeTemplate(cardAstJson);
 const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': cardAst }) }));
 ```
+
+`decodeTemplate`은 AST JSON의 모든 노드를 AST 스키마로 검사하며, 실패하면 `path`가 첫 번째 잘못된 노드의 JSON Pointer인 `AstDecodeError`를 던진다(AST-10).
 
 ## API
 
 | 내보내기 | 설명 |
 | --- | --- |
 | `parse(source, name, { delimiters })` | 템플릿 하나를 AST로 파싱한다. `source`는 문자열 또는 UTF-8 바이트다. |
+| `decodeTemplate(json)` | 텍스트 또는 파싱된 값인 AST JSON을 `contracts/schema/ast.schema.json`으로 검사해 `Template`으로 읽는다. `AstDecodeError`는 `path`에 첫 번째 잘못된 노드의 JSON Pointer를 담는다(AST-10). `@polyspec/template/render`도 내보낸다. |
 | `analyze(source, name, { delimiters })` | 한 번 파싱해 AST, 파서 태그 범위, 읽은 표현식 token 범위를 반환한다. |
 | `new AstProgram({ loader, functions, limits, delimiters })` | AST program을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
 | `new Engine(program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |

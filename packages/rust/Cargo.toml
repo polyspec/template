@@ -49,6 +49,8 @@ allow_attributes_without_reason = "deny"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+# The path of the first invalid value of a decoded AST (decode_template).
+serde_path_to_error = "0.1.20"
 
 # The volume serial number and file index of an open file, the identity of a file of FsLoader on Windows; the standard
 # library offers them only behind the unstable feature windows_by_handle.

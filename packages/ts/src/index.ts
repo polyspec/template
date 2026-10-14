@@ -8,6 +8,7 @@ import { internalBoundary } from './errors.js';
 import { Source } from './source.js';
 
 export type { Template, Comment, Node, Expr, Span } from './ast.js';
+export { decodeTemplate, AstDecodeError } from './decode.js';
 export { TemplateError, internalBoundary, type ErrorCode, type ErrorObject } from './errors.js';
 export { NativeObject, SafeString, type Value, type MapValue, type ListValue } from './value/value.js';
 export { bindValue, bindMap, bindData, checkText, BindError } from './value/bind.js';
