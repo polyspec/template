@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 79c1794d21a1ce81c9ff918d0573012a0f3591e074338604d749ea93ecc168c6 -->
+<!-- source-sha256: 5a9317404e83c53bfde51959fee31a973231e15bd2cd8cfd645aaf71efb65fac -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -448,7 +448,7 @@
 | ID | 작업 | 검증 | 완료 |
 | --- | --- | --- | --- |
 | T24.1 | 공유 tool을 npm package `@polyspec/kit`으로 설치한다. Makefile은 vendored `scripts/kit/kit.mk` 대신 `scripts/kit/kit-bootstrap.mk`를 include한다. `kit.copies`의 copy는 `make kit-sync`가 쓴다. vendored `scripts/kit/*`, `tests/kit/*`, `.kit/kit.lock.json`, `kit.json`과 그것을 가리키는 모든 참조를 지운다. recipe는 kit의 tool을 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. pre-push hook은 `make push-gate-hook`을 호출한다. CI는 `make install-tools TOOLS=npm`과 `make install-packages`로 설치한다. `@polyspec/kit`은 release asset과 integrity로 고정한 devDependency다. | `make kit-check` | [o] |
-| T24.2 | npm이 link를 쓰게 한다. `.npmrc`의 key `install-links`와 `bin-links`, 그리고 그것이 강요한 우회를 지운다: root `package.json`은 JavaScript package를 override가 붙은 `file:` 의존성 대신 npm workspace로 선언하고, `scripts/build-package.mjs`는 build한 package를 다시 설치하지 않으며, recipe와 script는 tool을 `node_modules/.bin`에서 시작하고, `tests/scripts/no-symlinks.test.mjs`를 지운다. | `make toolchain-check` | [ ] |
+| T24.2 | npm이 link를 쓰게 한다. `.npmrc`의 key `install-links`와 `bin-links`, 그리고 그것이 강요한 우회를 지운다: root `package.json`은 JavaScript package를 override가 붙은 `file:` 의존성 대신 npm workspace로 선언하고, `scripts/build-package.mjs`는 build한 package를 다시 설치하지 않으며, recipe와 script는 tool을 `node_modules/.bin`에서 시작하고, `tests/scripts/no-symlinks.test.mjs`를 지운다. | `make toolchain-check` | [o] |
 | T24.3 | toolchain floor를 kit의 pin으로 올린다: `.node-version` 26.11.1과 `engines.node` `>=26.11.1`, Composer `require.php` `>=8.5`와 `config.platform.php` `8.5`, `requires-python` `>=3.14`, toolchain 줄 없는 go.mod `go 1.27.2`, Cargo `rust-version` 1.99.0, `rust-toolchain.toml` 1.99.0, `typescript` 7.0.2. | `make toolchain-check` | [ ] |
 | T24.4 | showcase adapter의 Go package를 `go.mod`의 `replace` 대신 `go.work`로 해석한다. | `make layout-check` | [ ] |
 | T24.5 | Python은 kit의 root `ruff.toml`로만 lint한다: `packages/template-python/pyproject.toml`의 `[tool.ruff]`를 지운다. | `make layout-check` | [ ] |
