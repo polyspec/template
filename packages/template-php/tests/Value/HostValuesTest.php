@@ -31,7 +31,7 @@ final class HostValuesTest extends TestCase
      */
     private static function expectations(): array
     {
-        return json_decode((string) file_get_contents(self::fixtureDirectory() . '/host-values.json'), true, flags: JSON_THROW_ON_ERROR);
+        return Support::readJson(self::fixtureDirectory() . '/host-values.json');
     }
 
     /**

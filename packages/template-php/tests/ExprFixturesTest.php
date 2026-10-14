@@ -27,7 +27,7 @@ final class ExprFixturesTest extends TestCase
      */
     public static function cases(): iterable
     {
-        $cases = json_decode((string) file_get_contents(Support::exprFixture()), true);
+        $cases = Support::readJson(Support::exprFixture());
         foreach ($cases as $case) {
             yield $case['name'] => [$case];
         }
@@ -96,10 +96,10 @@ final class ExprFixturesTest extends TestCase
         }
         self::assertSame($case['tokens'], self::tokenize($case['expr']));
         $ast = self::parseExpression($case['expr']);
-        self::assertSame(Support::normalize($case['ast']), Support::normalize(json_decode(Ast::toJson($ast), true)));
+        self::assertSame(Support::normalize($case['ast']), Support::normalize(Support::json(Ast::toJson($ast))));
         foreach ($case['cases'] ?? [] as $evaluation) {
             $value = Support::plain(self::evaluate($ast, $evaluation['data']));
-            self::assertSame(Support::normalize($evaluation['value']), Support::normalize(json_decode((string) json_encode($value), true)));
+            self::assertSame(Support::normalize($evaluation['value']), Support::normalize(Support::json(json_encode($value, JSON_THROW_ON_ERROR))));
         }
     }
 }

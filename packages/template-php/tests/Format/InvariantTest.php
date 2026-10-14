@@ -35,21 +35,8 @@ final class InvariantTest extends TestCase
         }
         sort($files);
         foreach ($files as $file) {
-            yield substr($file, strlen($root) + 1) => [$file, self::options(dirname($file))];
+            yield substr($file, strlen($root) + 1) => [$file, Support::delimiterOptions(dirname($file))];
         }
-    }
-
-    /**
-     * @return array{delimiters?: string}
-     */
-    private static function options(string $dir): array
-    {
-        if (!is_file("{$dir}/options.json")) {
-            return [];
-        }
-        $options = json_decode((string) file_get_contents("{$dir}/options.json"), true);
-
-        return is_array($options) && isset($options['delimiters']) && is_string($options['delimiters']) ? ['delimiters' => $options['delimiters']] : [];
     }
 
     public function testFindsTheConformanceInputs(): void
@@ -63,7 +50,7 @@ final class InvariantTest extends TestCase
     #[DataProvider('inputs')]
     public function testHoldsTheInvariant(string $file, array $parseOptions): void
     {
-        $source = (string) file_get_contents($file);
+        $source = Support::read($file);
         $name = 'input.tpl';
         $kept = ['name' => $name, 'indent' => null] + $parseOptions;
         $options = ['name' => $name] + $parseOptions;
@@ -78,7 +65,7 @@ final class InvariantTest extends TestCase
 
             return;
         }
-        self::assertNull($result->error, json_encode((array) $result->error) ?: '');
+        self::assertNull($result->error, json_encode((array) $result->error, JSON_THROW_ON_ERROR));
         $text = (string) $result->text;
         self::assertTrue(Invariant::sameTree($before, AstProgram::parse($text, $name, $parseOptions)));
         self::assertSame(self::outsideTags($source, $parseOptions), self::outsideTags($text, $parseOptions));

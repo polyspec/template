@@ -27,31 +27,24 @@ final class ExtConformanceTest extends TestCase
     #[DataProvider('caseProvider')]
     public function testCase(string $directory): void
     {
-        $options = [];
-        $optionsJson = Support::read($directory . '/options.json');
-        if ($optionsJson !== null) {
-            $decoded = json_decode($optionsJson, true);
-            if (isset($decoded['delimiters'])) {
-                $options['delimiters'] = $decoded['delimiters'];
-            }
-        }
-        $expectedError = Support::read($directory . '/expected.error.json');
-        $expectedHtml = Support::read($directory . '/expected.html');
-        $expectedAst = Support::read($directory . '/expected.ast.json');
+        $options = Support::delimiterOptions($directory);
+        $expectedError = Support::readOptional($directory . '/expected.error.json');
+        $expectedHtml = Support::readOptional($directory . '/expected.html');
+        $expectedAst = Support::readOptional($directory . '/expected.ast.json');
 
         if ($expectedAst !== null) {
-            $source = Support::read($directory . '/input.tpl') ?? '';
+            $source = Support::read($directory . '/input.tpl');
             $ast = Engine::parseToJson($source, 'input.tpl', $options);
-            $this->assertSame(json_decode($expectedAst, true), json_decode($ast, true));
+            $this->assertSame(Support::json($expectedAst), Support::json($ast));
         }
 
-        $assign = Support::read($directory . '/data.json') ?? '{}';
-        $define = Support::read($directory . '/define.json');
-        $env = Support::read($directory . '/env.json');
+        $assign = Support::readOptional($directory . '/data.json') ?? '{}';
+        $define = Support::readOptional($directory . '/define.json');
+        $env = Support::readOptional($directory . '/env.json');
 
         if ($expectedError !== null && preg_match('//u', $assign) !== 1) {
             // The command line interface reports invalid UTF-8 in the data file itself.
-            $this->assertSame('E_DATA_INVALID_UTF8', json_decode($expectedError, true)['code']);
+            $this->assertSame('E_DATA_INVALID_UTF8', Support::json($expectedError)['code']);
 
             return;
         }
@@ -60,7 +53,7 @@ final class ExtConformanceTest extends TestCase
             $output = (new Engine($directory, $options))->renderJson('input.tpl', $assign, $define, $env);
         } catch (TemplateError $error) {
             $this->assertNotNull($expectedError, "unexpected error {$error->getErrorCode()}");
-            $expected = json_decode($expectedError, true);
+            $expected = Support::json($expectedError);
             $actual = $error->toArray();
             $this->assertSame(
                 $expected,

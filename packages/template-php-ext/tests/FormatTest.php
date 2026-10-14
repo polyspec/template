@@ -44,7 +44,7 @@ final class FormatTest extends TestCase
     #[DataProvider('caseProvider')]
     public function testFormatsTheCase(string $directory): void
     {
-        $source = Support::read($directory . '/input.tpl') ?? '';
+        $source = Support::read($directory . '/input.tpl');
         $parseOptions = Support::delimiterOptions($directory);
         $analyzer = new NativeAnalyzer();
         $results = [];
@@ -64,9 +64,9 @@ final class FormatTest extends TestCase
             $this->assertTrue($mode === 'keep' ? Invariant::sameTree($before, $after) : Invariant::sameTree(Invariant::withoutLineIndentation($before), Invariant::withoutLineIndentation($after)));
             $this->assertEquals(new FormatResult($text, false, null), Formatter::format($text, $options, $analyzer));
         }
-        $expected = Support::read($directory . '/expected.format.json');
+        $expected = Support::readOptional($directory . '/expected.format.json');
         if ($expected !== null) {
-            $this->assertSame(json_decode($expected, true), $results);
+            $this->assertSame(Support::json($expected), $results);
         } else {
             $this->assertSame('parse', $results['indent']['error']['reason'] ?? null);
             $this->expectException(TemplateError::class);
