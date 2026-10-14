@@ -363,7 +363,7 @@ $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/bu
 test-python: python-package ## Unit tests of the Python package
 	node $(KIT)/run-tests.$(KIT_EXT) python --venv $(PYTHON_VENV) -- discover -s $(PYTHON_PACKAGE)/tests -t $(PYTHON_PACKAGE)
 
-conformance-generated-python: build-ts ## Python generated compiler conformance suite
+conformance-generated-python: build-ts python-package ## Python generated compiler conformance suite
 	node tests/runner/conformance-generated-python.mjs
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
@@ -467,9 +467,9 @@ compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 compiler-interface-check: compiler-interface-diagrams-check compiler-interface-languages-check compiler-interface-mutations-check ## Verify the typed generated module structure in every language
 
 .PHONY: compiler-interface-languages-check compiler-interface-mutations-check
-compiler-interface-languages-check: cargo-downloads-check build-php
+compiler-interface-languages-check: cargo-downloads-check build-php python-package
 	node scripts/check-compiler-interface.mjs
-compiler-interface-mutations-check: cargo-downloads-check build-php
+compiler-interface-mutations-check: cargo-downloads-check build-php python-package
 	node scripts/check-compiler-interface-mutations.mjs
 
 docs: ## Build the documentation site
@@ -486,10 +486,10 @@ docs-static-check: docs ## Build the documentation site as static files
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
 	node scripts/generate-showcase-contract.mjs
 
-contract-check: cargo-downloads-check build-ts build-php ## Verify generated declarations, implementations and runtime state recovery
+contract-check: cargo-downloads-check build-ts build-php python-package ## Verify generated declarations, implementations and runtime state recovery
 	node scripts/check-showcase-contract.mjs
 
-showcase: cargo-downloads-check typed-generator build-php ## Build the executable example site and its result artifacts
+showcase: cargo-downloads-check typed-generator build-php python-package ## Build the executable example site and its result artifacts
 	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
 	node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
@@ -551,13 +551,13 @@ showcase-compile: build-ts ## Generate committed canonical AST artifacts
 generated-native-check: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
 
 .PHONY: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check
-generated-native-calls-check: cargo-downloads-check build-ts build-php
+generated-native-calls-check: cargo-downloads-check build-ts build-php python-package
 	node scripts/check-generated-native-calls.mjs
-generated-typed-values-check: cargo-downloads-check build-ts build-php
+generated-typed-values-check: cargo-downloads-check build-ts build-php python-package
 	node scripts/check-generated-typed-values.mjs
-generated-arguments-check: cargo-downloads-check build-ts build-php
+generated-arguments-check: cargo-downloads-check build-ts build-php python-package
 	node scripts/check-generated-arguments.mjs
-generated-bound-data-check: cargo-downloads-check build-ts build-php
+generated-bound-data-check: cargo-downloads-check build-ts build-php python-package
 	node scripts/check-generated-bound-data.mjs
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
@@ -578,7 +578,7 @@ compiler-ir-rules-check: build-ts
 conformance-type-manifest-check: build-ts
 	node scripts/check-conformance-type-manifest.mjs
 
-typed-generator-compile-check: cargo-downloads-check build-php compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
+typed-generator-compile-check: cargo-downloads-check build-php python-package compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	node scripts/check-typed-generator.mjs
 
 clean: ## Remove build outputs

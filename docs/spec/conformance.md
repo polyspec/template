@@ -57,7 +57,7 @@ The runner passes the options before `FILE`, as the POSIX utility syntax guideli
 | rust | `packages/template-rust/target/release/template` |
 | php | `php packages/template-php/bin/template.php` |
 | php-ext | `php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php` |
-| python | `python -m polyspec.template.cli` with `packages/template-python/src` on `PYTHONPATH` |
+| python | `var/python/venv/bin/python -m polyspec.template.cli` (`make python-package` installs `packages/template-python` into `var/python/venv`) |
 
 The formatter of TypeScript is the package `@polyspec/template-language`, which depends on `@polyspec/template`, so its command `template-language` provides `format` and the command `template` the other subcommands.
 

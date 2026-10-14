@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Python implementation of the showcase adapter contract (packages/template-compiler/interface.json).
 
-Run it as `python3.14 python.py SCENARIO_DIR` with PYTHONPATH set to packages/template-python/src. Without
-SHOWCASE_EXECUTION_MODE=generated it interprets the compiled AST artifacts of the scenario; with it, the adapter renders
+Run it as `var/python/venv/bin/python python.py SCENARIO_DIR`: `make python-package` installs packages/template-python
+into var/python/venv, and the directory of this script, the first entry of the import path of a script, holds the
+module generated.render_adapter. Without SHOWCASE_EXECUTION_MODE=generated it interprets the compiled AST artifacts of the scenario; with it, the adapter renders
 through the generated program of the scenario. Both modes call Engine.render.
 """
 
@@ -24,8 +25,7 @@ from polyspec.template import (
     parse_json_bytes,
 )
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from generated.render_adapter import (  # noqa: E402
+from generated.render_adapter import (
     DefineEntry,
     Environment,
     RenderAdapter,

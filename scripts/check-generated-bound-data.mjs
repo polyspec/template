@@ -12,7 +12,7 @@ import { goString, phpString, rustString } from '../packages/template-compiler/b
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
-import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
+import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/bound-data');
@@ -154,7 +154,7 @@ check(program.render('page.tpl', merge(bind(cases['assign']), bind(cases['second
 definition = RenderOptions(define={'part': {'template': 'part.tpl', 'data': bind(cases['definitionData'])}})
 check(program.render('define.tpl', cases['assign'], definition), cases['outputs']['define'], 'bound definition data')
 `);
-      run(pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+      run(pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment());
     },
   });
 } finally {

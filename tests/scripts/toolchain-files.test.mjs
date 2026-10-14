@@ -27,6 +27,7 @@ import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { parse } from 'smol-toml';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = file => readFileSync(path.join(ROOT, file), 'utf8');
@@ -35,6 +36,8 @@ const KIT_COPIES = new Set(Object.keys(JSON.parse(readFileSync(fileURLToPath(imp
 const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
 const TOOLCHAIN = JSON.parse(read('config/toolchain.json'));
 const SHIMS = path.join(ROOT, 'var/tools/mise/shims');
+// The tools of mise.toml, read with a TOML parser.
+const MISE_TOOLS = parse(read('mise.toml')).tools;
 
 // The jobs of a workflow with their text.
 function jobs(file) {
@@ -155,7 +158,7 @@ test('the path of every Go module that go get resolves names its directory in th
 
 test('Go is the go of mise.toml, which the go directive of packages/template-go/go.mod equals, and go downloads no other toolchain', () => {
   const expected = `go${/^go (\S+)$/m.exec(read('packages/template-go/go.mod'))[1]}`;
-  assert.equal(`go${/^go = "([^"]+)"$/m.exec(read('mise.toml'))?.[1]}`, expected, 'the go of mise.toml differs from the go directive of packages/template-go/go.mod');
+  assert.equal(`go${MISE_TOOLS.go}`, expected, 'the go of mise.toml differs from the go directive of packages/template-go/go.mod');
   for (const tool of ['go', 'gofmt']) assert.equal(recipe(`command -v ${tool} || true`), path.join(SHIMS, tool), `${tool} of the recipes is not the shim of mise; run make install-tools`);
   const actual = recipe('cd . && go env GOVERSION', { GOTOOLCHAIN: 'auto' });
   assert.equal(actual, expected, `go of the recipes: expected ${expected} (packages/template-go/go.mod), actual ${actual}; run make install-tools`);
@@ -187,7 +190,7 @@ test('rust-toolchain.toml names the toolchain and the components that cargo of t
 test('PHP is a minor version of config/toolchain.json, also in every CI job, and Composer the release of mise.toml', () => {
   const actual = recipe('cd . && php -r "echo PHP_MAJOR_VERSION, \'.\', PHP_MINOR_VERSION;"');
   assert.ok(TOOLCHAIN.php.includes(actual), `php of the recipes: expected a minor version of ${TOOLCHAIN.php.join(', ')} (config/toolchain.json), actual ${actual}`);
-  const declared = /^"http:composer" = \{ version = "([^"]+)"/m.exec(read('mise.toml'))?.[1];
+  const declared = MISE_TOOLS['http:composer']?.version;
   assert.equal(recipe('command -v composer || true'), path.join(SHIMS, 'composer'), 'composer of the recipes is not the shim of mise; run make install-tools');
   const composer = /Composer version (\S+)/.exec(recipe('composer --version --no-ansi 2>/dev/null'))?.[1];
   assert.equal(composer, declared, `composer of the recipes: expected ${declared} (mise.toml), actual ${composer}`);
@@ -429,6 +432,10 @@ test('make dependency-review installs the Rust toolchain before cargo-audit and 
   assert.ok(!read('.github/workflows/dependency-review.yml').includes('actions/setup-python'), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 
-test('the unit tests of the Python package run with the shim of the python of mise.toml', () => {
-  assert.match(read('Makefile'), /^PYTHON := \$\(CURDIR\)\/var\/tools\/mise\/shims\/python3$/m);
+test('the unit tests of the Python package run in var/python/venv, which python-venv of kit makes from the python of mise.toml', () => {
+  // T23.2: the package is installed editable into that environment, so the tests import it with no changed import path (S3).
+  const makefile = read('Makefile');
+  assert.match(makefile, /^PYTHON_VENV := var\/python\/venv$/m);
+  assert.match(makefile, /^\t\$\(MAKE\) python-venv DIR=\$\(PYTHON_VENV\)$/m);
+  assert.match(makefile, /^test-python: python-package .*\n\tnode \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
 });

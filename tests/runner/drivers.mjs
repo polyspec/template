@@ -10,7 +10,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { publishBuild } from '../../scripts/publish-build.mjs';
-import { pythonCommand } from '../../scripts/python-toolchain.mjs';
+import { pythonPackageCommand } from '../../scripts/python-toolchain.mjs';
 import { runStepSync } from '../../scripts/test-progress/step.mjs';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -88,7 +88,7 @@ export const drivers = {
       build('python', 'make', ['python-package'], root);
     },
     command(args) {
-      return [pythonCommand(join(root, 'var', 'python', 'venv', 'bin', 'python')), ['-m', 'polyspec.template.cli', ...args]];
+      return [pythonPackageCommand(), ['-m', 'polyspec.template.cli', ...args]];
     },
   },
   'php-ext': {

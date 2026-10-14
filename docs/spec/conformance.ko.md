@@ -58,7 +58,7 @@
 | rust | `packages/template-rust/target/release/template` |
 | php | `php packages/template-php/bin/template.php` |
 | php-ext | `php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php` |
-| python | `PYTHONPATH`에 `packages/template-python/src`를 둔 `python -m polyspec.template.cli` |
+| python | `var/python/venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/template-python`을 `var/python/venv`에 설치한다) |
 
 TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@polyspec/template-language`이므로, 그 명령 `template-language`가 `format`을 제공하고 명령 `template`이 나머지 하위 명령을 제공한다.
 

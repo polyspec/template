@@ -14,7 +14,7 @@ import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
 import { runBounded, seconds, stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mjs';
-import { pythonCommand } from '../../scripts/python-toolchain.mjs';
+import { pythonEnvironment, pythonPackageCommand } from '../../scripts/python-toolchain.mjs';
 
 // The time limit of one Python process of a case.
 const PROCESS_TIMEOUT_MS = 30_000;
@@ -88,11 +88,11 @@ const progress = stepProgress();
 
 // Runs one Python process of a case; a process that outlives its deadline fails the case.
 async function python(args, step) {
-  const interpreter = pythonCommand();
+  const interpreter = pythonPackageCommand();
   const result = await runBounded(interpreter, args, {
     cwd: root,
     timeoutMs: PROCESS_TIMEOUT_MS,
-    env: { ...process.env, PYTHONPATH: join(root, 'packages', 'template-python', 'src') },
+    env: { ...process.env, ...pythonEnvironment() },
   });
   if (result.timedOut) throw Object.assign(new Error(`${step} exceeded its ${seconds(PROCESS_TIMEOUT_MS)} deadline`), { deadline: true });
   return result;

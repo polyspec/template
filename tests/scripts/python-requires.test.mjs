@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
+import { pythonMinor } from '../../scripts/python-toolchain.mjs';
 
 const repository = resolve('.');
 
@@ -12,7 +13,6 @@ test('requires-python of the Python package is the minor release of the python o
   const pyproject = readFileSync(join(repository, 'packages/template-python/pyproject.toml'), 'utf8');
   const declared = /^requires-python = "(>=\d+\.\d+)"$/m.exec(pyproject)?.[1];
   assert.ok(declared, 'pyproject.toml declares requires-python as ">=<major>.<minor>"');
-  const release = /^python = "(\d+\.\d+)\.\d+"$/m.exec(readFileSync(join(repository, 'mise.toml'), 'utf8'))?.[1];
-  assert.ok(release, 'mise.toml declares python as an exact release');
+  const release = pythonMinor();
   assert.equal(declared, `>=${release}`, `requires-python ${declared} must state the tested minor release of the python of mise.toml (${release})`);
 });
