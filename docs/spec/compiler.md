@@ -89,4 +89,4 @@ Generated artifacts use the same refresh boundary as canonical AST artifacts. `d
 
 Both program modes use the same execution-state split. `RenderFrame` owns only `name`, `lines` and `context`; it cannot retain an AST. `RenderScope` owns `locals` and `loops`, exposes `lookup` and `loopMeta`, is shared by includes and is replaced for each block render. The interface gate checks these fields and operations in all four languages.
 
-The same gate checks the concrete `RuntimeEnvironment` field order, operation ownership and parameter counts through the TypeScript compiler API, Go AST, Rust syntax tree and PHP Reflection. It also verifies that the AST program owns the environment instead of duplicating limits or host-function state.
+The same gate checks the concrete `RuntimeEnvironment` field order, operation ownership and parameter counts through the TypeScript AST of oxc-parser, Go AST, Rust syntax tree and PHP Reflection. It also verifies that the AST program owns the environment instead of duplicating limits or host-function state.

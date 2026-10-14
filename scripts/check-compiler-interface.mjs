@@ -3,11 +3,53 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
+import { parseSync } from 'oxc-parser';
 import { listCases } from '../tests/runner/cases.mjs';
 import { pythonCommand } from './python-toolchain.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+
+// The sources are parsed by oxc-parser into an ESTree AST with the TypeScript nodes of
+// typescript-estree; a source that does not parse fails the check.
+function parseSource(path) {
+  const text = readFileSync(path, 'utf8');
+  const { program, errors } = parseSync(path, text);
+  if (errors.length > 0) throw new Error(`${path}: ${errors.map(error => error.message).join('; ')}`);
+  return { text, statements: program.body };
+}
+
+// The source text of a node.
+function textOf(source, node) {
+  return source.text.slice(node.start, node.end);
+}
+
+// The declaration of a statement, which an export statement wraps.
+function declared(statement) {
+  return statement.type === 'ExportNamedDeclaration' || statement.type === 'ExportDefaultDeclaration' ? statement.declaration : statement;
+}
+
+// The name of a class member: the text of its key, with # for a private name.
+function memberName(source, member) {
+  return member.key ? textOf(source, member.key) : undefined;
+}
+
+const isMethod = member => (member.type === 'MethodDefinition' || member.type === 'TSAbstractMethodDefinition') && member.kind === 'method';
+const isProperty = member => member.type === 'PropertyDefinition' || member.type === 'TSAbstractPropertyDefinition';
+const isConstructor = member => member.type === 'MethodDefinition' && member.kind === 'constructor';
+
+// The name of a parameter, also of a parameter property, without its type and default value.
+function parameterName(source, parameter) {
+  const binding = parameter.type === 'TSParameterProperty' ? parameter.parameter : parameter;
+  const target = binding.type === 'AssignmentPattern' ? binding.left : binding.type === 'RestElement' ? binding.argument : binding;
+  return target.type === 'Identifier' ? target.name : textOf(source, target);
+}
+
+// The names of the classes and interfaces that a class extends and implements.
+function heritage(source, declaration) {
+  return [declaration.superClass, ...(declaration.implements ?? []).map(clause => clause.expression)]
+    .filter(Boolean)
+    .map(expression => textOf(source, expression));
+}
 const manifestPath = process.env.TEMPLATE_INTERFACE_MANIFEST
   ? resolve(process.env.TEMPLATE_INTERFACE_MANIFEST)
   : resolve(root, 'packages/template-compiler/interface.json');
@@ -57,11 +99,10 @@ const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.m
 const backendOperations = manifest.components.LanguageBackend.operations;
 for (const [language, filename] of Object.entries(backendFiles)) {
   const path = resolve(backendDirectory, filename);
-  const source = ts.createSourceFile(path, readFileSync(path, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  const source = parseSource(path);
   const exportedFunctions = source.statements
-    .filter(ts.isFunctionDeclaration)
-    .filter(statement => statement.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.ExportKeyword))
-    .map(statement => statement.name?.text)
+    .filter(statement => statement.type === 'ExportNamedDeclaration' && statement.declaration?.type === 'FunctionDeclaration')
+    .map(statement => statement.declaration.id?.name)
     .filter(Boolean);
   for (const operation of backendOperations) {
     if (!exportedFunctions.includes(operation)) throw new Error(`${language}: LanguageBackend.${operation} is missing`);
@@ -132,95 +173,97 @@ for (const language of [...core.languages, 'php-extension', 'javascript-esm']) {
 }
 if (manifest.languages['javascript-esm'].entry !== '@polyspec/template/render') throw new Error('javascript-esm: the browser entry is missing');
 
-function declaration(source, kind, name) {
-  return source.statements.find(statement => statement.name?.text === name && statement.kind === kind);
+function declaration(source, type, name) {
+  return source.statements.map(declared).find(statement => statement?.type === type && statement.id?.name === name);
 }
 
 const enginePath = resolve(root, 'packages/template-ts/src/render/engine.ts');
-const engineSource = ts.createSourceFile(enginePath, readFileSync(enginePath, 'utf8'), ts.ScriptTarget.Latest, true);
-const program = declaration(engineSource, ts.SyntaxKind.InterfaceDeclaration, 'Program');
+const engineSource = parseSource(enginePath);
+const program = declaration(engineSource, 'TSInterfaceDeclaration', 'Program');
 if (!program) throw new Error('typescript: Program interface is missing');
-const programMethods = program.members.filter(ts.isMethodSignature);
+const programMethods = program.body.body.filter(member => member.type === 'TSMethodSignature');
 for (const operation of runtime.Program.operations) {
-  const method = programMethods.find(item => item.name.getText(engineSource) === operation.name);
-  if (!method || method.parameters.length !== operation.parameters.length) throw new Error(`typescript: Program.${operation.name} signature differs`);
+  const method = programMethods.find(item => textOf(engineSource, item.key) === operation.name);
+  if (!method || method.params.length !== operation.parameters.length) throw new Error(`typescript: Program.${operation.name} signature differs`);
 }
 if (programMethods.length !== runtime.Program.operations.length) throw new Error('typescript: Program has undeclared operations');
 
-const engine = declaration(engineSource, ts.SyntaxKind.ClassDeclaration, 'Engine');
-if (!engine || !engine.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(engineSource) === 'Program'))) throw new Error('typescript: Engine does not implement Program');
-const constructor = engine.members.find(ts.isConstructorDeclaration);
-if (!constructor?.parameters.some(parameter => parameter.name.getText(engineSource) === 'program')) throw new Error('typescript: Engine does not own program');
-const engineMethods = engine.members.filter(ts.isMethodDeclaration).map(item => item.name.getText(engineSource));
+const engine = declaration(engineSource, 'ClassDeclaration', 'Engine');
+if (!engine || !heritage(engineSource, engine).includes('Program')) throw new Error('typescript: Engine does not implement Program');
+const constructor = engine.body.body.find(isConstructor);
+if (!constructor?.value.params.some(parameter => parameterName(engineSource, parameter) === 'program')) throw new Error('typescript: Engine does not own program');
+const engineMethods = engine.body.body.filter(isMethod).map(item => memberName(engineSource, item));
 if (engineMethods.join(',') !== runtime.Engine.operations.join(',')) throw new Error('typescript: Engine operations differ');
 
 const indexPath = resolve(root, 'packages/template-ts/src/index.ts');
-const indexSource = ts.createSourceFile(indexPath, readFileSync(indexPath, 'utf8'), ts.ScriptTarget.Latest, true);
-const astProgram = declaration(indexSource, ts.SyntaxKind.ClassDeclaration, 'AstProgram');
-if (!astProgram?.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(indexSource) === 'AstProgramCore'))) throw new Error('typescript: AstProgram does not extend the AST Program implementation');
-const astProgramCore = declaration(engineSource, ts.SyntaxKind.ClassDeclaration, 'AstProgramCore');
-if (!astProgramCore?.members.some(member => ts.isPropertyDeclaration(member) && member.name.getText(engineSource) === 'runtime')) throw new Error('typescript: AstProgram does not own RuntimeEnvironment');
+const indexSource = parseSource(indexPath);
+const astProgram = declaration(indexSource, 'ClassDeclaration', 'AstProgram');
+if (!astProgram || !heritage(indexSource, astProgram).includes('AstProgramCore')) throw new Error('typescript: AstProgram does not extend the AST Program implementation');
+const astProgramCore = declaration(engineSource, 'ClassDeclaration', 'AstProgramCore');
+if (!astProgramCore?.body.body.some(member => isProperty(member) && memberName(engineSource, member) === 'runtime')) throw new Error('typescript: AstProgram does not own RuntimeEnvironment');
 
 const runtimeEnvironmentPath = resolve(root, 'packages/template-ts/src/render/runtime-environment.ts');
-const runtimeEnvironmentSource = ts.createSourceFile(runtimeEnvironmentPath, readFileSync(runtimeEnvironmentPath, 'utf8'), ts.ScriptTarget.Latest, true);
-const runtimeEnvironment = declaration(runtimeEnvironmentSource, ts.SyntaxKind.ClassDeclaration, 'RuntimeEnvironment');
-if (!runtimeEnvironment?.heritageClauses?.some(clause => clause.types.some(type => type.expression.getText(runtimeEnvironmentSource) === 'RuntimeServices'))) throw new Error('typescript: RuntimeEnvironment does not implement RuntimeServices');
-const runtimeEnvironmentFields = runtimeEnvironment.members.filter(ts.isPropertyDeclaration).map(item => item.name.getText(runtimeEnvironmentSource));
-const runtimeEnvironmentMethods = runtimeEnvironment.members.filter(ts.isMethodDeclaration).map(item => item.name.getText(runtimeEnvironmentSource));
+const runtimeEnvironmentSource = parseSource(runtimeEnvironmentPath);
+const runtimeEnvironment = declaration(runtimeEnvironmentSource, 'ClassDeclaration', 'RuntimeEnvironment');
+if (!runtimeEnvironment || !heritage(runtimeEnvironmentSource, runtimeEnvironment).includes('RuntimeServices')) throw new Error('typescript: RuntimeEnvironment does not implement RuntimeServices');
+const runtimeEnvironmentFields = runtimeEnvironment.body.body.filter(isProperty).map(item => memberName(runtimeEnvironmentSource, item));
+const runtimeEnvironmentMethods = runtimeEnvironment.body.body.filter(isMethod).map(item => memberName(runtimeEnvironmentSource, item));
 if (runtimeEnvironmentFields.join(',') !== manifest.languages.typescript.runtimeEnvironmentFields.join(',')) throw new Error('typescript: RuntimeEnvironment fields differ');
 if (runtimeEnvironmentMethods.join(',') !== manifest.languages.typescript.runtimeEnvironmentOperations.join(',')) throw new Error('typescript: RuntimeEnvironment operations differ');
 for (const operation of runtime.RuntimeEnvironment.operations) {
-  const method = runtimeEnvironment.members.filter(ts.isMethodDeclaration).find(item => item.name.getText(runtimeEnvironmentSource) === operation.name);
-  if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeEnvironment.${operation.name} signature differs`);
+  const method = runtimeEnvironment.body.body.filter(isMethod).find(item => memberName(runtimeEnvironmentSource, item) === operation.name);
+  if (method?.value.params.length !== operation.parameters.length) throw new Error(`typescript: RuntimeEnvironment.${operation.name} signature differs`);
 }
 
 const bindingsPath = resolve(root, 'packages/template-ts/src/render/runtime-bindings.ts');
-const bindingsSource = ts.createSourceFile(bindingsPath, readFileSync(bindingsPath, 'utf8'), ts.ScriptTarget.Latest, true);
-const bindings = declaration(bindingsSource, ts.SyntaxKind.ClassDeclaration, 'RuntimeBindings');
-const bindingMethods = bindings?.members.filter(ts.isMethodDeclaration);
-if (bindingMethods?.map(item => item.name.getText(bindingsSource)).join(',') !== runtimeBindingOperations.join(',')) throw new Error(`typescript: RuntimeBindings operations differ`);
+const bindingsSource = parseSource(bindingsPath);
+const bindings = declaration(bindingsSource, 'ClassDeclaration', 'RuntimeBindings');
+const bindingMethods = bindings?.body.body.filter(isMethod);
+if (bindingMethods?.map(item => memberName(bindingsSource, item)).join(',') !== runtimeBindingOperations.join(',')) throw new Error(`typescript: RuntimeBindings operations differ`);
 for (const operation of runtime.RuntimeBindings.operations) {
-  const method = bindingMethods?.find(item => item.name.getText(bindingsSource) === operation.name);
-  if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeBindings.${operation.name} signature differs`);
+  const method = bindingMethods?.find(item => memberName(bindingsSource, item) === operation.name);
+  if (method?.value.params.length !== operation.parameters.length) throw new Error(`typescript: RuntimeBindings.${operation.name} signature differs`);
 }
 
 // The TypeScript bound map class has no member other than its private state, its constructor and
 // its static block, and both entries export bind and merge under the names of the manifest.
 const boundPath = process.env.TEMPLATE_TS_BOUND_SOURCE ? resolve(process.env.TEMPLATE_TS_BOUND_SOURCE) : resolve(root, 'packages/template-ts/src/value/bound.ts');
-const boundSource = ts.createSourceFile(boundPath, readFileSync(boundPath, 'utf8'), ts.ScriptTarget.Latest, true);
-const boundClass = declaration(boundSource, ts.SyntaxKind.ClassDeclaration, manifest.languages.typescript.boundMap.type);
+const boundSource = parseSource(boundPath);
+const boundClass = declaration(boundSource, 'ClassDeclaration', manifest.languages.typescript.boundMap.type);
 if (!boundClass) throw new Error('typescript: BoundMap class is missing');
-for (const member of boundClass.members) {
-  const allowed = ts.isConstructorDeclaration(member) || ts.isClassStaticBlockDeclaration(member) ||
-    (ts.isPropertyDeclaration(member) && ts.isPrivateIdentifier(member.name));
-  if (!allowed) throw new Error(`typescript: BoundMap has the undeclared member ${member.name?.getText(boundSource) ?? ts.SyntaxKind[member.kind]}`);
+for (const member of boundClass.body.body) {
+  const allowed = isConstructor(member) || member.type === 'StaticBlock' ||
+    (isProperty(member) && member.key.type === 'PrivateIdentifier');
+  if (!allowed) throw new Error(`typescript: BoundMap has the undeclared member ${memberName(boundSource, member) ?? member.type}`);
 }
 for (const [language, entry] of [['typescript', 'index.ts'], ['javascript-esm', 'render.ts']]) {
   const entryPath = resolve(root, 'packages/template-ts/src', entry);
-  const entrySource = ts.createSourceFile(entryPath, readFileSync(entryPath, 'utf8'), ts.ScriptTarget.Latest, true);
-  const exported = entrySource.statements.filter(ts.isExportDeclaration).flatMap(statement => statement.exportClause && ts.isNamedExports(statement.exportClause) ? statement.exportClause.elements.map(element => element.name.text) : []);
+  const entrySource = parseSource(entryPath);
+  const exported = entrySource.statements
+    .filter(statement => statement.type === 'ExportNamedDeclaration' && !statement.declaration)
+    .flatMap(statement => statement.specifiers.map(specifier => specifier.exported.name ?? specifier.exported.value));
   for (const name of [...Object.values(manifest.languages[language].boundMap.operations), manifest.languages[language].boundMap.type]) {
     if (!exported.includes(name)) throw new Error(`${language}: ${entry} does not export ${name}`);
   }
 }
 
 const contextPath = resolve(root, 'packages/template-ts/src/render/context.ts');
-const contextSource = ts.createSourceFile(contextPath, readFileSync(contextPath, 'utf8'), ts.ScriptTarget.Latest, true);
-const services = declaration(contextSource, ts.SyntaxKind.InterfaceDeclaration, 'RuntimeServices');
-const serviceMethods = services?.members.filter(ts.isMethodSignature);
-if (serviceMethods?.map(item => item.name.getText(contextSource)).join(',') !== runtimeServiceOperations.join(',')) throw new Error('typescript: RuntimeServices operations differ');
+const contextSource = parseSource(contextPath);
+const services = declaration(contextSource, 'TSInterfaceDeclaration', 'RuntimeServices');
+const serviceMethods = services?.body.body.filter(member => member.type === 'TSMethodSignature');
+if (serviceMethods?.map(item => textOf(contextSource, item.key)).join(',') !== runtimeServiceOperations.join(',')) throw new Error('typescript: RuntimeServices operations differ');
 for (const operation of runtime.RuntimeServices.operations) {
-  const method = serviceMethods?.find(item => item.name.getText(contextSource) === operation.name);
-  if (method?.parameters.length !== operation.parameters.length) throw new Error(`typescript: RuntimeServices.${operation.name} signature differs`);
+  const method = serviceMethods?.find(item => textOf(contextSource, item.key) === operation.name);
+  if (method?.params.length !== operation.parameters.length) throw new Error(`typescript: RuntimeServices.${operation.name} signature differs`);
 }
-const frame = declaration(contextSource, ts.SyntaxKind.ClassDeclaration, 'Frame');
-const frameConstructor = frame?.members.find(ts.isConstructorDeclaration);
-const frameFields = frameConstructor?.parameters.map(parameter => parameter.name.getText(contextSource));
+const frame = declaration(contextSource, 'ClassDeclaration', 'Frame');
+const frameConstructor = frame?.body.body.find(isConstructor);
+const frameFields = frameConstructor?.value.params.map(parameter => parameterName(contextSource, parameter));
 if (frameFields?.join(',') !== manifest.languages.typescript.frameFields.join(',')) throw new Error('typescript: RenderFrame fields differ');
 if (frameFields?.join(',') !== runtime.RenderFrame.fields.join(',')) throw new Error('typescript: RenderFrame logical fields differ');
-const scope = declaration(contextSource, ts.SyntaxKind.ClassDeclaration, 'Scope');
-const scopeFields = scope?.members.filter(ts.isPropertyDeclaration).map(item => item.name.getText(contextSource));
-const scopeOperations = scope?.members.filter(ts.isMethodDeclaration).map(item => item.name.getText(contextSource));
+const scope = declaration(contextSource, 'ClassDeclaration', 'Scope');
+const scopeFields = scope?.body.body.filter(isProperty).map(item => memberName(contextSource, item));
+const scopeOperations = scope?.body.body.filter(isMethod).map(item => memberName(contextSource, item));
 if (scopeFields?.join(',') !== manifest.languages.typescript.scopeFields.join(',')) throw new Error('typescript: RenderScope fields differ');
 if (scopeOperations?.join(',') !== manifest.languages.typescript.scopeOperations.join(',')) throw new Error('typescript: RenderScope operations differ');
 
