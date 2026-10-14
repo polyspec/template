@@ -4,15 +4,12 @@ the compiler manifest (packages/template-compiler/interface.json): Program, Engi
 AstProgram, RuntimeBindings, RuntimeServices, RuntimeEnvironment, Frame, Scope and the
 bound map (VAL-22)."""
 
-import importlib
 import inspect
 import json
 import os
-import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import polyspec.template as template
 from polyspec.template.engine import Program
 
@@ -135,7 +132,9 @@ class CompilerInterface(unittest.TestCase):
         self.assertEqual(
             sorted(bound["assign"]), sorted(CONTRACT["BoundMap"]["acceptedBy"])
         )
-        bind_module = importlib.import_module("polyspec.template.bind")
+        # The package exports the function bind (of bind_operations), which hides
+        # its module bind, the module of bind_map.
+        bind_module = inspect.getmodule(template.bind_map)
         for name in bound["generatedOperations"]:
             self.assertTrue(inspect.isfunction(getattr(bind_module, name)), name)
 

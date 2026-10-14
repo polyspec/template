@@ -79,15 +79,17 @@ export const drivers = {
       return ['php', [join(packages, 'template-php', 'bin', 'template.php'), ...args]];
     },
   },
+  // The command is the python of var/python/venv, where make python-package installs packages/template-python editable, so
+  // it imports polyspec.template from the sources of the checkout with no PYTHONPATH (PRINCIPLES S3). The build is make
+  // python-package, which makes that environment and does nothing when it is current.
   python: {
     dir: join(packages, 'template-python'),
     build() {
-      build('python', pythonCommand(), ['-m', 'compileall', '-q', join(packages, 'template-python', 'src')], root);
+      build('python', 'make', ['python-package'], root);
     },
     command(args) {
-      return [pythonCommand(), ['-m', 'polyspec.template.cli', ...args]];
+      return [pythonCommand(join(root, 'var', 'python', 'venv', 'bin', 'python')), ['-m', 'polyspec.template.cli', ...args]];
     },
-    env: { PYTHONPATH: join(packages, 'template-python', 'src') },
   },
   'php-ext': {
     dir: join(packages, 'template-php-ext'),
@@ -104,7 +106,8 @@ export const drivers = {
 /**
  * Builds the CLI of the language `name` before a run. The build runs every time, because a present binary may be
  * built from older sources (T19.6); each build does nothing when its inputs are unchanged: make build-ts and
- * scripts/build-package.mjs, go build, cargo build, composer install and scripts/build-php-extension.mjs.
+ * scripts/build-package.mjs, go build, cargo build, composer install, scripts/build-php-extension.mjs and make
+ * python-package.
  */
 export function prepare(name) {
   const driver = drivers[name];
@@ -116,12 +119,7 @@ export function prepare(name) {
 // default) returns status -1 with the command and the limit (T19.10).
 export function invoke(name, args, cwd, { timeoutMs = INVOKE_TIMEOUT_MS } = {}) {
   const [command, argv] = drivers[name].command(args);
-  const driver = drivers[name];
-  const base = environment();
-  const env = driver.env
-    ? { ...base, ...Object.fromEntries(Object.entries(driver.env).map(([key, value]) => [key, base[key] ? `${value}:${base[key]}` : value])) }
-    : base;
-  const result = spawnSync(command, argv, { encoding: 'utf8', timeout: timeoutMs, cwd: cwd ?? root, env, maxBuffer: 64 * 1024 * 1024 });
+  const result = spawnSync(command, argv, { encoding: 'utf8', timeout: timeoutMs, cwd: cwd ?? root, env: environment(), maxBuffer: 64 * 1024 * 1024 });
   if (result.error) {
     const call = [command, ...argv].join(' ');
     const stderr = result.error.code === 'ETIMEDOUT' ? `${call} did not finish within its limit of ${timeoutMs / 1000} s` : `${call} failed: ${result.error.message}`;
