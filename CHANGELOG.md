@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T23.2: the Go tests list the conformance cases and read their `options.json` with one internal test helper, `internal/casetest`, instead of three copies in `parser/analyze_test.go`, `format/format_test.go` and `conformance_test.go`; it finds `tests/cases` from the directory of `go.mod` and fails when the list is empty, where the tests required at least 200 cases. The Python format test requires a non-empty list of templates instead of more than 200.
 - T23.2: `make schema-check` describes the schema errors with `ajv.errorsText` instead of two copies of a hand-written `describe` in `scripts/check-schema.mjs` and `scripts/conformance-case-files.mjs`.
 - T23.2: the format commands of TypeScript (`template-language format` and `template-fmt`), PHP and Python leave an absent `--indent` out of the format options, so the default indent of the formatter applies; each restated it (`'  '`, `'2'`, `"2"`).
 - T23.2: the environment of the Python package is written once, as the command `var/python/venv/bin/python` of the implementation python of `config/parity.json`; `scripts/python-venv.mjs` reads it, and `PYTHON_VENV` of the Makefile and `pythonPackageInterpreter` of `scripts/python-toolchain.mjs` derive from it.

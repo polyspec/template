@@ -10,39 +10,9 @@ import (
 
 	template "github.com/polyspec/template/packages/template-go"
 	"github.com/polyspec/template/packages/template-go/errs"
+	"github.com/polyspec/template/packages/template-go/internal/casetest"
 	"github.com/polyspec/template/packages/template-go/value"
 )
-
-var casesDir = filepath.Join("..", "..", "tests", "cases")
-
-type conformanceCase struct {
-	id  string
-	dir string
-}
-
-func listCases(t *testing.T) []conformanceCase {
-	t.Helper()
-	groups, err := os.ReadDir(casesDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var cases []conformanceCase
-	for _, group := range groups {
-		if !group.IsDir() {
-			continue
-		}
-		entries, err := os.ReadDir(filepath.Join(casesDir, group.Name()))
-		if err != nil {
-			t.Fatal(err)
-		}
-		for _, entry := range entries {
-			if entry.IsDir() {
-				cases = append(cases, conformanceCase{id: group.Name() + "/" + entry.Name(), dir: filepath.Join(casesDir, group.Name(), entry.Name())})
-			}
-		}
-	}
-	return cases
-}
 
 func readIf(path string) []byte {
 	data, err := os.ReadFile(path)
@@ -80,17 +50,9 @@ func errorFields(err error) map[string]any {
 	return map[string]any{"unexpected": err.Error()}
 }
 
-func renderCase(c conformanceCase) (string, error) {
-	options := template.Options{Loader: template.NewFSLoader(os.DirFS(c.dir))}
-	if optionsBytes := readIf(filepath.Join(c.dir, "options.json")); optionsBytes != nil {
-		var opts struct {
-			Delimiters string `json:"delimiters"`
-		}
-		if err := json.Unmarshal(optionsBytes, &opts); err != nil {
-			return "", err
-		}
-		options.Delimiters = opts.Delimiters
-	}
+func renderCase(t *testing.T, c casetest.Case) (string, error) {
+	t.Helper()
+	options := template.Options{Loader: template.NewFSLoader(os.DirFS(c.Dir)), Delimiters: casetest.DelimiterOption(t, c.Dir)}
 	program, err := template.NewAstProgram(options)
 	if err != nil {
 		return "", err
@@ -106,13 +68,13 @@ func renderCase(c conformanceCase) (string, error) {
 		}
 		return parsed, err
 	}
-	if dataBytes := readIf(filepath.Join(c.dir, "data.json")); dataBytes != nil {
+	if dataBytes := readIf(filepath.Join(c.Dir, "data.json")); dataBytes != nil {
 		if assign, err = parseData(dataBytes); err != nil {
 			return "", err
 		}
 	}
 	renderOptions := template.RenderOptions{}
-	if defineBytes := readIf(filepath.Join(c.dir, "define.json")); defineBytes != nil {
+	if defineBytes := readIf(filepath.Join(c.Dir, "define.json")); defineBytes != nil {
 		if _, err := parseData(defineBytes); err != nil {
 			return "", err
 		}
@@ -138,7 +100,7 @@ func renderCase(c conformanceCase) (string, error) {
 			renderOptions.Define[id] = template.DefineInput{Template: entry.Template, Data: entry.Data, HTML: entry.HTML}
 		}
 	}
-	if envBytes := readIf(filepath.Join(c.dir, "env.json")); envBytes != nil {
+	if envBytes := readIf(filepath.Join(c.Dir, "env.json")); envBytes != nil {
 		if _, err := parseData(envBytes); err != nil {
 			return "", err
 		}
@@ -160,21 +122,14 @@ func renderCase(c conformanceCase) (string, error) {
 }
 
 func TestConformanceCases(t *testing.T) {
-	for _, c := range listCases(t) {
-		t.Run(c.id, func(t *testing.T) {
-			if expectedAST := readIf(filepath.Join(c.dir, "expected.ast.json")); expectedAST != nil {
-				source, err := os.ReadFile(filepath.Join(c.dir, "input.tpl"))
+	for _, c := range casetest.List(t) {
+		t.Run(c.ID, func(t *testing.T) {
+			if expectedAST := readIf(filepath.Join(c.Dir, "expected.ast.json")); expectedAST != nil {
+				source, err := os.ReadFile(filepath.Join(c.Dir, "input.tpl"))
 				if err != nil {
 					t.Fatal(err)
 				}
-				parseOptions := template.ParseOptions{}
-				if optionsBytes := readIf(filepath.Join(c.dir, "options.json")); optionsBytes != nil {
-					var opts struct {
-						Delimiters string `json:"delimiters"`
-					}
-					_ = json.Unmarshal(optionsBytes, &opts)
-					parseOptions.Delimiters = opts.Delimiters
-				}
+				parseOptions := template.ParseOptions{Delimiters: casetest.DelimiterOption(t, c.Dir)}
 				tree, err := template.Parse(source, "input.tpl", parseOptions)
 				if err != nil {
 					t.Fatalf("parse: %v", err)
@@ -187,8 +142,8 @@ func TestConformanceCases(t *testing.T) {
 					t.Errorf("ast differs\n got %s\nwant %s", data, expectedAST)
 				}
 			}
-			html, err := renderCase(c)
-			if expectedError := readIf(filepath.Join(c.dir, "expected.error.json")); expectedError != nil {
+			html, err := renderCase(t, c)
+			if expectedError := readIf(filepath.Join(c.Dir, "expected.error.json")); expectedError != nil {
 				var want map[string]any
 				_ = json.Unmarshal(expectedError, &want)
 				if err == nil {
@@ -202,7 +157,7 @@ func TestConformanceCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("render: %v", err)
 			}
-			want := string(readIf(filepath.Join(c.dir, "expected.html")))
+			want := string(readIf(filepath.Join(c.Dir, "expected.html")))
 			if html != want {
 				t.Errorf("html differs\n got %q\nwant %q", html, want)
 			}
