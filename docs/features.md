@@ -21,7 +21,7 @@ The table records the status of each feature. The implementations and the units 
 | release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [Evidence](operations/testing) |
 | template-function-inventory | Template function inventory | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/template-functions) |
 | template-language | Template language service, formatter and CLI | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/editor-tools) |
-| formatting | Tokens and formatter of every runtime (`tokens`, `format`) | partial | go: planned<br>php: planned<br>rust: planned<br>typescript: pass<br>python: planned | [Evidence](spec/formatting) |
+| formatting | Tokens and formatter of every runtime (`tokens`, `format`) | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/formatting) |
 | template-vscode | VS Code extension | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/editor-tools) |
 | template-lsp | Template language server | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](spec/editor) |
 | template-codemirror | CodeMirror 6 adapter | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](spec/editor) |
