@@ -8,8 +8,8 @@
   "contractDigest": "d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e",
   "compilerDigest": "cf67b8ad1e3ac40a194a2c78b58ddf168f30719d1b2fa62d7b58eb3b0d7f03e1",
   "files": {
-    "react-boundary.py": {
-      "path": "react-boundary.py",
+    "react_boundary.py": {
+      "path": "react_boundary.py",
       "artifactDigest": "fe768df46b69d61b09935a6889ad819172a171490c4756ae2394749b1b0fd459"
     }
   }

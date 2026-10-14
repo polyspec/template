@@ -8,8 +8,8 @@
   "contractDigest": "d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e",
   "compilerDigest": "cf67b8ad1e3ac40a194a2c78b58ddf168f30719d1b2fa62d7b58eb3b0d7f03e1",
   "files": {
-    "scope-precedence.py": {
-      "path": "scope-precedence.py",
+    "scope_precedence.py": {
+      "path": "scope_precedence.py",
       "artifactDigest": "bd22312fd097790f646101dfe841e91da9391dc457cc69a26cb5fbfe8295617d"
     }
   }

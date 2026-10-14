@@ -3,14 +3,14 @@
 
 Run it as `var/python/venv/bin/python python.py SCENARIO_DIR`: `make python-package` installs packages/template-python
 into var/python/venv, and the directory of this script, the first entry of the import path of a script, holds the
-module generated.render_adapter. Without SHOWCASE_EXECUTION_MODE=generated it interprets the compiled AST artifacts of the scenario; with it, the adapter renders
+modules generated.render_adapter and generated.typed.<scenario>, the generated program of each scenario with `_` for
+`-` in its name (tools/showcase/python-module.mjs), which it imports with import statements. Without SHOWCASE_EXECUTION_MODE=generated it interprets the compiled AST artifacts of the scenario; with it, the adapter renders
 through the generated program of the scenario. Both modes call Engine.render.
 """
 
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import os
 import sys
@@ -33,28 +33,29 @@ from generated.render_adapter import (
     RepeatResult,
     Scenario,
 )
-
-SCENARIOS = (
-    "compiler-coverage",
-    "empty-state",
-    "html-slot",
-    "react-boundary",
-    "scope-precedence",
+from generated.typed import (
+    compiler_coverage,
+    empty_state,
+    html_slot,
+    react_boundary,
+    scope_precedence,
 )
+
+PROGRAMS = {
+    "compiler-coverage": compiler_coverage.GeneratedProgram,
+    "empty-state": empty_state.GeneratedProgram,
+    "html-slot": html_slot.GeneratedProgram,
+    "react-boundary": react_boundary.GeneratedProgram,
+    "scope-precedence": scope_precedence.GeneratedProgram,
+}
 
 
 def generated_program(root: str):
-    """Loads the generated program of the scenario in `root` from generated/typed."""
+    """The generated program of the scenario in `root`."""
     scenario = Path(root).name
-    if scenario not in SCENARIOS:
+    if scenario not in PROGRAMS:
         raise RuntimeError(f"generated program is missing for scenario {scenario}")
-    path = Path(__file__).resolve().parent / "generated" / "typed" / f"{scenario}.py"
-    spec = importlib.util.spec_from_file_location(
-        "generated_" + scenario.replace("-", "_"), path
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.GeneratedProgram()
+    return PROGRAMS[scenario]()
 
 
 def read_json(root: str, name: str):
