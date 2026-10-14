@@ -10,9 +10,9 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
-import { compileFiles } from '../../packages/compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
+import { compileFiles } from '../../packages/compiler/src/compiler.mts';
+import { deriveTypeManifest } from '../../packages/compiler/src/type-manifest.mts';
 import { parse } from '../../packages/ts/dist/index.mjs';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mts';
 

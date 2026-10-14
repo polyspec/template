@@ -187,6 +187,12 @@ function loadCase(id: string, dir: string): TestCase {
   };
 }
 
+/** The HTML that a case expects; a runner reads it for a case that expects no error, which then expects HTML. */
+export function expectedHtml(testCase: TestCase): string {
+  if (testCase.expectedHtml === null) throw new Error(`${testCase.id} expects no HTML`);
+  return testCase.expectedHtml;
+}
+
 // The template definitions of a case for type derivation. A define.json that is not JSON text, or
 // whose value is no map, is a data error of the render (VAL-12): the render step of every runner
 // reports it, and type derivation uses no definitions.

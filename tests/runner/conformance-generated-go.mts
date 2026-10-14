@@ -4,12 +4,12 @@
 // outlives its own timeout.
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
-import { goString } from '../../packages/compiler/backend-support.mjs';
-import { compileSource } from '../../packages/compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
+import { goString } from '../../packages/compiler/src/backend-support.mts';
+import { compileSource } from '../../packages/compiler/src/compiler.mts';
+import { deriveTypeManifest } from '../../packages/compiler/src/type-manifest.mts';
 import { parse } from '../../packages/ts/dist/index.mjs';
-import { caseTestFailures, errorField, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
+import { caseTestFailures, errorField, expectedHtml, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
 import { errorDifference } from './generated-errors.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
@@ -44,7 +44,7 @@ try {
       const dataBase64 = (testCase.hasData ? readFileSync(join(testCase.dir, 'data.json')) : Buffer.from('{}')).toString('base64');
       const envText = testCase.hasEnv ? readFileSync(join(testCase.dir, 'env.json'), 'utf8') : '';
       const expectation = testCase.expectedError === null
-        ? `if runErr != nil { t.Fatal(runErr) }; if actual != ${q(testCase.expectedHtml)} { t.Fatalf("generated output differs: %q", actual) }`
+        ? `if runErr != nil { t.Fatal(runErr) }; if actual != ${q(expectedHtml(testCase))} { t.Fatalf("generated output differs: %q", actual) }`
         : `_ = actual; assertGeneratedError(t, runErr, ${q(testCase.expectedError.code)}, ${q(testCase.expectedError.template)}, ${testCase.expectedError.line}, ${testCase.expectedError.col})`;
       writeFileSync(join(directory, 'generated_test.go'), `package generated
 import ("encoding/base64"; "encoding/json"; "errors"; "testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/errs"; "github.com/polyspec/template/packages/go/value")

@@ -7,9 +7,9 @@
 import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
-import { compileSource } from '../../packages/compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
+import { compileSource } from '../../packages/compiler/src/compiler.mts';
+import { deriveTypeManifest } from '../../packages/compiler/src/type-manifest.mts';
 import { parse } from '../../packages/ts/dist/index.mjs';
 import { inWorker, runStep, seconds, stepProgress } from './bounded.mts';
 import { errorField, generatedCases, type TestCase, typeDefinitions } from './cases.mts';

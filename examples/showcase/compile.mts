@@ -2,7 +2,7 @@
 // Compiles each showcase source graph through the product AST compiler.
 import { join } from 'node:path';
 import { root } from '../../tests/runner/drivers.mts';
-import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
+import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { isObject, object, readJson, text } from './json.mts';
 import { scenarioIds } from '../../scripts/showcase-documents.mts';
 

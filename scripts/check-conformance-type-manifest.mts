@@ -4,22 +4,14 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { parse } from '../packages/ts/dist/index.mjs';
 import { listCases, typeDefinitions } from '../tests/runner/cases.mts';
-import { deriveTypeManifest } from '../packages/compiler/type-manifest.mjs';
+import { deriveTypeManifest } from '../packages/compiler/src/type-manifest.mts';
 
-// The parts of the manifest of deriveTypeManifest that this check reads.
-interface DerivedManifest {
-  schema: number;
-  root: string;
-  entry: string;
-  defines: Record<string, { optional: unknown; template?: unknown; html?: unknown }>;
-  templates: Record<string, Record<string, string> | undefined>;
-}
 
 const cases = listCases();
 const parseableCases = cases.filter((testCase) => testCase.expectedAst !== null);
 let checked = 0;
 for (const testCase of parseableCases) {
-  const templates = new Map();
+  const templates = new Map<string, ReturnType<typeof parse>>();
   const pending = [testCase.dir];
   while (pending.length > 0) {
     const directory = pending.pop();
@@ -37,7 +29,7 @@ for (const testCase of parseableCases) {
       }
     }
   }
-  const manifest: DerivedManifest = deriveTypeManifest(templates, typeDefinitions(testCase));
+  const manifest = deriveTypeManifest(templates, typeDefinitions(testCase));
   assert.equal(manifest.schema, 3);
   assert.equal(manifest.root, 'any');
   assert.equal(manifest.entry, 'input.tpl');

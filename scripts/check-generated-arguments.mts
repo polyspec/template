@@ -8,10 +8,10 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { compileAst } from '../packages/compiler/ast-artifact.mjs';
-import { compileFiles, compileSource } from '../packages/compiler/compiler.mjs';
+import { compileAst } from '../packages/compiler/src/ast-artifact.mts';
+import { compileFiles, compileSource } from '../packages/compiler/src/compiler.mts';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
-import { phpString, rustString } from '../packages/compiler/backend-support.mjs';
+import { phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
 import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
 import { checkLanguages } from './language-checks.mts';
