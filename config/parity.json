@@ -85,10 +85,10 @@
     }
   ],
   "exclusions": [
-    { "unit": "tokens", "implementation": "php", "reason": "The PHP package has no native test of the tokens of the cases yet.", "item": "T23.2" },
-    { "unit": "tokens", "implementation": "php-ext", "reason": "The PHP extension has no native test of the tokens of the cases yet.", "item": "T23.2" },
-    { "unit": "formatting", "implementation": "php", "reason": "The PHP package has no formatter yet.", "item": "T23.2" },
-    { "unit": "formatting", "implementation": "php-ext", "reason": "The PHP extension has no formatter yet.", "item": "T23.2" },
+    { "unit": "tokens", "implementation": "php", "reason": "Only until kit 0.0.43 (K137): kit 0.0.42 cannot bind a suite to one PHPUnit method with a data set per case. Retry when template moves to kit 0.0.43: bind packages/template-php/tests/ConformanceTest.php with the symbol ConformanceTest::testTokens and delete this exclusion.", "item": "T23.2" },
+    { "unit": "tokens", "implementation": "php-ext", "reason": "Only until kit 0.0.43 (K137): kit 0.0.42 cannot bind a suite to one PHPUnit method with a data set per case. Retry when template moves to kit 0.0.43: bind packages/template-php-ext/tests/AnalyzeTest.php with the symbol AnalyzeTest::testEqualsTheAnalysisOfThePhpPackage and delete this exclusion.", "item": "T23.2" },
+    { "unit": "formatting", "implementation": "php", "reason": "Only until kit 0.0.43 (K137): kit 0.0.42 cannot bind a suite to one PHPUnit method with a data set per case. Retry when template moves to kit 0.0.43: bind packages/template-php/tests/ConformanceTest.php with the symbol ConformanceTest::testFormat and delete this exclusion.", "item": "T23.2" },
+    { "unit": "formatting", "implementation": "php-ext", "reason": "Only until kit 0.0.43 (K137): kit 0.0.42 cannot bind a suite to one PHPUnit method with a data set per case. Retry when template moves to kit 0.0.43: bind packages/template-php-ext/tests/FormatTest.php with the symbol FormatTest::testFormatsTheCase and delete this exclusion.", "item": "T23.2" },
     { "unit": "conformance", "implementation": "python", "reason": "The Python package runs the conformance cases only through the comparator tests/runner/conformance.mjs; it has no native test that reports each case.", "item": "T24.8" },
     { "unit": "expressions", "implementation": "php-ext", "reason": "The PHP extension has no native test of the expression vectors.", "item": "T24.8" }
   ]
