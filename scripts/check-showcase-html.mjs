@@ -24,7 +24,7 @@ const stack = [];
 for (const match of html.matchAll(/<!--[\s\S]*?-->|<\/?[A-Za-z][^>]*>/g)) {
   const token = match[0];
   if (token.startsWith('<!--') || /^<[^/]/.test(token) && token.endsWith('/>')) continue;
-  const closing = /^<\//.test(token);
+  const closing = token.startsWith('</');
   const name = token.match(/^<\/?([A-Za-z][\w:-]*)/)?.[1]?.toLowerCase();
   if (!name || voidTags.has(name)) continue;
   if (closing) {

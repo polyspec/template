@@ -28,7 +28,7 @@ test('the conformance runners select every language when no option names them, a
 test('no recipe of the Makefile skips its command when a directory or a file is absent', () => {
   const skips = readFileSync(path.join(ROOT, 'Makefile'), 'utf8').split('\n')
     .map((line, index) => ({ line, number: index + 1 }))
-    .filter(({ line }) => /^\t/.test(line) && /\btest ! -[defs] [^|]*\|\||\[ ! -[defs] [^\]]*\] *\|\||\[ -[defs] [^\]]*\] *&&|\btest -[defs] [^&]*&&/.test(line));
+    .filter(({ line }) => line.startsWith('\t') && /\btest ! -[defs] [^|]*\|\||\[ ! -[defs] [^\]]*\] *\|\||\[ -[defs] [^\]]*\] *&&|\btest -[defs] [^&]*&&/.test(line));
   assert.deepEqual(skips.map(({ line, number }) => `Makefile:${number}: ${line.trim()}`), []);
 });
 

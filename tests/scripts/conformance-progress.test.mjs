@@ -15,7 +15,7 @@ test('each case prints its result line in each language before the summary', { t
   const header = lines.findIndex(line => /^case\s+ts\s*$/.test(line));
   assert.ok(header > 0, run.stdout);
   const results = lines.slice(0, header);
-  const cases = lines.slice(header + 1).filter(line => /^whitespace\//.test(line)).map(line => line.split(/\s+/)[0]);
+  const cases = lines.slice(header + 1).filter(line => line.startsWith('whitespace/')).map(line => line.split(/\s+/)[0]);
   assert.ok(cases.length > 1, run.stdout);
   assert.deepEqual(results.map(line => /^(\S+) \[ts\] pass \(\d+ ms\)$/.exec(line)?.[1]), cases);
 });
