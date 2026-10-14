@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from .errors import TemplateError
+from .errors import TemplateError, position_of
 from .format_body import format_body
 from .format_indent import IndentError, indent_edits
 from .format_invariant import same_tree, without_line_indentation
@@ -93,8 +93,9 @@ def format_template(
     name = options.name
     bom = _BOM if source.startswith(_BOM) else ""
     text = source[len(bom) :]
+    template_source = Source.from_text(name, text)
     try:
-        analysis = analyze_template(Source.from_text(name, text), delimiters)
+        analysis = analyze_template(template_source, delimiters)
     except TemplateError as error:
         return FormatResult(
             ok=False,
@@ -134,7 +135,9 @@ def format_template(
                 )
             )
         except IndentError as error:
-            line, col = _position_of(text, error.index)
+            line, col = position_of(
+                template_source.lines, template_source.byte_at(error.index)
+            )
             return FormatResult(
                 ok=False, error=FormatError("html", None, line, col, error.message)
             )
@@ -143,7 +146,7 @@ def format_template(
         return FormatResult(ok=True, text=source, changed=False)
 
     formatted = _apply(text, edits)
-    line, col = _position_of(text, edits[0][0])
+    line, col = position_of(template_source.lines, template_source.byte_at(edits[0][0]))
     try:
         after = parse_template(Source.from_text(name, formatted), delimiters)
     except TemplateError as error:
@@ -186,11 +189,3 @@ def _apply(text: str, edits: list[tuple[int, int, str]]) -> str:
         cursor = end
     output.append(text[cursor:])
     return "".join(output)
-
-
-def _position_of(text: str, index: int) -> tuple[int, int]:
-    """The 1-based line and UTF-8 byte column of a code point index, counted as
-    the parser counts them."""
-    line_start = text.rfind("\n", 0, index) + 1
-    line = text.count("\n", 0, line_start) + 1
-    return line, len(text[line_start:index].encode("utf-8")) + 1
