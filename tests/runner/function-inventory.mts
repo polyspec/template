@@ -1,14 +1,29 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
+import type { JSONSchemaType } from 'ajv';
+import { jsonDocument } from '../../scripts/json-document.mts';
 import { root } from './drivers.mts';
 
+/** The part of the inventory report that the check reads; the report holds more fields. */
 interface InventoryReport {
   files: number;
   symbols: { category: string; name: string }[];
 }
 
-const report = JSON.parse(await new Promise<string>((resolveReport, reject) => {
+const REPORT_SCHEMA: JSONSchemaType<InventoryReport> = {
+  type: 'object',
+  properties: {
+    files: { type: 'integer' },
+    symbols: {
+      type: 'array',
+      items: { type: 'object', properties: { category: { type: 'string' }, name: { type: 'string' } }, required: ['category', 'name'] },
+    },
+  },
+  required: ['files', 'symbols'],
+};
+
+const report = jsonDocument<InventoryReport>('inventory report', REPORT_SCHEMA).parse(await new Promise<string>((resolveReport, reject) => {
   const child = process.getBuiltinModule('node:child_process').spawn(process.execPath, [
     join(root, 'scripts/inventory-template-functions.mts'),
     '--root', root,
@@ -20,7 +35,7 @@ const report = JSON.parse(await new Promise<string>((resolveReport, reject) => {
   child.stderr.on('data', (chunk: Buffer) => { stderr += chunk; });
   child.on('error', reject);
   child.on('close', code => code === 0 ? resolveReport(stdout) : reject(new Error(stderr || `inventory exited ${code}`)));
-})) as InventoryReport;
+}), 'the report of scripts/inventory-template-functions.mts');
 
 assert.equal(report.files, 1);
 assert.deepEqual(report.symbols.map(symbol => `${symbol.category}:${symbol.name}`), [

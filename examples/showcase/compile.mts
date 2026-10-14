@@ -1,27 +1,29 @@
 #!/usr/bin/env node
 // Compiles each showcase source graph through the product AST compiler.
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { root } from '../../tests/runner/drivers.mts';
 import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
+import { isObject, object, readJson, text } from './json.mts';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
 const argv = process.argv.slice(2);
 const refreshAt = argv.indexOf('--refresh');
-if (refreshAt < 0 || !argv[refreshAt + 1] || argv.length !== 2) {
-  throw new Error('usage: compile.mjs --refresh dev|true|false');
-}
 const refresh = argv[refreshAt + 1];
+if (refreshAt < 0 || refresh === undefined || argv.length !== 2) {
+  throw new Error('usage: compile.mts --refresh dev|true|false');
+}
 const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
   .filter(item => item.isDirectory() && existsSync(join(scenariosRoot, item.name, 'scenario.json')))
   .map(item => item.name).sort();
 
 for (const id of scenarios) {
   const directory = join(scenariosRoot, id);
-  const metadata = JSON.parse(readFileSync(join(directory, 'scenario.json'), 'utf8'));
-  const definitions = JSON.parse(readFileSync(join(directory, 'define.json'), 'utf8'));
-  const target = definitions[metadata.target];
-  const entry = typeof target === 'string' ? target : target?.template ?? metadata.target;
+  const targetName = text(object(readJson(join(directory, 'scenario.json')), `${id}/scenario.json`).target, `${id}/scenario.json: target`);
+  // The target resolves through a template definition (build.mts checks the same contract).
+  const target = object(readJson(join(directory, 'define.json')), `${id}/define.json`)[targetName];
+  const entry = typeof target === 'string' ? target : isObject(target) ? text(target.template, `${id}/define.json: ${targetName}.template`) : undefined;
+  if (entry === undefined) throw new Error(`${id}: the target ${targetName} has no template definition in define.json`);
   compileAst({
     root: directory,
     output: join(directory, 'compiled/ast'),

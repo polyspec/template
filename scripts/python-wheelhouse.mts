@@ -13,6 +13,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { jsonDocument } from './json-document.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -28,11 +29,24 @@ export interface Requirement {
   sha256: string;
 }
 
+// packages/python/build-requirements.json: schema 1 and at least one requirement.
+const text = { type: 'string' };
+const buildRequirementsDocument = jsonDocument<{ schema: 1; requirements: Requirement[] }>('build requirements of schema 1', {
+  type: 'object',
+  required: ['schema', 'requirements'],
+  properties: {
+    schema: { const: 1 },
+    requirements: {
+      type: 'array',
+      minItems: 1,
+      items: { type: 'object', required: ['name', 'version', 'filename', 'url', 'sha256'], properties: { name: text, version: text, filename: text, url: text, sha256: text } },
+    },
+  },
+});
+
 /** The pinned build requirements of packages/python. */
 export function buildRequirements(): Requirement[] {
-  const lock = JSON.parse(readFileSync(join(root, 'packages/python/build-requirements.json'), 'utf8')) as { schema?: unknown; requirements?: Requirement[] };
-  if (lock.schema !== 1 || !Array.isArray(lock.requirements) || lock.requirements.length === 0) throw new Error('packages/python/build-requirements.json has no requirements of schema 1');
-  return lock.requirements;
+  return buildRequirementsDocument.read(join(root, 'packages/python/build-requirements.json')).requirements;
 }
 
 const sha256 = (bytes: Uint8Array): string => createHash('sha256').update(bytes).digest('hex');

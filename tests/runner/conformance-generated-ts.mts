@@ -12,7 +12,8 @@ import { compileSource } from '../../packages/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
 import { parse } from '../../packages/ts/dist/index.mjs';
 import { inWorker, runStep, seconds, stepProgress } from './bounded.mts';
-import { errorField, firstDifference, generatedCases, type TestCase, typeDefinitions } from './cases.mts';
+import { errorField, generatedCases, type TestCase, typeDefinitions } from './cases.mts';
+import { errorDifference } from './generated-errors.mts';
 import type { RenderMessage } from './generated-ts-render.mts';
 import { tsc } from '../../scripts/tools.mts';
 import { nodeWorkspace } from '../../scripts/temporary-workspace.mts';
@@ -25,17 +26,6 @@ const temporary = nodeWorkspace('generated-conformance-ts');
 const sources = join(temporary, 'source');
 const output = join(temporary, 'output');
 mkdirSync(sources);
-
-function errorObject(error: unknown, template: string | null = null): { code: string; template: unknown; line: unknown; col: unknown } | null {
-  const code = errorField(error, 'code');
-  if (typeof code !== 'string') return null;
-  return {
-    code,
-    template: errorField(error, 'template') ?? template,
-    line: errorField(error, 'line') ?? 0,
-    col: errorField(error, 'col') ?? 0,
-  };
-}
 
 function parsedTemplates(testCase: TestCase): Map<string, ReturnType<typeof parse>> {
   const templates = new Map<string, ReturnType<typeof parse>>();
@@ -82,8 +72,7 @@ try {
       pending.push({ testCase, id, sourcePath });
       progress.pass(step);
     } catch (error) {
-      const actual = errorObject(error);
-      const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
+      const difference = errorDifference(testCase.expectedError, error, 'compile');
       if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${String(errorField(error, 'message'))}`); progress.fail(step, undefined, difference); }
       else { passed++; progress.pass(step); }
     }
@@ -118,8 +107,7 @@ try {
     if ('timedOut' in result) failures.push(`${testCase.id}: render exceeded its ${seconds(RENDER_TIMEOUT_MS)} deadline`);
     else if ('failure' in result) failures.push(`${testCase.id}: render ${result.failure}`);
     else if ('error' in result) {
-      const actual = errorObject(result.error, 'input.tpl');
-      const difference = testCase.expectedError === null || actual === null ? 'unexpected render failure' : firstDifference(testCase.expectedError, actual);
+      const difference = errorDifference(testCase.expectedError, result.error, 'render');
       if (difference) failures.push(`${testCase.id}: render ${difference}: ${String(result.error.message)}`);
       else passed++;
     } else if (testCase.expectedError !== null) failures.push(`${testCase.id}: expected ${testCase.expectedError.code}, generated execution succeeded`);

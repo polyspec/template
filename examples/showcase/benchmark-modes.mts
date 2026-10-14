@@ -9,7 +9,8 @@ import { fileURLToPath } from 'node:url';
 import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
 import { compileFiles, compileSource } from '../../packages/compiler/compiler.mjs';
 import { publishBuild } from '../../scripts/publish-build.mts';
-import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mts';
+import { number, object, text } from './json.mts';
 
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -17,10 +18,11 @@ const scenario = join(root, 'examples/site/scenarios/scope-precedence');
 // file empty or half written and a failed run keeps the previous result (T19.7); without it the result goes to stdout.
 const argv = process.argv.slice(2);
 if (!(argv.length === 0 || (argv.length === 2 && argv[0] === '--output'))) {
-  process.stderr.write('usage: benchmark-modes.mjs [--output <file>]\n');
+  process.stderr.write('usage: benchmark-modes.mts [--output <file>]\n');
   process.exit(2);
 }
-const output = argv.length === 2 ? resolve(argv[1]) : null;
+const outputArgument = argv[1];
+const output = outputArgument === undefined ? null : resolve(outputArgument);
 const sampleCount = Number(process.env.BENCH_SAMPLES ?? 21);
 const iterations = Number(process.env.BENCH_ITERATIONS ?? 1000);
 const warmup = Number(process.env.BENCH_WARMUP ?? 20);
@@ -29,28 +31,34 @@ if (!Number.isInteger(iterations) || iterations < 1) throw new Error('BENCH_ITER
 if (!Number.isInteger(warmup) || warmup < 0) throw new Error('BENCH_WARMUP must be a non-negative integer');
 
 const temporary = mkdtempSync(join(tmpdir(), 'polyspec-benchmark-'));
-const cargo = existsSync(join(process.env.HOME ?? '', '.cargo/bin/cargo')) ? join(process.env.HOME ?? '', '.cargo/bin/cargo') : 'cargo';
+const home = process.env.HOME;
+if (home === undefined) throw new Error('HOME is not set; the benchmark runs the cargo and the PATH of $HOME/.cargo/bin');
+const searchPath = process.env.PATH;
+if (searchPath === undefined) throw new Error('PATH is not set; the benchmark runs the tools of PATH');
+const cargo = existsSync(join(home, '.cargo/bin/cargo')) ? join(home, '.cargo/bin/cargo') : 'cargo';
 const expected = readFileSync(join(scenario, 'expected.html'), 'utf8');
 const expectedHash = createHash('sha256').update(expected).digest('hex');
 
-function run(command, args, cwd = root) {
+function run(command: string, args: string[], cwd = root): void {
   const result = spawnSync(command, args, {
     cwd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
-    env: { ...process.env, PATH: `${process.env.HOME ?? ''}/.cargo/bin:${process.env.PATH}` },
+    env: { ...process.env, PATH: `${home}/.cargo/bin:${searchPath}` },
   });
-  if (result.status !== 0) throw new Error(`${command} failed\n${result.stdout ?? ''}${result.stderr ?? ''}`);
+  if (result.status !== 0) throw new Error(`${command} failed\n${result.stdout}${result.stderr}`);
 }
 
-function percentile(values, fraction) {
+function percentile(values: number[], fraction: number): number {
   const sorted = [...values].sort((left, right) => left - right);
-  return sorted[Math.max(0, Math.ceil(sorted.length * fraction) - 1)];
+  const value = sorted[Math.max(0, Math.ceil(sorted.length * fraction) - 1)];
+  if (value === undefined) throw new Error('a percentile of no samples');
+  return value;
 }
 
-function summary(values) {
+function summary(values: number[]): { median: number; p95: number } {
   return { median: percentile(values, 0.5), p95: percentile(values, 0.95) };
 }
 
-function directoryBytes(path) {
+function directoryBytes(path: string): number {
   let total = 0;
   for (const entry of readdirSync(path, { withFileTypes: true })) {
     const child = join(path, entry.name);
@@ -59,16 +67,16 @@ function directoryBytes(path) {
   return total;
 }
 
-function generatedPath(language) {
+function generatedPath(language: string): string {
   if (language === 'go') return join(root, 'examples/showcase/adapters/go/generated/scope-precedence/generated.go');
   if (language === 'php') return join(root, showcasePhpDirectory('scope-precedence'));
   const extension = language === 'typescript' ? 'ts' : language;
   return join(root, `examples/showcase/adapters/generated/typed/scope-precedence.${extension}`);
 }
 
-function compileSamples(language, mode) {
-  const times = [];
-  const sizes = [];
+function compileSamples(language: string, mode: string): { compile_ms: { median: number; p95: number }; artifact_bytes: number } {
+  const times: number[] = [];
+  const sizes: number[] = [];
   for (let sample = 0; sample < sampleCount; sample += 1) {
     const output = join(temporary, `compile-${language}-${mode}-${sample}`);
     const started = process.hrtime.bigint();
@@ -89,26 +97,39 @@ function compileSamples(language, mode) {
   return { compile_ms: summary(times), artifact_bytes: percentile(sizes, 0.5) };
 }
 
-function timed(command, args, mode, count, warm) {
+function timed(command: string, args: string[], mode: string, count: number, warm: number): { processMs: number; rssMiB: number; renderMs: number; preparedRenderMs: number } {
   const started = process.hrtime.bigint();
   const timeArguments = process.platform === 'darwin' ? ['-l'] : ['-v'];
   const result = spawnSync('/usr/bin/time', [...timeArguments, command, ...args], {
     cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
     env: {
       ...process.env,
-      PATH: `${process.env.HOME ?? ''}/.cargo/bin:${process.env.PATH}`,
+      PATH: `${home}/.cargo/bin:${searchPath}`,
       SHOWCASE_EXECUTION_MODE: mode === 'generated' ? 'generated' : 'ast',
       SHOWCASE_BENCH_ITERATIONS: String(count),
       SHOWCASE_BENCH_WARMUP: String(warm),
     },
   });
   const processMs = Number(process.hrtime.bigint() - started) / 1e6;
-  if (result.status !== 0) throw new Error(`${command} benchmark failed\n${result.stdout ?? ''}${result.stderr ?? ''}`);
-  const payload = JSON.parse(result.stdout.trim().split('\n').at(-1));
-  const rss = process.platform === 'darwin'
-    ? Number(result.stderr.match(/(\d+)\s+maximum resident set size/)?.[1]) / 1024 / 1024
-    : Number(result.stderr.match(/Maximum resident set size \(kbytes\):\s*(\d+)/)?.[1]) / 1024;
-  if (!Number.isFinite(rss)) throw new Error(`${command} benchmark did not report peak RSS`);
+  if (result.status !== 0) throw new Error(`${command} benchmark failed\n${result.stdout}${result.stderr}`);
+  const last = result.stdout.trim().split('\n').at(-1);
+  if (last === undefined) throw new Error(`${command} benchmark printed no result`);
+  const report = object(JSON.parse(last), `the result of ${command}`);
+  const payload = {
+    language: text(report.language, `${command}: language`),
+    bytes: number(report.bytes, `${command}: bytes`),
+    outputSha256: text(report.outputSha256, `${command}: outputSha256`),
+    repeatSha256: text(report.repeatSha256, `${command}: repeatSha256`),
+    preparedSha256: text(report.preparedSha256, `${command}: preparedSha256`),
+    iterations: number(report.iterations, `${command}: iterations`),
+    renderSeconds: number(report.renderSeconds, `${command}: renderSeconds`),
+    preparedRenderSeconds: number(report.preparedRenderSeconds, `${command}: preparedRenderSeconds`),
+  };
+  const peak = process.platform === 'darwin'
+    ? /(\d+)\s+maximum resident set size/.exec(result.stderr)?.[1]
+    : /Maximum resident set size \(kbytes\):\s*(\d+)/.exec(result.stderr)?.[1];
+  if (peak === undefined) throw new Error(`${command} benchmark did not report peak RSS`);
+  const rss = process.platform === 'darwin' ? Number(peak) / 1024 / 1024 : Number(peak) / 1024;
   if (payload.bytes !== Buffer.byteLength(expected) || payload.outputSha256 !== expectedHash || payload.repeatSha256 !== expectedHash || payload.preparedSha256 !== expectedHash) {
     throw new Error(`${payload.language}/${mode} output contract mismatch`);
   }
@@ -120,9 +141,9 @@ function timed(command, args, mode, count, warm) {
   };
 }
 
-function measure(language, command, args, mode) {
-  const cold = [];
-  const persistent = [];
+function measure(language: string, command: string, args: string[], mode: string): Record<string, unknown> {
+  const cold: { processMs: number; rssMiB: number }[] = [];
+  const persistent: { processMs: number; rssMiB: number; renderMs: number; preparedRenderMs: number }[] = [];
   for (let sample = 0; sample < sampleCount; sample += 1) cold.push(timed(command, args, mode, 1, 0));
   for (let sample = 0; sample < sampleCount; sample += 1) persistent.push(timed(command, args, mode, iterations, warmup));
   const compiled = compileSamples(language, mode);
@@ -153,13 +174,13 @@ try {
   // file includes the check of macOS (T19.6-1).
   const rustAdapter = join(root, 'var/build/showcase-adapter-rust');
   publishBuild(join(root, 'examples/showcase/adapters/rust/target/release/showcase-adapter-rust'), rustAdapter);
-  const commands = {
+  const commands: Record<string, [string, string[]]> = {
     typescript: ['node', ['--experimental-strip-types', join(root, 'examples/showcase/adapters/typescript.ts'), scenario]],
     go: [goAdapter, [scenario]],
     rust: [rustAdapter, [scenario]],
     php: ['php', [join(root, 'examples/showcase/adapters/php.php'), scenario]],
   };
-  const results = [];
+  const results: Record<string, unknown>[] = [];
   for (const [language, [command, args]] of Object.entries(commands)) {
     for (const mode of ['ast', 'generated']) results.push(measure(language, command, args, mode));
   }

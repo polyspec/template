@@ -4,14 +4,15 @@ import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSy
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mjs';
-import { showcasePythonModule } from '../examples/showcase/python-module.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mts';
+import { showcasePythonModule } from '../examples/showcase/python-module.mts';
 import { checkLanguages } from './language-checks.mts';
+import { scenarioMetadataDocument } from './showcase-documents.mts';
 import { phpString } from '../packages/compiler/backend-support.mjs';
 import { phpProgramAutoload } from './php-program.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
-import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const generated = resolve(root, 'examples/showcase/adapters/generated/typed');
@@ -35,9 +36,10 @@ function run(command: string, args: string[], options: { cwd?: string; env?: Nod
     maxBuffer: 32 * 1024 * 1024,
   });
   if (result.error || result.status !== 0) {
-    process.stderr.write(result.stdout ?? '');
-    process.stderr.write(result.stderr ?? '');
-    throw result.error ?? new Error(`${command} exited with ${result.status}`);
+    if (result.error) throw result.error;
+    process.stderr.write(result.stdout);
+    process.stderr.write(result.stderr);
+    throw new Error(`${command} exited with ${result.status}`);
   }
   return result.stdout;
 }
@@ -60,7 +62,7 @@ function expected(id: string): string {
 }
 
 function target(id: string): string {
-  return (JSON.parse(fixture(id, 'scenario.json')) as { target: string }).target;
+  return scenarioMetadataDocument.parse(fixture(id, 'scenario.json'), `the scenario.json of ${id}`).target;
 }
 
 function checkTypeScript() {
@@ -179,9 +181,7 @@ fn generated_${index}_matches() {
 }`).join('\n');
   writeFileSync(test, `${modules}\n${cases}\n`);
   try {
-    const home = process.env.HOME;
-    if (!home) throw new Error('HOME is not set; the Rust check runs $HOME/.cargo/bin/cargo');
-    run(resolve(home, '.cargo/bin/cargo'), ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_program_check'], { env: { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' } });
+    run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_program_check'], { env: { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' } });
   } finally {
     rmSync(rust.directory, { recursive: true, force: true });
   }
@@ -198,7 +198,7 @@ function checkPhp() {
     assert.equal(coverageSource.includes(duplicate), false, `PHP generated source duplicates runtime semantics: ${duplicate}`);
   }
   for (const id of scenarios) {
-    // The generated program of a scenario is declared in the namespace of examples/showcase/php-namespace.mjs.
+    // The generated program of a scenario is declared in the namespace of examples/showcase/php-namespace.mts.
     const phpClass = `\\${showcasePhpNamespace(id)}\\GeneratedProgram`;
     const limit = id === scenarios[0] ? ` $limited = new ${phpClass}(new Polyspec\\Template\\Render\\RuntimeEnvironment(['outputBytes' => 1])); $failed = false; try { $limited->render(${JSON.stringify(target(id))}, $assign, $options); } catch (Polyspec\\Template\\TemplateError $error) { $failed = $error->errorCode === 'E_RUNTIME_LIMIT' && $error->errorLine > 0 && $error->errorCol > 0; } if (!$failed) throw new RuntimeException('PHP generated output limit did not preserve a positioned template error');` : '';
     // Composer loads the classes of the program from its PSR-4 directory (T25.1).

@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f3c921c2909fd8947413c67f093ff3dc3331932bcbe592fa32c909e0ace2e072 -->
+<!-- source-sha256: 8217a13780f30963958e5dc9992174c26b3356a513f63e5328e55b4bb9ce403c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.10: TypeScript 인프라는 읽는 문서를 cast하지 않고 검증합니다: `scripts/` 아래 JSON 문서마다 module 하나(compiler manifest, function contract, artifact manifest, package manifest와 lock, fixture, showcase 문서, benchmark 결과)가 type과 ajv validator를 갖고, `expected.error.json`은 schema 하나를 가지며, TOML은 smol-toml로, `.github/workflows`의 workflow는 yaml package로 읽고, `check-doc-coverage`는 TypeScript를 oxc-parser로 읽으며, 없는 값은 기본값 대신 `scripts/required.mts`로 실패하고, generated runner는 위치가 없는 오류를 실패시키며(`tests/runner/generated-errors.mts`), `conformance-cases`(이제 generated Python runner 포함), `check-function-contract`, delimiter matrix의 언어 목록은 `config/parity.json`, manifest, driver table에서 옵니다. `examples/showcase`의 script는 엄격한 `tsconfig.json` 아래의 `.mts`이고, `SHOWCASE_LANGS`는 Python을 포함합니다.
 - T24.10: Rust crate는 missing docs를 허용하는 대신 공개 enum(`Node`, `Expr`, `MapEntry`, `LiteralValue`, `LoopMetaField`, `ErrorCode`, `TokenType`)의 모든 variant와 field를 문서화하고, `render_for`는 For node의 field를 struct 하나로 받으며, 남은 lint 예외는 `#[expect(..., reason)]`입니다. Rust 적합성 test는 케이스 수를 확인하고, 없는 파일이 아닌 읽기 오류에서 케이스를 실패시키며, 표현식 test는 vector를 `Deserialize` struct로 읽습니다.
 - T24.11: TypeScript는 unit `compiler-interface`와 `bound-map-interface`를 `packages/ts/tests/compiler-interface.test.ts`로 bind합니다. 이 test는 package가 내보내는 engine, program, runtime environment, bound map 연산을 `packages/compiler/interface.json`의 mapping과 비교합니다. TypeScript를 뺀 profile `interface`는 사라집니다.
 - T24.10: `docs/spec/runtime.md`의 program class diagram은 runtime contract가 compiler manifest에 합쳐진 뒤 prepared-execution class가 있는 `packages/compiler/generated/compiler-classes.mmd`를 include합니다. include는 더 이상 없는 `tools/runtime/generated/prepared-execution-classes.mmd`를 가리켰습니다. `packages/python/CHANGELOG.md`의 Unreleased 항목은 `packages/compiler/interface.json`을 적습니다.

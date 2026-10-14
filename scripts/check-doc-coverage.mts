@@ -20,7 +20,9 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseSync, type ClassElement, type Declaration, type Directive, type ModuleExportName, type Statement } from 'oxc-parser';
 import { compareText } from './compare-text.mts';
+import { captured, required } from './required.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const findings: string[] = [];
@@ -62,28 +64,13 @@ function sources(directory: string, extensions: string[]): string[] {
 // lines between the comment and the declaration are skipped.
 function documented(lines: string[], index: number): boolean {
   for (let cursor = index - 1; cursor >= 0; cursor--) {
-    const line = (lines[cursor] ?? '').trim();
+    const line = required(lines[cursor], `line ${cursor + 1}`).trim();
     if (line === '') return false;
     if (line === '*/' || line.startsWith('*') || line.startsWith('//') || line.startsWith('/*')) return true;
     if (line.startsWith('#[') || line.startsWith('@')) continue;
     return false;
   }
   return false;
-}
-
-// Returns the index of the closing brace that matches the opening brace on the given line.
-function blockEnd(lines: string[], start: number): number {
-  let depth = 0;
-  for (let index = start; index < lines.length; index++) {
-    for (const character of lines[index] ?? '') {
-      if (character === '{') depth++;
-      else if (character === '}') {
-        depth--;
-        if (depth === 0) return index;
-      }
-    }
-  }
-  return lines.length - 1;
 }
 
 // ---------------------------------------------------------------- TypeScript
@@ -96,6 +83,39 @@ const typescriptEntries = ['index.ts', 'render.ts', 'node/index.ts'];
 // Resolves a module specifier of a file to a source path inside the package.
 function typescriptModule(fromFile: string, specifier: string): string {
   return resolve(dirname(fromFile), specifier.replace(/\.js$/, '.ts'));
+}
+
+/** A TypeScript file parsed by oxc-parser: its lines and its top-level statements; a file that does not parse fails. */
+interface TypescriptFile {
+  lines: string[];
+  statements: Array<Directive | Statement>;
+  /** The 0-based line of a source offset. */
+  lineOf(offset: number): number;
+}
+
+function parseTypescript(file: string): TypescriptFile {
+  const text = readFileSync(file, 'utf8');
+  const { program, errors } = parseSync(file, text);
+  if (errors.length > 0) throw new Error(`${relative(root, file)}: ${errors.map(error => error.message).join('; ')}`);
+  return { lines: text.split('\n'), statements: program.body, lineOf: offset => text.slice(0, offset).split('\n').length - 1 };
+}
+
+/** The name of a module export name: an identifier or a string literal. */
+function exportName(name: ModuleExportName): string {
+  return name.type === 'Literal' ? name.value : name.name;
+}
+
+/** The names that a declaration declares, with the keyword that the finding names. */
+function declaredNames(declaration: Declaration): { kind: string; name: string }[] {
+  switch (declaration.type) {
+    case 'FunctionDeclaration': return declaration.id ? [{ kind: 'function', name: declaration.id.name }] : [];
+    case 'ClassDeclaration': return declaration.id ? [{ kind: 'class', name: declaration.id.name }] : [];
+    case 'TSInterfaceDeclaration': return [{ kind: 'interface', name: declaration.id.name }];
+    case 'TSTypeAliasDeclaration': return [{ kind: 'type', name: declaration.id.name }];
+    case 'TSEnumDeclaration': return [{ kind: 'enum', name: declaration.id.name }];
+    case 'VariableDeclaration': return declaration.declarations.flatMap(declarator => (declarator.id.type === 'Identifier' ? [{ kind: declaration.kind, name: declarator.id.name }] : []));
+    default: return [];
+  }
 }
 
 // Collects {file, name} for every symbol that the entry files re-export or declare.
@@ -111,40 +131,30 @@ function typescriptSurface(): { file: string; name: string }[] {
       findings.push(`${relative(root, file)}:1: the entry file does not exist`);
       continue;
     }
-    const text = readFileSync(file, 'utf8');
-
-    // Where each imported binding of the entry file comes from.
-    const imported = new Map<string, string>();
-    for (const [, list = '', specifier = ''] of text.matchAll(/import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'([^']+)'/g)) {
-      for (const item of list.split(',')) {
-        const name = item.replace(/^\s*type\s+/, '').trim().split(/\s+as\s+/)[0] ?? '';
-        if (name) imported.set(name, typescriptModule(file, specifier));
+    const { statements } = parseTypescript(file);
+    // Where each imported binding of the entry file comes from: its module and its name there.
+    const imported = new Map<string, { module: string; name: string }>();
+    for (const statement of statements) {
+      if (statement.type !== 'ImportDeclaration') continue;
+      for (const specifier of statement.specifiers) {
+        if (specifier.type === 'ImportSpecifier') imported.set(specifier.local.name, { module: typescriptModule(file, statement.source.value), name: exportName(specifier.imported) });
       }
     }
-
-    // export { a, type b, c as d } from './x.js'
-    for (const [, list = '', specifier = ''] of text.matchAll(/export\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'([^']+)'/g)) {
-      const module = typescriptModule(file, specifier);
-      for (const item of list.split(',')) {
-        const name = item.replace(/^\s*type\s+/, '').trim().split(/\s+as\s+/)[0] ?? '';
-        if (name) add(module, name);
+    for (const statement of statements) {
+      if (statement.type !== 'ExportNamedDeclaration') continue;
+      if (statement.declaration) {
+        // Declarations of the entry file itself.
+        for (const { name } of declaredNames(statement.declaration)) add(file, name);
+      } else if (statement.source) {
+        // export { a, type b, c as d } from './x.js'
+        for (const specifier of statement.specifiers) add(typescriptModule(file, statement.source.value), exportName(specifier.local));
+      } else {
+        // export type { a, b as c };  where a and b are imported bindings
+        for (const specifier of statement.specifiers) {
+          const binding = imported.get(exportName(specifier.local));
+          if (binding) add(binding.module, binding.name);
+        }
       }
-    }
-
-    // export type { a, b as c };  where a and b are imported bindings
-    for (const [, list = ''] of text.matchAll(/export\s+(?:type\s+)?\{([^}]*)\}\s*;/g)) {
-      for (const item of list.split(',')) {
-        const name = item.replace(/^\s*type\s+/, '').trim().split(/\s+as\s+/)[0] ?? '';
-        const module = imported.get(name);
-        if (name && module) add(module, name);
-      }
-    }
-
-    // Declarations of the entry file itself.
-    for (const [, name = ''] of text.matchAll(
-      /^export\s+(?:declare\s+)?(?:abstract\s+)?(?:function|class|interface|type|const|enum)\s+([A-Za-z_$][\w$]*)/gm,
-    )) {
-      add(file, name);
     }
   }
   return [...surface.values()];
@@ -160,41 +170,38 @@ function checkTypescriptSymbol(file: string, name: string, seen = new Set<string
   const key = `${file}::${name}`;
   if (seen.has(key)) return;
   seen.add(key);
-  const text = readFileSync(file, 'utf8');
-  const lines = text.split('\n');
-  const pattern = new RegExp(
-    `^export\\s+(?:declare\\s+)?(?:abstract\\s+)?(function|class|interface|type|const|enum)\\s+${name}\\b`,
-  );
-  const index = lines.findIndex(line => pattern.test(line));
-  if (index === -1) {
-    for (const [, list = '', specifier = ''] of text.matchAll(/export\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'([^']+)'/g)) {
-      const source = list
-        .split(',')
-        .map(item => item.replace(/^\s*type\s+/, '').trim().split(/\s+as\s+/))
-        .find(parts => (parts[1] ?? parts[0]) === name)?.[0];
-      if (source !== undefined) {
-        checkTypescriptSymbol(typescriptModule(file, specifier), source, seen);
+  const source = parseTypescript(file);
+  for (const statement of source.statements) {
+    if (statement.type !== 'ExportNamedDeclaration') continue;
+    const declaration = statement.declaration;
+    const found = declaration ? declaredNames(declaration).find(item => item.name === name) : undefined;
+    if (declaration && found) {
+      count();
+      const index = source.lineOf(statement.start);
+      if (!documented(source.lines, index)) report(file, index + 1, `${found.kind} ${name}`);
+      if (declaration.type === 'ClassDeclaration') checkTypescriptMembers(file, source, name, declaration.body.body);
+      return;
+    }
+    if (!declaration && statement.source) {
+      const specifier = statement.specifiers.find(item => exportName(item.exported) === name);
+      if (specifier) {
+        checkTypescriptSymbol(typescriptModule(file, statement.source.value), exportName(specifier.local), seen);
         return;
       }
     }
-    findings.push(`${relative(root, file)}:1: ${name} is part of the public surface but is not declared here`);
-    return;
   }
-  count();
-  const kind = pattern.exec(lines[index] ?? '')?.[1];
-  if (kind === undefined) throw new Error(`${relative(root, file)}:${index + 1}: the declaration of ${name} no longer matches`);
-  if (!documented(lines, index)) report(file, index + 1, `${kind} ${name}`);
-  if (kind !== 'class') return;
+  findings.push(`${relative(root, file)}:1: ${name} is part of the public surface but is not declared here`);
+}
 
-  // Public members of an exported class.
-  const end = blockEnd(lines, index);
-  const member = /^ {2}(?!private|protected|#)(?:public\s+)?(?:readonly\s+)?(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?([A-Za-z_$][\w$]*)\s*[(<]/;
-  for (let cursor = index + 1; cursor < end; cursor++) {
-    const memberName = member.exec(lines[cursor] ?? '')?.[1];
-    if (memberName === undefined) continue;
-    if (['if', 'for', 'while', 'switch', 'return', 'catch'].includes(memberName)) continue;
+// The public methods of an exported class: every method, accessor and constructor that is neither private nor protected.
+function checkTypescriptMembers(file: string, source: TypescriptFile, className: string, members: ClassElement[]): void {
+  for (const member of members) {
+    if (member.type !== 'MethodDefinition' && member.type !== 'TSAbstractMethodDefinition') continue;
+    if (member.accessibility === 'private' || member.accessibility === 'protected' || member.key.type === 'PrivateIdentifier') continue;
+    if (member.key.type !== 'Identifier') continue;
     count();
-    if (!documented(lines, cursor)) report(file, cursor + 1, `method ${name}.${memberName}`);
+    const index = source.lineOf(member.start);
+    if (!documented(source.lines, index)) report(file, index + 1, `method ${className}.${member.key.name}`);
   }
 }
 
@@ -212,8 +219,8 @@ const goMethod = /^func\s+\([^)]*?\*?(\w+)\)\s+([A-Z]\w*)/;
 function checkGoDeclaration(file: string, lines: string[], index: number, name: string, label?: string): void {
   count();
   let cursor = index - 1;
-  while (cursor >= 0 && (lines[cursor] ?? '').trim().startsWith('//')) cursor--;
-  const first = (lines[cursor + 1] ?? '').trim();
+  while (cursor >= 0 && required(lines[cursor], `line ${cursor + 1} of ${file}`).trim().startsWith('//')) cursor--;
+  const first = required(lines[cursor + 1], `line ${cursor + 2} of ${file}`).trim();
   if (cursor === index - 1 || !first.startsWith(`// ${name}`)) report(file, index + 1, label ?? name);
 }
 
@@ -227,10 +234,13 @@ if (existsSync(goRoot)) {
   const referenced = new Map<string, { directory: string; name: string }>();
   for (const file of rootFiles) {
     const text = readFileSync(file, 'utf8');
-    for (const [, path = ''] of text.matchAll(/"github\.com\/polyspec\/template\/([\w/]+)"/g)) {
+    for (const match of text.matchAll(/"github\.com\/polyspec\/template\/([\w/]+)"/g)) {
+      const path = captured(match, 1, `an import path of ${file}`);
       packageDirectories.set(path.replace(/^.*\//, ''), join(goRoot, path));
     }
-    for (const [, alias = '', name = ''] of text.matchAll(/\b([a-z]\w*)\.([A-Z]\w*)/g)) {
+    for (const match of text.matchAll(/\b([a-z]\w*)\.([A-Z]\w*)/g)) {
+      const alias = captured(match, 1, `a package alias of ${file}`);
+      const name = captured(match, 2, `a qualified identifier of ${file}`);
       const directory = packageDirectories.get(alias);
       if (!directory) continue;
       const key = `${directory}::${name}`;
@@ -240,8 +250,8 @@ if (existsSync(goRoot)) {
     lines.forEach((line, index) => {
       const method = goMethod.exec(line);
       const declaration = method ? null : goDeclaration.exec(line);
-      if (method) checkGoDeclaration(file, lines, index, method[2] ?? '', `method ${method[1]}.${method[2]}`);
-      else if (declaration) checkGoDeclaration(file, lines, index, declaration[1] ?? '');
+      if (method) checkGoDeclaration(file, lines, index, captured(method, 2, `a method name of ${file}`), `method ${captured(method, 1, `a receiver of ${file}`)}.${captured(method, 2, `a method name of ${file}`)}`);
+      else if (declaration) checkGoDeclaration(file, lines, index, captured(declaration, 1, `a declared name of ${file}`));
     });
   }
 
@@ -256,7 +266,8 @@ if (existsSync(goRoot)) {
         if (declaration && declaration[1] === name) checkGoDeclaration(path, lines, index, name);
         const method = goMethod.exec(line);
         if (method && method[1] === name) {
-          checkGoDeclaration(path, lines, index, method[2] ?? '', `method ${name}.${method[2]}`);
+          const methodName = captured(method, 2, `a method name of ${path}`);
+          checkGoDeclaration(path, lines, index, methodName, `method ${name}.${methodName}`);
         }
       });
     }

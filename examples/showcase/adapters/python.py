@@ -4,7 +4,7 @@
 Run it as `var/python/venv/bin/python python.py SCENARIO_DIR`: `make python-package` installs packages/python
 into var/python/venv, and the directory of this script, the first entry of the import path of a script, holds the
 modules generated.render_adapter and generated.typed.<scenario>, the generated program of each scenario with `_` for
-`-` in its name (examples/showcase/python-module.mjs), which it imports with import statements. Without SHOWCASE_EXECUTION_MODE=generated it interprets the compiled AST artifacts of the scenario; with it, the adapter renders
+`-` in its name (examples/showcase/python-module.mts), which it imports with import statements. Without SHOWCASE_EXECUTION_MODE=generated it interprets the compiled AST artifacts of the scenario; with it, the adapter renders
 through the generated program of the scenario. Both modes call Engine.render.
 """
 

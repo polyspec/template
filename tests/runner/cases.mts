@@ -1,4 +1,5 @@
 // Fixture case enumeration and comparison helpers shared by the runners.
+import { EXPECTED_ERROR_SCHEMA, type ExpectedError, expectedErrorDocument } from '../../scripts/conformance-case-files.mts';
 import { spawn } from 'node:child_process';
 import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -6,15 +7,13 @@ import { dirname, join, relative } from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { caseIds, caseOptions, casesDir } from './case-list.mts';
+import { jsonDocument } from '../../scripts/json-document.mts';
+import { isJsonObject, parsedJsonObject } from './checked.mts';
 import { root } from './drivers.mts';
+import type { JSONSchemaType } from 'ajv';
 
-/** The expected error of a case: the error code with the template and the position that expected.error.json names. */
-export interface ExpectedError {
-  code: string;
-  template?: string;
-  line?: number;
-  col?: number;
-}
+/** The expected error of a case, read and validated by the one reader of the case files. */
+export type { ExpectedError };
 
 /** The modes of expected.format.json. */
 export type FormatMode = 'indent' | 'keep';
@@ -54,6 +53,47 @@ interface FilesystemCase {
   expected: { html?: string; error?: ExpectedError };
 }
 
+const NAMES: JSONSchemaType<Record<string, string>> = { type: 'object', required: [], additionalProperties: { type: 'string' } };
+const FILESYSTEM_CASES_SCHEMA: JSONSchemaType<FilesystemCase[]> = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      rules: { type: 'array', items: { type: 'string' } },
+      files: NAMES,
+      symbolicLinks: { ...NAMES, nullable: true },
+      hardLinks: { ...NAMES, nullable: true },
+      expected: {
+        type: 'object',
+        properties: { html: { type: 'string', nullable: true }, error: { ...EXPECTED_ERROR_SCHEMA, nullable: true } },
+        required: [],
+        additionalProperties: false,
+      },
+    },
+    required: ['name', 'rules', 'files', 'expected'],
+    additionalProperties: false,
+  },
+};
+
+const filesystemCasesDocument = jsonDocument<FilesystemCase[]>('list of filesystem cases', FILESYSTEM_CASES_SCHEMA);
+
+const CASE_META_SCHEMA: JSONSchemaType<TestCase['meta']> = {
+  type: 'object',
+  properties: { rules: { type: 'array', items: { type: 'string' } }, stage: { type: 'integer' } },
+  required: ['rules', 'stage'],
+  additionalProperties: false,
+};
+
+const caseMetaDocument = jsonDocument<TestCase['meta']>('case.json', CASE_META_SCHEMA);
+
+/** The entries of expected.format.json, one for each format mode. */
+function expectedFormatOf(text: string, where: string): Record<FormatMode, unknown> {
+  const value = parsedJsonObject(text, where);
+  if (!('indent' in value) || !('keep' in value)) throw new Error(`${where} holds no entries indent and keep`);
+  return { indent: value.indent, keep: value.keep };
+}
+
 // Returns the cases that the arguments of a generated runner select: every case without arguments,
 // or one case or group with `--case group/name | group`. Other arguments and a filter that selects
 // no case end the process, so a run never passes without running a case.
@@ -90,7 +130,7 @@ export function filesystemCases(filter?: string): { directory: string; cases: Te
   // The real path, because a CLI compares the root with its working directory, which the system reports resolved.
   const directory = realpathSync(mkdtempSync(join(tmpdir(), 'template-filesystem-cases-')));
   const cases: TestCase[] = [];
-  for (const entry of JSON.parse(readFileSync(filesystemCasesFile, 'utf8')) as FilesystemCase[]) {
+  for (const entry of filesystemCasesDocument.read(filesystemCasesFile)) {
     const id = `filesystem/${entry.name}`;
     if (filter && id !== filter && filter !== 'filesystem') continue;
     const dir = join(directory, entry.name);
@@ -98,8 +138,9 @@ export function filesystemCases(filter?: string): { directory: string; cases: Te
       mkdirSync(dirname(join(dir, name)), { recursive: true });
       writeFileSync(join(dir, name), text);
     }
-    for (const [name, target] of Object.entries(entry.symbolicLinks ?? {})) symlinkSync(target, join(dir, name));
-    for (const [name, target] of Object.entries(entry.hardLinks ?? {})) linkSync(join(dir, target), join(dir, name));
+    // A case without links holds no symbolicLinks or hardLinks entry.
+    if (entry.symbolicLinks) for (const [name, target] of Object.entries(entry.symbolicLinks)) symlinkSync(target, join(dir, name));
+    if (entry.hardLinks) for (const [name, target] of Object.entries(entry.hardLinks)) linkSync(join(dir, target), join(dir, name));
     cases.push({
       id,
       dir,
@@ -137,26 +178,28 @@ function loadCase(id: string, dir: string): TestCase {
     hasDefine: existsSync(join(dir, 'define.json')),
     hasEnv: existsSync(join(dir, 'env.json')),
     options: caseOptions(id),
-    meta: existsSync(join(dir, 'case.json')) ? JSON.parse(readFileSync(join(dir, 'case.json'), 'utf8')) as TestCase['meta'] : { rules: [], stage: 0 },
+    meta: existsSync(join(dir, 'case.json')) ? caseMetaDocument.read(join(dir, 'case.json')) : { rules: [], stage: 0 },
     expectedHtml,
-    expectedError: expectedError === null ? null : JSON.parse(expectedError) as ExpectedError,
+    expectedError: expectedError === null ? null : expectedErrorDocument.parse(expectedError, join(dir, 'expected.error.json')),
     expectedAst: expectedAst === null ? null : JSON.parse(expectedAst),
     expectedTokens: expectedTokens === null ? null : JSON.parse(expectedTokens),
-    expectedFormat: expectedFormat === null ? null : JSON.parse(expectedFormat) as Record<FormatMode, unknown>,
+    expectedFormat: expectedFormat === null ? null : expectedFormatOf(expectedFormat, join(dir, 'expected.format.json')),
   };
 }
 
-// The template definitions of a case for type derivation. A define.json that is not JSON text is
-// a data error of the render (VAL-12): the render step of every runner reports it as
-// E_DATA_INVALID_JSON, and type derivation uses no definitions.
+// The template definitions of a case for type derivation. A define.json that is not JSON text, or
+// whose value is no map, is a data error of the render (VAL-12): the render step of every runner
+// reports it, and type derivation uses no definitions.
 export function typeDefinitions(testCase: TestCase): Record<string, unknown> {
   if (!testCase.hasDefine) return {};
+  let value: unknown;
   try {
-    return JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8')) as Record<string, unknown>;
+    value = JSON.parse(readFileSync(join(testCase.dir, 'define.json'), 'utf8'));
   } catch (error) {
     if (error instanceof SyntaxError) return {};
     throw error;
   }
+  return isJsonObject(value) ? value : {};
 }
 
 /** The field `name` of a thrown value, or undefined when the value is no object or has no such field. */
@@ -211,8 +254,9 @@ export function formatOutcome(result: CallResult): FormatOutcome {
   const stderr = result.stderr.trim();
   if (result.status !== 2) return { failure: `exit ${result.status}: ${stderr}` };
   try {
-    const { reason, code, line, col } = JSON.parse(stderr) as { reason: unknown; code: unknown; line: unknown; col: unknown };
-    return { error: { reason, code, line, col } };
+    const value: unknown = JSON.parse(stderr);
+    if (!isJsonObject(value)) return { failure: `exit 2 with a standard error that is no JSON object: ${stderr}` };
+    return { error: { reason: value.reason, code: value.code, line: value.line, col: value.col } };
   } catch (error) {
     if (!(error instanceof SyntaxError)) throw error;
     return { failure: `exit 2 with a standard error that is no JSON (${error.message}): ${stderr}` };
@@ -269,7 +313,8 @@ export function firstDifference(a: unknown, b: unknown, path = '$'): string | nu
 export function parseErrorOutput(stderr: string): { code: unknown; template: unknown; line: unknown; col: unknown } | null {
   const text = stderr.trim();
   try {
-    const parsed = JSON.parse(text) as { code: unknown; template: unknown; line: unknown; col: unknown };
+    const parsed: unknown = JSON.parse(text);
+    if (!isJsonObject(parsed)) return null;
     return { code: parsed.code, template: parsed.template, line: parsed.line, col: parsed.col };
   } catch {
     return null;

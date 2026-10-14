@@ -6,15 +6,18 @@
 // fails when any implementation disagrees with the expected bytes or changes its output on the
 // second render.
 import { createHash } from 'node:crypto';
+import { Ajv } from 'ajv';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import type { Engine as TemplateEngine, RenderOptions, Template } from '@polyspec/template';
 import { invoke, prepare, selectLanguages, root } from '../../tests/runner/drivers.mts';
+import { isObject, list, manifestFiles, object, readJson, text, type JsonObject } from './json.mts';
 
 const showcaseDir = join(root, 'examples', 'site');
 const scenariosDir = join(showcaseDir, 'scenarios');
 const dataDir = join(showcaseDir, 'data');
 
-const options = { langs: null, mode: null };
+const options: { langs: string | undefined; mode: 'write' | 'check' | null } = { langs: undefined, mode: null };
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
   switch (argv[i]) {
@@ -22,7 +25,7 @@ for (let i = 0; i < argv.length; i++) {
     case '--write': options.mode = 'write'; break;
     case '--check': options.mode = 'check'; break;
     case '--help':
-      process.stdout.write('usage: build.mjs (--write|--check) [--langs ts,go,rust,php,php-ext]\n');
+      process.stdout.write('usage: build.mts (--write|--check) [--langs ts,go,rust,php,php-ext]\n');
       process.exit(0);
       break;
     default:
@@ -35,11 +38,25 @@ if (options.mode === null) {
   process.exit(1);
 }
 
-function readJson(path) {
-  return JSON.parse(readFileSync(path, 'utf8'));
+// A definition of define.json: a template path, or an entry with a template or html and optional data.
+type DefineEntry = string | JsonObject;
+
+interface Scenario {
+  id: string;
+  dir: string;
+  target: string;
+  title: string;
+  description: string;
+  focus: string[];
+  source: string | null;
+  templates: Record<string, string>;
+  integrationFiles: { name: string; source: string }[];
+  assign: JsonObject;
+  define: Record<string, DefineEntry>;
+  env: JsonObject | null;
 }
 
-function collectTemplates(dir, prefix = '', into = {}) {
+function collectTemplates(dir: string, prefix = '', into: Record<string, string> = {}): Record<string, string> {
   for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) collectTemplates(path, `${prefix}${entry.name}/`, into);
@@ -48,22 +65,24 @@ function collectTemplates(dir, prefix = '', into = {}) {
   return into;
 }
 
-function compiledTemplates(scenario) {
+function compiledTemplates(scenario: Scenario): Map<string, Template> {
   const artifactRoot = join(scenario.dir, 'compiled', 'ast');
-  const manifest = readJson(join(artifactRoot, 'manifest.json'));
-  return Object.fromEntries(Object.entries(manifest.files).map(([name, entry]) => [
-    name,
-    readJson(join(artifactRoot, entry.path)),
-  ]));
+  const files = manifestFiles(readJson(join(artifactRoot, 'manifest.json')), `${scenario.id}/compiled/ast/manifest.json`);
+  return new Map([...files].map(([name, path]): [string, Template] => [name, templateOf(readJson(join(artifactRoot, path)), `${scenario.id}/compiled/ast/${path}`)]));
 }
 
-function isObject(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
+// A compiled AST artifact holds one Template node of contracts/schema/ast.schema.json, which the TypeScript program
+// loads as it is; ajv checks each artifact against that schema.
+const validateTemplate = new Ajv({ strict: true }).compile<Template>(object(readJson(join(root, 'contracts/schema/ast.schema.json')), 'contracts/schema/ast.schema.json'));
+
+function templateOf(value: unknown, what: string): Template {
+  if (!validateTemplate(value)) throw new Error(`${what} is no Template of the AST schema: ${JSON.stringify(validateTemplate.errors)}`);
+  return value;
 }
 
 // The showcase uses a direct key-to-template-path define contract. Object entries remain available
 // for per-definition data and pre-rendered HTML where a scenario needs them.
-function validateScenarioContract(scenario) {
+function validateScenarioContract(scenario: Scenario): void {
   if (!isObject(scenario.assign)) throw new Error(`${scenario.id}: data.json must contain an object`);
   if (!isObject(scenario.define)) throw new Error(`${scenario.id}: define.json must contain an object`);
   for (const [id, entry] of Object.entries(scenario.define)) {
@@ -87,32 +106,40 @@ function validateScenarioContract(scenario) {
   if (scenario.env !== null && !isObject(scenario.env)) throw new Error(`${scenario.id}: env.json must contain an object`);
 }
 
-function loadScenario(id) {
+function loadScenario(id: string): Scenario {
   const dir = join(scenariosDir, id);
-  const metadata = readJson(join(dir, 'scenario.json'));
-  const has = name => existsSync(join(dir, name));
-  const scenario = {
+  const where = `${id}/scenario.json`;
+  const metadata = object(readJson(join(dir, 'scenario.json')), where);
+  const has = (name: string): boolean => existsSync(join(dir, name));
+  const define = has('define.json') ? object(readJson(join(dir, 'define.json')), `${id}/define.json`) : {};
+  const scenario: Scenario = {
     id,
     dir,
-    target: metadata.target,
-    title: metadata.title,
-    description: metadata.description,
-    focus: metadata.focus ?? [],
-    source: metadata.source ?? null,
+    target: text(metadata.target, `${where}: target`),
+    title: text(metadata.title, `${where}: title`),
+    description: text(metadata.description, `${where}: description`),
+    // focus, source and integrationFiles are optional fields of scenario.json.
+    focus: metadata.focus === undefined ? [] : list(metadata.focus, `${where}: focus`).map((tag, index) => text(tag, `${where}: focus[${index}]`)),
+    source: metadata.source === undefined ? null : text(metadata.source, `${where}: source`),
     templates: collectTemplates(dir),
-    integrationFiles: (metadata.integrationFiles ?? []).map(file => ({
-      name: file,
-      source: readFileSync(join(dir, file), 'utf8'),
-    })),
-    assign: has('data.json') ? readJson(join(dir, 'data.json')) : {},
-    define: has('define.json') ? readJson(join(dir, 'define.json')) : {},
-    env: has('env.json') ? readJson(join(dir, 'env.json')) : null,
+    integrationFiles: (metadata.integrationFiles === undefined ? [] : list(metadata.integrationFiles, `${where}: integrationFiles`)).map((file, index) => {
+      const name = text(file, `${where}: integrationFiles[${index}]`);
+      return { name, source: readFileSync(join(dir, name), 'utf8') };
+    }),
+    assign: has('data.json') ? object(readJson(join(dir, 'data.json')), `${id}/data.json`) : {},
+    define: Object.fromEntries(Object.entries(define).map(([key, entry]): [string, DefineEntry] => [key, typeof entry === 'string' ? entry : object(entry, `${id}/define.json: ${key}`)])),
+    env: has('env.json') ? object(readJson(join(dir, 'env.json')), `${id}/env.json`) : null,
   };
   validateScenarioContract(scenario);
   return scenario;
 }
 
-function listScenarios() {
+/** The message of a thrown value. */
+function message(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function listScenarios(): Scenario[] {
   return readdirSync(scenariosDir, { withFileTypes: true })
     .filter(entry => entry.isDirectory() && existsSync(join(scenariosDir, entry.name, 'scenario.json')))
     .map(entry => entry.name)
@@ -120,7 +147,7 @@ function listScenarios() {
     .map(loadScenario);
 }
 
-function renderArgs(scenario) {
+function renderArgs(scenario: Scenario): string[] {
   // CNF-4: the options before the operand.
   const args = ['render', '--root', scenario.dir];
   if (existsSync(join(scenario.dir, 'data.json'))) args.push('--data', 'data.json');
@@ -129,13 +156,13 @@ function renderArgs(scenario) {
   return [...args, scenario.target];
 }
 
-function renderOptions(scenario) {
-  const result = { define: scenario.define };
+function renderOptions(scenario: Scenario): RenderOptions {
+  const result: RenderOptions = { define: scenario.define };
   if (scenario.env !== null) result.env = scenario.env;
   return result;
 }
 
-function digest(html) {
+function digest(html: string): { bytes: number; sha256: string } {
   const bytes = Buffer.byteLength(html, 'utf8');
   return {
     bytes,
@@ -143,11 +170,11 @@ function digest(html) {
   };
 }
 
-function directTypeScriptRender(engine, scenario) {
+function directTypeScriptRender(engine: TemplateEngine, scenario: Scenario): string {
   return engine.render(scenario.target, scenario.assign, renderOptions(scenario));
 }
 
-function cliRender(language, scenario) {
+function cliRender(language: string, scenario: Scenario): string {
   const result = invoke(language, renderArgs(scenario), scenario.dir);
   if (result.status !== 0) {
     throw new Error(`${scenario.id} [${language}] exited ${result.status}: ${result.stderr.trim()}`);
@@ -155,7 +182,7 @@ function cliRender(language, scenario) {
   return result.stdout;
 }
 
-function sameJson(actual, expected) {
+function sameJson(actual: unknown, expected: unknown): boolean {
   return JSON.stringify(actual) === JSON.stringify(expected);
 }
 
@@ -166,16 +193,16 @@ if (!languages.includes('ts')) {
 }
 for (const language of languages) prepare(language);
 
-const { AstProgram, Engine, MapLoader } = await import(join(root, 'packages', 'ts', 'dist', 'index.mjs'));
+const { AstProgram, Engine, MapLoader } = await import('@polyspec/template');
 const scenarios = listScenarios();
 if (!scenarios.length) {
   process.stderr.write('no showcase scenarios found\n');
   process.exit(1);
 }
 
-const failures = [];
-const resultScenarios = [];
-const siteScenarios = [];
+const failures: string[] = [];
+const resultScenarios: JsonObject[] = [];
+const siteScenarios: (JsonObject & { id: string; expectedHtml: string })[] = [];
 
 for (const scenario of scenarios) {
   const apiEngine = new Engine(new AstProgram({ loader: new MapLoader(compiledTemplates(scenario)) }));
@@ -185,7 +212,7 @@ for (const scenario of scenarios) {
     apiFirst = directTypeScriptRender(apiEngine, scenario);
     apiSecond = directTypeScriptRender(apiEngine, scenario);
   } catch (error) {
-    failures.push(`${scenario.id} [ts-api] ${error.message}`);
+    failures.push(`${scenario.id} [ts-api] ${message(error)}`);
     continue;
   }
   const expected = digest(apiFirst);
@@ -204,7 +231,7 @@ for (const scenario of scenarios) {
     }
   }
 
-  const renders = {};
+  const renders: Record<string, JsonObject> = {};
   let scenarioPassed = apiFirst === apiSecond;
   for (const language of languages) {
     try {
@@ -230,8 +257,8 @@ for (const scenario of scenarios) {
       };
     } catch (error) {
       scenarioPassed = false;
-      failures.push(error.message);
-      renders[language] = { status: 'fail', error: error.message };
+      failures.push(message(error));
+      renders[language] = { status: 'fail', error: message(error) };
     }
   }
 
@@ -289,7 +316,8 @@ const siteData = {
 
 process.stdout.write(`showcase ${scenarios.length} scenarios across ${languages.join(', ')}\n`);
 for (const result of resultScenarios) {
-  process.stdout.write(`${result.id.padEnd(20)} ${result.status.padEnd(5)} ${result.bytes} bytes ${result.sha256.slice(0, 12)}\n`);
+  const sha256 = text(result.sha256, `${String(result.id)}: sha256`);
+  process.stdout.write(`${text(result.id, 'result id').padEnd(20)} ${text(result.status, 'result status').padEnd(5)} ${String(result.bytes)} bytes ${sha256.slice(0, 12)}\n`);
 }
 if (failures.length) {
   for (const failure of failures) process.stderr.write(`${failure}\n`);
@@ -301,8 +329,9 @@ const resultsPath = join(dataDir, 'results.json');
 if (options.mode === 'write') {
   mkdirSync(dataDir, { recursive: true });
   for (const scenario of scenarios) {
-    const expected = siteScenarios.find(item => item.id === scenario.id).expectedHtml;
-    writeFileSync(join(scenario.dir, 'expected.html'), expected);
+    const site = siteScenarios.find(item => item.id === scenario.id);
+    if (site === undefined) throw new Error(`${scenario.id} has no rendered site entry`);
+    writeFileSync(join(scenario.dir, 'expected.html'), site.expectedHtml);
   }
   writeFileSync(siteDataPath, JSON.stringify(siteData, null, 2) + '\n');
   writeFileSync(resultsPath, JSON.stringify(results, null, 2) + '\n');

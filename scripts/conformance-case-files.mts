@@ -1,17 +1,32 @@
 // Reads the expected files of the conformance cases and checks the presence rules of CNF-2 and CNF-15 and, with the
 // schemas of contracts/schema/, the content of the token and format files.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Ajv, ValidateFunction } from 'ajv';
+import type { Ajv, JSONSchemaType, ValidateFunction } from 'ajv';
 import { caseIds, casesDir } from '../tests/runner/case-list.mts';
+import { jsonDocument, readJson } from './json-document.mts';
 
-/** The expected error of a case as expected.error.json holds it. */
+// A JSON Schema of contracts/schema, which ajv compiles.
+const schemaObjectDocument = jsonDocument<Record<string, unknown>>('JSON Schema', { type: 'object' });
+
+/** The expected error of a case as expected.error.json holds it: the code, the template and the 1-based position. */
 export interface ExpectedError {
-  template?: unknown;
-  code?: unknown;
-  line?: unknown;
-  col?: unknown;
+  code: string;
+  template: string;
+  line: number;
+  col: number;
 }
+
+/** The expected.error.json of a case. */
+/** The schema of expected.error.json, which the runners also apply to the expected errors of the filesystem cases. */
+export const EXPECTED_ERROR_SCHEMA: JSONSchemaType<ExpectedError> = {
+  type: 'object',
+  required: ['code', 'template', 'line', 'col'],
+  properties: { code: { type: 'string' }, template: { type: 'string' }, line: { type: 'integer' }, col: { type: 'integer' } },
+  additionalProperties: false,
+};
+
+export const expectedErrorDocument = jsonDocument<ExpectedError>('expected error', EXPECTED_ERROR_SCHEMA);
 
 /** The expected files of one case; an absent file is null. */
 export interface CaseFile {
@@ -40,11 +55,12 @@ export function readCaseFiles(): CaseFile[] {
   if (!existsSync(casesDir)) return [];
   return caseIds().map(id => {
     const dir = join(casesDir, id);
-    const read = (name: string): unknown => (existsSync(join(dir, name)) ? JSON.parse(readFileSync(join(dir, name), 'utf8')) : null);
+    const read = (name: string): unknown => (existsSync(join(dir, name)) ? readJson(join(dir, name)) : null);
+    const errorPath = join(dir, 'expected.error.json');
     return {
       id,
       hasAst: existsSync(join(dir, 'expected.ast.json')),
-      expectedError: read('expected.error.json') as ExpectedError | null,
+      expectedError: existsSync(errorPath) ? expectedErrorDocument.read(errorPath) : null,
       tokens: read('expected.tokens.json'),
       format: read('expected.format.json'),
     };
@@ -52,17 +68,17 @@ export function readCaseFiles(): CaseFile[] {
 }
 
 /** Whether the expected error is a lexical or parse error of the entry template, which has no AST. */
-function entryParseError(expectedError: ExpectedError | null): boolean {
-  return expectedError !== null && expectedError.template === 'input.tpl' && /^E_(LEX|PARSE)_/.test(String(expectedError.code));
+function entryParseError(expectedError: ExpectedError): boolean {
+  return expectedError.template === 'input.tpl' && /^E_(LEX|PARSE)_/.test(expectedError.code);
 }
 
 /** CNF-15: a case has expected.ast.json exactly when its entry template parses. */
 export function astPresenceFailures(cases: readonly CaseFile[]): string[] {
   const failures: string[] = [];
   for (const testCase of cases) {
-    const parseError = entryParseError(testCase.expectedError);
-    if (!testCase.hasAst && !parseError) failures.push(`${testCase.id}: expected.ast.json is missing`);
-    if (testCase.hasAst && parseError) failures.push(`${testCase.id}: expected.ast.json exists although input.tpl has the parse error ${String(testCase.expectedError?.code)}`);
+    const parseError = testCase.expectedError !== null && entryParseError(testCase.expectedError) ? testCase.expectedError.code : null;
+    if (!testCase.hasAst && parseError === null) failures.push(`${testCase.id}: expected.ast.json is missing`);
+    if (testCase.hasAst && parseError !== null) failures.push(`${testCase.id}: expected.ast.json exists although input.tpl has the parse error ${parseError}`);
   }
   return failures;
 }
@@ -72,7 +88,7 @@ export function astPresenceFailures(cases: readonly CaseFile[]): string[] {
  * format files of CNF-2, with the Ajv instance that describes their errors.
  */
 export function caseFileValidators(ajv: Ajv, root: string): CaseFileValidators {
-  const schema = (name: string): object => JSON.parse(readFileSync(join(root, 'contracts', 'schema', name), 'utf8')) as object;
+  const schema = (name: string): Record<string, unknown> => schemaObjectDocument.read(join(root, 'contracts', 'schema', name));
   return { ajv, tokens: ajv.compile<Token[]>(schema('tokens.schema.json')), format: ajv.compile(schema('format.schema.json')) };
 }
 

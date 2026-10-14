@@ -5,11 +5,12 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { compareText } from './compare-text.mts';
+import { captured, required } from './required.mts';
 
 const args = process.argv.slice(2);
 const valueFor = (name: string): string | null => {
   const index = args.indexOf(name);
-  return index < 0 ? null : args[index + 1] ?? null;
+  return index < 0 ? null : required(args[index + 1], `the value of ${name}`);
 };
 const inputRoot = valueFor('--root');
 const outputPath = valueFor('--output');
@@ -27,9 +28,9 @@ const files = (onlyPath
   .sort();
 
 // A character of a text, or undefined past its end, which is no identifier character and no whitespace.
-const identifierStart = (char: string | undefined): boolean => /[A-Za-z_]/.test(char ?? '');
-const identifierPart = (char: string | undefined): boolean => /[A-Za-z0-9_]/.test(char ?? '');
-const whitespace = (char: string | undefined): boolean => /\s/.test(char ?? '');
+const identifierStart = (char: string | undefined): boolean => char !== undefined && /[A-Za-z_]/.test(char);
+const identifierPart = (char: string | undefined): boolean => char !== undefined && /[A-Za-z0-9_]/.test(char);
+const whitespace = (char: string | undefined): boolean => char !== undefined && /\s/.test(char);
 const categories = ['direct', 'qualified', 'static', 'instance'];
 
 /** The calls of one category and name: their count, the files they occur in and up to three locations. */
@@ -172,7 +173,10 @@ function callCandidates(body: string, absoluteStart: number, file: string, sourc
 
 function rawTagState(text: string, index: number, state: string | null): string | null {
   const lower = text.slice(index, index + 16).toLowerCase();
-  if (state === null) return /^<(script|style)(?:\s|>)/.exec(lower)?.[1] ?? null;
+  if (state === null) {
+    const opening = /^<(script|style)(?:\s|>)/.exec(lower);
+    return opening === null ? null : captured(opening, 1, 'the name of a raw text element');
+  }
   const close = `</${state}`;
   return lower.startsWith(close) ? null : state;
 }
@@ -204,7 +208,7 @@ function scanSource(file: string, source: string): void {
       continue;
     }
     if (raw === null && (source[index] === '"' || source[index] === "'")) {
-      if (htmlQuote === null) htmlQuote = source[index] ?? null;
+      if (htmlQuote === null) htmlQuote = required(source[index], `the quote at ${index} of ${file}`);
       else if (htmlQuote === source[index] && source[index - 1] !== '\\') htmlQuote = null;
       index++;
       continue;
@@ -212,7 +216,9 @@ function scanSource(file: string, source: string): void {
     if (source[index] !== '{') { index++; continue; }
     const double = source[index + 1] === '{';
     const sigilIndex = index + (double ? 2 : 1);
-    const sigil = source[sigilIndex] ?? '';
+    // A { at the end of the source has no sigil and starts no tag.
+    const sigil = source[sigilIndex];
+    if (sigil === undefined) { index++; continue; }
     const explicit = '=?:@#/+*%'.includes(sigil);
     if (!explicit && (raw !== null || htmlQuote !== null || !/[A-Za-z_\\$]/.test(sigil))) { index++; continue; }
     const close = double ? '}}' : '}';

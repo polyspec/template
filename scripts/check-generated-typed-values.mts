@@ -11,7 +11,7 @@ import { compileFiles, compileSource } from '../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mts';
-import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
 import { checkLanguages } from './language-checks.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
@@ -95,7 +95,7 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
 #[test] fn generated_typed_values_match() { let mut runtime = RuntimeEnvironment::new(None, std::collections::HashMap::new()); runtime.register("describe", Box::new(|args, _| Ok(Value::text(args.iter().map(describe_value).collect::<Vec<_>>().join(","))))).unwrap(); let program = generated::GeneratedProgram::new(runtime); let assign = serde_json::json!({ "page": { "title": "T", "count": 2 }, "rows": [{ "name": "a" }, { "name": "b" }], "tags": { "x": 1 } }); assert_eq!(program.render(RenderTarget::Name("input.tpl"), &assign, &RenderOptions::default()).unwrap(), ${rustString(expected)}); }
 `);
       try {
-        run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_typed_values_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_typed_values_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }

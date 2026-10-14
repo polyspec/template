@@ -14,6 +14,7 @@
 //                                    write the expected file from the ts implementation
 import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseJson } from '../../scripts/json-document.mts';
 import { invoke, prepare, selectLanguages } from './drivers.mts';
 import {
   describeText, filesystemCases, firstDifference, FORMAT_MODE_NAMES, formatArgs, formatOutcome, listCases, parseArgs, parseErrorOutput, renderArgs, tokensArgs,
@@ -84,7 +85,9 @@ if (options.update) {
           failedUpdates++;
           continue;
         }
-        writeFileSync(join(testCase.dir, 'expected.tokens.json'), tokensText(JSON.parse(result.stdout) as unknown[]));
+        const tokens = parseJson(result.stdout, `the tokens of ${testCase.id} in ${language}`);
+        if (!Array.isArray(tokens)) throw new Error(`the tokens of ${testCase.id} in ${language} are no list: ${result.stdout}`);
+        writeFileSync(join(testCase.dir, 'expected.tokens.json'), tokensText(tokens));
       } else {
         const expected: Partial<Record<FormatMode, FormatOutcome>> = {};
         for (const mode of FORMAT_MODE_NAMES) {

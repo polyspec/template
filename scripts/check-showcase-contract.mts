@@ -6,45 +6,16 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { pythonCommand, pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
+import { compilerManifestDocument, manifestPath, type AdapterLanguage } from './compiler-manifest.mts';
+import { readJson } from './json-document.mts';
+import { runtimePayloadDocument, scenarioMetadataDocument, type RuntimePayload } from './showcase-documents.mts';
+import { CARGO } from './temporary-workspace.mts';
 import { tsc } from './tools.mts';
-import { showcasePythonModule } from '../examples/showcase/python-module.mjs';
+import { showcasePythonModule } from '../examples/showcase/python-module.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const adapterRoot = join(root, 'examples', 'showcase', 'adapters');
 const scenariosRoot = join(root, 'examples', 'site', 'scenarios');
-interface LanguageDefinition {
-  file: string;
-  generated: string;
-  constructorName: string;
-  operationNames: Record<string, string>;
-  supportLevels?: string[];
-}
-
-// The parts of showcaseAdapter of packages/compiler/interface.json that this check reads.
-interface ShowcaseAdapter {
-  schema: number;
-  concreteType: string;
-  constructor: { owns: string[] };
-  operations: { name: string }[];
-  supportLevels?: Record<string, unknown>;
-  languages: Record<string, LanguageDefinition | undefined>;
-  executionModes?: Record<string, { requiredSupportLevel: string; status: string } | undefined>;
-}
-
-// The JSON line that a language adapter prints for one scenario.
-interface RuntimePayload {
-  language: string;
-  type: string;
-  operations: string[];
-  request: unknown;
-  bytes: number;
-  firstSha256: string;
-  secondSha256: string;
-  recoveredSha256: string;
-  requestUnchanged: boolean;
-  failureObserved: boolean;
-}
-
 interface ExpectedRequest {
   target: string;
   assign: unknown;
@@ -52,13 +23,13 @@ interface ExpectedRequest {
   env?: unknown;
 }
 
-const manifest = (JSON.parse(readFileSync(join(root, 'packages', 'compiler', 'interface.json'), 'utf8')) as { showcaseAdapter: ShowcaseAdapter }).showcaseAdapter;
+const manifest = compilerManifestDocument.read(manifestPath(root)).showcaseAdapter;
 const operationNames = manifest.operations.map(operation => operation.name);
 const languageNames = ['typescript', 'javascript', 'go', 'rust', 'php', 'python'];
 const requiredSupportLevels = ['core-runtime', 'source-compiler', 'artifact-runtime', 'generated-compiler'];
 
 /** The definition of `language` in the manifest; fails when the manifest maps no such language. */
-function languageDefinition(language: string): LanguageDefinition {
+function languageDefinition(language: string): AdapterLanguage {
   const definition = manifest.languages[language];
   if (!definition) throw new Error(`the manifest maps no language ${language}`);
   return definition;
@@ -181,25 +152,21 @@ function digest(bytes: Buffer): { bytes: number; sha256: string } {
 }
 
 function expectedRequest(scenarioPath: string): ExpectedRequest {
-  const metadata = JSON.parse(readFileSync(join(scenarioPath, 'scenario.json'), 'utf8')) as { target: string };
+  const metadata = scenarioMetadataDocument.read(join(scenarioPath, 'scenario.json'));
   const request: ExpectedRequest = {
     target: metadata.target,
-    assign: JSON.parse(readFileSync(join(scenarioPath, 'data.json'), 'utf8')),
-    define: JSON.parse(readFileSync(join(scenarioPath, 'define.json'), 'utf8')),
+    assign: readJson(join(scenarioPath, 'data.json')),
+    define: readJson(join(scenarioPath, 'define.json')),
   };
   const environmentPath = join(scenarioPath, 'env.json');
-  if (existsSync(environmentPath)) request.env = JSON.parse(readFileSync(environmentPath, 'utf8'));
+  if (existsSync(environmentPath)) request.env = readJson(environmentPath);
   return request;
 }
 
 function parseRuntimeOutput(language: string, stdout: string): RuntimePayload {
   const text = stdout.trim();
   assert(text.length > 0, `${language} adapter produced no JSON output`);
-  try {
-    return JSON.parse(text) as RuntimePayload;
-  } catch (error) {
-    throw new Error(`${language} adapter produced invalid JSON: ${error instanceof Error ? error.message : String(error)}\n${text}`);
-  }
+  return runtimePayloadDocument.parse(text, `the output of the ${language} adapter`);
 }
 
 function runtimeCommand(language: string, scenarioPath: string, mode = 'ast'): [string, string[], string, NodeJS.ProcessEnv] {
@@ -210,8 +177,7 @@ function runtimeCommand(language: string, scenarioPath: string, mode = 'ast'): [
   if (language === 'javascript') return [process.execPath, [source, scenarioPath], root, env];
   if (language === 'go') return ['go', ['run', '.', scenarioPath], join(adapterRoot, 'go'), env];
   if (language === 'rust') {
-    const cargo = join(process.env.HOME ?? '', '.cargo', 'bin', 'cargo');
-    return [existsSync(cargo) ? cargo : 'cargo', ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root, env];
+    return [CARGO, ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root, env];
   }
   if (language === 'python') return [pythonPackageCommand(), [source, scenarioPath], root, { ...env, ...pythonEnvironment() }];
   return ['php', [source, scenarioPath], root, env];
@@ -312,15 +278,14 @@ async function main() {
   checkSupportLevels();
   checkGeneratedEngineRoute();
   run('manifest generator', process.execPath, ['scripts/generate-showcase-contract.mts', '--check']);
-  run('product generated compiler', process.execPath, ['examples/showcase/compile-generated.mjs', '--refresh', 'dev', '--check']);
+  run('product generated compiler', process.execPath, ['examples/showcase/compile-generated.mts', '--refresh', 'dev', '--check']);
   for (const language of languageNames) checkStaticImplementation(language);
 
   run('TypeScript declarations', 'node', [tsc, '--noEmit', '-p', 'examples/showcase/adapters/tsconfig.json']);
   const gofmt = run('Go formatting', 'gofmt', ['-d', join(adapterRoot, 'go', 'main.go'), join(adapterRoot, 'go', 'render_adapter.go')]);
   assert(gofmt.trim() === '', `Go sources are not formatted:\n${gofmt}`);
   run('Go contract compilation', 'go', ['test', './...'], join(adapterRoot, 'go'));
-  const cargo = join(process.env.HOME ?? '', '.cargo', 'bin', 'cargo');
-  run('Rust contract compilation', existsSync(cargo) ? cargo : 'cargo', ['check', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml')]);
+  run('Rust contract compilation', CARGO, ['check', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml')]);
   run('PHP generated declaration syntax', 'php', ['-l', join(adapterRoot, languageDefinition('php').generated)]);
   run('PHP adapter syntax', 'php', ['-l', join(adapterRoot, languageDefinition('php').file)]);
   checkPhpReflection();

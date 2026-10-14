@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 import { artifactManifests, staleArtifacts } from '../../scripts/check-artifact-digests.mts';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mts';
+import { parsedJsonObject } from '../runner/checked.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -26,7 +27,8 @@ test('a manifest with the digest of another compiler is named with both digests'
   }
   const manifest = 'examples/site/scenarios/empty-state/compiled/ast/manifest.json';
   const text = readFileSync(path.join(base, manifest), 'utf8');
-  const recorded = JSON.parse(text).compilerDigest;
+  const recorded = parsedJsonObject(text, manifest).compilerDigest;
+  assert.ok(typeof recorded === 'string', `${manifest} records no compiler digest`);
   writeFileSync(path.join(base, manifest), text.replace(recorded, '0'.repeat(64)));
   const stale = staleArtifacts(base);
   assert.equal(stale.length, 1, stale.join('\n'));

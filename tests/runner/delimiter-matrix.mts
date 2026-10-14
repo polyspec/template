@@ -15,7 +15,8 @@ for (let code = 0x21; code < 0x7f; code++) {
   if (!/[A-Za-z0-9_\\]/.test(char)) delimiterChars.push(char);
 }
 
-const languages = selectLanguages(process.env.DELIMITER_MATRIX_LANGS ?? 'ts,go,rust,php,python');
+// Every language of the driver table unless DELIMITER_MATRIX_LANGS names some of them.
+const languages = selectLanguages(process.env.DELIMITER_MATRIX_LANGS);
 for (const language of languages) prepare(language);
 
 const root = realpathSync(mkdtempSync(join(tmpdir(), 'template-delimiter-matrix-')));

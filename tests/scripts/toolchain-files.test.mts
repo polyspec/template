@@ -22,21 +22,29 @@
 // print the same commands for every target (T17.1-4).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
+import type { JSONSchemaType } from 'ajv';
 import { parse, TomlDate, type TomlTable, type TomlValue } from 'smol-toml';
 import { compareText } from '../../scripts/compare-text.mts';
+import { jsonDocument } from '../../scripts/json-document.mts';
+import { captured, required } from '../../scripts/required.mts';
+import { isJsonObject, parsedJsonObject } from '../runner/checked.mts';
+import { type Job, jobField, jobs, jobsOf, pinsOf, ROOT, runLines, runsOf, workflowOf, WORKFLOWS } from './workflows.mts';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
-// The workflows of template; a workflow that kit copies (kit.copies of @polyspec/kit) is kit's, and make kit-check compares it.
-const KIT_PACKAGE = JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json')), 'utf8')) as { kit: { copies: Record<string, unknown> } };
-const KIT_COPIES = new Set(Object.keys(KIT_PACKAGE.kit.copies));
-const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
-const TOOLCHAIN = JSON.parse(read('config/toolchain.json')) as { php: string[] };
+const TOOLCHAIN_SCHEMA: JSONSchemaType<{ php: string[] }> = {
+  type: 'object', properties: { php: { type: 'array', items: { type: 'string' } } }, required: ['php'],
+};
+const TOOLCHAIN = jsonDocument<{ php: string[] }>('toolchain configuration', TOOLCHAIN_SCHEMA).read(path.join(ROOT, 'config/toolchain.json'));
+// The string field `key` of package.json.
+const packageField = (key: string) => {
+  const value = parsedJsonObject(read('package.json'), 'package.json')[key];
+  if (typeof value !== 'string') throw new Error(`package.json ${key} is no string`);
+  return value;
+};
 const SHIMS = path.join(ROOT, 'var/tools/mise/shims');
 // The tools of mise.toml, read with a TOML parser.
 const MISE_TOOLS = tableOf(parse(read('mise.toml')).tools, 'the [tools] of mise.toml');
@@ -53,35 +61,16 @@ function textOf(value: TomlValue | undefined, name: string): string {
   return value;
 }
 
-// The text of the first group that `match` captured; every pattern here captures it whenever it matches.
-function captured(match: RegExpMatchArray): string {
-  const value = match[1];
-  if (value === undefined) throw new Error(`the pattern captured no group in: ${match[0]}`);
-  return value;
-}
-
 // The go directive of packages/go/go.mod.
 function goDirective(): string {
-  const version = /^go (\S+)$/m.exec(read('packages/go/go.mod'))?.[1];
-  if (version === undefined) throw new Error('packages/go/go.mod has no go directive');
-  return version;
+  return captured(/^go (\S+)$/m.exec(read('packages/go/go.mod')), 1, 'the go directive of packages/go/go.mod');
 }
 
-// The jobs of a workflow with their text.
-function jobs(file: string) {
-  return jobsOf(read(file));
-}
+// The steps of a job that use an action of `prefix`, such as actions/setup-node@.
+const usesOf = (job: Job, prefix: string) => job.steps.filter(step => step.uses?.startsWith(prefix) === true);
 
-interface Job {
-  name: string;
-  text: string;
-}
-
-function jobsOf(text: string): Job[] {
-  const [, body] = text.split(/\njobs:\n/);
-  if (body === undefined) return [];
-  return body.split(/\n(?= {2}[a-z][a-z0-9-]*:\n)/).map(job => ({ name: job.trim().split(':', 1).join(''), text: job }));
-}
+// A value of a workflow as the messages show it.
+const shown = (value: unknown) => (value === undefined ? 'nothing' : typeof value === 'string' ? value : JSON.stringify(value));
 
 // The job ci-passed of ci.yml runs only make ci-passed, which reads the results of the other jobs: it installs nothing,
 // runs no check of the suite and writes no report.
@@ -90,24 +79,26 @@ const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
 export function ciPassedViolations(text: string) {
-  const all = jobsOf(text);
+  const all = jobsOf(text, 'ci.yml');
   const job = all.find(entry => entry.name === CI_PASSED);
   if (!job) return [`ci.yml: the job ${CI_PASSED} is missing; a release requires it as the check of ci.yml`];
   const found: string[] = [];
   const others = all.filter(entry => entry.name !== CI_PASSED);
-  // The value of the key `name` of a job; a key that the job does not set is empty.
-  const key = (entry: Job, name: string) => new RegExp(`^ {4}${name}: (.*)$`, 'm').exec(entry.text)?.[1]?.trim() ?? '';
   if (all.at(-1)?.name !== CI_PASSED) found.push(`ci.yml: the job ${CI_PASSED} is not the last job; the jobs are ${all.map(entry => entry.name).join(', ')}`);
-  if (key(job, 'if') !== '${{ always() }}') found.push(`ci.yml: the job ${CI_PASSED} has if: '${key(job, 'if')}', not '\${{ always() }}'; it must run after a failed, skipped or cancelled job too`);
-  const needs = key(job, 'needs').replace(/^\[|\]$/g, '').split(',').map(name => name.trim()).filter(Boolean);
-  if (JSON.stringify([...needs].sort()) !== JSON.stringify(others.map(entry => entry.name).sort())) {
+  const condition = jobField(job, 'if');
+  if (condition !== '${{ always() }}') found.push(`ci.yml: the job ${CI_PASSED} has if: '${shown(condition)}', not '\${{ always() }}'; it must run after a failed, skipped or cancelled job too`);
+  const declared = job.value.needs;
+  if (!Array.isArray(declared) || declared.some(name => typeof name !== 'string')) throw new Error(`ci.yml: the needs of the job ${CI_PASSED} are no list of job names`);
+  const needs = declared.map(String);
+  if (JSON.stringify([...needs].sort(compareText)) !== JSON.stringify(others.map(entry => entry.name).sort(compareText))) {
     found.push(`ci.yml: the job ${CI_PASSED} needs [${needs.join(', ')}], not every other job [${others.map(entry => entry.name).join(', ')}]`);
   }
-  const runners = [...new Set(others.map(entry => key(entry, 'runs-on')))].sort(compareText);
-  if (JSON.stringify([key(job, 'runs-on')]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${key(job, 'runs-on')}', not on the runner of the other jobs ${runners.join(', ')}`);
-  const runs = [...job.text.matchAll(/^ {6}(?:- )? {0,2}run: (.*)$/gm)].map(match => match[1]);
-  const steps = job.text.split(/\n(?= {6}- )/).slice(1);
-  if (JSON.stringify(runs) !== JSON.stringify([CI_PASSED_RUN]) || !/run: /.test(steps.at(-1) ?? '') || /\n {8}if:/.test(steps.at(-1) ?? '')) {
+  const runners = [...new Set(others.map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
+  const runsOn = shown(jobField(job, 'runs-on'));
+  if (JSON.stringify([runsOn]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${runsOn}', not on the runner of the other jobs ${runners.join(', ')}`);
+  const runs = runsOf(job);
+  const last = job.steps.at(-1);
+  if (JSON.stringify(runs) !== JSON.stringify([CI_PASSED_RUN]) || last?.run === undefined || last.if !== undefined) {
     found.push(`ci.yml: the job ${CI_PASSED} runs [${runs.join(', ')}], not the last step ${CI_PASSED_RUN} without a condition of its own`);
   }
   return found;
@@ -133,7 +124,9 @@ function recipe(command: string, env: NodeJS.ProcessEnv = {}, make = 'make') {
 
 test('Node.js is the version of .node-version, which engines.node of package.json names as its floor', () => {
   const version = read('.node-version').trim();
-  const engines = JSON.parse(read('package.json')).engines.node;
+  const enginesField = parsedJsonObject(read('package.json'), 'package.json').engines;
+  const engines = isJsonObject(enginesField) ? enginesField.node : undefined;
+  assert.ok(typeof engines === 'string', 'package.json declares no engines.node');
   // The floor equals the pin of kit, which .node-version declares (T24.3); make toolchain-check checks every manifest.
   assert.equal(engines, `>=${version}`, `package.json engines.node ${engines} is not >=${version} (.node-version)`);
   const actual = recipe('cd . && node --version');
@@ -143,16 +136,16 @@ test('Node.js is the version of .node-version, which engines.node of package.jso
 test('every CI job that runs Node.js takes it from .node-version', () => {
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
-      if (!/\b(npm|node|make) /.test(job.text)) continue;
-      assert.match(job.text, /uses: actions\/setup-node@\S+.*\n\s+with:\n\s+node-version-file: \.node-version\n/, `${file} job ${job.name} does not take Node.js from .node-version`);
-      assert.doesNotMatch(job.text, /\bnode-version:/, `${file} job ${job.name} names a Node.js version`);
+      if (!runLines(job).some(line => /\b(npm|node|make) /.test(line))) continue;
+      assert.ok(usesOf(job, 'actions/setup-node@').some(step => step.with['node-version-file'] === '.node-version'), `${file} job ${job.name} does not take Node.js from .node-version`);
+      assert.ok(job.steps.every(step => !('node-version' in step.with)), `${file} job ${job.name} names a Node.js version`);
     }
   }
 });
 
 test('npm is the version of packageManager in package.json, from var/tools/bin first on PATH', () => {
-  const manager = JSON.parse(read('package.json')).packageManager;
-  const expected = /^npm@(\d+\.\d+\.\d+)$/.exec(manager ?? '')?.[1];
+  const manager = packageField('packageManager');
+  const expected = /^npm@(\d+\.\d+\.\d+)$/.exec(manager)?.[1];
   assert.ok(expected, `package.json packageManager: expected npm@<major>.<minor>.<patch>, actual ${manager}`);
   const first = recipe('echo "$PATH"').split(':')[0];
   assert.equal(first, path.join(ROOT, 'var/tools/bin'), `the first entry of PATH of the recipes: expected ${path.join(ROOT, 'var/tools/bin')}, actual ${first}`);
@@ -167,7 +160,7 @@ test('every recipe line runs the npm of var/tools/bin and the go of mise, with e
   // its wrapper, and go and gofmt only in lines with shell syntax, which the shell runs with the exported PATH.
   // gmake is GNU Make 4 where it is installed beside make 3.81.
   const makes = ['make', ...(spawnSync('gmake', ['--version']).status === 0 ? ['gmake'] : [])];
-  const npm = JSON.parse(read('package.json')).packageManager.replace('npm@', '');
+  const npm = packageField('packageManager').replace('npm@', '');
   const go = `go${goDirective()}`;
   for (const make of makes) {
     assert.equal(recipe('$(NPM) --version', {}, make), npm, `${make}: the recipe line $(NPM) --version runs another npm than ${npm} of var/tools/bin`);
@@ -209,16 +202,18 @@ test('go builds into the build cache of the checkout, and no script names anothe
 });
 
 test('rust-toolchain.toml names the toolchain and the components that cargo of the Rust targets uses', () => {
-  const toolchain = read('rust-toolchain.toml');
-  const channel = /^channel = "([^"]+)"$/m.exec(toolchain)?.[1];
-  const components = JSON.parse(/^components = (\[.*\])$/m.exec(toolchain)?.[1] ?? '[]');
+  const toolchain = tableOf(parse(read('rust-toolchain.toml')).toolchain, 'the [toolchain] of rust-toolchain.toml');
+  const channel = textOf(toolchain.channel, 'the channel of rust-toolchain.toml');
+  const components = toolchain.components;
+  if (!Array.isArray(components)) throw new Error('rust-toolchain.toml names no list of components');
   const cargo = spawnSync(path.join(homedir(), '.cargo/bin/cargo'), ['--version'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(cargo.status, 0, cargo.stderr);
   const actual = cargo.stdout.split(' ')[1];
   assert.equal(actual, channel, `cargo of the Rust targets: expected ${channel} (rust-toolchain.toml), actual ${actual}`);
   for (const component of ['rustfmt', 'clippy']) assert.ok(components.includes(component), `rust-toolchain.toml does not name the component ${component}`);
   for (const file of WORKFLOWS) {
-    assert.doesNotMatch(read(file), /rust-toolchain@|\btoolchain:/, `${file} names a Rust toolchain other than rust-toolchain.toml`);
+    const named = jobs(file).some(job => usesOf(job, 'dtolnay/rust-toolchain@').length > 0 || job.steps.some(step => 'toolchain' in step.with));
+    assert.ok(!named, `${file} names a Rust toolchain other than rust-toolchain.toml`);
   }
 });
 
@@ -230,11 +225,18 @@ test('PHP is a minor version of config/toolchain.json, also in every CI job, and
   const composer = /Composer version (\S+)/.exec(recipe('composer --version --no-ansi 2>/dev/null'))?.[1];
   assert.equal(composer, declared, `composer of the recipes: expected ${declared} (mise.toml), actual ${composer}`);
   for (const file of WORKFLOWS) {
-    const text = read(file);
-    for (const match of text.matchAll(/php-version: '([^']*)'/g)) assert.ok(TOOLCHAIN.php.includes(captured(match)), `${file}: php-version ${match[1]}, expected one of ${TOOLCHAIN.php.join(', ')}`);
-    for (const match of text.matchAll(/php: \[([^\]]*)\]/g)) assert.deepEqual(JSON.parse(`[${captured(match).replaceAll("'", '"')}]`), TOOLCHAIN.php, `${file}: the PHP matrix differs from config/toolchain.json`);
-    // Composer is a tool of mise.toml, so setup-php installs no tools of its own (T24.12).
-    for (const match of text.matchAll(/tools: (\S+)/g)) assert.equal(match[1], 'none', `${file}: setup-php installs tools ${match[1]}; make install-tools installs Composer from mise.toml`);
+    for (const job of jobs(file)) {
+      const strategy = job.value.strategy;
+      const matrix = isJsonObject(strategy) && isJsonObject(strategy.matrix) ? strategy.matrix : {};
+      if (matrix.php !== undefined) assert.deepEqual(matrix.php, TOOLCHAIN.php, `${file}: the PHP matrix differs from config/toolchain.json`);
+      for (const step of usesOf(job, 'shivammathur/setup-php@')) {
+        const version = step.with['php-version'];
+        // A job of the PHP matrix takes its version from the matrix, which the line above checks.
+        if (version !== '${{ matrix.php }}') assert.ok(typeof version === 'string' && TOOLCHAIN.php.includes(version), `${file}: php-version ${shown(version)}, expected one of ${TOOLCHAIN.php.join(', ')}`);
+        // Composer is a tool of mise.toml, so setup-php installs no tools of its own (T24.12).
+        assert.equal(step.with.tools, 'none', `${file}: setup-php installs tools ${shown(step.with.tools)}; make install-tools installs Composer from mise.toml`);
+      }
+    }
   }
 });
 
@@ -252,9 +254,9 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, 'rustup toolchain install --no-self-update', `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts packages/php`, `${online} node scripts/composer-install.mts packages/php-ext`, `${online} node scripts/python-wheelhouse.mts`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
-    const text = read(file);
-    assert.match(text, /\nenv:\n {2}RUSTUP_AUTO_INSTALL: '0'\n/, `${file} does not set RUSTUP_AUTO_INSTALL to 0 for its jobs`);
-    assert.doesNotMatch(text, /rustup show/, `${file} runs rustup show, which installs the toolchain as a side effect`);
+    const env = workflowOf(read(file), file).env;
+    assert.ok(isJsonObject(env) && env.RUSTUP_AUTO_INSTALL === '0', `${file} does not set RUSTUP_AUTO_INSTALL to 0 for its jobs`);
+    assert.ok(!jobs(file).some(job => runLines(job).some(line => /\brustup show\b/.test(line))), `${file} runs rustup show, which installs the toolchain as a side effect`);
   }
 });
 
@@ -269,14 +271,17 @@ test('every recipe runs cargo, go, npm and Composer offline, so no check reaches
 
 test('every CI job installs with make install-tools TOOLS=npm, make install-packages and make install, and sets up no Go', () => {
   for (const file of WORKFLOWS) {
-    const text = read(file);
-    const direct = /- run: (npm ci|npm install|rustup )[^\n]*/.exec(text);
-    assert.equal(direct?.[0], undefined, `${file} installs without make install`);
+    const direct = jobs(file).flatMap(runLines).find(line => /^(npm ci|npm install|rustup )/.test(line));
+    assert.equal(direct, undefined, `${file} installs without make install`);
     for (const job of jobs(file)) {
-      if (!/- run: .*\bmake /.test(job.text) || (file.endsWith('/ci.yml') && job.name === CI_PASSED)) continue;
+      if (!runLines(job).some(line => /\bmake /.test(line)) || (file.endsWith('/ci.yml') && job.name === CI_PASSED)) continue;
       // make install-tools installs the Go and the Python of mise.toml, so no job sets up a Go or a Python of its own (T24.1, T24.12).
-      assert.doesNotMatch(job.text, /uses: actions\/setup-(go|python)@/, `${file} job ${job.name} sets up a Go or a Python of PATH; make install-tools installs those of mise.toml`);
-      if (file.endsWith('/ci.yml')) assert.match(job.text, /- run: make install-tools TOOLS=npm\n(?:.*\n)*?\s+- run: make install-packages\n(?:.*\n)*?\s+- run: make install\n/, `${file} job ${job.name} does not install with make install-tools TOOLS=npm, make install-packages and make install`);
+      assert.ok(usesOf(job, 'actions/setup-go@').length + usesOf(job, 'actions/setup-python@').length === 0, `${file} job ${job.name} sets up a Go or a Python of PATH; make install-tools installs those of mise.toml`);
+      if (file.endsWith('/ci.yml')) {
+        const runs = runsOf(job);
+        const order = ['make install-tools TOOLS=npm', 'make install-packages', 'make install'].map(command => runs.indexOf(command));
+        assert.ok(order.every((index, position) => index !== -1 && (position === 0 || index > (order[position - 1] ?? -1))), `${file} job ${job.name} does not install with make install-tools TOOLS=npm, make install-packages and make install`);
+      }
     }
   }
 });
@@ -314,7 +319,7 @@ test('only the CI jobs that run the VS Code integration test install VS Code, be
   const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8' });
   assert.doesNotMatch(install.stdout, /install-vscode/, 'make install downloads VS Code for every job');
   for (const job of jobs('.github/workflows/ci.yml')) {
-    const steps = [...job.text.matchAll(/- run: (.*)\n/g)].map(captured);
+    const steps = runsOf(job);
     const runs = steps.findIndex(step => /\bmake\b/.test(step) && reached(makeTargets(step)).has('test-vscode-integration'));
     const installs = steps.indexOf('make install-vscode');
     if (runs === -1) assert.equal(installs, -1, `ci.yml job ${job.name} installs VS Code and runs no VS Code integration test`);
@@ -326,11 +331,9 @@ test('every CI step runs its tools through make, so the recipes give them their 
   const direct: string[] = [];
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
-      for (const match of job.text.matchAll(/- run: (\|\n(?:\s{10,}.*\n?)+|.*)/g)) {
-        for (const line of captured(match).replace(/^\|\n/, '').split('\n').map(line => line.trim()).filter(Boolean)) {
-          const command = line.replace(/^xvfb-run(?: -\S+)* /, '');
-          if (/^(?:node|npm|npx|cargo|go|php|composer|rustup)\b/.test(command)) direct.push(`${file} job ${job.name}: ${line}`);
-        }
+      for (const line of runLines(job)) {
+        const command = line.replace(/^xvfb-run(?: -\S+)* /, '');
+        if (/^(?:node|npm|npx|cargo|go|php|composer|rustup)\b/.test(command)) direct.push(`${file} job ${job.name}: ${line}`);
       }
     }
   }
@@ -342,7 +345,7 @@ test('every CI job runs its targets past failures and uploads their report, also
   const REPORTS: Record<string, string> = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
-    const lines = [...job.text.matchAll(/- run: (\|\n(?:\s{10,}.*\n?)+|.*)/g)].flatMap(match => captured(match).replace(/^\|\n/, '').split('\n').map(line => line.trim()).filter(Boolean));
+    const lines = runLines(job);
     const runners = new Set<string>();
     for (const line of lines.filter(line => /\bmake\b/.test(line))) {
       const [target] = makeTargets(line);
@@ -353,8 +356,11 @@ test('every CI job runs its targets past failures and uploads their report, also
     for (const runner of runners) {
       const report = REPORTS[runner];
       if (report === undefined) throw new Error(`no report directory of make ${runner}`);
-      const upload = new RegExp(`- uses: actions/upload-artifact@\\S+.*\\n\\s+if: \\$\\{\\{ !cancelled\\(\\) \\}\\}\\n\\s+with:\\n\\s+name: report-.+\\n\\s+path: (?:\\|\\n(?:\\s+.*\\n)*?\\s+${report.replace(/[/.]/g, '\\$&')}\\n|${report.replace(/[/.]/g, '\\$&')}\\n)\\s+if-no-files-found: error\\n`);
-      if (!upload.test(job.text)) problems.push(`${job.name}: no upload of ${report} under if: !cancelled() with if-no-files-found: error`);
+      const uploads = usesOf(job, 'actions/upload-artifact@').some(step => step.if === '${{ !cancelled() }}'
+        && typeof step.with.name === 'string' && step.with.name.startsWith('report-')
+        && typeof step.with.path === 'string' && step.with.path.split('\n').map(line => line.trim()).includes(report)
+        && step.with['if-no-files-found'] === 'error');
+      if (!uploads) problems.push(`${job.name}: no upload of ${report} under if: !cancelled() with if-no-files-found: error`);
     }
   }
   assert.deepEqual(problems, []);
@@ -365,8 +371,9 @@ test('a job of a matrix runs every combination to its end, also after another co
   // result of PHP 8.5 that way when PHP 8.2 failed.
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
-      if (!/\n {4}strategy:\n/.test(job.text)) continue;
-      assert.match(job.text, /\n {4}strategy:\n {6}fail-fast: false\n/, `${file} job ${job.name} has a matrix that cancels its other jobs at the first failure`);
+      const strategy = job.value.strategy;
+      if (strategy === undefined) continue;
+      assert.ok(isJsonObject(strategy) && strategy['fail-fast'] === false, `${file} job ${job.name} has a matrix that cancels its other jobs at the first failure`);
     }
   }
 });
@@ -374,32 +381,32 @@ test('a job of a matrix runs every combination to its end, also after another co
 test('no push cancels the running CI of an earlier push (T17.1-7)', () => {
   // The run of a push to main is the evidence of the commit that a release tags, so a newer push does not replace it.
   for (const file of WORKFLOWS) {
-    const text = read(file);
-    const [, triggers = ''] = /\non:\n((?: {2}.*\n|\s*\n)+)/.exec(`\n${text}`) ?? [];
+    const workflow = workflowOf(read(file), file);
+    const triggers = workflow.on;
+    if (!isJsonObject(triggers)) throw new Error(`${file} declares no triggers`);
     // A tag push runs a release, which no later push replaces.
-    if (!/^ {2}push:/m.test(triggers) || /^ {4}tags:/m.test(triggers)) continue;
-    assert.match(text, /\nconcurrency:\n {2}group: \$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}\n {2}cancel-in-progress: false\n/, `${file} has no concurrency group of its workflow and ref that cancels no run`);
+    if (!('push' in triggers) || (isJsonObject(triggers.push) && 'tags' in triggers.push)) continue;
+    assert.deepEqual(workflow.concurrency, { group: '${{ github.workflow }}-${{ github.ref }}', 'cancel-in-progress': false }, `${file} has no concurrency group of its workflow and ref that cancels no run`);
   }
 });
 
 test('each workflow of template declares exactly its triggers: CI and the site on a push to main and on a manual run (T17.1-7, T17.1-9)', () => {
-  const triggers = {
-    '.github/workflows/ci.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
-    '.github/workflows/pages.yml': 'on:\n  push:\n    branches: [main]\n  workflow_dispatch:\n',
-    '.github/workflows/dependency-review.yml': "on:\n  schedule:\n    - cron: '17 3 * * *'\n  workflow_dispatch:\n",
+  const onMain = { push: { branches: ['main'] }, workflow_dispatch: null };
+  const triggers: Record<string, unknown> = {
+    '.github/workflows/ci.yml': onMain,
+    '.github/workflows/pages.yml': onMain,
+    '.github/workflows/dependency-review.yml': { schedule: [{ cron: '17 3 * * *' }], workflow_dispatch: null },
   };
-  assert.deepEqual([...WORKFLOWS].sort(), Object.keys(triggers).sort());
-  for (const [file, block] of Object.entries(triggers)) {
-    const [, declared = ''] = /\n(on:\n(?: .*\n)+)/.exec(`\n${read(file)}`) ?? [];
-    assert.equal(declared, block, `${file} declares other triggers`);
+  assert.deepEqual([...WORKFLOWS].sort(compareText), Object.keys(triggers).sort(compareText));
+  for (const [file, declared] of Object.entries(triggers)) {
+    assert.deepEqual(workflowOf(read(file), file).on, declared, `${file} declares other triggers`);
   }
 });
 
 test('ci-passed is the last job of ci.yml, runs always, needs every other job and runs make ci-passed (T22.1-3)', () => {
   const text = read('.github/workflows/ci.yml');
   assert.deepEqual(ciPassedViolations(text), []);
-  const [head] = text.split('\n  ci-passed:\n');
-  assert.ok(head !== undefined, 'ci.yml is empty');
+  const head = required(text.split('\n  ci-passed:\n')[0], 'the text of ci.yml before the job ci-passed');
   const job = text.slice(head.length);
   const broken: Record<string, [string, string]> = {
     missing: [`${head}\n`, 'the job ci-passed is missing'],
@@ -419,15 +426,14 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
-    const text = read(file);
-    for (const match of text.matchAll(/uses: (\S+)(.*)/g)) {
-      const action = captured(match);
-      const comment = match[2];
-      assert.ok(comment !== undefined, `${file}: ${action} has no text after it`);
-      assert.match(action, /^[\w.-]+\/[\w.-]+@[0-9a-f]{40}$/, `${file}: ${match[1]} is not pinned by a commit`);
-      assert.match(comment, /^ # v?\d+\.\d+\.\d+$/, `${file}: ${action} does not name its release in a comment`);
+    for (const pin of pinsOf(file)) {
+      assert.match(pin.uses, /^[\w.-]+\/[\w.-]+@[0-9a-f]{40}$/, `${file}: ${pin.uses} is not pinned by a commit`);
+      assert.match(pin.comment ?? 'no comment', /^v?\d+\.\d+\.\d+$/, `${file}: ${pin.uses} does not name its release in a comment`);
     }
-    for (const match of text.matchAll(/runs-on: (\S+)/g)) assert.equal(match[1], 'ubuntu-24.04', `${file}: runs-on ${match[1]}, expected ubuntu-24.04`);
+    for (const job of jobs(file)) {
+      const runsOn = jobField(job, 'runs-on');
+      assert.equal(runsOn, 'ubuntu-24.04', `${file}: runs-on ${shown(runsOn)}, expected ubuntu-24.04`);
+    }
   }
 });
 
@@ -435,39 +441,40 @@ test('every action of a workflow is pinned by its commit and every job runs on u
 // (python-requires.test.mts), so the job has no matrix and no floor job on another interpreter. The interpreter is the
 // pinned Python that make install installs (T22.5-5), so the job sets up no Python of its own.
 test('the python job of ci.yml runs make install for the pinned interpreter and has no matrix (T22.4-12, T22.5-5)', () => {
-  const job = read('.github/workflows/ci.yml').match(/^  python:\n([\s\S]*?)(?=^  [a-z-]+:\n)/m)?.[1];
+  const job = jobs('.github/workflows/ci.yml').find(entry => entry.name === 'python');
   assert.ok(job, 'ci.yml has no python job; the check verified nothing');
-  assert.ok(!/^\s+matrix:/m.test(job), 'the python job of ci.yml has a matrix; it runs the python of mise.toml only');
-  assert.ok(job.includes('run: make install\n'), 'the python job runs make install, which installs the pinned Python');
-  assert.ok(!job.includes('actions/setup-python'), 'the python job sets up a Python of PATH; it runs the pinned interpreter');
+  assert.equal(job.value.strategy, undefined, 'the python job of ci.yml has a matrix; it runs the python of mise.toml only');
+  assert.ok(runsOf(job).includes('make install'), 'the python job runs make install, which installs the pinned Python');
+  assert.equal(usesOf(job, 'actions/setup-python@').length, 0, 'the python job sets up a Python of PATH; it runs the pinned interpreter');
 });
 
 // The python job of ci.yml runs the unit tests, the conformance suite and the generated conformance suite of Python, and
 // ci-passed needs the job, so a failing Python run fails the check that the release requires (T22.4-7).
 test('the python job of ci.yml runs the Python suites and ci-passed needs it (T22.4-7)', () => {
-  const text = read('.github/workflows/ci.yml');
-  const job = text.match(/^  python:\n([\s\S]*?)(?=^  [a-z-]+:\n)/m);
+  const all = jobs('.github/workflows/ci.yml');
+  const job = all.find(entry => entry.name === 'python');
   assert.ok(job, 'ci.yml has no python job; the check verified nothing');
-  const targets = captured(job).match(/make ci-targets TARGETS="([^"]*)"/);
+  const targets = runLines(job).map(line => /make ci-targets TARGETS="([^"]*)"/.exec(line)).find(match => match !== null);
   assert.ok(targets, 'the python job runs no make ci-targets step');
-  const run = captured(targets).split(/\s+/);
+  const run = captured(targets, 1, 'the targets of the python job').split(/\s+/);
   for (const target of ['test-python', 'conformance-python', 'conformance-generated-python']) {
     assert.ok(run.includes(target), `the python job runs ${run.join(' ')}, expected ${target} among them`);
   }
-  const needs = text.match(/^  ci-passed:[\s\S]*?needs: \[([^\]]*)\]/m);
-  assert.ok(needs, 'ci.yml has no ci-passed job with needs');
-  assert.ok(captured(needs).split(',').map(name => name.trim()).includes('python'), `ci-passed needs ${needs[1]}, expected python among them`);
+  const needs = all.find(entry => entry.name === CI_PASSED)?.value.needs;
+  assert.ok(Array.isArray(needs), 'ci.yml has no ci-passed job with needs');
+  assert.ok(needs.includes('python'), `ci-passed needs ${needs.join(', ')}, expected python among them`);
 });
 
 // ruff and vulture are tools of mise.toml, which make install installs with the Python of mise.toml (T22.4-33, T24.12),
 // so the job that runs lint-python runs make install before it.
 test('the job that runs lint-python installs the tools of mise.toml before it, with no setup-python', () => {
   for (const job of jobs('.github/workflows/ci.yml')) {
-    if (!/\bTARGETS="[^"]*\blint-python\b/.test(job.text)) continue;
-    const install = job.text.indexOf('run: make install\n');
-    const lint = job.text.indexOf('lint-python');
+    const runs = runsOf(job);
+    const lint = runs.findIndex(run => /\bTARGETS="[^"]*\blint-python\b/.test(run));
+    if (lint === -1) continue;
+    const install = runs.indexOf('make install');
     assert.ok(install !== -1 && install < lint, `job ${job.name} runs lint-python without make install before it`);
-    assert.ok(!job.text.includes('actions/setup-python'), `job ${job.name} sets up a Python of PATH for ruff`);
+    assert.equal(usesOf(job, 'actions/setup-python@').length, 0, `job ${job.name} sets up a Python of PATH for ruff`);
   }
 });
 
@@ -476,7 +483,7 @@ test('make dependency-review installs the Rust toolchain before cargo-audit and 
   assert.equal(recipe[0], 'rustup toolchain install --no-self-update');
   assert.ok(recipe[1] !== undefined, 'make -n dependency-review prints one command');
   assert.match(recipe[1], /install-tools\.mjs $/);
-  assert.ok(!read('.github/workflows/dependency-review.yml').includes('actions/setup-python'), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
+  assert.ok(!jobs('.github/workflows/dependency-review.yml').some(job => usesOf(job, 'actions/setup-python@').length > 0), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 
 test('the unit tests of the Python package run in var/python/venv, which python-venv of kit makes from the python of mise.toml', () => {

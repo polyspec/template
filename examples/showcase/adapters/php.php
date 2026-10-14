@@ -22,7 +22,7 @@ function generatedProgram(string $scenarioRoot): Program
     if (!in_array($scenario, ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'], true)) {
         throw new RuntimeException('generated program is missing for scenario ' . $scenario);
     }
-    // The rules of examples/showcase/php-namespace.mjs: compiler-coverage becomes the namespace CompilerCoverage, whose
+    // The rules of examples/showcase/php-namespace.mts: compiler-coverage becomes the namespace CompilerCoverage, whose
     // classes are the PSR-4 files of generated/php/compiler-coverage, which the autoload of Composer loads.
     $namespace = 'Polyspec\\Showcase\\Generated\\' . str_replace(' ', '', ucwords(str_replace('-', ' ', $scenario)));
     $loader->addPsr4($namespace . '\\', __DIR__ . '/generated/php/' . $scenario);

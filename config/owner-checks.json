@@ -357,7 +357,7 @@
     },
     {
       "paths": [
-        "examples/showcase/benchmark-modes.mjs"
+        "examples/showcase/benchmark-modes.mts"
       ],
       "tests": [
         "tests/scripts/atomic-publish.test.mts"
@@ -836,7 +836,8 @@
         "scripts/test-progress/*.mts",
         "tests/runner/*.mts",
         "tests/scripts/*.mts",
-        "tests/browser/*.mts"
+        "tests/browser/*.mts",
+        "examples/showcase/*.mts"
       ],
       "targets": [
         "typecheck"
@@ -1394,7 +1395,7 @@
       "check": "make typed-generator-check",
       "paths": [
         "packages/compiler/**",
-        "examples/showcase/compile-generated.mjs"
+        "examples/showcase/compile-generated.mts"
       ]
     },
     {
@@ -1437,7 +1438,7 @@
     {
       "check": "make showcase-site-check",
       "paths": [
-        "examples/showcase/build-site.mjs",
+        "examples/showcase/build-site.mts",
         "examples/site/**"
       ]
     },
@@ -1463,7 +1464,7 @@
       "check": "make benchmark-smoke",
       "paths": [
         "scripts/check-benchmark-smoke.mts",
-        "examples/showcase/benchmark-modes.mjs",
+        "examples/showcase/benchmark-modes.mts",
         "examples/showcase/adapters/**"
       ]
     },

@@ -5,17 +5,13 @@
 // failure. Only a job that publishes stops at its first failure.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { captured } from '../../scripts/required.mts';
+import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
-// The workflows of template; a workflow that kit copies (kit.copies of @polyspec/kit) is kit's, and make kit-check compares it.
-const KIT_PACKAGE = JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json')), 'utf8')) as { kit: { copies: Record<string, unknown> } };
-const KIT_COPIES = new Set(Object.keys(KIT_PACKAGE.kit.copies));
-const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
 
 // The commands that make prints for `target` without running them. A make started by another make, as `make check`
 // starts `make test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
@@ -26,30 +22,7 @@ function dryRun(target: string) {
   return run.stdout.split('\n').filter(Boolean);
 }
 
-// The jobs of a workflow with their steps; a step is the text of one `- ` item of `steps:`.
-// The text of the first group that `match` captured; every pattern here captures it whenever it matches.
-function captured(match: RegExpMatchArray): string {
-  const value = match[1];
-  if (value === undefined) throw new Error(`the pattern captured no group in: ${match[0]}`);
-  return value;
-}
-
-function jobs(file: string) {
-  return jobsOf(read(file));
-}
-
-function jobsOf(text: string) {
-  const [, body] = text.split(/\njobs:\n/);
-  if (body === undefined) throw new Error(`the workflow has no jobs:\n${text}`);
-  return body.split(/\n(?= {2}[a-z][a-z0-9-]*:\n)/).map((text) => {
-    const [, steps = ''] = text.split(/\n {4}steps:\n/);
-    return { name: text.trim().split(':', 1).join(''), text, steps: steps.split(/\n(?= {6}- )/).filter(step => step.trim()) };
-  });
-}
-
-const CHECK_TARGETS_LINE = read('Makefile').match(/^CHECK_TARGETS := (.*)$/m);
-if (CHECK_TARGETS_LINE === null) throw new Error('the Makefile declares no CHECK_TARGETS');
-const CHECK_TARGETS = captured(CHECK_TARGETS_LINE).split(/\s+/).filter(Boolean);
+const CHECK_TARGETS = captured(read('Makefile').match(/^CHECK_TARGETS := (.*)$/m), 1, 'CHECK_TARGETS of the Makefile').split(/\s+/).filter(Boolean);
 
 test('make release-test-matrix runs the targets of make check through the same guard', () => {
   const guard = `node node_modules/@polyspec/kit/dist/full-run.mjs run ${CHECK_TARGETS.join(' ')}`;
@@ -70,9 +43,12 @@ export function suiteViolations(text: string, suite: string[]) {
   const found: string[] = [];
   const owners = new Map<string, string[]>();
   for (const job of jobsOf(text)) {
-    if (/- run: .*\bmake (?:-\S+ )*check\b/.test(job.text)) found.push(`job ${job.name} runs make check, the whole suite again`);
-    for (const match of job.text.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
-      for (const target of captured(match).split(/\s+/).filter(Boolean)) owners.set(target, [...(owners.get(target) ?? []), job.name]);
+    const runs = runsOf(job);
+    if (runs.some(run => /\bmake (?:-\S+ )*check\b/.test(run))) found.push(`job ${job.name} runs make check, the whole suite again`);
+    for (const run of runs) {
+      for (const match of run.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
+        for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/).filter(Boolean)) owners.set(target, [...(owners.get(target) ?? []), job.name]);
+      }
     }
   }
   for (const target of suite) {
@@ -109,9 +85,10 @@ export function browserSetupViolations(text: string) {
   for (const job of jobsOf(text)) {
     let installed = false;
     for (const step of job.steps) {
-      if (/\bmake (?:-\S+ )*install-browsers\b/.test(step)) installed = true;
-      for (const match of step.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
-        for (const target of captured(match).split(/\s+/).filter(target => BROWSER_TARGETS.includes(target))) {
+      if (step.run === undefined) continue;
+      if (/\bmake (?:-\S+ )*install-browsers\b/.test(step.run)) installed = true;
+      for (const match of step.run.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
+        for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/).filter(target => BROWSER_TARGETS.includes(target))) {
           if (!installed) found.push(`job ${job.name} runs ${target} without make install-browsers before it`);
         }
       }
@@ -134,16 +111,17 @@ test('a verifying CI job runs every later step after a failing step, and a make 
     for (const job of jobs(file)) {
       // A job that publishes stops at its first failure. The step of the job ci-passed of ci.yml runs also after a
       // cancelled job: a skipped step would pass the check that a release requires (T22.1-3).
-      const publishes = job.steps.some(step => /uses: actions\/deploy-pages@|run: make release-publish\b/.test(step))
+      const publishes = job.steps.some(step => step.uses?.startsWith('actions/deploy-pages@') === true || (step.run !== undefined && /^make release-publish\b/.test(step.run)))
         || (file.endsWith('/ci.yml') && job.name === 'ci-passed');
       for (const step of job.steps) {
-        const command = step.match(/^ {6}- run: (.*)$/m)?.[1];
-        if (!command) continue;
-        if (!publishes) assert.match(step, /\n {8}if: \$\{\{ !cancelled\(\) \}\}(\n|$)/, `${file} job ${job.name} stops after a failing step before: ${command}`);
+        const command = step.run;
+        if (command === undefined) continue;
+        if (!publishes) assert.equal(step.if, '${{ !cancelled() }}', `${file} job ${job.name} stops after a failing step before: ${command}`);
         for (const make of command.matchAll(/\bmake((?: [^|&;]+)?)/g)) {
           // The arguments of make are optional in the pattern: a bare make names no goal.
-          const args = make[1] ?? '';
-          const goals = args.replace(/\w+="[^"]*"/g, '').trim().split(/\s+/).filter(word => word && !word.startsWith('-') && !word.includes('='));
+          const args = make[1];
+          if (args === undefined) continue;
+          const goals = args.replace(/\w+=(?:"[^"]*"|'[^']*')/g, '').trim().split(/\s+/).filter(word => word && !word.startsWith('-') && !word.includes('='));
           // TARGETS="..." of make ci-targets are the targets of its runner, which runs each to its end (T20.1-9).
           if (goals.length > 1) assert.match(make[0], /^make -k /, `${file} job ${job.name}: make ${args.trim()} stops at its first failing target`);
         }

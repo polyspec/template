@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { compileGeneratedArtifact, generatedManifestPath } from '../packages/compiler/generated-artifact.mjs';
 import { loadSourceGraph } from '../packages/compiler/ir.mjs';
+import { artifactManifestDocument } from './artifact-manifest.mts';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const fixture = join(root, 'examples/site/scenarios/empty-state');
@@ -20,7 +21,7 @@ try {
   copyFileSync(join(fixture, 'types.json'), types);
   const graphDirectory = join(temporary, 'graph-files');
   mkdirSync(graphDirectory);
-  const graphWithFile = JSON.parse(readFileSync(graph, 'utf8')) as { files: Record<string, { path: string }> };
+  const graphWithFile = artifactManifestDocument.read(graph);
   const graphFile = Object.values(graphWithFile.files)[0];
   if (!graphFile) throw new Error('the AST manifest of empty-state lists no file');
   graphFile.path = `graph-files/${graphFile.path}`;

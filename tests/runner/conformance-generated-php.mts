@@ -10,7 +10,8 @@ import { compileFiles } from '../../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from '../../scripts/php-program.mts';
 import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
 import { parse } from '../../packages/ts/dist/index.mjs';
-import { errorField, firstDifference, generatedCases, type TestCase, typeDefinitions } from './cases.mts';
+import { errorField, generatedCases, type TestCase, typeDefinitions } from './cases.mts';
+import { errorDifference, parsedCaseResult } from './generated-errors.mts';
 import { type BoundedResult, runBounded, seconds, stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mts';
@@ -22,12 +23,6 @@ const temporary = temporaryDirectory('generated-conformance-php');
 const sources = join(temporary, 'source');
 const runner = join(temporary, 'runner.php');
 mkdirSync(sources);
-
-function errorObject(error: unknown): { code: string; template: unknown; line: unknown; col: unknown } | null {
-  const code = errorField(error, 'code');
-  if (typeof code !== 'string') return null;
-  return { code, template: errorField(error, 'template') ?? 'input.tpl', line: errorField(error, 'line') ?? 0, col: errorField(error, 'col') ?? 0 };
-}
 
 function parsedTemplates(testCase: TestCase): Map<string, ReturnType<typeof parse>> {
   const templates = new Map<string, ReturnType<typeof parse>>();
@@ -74,12 +69,6 @@ try {
 `);
 
 /** The JSON line that the runner of a case prints: the HTML in base64, the error fields or a failure. */
-interface CaseResult {
-  html?: string;
-  error?: unknown;
-  failure?: string;
-}
-
 const failures: string[] = [];
 let passed = 0;
 const { cases, filtered } = generatedCases(process.argv.slice(2));
@@ -110,20 +99,17 @@ try {
       const result = await php([runner, join(root, 'packages/php/vendor/autoload.php'), programDirectory,
         testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], 'the case process');
       if (result.status !== 0) throw new Error(result.stderr || `PHP exited with ${result.status}`);
-      let actual: CaseResult;
-      try { actual = JSON.parse(result.stdout) as CaseResult; }
-      catch { throw new Error(`invalid PHP result: ${result.stdout}`); }
+      const actual = parsedCaseResult(result.stdout, 'PHP');
       if (actual.failure) failures.push(`${testCase.id}: ${actual.failure}`);
       else if (actual.error) {
-        const difference = testCase.expectedError === null ? 'unexpected render failure' : firstDifference(testCase.expectedError, actual.error);
+        const difference = errorDifference(testCase.expectedError, actual.error, 'render');
         if (difference) failures.push(`${testCase.id}: render ${difference}`); else passed++;
       } else if (testCase.expectedError !== null) failures.push(`${testCase.id}: expected ${testCase.expectedError.code}, generated execution succeeded`);
       else if (actual.html === undefined) failures.push(`${testCase.id}: the PHP result holds no html, error or failure: ${result.stdout}`);
       else if (Buffer.from(actual.html, 'base64').toString('utf8') !== testCase.expectedHtml) failures.push(`${testCase.id}: generated HTML differs`);
       else passed++;
     } catch (error) {
-      const actual = errorObject(error);
-      const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
+      const difference = errorDifference(testCase.expectedError, error, 'compile');
       if (errorField(error, 'deadline')) failures.push(`${testCase.id}: ${String(errorField(error, 'message'))}`);
       else if (difference) failures.push(`${testCase.id}: compile ${difference}: ${String(errorField(error, 'message'))}`); else passed++;
     }

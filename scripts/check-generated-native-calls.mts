@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Compiles and executes one native object/class-call program in every generated backend.
 import assert from 'node:assert/strict';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../packages/compiler/ast-artifact.mjs';
@@ -9,9 +9,10 @@ import { compileFiles, compileSource } from '../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mts';
-import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
 import { checkLanguages } from './language-checks.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
+import { hostValuesDocument } from './fixture-documents.mts';
 import { tsc } from './tools.mts';
 
 const fixture = join(root, 'tests/fixtures/native-object');
@@ -29,7 +30,7 @@ const errorCases = {
   'member-arity.tpl': 'E_RUNTIME_HOST_FUNCTION',
 };
 // VAL-21 and EXP-39: the shared expectations of host argument values and native object equality.
-const hostValues = JSON.parse(readFileSync(join(fixture, 'host-values.json'), 'utf8')) as { outputs: Record<string, string>; errors: Record<string, string> };
+const hostValues = hostValuesDocument.read(join(fixture, 'host-values.json'));
 const phpNamespace = 'Polyspec\\Generated\\NativeCheck';
 const run = (command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): string => {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
@@ -145,7 +146,7 @@ fn render_host_value(target: &str) -> Result<String, RequestError> { let order =
 #[test] fn generated_host_values_match() { for (target, output) in [${Object.entries(hostValues.outputs).map(([name, output]) => `(${rustString(name)}, ${rustString(output)})`).join(', ')}] { assert_eq!(render_host_value(target).unwrap(), output, "Rust generated {target}"); } for (target, code) in [${Object.entries(hostValues.errors).map(([name, code]) => `(${rustString(name)}, ErrorCode::${code})`).join(', ')}] { assert_eq!(template_error(render_host_value(target).unwrap_err()).code, code, "Rust generated {target}"); } }
 `);
       try {
-        run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_native_object_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_native_object_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }

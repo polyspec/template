@@ -5,12 +5,13 @@
 // typescriptDeliveryDigest. A change of the compiler, such as a change of packages/ts/src, leaves them stale
 // until `make showcase` writes them again; a stale artifact is found here, from the tracked sources alone and without a
 // build, so the job push-gate runs this check.
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { astCompilerDigest, generatedCompilerDigest } from '../packages/compiler/compiler-digest.mjs';
-import { typescriptDeliveryDigest } from '../examples/showcase/delivery-digest.mjs';
+import { typescriptDeliveryDigest } from '../examples/showcase/delivery-digest.mts';
+import { artifactManifestDocument } from './artifact-manifest.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -30,7 +31,7 @@ export function artifactManifests(base = root) {
   for (const id of readdirSync(join(base, go)).sort()) manifests.push({ path: `${go}/${id}/generated.go.manifest.json` });
   for (const manifest of manifests) {
     if (manifest.expected) continue;
-    const { target } = JSON.parse(readFileSync(join(base, manifest.path), 'utf8'));
+    const { target } = artifactManifestDocument.read(join(base, manifest.path));
     manifest.expected = target === 'js' ? typescriptDeliveryDigest() : generatedCompilerDigest(target);
   }
   return manifests;
@@ -40,7 +41,7 @@ export function artifactManifests(base = root) {
 export function staleArtifacts(base = root) {
   const stale = [];
   for (const { path, expected } of artifactManifests(base)) {
-    const recorded = JSON.parse(readFileSync(join(base, path), 'utf8')).compilerDigest;
+    const recorded = artifactManifestDocument.read(join(base, path)).compilerDigest;
     if (recorded !== expected) stale.push(`${path} records the compiler digest ${recorded}, but the compiler of the tree has the digest ${expected}`);
   }
   return stale;

@@ -9,7 +9,8 @@ import { rustString } from '../../packages/compiler/backend-support.mjs';
 import { compileSource } from '../../packages/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
 import { parse } from '../../packages/ts/dist/index.mjs';
-import { caseTestFailures, errorField, firstDifference, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
+import { caseTestFailures, errorField, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
+import { errorDifference } from './generated-errors.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { CARGO, rustWorkspace } from '../../scripts/temporary-workspace.mts';
@@ -24,12 +25,6 @@ const temporary = workspace.directory;
 const integrationTest = workspace.test('generated_conformance_check');
 // Paths and expected output are embedded as exact Rust string literals.
 const quote = rustString;
-
-function errorObject(error: unknown): { code: string; template: unknown; line: unknown; col: unknown } | null {
-  const code = errorField(error, 'code');
-  if (typeof code !== 'string') return null;
-  return { code, template: errorField(error, 'template') ?? 'input.tpl', line: errorField(error, 'line') ?? 0, col: errorField(error, 'col') ?? 0 };
-}
 
 function parsedTemplates(testCase: TestCase): Map<string, ReturnType<typeof parse>> {
   const templates = new Map<string, ReturnType<typeof parse>>();
@@ -80,8 +75,7 @@ try {
       runnable.push({ testCase, sourcePath, name });
       progress.pass(step);
     } catch (error) {
-      const actual = errorObject(error);
-      const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
+      const difference = errorDifference(testCase.expectedError, error, 'compile');
       if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${String(errorField(error, 'message'))}`); progress.fail(step, undefined, difference); }
       else { compilePassed++; progress.pass(step); }
     }

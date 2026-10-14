@@ -25,6 +25,9 @@ import { dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { compareText } from './compare-text.mts';
+import { jsonDocument } from './json-document.mts';
+import { captured } from './required.mts';
+import { npmManifestDocument } from './package-manifests.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ESBUILD = join(root, 'node_modules/.bin/esbuild');
@@ -80,17 +83,18 @@ const pkg = join(root, 'packages', packageId);
 const dist = resolve(values.dist ?? join(pkg, 'dist'));
 const stamp = `${dist}.inputs.json`;
 /** The fields of a package.json that the build reads. */
-interface Manifest {
-  dependencies?: Record<string, string>;
-}
-
 /** The record of a build in `<dist>.inputs.json`: the hash of its inputs and the files it published. */
 interface Stamp {
   hash: string;
   files: string[];
 }
+const stampDocument = jsonDocument<Stamp>('build record', {
+  type: 'object',
+  required: ['hash', 'files'],
+  properties: { hash: { type: 'string' }, files: { type: 'array', items: { type: 'string' } } },
+});
 
-const manifest = JSON.parse(readFileSync(join(pkg, 'package.json'), 'utf8')) as Manifest;
+const manifest = npmManifestDocument.read(join(pkg, 'package.json'));
 
 function files(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry): string[] => {
@@ -108,7 +112,7 @@ function workspacePackages(dependencies: Record<string, string> | undefined, see
     if (!existsSync(join(link, 'package.json'))) throw new Error(`${relative(root, link)} is not installed; ${packageId} depends on ${name}; run make install-packages`);
     const directory = realpathSync(link);
     seen.set(name, directory);
-    workspacePackages((JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')) as Manifest).dependencies, seen);
+    workspacePackages(npmManifestDocument.read(join(directory, 'package.json')).dependencies, seen);
   }
   return [...seen.values()].sort(compareText);
 }
@@ -134,7 +138,7 @@ function publicationOrder(directory: string, names: string[]): string[] {
     if (!/\.(mjs|cjs|js|ts)$/.test(name)) return [];
     const text = readFileSync(join(directory, name), 'utf8');
     return [...text.matchAll(/(?:from|import|require)\s*\(?\s*["'](\.\.?\/[^"']+)["']/g)]
-      .map(([, specifier = '']) => posix.join(posix.dirname(name), specifier))
+      .map(match => posix.join(posix.dirname(name), captured(match, 1, `an import specifier of ${name}`)))
       .flatMap(target => [target, target.replace(/\.js$/, '.d.ts')])
       .filter(target => present.has(target) && target !== name);
   };
@@ -166,7 +170,7 @@ function build(hash: string): void {
   }
   const published = new Set(names);
   // Without a record of the previous build, every other file of `dist` belongs to it.
-  const previous = existsSync(stamp) ? (JSON.parse(readFileSync(stamp, 'utf8')) as Stamp).files : files(dist).map(file => relative(dist, file).split(sep).join('/'));
+  const previous = existsSync(stamp) ? stampDocument.read(stamp).files : files(dist).map(file => relative(dist, file).split(sep).join('/'));
   const stale = previous.filter(name => !published.has(name) && existsSync(join(dist, name)));
   for (const name of stale) unlinkSync(join(dist, name));
   rmSync(next, { recursive: true });
@@ -181,7 +185,7 @@ if (values['print-inputs']) {
   process.exit(0);
 }
 const hash = inputs(list);
-const recorded = existsSync(stamp) ? JSON.parse(readFileSync(stamp, 'utf8')) as Stamp : null;
+const recorded = existsSync(stamp) ? stampDocument.read(stamp) : null;
 const complete = recorded !== null && recorded.files.every(name => existsSync(join(dist, name)));
 const where = relative(root, dist).startsWith('..') ? dist : relative(root, dist);
 if (!values.force && complete && recorded.hash === hash) {

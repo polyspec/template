@@ -14,6 +14,7 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, write
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseCargoLock, type LockPackage } from './install-workspace.mts';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RUST = join(root, 'packages/rust');
@@ -42,20 +43,9 @@ export function nodeWorkspace(name: string, packages: readonly string[] = ['@pol
   return directory;
 }
 
-// The packages of a Cargo.lock: `name version source` -> { checksum, dependencies }.
-interface LockPackage {
-  checksum: string;
-  dependencies: string[];
-}
-
+// The packages of a Cargo.lock by `name version` and, for a package of a registry or git, its source.
 function lockPackages(text: string): Map<string, LockPackage> {
-  const entries = new Map<string, LockPackage>();
-  for (const block of text.split(/\n(?=\[\[package\]\]\n)/).filter(part => part.startsWith('[[package]]'))) {
-    const field = (key: string): string => block.match(new RegExp(`^${key} = "([^"]*)"$`, 'm'))?.[1] ?? '';
-    const dependencies = [...(block.match(/^dependencies = \[\n([^\]]*)\]/m)?.[1] ?? '').matchAll(/"([^"]+)"/g)].map(match => match[1] ?? '');
-    entries.set(`${field('name')} ${field('version')} ${field('source')}`, { checksum: field('checksum'), dependencies });
-  }
-  return entries;
+  return new Map(parseCargoLock(text).packages.map(item => [item.source === undefined ? `${item.name} ${item.version}` : `${item.name} ${item.version} ${item.source}`, item]));
 }
 
 /**
@@ -100,7 +90,7 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   // --offline: the crates come from the registry of CARGO_HOME, into which make install downloads every Cargo.lock.
   if (metadata.error || metadata.status !== 0) {
     rmSync(directory, { recursive: true, force: true });
-    throw new Error(`cargo metadata --offline of ${directory} failed; a crate of packages/rust/Cargo.lock is not in the registry of CARGO_HOME, run make install: ${metadata.error?.message ?? metadata.stderr}`);
+    throw new Error(`cargo metadata --offline of ${directory} failed; a crate of packages/rust/Cargo.lock is not in the registry of CARGO_HOME, run make install: ${metadata.error ? metadata.error.message : metadata.stderr}`);
   }
   const known = lockPackages(original);
   const chosen = [...lockPackages(readFileSync(join(directory, 'Cargo.lock'), 'utf8'))].filter(([key]) => !key.startsWith('template-generated-check '));

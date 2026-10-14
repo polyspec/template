@@ -13,7 +13,7 @@ import { compileFiles, compileSource } from '../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { phpString, rustString } from '../packages/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mts';
-import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
 import { checkLanguages } from './language-checks.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
@@ -82,7 +82,7 @@ fn kind<T, E: std::fmt::Debug>(result: Result<T, E>) -> String { match result { 
 #[test] fn generated_arguments_fail_as_argument_errors() { let program = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); assert_eq!(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::text("N"))).unwrap(), ${rustString(expected)}); let first = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": 1 }), &options(Value::text("N")))); let second = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::Number(2.0)))); assert!(first == "argument" && second == "argument", "Rust reports {first}, {second}"); }
 `);
       try {
-        run('Rust', process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        run('Rust', CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }
