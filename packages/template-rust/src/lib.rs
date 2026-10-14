@@ -21,7 +21,7 @@ pub mod value;
 
 pub use ast::{Comment, Expr, Node, Template};
 pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_boundary};
-pub use format::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format};
+pub use format::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{Limits, ParsedTemplate};

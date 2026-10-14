@@ -208,6 +208,21 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Format
     })
 }
 
+/// Formats a source given as bytes: UTF-8 bytes format as [`format`] does, and other bytes keep the source with the
+/// parse error that the parser reports for them (LEX-1).
+pub fn format_bytes(source: &[u8], options: &FormatOptions) -> Result<Formatted, FormatError> {
+    match std::str::from_utf8(source) {
+        Ok(text) => format(text, options),
+        Err(_) => {
+            let parse_options = ParseOptions {
+                delimiters: options.delimiters.clone(),
+            };
+            analyze(source, &options.name, &parse_options).map_err(parse_error)?;
+            unreachable!("the parser rejects a source that is not UTF-8 (LEX-1)")
+        }
+    }
+}
+
 fn tag_edit(text: &str, tag: &SyntaxTag, tokens: &[crate::parser::SyntaxToken]) -> Option<Edit> {
     let inside: Vec<_> = tokens
         .iter()
