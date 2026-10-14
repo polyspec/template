@@ -33,7 +33,7 @@ before(() => {
 test('make showcase and make bench write the mode benchmark with --output, not with a shell redirection', () => {
   for (const target of ['showcase', 'bench']) {
     const lines = commands(target).filter(line => line.includes('benchmark-modes.mjs'));
-    assert.deepEqual(lines, ['node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json'], `make -n ${target}`);
+    assert.deepEqual(lines, ['node examples/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json'], `make -n ${target}`);
   }
 });
 

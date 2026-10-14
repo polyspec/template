@@ -1,0 +1,16 @@
+{
+  "schema": 3,
+  "mode": "gen",
+  "target": "python",
+  "entry": "layout.tpl",
+  "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
+  "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
+  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
+  "compilerDigest": "8e9a860bd7d6a906113c557005b99230c2368cececbe5f9c68efaafd5f971ff9",
+  "files": {
+    "scope_precedence.py": {
+      "path": "scope_precedence.py",
+      "artifactDigest": "6d7454c4c35283f105e6a35df8b8ae6d11ba4b4859c57ed201f9a49777c2f179"
+    }
+  }
+}

@@ -39,7 +39,7 @@ for (const path of pages) {
   }
   for (const match of html.matchAll(/href="([^"]+)"/g)) {
     const href = match[1];
-    if (!href.startsWith('http') && (/\.ko(?:\.html)?/.test(href) || href.includes('/packages/') || href.includes('/schema/'))) {
+    if (!href.startsWith('http') && (/\.ko(?:\.html)?/.test(href) || href.includes('/packages/') || href.includes('/contracts/schema/'))) {
       throw new Error(`${name}: link points to a source-only or legacy route: ${href}`);
     }
   }

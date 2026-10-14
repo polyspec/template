@@ -21,7 +21,7 @@ test('every committed artifact of the tree records the digest of its compiler', 
 test('a manifest with the digest of another compiler is named with both digests', { timeout: 30_000 }, (t) => {
   const base = temporaryDirectory('artifact-digests');
   t.after(() => rmSync(base, { recursive: true, force: true }));
-  for (const directory of ['examples/site/scenarios', 'tools/showcase/adapters/generated', 'tools/showcase/adapters/go/generated']) {
+  for (const directory of ['examples/site/scenarios', 'examples/showcase/adapters/generated', 'examples/showcase/adapters/go/generated']) {
     cpSync(path.join(ROOT, directory), path.join(base, directory), { recursive: true });
   }
   const manifest = 'examples/site/scenarios/empty-state/compiled/ast/manifest.json';

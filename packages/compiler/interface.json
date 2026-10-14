@@ -30,7 +30,7 @@
     ],
     "generatedEvidence": [
       "packages/compiler/generated",
-      "tools/showcase/adapters/generated",
+      "examples/showcase/adapters/generated",
       "examples/site/data"
     ]
   },

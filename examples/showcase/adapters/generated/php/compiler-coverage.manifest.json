@@ -1,0 +1,80 @@
+{
+  "schema": 3,
+  "mode": "gen",
+  "target": "php",
+  "entry": "layout.tpl",
+  "sourceDigest": "936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625",
+  "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
+  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
+  "compilerDigest": "d35097c0ee143f126a14a2e3fc6988828444d07cd29b1595ff8ec25fc4598907",
+  "files": {
+    "Page.php": {
+      "path": "Page.php",
+      "artifactDigest": "cbffa5fc40d8cf9bc4f774d00647df3d4b3409b6a28c964e2c088cdaf4fa5b47"
+    },
+    "Row.php": {
+      "path": "Row.php",
+      "artifactDigest": "81c3d16d492639958c7fe3dfd592a98ae751d527785faafdc0a1a98f3a15c80b"
+    },
+    "Slot.php": {
+      "path": "Slot.php",
+      "artifactDigest": "039e1da3e55bda3debc78b45a39c5c0833b66d4635929b4e965311bb5bf637bc"
+    },
+    "Assign.php": {
+      "path": "Assign.php",
+      "artifactDigest": "7a46d541770077c3a43366552024d33fafffc44f260007682f528b2bfdb206fd"
+    },
+    "InputCardTpl.php": {
+      "path": "InputCardTpl.php",
+      "artifactDigest": "99c1740bed0945efc344b5d64f5997ad3d06a2a22891378a5ac753dc5267fa1b"
+    },
+    "InputLayoutTpl.php": {
+      "path": "InputLayoutTpl.php",
+      "artifactDigest": "90a8c10ab520b9a4b4331b9059a08e8e96a61fa275accbcadd45a2ca636d9647"
+    },
+    "InputPartialTpl.php": {
+      "path": "InputPartialTpl.php",
+      "artifactDigest": "0dc6c9bd0951fc713a2fdcb139edfb033b5bcfdd068946d8ed28a797750b1d71"
+    },
+    "DefinitionDataCardTpl.php": {
+      "path": "DefinitionDataCardTpl.php",
+      "artifactDigest": "571578dcca2072e25c17010c571b3a06d79698ddfbc1fb584d66b1dbc2d105a8"
+    },
+    "DefinitionDataLayoutTpl.php": {
+      "path": "DefinitionDataLayoutTpl.php",
+      "artifactDigest": "3678921062097582186777e14817310de4126a2c27212fc0f4119dc802d4fcab"
+    },
+    "DefinitionDataPartialTpl.php": {
+      "path": "DefinitionDataPartialTpl.php",
+      "artifactDigest": "e7189ec40151b92aeef12855c79edf8d4f8b25e3360156fc83fe9635f4f23dff"
+    },
+    "Definition.php": {
+      "path": "Definition.php",
+      "artifactDigest": "329d06a2941db3c464c437163ad1e21ab20b10533dafb463ae1febff303a22fa"
+    },
+    "Definitions.php": {
+      "path": "Definitions.php",
+      "artifactDigest": "2a01e1bd496f4da05fb3a864650e1378601c1db61380d76eb39161fd3fb58c20"
+    },
+    "ArtifactManifest.php": {
+      "path": "ArtifactManifest.php",
+      "artifactDigest": "ef8947a09ffc0b7fccd351f03e499115649587919a224b008af92d17ddeff03a"
+    },
+    "GeneratedRuntime.php": {
+      "path": "GeneratedRuntime.php",
+      "artifactDigest": "dedb9642eb34ac28d69d44042614620676afbdf5eb1ad8544a7f9aa31cf956c5"
+    },
+    "GeneratedTemplates.php": {
+      "path": "GeneratedTemplates.php",
+      "artifactDigest": "9e8c5f9e2b1a30bfa506835be44939c1c2e1270e2c901f543a582240ccacb199"
+    },
+    "GeneratedExecution.php": {
+      "path": "GeneratedExecution.php",
+      "artifactDigest": "ba79633119f4765a2ea980fd34f53bfa8de88108ce74cf48864eb21409de290b"
+    },
+    "GeneratedProgram.php": {
+      "path": "GeneratedProgram.php",
+      "artifactDigest": "cc53ad4abb1dc4503fe6a743efb927db39ab6ab608f6abbcc392b84c11462d90"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema": 3,
+  "mode": "gen",
+  "target": "python",
+  "entry": "layout.tpl",
+  "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
+  "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
+  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
+  "compilerDigest": "8e9a860bd7d6a906113c557005b99230c2368cececbe5f9c68efaafd5f971ff9",
+  "files": {
+    "html_slot.py": {
+      "path": "html_slot.py",
+      "artifactDigest": "9c170275cf1eec0af34f1c6d6b8e7c822449642caac0681f12a88ce459bd6209"
+    }
+  }
+}

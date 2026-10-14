@@ -1,0 +1,16 @@
+{
+  "schema": 3,
+  "mode": "gen",
+  "target": "js",
+  "entry": "layout.tpl",
+  "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
+  "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
+  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
+  "compilerDigest": "38d5072d0205aa104647efde47b4ccdd7bc524d13dfeda440259dea85205838b",
+  "files": {
+    "empty-state.js": {
+      "path": "empty-state.js",
+      "artifactDigest": "2f68a9f8e2ccc15c0b9eeb2cec78b4ea4499f798dbfe7af0368469cf18383f94"
+    }
+  }
+}

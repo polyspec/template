@@ -135,13 +135,13 @@ export class ExpressionParser {
       const then = this.parseTernary();
       this.expect('COLON');
       const otherwise = this.parseTernary();
-      // oxlint-disable-next-line unicorn/no-thenable -- the Ternary node of schema/ast.schema.json names its branch then
+      // oxlint-disable-next-line unicorn/no-thenable -- the Ternary node of contracts/schema/ast.schema.json names its branch then
       return { type: 'Ternary', test, then, else: otherwise, span: this.span(start, this.end) };
     }
     if (token.type === 'ELVIS') {
       this.next();
       const otherwise = this.parseTernary();
-      // oxlint-disable-next-line unicorn/no-thenable -- the Ternary node of schema/ast.schema.json names its branch then
+      // oxlint-disable-next-line unicorn/no-thenable -- the Ternary node of contracts/schema/ast.schema.json names its branch then
       return { type: 'Ternary', test, then: null, else: otherwise, span: this.span(start, this.end) };
     }
     return test;

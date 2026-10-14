@@ -1,0 +1,64 @@
+{
+  "schema": 3,
+  "mode": "gen",
+  "target": "php",
+  "entry": "layout.tpl",
+  "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
+  "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
+  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
+  "compilerDigest": "d35097c0ee143f126a14a2e3fc6988828444d07cd29b1595ff8ec25fc4598907",
+  "files": {
+    "Page.php": {
+      "path": "Page.php",
+      "artifactDigest": "b74a64385368068ae4eff959d5cb14c237e72166308d66dae0ddce028edaebb2"
+    },
+    "Assign.php": {
+      "path": "Assign.php",
+      "artifactDigest": "b0e4413b0d3be056e19dd2d5c914ece84f0339ad7590a2cd63c7160daa45a246"
+    },
+    "InputContentTpl.php": {
+      "path": "InputContentTpl.php",
+      "artifactDigest": "83e6727dd9c8ec97e454e7b90018d8a302f36c7220eed52951bc75d6452bd209"
+    },
+    "InputLayoutTpl.php": {
+      "path": "InputLayoutTpl.php",
+      "artifactDigest": "79e4964e3b80b00ae36d281da2106949431465862ea3ccecacddd8495c33ebda"
+    },
+    "DefinitionDataContentTpl.php": {
+      "path": "DefinitionDataContentTpl.php",
+      "artifactDigest": "007f373121b52b056610c423738120f328008978a2db9ab79c99332db1b07756"
+    },
+    "DefinitionDataLayoutTpl.php": {
+      "path": "DefinitionDataLayoutTpl.php",
+      "artifactDigest": "249cf2081e72236926cf75dd16e786ab359d8b50f884ab5a58f0d784d1dea4e6"
+    },
+    "Definition.php": {
+      "path": "Definition.php",
+      "artifactDigest": "f8af91f48a9173ad58775e2e26aa7632f9340bfc8953c18ca921f374259c617e"
+    },
+    "Definitions.php": {
+      "path": "Definitions.php",
+      "artifactDigest": "d474ff0a142bf279f94069ed4716a0c8d394204d3ae8ae86cbc3e8399327ae63"
+    },
+    "ArtifactManifest.php": {
+      "path": "ArtifactManifest.php",
+      "artifactDigest": "665cbba9f9afc5805374e5cf203033449fb50e5a3f1fe8c404f72eeda0881795"
+    },
+    "GeneratedRuntime.php": {
+      "path": "GeneratedRuntime.php",
+      "artifactDigest": "f1b6e080ca5a7f1f67d879ae9af8f079c83392a373444d816c64f5e11af4d742"
+    },
+    "GeneratedTemplates.php": {
+      "path": "GeneratedTemplates.php",
+      "artifactDigest": "6a9aa1a4ec28a21d3f1f90aa3cc4991679ab5a6331a84fc24109d7dc53676a14"
+    },
+    "GeneratedExecution.php": {
+      "path": "GeneratedExecution.php",
+      "artifactDigest": "dd5b697c02acd7c5035bd39aee273698f379cef83c186fe8d4f1fb165387e8fe"
+    },
+    "GeneratedProgram.php": {
+      "path": "GeneratedProgram.php",
+      "artifactDigest": "54f92593a57e937528c9645e965ceb8d5cf1312ed816f680736c306d575fa291"
+    }
+  }
+}

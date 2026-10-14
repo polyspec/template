@@ -13,7 +13,7 @@
     { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] }
   ],
   "suites": ["tests/fixtures/expr/cases.json"],
-  "comparators": ["tests/runner", "tests/browser", "tools/showcase"],
+  "comparators": ["tests/runner", "packages/ts/tests/browser", "examples/showcase"],
   "tools": [
     { "root": "packages/lsp", "reason": "The language server is a TypeScript tool of the editors." },
     { "root": "packages/codemirror", "reason": "The CodeMirror adapter is a TypeScript tool of the editors." },

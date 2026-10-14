@@ -6,10 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "node tests/runner/conformance.mjs",
-    "test:browser": "node tests/browser/run.mjs",
+    "test:browser": "node packages/ts/tests/browser/run.mjs",
     "schema:check": "node scripts/check-schema.mjs",
-    "docs:coverage": "node scripts/check-doc-coverage.mjs",
-    "bench": "node tools/bench/run.mjs"
+    "docs:coverage": "node scripts/check-doc-coverage.mjs"
   },
   "license": "MIT",
   "engines": {

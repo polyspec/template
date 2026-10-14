@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8e5b40d1e12650281374498e8bd1841d29108b5bc9be8c1cf463949c791c6235 -->
+<!-- source-sha256: fb27e91bfaff5c51063f1e63f8ca9f9874c83523f16db178d7e17aedbedddd2b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.10: root에는 S5의 폴더와 S7의 test만 남습니다: `schema/` → `contracts/schema/`, `tools/showcase/` → `examples/showcase/`(example site의 builder와 언어 adapter), TypeScript package의 browser test는 그 package로 옮겨 `tests/browser/` → `packages/ts/tests/browser/`, `playwright.config.ts` → `packages/ts/playwright.config.ts`이고 Playwright는 그 폴더에서 실행됩니다. `config/layout.yml`은 root test 폴더 `tests/cases`, `tests/fixtures`, `tests/runner`, `tests/scripts`를 각각 이유와 함께 선언합니다. 없는 `tools/bench/run.mjs`를 가리키던 root `package.json`의 npm script `bench`는 제거됩니다.
 - T24.10: package 폴더는 저장소 접두사 없이 runtime이나 component 이름을 씁니다(kit layout의 S5, `config/layout.yml`): `packages/template-ts` → `packages/ts`, `packages/template-go` → `packages/go`, `packages/template-rust` → `packages/rust`, `packages/template-php` → `packages/php`, `packages/template-php-ext` → `packages/php-ext`, `packages/template-python` → `packages/python`, `packages/template-compiler` → `packages/compiler`, `packages/template-language` → `packages/language`, `packages/template-lsp` → `packages/lsp`, `packages/template-codemirror` → `packages/codemirror`, `packages/template-vscode` → `packages/vscode`. Go module 경로는 `github.com/polyspec/template/packages/go`이므로 release tag는 `packages/go/v<version>`입니다. 이후 release의 소비자는 새 경로를 import하고, v0.0.6 이하의 tag는 옛 경로를 유지합니다. `make build-*`는 폴더 이름을 넘깁니다(`--package ts`). 배포 이름(`@polyspec/template`, `@polyspec/template-*`, `polyspec/template`, `polyspec/template-php-ext`, `polyspec-template`)은 바뀌지 않습니다. commit한 AST와 generated artifact는 새 compiler digest를 기록합니다.
 - T24.5: Python package가 vulture를 통과합니다: 쓰지 않는 `BIND_ERROR_CODES`, `FAIL_CODES`, alias `ErrorCode`, `ExprParser.at_end`, `FsLoader.path_of`, `PageCache.delete`, `code_point_length`를 지우고, 테스트는 상수 조건 두 개를 없애고 `load_tests`와 host 함수의 쓰지 않는 parameter 이름 앞에 `_`를 붙이며, `packages/template-python/vulture_whitelist.py`는 unittest와 테스트의 template이 쓰는 코드를 이유와 함께 나열합니다.
 - T25.3: Python target은 compile 시점의 formatter 없이 ruff format의 정규 형식을 쓰고 program이 쓰는 helper, schema 상수, import, loop metadata만 남깁니다. `make generated-lint-check`는 showcase의 생성된 Python을 `ruff format --check`, `ruff check`, vulture로 lint합니다.

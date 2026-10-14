@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { validateBenchmark } from './check-benchmark-results.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const result = spawnSync(process.execPath, ['tools/showcase/benchmark-modes.mjs'], {
+const result = spawnSync(process.execPath, ['examples/showcase/benchmark-modes.mjs'], {
   cwd: root,
   encoding: 'utf8',
   maxBuffer: 64 * 1024 * 1024,

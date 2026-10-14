@@ -22,7 +22,7 @@ const OUTPUTS = [
   'packages/codemirror/dist/index.mjs',
   'packages/vscode/dist/extension.cjs',
   'packages/rust/target/debug/template',
-  'tools/showcase/adapters/rust/target/release/showcase-adapter-rust',
+  'examples/showcase/adapters/rust/target/release/showcase-adapter-rust',
   'packages/go/template',
   'packages/php/vendor/autoload.php',
   'docs/.vitepress/dist/index.html',

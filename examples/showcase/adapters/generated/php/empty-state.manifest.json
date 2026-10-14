@@ -1,0 +1,52 @@
+{
+  "schema": 3,
+  "mode": "gen",
+  "target": "php",
+  "entry": "layout.tpl",
+  "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
+  "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
+  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
+  "compilerDigest": "d35097c0ee143f126a14a2e3fc6988828444d07cd29b1595ff8ec25fc4598907",
+  "files": {
+    "Assign.php": {
+      "path": "Assign.php",
+      "artifactDigest": "33dd7be03cccfa8df884753b41aa87358a376f013446af017fd837fb8478829e"
+    },
+    "InputLayoutTpl.php": {
+      "path": "InputLayoutTpl.php",
+      "artifactDigest": "348fcbcbf8cf84bc3643787cf94a8f1eae4c23bc033437d7b21462fcdc643054"
+    },
+    "DefinitionDataLayoutTpl.php": {
+      "path": "DefinitionDataLayoutTpl.php",
+      "artifactDigest": "9eb0bca17b2c9bab2b5fc5c55c4e693ee30506e5bccbd90daca979f3af5eba65"
+    },
+    "Definition.php": {
+      "path": "Definition.php",
+      "artifactDigest": "a1093ec2b5227e20324d52a1482dc75d2f6b2b51e97ae9e07436329f90ffcb48"
+    },
+    "Definitions.php": {
+      "path": "Definitions.php",
+      "artifactDigest": "b8e7f758fcf26f1c251e8e7e9ea92b520d81f5935b795290b60b2337fb14a679"
+    },
+    "ArtifactManifest.php": {
+      "path": "ArtifactManifest.php",
+      "artifactDigest": "36fe6a4b728613284594e6dee1a568ec89f3fa6602fdcf1ef18f8318a7d2eb90"
+    },
+    "GeneratedRuntime.php": {
+      "path": "GeneratedRuntime.php",
+      "artifactDigest": "d64b29ffadd412b2fda5c7c15dbd27808723fd988f65e382a73c585f83337fb8"
+    },
+    "GeneratedTemplates.php": {
+      "path": "GeneratedTemplates.php",
+      "artifactDigest": "d55948805e1fbb2cba152a4dab6c8bf0c66fd08a3b7580ef55223415d3666b84"
+    },
+    "GeneratedExecution.php": {
+      "path": "GeneratedExecution.php",
+      "artifactDigest": "6284308bda6da01266d53487c67dce52ebf5aa3569da9afa55f2c3fc2fa931df"
+    },
+    "GeneratedProgram.php": {
+      "path": "GeneratedProgram.php",
+      "artifactDigest": "037edcbc7e74a91d27320939790151e199b39d4fa7762ff28a9cabf324eee24a"
+    }
+  }
+}

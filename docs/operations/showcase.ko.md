@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-showcase -->
-<!-- source-sha256: 3b9af0b9ecf9192b309042fecedf79ebd1f0928ebd4043af4f060b3a3f70b2ff -->
+<!-- source-sha256: 5cb13c509f1f7fdd9e31bbdb7852ca28156b5ec0cd25bd5e06314edaddb20dbe -->
 # 예제 사이트
 
 [English](/operations/showcase).
@@ -29,7 +29,7 @@
 
 ## 계약 게이트
 
-어댑터 구조는 공통 [compiler interface manifest](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)에 포함한다. 이 manifest가 `tools/showcase/adapters/generated/` 아래의 선언부와 Mermaid 파일의 원본이며, 언어별 어댑터는 매핑된 타입과 연산 이름을 구현한다. 생성기와 검사기는 저장소의 영구 도구이므로 선언이나 도표가 manifest에서 조용히 벗어날 수 없다.
+어댑터 구조는 공통 [compiler interface manifest](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)에 포함한다. 이 manifest가 `examples/showcase/adapters/generated/` 아래의 선언부와 Mermaid 파일의 원본이며, 언어별 어댑터는 매핑된 타입과 연산 이름을 구현한다. 생성기와 검사기는 저장소의 영구 도구이므로 선언이나 도표가 manifest에서 조용히 벗어날 수 없다.
 
 게이트를 직접 실행하려면 다음 명령을 사용한다.
 

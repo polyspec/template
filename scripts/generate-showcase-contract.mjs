@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const adapterRoot = join(root, 'tools', 'showcase', 'adapters');
+const adapterRoot = join(root, 'examples', 'showcase', 'adapters');
 const manifestPath = join(root, 'packages', 'compiler', 'interface.json');
 const check = process.argv.includes('--check');
 

@@ -1,5 +1,5 @@
 // Reads the expected files of the conformance cases and checks the presence rules of CNF-2 and CNF-15 and, with the
-// schemas of schema/, the content of the token and format files.
+// schemas of contracts/schema/, the content of the token and format files.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { caseIds, casesDir } from '../tests/runner/case-list.mjs';
@@ -40,11 +40,11 @@ export function astPresenceFailures(cases) {
 }
 
 /**
- * The Ajv validators of schema/tokens.schema.json and schema/format.schema.json, which hold the shape of the token and
+ * The Ajv validators of contracts/schema/tokens.schema.json and contracts/schema/format.schema.json, which hold the shape of the token and
  * format files of CNF-2, with the Ajv instance that describes their errors.
  */
 export function caseFileValidators(ajv, root) {
-  const compile = name => ajv.compile(JSON.parse(readFileSync(join(root, 'schema', name), 'utf8')));
+  const compile = name => ajv.compile(JSON.parse(readFileSync(join(root, 'contracts', 'schema', name), 'utf8')));
   return { ajv, tokens: compile('tokens.schema.json'), format: compile('format.schema.json') };
 }
 

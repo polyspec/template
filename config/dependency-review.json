@@ -33,7 +33,7 @@
       "advisories": []
     },
     {
-      "lock": "tools/showcase/adapters/rust/Cargo.lock",
+      "lock": "examples/showcase/adapters/rust/Cargo.lock",
       "sha256": "4e7c210a37394bd2bb513515fbedaef69d4dcaa73f287b302f27a226a2beb1fe",
       "advisories": []
     }

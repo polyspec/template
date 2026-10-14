@@ -1,6 +1,6 @@
 // Tests that the browser test starts its static server as a step without a time limit: a server that starts later than
 // a small limit would allow is used once it reports that it listens (T17.11). The slow server is a wrapper that
-// tests/browser/run.mjs receives as its server command, so the test does not depend on the order of PATH, and the
+// packages/ts/tests/browser/run.mjs receives as its server command, so the test does not depend on the order of PATH, and the
 // wrapper records that it ran (T20.2). run.mjs runs no build step: it tests the package build that exists.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -19,11 +19,11 @@ test('the browser test waits for a server that starts slowly and runs the browse
   // The server command records that it ran, waits 1.5 s and then runs the server with this Node.js.
   const wrapper = path.join(directory, 'slow-server');
   writeFileSync(wrapper, `#!/bin/sh\necho "$@" > "${ran}"\nsleep 1.5\nexec "${process.execPath}" "$@"\n`, { mode: 0o755 });
-  const run = spawnSync(process.execPath, [path.join(ROOT, 'tests/browser/run.mjs'), '--server-command', wrapper], { cwd: ROOT, encoding: 'utf8' });
+  const run = spawnSync(process.execPath, [path.join(ROOT, 'packages/ts/tests/browser/run.mjs'), '--server-command', wrapper], { cwd: ROOT, encoding: 'utf8' });
   const output = `${run.stdout}${run.stderr}`;
   assert.equal(run.status, 0, output);
   assert.ok(existsSync(ran), `the slow server command ${wrapper} was not run:\n${output}`);
-  assert.equal(readFileSync(ran, 'utf8').trim(), path.join(ROOT, 'tests/browser/server.mjs'));
+  assert.equal(readFileSync(ran, 'utf8').trim(), path.join(ROOT, 'packages/ts/tests/browser/server.mjs'));
   assert.match(output, /\[server\] listening on http:\/\/127\.0\.0\.1:\d+\n/);
   assert.match(output, /✔ start the static server \((?:1\.[5-9]|[2-9]\.\d|\d{2,}\.\d)s\)\n/);
   assert.match(output, /\d+ passed/);

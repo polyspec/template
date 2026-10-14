@@ -24,7 +24,7 @@ function holdPort() {
 test('the browser test runs on its own server while another server holds 127.0.0.1:4173', { timeout: 820_000 }, async () => {
   const foreign = await holdPort();
   try {
-    const run = spawn(process.execPath, [path.join(ROOT, 'tests/browser/run.mjs')], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+    const run = spawn(process.execPath, [path.join(ROOT, 'packages/ts/tests/browser/run.mjs')], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = '';
     run.stdout.on('data', data => { output += data; process.stdout.write(data); });
     run.stderr.on('data', data => { output += data; process.stderr.write(data); });

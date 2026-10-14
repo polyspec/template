@@ -33,3 +33,17 @@ rules:
       - "!packages/lsp"
       - "!packages/codemirror"
       - "!packages/vscode"
+
+  # S7: the cross-language runners, data and tool tests of the root tests/: cases (the conformance cases that every
+  # implementation runs, CNF), fixtures (the vectors that the native tests of every implementation read, such as the
+  # expression, bound-data and host-value vectors, the inputs of the generated checks of every language and the
+  # consumer projects of the release archives), runner (the conformance, generated and function-contract runners over
+  # every implementation) and scripts (the tool tests of scripts/, the runners, the Makefile and the configuration).
+  - id: layout-root-tests
+    paths:
+      - "tests/*"
+      - "!tests/kit"
+      - "!tests/cases"
+      - "!tests/fixtures"
+      - "!tests/runner"
+      - "!tests/scripts"

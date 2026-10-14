@@ -6,7 +6,7 @@
     "AGENTS.md",
     "CHANGELOG.md",
     "docs/**/*.md",
-    "schema/**/*.md",
+    "contracts/schema/**/*.md",
     "packages/**/*.md",
     "tests/fixtures/**/*.md"
   ],
