@@ -5,7 +5,11 @@ use std::fmt;
 
 /// Error codes of the specification.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[allow(non_camel_case_types, missing_docs)]
+#[allow(
+    non_camel_case_types,
+    missing_docs,
+    reason = "the variants are the error codes of the specification by their exact names, which docs/spec documents"
+)]
 pub enum ErrorCode {
     E_LEX_INVALID_UTF8,
     E_PARSE_UNTERMINATED_TAG,

@@ -87,7 +87,10 @@ impl<'c, 'e> Renderer<'c, 'e> {
         Ok(())
     }
 
-    #[allow(clippy::too_many_arguments)]
+    #[allow(
+        clippy::too_many_arguments,
+        reason = "the arguments are the parts of a For node of the AST, which render_for takes apart at its caller"
+    )]
     fn render_for(
         &mut self,
         name: &str,
