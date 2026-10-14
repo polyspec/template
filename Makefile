@@ -341,7 +341,7 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 
 # The Python package is installed, editable, into the virtual environment PYTHON_VENV, so its tests, the conformance
 # driver (tests/runner/drivers.mjs) and the parity check (config/parity.json) import polyspec.template from the sources of
-# the checkout with no PYTHONPATH and no sys.path change (PRINCIPLES S3). kit's python-venv makes the environment from the
+# the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
 # python of mise.toml, and the uv of mise.toml installs the package into it offline, with its build requirement from
 # var/python/wheelhouse (make install). The stamp is remade when the project or its build requirements change; a change of
 # the sources needs no install. The tests are discovered with packages/template-python as the top level: the directory
