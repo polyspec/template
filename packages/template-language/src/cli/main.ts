@@ -76,15 +76,15 @@ export function formatBytes(bytes: Uint8Array, name: string, options: FormatOpti
   let source: string;
   try {
     source = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
-  } catch {
+  } catch (decodeError) {
+    if (!(decodeError instanceof TypeError)) throw decodeError;
     try {
       parse(bytes, name, options.delimiters === undefined ? {} : { delimiters: options.delimiters });
     } catch (error) {
-      if (error instanceof TemplateError) {
-        return { ok: false, error: { reason: 'parse', code: error.code, line: error.line, col: error.col, message: error.message } };
-      }
+      if (!(error instanceof TemplateError)) throw error;
+      return { ok: false, error: { reason: 'parse', code: error.code, line: error.line, col: error.col, message: error.message } };
     }
-    return { ok: false, error: { reason: 'parse', code: 'E_LEX_INVALID_UTF8', line: 0, col: 0, message: 'invalid UTF-8' } };
+    throw new Error(`${name}: the parser accepted bytes that are not UTF-8`, { cause: decodeError });
   }
   return format(source, { ...options, name });
 }

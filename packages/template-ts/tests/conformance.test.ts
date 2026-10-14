@@ -1,10 +1,11 @@
 // Conformance cases rendered in-process (CNF-6 to CNF-9).
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
-import { casesDir, toJsonValue } from './helpers.js';
+import { caseIds, casesDir } from '../../../tests/runner/case-list.mjs';
+import { toJsonValue } from './helpers.js';
 
 interface Case {
   id: string;
@@ -12,14 +13,7 @@ interface Case {
 }
 
 function listCases(): Case[] {
-  const cases: Case[] = [];
-  for (const group of readdirSync(casesDir, { withFileTypes: true })) {
-    if (!group.isDirectory()) continue;
-    for (const entry of readdirSync(join(casesDir, group.name), { withFileTypes: true })) {
-      if (entry.isDirectory()) cases.push({ id: `${group.name}/${entry.name}`, dir: join(casesDir, group.name, entry.name) });
-    }
-  }
-  return cases.sort((a, b) => a.id.localeCompare(b.id));
+  return caseIds().map(id => ({ id, dir: join(casesDir, id) }));
 }
 
 function readIf(path: string): Uint8Array | null {
