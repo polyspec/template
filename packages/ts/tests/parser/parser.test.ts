@@ -1,6 +1,6 @@
 // Parser behavior that the fixtures do not cover directly.
 import { describe, expect, it } from 'vitest';
-import { analyze, analyzePrefix, parse, TemplateError } from '../../src/index.js';
+import { analyze, analyzePrefix, AstProgram, parse, TemplateError } from '../../src/index.js';
 
 function codeOf(fn: () => unknown): string | null {
   try {
@@ -33,6 +33,20 @@ describe('delimiters', () => {
   it('rejects a directive that is not the first tag', () => {
     expect(codeOf(() => parse('{= a}{% delimiter ;;}', 't.tpl'))).toBe('E_PARSE_INVALID_DIRECTIVE');
     expect(codeOf(() => parse('{% delimiter ab}', 't.tpl'))).toBe('E_PARSE_INVALID_DIRECTIVE');
+  });
+  it('rejects a delimiter option that is not a delimiter pair with an argument error (ERR-13)', () => {
+    for (const run of [() => parse('x', 't.tpl', { delimiters: '[' }), () => new AstProgram({ delimiters: '[[[' })]) {
+      let thrown: unknown;
+      try {
+        run();
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(Error);
+      expect(thrown).not.toBeInstanceOf(TemplateError);
+      expect(thrown).not.toBeInstanceOf(TypeError);
+      expect(thrown).not.toBeInstanceOf(RangeError);
+    }
   });
 });
 

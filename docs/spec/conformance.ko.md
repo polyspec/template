@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: 834dccc96018f9c353202b0a069812094912fa0fe84d8eec39577517ca8863f6 -->
+<!-- source-sha256: 3a43fcb680923f8356b800fa43082c6a38fc9aa61dd7b808a6b286ae97663586 -->
 # 적합성
 
 [English](/spec/conformance).
@@ -87,7 +87,7 @@ TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@poly
 | `--list` | 실행하지 않고 케이스 id와 건수를 출력한다. |
 | `--update ast\|html\|error\|tokens\|format` | 지정한 종류의 기대 파일을 `ts` 구현의 결과로 쓴다. `tokens`와 `format`은 `expected.ast.json`이 있는 케이스의 파일을 쓴다. `ts`가 선택된 구현에 포함되어야 한다. |
 
-**CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스(unit `conformance`, native test가 AST와 렌더 결과를 비교한다), 그 케이스의 토큰(unit `tokens`, CNF-17), 그 포맷 결과(unit `formatting`, CNF-18), `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다. 각 native test는 각 케이스를 그 runner의 이름으로 보고한다: Go는 subtest `TestX/<case>`, cargo는 test `<symbol>::<case>`, vitest는 top-level test `<case>`, PHPUnit은 binding method의 data set `"<case>"`, unittest는 test `<case>`다. PHP extension은 표현식 lexer와 evaluator를 노출하지 않으므로, 표현식 vector의 test는 각 표현식을 echo tag `{=<expr>}`로 parse하고 `{= json(<expr>) | raw}`로 평가하며, token vector는 비교하지 않는다.
+**CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스(unit `conformance`, native test가 AST와 렌더 결과를 비교한다), 그 케이스의 토큰(unit `tokens`, CNF-17), 그 포맷 결과(unit `formatting`, CNF-18), `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다. 각 native test는 각 케이스를 그 runner의 이름으로 보고한다: Go는 subtest `TestX/<case>`, cargo는 test `<symbol>::<case>`, vitest는 top-level test `<case>`, PHPUnit은 binding method의 data set `"<case>"`, unittest는 test `<case>`다. PHP extension은 표현식 lexer와 evaluator를 노출하지 않으므로, 표현식 vector의 test는 각 표현식을 echo tag `{=<expr>}`로 parse하고 `{= json(<expr>) | raw}`로 평가하며, token vector는 비교하지 않는다. 구현의 다른 모든 test 파일은 `config/parity.json`의 feature unit, 곧 profile의 각 구현에 native test 하나를 두는 unit의 test다. 모든 구현보다 좁은 profile은 그 차이를 영구적으로 만드는 spec 규칙을 적는다.
 
 ## 표현식 픽스처
 

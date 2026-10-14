@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The conformance cases of tests/cases, their tokens and format results and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools.",
+  "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The conformance cases of tests/cases, their tokens and format results and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools; every other test file of an implementation is the native test of a feature unit (T24.8, T24.11).",
   "implementations": [
     { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"] },
     { "name": "go", "runner": "go", "prose": ["Go"], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"] },
@@ -10,7 +10,12 @@
     { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/python"], "tests": ["packages/python/tests/test_*.py"], "command": "var/python/venv/bin/python" }
   ],
   "profiles": [
-    { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] }
+    { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] },
+    { "name": "manifest", "implementations": ["ts", "go", "rust", "php", "python"], "reason": "The PHP extension is the native renderer of the PHP package and declares no support level of packages/compiler/interface.json and no entry of the function contract (RT-55, RT-56): its PHP surface is Engine (parse, analyze, render and register over a template directory), BoundMap and TemplateError, so the loader interface, the artifact refresh of a program, the page cache, the value and number operations, the function registry and the formatter are absent, and a PHP host reaches them in the PHP package that the extension requires.", "spec": ["docs/spec/runtime.md#support-levels-and-compiled-artifacts", "docs/spec/functions.md#canonical-contract"] },
+    { "name": "interface", "implementations": ["go", "rust", "php", "python"], "reason": "The interface gate reads the TypeScript declarations with oxc-parser in scripts/check-compiler-interface.mts (make compiler-interface-check), and the declarations of Go, Rust, PHP and Python in a test of each package; the PHP extension declares no mapping of the manifest.", "spec": ["docs/spec/runtime.md#api", "docs/spec/runtime.md#support-levels-and-compiled-artifacts"] },
+    { "name": "export-list", "implementations": ["ts", "python"], "reason": "Names follow the conventions of each language (RT-1): the TypeScript and Python packages name their public API in an export list, the re-exports of the entry points of package.json and __all__ with the package data of pyproject.toml, which a test keeps complete; Go, Rust and PHP export a declaration by its visibility, which their compilers check.", "spec": ["docs/spec/runtime.md#api"] },
+    { "name": "language-service", "implementations": ["ts"], "reason": "The language service and its command template-fmt, the editor documents and the template root are one TypeScript package, @polyspec/template-language, which the editor adapters use (EDT layers).", "spec": ["docs/spec/editor.md#layers"] },
+    { "name": "concurrent-renders", "implementations": ["go", "python"], "reason": "Renders of one program run at the same time where the host language runs code concurrently (RT-70): Go renders one program and one bound map from concurrent goroutines and Python from concurrent threads, while a Rust program and its bound maps stay in the thread that created them, TypeScript and PHP run one render at a time in a process or worker, and the PHP extension keeps the objects of a request in that request.", "spec": ["docs/spec/runtime.md#api", "docs/spec/data-model.md#bound-data"] }
   ],
   "suites": ["tests/fixtures/expr/cases.json"],
   "comparators": ["tests/runner", "tests/browser", "examples/showcase"],
@@ -87,6 +92,470 @@
         { "implementation": "php", "test": "packages/php/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Tests\\ExprFixturesTest::testCase" },
         { "implementation": "php-ext", "test": "packages/php-ext/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\ExprFixturesTest::testCase" },
         { "implementation": "python", "test": "packages/python/tests/test_expr_fixtures.py" }
+      ]
+    },
+    {
+      "id": "cli-parse",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/cli.test.ts", "id": "template CLI › parses a file to AST JSON" },
+        { "implementation": "go", "test": "packages/go/cmd/template/main_test.go", "id": "TestParseCommand" },
+        { "implementation": "rust", "test": "packages/rust/tests/cli.rs", "id": "parse_prints_the_ast" },
+        { "implementation": "php", "test": "packages/php/tests/CliTest.php", "id": "testParsePrintsAstJson" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/CliTest.php", "id": "testParsePrintsTheAst" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_parse_writes_the_ast_json" }
+      ]
+    },
+    {
+      "id": "cli-format",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/command.test.ts", "id": "template-language format › prints the formatted text without a trailing newline" },
+        { "implementation": "go", "test": "packages/go/cmd/template/main_test.go", "id": "TestFormatCommand" },
+        { "implementation": "rust", "test": "packages/rust/tests/cli.rs", "id": "format_prints_the_formatted_text_and_errors_exit_with_status_2" },
+        { "implementation": "php", "test": "packages/php/tests/CliTest.php", "id": "testFormatPrintsTheFormattedText" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/CliTest.php", "id": "testFormatPrintsTheFormattedText" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_format_writes_the_formatted_text_without_a_newline" }
+      ]
+    },
+    {
+      "id": "parse-spans",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "spans › counts bytes, not code units" },
+        { "implementation": "go", "test": "packages/go/parser/parser_test.go", "id": "TestSpansAreBytes" },
+        { "implementation": "rust", "test": "packages/rust/tests/parser.rs", "id": "spans_count_bytes" },
+        { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testSpansCountBytes" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testParseCountsSpansInBytes" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_error_positions_are_bytes" }
+      ]
+    },
+    {
+      "id": "delimiters",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "delimiters › accepts the engine option and the directive" },
+        { "implementation": "go", "test": "packages/go/parser/parser_test.go", "id": "TestDelimiters" },
+        { "implementation": "rust", "test": "packages/rust/tests/parser.rs", "id": "delimiters_come_from_the_option_and_the_directive" },
+        { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testDelimitersOptionAndDirective" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testDelimitersOptionIsUsed" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_delimiter_directive" }
+      ]
+    },
+    {
+      "id": "delimiter-argument-error",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "delimiters › rejects a delimiter option that is not a delimiter pair with an argument error (ERR-13)" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestInvalidDelimiterIsArgumentError" },
+        { "implementation": "rust", "test": "packages/rust/tests/delimiters.rs", "id": "an_engine_with_an_invalid_delimiter_option_returns_an_argument_error" },
+        { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testAnInvalidDelimiterOptionIsAnArgumentError" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testInvalidDelimitersOfAnEngineAreAnArgumentError" },
+        { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_an_invalid_delimiter_option_is_a_value_error" }
+      ]
+    },
+    {
+      "id": "analysis",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "syntax analysis › classifies every part of every tag kind" },
+        { "implementation": "go", "test": "packages/go/parser/analyze_test.go", "id": "TestAnalyzeClassifiesEveryPartOfEveryTagKind" },
+        { "implementation": "rust", "test": "packages/rust/tests/analyze.rs", "id": "classifies_every_part_of_every_tag_kind" },
+        { "implementation": "php", "test": "packages/php/tests/Parser/AnalyzeTest.php", "id": "testClassifiesEveryPartOfEveryTagKind" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/AnalyzeTest.php", "id": "testClassifiesEveryPartOfEveryTagKind" },
+        { "implementation": "python", "test": "packages/python/tests/test_analysis.py", "id": "test_classifies_every_part_of_every_tag_kind" }
+      ]
+    },
+    {
+      "id": "bound-data",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/value/bound.test.ts", "id": "bound data (VAL-22) › renders a bound map with the same bytes as the host map (RT-61)" },
+        { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestBoundMapRendersTheBytesOfTheHostMap" },
+        { "implementation": "rust", "test": "packages/rust/tests/bound.rs", "id": "a_bound_map_renders_the_bytes_of_the_host_map" },
+        { "implementation": "php", "test": "packages/php/tests/Value/BoundMapTest.php", "id": "testBoundMapRendersTheBytesOfTheHostMap" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/BoundMapTest.php", "id": "testBoundMapRendersTheBytesOfTheHostMap" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_bound_maps" }
+      ]
+    },
+    {
+      "id": "bound-data-merge",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/value/bound.test.ts", "id": "bound data (VAL-22) › merges by the precedence of RT-26 and keeps the position of the first map" },
+        { "implementation": "go", "test": "packages/go/value/bound_test.go", "id": "TestMergeKeepsThePositionOfTheFirstMap" },
+        { "implementation": "rust", "test": "packages/rust/tests/bound.rs", "id": "merge_follows_the_precedence_of_rt_26" },
+        { "implementation": "php", "test": "packages/php/tests/Value/BoundMapTest.php", "id": "testMergeFollowsThePrecedenceOfRt26" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/BoundMapTest.php", "id": "testMergeFollowsThePrecedenceOfRt26" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_bound_maps" }
+      ]
+    },
+    {
+      "id": "host-binding-numbers",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "numbers › checks the value, not the host type or the JSON spelling (VAL-2)" },
+        { "implementation": "go", "test": "packages/go/host_binding_test.go", "id": "TestNumbersAreCheckedByValue" },
+        { "implementation": "rust", "test": "packages/rust/tests/value.rs", "id": "binding_checks_the_numeric_value_and_not_its_spelling" },
+        { "implementation": "php", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testNumbersAreCheckedByValue" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/HostBindingTest.php", "id": "testNumbersAreCheckedByValue" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_bind_rules" }
+      ]
+    },
+    {
+      "id": "invalid-text",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "strings and keys › rejects text that is not well-formed UTF-16 (VAL-13, VAL-17)" },
+        { "implementation": "go", "test": "packages/go/host_binding_test.go", "id": "TestKeysAndJSONTextAreCheckedAsUnicode" },
+        { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "formats_bytes_and_reports_bytes_that_are_not_utf8_as_a_parse_error" },
+        { "implementation": "php", "test": "packages/php/tests/Utf8Test.php", "id": "testNamedCases" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testRenderRejectsAStringThatIsNotUtf8" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_bind_rules" }
+      ]
+    },
+    {
+      "id": "invalid-json",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "JSON text › reports text that is not one JSON document as E_DATA_INVALID_JSON (VAL-12)" },
+        { "implementation": "go", "test": "packages/go/load_failure_test.go", "id": "TestJSONTextThatIsNotOneDocument" },
+        { "implementation": "rust", "test": "packages/rust/tests/load_failures.rs", "id": "text_that_is_not_one_json_document_is_invalid_json" },
+        { "implementation": "php", "test": "packages/php/tests/LoadFailureTest.php", "id": "testTextThatIsNotOneJsonDocumentIsInvalidJson" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/LoadFailureTest.php", "id": "testJsonTextThatIsNotOneDocumentIsInvalidJson" },
+        { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_text_that_is_not_one_json_document_is_invalid_json" }
+      ]
+    },
+    {
+      "id": "host-values",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-values.test.ts", "id": "host arguments and native object equality › renders arguments.tpl (VAL-21, EXP-39)" },
+        { "implementation": "go", "test": "packages/go/host_values_test.go", "id": "TestHostArgumentsAndNativeEquality" },
+        { "implementation": "rust", "test": "packages/rust/tests/host_values.rs", "id": "host_arguments_and_native_equality_match_the_shared_fixture" },
+        { "implementation": "php", "test": "packages/php/tests/Value/HostValuesTest.php", "id": "testRendersTheSharedFixture" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/HostValuesTest.php", "id": "testRendersTheSharedFixture" },
+        { "implementation": "python", "test": "packages/python/tests/test_object_calls.py", "id": "test_host_arguments_and_native_object_equality" }
+      ]
+    },
+    {
+      "id": "object-calls",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/program.test.ts", "id": "program › binds the original instance and calls its public method" },
+        { "implementation": "go", "test": "packages/go/render/object_calls_test.go", "id": "TestAssignedObjectRetainsPublicFieldsAndMethods" },
+        { "implementation": "rust", "test": "packages/rust/tests/object_calls.rs", "id": "native_instance_member_and_method_are_rendered_without_copying" },
+        { "implementation": "php", "test": "packages/php/tests/ObjectCallsTest.php", "id": "testAssignedObjectRetainsPublicFieldsAndMethods" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testRenderRetainsAnObjectWithItsPublicMembers" },
+        { "implementation": "python", "test": "packages/python/tests/test_object_calls.py", "id": "test_member_call_class_call_and_public_field" }
+      ]
+    },
+    {
+      "id": "host-function-failures",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › reports host function failures at the call" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestHostFunctions" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "engine_reports_host_failures_and_limits" },
+        { "implementation": "php", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testHostExceptionsKeepTheirMessage" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/HostBindingTest.php", "id": "testHostExceptionsKeepTheirMessage" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_host_functions_and_limits" }
+      ]
+    },
+    {
+      "id": "limits",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › applies the iteration limit" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestLimits" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "engine_reports_host_failures_and_limits" },
+        { "implementation": "php", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testConfiguredExpressionDepthLimitIsApplied" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testLimitsAreApplied" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_host_functions_and_limits" }
+      ]
+    },
+    {
+      "id": "functions-date",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/functions/functions.test.ts", "id": "date › parses offsets and formats civil dates" },
+        { "implementation": "go", "test": "packages/go/functions/functions_test.go", "id": "TestDate" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "date_parsing_and_formatting" },
+        { "implementation": "php", "test": "packages/php/tests/Functions/FunctionsTest.php", "id": "testDateOffsetsAndFormatting" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/HostBindingTest.php", "id": "testDateWithAMultibyteTimeFailsWithoutAbortingThePhpProcess" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_number_and_date_functions" }
+      ]
+    },
+    {
+      "id": "filesystem-loader-failures",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "loader failures › reports an unreadable regular file as E_LOAD_FAILED and a directory as E_LOAD_NOT_FOUND (RT-10)" },
+        { "implementation": "go", "test": "packages/go/load_failure_test.go", "id": "TestFilesystemLoaderFailures" },
+        { "implementation": "rust", "test": "packages/rust/tests/load_failures.rs", "id": "the_filesystem_loader_separates_missing_and_unreadable_files" },
+        { "implementation": "php", "test": "packages/php/tests/LoadFailureTest.php", "id": "testTheFilesystemLoaderSeparatesMissingAndUnreadableFiles" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/LoadFailureTest.php", "id": "testTheFilesystemLoaderSeparatesMissingAndUnreadableFiles" },
+        { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_the_filesystem_loader_separates_missing_and_unreadable_files" }
+      ]
+    },
+    {
+      "id": "format-delimiters",
+      "kind": "feature",
+      "profile": "runtime",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/format.test.ts", "id": "format › formats with the delimiter option" },
+        { "implementation": "go", "test": "packages/go/format/format_test.go", "id": "TestFormat" },
+        { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "formats_with_the_delimiter_option" },
+        { "implementation": "php", "test": "packages/php/tests/Format/FormatterTest.php", "id": "testFormatsWithTheDelimiterOption" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/FormatTest.php", "id": "testFormatsWithTheDelimiterOption" },
+        { "implementation": "python", "test": "packages/python/tests/test_format.py", "id": "test_formats_with_the_delimiter_option" }
+      ]
+    },
+    {
+      "id": "loader-errors",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "loader failures › reports a throwing loader as E_LOAD_FAILED at the entry template (RT-9, ERR-6)" },
+        { "implementation": "go", "test": "packages/go/load_failure_test.go", "id": "TestLoaderErrorsAreLoadFailures" },
+        { "implementation": "rust", "test": "packages/rust/tests/load_failures.rs", "id": "a_loader_error_is_a_load_failure" },
+        { "implementation": "php", "test": "packages/php/tests/LoadFailureTest.php", "id": "testALoaderExceptionIsALoadFailureAtTheEntryTemplate" },
+        { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_a_loader_error_is_a_load_failure" }
+      ]
+    },
+    {
+      "id": "loaders",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › renders a template from a map loader" },
+        { "implementation": "go", "test": "packages/go/loader/loader_test.go", "id": "TestLoaders" },
+        { "implementation": "rust", "test": "packages/rust/tests/loader_files.rs", "id": "the_filesystem_loader_keeps_no_file_open" },
+        { "implementation": "php", "test": "packages/php/tests/LoadFailureTest.php", "id": "testALoaderExceptionIsALoadFailureAtTheIncludeTag" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_include_resolves_against_the_current_template" }
+      ]
+    },
+    {
+      "id": "artifact-refresh",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › supports development and immutable artifact refresh policies" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestArtifactRefreshPolicies" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "artifact_refresh_policies_are_independent_of_rendering" },
+        { "implementation": "php", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testDevelopmentRefreshesOnEveryRender" },
+        { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_artifact_refresh_policies" }
+      ]
+    },
+    {
+      "id": "page-cache",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/page-cache.test.ts", "id": "PageCache › expires positive TTLs and keeps zero and null forever" },
+        { "implementation": "go", "test": "packages/go/cache/page_cache_test.go", "id": "TestPageCacheTTL" },
+        { "implementation": "rust", "test": "packages/rust/tests/page_cache.rs", "id": "ttl_zero_and_null_are_permanent" },
+        { "implementation": "php", "test": "packages/php/tests/PageCacheTest.php", "id": "testPositiveTtlExpiresAndZeroOrNullArePermanent" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_page_cache" }
+      ]
+    },
+    {
+      "id": "number-to-string",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/value/number.test.ts", "id": "numberToString › follows the ECMAScript layout" },
+        { "implementation": "go", "test": "packages/go/value/value_test.go", "id": "TestNumberToString" },
+        { "implementation": "rust", "test": "packages/rust/tests/value.rs", "id": "number_to_string_follows_the_ecmascript_layout" },
+        { "implementation": "php", "test": "packages/php/tests/Value/NumberTest.php", "id": "testToTextFollowsTheEcmascriptLayout" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_numbers_follow_ecmascript_tostring" }
+      ]
+    },
+    {
+      "id": "truthiness",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/value/value.test.ts", "id": "truthiness › treats only the listed values as falsy" },
+        { "implementation": "go", "test": "packages/go/value/value_test.go", "id": "TestTruthinessAndEquality" },
+        { "implementation": "rust", "test": "packages/rust/tests/value.rs", "id": "truthiness_equality_and_ordering" },
+        { "implementation": "php", "test": "packages/php/tests/Value/ValueTest.php", "id": "testTruthiness" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_operators" }
+      ]
+    },
+    {
+      "id": "function-arity",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/functions/functions.test.ts", "id": "arity table › declares minimum and maximum arguments for every built-in" },
+        { "implementation": "go", "test": "packages/go/functions/functions_test.go", "id": "TestArityTable" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "builtins_declare_arity" },
+        { "implementation": "php", "test": "packages/php/tests/Functions/FunctionsTest.php", "id": "testArityTable" },
+        { "implementation": "python", "test": "packages/python/tests/test_function_contract.py", "id": "test_the_registry_has_the_canonical_names_and_argument_ranges" }
+      ]
+    },
+    {
+      "id": "format-unchanged",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/format.test.ts", "id": "format › reports an unchanged source" },
+        { "implementation": "go", "test": "packages/go/format/format_test.go", "id": "TestFormat" },
+        { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "reports_an_unchanged_source_and_never_changes_a_comment" },
+        { "implementation": "php", "test": "packages/php/tests/Format/FormatterTest.php", "id": "testReportsAnUnchangedSource" },
+        { "implementation": "python", "test": "packages/python/tests/test_format.py", "id": "test_reports_an_unchanged_source" }
+      ]
+    },
+    {
+      "id": "format-indentation",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/indent.test.ts", "id": "indentation › indents HTML elements and template blocks by two spaces" },
+        { "implementation": "go", "test": "packages/go/format/format_test.go", "id": "TestIndentation" },
+        { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "indents_html_elements_and_template_blocks" },
+        { "implementation": "php", "test": "packages/php/tests/Format/IndentTest.php", "id": "testIndentsHtmlElementsAndTemplateBlocksByTwoSpaces" },
+        { "implementation": "python", "test": "packages/python/tests/test_format.py", "id": "test_indents_html_elements_and_template_blocks_by_two_spaces" }
+      ]
+    },
+    {
+      "id": "format-expression",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/expression.test.ts", "id": "joinTokens › joins [[\"a\",\"variable\"],[\"+\",\"operator\"],[\"b\",\"variable\"]]" },
+        { "implementation": "go", "test": "packages/go/format/format_test.go", "id": "TestJoinTokens" },
+        { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "applies_the_expression_spacing_of_the_style" },
+        { "implementation": "php", "test": "packages/php/tests/Format/ExpressionTest.php", "id": "testJoinsTokens" },
+        { "implementation": "python", "test": "packages/python/tests/test_format.py", "id": "test_joins_tokens_with_the_separators_of_the_style" }
+      ]
+    },
+    {
+      "id": "format-invariant",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/invariant.test.ts", "id": "safety invariant › finds the conformance inputs" },
+        { "implementation": "go", "test": "packages/go/format/format_test.go", "id": "TestInvariantOverConformanceInputs" },
+        { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "holds_the_invariant_and_idempotence_over_every_case" },
+        { "implementation": "php", "test": "packages/php/tests/Format/InvariantTest.php", "id": "testHoldsTheInvariant" },
+        { "implementation": "python", "test": "packages/python/tests/test_format_cases.py", "id": "test_holds_the_invariant_and_idempotence_over_every_case_template" }
+      ]
+    },
+    {
+      "id": "compiler-interface",
+      "kind": "feature",
+      "profile": "interface",
+      "bindings": [
+        { "implementation": "go", "test": "packages/go/compiler_interface_test.go", "id": "TestCompilerRuntimeInterface" },
+        { "implementation": "rust", "test": "packages/rust/tests/compiler_interface.rs", "id": "runtime_declarations_match_manifest" },
+        { "implementation": "php", "test": "packages/php/tests/CompilerInterfaceTest.php", "id": "testRuntimeDeclarationsMatchManifest" },
+        { "implementation": "python", "test": "packages/python/tests/test_compiler_interface.py", "id": "test_program_and_engine" }
+      ]
+    },
+    {
+      "id": "bound-map-interface",
+      "kind": "feature",
+      "profile": "interface",
+      "bindings": [
+        { "implementation": "go", "test": "packages/go/compiler_interface_test.go", "id": "TestBoundMapInterface" },
+        { "implementation": "rust", "test": "packages/rust/tests/compiler_interface.rs", "id": "bound_map_declarations_match_manifest" },
+        { "implementation": "php", "test": "packages/php/tests/CompilerInterfaceTest.php", "id": "testBoundMapDeclarationsMatchManifest" },
+        { "implementation": "python", "test": "packages/python/tests/test_compiler_interface.py", "id": "test_bound_map" }
+      ]
+    },
+    {
+      "id": "export-list",
+      "kind": "feature",
+      "profile": "export-list",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/smoke.test.ts", "id": "entry points › export the documented API" },
+        { "implementation": "python", "test": "packages/python/tests/test_exports.py", "id": "test_every_exported_name_resolves" }
+      ]
+    },
+    {
+      "id": "package-entries",
+      "kind": "feature",
+      "profile": "export-list",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/value/bound-formats.test.ts", "id": "bound maps across entry points and module formats (VAL-22) › renders a bound map of every entry with the program of every other entry" },
+        { "implementation": "python", "test": "packages/python/tests/test_package_data.py", "id": "test_package_data_keys_name_importable_packages" }
+      ]
+    },
+    {
+      "id": "template-fmt",
+      "kind": "feature",
+      "profile": "language-service",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/cli.test.ts", "id": "template-fmt › prints the formatted text of one file" }
+      ]
+    },
+    {
+      "id": "editor-documents",
+      "kind": "feature",
+      "profile": "language-service",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/document.test.ts", "id": "constructs › returns the tags of an if construct in source order" }
+      ]
+    },
+    {
+      "id": "editor-fixtures",
+      "kind": "feature",
+      "profile": "language-service",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/editor.test.ts", "id": "editor fixtures › has fixtures" }
+      ]
+    },
+    {
+      "id": "editor-template-root",
+      "kind": "feature",
+      "profile": "language-service",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/root.test.ts", "id": "template root › is the directory of the marker in the nearest ancestor" }
+      ]
+    },
+    {
+      "id": "lexical-tables",
+      "kind": "feature",
+      "profile": "language-service",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/lexical-tables.test.ts", "id": "lexical tables › every listed entry is still in the sources" }
+      ]
+    },
+    {
+      "id": "concurrent-renders",
+      "kind": "feature",
+      "profile": "concurrent-renders",
+      "bindings": [
+        { "implementation": "go", "test": "packages/go/concurrency_test.go", "id": "TestConcurrentRendersShareOneProgram" },
+        { "implementation": "python", "test": "packages/python/tests/test_concurrency.py", "id": "test_concurrent_renders_share_one_program" }
+      ]
+    },
+    {
+      "id": "concurrent-bound-map",
+      "kind": "feature",
+      "profile": "concurrent-renders",
+      "bindings": [
+        { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },
+        { "implementation": "python", "test": "packages/python/tests/test_concurrency.py", "id": "test_concurrent_renders_read_one_bound_map" }
       ]
     }
   ]

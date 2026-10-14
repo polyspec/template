@@ -52,6 +52,25 @@ final class ParserTest extends TestCase
         );
     }
 
+    /**
+     * A delimiter option that is not a delimiter pair is the argument error of PHP, not an ERR-1 error (ERR-13).
+     */
+    public function testAnInvalidDelimiterOptionIsAnArgumentError(): void
+    {
+        $runs = [
+            static fn () => AstProgram::parse('x', 't.tpl', ['delimiters' => '[']),
+            static fn () => new AstProgram(null, ['delimiters' => '[[[']),
+        ];
+        foreach ($runs as $run) {
+            try {
+                $run();
+                self::fail('no argument error');
+            } catch (\InvalidArgumentException $error) {
+                self::assertStringContainsString('is not a delimiter pair', $error->getMessage());
+            }
+        }
+    }
+
     public function testBlockStructureErrors(): void
     {
         self::assertSame('E_PARSE_UNEXPECTED_CLOSE', self::codeOf(static fn () => AstProgram::parse('{/}', 't.tpl')));
