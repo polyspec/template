@@ -88,9 +88,9 @@ function blockEnd(lines, start) {
 
 // ---------------------------------------------------------------- TypeScript
 
-group = 'template-ts';
+group = 'packages/ts';
 
-const typescriptRoot = join(root, 'packages/template-ts/src');
+const typescriptRoot = join(root, 'packages/ts/src');
 const typescriptEntries = ['index.ts', 'render.ts', 'node/index.ts'];
 
 // Resolves a module specifier of a file to a source path inside the package.
@@ -201,9 +201,9 @@ for (const symbol of typescriptSurface()) checkTypescriptSymbol(symbol.file, sym
 
 // ---------------------------------------------------------------- Go
 
-group = 'template-go';
+group = 'packages/go';
 
-const goRoot = join(root, 'packages/template-go');
+const goRoot = join(root, 'packages/go');
 const goDeclaration = /^(?:func|type|var|const)\s+([A-Z]\w*)/;
 const goMethod = /^func\s+\([^)]*?\*?(\w+)\)\s+([A-Z]\w*)/;
 
@@ -264,9 +264,9 @@ if (existsSync(goRoot)) {
 
 // ---------------------------------------------------------------- PHP
 
-group = 'template-php';
+group = 'packages/php';
 
-// The classes of the API table of packages/template-php/README.md.
+// The classes of the API table of packages/php/README.md.
 const phpClasses = [
   'Engine.php',
   'TemplateError.php',
@@ -280,9 +280,9 @@ const phpType = /^\s*(?:final\s+|abstract\s+)?(class|interface|trait|enum)\s+([A
 const phpMethod = /^\s*public\s+(?:static\s+)?function\s+([A-Za-z_]\w*)/;
 
 for (const relativePath of phpClasses) {
-  const file = join(root, 'packages/template-php/src', relativePath);
+  const file = join(root, 'packages/php/src', relativePath);
   if (!existsSync(file)) {
-    findings.push(`packages/template-php/src/${relativePath}:1: the file of a public class does not exist`);
+    findings.push(`packages/php/src/${relativePath}:1: the file of a public class does not exist`);
     continue;
   }
   const lines = readFileSync(file, 'utf8').split('\n');
@@ -299,13 +299,13 @@ for (const relativePath of phpClasses) {
 
 // ---------------------------------------------------------------- Rust
 
-group = 'template-rust';
+group = 'packages/rust';
 
-const rustLibrary = join(root, 'packages/template-rust/src/lib.rs');
+const rustLibrary = join(root, 'packages/rust/src/lib.rs');
 if (existsSync(rustLibrary)) {
   count();
   if (!readFileSync(rustLibrary, 'utf8').includes('#![deny(missing_docs)]')) {
-    findings.push('packages/template-rust/src/lib.rs:1: the crate does not set #![deny(missing_docs)]');
+    findings.push('packages/rust/src/lib.rs:1: the crate does not set #![deny(missing_docs)]');
   }
 }
 
@@ -326,9 +326,9 @@ function startsWithComment(file) {
 }
 
 const fileGroups = [
-  ['packages/template-ts/src', ['.ts']],
-  ['packages/template-rust/src', ['.rs']],
-  ['packages/template-php/src', ['.php']],
+  ['packages/ts/src', ['.ts']],
+  ['packages/rust/src', ['.rs']],
+  ['packages/php/src', ['.php']],
 ];
 for (const [directory, extensions] of fileGroups) {
   for (const file of sources(directory, extensions)) {
@@ -340,7 +340,7 @@ for (const [directory, extensions] of fileGroups) {
 
 // A Go package carries its comment on one of its files.
 const goPackages = new Set(
-  sources('packages/template-go', ['.go'])
+  sources('packages/go', ['.go'])
     .filter(file => !file.endsWith('_test.go'))
     .map(file => dirname(file)),
 );

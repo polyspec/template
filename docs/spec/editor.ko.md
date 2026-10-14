@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-editor -->
-<!-- source-sha256: 6cc83d95dcf269a1403a7713cfb43cf71733fcd231e1df99ba79cfd48e0a1693 -->
+<!-- source-sha256: 7b6531eb27cb5929b89114e62be89a5452df6e5f89288286e28a54dcbd47247f -->
 # 에디터 지원
 
 [English](/spec/editor).
@@ -96,7 +96,7 @@
 
 **EDT-18** 파일 `template-root.json`은 템플릿 root, 곧 그 디렉터리를 선언한다. 문서의 root는 문서의 가장 가까운 상위 디렉터리에 있는 marker가 선언하며, 문서의 디렉터리부터 파일시스템 root까지 찾는다. 일반 파일만 marker다. marker는 호출자가 root를 주지 않는 도구, 곧 언어 서비스, LSP 서버, `options.location`을 통한 CodeMirror 어댑터를 위한 것이다. 컴파일러는 `root` 인자를, 파일시스템 로더는 그 root를 유지하고, map 로더와 artifact 로더는 바뀌지 않으며, 적합성 명령은 `--root`(CNF-4)를 유지한다. 에디터는 marker를 기준으로 경로를 해석하고 host의 loader root를 검사하지 않는다. host의 loader root는 host 자신의 선언이며, 둘의 차이는 host의 선택이다.
 
-**EDT-19** marker의 내용은 `{"schema": 1}`이다. 곧 유일한 키가 숫자 1인 `schema`인 객체 하나의 JSON 문서다. JSON 문서 하나가 아닌 텍스트, 객체가 아닌 값, `schema`가 없는 것, 다른 `schema` 값, 알 수 없는 키는 각각 marker 텍스트 전체에 걸친 오류 `E_ROOT_INVALID`이며 marker에 보고된다(`TemplateDocument.root.diagnostics`, EDT-14에 따라 marker의 URI에 게시). 유효하지 않은 marker는 root를 선언하지 않는다. `packages/template-language/tests/root-marker/vectors.json`의 vector가 marker 텍스트를 받아들이고 거부한다.
+**EDT-19** marker의 내용은 `{"schema": 1}`이다. 곧 유일한 키가 숫자 1인 `schema`인 객체 하나의 JSON 문서다. JSON 문서 하나가 아닌 텍스트, 객체가 아닌 값, `schema`가 없는 것, 다른 `schema` 값, 알 수 없는 키는 각각 marker 텍스트 전체에 걸친 오류 `E_ROOT_INVALID`이며 marker에 보고된다(`TemplateDocument.root.diagnostics`, EDT-14에 따라 marker의 URI에 게시). 유효하지 않은 marker는 root를 선언하지 않는다. `packages/language/tests/root-marker/vectors.json`의 vector가 marker 텍스트를 받아들이고 거부한다.
 
 **EDT-20** 파싱되는 텍스트에서 모든 include 경로와 경로 토큰을 가진 block 태그의 모든 block 경로는 해석되지 않으면 그 태그에 걸친 진단 하나를 받는다:
 
@@ -113,4 +113,4 @@
 
 ## 적합성
 
-**EDT-17** `packages/template-language/tests/editor` 아래의 에디터 픽스처는 각 템플릿에 대해 기대하는 진단, 토큰, 태그 범위, 접기 범위, 지정한 위치의 강조와 짝 태그, 모든 줄의 들여쓰기, 포맷한 텍스트를 준다. 픽스처는 그 디렉터리의 marker `template-root.json` 아래에 있으며, 모든 어댑터는 그 파일 경로로 연다. 언어 서비스, LSP 서버(표준 입력과 출력의 프로토콜로), CodeMirror 어댑터(`EditorState`로)는 위치를 변환한 뒤 같은 결과를 내야 한다.
+**EDT-17** `packages/language/tests/editor` 아래의 에디터 픽스처는 각 템플릿에 대해 기대하는 진단, 토큰, 태그 범위, 접기 범위, 지정한 위치의 강조와 짝 태그, 모든 줄의 들여쓰기, 포맷한 텍스트를 준다. 픽스처는 그 디렉터리의 marker `template-root.json` 아래에 있으며, 모든 어댑터는 그 파일 경로로 연다. 언어 서비스, LSP 서버(표준 입력과 출력의 프로토콜로), CodeMirror 어댑터(`EditorState`로)는 위치를 변환한 뒤 같은 결과를 내야 한다.

@@ -1,4 +1,4 @@
 go 1.27.2
 
-use ./packages/template-go
+use ./packages/go
 use ./tools/showcase/adapters/go

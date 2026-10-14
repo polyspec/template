@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { showcasePhpDirectory, showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
 import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
 import { checkLanguages } from './language-checks.mjs';
-import { phpString } from '../packages/template-compiler/backend-support.mjs';
+import { phpString } from '../packages/compiler/backend-support.mjs';
 import { phpProgramAutoload } from './php-program.mjs';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
@@ -106,8 +106,8 @@ import (
   "errors"
   "os"
   "testing"
-  template "github.com/polyspec/template/packages/template-go"
-  "github.com/polyspec/template/packages/template-go/value"
+  template "github.com/polyspec/template/packages/go"
+  "github.com/polyspec/template/packages/go/value"
 )
 func TestGeneratedProgram(t *testing.T) {
   assignBytes, err := os.ReadFile(${JSON.stringify(join(scenarioRoot, id, 'data.json'))}); if err != nil { t.Fatal(err) }
@@ -187,7 +187,7 @@ fn generated_${index}_matches() {
 }
 
 function checkPhp() {
-  const autoload = join(root, 'packages/template-php/vendor/autoload.php');
+  const autoload = join(root, 'packages/php/vendor/autoload.php');
   const phpFiles = id => readdirSync(generatedSource(id, 'php')).filter(name => name.endsWith('.php')).map(name => join(generatedSource(id, 'php'), name));
   const coverageSource = phpFiles(scenarios[0]).map(path => readFileSync(path, 'utf8')).join('\n');
   assert.match(coverageSource, /new RuntimeBindings\(\$context\)/);

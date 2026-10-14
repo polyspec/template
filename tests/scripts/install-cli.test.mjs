@@ -14,7 +14,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const SCRIPT = path.join(ROOT, 'scripts/install-cli.mjs');
 
 before(() => {
-  for (const name of ['template-ts', 'template-language']) {
+  for (const name of ['ts', 'language']) {
     const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mjs'), '--package', name], { cwd: ROOT, encoding: 'utf8' });
     assert.equal(build.status, 0, `the build of ${name} failed:\n${build.stdout}${build.stderr}`);
   }
@@ -37,7 +37,7 @@ test('install-cli writes a copy and a script without a symbolic link, and uninst
   const command = path.join(prefix, 'bin', 'template-fmt');
   const stats = lstatSync(command);
   assert.ok(stats.isFile() && (stats.mode & 0o111) !== 0, command);
-  const check = spawnSync(command, ['--check', path.join(ROOT, 'packages/template-language/tests/fixtures/expected')], { encoding: 'utf8' });
+  const check = spawnSync(command, ['--check', path.join(ROOT, 'packages/language/tests/fixtures/expected')], { encoding: 'utf8' });
   assert.equal(check.status, 0, `${check.stdout}${check.stderr}`);
   const uninstall = spawnSync(process.execPath, [SCRIPT, 'uninstall', '--prefix', prefix], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(uninstall.status, 0, uninstall.stderr);

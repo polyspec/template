@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
-  "contractDigest": "d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e",
-  "compilerDigest": "a89ed26b259edd3c2c257b94a27452a61f45bc063277a20fabaf0caf5d893fea",
+  "contractDigest": "c75c35bdf956018be512b3b7a3b68e367bb882f5890ec7f2806ccfb95ce2662b",
+  "compilerDigest": "8e9a860bd7d6a906113c557005b99230c2368cececbe5f9c68efaafd5f971ff9",
   "files": {
     "compiler_coverage.py": {
       "path": "compiler_coverage.py",

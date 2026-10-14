@@ -5,10 +5,10 @@
 //
 // - nodeWorkspace: an ES module directory whose node_modules holds copies of installed packages of this repository, so
 //   that tsc and Node.js resolve `@polyspec/template` from it as from the checkout. No symbolic link (AGENTS).
-// - rustWorkspace: a crate that depends on packages/template-rust by path, with the versions of its Cargo.lock and the
-//   rust-toolchain.toml of the repository; its tests build into the target of packages/template-rust, the target of this
+// - rustWorkspace: a crate that depends on packages/rust by path, with the versions of its Cargo.lock and the
+//   rust-toolchain.toml of the repository; its tests build into the target of packages/rust, the target of this
 //   checkout (T18.7).
-// - goWorkspace: a module that requires the module of packages/template-go and replaces it with that directory.
+// - goWorkspace: a module that requires the module of packages/go and replaces it with that directory.
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -16,8 +16,8 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const RUST = join(root, 'packages/template-rust');
-const GO = join(root, 'packages/template-go');
+const RUST = join(root, 'packages/rust');
+const GO = join(root, 'packages/go');
 export const CARGO = resolve(process.env.HOME, '.cargo/bin/cargo');
 
 /** A new directory `template-<name>-*` of the system temporary directory. */
@@ -49,9 +49,9 @@ function lockPackages(text) {
 }
 
 /**
- * A temporary crate `template-generated-check` that depends on packages/template-rust by path and on its serde_json;
+ * A temporary crate `template-generated-check` that depends on packages/rust by path and on its serde_json;
  * its integration tests go into its directory `tests`. Its Cargo.lock starts as a copy of the lock of
- * packages/template-rust; cargo adds the crate and drops the dependencies that only the tests of template-rust use, and
+ * packages/rust; cargo adds the crate and drops the dependencies that only the tests of packages/rust use, and
  * the workspace fails when cargo chose any other package or version. Returns the directory, its manifest, the path of
  * the integration test `<test>.rs` and the environment of its cargo commands.
  */
@@ -81,24 +81,24 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   // --offline: the crates come from the registry of CARGO_HOME, into which make install downloads every Cargo.lock.
   if (metadata.error || metadata.status !== 0) {
     rmSync(directory, { recursive: true, force: true });
-    throw new Error(`cargo metadata --offline of ${directory} failed; a crate of packages/template-rust/Cargo.lock is not in the registry of CARGO_HOME, run make install: ${metadata.error?.message ?? metadata.stderr}`);
+    throw new Error(`cargo metadata --offline of ${directory} failed; a crate of packages/rust/Cargo.lock is not in the registry of CARGO_HOME, run make install: ${metadata.error?.message ?? metadata.stderr}`);
   }
   const known = lockPackages(original);
   const chosen = [...lockPackages(readFileSync(join(directory, 'Cargo.lock'), 'utf8'))].filter(([key]) => !key.startsWith('template-generated-check '));
   // A package keeps its version, source and checksum; its dependencies can only lose those that only the tests of
-  // packages/template-rust use, such as syn of polyspec-template.
+  // packages/rust use, such as syn of polyspec-template.
   const other = chosen.filter(([key, entry]) => {
     const original = known.get(key);
     return !original || original.checksum !== entry.checksum || entry.dependencies.some(dependency => !original.dependencies.includes(dependency));
   }).map(([key]) => key);
   if (other.length) {
     rmSync(directory, { recursive: true, force: true });
-    throw new Error(`the lock of ${directory} holds packages that packages/template-rust/Cargo.lock does not: ${other.join(', ')}`);
+    throw new Error(`the lock of ${directory} holds packages that packages/rust/Cargo.lock does not: ${other.join(', ')}`);
   }
   return { directory, manifest, env, targetDirectory: env.CARGO_TARGET_DIR, test: file => join(directory, 'tests', `${file}.rs`) };
 }
 
-/** A temporary Go module that uses the module of packages/template-go from that directory. */
+/** A temporary Go module that uses the module of packages/go from that directory. */
 export function goWorkspace(name) {
   const directory = temporaryDirectory(name);
   const module = readFileSync(join(GO, 'go.mod'), 'utf8');

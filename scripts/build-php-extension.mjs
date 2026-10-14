@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds the C PHP extension of packages/template-php-ext and publishes its shared library (T21.1):
+// Builds the C PHP extension of packages/php-ext and publishes its shared library (T21.1):
 //
 //   node scripts/build-php-extension.mjs <source directory> <destination>
 //   node scripts/build-php-extension.mjs --arginfo <source directory>

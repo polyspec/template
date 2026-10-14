@@ -18,9 +18,9 @@ import { compareText } from '../../scripts/compare-text.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const BUILD = path.join(ROOT, 'scripts/build-package.mjs');
-const PACKAGES = ['template-ts', 'template-language', 'template-lsp', 'template-codemirror', 'template-vscode'];
+const PACKAGES = ['ts', 'language', 'lsp', 'codemirror', 'vscode'];
 // The packages of this repository that the packages depend on, in the order of their dependencies.
-const PREREQUISITES = ['template-ts', 'template-language', 'template-lsp'];
+const PREREQUISITES = ['ts', 'language', 'lsp'];
 
 before(() => {
   for (const name of PREREQUISITES) {
@@ -90,14 +90,14 @@ function temporary(t) {
 
 // The limits of the build tests protect against a hang: a build, a reader or an install that never ends. A limit is
 // 100 times the expected time of its test, and a slow pass on a loaded machine is a pass; the limits do not judge speed.
-// The template-ts reader has an expected time of 33 s, the mean of three runs alone on a loaded machine (28.6 s, 32.3 s,
+// The ts reader has an expected time of 33 s, the mean of three runs alone on a loaded machine (28.6 s, 32.3 s,
 // 37.9 s). The other limits are 100 times the elapsed time of their test in one run of tests/scripts under load (about
-// 60). template-vscode keeps the runner default, which is 24 times its measured time.
+// 60). vscode keeps the runner default, which is 24 times its measured time.
 const LIMITS_MS = {
-  'template-ts': { reader: 3_300_000, unchanged: 1_160_000 },
-  'template-language': { reader: 1_670_000, unchanged: 650_000 },
-  'template-lsp': { reader: 600_000, unchanged: 340_000 },
-  'template-codemirror': { reader: 1_110_000, unchanged: 1_110_000 },
+  'ts': { reader: 3_300_000, unchanged: 1_160_000 },
+  'language': { reader: 1_670_000, unchanged: 650_000 },
+  'lsp': { reader: 600_000, unchanged: 340_000 },
+  'codemirror': { reader: 1_110_000, unchanged: 1_110_000 },
 };
 
 for (const name of PACKAGES) {
@@ -129,11 +129,11 @@ for (const name of PACKAGES) {
 }
 
 test('the inputs of a package include the builds of the workspace packages that it depends on', () => {
-  const result = spawnSync(process.execPath, [BUILD, '--package', 'template-vscode', '--print-inputs'], { cwd: ROOT, encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [BUILD, '--package', 'vscode', '--print-inputs'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
   const inputs = result.stdout.split('\n');
-  for (const file of ['packages/template-vscode/src/extension.ts', 'package-lock.json', 'packages/template-lsp/dist/main.mjs', 'packages/template-language/dist/index.mjs', 'packages/template-ts/dist/index.mjs']) {
-    assert.ok(inputs.includes(file), `the inputs of template-vscode do not include ${file}`);
+  for (const file of ['packages/vscode/src/extension.ts', 'package-lock.json', 'packages/lsp/dist/main.mjs', 'packages/language/dist/index.mjs', 'packages/ts/dist/index.mjs']) {
+    assert.ok(inputs.includes(file), `the inputs of vscode do not include ${file}`);
   }
 });
 

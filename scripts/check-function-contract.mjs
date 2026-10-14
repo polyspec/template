@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { compareText } from './compare-text.mjs';
 
 const root = resolve(import.meta.dirname, '..');
-const contract = JSON.parse(readFileSync(resolve(root, 'packages/template-compiler/functions.json'), 'utf8'));
+const contract = JSON.parse(readFileSync(resolve(root, 'packages/compiler/functions.json'), 'utf8'));
 assert.equal(contract.schema, 1, 'function contract schema must be 1');
 assert.equal(contract.contractVersion, '0.0.1', 'function contract version must be 0.0.1');
 assert.deepEqual(Object.keys(contract), ['schema', 'contractVersion', 'syntax', 'canonical'], 'the function contract holds only its schema, version, syntax and canonical functions');
@@ -28,10 +28,10 @@ function pairs(source, expression, normalize = value => Number(value)) {
 }
 
 const files = {
-  typescript: ['packages/template-ts/src/functions/encoding.ts', 'packages/template-ts/src/functions/string.ts', 'packages/template-ts/src/functions/collection.ts', 'packages/template-ts/src/functions/number.ts', 'packages/template-ts/src/functions/date.ts'],
-  go: ['packages/template-go/functions/encoding.go', 'packages/template-go/functions/string.go', 'packages/template-go/functions/collection.go', 'packages/template-go/functions/number.go', 'packages/template-go/functions/date.go'],
-  rust: ['packages/template-rust/src/functions/encoding.rs', 'packages/template-rust/src/functions/string.rs', 'packages/template-rust/src/functions/collection.rs', 'packages/template-rust/src/functions/number.rs', 'packages/template-rust/src/functions/date.rs'],
-  python: ['packages/template-python/src/polyspec/template/functions.py'],
+  typescript: ['packages/ts/src/functions/encoding.ts', 'packages/ts/src/functions/string.ts', 'packages/ts/src/functions/collection.ts', 'packages/ts/src/functions/number.ts', 'packages/ts/src/functions/date.ts'],
+  go: ['packages/go/functions/encoding.go', 'packages/go/functions/string.go', 'packages/go/functions/collection.go', 'packages/go/functions/number.go', 'packages/go/functions/date.go'],
+  rust: ['packages/rust/src/functions/encoding.rs', 'packages/rust/src/functions/string.rs', 'packages/rust/src/functions/collection.rs', 'packages/rust/src/functions/number.rs', 'packages/rust/src/functions/date.rs'],
+  python: ['packages/python/src/polyspec/template/functions.py'],
 };
 const patterns = {
   typescript: [/([a-z][a-z0-9_]*):\s*\{\s*min:\s*(\d+),\s*max:\s*(Infinity|-?\d+)/gs],
@@ -42,7 +42,7 @@ const patterns = {
 
 // PHP answers for itself: the arities come from Registry::builtins() of the package, not from a reading of its source, so
 // the check follows the table whatever the formatting of the PHP files is.
-const php = spawnSync('php', ['-r', `require ${JSON.stringify(resolve(root, 'packages/template-php/vendor/autoload.php'))}; echo json_encode(array_map(static fn (array $f): array => [$f['min'], $f['max'] === PHP_INT_MAX ? -1 : $f['max']], Polyspec\\Template\\Functions\\Registry::builtins()));`], { encoding: 'utf8' });
+const php = spawnSync('php', ['-r', `require ${JSON.stringify(resolve(root, 'packages/php/vendor/autoload.php'))}; echo json_encode(array_map(static fn (array $f): array => [$f['min'], $f['max'] === PHP_INT_MAX ? -1 : $f['max']], Polyspec\\Template\\Functions\\Registry::builtins()));`], { encoding: 'utf8' });
 assert.equal(php.status, 0, `php could not list its functions: ${php.error?.message ?? php.stderr}`);
 const phpFound = new Map(Object.entries(JSON.parse(php.stdout)));
 assert.deepEqual([...phpFound.keys()].sort(), [...expected.keys()].sort(), 'php function names differ from contract');

@@ -4,11 +4,11 @@
 // outlives its own timeout.
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
-import { goString } from '../../packages/template-compiler/backend-support.mjs';
-import { compileSource } from '../../packages/template-compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../packages/template-compiler/type-manifest.mjs';
-import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
+import { goString } from '../../packages/compiler/backend-support.mjs';
+import { compileSource } from '../../packages/compiler/compiler.mjs';
+import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { parse } from '../../packages/ts/dist/index.mjs';
 import { caseTestFailures, firstDifference, generatedCases, runCaseTests, typeDefinitions } from './cases.mjs';
 import { stepProgress } from './bounded.mjs';
 import { root } from './drivers.mjs';
@@ -17,7 +17,7 @@ import { goWorkspace } from '../../scripts/temporary-workspace.mjs';
 // The time limit of one generated case test.
 const CASE_TIMEOUT_SECONDS = 30;
 
-// A module of the system temporary directory that uses the module of packages/template-go from that directory.
+// A module of the system temporary directory that uses the module of packages/go from that directory.
 const temporary = goWorkspace('generated-conformance-go');
 function errorObject(error) { return typeof error?.code === 'string' ? { code: error.code, template: error.template ?? 'input.tpl', line: error.line ?? 0, col: error.col ?? 0 } : null; }
 function parsedTemplates(testCase) { const templates = new Map(), pending = [[testCase.dir, '']]; while (pending.length) { const [directory, prefix] = pending.pop(); for (const entry of readdirSync(directory, { withFileTypes: true })) { const path = join(directory, entry.name), name = prefix ? `${prefix}/${entry.name}` : entry.name; if (entry.isDirectory()) pending.push([path, name]); else if (entry.isFile() && entry.name.endsWith('.tpl')) templates.set(name, parse(readFileSync(path), name, testCase.options)); } } return templates; }
@@ -47,7 +47,7 @@ try {
         ? `if runErr != nil { t.Fatal(runErr) }; if actual != ${q(testCase.expectedHtml)} { t.Fatalf("generated output differs: %q", actual) }`
         : `_ = actual; assertGeneratedError(t, runErr, ${q(testCase.expectedError.code)}, ${q(testCase.expectedError.template)}, ${testCase.expectedError.line}, ${testCase.expectedError.col})`;
       writeFileSync(join(directory, 'generated_test.go'), `package generated
-import ("encoding/base64"; "encoding/json"; "errors"; "testing"; template "github.com/polyspec/template/packages/template-go"; "github.com/polyspec/template/packages/template-go/errs"; "github.com/polyspec/template/packages/template-go/value")
+import ("encoding/base64"; "encoding/json"; "errors"; "testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/errs"; "github.com/polyspec/template/packages/go/value")
 func assertGeneratedError(t *testing.T, err error, code, name string, line, col int) { t.Helper(); if err == nil { t.Fatalf("expected %s", code) }; var te *errs.Error; if errors.As(err, &te) { if string(te.Code) != code || te.Template != name || te.Line != line || te.Col != col { t.Fatalf("expected %s %s:%d:%d, got %#v", code,name,line,col,te) }; return }; var be *value.BindError; if errors.As(err, &be) && string(be.Code) == code && name == "input.tpl" && line == 0 && col == 0 { return }; t.Fatalf("unexpected error: %T %v",err,err) }
 func generatedDefinitions(t *testing.T) map[string]template.DefineInput { var raw map[string]json.RawMessage; if err:=json.Unmarshal([]byte(${q(defineText)}),&raw);err!=nil{t.Fatal(err)}; result:=map[string]template.DefineInput{}; for name,encoded:=range raw { var path string; if json.Unmarshal(encoded,&path)==nil { result[name]=template.DefineInput{Template:path}; continue }; var entry struct{Template string \`json:"template"\`;Data any \`json:"data"\`;HTML *string \`json:"html"\`}; if err:=json.Unmarshal(encoded,&entry);err!=nil{t.Fatal(err)};result[name]=template.DefineInput{Template:entry.Template,Data:entry.Data,HTML:entry.HTML} }; return result }
 func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeString(${q(dataBase64)}); assign,runErr:=value.ParseJSON(data); if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(defineText)})) }; ${envText ? `if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(envText)})) };` : ''} var actual string; if runErr==nil { options:=template.RenderOptions{Define:generatedDefinitions(t)}; ${envText ? `var env template.Env; if err:=json.Unmarshal([]byte(${q(envText)}),&env);err!=nil{t.Fatal(err)}; options.Env=&env;` : ''} program,err:=NewGeneratedProgram(template.Options{});runErr=err;if runErr==nil{actual,runErr=program.Render("input.tpl",assign,options)} }; ${expectation} }

@@ -35,8 +35,8 @@ if (action === 'uninstall') {
   rmSync(next, { recursive: true, force: true });
   mkdirSync(next, { recursive: true });
   try {
-    const language = join(root, 'packages', 'template-language');
-    const template = join(root, 'packages', 'template-ts');
+    const language = join(root, 'packages', 'language');
+    const template = join(root, 'packages', 'ts');
     writeFileSync(join(next, 'package.json'), `${JSON.stringify({
       private: true,
       dependencies: { '@polyspec/template-language': `file:${language}`, '@polyspec/template': `file:${template}` },

@@ -39,10 +39,10 @@ A symbol of the public entry surface of a package carries a documentation commen
 
 | Package | Public entry surface |
 | --- | --- |
-| `template-ts` | The symbols re-exported from `src/index.ts`, `src/render.ts` and `src/node/index.ts`, and the public members of the classes among them |
-| `template-go` | The exported identifiers of the module root package, the subpackage types that its declarations name, and the exported methods of those types |
-| `template-php` | The classes of the API table of the package README and their public methods |
-| `template-rust` | Every public item, which the crate attribute `#![deny(missing_docs)]` makes the compiler check |
+| `packages/ts` | The symbols re-exported from `src/index.ts`, `src/render.ts` and `src/node/index.ts`, and the public members of the classes among them |
+| `packages/go` | The exported identifiers of the module root package, the subpackage types that its declarations name, and the exported methods of those types |
+| `packages/php` | The classes of the API table of the package README and their public methods |
+| `packages/rust` | Every public item, which the crate attribute `#![deny(missing_docs)]` makes the compiler check |
 
 A symbol that a package exports only so that another file of the same package can use it is internal and carries no documentation comment. Every source file starts with a comment naming what the file implements; a Go package carries that comment on one of its files.
 

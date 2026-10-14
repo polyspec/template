@@ -1,5 +1,5 @@
 {
-  "extends": "../../../packages/template-ts/tsconfig.json",
+  "extends": "../../../packages/ts/tsconfig.json",
   "compilerOptions": {
     "types": [
       "node"

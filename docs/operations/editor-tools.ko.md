@@ -1,17 +1,17 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: e9fc7b522919c5d27caeb320ddccbcc6a79a3aa43548a66dd0bc50e1ddc2f61a -->
+<!-- source-sha256: 2a31dbd2e1c39785c2c34fb1e8eaeb229289c5e622e06991126486777ba193b1 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
 
 네 TypeScript 패키지가 템플릿 작성을 지원한다.
 
-- `packages/template-language`(`@polyspec/template-language`): 언어 서비스 `openDocument()`([에디터 지원](/ko/spec/editor)), 포매터 `format()`([포맷](/ko/spec/formatting)), 명령줄 도구 `template-fmt`, 적합성 명령 `template-language`.
-- `packages/template-lsp`(`@polyspec/template-lsp`): 언어 서비스의 어댑터인 Language Server Protocol 서버 `template-lsp`.
-- `packages/template-codemirror`(`@polyspec/template-codemirror`): 언어 서비스의 결과를 CodeMirror 편집기에 등록하는 CodeMirror 6 확장 `template()`([CodeMirror 6 어댑터](#codemirror-6-어댑터)).
-- `packages/template-vscode`(`polyspec-template`): 언어 정의와 HTML 호스트의 TextMate 문법을 갖고, 확장 안에 포함한 언어 서버에 연결해 기능을 제공하는 VS Code 확장. 템플릿 규칙을 갖지 않는다.
+- `packages/language`(`@polyspec/template-language`): 언어 서비스 `openDocument()`([에디터 지원](/ko/spec/editor)), 포매터 `format()`([포맷](/ko/spec/formatting)), 명령줄 도구 `template-fmt`, 적합성 명령 `template-language`.
+- `packages/lsp`(`@polyspec/template-lsp`): 언어 서비스의 어댑터인 Language Server Protocol 서버 `template-lsp`.
+- `packages/codemirror`(`@polyspec/template-codemirror`): 언어 서비스의 결과를 CodeMirror 편집기에 등록하는 CodeMirror 6 확장 `template()`([CodeMirror 6 어댑터](#codemirror-6-어댑터)).
+- `packages/vscode`(`polyspec-template`): 언어 정의와 HTML 호스트의 TextMate 문법을 갖고, 확장 안에 포함한 언어 서버에 연결해 기능을 제공하는 VS Code 확장. 템플릿 규칙을 갖지 않는다.
 
-언어 서비스만 템플릿 문법을 `@polyspec/template`에서 가져온다. 언어 서비스와 포매터는 파서가 돌려주는 태그 범위, 태그 본문, 그리고 파서가 EDT-8로 분류한 토큰을 사용하며, 자체 어휘 표를 선언하지 않는다(`packages/template-language/tests/lexical-tables.test.ts`). 서버, CodeMirror 어댑터, 확장은 언어 서비스를 호출한다. 확장은 템플릿 태그를 문법이 아니라 서버의 시맨틱 토큰으로 칠한다.
+언어 서비스만 템플릿 문법을 `@polyspec/template`에서 가져온다. 언어 서비스와 포매터는 파서가 돌려주는 태그 범위, 태그 본문, 그리고 파서가 EDT-8로 분류한 토큰을 사용하며, 자체 어휘 표를 선언하지 않는다(`packages/language/tests/lexical-tables.test.ts`). 서버, CodeMirror 어댑터, 확장은 언어 서비스를 호출한다. 확장은 템플릿 태그를 문법이 아니라 서버의 시맨틱 토큰으로 칠한다.
 
 ## 포매터
 
@@ -28,9 +28,9 @@
 
 출력이 HTML이 아닌 템플릿은 `indent: null`로 포맷한다.
 
-불변식 테스트(`packages/template-language/tests/invariant.test.ts`)는 `tests/cases`(`options.json`의 구분자 적용), `tests/fixtures`, `examples`, 포매터 픽스처 아래의 모든 `.tpl` 파일을 `indent: null`로 한 번, 기본 들여쓰기로 한 번 포맷한다. 파싱되는 파일마다 `indent: null`은 span을 제외한 AST와 태그 밖의 텍스트가 같아야 한다. 기본 들여쓰기는 `html` 오류이거나, 줄 앞 공백과 탭을 제거한 상태에서 AST와 태그 밖의 텍스트가 같아야 한다. 둘 다 두 번째 실행에서 바뀌지 않아야 한다(FMT-13, FMT-15). `packages/template-language/tests/conformance.test.ts`는 모든 적합성 케이스의 결과를 그 `expected.format.json`과 비교한다.
+불변식 테스트(`packages/language/tests/invariant.test.ts`)는 `tests/cases`(`options.json`의 구분자 적용), `tests/fixtures`, `examples`, 포매터 픽스처 아래의 모든 `.tpl` 파일을 `indent: null`로 한 번, 기본 들여쓰기로 한 번 포맷한다. 파싱되는 파일마다 `indent: null`은 span을 제외한 AST와 태그 밖의 텍스트가 같아야 한다. 기본 들여쓰기는 `html` 오류이거나, 줄 앞 공백과 탭을 제거한 상태에서 AST와 태그 밖의 텍스트가 같아야 한다. 둘 다 두 번째 실행에서 바뀌지 않아야 한다(FMT-13, FMT-15). `packages/language/tests/conformance.test.ts`는 모든 적합성 케이스의 결과를 그 `expected.format.json`과 비교한다.
 
-명령 `template-language format [--indent none|tab|N] [--delimiters OC] FILE`(`packages/template-language/bin/template-language.mjs`)는 적합성 계약에서 TypeScript의 format 명령이다(CNF-4, CNF-5). `template-fmt`처럼 node:util `parseArgs`로 옵션을 파싱한다. 포맷한 텍스트를 출력하거나, 오류를 표준 오류에 JSON으로 쓰고 종료 상태 2로 끝난다.
+명령 `template-language format [--indent none|tab|N] [--delimiters OC] FILE`(`packages/language/bin/template-language.mjs`)는 적합성 계약에서 TypeScript의 format 명령이다(CNF-4, CNF-5). `template-fmt`처럼 node:util `parseArgs`로 옵션을 파싱한다. 포맷한 텍스트를 출력하거나, 오류를 표준 오류에 JSON으로 쓰고 종료 상태 2로 끝난다.
 
 ## 명령줄
 
@@ -69,7 +69,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|none]
 
 ```sh
 make build-lsp
-node packages/template-lsp/bin/template-lsp.mjs --stdio
+node packages/lsp/bin/template-lsp.mjs --stdio
 ```
 
 `template-lsp`는 Language Server Protocol 클라이언트가 있는 에디터에 표준 입력과 출력으로 Language Server Protocol을 제공한다. 클라이언트는 `.tpl` 문서에 대해 이 명령을 실행한다. 서버는 EDT-14([에디터 지원](/ko/spec/editor))의 기능을 제공한다. 진단, 시맨틱 토큰, 접기 범위, 문서 강조, 문서와 범위 포맷, `\n`, `>`, `}` 뒤의 타이핑 들여쓰기, 요청 `polyspec-template/tagRanges`와 `polyspec-template/matchingTag`다. 설정 `polyspec-template.format.templateBlocks`를 `workspace/configuration`으로 읽고, 포맷 오류는 클라이언트 로그에 경고로 쓴다. 서버는 템플릿 규칙을 갖지 않는다. 문서 버전마다 `openDocument()`를 한 번 호출하고, 언어 서비스의 UTF-16 문자열 인덱스를 프로토콜 위치로 변환한다. Language Server Protocol 클라이언트가 넘기는 인자 `--stdio`는 받아들이며 효과가 없다.
@@ -82,11 +82,11 @@ make vscode-install
 code --list-extensions --show-versions | grep polyspec
 ```
 
-`make vscode-package`는 `src/extension.ts`와 `vscode-languageclient`를 한 파일 `dist/extension.cjs`로 만들고, 서버 진입점 `@polyspec/template-lsp/server`와 `@polyspec/template-language`, `@polyspec/template`을 한 파일 `dist/server.cjs`로 만든 뒤, `packages/template-vscode/dist/polyspec-template.vsix`를 만든다. 설치한 확장은 실행할 때 저장소가 필요 없다. `make vscode-install`은 `--force`를 붙여 `code --install-extension`을 실행한다.
+`make vscode-package`는 `src/extension.ts`와 `vscode-languageclient`를 한 파일 `dist/extension.cjs`로 만들고, 서버 진입점 `@polyspec/template-lsp/server`와 `@polyspec/template-language`, `@polyspec/template`을 한 파일 `dist/server.cjs`로 만든 뒤, `packages/vscode/dist/polyspec-template.vsix`를 만든다. 설치한 확장은 실행할 때 저장소가 필요 없다. `make vscode-install`은 `--force`를 붙여 `code --install-extension`을 실행한다.
 
 확장은 언어 서버 `template-lsp`에 연결해 동작한다(EDT-15). 확장의 언어 클라이언트(`vscode-languageclient`)가 VS Code의 Node.js 런타임으로 `dist/server.cjs`를 실행하고, 표준 입력과 출력으로 서버와 통신한다. 클라이언트는 URI scheme과 관계없이 언어 `polyspec-template`의 열린 문서마다 텍스트를 서버에 보낸다.
 
-확장과 서버는 열린 문서의 텍스트만 읽고 작업 공간의 코드를 실행하지 않으므로 확장은 `capabilities.untrustedWorkspaces.supported`를 선언한다. 이 선언이 없으면 VS Code는 Restricted Mode에서 문법을 포함한 확장 전체를 비활성화하고, 신뢰하지 않은 폴더의 `.tpl` 파일은 일반 텍스트로 열린다. 확장은 `capabilities.virtualWorkspaces`도 선언한다. 서버는 문서 텍스트를 프로토콜로만 받고 파일 시스템을 읽지 않으므로, 가상 작업 공간의 문서도 파일과 같이 분석하며 그 URI가 진단의 템플릿 이름이 된다. 확장은 `main` 진입점만 있고 `browser` 진입점이 없으므로, Node.js 확장 호스트가 없는 VS Code for the Web은 확장을 실행하지 않는다. VS Code는 Electron 빌드에 포함된 Node.js로 확장과 서버를 실행한다. VS Code 1.138.0은 Node.js 24.18.1을 가진 Electron 42.10.0을 사용하므로 두 번들의 대상은 `node24`이고, 확장은 `engines.vscode` `^1.138.0`과 그 Electron의 Node.js인 `engines.node` `>=24.18.1`을 선언한다. kit의 Node.js pin 26.11.1은 다른 package의 하한이다. scope가 `packages/template-vscode`이고 channel이 24.18.1인 `config/toolchain.json`의 exception이 toolchain 검사가 확장의 하한을 받아들이게 한다.
+확장과 서버는 열린 문서의 텍스트만 읽고 작업 공간의 코드를 실행하지 않으므로 확장은 `capabilities.untrustedWorkspaces.supported`를 선언한다. 이 선언이 없으면 VS Code는 Restricted Mode에서 문법을 포함한 확장 전체를 비활성화하고, 신뢰하지 않은 폴더의 `.tpl` 파일은 일반 텍스트로 열린다. 확장은 `capabilities.virtualWorkspaces`도 선언한다. 서버는 문서 텍스트를 프로토콜로만 받고 파일 시스템을 읽지 않으므로, 가상 작업 공간의 문서도 파일과 같이 분석하며 그 URI가 진단의 템플릿 이름이 된다. 확장은 `main` 진입점만 있고 `browser` 진입점이 없으므로, Node.js 확장 호스트가 없는 VS Code for the Web은 확장을 실행하지 않는다. VS Code는 Electron 빌드에 포함된 Node.js로 확장과 서버를 실행한다. VS Code 1.138.0은 Node.js 24.18.1을 가진 Electron 42.10.0을 사용하므로 두 번들의 대상은 `node24`이고, 확장은 `engines.vscode` `^1.138.0`과 그 Electron의 Node.js인 `engines.node` `>=24.18.1`을 선언한다. kit의 Node.js pin 26.11.1은 다른 package의 하한이다. scope가 `packages/vscode`이고 channel이 24.18.1인 `config/toolchain.json`의 exception이 toolchain 검사가 확장의 하한을 받아들이게 한다.
 
 확장은 `.tpl` 파일에 언어 `polyspec-template`을 등록하고 다음을 제공한다.
 
@@ -114,7 +114,7 @@ code --list-extensions --show-versions | grep polyspec
 
 ## CodeMirror 6 어댑터
 
-`packages/template-codemirror`(`@polyspec/template-codemirror`)는 `@codemirror/lang-html` 위에 만든 CodeMirror 6 확장이다(EDT-16). 모든 결과를 언어 서비스의 `openDocument()`에서 얻고, 위치 외에는 아무것도 변환하지 않으며, 템플릿 규칙을 갖지 않는다([에디터 지원](/ko/spec/editor)). CodeMirror와 언어 서비스는 모두 문서 텍스트의 UTF-16 문자열 인덱스를 쓰므로, 언어 서비스의 위치가 곧 CodeMirror의 위치다. `@codemirror/state`, `@codemirror/view`, `@codemirror/language`, `@codemirror/lint`, `@codemirror/lang-html`, `@codemirror/commands`는 peer dependency이므로 어댑터는 편집기가 쓰는 각 패키지의 인스턴스 하나를 쓴다.
+`packages/codemirror`(`@polyspec/template-codemirror`)는 `@codemirror/lang-html` 위에 만든 CodeMirror 6 확장이다(EDT-16). 모든 결과를 언어 서비스의 `openDocument()`에서 얻고, 위치 외에는 아무것도 변환하지 않으며, 템플릿 규칙을 갖지 않는다([에디터 지원](/ko/spec/editor)). CodeMirror와 언어 서비스는 모두 문서 텍스트의 UTF-16 문자열 인덱스를 쓰므로, 언어 서비스의 위치가 곧 CodeMirror의 위치다. `@codemirror/state`, `@codemirror/view`, `@codemirror/language`, `@codemirror/lint`, `@codemirror/lang-html`, `@codemirror/commands`는 peer dependency이므로 어댑터는 편집기가 쓰는 각 패키지의 인스턴스 하나를 쓴다.
 
 ```ts
 import { defaultKeymap } from '@codemirror/commands';
@@ -196,7 +196,7 @@ make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 
 integration 실행은 VS Code를 내려받지 않는다. 설치된 사본이 없으면 `run make install-vscode`와 함께 실패한다. VS Code는 integration test를 실행하는 곳에만 필요하므로 `make install`은 이것을 내려받지 않고, CI에서는 integration test를 실행하는 job만 `make install-vscode`를 실행한다(T20.1-6). installer는 사본을 `var/tools/vscode/.next-<pid>`에 내려받고 `vscode-<platform>-<version>`으로 rename하므로, 읽는 쪽은 사본이 없거나 완전한 사본을 찾으며, 있는 사본은 다시 내려받지 않는다. 설치된 사본은 바뀌지 않으므로 lock이 필요 없다(T20.1-4).
 
-`make test-codemirror`는 어댑터를 빌드하고 두 종류의 테스트를 실행한다. Vitest 테스트는 `packages/template-language/tests/editor`의 모든 에디터 픽스처마다 DOM 없이 `EditorState`를 만들고, `templateDiagnostics`의 진단, 상태의 decoration 집합에 있는 토큰 마크와 태그 마크, fold service의 접기 범위, 모든 조회 위치의 강조 마크와 `goToMatchingTag` 목적지, `templateBlocks` `indent`와 `flat` 및 공백 두 개의 들여쓰기 단위로 구한 모든 줄의 들여쓰기 서비스 결과, `formatTemplate`의 결과를 픽스처의 기대 결과와 비교한다(EDT-17). 다른 테스트는 한 줄을 입력하고 `insertNewlineAndIndent`로 Enter를 누르며, 옵션, `formatTemplate`의 들여쓰기 단위, 텍스트마다 분석 하나를 재사용하는지 검사한다. Playwright 테스트는 `tests/browser/page.ts`를 esbuild로 `packages/template-codemirror/dist/browser/page.js`에 번들하고 빈 Chromium 페이지에 불러온 뒤, `<ul>`, Enter, `{@ x = xs}`, Enter를 입력한 뒤의 들여쓰기, 토큰 클래스, HTML 속성 값 안의 템플릿 색, 밝은 테마와 어두운 테마의 태그 배경, 닫히지 않은 블록의 lint 진단, 포맷되는 텍스트와 파싱되지 않는 텍스트에서의 Shift+Alt+F를 검사한다.
+`make test-codemirror`는 어댑터를 빌드하고 두 종류의 테스트를 실행한다. Vitest 테스트는 `packages/language/tests/editor`의 모든 에디터 픽스처마다 DOM 없이 `EditorState`를 만들고, `templateDiagnostics`의 진단, 상태의 decoration 집합에 있는 토큰 마크와 태그 마크, fold service의 접기 범위, 모든 조회 위치의 강조 마크와 `goToMatchingTag` 목적지, `templateBlocks` `indent`와 `flat` 및 공백 두 개의 들여쓰기 단위로 구한 모든 줄의 들여쓰기 서비스 결과, `formatTemplate`의 결과를 픽스처의 기대 결과와 비교한다(EDT-17). 다른 테스트는 한 줄을 입력하고 `insertNewlineAndIndent`로 Enter를 누르며, 옵션, `formatTemplate`의 들여쓰기 단위, 텍스트마다 분석 하나를 재사용하는지 검사한다. Playwright 테스트는 `tests/browser/page.ts`를 esbuild로 `packages/codemirror/dist/browser/page.js`에 번들하고 빈 Chromium 페이지에 불러온 뒤, `<ul>`, Enter, `{@ x = xs}`, Enter를 입력한 뒤의 들여쓰기, 토큰 클래스, HTML 속성 값 안의 템플릿 색, 밝은 테마와 어두운 테마의 태그 배경, 닫히지 않은 블록의 lint 진단, 포맷되는 텍스트와 파싱되지 않는 텍스트에서의 Shift+Alt+F를 검사한다.
 
 CI job `editor`는 `make editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode`를 실행하고, VS Code가 화면을 요구하므로 `make test-vscode-integration`을 `xvfb-run`의 가상 X 서버에서 실행한다.
 

@@ -10,10 +10,10 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
-import { compileFiles } from '../../packages/template-compiler/compiler.mjs';
-import { deriveTypeManifest } from '../../packages/template-compiler/type-manifest.mjs';
-import { parse } from '../../packages/template-ts/dist/index.mjs';
+import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
+import { compileFiles } from '../../packages/compiler/compiler.mjs';
+import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
+import { parse } from '../../packages/ts/dist/index.mjs';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

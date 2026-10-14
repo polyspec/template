@@ -2,7 +2,7 @@
 // var/tools/mise/shims/python3, the shim of the python of mise.toml, which `make install-tools` installs with mise at the
 // digest of mise.lock (T24.12, kit K127). No check runs the `python3` of PATH or of the machine (AGENTS, Idempotency:
 // Toolchains). A program that imports `polyspec.template` runs the python of var/python/venv, where `make python-package`
-// installs packages/template-python editable, so it imports the package from the sources of the checkout through its
+// installs packages/python editable, so it imports the package from the sources of the checkout through its
 // environment, with no changed import path (PRINCIPLES S3).
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -16,7 +16,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /** The pinned interpreter of the checkout: the shim var/tools/mise/shims/python3 of the python of mise.toml. */
 export const pythonInterpreter = join(root, 'var/tools/mise/shims/python3');
 
-/** The python of the environment of config/parity.json, where `make python-package` installs packages/template-python. */
+/** The python of the environment of config/parity.json, where `make python-package` installs packages/python. */
 export const pythonPackageInterpreter = join(root, pythonPackageCommandPath());
 
 /** The minor release of the python of mise.toml, such as `3.14` of `python = "3.14.8"`. */

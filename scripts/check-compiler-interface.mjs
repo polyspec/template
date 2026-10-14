@@ -51,7 +51,7 @@ function heritage(source, declaration) {
 }
 const manifestPath = process.env.TEMPLATE_INTERFACE_MANIFEST
   ? resolve(process.env.TEMPLATE_INTERFACE_MANIFEST)
-  : resolve(root, 'packages/template-compiler/interface.json');
+  : resolve(root, 'packages/compiler/interface.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 if (manifest.schema !== 2 || manifest.name !== 'TemplateCompiler') throw new Error('invalid compiler interface manifest');
 if (existsSync(resolve(root, 'tools/runtime/interface.json'))) throw new Error('runtime contract must not duplicate the compiler manifest');
@@ -59,7 +59,7 @@ if (existsSync(resolve(root, 'tools/showcase/adapters/interface.json'))) throw n
 if (manifest.showcaseAdapter?.name !== 'RenderAdapter' || manifest.showcaseAdapter?.schema !== 3) throw new Error('showcase adapter contract is missing');
 
 const evidence = manifest.evidence;
-if (!Array.isArray(evidence?.readingOrder) || evidence.readingOrder[0] !== 'packages/template-compiler/interface.json' ||
+if (!Array.isArray(evidence?.readingOrder) || evidence.readingOrder[0] !== 'packages/compiler/interface.json' ||
     !evidence.readingOrder.every(path => existsSync(resolve(root, path)))) {
   throw new Error('compiler interface reading order is incomplete');
 }
@@ -93,7 +93,7 @@ for (const [owner, names] of Object.entries(expectedOperations)) {
 
 const backendDirectory = process.env.TEMPLATE_BACKEND_DIRECTORY
   ? resolve(process.env.TEMPLATE_BACKEND_DIRECTORY)
-  : resolve(root, 'packages/template-compiler/backends');
+  : resolve(root, 'packages/compiler/backends');
 const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.mjs', php: 'php.mjs', python: 'python.mjs' };
 const backendOperations = manifest.components.LanguageBackend.operations;
 for (const [language, filename] of Object.entries(backendFiles)) {
@@ -176,7 +176,7 @@ function declaration(source, type, name) {
   return source.statements.map(declared).find(statement => statement?.type === type && statement.id?.name === name);
 }
 
-const enginePath = resolve(root, 'packages/template-ts/src/render/engine.ts');
+const enginePath = resolve(root, 'packages/ts/src/render/engine.ts');
 const engineSource = parseSource(enginePath);
 const program = declaration(engineSource, 'TSInterfaceDeclaration', 'Program');
 if (!program) throw new Error('typescript: Program interface is missing');
@@ -194,14 +194,14 @@ if (!constructor?.value.params.some(parameter => parameterName(engineSource, par
 const engineMethods = engine.body.body.filter(isMethod).map(item => memberName(engineSource, item));
 if (engineMethods.join(',') !== runtime.Engine.operations.join(',')) throw new Error('typescript: Engine operations differ');
 
-const indexPath = resolve(root, 'packages/template-ts/src/index.ts');
+const indexPath = resolve(root, 'packages/ts/src/index.ts');
 const indexSource = parseSource(indexPath);
 const astProgram = declaration(indexSource, 'ClassDeclaration', 'AstProgram');
 if (!astProgram || !heritage(indexSource, astProgram).includes('AstProgramCore')) throw new Error('typescript: AstProgram does not extend the AST Program implementation');
 const astProgramCore = declaration(engineSource, 'ClassDeclaration', 'AstProgramCore');
 if (!astProgramCore?.body.body.some(member => isProperty(member) && memberName(engineSource, member) === 'runtime')) throw new Error('typescript: AstProgram does not own RuntimeEnvironment');
 
-const runtimeEnvironmentPath = resolve(root, 'packages/template-ts/src/render/runtime-environment.ts');
+const runtimeEnvironmentPath = resolve(root, 'packages/ts/src/render/runtime-environment.ts');
 const runtimeEnvironmentSource = parseSource(runtimeEnvironmentPath);
 const runtimeEnvironment = declaration(runtimeEnvironmentSource, 'ClassDeclaration', 'RuntimeEnvironment');
 if (!runtimeEnvironment || !heritage(runtimeEnvironmentSource, runtimeEnvironment).includes('RuntimeServices')) throw new Error('typescript: RuntimeEnvironment does not implement RuntimeServices');
@@ -214,7 +214,7 @@ for (const operation of runtime.RuntimeEnvironment.operations) {
   if (method?.value.params.length !== operation.parameters.length) throw new Error(`typescript: RuntimeEnvironment.${operation.name} signature differs`);
 }
 
-const bindingsPath = resolve(root, 'packages/template-ts/src/render/runtime-bindings.ts');
+const bindingsPath = resolve(root, 'packages/ts/src/render/runtime-bindings.ts');
 const bindingsSource = parseSource(bindingsPath);
 const bindings = declaration(bindingsSource, 'ClassDeclaration', 'RuntimeBindings');
 const bindingMethods = bindings?.body.body.filter(isMethod);
@@ -226,7 +226,7 @@ for (const operation of runtime.RuntimeBindings.operations) {
 
 // The TypeScript bound map class has no member other than its private state, its constructor and
 // its static block, and both entries export bind and merge under the names of the manifest.
-const boundPath = process.env.TEMPLATE_TS_BOUND_SOURCE ? resolve(process.env.TEMPLATE_TS_BOUND_SOURCE) : resolve(root, 'packages/template-ts/src/value/bound.ts');
+const boundPath = process.env.TEMPLATE_TS_BOUND_SOURCE ? resolve(process.env.TEMPLATE_TS_BOUND_SOURCE) : resolve(root, 'packages/ts/src/value/bound.ts');
 const boundSource = parseSource(boundPath);
 const boundClass = declaration(boundSource, 'ClassDeclaration', manifest.languages.typescript.boundMap.type);
 if (!boundClass) throw new Error('typescript: BoundMap class is missing');
@@ -236,7 +236,7 @@ for (const member of boundClass.body.body) {
   if (!allowed) throw new Error(`typescript: BoundMap has the undeclared member ${memberName(boundSource, member) ?? member.type}`);
 }
 for (const [language, entry] of [['typescript', 'index.ts'], ['javascript-esm', 'render.ts']]) {
-  const entryPath = resolve(root, 'packages/template-ts/src', entry);
+  const entryPath = resolve(root, 'packages/ts/src', entry);
   const entrySource = parseSource(entryPath);
   const exported = entrySource.statements
     .filter(statement => statement.type === 'ExportNamedDeclaration' && !statement.declaration)
@@ -246,7 +246,7 @@ for (const [language, entry] of [['typescript', 'index.ts'], ['javascript-esm', 
   }
 }
 
-const contextPath = resolve(root, 'packages/template-ts/src/render/context.ts');
+const contextPath = resolve(root, 'packages/ts/src/render/context.ts');
 const contextSource = parseSource(contextPath);
 const services = declaration(contextSource, 'TSInterfaceDeclaration', 'RuntimeServices');
 const serviceMethods = services?.body.body.filter(member => member.type === 'TSMethodSignature');
@@ -270,9 +270,9 @@ function run(label, command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, env: process.env });
   if (result.error || result.status !== 0) throw new Error(`${label} failed:\n${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
 }
-run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'packages/template-go'));
-run('rust interface AST check', resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/template-rust'));
-run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/template-php'));
-run('python interface check', pythonPackageCommand(), ['tests/test_compiler_interface.py'], resolve(root, 'packages/template-python'));
+run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'packages/go'));
+run('rust interface AST check', resolve(process.env.HOME, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/rust'));
+run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/php'));
+run('python interface check', pythonPackageCommand(), ['tests/test_compiler_interface.py'], resolve(root, 'packages/python'));
 
 process.stdout.write('compiler interface: manifest and TypeScript, Go, Rust, PHP, Python runtime declarations passed\n');

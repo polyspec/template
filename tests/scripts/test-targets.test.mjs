@@ -20,11 +20,11 @@ function commands(target) {
 const RUNS_TESTS_DIRECTLY = /\bnpm (?:test|run test:extension)\b|\bvitest\b(?! --cwd)|\bnode --test\b/;
 
 for (const [target, runner] of [
-  ['test-ts', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/template-ts'],
-  ['test-language', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/template-language'],
-  ['test-lsp', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/template-lsp'],
-  ['test-codemirror', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/template-codemirror'],
-  ['test-vscode', 'node node_modules/@polyspec/kit/dist/run-tests.mjs node --cwd packages/template-vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs'],
+  ['test-ts', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/ts'],
+  ['test-language', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/language'],
+  ['test-lsp', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/lsp'],
+  ['test-codemirror', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/codemirror'],
+  ['test-vscode', 'node node_modules/@polyspec/kit/dist/run-tests.mjs node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs'],
 ]) {
   test(`${target} runs its unit tests through the run-tests tool of @polyspec/kit`, () => {
     const lines = commands(target);
@@ -33,7 +33,7 @@ for (const [target, runner] of [
   });
 }
 
-// The targets that run PHP with the Composer packages of packages/template-php (its vendor/autoload.php), with the file
+// The targets that run PHP with the Composer packages of packages/php (its vendor/autoload.php), with the file
 // that reads them. A target installs them first with build-php, so it passes on a checkout without vendor (T19.5).
 for (const [target, reader] of [
   ['conformance-generated-php', 'tests/runner/conformance-generated-php.mjs'],
@@ -46,9 +46,9 @@ for (const [target, reader] of [
   ['compiler-interface-check', 'scripts/check-compiler-interface.mjs'],
   ['test-php', 'node_modules/@polyspec/kit/dist/run-tests.mjs phpunit'],
 ]) {
-  test(`${target} installs the Composer packages of template-php before ${reader}`, () => {
+  test(`${target} installs the Composer packages of php before ${reader}`, () => {
     const lines = commands(target);
-    const install = lines.indexOf('node scripts/composer-install.mjs packages/template-php');
-    assert.notEqual(install, -1, `make -n ${target} does not install the Composer packages of packages/template-php:\n${lines.join('\n')}`);
+    const install = lines.indexOf('node scripts/composer-install.mjs packages/php');
+    assert.notEqual(install, -1, `make -n ${target} does not install the Composer packages of packages/php:\n${lines.join('\n')}`);
   });
 }

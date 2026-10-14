@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
-  "contractDigest": "d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e",
-  "compilerDigest": "321adc5a4f5d2b323ce58b67c4d453720200b9de6c717bbd9a445a3d2ec7b584",
+  "contractDigest": "c75c35bdf956018be512b3b7a3b68e367bb882f5890ec7f2806ccfb95ce2662b",
+  "compilerDigest": "23559e90afcf7dd5c08d2c4af73dfeaad49f376f3c85b304f79dc5a123c68107",
   "files": {
     "compiler-coverage.ts": {
       "path": "compiler-coverage.ts",

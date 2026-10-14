@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: bf3eec3bfe5ddcfce2007ee39a5db2b956d57f7d54a30e1ef7b3945c73dcfa59 -->
+<!-- source-sha256: 0c57b6bf96f33df7691d7555a9b5e13b122ddb567d0d5bea7313159eb17a226b -->
 # 적합성
 
 [English](/spec/conformance).
@@ -53,12 +53,12 @@
 
 | 구현 | 명령 |
 | --- | --- |
-| ts | `node packages/template-ts/bin/template.mjs`; `format`: `node packages/template-language/bin/template-language.mjs` |
-| go | `packages/template-go/template` |
-| rust | `packages/template-rust/target/release/template` |
-| php | `php packages/template-php/bin/template.php` |
-| php-ext | `php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php` |
-| python | `var/python/venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/template-python`을 `var/python/venv`에 설치한다) |
+| ts | `node packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
+| go | `packages/go/template` |
+| rust | `packages/rust/target/release/template` |
+| php | `php packages/php/bin/template.php` |
+| php-ext | `php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php` |
+| python | `var/python/venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/python`을 `var/python/venv`에 설치한다) |
 
 TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@polyspec/template-language`이므로, 그 명령 `template-language`가 `format`을 제공하고 명령 `template`이 나머지 하위 명령을 제공한다.
 

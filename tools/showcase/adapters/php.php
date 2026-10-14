@@ -12,7 +12,7 @@ use Polyspec\Template\Value\Json;
 use Polyspec\Template\Value\MapValue;
 
 $root = dirname(__DIR__, 3);
-$loader = require $root . '/packages/template-php/vendor/autoload.php';
+$loader = require $root . '/packages/php/vendor/autoload.php';
 require __DIR__ . '/generated/render_adapter.php';
 
 function generatedProgram(string $scenarioRoot): Program

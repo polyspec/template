@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const original = JSON.parse(readFileSync(resolve(root, 'packages/template-compiler/interface.json'), 'utf8'));
+const original = JSON.parse(readFileSync(resolve(root, 'packages/compiler/interface.json'), 'utf8'));
 let rejected = 0;
 const directory = mkdtempSync(join(tmpdir(), 'template-interface-mutation-'));
 
@@ -51,7 +51,7 @@ try {
   const backendDirectory = join(directory, 'backends');
   mkdirSync(backendDirectory);
   for (const filename of ['typescript.mjs', 'go.mjs', 'rust.mjs', 'php.mjs', 'python.mjs']) {
-    copyFileSync(resolve(root, 'packages/template-compiler/backends', filename), join(backendDirectory, filename));
+    copyFileSync(resolve(root, 'packages/compiler/backends', filename), join(backendDirectory, filename));
   }
   const rustBackend = join(backendDirectory, 'rust.mjs');
   writeFileSync(rustBackend, readFileSync(rustBackend, 'utf8').replace('export function emitEntry', 'function emitEntry'));
@@ -65,7 +65,7 @@ try {
   rejected++;
   // VAL-22: a public operation added to the TypeScript bound map class is rejected.
   const boundSource = join(directory, 'bound.ts');
-  writeFileSync(boundSource, readFileSync(resolve(root, 'packages/template-ts/src/value/bound.ts'), 'utf8').replace('  static {', '  entries(): number {\n    return 0;\n  }\n\n  static {'));
+  writeFileSync(boundSource, readFileSync(resolve(root, 'packages/ts/src/value/bound.ts'), 'utf8').replace('  static {', '  entries(): number {\n    return 0;\n  }\n\n  static {'));
   const boundResult = spawnSync(process.execPath, ['scripts/check-compiler-interface.mjs'], {
     cwd: root,
     env: { ...process.env, TEMPLATE_TS_BOUND_SOURCE: boundSource },

@@ -1,6 +1,6 @@
 // Tests scripts/check-artifact-digests.mjs (T17.1-6): every committed compiled artifact of the tree records the digest
 // of the compiler of the tree, a manifest that records another digest is named with both digests, and the AST compiler
-// digest reads the tracked sources of packages/template-ts, so a change of a source changes it without a build.
+// digest reads the tracked sources of packages/ts, so a change of a source changes it without a build.
 import assert from 'node:assert/strict';
 import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';

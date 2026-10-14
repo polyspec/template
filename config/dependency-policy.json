@@ -2,16 +2,16 @@
   "schema": 1,
   "composerPlatforms": [
     {
-      "manifest": "packages/template-php/composer.json",
+      "manifest": "packages/php/composer.json",
       "php": "8.5.0"
     },
     {
-      "manifest": "packages/template-php-ext/composer.json",
+      "manifest": "packages/php-ext/composer.json",
       "php": "8.5.0"
     }
   ],
   "pythonManifests": [
-    "packages/template-python/pyproject.toml"
+    "packages/python/pyproject.toml"
   ],
   "pythonLocks": [],
   "npmLocks": [

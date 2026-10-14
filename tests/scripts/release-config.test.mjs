@@ -30,9 +30,9 @@ test('the packages of the release are the names that their manifests declare', (
 });
 
 test('the Python package is released as a wheel named by its pyproject.toml, with a pinned build backend and a smoke import', () => {
-  const file = 'packages/template-python/pyproject.toml';
+  const file = 'packages/python/pyproject.toml';
   const wheel = CONFIG.packages.find(item => item.kind === 'wheel');
-  assert.deepEqual(wheel, { kind: 'wheel', directory: 'packages/template-python', name: tomlValue(read(file), 'project', 'name') }, `${file}: the wheel package names another project than [project] name`);
+  assert.deepEqual(wheel, { kind: 'wheel', directory: 'packages/python', name: tomlValue(read(file), 'project', 'name') }, `${file}: the wheel package names another project than [project] name`);
   assert.equal(CONFIG.manifests[file], 'archive', `${file}: the wheel is released as an archive, so its version is set by the tag`);
   assert.equal(CONFIG.proof?.gitTag?.[file], undefined, `${file}: the wheel is not installed by git tag`);
   assert.deepEqual(Object.keys(CONFIG.buildBackend).sort(), ['requirement', 'sha256'], 'buildBackend holds the requirement and the sha256 only');
@@ -41,7 +41,7 @@ test('the Python package is released as a wheel named by its pyproject.toml, wit
 });
 
 test('the Rust crate is released by git tag with the name of its Cargo.toml', () => {
-  const file = 'packages/template-rust/Cargo.toml';
+  const file = 'packages/rust/Cargo.toml';
   assert.equal(CONFIG.manifests[file], 'git-tag', `${file}: cargo package would rewrite its git dependencies, so no archive holds the crate`);
   assert.equal(CONFIG.proof.gitTag[file].kind, 'rust');
   assert.equal(CONFIG.proof.gitTag[file].name, tomlValue(read(file), 'package', 'name'), `${file}: proof.gitTag names another package than [package] name`);

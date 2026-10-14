@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { analyze, AstProgram, MapLoader } from '../../packages/template-ts/dist/index.mjs';
+import { analyze, AstProgram, MapLoader } from '../../packages/ts/dist/index.mjs';
 import { root } from '../../tests/runner/drivers.mjs';
 import { showcasePhpDirectory } from './php-namespace.mjs';
 

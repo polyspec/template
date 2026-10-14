@@ -21,7 +21,7 @@
     },
     {
       "paths": [
-        "packages/template-compiler/functions.json",
+        "packages/compiler/functions.json",
         "tests/runner/function-contract.mjs",
         "scripts/check-function-contract.mjs"
       ],
@@ -235,11 +235,11 @@
         "package.json",
         "packages/*/package.json",
         "packages/*/composer.json",
-        "packages/template-rust/Cargo.toml",
-        "packages/template-go/go.mod",
+        "packages/rust/Cargo.toml",
+        "packages/go/go.mod",
         "config/release.json",
         "tests/fixtures/release-consumer/**",
-        "packages/template-python/pylock.wheel.toml"
+        "packages/python/pylock.wheel.toml"
       ],
       "targets": [
         "release-coverage"
@@ -305,7 +305,7 @@
     },
     {
       "paths": [
-        "packages/template-vscode/tests/integration/run.mjs"
+        "packages/vscode/tests/integration/run.mjs"
       ],
       "targets": [
         "test-vscode-integration"
@@ -550,7 +550,7 @@
     },
     {
       "paths": [
-        "packages/template-compiler/**"
+        "packages/compiler/**"
       ],
       "targets": [
         "artifact-digest-check",
@@ -571,7 +571,7 @@
     },
     {
       "paths": [
-        "packages/template-ts/**"
+        "packages/ts/**"
       ],
       "targets": [
         "artifact-digest-check",
@@ -591,7 +591,7 @@
     },
     {
       "paths": [
-        "packages/template-language/**"
+        "packages/language/**"
       ],
       "targets": [
         "test-language",
@@ -604,7 +604,7 @@
     },
     {
       "paths": [
-        "packages/template-lsp/**"
+        "packages/lsp/**"
       ],
       "targets": [
         "test-lsp",
@@ -615,7 +615,7 @@
     },
     {
       "paths": [
-        "packages/template-codemirror/**"
+        "packages/codemirror/**"
       ],
       "targets": [
         "test-codemirror",
@@ -624,7 +624,7 @@
     },
     {
       "paths": [
-        "packages/template-vscode/**"
+        "packages/vscode/**"
       ],
       "targets": [
         "test-vscode",
@@ -634,7 +634,7 @@
     },
     {
       "paths": [
-        "packages/template-go/**"
+        "packages/go/**"
       ],
       "targets": [
         "test-go",
@@ -649,7 +649,7 @@
     },
     {
       "paths": [
-        "packages/template-rust/**"
+        "packages/rust/**"
       ],
       "targets": [
         "test-rust",
@@ -664,7 +664,7 @@
     },
     {
       "paths": [
-        "packages/template-php/**"
+        "packages/php/**"
       ],
       "targets": [
         "test-php",
@@ -679,7 +679,7 @@
     },
     {
       "paths": [
-        "packages/template-python/**"
+        "packages/python/**"
       ],
       "targets": [
         "conformance",
@@ -697,7 +697,7 @@
     },
     {
       "paths": [
-        "packages/template-php-ext/**"
+        "packages/php-ext/**"
       ],
       "targets": [
         "test-ext",
@@ -716,7 +716,7 @@
         ".mise/**",
         "rust-toolchain.toml",
         ".github/workflows/*.yml",
-        "packages/template-go/go.mod"
+        "packages/go/go.mod"
       ],
       "tests": [
         "tests/scripts/toolchain-files.test.mjs"
@@ -742,7 +742,7 @@
     {
       "paths": [
         "scripts/python-wheelhouse.mjs",
-        "packages/template-python/build-requirements.json"
+        "packages/python/build-requirements.json"
       ],
       "targets": [
         "install-check"
@@ -1018,21 +1018,21 @@
         "scripts/check-showcase-contract.mjs",
         "tools/showcase/adapters/**",
         "scripts/python-toolchain.mjs",
-        "packages/template-python/**",
+        "packages/python/**",
         "mise.toml"
       ]
     },
     {
       "check": "make function-contract-registries-check",
       "paths": [
-        "packages/template-compiler/functions.json",
+        "packages/compiler/functions.json",
         "scripts/check-function-contract.mjs"
       ]
     },
     {
       "check": "make function-contract-runtimes-check",
       "paths": [
-        "packages/template-compiler/functions.json",
+        "packages/compiler/functions.json",
         "tests/runner/function-contract.mjs"
       ]
     },
@@ -1054,7 +1054,7 @@
     {
       "check": "make lint-ts",
       "paths": [
-        "packages/template-{ts,language,lsp,codemirror,compiler,vscode}/**",
+        "packages/{ts,language,lsp,codemirror,compiler,vscode}/**",
         ".oxlintrc.json",
         "knip.json"
       ]
@@ -1062,13 +1062,13 @@
     {
       "check": "make lint-go-format",
       "paths": [
-        "packages/template-go/**"
+        "packages/go/**"
       ]
     },
     {
       "check": "make lint-go",
       "paths": [
-        "packages/template-go/**",
+        "packages/go/**",
         "tools/showcase/adapters/go/**",
         ".golangci.yml"
       ]
@@ -1076,13 +1076,13 @@
     {
       "check": "make lint-rust-format",
       "paths": [
-        "packages/template-rust/**"
+        "packages/rust/**"
       ]
     },
     {
       "check": "make lint-rust",
       "paths": [
-        "packages/template-rust/**",
+        "packages/rust/**",
         "tools/showcase/adapters/rust/**"
       ]
     },
@@ -1101,14 +1101,14 @@
     {
       "check": "make lint-php-format",
       "paths": [
-        "packages/template-php/**"
+        "packages/php/**"
       ]
     },
     {
       "check": "make lint-php",
       "paths": [
-        "packages/template-php/**",
-        "packages/template-php-ext/**",
+        "packages/php/**",
+        "packages/php-ext/**",
         "phpcs.xml.dist",
         "phpstan.dist.neon",
         "config/php-lint/**"
@@ -1117,127 +1117,127 @@
     {
       "check": "make test-ts-unit",
       "paths": [
-        "packages/template-ts/**",
+        "packages/ts/**",
         "tests/fixtures/{bound-data,expr,native-object}/**"
       ]
     },
     {
       "check": "make test-ts-types",
       "paths": [
-        "packages/template-ts/**"
+        "packages/ts/**"
       ]
     },
     {
       "check": "make test-ts-types-node",
       "paths": [
-        "packages/template-ts/**"
+        "packages/ts/**"
       ]
     },
     {
       "check": "make test-language-unit",
       "paths": [
-        "packages/template-language/**",
-        "packages/template-ts/src/**",
+        "packages/language/**",
+        "packages/ts/src/**",
         "scripts/editor-fixtures.mjs"
       ]
     },
     {
       "check": "make test-language-types",
       "paths": [
-        "packages/template-language/**"
+        "packages/language/**"
       ]
     },
     {
       "check": "make format-check",
       "paths": [
-        "packages/template-language/**"
+        "packages/language/**"
       ]
     },
     {
       "check": "make test-lsp-unit",
       "paths": [
-        "packages/template-lsp/**",
-        "packages/template-language/src/**",
-        "packages/template-ts/src/**",
+        "packages/lsp/**",
+        "packages/language/src/**",
+        "packages/ts/src/**",
         "scripts/editor-fixtures.mjs"
       ]
     },
     {
       "check": "make test-lsp-types",
       "paths": [
-        "packages/template-lsp/**"
+        "packages/lsp/**"
       ]
     },
     {
       "check": "make test-codemirror-unit",
       "paths": [
-        "packages/template-codemirror/**",
-        "packages/template-language/src/**",
+        "packages/codemirror/**",
+        "packages/language/src/**",
         "scripts/editor-fixtures.mjs"
       ]
     },
     {
       "check": "make test-codemirror-browser",
       "paths": [
-        "packages/template-codemirror/**"
+        "packages/codemirror/**"
       ]
     },
     {
       "check": "make test-codemirror-types",
       "paths": [
-        "packages/template-codemirror/**"
+        "packages/codemirror/**"
       ]
     },
     {
       "check": "make test-vscode-unit",
       "paths": [
-        "packages/template-vscode/**",
-        "packages/template-lsp/src/**"
+        "packages/vscode/**",
+        "packages/lsp/src/**"
       ]
     },
     {
       "check": "make test-vscode-types",
       "paths": [
-        "packages/template-vscode/**"
+        "packages/vscode/**"
       ]
     },
     {
       "check": "make test-vscode-integration",
       "paths": [
-        "packages/template-vscode/**",
-        "packages/template-lsp/src/**"
+        "packages/vscode/**",
+        "packages/lsp/src/**"
       ]
     },
     {
       "check": "make test-go-vet",
       "paths": [
-        "packages/template-go/**"
+        "packages/go/**"
       ]
     },
     {
       "check": "make test-go-unit",
       "paths": [
-        "packages/template-go/**",
+        "packages/go/**",
         "tests/fixtures/{bound-data,expr,native-object}/**"
       ]
     },
     {
       "check": "make test-rust-clippy",
       "paths": [
-        "packages/template-rust/**"
+        "packages/rust/**"
       ]
     },
     {
       "check": "make test-rust-unit",
       "paths": [
-        "packages/template-rust/**",
+        "packages/rust/**",
         "tests/fixtures/{bound-data,expr,native-object}/**"
       ]
     },
     {
       "check": "make test-php",
       "paths": [
-        "packages/template-php/**",
+        "packages/php/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "scripts/composer-install.mjs"
       ]
@@ -1245,7 +1245,7 @@
     {
       "check": "make conformance",
       "paths": [
-        "packages/template-{ts,go,rust,php,python}/**",
+        "packages/{ts,go,rust,php,python}/**",
         "tests/runner/{conformance,cases,drivers}.mjs",
         "tests/fixtures/filesystem/**",
         "scripts/publish-build.mjs"
@@ -1260,39 +1260,39 @@
     {
       "check": "make conformance-generated-ts",
       "paths": [
-        "packages/template-ts/**",
-        "packages/template-compiler/**",
+        "packages/ts/**",
+        "packages/compiler/**",
         "tests/runner/{conformance-generated-ts,generated-ts-render,bounded,cases}.mjs"
       ]
     },
     {
       "check": "make conformance-generated-go",
       "paths": [
-        "packages/template-go/**",
-        "packages/template-compiler/**",
+        "packages/go/**",
+        "packages/compiler/**",
         "tests/runner/{conformance-generated-go,bounded,cases}.mjs"
       ]
     },
     {
       "check": "make conformance-generated-rust",
       "paths": [
-        "packages/template-rust/**",
-        "packages/template-compiler/**",
+        "packages/rust/**",
+        "packages/compiler/**",
         "tests/runner/{conformance-generated-rust,bounded,cases}.mjs"
       ]
     },
     {
       "check": "make conformance-generated-php",
       "paths": [
-        "packages/template-php/**",
-        "packages/template-compiler/**",
+        "packages/php/**",
+        "packages/compiler/**",
         "tests/runner/{conformance-generated-php,bounded,cases}.mjs"
       ]
     },
     {
       "check": "make delimiter-matrix",
       "paths": [
-        "packages/template-{ts,go,rust,php}/**",
+        "packages/{ts,go,rust,php}/**",
         "tests/runner/delimiter-matrix.mjs"
       ]
     },
@@ -1300,11 +1300,11 @@
       "check": "make generated-native-calls-check",
       "paths": [
         "tests/fixtures/native-object/**",
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-generated-native-calls.mjs",
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
-        "packages/template-python/**",
+        "packages/python/**",
         "mise.toml"
       ]
     },
@@ -1312,11 +1312,11 @@
       "check": "make generated-typed-values-check",
       "paths": [
         "tests/fixtures/typed-values/**",
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-generated-typed-values.mjs",
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
-        "packages/template-python/**",
+        "packages/python/**",
         "mise.toml"
       ]
     },
@@ -1324,11 +1324,11 @@
       "check": "make generated-arguments-check",
       "paths": [
         "tests/fixtures/typed-arguments/**",
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-generated-arguments.mjs",
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
-        "packages/template-python/**",
+        "packages/python/**",
         "mise.toml"
       ]
     },
@@ -1336,18 +1336,18 @@
       "check": "make generated-bound-data-check",
       "paths": [
         "tests/fixtures/bound-data/**",
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-generated-bound-data.mjs",
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
-        "packages/template-python/**",
+        "packages/python/**",
         "mise.toml"
       ]
     },
     {
       "check": "make test-ext-conformance",
       "paths": [
-        "packages/template-php-ext/**",
+        "packages/php-ext/**",
         "scripts/build-php-extension.mjs",
         "tests/runner/{conformance,cases,drivers}.mjs"
       ]
@@ -1355,53 +1355,53 @@
     {
       "check": "make test-ext-unit",
       "paths": [
-        "packages/template-php-ext/**",
+        "packages/php-ext/**",
         "scripts/build-php-extension.mjs"
       ]
     },
     {
       "check": "make typed-generator-compile-check",
       "paths": [
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-typed-generator.mjs",
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
-        "packages/template-python/**",
+        "packages/python/**",
         "mise.toml"
       ]
     },
     {
       "check": "make ast-artifact-check",
       "paths": [
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-ast-artifact.mjs"
       ]
     },
     {
       "check": "make generated-artifact-check",
       "paths": [
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-generated-artifact.mjs"
       ]
     },
     {
       "check": "make compiler-ir-rules-check",
       "paths": [
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-compiler-ir.mjs"
       ]
     },
     {
       "check": "make conformance-type-manifest-check",
       "paths": [
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "scripts/check-conformance-type-manifest.mjs"
       ]
     },
     {
       "check": "make typed-generator-check",
       "paths": [
-        "packages/template-compiler/**",
+        "packages/compiler/**",
         "tools/showcase/compile-generated.mjs"
       ]
     },
@@ -1418,12 +1418,12 @@
         "scripts/check-package-installs.mjs",
         "scripts/install-workspace.mjs",
         "scripts/language-checks.mjs",
-        "packages/template-{ts,go,rust,php}/**",
+        "packages/{ts,go,rust,php}/**",
         "scripts/python-toolchain.mjs",
-        "packages/template-python/**",
+        "packages/python/**",
         "mise.toml",
         "scripts/python-wheelhouse.mjs",
-        "packages/template-python/build-requirements.json"
+        "packages/python/build-requirements.json"
       ]
     },
     {
@@ -1431,7 +1431,7 @@
       "paths": [
         "tests/browser/**",
         "playwright.config.ts",
-        "packages/template-ts/**"
+        "packages/ts/**"
       ]
     },
     {
@@ -1439,7 +1439,7 @@
       "paths": [
         "tools/showcase/**",
         "examples/site/**",
-        "packages/template-compiler/**"
+        "packages/compiler/**"
       ]
     },
     {
@@ -1453,8 +1453,8 @@
       "check": "make artifact-digest-check",
       "paths": [
         "scripts/check-artifact-digests.mjs",
-        "packages/template-compiler/**",
-        "packages/template-ts/**",
+        "packages/compiler/**",
+        "packages/ts/**",
         "package-lock.json",
         "examples/site/**",
         "tools/showcase/**"
@@ -1478,13 +1478,13 @@
     {
       "check": "make test-python",
       "paths": [
-        "packages/template-python/**"
+        "packages/python/**"
       ]
     },
     {
       "check": "make conformance-python",
       "paths": [
-        "packages/template-python/**",
+        "packages/python/**",
         "tests/runner/{conformance,cases,drivers}.mjs",
         "scripts/publish-build.mjs"
       ]
@@ -1492,15 +1492,15 @@
     {
       "check": "make conformance-generated-python",
       "paths": [
-        "packages/template-python/**",
-        "packages/template-compiler/**",
+        "packages/python/**",
+        "packages/compiler/**",
         "tests/runner/{conformance-generated-python,bounded,cases}.mjs"
       ]
     },
     {
       "check": "make lint-python",
       "paths": [
-        "packages/template-python/**",
+        "packages/python/**",
         "config/toolchain.json",
         "mise.toml",
         "mise.lock",
@@ -1513,7 +1513,7 @@
         "config/parity.json",
         "tests/cases/**",
         "tests/fixtures/expr/**",
-        "packages/template-{ts,go,rust,php,php-ext,python}/**"
+        "packages/{ts,go,rust,php,php-ext,python}/**"
       ]
     }
   ]

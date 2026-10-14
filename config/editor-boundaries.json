@@ -5,9 +5,9 @@
     {
       "comment": "EDT-2: an adapter depends on @polyspec/template-language and neither declares nor imports the parser @polyspec/template.",
       "packages": [
-        "packages/template-lsp",
-        "packages/template-codemirror",
-        "packages/template-vscode"
+        "packages/lsp",
+        "packages/codemirror",
+        "packages/vscode"
       ],
       "sources": "src",
       "forbiddenModules": [
@@ -18,7 +18,7 @@
     {
       "comment": "EDT-3: the language service uses no editor, Node.js or DOM module or global; its command line entry src/cli is the one part that may use Node.js.",
       "packages": [
-        "packages/template-language"
+        "packages/language"
       ],
       "sources": "src",
       "forbiddenModules": [

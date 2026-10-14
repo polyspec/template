@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e",
-  "compilerDigest": "bc1fc6d15dc2aea06a52263856e3d09962cb4b9defd8c167d1ac818ba52083e3",
+  "contractDigest": "c75c35bdf956018be512b3b7a3b68e367bb882f5890ec7f2806ccfb95ce2662b",
+  "compilerDigest": "d35097c0ee143f126a14a2e3fc6988828444d07cd29b1595ff8ec25fc4598907",
   "files": {
     "Assign.php": {
       "path": "Assign.php",

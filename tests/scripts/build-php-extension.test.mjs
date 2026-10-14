@@ -11,7 +11,7 @@ import { checkArginfo, inputsHash, sourceFiles, stubFiles, stubHash } from '../.
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SOURCE = path.join(ROOT, 'packages/template-php-ext/src');
+const SOURCE = path.join(ROOT, 'packages/php-ext/src');
 const IDENTITY = { version: '8.5.0', vernum: '80500', 'include-dir': '/php/include', 'extension-dir': '/php/ext', 'configure-options': '' };
 
 function copySource(t) {

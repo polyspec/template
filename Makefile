@@ -57,20 +57,20 @@ include scripts/kit/kit-bootstrap.mk
 
 SHOWCASE_LANGS  ?= ts,go,rust,php
 
-TS_DIR   := packages/template-ts
-GO_DIR   := packages/template-go
-RUST_DIR := packages/template-rust
-PHP_DIR  := packages/template-php
-EXT_DIR  := packages/template-php-ext
+TS_DIR   := packages/ts
+GO_DIR   := packages/go
+RUST_DIR := packages/rust
+PHP_DIR  := packages/php
+EXT_DIR  := packages/php-ext
 # The builds that the checks run, published by scripts/publish-build.mjs only when their bytes change: cargo links
 # target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1). The C PHP
 # extension is built by phpize as polyspec_template.so on every platform (T21.4).
 EXT_LIBRARY := var/build/polyspec_template.so
 SHOWCASE_RUST := tools/showcase/adapters/rust
-LANGUAGE_DIR := packages/template-language
-LSP_DIR      := packages/template-lsp
-VSCODE_DIR := packages/template-vscode
-CODEMIRROR_DIR := packages/template-codemirror
+LANGUAGE_DIR := packages/language
+LSP_DIR      := packages/lsp
+VSCODE_DIR := packages/vscode
+CODEMIRROR_DIR := packages/codemirror
 # The VS Code build of the integration test, installed by make install-vscode (the VS Code installer of kit) after make
 # install and only read by the test, which never downloads (T20.1-4). Only a run of the test needs it (T20.1-6).
 VSCODE_TOOLS := $(CURDIR)/var/tools/vscode
@@ -196,7 +196,7 @@ install-browsers: ## Install the Chromium of Playwright and its system packages,
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
 
 build-ts: ## Build the TypeScript package
-	node scripts/build-package.mjs --package template-ts
+	node scripts/build-package.mjs --package ts
 
 build-go: ## Build the Go CLI
 	cd $(GO_DIR) && go build -o template ./cmd/template && cd $(CURDIR) && node scripts/publish-build.mjs $(GO_DIR)/template var/build/template-go
@@ -240,7 +240,7 @@ test-scripts: cargo-downloads-check build-ts build-language build-lsp build-code
 	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
-	node scripts/build-package.mjs --package template-language
+	node scripts/build-package.mjs --package language
 
 test-language: test-language-unit test-language-types ## Formatter, safety invariant and CLI tests, type check
 
@@ -251,7 +251,7 @@ test-language-types: build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
 build-lsp: build-language ## Build the language server template-lsp
-	node scripts/build-package.mjs --package template-lsp
+	node scripts/build-package.mjs --package lsp
 
 test-lsp: test-lsp-unit test-lsp-types ## Language server protocol tests against the editor fixtures, type check
 
@@ -269,7 +269,7 @@ format-external-check: build-language ## Run the formatter safety invariant on a
 	cd $(LANGUAGE_DIR) && TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" $(VITEST) run tests/invariant.test.ts
 
 build-codemirror: build-language ## Build the CodeMirror 6 adapter
-	node scripts/build-package.mjs --package template-codemirror
+	node scripts/build-package.mjs --package codemirror
 
 test-codemirror: test-codemirror-unit test-codemirror-browser test-codemirror-types ## CodeMirror adapter tests against the editor fixtures, browser test, type check
 
@@ -288,7 +288,7 @@ uninstall-cli: ## Remove the formatter copy and the script template-fmt of $(CLI
 	node scripts/install-cli.mjs uninstall --prefix $(CLI_PREFIX)
 
 build-vscode: build-lsp ## Bundle the VS Code extension
-	node scripts/build-package.mjs --package template-vscode
+	node scripts/build-package.mjs --package vscode
 
 test-vscode: test-vscode-unit test-vscode-types ## Extension tests and type check
 
@@ -345,10 +345,10 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 # the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
 # python of mise.toml, and the uv of mise.toml installs the package into it offline, with its build requirement from
 # var/python/wheelhouse (make install). The stamp is remade when the project or its build requirements change; a change of
-# the sources needs no install. The tests are discovered with packages/template-python as the top level: the directory
+# the sources needs no install. The tests are discovered with packages/python as the top level: the directory
 # tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
 # runs one test file by its path.
-PYTHON_PACKAGE := packages/template-python
+PYTHON_PACKAGE := packages/python
 PYTHON_VENV := $(shell node scripts/python-venv.mjs)
 ifeq ($(PYTHON_VENV),)
 $(error scripts/python-venv.mjs read no environment of the implementation python from config/parity.json)
@@ -356,7 +356,7 @@ endif
 UV := $(CURDIR)/var/tools/mise/shims/uv
 
 .PHONY: python-package
-python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/template-python installed editable; offline
+python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed editable; offline
 
 $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/build-requirements.json
 	rm -rf $(PYTHON_VENV)

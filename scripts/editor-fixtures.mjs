@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Editor fixtures (EDT-17): writes or checks the expected language service results of every template under
-// packages/template-language/tests/editor. Every editor adapter compares its own results with these files.
+// packages/language/tests/editor. Every editor adapter compares its own results with these files.
 //   node scripts/editor-fixtures.mjs --write | --check
 import { lstatSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-export const fixtureDirectory = join(root, 'packages/template-language/tests/editor');
+export const fixtureDirectory = join(root, 'packages/language/tests/editor');
 
 /**
  * The host of root resolution over the file system (EDT-21): `lstat` that never follows a link, and a missing path or a
@@ -77,7 +77,7 @@ export function fixtureNames() {
 }
 
 async function main(mode) {
-  const { openDocument } = await import(join(root, 'packages/template-language/dist/index.mjs'));
+  const { openDocument } = await import(join(root, 'packages/language/dist/index.mjs'));
   let drift = 0;
   for (const name of fixtureNames()) {
     const text = readFileSync(join(fixtureDirectory, name), 'utf8');

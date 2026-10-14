@@ -82,7 +82,7 @@ function checkPython() {
 function checkPhp() {
   // The PHP program of a scenario is a directory of PSR-4 files (T25.1).
   const files = scenarios.flatMap(id => readdirSync(join(root, showcasePhpDirectory(id))).map(name => join(root, showcasePhpDirectory(id), name)));
-  run(join(root, 'packages/template-php/vendor/bin/pint'), ['--test', '--preset', 'psr12', ...files]);
+  run(join(root, 'packages/php/vendor/bin/pint'), ['--test', '--preset', 'psr12', ...files]);
   run('phpcs', ['--standard=phpcs.xml.dist', ...files]);
 }
 

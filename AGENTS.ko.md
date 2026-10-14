@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: 37709fa854939ea0f6635b510fa9dbbf3857ca18a0bf7e7c2cb99643a615d200 -->
+<!-- source-sha256: e42297cdde27f1f176d2794d16f30652947d8a1b93626b2210cd21566c1d63b2 -->
 # 개발
 
 ## 문서
@@ -29,7 +29,7 @@
 
 검사는 같은 tree에 대해 언제, 어느 machine에서나 같은 결과를 낸다. 아래 규칙은 각각 한 종류의 결함을 다룬다. 한 종류의 결함은 그 종류가 나타나는 모든 곳에서 고치고, 규칙에는 test를 둔다.
 
-- Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `.node-version`, npm은 `package.json`의 `packageManager`, Go, Python, Composer와 lint·audit 도구는 `mise.toml`이 선언하고 그 digest는 `mise.lock`에 둔다. Go와 Python은 kit pin이며 `packages/template-go/go.mod`의 `go` 줄이 같아야 한다. Rust는 `rust-toolchain.toml`, PHP minor version과 mise는 `config/toolchain.json`이 선언한다. C PHP extension은 `PATH`에 있는 PHP의 phpize와 php-config로 build하며, 이 PHP는 test를 실행하는 PHP여야 한다(그렇지 않으면 `scripts/build-php-extension.mjs`가 실패한다). `make install-tools`(`node_modules/@polyspec/kit/dist/install-tools.mjs`)가 `make install-tools TOOLS=npm`이 npm과 mise를 설치한 뒤 `mise.toml`의 도구를 mise로 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mjs`가 모든 변경에서 version을 검사한다.
+- Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `.node-version`, npm은 `package.json`의 `packageManager`, Go, Python, Composer와 lint·audit 도구는 `mise.toml`이 선언하고 그 digest는 `mise.lock`에 둔다. Go와 Python은 kit pin이며 `packages/go/go.mod`의 `go` 줄이 같아야 한다. Rust는 `rust-toolchain.toml`, PHP minor version과 mise는 `config/toolchain.json`이 선언한다. C PHP extension은 `PATH`에 있는 PHP의 phpize와 php-config로 build하며, 이 PHP는 test를 실행하는 PHP여야 한다(그렇지 않으면 `scripts/build-php-extension.mjs`가 실패한다). `make install-tools`(`node_modules/@polyspec/kit/dist/install-tools.mjs`)가 `make install-tools TOOLS=npm`이 npm과 mise를 설치한 뒤 `mise.toml`의 도구를 mise로 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mjs`가 모든 변경에서 version을 검사한다.
 - Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. registry에 묻는 review는 따로 있는 명령이고 그 결과를 commit한다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로, `make release-consumer`가 `tests/fixtures/release-consumer`의 commit된 lock으로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`, `dependency-review`, `release-consumer-lock`의 download와 `make release-consumer`의 설치를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). cargo를 실행하는 모든 target은 `cargo-downloads-check`에 의존하며, 이것은 없는 crate에 대해 `make install`을 밝히므로 어떤 검사도 offline mode를 벗어나라는 cargo의 안내를 보이지 않는다.
 - Build: 검사는 자기가 읽는 것을, 입력이 바뀌지 않으면 아무것도 하지 않는 build로 만든다. 앞 target이나 앞 실행의 build에 기대지 않는다. 다른 것이 읽는 build는 byte가 바뀔 때에만 임시 파일과 rename으로 게시한다.
 - 공유 상태: 실행은 자기 directory에만 쓴다. 임시 파일은 checkout 밖에 실행의 이름으로, cache는 checkout 안(`var/`)에 둔다. 여러 실행이 읽고 쓰는 record는 읽을 때부터 마지막으로 쓸 때까지 lock을 쥔다. 실행은 자기가 시작한 group의 process를 남기지 않는다.
@@ -75,8 +75,8 @@
 ## 릴리스
 
 - 릴리스는 CI 실행이 성공한 `main`의 commit에 붙인 tag이다. `.github/workflows/ci.yml`의 job `ci-passed`는 그 실행의 다른 모든 job이 통과했을 때만 통과한다. tag를 만들고 옮기고 push하는 것은 메인테이너뿐이다(T22.1-4).
-- 버전 올림 commit `chore(release): Release X.Y.Z (#task)`는 `config/release.json`의 `manifests`가 나열한 모든 manifest(루트 `package.json`, npm 패키지, VS Code 확장, Rust crate와 Python 패키지(`packages/template-python/pyproject.toml`), `package-lock.json`, `packages/template-rust/Cargo.lock`. `composer.json`에는 `version` field가 없고 버전을 tag에서 받는다)의 버전을 X.Y.Z로 정하고, `CHANGELOG.md`와 `CHANGELOG.ko.md`의 `## Unreleased`를 `## X.Y.Z`로 바꾸며 그 위에 비어 있는 새 `## Unreleased`를 둔다.
-- 그 commit을 `main`으로 가져온 push의 CI 실행이 성공한 뒤, 메인테이너는 그 commit에 `vX.Y.Z` tag를, Go module에는 `packages/template-go/vX.Y.Z` tag를 붙이고 tag를 push한다. tag push는 `.github/workflows/release.yml`을 실행한다. 이 workflow는 tag된 commit이 `main`에 있고 check `ci-passed`를 통과했는지, 모든 manifest에 tag의 버전이 있고 `CHANGELOG.md`에 section `## X.Y.Z`가 있는지 확인하고, `<package>-<language>-<version>.<ext>`(`polyspec-template-npm-X.Y.Z.tgz`)라는 이름의 패키지 archive를 만들어 GitHub Release를 생성한다(`docs/operations/publication.md`).
+- 버전 올림 commit `chore(release): Release X.Y.Z (#task)`는 `config/release.json`의 `manifests`가 나열한 모든 manifest(루트 `package.json`, npm 패키지, VS Code 확장, Rust crate와 Python 패키지(`packages/python/pyproject.toml`), `package-lock.json`, `packages/rust/Cargo.lock`. `composer.json`에는 `version` field가 없고 버전을 tag에서 받는다)의 버전을 X.Y.Z로 정하고, `CHANGELOG.md`와 `CHANGELOG.ko.md`의 `## Unreleased`를 `## X.Y.Z`로 바꾸며 그 위에 비어 있는 새 `## Unreleased`를 둔다.
+- 그 commit을 `main`으로 가져온 push의 CI 실행이 성공한 뒤, 메인테이너는 그 commit에 `vX.Y.Z` tag를, Go module에는 `packages/go/vX.Y.Z` tag를 붙이고 tag를 push한다. tag push는 `.github/workflows/release.yml`을 실행한다. 이 workflow는 tag된 commit이 `main`에 있고 check `ci-passed`를 통과했는지, 모든 manifest에 tag의 버전이 있고 `CHANGELOG.md`에 section `## X.Y.Z`가 있는지 확인하고, `<package>-<language>-<version>.<ext>`(`polyspec-template-npm-X.Y.Z.tgz`)라는 이름의 패키지 archive를 만들어 GitHub Release를 생성한다(`docs/operations/publication.md`).
 
 ## Checklist
 

@@ -6,10 +6,10 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { compileAst } from '../packages/template-compiler/ast-artifact.mjs';
-import { compileFiles, compileSource } from '../packages/template-compiler/compiler.mjs';
+import { compileAst } from '../packages/compiler/ast-artifact.mjs';
+import { compileFiles, compileSource } from '../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mjs';
-import { goString, phpString, rustString } from '../packages/template-compiler/backend-support.mjs';
+import { goString, phpString, rustString } from '../packages/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
@@ -74,7 +74,7 @@ if (reference !== expected) throw new Error('TypeScript AST typed values differ:
       try {
         writeFileSync(join(goDir, 'generated.go'), compileSource(graphManifest, types, 'go'));
         writeFileSync(join(goDir, 'generated_test.go'), `package generated
-import ("strconv"; "strings"; "testing"; template "github.com/polyspec/template/packages/template-go"; "github.com/polyspec/template/packages/template-go/functions"; "github.com/polyspec/template/packages/template-go/value")
+import ("strconv"; "strings"; "testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/functions"; "github.com/polyspec/template/packages/go/value")
 func describeValue(input any) string { switch current := input.(type) { case nil: return "null"; case bool: return "bool(" + strconv.FormatBool(current) + ")"; case float64: return "number(" + strconv.FormatFloat(current, 'f', -1, 64) + ")"; case string: return "string(" + current + ")"; case value.List: parts := []string{}; for _, item := range current { parts = append(parts, describeValue(item)) }; return "list(" + strings.Join(parts, ",") + ")"; case *value.OrderedMap: parts := []string{}; for _, key := range current.Keys() { parts = append(parts, key+"="+describeValue(current.MustGet(key))) }; return "map(" + strings.Join(parts, ",") + ")" }; return "unexpected" }
 func TestGeneratedTypedValues(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; if err := program.Runtime.Register("describe", func(args []value.Value, _ functions.Context) (any, error) { parts := []string{}; for _, item := range args { parts = append(parts, describeValue(item)) }; return strings.Join(parts, ","), nil }); err != nil { t.Fatal(err) }; page := value.NewOrderedMap(); page.Set("title", "T"); page.Set("count", 2.0); first := value.NewOrderedMap(); first.Set("name", "a"); second := value.NewOrderedMap(); second.Set("name", "b"); tags := value.NewOrderedMap(); tags.Set("x", 1.0); assign := value.NewOrderedMap(); assign.Set("page", page); assign.Set("rows", value.List{first, second}); assign.Set("tags", tags); actual, err := program.Render("input.tpl", assign, template.RenderOptions{}); if err != nil || actual != ${goString(expected)} { t.Fatalf("generated Go typed values = %q %v", actual, err) } }
 `);
@@ -105,7 +105,7 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
       const phpNamespace = 'Polyspec\\Generated\\TypedValues';
       const phpDirectory = join(temporary, 'php');
       writePhpProgram(phpDirectory, compileFiles(graphManifest, types, 'php', { phpNamespace }));
-      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/template-php/vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
+      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/php/vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
     },
     Python: () => {
       // Python: the generated program renders through Engine like the AST program; the python of var/python/venv imports the package (scripts/python-toolchain.mjs).

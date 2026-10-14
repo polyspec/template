@@ -6,7 +6,7 @@ rust-version = "1.99.0"
 publish = false
 
 [dependencies]
-polyspec-template = { path = "../../../../packages/template-rust" }
+polyspec-template = { path = "../../../../packages/rust" }
 indexmap = { version = "2", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }

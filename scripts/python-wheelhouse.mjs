@@ -3,8 +3,8 @@
 //
 //   node scripts/python-wheelhouse.mjs
 //
-// packages/template-python/pyproject.toml builds with setuptools, which pip fetches from the network when it builds the
-// package. packages/template-python/build-requirements.json pins each requirement by exact version, file and SHA-256
+// packages/python/pyproject.toml builds with setuptools, which pip fetches from the network when it builds the
+// package. packages/python/build-requirements.json pins each requirement by exact version, file and SHA-256
 // digest. make install runs this script with the network, and the package install check builds the wheel with
 // `pip wheel --no-index --find-links var/python/wheelhouse`, so a check never reads an index. A file that is present
 // with the pinned digest is kept; a download whose digest differs from the pin fails and is not written. The file is
@@ -19,10 +19,10 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /** The directory that holds the downloaded build requirements. */
 export const wheelhouse = join(root, 'var/python/wheelhouse');
 
-/** The pinned build requirements of packages/template-python. */
+/** The pinned build requirements of packages/python. */
 export function buildRequirements() {
-  const lock = JSON.parse(readFileSync(join(root, 'packages/template-python/build-requirements.json'), 'utf8'));
-  if (lock.schema !== 1 || !Array.isArray(lock.requirements) || lock.requirements.length === 0) throw new Error('packages/template-python/build-requirements.json has no requirements of schema 1');
+  const lock = JSON.parse(readFileSync(join(root, 'packages/python/build-requirements.json'), 'utf8'));
+  if (lock.schema !== 1 || !Array.isArray(lock.requirements) || lock.requirements.length === 0) throw new Error('packages/python/build-requirements.json has no requirements of schema 1');
   return lock.requirements;
 }
 
@@ -40,7 +40,7 @@ export async function ensureWheelhouse(requirements, directory, download) {
     if (existsSync(path) && sha256(readFileSync(path)) === pinned) continue;
     const bytes = await download(url);
     const actual = sha256(bytes);
-    if (actual !== pinned) throw new Error(`${name} ${version}: ${url} has the SHA-256 digest ${actual}, but packages/template-python/build-requirements.json pins ${pinned}`);
+    if (actual !== pinned) throw new Error(`${name} ${version}: ${url} has the SHA-256 digest ${actual}, but packages/python/build-requirements.json pins ${pinned}`);
     const next = `${path}.next-${process.pid}`;
     writeFileSync(next, bytes);
     renameSync(next, path);
@@ -53,9 +53,9 @@ export async function ensureWheelhouse(requirements, directory, download) {
 export function requireWheelhouse(requirements, directory) {
   for (const { filename, sha256: pinned } of requirements) {
     const path = join(directory, filename);
-    if (!existsSync(path)) throw new Error(`${path} is missing; run make install, which downloads the build requirements of packages/template-python`);
+    if (!existsSync(path)) throw new Error(`${path} is missing; run make install, which downloads the build requirements of packages/python`);
     const actual = sha256(readFileSync(path));
-    if (actual !== pinned) throw new Error(`${path} has the SHA-256 digest ${actual}, but packages/template-python/build-requirements.json pins ${pinned}; run make install`);
+    if (actual !== pinned) throw new Error(`${path} has the SHA-256 digest ${actual}, but packages/python/build-requirements.json pins ${pinned}; run make install`);
   }
   return directory;
 }
