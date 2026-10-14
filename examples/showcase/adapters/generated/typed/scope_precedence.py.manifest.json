@@ -6,7 +6,7 @@
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "7c92c2929e40df276ca71625f867914dbb181120e4b3fdc47693c9ec5b89ec44",
+  "compilerDigest": "a3fbfcab5bbaf51ed562bdc36a5992992ba93b536a4a4442d8308970ccf39df1",
   "files": {
     "scope_precedence.py": {
       "path": "scope_precedence.py",

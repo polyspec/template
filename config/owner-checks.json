@@ -541,6 +541,15 @@
     },
     {
       "paths": [
+        "packages/compiler/backends/go/**"
+      ],
+      "targets": [
+        "lint-go-format",
+        "test-go"
+      ]
+    },
+    {
+      "paths": [
         "packages/compiler/**"
       ],
       "targets": [
@@ -1056,7 +1065,8 @@
     {
       "check": "make lint-go-format",
       "paths": [
-        "packages/go/**"
+        "packages/go/**",
+        "packages/compiler/backends/go/**"
       ]
     },
     {
@@ -1206,6 +1216,14 @@
       "check": "make test-go-vet",
       "paths": [
         "packages/go/**"
+      ]
+    },
+    {
+      "check": "make test-go-backend-vet",
+      "paths": [
+        "packages/compiler/backends/go/**",
+        "packages/go/**",
+        "go.work"
       ]
     },
     {

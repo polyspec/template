@@ -74,10 +74,15 @@ export function astCompilerDigest() {
   return digestFiles([...parserFiles(), ...packageFiles(['ast-artifact.mjs'])]);
 }
 
-/** The files of the shared generated compiler and the backend of one language, as entries of digestFiles. */
+/**
+ * The files of the shared generated compiler and the backend of one language, as entries of digestFiles: the module of
+ * the backend and the files of its folder, such as the Go that the Go backend writes as it is.
+ */
 export function generatedCompilerFiles(language) {
   const backend = language === 'ts' ? 'typescript' : language;
-  return packageFiles(['backend-support.mjs', `backends/${backend}.mjs`, 'compiler.mjs', 'generated-artifact.mjs', 'ir.mjs']);
+  const folder = join(packageRoot, 'backends', backend);
+  const sources = existsSync(folder) ? filesUnder(packageRoot, `backends/${backend}`) : [];
+  return packageFiles(['backend-support.mjs', `backends/${backend}.mjs`, ...sources, 'compiler.mjs', 'generated-artifact.mjs', 'ir.mjs']);
 }
 
 /** Identifies the shared generated compiler and one language backend. */
