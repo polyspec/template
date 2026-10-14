@@ -47,6 +47,16 @@ final class Parser
         return $this->lexer->consumedEnd();
     }
 
+    /**
+     * Tokens consumed so far, including the closing delimiter.
+     *
+     * @return list<Token>
+     */
+    public function consumed(): array
+    {
+        return $this->lexer->consumed();
+    }
+
     public function peek(): Token
     {
         return $this->lexer->peek();

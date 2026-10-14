@@ -41,7 +41,7 @@ final class BlockTag
     /**
      * Reads a quoted string or a run of path characters. Returns null at the close delimiter or end of input.
      *
-     * @return array{kind: string, value: string, start: int, end: int}|null
+     * @return array{kind: string, value: string, start: int, end: int, quoted: bool}|null
      */
     private function readToken(int $index): ?array
     {
@@ -54,7 +54,7 @@ final class BlockTag
         if ($char === '"' || $char === "'") {
             [$decoded, $end] = Lexer::stringLiteral($this->source, $index, $this->template);
 
-            return ['kind' => 'path', 'value' => $decoded, 'start' => $index, 'end' => $end];
+            return ['kind' => 'path', 'value' => $decoded, 'start' => $index, 'end' => $end, 'quoted' => true];
         }
         $end = $index;
         while ($end < strlen($text) && preg_match(self::PATH_CHARS, $text[$end]) === 1) {
@@ -62,19 +62,19 @@ final class BlockTag
         }
         $value = substr($text, $index, $end - $index);
         if (str_contains($value, '.') || str_contains($value, '/')) {
-            return ['kind' => 'path', 'value' => $value, 'start' => $index, 'end' => $end];
+            return ['kind' => 'path', 'value' => $value, 'start' => $index, 'end' => $end, 'quoted' => false];
         }
         if (preg_match(self::IDENT, $value) === 1) {
-            return ['kind' => 'ident', 'value' => $value, 'start' => $index, 'end' => $end];
+            return ['kind' => 'ident', 'value' => $value, 'start' => $index, 'end' => $end, 'quoted' => false];
         }
 
-        return ['kind' => 'ident', 'value' => '', 'start' => $index, 'end' => $index + 1];
+        return ['kind' => 'ident', 'value' => '', 'start' => $index, 'end' => $index + 1, 'quoted' => false];
     }
 
     /**
      * GRM-12: `+ path`.
      *
-     * @return array{0: string, 1: int} path and the index after it
+     * @return array{path: string, start: int, end: int, quoted: bool} the path and its range
      */
     public function readIncludePath(int $index): array
     {
@@ -87,13 +87,15 @@ final class BlockTag
             throw $this->fail('E_PARSE_INVALID_PATH', $token['start'], $token['end'], json_encode($token['value']) . ' is not a path');
         }
 
-        return [$token['value'], $token['end']];
+        return ['path' => $token['value'], 'start' => $token['start'], 'end' => $token['end'], 'quoted' => $token['quoted']];
     }
 
     /**
      * GRM-13 to GRM-15: `# [id] [path] {scope_item}`.
      *
-     * @return array{id: string|null, path: string|null, scope: list<array{name: string, expr: array<string, mixed>}>, end: int}
+     * The words are the id, the path and each scope item with its value.
+     *
+     * @return array{id: string|null, path: string|null, scope: list<array{name: string, expr: array<string, mixed>}>, words: list<array{start: int, end: int, quoted: bool}>, end: int}
      */
     public function readBlockBody(int $index): array
     {
@@ -101,6 +103,7 @@ final class BlockTag
         $id = null;
         $path = null;
         $scope = [];
+        $words = [];
         $cursor = $index;
         $token = $this->readToken($cursor);
         if ($token === null || $token['value'] === '') {
@@ -110,13 +113,16 @@ final class BlockTag
         if ($token['kind'] === 'path') {
             $path = $token['value'];
             $cursor = $token['end'];
+            $words[] = ['start' => $token['start'], 'end' => $token['end'], 'quoted' => $token['quoted']];
         } else {
             $id = $token['value'];
             $cursor = $token['end'];
+            $words[] = ['start' => $token['start'], 'end' => $token['end'], 'quoted' => $token['quoted']];
             $token = $this->readToken($cursor);
             if ($token !== null && $token['kind'] === 'path') {
                 $path = $token['value'];
                 $cursor = $token['end'];
+                $words[] = ['start' => $token['start'], 'end' => $token['end'], 'quoted' => $token['quoted']];
             }
         }
         for (;;) {
@@ -136,11 +142,13 @@ final class BlockTag
                 $parser = new ExpressionParser($this->source, $valueStart, $this->close, $this->closeCount, null, $this->template);
                 $scope[] = ['name' => $token['value'], 'expr' => $parser->parsePostfix(true)];
                 $cursor = $parser->end();
+                $words[] = ['start' => $token['start'], 'end' => $cursor, 'quoted' => false];
             } else {
+                $words[] = ['start' => $token['start'], 'end' => $token['end'], 'quoted' => false];
                 $scope[] = ['name' => $token['value'], 'expr' => Ast::variable($token['value'], $token['start'], $token['end'])];
             }
         }
 
-        return ['id' => $id, 'path' => $path, 'scope' => $scope, 'end' => $cursor];
+        return ['id' => $id, 'path' => $path, 'scope' => $scope, 'words' => $words, 'end' => $cursor];
     }
 }
