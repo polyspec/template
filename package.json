@@ -42,6 +42,7 @@
     "esbuild": "0.27.2",
     "oxc-parser": "^0.153.0",
     "picomatch": "^4.0.7",
+    "smol-toml": "^1.9.1",
     "tsup": "^8.5.1",
     "typescript": "7.0.2",
     "vitepress": "^1.6.4",

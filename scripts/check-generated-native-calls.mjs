@@ -10,7 +10,7 @@ import { goString, phpString, rustString } from '../packages/template-compiler/b
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
-import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
+import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/native-object');
@@ -280,7 +280,7 @@ for target, expected_code in expectations['hostValues']['errors'].items():
     if actual_code != expected_code:
         sys.exit('Python generated ' + target + ' = ' + actual_code)
 `);
-      run(pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+      run(pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment());
     },
   });
 } finally {

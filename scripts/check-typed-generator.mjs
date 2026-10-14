@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
 import { checkLanguages } from './language-checks.mjs';
-import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
+import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 
@@ -242,7 +242,7 @@ if limited:
         sys.exit('generated output limit lost its positioned template error')
 `);
   for (const id of scenarios) {
-    run(pythonCommand(), [runner, generatedSource(id, 'python'), join(scenarioRoot, id), target(id), id === scenarios[0] ? 'limited' : 'plain'], { env: pythonEnvironment() });
+    run(pythonPackageCommand(), [runner, generatedSource(id, 'python'), join(scenarioRoot, id), target(id), id === scenarios[0] ? 'limited' : 'plain'], { env: pythonEnvironment() });
   }
 }
 

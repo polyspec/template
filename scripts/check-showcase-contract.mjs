@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
+import { pythonCommand, pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -165,7 +165,7 @@ function runtimeCommand(language, scenarioPath, mode = 'ast') {
     const cargo = join(process.env.HOME ?? '', '.cargo', 'bin', 'cargo');
     return [existsSync(cargo) ? cargo : 'cargo', ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root, env];
   }
-  if (language === 'python') return [pythonCommand(), [source, scenarioPath], root, { ...env, ...pythonEnvironment() }];
+  if (language === 'python') return [pythonPackageCommand(), [source, scenarioPath], root, { ...env, ...pythonEnvironment() }];
   return ['php', [source, scenarioPath], root, env];
 }
 

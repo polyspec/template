@@ -12,7 +12,7 @@ import { goString, phpString, rustString } from '../packages/template-compiler/b
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
-import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
+import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/typed-values');
@@ -107,7 +107,7 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
       run('php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; require ${phpString(phpSource)}; function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
     },
     Python: () => {
-      // Python: the generated program renders through Engine like the AST program; the generated module imports the package from its sources (scripts/python-toolchain.mjs).
+      // Python: the generated program renders through Engine like the AST program; the python of var/python/venv imports the package (scripts/python-toolchain.mjs).
       const pythonDir = join(temporary, 'python');
       mkdirSync(pythonDir);
       writeFileSync(join(pythonDir, 'generated.py'), compileSource(graphManifest, types, 'python'));
@@ -142,7 +142,7 @@ with open('expected.html', encoding='utf-8', newline='') as handle:
 if actual != expected:
     sys.exit('Python generated typed values differ: ' + repr(actual))
 `);
-      run(pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+      run(pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment());
     },
   });
 } finally {

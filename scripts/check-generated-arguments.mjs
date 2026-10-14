@@ -14,7 +14,7 @@ import { phpString, rustString } from '../packages/template-compiler/backend-sup
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 import { checkLanguages } from './language-checks.mjs';
-import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
+import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 
 const fixture = join(root, 'tests/fixtures/typed-arguments');
@@ -131,7 +131,7 @@ kinds = [kind(lambda: program.render('input.tpl', {'title': 1}, card('N'))), kin
 if kinds != ['argument', 'argument']:
     sys.exit('Python reports ' + ', '.join(kinds))
 `);
-      run('Python', pythonCommand(), ['check.py'], pythonDir, pythonEnvironment());
+      run('Python', pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment());
     },
   });
 } finally {
