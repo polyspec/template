@@ -59,6 +59,9 @@ SHOWCASE_LANGS  ?= ts,go,rust,php,python
 
 TS_DIR   := packages/ts
 GO_DIR   := packages/go
+# The Go that the Go backend of the compiler writes as it is, one definition per file; the folder is in no module, so go
+# vet checks its files as one package and resolves their imports through go.work.
+GO_BACKEND_DIR := packages/compiler/backends/go
 RUST_DIR := packages/rust
 PHP_DIR  := packages/php
 EXT_DIR  := packages/php-ext
@@ -159,7 +162,7 @@ lint-rust: cargo-downloads-check
 
 .PHONY: lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php-format
 lint-go-format:
-	@out=$$(gofmt -l $(GO_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
+	@out=$$(gofmt -l $(GO_DIR) $(GO_BACKEND_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) $(GO_BACKEND_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
 lint-rust-format:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
 lint-showcase-format:
@@ -220,11 +223,13 @@ test-ts-types-node: build-ts
 test-ts-types-tests: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.tests.json
 
-test-go: test-go-vet test-go-unit ## Go unit tests
+test-go: test-go-vet test-go-backend-vet test-go-unit ## Go unit tests
 
-.PHONY: test-go-vet test-go-unit
+.PHONY: test-go-vet test-go-backend-vet test-go-unit
 test-go-vet:
 	cd $(GO_DIR) && go vet ./...
+test-go-backend-vet:
+	cd $(GO_BACKEND_DIR) && go vet *.go
 test-go-unit:
 	node $(KIT)/run-tests.$(KIT_EXT) go --cwd $(GO_DIR) -- -race ./...
 
