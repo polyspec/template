@@ -9,14 +9,15 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'smol-toml';
+import { pythonPackageCommandPath } from './python-venv.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 /** The pinned interpreter of the checkout: the shim var/tools/mise/shims/python3 of the python of mise.toml. */
 export const pythonInterpreter = join(root, 'var/tools/mise/shims/python3');
 
-/** The python of var/python/venv, the environment where `make python-package` installs packages/template-python. */
-export const pythonPackageInterpreter = join(root, 'var/python/venv/bin/python');
+/** The python of the environment of config/parity.json, where `make python-package` installs packages/template-python. */
+export const pythonPackageInterpreter = join(root, pythonPackageCommandPath());
 
 /** The minor release of the python of mise.toml, such as `3.14` of `python = "3.14.8"`. */
 export function pythonMinor() {

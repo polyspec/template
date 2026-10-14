@@ -699,7 +699,8 @@
     {
       "paths": [
         "mise.toml",
-        "scripts/python-toolchain.mjs"
+        "scripts/python-toolchain.mjs",
+        "scripts/python-venv.mjs"
       ],
       "targets": [
         "generated-native-check",

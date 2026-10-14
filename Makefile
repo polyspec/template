@@ -339,7 +339,8 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
 	node tests/runner/conformance.mjs --langs ts,python
 
-# The Python package is installed, editable, into the virtual environment PYTHON_VENV, so its tests, the conformance
+# The Python package is installed, editable, into the virtual environment PYTHON_VENV, the environment of the command of
+# the implementation python of config/parity.json (scripts/python-venv.mjs), so its tests, the conformance
 # driver (tests/runner/drivers.mjs) and the parity check (config/parity.json) import polyspec.template from the sources of
 # the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
 # python of mise.toml, and the uv of mise.toml installs the package into it offline, with its build requirement from
@@ -348,11 +349,14 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 # tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
 # runs one test file by its path.
 PYTHON_PACKAGE := packages/template-python
-PYTHON_VENV := var/python/venv
+PYTHON_VENV := $(shell node scripts/python-venv.mjs)
+ifeq ($(PYTHON_VENV),)
+$(error scripts/python-venv.mjs read no environment of the implementation python from config/parity.json)
+endif
 UV := $(CURDIR)/var/tools/mise/shims/uv
 
 .PHONY: python-package
-python-package: $(PYTHON_VENV)/.installed ## Make var/python/venv with packages/template-python installed editable; offline
+python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/template-python installed editable; offline
 
 $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/build-requirements.json
 	rm -rf $(PYTHON_VENV)

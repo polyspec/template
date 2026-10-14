@@ -3,11 +3,12 @@
 // interpreter fails with the path and the fix; the interpreter of PATH is never tried. A program that imports the package
 // runs the python of var/python/venv, with no changed import path (PRINCIPLES S3).
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { pythonCommand, pythonEnvironment, pythonInterpreter, pythonMinor, pythonPackageCommand, pythonPackageInterpreter } from '../../scripts/python-toolchain.mjs';
+import { pythonPackageEnvironment } from '../../scripts/python-venv.mjs';
 
 test('the minor release comes from the python of mise.toml', () => {
   assert.match(pythonMinor(), /^3\.\d+$/);
@@ -30,5 +31,7 @@ test('the environment of a Python program writes no bytecode and sets no import 
 
 test('the python that imports the package is the python of var/python/venv, which make python-package makes', () => {
   assert.equal(pythonPackageInterpreter, join(pythonInterpreter, '../../../../python/venv/bin/python'));
+  assert.equal(pythonPackageEnvironment(), 'var/python/venv');
+  assert.ok(!readFileSync(new URL('../../scripts/python-toolchain.mjs', import.meta.url), 'utf8').includes("'var/python/venv"), 'python-toolchain.mjs restates the environment that config/parity.json declares');
   assert.equal(pythonPackageCommand(), pythonPackageInterpreter, 'run make python-package');
 });
