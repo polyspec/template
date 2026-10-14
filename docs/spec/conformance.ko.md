@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: f3f4c3d1e89e2546dd7b58e8736ce1e63d1c219de443dc6f2718b4012e8f2d3c -->
+<!-- source-sha256: bf3eec3bfe5ddcfce2007ee39a5db2b956d57f7d54a30e1ef7b3945c73dcfa59 -->
 # 적합성
 
 [English](/spec/conformance).
@@ -47,7 +47,7 @@
 | `format`, 포맷 오류 | stderr에 FMT-14의 JSON `{"reason", "code", "line", "col", "message"}`. | 2 |
 | 모든 하위 명령, 사용 오류 | stderr에 메시지. | 1 |
 
-러너는 POSIX 유틸리티 문법 지침(지침 9와 10)의 순서대로 옵션을 `FILE`보다 앞에 넘긴다. 몇몇 표준 파서는 첫 피연산자에서 멈추기 때문이다. 구현은 자기 언어의 표준 파서(예: node:util `parseArgs`, Go `flag`, Rust `clap`, Python `argparse`, PHP `symfony/console`)로 파싱하고, 다른 순서에서는 그 파서의 동작을 따른다. `--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. 읽을 수 없는 파일은 사용 오류다. 내용이 하나의 JSON 문서가 아닌 파일은 ERR-5의 위치를 가진 템플릿 오류 `E_DATA_INVALID_JSON`이다(VAL-12). 이 파일의 다른 데이터 오류도 같은 위치에서 해당 `E_DATA_*` 코드를 가진 템플릿 오류다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. `--indent`는 FMT-9의 들여쓰기 단위다. `N`은 공백 수(1~8, 기본값 2), `tab`은 탭, `none`은 `indent: null`이다. `format`은 `templateBlocks` `indent`를 쓴다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
+러너는 하이픈으로 시작하는 값(구분자 쌍 `-!`)이 옵션으로 읽히지 않도록 각 옵션을 `--name=value` 한 인자로 넘기고, POSIX 유틸리티 문법 지침(지침 9와 10)의 순서대로 옵션을 `FILE`보다 앞에 넘긴다. 몇몇 표준 파서는 첫 피연산자에서 멈추기 때문이다. 구현은 자기 언어의 표준 파서(예: node:util `parseArgs`, Go `flag`, Rust `clap`, Python `argparse`, PHP `symfony/console`)로 파싱하고, 다른 순서에서는 그 파서의 동작을 따른다. `--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. 읽을 수 없는 파일은 사용 오류다. 내용이 하나의 JSON 문서가 아닌 파일은 ERR-5의 위치를 가진 템플릿 오류 `E_DATA_INVALID_JSON`이다(VAL-12). 이 파일의 다른 데이터 오류도 같은 위치에서 해당 `E_DATA_*` 코드를 가진 템플릿 오류다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. `--indent`는 FMT-9의 들여쓰기 단위다. `N`은 공백 수(1~8, 기본값 2), `tab`은 탭, `none`은 `indent: null`이다. `format`은 `templateBlocks` `indent`를 쓴다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
 
 **CNF-5** 구현별 명령:
 
