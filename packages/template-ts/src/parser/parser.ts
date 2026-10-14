@@ -2,7 +2,7 @@
 // as defined in docs/spec/lexical.md and docs/spec/grammar.md.
 import type { Block, Comment, Expr, If, IfBlock, For, Node, Set as SetNode, Template } from '../ast.js';
 import { errorAt, TemplateError, type ErrorCode } from '../errors.js';
-import type { Token, TokenType } from '../expr/lexer.js';
+import type { Token } from '../expr/lexer.js';
 import { ExpressionParser } from '../expr/parser.js';
 import type { Source } from '../source.js';
 import { RawTagReader } from './block-tag.js';
@@ -12,9 +12,14 @@ import {
 } from './scanner.js';
 import { standaloneRanges, type Range, type TagRange } from './standalone.js';
 
-/** Parser-owned source range for one accepted template tag. */
+/**
+ * Parser-owned source range for one accepted template tag. `bodyStart` and `bodyEnd` are the string indexes of the
+ * text between the open and the close delimiters, sigil included.
+ */
 export interface SyntaxTag extends TagRange {
   kind: 'assignment' | 'block' | 'close' | 'comment' | 'directive' | 'echo' | 'else' | 'elseif' | 'for' | 'if' | 'ifblock' | 'include';
+  bodyStart: number;
+  bodyEnd: number;
 }
 
 /** Canonical AST and the exact tag ranges accepted while producing it. */
@@ -24,21 +29,32 @@ export interface TemplateAnalysis {
   tokens: readonly SyntaxToken[];
 }
 
-/** Expression token range emitted by the lexer used during template parsing. */
+/** The token types of EDT-8. */
+export type SyntaxTokenKind = 'delimiter' | 'keyword' | 'variable' | 'property' | 'function' | 'string' | 'number' | 'operator' | 'comment' | 'path';
+
+/** A classified range of an accepted tag (EDT-8). `start` and `end` are string indexes. */
 export interface SyntaxToken {
   start: number;
   end: number;
-  kind: 'keyword' | 'number' | 'operator' | 'string' | 'variable';
+  kind: SyntaxTokenKind;
 }
 
-function syntaxToken(token: Token): SyntaxToken {
-  const keywords: ReadonlySet<TokenType> = new Set(['NULL', 'TRUE', 'FALSE']);
-  const variables: ReadonlySet<TokenType> = new Set(['IDENT', 'DOT_IDENT', 'DOT_INDEX']);
-  const kind: SyntaxToken['kind'] = token.type === 'STRING' ? 'string'
-    : token.type === 'NUMBER' ? 'number'
-      : keywords.has(token.type) ? 'keyword'
-        : variables.has(token.type) ? 'variable' : 'operator';
-  return { start: token.start, end: token.end, kind };
+// The EDT-8 class of an expression token, which depends on its neighbours for names.
+function expressionKind(token: Token, previous: Token | undefined, next: Token | undefined): SyntaxTokenKind {
+  switch (token.type) {
+    case 'STRING': return 'string';
+    case 'NUMBER': return 'number';
+    case 'NULL': case 'TRUE': case 'FALSE': case 'IN': return 'keyword';
+    case 'IDENT': return next?.type === 'LPAREN' || previous?.type === 'PIPE' ? 'function' : 'variable';
+    case 'DOT_IDENT': return next?.type === 'LPAREN' ? 'function' : 'property';
+    case 'DOT_INDEX': return 'property';
+    default: return 'operator';
+  }
+}
+
+function expressionTokens(parser: ExpressionParser): SyntaxToken[] {
+  const tokens = parser.lexer.consumed.filter(token => token.type !== 'CLOSE' && token.type !== 'EOF');
+  return tokens.map((token, index) => ({ start: token.start, end: token.end, kind: expressionKind(token, tokens[index - 1], tokens[index + 1]) }));
 }
 
 function syntaxKind(sigil: string | null, assignment = false): SyntaxTag['kind'] {
@@ -99,7 +115,7 @@ export function analyzeTemplate(source: Source, delimiters: Delimiters = DEFAULT
   return new TemplateParser(source, delimiters).parse();
 }
 
-/** The tag ranges and expression tokens a parse accepted before its first error, and that error (EDT-6). */
+/** The tags a parse accepted before its first error, their tokens, and that error (EDT-6). */
 export interface PrefixAnalysis {
   tags: readonly SyntaxTag[];
   tokens: readonly SyntaxToken[];
@@ -114,7 +130,7 @@ export function analyzeTemplatePrefix(source: Source, delimiters: Delimiters = D
     return { tags, tokens, error: null };
   } catch (error) {
     if (!(error instanceof TemplateError)) throw error;
-    return { tags: parser.acceptedTags, tokens: parser.consumedTokens(), error };
+    return { tags: parser.acceptedTags, tokens: parser.acceptedTokens, error };
   }
 }
 
@@ -124,8 +140,11 @@ class TemplateParser {
   private readonly root: Item[] = [];
   private readonly frames: Frame[] = [];
   private readonly tags: SyntaxTag[] = [];
+  private readonly tokens: SyntaxToken[] = [];
   private readonly comments: Comment[] = [];
-  private readonly expressionParsers: ExpressionParser[] = [];
+  // The expression parsers and the tokens outside expressions of the tag being parsed.
+  private tagParsers: ExpressionParser[] = [];
+  private tagTokens: SyntaxToken[] = [];
   private sawTag = false;
   private textBeforeFirstTagIsWhitespace = true;
 
@@ -157,7 +176,7 @@ class TemplateParser {
     return {
       ast: { type: 'Template', name: this.name, body: this.finalize(this.root, removed), comments: this.comments },
       tags: this.tags,
-      tokens: this.consumedTokens(),
+      tokens: this.tokens,
     };
   }
 
@@ -166,11 +185,13 @@ class TemplateParser {
     return this.tags;
   }
 
-  /** The expression tokens read so far, in source order. */
-  consumedTokens(): SyntaxToken[] {
-    return this.expressionParsers.flatMap(parser => parser.lexer.consumed
-      .filter(token => token.type !== 'CLOSE' && token.type !== 'EOF')
-      .map(syntaxToken));
+  /** The tokens of the tags accepted so far, in source order. */
+  get acceptedTokens(): readonly SyntaxToken[] {
+    return this.tokens;
+  }
+
+  private mark(start: number, end: number, kind: SyntaxTokenKind): void {
+    this.tagTokens.push({ start, end, kind });
   }
 
   // Pass 1: text scanning and tag parsing.
@@ -229,6 +250,8 @@ class TemplateParser {
     const isDirective = sigil === '%';
     const firstTag = !this.sawTag;
     this.sawTag = true;
+    this.tagParsers = [];
+    this.tagTokens = [];
 
     let end: number;
     let echo = false;
@@ -304,6 +327,7 @@ class TemplateParser {
       case '+': {
         const reader = this.rawReader(context);
         const path = reader.readIncludePath(bodyStart);
+        this.mark(path.start, path.end, path.quoted ? 'string' : 'path');
         end = this.finishTag(context, this.expectCloseRaw(context, path.end));
         this.items.push({ type: 'Include', path: path.path, span: this.source.span(context.start, end) });
         break;
@@ -311,6 +335,7 @@ class TemplateParser {
       case '#': {
         const reader = this.rawReader(context);
         const body = reader.readBlockBody(bodyStart);
+        for (const word of body.words) this.mark(word.start, word.end, word.quoted ? 'string' : 'path');
         end = this.finishTag(context, this.expectCloseRaw(context, body.end));
         const node: Block = { type: 'Block', id: body.id, path: body.path, scope: body.scope, span: this.source.span(context.start, end) };
         this.items.push(node);
@@ -328,8 +353,31 @@ class TemplateParser {
       throw this.fail('E_PARSE_INVALID_DIRECTIVE', context.start, context.start + 1, 'delimiter directive is not the first tag');
     }
     const assignment = sigil === ':' && ASSIGN_HEAD.test(text.slice(bodyStart));
-    this.tags.push({ start: context.start, end, echo, kind: syntaxKind(sigil, assignment) });
+    const kind = syntaxKind(sigil, assignment);
+    const tagBodyStart = context.open + 1;
+    const tagBodyEnd = this.closeStart(context, end);
+    this.tags.push({ start: context.start, end, echo, kind, bodyStart: tagBodyStart, bodyEnd: tagBodyEnd });
+    if (kind === 'comment') {
+      this.tokens.push({ start: context.start, end, kind: 'comment' });
+      return end;
+    }
+    this.tokens.push({ start: context.start, end: tagBodyStart, kind: 'delimiter' });
+    const sigilStart = skipHorizontalSpace(text, tagBodyStart);
+    this.tokens.push({ start: sigilStart, end: sigilStart + (sigil as string).length, kind: 'keyword' });
+    this.tokens.push(...this.tagTokens, ...this.tagParsers.flatMap(expressionTokens));
+    this.tokens.push({ start: tagBodyEnd, end, kind: 'delimiter' });
     return end;
+  }
+
+  // The string index of the close delimiters of the tag that ends at `end`: before the wrapper closer and the
+  // horizontal whitespace in front of it (LEX-19).
+  private closeStart(context: TagContext, end: number): number {
+    let tail = end;
+    if (context.wrapper !== null) {
+      tail -= context.wrapper.closer.length;
+      while (isHorizontalSpace(this.text.charCodeAt(tail - 1))) tail--;
+    }
+    return tail - context.closeCount;
   }
 
   private expressionParser(context: TagContext, start: number): ExpressionParser {
@@ -339,7 +387,7 @@ class TemplateParser {
       { close: this.delimiters.close, closeCount: context.closeCount, openIndex: context.open },
       this.name,
     );
-    this.expressionParsers.push(parser);
+    this.tagParsers.push(parser);
     return parser;
   }
 
@@ -389,6 +437,8 @@ class TemplateParser {
     const name = head[1] as string;
     const nameStart = bodyStart + head[0].indexOf(name);
     if (RESERVED.has(name)) throw this.fail('E_PARSE_RESERVED_NAME', nameStart, nameStart + name.length, `${name} is a reserved word`);
+    this.mark(nameStart, nameStart + name.length, 'variable');
+    this.mark(bodyStart + head[0].length - 1, bodyStart + head[0].length, 'operator');
     const parser = this.expressionParser(context, bodyStart + head[0].length);
     const iter = parser.parseExpression();
     const end = this.finishTag(context, parser.expectClose());
@@ -406,6 +456,8 @@ class TemplateParser {
     if (RESERVED.has(name)) throw this.fail('E_PARSE_RESERVED_NAME', bodyStart, bodyStart + name.length, `${name} is a reserved word`);
     const variable: Expr = { type: 'Var', name, span: this.source.span(bodyStart, bodyStart + name.length) };
     const afterOperator = bodyStart + head[0].length;
+    this.mark(bodyStart, bodyStart + name.length, 'variable');
+    this.mark(afterOperator - operator.length, afterOperator, 'operator');
     let expr: Expr;
     let end: number;
     if (operator === '++' || operator === '--') {
@@ -435,7 +487,9 @@ class TemplateParser {
     if (!firstTag || !this.textBeforeFirstTagIsWhitespace) throw invalid('delimiter directive is not the first tag');
     let index = skipHorizontalSpace(this.text, bodyStart);
     if (!this.text.startsWith('delimiter', index)) throw invalid('directive is not "delimiter"');
+    this.mark(index, index + 'delimiter'.length, 'keyword');
     index = skipHorizontalSpace(this.text, index + 'delimiter'.length);
+    const valueStart = index;
     let value = '';
     while (index < this.text.length && !isHorizontalSpace(this.text.charCodeAt(index)) && !this.text.startsWith(this.closeSequence(context), index)) {
       value += this.text[index];
@@ -444,6 +498,7 @@ class TemplateParser {
     }
     const delimiters = parseDelimiters(value);
     if (delimiters === null) throw invalid(`${JSON.stringify(value)} is not a delimiter pair`);
+    this.mark(valueStart, index, 'string');
     const end = this.finishTag(context, this.expectCloseRaw(context, index));
     this.delimiters = delimiters;
     return end;

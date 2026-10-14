@@ -1,26 +1,19 @@
 // Tag body formatting: writes the body of each tag kind in the formatting style (GRM-2).
-import { joinTokens } from './expression.js';
+import type { SyntaxTag, SyntaxToken } from '@polyspec/template';
+import { joinTokens, type ExpressionToken } from './expression.js';
 
 /** The tag kinds that the parser reports for accepted tags. */
-export type TagKind = 'assignment' | 'block' | 'close' | 'comment' | 'directive' | 'echo' | 'else' | 'elseif' | 'for' | 'if' | 'ifblock' | 'include';
+export type TagKind = SyntaxTag['kind'];
 
-/** An expression token with its string range in the source. */
-export interface TokenRange {
-  start: number;
-  end: number;
-}
-
-const LOOP_HEAD = /^@[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/;
-const ASSIGN_HEAD = /^:[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=)/;
 const WHITESPACE = /^[ \t\r\n]*$/;
 
-/** The source text of one tag body and the expression tokens that the parser read inside it. */
+/** The source text of one tag body and the tokens that the parser classified inside it, its sigil first. */
 export interface BodyInput {
   kind: TagKind;
   source: string;
   bodyStart: number;
   bodyEnd: number;
-  tokens: readonly TokenRange[];
+  tokens: readonly SyntaxToken[];
 }
 
 /**
@@ -29,48 +22,42 @@ export interface BodyInput {
  * cover every non-whitespace character.
  */
 export function formatBody(input: BodyInput): string | null {
-  const { kind, source, bodyStart, bodyEnd } = input;
+  const { kind, source, bodyStart, bodyEnd, tokens } = input;
   const body = source.slice(bodyStart, bodyEnd);
-  if (/[\r\n]/.test(body)) return null;
-  const lead = body.length - body.trimStart().length;
-  const head = body.slice(lead);
-  const at = bodyStart + lead;
-  const expression = (from: number): string | null => expressionText(input, from);
+  if (/[\r\n]/.test(body) || kind === 'comment' || kind === 'directive') return null;
+  const sigil = tokens[0] as SyntaxToken;
+  const rest = tokens.slice(1);
+  const text = (token: SyntaxToken): string => source.slice(token.start, token.end);
+  const after = source.slice(sigil.end, bodyEnd).trim();
   switch (kind) {
-    case 'comment':
-    case 'directive':
-      return null;
     case 'echo':
-      return withRest('=', expression(at + 1));
+      return withRest('=', expressionText(input, rest, sigil.end));
     case 'if':
-      return withRest('?', expression(at + 1));
+      return withRest('?', expressionText(input, rest, sigil.end));
     case 'elseif':
-      return withRest(':?', expression(at + 2));
+      return withRest(':?', expressionText(input, rest, sigil.end));
     case 'else':
       return ':';
     case 'close':
       return '/';
     case 'ifblock':
-      return withRest('?#', head.slice(2).trim());
+      return withRest('?#', after);
     case 'include':
-      return withRest('+', head.slice(1).trim());
+      return withRest('+', after);
     case 'block':
-      return withRest('#', words(head.slice(1)).join(' '));
+      return withRest('#', words(after).join(' '));
     case 'for': {
-      const match = LOOP_HEAD.exec(head);
-      if (!match) return null;
-      const iter = expression(at + match[0].length);
-      return iter === null ? null : `@ ${match[1]} = ${iter}`;
+      // The loop variable and its `=`, then the iterated expression.
+      const [name, equals] = rest as [SyntaxToken, SyntaxToken];
+      const iter = expressionText(input, rest.slice(2), equals.end);
+      return iter === null ? null : `@ ${text(name)} = ${iter}`;
     }
     case 'assignment': {
-      const match = ASSIGN_HEAD.exec(head);
-      if (!match) return null;
-      const operator = match[2] as string;
-      if (operator === '++' || operator === '--') {
-        return source.slice(at + match[0].length, bodyEnd).trim() === '' ? `:${match[1]}${operator}` : null;
-      }
-      const value = expression(at + match[0].length);
-      return value === null ? null : `:${match[1]} ${operator} ${value}`;
+      // The assigned name and its operator, then the value unless the operator is `++` or `--`.
+      const [name, operator] = rest as [SyntaxToken, SyntaxToken];
+      if (rest.length === 2) return WHITESPACE.test(source.slice(operator.end, bodyEnd)) ? `:${text(name)}${text(operator)}` : null;
+      const value = expressionText(input, rest.slice(2), operator.end);
+      return value === null ? null : `:${text(name)} ${text(operator)} ${value}`;
     }
   }
 }
@@ -80,19 +67,18 @@ function withRest(sigil: string, rest: string | null): string | null {
   return rest === '' ? sigil : `${sigil} ${rest}`;
 }
 
-// Joins the tokens in [from, bodyEnd). Returns null when anything other than whitespace lies between them.
-function expressionText(input: BodyInput, from: number): string | null {
-  const tokens = input.tokens.filter(token => token.start >= from && token.end <= input.bodyEnd);
+// Joins the expression tokens that start at `from`. Returns null when anything other than whitespace lies between them.
+function expressionText(input: BodyInput, tokens: readonly SyntaxToken[], from: number): string | null {
   let cursor = from;
-  const texts: string[] = [];
+  const joined: ExpressionToken[] = [];
   for (const token of tokens) {
     if (!WHITESPACE.test(input.source.slice(cursor, token.start))) return null;
-    texts.push(input.source.slice(token.start, token.end));
+    joined.push({ text: input.source.slice(token.start, token.end), kind: token.kind });
     cursor = token.end;
   }
   if (!WHITESPACE.test(input.source.slice(cursor, input.bodyEnd))) return null;
-  if (texts.length === 0) return null;
-  return joinTokens(texts);
+  if (joined.length === 0) return null;
+  return joinTokens(joined);
 }
 
 // Splits a block tag body at horizontal whitespace outside string literals.

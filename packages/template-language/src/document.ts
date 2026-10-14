@@ -1,11 +1,10 @@
 // Language service document: one analysis of a template text and every editor result of EDT-4 to EDT-13.
-import { analyzePrefix, type SyntaxTag, type SyntaxToken, type TemplateError } from '@polyspec/template';
+import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template';
 import { format, type FormatOptions, type FormatResult } from './format.js';
 import { lineIndentations } from './indent.js';
 import { indexOfByte } from './positions.js';
 import { constructAt, constructsOf, matchingTagOf, type Construct } from './structure.js';
-import { delimitersOf, tagParts, type Delimiters } from './tags.js';
-import { tagTokens, type Token } from './tokens.js';
+import type { Token } from './tokens.js';
 
 /** Options of {@link openDocument}. */
 export interface DocumentOptions {
@@ -76,7 +75,7 @@ export class TemplateDocument {
     this.accepted = analysis.tags.map(tag => ({ kind: tag.kind, start: tag.start + shift, end: tag.end + shift }));
     this.diagnostics = analysis.error === null ? [] : [diagnosticOf(source, analysis.error, shift)];
     this.tags = this.accepted.filter(tag => tag.kind !== 'comment');
-    this.tokens = tokensOf(text, this.accepted, analysis.tokens, shift, options.delimiters ?? '{}');
+    this.tokens = analysis.tokens.map(token => ({ start: token.start + shift, end: token.end + shift, type: token.kind }));
     this.constructs = constructsOf(this.accepted);
     this.lineStarts = [0];
     for (let index = text.indexOf('\n'); index >= 0; index = text.indexOf('\n', index + 1)) this.lineStarts.push(index + 1);
@@ -161,24 +160,4 @@ function diagnosticOf(source: string, error: TemplateError, shift: number): Diag
   let end = Math.max(indexOfByte(source, error.end), start);
   if (end === start) end = Math.min(start + 1, source.length);
   return { start: start + shift, end: Math.max(end, start) + shift, code: error.code, message: error.message, severity: 'error', source: 'polyspec-template' };
-}
-
-// The tokens of every accepted tag, following delimiter directives as the formatter does.
-function tokensOf(text: string, tags: readonly TagRange[], parserTokens: readonly SyntaxToken[], shift: number, option: string): Token[] {
-  const tokens = parserTokens.map(token => ({ start: token.start + shift, end: token.end + shift, kind: token.kind }));
-  const result: Token[] = [];
-  let delimiters: Delimiters = delimitersOf(option);
-  let next = 0;
-  for (const tag of tags) {
-    const parts = tagParts(text, tag.start, tag.end, delimiters);
-    while (next < tokens.length && (tokens[next] as { start: number }).start < tag.start) next++;
-    const inside: typeof tokens = [];
-    while (next < tokens.length && (tokens[next] as { end: number }).end <= tag.end) inside.push(tokens[next++] as (typeof tokens)[number]);
-    if (parts !== null) result.push(...tagTokens(text, tag.kind, tag.start, tag.end, parts, inside));
-    if (tag.kind === 'directive' && parts !== null) {
-      const value = /delimiter[ \t]*(\S\S)/.exec(parts.body);
-      if (value) delimiters = delimitersOf(value[1] as string);
-    }
-  }
-  return result;
 }

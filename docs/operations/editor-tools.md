@@ -10,7 +10,7 @@ Three TypeScript packages support template authors:
 - `packages/template-codemirror` (`@polyspec/template-codemirror`): the CodeMirror 6 extension `template()`, which registers the results of the language service in a CodeMirror editor ([CodeMirror 6 adapter](#codemirror-6-adapter)).
 - `packages/template-vscode` (`polyspec-template`): the VS Code extension with the language definition, the TextMate grammar and a client of the bundled language server. It contains no template rules.
 
-Only the language service reads the template syntax from `@polyspec/template`: the language service and the formatter use the parser's tag ranges and expression tokens. The server, the CodeMirror adapter and the extension call the language service, and the grammar of the extension follows [lexical rules](../spec/lexical.md), [tag grammar](../spec/grammar.md) and [expressions](../spec/expressions.md).
+Only the language service reads the template syntax from `@polyspec/template`: the language service and the formatter use the parser's tag ranges, tag bodies and tokens, which the parser classifies by EDT-8, and declare no lexical table of their own (`packages/template-language/tests/lexical-tables.test.ts`). The server, the CodeMirror adapter and the extension call the language service, and the grammar of the extension follows [lexical rules](../spec/lexical.md), [tag grammar](../spec/grammar.md) and [expressions](../spec/expressions.md).
 
 ## Formatting style
 
@@ -79,7 +79,7 @@ Spaces and tabs at the start of a line are part of the rendered output, except o
 
 ## Safety invariant
 
-`format()` parses the source with `analyze()` of `@polyspec/template`. It formats each tag with the parser's tag range and expression tokens, and parses the result again. It returns the result only when both ASTs are equal after every `span` field and, when the indentation changes, the spaces and tabs at the start of every line of text are removed. Otherwise it returns an error result and the caller keeps the source:
+`format()` parses the source with `analyze()` of `@polyspec/template`. It formats each tag with the parser's tag body and tokens, and parses the result again. It returns the result only when both ASTs are equal after every `span` field and, when the indentation changes, the spaces and tabs at the start of every line of text are removed. Otherwise it returns an error result and the caller keeps the source:
 
 | Result | Condition |
 | --- | --- |

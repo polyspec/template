@@ -1,34 +1,35 @@
-// Token spacing rules of the formatting style.
+// Token spacing rules of the formatting style, over expression tokens with the classes the parser gives them (EDT-8).
+import type { SyntaxToken } from '@polyspec/template';
 import { describe, expect, it } from 'vitest';
 import { joinTokens } from '../src/expression.js';
 
 describe('joinTokens', () => {
-  const cases: [string[], string][] = [
-    [['a', '+', 'b'], 'a + b'],
-    [['-', 'a', '-', '-', '1'], '-a - -1'],
-    [['!', 'done', '&&', '(', 'x', '||', 'y', ')'], '!done && (x || y)'],
-    [['f', '(', 'x', ',', 'g', '(', 'y', ')', ')'], 'f(x, g(y))'],
-    [['obj', '.method', '(', '1', ')'], 'obj.method(1)'],
-    [['Order', '::', 'total', '(', 'x', ')'], 'Order::total(x)'],
-    [['c', '?', 'Order', '::', 'total', '(', 'x', ')', ':', 'b'], 'c ? Order::total(x) : b'],
-    [['c', '?', 'a', ':', 'b'], 'c ? a : b'],
-    [['c', '?', 'd', '?', 'e', ':', 'a', ':', 'b'], 'c ? d ? e : a : b'],
-    [['a', '?:', 'b'], 'a ?: b'],
-    [['x', '??'], 'x ??'],
-    [['f', '(', 'x', '??', ')'], 'f(x ??)'],
-    [['x', '|', 'slice', '(', '0', ',', '10', ')'], 'x | slice(0, 10)'],
-    [['[', '1', ',', '...', 'rest', ',', ']'], '[1, ...rest,]'],
-    [['[', "'a'", '=>', '1', ']'], "['a' => 1]"],
-    [['list', '[', 'i', ']', '.name'], 'list[i].name'],
-    [['a', '.0', '.b'], 'a.0.b'],
-    [['x', 'in', '[', '1', ']'], 'x in [1]'],
-    [['x', 'in', '(', 'y', ')'], 'x in (y)'],
-    [['row', '.index_', '+', '1'], 'row.index_ + 1'],
-    [['(', '-', '1', ')', '*', '2'], '(-1) * 2'],
+  const cases: [[string, SyntaxToken['kind']][], string][] = [
+    [[["a", 'variable'], ["+", 'operator'], ["b", 'variable']], 'a + b'],
+    [[["-", 'operator'], ["a", 'variable'], ["-", 'operator'], ["-", 'operator'], ["1", 'number']], '-a - -1'],
+    [[["!", 'operator'], ["done", 'variable'], ["&&", 'operator'], ["(", 'operator'], ["x", 'variable'], ["||", 'operator'], ["y", 'variable'], [")", 'operator']], '!done && (x || y)'],
+    [[["f", 'function'], ["(", 'operator'], ["x", 'variable'], [",", 'operator'], ["g", 'function'], ["(", 'operator'], ["y", 'variable'], [")", 'operator'], [")", 'operator']], 'f(x, g(y))'],
+    [[["obj", 'variable'], [".method", 'function'], ["(", 'operator'], ["1", 'number'], [")", 'operator']], 'obj.method(1)'],
+    [[["Order", 'variable'], ["::", 'operator'], ["total", 'function'], ["(", 'operator'], ["x", 'variable'], [")", 'operator']], 'Order::total(x)'],
+    [[["c", 'variable'], ["?", 'operator'], ["Order", 'variable'], ["::", 'operator'], ["total", 'function'], ["(", 'operator'], ["x", 'variable'], [")", 'operator'], [":", 'operator'], ["b", 'variable']], 'c ? Order::total(x) : b'],
+    [[["c", 'variable'], ["?", 'operator'], ["a", 'variable'], [":", 'operator'], ["b", 'variable']], 'c ? a : b'],
+    [[["c", 'variable'], ["?", 'operator'], ["d", 'variable'], ["?", 'operator'], ["e", 'variable'], [":", 'operator'], ["a", 'variable'], [":", 'operator'], ["b", 'variable']], 'c ? d ? e : a : b'],
+    [[["a", 'variable'], ["?:", 'operator'], ["b", 'variable']], 'a ?: b'],
+    [[["x", 'variable'], ["??", 'operator']], 'x ??'],
+    [[["f", 'function'], ["(", 'operator'], ["x", 'variable'], ["??", 'operator'], [")", 'operator']], 'f(x ??)'],
+    [[["x", 'variable'], ["|", 'operator'], ["slice", 'function'], ["(", 'operator'], ["0", 'number'], [",", 'operator'], ["10", 'number'], [")", 'operator']], 'x | slice(0, 10)'],
+    [[["[", 'operator'], ["1", 'number'], [",", 'operator'], ["...", 'operator'], ["rest", 'variable'], [",", 'operator'], ["]", 'operator']], '[1, ...rest,]'],
+    [[["[", 'operator'], ["'a'", 'string'], ["=>", 'operator'], ["1", 'number'], ["]", 'operator']], "['a' => 1]"],
+    [[["list", 'variable'], ["[", 'operator'], ["i", 'variable'], ["]", 'operator'], [".name", 'property']], 'list[i].name'],
+    [[["a", 'variable'], [".0", 'property'], [".b", 'property']], 'a.0.b'],
+    [[["x", 'variable'], ["in", 'keyword'], ["[", 'operator'], ["1", 'number'], ["]", 'operator']], 'x in [1]'],
+    [[["x", 'variable'], ["in", 'keyword'], ["(", 'operator'], ["y", 'variable'], [")", 'operator']], 'x in (y)'],
+    [[["row", 'variable'], [".index_", 'property'], ["+", 'operator'], ["1", 'number']], 'row.index_ + 1'],
+    [[["(", 'operator'], ["-", 'operator'], ["1", 'number'], [")", 'operator'], ["*", 'operator'], ["2", 'number']], '(-1) * 2'],
   ];
   for (const [tokens, expected] of cases) {
     it(`joins ${JSON.stringify(tokens)}`, () => {
-      expect(joinTokens(tokens)).toBe(expected);
+      expect(joinTokens(tokens.map(([text, kind]) => ({ text, kind })))).toBe(expected);
     });
   }
 });

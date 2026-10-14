@@ -14,6 +14,7 @@ export interface PathToken {
   value: string;
   start: number;
   end: number;
+  quoted: boolean;
 }
 
 export interface IdentToken {
@@ -25,10 +26,19 @@ export interface IdentToken {
 
 export type RawToken = PathToken | IdentToken;
 
+/** The range of one word of a raw tag body, and whether it is a quoted string. */
+export interface RawWord {
+  start: number;
+  end: number;
+  quoted: boolean;
+}
+
 export interface BlockBody {
   id: string | null;
   path: string | null;
   scope: ScopeItem[];
+  // The words of the body: the id, the path and each scope item with its value.
+  words: RawWord[];
   end: number;
 }
 
@@ -56,25 +66,25 @@ export class RawTagReader {
     const char = this.text[index] as string;
     if (char === '"' || char === "'") {
       const literal = lexStringLiteral(this.source, index, this.template);
-      return { kind: 'path', value: literal.decoded, start: index, end: literal.end };
+      return { kind: 'path', value: literal.decoded, start: index, end: literal.end, quoted: true };
     }
     let end = index;
     while (end < this.text.length && PATH_CHARS.test(this.text[end] as string)) end++;
     const value = this.text.slice(index, end);
-    if (value.includes('.') || value.includes('/')) return { kind: 'path', value, start: index, end };
+    if (value.includes('.') || value.includes('/')) return { kind: 'path', value, start: index, end, quoted: false };
     if (IDENT.test(value)) return { kind: 'ident', value, start: index, end };
     return { kind: 'ident', value: '', start: index, end: index + 1 };
   }
 
   // GRM-12: `+ path`.
-  readIncludePath(index: number): { path: string; end: number } {
+  readIncludePath(index: number): { path: string; start: number; end: number; quoted: boolean } {
     const token = this.readToken(index);
     if (token === null || token.value === '') {
       const at = skipHorizontalSpace(this.text, index);
       throw this.fail('E_PARSE_INVALID_PATH', at, at + 1, 'include requires a path');
     }
     if (token.kind !== 'path') throw this.fail('E_PARSE_INVALID_PATH', token.start, token.end, `${JSON.stringify(token.value)} is not a path`);
-    return { path: token.value, end: token.end };
+    return { path: token.value, start: token.start, end: token.end, quoted: token.kind === 'path' && token.quoted };
   }
 
   // GRM-13 to GRM-15: `# [id] [path] {scope_item}`.
@@ -82,6 +92,10 @@ export class RawTagReader {
     let id: string | null = null;
     let path: string | null = null;
     const scope: ScopeItem[] = [];
+    const words: RawWord[] = [];
+    const word = (item: RawToken, end = item.end): void => {
+      words.push({ start: item.start, end, quoted: item.kind === 'path' && item.quoted });
+    };
     let cursor = index;
     let token = this.readToken(cursor);
     if (token === null || token.value === '') {
@@ -91,13 +105,16 @@ export class RawTagReader {
     if (token.kind === 'path') {
       path = token.value;
       cursor = token.end;
+      word(token);
     } else {
       id = token.value;
       cursor = token.end;
+      word(token);
       token = this.readToken(cursor);
       if (token !== null && token.kind === 'path') {
         path = token.value;
         cursor = token.end;
+        word(token);
       }
     }
     for (;;) {
@@ -116,13 +133,15 @@ export class RawTagReader {
         const expr: Expr = parser.parsePostfix(true);
         scope.push({ name: token.value, expr });
         cursor = parser.end;
+        word(token, cursor);
       } else {
+        word(token);
         scope.push({
           name: token.value,
           expr: { type: 'Var', name: token.value, span: this.source.span(token.start, token.end) },
         });
       }
     }
-    return { id, path, scope, end: cursor };
+    return { id, path, scope, words, end: cursor };
   }
 }

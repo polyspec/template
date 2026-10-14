@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-editor -->
-<!-- source-sha256: a75242d4533ffe25a21de131fecf149f3b83ba46915d54da112c81220d3ed7ce -->
+<!-- source-sha256: 38883e4b6f2fe78b4f6686fcb88273d308fa54cd24da0878d866fc7ecf93fa4a -->
 # 에디터 지원
 
 [English](/spec/editor).
@@ -12,7 +12,7 @@
 
 | 계층 | 패키지 | 실행 환경 | 내용 |
 | --- | --- | --- | --- |
-| 파서 | `@polyspec/template` | 브라우저, Node.js | 소스의 태그 범위와 표현식 토큰 |
+| 파서 | `@polyspec/template` | 브라우저, Node.js | 소스의 태그 범위, 태그 본문, 분류한 토큰 |
 | 언어 서비스 | `@polyspec/template-language` | 브라우저, Node.js | 문서 텍스트의 함수로 정의한 모든 에디터 규칙, 포매터와 명령 `template-fmt` |
 | 어댑터 | `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `polyspec-template`(VS Code) | Node.js, 브라우저, VS Code | 위치 변환과 기능 등록 |
 
@@ -26,7 +26,7 @@
 
 **EDT-5** 언어 서비스의 모든 위치는 바이트 순서 표시를 포함한 텍스트의 UTF-16 문자열 인덱스다. 줄은 `\n`, `\r\n` 또는 텍스트 끝으로 끝나는 범위이며 0부터 번호를 붙인다. 에디터와 Language Server Protocol은 같은 UTF-16 위치를 쓰므로 어댑터는 바이트를 세지 않고 위치를 변환한다.
 
-**EDT-6** 파싱되지 않는 텍스트에도 결과가 있다. 파서는 첫 오류 전까지 받아들인 태그와 표현식 토큰을 돌려준다(`@polyspec/template`의 `analyzePrefix()`). 닫히지 않은 블록은 텍스트 끝에서 보고되므로, 그런 텍스트의 태그는 모두 받아들여진다. 언어 서비스는 받아들인 태그로 토큰, 태그 범위, 들여쓰기를 계산한다. 구성, 접기 범위, 짝 태그는 닫힌 블록만 사용한다.
+**EDT-6** 파싱되지 않는 텍스트에도 결과가 있다. 파서는 첫 오류 전까지 받아들인 태그와 그 토큰을 돌려준다(`@polyspec/template`의 `analyzePrefix()`). 닫히지 않은 블록은 텍스트 끝에서 보고되므로, 그런 텍스트의 태그는 모두 받아들여진다. 언어 서비스는 받아들인 태그로 토큰, 태그 범위, 들여쓰기를 계산한다. 구성, 접기 범위, 짝 태그는 닫힌 블록만 사용한다.
 
 ## 결과
 
