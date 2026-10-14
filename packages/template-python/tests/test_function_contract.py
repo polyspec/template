@@ -5,11 +5,9 @@ errors at run time, and the call syntax the contract accepts and rejects."""
 
 import json
 import math
-import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from polyspec.template import (
     BUILTINS,
     AstProgram,

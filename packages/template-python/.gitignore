@@ -1,0 +1,2 @@
+# setuptools writes the metadata of the editable install of make python-package beside the sources.
+/src/*.egg-info/

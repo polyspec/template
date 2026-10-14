@@ -339,12 +339,29 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
 	node tests/runner/conformance.mjs --langs ts,python
 
-# The unit tests of the Python package run with the shim of the python of mise.toml (make install-tools), by its absolute
-# path, because make looks up a recipe line on its own PATH; PYTHON is never the python3 of the machine.
-PYTHON := $(CURDIR)/var/tools/mise/shims/python3
+# The Python package is installed, editable, into the virtual environment PYTHON_VENV, so its tests, the conformance
+# driver (tests/runner/drivers.mjs) and the parity check (config/parity.json) import polyspec.template from the sources of
+# the checkout with no PYTHONPATH and no sys.path change (PRINCIPLES S3). kit's python-venv makes the environment from the
+# python of mise.toml, and the uv of mise.toml installs the package into it offline, with its build requirement from
+# var/python/wheelhouse (make install). The stamp is remade when the project or its build requirements change; a change of
+# the sources needs no install. The tests are discovered with packages/template-python as the top level: the directory
+# tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
+# runs one test file by its path.
+PYTHON_PACKAGE := packages/template-python
+PYTHON_VENV := var/python/venv
+UV := $(CURDIR)/var/tools/mise/shims/uv
 
-test-python: ## Unit tests of the Python package
-	PYTHONPATH=packages/template-python/src $(PYTHON) -m unittest discover -s packages/template-python/tests -t packages/template-python/tests
+.PHONY: python-package
+python-package: $(PYTHON_VENV)/.installed ## Make var/python/venv with packages/template-python installed editable; offline
+
+$(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/build-requirements.json
+	rm -rf $(PYTHON_VENV)
+	$(MAKE) python-venv DIR=$(PYTHON_VENV)
+	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links var/python/wheelhouse --link-mode copy --no-deps -e $(PYTHON_PACKAGE)
+	touch $@
+
+test-python: python-package ## Unit tests of the Python package
+	node $(KIT)/run-tests.$(KIT_EXT) python --venv $(PYTHON_VENV) -- discover -s $(PYTHON_PACKAGE)/tests -t $(PYTHON_PACKAGE)
 
 conformance-generated-python: build-ts ## Python generated compiler conformance suite
 	node tests/runner/conformance-generated-python.mjs
@@ -367,7 +384,7 @@ package-installs-check: cargo-downloads-check typed-generator
 
 # parity-check and parity-declarations-check of kit read config/parity.json (T24.7): parity-check runs the native test of each
 # implementation that binds a shared suite, which reads the installed Composer packages, the PHP extension and the crates.
-parity-check: cargo-downloads-check build-php build-ext-php ext
+parity-check: cargo-downloads-check build-php build-ext-php ext python-package
 
 test-browser: build-ts ## Browser rendering test
 	node tests/browser/run.mjs

@@ -7,20 +7,13 @@ documents import from polyspec.template is exported.
 """
 
 import inspect
-
 import re
-
-import sys
-
 import unittest
-
 from pathlib import Path
 
+import polyspec.template as template
+
 ROOT = Path(__file__).resolve().parents[3]
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-import polyspec.template as template  # noqa: E402
 
 DOCUMENTS = [
     "README.md",

@@ -7,7 +7,7 @@
     { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/template-rust"], "tests": ["packages/template-rust/tests/*.rs"], "support": ["packages/template-rust/tests/common/*.rs"] },
     { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/template-php"], "tests": ["packages/template-php/tests/**/*Test.php"] },
     { "name": "php-ext", "runner": "php", "prose": ["PHP extension"], "roots": ["packages/template-php-ext"], "tests": ["packages/template-php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"] },
-    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/template-python"], "tests": ["packages/template-python/tests/test_*.py"], "env": [{ "name": "PYTHONPATH", "value": "packages/template-python/src" }] }
+    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/template-python"], "tests": ["packages/template-python/tests/test_*.py"], "command": "var/python/venv/bin/python" }
   ],
   "profiles": [
     { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] }

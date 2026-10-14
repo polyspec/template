@@ -3,7 +3,6 @@
 and is idempotent (FMT-13, FMT-15). The tokens and the format results of each
 case are compared in test_case_tokens.py and test_case_format.py."""
 
-import json
 import re
 import unittest
 from pathlib import Path
@@ -21,15 +20,9 @@ from polyspec.template import (
 )
 from polyspec.template.format_invariant import same_tree, without_line_indentation
 
-CASES = Path(__file__).resolve().parents[3] / "tests" / "cases"
+from .cases import CASES, delimiters_of
+
 _LINE_INDENTATION = re.compile(r"(^|\n)[ \t]+")
-
-
-def delimiters_for(path: Path) -> "str | None":
-    options = path.parent / "options.json"
-    if not options.exists():
-        return None
-    return json.loads(options.read_text("utf-8")).get("delimiters")
 
 
 def delimiter_pair(value: "str | None") -> tuple[str, str]:
@@ -69,19 +62,27 @@ class SafetyInvariant(unittest.TestCase):
     default indentation: the formatted AST equals the source AST without spans
     (and, when indented, without line indentation), the text outside tags is
     unchanged (up to line indentation), and formatting is idempotent. With
-    indentation the result may instead be the html error."""
+    indentation the result may instead be the html error. A template that is
+    not UTF-8 is the parse error E_LEX_INVALID_UTF8 of its bytes."""
 
     def test_holds_the_invariant_and_idempotence_over_every_case_template(self):
-        files = [path for path in sorted(CASES.rglob("*.tpl")) if _readable(path)]
+        files = sorted(CASES.rglob("*.tpl"))
         self.assertGreater(len(files), 200)
         for path in files:
             with self.subTest(file=str(path.relative_to(CASES))):
                 self.check(path)
 
     def check(self, path: Path) -> None:
-        source = path.read_bytes().decode("utf-8")
-        delimiters = delimiters_for(path)
+        data = path.read_bytes()
         name = str(path.relative_to(CASES))
+        try:
+            source = data.decode("utf-8")
+        except UnicodeDecodeError:
+            with self.assertRaises(TemplateError) as raised:
+                Source.from_bytes(name, data)
+            self.assertEqual(raised.exception.code, "E_LEX_INVALID_UTF8")
+            return
+        delimiters = delimiters_of(path.parent)
         options = FormatOptions(name=name, delimiters=delimiters)
         kept = FormatOptions(name=name, delimiters=delimiters, indent=None)
         result = format_template(source, kept)
@@ -117,14 +118,6 @@ class SafetyInvariant(unittest.TestCase):
             format_template(indented.text, options),
             FormatResult(ok=True, text=indented.text, changed=False),
         )
-
-
-def _readable(path: Path) -> bool:
-    try:
-        path.read_bytes().decode("utf-8")
-    except UnicodeDecodeError:
-        return False
-    return True
 
 
 if __name__ == "__main__":
