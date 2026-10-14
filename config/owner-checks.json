@@ -348,6 +348,8 @@
     {
       "paths": [
         "config/toolchain.json",
+        "mise.toml",
+        "mise.lock",
         "ruff.toml"
       ],
       "tests": [
@@ -672,7 +674,9 @@
     {
       "paths": [
         ".node-version",
-        ".python-version",
+        "mise.toml",
+        "mise.lock",
+        ".mise/**",
         "rust-toolchain.toml",
         ".github/workflows/*.yml",
         "packages/template-go/go.mod"
@@ -684,7 +688,7 @@
     },
     {
       "paths": [
-        ".python-version",
+        "mise.toml",
         "scripts/python-toolchain.mjs"
       ],
       "targets": [
@@ -977,7 +981,7 @@
         "tools/showcase/adapters/**",
         "scripts/python-toolchain.mjs",
         "packages/template-python/**",
-        ".python-version"
+        "mise.toml"
       ]
     },
     {
@@ -1263,7 +1267,7 @@
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
         "packages/template-python/**",
-        ".python-version"
+        "mise.toml"
       ]
     },
     {
@@ -1275,7 +1279,7 @@
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
         "packages/template-python/**",
-        ".python-version"
+        "mise.toml"
       ]
     },
     {
@@ -1287,7 +1291,7 @@
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
         "packages/template-python/**",
-        ".python-version"
+        "mise.toml"
       ]
     },
     {
@@ -1299,7 +1303,7 @@
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
         "packages/template-python/**",
-        ".python-version"
+        "mise.toml"
       ]
     },
     {
@@ -1325,7 +1329,7 @@
         "scripts/language-checks.mjs",
         "scripts/python-toolchain.mjs",
         "packages/template-python/**",
-        ".python-version"
+        "mise.toml"
       ]
     },
     {
@@ -1379,7 +1383,7 @@
         "packages/template-{ts,go,rust,php}/**",
         "scripts/python-toolchain.mjs",
         "packages/template-python/**",
-        ".python-version",
+        "mise.toml",
         "scripts/python-wheelhouse.mjs",
         "packages/template-python/build-requirements.json"
       ]
@@ -1460,6 +1464,8 @@
       "paths": [
         "packages/template-python/**",
         "config/toolchain.json",
+        "mise.toml",
+        "mise.lock",
         "ruff.toml"
       ]
     },
