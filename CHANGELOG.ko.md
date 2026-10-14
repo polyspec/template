@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 449656dd4b61a2737c26fdcf8e70d4d8e0229e9b90d6520eee1a83aa06f4d598 -->
+<!-- source-sha256: 461ca0cd6215d8f8c2879594da250b716a73cee68f14c943dcc62db2898537f1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.11: TypeScript는 unit `compiler-interface`와 `bound-map-interface`를 `packages/ts/tests/compiler-interface.test.ts`로 bind합니다. 이 test는 package가 내보내는 engine, program, runtime environment, bound map 연산을 `packages/compiler/interface.json`의 mapping과 비교합니다. TypeScript를 뺀 profile `interface`는 사라집니다.
 - T24.10: `docs/spec/runtime.md`의 program class diagram은 runtime contract가 compiler manifest에 합쳐진 뒤 prepared-execution class가 있는 `packages/compiler/generated/compiler-classes.mmd`를 include합니다. include는 더 이상 없는 `tools/runtime/generated/prepared-execution-classes.mmd`를 가리켰습니다. `packages/python/CHANGELOG.md`의 Unreleased 항목은 `packages/compiler/interface.json`을 적습니다.
 - T24.10: `make runtime-interface-check`, `runtime-interface-generate`, `runtime-interface-diagrams-check`와 그 script `scripts/generate-runtime-interface.mts`, `scripts/check-runtime-interface.mts`는 제거됩니다: 각각 같은 역할의 compiler-interface script를 import하기만 했으므로 `make compiler-interface-check`를 반복했습니다. `scripts/check-compiler-interface.mts`는 layout-check와 단일 manifest가 자리를 남기지 않는 경로 `tools/runtime/interface.json`, `examples/showcase/adapters/interface.json`을 더 이상 지키지 않습니다.
 - T24.11: `config/parity.json`의 feature unit 안의 모든 구현은 같은 동작의 test를 bind합니다: unit `loaders`는 `map-loader`, `filesystem-loader-files`(filesystem loader가 파일을 열어 두지 않음, T23.5), `include-resolution`(RT-8) 세 unit이 되고, 구현에 없던 test를 더합니다: TypeScript(`loader.test.ts`), Rust(`loaders.rs`), PHP(`Loader/LoaderTest.php`), PHP extension(`LoaderTest.php`, include로), Go, Python의 loader와 path test, PHP extension의 date test(`FunctionsTest.php`), Rust의 JSON byte 안 잘못된 UTF-8, 공유 fixture로 하는 Python의 bound data test(`test_bound.py`)와 truthiness, span, 값으로 검사하는 수, output limit test입니다.
