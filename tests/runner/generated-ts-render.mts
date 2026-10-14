@@ -29,9 +29,9 @@ function plain(value: unknown): unknown {
 /** Whether the workerData of the runner is a RenderCase. */
 function isRenderCase(value: unknown): value is RenderCase {
   if (typeof value !== 'object' || value === null) return false;
-  const fields = (name: string) => Reflect.get(value, name);
-  return typeof fields('module') === 'string' && typeof fields('dir') === 'string'
-    && ['hasData', 'hasDefine', 'hasEnv'].every(name => typeof fields(name) === 'boolean');
+  return 'module' in value && typeof value.module === 'string' && 'dir' in value && typeof value.dir === 'string'
+    && 'hasData' in value && typeof value.hasData === 'boolean' && 'hasDefine' in value && typeof value.hasDefine === 'boolean'
+    && 'hasEnv' in value && typeof value.hasEnv === 'boolean';
 }
 
 const data: unknown = workerData;
@@ -42,6 +42,7 @@ const port = parentPort;
 
 /** The field `name` of a thrown value, or undefined when it has none. */
 function field(error: unknown, name: string): unknown {
+  // The name is no literal, so `in` does not narrow the object to it and Reflect.get reads the field.
   return typeof error === 'object' && error !== null && name in error ? Reflect.get(error, name) : undefined;
 }
 
@@ -65,10 +66,26 @@ function inputs(): { assign: unknown; define: unknown; env: unknown } | null {
   }
 }
 
+/** A generated program: a class whose instances render a template by its name. */
+type GeneratedProgramClass = new () => { render(template: string, assign: unknown, options: { define: unknown; env: unknown }): unknown };
+
+/** Whether `value` is a class whose prototype has a render method, as the generated TypeScript program is. */
+function isGeneratedProgramClass(value: unknown): value is GeneratedProgramClass {
+  if (typeof value !== 'function') return false;
+  const prototype: unknown = value.prototype;
+  return typeof prototype === 'object' && prototype !== null && 'render' in prototype && typeof prototype.render === 'function';
+}
+
 try {
-  const { GeneratedProgram } = await import(pathToFileURL(module).href);
+  const compiled: unknown = await import(pathToFileURL(module).href);
+  const GeneratedProgram: unknown = typeof compiled === 'object' && compiled !== null && 'GeneratedProgram' in compiled ? compiled.GeneratedProgram : undefined;
+  if (!isGeneratedProgramClass(GeneratedProgram)) throw new Error(`${module} exports no GeneratedProgram class with a render method`);
   const request = inputs();
-  if (request !== null) post({ html: new GeneratedProgram().render('input.tpl', request.assign, { define: request.define, env: request.env }) });
+  if (request !== null) {
+    const html = new GeneratedProgram().render('input.tpl', request.assign, { define: request.define, env: request.env });
+    if (typeof html !== 'string') throw new Error(`the GeneratedProgram of ${module} rendered no string: ${String(html)}`);
+    post({ html });
+  }
 } catch (error) {
   post({ error: { code: field(error, 'code'), template: field(error, 'template'), line: field(error, 'line'), col: field(error, 'col'), message: field(error, 'message') ?? String(error) } });
 }

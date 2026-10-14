@@ -52,15 +52,15 @@ export class Scope {
 
   /** Resolves a local before the current frame data. */
   lookup(frame: Frame, name: string): Value {
-    if (this.locals.has(name)) return this.locals.get(name) as Value;
-    if (frame.context.has(name)) return frame.context.get(name) as Value;
-    return null;
+    // A value is never undefined, so undefined means that the name is absent. A local null is a value.
+    const local = this.locals.get(name);
+    if (local !== undefined) return local;
+    return frame.context.get(name) ?? null;
   }
 
   /** Returns the innermost active loop metadata for a variable. */
   loopMeta(name: string): LoopMeta | null {
-    const stack = this.loops.get(name);
-    return stack && stack.length ? (stack[stack.length - 1] as LoopMeta) : null;
+    return this.loops.get(name)?.at(-1) ?? null;
   }
 }
 

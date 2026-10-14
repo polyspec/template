@@ -1,4 +1,5 @@
 // date and now (FUN-37 to FUN-42).
+import { defined, elementAt } from '../checked.js';
 import { isString, textOf, type Value } from '../value/value.js';
 import { argString, typeError, type BuiltIn, type FunctionContext } from './helpers.js';
 
@@ -60,6 +61,7 @@ export function toUnixSeconds(value: Value, envOffset: number): number {
     if (month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59) {
       throw typeError(`${JSON.stringify(textOf(value))} is not a date`);
     }
+    // An offset outside the ranges of `parseOffset`, such as `+25:00`, makes the text no date (FUN-38).
     const offset = match[7] === undefined ? envOffset : parseOffset(match[7]);
     if (offset === null) throw typeError(`${JSON.stringify(textOf(value))} is not a date`);
     return daysFromCivil(year, month, day) * 86400 + hour * 3600 + minute * 60 + second - offset;
@@ -84,7 +86,7 @@ export function formatDate(seconds: number, format: string, offset: number): str
   const absOffset = Math.abs(offset);
   let result = '';
   for (let i = 0; i < format.length; i++) {
-    const char = format[i] as string;
+    const char = format.charAt(i);
     switch (char) {
       case '\\': result += format[i + 1] ?? ''; i++; break;
       case 'Y': result += pad(year, 4); break;
@@ -97,12 +99,12 @@ export function formatDate(seconds: number, format: string, offset: number): str
       case 'G': result += String(hour); break;
       case 'i': result += pad(minute, 2); break;
       case 's': result += pad(second, 2); break;
-      case 'D': result += DAY_SHORT[weekday] as string; break;
-      case 'l': result += DAY_LONG[weekday] as string; break;
+      case 'D': result += elementAt(DAY_SHORT, weekday); break;
+      case 'l': result += elementAt(DAY_LONG, weekday); break;
       case 'N': result += String(weekday === 0 ? 7 : weekday); break;
       case 'w': result += String(weekday); break;
-      case 'M': result += MONTH_SHORT[month - 1] as string; break;
-      case 'F': result += MONTH_LONG[month - 1] as string; break;
+      case 'M': result += elementAt(MONTH_SHORT, month - 1); break;
+      case 'F': result += elementAt(MONTH_LONG, month - 1); break;
       case 'U': result += String(seconds); break;
       case 'P': result += `${sign}${pad(Math.floor(absOffset / 3600), 2)}:${pad(Math.floor((absOffset % 3600) / 60), 2)}`; break;
       default: result += char;
@@ -124,7 +126,7 @@ export const dateFunctions: Record<string, BuiltIn> = {
     call: ([v, fmt], context) => {
       if (v === null) return '';
       const offset = envOffset(context);
-      return formatDate(toUnixSeconds(v as Value, offset), argString(fmt as Value, 'date'), offset);
+      return formatDate(toUnixSeconds(defined(v, 'the date value'), offset), argString(defined(fmt, 'the date format'), 'date'), offset);
     },
   },
   now: { min: 0, max: 0, call: (_args, context) => context.env.now },

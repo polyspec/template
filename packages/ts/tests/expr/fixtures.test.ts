@@ -2,18 +2,10 @@
 import { expect, it } from 'vitest';
 import { evaluateExpression, parseExpression, tokenizeExpression } from '../../src/expr/index.js';
 import { TemplateError } from '../../src/errors.js';
-import { exprFixture, readJson, toJsonValue } from '../helpers.js';
+import { expressionVectorsDocument } from '../../../../scripts/fixture-documents.mts';
+import { exprFixture, toJsonValue } from '../helpers.js';
 
-interface ExprCase {
-  name: string;
-  expr: string;
-  tokens?: { type: string; value: string }[];
-  ast?: unknown;
-  cases?: { data: unknown; value: unknown }[];
-  error?: string;
-}
-
-const cases = readJson(exprFixture) as ExprCase[];
+const cases = expressionVectorsDocument.read(exprFixture);
 
 // Each vector is a top-level test named by its name, as the suite unit expressions of config/parity.json reads the
 // results: an error vector fails the parse with its code, and any other vector has its tokens, its AST and the value of

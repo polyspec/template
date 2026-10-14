@@ -16,5 +16,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["scripts/*.mts", "scripts/test-progress/*.mts", "tests/runner/*.mts", "tests/scripts/*.mts", "tests/browser/*.mts", "examples/showcase/*.mts"]
+  "include": ["scripts/*.mts", "scripts/test-progress/*.mts", "tests/runner/*.mts", "tests/scripts/*.mts", "tests/browser/*.mts", "tests/browser/*.ts", "examples/showcase/*.mts"]
 }

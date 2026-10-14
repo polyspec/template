@@ -150,7 +150,7 @@ function checkPhp() {
   // Composer cache that the composer install of make install filled from the same lock, with the network disabled.
   const manifest = composerManifestDocument.read(join(packageDirectory, 'composer.json'));
   const lockPackages = composerLockDocument.read(join(packageDirectory, 'composer.lock')).packages;
-  const locked = lockPackages.map(item => [item.name, item.version]);
+  const locked = lockPackages.map((item): [string, string] => [item.name, item.version]);
   writeFileSync(join(directory, 'composer.json'), JSON.stringify({
     repositories: [{ 'packagist.org': false }, { type: 'artifact', url: artifacts }, { type: 'package', package: lockPackages }],
     require: { [manifest.name]: manifest.version, ...Object.fromEntries(locked) }, config: { 'allow-plugins': false },

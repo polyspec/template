@@ -252,6 +252,8 @@ test-scripts: cargo-downloads-check build-ts build-language build-lsp build-code
 # packages/ts and packages/language, whose declarations tsc reads.
 typecheck: build-ts build-language ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
 	$(TSC) -p tsconfig.json
+	$(TSC) -p docs/.vitepress/tsconfig.json
+	$(TSC) -p examples/site/scenarios/tsconfig.json
 
 # The type-aware lint of kit reads the same declarations: a module that imports @polyspec/template or
 # @polyspec/template-language resolves its types from the dist that package.json exports, so the lint runs after those

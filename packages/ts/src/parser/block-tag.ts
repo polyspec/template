@@ -63,13 +63,13 @@ export class RawTagReader {
   private readToken(index: number): RawToken | null {
     index = skipHorizontalSpace(this.text, index);
     if (index >= this.text.length || this.atClose(index)) return null;
-    const char = this.text[index] as string;
+    const char = this.text.charAt(index);
     if (char === '"' || char === "'") {
       const literal = lexStringLiteral(this.source, index, this.template);
       return { kind: 'path', value: literal.decoded, start: index, end: literal.end, quoted: true };
     }
     let end = index;
-    while (end < this.text.length && PATH_CHARS.test(this.text[end] as string)) end++;
+    while (end < this.text.length && PATH_CHARS.test(this.text.charAt(end))) end++;
     const value = this.text.slice(index, end);
     if (value.includes('.') || value.includes('/')) return { kind: 'path', value, start: index, end, quoted: false };
     if (IDENT.test(value)) return { kind: 'ident', value, start: index, end };

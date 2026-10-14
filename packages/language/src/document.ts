@@ -1,5 +1,5 @@
 // Language service document: one analysis of a template text and every editor result of EDT-4 to EDT-13.
-import { analyzePrefix, type SyntaxTag, type Template, type TemplateError } from '@polyspec/template';
+import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template';
 import { format, type FormatOptions, type FormatResult } from './format.js';
 import { lineIndentations } from './indent.js';
 import { indexOfByte } from './positions.js';
@@ -81,7 +81,7 @@ export class TemplateDocument {
     this.root = options.location === undefined ? null : findRoot(options.location);
     this.diagnostics = analysis.error !== null
       ? [diagnosticOf(source, analysis.error, shift)]
-      : pathDiagnostics(analysis.ast as Template, options.location, this.root).map(item => rangeOf(source, item.span[0], item.span[1], item.code, item.message, shift));
+      : pathDiagnostics(analysis.ast, options.location, this.root).map(item => rangeOf(source, item.span[0], item.span[1], item.code, item.message, shift));
     this.tags = this.accepted.filter(tag => tag.kind !== 'comment');
     this.tokens = analysis.tokens.map(token => ({ start: token.start + shift, end: token.end + shift, type: token.kind }));
     this.constructs = constructsOf(this.accepted);
@@ -100,7 +100,8 @@ export class TemplateDocument {
     let high = this.lineStarts.length - 1;
     while (low < high) {
       const middle = (low + high + 1) >> 1;
-      if ((this.lineStarts[middle] as number) <= index) low = middle;
+      const start = this.lineStarts[middle];
+      if (start !== undefined && start <= index) low = middle;
       else high = middle - 1;
     }
     return low;
@@ -117,7 +118,9 @@ export class TemplateDocument {
   foldingRanges(): FoldingRange[] {
     const ranges: FoldingRange[] = [];
     for (const construct of this.constructs) {
-      const close = construct.tags[construct.tags.length - 1] as Construct['tags'][number];
+      const close = construct.tags.at(-1);
+      // A closed construct ends with its close tag.
+      if (close === undefined) throw new Error(`The construct at ${construct.start} has no tags`);
       const startLine = this.lineOf(construct.start);
       const endLine = this.lineOf(close.start) - 1;
       if (endLine > startLine) ranges.push({ startLine, endLine });

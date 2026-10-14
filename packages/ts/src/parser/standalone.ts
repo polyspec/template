@@ -1,4 +1,5 @@
 // Standalone line groups (LEX-14, LEX-15).
+import { elementAt } from '../checked.js';
 
 export interface TagRange {
   // String indexes of the tag including any wrapper.
@@ -24,16 +25,16 @@ export function standaloneRanges(text: string, tags: readonly TagRange[]): Range
     let high = lineCount - 1;
     while (low < high) {
       const mid = (low + high + 1) >> 1;
-      if ((lineStarts[mid] as number) <= index) low = mid;
+      if (elementAt(lineStarts, mid) <= index) low = mid;
       else high = mid - 1;
     }
     return low;
   };
-  const lineEnd = (line: number): number => (line + 1 < lineCount ? (lineStarts[line + 1] as number) : text.length);
+  const lineEnd = (line: number): number => (line + 1 < lineCount ? elementAt(lineStarts, line + 1) : text.length);
 
   const tagsByLine: TagRange[][] = Array.from({ length: lineCount }, () => []);
   const sorted = [...tags].sort((a, b) => a.start - b.start);
-  for (const tag of sorted) (tagsByLine[lineOf(tag.start)] as TagRange[]).push(tag);
+  for (const tag of sorted) elementAt(tagsByLine, lineOf(tag.start)).push(tag);
 
   const ranges: Range[] = [];
   let line = 0;
@@ -43,7 +44,7 @@ export function standaloneRanges(text: string, tags: readonly TagRange[]): Range
     let hasEcho = false;
     const groupTags: TagRange[] = [];
     for (let cursor = line; cursor <= groupEnd; cursor++) {
-      for (const tag of tagsByLine[cursor] as TagRange[]) {
+      for (const tag of elementAt(tagsByLine, cursor)) {
         hasTag = true;
         if (tag.echo) hasEcho = true;
         groupTags.push(tag);
@@ -52,7 +53,7 @@ export function standaloneRanges(text: string, tags: readonly TagRange[]): Range
       }
     }
     if (hasTag && !hasEcho) {
-      const start = lineStarts[line] as number;
+      const start = elementAt(lineStarts, line);
       const end = lineEnd(groupEnd);
       if (onlyWhitespaceOutside(text, start, end, groupTags)) ranges.push({ start, end });
     }

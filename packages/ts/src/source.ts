@@ -1,4 +1,5 @@
 // Template source: UTF-8 validation, BOM removal and the mapping from string indexes to byte offsets (LEX-1, LEX-2, LEX-16).
+import { elementAt } from './checked.js';
 import { errorAt, lineIndexOf, type LineIndex } from './errors.js';
 import { firstInvalidUtf8, utf8Decoder, utf8Encoder } from './escape.js';
 
@@ -48,7 +49,7 @@ export class Source {
 
   // Returns the byte offset of a string index.
   byteAt(index: number): number {
-    return this.byteOffset[index] as number;
+    return elementAt(this.byteOffset, index);
   }
 
   // Returns the byte span of a range of string indexes.

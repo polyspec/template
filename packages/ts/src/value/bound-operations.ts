@@ -2,7 +2,7 @@
 // bound maps. Both run outside a render, so their errors have no template (ERR-14).
 import { errorWithoutPosition, internalBoundary } from '../errors.js';
 import { BindError, bindValue } from './bind.js';
-import { boundEntries, createBound, type BoundMap } from './bound.js';
+import { boundEntries, createBound, isBound, type BoundMap } from './bound.js';
 import type { MapValue } from './value.js';
 
 /**
@@ -11,7 +11,7 @@ import type { MapValue } from './value.js';
  */
 export function bind(input: unknown): BoundMap {
   return internalBoundary('', () => {
-    if (boundEntries(input) !== undefined) return input as BoundMap;
+    if (isBound(input)) return input;
     if (input === null || input === undefined) return createBound(new Map());
     let value;
     try {

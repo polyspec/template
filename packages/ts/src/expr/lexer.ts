@@ -67,14 +67,14 @@ export interface StringLiteral {
 // Reads a string literal starting at the quote at `start` (EXP-3).
 export function lexStringLiteral(source: Source, start: number, template: string): StringLiteral {
   const text = source.text;
-  const quote = text[start] as string;
+  const quote = text.charAt(start);
   const fail = (code: ErrorCode, from: number, to: number, message: string): TemplateError =>
     errorAt(code, template, source.lines, source.span(from, to), message);
   let decoded = '';
   let index = start + 1;
   for (;;) {
     if (index >= text.length) throw fail('E_PARSE_UNTERMINATED_STRING', start, start + 1, 'string literal is not terminated');
-    const char = text[index] as string;
+    const char = text.charAt(index);
     // EXP-3: a surrogate escape outside a high-low pair produces U+FFFD.
     if (char === quote) return { decoded: decoded.replace(/[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g, '�'), end: index + 1 };
     if (char !== '\\') {

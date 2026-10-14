@@ -58,7 +58,7 @@ export function typingEdits(text: TextDocument, document: TemplateDocument, posi
   const indentation = document.lineIndentation(line, { indent: indentOf(options), templateBlocks });
   const leading = /[ \t]*/y;
   leading.lastIndex = start;
-  const current = (leading.exec(document.text) as RegExpExecArray)[0];
+  const current = leading.exec(document.text)?.[0] ?? '';
   if (current === indentation) return [];
   return [TextEdit.replace(rangeOf(text, start, start + current.length), indentation)];
 }

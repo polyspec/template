@@ -1,5 +1,6 @@
 // Number conversion and formatting as defined in docs/spec/data-model.md (VAL-9)
 // and docs/spec/functions.md (FUN-20 to FUN-25).
+import { defined, elementAt } from '../checked.js';
 
 export const MAX_SAFE = 9007199254740991;
 
@@ -16,7 +17,7 @@ export function shortestDigits(value: number): { negative: boolean; digits: stri
   const text = Math.abs(value).toExponential();
   const match = /^(\d)(?:\.(\d+))?e([+-]\d+)$/.exec(text);
   if (!match) throw new Error(`cannot decompose ${text}`);
-  let digits = (match[1] as string) + (match[2] ?? '');
+  let digits = defined(match[1], 'the leading digit') + (match[2] ?? '');
   digits = digits.replace(/0+$/, '');
   if (digits === '') digits = '0';
   const exponent = Number(match[3]) + 1;
@@ -49,7 +50,7 @@ function roundDecimal(value: number, decimals: number): { negative: boolean; int
   if (fraction.length <= decimals) {
     return { negative, integer, fraction: fraction + '0'.repeat(decimals - fraction.length) };
   }
-  const roundUp = (fraction.charCodeAt(decimals) as number) >= 0x35;
+  const roundUp = fraction.charCodeAt(decimals) >= 0x35;
   let kept = integer + fraction.slice(0, decimals);
   if (roundUp) kept = incrementDigits(kept);
   const splitAt = kept.length - decimals;
@@ -64,7 +65,7 @@ function incrementDigits(digits: string): string {
       chars[index] = '0';
       index--;
     } else {
-      chars[index] = String.fromCharCode((chars[index] as string).charCodeAt(0) + 1);
+      chars[index] = String.fromCharCode(elementAt(chars, index).charCodeAt(0) + 1);
       return chars.join('');
     }
   }

@@ -4745,7 +4745,9 @@ function Counter() {
   return &lt;button onClick={() =&gt; alert(&#39;React owns this island&#39;)}&gt;Interactive island&lt;/button&gt;;
 }
 
-createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;);
+const island = document.getElementById(&#39;counter&#39;);
+if (island === null) throw new Error(&#39;the page has no element #counter&#39;);
+createRoot(island).render(&lt;Counter /&gt;);
 </pre></details><details open><summary>compiled artifacts</summary><pre class="long-code">ast/manifest.json
 {
   &quot;schema&quot;: 3,

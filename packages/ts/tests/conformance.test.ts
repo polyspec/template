@@ -2,9 +2,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
-import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError, type RenderOptions } from '../src/index.js';
+import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError, type DefineInput, type RenderOptions } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
-import { caseIds, casesDir } from '../../../tests/runner/case-list.mts';
+import { jsonDocument } from '../../../scripts/json-document.mts';
+import { caseIds, caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
 import { toJsonValue } from './helpers.js';
 
 interface Case {
@@ -24,17 +25,33 @@ function plain(bytes: Uint8Array | null): unknown {
   return bytes === null ? undefined : toJsonValue(parseJsonBytes(bytes));
 }
 
+// The define.json and env.json of a case in the shapes of RenderOptions: a definition is a path or an entry with a
+// template or ready HTML and data; the environment names a timezone and the current time.
+const defineDocument = jsonDocument<Record<string, DefineInput>>('map of definitions', {
+  type: 'object',
+  additionalProperties: {
+    anyOf: [
+      { type: 'string' },
+      { type: 'object', properties: { template: { type: 'string' }, html: { type: 'string' }, data: {} }, additionalProperties: false },
+    ],
+  },
+});
+const envDocument = jsonDocument<NonNullable<RenderOptions['env']>>('environment', {
+  type: 'object',
+  properties: { timezone: { type: 'string' }, now: { type: 'number' } },
+  additionalProperties: false,
+});
+
 function run(testCase: Case): { html: string } | { error: TemplateError } {
-  const optionsBytes = readIf(join(testCase.dir, 'options.json'));
-  const options = (plain(optionsBytes) ?? {}) as { delimiters?: string };
+  const { delimiters } = caseOptions(testCase.id);
   try {
-    const engine = new Engine(new AstProgram({ loader: new FsLoader(testCase.dir), ...(options.delimiters ? { delimiters: options.delimiters } : {}) }));
+    const engine = new Engine(new AstProgram({ loader: new FsLoader(testCase.dir), ...(delimiters ? { delimiters } : {}) }));
     const assign = readIf(join(testCase.dir, 'data.json'));
-    const define = plain(readIf(join(testCase.dir, 'define.json'))) as Record<string, string | { template?: string; data?: unknown; html?: string }> | undefined;
-    const env = plain(readIf(join(testCase.dir, 'env.json'))) as { timezone?: string; now?: number } | undefined;
+    const define = plain(readIf(join(testCase.dir, 'define.json')));
+    const env = plain(readIf(join(testCase.dir, 'env.json')));
     const renderOptions: RenderOptions = {};
-    if (define) renderOptions.define = define;
-    if (env) renderOptions.env = env;
+    if (define !== undefined) renderOptions.define = defineDocument.check(define, `${testCase.id}/define.json`);
+    if (env !== undefined) renderOptions.env = envDocument.check(env, `${testCase.id}/env.json`);
     const html = engine.render('input.tpl', assign === null ? {} : parseJsonBytes(assign), renderOptions);
     return { html };
   } catch (error) {
@@ -52,7 +69,7 @@ it.each(listCases().map(testCase => [testCase.id, testCase] as const))('%s', (_i
   const expectedAst = readIf(join(testCase.dir, 'expected.ast.json'));
   const expectedHtml = readIf(join(testCase.dir, 'expected.html'));
   const expectedError = readIf(join(testCase.dir, 'expected.error.json'));
-  const options = (plain(readIf(join(testCase.dir, 'options.json'))) ?? {}) as { delimiters?: string };
+  const options = caseOptions(testCase.id);
   if (expectedAst) {
     const source = new Uint8Array(readFileSync(join(testCase.dir, 'input.tpl')));
     const ast = parse(source, 'input.tpl', options.delimiters ? { delimiters: options.delimiters } : {});
@@ -60,9 +77,10 @@ it.each(listCases().map(testCase => [testCase.id, testCase] as const))('%s', (_i
   }
   const result = run(testCase);
   if (expectedError) {
-    const expected = JSON.parse(new TextDecoder().decode(expectedError)) as Record<string, unknown>;
+    const expected: unknown = JSON.parse(new TextDecoder().decode(expectedError));
     expect('error' in result ? { code: result.error.code, template: result.error.template, line: result.error.line, col: result.error.col } : result).toEqual(expected);
   } else {
-    expect('html' in result ? result.html : result.error.toObject()).toEqual(new TextDecoder().decode(expectedHtml as Uint8Array));
+    if (expectedHtml === null) throw new Error(`${testCase.id} has neither expected.html nor expected.error.json`);
+    expect('html' in result ? result.html : result.error.toObject()).toEqual(new TextDecoder().decode(expectedHtml));
   }
 });

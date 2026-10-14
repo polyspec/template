@@ -2,20 +2,21 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { AstProgram, MapLoader, TemplateError, bind, merge, type BoundMap, type RenderOptions } from '../../src/index.js';
+import { boundDataCasesDocument } from '../../../../scripts/fixture-documents.mts';
+import { AstProgram, MapLoader, TemplateError, bind, merge, type RenderOptions } from '../../src/index.js';
 import * as renderEntry from '../../src/render.js';
-import { boundEntries } from '../../src/value/bound.js';
+import { BoundMap, boundEntries } from '../../src/value/bound.js';
 import { repoRoot } from '../helpers.js';
 
+/** The entries of a bound map; a value that is no bound map fails the test. */
+function entriesOf(value: unknown) {
+  const entries = boundEntries(value);
+  if (entries === undefined) throw new Error('the value is no bound map');
+  return entries;
+}
+
 const fixtureDir = join(repoRoot, 'tests', 'fixtures', 'bound-data');
-const cases = JSON.parse(readFileSync(join(fixtureDir, 'cases.json'), 'utf8')) as {
-  assign: Record<string, unknown>;
-  second: Record<string, unknown>;
-  mergedKeys: string[];
-  definitionData: Record<string, unknown>;
-  outputs: Record<'page' | 'merged' | 'define' | 'empty', string>;
-  rejections: Record<string, { template: string; line: number; col: number }>;
-};
+const cases = boundDataCasesDocument.read(join(fixtureDir, 'cases.json'));
 
 const templates = Object.fromEntries(
   ['page.tpl', 'define.tpl', 'part.tpl', 'empty.tpl', 'result.tpl'].map(name => [name, readFileSync(join(fixtureDir, name), 'utf8')]),
@@ -29,7 +30,7 @@ function program(result: unknown = null): AstProgram {
 
 // A fresh copy of a fixture value, so that no test shares host data with another.
 function copy<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
+  return structuredClone(value);
 }
 
 function definition(data: unknown): RenderOptions {
@@ -64,7 +65,7 @@ describe('bound data (VAL-22)', () => {
   });
 
   it('keeps the values that bind checked when the host changes its value later', () => {
-    const assign = copy(cases.assign) as { list: unknown[]; m: Record<string, unknown> };
+    const assign = copy(cases.assign);
     const bound = bind(assign);
     assign.list.push(3);
     assign.m.k = 'changed';
@@ -73,7 +74,7 @@ describe('bound data (VAL-22)', () => {
 
   it('merges by the precedence of RT-26 and keeps the position of the first map', () => {
     const merged = merge(bind(copy(cases.assign)), bind(copy(cases.second)));
-    expect([...boundEntries(merged)!.keys()]).toEqual(cases.mergedKeys);
+    expect([...entriesOf(merged).keys()]).toEqual(cases.mergedKeys);
     expect(program().render('page.tpl', merged)).toBe(cases.outputs.merged);
     const host = { ...copy(cases.assign), ...copy(cases.second) };
     expect(program().render('page.tpl', host)).toBe(cases.outputs.merged);
@@ -87,7 +88,7 @@ describe('bound data (VAL-22)', () => {
   it('binds null and undefined to the empty bound map (RT-4)', () => {
     expect(program().render('empty.tpl', bind(null))).toBe(cases.outputs.empty);
     expect(program().render('empty.tpl', bind(undefined))).toBe(cases.outputs.empty);
-    expect([...boundEntries(bind(null))!.keys()]).toEqual([]);
+    expect([...entriesOf(bind(null)).keys()]).toEqual([]);
   });
 
   it('returns a bound map given to bind unchanged', () => {
@@ -169,20 +170,22 @@ describe('bound data (VAL-22)', () => {
   });
 
   describe('the bound map type', () => {
-    const type = Object.getPrototypeOf(bind({})).constructor as new (...args: unknown[]) => BoundMap;
+    // The class of a bound map, which host code reaches through the prototype of a bound map.
+    const type = BoundMap;
 
     it('cannot be created with new', () => {
-      expect(() => new type()).toThrow(TypeError);
+      expect(Object.getPrototypeOf(bind({}))).toBe(type.prototype);
+      expect(() => { Reflect.construct(type, []); }).toThrow(TypeError);
       expect(() => new type(Symbol('token'), new Map())).toThrow(TypeError);
     });
 
     it('cannot be subclassed', () => {
       class Derived extends type {}
-      expect(() => new Derived()).toThrow(TypeError);
+      expect(() => new Derived(Symbol('token'), new Map())).toThrow(TypeError);
     });
 
     it('treats an object that only inherits its prototype as a class instance (VAL-19)', () => {
-      const imitation = Object.create(type.prototype) as object;
+      const imitation: unknown = Object.create(type.prototype);
       expect(program().render('empty.tpl', { imitation })).toBe(cases.outputs.empty);
       expect(failure(() => bind(imitation)).code).toBe('E_DATA_UNSUPPORTED_TYPE');
     });

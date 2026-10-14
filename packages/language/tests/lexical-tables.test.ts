@@ -55,7 +55,7 @@ export function lexicalTables(directory: string): string[] {
       if (item.type === 'Literal' && item.regex !== undefined) found.push(`${name} /${item.regex.pattern}/${item.regex.flags}`);
       if ((item.type === 'NewExpression' || item.type === 'CallExpression') && item.callee?.type === 'Identifier' && item.callee.name === 'RegExp') found.push(`${name} RegExp()`);
       if (item.type === 'ArrayExpression' && item.elements !== undefined) {
-        const strings = item.elements.filter((element): element is { type: 'Literal'; value: string } => (element as { type?: string; value?: unknown } | null)?.type === 'Literal' && typeof (element as { value?: unknown }).value === 'string');
+        const strings = item.elements.filter((element): element is { type: 'Literal'; value: string } => element !== null && typeof element === 'object' && 'type' in element && element.type === 'Literal' && 'value' in element && typeof element.value === 'string');
         if (strings.length >= 2) found.push(`${name} [${strings.map(element => element.value).join(', ')}]`);
       }
       for (const value of Object.values(node)) visit(value);

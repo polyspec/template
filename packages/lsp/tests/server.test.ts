@@ -9,13 +9,18 @@ import type { Position, SemanticTokens, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { editorResults, fixtureDirectory, fixtureNames, queryIndexes } from '../../../scripts/editor-fixtures.mts';
+import { jsonDocument } from '../../../scripts/json-document.mts';
 import { Client } from './client.js';
 import { decodeTokens, serverResults, SPACES } from './results.js';
 
-const names = (fixtureNames as () => string[])();
-const expectedOf = (text: string): unknown => (editorResults as (document: unknown) => unknown)(openDocument(text));
-const indexesOf = (text: string): number[] => (queryIndexes as (document: unknown) => number[])(openDocument(text));
-const uriOf = (name: string): string => pathToFileURL(join(fixtureDirectory as string, name)).href;
+const names = fixtureNames();
+const expectedOf = (text: string): ReturnType<typeof editorResults> => editorResults(openDocument(text));
+const indexesOf = (text: string): number[] => queryIndexes(openDocument(text));
+const uriOf = (name: string): string => pathToFileURL(join(fixtureDirectory, name)).href;
+// The fixture results of the language service; the server results are compared with them as a whole.
+const fixtureDocument = jsonDocument<{ matchingTags: Record<string, unknown> }>('editor fixture results', {
+  type: 'object', properties: { matchingTags: { type: 'object' } }, required: ['matchingTags'],
+});
 
 // A text with a byte order mark, CRLF line ends, characters outside the ASCII range and the BMP and a comment over two lines.
 const UNICODE = '﻿<ul title="é😀">\r\n{@ x = xs}\r\n<li>{= x | upper}😀{= "é"}</li>{* a\r\nb *}\r\n{/}\r\n</ul>\r\n';
@@ -53,8 +58,8 @@ describe('editor fixtures', () => {
   });
   for (const name of names) {
     it(name, async () => {
-      const text = readFileSync(join(fixtureDirectory as string, name), 'utf8');
-      const expected = JSON.parse(readFileSync(join(fixtureDirectory as string, name.replace(/\.tpl$/, '.json')), 'utf8')) as { matchingTags: Record<string, unknown> };
+      const text = readFileSync(join(fixtureDirectory, name), 'utf8');
+      const expected = fixtureDocument.read(join(fixtureDirectory, name.replace(/\.tpl$/, '.json')));
       const indexes = Object.keys(expected.matchingTags).map(Number);
       expect(await serverResults(client, uriOf(name), text, indexes)).toEqual(expected);
     });
@@ -79,7 +84,7 @@ describe('positions', () => {
         [comment, UNICODE.indexOf('\r\n', comment), 'comment'],
         [UNICODE.indexOf('b *}'), UNICODE.indexOf('*}') + 2, 'comment'],
       ]);
-      const expected = (expectedOf(UNICODE) as { tokens: unknown[] }).tokens.filter(token => (token as string[])[2] !== 'comment');
+      const expected = expectedOf(UNICODE).tokens.filter(token => token[2] !== 'comment');
       expect(tokens.filter(token => token[2] !== 'comment')).toEqual(expected);
     } finally {
       expect(await single.stop()).toBe(0);

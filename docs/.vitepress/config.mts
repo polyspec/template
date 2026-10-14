@@ -21,6 +21,7 @@ const ebnfLanguage = {
   name: 'EBNF',
   scopeName: 'source.ebnf',
   aliases: ['ebnf'],
+  repository: {},
   patterns: [
     { name: 'comment.line.number-sign.ebnf', match: '#.*$' },
     { name: 'string.quoted.single.ebnf', begin: "'", end: "'", patterns: [{ name: 'constant.character.escape.ebnf', match: '\\\\.' }] },

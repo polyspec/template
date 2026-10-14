@@ -93,7 +93,7 @@ export function lineIndentations(text: string, tags: readonly IndentTag[], unit:
   let step = 0;
   let depth = 0;
   for (let lineStart = 0; lineStart <= text.length; lineStart = text.indexOf('\n', lineStart) + 1) {
-    while (step < scan.steps.length && (scan.steps[step] as Step).index < lineStart) depth += (scan.steps[step++] as Step).delta;
+    for (let current = scan.steps[step]; current !== undefined && current.index < lineStart; current = scan.steps[++step]) depth += current.delta;
     let first = lineStart;
     while (text[first] === ' ' || text[first] === '\t') first++;
     if (within(scan.kept, lineStart)) {
@@ -180,7 +180,7 @@ function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks:
         index = tag.end;
         continue;
       }
-      const character = text[index] as string;
+      const character = text.charAt(index);
       if (quote !== null) {
         if (character === quote) {
           kept.push({ start: quoteStart, end: index });
@@ -235,7 +235,10 @@ function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks:
       continue;
     }
     const closing = match[1] === '/';
-    const name = (match[2] as string).toLowerCase();
+    const [, , tagName] = match;
+    // The second group of the pattern always takes part in a match.
+    if (tagName === undefined) throw new Error(`The HTML tag at ${position} has no name`);
+    const name = tagName.toLowerCase();
     const end = htmlTagEnd(position);
     if (typeof end !== 'number') return { error: end };
     if (text.slice(position, end).includes('\n')) inside.push({ start: position, end });
@@ -292,8 +295,9 @@ function scanStructure(text: string, tags: readonly IndentTag[], templateBlocks:
 
   // Template tags inside an HTML comment are still template tags; the comment keeps its lines.
   function skipTemplateTags(end: number): number | IndentError {
-    while (next < tags.length && (tags[next] as IndentTag).start < end) {
-      const failure = templateTag(tags[next++] as IndentTag);
+    for (let tag = tags[next]; tag !== undefined && tag.start < end; tag = tags[next]) {
+      next++;
+      const failure = templateTag(tag);
       if (failure !== null) return failure;
     }
     return end;

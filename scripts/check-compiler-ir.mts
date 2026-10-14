@@ -135,7 +135,9 @@ function visitExpr(expr: IrExpr): void {
   exprOps.add(expr.op);
   for (const value of Object.values(expr)) {
     if (isExpr(value)) visitExpr(value);
-    else if (Array.isArray(value)) for (const item of value) {
+    else if (Array.isArray(value)) for (const element of value) {
+      // An element of a list field is an expression or an entry that holds one under value or key.
+      const item: unknown = element;
       if (isExpr(item)) visitExpr(item);
       if (typeof item === 'object' && item !== null) {
         if ('value' in item && isExpr(item.value)) visitExpr(item.value);

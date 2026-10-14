@@ -1,4 +1,5 @@
 // HTML escaping as defined in RT-32 and FUN-10, and UTF-8 helpers.
+import { elementAt } from './checked.js';
 
 export function escapeHtml(text: string): string {
   let result = '';
@@ -39,7 +40,7 @@ export function firstInvalidUtf8(bytes: Uint8Array): number {
   let i = 0;
   const n = bytes.length;
   while (i < n) {
-    const b0 = bytes[i] as number;
+    const b0 = elementAt(bytes, i);
     if (b0 < 0x80) {
       i++;
       continue;

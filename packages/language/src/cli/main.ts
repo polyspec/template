@@ -1,5 +1,6 @@
 // Command line interface template-fmt: prints, rewrites or checks formatted templates.
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
+import { buffer } from 'node:stream/consumers';
 import { parse, TemplateError } from '@polyspec/template';
 import { format, type FormatOptions, type FormatResult } from '../format.js';
 import { parseArguments, USAGE } from './args.js';
@@ -34,7 +35,8 @@ export async function main(argv: readonly string[]): Promise<number> {
 
   let files: string[];
   try {
-    if (mode === 'print' && (paths.length !== 1 || statSync(paths[0] as string).isDirectory())) {
+    const [only] = paths;
+    if (mode === 'print' && (paths.length !== 1 || only === undefined || statSync(only).isDirectory())) {
       return usageError('several files or a directory require --write or --check');
     }
     files = collectFiles(paths);
@@ -95,8 +97,6 @@ function reportFailure(path: string, result: Extract<FormatResult, { ok: false }
   return 2;
 }
 
-async function readStdin(): Promise<Uint8Array> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of process.stdin) chunks.push(chunk as Buffer);
-  return Buffer.concat(chunks);
+function readStdin(): Promise<Uint8Array> {
+  return buffer(process.stdin);
 }

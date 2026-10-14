@@ -33,11 +33,11 @@ function endsOperand(token: ExpressionToken | undefined): boolean {
  */
 export function joinTokens(tokens: readonly ExpressionToken[]): string {
   const unary = tokens.map((token, index) => token.text === '!' || (token.text === '-' && !endsOperand(tokens[index - 1])));
-  let output = tokens[0]?.text ?? '';
-  for (let index = 1; index < tokens.length; index++) {
-    const previous = tokens[index - 1] as ExpressionToken;
-    const current = tokens[index] as ExpressionToken;
-    output += separator(previous, current, unary[index - 1] === true) + current.text;
+  let output = '';
+  let previous: ExpressionToken | undefined;
+  for (const [index, current] of tokens.entries()) {
+    output += previous === undefined ? current.text : separator(previous, current, unary[index - 1] === true) + current.text;
+    previous = current;
   }
   return output;
 }

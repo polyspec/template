@@ -12,8 +12,14 @@ describe('Engine', () => {
   it('calls registered host functions and binds their results', () => {
     const program = new AstProgram({ loader: new MapLoader({ 'a.tpl': '{= twice(2)} {= wrap("a")}' }) });
     const engine = new Engine(program);
-    program.register('twice', ([n]) => (n as number) * 2);
-    program.register('wrap', ([s]) => `[${s as string}]`);
+    program.register('twice', ([n]) => {
+      if (typeof n !== 'number') throw new TypeError(`twice takes a number, not ${String(n)}`);
+      return n * 2;
+    });
+    program.register('wrap', ([s]) => {
+      if (typeof s !== 'string') throw new TypeError(`wrap takes a string, not ${String(s)}`);
+      return `[${s}]`;
+    });
     expect(engine.render('a.tpl', {})).toBe('4 [a]');
     expect(() => program.register('upper', () => '')).toThrow();
   });
@@ -23,8 +29,9 @@ describe('Engine', () => {
     let caught: TemplateError | null = null;
     try {
       engine.render('a.tpl', {});
-    } catch (error) {
-      caught = error as TemplateError;
+    } catch (error: unknown) {
+      if (!(error instanceof TemplateError)) throw error;
+      caught = error;
     }
     expect(caught?.code).toBe('E_RUNTIME_HOST_FUNCTION');
     expect(caught?.line).toBe(2);

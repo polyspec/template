@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d27d3cb8f177821e2cd139a39cfd60d563ea759ac8e50b69127c80c108345238 -->
+<!-- source-sha256: 0793ab57fa249ad066d91ad3167e9f6bf55ed47aaaf06c1654a11287aeb33b41 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.18: template은 `@polyspec/kit` 0.0.47을 고정하고, `make kit-sync`가 그 복사본(`.oxlintrc.json`, `.golangci.yml`, `config/layout.kit.yml`, bootstrap script)을 썼다. wheel backend는 `config/toolchain.json`의 `pythonBackend`에만 있다. `make typecheck`는 VitePress 설정과 react-boundary scenario의 React sample도 검사하며, 이제 React와 그 type이 그것을 type check한다. 손으로 쓴 TypeScript는 JSON을 schema로 읽고, cast, `any`, non-null assertion 대신 검사로 unknown 값을 좁힌다. `@polyspec/template`에는 runtime 수정이 함께 들어왔다. sparse host 배열의 구멍은 undefined가 아니라 null로 bind된다. `PrefixAnalysis`는 오류가 없을 때에만 AST가 있는 union이다.
 - T25.6: TypeScript는 `@polyspec/template`과 `@polyspec/template/render`에서 `decodeTemplate(json)`을, Rust는 `decode_template(json)`을 공개합니다. 각각 Go의 `ast.DecodeTemplate`처럼 AST JSON을 패키지의 `Template`으로 읽고, 첫 번째 잘못된 노드의 경로를 말하는 `AstDecodeError`로 실패합니다(AST-10). TypeScript는 build가 함께 묶는 `contracts/schema/ast.schema.json`으로 ajv가 검증하며 ajv를 runtime dependency로 갖고, Rust는 serde로 모든 노드의 모르는 필드와 빠진 필드를 거부하며 serde_path_to_error로 경로를 말합니다. parity unit `parsed-ast`는 Go의 것처럼 program이 decode한 AST를 렌더하는 TypeScript와 Rust의 decode test를 bind합니다.
 - T25.7: `date`는 `+25:00`이나 `+05:60`처럼 범위를 벗어난 오프셋을 가진 날짜 문자열에서 `E_RUNTIME_TYPE`으로 실패한다(FUN-37, FUN-38). 이 문자열은 날짜 pattern에 맞고 오프셋 parser는 그 오프셋을 거부했는데, TypeScript, Go, PHP, PHP 확장은 문자열을 오프셋 0으로 읽었고 Python은 `E_INTERNAL`로 실패했다. Rust는 이미 `E_RUNTIME_TYPE`으로 실패했으며, 이제 오프셋을 다시 parse하지 않고 parse한 값을 그대로 쓴다. FUN-37이 오프셋의 범위를 명시하고, case `functions/date-offset-hour-error`와 `functions/date-offset-minute-error`가 모든 runtime에서 이를 검사한다.
 - T25.4: Go backend가 그대로 쓰는 Go인 `OrderedMap`과 helper 25개는 `packages/compiler/backends/go/`의 Go 파일에 정의마다 하나씩 gofmt 형식으로 있고, `backends/go.mjs`는 파일의 package clause와 import 뒤의 선언을 읽습니다. template literal의 두 칸 들여쓰기를 tab으로 바꾸던 tag `gofmt`는 삭제되었습니다. `make lint-go-format`은 이 folder에 `gofmt -l`을, `make test-go-backend-vet`은 `go vet`을 실행하며, Go의 compiler digest는 이 파일들을 포함합니다. Generated program은 byte 단위로 같고, 커밋된 manifest와 `examples/site/index.html`은 새 compiler digest를 기록합니다.

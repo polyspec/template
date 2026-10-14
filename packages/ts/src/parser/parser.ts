@@ -1,6 +1,7 @@
 // Template parser: text scanning, tag bodies, block structure and standalone lines
 // as defined in docs/spec/lexical.md and docs/spec/grammar.md.
 import type { Block, Comment, Expr, If, IfBlock, For, Node, Set as SetNode, Template } from '../ast.js';
+import { defined, elementAt } from '../checked.js';
 import { errorAt, TemplateError, type ErrorCode } from '../errors.js';
 import type { Token } from '../expr/lexer.js';
 import { ExpressionParser } from '../expr/parser.js';
@@ -60,7 +61,7 @@ function expressionTokens(parser: ExpressionParser): SyntaxToken[] {
 function syntaxKind(sigil: string | null, assignment = false): SyntaxTag['kind'] {
   if (assignment) return 'assignment';
   switch (sigil) {
-    case null: throw new Error('bare assignments are not accepted');
+    case null: throw new RangeError('bare assignments are not accepted');
     case '*': return 'comment';
     case '=': return 'echo';
     case '@': return 'for';
@@ -72,13 +73,25 @@ function syntaxKind(sigil: string | null, assignment = false): SyntaxTag['kind']
     case '+': return 'include';
     case '#': return 'block';
     case '%': return 'directive';
-    default: throw new Error(`unknown accepted tag sigil ${JSON.stringify(sigil)}`);
+    default: throw new RangeError(`unknown accepted tag sigil ${JSON.stringify(sigil)}`);
   }
 }
 
 const RESERVED = new Set(['true', 'false', 'null', 'in']);
 const ASSIGN_HEAD = /^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*/%]=|=(?![=>]))/;
 const LOOP_HEAD = /^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/;
+
+// The binary operator of a compound assignment operator that ASSIGN_HEAD accepted.
+function compoundOperator(operator: string): '+' | '-' | '*' | '/' | '%' {
+  switch (operator) {
+    case '+=': return '+';
+    case '-=': return '-';
+    case '*=': return '*';
+    case '/=': return '/';
+    case '%=': return '%';
+    default: throw new RangeError(`unknown compound assignment operator ${JSON.stringify(operator)}`);
+  }
+}
 
 interface TextPiece {
   kind: 'text';
@@ -116,13 +129,13 @@ export function analyzeTemplate(source: Source, delimiters: Delimiters = DEFAULT
 }
 
 /** The tags a parse accepted before its first error, their tokens, and that error (EDT-6). */
-export interface PrefixAnalysis {
-  tags: readonly SyntaxTag[];
-  tokens: readonly SyntaxToken[];
-  error: TemplateError | null;
-  /** The AST of a source that parses, null with an error. */
-  ast: Template | null;
-}
+/**
+ * The tags and tokens that the parser accepted, with either the AST of a source that parses or the first error and no
+ * AST.
+ */
+export type PrefixAnalysis =
+  | { tags: readonly SyntaxTag[]; tokens: readonly SyntaxToken[]; error: null; ast: Template }
+  | { tags: readonly SyntaxTag[]; tokens: readonly SyntaxToken[]; error: TemplateError; ast: null };
 
 /** Parses a template and returns what the parser accepted before its first error instead of only the error. */
 export function analyzeTemplatePrefix(source: Source, delimiters: Delimiters = DEFAULT_DELIMITERS): PrefixAnalysis {
@@ -205,7 +218,7 @@ class TemplateParser {
       if (end > textStart) this.pushText(textStart, end, text.slice(textStart, end));
     };
     while (index < text.length) {
-      const char = text[index] as string;
+      const char = text.charAt(index);
       const { open } = this.delimiters;
       if (char === '\\' && text[index + 1] === open && startsTag(text, index + 1, this.delimiters)) {
         flushText(index);
@@ -277,8 +290,9 @@ class TemplateParser {
         const test = parser.parseExpression();
         end = this.finishTag(context, parser.expectClose());
         const span = this.source.span(context.start, end);
-        const node: If = { type: 'If', branches: [{ test, body: [], span }], else: null, span };
-        this.openFrame(node, node.branches[0]!.body as unknown as Item[], context.start);
+        const body: Node[] = [];
+        const node: If = { type: 'If', branches: [{ test, body, span }], else: null, span };
+        this.openFrame(node, body, context.start);
         break;
       }
       case '?#': {
@@ -286,7 +300,7 @@ class TemplateParser {
         const id = parser.expect('IDENT');
         end = this.finishTag(context, parser.expectClose());
         const node: IfBlock = { type: 'IfBlock', id: id.value, body: [], else: null, span: this.source.span(context.start, end) };
-        this.openFrame(node, node.body as unknown as Item[], context.start);
+        this.openFrame(node, node.body, context.start);
         break;
       }
       case ':?': {
@@ -299,7 +313,7 @@ class TemplateParser {
         end = this.finishTag(context, parser.expectClose());
         const body: Node[] = [];
         frame.node.branches.push({ test, body, span: this.source.span(context.start, end) });
-        frame.items = body as unknown as Item[];
+        frame.items = body;
         break;
       }
       case ':': {
@@ -315,7 +329,7 @@ class TemplateParser {
         if (frame.node.type === 'For') frame.node.empty = body;
         else frame.node.else = body;
         frame.hasElse = true;
-        frame.items = body as unknown as Item[];
+        frame.items = body;
         break;
       }
       case '/': {
@@ -436,7 +450,7 @@ class TemplateParser {
       const at = skipHorizontalSpace(this.text, bodyStart);
       throw this.fail('E_PARSE_UNEXPECTED_TOKEN', at, at + 1, 'loop requires "name = expression"');
     }
-    const name = head[1] as string;
+    const name = defined(head[1], 'the loop variable');
     const nameStart = bodyStart + head[0].indexOf(name);
     if (RESERVED.has(name)) throw this.fail('E_PARSE_RESERVED_NAME', nameStart, nameStart + name.length, `${name} is a reserved word`);
     this.mark(nameStart, nameStart + name.length, 'variable');
@@ -446,15 +460,15 @@ class TemplateParser {
     const end = this.finishTag(context, parser.expectClose());
     const span = this.source.span(context.start, end);
     const node: For = { type: 'For', name, iter, body: [], empty: null, span };
-    this.openFrame(node, node.body as unknown as Item[], context.start);
+    this.openFrame(node, node.body, context.start);
     return end;
   }
 
   private parseAssignment(context: TagContext, bodyStart: number): number {
     const head = ASSIGN_HEAD.exec(this.text.slice(bodyStart));
     if (!head) throw this.fail('E_PARSE_UNEXPECTED_TOKEN', bodyStart, bodyStart + 1, 'unknown tag');
-    const name = head[1] as string;
-    const operator = head[2] as string;
+    const name = defined(head[1], 'the assigned variable');
+    const operator = defined(head[2], 'the assignment operator');
     if (RESERVED.has(name)) throw this.fail('E_PARSE_RESERVED_NAME', bodyStart, bodyStart + name.length, `${name} is a reserved word`);
     const variable: Expr = { type: 'Var', name, span: this.source.span(bodyStart, bodyStart + name.length) };
     const afterOperator = bodyStart + head[0].length;
@@ -474,8 +488,7 @@ class TemplateParser {
       if (operator === '=') {
         expr = value;
       } else {
-        const op = operator[0] as '+' | '-' | '*' | '/' | '%';
-        expr = { type: 'Binary', op, left: variable, right: value, span: this.source.span(bodyStart, parser.end) };
+        expr = { type: 'Binary', op: compoundOperator(operator), left: variable, right: value, span: this.source.span(bodyStart, parser.end) };
       }
     }
     const node: SetNode = { type: 'Set', name, expr, span: this.source.span(context.start, end) };
@@ -521,7 +534,7 @@ class TemplateParser {
         nodes.push({
           type: 'Text',
           value,
-          span: this.source.span(pending[0]!.start, pending[pending.length - 1]!.end),
+          span: this.source.span(elementAt(pending, 0).start, elementAt(pending, pending.length - 1).end),
         });
       }
       pending = [];
@@ -541,16 +554,16 @@ class TemplateParser {
   private finalizeNode(node: Node, removed: Range[]): Node {
     switch (node.type) {
       case 'If':
-        for (const branch of node.branches) branch.body = this.finalize(branch.body as unknown as Item[], removed);
-        if (node.else) node.else = this.finalize(node.else as unknown as Item[], removed);
+        for (const branch of node.branches) branch.body = this.finalize(branch.body, removed);
+        if (node.else) node.else = this.finalize(node.else, removed);
         return node;
       case 'For':
-        node.body = this.finalize(node.body as unknown as Item[], removed);
-        if (node.empty) node.empty = this.finalize(node.empty as unknown as Item[], removed);
+        node.body = this.finalize(node.body, removed);
+        if (node.empty) node.empty = this.finalize(node.empty, removed);
         return node;
       case 'IfBlock':
-        node.body = this.finalize(node.body as unknown as Item[], removed);
-        if (node.else) node.else = this.finalize(node.else as unknown as Item[], removed);
+        node.body = this.finalize(node.body, removed);
+        if (node.else) node.else = this.finalize(node.else, removed);
         return node;
       default:
         return node;

@@ -86,20 +86,19 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
     edits.push(...indentation.edits);
     edits.sort((left, right) => left.start - right.start);
   }
-  if (edits.length === 0) return { ok: true, text: source, changed: false };
+  const [first] = edits;
+  if (first === undefined) return { ok: true, text: source, changed: false };
 
   const formatted = apply(text, edits);
   let after: ReturnType<typeof parse>;
   try {
     after = parse(formatted, name, parseOptions);
   } catch (error) {
-    const first = edits[0] as Edit;
     const detail = error instanceof Error ? error.message : String(error);
     return { ok: false, error: { reason: 'invariant', code: null, ...positionOf(text, first.start), message: `formatted text does not parse: ${detail}` } };
   }
   const same = indent === null ? sameTree(analysis.ast, after) : sameTree(withoutLineIndentation(analysis.ast), withoutLineIndentation(after));
   if (!same) {
-    const first = edits[0] as Edit;
     return { ok: false, error: { reason: 'invariant', code: null, ...positionOf(text, first.start), message: 'formatted text parses to a different AST' } };
   }
   return { ok: true, text: bom + formatted, changed: true };

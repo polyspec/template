@@ -1,5 +1,6 @@
 // Truthiness, equality, ordering and binding (EXP-33 to EXP-38, VAL-13).
 import { describe, expect, it } from 'vitest';
+import { AstProgram, MapLoader } from '../../src/index.js';
 import { bindValue, BindError } from '../../src/value/bind.js';
 import { parseJson } from '../../src/value/json.js';
 import { compareValues, isTruthy, looseEquals, strictEquals, SafeString } from '../../src/value/value.js';
@@ -46,11 +47,21 @@ describe('bindValue', () => {
     expect(() => bindValue(BigInt('9007199254740992'))).toThrow(BindError);
     expect(bindValue({ a: [1, 'b'] })).toEqual(new Map([['a', [1, 'b']]]));
   });
+
+  it('binds a hole of a sparse host list as null, as it binds undefined (RT-4)', () => {
+    // The list [1, , 3], whose index 1 is a hole.
+    const sparse: number[] = [1];
+    sparse[2] = 3;
+    const program = new AstProgram({ loader: new MapLoader({ 'item.tpl': '[{= list.1}]' }) });
+    expect(program.render('item.tpl', { list: sparse })).toBe(program.render('item.tpl', { list: [1, null, 3] }));
+    expect(bindValue({ list: sparse })).toStrictEqual(new Map([['list', [1, null, 3]]]));
+  });
 });
 
 describe('parseJson', () => {
   it('preserves document order and checks integer literals', () => {
-    const value = parseJson('{"2": 1, "1": 2, "x": 1e15}') as Map<string, unknown>;
+    const value = parseJson('{"2": 1, "1": 2, "x": 1e15}');
+    if (!(value instanceof Map)) throw new Error('a JSON object parses to a map');
     expect([...value.keys()]).toEqual(['2', '1', 'x']);
     expect(() => parseJson('9007199254740992')).toThrow(BindError);
     expect(() => parseJson('1e400')).toThrow(BindError);

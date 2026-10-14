@@ -8,8 +8,8 @@ export const fileHost: RootHost = {
     let stats;
     try {
       stats = lstatSync(path);
-    } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code;
+    } catch (error: unknown) {
+      const code = error instanceof Error && 'code' in error ? error.code : undefined;
       if (code === 'ENOENT' || code === 'ENOTDIR') return null;
       throw error;
     }

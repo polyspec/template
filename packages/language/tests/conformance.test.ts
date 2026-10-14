@@ -31,6 +31,7 @@ it.each(caseIds())('%s', id => {
     expect([indent.ok || indent.error.reason, keep.ok || keep.error.reason]).toEqual(['parse', 'parse']);
     return;
   }
-  const expected = JSON.parse(readFileSync(expectedPath, 'utf8')) as { indent: Expected; keep: Expected };
+  // The comparison reads the expected file as it is; the schema check of the case files validates its shape.
+  const expected: unknown = JSON.parse(readFileSync(expectedPath, 'utf8'));
   expect({ indent: outcome(indent), keep: outcome(keep) }).toEqual(expected);
 });

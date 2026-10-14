@@ -41,7 +41,7 @@ export class ExpressionParser {
       return token.end;
     }
     if (token.type === 'EOF') throw this.unexpected(token);
-    const close = this.options.close as string;
+    const close = this.options.close;
     let end = -1;
     for (let k = 0; k < this.options.closeCount; k++) {
       const part = this.peek();

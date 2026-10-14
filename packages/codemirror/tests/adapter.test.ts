@@ -12,7 +12,8 @@ function typeLine(state: EditorState, text: string): EditorState {
   const typed = state.update({ changes: { from: end, insert: text }, selection: EditorSelection.cursor(end + text.length) }).state;
   const result = run(insertNewlineAndIndent, typed);
   expect(result.handled).toBe(true);
-  return result.state as EditorState;
+  if (result.state === null) throw new Error('Enter dispatched no transaction');
+  return result.state;
 }
 
 describe('indentation of a new line', () => {
@@ -94,7 +95,11 @@ describe('template root', () => {
     path: '/w/page.tpl',
     host: {
       entryType: (path: string) => (path in files ? ('file' as const) : path === '/' || path === '/w' ? ('directory' as const) : null),
-      readText: (path: string) => files[path] as string,
+      readText: (path: string) => {
+        const text = files[path];
+        if (text === undefined) throw new Error(`${path} is not a file`);
+        return text;
+      },
     },
   };
 

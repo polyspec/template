@@ -4,6 +4,13 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 
+declare global {
+  interface Window {
+    /** Renders the browser cases in the page; index.html defines it. */
+    renderCases?: (items: unknown) => Promise<unknown>;
+  }
+}
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const casesDir = join(root, 'tests', 'cases');
 const CASE_FILES = new Set(['case.json', 'data.json', 'define.json', 'env.json', 'options.json']);
@@ -51,7 +58,7 @@ function loadCases(): BrowserCase[] {
       if (env !== undefined) item.env = env;
       if (options) {
         const parsed: unknown = JSON.parse(options);
-        const delimiters = typeof parsed === 'object' && parsed !== null ? Reflect.get(parsed, 'delimiters') : undefined;
+        const delimiters: unknown = typeof parsed === 'object' && parsed !== null && 'delimiters' in parsed ? parsed.delimiters : undefined;
         if (typeof delimiters !== 'string') throw new Error(`${item.id}/options.json names no delimiters string`);
         item.delimiters = delimiters;
       }
@@ -74,17 +81,19 @@ interface RenderResult {
 
 function isRenderResult(value: unknown): value is RenderResult {
   if (typeof value !== 'object' || value === null) return false;
-  const html: unknown = Reflect.get(value, 'html');
-  return typeof Reflect.get(value, 'id') === 'string' && (html === undefined || typeof html === 'string');
+  return 'id' in value && typeof value.id === 'string' && (!('html' in value) || value.html === undefined || typeof value.html === 'string');
 }
 
 test('renders every fixture case in the browser', async ({ page, baseURL }) => {
   expect(baseURL, 'TEMPLATE_BROWSER_URL names the static server; run the browser test with tests/browser/run.mts').toBeTruthy();
   const cases = loadCases();
   await page.goto('/tests/browser/index.html');
-  // index.html defines renderCases on the window of the page, where TypeScript does not see it: the global of the page
-  // is no type of this file, so its one function is named here.
-  const rendered: unknown = await page.evaluate(async items => (window as unknown as { renderCases: (c: unknown) => Promise<unknown> }).renderCases(items), cases);
+  // index.html defines renderCases on the window of the page (declared above as optional, since only the page has it),
+  // so the function is checked before the call and its result is checked below.
+  const rendered: unknown = await page.evaluate(async items => {
+    if (window.renderCases === undefined) throw new Error('index.html defines no renderCases function on the window');
+    return window.renderCases(items);
+  }, cases);
   if (!Array.isArray(rendered) || !rendered.every(isRenderResult)) throw new Error(`renderCases returned no list of results: ${JSON.stringify(rendered)}`);
   const results: RenderResult[] = rendered;
   expect(results).toHaveLength(cases.length);

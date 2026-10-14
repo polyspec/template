@@ -39,6 +39,8 @@ const nested = (levels: number): unknown => {
 
 class Order {
   name = 'n';
+  // A data property of the prototype, which an instance only inherits: `declare` gives its type and emits no own field.
+  declare shared: number;
   handler = (): string => 'h';
   #secret = 's';
   get label(): string { return `label:${this.#secret}`; }
@@ -47,7 +49,7 @@ class Order {
   nan(): number { return Number.NaN; }
   fail(): string { throw new Error('method exploded'); }
 }
-(Order.prototype as unknown as Record<string, unknown>).shared = 1;
+Order.prototype.shared = 1;
 
 describe('numbers', () => {
   it('checks the value, not the host type or the JSON spelling (VAL-2)', () => {
@@ -138,7 +140,7 @@ describe('native objects', () => {
   it('passes the original instance to host code (VAL-18)', () => {
     const order = new Order();
     const local = program({ 'same.tpl': '{= same(o, [o], ["k" => o])}|{= o.same(o)}|{= Order::same(o)}' });
-    local.register('same', ([direct, list, map]) => direct === order && (list as unknown[])[0] === order && (map as Map<string, unknown>).get('k') === order);
+    local.register('same', ([direct, list, map]) => direct === order && Array.isArray(list) && list[0] === order && map instanceof Map && map.get('k') === order);
     local.registerClass('Order', 'same', ([direct]) => direct === order);
     expect(local.render('same.tpl', { o: order })).toBe('true|true|true');
   });
@@ -158,7 +160,9 @@ describe('native objects', () => {
 
 describe('internal boundary', () => {
   it('reports a language runtime error as E_INTERNAL and lets other exceptions pass (ERR-13)', () => {
-    const broken = new AstProgram({ loader: { load: () => ({ ast: {} as Template, version: '1' }) } });
+    // An AST whose body fails with a TypeError when the runtime reads it, as a malformed AST does.
+    const ast: Template = { type: 'Template', name: 'page.tpl', comments: [], get body(): Template['body'] { throw new TypeError('the AST has no body'); } };
+    const broken = new AstProgram({ loader: { load: () => ({ ast, version: '1' }) } });
     const error = failure(() => broken.render('page.tpl', {}));
     expect([error.code, error.template, error.line] as [ErrorCode, string, number]).toEqual(['E_INTERNAL', 'page.tpl', 0]);
     expect(code(() => parse('{= 1}', 'p.tpl'))).toBe('OK');

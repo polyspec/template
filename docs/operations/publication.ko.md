@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 992ec3d2ec1ad9e1eee1155635cacf0627d3e34d5b0c80690f5d8248ae2067d7 -->
+<!-- source-sha256: 26b4d6afd53c97130885a31954bd31c576d96b35fb2704c36df420c91e23a450 -->
 # 발행
 
 [English](/operations/publication).
@@ -50,7 +50,7 @@ pip install ./polyspec_template-X.Y.Z-py3-none-any.whl
 
 ## Tag 릴리스
 
-릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`, Composer 패키지 `polyspec/template`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. `cargo package`는 git 의존성을 해석되지 않는 crates.io 요구로 바꾸기 때문이다(T22.1-5). Python 패키지 `polyspec-template`(`packages/python`, `config/release.json`의 package kind `wheel`)은 버전 X.Y.Z를 가지며 PEP 427 wheel `polyspec_template-X.Y.Z-py3-none-any.whl`로 릴리스한다. wheel은 tag된 commit에서 `buildBackend`(`config/release.json`이 버전과 sha256으로 고정한 build backend, `setuptools==84.0.0`)로 build한다. wheel의 metadata는 Requires-Dist를 담지 않는다. wheel은 다른 패키지에 의존하지 않으며, `dev` dependency group은 wheel의 요구가 아니다. tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. `make install` 뒤에 그 step은 다음 순서로 `node_modules/@polyspec/kit/dist/release.mjs`(패키지, manifest, Go module은 `config/release.json`의 data다)를 실행하고 첫 실패에서 멈춘다.
+릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`, Composer 패키지 `polyspec/template`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. `cargo package`는 git 의존성을 해석되지 않는 crates.io 요구로 바꾸기 때문이다(T22.1-5). Python 패키지 `polyspec-template`(`packages/python`, `config/release.json`의 package kind `wheel`)은 버전 X.Y.Z를 가지며 PEP 427 wheel `polyspec_template-X.Y.Z-py3-none-any.whl`로 릴리스한다. wheel은 tag된 commit에서 `pythonBackend`(`config/toolchain.json`이 버전과 sha256으로 고정한 build backend, `setuptools==84.0.0`)로 build한다. wheel의 metadata는 Requires-Dist를 담지 않는다. wheel은 다른 패키지에 의존하지 않으며, `dev` dependency group은 wheel의 요구가 아니다. tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. `make install` 뒤에 그 step은 다음 순서로 `node_modules/@polyspec/kit/dist/release.mjs`(패키지, manifest, Go module은 `config/release.json`의 data다)를 실행하고 첫 실패에서 멈춘다.
 
 ```sh
 make release-verify

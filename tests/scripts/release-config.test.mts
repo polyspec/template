@@ -19,7 +19,6 @@ const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 interface ReleaseConfig {
   packages: { kind: string; directory: string; name: string }[];
   manifests: Record<string, string>;
-  buildBackend: { requirement: string; sha256: string };
   consumers: { wheel: { smoke: Record<string, string[]> } };
   proof: { gitTag: Record<string, { kind: string; name: string }> };
   goModules: Record<string, string>;
@@ -38,11 +37,6 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
       },
     },
     manifests: STRINGS,
-    buildBackend: {
-      type: 'object',
-      properties: { requirement: { type: 'string' }, sha256: { type: 'string' } },
-      required: ['requirement', 'sha256'],
-    },
     consumers: {
       type: 'object',
       properties: {
@@ -71,9 +65,25 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
     },
     goModules: STRINGS,
   },
-  required: ['packages', 'manifests', 'buildBackend', 'consumers', 'proof', 'goModules'],
+  required: ['packages', 'manifests', 'consumers', 'proof', 'goModules'],
 };
 const CONFIG = jsonDocument<ReleaseConfig>('release configuration', RELEASE_SCHEMA).read(path.join(ROOT, 'config/release.json'));
+
+// The build backend of the wheel, `pythonBackend` of config/toolchain.json (kit K166); the file holds more.
+interface Toolchain { pythonBackend: { requirement: string; sha256: string } }
+const TOOLCHAIN_SCHEMA: JSONSchemaType<Toolchain> = {
+  type: 'object',
+  properties: {
+    pythonBackend: {
+      type: 'object',
+      properties: { requirement: { type: 'string' }, sha256: { type: 'string' } },
+      required: ['requirement', 'sha256'],
+      additionalProperties: false,
+    },
+  },
+  required: ['pythonBackend'],
+};
+const BACKEND = jsonDocument<Toolchain>('toolchain configuration', TOOLCHAIN_SCHEMA).read(path.join(ROOT, 'config/toolchain.json')).pythonBackend;
 
 // The string `key` of the table `table` of a TOML manifest.
 const tomlValue = (file: string, table: string, key: string) => tomlString(tomlTable(readToml(path.join(ROOT, file))[table], `[${table}] of ${file}`)[key], `${table}.${key} of ${file}`);
@@ -96,9 +106,8 @@ test('the Python package is released as a wheel named by its pyproject.toml, wit
   assert.deepEqual(wheel, { kind: 'wheel', directory: 'packages/python', name: tomlValue(file, 'project', 'name') }, `${file}: the wheel package names another project than [project] name`);
   assert.equal(CONFIG.manifests[file], 'archive', `${file}: the wheel is released as an archive, so its version is set by the tag`);
   assert.equal(CONFIG.proof.gitTag[file], undefined, `${file}: the wheel is not installed by git tag`);
-  assert.deepEqual(Object.keys(CONFIG.buildBackend).sort(), ['requirement', 'sha256'], 'buildBackend holds the requirement and the sha256 only');
   assert.deepEqual(CONFIG.consumers.wheel.smoke, { 'polyspec-template': ['python', '-c', 'import polyspec.template'] }, 'the smoke command imports the package by its import name');
-  assert.ok(read(file).includes(`requires = ["${CONFIG.buildBackend.requirement}"]`), `${file}: build-system.requires is not the buildBackend ${CONFIG.buildBackend.requirement}`);
+  assert.ok(read(file).includes(`requires = ["${BACKEND.requirement}"]`), `${file}: build-system.requires is not the pythonBackend ${BACKEND.requirement} of config/toolchain.json`);
 });
 
 test('the Rust crate is released by git tag with the name of its Cargo.toml', () => {

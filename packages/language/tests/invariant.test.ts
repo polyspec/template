@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { analyze, parse } from '@polyspec/template';
 import { describe, expect, it } from 'vitest';
+import { readCaseOptions } from '../../../tests/runner/case-list.mts';
 import { format } from '../src/index.js';
 import { sameTree, withoutLineIndentation } from '../src/invariant.js';
 import { repositoryRoot, templateFiles } from './helpers.js';
@@ -18,10 +19,7 @@ if (external !== undefined && external !== '') {
 }
 
 function delimitersFor(file: string): string | undefined {
-  const options = join(dirname(file), 'options.json');
-  if (!existsSync(options)) return undefined;
-  const value = (JSON.parse(readFileSync(options, 'utf8')) as { delimiters?: string }).delimiters;
-  return value;
+  return readCaseOptions(join(dirname(file), 'options.json')).delimiters;
 }
 
 // The source text outside every tag, comment and directive, in order.

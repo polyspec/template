@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { Ajv, type ValidateFunction } from 'ajv';
 import {
   AstProgram,
   Engine,
@@ -13,7 +14,6 @@ import {
   type Template,
 } from '@polyspec/template';
 import type {
-  DefineEntry,
   DefineRegistry,
   Environment,
   JsonObject,
@@ -44,12 +44,45 @@ function readJson(root: string, name: string): unknown {
   return parseJsonBytes(new Uint8Array(readFileSync(join(root, name))));
 }
 
+/** Whether `value` is a JSON object: no array and no null. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** The parsed JSON text of a file, unknown until a check reads it. */
+function readJsonText(path: string): unknown {
+  const value: unknown = JSON.parse(readFileSync(path, 'utf8'));
+  return value;
+}
+
+// A compiled AST artifact holds one Template node of contracts/schema/ast.schema.json, which the AST program loads as it
+// is; ajv checks each artifact against that schema. The validator is compiled on the first read, so the generated mode
+// does not read the schema.
+let validateTemplate: ValidateFunction<Template> | undefined;
+
+function templateOf(value: unknown, path: string): Template {
+  if (validateTemplate === undefined) {
+    const schemaPath = fileURLToPath(new URL('../../../contracts/schema/ast.schema.json', import.meta.url));
+    const schema = readJsonText(schemaPath);
+    if (!isRecord(schema)) throw new Error(schemaPath + ' is no JSON object');
+    validateTemplate = new Ajv({ strict: true }).compile<Template>(schema);
+  }
+  if (!validateTemplate(value)) throw new Error(path + ' is no Template of the AST schema: ' + JSON.stringify(validateTemplate.errors));
+  return value;
+}
+
 function readArtifactTemplates(root: string): Map<string, Template> {
   const artifactRoot = join(root, 'compiled', 'ast');
-  const manifest = JSON.parse(readFileSync(join(artifactRoot, 'manifest.json'), 'utf8')) as { files: Record<string, { path: string }> };
+  const manifestPath = join(artifactRoot, 'manifest.json');
+  const manifest = readJsonText(manifestPath);
+  const files = isRecord(manifest) ? manifest.files : undefined;
+  if (!isRecord(files)) throw new Error(manifestPath + ' has no files object');
   const templates = new Map<string, Template>();
-  for (const [name, entry] of Object.entries(manifest.files)) {
-    templates.set(name, JSON.parse(readFileSync(join(artifactRoot, entry.path), 'utf8')) as Template);
+  for (const [name, entry] of Object.entries(files)) {
+    const path = isRecord(entry) ? entry.path : undefined;
+    if (typeof path !== 'string') throw new Error(manifestPath + ': files.' + name + '.path must be a string');
+    const templatePath = join(artifactRoot, path);
+    templates.set(name, templateOf(readJsonText(templatePath), templatePath));
   }
   return templates;
 }
@@ -87,11 +120,12 @@ function defineValue(value: unknown): DefineRegistry {
     const hasHtml = typeof html === 'string';
     if (hasTemplate === hasHtml) throw new Error('define.' + id + ' needs one variant');
     if (data !== undefined && !(data instanceof Map)) throw new Error('define.' + id + '.data must be an object');
-    if (hasHtml && data !== undefined) throw new Error('define.' + id + '.html cannot have data');
-    const value: DefineEntry = hasTemplate
-      ? (data === undefined ? { template: template as string } : { template: template as string, data: data as JsonObject })
-      : { html: html as string };
-    define.set(id, value);
+    if (hasHtml) {
+      if (data !== undefined) throw new Error('define.' + id + '.html cannot have data');
+      define.set(id, { html });
+    } else if (hasTemplate) {
+      define.set(id, data === undefined ? { template } : { template, data });
+    }
   }
   return define;
 }
@@ -171,7 +205,7 @@ function plain(value: unknown): unknown {
   }
   if (Array.isArray(value)) return value.map(plain);
   if (value !== null && typeof value === 'object') {
-    if ('template' in value && typeof value.template === 'string' && (value as { data?: unknown }).data === undefined) return value.template;
+    if ('template' in value && typeof value.template === 'string' && (!('data' in value) || value.data === undefined)) return value.template;
     const result: Record<string, unknown> = {};
     for (const [key, item] of Object.entries(value)) result[key] = plain(item);
     return result;

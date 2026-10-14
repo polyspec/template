@@ -51,7 +51,7 @@ export class Client {
   /** Starts the server, sends `initialize` and `initialized` and returns the client. */
   static async start(options: ClientOptions): Promise<Client> {
     const child = spawn(process.execPath, [command, '--stdio'], { stdio: ['pipe', 'pipe', 'inherit'] });
-    const client = new Client(child, createMessageConnection(new StreamMessageReader(child.stdout as NodeJS.ReadableStream), new StreamMessageWriter(child.stdin as NodeJS.WritableStream)));
+    const client = new Client(child, createMessageConnection(new StreamMessageReader(child.stdout), new StreamMessageWriter(child.stdin)));
     client.initialized = await client.request<InitializeResult>('initialize', {
       processId: process.pid,
       rootUri: null,
@@ -82,7 +82,7 @@ export class Client {
 
   /** Sends a request and returns its result. */
   request<R>(method: string, params: unknown): Promise<R> {
-    return this.connection.sendRequest(method, params) as Promise<R>;
+    return this.connection.sendRequest<R>(method, params);
   }
 
   /** Waits for the published diagnostics of a document that satisfy `accept`. */
