@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: 7fd8840cef9dd5107ce80cd2b2119ac3b3a4238c83772c39449f337e473460fd -->
+<!-- source-sha256: bbba2110390e131e68b2249172b6bf1ab2055787f46dea67aeb6dd60c23a6e47 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -11,7 +11,7 @@
 - `packages/template-codemirror`(`@polyspec/template-codemirror`): 언어 서비스의 결과를 CodeMirror 편집기에 등록하는 CodeMirror 6 확장 `template()`([CodeMirror 6 어댑터](#codemirror-6-어댑터)).
 - `packages/template-vscode`(`polyspec-template`): 언어 정의와 TextMate 문법을 갖고, 확장 안에 포함한 언어 서버에 연결해 기능을 제공하는 VS Code 확장. 템플릿 규칙을 갖지 않는다.
 
-언어 서비스만 템플릿 문법을 `@polyspec/template`에서 가져온다. 언어 서비스와 포매터는 파서가 돌려주는 태그 범위와 표현식 토큰을 사용한다. 서버, CodeMirror 어댑터, 확장은 언어 서비스를 호출하며, 확장의 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
+언어 서비스만 템플릿 문법을 `@polyspec/template`에서 가져온다. 언어 서비스와 포매터는 파서가 돌려주는 태그 범위, 태그 본문, 그리고 파서가 EDT-8로 분류한 토큰을 사용하며, 자체 어휘 표를 선언하지 않는다(`packages/template-language/tests/lexical-tables.test.ts`). 서버, CodeMirror 어댑터, 확장은 언어 서비스를 호출하며, 확장의 문법은 [렉시컬 규칙](/ko/spec/lexical), [태그 문법](/ko/spec/grammar), [표현식](/ko/spec/expressions)을 따른다.
 
 ## 포맷 스타일
 
@@ -80,7 +80,7 @@
 
 ## 안전 불변식
 
-`format()`은 `@polyspec/template`의 `analyze()`로 소스를 파싱한다. 파서의 태그 범위와 표현식 토큰으로 각 태그를 포맷하고 결과를 다시 파싱한다. 두 AST가 모든 `span` 필드를, 그리고 들여쓰기를 바꿀 때는 텍스트의 모든 줄 앞 공백과 탭을 제거한 상태에서 같을 때만 결과를 돌려준다. 다르면 오류 결과를 돌려주고 호출자는 소스를 유지한다.
+`format()`은 `@polyspec/template`의 `analyze()`로 소스를 파싱한다. 파서의 태그 본문과 토큰으로 각 태그를 포맷하고 결과를 다시 파싱한다. 두 AST가 모든 `span` 필드를, 그리고 들여쓰기를 바꿀 때는 텍스트의 모든 줄 앞 공백과 탭을 제거한 상태에서 같을 때만 결과를 돌려준다. 다르면 오류 결과를 돌려주고 호출자는 소스를 유지한다.
 
 | 결과 | 조건 |
 | --- | --- |

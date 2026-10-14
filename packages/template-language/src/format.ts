@@ -1,9 +1,8 @@
 // Formatter entry: formats every tag and the indentation of every line, and refuses a result whose AST differs from the source AST.
 import { analyze, parse, TemplateError } from '@polyspec/template';
-import { formatBody, type TagKind } from './body.js';
+import { formatBody } from './body.js';
 import { indentEdits } from './indent.js';
 import { sameTree, withoutLineIndentation } from './invariant.js';
-import { delimitersOf, tagParts, type Delimiters } from './tags.js';
 
 /** Options of {@link format}. */
 export interface FormatOptions {
@@ -71,19 +70,13 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
   const shift = bom.length;
   const range = options.range === undefined ? null : { start: options.range.start - shift, end: options.range.end - shift };
   const edits: Edit[] = [];
-  let delimiters: Delimiters = delimitersOf(options.delimiters ?? '{}');
   for (const tag of analysis.tags) {
-    const parts = tagParts(text, tag.start, tag.end, delimiters);
-    if (parts === null) continue;
-    if (tag.kind === 'directive') {
-      const value = /delimiter[ \t]*(\S\S)/.exec(parts.body);
-      if (value) delimiters = delimitersOf(value[1] as string);
-      continue;
-    }
+    if (tag.kind === 'directive') continue;
     if (range !== null && (tag.start < range.start || tag.end > range.end)) continue;
-    const body = formatBody({ kind: tag.kind as TagKind, source: text, bodyStart: parts.bodyStart, bodyEnd: parts.bodyEnd, tokens: analysis.tokens });
-    if (body === null || body === parts.body) continue;
-    edits.push({ start: parts.bodyStart, end: parts.bodyEnd, text: body });
+    const tokens = analysis.tokens.filter(token => token.start >= tag.bodyStart && token.end <= tag.bodyEnd);
+    const body = formatBody({ kind: tag.kind, source: text, bodyStart: tag.bodyStart, bodyEnd: tag.bodyEnd, tokens });
+    if (body === null || body === text.slice(tag.bodyStart, tag.bodyEnd)) continue;
+    edits.push({ start: tag.bodyStart, end: tag.bodyEnd, text: body });
   }
   if (indent !== null) {
     const indentation = indentEdits(text, analysis.tags, { unit: indent, templateBlocks: options.templateBlocks ?? 'indent', range });

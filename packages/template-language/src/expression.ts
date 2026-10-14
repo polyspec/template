@@ -1,24 +1,28 @@
 // Expression spacing: joins the expression tokens of one tag with the separators of the formatting style.
+import type { SyntaxToken } from '@polyspec/template';
 
-const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
-const RESERVED = new Set(['true', 'false', 'null', 'in']);
+/** An expression token: its text and the EDT-8 class that the parser gives it. */
+export interface ExpressionToken {
+  text: string;
+  kind: SyntaxToken['kind'];
+}
 
-function isIdent(token: string | undefined): boolean {
-  return token !== undefined && IDENT.test(token) && !RESERVED.has(token);
+// A name that can be called or indexed: a variable or a function name, not a keyword.
+function isName(token: ExpressionToken | undefined): boolean {
+  return token !== undefined && (token.kind === 'variable' || (token.kind === 'function' && !token.text.startsWith('.')));
 }
 
 // DOT_IDENT and DOT_INDEX tokens (EXP-5). They must stay adjacent to the token on their left.
-function isAccessor(token: string | undefined): boolean {
-  return token !== undefined && token.startsWith('.') && token !== '...';
+function isAccessor(token: ExpressionToken | undefined): boolean {
+  return token !== undefined && (token.kind === 'property' || (token.kind === 'function' && token.text.startsWith('.')));
 }
 
 // True when the token can end an operand, so that a following `-` is binary and a following `[` is an index.
-function endsOperand(token: string | undefined): boolean {
+function endsOperand(token: ExpressionToken | undefined): boolean {
   if (token === undefined) return false;
-  if (token === ')' || token === ']') return true;
-  if (isAccessor(token)) return true;
-  if (token === 'in') return false;
-  return IDENT.test(token) || /^[0-9]/.test(token) || token.startsWith('"') || token.startsWith("'");
+  if (token.text === ')' || token.text === ']') return true;
+  if (token.kind === 'keyword') return token.text !== 'in';
+  return token.kind !== 'operator';
 }
 
 /**
@@ -27,22 +31,22 @@ function endsOperand(token: string | undefined): boolean {
  * and unary `!` and `-`; no space before `,`, `)`, `]` and accessors; no space between a function
  * or method name and `(`, between an operand and an index `[`, and around the `::` token of `Class::name`.
  */
-export function joinTokens(tokens: readonly string[]): string {
-  const unary = tokens.map((token, index) => token === '!' || (token === '-' && !endsOperand(tokens[index - 1])));
-  let output = tokens[0] ?? '';
+export function joinTokens(tokens: readonly ExpressionToken[]): string {
+  const unary = tokens.map((token, index) => token.text === '!' || (token.text === '-' && !endsOperand(tokens[index - 1])));
+  let output = tokens[0]?.text ?? '';
   for (let index = 1; index < tokens.length; index++) {
-    const previous = tokens[index - 1] as string;
-    const current = tokens[index] as string;
-    output += separator(previous, current, unary[index - 1] === true) + current;
+    const previous = tokens[index - 1] as ExpressionToken;
+    const current = tokens[index] as ExpressionToken;
+    output += separator(previous, current, unary[index - 1] === true) + current.text;
   }
   return output;
 }
 
-function separator(previous: string, current: string, previousUnary: boolean): string {
-  if (previous === '::' || current === '::') return '';
-  if (current === ',' || current === ')' || current === ']' || isAccessor(current)) return '';
-  if (previous === '(' || previous === '[' || previous === '...' || previousUnary) return '';
-  if (current === '(') return isIdent(previous) || isAccessor(previous) ? '' : ' ';
-  if (current === '[') return endsOperand(previous) ? '' : ' ';
+function separator(previous: ExpressionToken, current: ExpressionToken, previousUnary: boolean): string {
+  if (previous.text === '::' || current.text === '::') return '';
+  if (current.text === ',' || current.text === ')' || current.text === ']' || isAccessor(current)) return '';
+  if (previous.text === '(' || previous.text === '[' || previous.text === '...' || previousUnary) return '';
+  if (current.text === '(') return isName(previous) || isAccessor(previous) ? '' : ' ';
+  if (current.text === '[') return endsOperand(previous) ? '' : ' ';
   return ' ';
 }

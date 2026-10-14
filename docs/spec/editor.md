@@ -11,7 +11,7 @@ This document defines how editors support templates. One language service holds 
 
 | Layer | Package | Runs in | Contents |
 | --- | --- | --- | --- |
-| parser | `@polyspec/template` | browser, Node.js | tag ranges and expression tokens of a source |
+| parser | `@polyspec/template` | browser, Node.js | tag ranges, tag bodies and the classified tokens of a source |
 | language service | `@polyspec/template-language` | browser, Node.js | every editor rule as functions of the document text; the formatter and the command `template-fmt` |
 | adapters | `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `polyspec-template` (VS Code) | Node.js, browser, VS Code | position conversion and feature registration |
 
@@ -25,7 +25,7 @@ This document defines how editors support templates. One language service holds 
 
 **EDT-5** Every position of the language service is a UTF-16 string index into the text, including a byte order mark. A line is a range that ends with `\n`, `\r\n` or the end of the text; lines are numbered from 0. Editors and the Language Server Protocol use the same UTF-16 positions, so an adapter converts positions without counting bytes.
 
-**EDT-6** A text that does not parse still has results. The parser returns the tags and expression tokens it accepted before its first error (`analyzePrefix()` of `@polyspec/template`). An unclosed block is reported at the end of the text, so all tags of such a text are accepted. The language service computes tokens, tag ranges and indentation from the accepted tags; constructs, folding ranges and matching tags use only blocks that are closed.
+**EDT-6** A text that does not parse still has results. The parser returns the tags it accepted before its first error and their tokens (`analyzePrefix()` of `@polyspec/template`). An unclosed block is reported at the end of the text, so all tags of such a text are accepted. The language service computes tokens, tag ranges and indentation from the accepted tags; constructs, folding ranges and matching tags use only blocks that are closed.
 
 ## Results
 
