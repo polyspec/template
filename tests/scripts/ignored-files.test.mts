@@ -24,7 +24,7 @@ const OUTPUTS = [
   'packages/rust/target/debug/template',
   'examples/showcase/adapters/rust/target/release/showcase-adapter-rust',
   'packages/go/template',
-  'packages/php/vendor/autoload.php',
+  'vendor/autoload.php',
   'docs/.vitepress/dist/index.html',
   'docs/.vitepress/cache/deps/_metadata.json',
   '.vscode-test/vscode-darwin-arm64/code',

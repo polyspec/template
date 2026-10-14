@@ -34,8 +34,8 @@ for (const [target, runner] of RUNNERS) {
   });
 }
 
-// The targets that run PHP with the Composer packages of packages/php (its vendor/autoload.php), with the file
-// that reads them. A target installs them first with build-php, so it passes on a checkout without vendor (T19.5).
+// The targets that run PHP with the Composer packages of the development root composer.json (vendor/autoload.php), with
+// the file that reads them. A target installs them first with build-php, so it passes on a checkout without vendor (T19.5).
 const PHP_READERS: [string, string][] = [
   ['conformance-generated-php', 'tests/runner/conformance-generated-php.mts'],
   ['contract-check', 'scripts/check-showcase-contract.mts runs examples/showcase/adapters/php.php'],
@@ -48,9 +48,9 @@ const PHP_READERS: [string, string][] = [
   ['test-php', 'node_modules/@polyspec/kit/dist/run-tests.mjs phpunit'],
 ];
 for (const [target, reader] of PHP_READERS) {
-  test(`${target} installs the Composer packages of php before ${reader}`, () => {
+  test(`${target} installs the Composer packages of the root composer.json before ${reader}`, () => {
     const lines = commands(target);
-    const install = lines.indexOf('node scripts/composer-install.mts packages/php');
-    assert.notEqual(install, -1, `make -n ${target} does not install the Composer packages of packages/php:\n${lines.join('\n')}`);
+    const install = lines.indexOf('node scripts/composer-install.mts .');
+    assert.notEqual(install, -1, `make -n ${target} does not install the Composer packages of the root composer.json:\n${lines.join('\n')}`);
   });
 }

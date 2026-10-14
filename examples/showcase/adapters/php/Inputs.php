@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Polyspec\Showcase\Adapter\Php;
 
-use Composer\Autoload\ClassLoader;
 use Polyspec\Showcase\Adapter\DefineEntry;
 use Polyspec\Showcase\Adapter\Environment;
 use Polyspec\Template\Loader\ArrayLoader;
@@ -24,7 +23,7 @@ final class Inputs
     /**
      * The generated program of the scenario. The rules of examples/showcase/php-namespace.mts: compiler-coverage
      * becomes the namespace CompilerCoverage, whose classes are the PSR-4 files of generated/php/compiler-coverage,
-     * which the autoload of Composer loads.
+     * which the autoload-dev of the root composer.json maps.
      */
     public static function generatedProgram(string $scenarioRoot): Program
     {
@@ -34,7 +33,6 @@ final class Inputs
         }
         $words = ucwords(str_replace('-', ' ', $scenario));
         $namespace = 'Polyspec\\Showcase\\Generated\\' . str_replace(' ', '', $words);
-        self::classLoader()->addPsr4($namespace . '\\', dirname(__DIR__) . '/generated/php/' . $scenario);
         $class = $namespace . '\\GeneratedProgram';
         $program = new $class();
         if (!$program instanceof Program) {
@@ -42,17 +40,6 @@ final class Inputs
         }
 
         return $program;
-    }
-
-    /** The class loader of the PHP package, which vendor/autoload.php returns once it is loaded. */
-    private static function classLoader(): ClassLoader
-    {
-        $loader = require dirname(__DIR__, 4) . '/packages/php/vendor/autoload.php';
-        if (!$loader instanceof ClassLoader) {
-            throw new RuntimeException('packages/php/vendor/autoload.php returned no class loader');
-        }
-
-        return $loader;
     }
 
     /** The AST artifacts of the scenario, read from compiled/ast by its manifest. */

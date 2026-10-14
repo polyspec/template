@@ -24,10 +24,6 @@
         }
     },
     "bin": ["bin/template.php"],
-    "scripts": {
-        "test": "phpunit",
-        "lint": "pint --test"
-    },
     "config": {
         "platform": {
             "php": "8.5.0"

@@ -291,7 +291,7 @@ function run(label: string, command: string, args: string[], cwd: string): void 
 }
 run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'packages/go'));
 run('rust interface AST check', CARGO, ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/rust'));
-run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/php'));
+run('php interface reflection check', 'php', [resolve(root, 'vendor/bin/phpunit'), '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/php'));
 run('python interface check', pythonPackageCommand(), ['tests/test_compiler_interface.py'], resolve(root, 'packages/python'));
 
 process.stdout.write('compiler interface: manifest and TypeScript, Go, Rust, PHP, Python runtime declarations passed\n');

@@ -59,7 +59,7 @@ const patterns: Record<string, RegExp[]> = {
 
 // PHP answers for itself: the arities come from Registry::builtins() of the package, not from a reading of its source, so
 // the check follows the table whatever the formatting of the PHP files is.
-const php = spawnSync('php', ['-r', `require ${JSON.stringify(resolve(root, 'packages/php/vendor/autoload.php'))}; echo json_encode(array_map(static fn (array $f): array => [$f['min'], $f['max'] === PHP_INT_MAX ? -1 : $f['max']], Polyspec\\Template\\Functions\\Registry::builtins()));`], { encoding: 'utf8' });
+const php = spawnSync('php', ['-r', `require ${JSON.stringify(resolve(root, 'vendor/autoload.php'))}; echo json_encode(array_map(static fn (array $f): array => [$f['min'], $f['max'] === PHP_INT_MAX ? -1 : $f['max']], Polyspec\\Template\\Functions\\Registry::builtins()));`], { encoding: 'utf8' });
 assert.equal(php.status, 0, `php could not list its functions: ${php.error ? php.error.message : php.stderr}`);
 const phpFound = new Map(Object.entries(phpArityDocument.parse(php.stdout, 'the built-in functions that php lists')));
 assert.deepEqual([...phpFound.keys()].sort(compareText), [...expected.keys()].sort(compareText), 'php function names differ from contract');

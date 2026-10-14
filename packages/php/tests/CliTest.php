@@ -14,6 +14,18 @@ use Polyspec\Template\Cli\PackageRuntime;
 final class CliTest extends TestCase
 {
     /**
+     * The proxy of bin/template.php in the vendor/bin of the Composer project that runs PHPUnit, which Composer names in
+     * $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of that project.
+     */
+    private static function command(): string
+    {
+        $binDir = $GLOBALS['_composer_bin_dir'] ?? null;
+        self::assertIsString($binDir, 'PHPUnit runs without the proxy of vendor/bin/phpunit');
+
+        return $binDir . '/template.php';
+    }
+
+    /**
      * @param list<string> $args
      * @return array{status: int, stdout: string, stderr: string}
      */
@@ -21,7 +33,7 @@ final class CliTest extends TestCase
     {
         $command = implode(
             ' ',
-            array_map('escapeshellarg', array_merge([PHP_BINARY, dirname(__DIR__) . '/bin/template.php'], $args)),
+            array_map('escapeshellarg', array_merge([PHP_BINARY, self::command()], $args)),
         );
         $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
         self::assertIsResource($process);

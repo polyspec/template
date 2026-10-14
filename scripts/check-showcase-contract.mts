@@ -254,13 +254,11 @@ async function checkRuntimeAssertionHelpers() {
 function checkPhpReflection() {
   const php = languageDefinition('php');
   const expected = JSON.stringify(operationNames.map(name => php.operationNames[name]));
-  // The adapter is a PSR-4 class of the namespace Polyspec\Showcase\Adapter\Php, loaded with the generated
-  // declarations by the class loader of the PHP package, as php.php loads it.
+  // The adapter is a PSR-4 class of the namespace Polyspec\Showcase\Adapter\Php, which the autoload-dev of the root
+  // composer.json maps with the generated declarations, as php.php loads it.
   const adapterClass = 'Polyspec\\Showcase\\Adapter\\Php\\' + php.type;
   const probe = [
-    `$loader = require ${JSON.stringify(join(root, 'packages/php/vendor/autoload.php'))};`,
-    `$loader->addPsr4('Polyspec\\\\Showcase\\\\Adapter\\\\', ${JSON.stringify(join(adapterRoot, 'generated/php-adapter'))});`,
-    `$loader->addPsr4('Polyspec\\\\Showcase\\\\Adapter\\\\Php\\\\', ${JSON.stringify(join(adapterRoot, 'php'))});`,
+    `require ${JSON.stringify(join(root, 'vendor/autoload.php'))};`,
     `$class = ${JSON.stringify(adapterClass)};`,
     `$reflection = new ReflectionClass($class);`,
     `$expected = json_decode(${JSON.stringify(expected)}, true);`,

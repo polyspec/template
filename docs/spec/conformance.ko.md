@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: 3a43fcb680923f8356b800fa43082c6a38fc9aa61dd7b808a6b286ae97663586 -->
+<!-- source-sha256: 87bde3a9bf767ec7d8b99ac8ad249239d643cf18eed8a7113f5263c0ae19bb39 -->
 # 적합성
 
 [English](/spec/conformance).
@@ -56,7 +56,7 @@
 | ts | `node packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
 | go | `packages/go/template` |
 | rust | `packages/rust/target/release/template` |
-| php | `php packages/php/bin/template.php` |
+| php | `php vendor/bin/template.php` |
 | php-ext | `php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php` |
 | python | `var/python/venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/python`을 `var/python/venv`에 설치한다) |
 

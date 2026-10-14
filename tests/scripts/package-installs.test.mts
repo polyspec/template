@@ -47,7 +47,7 @@ const CALL_SCHEMA: JSONSchemaType<Call> = {
 
 const callDocument = jsonDocument<Call>('stub call', CALL_SCHEMA);
 
-// The parts of the composer.json of the PHP install project, of packages/php/composer.lock and of
+// The parts of the composer.json of the PHP install project, of the root composer.lock and of
 // packages/php/composer.json that the test reads; each file holds more.
 interface InstallProject { repositories: Record<string, unknown>[]; require: Record<string, string> }
 const INSTALL_PROJECT_SCHEMA: JSONSchemaType<InstallProject> = {
@@ -154,17 +154,17 @@ test('the install projects read no network source and use the pinned toolchains 
   const composer = calls.find(call => call.name === 'composer' && call.args[0] === 'install');
   assert.ok(composer, 'the check started no composer install');
   // The archive is installed by its own composer.json, so its require cannot drift from the manifest; the dependencies
-  // resolve from the packages of packages/php/composer.lock, not from Packagist, and their archives come from
+  // resolve from the other packages of the root composer.lock, not from Packagist, and their archives come from
   // the Composer cache that make install filled, with the network disabled.
   const installManifest = composer.files['composer.json'];
   assert.ok(installManifest, 'the PHP install project has no composer.json');
   const installProject = jsonDocument<InstallProject>('install project manifest', INSTALL_PROJECT_SCHEMA).parse(installManifest, 'the composer.json of the PHP install project');
   assert.equal(composer.env.COMPOSER_DISABLE_NETWORK, '1', 'the PHP install project may read the network');
-  const lockPackages = jsonDocument<{ packages: ComposerPackage[] }>('Composer lock', LOCK_SCHEMA).read(path.join(ROOT, 'packages/php/composer.lock')).packages;
+  const manifest = jsonDocument<ComposerPackage>('Composer manifest', PACKAGE_SCHEMA).read(path.join(ROOT, 'packages/php/composer.json'));
+  const lockPackages = jsonDocument<{ packages: ComposerPackage[] }>('Composer lock', LOCK_SCHEMA).read(path.join(ROOT, 'composer.lock')).packages.filter(item => item.name !== manifest.name);
   assert.deepEqual(installProject.repositories.map(repository => repository.type ?? Object.keys(repository)), [['packagist.org'], 'artifact', 'package'], `the PHP install project reads ${JSON.stringify(installProject.repositories)}, not only the archive of the run and the locked packages`);
   assert.equal(installProject.repositories[0]?.['packagist.org'], false, 'the PHP install project reads Packagist');
-  assert.deepEqual(installProject.repositories[2]?.package, lockPackages, 'the package repository is not the packages of packages/php/composer.lock');
-  const manifest = jsonDocument<ComposerPackage>('Composer manifest', PACKAGE_SCHEMA).read(path.join(ROOT, 'packages/php/composer.json'));
+  assert.deepEqual(installProject.repositories[2]?.package, lockPackages, 'the package repository is not the other packages of the root composer.lock');
   const locked = Object.fromEntries(lockPackages.map(item => [item.name, item.version]));
   assert.deepEqual(installProject.require, { [manifest.name]: manifest.version, ...locked });
 });

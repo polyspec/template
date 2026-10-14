@@ -1,5 +1,5 @@
 // The package manifests and locks that the scripts read, described once: the package.json of an npm package of
-// packages/, and the composer.json and composer.lock of the PHP package.
+// packages/, the composer.json of the PHP package and the composer.lock of the development root.
 import { jsonDocument } from './json-document.mts';
 
 /** The package.json of an npm package: its name and version and, when it has any, its dependencies. */

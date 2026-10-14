@@ -188,7 +188,7 @@ fn generated_${index}_matches() {
 }
 
 function checkPhp() {
-  const autoload = join(root, 'packages/php/vendor/autoload.php');
+  const autoload = join(root, 'vendor/autoload.php');
   const phpFiles = (id: string): string[] => readdirSync(generatedSource(id, 'php')).filter(name => name.endsWith('.php')).map(name => join(generatedSource(id, 'php'), name));
   const coverageSource = phpFiles(scenarios[0]).map(path => readFileSync(path, 'utf8')).join('\n');
   assert.match(coverageSource, /new RuntimeBindings\(\$context\)/);

@@ -1,0 +1,44 @@
+{
+    "name": "polyspec/template-workspace",
+    "description": "Development root of the Composer packages of packages/; never published",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.5",
+        "polyspec/template": "0.0.6"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "phpunit/phpunit": "^13.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Polyspec\\Template\\Native\\": "packages/php-ext/php/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Polyspec\\Template\\Tests\\": "packages/php/tests/",
+            "Polyspec\\Template\\Native\\Tests\\": "packages/php-ext/tests/",
+            "Polyspec\\Showcase\\Adapter\\": "examples/showcase/adapters/generated/php-adapter/",
+            "Polyspec\\Showcase\\Adapter\\Php\\": "examples/showcase/adapters/php/",
+            "Polyspec\\Showcase\\Generated\\CompilerCoverage\\": "examples/showcase/adapters/generated/php/compiler-coverage/",
+            "Polyspec\\Showcase\\Generated\\EmptyState\\": "examples/showcase/adapters/generated/php/empty-state/",
+            "Polyspec\\Showcase\\Generated\\HtmlSlot\\": "examples/showcase/adapters/generated/php/html-slot/",
+            "Polyspec\\Showcase\\Generated\\ReactBoundary\\": "examples/showcase/adapters/generated/php/react-boundary/",
+            "Polyspec\\Showcase\\Generated\\ScopePrecedence\\": "examples/showcase/adapters/generated/php/scope-precedence/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/php"
+        }
+    ],
+    "config": {
+        "platform": {
+            "php": "8.5.0"
+        },
+        "sort-packages": true
+    }
+}
