@@ -2,13 +2,13 @@
 // Checks the manifest-generated declarations, language implementations and runtime state proof.
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { pythonCommand, pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { compilerManifestDocument, manifestPath, type AdapterLanguage } from './compiler-manifest.mts';
 import { readJson } from './json-document.mts';
-import { runtimePayloadDocument, scenarioMetadataDocument, type RuntimePayload } from './showcase-documents.mts';
+import { runtimePayloadDocument, scenarioIds, scenarioMetadataDocument, type RuntimePayload } from './showcase-documents.mts';
 import { CARGO } from './temporary-workspace.mts';
 import { tsc } from './tools.mts';
 import { showcasePythonModule } from '../examples/showcase/python-module.mts';
@@ -106,10 +106,7 @@ function checkGeneratedEngineRoute() {
   assert(!/CompileModeGen|CompileMode::Gen|compile\.mode/.test(allSource), 'adapter still selects generated execution inside an AST engine');
   assert(!allSource.includes('native_templates'), 'generated execution still packages an AST template loader');
 
-  const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && existsSync(join(scenariosRoot, entry.name, 'scenario.json')))
-    .map(entry => entry.name)
-    .sort();
+  const scenarios = scenarioIds(scenariosRoot);
   const generatedChecks: Record<string, (id: string) => [string, RegExp]> = {
     typescript: id => [`generated/typed/${id}.ts`, /export class GeneratedProgram implements Program/],
     javascript: id => [`generated/javascript/${id}.js`, /export class GeneratedProgram/],
@@ -317,12 +314,9 @@ async function main() {
   }
   await checkRuntimeAssertionHelpers();
 
-  const scenarioIds = readdirSync(scenariosRoot, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && existsSync(join(scenariosRoot, entry.name, 'scenario.json')))
-    .map(entry => entry.name)
-    .sort();
-  assert(scenarioIds.length > 0, 'showcase scenarios are missing');
-  for (const scenarioId of scenarioIds) {
+  const scenarios = scenarioIds(scenariosRoot);
+  assert(scenarios.length > 0, 'showcase scenarios are missing');
+  for (const scenarioId of scenarios) {
     const scenarioPath = join(scenariosRoot, scenarioId);
     const expectedPath = join(scenarioPath, 'expected.html');
     assert(existsSync(expectedPath), `${scenarioId}: expected.html is missing`);
@@ -334,7 +328,7 @@ async function main() {
     }
     process.stdout.write(`[contract] ${scenarioId} passed across ${languageNames.length} languages\n`);
   }
-  process.stdout.write(`[contract] manifest, generated declarations, AST/generated mode parity, reflection, state recovery and ${scenarioIds.length} scenarios passed\n`);
+  process.stdout.write(`[contract] manifest, generated declarations, AST/generated mode parity, reflection, state recovery and ${scenarios.length} scenarios passed\n`);
 }
 
 main().catch((error: unknown) => {

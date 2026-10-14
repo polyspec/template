@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Compiles every showcase source graph through the product generated compiler.
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { transformSync } from 'esbuild';
 import { root } from '../../tests/runner/drivers.mts';
@@ -10,6 +10,7 @@ import { typescriptDeliveryDigest } from './delivery-digest.mts';
 import { compileGeneratedArtifact } from '../../packages/compiler/generated-artifact.mjs';
 import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mts';
 import { showcasePythonModule } from './python-module.mts';
+import { scenarioIds } from '../../scripts/showcase-documents.mts';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
 const adapterRoot = join(root, 'examples/showcase/adapters');
@@ -20,10 +21,7 @@ const refresh = argv[refreshAt + 1];
 if (refreshAt < 0 || refresh === undefined || argv.some((value, index) => index !== refreshAt && index !== refreshAt + 1 && value !== '--check')) {
   throw new Error('usage: compile-generated.mts --refresh dev|true|false [--check]');
 }
-const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
-  .filter(item => item.isDirectory() && existsSync(join(scenariosRoot, item.name, 'scenario.json')))
-  .map(item => item.name)
-  .sort();
+const scenarios = scenarioIds(scenariosRoot);
 
 /** The generated artifact of a scenario in a target: a file, or the directory of the PHP files. */
 function generatedOutput(id: string, language: string): string {

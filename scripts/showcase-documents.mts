@@ -1,7 +1,20 @@
 // The JSON documents of the example site that the showcase checks read, described once: the scenario.json of a
 // scenario of examples/site/scenarios, the scenario list examples/site/data/scenarios.json and the JSON line that a
 // language adapter of examples/showcase/adapters prints for a scenario.
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { jsonDocument } from './json-document.mts';
+
+/**
+ * The ids of the scenarios of a scenarios folder, sorted: its directories with a scenario.json. The folder also holds
+ * files that every scenario shares, such as tsconfig.json.
+ */
+export function scenarioIds(scenariosRoot: string): string[] {
+  return readdirSync(scenariosRoot, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && existsSync(join(scenariosRoot, entry.name, 'scenario.json')))
+    .map(entry => entry.name)
+    .sort();
+}
 
 /** The scenario.json of a scenario: its title and description and the template that it renders. */
 export interface ScenarioMetadata {

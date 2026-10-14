@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Compiles each showcase source graph through the product AST compiler.
-import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { root } from '../../tests/runner/drivers.mts';
 import { compileAst } from '../../packages/compiler/ast-artifact.mjs';
 import { isObject, object, readJson, text } from './json.mts';
+import { scenarioIds } from '../../scripts/showcase-documents.mts';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
 const argv = process.argv.slice(2);
@@ -13,9 +13,7 @@ const refresh = argv[refreshAt + 1];
 if (refreshAt < 0 || refresh === undefined || argv.length !== 2) {
   throw new Error('usage: compile.mts --refresh dev|true|false');
 }
-const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
-  .filter(item => item.isDirectory() && existsSync(join(scenariosRoot, item.name, 'scenario.json')))
-  .map(item => item.name).sort();
+const scenarios = scenarioIds(scenariosRoot);
 
 for (const id of scenarios) {
   const directory = join(scenariosRoot, id);

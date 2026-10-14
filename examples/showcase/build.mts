@@ -12,6 +12,7 @@ import { join, relative } from 'node:path';
 import type { Engine as TemplateEngine, RenderOptions, Template } from '@polyspec/template';
 import { invoke, prepare, selectLanguages, root } from '../../tests/runner/drivers.mts';
 import { isObject, list, manifestFiles, object, readJson, text, type JsonObject } from './json.mts';
+import { scenarioIds } from '../../scripts/showcase-documents.mts';
 
 const showcaseDir = join(root, 'examples', 'site');
 const scenariosDir = join(showcaseDir, 'scenarios');
@@ -140,11 +141,7 @@ function message(error: unknown): string {
 }
 
 function listScenarios(): Scenario[] {
-  return readdirSync(scenariosDir, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && existsSync(join(scenariosDir, entry.name, 'scenario.json')))
-    .map(entry => entry.name)
-    .sort()
-    .map(loadScenario);
+  return scenarioIds(scenariosDir).map(loadScenario);
 }
 
 function renderArgs(scenario: Scenario): string[] {
