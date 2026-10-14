@@ -1,13 +1,14 @@
 // Fixture case enumeration and comparison helpers shared by the runners.
 import { spawn } from 'node:child_process';
-import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
+import { caseIds, caseOptions, casesDir } from './case-list.mjs';
 import { root } from './drivers.mjs';
 
-export const casesDir = join(root, 'tests', 'cases');
+export { casesDir };
 
 // Returns the cases that the arguments of a generated runner select: every case without arguments,
 // or one case or group with `--case group/name | group`. Other arguments and a filter that selects
@@ -28,20 +29,10 @@ export function generatedCases(argv) {
 }
 
 export function listCases(filter) {
-  const cases = [];
-  if (!existsSync(casesDir)) return cases;
-  for (const group of readdirSync(casesDir, { withFileTypes: true })) {
-    if (!group.isDirectory()) continue;
-    for (const entry of readdirSync(join(casesDir, group.name), { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const dir = join(casesDir, group.name, entry.name);
-      if (!existsSync(join(dir, 'input.tpl'))) continue;
-      const id = `${group.name}/${entry.name}`;
-      if (filter && id !== filter && group.name !== filter) continue;
-      cases.push(loadCase(id, dir));
-    }
-  }
-  return cases.sort((a, b) => a.id.localeCompare(b.id));
+  if (!existsSync(casesDir)) return [];
+  return caseIds()
+    .filter(id => existsSync(join(casesDir, id, 'input.tpl')) && (!filter || id === filter || id.split('/')[0] === filter))
+    .map(id => loadCase(id, join(casesDir, id)));
 }
 
 const filesystemCasesFile = join(root, 'tests', 'fixtures', 'filesystem', 'cases.json');
@@ -101,7 +92,7 @@ function loadCase(id, dir) {
     hasData: existsSync(join(dir, 'data.json')),
     hasDefine: existsSync(join(dir, 'define.json')),
     hasEnv: existsSync(join(dir, 'env.json')),
-    options: existsSync(join(dir, 'options.json')) ? JSON.parse(readFileSync(join(dir, 'options.json'), 'utf8')) : {},
+    options: caseOptions(id),
     meta: existsSync(join(dir, 'case.json')) ? JSON.parse(readFileSync(join(dir, 'case.json'), 'utf8')) : { rules: [], stage: 0 },
     expectedHtml,
     expectedError: expectedError === null ? null : JSON.parse(expectedError),
@@ -124,25 +115,22 @@ export function typeDefinitions(testCase) {
   }
 }
 
+// The command lines of CNF-4: `<subcommand> [options] FILE`, the options before the operand (POSIX utility syntax
+// guidelines), an order that every standard argument parser reads, also those that stop at the first operand.
 export function renderArgs(testCase) {
-  const args = ['render', testCase.input, '--root', testCase.dir];
-  if (testCase.hasData) args.push('--data', 'data.json');
-  if (testCase.hasDefine) args.push('--define', 'define.json');
-  if (testCase.hasEnv) args.push('--env', 'env.json');
-  if (testCase.options.delimiters) args.push('--delimiters', testCase.options.delimiters);
-  return args;
+  const options = ['--root', testCase.dir];
+  if (testCase.hasData) options.push('--data', 'data.json');
+  if (testCase.hasDefine) options.push('--define', 'define.json');
+  if (testCase.hasEnv) options.push('--env', 'env.json');
+  return ['render', ...options, ...delimiterOptions(testCase), testCase.input];
 }
 
 export function parseArgs(testCase) {
-  const args = ['parse', testCase.input, '--root', testCase.dir];
-  if (testCase.options.delimiters) args.push('--delimiters', testCase.options.delimiters);
-  return args;
+  return ['parse', '--root', testCase.dir, ...delimiterOptions(testCase), testCase.input];
 }
 
 export function tokensArgs(testCase) {
-  const args = ['tokens', testCase.input, '--root', testCase.dir];
-  if (testCase.options.delimiters) args.push('--delimiters', testCase.options.delimiters);
-  return args;
+  return ['tokens', '--root', testCase.dir, ...delimiterOptions(testCase), testCase.input];
 }
 
 // The modes of expected.format.json: `indent` formats with the default options, `keep` with indent null (CNF-2).
@@ -150,21 +138,26 @@ export const FORMAT_MODES = { indent: [], keep: ['--indent', 'none'] };
 
 // The arguments of `format` for a mode; the command runs in the case directory.
 export function formatArgs(testCase, mode) {
-  const args = ['format', testCase.input, ...FORMAT_MODES[mode]];
-  if (testCase.options.delimiters) args.push('--delimiters', testCase.options.delimiters);
-  return args;
+  return ['format', ...FORMAT_MODES[mode], ...delimiterOptions(testCase), testCase.input];
+}
+
+function delimiterOptions(testCase) {
+  return testCase.options.delimiters ? ['--delimiters', testCase.options.delimiters] : [];
 }
 
 // The result of one `format` call as an entry of expected.format.json: {text} for exit status 0, {error} with the
-// reason, the code and the position of the stderr JSON for exit status 2, and null for any other outcome.
+// reason, the code and the position of the stderr JSON for exit status 2, and {failure} with the reason for any other
+// outcome.
 export function formatOutcome(result) {
   if (result.status === 0) return { text: result.stdout };
-  if (result.status !== 2) return null;
+  const stderr = result.stderr.trim();
+  if (result.status !== 2) return { failure: `exit ${result.status}: ${stderr}` };
   try {
-    const { reason, code, line, col } = JSON.parse(result.stderr.trim());
+    const { reason, code, line, col } = JSON.parse(stderr);
     return { error: { reason, code, line, col } };
-  } catch {
-    return null;
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
+    return { failure: `exit 2 with a standard error that is no JSON (${error.message}): ${stderr}` };
   }
 }
 

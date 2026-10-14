@@ -30,6 +30,6 @@ template-fmt < page.tpl
 
 Exit status 0 means success, 1 means that `--check` found a file that is not formatted, and 2 means that a file does not parse, a formatted AST differs or the arguments are invalid.
 
-`template-language format FILE [--indent none|tab|N] [--delimiters OC]` is the format command of the conformance contract (CNF-4): it prints the formatted text, or the format error as JSON on standard error with exit status 2.
+`template-language format [--indent none|tab|N] [--delimiters OC] FILE` is the format command of the conformance contract (CNF-4): it prints the formatted text, or the format error as JSON on standard error with exit status 2.
 
 The formatting style, the indentation and the safety invariant are rules of [formatting](../../docs/spec/formatting.md); the command lines are described in [Formatter, language server and editors](../../docs/operations/editor-tools.md).

@@ -33,7 +33,7 @@ const quoted = [
 // Renders input.tpl in `language` with the delimiter pair `pair` and prints the result line of `name`.
 function check(name, language, pair, expected) {
   const started = performance.now();
-  const result = invoke(language, ['render', 'input.tpl', '--root', root, '--delimiters', pair], root);
+  const result = invoke(language, ['render', '--root', root, '--delimiters', pair, 'input.tpl'], root);
   const passed = result.status === 0 && result.stdout === expected;
   if (!passed) failures.push(`${language} ${name}: status=${result.status}, output=${JSON.stringify(result.stdout)}, error=${result.stderr.trim()}`);
   process.stdout.write(`${name} [${language}] ${passed ? 'pass' : 'fail'} (${Math.round(performance.now() - started)} ms)\n`);

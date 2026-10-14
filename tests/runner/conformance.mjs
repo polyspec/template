@@ -90,9 +90,9 @@ if (options.update) {
         for (const mode of Object.keys(FORMAT_MODES)) {
           const result = invoke(language, formatArgs(testCase, mode), testCase.dir);
           expected[mode] = formatOutcome(result);
-          if (expected[mode] === null) process.stderr.write(`${testCase.id}: format ${mode} failed (exit ${result.status})\n${result.stderr}`);
+          if ('failure' in expected[mode]) process.stderr.write(`${testCase.id}: format ${mode} failed: ${expected[mode].failure}\n`);
         }
-        if (expected.indent === null || expected.keep === null) {
+        if ('failure' in expected.indent || 'failure' in expected.keep) {
           failedUpdates++;
           continue;
         }
@@ -174,7 +174,7 @@ for (const testCase of cases) {
           const expected = testCase.expectedFormat[mode];
           const result = invoke(language, formatArgs(testCase, mode), testCase.dir);
           const actual = formatOutcome(result);
-          if (actual === null) problems.push(`format ${mode} exit ${result.status}: ${result.stderr.trim()}`);
+          if ('failure' in actual) problems.push(`format ${mode} ${actual.failure}`);
           else if (typeof expected.text === 'string' && typeof actual.text === 'string') {
             if (actual.text !== expected.text) problems.push(`format ${mode} ${describeText(expected.text, actual.text)}`);
           } else {

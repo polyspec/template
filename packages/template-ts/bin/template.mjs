@@ -1,34 +1,41 @@
 #!/usr/bin/env node
-// Command line interface as defined in docs/spec/conformance.md (CNF-4).
-//   parse FILE [--root DIR] [--delimiters OC]
-//   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
-//   tokens FILE [--root DIR] [--delimiters OC]
+// Command line interface as defined in docs/spec/conformance.md (CNF-4), parsed with node:util parseArgs.
+//   parse [--root DIR] [--delimiters OC] FILE
+//   render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+//   tokens [--root DIR] [--delimiters OC] FILE
 import { readFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 
 const distDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const { AstProgram, Engine, Source, TemplateError, analyze, parse, parseJsonBytes, BindError } = await import(`${distDir}/index.mjs`);
 const { FsLoader } = await import(`${distDir}/node.mjs`);
 
 function usage(message) {
-  process.stderr.write(`${message}\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n       template tokens FILE [--root DIR] [--delimiters OC]\n`);
+  process.stderr.write(`${message}\nusage: template parse [--root DIR] [--delimiters OC] FILE\n       template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE\n       template tokens [--root DIR] [--delimiters OC] FILE\n`);
   process.exit(1);
 }
 
-const [command, file, ...rest] = process.argv.slice(2);
-if (!command || !file || !['parse', 'render', 'tokens'].includes(command)) usage('command and FILE are required');
+const SOURCE_OPTIONS = { root: { type: 'string' }, delimiters: { type: 'string' } };
+const OPTIONS = {
+  parse: SOURCE_OPTIONS,
+  tokens: SOURCE_OPTIONS,
+  render: { ...SOURCE_OPTIONS, data: { type: 'string' }, define: { type: 'string' }, env: { type: 'string' } },
+};
 
-const options = command === 'render' ? { data: null, define: null, env: null, root: null, delimiters: null } : { root: null, delimiters: null };
-for (let i = 0; i < rest.length; i++) {
-  const flag = rest[i];
-  const value = rest[i + 1];
-  if (!flag.startsWith('--') || value === undefined) usage(`invalid option ${flag}`);
-  const key = flag.slice(2);
-  if (!(key in options)) usage(`unknown option ${flag}`);
-  options[key] = value;
-  i++;
+const [command, ...rest] = process.argv.slice(2);
+if (!Object.hasOwn(OPTIONS, command ?? '')) usage('the command parse, render or tokens is required');
+let parsed;
+try {
+  parsed = parseArgs({ args: rest, options: OPTIONS[command], strict: true, allowPositionals: true });
+} catch (error) {
+  if (!(error instanceof TypeError && String(error.code).startsWith('ERR_PARSE_ARGS_'))) throw error;
+  usage(error.message);
 }
+if (parsed.positionals.length !== 1) usage('exactly one FILE is required');
+const [file] = parsed.positionals;
+const options = parsed.values;
 
 const filePath = resolve(file);
 const root = resolve(options.root ?? dirname(filePath));
@@ -40,8 +47,9 @@ function readJson(path) {
   let bytes;
   try {
     bytes = readFileSync(resolve(root, path));
-  } catch {
-    usage(`cannot read ${path}`);
+  } catch (error) {
+    if (error?.code === undefined) throw error;
+    usage(`cannot read ${path}: ${error.message}`);
   }
   return parseJsonBytes(new Uint8Array(bytes));
 }
@@ -62,16 +70,17 @@ function toPlain(value) {
 
 try {
   const engineOptions = { loader: new FsLoader(root) };
-  if (options.delimiters !== null) engineOptions.delimiters = options.delimiters;
+  if (options.delimiters !== undefined) engineOptions.delimiters = options.delimiters;
   if (command === 'parse' || command === 'tokens') {
     let source;
     try {
       source = new Uint8Array(readFileSync(filePath));
-    } catch {
-      usage(`cannot read ${file}`);
+    } catch (error) {
+      if (error?.code === undefined) throw error;
+      usage(`cannot read ${file}: ${error.message}`);
     }
     const parseOptions = {};
-    if (options.delimiters !== null) parseOptions.delimiters = options.delimiters;
+    if (options.delimiters !== undefined) parseOptions.delimiters = options.delimiters;
     if (command === 'parse') {
       process.stdout.write(JSON.stringify(parse(source, name, parseOptions)));
     } else {
@@ -86,9 +95,9 @@ try {
     const renderOptions = {};
     let assign = {};
     try {
-      if (options.data !== null) assign = readJson(options.data);
-      if (options.define !== null) renderOptions.define = toPlain(readJson(options.define));
-      if (options.env !== null) renderOptions.env = toPlain(readJson(options.env));
+      if (options.data !== undefined) assign = readJson(options.data);
+      if (options.define !== undefined) renderOptions.define = toPlain(readJson(options.define));
+      if (options.env !== undefined) renderOptions.env = toPlain(readJson(options.env));
     } catch (error) {
       if (error instanceof BindError) {
         throw new TemplateError({ code: error.code, template: name, line: 0, col: 0, offset: 0, end: 0, message: error.message });

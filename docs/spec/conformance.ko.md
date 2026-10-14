@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: 3cb338def9845615a01aeda0486d2a255e3f3ae9758b5ad9bcb836d176943542 -->
+<!-- source-sha256: ff0064d54f767a4b22e6b6e4b246fc749db6e0b573c1d143114938885999c185 -->
 # 적합성
 
 [English](/spec/conformance).
@@ -39,15 +39,15 @@
 
 | 명령 | 출력 | 종료 상태 |
 | --- | --- | --- |
-| `parse FILE [--root DIR] [--delimiters OC]` | stdout에 AST JSON. | 0 |
-| `render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]` | stdout에 렌더된 HTML. | 0 |
-| `tokens FILE [--root DIR] [--delimiters OC]` | stdout에 FMT-1과 FMT-2의 토큰을 `[start, end, type]`의 JSON 배열로. | 0 |
-| `format FILE [--indent none\|tab\|N] [--delimiters OC]` | stdout에 포맷한 텍스트. 바뀌는 것이 없으면 소스. | 0 |
+| `parse [--root DIR] [--delimiters OC] FILE` | stdout에 AST JSON. | 0 |
+| `render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE` | stdout에 렌더된 HTML. | 0 |
+| `tokens [--root DIR] [--delimiters OC] FILE` | stdout에 FMT-1과 FMT-2의 토큰을 `[start, end, type]`의 JSON 배열로. | 0 |
+| `format [--indent none\|tab\|N] [--delimiters OC] FILE` | stdout에 포맷한 텍스트. 바뀌는 것이 없으면 소스. | 0 |
 | `parse`, `render`, `tokens`, 템플릿 오류 | stderr에 오류 JSON. | 2 |
 | `format`, 포맷 오류 | stderr에 FMT-14의 JSON `{"reason", "code", "line", "col", "message"}`. | 2 |
 | 모든 하위 명령, 사용 오류 | stderr에 메시지. | 1 |
 
-`--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. 읽을 수 없는 파일은 사용 오류다. 내용이 하나의 JSON 문서가 아닌 파일은 ERR-5의 위치를 가진 템플릿 오류 `E_DATA_INVALID_JSON`이다(VAL-12). 이 파일의 다른 데이터 오류도 같은 위치에서 해당 `E_DATA_*` 코드를 가진 템플릿 오류다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. `--indent`는 FMT-9의 들여쓰기 단위다. `N`은 공백 수(1~8, 기본값 2), `tab`은 탭, `none`은 `indent: null`이다. `format`은 `templateBlocks` `indent`를 쓴다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
+러너는 POSIX 유틸리티 문법 지침(지침 9와 10)의 순서대로 옵션을 `FILE`보다 앞에 넘긴다. 몇몇 표준 파서는 첫 피연산자에서 멈추기 때문이다. 구현은 자기 언어의 표준 파서(예: node:util `parseArgs`, Go `flag`, Rust `clap`, Python `argparse`, PHP `symfony/console`)로 파싱하고, 다른 순서에서는 그 파서의 동작을 따른다. `--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. 읽을 수 없는 파일은 사용 오류다. 내용이 하나의 JSON 문서가 아닌 파일은 ERR-5의 위치를 가진 템플릿 오류 `E_DATA_INVALID_JSON`이다(VAL-12). 이 파일의 다른 데이터 오류도 같은 위치에서 해당 `E_DATA_*` 코드를 가진 템플릿 오류다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. `--indent`는 FMT-9의 들여쓰기 단위다. `N`은 공백 수(1~8, 기본값 2), `tab`은 탭, `none`은 `indent: null`이다. `format`은 `templateBlocks` `indent`를 쓴다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
 
 **CNF-5** 구현별 명령:
 

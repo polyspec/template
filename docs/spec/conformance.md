@@ -38,15 +38,15 @@ Conformance is verified by fixture cases that every implementation renders throu
 
 | Command | Output | Exit status |
 | --- | --- | --- |
-| `parse FILE [--root DIR] [--delimiters OC]` | The AST JSON on stdout. | 0 |
-| `render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]` | The rendered HTML on stdout. | 0 |
-| `tokens FILE [--root DIR] [--delimiters OC]` | The tokens of FMT-1 and FMT-2 as a JSON array of `[start, end, type]` on stdout. | 0 |
-| `format FILE [--indent none\|tab\|N] [--delimiters OC]` | The formatted text on stdout, the source when nothing changes. | 0 |
+| `parse [--root DIR] [--delimiters OC] FILE` | The AST JSON on stdout. | 0 |
+| `render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE` | The rendered HTML on stdout. | 0 |
+| `tokens [--root DIR] [--delimiters OC] FILE` | The tokens of FMT-1 and FMT-2 as a JSON array of `[start, end, type]` on stdout. | 0 |
+| `format [--indent none\|tab\|N] [--delimiters OC] FILE` | The formatted text on stdout, the source when nothing changes. | 0 |
 | `parse`, `render` or `tokens`, template error | The error JSON on stderr. | 2 |
 | `format`, format error | The JSON `{"reason", "code", "line", "col", "message"}` of FMT-14 on stderr. | 2 |
 | any subcommand, usage error | A message on stderr. | 1 |
 
-`--root` defaults to the directory of `FILE`. The template name passed to the parser and used in errors is `FILE` relative to the root. `--data`, `--define` and `--env` name JSON files with the content of CNF-2. A file that cannot be read is a usage error. A file whose content is not one JSON document is a template error `E_DATA_INVALID_JSON` with the position of ERR-5 (VAL-12); every other data error of these files is a template error with its `E_DATA_*` code at the same position. `--delimiters` is the two-character value of the engine option `delimiters`; the runner passes the value of `options.json`. `--indent` is the indent unit of FMT-9: `N` spaces (1 to 8, default 2), `tab`, or `none` for `indent: null`; `format` uses `templateBlocks` `indent`. Output is UTF-8. The command does not add a trailing newline.
+The runner passes the options before `FILE`, as the POSIX utility syntax guidelines (guidelines 9 and 10) order them, because some standard parsers stop at the first operand. Implementations parse with their language's standard parser (for example node:util `parseArgs`, Go `flag`, Rust `clap`, Python `argparse`, PHP `symfony/console`) and follow its behavior for any other order. `--root` defaults to the directory of `FILE`. The template name passed to the parser and used in errors is `FILE` relative to the root. `--data`, `--define` and `--env` name JSON files with the content of CNF-2. A file that cannot be read is a usage error. A file whose content is not one JSON document is a template error `E_DATA_INVALID_JSON` with the position of ERR-5 (VAL-12); every other data error of these files is a template error with its `E_DATA_*` code at the same position. `--delimiters` is the two-character value of the engine option `delimiters`; the runner passes the value of `options.json`. `--indent` is the indent unit of FMT-9: `N` spaces (1 to 8, default 2), `tab`, or `none` for `indent: null`; `format` uses `templateBlocks` `indent`. Output is UTF-8. The command does not add a trailing newline.
 
 **CNF-5** Commands per implementation:
 
