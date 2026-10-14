@@ -65,7 +65,10 @@ def _arguments() -> _Parser:
         render.add_argument(option, metavar="F")
     for command in (parse, render, tokens):
         command.add_argument("--root", metavar="DIR")
-    format_.add_argument("--indent", type=_indent, default="2", metavar="none|tab|N")
+    # An absent --indent is left out, so the default of FormatOptions applies.
+    format_.add_argument(
+        "--indent", type=_indent, default=argparse.SUPPRESS, metavar="none|tab|N"
+    )
     for command in (parse, render, tokens, format_):
         command.add_argument("--delimiters", type=_delimiters, metavar="OC")
         command.add_argument("file", metavar="FILE")
@@ -158,8 +161,8 @@ def _format(data: bytes, arguments: argparse.Namespace) -> int:
         data.decode("utf-8"),
         FormatOptions(
             name=arguments.file,
-            indent=arguments.indent,
             delimiters=arguments.delimiters,
+            **({"indent": arguments.indent} if "indent" in arguments else {}),
         ),
     )
     if not result.ok:

@@ -5,7 +5,6 @@
 // {"reason","code","line","col","message"} on standard error and exits with status 2, and exits with status 1 on a
 // usage error.
 import { readFileSync } from 'node:fs';
-import type { FormatOptions } from '../format.js';
 import { FORMAT_OPTIONS, formatOptions, readCommandLine } from './args.js';
 import { formatBytes } from './main.js';
 
@@ -19,8 +18,8 @@ export function main(argv: readonly string[]): number {
   if (typeof parsed === 'string') return usageError(parsed);
   const [file, ...extra] = parsed.positionals;
   if (file === undefined || extra.length > 0) return usageError('exactly one FILE is required');
-  const values = formatOptions(parsed.values);
-  if (typeof values === 'string') return usageError(values);
+  const options = formatOptions(parsed.values);
+  if (typeof options === 'string') return usageError(options);
   let bytes: Uint8Array;
   try {
     bytes = readFileSync(file);
@@ -28,8 +27,6 @@ export function main(argv: readonly string[]): number {
     if (!(error instanceof Error && 'code' in error)) throw error;
     return usageError(`cannot read ${file}: ${error.message}`);
   }
-  const { indent, delimiters } = values;
-  const options: FormatOptions = delimiters === undefined ? { indent } : { indent, delimiters };
   const result = formatBytes(bytes, file, options);
   if (!result.ok) {
     const { reason, code, line, col, message } = result.error;

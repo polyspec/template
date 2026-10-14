@@ -15,8 +15,7 @@ export async function main(argv: readonly string[]): Promise<number> {
     process.stdout.write(USAGE);
     return 0;
   }
-  const { mode, delimiters, indent, templateBlocks, paths } = parsed;
-  const options: FormatOptions = delimiters === undefined ? { indent, templateBlocks } : { delimiters, indent, templateBlocks };
+  const { mode, format: options, paths } = parsed;
   const stdin = paths.length === 0 || (paths.length === 1 && paths[0] === '-');
   if (!stdin && paths.includes('-')) return usageError('"-" cannot be combined with other paths');
 

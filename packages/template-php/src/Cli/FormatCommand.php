@@ -29,7 +29,7 @@ final class FormatCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('indent', null, InputOption::VALUE_REQUIRED, 'none, tab or a number of spaces from 1 to 8', '2')
+            ->addOption('indent', null, InputOption::VALUE_REQUIRED, 'none, tab or a number of spaces from 1 to 8')
             ->addOption('delimiters', null, InputOption::VALUE_REQUIRED, 'the two delimiter characters')
             ->addArgument('file', InputArgument::REQUIRED, 'the template file');
     }
@@ -39,18 +39,13 @@ final class FormatCommand extends Command
         $file = $input->getArgument('file');
         $indent = $input->getOption('indent');
         $delimiters = $input->getOption('delimiters');
-        if (!is_string($file) || !is_string($indent)) {
+        if (!is_string($file) || ($indent !== null && !is_string($indent))) {
             throw new \LogicException('FILE and --indent hold one value');
         }
         $options = ['name' => $file];
-        if ($indent === 'none') {
-            $options['indent'] = null;
-        } elseif ($indent === 'tab') {
-            $options['indent'] = "\t";
-        } elseif (preg_match('/^[1-8]$/D', $indent) === 1) {
-            $options['indent'] = str_repeat(' ', (int) $indent);
-        } else {
-            throw new InvalidArgumentException('--indent requires a number from 1 to 8, tab or none');
+        // An absent --indent is left out, so the default of Formatter::format applies.
+        if ($indent !== null) {
+            $options['indent'] = self::indentUnit($indent);
         }
         if ($delimiters !== null) {
             if (!is_string($delimiters) || mb_strlen($delimiters, 'UTF-8') !== 2) {
@@ -73,5 +68,22 @@ final class FormatCommand extends Command
         $output->write((string) $result->text, false, OutputInterface::OUTPUT_RAW);
 
         return 0;
+    }
+
+    /**
+     * The indent unit of an --indent value: `N` (1 to 8 spaces), `tab`, or `none` (null).
+     */
+    private static function indentUnit(string $value): ?string
+    {
+        if ($value === 'none') {
+            return null;
+        }
+        if ($value === 'tab') {
+            return "\t";
+        }
+        if (preg_match('/^[1-8]$/D', $value) === 1) {
+            return str_repeat(' ', (int) $value);
+        }
+        throw new InvalidArgumentException('--indent requires a number from 1 to 8, tab or none');
     }
 }
