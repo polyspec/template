@@ -25,7 +25,7 @@ function directoryFiles(directory) {
     .sort();
 }
 
-export function verifyGeneratedArtifact(output, target, expected = null) {
+function verifyGeneratedArtifact(output, target, expected = null) {
   const manifestPath = generatedManifestPath(output);
   if (!existsSync(manifestPath)) throw new Error(`generated artifact manifest is missing: ${manifestPath}`);
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));

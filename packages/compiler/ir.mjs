@@ -8,7 +8,7 @@ const scalarTypes = new Set(['null', 'boolean', 'number', 'string', 'any']);
 const hash = value => createHash('sha256').update(value).digest('hex');
 
 /** A structured compile diagnostic with the same observable location fields as render errors. */
-export class CompilerError extends Error {
+class CompilerError extends Error {
   constructor(code, template, span, lines, message) {
     super(message);
     this.name = 'CompilerError';
@@ -345,4 +345,3 @@ export function lowerSourceGraph(graph, manifest) {
   return { schema: 1, entry, dynamicRoot, fields: root, records, functions, definitions, templates };
 }
 
-export { parseType, typeSource };

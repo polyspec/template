@@ -74,11 +74,6 @@ export const goType = type => (optional(type) && typeName(type) !== 'any' ? '*' 
 export const rustType = type => `${optional(type) ? 'Option<' : ''}${genericType(type, scalarTypes.rust, item => `Vec<${item}>`, (key, value) => `OrderedMap<${key}, ${value}>`)}${optional(type) ? '>' : ''}`;
 export const phpType = type => genericType(type, scalarTypes.php, () => 'array', () => 'MapValue');
 export const tsField = (name, type) => `${name}${optional(type) ? '?' : ''}: ${tsType(type)};`;
-// PHP rejects a nullable mark on mixed, which already includes null.
-const phpNullable = type => optional(type) && phpType(type) !== 'mixed' ? '?' : '';
-export const phpField = (name, type) => `public readonly ${phpNullable(type)}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
-export const phpInputField = (name, type) => `public ${phpNullable(type)}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
-export const phpDefinitionDataField = (name, type) => `public bool $has_${name} = false, public ${phpType(type) === 'mixed' ? 'mixed' : `?${phpType(type)}`} $${name} = null`;
 /**
  * A definition of generated code that the program keeps only when the code it keeps uses it (T25.1): `name` is the
  * identifier that the definition declares, and `pattern` a use of it, the whole word `name` by default.
@@ -115,7 +110,7 @@ export function usedDefinitions(definitions, text) {
  * uses, until no further definition is used, and every dependent part, so the program carries no helper, type, method
  * or import that it does not use.
  */
-export function usedParts(parts) {
+function usedParts(parts) {
   const strings = parts.filter(part => typeof part === 'string').join('\n');
   const definitions = new Set(usedDefinitions(parts.filter(part => part.pattern), strings));
   const text = [strings, ...[...definitions].map(item => item.code)].join('\n');
