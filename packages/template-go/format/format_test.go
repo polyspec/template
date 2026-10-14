@@ -2,6 +2,8 @@ package format
 
 import (
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -31,8 +33,8 @@ func formatted(t *testing.T, source string, options Options) string {
 func formatError(t *testing.T, source string, options Options) *Error {
 	t.Helper()
 	result, err := Format(source, options)
-	failure, ok := err.(*Error)
-	if !ok {
+	var failure *Error
+	if !errors.As(err, &failure) {
 		t.Fatalf("expected a format error for %q, got %+v %v", source, result, err)
 	}
 	return failure
@@ -83,7 +85,10 @@ func TestFixtures(t *testing.T) {
 	}
 	for _, path := range names {
 		name := filepath.Base(path)
-		input, _ := os.ReadFile(path)
+		input, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
 		expected, err := os.ReadFile(filepath.Join(fixtures, "expected", name))
 		if err != nil {
 			t.Fatal(err)
@@ -101,8 +106,8 @@ func TestFormat(t *testing.T) {
 	if got := formatted(t, "\ufeff<ul>\r\n{@ x=xs}\r\n<li>{=x}</li>\r\n{/}\r\n</ul>\r\n", Options{}); got != "\ufeff<ul>\r\n  {@ x = xs}\r\n    <li>{= x}</li>\r\n  {/}\r\n</ul>\r\n" {
 		t.Errorf("bom and crlf: %q", got)
 	}
-	if result, _ := Format("{=a}{=b}{=c}", Options{Range: &Range{Start: 4, End: 8}}); result.Text != "{=a}{= b}{=c}" {
-		t.Errorf("range: %q", result.Text)
+	if result, err := Format("{=a}{=b}{=c}", Options{Range: &Range{Start: 4, End: 8}}); err != nil || result.Text != "{=a}{= b}{=c}" {
+		t.Errorf("range: %q %v", result.Text, err)
 	}
 	if got := formatted(t, "[= a[0]+1]\n[= [1,2][1]]", Options{Delimiters: "[]"}); got != "[= a[0] + 1]\n[= [1, 2][1]]" {
 		t.Errorf("delimiters: %q", got)
@@ -165,8 +170,8 @@ func TestIndentation(t *testing.T) {
 	}
 	source := lines("<ul>", "<li>a</li>", "<li>{=b}</li>", "</ul>")
 	start := strings.Index(source, "<li>{=b}")
-	if result, _ := Format(source, Options{Range: &Range{Start: start, End: len(source)}}); result.Text != lines("<ul>", "<li>a</li>", "  <li>{= b}</li>", "</ul>") {
-		t.Errorf("range indentation: %q", result.Text)
+	if result, err := Format(source, Options{Range: &Range{Start: start, End: len(source)}}); err != nil || result.Text != lines("<ul>", "<li>a</li>", "  <li>{= b}</li>", "</ul>") {
+		t.Errorf("range indentation: %q %v", result.Text, err)
 	}
 }
 
@@ -209,28 +214,35 @@ func TestSameTree(t *testing.T) {
 // is unchanged (without line indentation for indent mode), and formatting is idempotent.
 func TestInvariantOverConformanceInputs(t *testing.T) {
 	var files []string
-	_ = filepath.WalkDir(filepath.Join(repositoryRoot, "tests", "cases"), func(path string, entry os.DirEntry, err error) error {
+	err := filepath.WalkDir(filepath.Join(repositoryRoot, "tests", "cases"), func(path string, entry os.DirEntry, err error) error {
 		if err == nil && !entry.IsDir() && strings.HasSuffix(path, ".tpl") {
 			files = append(files, path)
 		}
 		return err
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	sort.Strings(files)
 	if len(files) < 200 {
 		t.Fatalf("found %d templates", len(files))
 	}
 	for _, file := range files {
-		data, _ := os.ReadFile(file)
+		data, err := os.ReadFile(file)
+		if err != nil {
+			t.Fatal(err)
+		}
 		source := string(data)
-		delimiters := delimitersFor(file)
+		delimiters := delimitersFor(t, file)
 		keep := Options{Name: file, Delimiters: delimiters, KeepIndentation: true}
 		indent := Options{Name: file, Delimiters: delimiters}
 		kept, keptErr := Format(source, keep)
 		indented, indentedErr := Format(source, indent)
-		original, parseErr := parseTree(data, delimiters)
+		original, parseErr := parseTree(t, data, delimiters)
 		if parseErr != nil {
 			for _, err := range []error{keptErr, indentedErr} {
-				if failure, ok := err.(*Error); !ok || failure.Reason != ReasonParse {
+				var failure *Error
+				if !errors.As(err, &failure) || failure.Reason != ReasonParse {
 					t.Errorf("%s: %v, want a parse error", file, err)
 				}
 			}
@@ -240,7 +252,7 @@ func TestInvariantOverConformanceInputs(t *testing.T) {
 			t.Errorf("%s: %v", file, keptErr)
 			continue
 		}
-		after, err := parseTree([]byte(kept.Text), delimiters)
+		after, err := parseTree(t, []byte(kept.Text), delimiters)
 		if err != nil || !sameTree(original, after) {
 			t.Errorf("%s: kept result parses to a different AST: %v", file, err)
 		}
@@ -251,12 +263,13 @@ func TestInvariantOverConformanceInputs(t *testing.T) {
 			t.Errorf("%s: not idempotent: %v", file, err)
 		}
 		if indentedErr != nil {
-			if failure, ok := indentedErr.(*Error); !ok || failure.Reason != ReasonHTML {
+			var failure *Error
+			if !errors.As(indentedErr, &failure) || failure.Reason != ReasonHTML {
 				t.Errorf("%s: %v, want an html error", file, indentedErr)
 			}
 			continue
 		}
-		after, err = parseTree([]byte(indented.Text), delimiters)
+		after, err = parseTree(t, []byte(indented.Text), delimiters)
 		if err != nil || !sameTree(withoutLineIndentation(original), withoutLineIndentation(after)) {
 			t.Errorf("%s: indented result parses to a different AST: %v", file, err)
 		}
@@ -269,15 +282,23 @@ func TestInvariantOverConformanceInputs(t *testing.T) {
 	}
 }
 
-func delimitersFor(file string) string {
-	data, err := os.ReadFile(filepath.Join(filepath.Dir(file), "options.json"))
-	if err != nil {
+// delimitersFor is the delimiters option of the options.json beside a case file, or "" when the case has none.
+func delimitersFor(t *testing.T, file string) string {
+	t.Helper()
+	path := filepath.Join(filepath.Dir(file), "options.json")
+	data, err := os.ReadFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
 		return ""
+	}
+	if err != nil {
+		t.Fatal(err)
 	}
 	var options struct {
 		Delimiters string `json:"delimiters"`
 	}
-	_ = json.Unmarshal(data, &options)
+	if err := json.Unmarshal(data, &options); err != nil {
+		t.Fatalf("%s: %v", path, err)
+	}
 	return options.Delimiters
 }
 
@@ -292,11 +313,9 @@ func delimitersOf(t *testing.T, option string) parser.Delimiters {
 	return d
 }
 
-func parseTree(data []byte, delimiters string) (any, error) {
-	d := parser.DefaultDelimiters
-	if delimiters != "" {
-		d, _ = parser.ParseDelimiters(delimiters)
-	}
+func parseTree(t *testing.T, data []byte, delimiters string) (any, error) {
+	t.Helper()
+	d := delimitersOf(t, delimiters)
 	source, err := lexer.FromBytes("x.tpl", data)
 	if err != nil {
 		return nil, err
@@ -339,7 +358,10 @@ func withoutIndentation(pieces []string) []string {
 // a case whose input does not parse has no such file (CNF-2, CNF-17). Each case is the subtest
 // TestConformanceFormat/<group>/<name>, as the suite unit formatting of config/parity.json reads the results.
 func TestConformanceFormat(t *testing.T) {
-	dirs, _ := filepath.Glob(filepath.Join(repositoryRoot, "tests", "cases", "*", "*"))
+	dirs, err := filepath.Glob(filepath.Join(repositoryRoot, "tests", "cases", "*", "*"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(dirs) < 200 {
 		t.Fatalf("found %d case directories", len(dirs))
 	}
@@ -374,7 +396,7 @@ func TestConformanceFormat(t *testing.T) {
 				t.Fatal(err)
 			}
 			for mode, options := range map[string]Options{"indent": {Name: "input.tpl"}, "keep": {Name: "input.tpl", KeepIndentation: true}} {
-				options.Delimiters = delimitersFor(filepath.Join(dir, "input.tpl"))
+				options.Delimiters = delimitersFor(t, filepath.Join(dir, "input.tpl"))
 				want := expected[mode]
 				result, err := Format(string(source), options)
 				switch {
@@ -383,7 +405,8 @@ func TestConformanceFormat(t *testing.T) {
 						t.Errorf("%s: %q %v, want %q", mode, result.Text, err, *want.Text)
 					}
 				case want.Error != nil:
-					failure, ok := err.(*Error)
+					var failure *Error
+					ok := errors.As(err, &failure)
 					code := ""
 					if want.Error.Code != nil {
 						code = *want.Error.Code

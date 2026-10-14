@@ -2,6 +2,8 @@ package parser_test
 
 import (
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -87,7 +89,10 @@ func TestAnalyzeGivesEachTagItsKindAndBodyRange(t *testing.T) {
 // not parse has no such file (CNF-2, CNF-16). Each case is the subtest TestConformanceTokens/<group>/<name>, as the
 // suite unit tokens of config/parity.json reads the results.
 func TestConformanceTokens(t *testing.T) {
-	dirs, _ := filepath.Glob(filepath.Join("..", "..", "..", "tests", "cases", "*", "*"))
+	dirs, err := filepath.Glob(filepath.Join("..", "..", "..", "tests", "cases", "*", "*"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(dirs) < 200 {
 		t.Fatalf("found %d case directories", len(dirs))
 	}
@@ -109,7 +114,11 @@ func TestConformanceTokens(t *testing.T) {
 				t.Fatalf("%s: %v", path, err)
 			}
 			delimiters := parser.DefaultDelimiters
-			if options, err := os.ReadFile(filepath.Join(dir, "options.json")); err == nil {
+			options, err := os.ReadFile(filepath.Join(dir, "options.json"))
+			if err != nil && !errors.Is(err, fs.ErrNotExist) {
+				t.Fatal(err)
+			}
+			if err == nil {
 				var value struct{ Delimiters string }
 				if err := json.Unmarshal(options, &value); err != nil {
 					t.Fatal(err)
