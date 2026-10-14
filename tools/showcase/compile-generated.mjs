@@ -2,7 +2,7 @@
 // Compiles every showcase source graph through the product generated compiler.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { transformSync } from 'esbuild';
+import ts from 'typescript';
 import { root } from '../../tests/runner/drivers.mjs';
 import { compileSource } from '../../packages/template-compiler/compiler.mjs';
 import { generatedCompilerDigest } from '../../packages/template-compiler/compiler-digest.mjs';
@@ -57,11 +57,10 @@ for (const id of scenarios) {
     refresh,
     check,
     compilerDigest: typescriptDeliveryDigest(),
-    compile: () => transformSync(readFileSync(typescriptOutput, 'utf8'), {
-      loader: 'ts',
-      target: 'es2022',
-      sourcefile: typescriptOutput,
-    }).code,
+    compile: () => ts.transpileModule(readFileSync(typescriptOutput, 'utf8'), {
+      compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+      fileName: typescriptOutput,
+    }).outputText,
   });
 }
 
