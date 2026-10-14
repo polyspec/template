@@ -1,5 +1,7 @@
 // Command line contract (CNF-4).
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { casesDir, repoRoot } from './helpers.js';
@@ -39,5 +41,27 @@ describe('template CLI', () => {
     expect(run(['parse', join(casesDir, 'text', 'plain', 'missing.tpl')]).status).toBe(1);
     const missingData = run(['render', join(casesDir, 'echo', 'path', 'input.tpl'), '--data', 'missing.json']);
     expect([missingData.status, missingData.stderr.startsWith('cannot read missing.json')]).toEqual([1, true]);
+  });
+
+  it('prints the EDT-8 tokens of a file with UTF-8 byte offsets counted after the byte order mark', () => {
+    const work = mkdtempSync(join(tmpdir(), 'template-tokens-'));
+    try {
+      const file = join(work, 'a.tpl');
+      writeFileSync(file, '\uFEFFé{= a.b}');
+      const result = run(['tokens', file]);
+      expect([result.status, result.stderr]).toEqual([0, '']);
+      expect(JSON.parse(result.stdout)).toEqual([[2, 3, 'delimiter'], [3, 4, 'keyword'], [5, 6, 'variable'], [6, 8, 'property'], [8, 9, 'delimiter']]);
+      const custom = run(['tokens', join(casesDir, 'delimiters', 'option-semicolon', 'input.tpl'), '--delimiters', ';;']);
+      expect(custom.status).toBe(0);
+      expect((JSON.parse(custom.stdout) as unknown[]).length).toBeGreaterThan(0);
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
+  });
+
+  it('reports a template error of tokens with exit status 2', () => {
+    const failed = run(['tokens', join(casesDir, 'errors', 'unclosed-block', 'input.tpl')]);
+    expect([failed.status, JSON.parse(failed.stderr).code]).toEqual([2, 'E_PARSE_UNCLOSED_BLOCK']);
+    expect(run(['tokens', 'x.tpl', '--data', 'd.json']).status).toBe(1);
   });
 });

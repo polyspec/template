@@ -58,18 +58,17 @@ export function parseArguments(argv: readonly string[]): Arguments | string {
         break;
       }
       case '--delimiters': {
-        const value = argv[index + 1];
-        if (value === undefined || value.length !== 2) return '--delimiters requires two characters';
+        const value = delimitersArgument(argv[index + 1]);
+        if (value === null) return DELIMITERS_MESSAGE;
         result.delimiters = value;
         index++;
         break;
       }
       case '--indent': {
         const value = argv[index + 1];
-        if (value === 'keep') result.indent = null;
-        else if (value === 'tab') result.indent = '\t';
-        else if (value !== undefined && /^[1-8]$/.test(value)) result.indent = ' '.repeat(Number(value));
-        else return '--indent requires a number from 1 to 8, tab or keep';
+        const unit = value === 'keep' ? null : indentUnit(value);
+        if (unit === undefined) return '--indent requires a number from 1 to 8, tab or keep';
+        result.indent = unit;
         index++;
         break;
       }
@@ -86,4 +85,18 @@ export function parseArguments(argv: readonly string[]): Arguments | string {
     }
   }
   return result;
+}
+
+export const DELIMITERS_MESSAGE = '--delimiters requires two characters';
+
+/** The value of --delimiters, or null when it is not two characters. */
+export function delimitersArgument(value: string | undefined): string | null {
+  return value !== undefined && value.length === 2 ? value : null;
+}
+
+/** The indent unit of an --indent value `N` (1 to 8 spaces) or `tab`, or undefined for any other value. */
+export function indentUnit(value: string | undefined): string | undefined {
+  if (value === 'tab') return '\t';
+  if (value !== undefined && /^[1-8]$/.test(value)) return ' '.repeat(Number(value));
+  return undefined;
 }

@@ -18,7 +18,8 @@
     "bin"
   ],
   "bin": {
-    "template-fmt": "./bin/template-fmt.mjs"
+    "template-fmt": "./bin/template-fmt.mjs",
+    "template-language": "./bin/template-language.mjs"
   },
   "sideEffects": false,
   "engines": {

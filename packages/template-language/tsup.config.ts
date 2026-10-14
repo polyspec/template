@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     cli: 'src/cli/main.ts',
+    command: 'src/cli/command.ts',
   },
   format: ['esm'],
   clean: true,
