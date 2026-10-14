@@ -48,14 +48,20 @@ final class LoadFailureTest extends TestCase
     public function testALoaderExceptionIsALoadFailureAtTheEntryTemplate(): void
     {
         $error = self::failure(self::throwing('page.tpl'), 'page.tpl');
-        $this->assertSame(['E_LOAD_FAILED', 'page.tpl', 0, 0], [$error->errorCode, $error->template, $error->errorLine, $error->errorCol]);
+        $this->assertSame(
+            ['E_LOAD_FAILED', 'page.tpl', 0, 0],
+            [$error->errorCode, $error->template, $error->errorLine, $error->errorCol],
+        );
         $this->assertStringContainsString('cannot read page.tpl', $error->getMessage());
     }
 
     public function testALoaderExceptionIsALoadFailureAtTheIncludeTag(): void
     {
         $error = self::failure(self::throwing('part.tpl'), 'page.tpl');
-        $this->assertSame(['E_LOAD_FAILED', 'page.tpl', 2, 1], [$error->errorCode, $error->template, $error->errorLine, $error->errorCol]);
+        $this->assertSame(
+            ['E_LOAD_FAILED', 'page.tpl', 2, 1],
+            [$error->errorCode, $error->template, $error->errorLine, $error->errorCol],
+        );
         $this->assertStringContainsString('cannot read part.tpl', $error->getMessage());
     }
 
@@ -66,8 +72,8 @@ final class LoadFailureTest extends TestCase
         file_put_contents($root . '/locked.tpl', 'x');
         chmod($root . '/locked.tpl', 0o000);
         try {
-            // Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly when the
-            // process cannot read it, and the process cannot read it exactly when it does not run as root.
+            // Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly
+            // when the process cannot read it, and the process cannot read it exactly when it does not run as root.
             $readable = @file_get_contents($root . '/locked.tpl') !== false;
             $asRoot = posix_geteuid() === 0;
             try {
@@ -93,10 +99,19 @@ final class LoadFailureTest extends TestCase
     public function testTextThatIsNotOneJsonDocumentIsInvalidJson(): void
     {
         $cases = [
-            '' => 'E_DATA_INVALID_JSON', ' ' => 'E_DATA_INVALID_JSON', '{' => 'E_DATA_INVALID_JSON', '{"a": }' => 'E_DATA_INVALID_JSON',
-            '[1,]' => 'E_DATA_INVALID_JSON', '{"a": 1} x' => 'E_DATA_INVALID_JSON', 'nul' => 'E_DATA_INVALID_JSON', '"a' => 'E_DATA_INVALID_JSON',
-            '01' => 'E_DATA_INVALID_JSON', '{"a": , "b": 1e19}' => 'E_DATA_INVALID_JSON', '{"a": 1e19, "b": }' => 'E_DATA_NUMBER_RANGE',
-            '[' . str_repeat('[', 64) . 'x' => 'E_DATA_DEPTH', '[x, ' . str_repeat('[', 65) => 'E_DATA_INVALID_JSON',
+            '' => 'E_DATA_INVALID_JSON',
+            ' ' => 'E_DATA_INVALID_JSON',
+            '{' => 'E_DATA_INVALID_JSON',
+            '{"a": }' => 'E_DATA_INVALID_JSON',
+            '[1,]' => 'E_DATA_INVALID_JSON',
+            '{"a": 1} x' => 'E_DATA_INVALID_JSON',
+            'nul' => 'E_DATA_INVALID_JSON',
+            '"a' => 'E_DATA_INVALID_JSON',
+            '01' => 'E_DATA_INVALID_JSON',
+            '{"a": , "b": 1e19}' => 'E_DATA_INVALID_JSON',
+            '{"a": 1e19, "b": }' => 'E_DATA_NUMBER_RANGE',
+            '[' . str_repeat('[', 64) . 'x' => 'E_DATA_DEPTH',
+            '[x, ' . str_repeat('[', 65) => 'E_DATA_INVALID_JSON',
         ];
         foreach ($cases as $text => $code) {
             try {

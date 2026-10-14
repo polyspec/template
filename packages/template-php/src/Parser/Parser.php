@@ -21,7 +21,19 @@ final class Parser
     private const RESERVED = ['true' => true, 'false' => true, 'null' => true, 'in' => true];
     private const ASSIGN_HEAD = '/\G([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
     /** The tag kind of each sigil of an accepted tag; `:` is `assignment` when an assignment head follows it. */
-    private const KINDS = ['*' => 'comment', '=' => 'echo', '@' => 'for', '?' => 'if', '?#' => 'ifblock', ':?' => 'elseif', ':' => 'else', '/' => 'close', '+' => 'include', '#' => 'block', '%' => 'directive'];
+    private const KINDS = [
+        '*' => 'comment',
+        '=' => 'echo',
+        '@' => 'for',
+        '?' => 'if',
+        '?#' => 'ifblock',
+        ':?' => 'elseif',
+        ':' => 'else',
+        '/' => 'close',
+        '+' => 'include',
+        '#' => 'block',
+        '%' => 'directive',
+    ];
     private const LOOP_HEAD = '/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/';
 
     private string $open;
@@ -65,7 +77,11 @@ final class Parser
      * A tag has its kind, its byte range and the byte range of its body between the open and the close delimiters,
      * sigil included. Tokens are in source order.
      *
-     * @return array{ast: array<string, mixed>, tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>, tokens: list<array{start: int, end: int, kind: string}>}
+     * @return array{
+     *     ast: array<string, mixed>,
+     *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
+     *     tokens: list<array{start: int, end: int, kind: string}>,
+     * }
      */
     public static function analyze(Source $source, string $open = '{', string $close = '}'): array
     {
@@ -107,11 +123,21 @@ final class Parser
         $this->scan();
         if ($this->frames !== []) {
             $frame = $this->frames[count($this->frames) - 1];
-            throw $this->fail('E_PARSE_UNCLOSED_BLOCK', $frame['openStart'], $frame['openStart'] + 1, 'block is not closed before the end of the file');
+            throw $this->fail(
+                'E_PARSE_UNCLOSED_BLOCK',
+                $frame['openStart'],
+                $frame['openStart'] + 1,
+                'block is not closed before the end of the file',
+            );
         }
         $removed = Standalone::ranges($this->text, $this->tags);
 
-        return ['type' => 'Template', 'name' => $this->source->name, 'body' => $this->finalize($this->root, $removed), 'comments' => $this->comments];
+        return [
+            'type' => 'Template',
+            'name' => $this->source->name,
+            'body' => $this->finalize($this->root, $removed),
+            'comments' => $this->comments,
+        ];
     }
 
     private function scan(): void
@@ -123,7 +149,11 @@ final class Parser
         while ($index < $length) {
             $char = $text[$index];
             $open = $this->open;
-            if ($char === '\\' && ($text[$index + 1] ?? null) === $open && Scanner::startsTag($text, $index + 1, $this->close)) {
+            if (
+                $char === '\\'
+                && ($text[$index + 1] ?? null) === $open
+                && Scanner::startsTag($text, $index + 1, $this->close)
+            ) {
                 $this->flushText($textStart, $index);
                 $this->pushText($index, $index + 2, $open);
                 $index += 2;
@@ -178,7 +208,10 @@ final class Parser
     {
         $text = $this->text;
         $sigil = Scanner::sigilAfter($text, $open);
-        $bodyStart = $sigil === null ? $open + 1 : Scanner::skipHorizontalSpace($text, Scanner::skipHorizontalSpace($text, $open + 1) + strlen($sigil));
+        $bodyStart = $sigil === null ? $open + 1 : Scanner::skipHorizontalSpace(
+            $text,
+            Scanner::skipHorizontalSpace($text, $open + 1) + strlen($sigil),
+        );
         $firstTag = !$this->sawTag;
         $this->sawTag = true;
         $this->tagParsers = [];
@@ -203,14 +236,25 @@ final class Parser
                 $parser = $this->expressionParser($open, $closeCount, $bodyStart);
                 $test = $parser->parseExpression();
                 $end = $this->finishTag($start, $wrapper, $parser->expectClose());
-                $node = ['type' => 'If', 'branches' => [['test' => $test, 'body' => [], 'span' => [$start, $end]]], 'else' => null, 'span' => [$start, $end]];
+                $node = [
+                    'type' => 'If',
+                    'branches' => [['test' => $test, 'body' => [], 'span' => [$start, $end]]],
+                    'else' => null,
+                    'span' => [$start, $end],
+                ];
                 $this->frames[] = ['node' => $node, 'items' => [], 'hasElse' => false, 'openStart' => $start];
                 break;
             case '?#':
                 $parser = $this->expressionParser($open, $closeCount, $bodyStart);
                 $id = $parser->expect('IDENT');
                 $end = $this->finishTag($start, $wrapper, $parser->expectClose());
-                $node = ['type' => 'IfBlock', 'id' => $id->value, 'body' => [], 'else' => null, 'span' => [$start, $end]];
+                $node = [
+                    'type' => 'IfBlock',
+                    'id' => $id->value,
+                    'body' => [],
+                    'else' => null,
+                    'span' => [$start, $end],
+                ];
                 $this->frames[] = ['node' => $node, 'items' => [], 'hasElse' => false, 'openStart' => $start];
                 break;
             case ':?':
@@ -219,7 +263,12 @@ final class Parser
                     throw $this->fail('E_PARSE_ELSE_OUTSIDE_BLOCK', $start, $start + 1, '"{:?}" outside of a block');
                 }
                 if ($this->frames[$frameIndex]['node']['type'] !== 'If') {
-                    throw $this->fail('E_PARSE_ELSEIF_NOT_IN_IF', $start, $start + 1, '"{:?}" inside a loop or if-block');
+                    throw $this->fail(
+                        'E_PARSE_ELSEIF_NOT_IN_IF',
+                        $start,
+                        $start + 1,
+                        '"{:?}" inside a loop or if-block',
+                    );
                 }
                 if ($this->frames[$frameIndex]['hasElse']) {
                     throw $this->fail('E_PARSE_ELSEIF_AFTER_ELSE', $start, $start + 1, '"{:?}" after "{:}"');
@@ -228,7 +277,11 @@ final class Parser
                 $test = $parser->parseExpression();
                 $end = $this->finishTag($start, $wrapper, $parser->expectClose());
                 $this->storeBranch($frameIndex);
-                $this->frames[$frameIndex]['node']['branches'][] = ['test' => $test, 'body' => [], 'span' => [$start, $end]];
+                $this->frames[$frameIndex]['node']['branches'][] = [
+                    'test' => $test,
+                    'body' => [],
+                    'span' => [$start, $end],
+                ];
                 $this->frames[$frameIndex]['items'] = [];
                 break;
             case ':':
@@ -286,7 +339,14 @@ final class Parser
         $kind = $assignment ? 'assignment' : self::KINDS[$sigil];
         $tagBodyStart = $open + 1;
         $tagBodyEnd = $this->closeStart($wrapper, $closeCount, $end);
-        $this->tags[] = ['start' => $start, 'end' => $end, 'echo' => $echo, 'kind' => $kind, 'bodyStart' => $tagBodyStart, 'bodyEnd' => $tagBodyEnd];
+        $this->tags[] = [
+            'start' => $start,
+            'end' => $end,
+            'echo' => $echo,
+            'kind' => $kind,
+            'bodyStart' => $tagBodyStart,
+            'bodyEnd' => $tagBodyEnd,
+        ];
         if ($kind === 'comment') {
             $this->tokens[] = ['start' => $start, 'end' => $end, 'kind' => 'comment'];
 
@@ -335,7 +395,10 @@ final class Parser
      */
     private static function expressionTokens(ExpressionParser $parser): array
     {
-        $tokens = array_values(array_filter($parser->consumed(), static fn (Token $token): bool => $token->type !== 'CLOSE' && $token->type !== 'EOF'));
+        $tokens = array_values(array_filter(
+            $parser->consumed(),
+            static fn (Token $token): bool => $token->type !== 'CLOSE' && $token->type !== 'EOF',
+        ));
         $result = [];
         foreach ($tokens as $index => $token) {
             $previous = $tokens[$index - 1] ?? null;
@@ -417,7 +480,12 @@ final class Parser
             throw $this->fail('E_PARSE_UNTERMINATED_TAG', $open, $open + 1, 'tag is not terminated');
         }
 
-        throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $at, $at + 1, 'unexpected ' . json_encode($this->text[$at]) . ' before the end of the tag');
+        throw $this->fail(
+            'E_PARSE_UNEXPECTED_TOKEN',
+            $at,
+            $at + 1,
+            'unexpected ' . json_encode($this->text[$at]) . ' before the end of the tag',
+        );
     }
 
     /**
@@ -430,7 +498,12 @@ final class Parser
         }
         $at = Scanner::skipHorizontalSpace($this->text, $afterClose);
         if (substr($this->text, $at, strlen($wrapper[1])) !== $wrapper[1]) {
-            throw $this->fail('E_PARSE_INVALID_WRAPPER', $start, $start + strlen($wrapper[0]), 'wrapped tag is not followed by ' . json_encode($wrapper[1]));
+            throw $this->fail(
+                'E_PARSE_INVALID_WRAPPER',
+                $start,
+                $start + strlen($wrapper[0]),
+                'wrapped tag is not followed by ' . json_encode($wrapper[1]),
+            );
         }
 
         return $at + strlen($wrapper[1]);
@@ -466,14 +539,26 @@ final class Parser
         $name = $head[1];
         $nameStart = $bodyStart + (int) strpos($head[0], $name);
         if (isset(self::RESERVED[$name])) {
-            throw $this->fail('E_PARSE_RESERVED_NAME', $nameStart, $nameStart + strlen($name), "{$name} is a reserved word");
+            throw $this->fail(
+                'E_PARSE_RESERVED_NAME',
+                $nameStart,
+                $nameStart + strlen($name),
+                "{$name} is a reserved word",
+            );
         }
         $this->mark($nameStart, $nameStart + strlen($name), 'variable');
         $this->mark($bodyStart + strlen($head[0]) - 1, $bodyStart + strlen($head[0]), 'operator');
         $parser = $this->expressionParser($open, $closeCount, $bodyStart + strlen($head[0]));
         $iter = $parser->parseExpression();
         $end = $this->finishTag($start, $wrapper, $parser->expectClose());
-        $node = ['type' => 'For', 'name' => $name, 'iter' => $iter, 'body' => [], 'empty' => null, 'span' => [$start, $end]];
+        $node = [
+            'type' => 'For',
+            'name' => $name,
+            'iter' => $iter,
+            'body' => [],
+            'empty' => null,
+            'span' => [$start, $end],
+        ];
         $this->frames[] = ['node' => $node, 'items' => [], 'hasElse' => false, 'openStart' => $start];
 
         return $end;
@@ -491,7 +576,12 @@ final class Parser
         $operator = $head[2];
         $nameStart = $bodyStart + strpos($head[0], $name);
         if (isset(self::RESERVED[$name])) {
-            throw $this->fail('E_PARSE_RESERVED_NAME', $nameStart, $nameStart + strlen($name), "{$name} is a reserved word");
+            throw $this->fail(
+                'E_PARSE_RESERVED_NAME',
+                $nameStart,
+                $nameStart + strlen($name),
+                "{$name} is a reserved word",
+            );
         }
         $variable = Ast::variable($name, $nameStart, $nameStart + strlen($name));
         $afterOperator = $bodyStart + strlen($head[0]);
@@ -505,7 +595,13 @@ final class Parser
             $parser = $this->expressionParser($open, $closeCount, $afterOperator);
             $value = $parser->parseExpression();
             $end = $this->finishTag($start, $wrapper, $parser->expectClose());
-            $expr = $operator === '=' ? $value : Ast::binary($operator[0], $variable, $value, $bodyStart, $parser->end());
+            $expr = $operator === '=' ? $value : Ast::binary(
+                $operator[0],
+                $variable,
+                $value,
+                $bodyStart,
+                $parser->end(),
+            );
         }
         $this->push(Ast::set($name, $expr, $start, $end));
 
@@ -515,9 +611,20 @@ final class Parser
     /**
      * @param array{0: string, 1: string}|null $wrapper
      */
-    private function parseDirective(int $start, int $open, int $closeCount, ?array $wrapper, int $bodyStart, bool $firstTag): int
-    {
-        $invalid = fn (string $message): TemplateError => $this->fail('E_PARSE_INVALID_DIRECTIVE', $start, $start + 1, $message);
+    private function parseDirective(
+        int $start,
+        int $open,
+        int $closeCount,
+        ?array $wrapper,
+        int $bodyStart,
+        bool $firstTag,
+    ): int {
+        $invalid = fn (string $message): TemplateError => $this->fail(
+            'E_PARSE_INVALID_DIRECTIVE',
+            $start,
+            $start + 1,
+            $message,
+        );
         if (!$firstTag || !$this->textBeforeFirstTagIsWhitespace) {
             throw $invalid('delimiter directive is not the first tag');
         }
@@ -530,7 +637,11 @@ final class Parser
         $valueStart = $index;
         $value = '';
         $sequence = $this->closeSequence($closeCount);
-        while ($index < strlen($this->text) && !Scanner::isHorizontalSpace($this->text[$index]) && substr($this->text, $index, strlen($sequence)) !== $sequence) {
+        while (
+            $index < strlen($this->text)
+            && !Scanner::isHorizontalSpace($this->text[$index])
+            && substr($this->text, $index, strlen($sequence)) !== $sequence
+        ) {
             $value .= $this->text[$index];
             $index++;
             if (strlen($value) > 2) {

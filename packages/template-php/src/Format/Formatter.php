@@ -27,10 +27,19 @@ final class Formatter
      * to keep the indentation of every line); `templateBlocks` (`indent` by default: template blocks add a level like
      * HTML elements; `flat`: they add none).
      *
-     * @param array{name?: string, delimiters?: string, range?: array{start: int, end: int}, indent?: string|null, templateBlocks?: 'indent'|'flat'} $options
+     * @param array{
+     *     name?: string,
+     *     delimiters?: string,
+     *     range?: array{start: int, end: int},
+     *     indent?: string|null,
+     *     templateBlocks?: 'indent'|'flat',
+     * } $options
      */
-    public static function format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer()): FormatResult
-    {
+    public static function format(
+        string $source,
+        array $options = [],
+        Analyzer $analyzer = new PackageAnalyzer(),
+    ): FormatResult {
         $indent = array_key_exists('indent', $options) ? $options['indent'] : '  ';
         if ($indent !== null && preg_match('/^(?: +|\t)$/D', $indent) !== 1) {
             throw new \InvalidArgumentException('indent must be a run of spaces or one tab');
@@ -46,13 +55,22 @@ final class Formatter
         try {
             $analysis = $analyzer->analyze($text, $name, $parseOptions);
         } catch (TemplateError $error) {
-            return FormatResult::error(new FormatError('parse', $error->errorCode, $error->errorLine, $error->errorCol, $error->getMessage()));
+            return FormatResult::error(new FormatError(
+                'parse',
+                $error->errorCode,
+                $error->errorLine,
+                $error->errorCol,
+                $error->getMessage(),
+            ));
         } catch (\InvalidArgumentException $error) {
             return FormatResult::error(new FormatError('parse', null, 0, 0, $error->getMessage()));
         }
 
         $shift = strlen($bom);
-        $range = isset($options['range']) ? ['start' => $options['range']['start'] - $shift, 'end' => $options['range']['end'] - $shift] : null;
+        $range = isset($options['range']) ? [
+            'start' => $options['range']['start'] - $shift,
+            'end' => $options['range']['end'] - $shift,
+        ] : null;
         $edits = [];
         foreach ($analysis['tags'] as $tag) {
             if ($tag['kind'] === 'directive') {
@@ -61,7 +79,11 @@ final class Formatter
             if ($range !== null && ($tag['start'] < $range['start'] || $tag['end'] > $range['end'])) {
                 continue;
             }
-            $tokens = array_values(array_filter($analysis['tokens'], static fn (array $token): bool => $token['start'] >= $tag['bodyStart'] && $token['end'] <= $tag['bodyEnd']));
+            $tokens = array_values(array_filter(
+                $analysis['tokens'],
+                static fn (array $token): bool => $token['start'] >= $tag['bodyStart']
+                    && $token['end'] <= $tag['bodyEnd'],
+            ));
             $body = Body::format($tag['kind'], $text, $tag['bodyStart'], $tag['bodyEnd'], $tokens);
             if ($body === null || $body === substr($text, $tag['bodyStart'], $tag['bodyEnd'] - $tag['bodyStart'])) {
                 continue;
@@ -73,7 +95,13 @@ final class Formatter
             if (isset($indentation['error'])) {
                 [$line, $col] = Source::position(Source::lineIndex($text), $indentation['error']['index']);
 
-                return FormatResult::error(new FormatError('html', null, $line, $col, $indentation['error']['message']));
+                return FormatResult::error(new FormatError(
+                    'html',
+                    null,
+                    $line,
+                    $col,
+                    $indentation['error']['message'],
+                ));
             }
             array_push($edits, ...$indentation['edits']);
             usort($edits, static fn (array $left, array $right): int => $left['start'] <=> $right['start']);
@@ -87,14 +115,29 @@ final class Formatter
         try {
             $after = $analyzer->parse($formatted, $name, $parseOptions);
         } catch (TemplateError $error) {
-            return FormatResult::error(new FormatError('invariant', null, $line, $col, 'formatted text does not parse: ' . $error->getMessage()));
+            return FormatResult::error(new FormatError(
+                'invariant',
+                null,
+                $line,
+                $col,
+                'formatted text does not parse: ' . $error->getMessage(),
+            ));
         }
         $before = $analysis['ast'];
         $same = $indent === null
             ? Invariant::sameTree($before, $after)
-            : Invariant::sameTree(Invariant::withoutLineIndentation($before), Invariant::withoutLineIndentation($after));
+            : Invariant::sameTree(
+                Invariant::withoutLineIndentation($before),
+                Invariant::withoutLineIndentation($after),
+            );
         if (!$same) {
-            return FormatResult::error(new FormatError('invariant', null, $line, $col, 'formatted text parses to a different AST'));
+            return FormatResult::error(new FormatError(
+                'invariant',
+                null,
+                $line,
+                $col,
+                'formatted text parses to a different AST',
+            ));
         }
 
         return FormatResult::text($bom . $formatted, true);

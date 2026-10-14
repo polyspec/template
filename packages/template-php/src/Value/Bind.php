@@ -145,7 +145,10 @@ final class Bind
         // A bound map is accepted only as assign and as definition data, and a bound map of the PHP
         // extension, another implementation, at no position (VAL-22).
         if ($input instanceof BoundMap || $input instanceof \Polyspec\Template\Native\BoundMap) {
-            throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a bound map is accepted only as assign and as definition data');
+            throw new BindError(
+                'E_DATA_UNSUPPORTED_TYPE',
+                'a bound map is accepted only as assign and as definition data',
+            );
         }
         if (is_object($input)) {
             // Preserve objects so public fields and methods remain available to templates.

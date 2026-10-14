@@ -75,10 +75,20 @@ final class Parser
             return $this->lexer->error('E_PARSE_UNTERMINATED_TAG', $open, $open + 1, 'tag is not terminated');
         }
         if ($token->type === 'EOF') {
-            return $this->lexer->error('E_PARSE_UNEXPECTED_TOKEN', $token->start, $token->start, 'unexpected end of input');
+            return $this->lexer->error(
+                'E_PARSE_UNEXPECTED_TOKEN',
+                $token->start,
+                $token->start,
+                'unexpected end of input',
+            );
         }
 
-        return $this->lexer->error('E_PARSE_UNEXPECTED_TOKEN', $token->start, $token->end, 'unexpected token ' . json_encode($token->value));
+        return $this->lexer->error(
+            'E_PARSE_UNEXPECTED_TOKEN',
+            $token->start,
+            $token->end,
+            'unexpected token ' . json_encode($token->value),
+        );
     }
 
     public function expect(string $type): Token
@@ -124,7 +134,12 @@ final class Parser
         $this->depth++;
         if ($this->depth > self::DEPTH_LIMIT) {
             $token = $this->peek();
-            throw $this->lexer->error('E_RUNTIME_LIMIT', $token->start, $token->end, 'expression nesting exceeds ' . self::DEPTH_LIMIT);
+            throw $this->lexer->error(
+                'E_RUNTIME_LIMIT',
+                $token->start,
+                $token->end,
+                'expression nesting exceeds ' . self::DEPTH_LIMIT,
+            );
         }
     }
 
@@ -488,7 +503,12 @@ final class Parser
                 $mapEntries[] = $entry;
             } elseif ($entry['value'] === null) {
                 $keyStart = $entry['key']['span'][0];
-                throw $this->lexer->error('E_PARSE_UNEXPECTED_TOKEN', $keyStart, $keyStart + 1, 'map literal entry without "=>"');
+                throw $this->lexer->error(
+                    'E_PARSE_UNEXPECTED_TOKEN',
+                    $keyStart,
+                    $keyStart + 1,
+                    'map literal entry without "=>"',
+                );
             } else {
                 $mapEntries[] = ['key' => $entry['key'], 'value' => $entry['value']];
             }

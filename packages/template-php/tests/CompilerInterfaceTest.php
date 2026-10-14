@@ -20,7 +20,7 @@ final class CompilerInterfaceTest extends TestCase
     /** Compares PHP declarations with the manifest through Reflection. */
     public function testRuntimeDeclarationsMatchManifest(): void
     {
-        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../template-compiler/interface.json';
+        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__ . '/../../template-compiler/interface.json';
         $manifest = Support::readJson($manifestPath);
         $contract = $manifest['runtimeContract'];
         $program = new \ReflectionClass(Program::class);
@@ -30,7 +30,10 @@ final class CompilerInterfaceTest extends TestCase
             $program->getMethods(\ReflectionMethod::IS_PUBLIC),
         ));
         foreach ($contract['Program']['operations'] as $operation) {
-            self::assertSame(count($operation['parameters']), $program->getMethod($operation['name'])->getNumberOfParameters());
+            self::assertSame(
+                count($operation['parameters']),
+                $program->getMethod($operation['name'])->getNumberOfParameters(),
+            );
         }
 
         $engine = new \ReflectionClass(Engine::class);
@@ -41,7 +44,10 @@ final class CompilerInterfaceTest extends TestCase
         ));
         self::assertSame($contract['Engine']['operations'], array_values(array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),
-            array_filter($engine->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
+            array_filter(
+                $engine->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
         )));
 
         $ast = new \ReflectionClass(AstProgram::class);
@@ -53,10 +59,16 @@ final class CompilerInterfaceTest extends TestCase
         self::assertFalse($bindings->isAbstract());
         self::assertSame(array_column($contract['RuntimeBindings']['operations'], 'name'), array_values(array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),
-            array_filter($bindings->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
+            array_filter(
+                $bindings->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
         )));
         foreach ($contract['RuntimeBindings']['operations'] as $operation) {
-            self::assertSame(count($operation['parameters']), $bindings->getMethod($operation['name'])->getNumberOfParameters());
+            self::assertSame(
+                count($operation['parameters']),
+                $bindings->getMethod($operation['name'])->getNumberOfParameters(),
+            );
         }
 
         $services = new \ReflectionClass(RuntimeServices::class);
@@ -66,7 +78,10 @@ final class CompilerInterfaceTest extends TestCase
             $services->getMethods(\ReflectionMethod::IS_PUBLIC),
         ));
         foreach ($contract['RuntimeServices']['operations'] as $operation) {
-            self::assertSame(count($operation['parameters']), $services->getMethod($operation['name'])->getNumberOfParameters());
+            self::assertSame(
+                count($operation['parameters']),
+                $services->getMethod($operation['name'])->getNumberOfParameters(),
+            );
         }
 
         $runtime = new \ReflectionClass(RuntimeEnvironment::class);
@@ -78,10 +93,16 @@ final class CompilerInterfaceTest extends TestCase
         ));
         self::assertSame($manifest['languages']['php']['runtimeEnvironmentOperations'], array_values(array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),
-            array_filter($runtime->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
+            array_filter(
+                $runtime->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
         )));
         foreach ($contract['RuntimeEnvironment']['operations'] as $operation) {
-            self::assertSame(count($operation['parameters']), $runtime->getMethod($operation['name'])->getNumberOfParameters());
+            self::assertSame(
+                count($operation['parameters']),
+                $runtime->getMethod($operation['name'])->getNumberOfParameters(),
+            );
         }
         foreach ([Frame::class => 'frameFields', Scope::class => 'scopeFields'] as $class => $mapping) {
             self::assertSame($manifest['languages']['php'][$mapping], array_map(
@@ -92,7 +113,10 @@ final class CompilerInterfaceTest extends TestCase
         $scope = new \ReflectionClass(Scope::class);
         self::assertSame($manifest['languages']['php']['scopeOperations'], array_values(array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),
-            array_filter($scope->getMethods(\ReflectionMethod::IS_PUBLIC), static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct'),
+            array_filter(
+                $scope->getMethods(\ReflectionMethod::IS_PUBLIC),
+                static fn (\ReflectionMethod $method): bool => $method->getName() !== '__construct',
+            ),
         )));
     }
 
@@ -102,14 +126,17 @@ final class CompilerInterfaceTest extends TestCase
      */
     public function testBoundMapDeclarationsMatchManifest(): void
     {
-        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../template-compiler/interface.json';
+        $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__ . '/../../template-compiler/interface.json';
         $manifest = Support::readJson($manifestPath);
         $mapping = $manifest['languages']['php']['boundMap'];
         $type = new \ReflectionClass($mapping['type']);
         self::assertTrue($type->isFinal());
         self::assertFalse($type->isInstantiable());
         self::assertFalse($type->isCloneable());
-        $public = array_map(static fn (\ReflectionMethod $method): string => $method->getName(), $type->getMethods(\ReflectionMethod::IS_PUBLIC));
+        $public = array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            $type->getMethods(\ReflectionMethod::IS_PUBLIC),
+        );
         sort($public);
         $expected = [...array_values($mapping['operations']), '__unserialize'];
         sort($expected);
@@ -117,6 +144,12 @@ final class CompilerInterfaceTest extends TestCase
         foreach ($mapping['operations'] as $name) {
             self::assertTrue($type->getMethod($name)->isStatic());
         }
-        self::assertSame([], array_map(static fn (\ReflectionProperty $property): string => $property->getName(), $type->getProperties(\ReflectionProperty::IS_PUBLIC)));
+        self::assertSame(
+            [],
+            array_map(
+                static fn (\ReflectionProperty $property): string => $property->getName(),
+                $type->getProperties(\ReflectionProperty::IS_PUBLIC),
+            ),
+        );
     }
 }

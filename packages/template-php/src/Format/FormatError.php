@@ -11,7 +11,8 @@ final class FormatError
 {
     /**
      * @param 'parse'|'invariant'|'html' $reason `parse`: the source does not parse. `invariant`: the formatted text
-     *        does not parse to the same AST. `html`: the HTML structure is not balanced, so the lines cannot be indented.
+     *        does not parse to the same AST. `html`: the HTML structure is not balanced, so the lines cannot be
+     *        indented.
      * @param string|null $code error code of the parser, or null
      * @param int $line 1-based line of the error position
      * @param int $col 1-based byte column of the error position, as in parser errors (ERR-1)
@@ -30,6 +31,12 @@ final class FormatError
      */
     public function toArray(): array
     {
-        return ['reason' => $this->reason, 'code' => $this->code, 'line' => $this->line, 'col' => $this->col, 'message' => $this->message];
+        return [
+            'reason' => $this->reason,
+            'code' => $this->code,
+            'line' => $this->line,
+            'col' => $this->col,
+            'message' => $this->message,
+        ];
     }
 }

@@ -99,7 +99,10 @@ final class ExprFixturesTest extends TestCase
         self::assertSame(Support::normalize($case['ast']), Support::normalize(Support::json(Ast::toJson($ast))));
         foreach ($case['cases'] ?? [] as $evaluation) {
             $value = Support::plain(self::evaluate($ast, $evaluation['data']));
-            self::assertSame(Support::normalize($evaluation['value']), Support::normalize(Support::json(json_encode($value, JSON_THROW_ON_ERROR))));
+            self::assertSame(
+                Support::normalize($evaluation['value']),
+                Support::normalize(Support::json(json_encode($value, JSON_THROW_ON_ERROR))),
+            );
         }
     }
 }

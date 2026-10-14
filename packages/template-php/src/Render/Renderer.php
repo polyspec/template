@@ -47,7 +47,8 @@ final class Renderer
                 return;
             case 'If':
                 foreach ($node['branches'] as $branch) {
-                    if ($this->evaluator->runtime->truthy($this->evaluator->evaluate($branch['test'], $frame, $scope))) {
+                    $test = $this->evaluator->evaluate($branch['test'], $frame, $scope);
+                    if ($this->evaluator->runtime->truthy($test)) {
                         $this->renderNodes($branch['body'], $frame, $scope);
 
                         return;
@@ -108,7 +109,14 @@ final class Renderer
             foreach ($entries as $index => [$key, $value]) {
                 $this->context->iterations++;
                 $this->evaluator->runtime->limit('iteration', $this->context->iterations, $frame, $node['span']);
-                $meta = ['index' => $index, 'key' => $key, 'value' => $value, 'first' => $index === 0, 'last' => $index === $size - 1, 'size' => $size];
+                $meta = [
+                    'index' => $index,
+                    'key' => $key,
+                    'value' => $value,
+                    'first' => $index === 0,
+                    'last' => $index === $size - 1,
+                    'size' => $size,
+                ];
                 $scope->loops[$name] = [...$stackBefore, $meta];
                 $scope->locals->set($name, $value);
                 $this->renderNodes($node['body'], $frame, $scope);
@@ -130,7 +138,12 @@ final class Renderer
     {
         $name = Path::resolve($frame->name, $path);
         if ($name === null) {
-            throw $this->context->fail('E_LOAD_OUTSIDE_ROOT', $frame, $span, json_encode($path) . ' leaves the loader root');
+            throw $this->context->fail(
+                'E_LOAD_OUTSIDE_ROOT',
+                $frame,
+                $span,
+                json_encode($path) . ' leaves the loader root',
+            );
         }
 
         return $name;
@@ -160,7 +173,12 @@ final class Renderer
         if ($node['id'] !== null && $node['path'] === null) {
             $entry = $this->context->registry[$node['id']] ?? null;
             if ($entry === null) {
-                throw $this->context->fail('E_RUNTIME_BLOCK_UNDEFINED', $frame, $node['span'], 'define ' . $node['id'] . ' is not registered');
+                throw $this->context->fail(
+                    'E_RUNTIME_BLOCK_UNDEFINED',
+                    $frame,
+                    $node['span'],
+                    'define ' . $node['id'] . ' is not registered',
+                );
             }
         } else {
             $name = $this->resolve((string) $node['path'], $frame, $node['span']);
@@ -168,7 +186,12 @@ final class Renderer
                 $registered = $this->context->registry[$node['id']] ?? null;
                 if ($registered !== null) {
                     if (isset($registered['html']) || $registered['template'] !== $name) {
-                        throw $this->context->fail('E_RUNTIME_BLOCK_REDEFINED', $frame, $node['span'], 'define ' . $node['id'] . ' is registered with a different template');
+                        throw $this->context->fail(
+                            'E_RUNTIME_BLOCK_REDEFINED',
+                            $frame,
+                            $node['span'],
+                            'define ' . $node['id'] . ' is registered with a different template',
+                        );
                     }
                     $entry = $registered;
                 } else {
@@ -196,7 +219,11 @@ final class Renderer
         $template = $this->program->loadTemplate($entry['template'], $frame, $node['span']);
         $this->context->enter($entry['template'], $frame, $node['span']);
         try {
-            $this->renderNodes($template['ast']['body'], new Frame($template['ast']['name'], $template['lines'], $data), new Scope());
+            $this->renderNodes(
+                $template['ast']['body'],
+                new Frame($template['ast']['name'], $template['lines'], $data),
+                new Scope(),
+            );
         } finally {
             $this->context->leave();
         }

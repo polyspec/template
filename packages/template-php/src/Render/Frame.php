@@ -20,5 +20,4 @@ final class Frame
         public readonly MapValue $context,
     ) {
     }
-
 }

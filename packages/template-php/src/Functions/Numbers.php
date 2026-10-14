@@ -57,11 +57,27 @@ final class Numbers
 
                 return Number::round(Helpers::number($a[0]), $places);
             }],
-            'floor' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => self::finite(floor(Helpers::number($a[0])))],
-            'ceil' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => self::finite(ceil(Helpers::number($a[0])))],
+            'floor' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => self::finite(floor(Helpers::number($a[0]))),
+            ],
+            'ceil' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => self::finite(ceil(Helpers::number($a[0]))),
+            ],
             'abs' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => abs(Helpers::number($a[0]))],
-            'min' => ['min' => 1, 'max' => PHP_INT_MAX, 'call' => static fn (array $a) => min(array_map(static fn ($v) => self::requireNumber($v, 'min'), $a))],
-            'max' => ['min' => 1, 'max' => PHP_INT_MAX, 'call' => static fn (array $a) => max(array_map(static fn ($v) => self::requireNumber($v, 'max'), $a))],
+            'min' => [
+                'min' => 1,
+                'max' => PHP_INT_MAX,
+                'call' => static fn (array $a) => min(array_map(static fn ($v) => self::requireNumber($v, 'min'), $a)),
+            ],
+            'max' => [
+                'min' => 1,
+                'max' => PHP_INT_MAX,
+                'call' => static fn (array $a) => max(array_map(static fn ($v) => self::requireNumber($v, 'max'), $a)),
+            ],
             'num' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => Helpers::number($a[0])],
         ];
     }

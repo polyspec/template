@@ -26,11 +26,16 @@ final class Expression
         }
         $unary = [];
         foreach ($tokens as $index => $token) {
-            $unary[$index] = $token['text'] === '!' || ($token['text'] === '-' && !self::endsOperand($tokens[$index - 1] ?? null));
+            $unary[$index] = $token['text'] === '!'
+                || ($token['text'] === '-' && !self::endsOperand($tokens[$index - 1] ?? null));
         }
         $output = $tokens[0]['text'];
         for ($index = 1; $index < count($tokens); $index++) {
-            $output .= self::separator($tokens[$index - 1], $tokens[$index], $unary[$index - 1]) . $tokens[$index]['text'];
+            $output .= self::separator(
+                $tokens[$index - 1],
+                $tokens[$index],
+                $unary[$index - 1],
+            ) . $tokens[$index]['text'];
         }
 
         return $output;
@@ -43,7 +48,10 @@ final class Expression
      */
     private static function isName(array $token): bool
     {
-        return $token['kind'] === 'variable' || ($token['kind'] === 'function' && !str_starts_with($token['text'], '.'));
+        return $token['kind'] === 'variable' || ($token['kind'] === 'function' && !str_starts_with(
+            $token['text'],
+            '.',
+        ));
     }
 
     /**

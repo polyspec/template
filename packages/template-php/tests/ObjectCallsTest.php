@@ -16,6 +16,7 @@ final class ObjectCallsTest extends TestCase
         $program = new AstProgram(new ArrayLoader(['page.tpl' => '{= order.total}|{= order.status_label("ready")}']));
         $order = new class () {
             public float $total = 12.0;
+            // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps -- the template calls the method by this name
             public function status_label(string $prefix): string
             {
                 return $prefix . ':' . (int) $this->total;

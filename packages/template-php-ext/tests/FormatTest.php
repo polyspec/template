@@ -33,12 +33,18 @@ final class FormatTest extends TestCase
     {
         $error = Formatter::format("<p>\n  {? a}\n</p>", ['name' => 'x.tpl'], new NativeAnalyzer())->error;
         $this->assertNotNull($error);
-        $this->assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error->reason, $error->code, $error->line, $error->col]);
+        $this->assertSame(
+            ['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3],
+            [$error->reason, $error->code, $error->line, $error->col],
+        );
     }
 
     public function testFormatsWithTheDelimiterOption(): void
     {
-        $this->assertSame("[= a[0] + 1]\n[= [1, 2][1]]", Formatter::format("[= a[0]+1]\n[= [1,2][1]]", ['delimiters' => '[]'], new NativeAnalyzer())->text);
+        $this->assertSame(
+            "[= a[0] + 1]\n[= [1, 2][1]]",
+            Formatter::format("[= a[0]+1]\n[= [1,2][1]]", ['delimiters' => '[]'], new NativeAnalyzer())->text,
+        );
     }
 
     #[DataProvider('caseProvider')]
@@ -53,7 +59,14 @@ final class FormatTest extends TestCase
             $result = Formatter::format($source, $options, $analyzer);
             $results[$mode] = $result->error === null
                 ? ['text' => $result->text]
-                : ['error' => ['reason' => $result->error->reason, 'code' => $result->error->code, 'line' => $result->error->line, 'col' => $result->error->col]];
+                : [
+                    'error' => [
+                        'reason' => $result->error->reason,
+                        'code' => $result->error->code,
+                        'line' => $result->error->line,
+                        'col' => $result->error->col,
+                    ],
+                ];
             if ($result->error !== null) {
                 $this->assertContains($result->error->reason, ['parse', 'html']);
                 continue;
@@ -61,7 +74,12 @@ final class FormatTest extends TestCase
             $text = (string) $result->text;
             $before = Engine::parse($source, 'input.tpl', $parseOptions);
             $after = Engine::parse($text, 'input.tpl', $parseOptions);
-            $this->assertTrue($mode === 'keep' ? Invariant::sameTree($before, $after) : Invariant::sameTree(Invariant::withoutLineIndentation($before), Invariant::withoutLineIndentation($after)));
+            $this->assertTrue(
+                $mode === 'keep' ? Invariant::sameTree($before, $after) : Invariant::sameTree(
+                    Invariant::withoutLineIndentation($before),
+                    Invariant::withoutLineIndentation($after),
+                ),
+            );
             $this->assertEquals(new FormatResult($text, false, null), Formatter::format($text, $options, $analyzer));
         }
         $expected = Support::readOptional($directory . '/expected.format.json');

@@ -40,7 +40,7 @@ final class RuntimeEnvironment implements RuntimeServices
     public function register(string $name, callable $function): void
     {
         if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name) !== 1) {
-            throw new \InvalidArgumentException(json_encode($name).' is not an identifier');
+            throw new \InvalidArgumentException(json_encode($name) . ' is not an identifier');
         }
         if (Registry::isBuiltin($name)) {
             throw new \InvalidArgumentException("{$name} is a built-in function");
@@ -63,15 +63,18 @@ final class RuntimeEnvironment implements RuntimeServices
     /** Registers one logical class function used by `Class::method(...)`. */
     public function registerClass(string $className, string $method, callable $function): void
     {
-        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $className) !== 1 || preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $method) !== 1) {
+        if (
+            preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $className) !== 1
+            || preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $method) !== 1
+        ) {
             throw new \InvalidArgumentException('class function names must be identifiers');
         }
-        $this->classFunctions[$className.'::'.$method] = $function;
+        $this->classFunctions[$className . '::' . $method] = $function;
     }
 
     /** Returns one logical class function. */
     public function classFunction(string $className, string $method): ?callable
     {
-        return $this->classFunctions[$className.'::'.$method] ?? null;
+        return $this->classFunctions[$className . '::' . $method] ?? null;
     }
 }

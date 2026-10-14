@@ -42,8 +42,14 @@ final class ParserTest extends TestCase
         self::assertSame('Echo', AstProgram::parse(';= a;', 't.tpl', ['delimiters' => ';;'])['body'][0]['type']);
         $ast = AstProgram::parse("{% delimiter [] }\n[= a[0]]\n", 't.tpl');
         self::assertSame(['Echo', 'Text'], array_column($ast['body'], 'type'));
-        self::assertSame('E_PARSE_INVALID_DIRECTIVE', self::codeOf(static fn () => AstProgram::parse('{= a}{% delimiter ;;}', 't.tpl')));
-        self::assertSame('E_PARSE_INVALID_DIRECTIVE', self::codeOf(static fn () => AstProgram::parse('{% delimiter ab}', 't.tpl')));
+        self::assertSame(
+            'E_PARSE_INVALID_DIRECTIVE',
+            self::codeOf(static fn () => AstProgram::parse('{= a}{% delimiter ;;}', 't.tpl')),
+        );
+        self::assertSame(
+            'E_PARSE_INVALID_DIRECTIVE',
+            self::codeOf(static fn () => AstProgram::parse('{% delimiter ab}', 't.tpl')),
+        );
     }
 
     public function testBlockStructureErrors(): void
@@ -51,9 +57,18 @@ final class ParserTest extends TestCase
         self::assertSame('E_PARSE_UNEXPECTED_CLOSE', self::codeOf(static fn () => AstProgram::parse('{/}', 't.tpl')));
         self::assertSame('E_PARSE_UNCLOSED_BLOCK', self::codeOf(static fn () => AstProgram::parse('{? a}', 't.tpl')));
         self::assertSame('E_PARSE_ELSE_OUTSIDE_BLOCK', self::codeOf(static fn () => AstProgram::parse('{:}', 't.tpl')));
-        self::assertSame('E_PARSE_DUPLICATE_ELSE', self::codeOf(static fn () => AstProgram::parse('{? a}{:}{:}{/}', 't.tpl')));
-        self::assertSame('E_PARSE_ELSEIF_AFTER_ELSE', self::codeOf(static fn () => AstProgram::parse('{? a}{:}{:? b}{/}', 't.tpl')));
-        self::assertSame('E_PARSE_ELSEIF_NOT_IN_IF', self::codeOf(static fn () => AstProgram::parse('{?# a}{:? b}{/}', 't.tpl')));
+        self::assertSame(
+            'E_PARSE_DUPLICATE_ELSE',
+            self::codeOf(static fn () => AstProgram::parse('{? a}{:}{:}{/}', 't.tpl')),
+        );
+        self::assertSame(
+            'E_PARSE_ELSEIF_AFTER_ELSE',
+            self::codeOf(static fn () => AstProgram::parse('{? a}{:}{:? b}{/}', 't.tpl')),
+        );
+        self::assertSame(
+            'E_PARSE_ELSEIF_NOT_IN_IF',
+            self::codeOf(static fn () => AstProgram::parse('{?# a}{:? b}{/}', 't.tpl')),
+        );
     }
 
     public function testSpansCountBytes(): void

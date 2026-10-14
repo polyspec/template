@@ -35,8 +35,16 @@ final class Strings
     public static function table(): array
     {
         return [
-            'upper' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => strtoupper(Helpers::string($a[0], 'upper'))],
-            'lower' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => strtolower(Helpers::string($a[0], 'lower'))],
+            'upper' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => strtoupper(Helpers::string($a[0], 'upper')),
+            ],
+            'lower' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => strtolower(Helpers::string($a[0], 'lower')),
+            ],
             'trim' => ['min' => 1, 'max' => 2, 'call' => static fn (array $a) => self::trimChars(
                 Helpers::string($a[0], 'trim'),
                 array_key_exists(1, $a) ? Helpers::string($a[1], 'trim') : " \t\r\n",
@@ -87,8 +95,22 @@ final class Strings
 
                 throw Helpers::typeError('contains requires a string or a list');
             }],
-            'starts_with' => ['min' => 2, 'max' => 2, 'call' => static fn (array $a) => str_starts_with(Helpers::string($a[0], 'starts_with'), Helpers::string($a[1], 'starts_with'))],
-            'ends_with' => ['min' => 2, 'max' => 2, 'call' => static fn (array $a) => str_ends_with(Helpers::string($a[0], 'ends_with'), Helpers::string($a[1], 'ends_with'))],
+            'starts_with' => [
+                'min' => 2,
+                'max' => 2,
+                'call' => static fn (array $a) => str_starts_with(
+                    Helpers::string($a[0], 'starts_with'),
+                    Helpers::string($a[1], 'starts_with'),
+                ),
+            ],
+            'ends_with' => [
+                'min' => 2,
+                'max' => 2,
+                'call' => static fn (array $a) => str_ends_with(
+                    Helpers::string($a[0], 'ends_with'),
+                    Helpers::string($a[1], 'ends_with'),
+                ),
+            ],
             'length' => ['min' => 1, 'max' => 1, 'call' => static function (array $a): float {
                 $value = $a[0];
                 if ($value === null) {

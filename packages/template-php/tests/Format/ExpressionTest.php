@@ -21,25 +21,138 @@ final class ExpressionTest extends TestCase
         $cases = [
             [[['a', 'variable'], ['+', 'operator'], ['b', 'variable']], 'a + b'],
             [[['-', 'operator'], ['a', 'variable'], ['-', 'operator'], ['-', 'operator'], ['1', 'number']], '-a - -1'],
-            [[['!', 'operator'], ['done', 'variable'], ['&&', 'operator'], ['(', 'operator'], ['x', 'variable'], ['||', 'operator'], ['y', 'variable'], [')', 'operator']], '!done && (x || y)'],
-            [[['f', 'function'], ['(', 'operator'], ['x', 'variable'], [',', 'operator'], ['g', 'function'], ['(', 'operator'], ['y', 'variable'], [')', 'operator'], [')', 'operator']], 'f(x, g(y))'],
-            [[['obj', 'variable'], ['.method', 'function'], ['(', 'operator'], ['1', 'number'], [')', 'operator']], 'obj.method(1)'],
-            [[['Order', 'variable'], ['::', 'operator'], ['total', 'function'], ['(', 'operator'], ['x', 'variable'], [')', 'operator']], 'Order::total(x)'],
-            [[['c', 'variable'], ['?', 'operator'], ['Order', 'variable'], ['::', 'operator'], ['total', 'function'], ['(', 'operator'], ['x', 'variable'], [')', 'operator'], [':', 'operator'], ['b', 'variable']], 'c ? Order::total(x) : b'],
-            [[['c', 'variable'], ['?', 'operator'], ['a', 'variable'], [':', 'operator'], ['b', 'variable']], 'c ? a : b'],
-            [[['c', 'variable'], ['?', 'operator'], ['d', 'variable'], ['?', 'operator'], ['e', 'variable'], [':', 'operator'], ['a', 'variable'], [':', 'operator'], ['b', 'variable']], 'c ? d ? e : a : b'],
+            [
+                [
+                    ['!', 'operator'],
+                    ['done', 'variable'],
+                    ['&&', 'operator'],
+                    ['(', 'operator'],
+                    ['x', 'variable'],
+                    ['||', 'operator'],
+                    ['y', 'variable'],
+                    [')', 'operator'],
+                ],
+                '!done && (x || y)',
+            ],
+            [
+                [
+                    ['f', 'function'],
+                    ['(', 'operator'],
+                    ['x', 'variable'],
+                    [',', 'operator'],
+                    ['g', 'function'],
+                    ['(', 'operator'],
+                    ['y', 'variable'],
+                    [')', 'operator'],
+                    [')', 'operator'],
+                ],
+                'f(x, g(y))',
+            ],
+            [
+                [['obj', 'variable'], ['.method', 'function'], ['(', 'operator'], ['1', 'number'], [')', 'operator']],
+                'obj.method(1)',
+            ],
+            [
+                [
+                    ['Order', 'variable'],
+                    ['::', 'operator'],
+                    ['total', 'function'],
+                    ['(', 'operator'],
+                    ['x', 'variable'],
+                    [')', 'operator'],
+                ],
+                'Order::total(x)',
+            ],
+            [
+                [
+                    ['c', 'variable'],
+                    ['?', 'operator'],
+                    ['Order', 'variable'],
+                    ['::', 'operator'],
+                    ['total', 'function'],
+                    ['(', 'operator'],
+                    ['x', 'variable'],
+                    [')', 'operator'],
+                    [':', 'operator'],
+                    ['b', 'variable'],
+                ],
+                'c ? Order::total(x) : b',
+            ],
+            [
+                [['c', 'variable'], ['?', 'operator'], ['a', 'variable'], [':', 'operator'], ['b', 'variable']],
+                'c ? a : b',
+            ],
+            [
+                [
+                    ['c', 'variable'],
+                    ['?', 'operator'],
+                    ['d', 'variable'],
+                    ['?', 'operator'],
+                    ['e', 'variable'],
+                    [':', 'operator'],
+                    ['a', 'variable'],
+                    [':', 'operator'],
+                    ['b', 'variable'],
+                ],
+                'c ? d ? e : a : b',
+            ],
             [[['a', 'variable'], ['?:', 'operator'], ['b', 'variable']], 'a ?: b'],
             [[['x', 'variable'], ['??', 'operator']], 'x ??'],
-            [[['f', 'function'], ['(', 'operator'], ['x', 'variable'], ['??', 'operator'], [')', 'operator']], 'f(x ??)'],
-            [[['x', 'variable'], ['|', 'operator'], ['slice', 'function'], ['(', 'operator'], ['0', 'number'], [',', 'operator'], ['10', 'number'], [')', 'operator']], 'x | slice(0, 10)'],
-            [[['[', 'operator'], ['1', 'number'], [',', 'operator'], ['...', 'operator'], ['rest', 'variable'], [',', 'operator'], [']', 'operator']], '[1, ...rest,]'],
-            [[['[', 'operator'], ["'a'", 'string'], ['=>', 'operator'], ['1', 'number'], [']', 'operator']], "['a' => 1]"],
-            [[['list', 'variable'], ['[', 'operator'], ['i', 'variable'], [']', 'operator'], ['.name', 'property']], 'list[i].name'],
+            [
+                [['f', 'function'], ['(', 'operator'], ['x', 'variable'], ['??', 'operator'], [')', 'operator']],
+                'f(x ??)',
+            ],
+            [
+                [
+                    ['x', 'variable'],
+                    ['|', 'operator'],
+                    ['slice', 'function'],
+                    ['(', 'operator'],
+                    ['0', 'number'],
+                    [',', 'operator'],
+                    ['10', 'number'],
+                    [')', 'operator'],
+                ],
+                'x | slice(0, 10)',
+            ],
+            [
+                [
+                    ['[', 'operator'],
+                    ['1', 'number'],
+                    [',', 'operator'],
+                    ['...', 'operator'],
+                    ['rest', 'variable'],
+                    [',', 'operator'],
+                    [']', 'operator'],
+                ],
+                '[1, ...rest,]',
+            ],
+            [
+                [['[', 'operator'], ["'a'", 'string'], ['=>', 'operator'], ['1', 'number'], [']', 'operator']],
+                "['a' => 1]",
+            ],
+            [
+                [['list', 'variable'], ['[', 'operator'], ['i', 'variable'], [']', 'operator'], ['.name', 'property']],
+                'list[i].name',
+            ],
             [[['a', 'variable'], ['.0', 'property'], ['.b', 'property']], 'a.0.b'],
             [[['x', 'variable'], ['in', 'keyword'], ['[', 'operator'], ['1', 'number'], [']', 'operator']], 'x in [1]'],
-            [[['x', 'variable'], ['in', 'keyword'], ['(', 'operator'], ['y', 'variable'], [')', 'operator']], 'x in (y)'],
+            [
+                [['x', 'variable'], ['in', 'keyword'], ['(', 'operator'], ['y', 'variable'], [')', 'operator']],
+                'x in (y)',
+            ],
             [[['row', 'variable'], ['.index_', 'property'], ['+', 'operator'], ['1', 'number']], 'row.index_ + 1'],
-            [[['(', 'operator'], ['-', 'operator'], ['1', 'number'], [')', 'operator'], ['*', 'operator'], ['2', 'number']], '(-1) * 2'],
+            [
+                [
+                    ['(', 'operator'],
+                    ['-', 'operator'],
+                    ['1', 'number'],
+                    [')', 'operator'],
+                    ['*', 'operator'],
+                    ['2', 'number'],
+                ],
+                '(-1) * 2',
+            ],
         ];
         foreach ($cases as [$tokens, $expected]) {
             yield $expected => [$tokens, $expected];
@@ -52,6 +165,11 @@ final class ExpressionTest extends TestCase
     #[DataProvider('cases')]
     public function testJoinsTokens(array $tokens, string $expected): void
     {
-        self::assertSame($expected, Expression::join(array_map(static fn (array $token): array => ['text' => $token[0], 'kind' => $token[1]], $tokens)));
+        self::assertSame(
+            $expected,
+            Expression::join(
+                array_map(static fn (array $token): array => ['text' => $token[0], 'kind' => $token[1]], $tokens),
+            ),
+        );
     }
 }

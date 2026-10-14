@@ -45,17 +45,34 @@ final class RuntimeBindings
         switch ($operator) {
             case '+':
                 if (Value::isCollection($left) || Value::isCollection($right)) {
-                    throw $this->error($frame, $span, 'E_RUNTIME_STRINGIFY', 'a list or map cannot be converted to text');
+                    throw $this->error(
+                        $frame,
+                        $span,
+                        'E_RUNTIME_STRINGIFY',
+                        'a list or map cannot be converted to text',
+                    );
                 }
                 if (Value::isString($left) || Value::isString($right)) {
-                    return $this->stringify($left, $frame, $span).$this->stringify($right, $frame, $span);
+                    return $this->stringify($left, $frame, $span) . $this->stringify($right, $frame, $span);
                 }
 
-                return $this->finite($this->number($left, $frame, $span) + $this->number($right, $frame, $span), $frame, $span);
+                return $this->finite(
+                    $this->number($left, $frame, $span) + $this->number($right, $frame, $span),
+                    $frame,
+                    $span,
+                );
             case '-':
-                return $this->finite($this->number($left, $frame, $span) - $this->number($right, $frame, $span), $frame, $span);
+                return $this->finite(
+                    $this->number($left, $frame, $span) - $this->number($right, $frame, $span),
+                    $frame,
+                    $span,
+                );
             case '*':
-                return $this->finite($this->number($left, $frame, $span) * $this->number($right, $frame, $span), $frame, $span);
+                return $this->finite(
+                    $this->number($left, $frame, $span) * $this->number($right, $frame, $span),
+                    $frame,
+                    $span,
+                );
             case '/':
                 $divisor = $this->number($right, $frame, $span);
                 if ($divisor == 0.0) {
@@ -74,10 +91,14 @@ final class RuntimeBindings
                 }
 
                 return fmod($dividend, $divisor);
-            case '==': return $this->equal($left, $right, false);
-            case '!=': return !$this->equal($left, $right, false);
-            case '===': return $this->equal($left, $right, true);
-            case '!==': return !$this->equal($left, $right, true);
+            case '==':
+                return $this->equal($left, $right, false);
+            case '!=':
+                return !$this->equal($left, $right, false);
+            case '===':
+                return $this->equal($left, $right, true);
+            case '!==':
+                return !$this->equal($left, $right, true);
             case '<':
             case '>':
             case '<=':
@@ -159,7 +180,12 @@ final class RuntimeBindings
     {
         $order = Value::compare($left, $right);
         if ($order === null) {
-            throw $this->error($frame, $span, 'E_RUNTIME_COMPARE', Value::typeOf($left) . ' and ' . Value::typeOf($right) . ' have no order');
+            throw $this->error(
+                $frame,
+                $span,
+                'E_RUNTIME_COMPARE',
+                Value::typeOf($left) . ' and ' . Value::typeOf($right) . ' have no order',
+            );
         }
 
         return $order;
@@ -193,7 +219,12 @@ final class RuntimeBindings
         $target = $reflection->getMethod($method);
         $arguments = HostArgument::list($args);
 
-        return $this->hostResult($method, static fn (): mixed => $target->invokeArgs($target->isStatic() ? null : $container, $arguments), $frame, $span);
+        return $this->hostResult(
+            $method,
+            static fn (): mixed => $target->invokeArgs($target->isStatic() ? null : $container, $arguments),
+            $frame,
+            $span,
+        );
     }
 
     /**
@@ -206,12 +237,22 @@ final class RuntimeBindings
     {
         $function = $this->context->services->classFunction($className, $method);
         if ($function === null) {
-            throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$className}::{$method} is not a function");
+            throw $this->error(
+                $frame,
+                $span,
+                'E_RUNTIME_UNKNOWN_FUNCTION',
+                "{$className}::{$method} is not a function",
+            );
         }
         $env = $this->context->env;
         $arguments = HostArgument::list($args);
 
-        return $this->hostResult("{$className}::{$method}", static fn (): mixed => $function($arguments, $env), $frame, $span);
+        return $this->hostResult(
+            "{$className}::{$method}",
+            static fn (): mixed => $function($arguments, $env),
+            $frame,
+            $span,
+        );
     }
 
     /**
@@ -262,7 +303,12 @@ final class RuntimeBindings
     public function depth(mixed $value, Frame $frame, array $span): mixed
     {
         if (!Bind::depthWithin($value, Bind::MAX_DEPTH)) {
-            throw $this->error($frame, $span, 'E_RUNTIME_LIMIT', 'a list or map literal nests deeper than ' . Bind::MAX_DEPTH . ' levels');
+            throw $this->error(
+                $frame,
+                $span,
+                'E_RUNTIME_LIMIT',
+                'a list or map literal nests deeper than ' . Bind::MAX_DEPTH . ' levels',
+            );
         }
 
         return $value;
@@ -327,8 +373,15 @@ final class RuntimeBindings
         if ($builtin !== null) {
             $count = count($args);
             if ($count < $builtin['min'] || $count > $builtin['max']) {
-                $accepts = $builtin['min'] === $builtin['max'] ? (string) $builtin['min'] : $builtin['min'] . ' to ' . $builtin['max'];
-                throw $this->error($frame, $span, 'E_RUNTIME_ARITY', "{$name} accepts {$accepts} arguments, got {$count}");
+                $accepts = $builtin['min'] === $builtin['max']
+                    ? (string) $builtin['min']
+                    : $builtin['min'] . ' to ' . $builtin['max'];
+                throw $this->error(
+                    $frame,
+                    $span,
+                    'E_RUNTIME_ARITY',
+                    "{$name} accepts {$accepts} arguments, got {$count}",
+                );
             }
             try {
                 return ($builtin['call'])($args, $this->context->env);

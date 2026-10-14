@@ -38,7 +38,10 @@ final class LoadFailureTest extends TestCase
             // the process cannot read it, and the process cannot read it exactly when it does not run as root.
             $readable = @file_get_contents($root . '/locked.tpl') !== false;
             $asRoot = posix_geteuid() === 0;
-            $codes = array_map(static fn (string $name): string => self::code(static fn () => $engine->render($name, [])), ['locked.tpl', 'folder.tpl', 'missing.tpl']);
+            $codes = array_map(
+                static fn (string $name): string => self::code(static fn () => $engine->render($name, [])),
+                ['locked.tpl', 'folder.tpl', 'missing.tpl'],
+            );
         } finally {
             chmod($root . '/locked.tpl', 0o600);
             unlink($root . '/locked.tpl');
@@ -52,10 +55,25 @@ final class LoadFailureTest extends TestCase
     public function testJsonTextThatIsNotOneDocumentIsInvalidJson(): void
     {
         $engine = new Engine(__DIR__ . '/templates');
-        $this->assertSame('E_DATA_INVALID_JSON', self::code(static fn () => $engine->renderJson('echo.tpl', '{"title": }')));
-        $this->assertSame('E_DATA_INVALID_JSON', self::code(static fn () => $engine->renderJson('echo.tpl', '{}', '{"a": ')));
-        $this->assertSame('E_DATA_INVALID_JSON', self::code(static fn () => $engine->renderJson('echo.tpl', '{}', null, '{"now": 1} x')));
-        $this->assertSame('E_DATA_INVALID_JSON', self::code(static fn () => $engine->renderJson('echo.tpl', '{"a": , "b": 1e19}')));
-        $this->assertSame('E_DATA_NUMBER_RANGE', self::code(static fn () => $engine->renderJson('echo.tpl', '{"a": 1e19, "b": }')));
+        $this->assertSame(
+            'E_DATA_INVALID_JSON',
+            self::code(static fn () => $engine->renderJson('echo.tpl', '{"title": }')),
+        );
+        $this->assertSame(
+            'E_DATA_INVALID_JSON',
+            self::code(static fn () => $engine->renderJson('echo.tpl', '{}', '{"a": ')),
+        );
+        $this->assertSame(
+            'E_DATA_INVALID_JSON',
+            self::code(static fn () => $engine->renderJson('echo.tpl', '{}', null, '{"now": 1} x')),
+        );
+        $this->assertSame(
+            'E_DATA_INVALID_JSON',
+            self::code(static fn () => $engine->renderJson('echo.tpl', '{"a": , "b": 1e19}')),
+        );
+        $this->assertSame(
+            'E_DATA_NUMBER_RANGE',
+            self::code(static fn () => $engine->renderJson('echo.tpl', '{"a": 1e19, "b": }')),
+        );
     }
 }

@@ -67,7 +67,8 @@ final class Scanner
     }
 
     /**
-     * Returns the wrapper [opener, closer] whose opener starts at $index and is followed by a wrapped tag start, or null.
+     * Returns the wrapper [opener, closer] whose opener starts at $index and is followed by a wrapped tag start, or
+     * null.
      *
      * @return array{0: string, 1: string}|null
      */
@@ -78,7 +79,11 @@ final class Scanner
                 continue;
             }
             $after = self::skipHorizontalSpace($text, $index + strlen($wrapper[0]));
-            if (($text[$after] ?? null) === $open && ($text[$after + 1] ?? null) === $open && self::startsTag($text, $after + 1, $close)) {
+            if (
+                ($text[$after] ?? null) === $open
+                && ($text[$after + 1] ?? null) === $open
+                && self::startsTag($text, $after + 1, $close)
+            ) {
                 return $wrapper;
             }
 

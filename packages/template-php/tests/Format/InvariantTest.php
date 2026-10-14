@@ -26,7 +26,9 @@ final class InvariantTest extends TestCase
     public static function inputs(): iterable
     {
         $root = Support::casesDir();
-        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
+        );
         $files = [];
         foreach ($iterator as $file) {
             if ($file instanceof \SplFileInfo && str_ends_with($file->getFilename(), '.tpl')) {
@@ -77,8 +79,16 @@ final class InvariantTest extends TestCase
             return;
         }
         $text = (string) $indented->text;
-        self::assertTrue(Invariant::sameTree(Invariant::withoutLineIndentation($before), Invariant::withoutLineIndentation(AstProgram::parse($text, $name, $parseOptions))));
-        self::assertSame(self::withoutIndentation(self::outsideTags($source, $parseOptions)), self::withoutIndentation(self::outsideTags($text, $parseOptions)));
+        self::assertTrue(
+            Invariant::sameTree(
+                Invariant::withoutLineIndentation($before),
+                Invariant::withoutLineIndentation(AstProgram::parse($text, $name, $parseOptions)),
+            ),
+        );
+        self::assertSame(
+            self::withoutIndentation(self::outsideTags($source, $parseOptions)),
+            self::withoutIndentation(self::outsideTags($text, $parseOptions)),
+        );
         self::assertEquals(new FormatResult($text, false, null), Formatter::format($text, $options));
     }
 
@@ -108,6 +118,9 @@ final class InvariantTest extends TestCase
      */
     private static function withoutIndentation(array $pieces): array
     {
-        return array_map(static fn (string $piece): string => (string) preg_replace('/(^|\n)[ \t]+/', '$1', $piece), $pieces);
+        return array_map(
+            static fn (string $piece): string => (string) preg_replace('/(^|\n)[ \t]+/', '$1', $piece),
+            $pieces,
+        );
     }
 }

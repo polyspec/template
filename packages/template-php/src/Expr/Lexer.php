@@ -24,7 +24,18 @@ final class Lexer
 
     private const EXPRESSION_CHARS = '()[],|?:=>.+-*/%!<&\'"';
 
-    private const POSTFIX_END = ['IDENT' => true, 'NUMBER' => true, 'STRING' => true, 'NULL' => true, 'TRUE' => true, 'FALSE' => true, 'RPAREN' => true, 'RBRACKET' => true, 'DOT_IDENT' => true, 'DOT_INDEX' => true];
+    private const POSTFIX_END = [
+        'IDENT' => true,
+        'NUMBER' => true,
+        'STRING' => true,
+        'NULL' => true,
+        'TRUE' => true,
+        'FALSE' => true,
+        'RPAREN' => true,
+        'RBRACKET' => true,
+        'DOT_IDENT' => true,
+        'DOT_INDEX' => true,
+    ];
 
     private int $index;
     private ?Token $previous = null;
@@ -117,7 +128,14 @@ final class Lexer
         $index = $start + 1;
         for (;;) {
             if ($index >= $length) {
-                throw TemplateError::at('E_PARSE_UNTERMINATED_STRING', $template, $source->lines, $start, $start + 1, 'string literal is not terminated');
+                throw TemplateError::at(
+                    'E_PARSE_UNTERMINATED_STRING',
+                    $template,
+                    $source->lines,
+                    $start,
+                    $start + 1,
+                    'string literal is not terminated',
+                );
             }
             $char = $text[$index];
             if ($char === $quote) {
@@ -157,7 +175,14 @@ final class Lexer
                 case 'u':
                     $hex = substr($text, $index + 2, 4);
                     if (preg_match('/^[0-9a-fA-F]{4}$/', $hex) !== 1) {
-                        throw TemplateError::at('E_PARSE_INVALID_ESCAPE', $template, $source->lines, $index, $index + 2, 'invalid escape sequence');
+                        throw TemplateError::at(
+                            'E_PARSE_INVALID_ESCAPE',
+                            $template,
+                            $source->lines,
+                            $index,
+                            $index + 2,
+                            'invalid escape sequence',
+                        );
                     }
                     $code = (int) hexdec($hex);
                     $index += 6;
@@ -174,7 +199,14 @@ final class Lexer
                     $decoded .= Utf8::chr($code);
                     break;
                 default:
-                    throw TemplateError::at('E_PARSE_INVALID_ESCAPE', $template, $source->lines, $index, $index + 2, 'invalid escape sequence');
+                    throw TemplateError::at(
+                        'E_PARSE_INVALID_ESCAPE',
+                        $template,
+                        $source->lines,
+                        $index,
+                        $index + 2,
+                        'invalid escape sequence',
+                    );
             }
         }
     }
@@ -201,7 +233,10 @@ final class Lexer
             return new Token('EOF', '', $start, $start);
         }
 
-        if ($this->close !== null && (($this->previous !== null && isset(self::POSTFIX_END[$this->previous->type]) && $this->nestingDepth === 0) || !$this->closeIsExpressionChar)) {
+        $afterOperand = $this->previous !== null
+            && isset(self::POSTFIX_END[$this->previous->type])
+            && $this->nestingDepth === 0;
+        if ($this->close !== null && ($afterOperand || !$this->closeIsExpressionChar)) {
             $sequence = str_repeat($this->close, $this->closeCount);
             if (substr($text, $start, strlen($sequence)) === $sequence) {
                 $this->index = $start + strlen($sequence);
@@ -248,7 +283,12 @@ final class Lexer
             }
         }
 
-        throw $this->error('E_PARSE_UNEXPECTED_TOKEN', $start, $start + 1, 'unexpected character ' . json_encode($char));
+        throw $this->error(
+            'E_PARSE_UNEXPECTED_TOKEN',
+            $start,
+            $start + 1,
+            'unexpected character ' . json_encode($char),
+        );
     }
 
     private function readNumber(int $start): Token
@@ -276,17 +316,31 @@ final class Lexer
                 }
                 $end = $cursor;
             } else {
-                throw $this->error('E_PARSE_INVALID_NUMBER', $start, $cursor, 'invalid number ' . json_encode(substr($text, $start, $cursor - $start)));
+                throw $this->error(
+                    'E_PARSE_INVALID_NUMBER',
+                    $start,
+                    $cursor,
+                    'invalid number ' . json_encode(substr($text, $start, $cursor - $start)),
+                );
             }
         }
         $following = $text[$end] ?? '';
-        $closeAtEnd = $this->close !== null && $this->nestingDepth === 0 && substr($text, $end, strlen($this->close)) === $this->close;
+        $closeAtEnd = $this->close !== null && $this->nestingDepth === 0 && substr(
+            $text,
+            $end,
+            strlen($this->close),
+        ) === $this->close;
         if ($end < $length && (self::isIdentPart($following) || ($following === '.' && !$closeAtEnd))) {
             $cursor = $end + 1;
             while ($cursor < $length && (self::isIdentPart($text[$cursor]) || $text[$cursor] === '.')) {
                 $cursor++;
             }
-            throw $this->error('E_PARSE_INVALID_NUMBER', $start, $cursor, 'invalid number ' . json_encode(substr($text, $start, $cursor - $start)));
+            throw $this->error(
+                'E_PARSE_INVALID_NUMBER',
+                $start,
+                $cursor,
+                'invalid number ' . json_encode(substr($text, $start, $cursor - $start)),
+            );
         }
         $this->index = $end;
 
@@ -303,7 +357,9 @@ final class Lexer
             return new Token('SPREAD', '...', $start, $this->index);
         }
         $next = $text[$start + 1] ?? '';
-        $adjacent = $this->previous !== null && $this->previous->end === $start && isset(self::POSTFIX_END[$this->previous->type]);
+        $adjacent = $this->previous !== null
+            && $this->previous->end === $start
+            && isset(self::POSTFIX_END[$this->previous->type]);
         if ($adjacent && $next !== '' && self::isIdentStart($next)) {
             $end = $start + 2;
             while ($end < $length && self::isIdentPart($text[$end])) {
@@ -327,7 +383,12 @@ final class Lexer
             while ($end < $length && (self::isIdentPart($text[$end]) || $text[$end] === '.')) {
                 $end++;
             }
-            throw $this->error('E_PARSE_INVALID_NUMBER', $start, $end, 'invalid number ' . json_encode(substr($text, $start, $end - $start)));
+            throw $this->error(
+                'E_PARSE_INVALID_NUMBER',
+                $start,
+                $end,
+                'invalid number ' . json_encode(substr($text, $start, $end - $start)),
+            );
         }
 
         throw $this->error('E_PARSE_UNEXPECTED_TOKEN', $start, $start + 1, 'unexpected "."');

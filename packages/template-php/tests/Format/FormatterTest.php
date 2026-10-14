@@ -31,7 +31,12 @@ final class FormatterTest extends TestCase
     public static function fixtures(): iterable
     {
         $root = Support::repoRoot() . '/packages/template-language/tests/fixtures';
-        $names = array_values(array_filter(Support::entries("{$root}/input"), static fn (string $name): bool => str_ends_with($name, '.tpl')));
+        $names = array_values(
+            array_filter(
+                Support::entries("{$root}/input"),
+                static fn (string $name): bool => str_ends_with($name, '.tpl'),
+            ),
+        );
         foreach ($names as $name) {
             yield $name => [Support::read("{$root}/input/{$name}"), Support::read("{$root}/expected/{$name}")];
         }
@@ -53,29 +58,44 @@ final class FormatterTest extends TestCase
     public function testKeepsAByteOrderMarkAndCrlf(): void
     {
         $source = "\u{FEFF}<ul>\r\n{@ x=xs}\r\n<li>{=x}</li>\r\n{/}\r\n</ul>\r\n";
-        self::assertSame("\u{FEFF}<ul>\r\n  {@ x = xs}\r\n    <li>{= x}</li>\r\n  {/}\r\n</ul>\r\n", self::text(Formatter::format($source)));
+        self::assertSame(
+            "\u{FEFF}<ul>\r\n  {@ x = xs}\r\n    <li>{= x}</li>\r\n  {/}\r\n</ul>\r\n",
+            self::text(Formatter::format($source)),
+        );
     }
 
     public function testFormatsOnlyTheTagsInsideARange(): void
     {
-        self::assertSame('{=a}{= b}{=c}', self::text(Formatter::format('{=a}{=b}{=c}', ['range' => ['start' => 4, 'end' => 8]])));
+        self::assertSame(
+            '{=a}{= b}{=c}',
+            self::text(Formatter::format('{=a}{=b}{=c}', ['range' => ['start' => 4, 'end' => 8]])),
+        );
     }
 
     public function testFormatsWithTheDelimiterOption(): void
     {
-        self::assertSame("[= a[0] + 1]\n[= [1, 2][1]]", self::text(Formatter::format("[= a[0]+1]\n[= [1,2][1]]", ['delimiters' => '[]'])));
+        self::assertSame(
+            "[= a[0] + 1]\n[= [1, 2][1]]",
+            self::text(Formatter::format("[= a[0]+1]\n[= [1,2][1]]", ['delimiters' => '[]'])),
+        );
     }
 
     public function testFormatsAWrappedTagWithSameCharacterDelimiters(): void
     {
-        self::assertSame('var page = ";;= json(page) | raw;;";', self::text(Formatter::format('var page = ";;=json(page)|raw;;";', ['delimiters' => ';;'])));
+        self::assertSame(
+            'var page = ";;= json(page) | raw;;";',
+            self::text(Formatter::format('var page = ";;=json(page)|raw;;";', ['delimiters' => ';;'])),
+        );
     }
 
     public function testReturnsTheParserErrorPosition(): void
     {
         $error = Formatter::format("<p>\n  {? a}\n</p>", ['name' => 'x.tpl'])->error;
         self::assertNotNull($error);
-        self::assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error->reason, $error->code, $error->line, $error->col]);
+        self::assertSame(
+            ['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3],
+            [$error->reason, $error->code, $error->line, $error->col],
+        );
     }
 
     public function testNeverChangesAComment(): void
@@ -85,13 +105,20 @@ final class FormatterTest extends TestCase
 
     public function testFormatsTheBodyOfEveryTagKind(): void
     {
-        $source = '{=a+b}{?  x}{:?y}{:}{/}{?#  side}{/}{+   a.tpl  }{#  card   c.tpl  t:p.t }{@ i=xs}{:   n+=1}{: n++}{/}';
-        self::assertSame('{= a + b}{? x}{:? y}{:}{/}{?# side}{/}{+ a.tpl}{# card c.tpl t:p.t}{@ i = xs}{:n += 1}{:n++}{/}', self::text(Formatter::format($source, ['indent' => null])));
+        $source = '{=a+b}{?  x}{:?y}{:}{/}{?#  side}{/}{+   a.tpl  }'
+            . '{#  card   c.tpl  t:p.t }{@ i=xs}{:   n+=1}{: n++}{/}';
+        self::assertSame(
+            '{= a + b}{? x}{:? y}{:}{/}{?# side}{/}{+ a.tpl}{# card c.tpl t:p.t}{@ i = xs}{:n += 1}{:n++}{/}',
+            self::text(Formatter::format($source, ['indent' => null])),
+        );
     }
 
     public function testKeepsABodyThatSpansLines(): void
     {
-        self::assertEquals(new FormatResult("{= a\n+b}", false, null), Formatter::format("{= a\n+b}", ['indent' => null]));
+        self::assertEquals(
+            new FormatResult("{= a\n+b}", false, null),
+            Formatter::format("{= a\n+b}", ['indent' => null]),
+        );
     }
 
     public function testCountsTheErrorColumnInBytes(): void
@@ -115,8 +142,18 @@ final class FormatterTest extends TestCase
 
     public function testSameTreeIgnoresSpansAndKeyOrder(): void
     {
-        self::assertTrue(Invariant::sameTree(['type' => 'Var', 'name' => 'a', 'span' => [0, 1]], ['span' => [4, 5], 'name' => 'a', 'type' => 'Var']));
-        self::assertFalse(Invariant::sameTree(['type' => 'Text', 'value' => 'a ', 'span' => [0, 2]], ['type' => 'Text', 'value' => 'a', 'span' => [0, 1]]));
+        self::assertTrue(
+            Invariant::sameTree(
+                ['type' => 'Var', 'name' => 'a', 'span' => [0, 1]],
+                ['span' => [4, 5], 'name' => 'a', 'type' => 'Var'],
+            ),
+        );
+        self::assertFalse(
+            Invariant::sameTree(
+                ['type' => 'Text', 'value' => 'a ', 'span' => [0, 2]],
+                ['type' => 'Text', 'value' => 'a', 'span' => [0, 1]],
+            ),
+        );
         self::assertFalse(Invariant::sameTree(['body' => [1, 2]], ['body' => [1]]));
         self::assertFalse(Invariant::sameTree(['value' => 1.0], ['value' => '1']));
     }
@@ -125,7 +162,15 @@ final class FormatterTest extends TestCase
     {
         self::assertSame(
             ['body' => [['type' => 'Text', 'value' => "a\nb\n"], ['type' => 'Echo']]],
-            Invariant::withoutLineIndentation(['body' => [['type' => 'Text', 'value' => "  a\n\tb\n"], ['type' => 'Text', 'value' => '  '], ['type' => 'Echo']]]),
+            Invariant::withoutLineIndentation(
+                [
+                    'body' => [
+                        ['type' => 'Text', 'value' => "  a\n\tb\n"],
+                        ['type' => 'Text', 'value' => '  '],
+                        ['type' => 'Echo'],
+                    ],
+                ],
+            ),
         );
     }
 }

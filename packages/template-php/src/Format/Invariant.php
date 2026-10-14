@@ -40,7 +40,14 @@ final class Invariant
         if (array_is_list($value)) {
             $items = array_map(self::withoutLineIndentation(...), $value);
 
-            return array_values(array_filter($items, static fn (mixed $item): bool => !(is_array($item) && ($item['type'] ?? null) === 'Text' && ($item['value'] ?? null) === '')));
+            return array_values(array_filter(
+                $items,
+                static fn (mixed $item): bool => !(
+                    is_array($item)
+                    && ($item['type'] ?? null) === 'Text'
+                    && ($item['value'] ?? null) === ''
+                ),
+            ));
         }
         $result = [];
         foreach ($value as $key => $field) {

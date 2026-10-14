@@ -257,7 +257,8 @@ final class Json
 
     private function parseNumber(): float
     {
-        if (preg_match('/^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?/', substr($this->text, $this->index), $m) !== 1) {
+        $rest = substr($this->text, $this->index);
+        if (preg_match('/^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?/', $rest, $m) !== 1) {
             $this->fail('invalid number');
         }
         $literal = $m[0];
