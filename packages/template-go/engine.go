@@ -101,6 +101,32 @@ func Parse(source []byte, name string, options ParseOptions) (*ast.Template, err
 	})
 }
 
+// Analysis is the AST of a template with the accepted tags and their EDT-8 tokens; offsets are UTF-8 byte offsets
+// after a leading byte order mark.
+type Analysis = parser.Analysis
+
+// Tag is the source range of one accepted tag, with its kind and the range of its body.
+type Tag = parser.Tag
+
+// Token is a classified byte range of an accepted tag (EDT-8).
+type Token = parser.Token
+
+// Analyze parses one template source once and returns its AST with the accepted tags and their tokens. A panic is
+// E_INTERNAL (ERR-13).
+func Analyze(source []byte, name string, options ParseOptions) (*Analysis, error) {
+	d, err := delimitersOf(options.Delimiters)
+	if err != nil {
+		return nil, err
+	}
+	return render.Guard(name, func() (*Analysis, error) {
+		src, err := lexer.FromBytes(name, source)
+		if err != nil {
+			return nil, err
+		}
+		return parser.Analyze(src, d)
+	})
+}
+
 func parseWithLines(source []byte, name string, d parser.Delimiters) (*render.ParsedTemplate, error) {
 	src, err := lexer.FromBytes(name, source)
 	if err != nil {

@@ -35,6 +35,9 @@ func NewParser(source *lexer.Source, start int, options Options) *Parser {
 // End is the byte offset after the last consumed token.
 func (p *Parser) End() int { return p.lexer.ConsumedEnd() }
 
+// Consumed returns the tokens consumed so far, including the close delimiter.
+func (p *Parser) Consumed() []*Token { return p.lexer.Consumed() }
+
 // Peek returns the next token.
 func (p *Parser) Peek() (*Token, error) { return p.lexer.Peek() }
 

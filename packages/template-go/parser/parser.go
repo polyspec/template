@@ -60,21 +60,175 @@ type tagContext struct {
 	wrapper    *Wrapper
 }
 
+// TagKind is the kind of an accepted tag.
+type TagKind string
+
+// The tag kinds of accepted tags.
+const (
+	TagAssignment TagKind = "assignment"
+	TagBlock      TagKind = "block"
+	TagClose      TagKind = "close"
+	TagComment    TagKind = "comment"
+	TagDirective  TagKind = "directive"
+	TagEcho       TagKind = "echo"
+	TagElse       TagKind = "else"
+	TagElseIf     TagKind = "elseif"
+	TagFor        TagKind = "for"
+	TagIf         TagKind = "if"
+	TagIfBlock    TagKind = "ifblock"
+	TagInclude    TagKind = "include"
+)
+
+// Tag is the source range of one accepted template tag. Start and End include the wrapper; BodyStart and BodyEnd are
+// the byte offsets of the text between the open and the close delimiters, sigil included.
+type Tag struct {
+	Kind      TagKind
+	Start     int
+	End       int
+	BodyStart int
+	BodyEnd   int
+	Echo      bool
+}
+
+// TokenKind is a token type of EDT-8.
+type TokenKind string
+
+// The token types of EDT-8.
+const (
+	TokenDelimiter TokenKind = "delimiter"
+	TokenKeyword   TokenKind = "keyword"
+	TokenVariable  TokenKind = "variable"
+	TokenProperty  TokenKind = "property"
+	TokenFunction  TokenKind = "function"
+	TokenString    TokenKind = "string"
+	TokenNumber    TokenKind = "number"
+	TokenOperator  TokenKind = "operator"
+	TokenComment   TokenKind = "comment"
+	TokenPath      TokenKind = "path"
+)
+
+// Token is a classified byte range of an accepted tag (EDT-8).
+type Token struct {
+	Start int
+	End   int
+	Kind  TokenKind
+}
+
+// Analysis is the AST of a template with the tags accepted while producing it and the tokens of those tags in source
+// order.
+type Analysis struct {
+	AST    *ast.Template
+	Tags   []Tag
+	Tokens []Token
+}
+
 // Parse parses a source into a template.
 func Parse(source *lexer.Source, delimiters Delimiters) (*ast.Template, error) {
+	analysis, err := Analyze(source, delimiters)
+	if err != nil {
+		return nil, err
+	}
+	return analysis.AST, nil
+}
+
+// Analyze parses a source once and returns its AST with the parser-owned tag ranges and tokens.
+func Analyze(source *lexer.Source, delimiters Delimiters) (*Analysis, error) {
 	root := []item{}
 	p := &templateParser{source: source, delimiters: delimiters, text: source.Text, root: &root, textBeforeFirstTagIsWhitespace: true}
-	return p.parse()
+	tree, err := p.parse()
+	if err != nil {
+		return nil, err
+	}
+	return &Analysis{AST: tree, Tags: p.syntaxTags, Tokens: p.tokens}, nil
+}
+
+// expressionKind is the EDT-8 class of an expression token, which depends on its neighbours for names.
+func expressionKind(token, previous, next *expr.Token) TokenKind {
+	switch token.Type {
+	case "STRING":
+		return TokenString
+	case "NUMBER":
+		return TokenNumber
+	case "NULL", "TRUE", "FALSE", "IN":
+		return TokenKeyword
+	case "IDENT":
+		if next != nil && next.Type == "LPAREN" || previous != nil && previous.Type == "PIPE" {
+			return TokenFunction
+		}
+		return TokenVariable
+	case "DOT_IDENT":
+		if next != nil && next.Type == "LPAREN" {
+			return TokenFunction
+		}
+		return TokenProperty
+	case "DOT_INDEX":
+		return TokenProperty
+	}
+	return TokenOperator
+}
+
+func expressionTokens(parser *expr.Parser) []Token {
+	var consumed []*expr.Token
+	for _, token := range parser.Consumed() {
+		if token.Type != "CLOSE" && token.Type != "EOF" {
+			consumed = append(consumed, token)
+		}
+	}
+	tokens := make([]Token, len(consumed))
+	for i, token := range consumed {
+		var previous, next *expr.Token
+		if i > 0 {
+			previous = consumed[i-1]
+		}
+		if i+1 < len(consumed) {
+			next = consumed[i+1]
+		}
+		tokens[i] = Token{Start: token.Start, End: token.End, Kind: expressionKind(token, previous, next)}
+	}
+	return tokens
+}
+
+func sigilKind(sigil string) TagKind {
+	switch sigil {
+	case "*":
+		return TagComment
+	case "=":
+		return TagEcho
+	case "@":
+		return TagFor
+	case "?":
+		return TagIf
+	case "?#":
+		return TagIfBlock
+	case ":?":
+		return TagElseIf
+	case ":":
+		return TagElse
+	case "/":
+		return TagClose
+	case "+":
+		return TagInclude
+	case "#":
+		return TagBlock
+	case "%":
+		return TagDirective
+	}
+	panic(fmt.Sprintf("unknown accepted tag sigil %q", sigil))
 }
 
 type templateParser struct {
-	source                         *lexer.Source
-	delimiters                     Delimiters
-	text                           string
-	root                           *[]item
-	frames                         []*frame
-	tags                           []tagRange
-	comments                       []*ast.Comment
+	source     *lexer.Source
+	delimiters Delimiters
+	text       string
+	root       *[]item
+	frames     []*frame
+	tags       []tagRange
+	syntaxTags []Tag
+	tokens     []Token
+	comments   []*ast.Comment
+	// The expression parsers and the tokens outside expressions of the tag being parsed.
+	tagParsers                     []*expr.Parser
+	tagTokens                      []Token
 	sawTag                         bool
 	textBeforeFirstTagIsWhitespace bool
 }
@@ -181,7 +335,26 @@ func (p *templateParser) closeSequence(c tagContext) string {
 }
 
 func (p *templateParser) exprParser(c tagContext, start int) *expr.Parser {
-	return expr.NewParser(p.source, start, expr.Options{Close: p.delimiters.Close, CloseCount: c.closeCount, OpenIndex: c.open})
+	parser := expr.NewParser(p.source, start, expr.Options{Close: p.delimiters.Close, CloseCount: c.closeCount, OpenIndex: c.open})
+	p.tagParsers = append(p.tagParsers, parser)
+	return parser
+}
+
+func (p *templateParser) mark(start, end int, kind TokenKind) {
+	p.tagTokens = append(p.tagTokens, Token{Start: start, End: end, Kind: kind})
+}
+
+// closeStart is the byte offset of the close delimiters of the tag that ends at end: before the wrapper closer and
+// the horizontal whitespace in front of it (LEX-19).
+func (p *templateParser) closeStart(c tagContext, end int) int {
+	tail := end
+	if c.wrapper != nil {
+		tail -= len(c.wrapper.Closer)
+		for isHorizontalSpace(p.text[tail-1]) {
+			tail--
+		}
+	}
+	return tail - c.closeCount
 }
 
 func (p *templateParser) rawReader(c tagContext) *rawTagReader {
@@ -240,6 +413,9 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 	}
 	firstTag := !p.sawTag
 	p.sawTag = true
+	p.tagParsers = nil
+	p.tagTokens = nil
+	assignment := false
 	var end int
 	var err error
 	echo := false
@@ -259,6 +435,7 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 		end, err = p.parseElseIf(c, bodyStart)
 	case ":":
 		if matchAssignHead(text[bodyStart:]) != nil {
+			assignment = true
 			end, err = p.parseAssignment(c, bodyStart)
 		} else {
 			end, err = p.parseElse(c, bodyStart)
@@ -280,6 +457,25 @@ func (p *templateParser) parseTag(c tagContext) (int, error) {
 		return 0, err
 	}
 	p.tags = append(p.tags, tagRange{start: c.start, end: end, echo: echo})
+	kind := sigilKind(sigil)
+	if assignment {
+		kind = TagAssignment
+	}
+	tagBodyStart := c.open + 1
+	tagBodyEnd := p.closeStart(c, end)
+	p.syntaxTags = append(p.syntaxTags, Tag{Kind: kind, Start: c.start, End: end, BodyStart: tagBodyStart, BodyEnd: tagBodyEnd, Echo: echo})
+	if kind == TagComment {
+		p.tokens = append(p.tokens, Token{Start: c.start, End: end, Kind: TokenComment})
+		return end, nil
+	}
+	p.tokens = append(p.tokens, Token{Start: c.start, End: tagBodyStart, Kind: TokenDelimiter})
+	sigilStart := skipHorizontalSpace(text, tagBodyStart)
+	p.tokens = append(p.tokens, Token{Start: sigilStart, End: sigilStart + len(sigil), Kind: TokenKeyword})
+	p.tokens = append(p.tokens, p.tagTokens...)
+	for _, parser := range p.tagParsers {
+		p.tokens = append(p.tokens, expressionTokens(parser)...)
+	}
+	p.tokens = append(p.tokens, Token{Start: tagBodyEnd, End: end, Kind: TokenDelimiter})
 	return end, nil
 }
 
@@ -323,6 +519,8 @@ func (p *templateParser) parseLoop(c tagContext, bodyStart int) (int, error) {
 	if reserved[name] {
 		return 0, p.fail(errs.ParseReservedName, bodyStart+m[2], bodyStart+m[3], name+" is a reserved word")
 	}
+	p.mark(bodyStart+m[2], bodyStart+m[3], TokenVariable)
+	p.mark(bodyStart+m[1]-1, bodyStart+m[1], TokenOperator)
 	parser := p.exprParser(c, bodyStart+m[1])
 	iter, err := parser.ParseExpression()
 	if err != nil {
@@ -428,15 +626,16 @@ func (p *templateParser) parseClose(c tagContext, bodyStart int) (int, error) {
 }
 
 func (p *templateParser) parseInclude(c tagContext, bodyStart int) (int, error) {
-	path, pathEnd, err := p.rawReader(c).readIncludePath(bodyStart)
+	path, err := p.rawReader(c).readIncludePath(bodyStart)
 	if err != nil {
 		return 0, err
 	}
-	end, err := p.closeRaw(c, pathEnd)
+	p.mark(path.start, path.end, rawKind(path.quoted))
+	end, err := p.closeRaw(c, path.end)
 	if err != nil {
 		return 0, err
 	}
-	p.push(&ast.Include{Type: "Include", Path: path, Span: ast.Span{c.start, end}})
+	p.push(&ast.Include{Type: "Include", Path: path.value, Span: ast.Span{c.start, end}})
 	return end, nil
 }
 
@@ -444,6 +643,9 @@ func (p *templateParser) parseBlock(c tagContext, bodyStart int) (int, error) {
 	body, err := p.rawReader(c).readBlockBody(bodyStart)
 	if err != nil {
 		return 0, err
+	}
+	for _, word := range body.words {
+		p.mark(word.start, word.end, rawKind(word.quoted))
 	}
 	end, err := p.closeRaw(c, body.end)
 	if err != nil {
@@ -465,6 +667,8 @@ func (p *templateParser) parseAssignment(c tagContext, bodyStart int) (int, erro
 	}
 	variable := &ast.Var{Type: "Var", Name: name, Span: ast.Span{bodyStart, bodyStart + len(name)}}
 	afterOperator := bodyStart + m[1]
+	p.mark(bodyStart, bodyStart+len(name), TokenVariable)
+	p.mark(afterOperator-len(operator), afterOperator, TokenOperator)
 	var value ast.Expr
 	var end int
 	var err error
@@ -508,7 +712,9 @@ func (p *templateParser) parseDirective(c tagContext, bodyStart int, firstTag bo
 	if !strings.HasPrefix(p.text[index:], "delimiter") {
 		return 0, invalid("directive is not \"delimiter\"")
 	}
+	p.mark(index, index+len("delimiter"), TokenKeyword)
 	index = skipHorizontalSpace(p.text, index+len("delimiter"))
+	valueStart := index
 	value := ""
 	for index < len(p.text) && !isHorizontalSpace(p.text[index]) && !strings.HasPrefix(p.text[index:], p.closeSequence(c)) {
 		value += p.text[index : index+1]
@@ -521,12 +727,20 @@ func (p *templateParser) parseDirective(c tagContext, bodyStart int, firstTag bo
 	if !ok {
 		return 0, invalid(fmt.Sprintf("%q is not a delimiter pair", value))
 	}
+	p.mark(valueStart, index, TokenString)
 	end, err := p.closeRaw(c, index)
 	if err != nil {
 		return 0, err
 	}
 	p.delimiters = delimiters
 	return end, nil
+}
+
+func rawKind(quoted bool) TokenKind {
+	if quoted {
+		return TokenString
+	}
+	return TokenPath
 }
 
 func setSpan(node ast.Node, span ast.Span) {
