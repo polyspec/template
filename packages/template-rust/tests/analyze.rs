@@ -1,6 +1,11 @@
 //! Tag analysis (EDT-8): the accepted tags with their kind and body ranges, and the token class of every part of them.
 
+mod common;
+
+use common::repo_root;
 use polyspec_template::{ParseOptions, TagKind, analyze};
+use std::fs;
+use std::path::{Path, PathBuf};
 
 fn tokens(source: &str, delimiters: Option<&str>) -> Vec<String> {
     let options = ParseOptions {
@@ -215,4 +220,57 @@ fn offsets_are_bytes_after_the_bom() {
 fn a_source_that_does_not_parse_is_an_error() {
     let error = analyze(b"{= a +}", "t.tpl", &ParseOptions::default());
     assert!(error.is_err());
+}
+
+fn case_dirs(dir: &Path, found: &mut Vec<PathBuf>) {
+    for entry in fs::read_dir(dir).expect("cases directory").flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            case_dirs(&path, found);
+        } else if entry.file_name() == "input.tpl" {
+            found.push(dir.to_path_buf());
+        }
+    }
+}
+
+/// Every case under tests/cases with options.json delimiters.
+fn cases() -> Vec<PathBuf> {
+    let mut found = Vec::new();
+    case_dirs(&repo_root().join("tests").join("cases"), &mut found);
+    found.sort();
+    found
+}
+
+fn delimiters(dir: &Path) -> Option<String> {
+    let text = fs::read_to_string(dir.join("options.json")).ok()?;
+    let options: serde_json::Value = serde_json::from_str(&text).expect("options.json");
+    options.get("delimiters").and_then(|value| value.as_str()).map(str::to_string)
+}
+
+/// CNF-2: the tokens of every case that parses equal its expected.tokens.json, `[start, end, type]` with byte offsets.
+#[test]
+fn tokens_of_every_case_equal_the_expected_tokens() {
+    let mut compared = 0;
+    for dir in cases() {
+        let source = fs::read(dir.join("input.tpl")).expect("input.tpl");
+        let options = ParseOptions {
+            delimiters: delimiters(&dir),
+        };
+        let expected_path = dir.join("expected.tokens.json");
+        let Ok(analysis) = analyze(&source, "input.tpl", &options) else {
+            assert!(!expected_path.exists(), "{}: does not parse but has expected tokens", dir.display());
+            continue;
+        };
+        let actual: Vec<serde_json::Value> = analysis
+            .tokens
+            .iter()
+            .map(|token| serde_json::json!([token.start, token.end, token.kind.as_str()]))
+            .collect();
+        let expected: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(&expected_path).unwrap_or_else(|_| panic!("{}: expected.tokens.json", dir.display())))
+                .expect("expected.tokens.json");
+        assert_eq!(serde_json::Value::Array(actual), expected, "{}", dir.display());
+        compared += 1;
+    }
+    assert!(compared > 0);
 }

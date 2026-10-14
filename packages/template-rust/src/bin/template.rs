@@ -2,10 +2,12 @@
 //!   parse FILE [--root DIR] [--delimiters OC]
 //!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
 //!   tokens FILE [--root DIR] [--delimiters OC]
+//!   format FILE [--indent none|tab|N] [--delimiters OC]
 
 use polyspec_template::{
-    ArgumentError, AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
-    analyze, defines_from_json, env_from_json, parse, read_json as parse_json_text,
+    ArgumentError, AstProgram, BindError, Engine, EngineOptions, FormatError, FormatErrorReason, FormatOptions, IndentUnit, ParseOptions,
+    RenderOptions, RenderTarget, RequestError, TemplateError, analyze, defines_from_json, env_from_json, format as format_template, parse,
+    read_json as parse_json_text,
 };
 use std::path::{Path, PathBuf};
 use std::process::exit;
@@ -15,6 +17,7 @@ fn usage(message: &str) -> ! {
     eprintln!("usage: template parse FILE [--root DIR] [--delimiters OC]");
     eprintln!("       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]");
     eprintln!("       template tokens FILE [--root DIR] [--delimiters OC]");
+    eprintln!("       template format FILE [--indent none|tab|N] [--delimiters OC]");
     exit(1);
 }
 
@@ -24,6 +27,7 @@ struct Options {
     env: Option<String>,
     root: Option<String>,
     delimiters: Option<String>,
+    indent: Option<String>,
 }
 
 /// An argument error is not an ERR-1 error (ERR-13); it ends like a usage error.
@@ -58,7 +62,9 @@ fn bind_failure(template: &str, error: BindError) -> ! {
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let (command, file) = match (args.first(), args.get(1)) {
-        (Some(command), Some(file)) if matches!(command.as_str(), "parse" | "render" | "tokens") => (command.clone(), file.clone()),
+        (Some(command), Some(file)) if matches!(command.as_str(), "parse" | "render" | "tokens" | "format") => {
+            (command.clone(), file.clone())
+        }
         _ => usage("command and FILE are required"),
     };
     let mut options = Options {
@@ -67,6 +73,7 @@ fn main() {
         env: None,
         root: None,
         delimiters: None,
+        indent: None,
     };
     let mut index = 2;
     while index < args.len() {
@@ -80,6 +87,7 @@ fn main() {
             "--env" => options.env = Some(value.clone()),
             "--root" => options.root = Some(value.clone()),
             "--delimiters" => options.delimiters = Some(value.clone()),
+            "--indent" if command == "format" => options.indent = Some(value.clone()),
             _ => usage(&format!("unknown option {flag}")),
         }
         index += 2;
@@ -104,6 +112,49 @@ fn main() {
     let parse_options = ParseOptions {
         delimiters: options.delimiters.clone(),
     };
+    if command == "format" {
+        let source = std::fs::read(&file_path).unwrap_or_else(|error| usage(&format!("cannot read {file}: {error}")));
+        let indent = match options.indent.as_deref() {
+            None => Some(IndentUnit::new("  ")),
+            Some("none") => None,
+            Some("tab") => Some(IndentUnit::new("\t")),
+            Some(count) => match count.parse::<usize>() {
+                Ok(count @ 1..=8) => Some(IndentUnit::new(&" ".repeat(count))),
+                _ => usage(&format!("invalid indent {count}")),
+            },
+        }
+        .transpose()
+        .unwrap_or_else(|error| argument(error));
+        let format_options = FormatOptions {
+            name: name.clone(),
+            delimiters: options.delimiters.clone(),
+            indent,
+            ..FormatOptions::default()
+        };
+        // A source that is not UTF-8 does not parse; the parser reports where (LEX-1).
+        let result = match std::str::from_utf8(&source) {
+            Ok(text) => format_template(text, &format_options),
+            Err(_) => match analyze(&source, &name, &parse_options) {
+                Err(RequestError::Template(error)) => Err(FormatError {
+                    reason: FormatErrorReason::Parse,
+                    code: Some(error.code.as_str().to_string()),
+                    line: error.line,
+                    col: error.col,
+                    message: error.to_string(),
+                }),
+                Err(RequestError::Argument(error)) => argument(error),
+                Ok(_) => unreachable!("a source that is not UTF-8 parses"),
+            },
+        };
+        match result {
+            Ok(formatted) => print!("{}", formatted.text),
+            Err(error) => {
+                eprintln!("{}", serde_json::to_string(&error).unwrap_or_default());
+                exit(2);
+            }
+        }
+        return;
+    }
     if command == "tokens" {
         let source = std::fs::read(&file_path).unwrap_or_else(|error| usage(&format!("cannot read {file}: {error}")));
         match analyze(&source, &name, &parse_options) {

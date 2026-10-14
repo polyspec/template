@@ -27,6 +27,8 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 | Item | Description |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | Parses one UTF-8 template into its AST with optional delimiters. |
+| `analyze(source, name, &ParseOptions)` | Parses like `parse` and also returns every accepted tag (`TagKind`, range, body range) and the EDT-8 class of every part of it (`SyntaxToken`), in byte offsets after a leading BOM. |
+| `format(source, &FormatOptions)` | Formats the whitespace inside tags and the indentation of lines by HTML elements and template blocks. `FormatOptions` sets the indent unit (`IndentUnit`, two spaces by default; `None` keeps every line), `TemplateBlocks::Indent` or `Flat`, delimiters and a byte range. The result is the text only when it parses to the same AST; otherwise a `FormatError` with reason `parse`, `invariant` or `html`. |
 | `AstProgram::new(EngineOptions)` | Creates an AST program with a loader, host functions, limits and delimiters, or returns an `ArgumentError` for a delimiter option that is not a delimiter pair. |
 | `Engine::new(Program)` | Creates an engine that delegates to one AST or generated program. |
 | `Engine::render(target, assign, &RenderOptions)` | Renders a template name or a parsed template to a string. `assign` contains variables and `define` supplies template or HTML entries. |
@@ -47,9 +49,11 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 ```sh
 template parse FILE [--root DIR] [--delimiters OC]
 template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+template tokens FILE [--root DIR] [--delimiters OC]
+template format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
+`parse` prints the AST JSON. `render` prints the output. `tokens` prints `[start, end, type]` for every token. `format` prints the formatted text, or exits with status 2 and prints `{reason, code, line, col, message}` on stderr. A template error prints the error JSON on stderr and exits with status 2.
 ## Development
 
 ```sh
