@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://polyspec.dev/template/format.schema.json",
+  "title": "Template format results",
+  "description": "The formatted text of one template file in the two modes of CNF-2: indent (default options) and keep (indent null).",
+  "type": "object",
+  "properties": {
+    "indent": { "$ref": "#/definitions/Result" },
+    "keep": { "$ref": "#/definitions/Result" }
+  },
+  "required": ["indent", "keep"],
+  "additionalProperties": false,
+  "definitions": {
+    "Result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": { "text": { "type": "string" } },
+          "required": ["text"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": { "error": { "$ref": "#/definitions/Error" } },
+          "required": ["error"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Error": {
+      "description": "A format error of FMT-14 without its message.",
+      "type": "object",
+      "properties": {
+        "reason": { "enum": ["parse", "invariant", "html"] },
+        "code": { "type": ["string", "null"] },
+        "line": { "type": "integer", "minimum": 1 },
+        "col": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["reason", "code", "line", "col"],
+      "additionalProperties": false
+    }
+  }
+}

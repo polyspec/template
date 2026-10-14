@@ -1,29 +1,30 @@
 #!/usr/bin/env node
-// Validates schema/ast.schema.json, every tests/cases/**/expected.ast.json and every
-// ast field of tests/fixtures/expr/cases.json, and checks that every case whose input.tpl
-// parses has its expected.ast.json, expected.tokens.json and expected.format.json with the content of CNF-2 (CNF-2,
-// CNF-15).
+// Validates the schemas of schema/, every tests/cases/**/expected.ast.json and every ast field of
+// tests/fixtures/expr/cases.json, and checks that every case whose input.tpl parses has its expected.ast.json,
+// expected.tokens.json and expected.format.json, the last two valid against schema/tokens.schema.json and
+// schema/format.schema.json with sorted, non-overlapping tokens (CNF-2, CNF-15).
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { astPresenceFailures, formatFileFailures, readCaseFiles } from './conformance-case-files.mjs';
+import { astPresenceFailures, caseFileValidators, formatFileFailures, readCaseFiles } from './conformance-case-files.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const schemaPath = 'schema/ast.schema.json';
 const schema = JSON.parse(readFileSync(join(root, schemaPath), 'utf8'));
 const errors = [];
-const cases = readCaseFiles(join(root, 'tests', 'cases'));
-for (const failure of [...astPresenceFailures(cases), ...formatFileFailures(cases)]) errors.push(failure);
-
 const ajv = new Ajv({ strict: true, allErrors: true });
 addFormats(ajv);
 
-if (!ajv.validateSchema(schema)) {
-  for (const error of ajv.errors ?? []) errors.push(`${schemaPath}: ${error.instancePath} ${error.message}`);
-  report();
+for (const path of [schemaPath, 'schema/tokens.schema.json', 'schema/format.schema.json']) {
+  if (ajv.validateSchema(JSON.parse(readFileSync(join(root, path), 'utf8')))) continue;
+  for (const error of ajv.errors) errors.push(`${path}: ${error.instancePath} ${error.message}`);
 }
+if (errors.length) report();
+
+const cases = readCaseFiles(join(root, 'tests', 'cases'));
+for (const failure of [...astPresenceFailures(cases), ...formatFileFailures(cases, caseFileValidators(ajv, root))]) errors.push(failure);
 
 const validateTemplate = ajv.compile(schema);
 const validateExpr = ajv.compile({ $ref: `${schema.$id}#/definitions/Expr` });

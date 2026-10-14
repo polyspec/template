@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://polyspec.dev/template/tokens.schema.json",
+  "title": "Template tokens",
+  "description": "The tokens of one template file (CNF-2, EDT-8): [start, end, type] with UTF-8 byte offsets. The array is sorted and its tokens do not overlap, which scripts/conformance-case-files.mjs checks.",
+  "type": "array",
+  "items": { "$ref": "#/definitions/Token" },
+  "definitions": {
+    "Offset": { "type": "integer", "minimum": 0 },
+    "Token": {
+      "type": "array",
+      "items": [
+        { "$ref": "#/definitions/Offset" },
+        { "$ref": "#/definitions/Offset" },
+        { "$ref": "#/definitions/TokenType" }
+      ],
+      "minItems": 3,
+      "maxItems": 3,
+      "additionalItems": false
+    },
+    "TokenType": {
+      "enum": ["delimiter", "keyword", "variable", "property", "function", "string", "number", "operator", "comment", "path"]
+    }
+  }
+}
