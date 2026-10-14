@@ -1,11 +1,17 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e818e1e3a26e0069a15bed8706999cd5b2695aa33a496661d148027f1232982a -->
+<!-- source-sha256: eb0a221f87ddb520c5d19f9d2fb2625aa1b6afacb1c8218d8371d6125a94cc80 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T23.2: 모든 런타임(TypeScript, Go, Rust, PHP, PHP 확장, Python)이 `tokens`와 `format`을 제공한다. `tokens`는 받아들인 각 태그의 모든 부분을 EDT-8로 분류해 UTF-8 바이트 오프셋의 `[start, end, type]`으로 돌려준다(Go `Analyze`, Rust `analyze`, PHP `AstProgram::analyze`, PHP 확장 `Engine::analyze`, 그리고 `analyze`가 이제 토큰을 돌려주는 Python). `format`은 새 `docs/spec/formatting.md`의 규칙 FMT-1~FMT-15를 적용한다. 이 규칙은 포맷 스타일, HTML 요소와 템플릿 블록에 따른 들여쓰기, 안전 불변식을 `docs/operations/editor-tools.md`에서 가져온 것이다. 결과는 같은 AST로 파싱될 때만 돌려주며, 다시 포맷해도 바뀌지 않는다. `docs/features.md`는 `formatting`을 모든 런타임에서 통과로 적는다.
+- T23.2: 입력이 파싱되는 적합성 케이스는 `expected.tokens.json`과 `expected.format.json`(기본 들여쓰기와 `indent: null`의 결과)을 가지며, `make schema-check`에서 `schema/tokens.schema.json`과 `schema/format.schema.json`이 이를 검증한다(CNF-2, CNF-15). `tests/runner/conformance.mjs`는 모든 언어에서 이를 비교하고(CNF-17, CNF-18) `--update tokens|format`으로 TypeScript의 결과를 쓴다. 각 런타임의 네이티브 suite가 케이스마다 이를 비교하며, `config/parity.json`은 이를 unit `formatting`으로 bind한다.
+- T23.2: CNF-4는 하위 명령 `parse`, `render`, `tokens`, `format`에서 POSIX 유틸리티 문법 지침의 순서대로 옵션을 `FILE`보다 앞에 넘기며, 각 명령줄은 자기 언어의 표준 파서로 인자를 파싱한다. Go `flag`, Rust `clap`, Python `argparse`, TypeScript node:util `parseArgs`, PHP Symfony Console(`symfony/console`, PHP 확장도 이를 실행한다)이다. `parse FILE [options]` 순서는 더 이상 받지 않는다.
+- T23.2: PHP 확장은 PHP 패키지 `polyspec/template`을 요구하고, 네이티브 분석 위에서 그 `Formatter`로 포맷한다. 이 저장소는 그 패키지를 Composer `path` 소스 `../template-php`로 해석한다.
+- T23.2: Python 패키지는 `make python-package`가 `mise.toml`의 python과 uv로 만드는 `var/python/venv`의 editable 설치에서 실행된다. 그 테스트, 적합성 driver, parity check, 그리고 `polyspec.template`을 import하는 모든 검사가 그 python을 실행하며, import 경로를 바꾸지 않는다(PRINCIPLES S3). `scripts/python-toolchain.mjs`는 smol-toml로 `mise.toml`을 읽는다.
+- T23.2: `template-fmt --indent none`이 `--indent keep`을 대체한다.
 - T24.3: `tools/showcase/compile-generated.mjs`는 TypeScript 7에 없는 `ts.transpileModule` 대신 esbuild의 `transformSync`로 showcase의 생성 TypeScript를 JavaScript artifact로 컴파일하며, `tools/showcase/adapters/generated/javascript`의 artifact 다섯 개를 이것으로 다시 컴파일했다. RED: `node tools/showcase/compile-generated.mjs --refresh dev --check`가 `TypeError: Cannot read properties of undefined (reading 'ESNext')`로 실패했다. GREEN: 생성 showcase artifact 30개를 검사하고 `scripts/check-showcase-contract.mjs`가 6개 언어에서 5개 scenario를 통과한다.
 - T23.5: `tests/rule-evidence.json`은 T23.5 규칙의 근거를 명시한다. group `filesystem-conformance`는 filesystem case와 그 runner로 CNF-16을(`make conformance`), `editor-template-root`는 language service, LSP 서버, CodeMirror adapter의 root 테스트로 EDT-18부터 EDT-21을 담는다. RED: `make rules-check`가 `uncovered: CNF-16 EDT-18 EDT-19 EDT-20 EDT-21`을 보고했다. GREEN: uncovered 0개를 보고한다.
 - T23.2: Go, PHP, PHP 확장은 `{:` 태그의 대입 형태를 TypeScript와 같게 결정한다(LEX-6). Go regexp에는 lookahead가 없어 Go 파서는 `{:x == 1}`과 `{:x => 1}`을 대입으로 받았으므로, 이제 `assignHead`의 match 뒤에 `=` 또는 `>`가 뒤따르는 연산자 `=`를 거부한다. Go, PHP, PHP 확장은 태그 본문의 처음 80 byte에서만 head를 match했으므로 약 78 byte보다 긴 이름은 대입을 else 태그로 만들었다. 이제 각각 나머지 텍스트 전체에서 head를 match한다(PHP는 offset에서 `\G`로). Rust와 Python은 이미 TypeScript와 같게 결정했다. conformance case `errors/assign-head-equality`, `errors/assign-head-arrow`, `errors/assign-head-long-name`이 모든 구현을 TypeScript의 오류에 묶고, Go 파서의 `TestAssignmentHeadDecidesAsTypeScript`가 입력 10개를 TypeScript의 코드와 offset과 비교한다. RED: Go 테스트가 입력 10개 중 9개에서 실패했고, case가 Go(3개 중 3개), PHP와 PHP 확장(긴 이름)에서 실패했다. GREEN: Go 테스트가 통과하고 오류 case가 여섯 구현에서 108개 중 108개 통과하며 `make conformance`가 1554개 중 1554개 통과한다.
