@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 92fbbce862575d6c6a1d9f895d0732fe9c7887b9440e46dc85b3ae03a0ca7353 -->
+<!-- source-sha256: 92845e915f3b02801f957cc5d8b47d44ec06cba88fa2bcd6dd361a074919a42d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T23.2: `make schema-check`는 `scripts/check-schema.mjs`와 `scripts/conformance-case-files.mjs`에 복사된 직접 작성한 `describe` 대신 `ajv.errorsText`로 schema 오류를 설명합니다.
 - T23.2: TypeScript(`template-language format`와 `template-fmt`), PHP, Python의 format command는 `--indent`가 없으면 format option에서 빼므로 formatter의 기본 indent가 적용됩니다. 각 command가 이를 다시 적었습니다(`'  '`, `'2'`, `"2"`).
 - T23.2: Python package의 environment는 `config/parity.json`의 implementation python command `var/python/venv/bin/python`으로 한 번만 적힙니다. `scripts/python-venv.mjs`가 이를 읽고, Makefile의 `PYTHON_VENV`와 `scripts/python-toolchain.mjs`의 `pythonPackageInterpreter`가 이로부터 정해집니다.
 - T23.2: PHP package와 PHP 확장은 다른 runtime처럼 case의 `expected.ast.json`으로 tokens와 format 여부를 정하고, 그런 case에 `expected.tokens.json`과 `expected.format.json`을 요구합니다. Package의 `ConformanceTest`와 확장의 `AnalyzeTest`는 expected 파일이 없는 case를 통과시켰습니다.
