@@ -63,9 +63,9 @@ test('manifest contributes the templateBlocks formatting setting and enables for
   assert.deepEqual(manifest.contributes.configurationDefaults, { '[polyspec-template]': { 'editor.formatOnType': true } });
 });
 
-test('manifest supports untrusted and virtual workspaces and declares no Node.js engine', () => {
+test('manifest supports untrusted and virtual workspaces and declares the Node.js of the Electron of its minimum VS Code', () => {
   assert.deepEqual(manifest.capabilities, { untrustedWorkspaces: { supported: true }, virtualWorkspaces: true });
-  assert.deepEqual(Object.keys(manifest.engines), ['vscode']);
+  assert.deepEqual(manifest.engines, { node: '>=24.18.1', vscode: '^1.138.0' });
 });
 
 test('manifest contributes the Go to Matching Template Tag command and its keybinding', () => {
