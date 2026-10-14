@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fa60f9ae870b619a586abac35c3e0947",
+    "content-hash": "b753c0f200c991561773af56db7d36a4",
     "packages": [
         {
             "name": "polyspec/template",

@@ -5,9 +5,6 @@
         {
             "type": "artifact",
             "url": "artifacts"
-        },
-        {
-            "packagist.org": false
         }
     ],
     "require": {
