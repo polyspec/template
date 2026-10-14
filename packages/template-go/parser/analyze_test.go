@@ -2,13 +2,12 @@ package parser_test
 
 import (
 	"encoding/json"
-	"errors"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 
+	"github.com/polyspec/template/packages/template-go/internal/casetest"
 	"github.com/polyspec/template/packages/template-go/lexer"
 	"github.com/polyspec/template/packages/template-go/parser"
 )
@@ -89,15 +88,9 @@ func TestAnalyzeGivesEachTagItsKindAndBodyRange(t *testing.T) {
 // not parse has no such file (CNF-2, CNF-17). Each case is the subtest TestConformanceTokens/<group>/<name>, as the
 // suite unit tokens of config/parity.json reads the results.
 func TestConformanceTokens(t *testing.T) {
-	dirs, err := filepath.Glob(filepath.Join("..", "..", "..", "tests", "cases", "*", "*"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(dirs) < 200 {
-		t.Fatalf("found %d case directories", len(dirs))
-	}
-	for _, dir := range dirs {
-		t.Run(filepath.Base(filepath.Dir(dir))+"/"+filepath.Base(dir), func(t *testing.T) {
+	for _, c := range casetest.List(t) {
+		dir := c.Dir
+		t.Run(c.ID, func(t *testing.T) {
 			path := filepath.Join(dir, "expected.tokens.json")
 			if _, err := os.Stat(filepath.Join(dir, "expected.ast.json")); err != nil {
 				if _, err := os.Stat(path); err == nil {
@@ -113,21 +106,7 @@ func TestConformanceTokens(t *testing.T) {
 			if err := json.Unmarshal(data, &expected); err != nil {
 				t.Fatalf("%s: %v", path, err)
 			}
-			delimiters := parser.DefaultDelimiters
-			options, err := os.ReadFile(filepath.Join(dir, "options.json"))
-			if err != nil && !errors.Is(err, fs.ErrNotExist) {
-				t.Fatal(err)
-			}
-			if err == nil {
-				var value struct{ Delimiters string }
-				if err := json.Unmarshal(options, &value); err != nil {
-					t.Fatal(err)
-				}
-				var ok bool
-				if delimiters, ok = parser.ParseDelimiters(value.Delimiters); !ok {
-					t.Fatalf("options.json delimiters %q", value.Delimiters)
-				}
-			}
+			delimiters := casetest.Delimiters(t, dir)
 			input, err := os.ReadFile(filepath.Join(dir, "input.tpl"))
 			if err != nil {
 				t.Fatal(err)

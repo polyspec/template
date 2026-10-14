@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 92845e915f3b02801f957cc5d8b47d44ec06cba88fa2bcd6dd361a074919a42d -->
+<!-- source-sha256: 64a89135d637759f4e725f47c57c219f2d387ae44991c22b9a69e4a9f4684359 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T23.2: Go 테스트는 `parser/analyze_test.go`, `format/format_test.go`, `conformance_test.go`의 세 복사본 대신 내부 test helper `internal/casetest` 하나로 적합성 case를 나열하고 `options.json`을 읽습니다. 이 helper는 `go.mod`의 directory에서 `tests/cases`를 찾고 목록이 비면 실패하며, 이전 테스트는 case를 200개 이상 요구했습니다. Python format 테스트는 200개 초과 대신 비어 있지 않은 template 목록을 요구합니다.
 - T23.2: `make schema-check`는 `scripts/check-schema.mjs`와 `scripts/conformance-case-files.mjs`에 복사된 직접 작성한 `describe` 대신 `ajv.errorsText`로 schema 오류를 설명합니다.
 - T23.2: TypeScript(`template-language format`와 `template-fmt`), PHP, Python의 format command는 `--indent`가 없으면 format option에서 빼므로 formatter의 기본 indent가 적용됩니다. 각 command가 이를 다시 적었습니다(`'  '`, `'2'`, `"2"`).
 - T23.2: Python package의 environment는 `config/parity.json`의 implementation python command `var/python/venv/bin/python`으로 한 번만 적힙니다. `scripts/python-venv.mjs`가 이를 읽고, Makefile의 `PYTHON_VENV`와 `scripts/python-toolchain.mjs`의 `pythonPackageInterpreter`가 이로부터 정해집니다.

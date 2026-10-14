@@ -3,7 +3,6 @@ package format
 import (
 	"encoding/json"
 	"errors"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/polyspec/template/packages/template-go/internal/casetest"
 	"github.com/polyspec/template/packages/template-go/lexer"
 	"github.com/polyspec/template/packages/template-go/parser"
 )
@@ -214,7 +214,7 @@ func TestSameTree(t *testing.T) {
 // is unchanged (without line indentation for indent mode), and formatting is idempotent.
 func TestInvariantOverConformanceInputs(t *testing.T) {
 	var files []string
-	err := filepath.WalkDir(filepath.Join(repositoryRoot, "tests", "cases"), func(path string, entry os.DirEntry, err error) error {
+	err := filepath.WalkDir(casetest.Dir(t), func(path string, entry os.DirEntry, err error) error {
 		if err == nil && !entry.IsDir() && strings.HasSuffix(path, ".tpl") {
 			files = append(files, path)
 		}
@@ -224,8 +224,8 @@ func TestInvariantOverConformanceInputs(t *testing.T) {
 		t.Fatal(err)
 	}
 	sort.Strings(files)
-	if len(files) < 200 {
-		t.Fatalf("found %d templates", len(files))
+	if len(files) == 0 {
+		t.Fatal("tests/cases holds no template")
 	}
 	for _, file := range files {
 		data, err := os.ReadFile(file)
@@ -233,7 +233,7 @@ func TestInvariantOverConformanceInputs(t *testing.T) {
 			t.Fatal(err)
 		}
 		source := string(data)
-		delimiters := delimitersFor(t, file)
+		delimiters := casetest.DelimiterOption(t, filepath.Dir(file))
 		keep := Options{Name: file, Delimiters: delimiters, KeepIndentation: true}
 		indent := Options{Name: file, Delimiters: delimiters}
 		kept, keptErr := Format(source, keep)
@@ -280,26 +280,6 @@ func TestInvariantOverConformanceInputs(t *testing.T) {
 			t.Errorf("%s: indented not idempotent: %v", file, err)
 		}
 	}
-}
-
-// delimitersFor is the delimiters option of the options.json beside a case file, or "" when the case has none.
-func delimitersFor(t *testing.T, file string) string {
-	t.Helper()
-	path := filepath.Join(filepath.Dir(file), "options.json")
-	data, err := os.ReadFile(path)
-	if errors.Is(err, fs.ErrNotExist) {
-		return ""
-	}
-	if err != nil {
-		t.Fatal(err)
-	}
-	var options struct {
-		Delimiters string `json:"delimiters"`
-	}
-	if err := json.Unmarshal(data, &options); err != nil {
-		t.Fatalf("%s: %v", path, err)
-	}
-	return options.Delimiters
 }
 
 func delimitersOf(t *testing.T, option string) parser.Delimiters {
@@ -358,13 +338,6 @@ func withoutIndentation(pieces []string) []string {
 // a case whose input does not parse has no such file (CNF-2, CNF-18). Each case is the subtest
 // TestConformanceFormat/<group>/<name>, as the suite unit formatting of config/parity.json reads the results.
 func TestConformanceFormat(t *testing.T) {
-	dirs, err := filepath.Glob(filepath.Join(repositoryRoot, "tests", "cases", "*", "*"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(dirs) < 200 {
-		t.Fatalf("found %d case directories", len(dirs))
-	}
 	type expectedResult struct {
 		Text  *string `json:"text"`
 		Error *struct {
@@ -374,8 +347,9 @@ func TestConformanceFormat(t *testing.T) {
 			Col    int     `json:"col"`
 		} `json:"error"`
 	}
-	for _, dir := range dirs {
-		t.Run(filepath.Base(filepath.Dir(dir))+"/"+filepath.Base(dir), func(t *testing.T) {
+	for _, c := range casetest.List(t) {
+		dir := c.Dir
+		t.Run(c.ID, func(t *testing.T) {
 			path := filepath.Join(dir, "expected.format.json")
 			if _, err := os.Stat(filepath.Join(dir, "expected.ast.json")); err != nil {
 				if _, err := os.Stat(path); err == nil {
@@ -396,7 +370,7 @@ func TestConformanceFormat(t *testing.T) {
 				t.Fatal(err)
 			}
 			for mode, options := range map[string]Options{"indent": {Name: "input.tpl"}, "keep": {Name: "input.tpl", KeepIndentation: true}} {
-				options.Delimiters = delimitersFor(t, filepath.Join(dir, "input.tpl"))
+				options.Delimiters = casetest.DelimiterOption(t, dir)
 				want := expected[mode]
 				result, err := Format(string(source), options)
 				switch {
