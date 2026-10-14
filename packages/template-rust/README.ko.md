@@ -28,6 +28,8 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 | 항목 | 설명 |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | 선택적인 구분자로 UTF-8 템플릿 하나를 AST로 파싱한다. |
+| `analyze(source, name, &ParseOptions)` | `parse`처럼 파싱하고, 받아들인 모든 태그(`TagKind`, 범위, 본문 범위)와 그 모든 부분의 EDT-8 분류(`SyntaxToken`)를 앞의 BOM을 뺀 바이트 오프셋으로 함께 반환한다. |
+| `format(source, &FormatOptions)` | 태그 안의 공백과, HTML 요소와 템플릿 블록에 따른 줄 들여쓰기를 정리한다. `FormatOptions`는 들여쓰기 단위(`IndentUnit`, 기본값 공백 두 칸; `None`은 모든 줄을 유지), `TemplateBlocks::Indent` 또는 `Flat`, 구분자, 바이트 범위를 정한다. 결과가 같은 AST로 파싱될 때만 텍스트를 돌려주고, 아니면 reason이 `parse`, `invariant`, `html`인 `FormatError`를 돌려준다. |
 | `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. 구분자 쌍이 아닌 구분자 옵션에는 `ArgumentError`를 돌려준다. |
 | `Engine::new(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `Engine::render(target, assign, &RenderOptions)` | 템플릿 이름 또는 파싱된 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 또는 HTML 항목을 제공한다. |
@@ -48,9 +50,11 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 ```sh
 template parse FILE [--root DIR] [--delimiters OC]
 template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+template tokens FILE [--root DIR] [--delimiters OC]
+template format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
+`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 모든 토큰의 `[start, end, type]`을 출력한다. `format`은 정리한 텍스트를 출력하거나, stderr에 `{reason, code, line, col, message}`를 출력하고 상태 2로 종료한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
 ## 개발
 
 ```sh

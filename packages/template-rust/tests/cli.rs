@@ -58,3 +58,31 @@ fn tokens_prints_the_classified_ranges_and_errors_exit_with_status_2() {
     let error: serde_json::Value = serde_json::from_slice(&output.stderr).expect("json");
     assert_eq!(error["code"], "E_PARSE_UNCLOSED_BLOCK");
 }
+
+#[test]
+fn format_prints_the_formatted_text_and_errors_exit_with_status_2() {
+    let dir = std::env::temp_dir().join(format!("polyspec-template-cli-format-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).expect("directory");
+    let file = dir.join("input.tpl");
+    std::fs::write(&file, "<ul>\n<li>{=a}</li>\n</ul>").expect("write");
+    let path = file.to_str().expect("path");
+    let output = run(&["format", path]);
+    assert_eq!(output.status.code(), Some(0));
+    assert_eq!(String::from_utf8_lossy(&output.stdout), "<ul>\n  <li>{= a}</li>\n</ul>");
+    assert_eq!(
+        String::from_utf8_lossy(&run(&["format", path, "--indent", "tab"]).stdout),
+        "<ul>\n\t<li>{= a}</li>\n</ul>"
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&run(&["format", path, "--indent", "none"]).stdout),
+        "<ul>\n<li>{= a}</li>\n</ul>"
+    );
+    assert_eq!(run(&["format", path, "--indent", "9"]).status.code(), Some(1));
+    std::fs::write(&file, "<ul>\n<li>{=a}</ul>").expect("write");
+    let output = run(&["format", path]);
+    assert_eq!(output.status.code(), Some(2));
+    let error: serde_json::Value = serde_json::from_slice(&output.stderr).expect("json");
+    assert_eq!(error["reason"], "html");
+    assert_eq!((error["line"].as_u64(), error["col"].as_u64()), (Some(2), Some(9)));
+    std::fs::remove_dir_all(&dir).expect("cleanup");
+}
