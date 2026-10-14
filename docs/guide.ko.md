@@ -1,5 +1,5 @@
 <!-- doc-id: docs-guide -->
-<!-- source-sha256: a93a75fbecb40611e02285387b39d359983a0d672426a1353e743bb2061a2cac -->
+<!-- source-sha256: 962dd938da70692ff7e151be9ec33aa35c9c93fb2245aa748269f767cc9a8694 -->
 # 사용법
 
 [English](/guide).
@@ -340,11 +340,15 @@ let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 ```python
 from polyspec.template import AstProgram, Engine, EngineOptions, FsLoader, RenderOptions
 
-engine = Engine(AstProgram(EngineOptions(loader=FsLoader('templates'))))
-html = engine.render('layout', assign, RenderOptions(
-    define={'layout': 'page.tpl', 'content': 'pages/list.tpl'},
-    env={'timezone': '+09:00', 'now': 1789084800},
-))
+engine = Engine(AstProgram(EngineOptions(loader=FsLoader("templates"))))
+html = engine.render(
+    "layout",
+    assign,
+    RenderOptions(
+        define={"layout": "page.tpl", "content": "pages/list.tpl"},
+        env={"timezone": "+09:00", "now": 1789084800},
+    ),
+)
 ```
 
 전체 API는 각 패키지 문서에 있다: [TypeScript](https://github.com/polyspec/template/tree/main/packages/template-ts), [Go](https://github.com/polyspec/template/tree/main/packages/template-go), [Rust](https://github.com/polyspec/template/tree/main/packages/template-rust), [PHP](https://github.com/polyspec/template/tree/main/packages/template-php), [Python](https://github.com/polyspec/template/tree/main/packages/template-python).
