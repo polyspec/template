@@ -9,10 +9,10 @@ import { formatArgs, formatOutcome, parseArgs, renderArgs, tokensArgs } from '..
 const testCase = { input: 'input.tpl', dir: '/cases/g/n', hasData: true, hasDefine: true, hasEnv: true, options: { delimiters: '[]' } };
 
 test('every subcommand passes its options before FILE', () => {
-  assert.deepEqual(parseArgs(testCase), ['parse', '--root', '/cases/g/n', '--delimiters', '[]', 'input.tpl']);
-  assert.deepEqual(tokensArgs(testCase), ['tokens', '--root', '/cases/g/n', '--delimiters', '[]', 'input.tpl']);
-  assert.deepEqual(renderArgs(testCase), ['render', '--root', '/cases/g/n', '--data', 'data.json', '--define', 'define.json', '--env', 'env.json', '--delimiters', '[]', 'input.tpl']);
-  assert.deepEqual(formatArgs(testCase, 'keep'), ['format', '--indent', 'none', '--delimiters', '[]', 'input.tpl']);
+  assert.deepEqual(parseArgs(testCase), ['parse', '--root', '/cases/g/n', '--delimiters=[]', 'input.tpl']);
+  assert.deepEqual(tokensArgs(testCase), ['tokens', '--root', '/cases/g/n', '--delimiters=[]', 'input.tpl']);
+  assert.deepEqual(renderArgs(testCase), ['render', '--root', '/cases/g/n', '--data', 'data.json', '--define', 'define.json', '--env', 'env.json', '--delimiters=[]', 'input.tpl']);
+  assert.deepEqual(formatArgs(testCase, 'keep'), ['format', '--indent', 'none', '--delimiters=[]', 'input.tpl']);
   assert.deepEqual(formatArgs({ ...testCase, options: {} }, 'indent'), ['format', 'input.tpl']);
 });
 
