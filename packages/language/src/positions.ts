@@ -5,7 +5,9 @@ export function indexOfByte(text: string, offset: number): number {
   let bytes = 0;
   for (let index = 0; index < text.length; index++) {
     if (bytes >= offset) return index;
-    const code = text.codePointAt(index) as number;
+    const code = text.codePointAt(index);
+    // The loop reads only indexes inside the text.
+    if (code === undefined) throw new RangeError(`index ${index} is outside the text`);
     bytes += code < 0x80 ? 1 : code < 0x800 ? 2 : code < 0x10000 ? 3 : 4;
     if (code >= 0x10000) index++;
   }

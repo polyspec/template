@@ -1,4 +1,5 @@
 // escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
+import { defined } from '../checked.js';
 import { escapeHtml } from '../escape.js';
 import { numberToString } from '../value/number.js';
 import { NativeObject, SafeString, typeOf, type Value } from '../value/value.js';
@@ -7,7 +8,8 @@ import { argString, safe, stringifyArg, typeError, type BuiltIn } from './helper
 function jsonString(text: string): string {
   let result = '"';
   for (const char of text) {
-    const code = char.codePointAt(0) as number;
+    // A control character is one UTF-16 unit, so the first unit decides the test below.
+    const code = char.charCodeAt(0);
     switch (char) {
       case '"': result += '\\"'; break;
       case '\\': result += '\\\\'; break;
@@ -48,11 +50,11 @@ export function percentEncode(text: string): string {
 }
 
 export const encodingFunctions: Record<string, BuiltIn> = {
-  escape: { min: 1, max: 1, call: ([v]) => safe(escapeHtml(stringifyArg(v as Value))) },
-  raw: { min: 1, max: 1, call: ([v]) => safe(stringifyArg(v as Value)) },
-  json: { min: 1, max: 1, call: ([v]) => toJson(v as Value) },
-  url: { min: 1, max: 1, call: ([v]) => percentEncode(stringifyArg(v as Value)) },
-  nl2br: { min: 1, max: 1, call: ([v]) => argString(v as Value, 'nl2br').replace(/\r\n|\n/g, match => (match === '\n' ? '<br>\n' : '<br>\n')) },
-  str: { min: 1, max: 1, call: ([v]) => stringifyArg(v as Value) },
-  type: { min: 1, max: 1, call: ([v]) => typeOf(v as Value) },
+  escape: { min: 1, max: 1, call: ([v]) => safe(escapeHtml(stringifyArg(defined(v, 'the argument of escape')))) },
+  raw: { min: 1, max: 1, call: ([v]) => safe(stringifyArg(defined(v, 'the argument of raw'))) },
+  json: { min: 1, max: 1, call: ([v]) => toJson(defined(v, 'the argument of json')) },
+  url: { min: 1, max: 1, call: ([v]) => percentEncode(stringifyArg(defined(v, 'the argument of url'))) },
+  nl2br: { min: 1, max: 1, call: ([v]) => argString(defined(v, 'the argument of nl2br'), 'nl2br').replace(/\r\n|\n/g, match => (match === '\n' ? '<br>\n' : '<br>\n')) },
+  str: { min: 1, max: 1, call: ([v]) => stringifyArg(defined(v, 'the argument of str')) },
+  type: { min: 1, max: 1, call: ([v]) => typeOf(defined(v, 'the argument of type')) },
 };

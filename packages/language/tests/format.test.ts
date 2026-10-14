@@ -54,10 +54,13 @@ describe('format', () => {
   });
 
   it('returns the parser error position for a source that does not parse', () => {
-    expect(format('<p>\n  {? a}\n</p>', { name: 'x.tpl' })).toEqual({
-      ok: false,
-      error: { reason: 'parse', code: 'E_PARSE_UNCLOSED_BLOCK', line: 2, col: 3, message: expect.any(String) },
-    });
+    const result = format('<p>\n  {? a}\n</p>', { name: 'x.tpl' });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    // The message is the parser's own; the test fixes only the error position.
+    const { message, ...error } = result.error;
+    expect(error).toEqual({ reason: 'parse', code: 'E_PARSE_UNCLOSED_BLOCK', line: 2, col: 3 });
+    expect(message).toBeTypeOf('string');
   });
 
   it('never changes a comment', () => {

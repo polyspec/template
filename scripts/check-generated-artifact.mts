@@ -31,7 +31,12 @@ try {
   let compilations = 0;
   const compile = (value: string) => (): string => { compilations += 1; return value; };
 
-  const first = compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compilerDigest: compilerA, compile: compile('first\n') });
+  // compileGeneratedArtifact of packages/compiler declares no return type. The manifest that it returns is the JSON
+  // document that it writes next to the artifact, so the check reads it through the schema of that document.
+  const first = artifactManifestDocument.check(
+    compileGeneratedArtifact({ graphPath: graph, typeManifestPath: types, target: 'ts', output, refresh: 'dev', compilerDigest: compilerA, compile: compile('first\n') }),
+    'the manifest that compileGeneratedArtifact returned',
+  );
   assert.equal(readFileSync(output, 'utf8'), 'first\n');
   assert.equal(first.mode, 'gen');
   assert.equal(first.target, 'ts');

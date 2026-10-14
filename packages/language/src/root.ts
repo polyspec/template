@@ -125,7 +125,12 @@ function pathTags(ast: Template): PathTag[] {
     }
     if (typeof value !== 'object' || value === null) return;
     const node = value as { type?: unknown; path?: unknown; span?: unknown };
-    if ((node.type === 'Include' || node.type === 'Block') && typeof node.path === 'string') tags.push({ path: node.path, span: node.span as [number, number] });
+    if ((node.type === 'Include' || node.type === 'Block') && typeof node.path === 'string') {
+      const { span } = node;
+      // Every AST node carries its span as a pair of byte offsets (AST-2).
+      if (!Array.isArray(span) || span.length !== 2 || typeof span[0] !== 'number' || typeof span[1] !== 'number') throw new Error(`The ${node.type} node of ${node.path} has no span`);
+      tags.push({ path: node.path, span: [span[0], span[1]] });
+    }
     for (const child of Object.values(value)) visit(child);
   };
   visit(ast.body);

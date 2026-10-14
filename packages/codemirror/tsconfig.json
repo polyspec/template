@@ -24,6 +24,8 @@
   "include": [
     "src",
     "tests",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "tsup.config.ts",
+    "vitest.config.ts"
   ]
 }

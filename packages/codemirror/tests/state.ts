@@ -16,7 +16,10 @@ export function marks(state: EditorState): [number, number, string][] {
   for (const source of state.facet(EditorView.decorations)) {
     if (typeof source === 'function') continue;
     source.between(0, state.doc.length, (from, to, value) => {
-      result.push([from, to, (value.spec as { class: string }).class]);
+      // The spec of a decoration is the plain object that created it; the marks of the extension carry a class.
+      const spec: unknown = value.spec;
+      if (spec === null || typeof spec !== 'object' || !('class' in spec) || typeof spec.class !== 'string') throw new Error(`The mark at ${from} has no class`);
+      result.push([from, to, spec.class]);
     });
   }
   return result.sort((left, right) => left[0] - right[0] || left[1] - right[1] || left[2].localeCompare(right[2]));

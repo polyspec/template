@@ -131,7 +131,7 @@
       "integrationFiles": [
         {
           "name": "react-host.tsx",
-          "source": "import { createRoot } from 'react-dom/client';\n\nfunction Counter() {\n  return <button onClick={() => alert('React owns this island')}>Interactive island</button>;\n}\n\ncreateRoot(document.getElementById('counter')!).render(<Counter />);\n"
+          "source": "import { createRoot } from 'react-dom/client';\n\nfunction Counter() {\n  return <button onClick={() => alert('React owns this island')}>Interactive island</button>;\n}\n\nconst island = document.getElementById('counter');\nif (island === null) throw new Error('the page has no element #counter');\ncreateRoot(island).render(<Counter />);\n"
         }
       ],
       "assign": {

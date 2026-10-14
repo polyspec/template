@@ -215,8 +215,9 @@ export class AstProgramCore implements RuntimeServices, Program {
       checkText(id);
       if (typeof input !== 'string' && typeof input.html === 'string') {
         registry.set(id, { html: input.html });
-      } else if (typeof input === 'string' || typeof input.template === 'string') {
-        const template = typeof input === 'string' ? input : input.template as string;
+      } else {
+        const template = typeof input === 'string' ? input : input.template;
+        if (typeof template !== 'string') throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: entry needs "template" or "html"`);
         let name: string;
         try {
           name = resolvePath('', template);
@@ -227,8 +228,6 @@ export class AstProgramCore implements RuntimeServices, Program {
         const data = typeof input === 'string' || input.data === undefined ? null : bindData(input.data);
         if (data !== null && !(data instanceof Map)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: data is not a map`);
         registry.set(id, { template: name, data });
-      } else {
-        throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: entry needs "template" or "html"`);
       }
     }
     return registry;

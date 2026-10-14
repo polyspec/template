@@ -221,8 +221,23 @@ function checkStaticImplementation(language: string): void {
   if (language === 'python') assert(/class Adapter\(RenderAdapter\):/.test(source), 'Python Adapter does not implement RenderAdapter');
 }
 
+/** The runtime assertions that the generated JavaScript contract exports. */
+interface RuntimeAssertions {
+  assertRenderAdapter(adapter: object): unknown;
+  assertRequestShape(request: object): unknown;
+}
+
+/** Whether the module `value` exports both runtime assertions as functions. */
+function isRuntimeAssertions(value: unknown): value is RuntimeAssertions {
+  return typeof value === 'object' && value !== null
+    && 'assertRenderAdapter' in value && typeof value.assertRenderAdapter === 'function'
+    && 'assertRequestShape' in value && typeof value.assertRequestShape === 'function';
+}
+
 async function checkRuntimeAssertionHelpers() {
-  const contract: { assertRenderAdapter(adapter: object): unknown; assertRequestShape(request: object): unknown } = await import(pathToFileURL(join(adapterRoot, languageDefinition('javascript').generated)).href);
+  const generated = join(adapterRoot, languageDefinition('javascript').generated);
+  const contract: unknown = await import(pathToFileURL(generated).href);
+  assert(isRuntimeAssertions(contract), `${generated} does not export assertRenderAdapter and assertRequestShape`);
   let rejectedMissingOperation = false;
   try {
     contract.assertRenderAdapter({});

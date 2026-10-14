@@ -1,4 +1,5 @@
 // Error object and error codes as defined in docs/spec/errors.md.
+import { elementAt } from './checked.js';
 
 // The code of a template error. Every code is listed with its condition and position in ERR-7
 // to ERR-12.
@@ -75,10 +76,10 @@ function positionOf(lines: LineIndex, offset: number): { line: number; col: numb
   let high = lines.length - 1;
   while (low < high) {
     const mid = (low + high + 1) >> 1;
-    if ((lines[mid] as number) <= offset) low = mid;
+    if (elementAt(lines, mid) <= offset) low = mid;
     else high = mid - 1;
   }
-  return { line: low + 1, col: offset - (lines[low] as number) + 1 };
+  return { line: low + 1, col: offset - elementAt(lines, low) + 1 };
 }
 
 // The error that parsing and rendering raise. It carries the position of the token or node it
@@ -153,9 +154,9 @@ const runtimeErrors = [TypeError, RangeError, ReferenceError, SyntaxError, EvalE
 export function internalBoundary<T>(template: string, operation: () => T): T {
   try {
     return operation();
-  } catch (error) {
-    if (runtimeErrors.some(type => error instanceof type)) {
-      throw errorWithoutPosition('E_INTERNAL', template, `internal failure: ${(error as Error).message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error && runtimeErrors.some(type => error instanceof type)) {
+      throw errorWithoutPosition('E_INTERNAL', template, `internal failure: ${error.message}`);
     }
     throw error;
   }

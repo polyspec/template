@@ -58,7 +58,7 @@ test('ESRCH on the group probe means the group has ended, so no signal is sent',
 
 test('EPERM that persists past the deadline is an error naming the pgid, the errno and the elapsed time', { timeout: 5000 }, async () => {
   const fake = fakeKill(() => 'EPERM');
-  const error = await stopProcessGroup(exitedChild(), 'SIGKILL', fake.kill, 50).then(() => undefined, e => e);
+  const error = await stopProcessGroup(exitedChild(), 'SIGKILL', fake.kill, 50).then(() => undefined, (rejection: unknown) => rejection);
   assert.equal(fake.capped(), false, 'the wait did not stop at its deadline');
   assert.ok(error instanceof Error, 'a group that stays exiting must not resolve as ended');
   assert.ok('code' in error && 'pgid' in error, `the error names no code and pgid: ${error.message}`);

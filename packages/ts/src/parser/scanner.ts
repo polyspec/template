@@ -81,8 +81,8 @@ function isDelimiterChar(char: string): boolean {
 
 export function parseDelimiters(value: string): Delimiters | null {
   if (value.length !== 2) return null;
-  const open = value[0] as string;
-  const close = value[1] as string;
+  const open = value.charAt(0);
+  const close = value.charAt(1);
   if (!isDelimiterChar(open) || !isDelimiterChar(close)) return null;
   return { open, close };
 }

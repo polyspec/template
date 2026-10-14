@@ -26,8 +26,12 @@ const OPTIONS_SCHEMA: JSONSchemaType<CaseOptions> = {
 };
 const optionsDocument = jsonDocument<CaseOptions>('options of a case', OPTIONS_SCHEMA);
 
+/** The content of an options.json at `path`, as a case or another template tree has it; a missing file is no options. */
+export function readCaseOptions(path: string): CaseOptions {
+  return existsSync(path) ? optionsDocument.read(path) : {};
+}
+
 /** The content of the options.json of a case; a case without options.json has no options. */
 export function caseOptions(id: string): CaseOptions {
-  const path = join(casesDir, id, 'options.json');
-  return existsSync(path) ? optionsDocument.read(path) : {};
+  return readCaseOptions(join(casesDir, id, 'options.json'));
 }

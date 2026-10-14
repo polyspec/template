@@ -20,10 +20,10 @@ function withoutSpans(value: unknown): unknown {
  */
 export function withoutLineIndentation(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map(withoutLineIndentation).filter(item => !(item !== null && typeof item === 'object' && (item as Record<string, unknown>).type === 'Text' && (item as Record<string, unknown>).value === ''));
+    return value.map(withoutLineIndentation).filter(item => !(isRecord(item) && item.type === 'Text' && item.value === ''));
   }
-  if (value !== null && typeof value === 'object') {
-    const record = value as Record<string, unknown>;
+  if (isRecord(value)) {
+    const record = value;
     const result: Record<string, unknown> = {};
     for (const [key, field] of Object.entries(record)) {
       result[key] = record.type === 'Text' && key === 'value' && typeof field === 'string' ? field.replace(/(^|\n)[ \t]+/g, '$1') : withoutLineIndentation(field);
@@ -44,9 +44,13 @@ function equal(left: unknown, right: unknown): boolean {
     if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
     return left.every((item, index) => equal(item, right[index]));
   }
-  if (left === null || right === null || typeof left !== 'object' || typeof right !== 'object') return false;
+  if (!isRecord(left) || !isRecord(right)) return false;
   const leftKeys = Object.keys(left);
-  const rightRecord = right as Record<string, unknown>;
   if (leftKeys.length !== Object.keys(right).length) return false;
-  return leftKeys.every(key => key in rightRecord && equal((left as Record<string, unknown>)[key], rightRecord[key]));
+  return leftKeys.every(key => key in right && equal(left[key], right[key]));
+}
+
+// Every non-null object reads by string keys: a key that it lacks reads as undefined.
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object';
 }

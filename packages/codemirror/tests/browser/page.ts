@@ -21,7 +21,8 @@ let view: EditorView | null = null;
 
 window.mount = (doc, dark) => {
   view?.destroy();
-  const parent = document.querySelector('#editor') as HTMLElement;
+  const parent = document.querySelector<HTMLElement>('#editor');
+  if (parent === null) throw new Error('The test page has no #editor element');
   const extensions = [keymap.of(defaultKeymap), syntaxHighlighting(defaultHighlightStyle), template(), EditorView.theme({}, { dark })];
   view = new EditorView({ parent, state: EditorState.create({ doc, extensions }) });
   view.focus();

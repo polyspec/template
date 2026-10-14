@@ -7,7 +7,8 @@
     "examples/showcase/adapters/javascript.mjs": "The JavaScript adapter of the showcase: scripts/check-showcase-contract.mts and examples/showcase/benchmark-modes.mts run it by path.",
     "tests/runner/*.mts": "The cross-language runners: make conformance, conformance-generated-*, delimiter-matrix, function-contract-check and function-inventory-check run them by path.",
     "tests/browser/{playwright.config.ts,server.mts}": "The browser test: tests/browser/run.mts (make test-browser) starts server.mts by path and Playwright, which reads playwright.config.ts.",
-    "examples/showcase/adapters/generated/**/*.{ts,mjs,js}": "The generated programs and contract declarations of the showcase: scripts/generate-showcase-contract.mts and the compiler write them, and their exports are the API that a host of a generated program imports, of which the showcase adapters use a part."
+    "examples/showcase/adapters/generated/**/*.{ts,mjs,js}": "The generated programs and contract declarations of the showcase: scripts/generate-showcase-contract.mts and the compiler write them, and their exports are the API that a host of a generated program imports, of which the showcase adapters use a part.",
+    "examples/site/scenarios/react-boundary/react-host.tsx": "The site shows it as the react-boundary integration source (scenario.json integrationFiles); make typecheck checks it with examples/site/scenarios/tsconfig.json."
   },
   "binaries": {
     "gmake": "GNU Make of Homebrew: tests/scripts/toolchain-files.test.mts runs the recipes with it where the make of the machine is the GNU Make 3.81 of macOS."

@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-14T22:41:24.936Z",
+  "reviewed": "2026-10-14T22:49:41.882Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "f03f36a206a83d9397e4f3b515dc1fbd4d16cafd555368f20a3d77bddf786f9b",
+      "sha256": "e9af5a3e2f23110af09458458ba6989f7cf348d382f8d9c855a8ca5cec296efc",
       "advisories": [
         {
           "package": "sprintf-js",
@@ -63,6 +63,20 @@
     {
       "ecosystem": "npm",
       "manifest": "package.json",
+      "package": "@types/react",
+      "version": "19.3.0",
+      "latest": "19.3.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@types/react-dom",
+      "version": "19.3.0",
+      "latest": "19.3.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
       "package": "@types/vscode",
       "version": "1.138.0",
       "latest": "1.140.0"
@@ -108,6 +122,20 @@
       "package": "picomatch",
       "version": "4.0.7",
       "latest": "4.0.7"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "react",
+      "version": "19.3.1",
+      "latest": "19.3.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "react-dom",
+      "version": "19.3.1",
+      "latest": "19.3.1"
     },
     {
       "ecosystem": "npm",
@@ -262,6 +290,13 @@
       "package": "phpunit/phpunit",
       "version": "13.4.2",
       "latest": "13.4.2"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/php/composer.json",
+      "package": "symfony/console",
+      "version": "v8.1.9",
+      "latest": "v8.1.9"
     },
     {
       "ecosystem": "pypi",

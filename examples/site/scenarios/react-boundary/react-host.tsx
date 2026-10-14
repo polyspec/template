@@ -4,4 +4,6 @@ function Counter() {
   return <button onClick={() => alert('React owns this island')}>Interactive island</button>;
 }
 
-createRoot(document.getElementById('counter')!).render(<Counter />);
+const island = document.getElementById('counter');
+if (island === null) throw new Error('the page has no element #counter');
+createRoot(island).render(<Counter />);

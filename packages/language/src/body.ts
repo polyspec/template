@@ -25,8 +25,9 @@ export function formatBody(input: BodyInput): string | null {
   const { kind, source, bodyStart, bodyEnd, tokens } = input;
   const body = source.slice(bodyStart, bodyEnd);
   if (/[\r\n]/.test(body) || kind === 'comment' || kind === 'directive') return null;
-  const sigil = tokens[0] as SyntaxToken;
-  const rest = tokens.slice(1);
+  const [sigil, ...rest] = tokens;
+  // The parser reports every accepted tag with its sigil token first.
+  if (sigil === undefined) throw new Error(`The ${kind} tag at ${bodyStart} has no sigil token`);
   const text = (token: SyntaxToken): string => source.slice(token.start, token.end);
   const after = source.slice(sigil.end, bodyEnd).trim();
   switch (kind) {
@@ -48,13 +49,15 @@ export function formatBody(input: BodyInput): string | null {
       return withRest('#', words(after).join(' '));
     case 'for': {
       // The loop variable and its `=`, then the iterated expression.
-      const [name, equals] = rest as [SyntaxToken, SyntaxToken];
+      const [name, equals] = rest;
+      if (name === undefined || equals === undefined) throw new Error(`The for tag at ${bodyStart} has no loop variable and \`=\``);
       const iter = expressionText(input, rest.slice(2), equals.end);
       return iter === null ? null : `@ ${text(name)} = ${iter}`;
     }
     case 'assignment': {
       // The assigned name and its operator, then the value unless the operator is `++` or `--`.
-      const [name, operator] = rest as [SyntaxToken, SyntaxToken];
+      const [name, operator] = rest;
+      if (name === undefined || operator === undefined) throw new Error(`The assignment tag at ${bodyStart} has no name and operator`);
       if (rest.length === 2) return WHITESPACE.test(source.slice(operator.end, bodyEnd)) ? `:${text(name)}${text(operator)}` : null;
       const value = expressionText(input, rest.slice(2), operator.end);
       return value === null ? null : `:${text(name)} ${text(operator)} ${value}`;
@@ -87,7 +90,7 @@ function words(text: string): string[] {
   let current = '';
   let quote: string | null = null;
   for (let index = 0; index < text.length; index++) {
-    const char = text[index] as string;
+    const char = text.charAt(index);
     if (quote !== null) {
       current += char;
       if (char === '\\') {

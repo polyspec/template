@@ -17,13 +17,18 @@ export class BoundMap {
   }
 
   static {
-    entriesOf = value => (typeof value === 'object' && value !== null && #entries in value ? (value as BoundMap).#entries : undefined);
+    entriesOf = value => (typeof value === 'object' && value !== null && #entries in value ? value.#entries : undefined);
   }
 }
 
 /** The entries of a bound map, or undefined for every other value (VAL-22). */
 export function boundEntries(value: unknown): MapValue | undefined {
   return entriesOf(value);
+}
+
+/** Whether a value is a bound map (VAL-22). */
+export function isBound(value: unknown): value is BoundMap {
+  return entriesOf(value) !== undefined;
 }
 
 /** Creates a bound map from entries that host binding produced. */

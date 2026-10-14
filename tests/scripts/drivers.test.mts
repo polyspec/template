@@ -6,8 +6,8 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { pathToFileURL } from 'node:url';
 
+import { importDriverCopy } from './driver-copy.mts';
 import { copyDriverFiles, driverModules } from './driver-fixture.mts';
 
 test('the driver fixture reaches the modules that the drivers import through other modules', () => {
@@ -22,7 +22,7 @@ test('prepare builds the CLI of a language also when its binary is present', asy
   copyDriverFiles(directory);
   mkdirSync(path.join(directory, 'packages/go'), { recursive: true });
   writeFileSync(path.join(directory, 'packages/go/template'), 'a binary built from older sources\n');
-  const { drivers, prepare } = await import(pathToFileURL(path.join(directory, 'tests/runner/drivers.mts')).href);
+  const { drivers, prepare } = await importDriverCopy(directory);
   let builds = 0;
   drivers.go.build = () => { builds++; };
   prepare('go');

@@ -1,8 +1,8 @@
 // Template root (EDT-18 to EDT-21): the marker vectors, the root by nearest ancestor and the path diagnostics through an
 // injected host.
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { jsonDocument } from '../../../scripts/json-document.mts';
 import { checkRootMarker, openDocument, ROOT_MARKER, type EntryType, type RootHost } from '../src/index.js';
 import { packageRoot } from './helpers.js';
 
@@ -10,6 +10,13 @@ interface Vector {
   text: string;
   message: string | null;
 }
+
+const vectorsDocument = jsonDocument<Vector[]>('root marker vectors', {
+  type: 'array',
+  items: {
+    type: 'object', properties: { text: { type: 'string' }, message: { type: 'string', nullable: true } }, required: ['text', 'message'], additionalProperties: false,
+  },
+});
 
 /** A host over an in-memory tree: a string is a file, null a directory, `{ link }` a symbolic link. */
 function memoryHost(tree: Record<string, string | null | { link: string }>): RootHost {
@@ -36,7 +43,7 @@ function diagnosticsOf(text: string, path: string, host: RootHost): { start: num
 }
 
 describe('root marker vectors', () => {
-  const vectors = JSON.parse(readFileSync(join(packageRoot, 'tests', 'root-marker', 'vectors.json'), 'utf8')) as Vector[];
+  const vectors = vectorsDocument.read(join(packageRoot, 'tests', 'root-marker', 'vectors.json'));
   for (const vector of vectors) {
     it(`${vector.message === null ? 'accepts' : 'rejects'} ${JSON.stringify(vector.text)}`, () => {
       const diagnostics = checkRootMarker(vector.text);

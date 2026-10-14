@@ -7,8 +7,9 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
+import { importDriverCopy } from './driver-copy.mts';
 import { copyDriverFiles } from './driver-fixture.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -19,7 +20,7 @@ test('the conformance runners select every language when no option names them, a
   const directory = mkdtempSync(path.join(tmpdir(), 'template-drivers-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   copyDriverFiles(directory);
-  const { drivers, prepare, selectLanguages } = await import(pathToFileURL(path.join(directory, 'tests/runner/drivers.mts')).href);
+  const { drivers, prepare, selectLanguages } = await importDriverCopy(directory);
   assert.deepEqual(selectLanguages(undefined), Object.keys(drivers));
   assert.deepEqual(selectLanguages('go,php'), ['go', 'php']);
   assert.throws(() => prepare('go'), /go: package directory is absent/);

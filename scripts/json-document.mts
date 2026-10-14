@@ -5,8 +5,12 @@ import { Ajv, type Schema } from 'ajv';
 
 const ajv = new Ajv({ allErrors: true });
 
-/** A JSON document of type T: `parse` validates a text, `read` a file; both fail with the source and the errors. */
+/**
+ * A JSON document of type T: `check` validates a value, such as one that an untyped module returns, `parse` a text and
+ * `read` a file; each fails with the source and the errors.
+ */
 export interface JsonDocument<T> {
+  check(value: unknown, source: string): T;
   parse(text: string, source: string): T;
   read(path: string): T;
 }
@@ -14,12 +18,12 @@ export interface JsonDocument<T> {
 /** The document `what` with the JSON Schema `schema`, which describes the type T. */
 export function jsonDocument<T>(what: string, schema: Schema): JsonDocument<T> {
   const validate = ajv.compile<T>(schema);
-  const parse = (text: string, source: string): T => {
-    const value: unknown = parseJson(text, source);
+  const check = (value: unknown, source: string): T => {
     if (validate(value)) return value;
     throw new Error(`${source} is no ${what}: ${ajv.errorsText(validate.errors)}`);
   };
-  return { parse, read: path => parse(readFileSync(path, 'utf8'), path) };
+  const parse = (text: string, source: string): T => check(parseJson(text, source), source);
+  return { check, parse, read: path => parse(readFileSync(path, 'utf8'), path) };
 }
 
 /** The value of a JSON text whose shape the caller does not read, or an error that names `source`. */

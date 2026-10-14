@@ -24,7 +24,7 @@ describe('template CLI', () => {
   it('parses a file to AST JSON', () => {
     const result = run(['parse', join(casesDir, 'text', 'plain', 'input.tpl')]);
     expect(result.status).toBe(0);
-    expect(JSON.parse(result.stdout).type).toBe('Template');
+    expect(JSON.parse(result.stdout)).toMatchObject({ type: 'Template' });
   });
 
   it('renders a case and reports errors with exit status 2', () => {
@@ -32,7 +32,7 @@ describe('template CLI', () => {
     expect(rendered.status).toBe(0);
     const failed = run(['render', join(casesDir, 'errors', 'unclosed-block', 'input.tpl')]);
     expect(failed.status).toBe(2);
-    expect(JSON.parse(failed.stderr).code).toBe('E_PARSE_UNCLOSED_BLOCK');
+    expect(JSON.parse(failed.stderr)).toMatchObject({ code: 'E_PARSE_UNCLOSED_BLOCK' });
   });
 
   it('exits with status 1 on a usage error', () => {
@@ -57,7 +57,9 @@ describe('template CLI', () => {
       expect(JSON.parse(result.stdout)).toEqual([[2, 3, 'delimiter'], [3, 4, 'keyword'], [5, 6, 'variable'], [6, 8, 'property'], [8, 9, 'delimiter']]);
       const custom = run(['tokens', '--delimiters', ';;', join(casesDir, 'delimiters', 'option-semicolon', 'input.tpl')]);
       expect(custom.status).toBe(0);
-      expect((JSON.parse(custom.stdout) as unknown[]).length).toBeGreaterThan(0);
+      const tokens: unknown = JSON.parse(custom.stdout);
+      expect(tokens).toBeInstanceOf(Array);
+      expect(tokens).not.toHaveLength(0);
     } finally {
       rmSync(work, { recursive: true, force: true });
     }
@@ -65,7 +67,8 @@ describe('template CLI', () => {
 
   it('reports a template error of tokens with exit status 2', () => {
     const failed = run(['tokens', join(casesDir, 'errors', 'unclosed-block', 'input.tpl')]);
-    expect([failed.status, JSON.parse(failed.stderr).code]).toEqual([2, 'E_PARSE_UNCLOSED_BLOCK']);
+    expect(failed.status).toBe(2);
+    expect(JSON.parse(failed.stderr)).toMatchObject({ code: 'E_PARSE_UNCLOSED_BLOCK' });
     expect(run(['tokens', '--data', 'd.json', 'x.tpl']).status).toBe(1);
   });
 });

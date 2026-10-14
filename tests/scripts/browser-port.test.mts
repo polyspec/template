@@ -26,8 +26,8 @@ test('the browser test runs on its own server while another server holds 127.0.0
   try {
     const run = spawn(process.execPath, [path.join(ROOT, 'tests/browser/run.mts')], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = '';
-    run.stdout.on('data', data => { output += data; process.stdout.write(data); });
-    run.stderr.on('data', data => { output += data; process.stderr.write(data); });
+    run.stdout.on('data', (data: Buffer) => { output += data; process.stdout.write(data); });
+    run.stderr.on('data', (data: Buffer) => { output += data; process.stderr.write(data); });
     const code = await new Promise(resolvePromise => run.on('close', resolvePromise));
     assert.equal(code, 0, output);
     const port = /\[server\] listening on http:\/\/127\.0\.0\.1:(\d+)\n/.exec(output)?.[1];

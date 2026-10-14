@@ -1,6 +1,6 @@
 // Fixture form of the server results (EDT-17): every result is requested through the protocol and its positions are
 // converted to string indexes, so it can be compared with the editor fixtures of the language service.
-import type { DocumentHighlight, FoldingRange, InitializeResult, Position, SemanticTokens, TextEdit } from 'vscode-languageserver';
+import type { DocumentHighlight, FoldingRange, Position, SemanticTokens, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import type { Client } from './client.js';
 
@@ -23,11 +23,14 @@ export function decodeTokens(text: TextDocument, data: readonly number[], legend
   let line = 0;
   let character = 0;
   for (let index = 0; index < data.length; index += 5) {
-    const [deltaLine, deltaStart, length, type] = data.slice(index, index + 4) as [number, number, number, number];
+    const [deltaLine, deltaStart, length, type] = data.slice(index, index + 4);
+    if (deltaLine === undefined || deltaStart === undefined || length === undefined || type === undefined) throw new Error(`The semantic tokens end inside the token at ${index}`);
+    const label = legend[type];
+    if (label === undefined) throw new Error(`The semantic token type ${type} is not in the legend`);
     line += deltaLine;
     character = deltaLine === 0 ? character + deltaStart : deltaStart;
     const start = text.offsetAt({ line, character });
-    tokens.push([start, start + length, legend[type] as string]);
+    tokens.push([start, start + length, label]);
   }
   return tokens;
 }
@@ -41,7 +44,8 @@ export async function serverResults(client: Client, uri: string, source: string,
   await client.open(uri, source);
 
   const published = await client.diagnosticsOf(uri, () => true);
-  const legend = (client.initialized as InitializeResult).capabilities.semanticTokensProvider?.legend.tokenTypes ?? [];
+  if (client.initialized === null) throw new Error('The client has no initialize result');
+  const legend = client.initialized.capabilities.semanticTokensProvider?.legend.tokenTypes ?? [];
   const tokens = await client.request<SemanticTokens>('textDocument/semanticTokens/full', { textDocument });
   const tags = await client.request<Array<{ start: Position; end: Position }>>('polyspec-template/tagRanges', { textDocument });
   const folding = await client.request<FoldingRange[]>('textDocument/foldingRange', { textDocument });
@@ -62,7 +66,7 @@ export async function serverResults(client: Client, uri: string, source: string,
     for (const start of starts) {
       const edits = await client.request<TextEdit[]>('textDocument/onTypeFormatting', { textDocument, position: at(start), ch: '\n', options: SPACES });
       const typed = TextDocument.applyEdits(text, edits);
-      lines.push((/^[ \t]*/.exec(typed.slice(start)) as RegExpExecArray)[0]);
+      lines.push(/^[ \t]*/.exec(typed.slice(start))?.[0] ?? '');
     }
     return lines;
   };

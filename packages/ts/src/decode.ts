@@ -34,8 +34,12 @@ function depth(error: ErrorObject): number {
 
 // The node type that a schema of the AST declares, as its `properties.type.const`.
 function declaredType(error: ErrorObject): unknown {
-  const parent = error.parentSchema as { properties?: { type?: { const?: unknown } } } | undefined;
-  return parent?.properties?.type?.const;
+  const parent: unknown = error.parentSchema;
+  if (typeof parent !== 'object' || parent === null || !('properties' in parent)) return undefined;
+  const properties: unknown = parent.properties;
+  if (typeof properties !== 'object' || properties === null || !('type' in properties)) return undefined;
+  const type: unknown = properties.type;
+  return typeof type === 'object' && type !== null && 'const' in type ? type.const : undefined;
 }
 
 // A value that matches no branch of a `oneOf` fails every branch, so ajv reports an error of each
@@ -49,10 +53,14 @@ function firstInvalid(errors: readonly ErrorObject[]): ErrorObject {
   const rejectsBranch = (error: ErrorObject): boolean => {
     if (error.keyword === 'const') return true;
     const declared = declaredType(error);
-    const data = error.data as { type?: unknown } | null;
-    return declared !== undefined && typeof data === 'object' && data !== null && declared !== data.type;
+    const data: unknown = error.data;
+    if (declared === undefined || typeof data !== 'object' || data === null) return false;
+    return declared !== ('type' in data ? data.type : undefined);
   };
-  return candidates.find(error => error.keyword !== 'oneOf' && !rejectsBranch(error)) ?? candidates.find(error => error.keyword === 'oneOf') ?? candidates[0]!;
+  const found = candidates.find(error => error.keyword !== 'oneOf' && !rejectsBranch(error)) ?? candidates.find(error => error.keyword === 'oneOf') ?? candidates[0];
+  // ajv reports at least one error of a value that fails the schema.
+  if (found === undefined) throw new RangeError('the validation of an invalid AST reported no error');
+  return found;
 }
 
 function reason(error: ErrorObject): string {

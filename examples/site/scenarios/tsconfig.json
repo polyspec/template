@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["es2025", "dom"],
+    "types": []
+  },
+  "include": ["*/*.tsx"]
+}

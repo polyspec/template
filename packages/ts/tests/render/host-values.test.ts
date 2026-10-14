@@ -3,14 +3,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { hostValuesDocument } from '../../../../scripts/fixture-documents.mts';
 import { AstProgram, MapLoader, TemplateError } from '../../src/index.js';
 import { repoRoot } from '../helpers.js';
 
 const fixtureDir = join(repoRoot, 'tests', 'fixtures', 'native-object');
-const expected = JSON.parse(readFileSync(join(fixtureDir, 'host-values.json'), 'utf8')) as {
-  outputs: Record<string, string>;
-  errors: Record<string, string>;
-};
+const expected = hostValuesDocument.read(join(fixtureDir, 'host-values.json'));
 
 class Order {
   describe(...args: unknown[]): string {
@@ -41,11 +39,12 @@ function render(target: string): string {
   const program = new AstProgram({ loader: new MapLoader(templates) });
   program.register('describe', args => describeArguments(args, order));
   program.register('mutate', ([list, map, items]) => {
-    (list as unknown[])[0] = 'changed';
-    (list as unknown[]).push('added');
-    (map as Map<string, unknown>).set('k', 'changed');
-    (map as Map<string, unknown>).set('added', true);
-    (items as unknown[]).push('added');
+    if (!Array.isArray(list) || !(map instanceof Map) || !Array.isArray(items)) throw new TypeError('mutate takes a list, a map and a list');
+    list[0] = 'changed';
+    list.push('added');
+    map.set('k', 'changed');
+    map.set('added', true);
+    items.push('added');
     return null;
   });
   program.register('pick', ([value]) => value);

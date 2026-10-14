@@ -1,5 +1,6 @@
 // Shared runtime value, function and error semantics for AST and generated programs.
 import type { Span } from '../ast.js';
+import { elementAt } from '../checked.js';
 import { TemplateError } from '../errors.js';
 import { escapeHtml } from '../escape.js';
 import { builtins, FunctionError, toNumber, type FunctionContext } from '../functions/index.js';
@@ -120,9 +121,9 @@ export class RuntimeBindings {
 
   /** Calls a public method on an assigned native object and binds its result (VAL-19). */
   memberCall(container: Value, method: string, args: Value[], frame: Frame, span: Span): Value {
-    const candidate = container instanceof NativeObject ? publicMethod(container.target, method) : undefined;
-    if (candidate === undefined) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${method} is not a function`);
-    const target = (container as NativeObject).target;
+    const target = container instanceof NativeObject ? container.target : null;
+    const candidate = target === null ? undefined : publicMethod(target, method);
+    if (target === null || candidate === undefined) throw this.error(frame, span, 'E_RUNTIME_UNKNOWN_FUNCTION', `${method} is not a function`);
     return hostResult(this, method, () => Reflect.apply(candidate, target, args.map(hostArgument)), frame, span);
   }
 
@@ -145,7 +146,7 @@ export class RuntimeBindings {
       if (typeof key === 'number' && Number.isInteger(key)) position = key;
       else if (isString(key) && /^(0|[1-9][0-9]*)$/.test(textOf(key))) position = Number(textOf(key));
       if (position === null || position < 0 || position >= container.length) return null;
-      return container[position] as Value;
+      return elementAt(container, position);
     }
     if (container instanceof NativeObject && isString(key)) {
       const name = textOf(key);
@@ -230,7 +231,7 @@ export class RuntimeBindings {
 /** VAL-19: an own property of the instance, or an accessor property on its prototype chain below `Object.prototype`. */
 function publicField(target: object, name: string): boolean {
   if (Object.prototype.hasOwnProperty.call(target, name)) return true;
-  for (let prototype = Object.getPrototypeOf(target); prototype !== null && prototype !== Object.prototype; prototype = Object.getPrototypeOf(prototype)) {
+  for (let prototype = Reflect.getPrototypeOf(target); prototype !== null && prototype !== Object.prototype; prototype = Reflect.getPrototypeOf(prototype)) {
     const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
     if (descriptor) return descriptor.get !== undefined;
   }
@@ -240,11 +241,19 @@ function publicField(target: object, name: string): boolean {
 /** VAL-19: a function-valued data property on the prototype chain below `Object.prototype`, except `constructor`. */
 function publicMethod(target: object, name: string): ((...args: unknown[]) => unknown) | undefined {
   if (name === 'constructor' || Object.prototype.hasOwnProperty.call(target, name)) return undefined;
-  for (let prototype = Object.getPrototypeOf(target); prototype !== null && prototype !== Object.prototype; prototype = Object.getPrototypeOf(prototype)) {
+  for (let prototype = Reflect.getPrototypeOf(target); prototype !== null && prototype !== Object.prototype; prototype = Reflect.getPrototypeOf(prototype)) {
     const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
-    if (descriptor) return typeof descriptor.value === 'function' ? descriptor.value as (...args: unknown[]) => unknown : undefined;
+    if (descriptor) {
+      const value: unknown = descriptor.value;
+      return isFunction(value) ? value : undefined;
+    }
   }
   return undefined;
+}
+
+/** Whether a value is a function, which JavaScript lets a caller pass any arguments. */
+function isFunction(value: unknown): value is (...args: unknown[]) => unknown {
+  return typeof value === 'function';
 }
 
 /** Runs host code and binds its result; a failure is E_RUNTIME_HOST_FUNCTION at the call (FUN-46). */

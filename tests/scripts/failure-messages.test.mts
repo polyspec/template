@@ -11,9 +11,10 @@ import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'n
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test, { type TestContext } from 'node:test';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 import { caseTestFailures, runCaseTests } from '../runner/cases.mts';
+import { importDriverCopy } from './driver-copy.mts';
 import { copyDriverFiles } from './driver-fixture.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -53,7 +54,7 @@ test('a tool that cannot start fails with its command and the install fix', (t) 
 test('a CLI call of the drivers that outlives its limit names the limit and the command', async (t) => {
   const copy = directory(t, 'template-drivers-limit-');
   copyDriverFiles(copy);
-  const { drivers, invoke } = await import(pathToFileURL(path.join(copy, 'tests/runner/drivers.mts')).href);
+  const { drivers, invoke } = await importDriverCopy(copy);
   drivers.go.command = () => ['sleep', ['5']];
   const result = invoke('go', [], copy, { timeoutMs: 200 });
   assert.equal(result.status, -1);

@@ -39,9 +39,10 @@ describe('bound maps across entry points and module formats (VAL-22)', () => {
     const run = spawnSync(process.execPath, ['--input-type=module', '-e', script], { encoding: 'utf8' });
     expect(run.stderr).toBe('');
     expect(run.status).toBe(0);
-    const { results, exported } = JSON.parse(run.stdout) as { results: string[][]; exported: string[][] };
     const creators = ['index.mjs', 'index.cjs', 'render.mjs', 'render.cjs'];
-    expect(results).toEqual(creators.flatMap(creator => creators.map(renderer => [creator, renderer, 'x12', 'x12'])));
-    expect(exported).toEqual(creators.map(name => [name, 'function', 'function']));
+    expect(JSON.parse(run.stdout)).toEqual({
+      results: creators.flatMap(creator => creators.map(renderer => [creator, renderer, 'x12', 'x12'])),
+      exported: creators.map(name => [name, 'function', 'function']),
+    });
   });
 });

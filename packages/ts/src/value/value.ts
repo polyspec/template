@@ -1,5 +1,6 @@
 // Value types, safe strings, truthiness, equality and ordering as defined in
 // docs/spec/data-model.md and docs/spec/expressions.md.
+import { defined, elementAt } from '../checked.js';
 
 // A string that the echo tag writes without HTML escaping (VAL-6). The functions `raw` and
 // `escape` produce one.
@@ -63,8 +64,8 @@ function compareCodePoints(a: string, b: string): number {
     if (ra.done && rb.done) return 0;
     if (ra.done) return -1;
     if (rb.done) return 1;
-    const ca = (ra.value as string).codePointAt(0) as number;
-    const cb = (rb.value as string).codePointAt(0) as number;
+    const ca = defined(ra.value.codePointAt(0), 'a code point');
+    const cb = defined(rb.value.codePointAt(0), 'a code point');
     if (ca !== cb) return ca < cb ? -1 : 1;
   }
 }
@@ -107,14 +108,14 @@ export function parseNumericString(text: string): number | null {
 export function looseEquals(a: Value, b: Value): boolean {
   const ta = typeOf(a);
   const tb = typeOf(b);
-  if (ta === tb) return sameTypeEquals(a, b, ta);
-  if (ta === 'number' && tb === 'string') {
-    const n = parseNumericString(textOf(b as string | SafeString));
-    return n !== null && n === (a as number);
+  if (ta === tb) return sameTypeEquals(a, b);
+  if (typeof a === 'number' && isString(b)) {
+    const n = parseNumericString(textOf(b));
+    return n !== null && n === a;
   }
-  if (ta === 'string' && tb === 'number') {
-    const n = parseNumericString(textOf(a as string | SafeString));
-    return n !== null && n === (b as number);
+  if (isString(a) && typeof b === 'number') {
+    const n = parseNumericString(textOf(a));
+    return n !== null && n === b;
   }
   return false;
 }
@@ -122,36 +123,27 @@ export function looseEquals(a: Value, b: Value): boolean {
 // EXP-37.
 export function strictEquals(a: Value, b: Value): boolean {
   const ta = typeOf(a);
-  return ta === typeOf(b) && sameTypeEquals(a, b, ta);
+  return ta === typeOf(b) && sameTypeEquals(a, b);
 }
 
-function sameTypeEquals(a: Value, b: Value, type: ValueType): boolean {
-  switch (type) {
-    case 'null':
-      return true;
-    case 'bool':
-    case 'number':
-      return a === b;
-    case 'string':
-      return textOf(a as string | SafeString) === textOf(b as string | SafeString);
-    case 'list': {
-      const la = a as ListValue;
-      const lb = b as ListValue;
-      return la.length === lb.length && la.every((item, index) => looseEquals(item, lb[index] as Value));
-    }
-    case 'map': {
-      const ma = a as MapValue;
-      const mb = b as MapValue;
-      if (ma.size !== mb.size) return false;
-      for (const [key, value] of ma) {
-        if (!mb.has(key) || !looseEquals(value, mb.get(key) as Value)) return false;
-      }
-      return true;
-    }
-    case 'object':
-      // EXP-39: two native objects are equal when they hold the same instance.
-      return (a as NativeObject).target === (b as NativeObject).target;
+// Compares two values that `typeOf` gives the same type.
+function sameTypeEquals(a: Value, b: Value): boolean {
+  if (isString(a) && isString(b)) return textOf(a) === textOf(b);
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((item, index) => looseEquals(item, elementAt(b, index)));
   }
+  if (a instanceof Map && b instanceof Map) {
+    if (a.size !== b.size) return false;
+    for (const [key, value] of a) {
+      const other = b.get(key);
+      if (other === undefined || !looseEquals(value, other)) return false;
+    }
+    return true;
+  }
+  // EXP-39: two native objects are equal when they hold the same instance.
+  if (a instanceof NativeObject && b instanceof NativeObject) return a.target === b.target;
+  // Null, bool and number compare by value.
+  return a === b;
 }
 
 // EXP-38: returns a negative, zero or positive number, or null when the pair has no order.

@@ -1,9 +1,10 @@
 // The language service document: diagnostics, tags, tokens, constructs, folding, highlights, matching tags and line
 // indentation (EDT-4 to EDT-13), and the agreement of its constructs with the AST spans.
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { parse } from '@polyspec/template';
+import { readFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
+import { parse, type Node } from '@polyspec/template';
 import { describe, expect, it } from 'vitest';
+import { caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
 import { openDocument, type TemplateDocument } from '../src/index.js';
 import { repositoryRoot, templateFiles } from './helpers.js';
 
@@ -108,7 +109,8 @@ describe('tokens', () => {
     const document = openDocument('<a href="{= a.b}">{? c}{= d(1, "x")}{/}</a>');
     for (const [index, token] of document.tokens.entries()) {
       expect(token.end).toBeGreaterThan(token.start);
-      if (index > 0) expect(token.start).toBeGreaterThanOrEqual((document.tokens[index - 1] as { end: number }).end);
+      const previous = document.tokens[index - 1];
+      if (previous !== undefined) expect(token.start).toBeGreaterThanOrEqual(previous.end);
     }
   });
 
@@ -182,21 +184,31 @@ describe('line indentation', () => {
 });
 
 // Collects the [start, end] byte spans of block nodes and of if-branch opening tags.
-function blockSpans(nodes: unknown[], blocks: string[], branches: string[]): void {
-  for (const node of nodes as Record<string, unknown>[]) {
-    if (node.type === 'If' || node.type === 'For' || node.type === 'IfBlock') blocks.push(JSON.stringify(node.span));
-    if (node.type === 'If') {
-      for (const branch of node.branches as { span: number[]; body: unknown[] }[]) {
-        branches.push(JSON.stringify(branch.span));
-        blockSpans(branch.body, blocks, branches);
-      }
+function blockSpans(nodes: readonly Node[], blocks: string[], branches: string[]): void {
+  for (const node of nodes) {
+    // The nested bodies of a node: the branches and else of an if, the body and empty of a for, the body and else of an ifblock.
+    let children: (Node[] | null)[];
+    switch (node.type) {
+      case 'If':
+        blocks.push(JSON.stringify(node.span));
+        for (const branch of node.branches) {
+          branches.push(JSON.stringify(branch.span));
+          blockSpans(branch.body, blocks, branches);
+        }
+        children = [node.else];
+        break;
+      case 'For':
+        blocks.push(JSON.stringify(node.span));
+        children = [node.body, node.empty];
+        break;
+      case 'IfBlock':
+        blocks.push(JSON.stringify(node.span));
+        children = [node.body, node.else];
+        break;
+      default:
+        children = [];
     }
-    for (const key of ['body', 'else', 'empty']) {
-      if (node.type !== 'If' || key !== 'body') {
-        const child = node[key];
-        if (Array.isArray(child)) blockSpans(child, blocks, branches);
-      }
-    }
+    for (const child of children) if (child !== null) blockSpans(child, blocks, branches);
   }
 }
 
@@ -204,8 +216,7 @@ describe('agreement with the AST', () => {
   const files = templateFiles(join(repositoryRoot, 'tests/cases'));
   for (const file of files) {
     const source = readFileSync(file, 'utf8');
-    const optionsPath = join(dirname(file), 'options.json');
-    const delimiters = existsSync(optionsPath) ? (JSON.parse(readFileSync(optionsPath, 'utf8')) as { delimiters?: string }).delimiters : undefined;
+    const { delimiters } = caseOptions(relative(casesDir, dirname(file)));
     const options = delimiters === undefined ? {} : { delimiters };
     it(file.slice(repositoryRoot.length + 1), () => {
       const document = openDocument(source, options);
@@ -229,7 +240,8 @@ describe('agreement with the AST', () => {
       expect(opening.map(tag => JSON.stringify([bytes(tag.start), bytes(tag.end)])).sort()).toEqual(branches.sort());
       for (const [index, token] of document.tokens.entries()) {
         expect(token.end).toBeGreaterThan(token.start);
-        if (index > 0) expect(token.start).toBeGreaterThanOrEqual((document.tokens[index - 1] as { end: number }).end);
+        const previous = document.tokens[index - 1];
+        if (previous !== undefined) expect(token.start).toBeGreaterThanOrEqual(previous.end);
       }
     });
   }

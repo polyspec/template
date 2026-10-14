@@ -53,6 +53,13 @@ export function bindValue(input: unknown): Value {
   return bindAt(input, 0);
 }
 
+// Whether an object is a plain object: its prototype is `Object.prototype` or null, so its own
+// enumerable string keys are its entries.
+function isPlainObject(input: object): input is Record<string, unknown> {
+  const prototype = Reflect.getPrototypeOf(input);
+  return prototype === Object.prototype || prototype === null;
+}
+
 function bindAt(input: unknown, level: number): Value {
   if (input === null || input === undefined) return null;
   switch (typeof input) {
@@ -79,7 +86,8 @@ function bindAt(input: unknown, level: number): Value {
   if (input instanceof Date) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a Date value has no binding');
   if (Array.isArray(input)) {
     checkLevel(level + 1);
-    return input.map(item => bindAt(item, level + 1));
+    // Array.from visits the holes of a sparse list as undefined, which binds to null; map would keep them as holes.
+    return Array.from(input, (item: unknown) => bindAt(item, level + 1));
   }
   if (input instanceof Map) {
     checkLevel(level + 1);
@@ -90,11 +98,10 @@ function bindAt(input: unknown, level: number): Value {
     }
     return map;
   }
-  const prototype = Object.getPrototypeOf(input);
-  if (prototype === Object.prototype || prototype === null) {
+  if (isPlainObject(input)) {
     checkLevel(level + 1);
     const map: MapValue = new Map();
-    for (const key of Object.keys(input as object)) map.set(checkText(key), bindAt((input as Record<string, unknown>)[key], level + 1));
+    for (const key of Object.keys(input)) map.set(checkText(key), bindAt(input[key], level + 1));
     return map;
   }
   return new NativeObject(input);

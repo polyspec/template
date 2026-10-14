@@ -5,7 +5,8 @@ import { countColumn } from '@codemirror/state';
 import { getIndentation } from '@codemirror/language';
 import { describe, expect, it } from 'vitest';
 import { fixtureDirectory, fixtureNames, fixtureOptions } from '../../../scripts/editor-fixtures.mts';
-import { formatTemplate, goToMatchingTag, templateDiagnostics, type TemplateOptions } from '../src/index.js';
+import { jsonDocument } from '../../../scripts/json-document.mts';
+import { formatTemplate, goToMatchingTag, templateDiagnostics } from '../src/index.js';
 import { createState, foldingRanges, marks, run } from './state.js';
 
 interface Fixture {
@@ -19,8 +20,28 @@ interface Fixture {
   formatted: string | { error: string };
 }
 
-const directory = fixtureDirectory as string;
-const names = (fixtureNames as () => string[])();
+const names = fixtureNames();
+
+const span = { type: 'array', items: { type: 'integer' }, minItems: 2, maxItems: 2 };
+const lines = { type: 'array', items: { type: 'string' } };
+// The fixture results of the language service, as scripts/editor-fixtures.mts writes them.
+const fixtureDocument = jsonDocument<Fixture>('editor fixture results', {
+  type: 'object',
+  properties: {
+    diagnostics: {
+      type: 'array',
+      items: { type: 'object', properties: { start: { type: 'integer' }, end: { type: 'integer' }, code: { type: 'string' } }, required: ['start', 'end', 'code'] },
+    },
+    tokens: { type: 'array', items: { type: 'array', items: [{ type: 'integer' }, { type: 'integer' }, { type: 'string' }], minItems: 3, additionalItems: false } },
+    tags: { type: 'array', items: span },
+    foldingRanges: { type: 'array', items: span },
+    highlights: { type: 'object', additionalProperties: { type: 'array', items: span } },
+    matchingTags: { type: 'object', additionalProperties: { type: 'integer', nullable: true } },
+    lineIndentation: { type: 'object', properties: { indent: lines, flat: lines }, required: ['indent', 'flat'] },
+    formatted: { oneOf: [{ type: 'string' }, { type: 'object', properties: { error: { type: 'string' } }, required: ['error'] }] },
+  },
+  required: ['diagnostics', 'tokens', 'tags', 'foldingRanges', 'highlights', 'matchingTags', 'lineIndentation', 'formatted'],
+});
 
 describe('editor fixtures', () => {
   it('has fixtures', () => {
@@ -28,9 +49,9 @@ describe('editor fixtures', () => {
   });
   for (const name of names) {
     describe(name, () => {
-      const text = readFileSync(join(directory, name), 'utf8');
-      const expected = JSON.parse(readFileSync(join(directory, name.replace(/\.tpl$/, '.json')), 'utf8')) as Fixture;
-      const options = (fixtureOptions as (name: string) => TemplateOptions)(name);
+      const text = readFileSync(join(fixtureDirectory, name), 'utf8');
+      const expected = fixtureDocument.read(join(fixtureDirectory, name.replace(/\.tpl$/, '.json')));
+      const options = fixtureOptions(name);
       const state = createState(text, options);
 
       it('diagnostics', () => {

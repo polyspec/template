@@ -1,7 +1,8 @@
 // Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32).
 import type { Block, For, If, IfBlock, Node, Span } from '../ast.js';
+import { elementAt } from '../checked.js';
 import { PathError, resolvePath } from '../loader.js';
-import { type MapValue, type Value } from '../value/value.js';
+import type { MapValue } from '../value/value.js';
 import { Frame, Scope, type DefineEntry, type LoopMeta, type RenderContext } from './context.js';
 import { Evaluator } from './expressions.js';
 import type { AstProgramCore } from './engine.js';
@@ -67,7 +68,7 @@ export class Renderer {
       if (node.empty) this.renderNodes(node.empty, frame, scope);
       return;
     }
-    const hadLocal = scope.locals.has(node.name);
+    // A value is never undefined, so undefined means that the loop variable had no local.
     const previous = scope.locals.get(node.name);
     let stack = scope.loops.get(node.name);
     if (!stack) {
@@ -78,7 +79,7 @@ export class Renderer {
     stack.push(meta);
     try {
       for (let index = 0; index < entries.length; index++) {
-        const [key, value] = entries[index] as [Value, Value];
+        const [key, value] = elementAt(entries, index);
         this.context.iterations++;
         this.evaluator.runtime.limit('iteration', this.context.iterations, frame, node.span);
         meta.index = index;
@@ -91,7 +92,7 @@ export class Renderer {
       }
     } finally {
       stack.pop();
-      if (hadLocal) scope.locals.set(node.name, previous as Value);
+      if (previous !== undefined) scope.locals.set(node.name, previous);
       else scope.locals.delete(node.name);
     }
   }
@@ -125,7 +126,10 @@ export class Renderer {
       if (!registered) throw this.context.fail('E_RUNTIME_BLOCK_UNDEFINED', frame, node.span, `define ${node.id} is not registered`);
       entry = registered;
     } else {
-      const name = this.resolve(node.path as string, frame, node.span);
+      // The parser gives a block a define id, a path or both, so a block without either is no AST of the parser and
+      // fails as an internal error (ERR-12).
+      if (node.path === null) throw new RangeError('the block has neither a define id nor a path');
+      const name = this.resolve(node.path, frame, node.span);
       if (node.id !== null) {
         const registered = registry.get(node.id);
         if (registered) {
