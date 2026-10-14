@@ -18,7 +18,7 @@ use Polyspec\Template\TemplateError;
 final class Parser
 {
     private const RESERVED = ['true' => true, 'false' => true, 'null' => true, 'in' => true];
-    private const ASSIGN_HEAD = '/^([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
+    private const ASSIGN_HEAD = '/\G([A-Za-z_][A-Za-z0-9_]*)[ \t]*(\+\+|--|[-+*\/%]=|=(?![=>]))/';
     private const LOOP_HEAD = '/^[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*=/';
 
     private string $open;
@@ -204,7 +204,7 @@ final class Parser
                 $this->frames[$frameIndex]['items'] = [];
                 break;
             case ':':
-                if (preg_match(self::ASSIGN_HEAD, substr($text, $bodyStart, 80)) === 1) {
+                if (preg_match(self::ASSIGN_HEAD, $text, $head, 0, $bodyStart) === 1) {
                     $end = $this->parseAssignment($start, $open, $closeCount, $wrapper, $bodyStart);
                     break;
                 }
@@ -379,7 +379,7 @@ final class Parser
      */
     private function parseAssignment(int $start, int $open, int $closeCount, ?array $wrapper, int $bodyStart): int
     {
-        if (preg_match(self::ASSIGN_HEAD, substr($this->text, $bodyStart), $head) !== 1) {
+        if (preg_match(self::ASSIGN_HEAD, $this->text, $head, 0, $bodyStart) !== 1) {
             throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $bodyStart, $bodyStart + 1, 'unknown tag');
         }
         $name = $head[1];
