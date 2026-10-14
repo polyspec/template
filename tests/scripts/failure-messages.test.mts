@@ -1,13 +1,13 @@
 // Tests that a failure names what failed with the expected and the actual value or the fix (T19.10):
 // - the generated Go and Rust conformance runners name each failed case instead of "the failed cases are listed above";
-// - scripts/kit/run-tests.mjs names a tool that cannot start, with its command and the install fix, instead of an unhandled
+// - the run-tests of @polyspec/kit names a tool that cannot start, with its command and the install fix, instead of an unhandled
 //   `error` event;
 // - a CLI call of the conformance drivers that outlives its limit names the limit and the command;
 // - the Go and PHP install projects print the expected and the actual output;
-// - the PHP extension tests run through scripts/kit/run-tests.mjs, which prints each test with its elapsed time.
+// - the PHP extension tests run through the run-tests of @polyspec/kit, which prints each test with its elapsed time.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test, { type TestContext } from 'node:test';
@@ -38,8 +38,12 @@ test('the generated runners name each case whose generated test failed', async (
 });
 
 test('a tool that cannot start fails with its command and the install fix', (t) => {
-  // An empty directory as PATH: go cannot start; the runner itself starts with the path of node.
+  // A directory that holds only git as PATH: go cannot start; the runner itself starts with the path of node and finds
+  // the root of the checkout with git.
   const bin = directory(t, 'template-no-go-');
+  const gitCore = spawnSync('git', ['--exec-path'], { encoding: 'utf8' });
+  assert.equal(gitCore.status, 0, gitCore.stderr);
+  symlinkSync(path.join(gitCore.stdout.trim(), 'git'), path.join(bin, 'git'));
   const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'go', '--cwd', bin, '--', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
