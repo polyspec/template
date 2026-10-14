@@ -47,7 +47,7 @@ MAKEFLAGS += -k
 # config/*.json differ between repositories.
 include scripts/kit/kit-bootstrap.mk
 
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts runtime-interface-generate runtime-interface-check compiler-interface-generate compiler-interface-check \
+.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts compiler-interface-generate compiler-interface-check \
 	conformance delimiter-matrix test-browser ext ext-arginfo test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile \
@@ -144,7 +144,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check layout-check typecheck lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check runtime-interface-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check layout-check typecheck lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	node $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
@@ -454,26 +454,15 @@ schema-fixtures-check:
 schema-mutations-check:
 	node scripts/check-schema-mutations.mts
 
-docs-check: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check schema-check doc-coverage benchmark-docs-check ## Document checks
+docs-check: compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check schema-check doc-coverage benchmark-docs-check ## Document checks
 
-.PHONY: runtime-interface-diagrams-check compiler-interface-diagrams-check showcase-contract-diagrams-check benchmark-docs-check
-runtime-interface-diagrams-check:
-	node scripts/generate-runtime-interface.mts --check
+.PHONY: compiler-interface-diagrams-check showcase-contract-diagrams-check benchmark-docs-check
 compiler-interface-diagrams-check:
 	node scripts/generate-compiler-interface.mts --check
 showcase-contract-diagrams-check:
 	node scripts/generate-showcase-contract.mts --check
 benchmark-docs-check:
 	node scripts/update-benchmark-docs.mts --check
-
-runtime-interface-generate: ## Generate the runtime prepared-execution Mermaid diagrams
-	node scripts/generate-runtime-interface.mts
-
-runtime-interface-check: runtime-interface-diagrams-check runtime-interface-runtimes-check ## Verify the prepared render interface in every runtime
-
-.PHONY: runtime-interface-runtimes-check
-runtime-interface-runtimes-check: build-php
-	node scripts/check-runtime-interface.mts
 
 compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 	node scripts/generate-compiler-interface.mts
