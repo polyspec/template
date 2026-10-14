@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: a31d76446f00ebceb634932a2417a0829566f41f292c9af4ccfc745936bd478d -->
+<!-- source-sha256: 007a5cf0caa739f7a04e01c51bb72b953e382af08a53262e0292122711c73341 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -57,7 +57,7 @@ program 도표는 단일 제품 manifest에서 생성한다.
 <!--@include: ../../tools/runtime/generated/prepared-execution-classes.mmd-->
 ```
 
-compiler manifest는 공개 `Program`, `Engine`, `AstProgram`, generated program 선언 구조도 고정한다. interface gate는 TypeScript는 compiler API, Go는 `go/parser`, Rust는 `syn`, PHP는 Reflection으로 읽는다. 연산 누락·추가, 인자 수 변경, 소유자 변경, 구체 AST program 누락이 있으면 빌드가 실패한다.
+compiler manifest는 공개 `Program`, `Engine`, `AstProgram`, generated program 선언 구조도 고정한다. interface gate는 TypeScript는 oxc-parser, Go는 `go/parser`, Rust는 `syn`, PHP는 Reflection으로 읽는다. 연산 누락·추가, 인자 수 변경, 소유자 변경, 구체 AST program 누락이 있으면 빌드가 실패한다.
 - **RT-42** 엔진 옵션과 `parse`의 `delimiters`는 렉시컬 문서가 정의하는 대로 태그 구분자를 선택한다. 기본값은 `{}`다. 템플릿 파일의 구분자 지시문은 그 파일에 대해 옵션보다 우선한다.
 
 ## 언어 간 렌더 계약

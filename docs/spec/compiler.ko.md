@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: ad0311426ff011ca5108eb2f4a9b6f8f971e7a2b8e098800fb7b8006f2b8fc4e -->
+<!-- source-sha256: eae52a177a6255b6fabe441ed4a91799aaebd7dd6d79803b6c15e059ea953c90 -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -90,4 +90,4 @@ Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용�
 
 두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 네 언어의 필드와 연산을 검사한다.
 
-같은 gate가 TypeScript compiler API, Go AST, Rust syntax tree, PHP Reflection으로 구체적인 `RuntimeEnvironment`의 field 순서, operation 소속과 인자 수를 검사한다. AST program이 limits나 host 함수 상태를 중복 소유하지 않고 environment를 소유하는지도 함께 확인한다.
+같은 gate가 oxc-parser의 TypeScript AST, Go AST, Rust syntax tree, PHP Reflection으로 구체적인 `RuntimeEnvironment`의 field 순서, operation 소속과 인자 수를 검사한다. AST program이 limits나 host 함수 상태를 중복 소유하지 않고 environment를 소유하는지도 함께 확인한다.
