@@ -23,8 +23,10 @@ Conformance is verified by fixture cases that every implementation renders throu
 | `expected.ast.json` | yes, unless `expected.error.json` names a lexical or parse error of `input.tpl` | The AST of `input.tpl`. Includes and blocks are not expanded. |
 | `expected.html` | one of the two | The exact render output. |
 | `expected.error.json` | one of the two | `{"code", "template", "line", "col"}` of the expected error. |
+| `expected.tokens.json` | when `expected.ast.json` is present | The tokens of `input.tpl` (FMT-1, FMT-2): a JSON array of `[start, end, type]`. |
+| `expected.format.json` | when `expected.ast.json` is present | `{"indent": R, "keep": R}`: the result of formatting `input.tpl` with the default options (`indent`, two spaces and `templateBlocks` `indent`) and with `indent: null` (`keep`) ([formatting](formatting.md)). `R` is `{"text": "<formatted text>"}` or `{"error": {"reason", "code", "line", "col"}}` (FMT-14). |
 
-**CNF-15** `scripts/check-schema.mjs` checks the presence of `expected.ast.json` in every case directory. It fails when a case has no `expected.ast.json` and its `expected.error.json` does not name an `E_LEX_*` or `E_PARSE_*` code with `template` equal to `input.tpl`, and when a case has an `expected.ast.json` although its `expected.error.json` names such an error. `make schema-check` and `make docs-check` run it, so `make check` fails for a missing AST file. Reason: CNF-9 compares the parse result of every case, and a case without its AST file would otherwise pass without that comparison.
+**CNF-15** `scripts/check-schema.mjs` checks the presence of `expected.ast.json` in every case directory. It fails when a case has no `expected.ast.json` and its `expected.error.json` does not name an `E_LEX_*` or `E_PARSE_*` code with `template` equal to `input.tpl`, and when a case has an `expected.ast.json` although its `expected.error.json` names such an error. It also fails when `expected.tokens.json` or `expected.format.json` is missing in a case with `expected.ast.json`, present in a case without it, or does not have the content of CNF-2. `make schema-check` and `make docs-check` run it, so `make check` fails for a missing file. Reason: CNF-9 compares the parse, token and format results of every case whose input parses, and a case without its files would otherwise pass without those comparisons.
 
 **CNF-16** `tests/fixtures/filesystem/cases.json` lists the filesystem cases of the filesystem loader (RT-10), which a case directory cannot hold because a checkout holds no symbolic or hard link. Each case has `name`, `rules`, `files` (a template name mapped to its text, `input.tpl` among them), optional `symbolicLinks` and `hardLinks` (a name mapped to the name of its target), and `expected` with `html` or `error` (`{code, template, line, col}`). `tests/runner/conformance.mjs` writes the tree of each case into a directory of the system temporary directory, runs `render input.tpl --root <directory>` of every selected implementation as the case `filesystem/<name>` and compares the result by CNF-7 and CNF-8; `--case filesystem` selects them.
 
@@ -32,26 +34,32 @@ Conformance is verified by fixture cases that every implementation renders throu
 
 ## Command line contract
 
-**CNF-4** Every implementation provides a command with two subcommands.
+**CNF-4** Every implementation provides a command with four subcommands.
 
 | Command | Output | Exit status |
 | --- | --- | --- |
 | `parse FILE [--root DIR] [--delimiters OC]` | The AST JSON on stdout. | 0 |
 | `render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]` | The rendered HTML on stdout. | 0 |
-| either subcommand, template error | The error JSON on stderr. | 2 |
-| either subcommand, usage error | A message on stderr. | 1 |
+| `tokens FILE [--root DIR] [--delimiters OC]` | The tokens of FMT-1 and FMT-2 as a JSON array of `[start, end, type]` on stdout. | 0 |
+| `format FILE [--indent none\|tab\|N] [--delimiters OC]` | The formatted text on stdout, the source when nothing changes. | 0 |
+| `parse`, `render` or `tokens`, template error | The error JSON on stderr. | 2 |
+| `format`, format error | The JSON `{"reason", "code", "line", "col", "message"}` of FMT-14 on stderr. | 2 |
+| any subcommand, usage error | A message on stderr. | 1 |
 
-`--root` defaults to the directory of `FILE`. The template name passed to the parser and used in errors is `FILE` relative to the root. `--data`, `--define` and `--env` name JSON files with the content of CNF-2. A file that cannot be read is a usage error. A file whose content is not one JSON document is a template error `E_DATA_INVALID_JSON` with the position of ERR-5 (VAL-12); every other data error of these files is a template error with its `E_DATA_*` code at the same position. `--delimiters` is the two-character value of the engine option `delimiters`; the runner passes the value of `options.json`. Output is UTF-8. The command does not add a trailing newline.
+`--root` defaults to the directory of `FILE`. The template name passed to the parser and used in errors is `FILE` relative to the root. `--data`, `--define` and `--env` name JSON files with the content of CNF-2. A file that cannot be read is a usage error. A file whose content is not one JSON document is a template error `E_DATA_INVALID_JSON` with the position of ERR-5 (VAL-12); every other data error of these files is a template error with its `E_DATA_*` code at the same position. `--delimiters` is the two-character value of the engine option `delimiters`; the runner passes the value of `options.json`. `--indent` is the indent unit of FMT-9: `N` spaces (1 to 8, default 2), `tab`, or `none` for `indent: null`; `format` uses `templateBlocks` `indent`. Output is UTF-8. The command does not add a trailing newline.
 
 **CNF-5** Commands per implementation:
 
 | Implementation | Command |
 | --- | --- |
-| ts | `node packages/template-ts/bin/template.mjs` |
+| ts | `node packages/template-ts/bin/template.mjs`; `format`: `node packages/template-language/bin/template-language.mjs` |
 | go | `packages/template-go/template` |
 | rust | `packages/template-rust/target/release/template` |
 | php | `php packages/template-php/bin/template.php` |
 | php-ext | `php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php` |
+| python | `python -m polyspec.template.cli` with `packages/template-python/src` on `PYTHONPATH` |
+
+The formatter of TypeScript is the package `@polyspec/template-language`, which depends on `@polyspec/template`, so its command `template-language` provides `format` and the command `template` the other subcommands.
 
 ## Comparison
 
@@ -61,7 +69,11 @@ Conformance is verified by fixture cases that every implementation renders throu
 
 **CNF-8** Error comparison compares `code`, `template`, `line` and `col` of the stderr JSON with `expected.error.json`. A case with `expected.error.json` passes only when the exit status is 2.
 
-**CNF-9** A case passes for an implementation when the `parse` result equals `expected.ast.json` and the `render` result satisfies CNF-7 or CNF-8.
+**CNF-16** Token comparison parses the stdout of `tokens` and requires the array to equal `expected.tokens.json` element by element, with the exit status 0.
+
+**CNF-17** Format comparison runs `format` once with the default options and once with `--indent none`, and compares each with the entry `indent` or `keep` of `expected.format.json`: for `text`, the exit status is 0 and the bytes of stdout equal the text; for `error`, the exit status is 2 and `reason`, `code`, `line` and `col` of the stderr JSON equal the expected fields. `message` is not compared.
+
+**CNF-9** A case passes for an implementation when the `render` result satisfies CNF-7 or CNF-8 and, for a case with `expected.ast.json`, the `parse` result equals it and the `tokens` and `format` results satisfy CNF-16 and CNF-17. An implementation without one of the subcommands fails the case.
 
 ## Runners
 
@@ -72,9 +84,9 @@ Conformance is verified by fixture cases that every implementation renders throu
 | `--langs a,b` | Run the listed implementations. Default: every implementation whose command exists. |
 | `--case group/name` | Run one case. |
 | `--list` | Print the case ids and the count without running. |
-| `--update ast\|html\|error` | Write the expected file of the given kind from the `ts` implementation. `ts` must be among the selected implementations. |
+| `--update ast\|html\|error\|tokens\|format` | Write the expected file of the given kind from the `ts` implementation; `tokens` and `format` write the files of the cases with `expected.ast.json`. `ts` must be among the selected implementations. |
 
-**CNF-11** `config/parity.json` declares the implementations and the shared suites: the conformance cases of `tests/cases` and the expression vectors of `tests/fixtures/expr/cases.json`. `make parity-check` of kit runs the native test of each implementation that binds a suite and fails unless every case of the suite passed in every implementation of its profile; an exclusion fails until the task that it names removes it.
+**CNF-11** `config/parity.json` declares the implementations and the shared suites: the conformance cases of `tests/cases` (unit `conformance`, whose native tests compare the AST, the tokens and the render result), the format results of those cases (unit `formatting`, CNF-17) and the expression vectors of `tests/fixtures/expr/cases.json`. `make parity-check` of kit runs the native test of each implementation that binds a suite and fails unless every case of the suite passed in every implementation of its profile; an exclusion fails until the task that it names removes it.
 
 ## Expression fixtures
 

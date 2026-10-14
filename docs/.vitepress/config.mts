@@ -48,6 +48,7 @@ const englishSidebar = [
       { text: 'Conformance', link: '/spec/conformance' },
       { text: 'Examples', link: '/spec/examples' },
       { text: 'Editor support', link: '/spec/editor' },
+      { text: 'Formatting', link: '/spec/formatting' },
     ],
   },
   {
@@ -92,6 +93,7 @@ const koreanSidebar = [
       { text: '적합성', link: '/ko/spec/conformance' },
       { text: '예제', link: '/ko/spec/examples' },
       { text: '에디터 지원', link: '/ko/spec/editor' },
+      { text: '포맷', link: '/ko/spec/formatting' },
     ],
   },
   {

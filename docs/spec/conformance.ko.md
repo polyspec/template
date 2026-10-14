@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: 7f92966cd0b7e2f93a5051792221efadd6a3628d8893df425f814bbb4cf070e4 -->
+<!-- source-sha256: 3cb338def9845615a01aeda0486d2a255e3f3ae9758b5ad9bcb836d176943542 -->
 # 적합성
 
 [English](/spec/conformance).
@@ -24,8 +24,10 @@
 | `expected.ast.json` | 예. 단 `expected.error.json`이 `input.tpl`의 렉시컬 또는 파싱 오류를 지정하면 제외 | `input.tpl`의 AST. include와 block은 전개하지 않는다. |
 | `expected.html` | 둘 중 하나 | 정확한 렌더 출력. |
 | `expected.error.json` | 둘 중 하나 | 기대 오류의 `{"code", "template", "line", "col"}`. |
+| `expected.tokens.json` | `expected.ast.json`이 있을 때 | `input.tpl`의 토큰(FMT-1, FMT-2). `[start, end, type]`의 JSON 배열. |
+| `expected.format.json` | `expected.ast.json`이 있을 때 | `{"indent": R, "keep": R}`. `input.tpl`을 기본 옵션(`indent`, 공백 두 개, `templateBlocks` `indent`)과 `indent: null`(`keep`)로 포맷한 결과다([포맷](/ko/spec/formatting)). `R`은 `{"text": "<포맷한 텍스트>"}` 또는 `{"error": {"reason", "code", "line", "col"}}`이다(FMT-14). |
 
-**CNF-15** `scripts/check-schema.mjs`는 모든 케이스 디렉터리에서 `expected.ast.json`이 있는지 검사한다. 케이스에 `expected.ast.json`이 없고 그 `expected.error.json`이 `template`이 `input.tpl`인 `E_LEX_*` 또는 `E_PARSE_*` 코드를 지정하지 않으면 실패하고, `expected.error.json`이 그런 오류를 지정하는데 `expected.ast.json`이 있어도 실패한다. `make schema-check`와 `make docs-check`가 이를 실행하므로 AST 파일이 없으면 `make check`가 실패한다. 이유: CNF-9는 모든 케이스의 파싱 결과를 비교하며, AST 파일이 없는 케이스는 그렇지 않으면 그 비교 없이 통과한다.
+**CNF-15** `scripts/check-schema.mjs`는 모든 케이스 디렉터리에서 `expected.ast.json`이 있는지 검사한다. 케이스에 `expected.ast.json`이 없고 그 `expected.error.json`이 `template`이 `input.tpl`인 `E_LEX_*` 또는 `E_PARSE_*` 코드를 지정하지 않으면 실패하고, `expected.error.json`이 그런 오류를 지정하는데 `expected.ast.json`이 있어도 실패한다. `expected.ast.json`이 있는 케이스에 `expected.tokens.json`이나 `expected.format.json`이 없을 때, 그것이 없는 케이스에 있을 때, 또는 CNF-2의 내용을 갖지 않을 때도 실패한다. `make schema-check`와 `make docs-check`가 이를 실행하므로 파일이 없으면 `make check`가 실패한다. 이유: CNF-9는 입력이 파싱되는 모든 케이스의 파싱, 토큰, 포맷 결과를 비교하며, 파일이 없는 케이스는 그렇지 않으면 그 비교 없이 통과한다.
 
 **CNF-16** `tests/fixtures/filesystem/cases.json`은 파일시스템 로더(RT-10)의 filesystem 케이스를 나열한다. checkout은 symbolic link와 hard link를 담지 않으므로 케이스 디렉터리는 이 케이스를 담을 수 없다. 각 케이스는 `name`, `rules`, `files`(template 이름에서 그 텍스트로의 map, `input.tpl` 포함), 선택적 `symbolicLinks`와 `hardLinks`(이름에서 대상 이름으로의 map), 그리고 `html` 또는 `error`(`{code, template, line, col}`)를 가진 `expected`를 가진다. `tests/runner/conformance.mjs`는 각 케이스의 tree를 시스템 임시 디렉터리의 한 디렉터리에 쓰고, 선택된 모든 구현의 `render input.tpl --root <directory>`를 케이스 `filesystem/<name>`으로 실행해 결과를 CNF-7과 CNF-8로 비교한다. `--case filesystem`이 이 케이스들을 선택한다.
 
@@ -33,26 +35,32 @@
 
 ## 명령줄 계약
 
-**CNF-4** 모든 구현은 두 하위 명령을 가진 명령을 제공한다.
+**CNF-4** 모든 구현은 네 하위 명령을 가진 명령을 제공한다.
 
 | 명령 | 출력 | 종료 상태 |
 | --- | --- | --- |
 | `parse FILE [--root DIR] [--delimiters OC]` | stdout에 AST JSON. | 0 |
 | `render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]` | stdout에 렌더된 HTML. | 0 |
-| 두 하위 명령 모두, 템플릿 오류 | stderr에 오류 JSON. | 2 |
-| 두 하위 명령 모두, 사용 오류 | stderr에 메시지. | 1 |
+| `tokens FILE [--root DIR] [--delimiters OC]` | stdout에 FMT-1과 FMT-2의 토큰을 `[start, end, type]`의 JSON 배열로. | 0 |
+| `format FILE [--indent none\|tab\|N] [--delimiters OC]` | stdout에 포맷한 텍스트. 바뀌는 것이 없으면 소스. | 0 |
+| `parse`, `render`, `tokens`, 템플릿 오류 | stderr에 오류 JSON. | 2 |
+| `format`, 포맷 오류 | stderr에 FMT-14의 JSON `{"reason", "code", "line", "col", "message"}`. | 2 |
+| 모든 하위 명령, 사용 오류 | stderr에 메시지. | 1 |
 
-`--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. 읽을 수 없는 파일은 사용 오류다. 내용이 하나의 JSON 문서가 아닌 파일은 ERR-5의 위치를 가진 템플릿 오류 `E_DATA_INVALID_JSON`이다(VAL-12). 이 파일의 다른 데이터 오류도 같은 위치에서 해당 `E_DATA_*` 코드를 가진 템플릿 오류다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
+`--root`의 기본값은 `FILE`의 디렉터리다. 파서에 전달하고 오류에 사용하는 템플릿 이름은 루트 기준 `FILE`의 상대 경로다. `--data`, `--define`, `--env`는 CNF-2의 내용을 가진 JSON 파일을 지정한다. 읽을 수 없는 파일은 사용 오류다. 내용이 하나의 JSON 문서가 아닌 파일은 ERR-5의 위치를 가진 템플릿 오류 `E_DATA_INVALID_JSON`이다(VAL-12). 이 파일의 다른 데이터 오류도 같은 위치에서 해당 `E_DATA_*` 코드를 가진 템플릿 오류다. `--delimiters`는 엔진 옵션 `delimiters`의 두 문자 값이다. 러너는 `options.json`의 값을 전달한다. `--indent`는 FMT-9의 들여쓰기 단위다. `N`은 공백 수(1~8, 기본값 2), `tab`은 탭, `none`은 `indent: null`이다. `format`은 `templateBlocks` `indent`를 쓴다. 출력은 UTF-8이다. 명령은 끝에 개행을 추가하지 않는다.
 
 **CNF-5** 구현별 명령:
 
 | 구현 | 명령 |
 | --- | --- |
-| ts | `node packages/template-ts/bin/template.mjs` |
+| ts | `node packages/template-ts/bin/template.mjs`; `format`: `node packages/template-language/bin/template-language.mjs` |
 | go | `packages/template-go/template` |
 | rust | `packages/template-rust/target/release/template` |
 | php | `php packages/template-php/bin/template.php` |
 | php-ext | `php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php` |
+| python | `PYTHONPATH`에 `packages/template-python/src`를 둔 `python -m polyspec.template.cli` |
+
+TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@polyspec/template-language`이므로, 그 명령 `template-language`가 `format`을 제공하고 명령 `template`이 나머지 하위 명령을 제공한다.
 
 ## 비교
 
@@ -62,7 +70,11 @@
 
 **CNF-8** 오류 비교는 stderr JSON의 `code`, `template`, `line`, `col`을 `expected.error.json`과 비교한다. `expected.error.json`이 있는 케이스는 종료 상태가 2일 때만 통과한다.
 
-**CNF-9** `parse` 결과가 `expected.ast.json`과 같고 `render` 결과가 CNF-7 또는 CNF-8을 만족할 때 케이스가 그 구현에서 통과한다.
+**CNF-16** 토큰 비교는 `tokens`의 stdout을 파싱하고, 종료 상태가 0이며 배열이 `expected.tokens.json`과 원소마다 같기를 요구한다.
+
+**CNF-17** 포맷 비교는 `format`을 기본 옵션으로 한 번, `--indent none`으로 한 번 실행하고, 각각을 `expected.format.json`의 `indent` 또는 `keep` 항목과 비교한다. `text`이면 종료 상태가 0이고 stdout의 바이트가 텍스트와 같아야 한다. `error`이면 종료 상태가 2이고 stderr JSON의 `reason`, `code`, `line`, `col`이 기대 필드와 같아야 한다. `message`는 비교하지 않는다.
+
+**CNF-9** `render` 결과가 CNF-7 또는 CNF-8을 만족하고, `expected.ast.json`이 있는 케이스에서는 `parse` 결과가 그것과 같고 `tokens`와 `format` 결과가 CNF-16과 CNF-17을 만족할 때 케이스가 그 구현에서 통과한다. 하위 명령 하나라도 없는 구현은 그 케이스에서 실패한다.
 
 ## 러너
 
@@ -73,9 +85,9 @@
 | `--langs a,b` | 나열된 구현을 실행한다. 기본값: 명령이 존재하는 모든 구현. |
 | `--case group/name` | 케이스 하나를 실행한다. |
 | `--list` | 실행하지 않고 케이스 id와 건수를 출력한다. |
-| `--update ast\|html\|error` | 지정한 종류의 기대 파일을 `ts` 구현의 결과로 쓴다. `ts`가 선택된 구현에 포함되어야 한다. |
+| `--update ast\|html\|error\|tokens\|format` | 지정한 종류의 기대 파일을 `ts` 구현의 결과로 쓴다. `tokens`와 `format`은 `expected.ast.json`이 있는 케이스의 파일을 쓴다. `ts`가 선택된 구현에 포함되어야 한다. |
 
-**CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스와 `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다.
+**CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스(unit `conformance`, native test가 AST, 토큰, 렌더 결과를 비교한다), 그 케이스의 포맷 결과(unit `formatting`, CNF-17), `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다.
 
 ## 표현식 픽스처
 
