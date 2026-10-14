@@ -19,10 +19,10 @@ function run(command: string, args: string[], cwd = root, capture = false): stri
   });
   if (result.error) throw result.error;
   if (result.status !== 0) {
-    const detail = capture ? `\n${result.stdout ?? ''}${result.stderr ?? ''}` : '';
+    const detail = capture ? `\n${result.stdout}${result.stderr}` : '';
     throw new Error(`${command} ${args.join(' ')} failed with status ${result.status}${detail}`);
   }
-  return result.stdout ?? '';
+  return capture ? result.stdout : '';
 }
 
 try {

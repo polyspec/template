@@ -2,18 +2,10 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { benchmarkResultDocument } from './benchmark-result.mts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-interface Metric {
-  median: number;
-}
-
-// The rows of examples/site/data/mode-benchmark.json that the tables show.
-interface Benchmark {
-  results: { language: string; mode: string; cold_process_ms: Metric; render_ms: Metric; prepared_render_ms: Metric; persistent_rss_mib: Metric }[];
-}
-
-const benchmark = JSON.parse(readFileSync(join(root, 'examples/site/data/mode-benchmark.json'), 'utf8')) as Benchmark;
+const benchmark = benchmarkResultDocument.read(join(root, 'examples/site/data/mode-benchmark.json'));
 const check = process.argv.includes('--check');
 const start = '<!-- benchmark-results:start -->';
 const end = '<!-- benchmark-results:end -->';

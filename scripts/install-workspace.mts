@@ -2,6 +2,8 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { parse } from 'smol-toml';
+import { tomlArray, tomlString, tomlTable } from './toml.mts';
 
 /** Creates a new temporary directory for one install project run. */
 export function createWorkspace(): string {
@@ -45,21 +47,24 @@ export interface InstallLockOptions {
 }
 
 /**
- * Parses the text of a Cargo.lock: its header lines and its packages, each with its name, version, optional source and
- * checksum, and its dependencies as cargo writes them (`name`, `name version` or `name version (source)`).
+ * Parses the text of a Cargo.lock with smol-toml: its packages, each with its name, version, optional source and
+ * checksum, and its dependencies as cargo writes them (`name`, `name version` or `name version (source)`), and its header,
+ * the text before the first package, which a derived lock keeps as cargo wrote it.
  */
 export function parseCargoLock(text: string): { header: string; packages: LockPackage[] } {
-  const [header = '', ...blocks] = text.split(/^\[\[package\]\]\n/m);
-  const packages = blocks.map((block): LockPackage => {
-    const field = (key: string): string | undefined => new RegExp(`^${key} = "([^"]*)"$`, 'm').exec(block)?.[1];
-    const required = (key: string): string => {
-      const value = field(key);
-      if (value === undefined) throw new Error(`a package of the Cargo.lock has no ${key}:\n${block}`);
-      return value;
+  const start = text.search(/^\[\[package\]\]$/m);
+  const header = start === -1 ? text : text.slice(0, start);
+  const packages = tomlArray(parse(text).package, 'the packages of the Cargo.lock').map((value, index): LockPackage => {
+    const item = tomlTable(value, `package ${index} of the Cargo.lock`);
+    const optional = (key: string): string | undefined => (item[key] === undefined ? undefined : tomlString(item[key], `the ${key} of package ${index} of the Cargo.lock`));
+    return {
+      name: tomlString(item.name, `the name of package ${index} of the Cargo.lock`),
+      version: tomlString(item.version, `the version of package ${index} of the Cargo.lock`),
+      source: optional('source'),
+      checksum: optional('checksum'),
+      dependencies: item.dependencies === undefined ? [] : tomlArray(item.dependencies, `the dependencies of package ${index} of the Cargo.lock`)
+        .map(dependency => tomlString(dependency, `a dependency of package ${index} of the Cargo.lock`)),
     };
-    const list = /^dependencies = \[\n((?: "[^"]*",\n)*)\]$/m.exec(block)?.[1] ?? '';
-    const dependencies = [...list.matchAll(/ "([^"]*)",/g)].map(([, dependency = '']) => dependency);
-    return { name: required('name'), version: required('version'), source: field('source'), checksum: field('checksum'), dependencies };
   });
   return { header: header.trimEnd(), packages };
 }
@@ -86,7 +91,8 @@ export function installCargoLock(text: string, { name, version, dependencies, re
   const visit = (item: LockPackage): void => {
     const key = `${item.name} ${item.version}`;
     if (reached.has(key)) return;
-    const kept = item.dependencies.filter(reference => !(removed[item.name] ?? []).includes(reference.replace(/ .*/, '')));
+    const dropped = removed[item.name];
+    const kept = dropped === undefined ? item.dependencies : item.dependencies.filter(reference => !dropped.includes(reference.replace(/ .*/, '')));
     const entries = kept.map(find);
     reached.set(key, { ...item, entries });
     entries.forEach(visit);

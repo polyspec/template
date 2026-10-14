@@ -5,6 +5,15 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { compileAst } from '../packages/compiler/ast-artifact.mjs';
+import { artifactManifestDocument } from './artifact-manifest.mts';
+import { jsonDocument } from './json-document.mts';
+
+// The AST of one template of an artifact, as far as this check reads it: the types of its body nodes.
+const templateAstDocument = jsonDocument<{ body: { type: string }[] }>('template AST', {
+  type: 'object',
+  required: ['body'],
+  properties: { body: { type: 'array', items: { type: 'object', required: ['type'], properties: { type: { type: 'string' } } } } },
+});
 
 const directory = mkdtempSync(join(tmpdir(), 'template-ast-artifact-'));
 const source = join(directory, 'source');
@@ -24,7 +33,7 @@ try {
   assert.equal(unchanged.sourceDigest, first.sourceDigest);
   assert.deepEqual(readFileSync(join(output, 'manifest.json')), manifestBytes);
 
-  const staleCompiler = JSON.parse(manifestBytes.toString('utf8')) as { compilerDigest: string };
+  const staleCompiler = artifactManifestDocument.parse(manifestBytes.toString('utf8'), 'the AST manifest of the first compilation');
   staleCompiler.compilerDigest = 'stale';
   writeFileSync(join(output, 'manifest.json'), JSON.stringify(staleCompiler));
   const rebuilt = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true' });
@@ -34,8 +43,8 @@ try {
   const custom = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true', delimiters: '[]' });
   assert.equal(custom.delimiters, '[]');
   assert.notEqual(custom.sourceDigest, first.sourceDigest);
-  const customAst = JSON.parse(readFileSync(join(output, custom.files['layout.tpl'].path), 'utf8'));
-  assert.equal(customAst.body[1].type, 'Echo');
+  const customAst = templateAstDocument.read(join(output, custom.files['layout.tpl'].path));
+  assert.equal(customAst.body[1]?.type, 'Echo');
   const customBytes = readFileSync(join(output, 'manifest.json'));
 
   compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true', delimiters: '[]' });

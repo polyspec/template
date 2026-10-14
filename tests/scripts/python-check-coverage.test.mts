@@ -7,7 +7,9 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { showcasePythonModule } from '../../examples/showcase/python-module.mjs';
+import { showcasePythonModule } from '../../examples/showcase/python-module.mts';
+import { compilerManifestDocument, manifestPath } from '../../scripts/compiler-manifest.mts';
+import { jobs, runsOf, runLines } from './workflows.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const checks = [
@@ -34,25 +36,23 @@ for (const check of checks) {
 const pythonTargets = ['test-scripts', 'install-check', 'generated-native-check', 'typed-generator-compile-check', 'showcase-check'];
 
 test('each CI job that runs a Python check target runs make install and sets up no Python of PATH', () => {
-  const workflow = readFileSync(join(root, '.github/workflows/ci.yml'), 'utf8');
-  const jobs = workflow.slice(workflow.indexOf('\njobs:')).split(/\n(?=  [a-z][a-z-]*:\n)/).slice(1);
-  const needing = jobs.filter(job => {
-    // A job without make ci-targets runs no check target.
-    const listed = job.match(/make ci-targets TARGETS="([^"]*)"/)?.[1];
-    const targets = listed === undefined ? [] : listed.split(/\s+/);
-    return targets.some(target => pythonTargets.includes(target));
-  });
+  const all = jobs('.github/workflows/ci.yml');
+  const needing = all.filter(job => runLines(job).some(line => {
+    // A step without make ci-targets runs no check target.
+    const listed = /make ci-targets TARGETS="([^"]*)"/.exec(line)?.[1];
+    return listed !== undefined && listed.split(/\s+/).some(target => pythonTargets.includes(target));
+  }));
   assert.ok(needing.length >= 3, `found ${needing.length} jobs that run a Python check target, expected at least 3`);
   for (const job of needing) {
-    assert.ok(/run: make install\n/.test(job), `the job ${job.split('\n')[0]?.trim()} runs a Python check target and does not run make install, which installs the pinned Python`);
+    assert.ok(runsOf(job).includes('make install'), `the job ${job.name} runs a Python check target and does not run make install, which installs the pinned Python`);
   }
-  assert.ok(!/actions\/setup-python/.test(workflow), 'a workflow sets up a Python of PATH; the checks run the pinned interpreter of make install');
+  assert.ok(!all.some(job => job.steps.some(step => step.uses?.startsWith('actions/setup-python@') === true)), 'a workflow sets up a Python of PATH; the checks run the pinned interpreter of make install');
 });
 
 // The showcase contract has a Python implementation: the manifest maps Python, scripts/check-showcase-contract.mts runs it
 // in both execution modes, and the generated Python programs of the scenarios are committed beside the other languages.
 test('the showcase contract checks a Python adapter and the generated Python programs of every scenario', () => {
-  const manifest = JSON.parse(readFileSync(join(root, 'packages/compiler/interface.json'), 'utf8')).showcaseAdapter;
+  const manifest = compilerManifestDocument.read(manifestPath(root)).showcaseAdapter;
   const python = manifest.languages.python;
   assert.ok(python, 'interface.json showcaseAdapter.languages names no python');
   assert.match(readFileSync(join(root, 'scripts/check-showcase-contract.mts'), 'utf8'), /const languageNames = \[[^\]]*'python'/, 'check-showcase-contract.mjs does not run python');

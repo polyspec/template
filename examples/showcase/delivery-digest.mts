@@ -6,9 +6,9 @@ import { digestFiles, generatedCompilerFiles } from '../../packages/compiler/com
 const root = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 
 /** Identifies TypeScript-to-JavaScript delivery compilation: the TypeScript backend, its tools and this compilation. */
-export function typescriptDeliveryDigest() {
+export function typescriptDeliveryDigest(): string {
   return digestFiles([
     ...generatedCompilerFiles('ts'),
-    ...['package-lock.json', 'examples/showcase/compile-generated.mjs'].map(path => [path, join(root, path)]),
+    ...['package-lock.json', 'examples/showcase/compile-generated.mts'].map((path): [string, string] => [path, join(root, path)]),
   ]);
 }

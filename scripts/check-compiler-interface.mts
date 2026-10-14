@@ -4,7 +4,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseSync, type Class, type ClassElement, type Directive, type MethodDefinition, type ParamPattern, type PropertyDefinition, type Span, type Statement, type TSInterfaceDeclaration } from 'oxc-parser';
+import { compilerManifestDocument, languageMapping, manifestPath, typeFields, typeOperations } from './compiler-manifest.mts';
 import { pythonPackageCommand } from './python-toolchain.mts';
+import { required } from './required.mts';
+import { CARGO } from './temporary-workspace.mts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
@@ -55,79 +58,19 @@ function heritage(source: Source, declaration: Class): string[] {
     .map(expression => textOf(source, expression));
 }
 
-interface RuntimeOperation {
-  name: string;
-  parameters: unknown[];
-}
-
-interface ManifestType {
-  operations: string[];
-  fields: string[];
-}
-
-interface BoundMapping {
-  type: string;
-  operations: Record<string, string>;
-  assign: Record<string, string>;
-  generatedOperations: unknown;
-}
-
-interface LanguageMapping {
-  backend: string;
-  program: string[];
-  runtimeServices: string;
-  error: string;
-  runtimeServiceOperationNames: Record<string, string>;
-  runtimeEnvironmentFields: string[];
-  runtimeEnvironmentOperations: string[];
-  runtimeBindingsExplicitContext: string[];
-  boundMap: BoundMapping;
-  entry: string;
-  frameFields: string[];
-  scopeFields: string[];
-  scopeOperations: string[];
-}
-
-interface CompilerManifest {
-  schema: number;
-  name: string;
-  showcaseAdapter?: { name: string; schema: number };
-  evidence?: { readingOrder: string[]; fixtures: string; examples: string[]; generatedEvidence: string[]; verificationCommands: string[] };
-  types: Record<string, ManifestType | undefined> & Record<'RuntimeServices' | 'RuntimeEnvironment' | 'RuntimeBindings' | 'RenderFrame' | 'RenderScope', ManifestType>;
-  operations: { owner: string; name: string }[];
-  components: { LanguageBackend: { operations: string[] } };
-  supportLevels?: { core?: { languages: string[]; compileModes: string[] } };
-  languages: Record<string, LanguageMapping | undefined> & Record<'rust' | 'typescript' | 'javascript-esm', LanguageMapping>;
-  forbidden?: string[];
-  runtimeContract: {
-    Program: { operations: RuntimeOperation[] };
-    Engine: { owns: string[]; implements: string; operations: string[] };
-    AstProgram: { implements: string; owns: string[] };
-    GeneratedProgram: { implements: string };
-    RuntimeBindings: { operations: RuntimeOperation[] };
-    RuntimeServices: { operations: RuntimeOperation[] };
-    RuntimeEnvironment: { implements: string; fields: string[]; operations: RuntimeOperation[] };
-    RenderFrame: { fields: string[] };
-    RenderScope: { fields: string[]; operations: string[] };
-    BoundMap: { operations: RuntimeOperation[]; acceptedBy: string[] };
-  };
-}
-const manifestPath = process.env.TEMPLATE_INTERFACE_MANIFEST
+const manifest = compilerManifestDocument.read(process.env.TEMPLATE_INTERFACE_MANIFEST
   ? resolve(process.env.TEMPLATE_INTERFACE_MANIFEST)
-  : resolve(root, 'packages/compiler/interface.json');
-const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as CompilerManifest;
+  : manifestPath(root));
 if (manifest.schema !== 2 || manifest.name !== 'TemplateCompiler') throw new Error('invalid compiler interface manifest');
-if (manifest.showcaseAdapter?.name !== 'RenderAdapter' || manifest.showcaseAdapter?.schema !== 3) throw new Error('showcase adapter contract is missing');
+if (manifest.showcaseAdapter.name !== 'RenderAdapter' || manifest.showcaseAdapter.schema !== 3) throw new Error('showcase adapter contract is missing');
 
 const evidence = manifest.evidence;
-if (!Array.isArray(evidence?.readingOrder) || evidence.readingOrder[0] !== 'packages/compiler/interface.json' ||
+if (evidence.readingOrder[0] !== 'packages/compiler/interface.json' ||
     !evidence.readingOrder.every(path => existsSync(resolve(root, path)))) {
   throw new Error('compiler interface reading order is incomplete');
 }
-if (typeof evidence.fixtures !== 'string' || !existsSync(resolve(root, evidence.fixtures)) ||
-    !Array.isArray(evidence.examples) || !evidence.examples.every(path => existsSync(resolve(root, path))) ||
-    !Array.isArray(evidence.generatedEvidence) || !evidence.generatedEvidence.every(path => existsSync(resolve(root, path))) ||
-    !Array.isArray(evidence.verificationCommands) || evidence.verificationCommands.length < 1) {
+if (!existsSync(resolve(root, evidence.fixtures)) || !evidence.examples.every(path => existsSync(resolve(root, path))) ||
+    !evidence.generatedEvidence.every(path => existsSync(resolve(root, path))) || evidence.verificationCommands.length < 1) {
   throw new Error('compiler interface evidence links are incomplete');
 }
 
@@ -137,7 +80,7 @@ const requiredTypes = [
   'RuntimeBindings', 'RuntimeServices', 'RuntimeEnvironment', 'FunctionSignature', 'DefinitionData<T>', 'Definition<T>',
   'Definitions', 'Input<T>', 'RenderFrame', 'RenderScope',
 ];
-for (const name of requiredTypes) if (!manifest.types?.[name]) throw new Error(`compiler type ${name} is missing`);
+for (const name of requiredTypes) if (!manifest.types[name]) throw new Error(`compiler type ${name} is missing`);
 
 const expectedOperations = {
   Compiler: ['loadSourceGraph', 'parseSourceGraph', 'lowerSourceGraph', 'emitArtifact'],
@@ -156,7 +99,7 @@ const backendDirectory = process.env.TEMPLATE_BACKEND_DIRECTORY
   ? resolve(process.env.TEMPLATE_BACKEND_DIRECTORY)
   : resolve(root, 'packages/compiler/backends');
 const backendFiles = { typescript: 'typescript.mjs', go: 'go.mjs', rust: 'rust.mjs', php: 'php.mjs', python: 'python.mjs' };
-const backendOperations = manifest.components.LanguageBackend.operations;
+const backendOperations = required(manifest.components.LanguageBackend, 'the component LanguageBackend of interface.json').operations;
 for (const [language, filename] of Object.entries(backendFiles)) {
   const path = resolve(backendDirectory, filename);
   const source = parseSource(path);
@@ -171,28 +114,25 @@ for (const [language, filename] of Object.entries(backendFiles)) {
   if (exportedFunctions.includes('emitProgram')) throw new Error(`${language}: backend bypasses the compiler section contract`);
 }
 
-const core = manifest.supportLevels?.core;
-if (core?.languages?.join(',') !== 'typescript,go,rust,php,python') throw new Error('core languages are missing or reordered');
-if (core?.compileModes?.join(',') !== 'ast,gen') throw new Error('core support level is incomplete');
-/** The mapping of `language`; fails when the manifest maps no such language. */
-function languageMapping(language: string): LanguageMapping {
-  const mapping = manifest.languages[language];
-  if (!mapping) throw new Error(`${language}: the manifest has no language mapping`);
-  return mapping;
-}
+const core = required(manifest.supportLevels.core, 'the support level core of interface.json');
+if (core.languages.join(',') !== 'typescript,go,rust,php,python') throw new Error('core languages are missing or reordered');
+if (core.compileModes.join(',') !== 'ast,gen') throw new Error('core support level is incomplete');
+const runtimeServiceTypeOperations = typeOperations(manifest, 'RuntimeServices');
+const runtimeEnvironmentTypeFields = typeFields(manifest, 'RuntimeEnvironment');
+const runtimeEnvironmentTypeOperations = typeOperations(manifest, 'RuntimeEnvironment');
 for (const language of core.languages) {
-  const mapping = manifest.languages?.[language];
+  const mapping = manifest.languages[language];
   if (!mapping?.backend || mapping.program?.join(',') !== 'AstProgram,GeneratedProgram' || mapping.runtimeServices !== 'RuntimeServices' || !mapping.error) {
     throw new Error(`${language}: compiler mapping is incomplete`);
   }
-  for (const operation of manifest.types.RuntimeServices.operations) {
+  for (const operation of runtimeServiceTypeOperations) {
     if (!mapping.runtimeServiceOperationNames?.[operation]) throw new Error(`${language}: RuntimeServices.${operation} name mapping is missing`);
   }
-  if (mapping.runtimeEnvironmentFields?.length !== manifest.types.RuntimeEnvironment.fields.length) throw new Error(`${language}: RuntimeEnvironment field mapping is incomplete`);
-  if (mapping.runtimeEnvironmentOperations?.length !== manifest.types.RuntimeEnvironment.operations.length) throw new Error(`${language}: RuntimeEnvironment operation mapping is incomplete`);
+  if (mapping.runtimeEnvironmentFields?.length !== runtimeEnvironmentTypeFields.length) throw new Error(`${language}: RuntimeEnvironment field mapping is incomplete`);
+  if (mapping.runtimeEnvironmentOperations?.length !== runtimeEnvironmentTypeOperations.length) throw new Error(`${language}: RuntimeEnvironment operation mapping is incomplete`);
 }
 const rustContextOperations = ['unary', 'binary', 'stringify', 'escape', 'number', 'finite', 'compare', 'member', 'memberCall', 'classCall', 'index', 'depth', 'entries', 'listSpread', 'mapSpread', 'call', 'limit', 'error'];
-if (manifest.languages.rust.runtimeBindingsExplicitContext?.join(',') !== rustContextOperations.join(',')) {
+if (languageMapping(manifest, 'rust').runtimeBindingsExplicitContext?.join(',') !== rustContextOperations.join(',')) {
   throw new Error('rust RuntimeBindings context mapping differs');
 }
 
@@ -201,43 +141,42 @@ const requiredForbidden = [
   'showcase-specific compiler', 'legacy wrapper compatibility',
   'parsing or code generation during render',
 ];
-if (manifest.forbidden?.join('\n') !== requiredForbidden.join('\n')) throw new Error('forbidden architecture list differs');
+if (manifest.forbidden.join('\n') !== requiredForbidden.join('\n')) throw new Error('forbidden architecture list differs');
 
 const runtime = manifest.runtimeContract;
-if (runtime?.Program?.operations?.map(item => item.name).join(',') !== 'prepare,render') throw new Error('Program runtime operations differ');
-if (runtime.Engine?.owns?.join(',') !== 'program' || runtime.Engine?.implements !== 'Program') throw new Error('Engine ownership differs');
-if (runtime.AstProgram?.implements !== 'Program' || runtime.GeneratedProgram?.implements !== 'Program') throw new Error('program implementation mapping differs');
-if (runtime.AstProgram?.owns?.join(',') !== 'runtime') throw new Error('AstProgram runtime ownership differs');
-const runtimeBindingOperations = manifest.types.RuntimeBindings.operations;
-if (runtime.RuntimeBindings?.operations?.map(item => item.name).join(',') !== runtimeBindingOperations.join(',')) throw new Error('RuntimeBindings operations differ');
-const runtimeServiceOperations = manifest.types.RuntimeServices.operations;
-if (runtime.RuntimeServices?.operations?.map(item => item.name).join(',') !== runtimeServiceOperations.join(',')) throw new Error('RuntimeServices operations differ');
-const runtimeEnvironmentOperations = manifest.types.RuntimeEnvironment.operations;
-if (runtime.RuntimeEnvironment?.implements !== 'RuntimeServices') throw new Error('RuntimeEnvironment implementation differs');
-if (runtime.RuntimeEnvironment?.fields?.join(',') !== manifest.types.RuntimeEnvironment.fields.join(',')) throw new Error('RuntimeEnvironment fields differ');
-if (runtime.RuntimeEnvironment?.operations?.map(item => item.name).join(',') !== runtimeEnvironmentOperations.join(',')) throw new Error('RuntimeEnvironment operations differ');
-if (runtime.RenderFrame?.fields?.join(',') !== manifest.types.RenderFrame.fields.join(',')) throw new Error('RenderFrame fields differ');
-if (runtime.RenderScope?.fields?.join(',') !== manifest.types.RenderScope.fields.join(',')) throw new Error('RenderScope fields differ');
-if (runtime.RenderScope?.operations?.join(',') !== manifest.types.RenderScope.operations.join(',')) throw new Error('RenderScope operations differ');
+const typescriptMapping = languageMapping(manifest, 'typescript');
+if (runtime.Program.operations.map(item => item.name).join(',') !== 'prepare,render') throw new Error('Program runtime operations differ');
+if (runtime.Engine.owns.join(',') !== 'program' || runtime.Engine.implements !== 'Program') throw new Error('Engine ownership differs');
+if (runtime.AstProgram.implements !== 'Program' || runtime.GeneratedProgram.implements !== 'Program') throw new Error('program implementation mapping differs');
+if (runtime.AstProgram.owns.join(',') !== 'runtime') throw new Error('AstProgram runtime ownership differs');
+const runtimeBindingOperations = typeOperations(manifest, 'RuntimeBindings');
+if (runtime.RuntimeBindings.operations.map(item => item.name).join(',') !== runtimeBindingOperations.join(',')) throw new Error('RuntimeBindings operations differ');
+if (runtime.RuntimeServices.operations.map(item => item.name).join(',') !== runtimeServiceTypeOperations.join(',')) throw new Error('RuntimeServices operations differ');
+if (runtime.RuntimeEnvironment.implements !== 'RuntimeServices') throw new Error('RuntimeEnvironment implementation differs');
+if (runtime.RuntimeEnvironment.fields.join(',') !== runtimeEnvironmentTypeFields.join(',')) throw new Error('RuntimeEnvironment fields differ');
+if (runtime.RuntimeEnvironment.operations.map(item => item.name).join(',') !== runtimeEnvironmentTypeOperations.join(',')) throw new Error('RuntimeEnvironment operations differ');
+if (runtime.RenderFrame.fields.join(',') !== typeFields(manifest, 'RenderFrame').join(',')) throw new Error('RenderFrame fields differ');
+if (runtime.RenderScope.fields.join(',') !== typeFields(manifest, 'RenderScope').join(',')) throw new Error('RenderScope fields differ');
+if (runtime.RenderScope.operations.join(',') !== typeOperations(manifest, 'RenderScope').join(',')) throw new Error('RenderScope operations differ');
 
 // VAL-22: the bound map type has the operations bind and merge in every implementation, and the
 // manifest names them, the operations that take a bound map as assign and the operations that it
 // declares for generated programs.
 const boundContract = runtime.BoundMap;
-if (boundContract?.operations?.map(item => item.name).join(',') !== 'bind,merge' || manifest.types.BoundMap?.operations?.join(',') !== 'bind,merge') throw new Error('BoundMap operations differ');
-if (boundContract.acceptedBy?.join(',') !== 'prepare,render') throw new Error('BoundMap acceptance differs');
+if (boundContract.operations.map(item => item.name).join(',') !== 'bind,merge' || manifest.types.BoundMap?.operations?.join(',') !== 'bind,merge') throw new Error('BoundMap operations differ');
+if (boundContract.acceptedBy.join(',') !== 'prepare,render') throw new Error('BoundMap acceptance differs');
 for (const language of [...core.languages, 'php-extension', 'javascript-esm']) {
-  const bound = manifest.languages?.[language]?.boundMap;
-  if (typeof bound?.type !== 'string' || Object.keys(bound.operations ?? {}).join(',') !== 'bind,merge' || !Object.values(bound.operations).every(name => typeof name === 'string' && name !== '')) {
+  const bound = manifest.languages[language]?.boundMap;
+  if (bound === undefined || Object.keys(bound.operations).join(',') !== 'bind,merge' || !Object.values(bound.operations).every(name => name !== '')) {
     throw new Error(`${language}: BoundMap mapping is incomplete`);
   }
-  const accepted = Object.keys(bound.assign ?? {});
+  const accepted = Object.keys(bound.assign);
   if (!accepted.includes('render') || !accepted.every(name => boundContract.acceptedBy.includes(name)) || (language !== 'php-extension' && !accepted.includes('prepare'))) {
     throw new Error(`${language}: BoundMap assign mapping is incomplete`);
   }
-  if (!Array.isArray(bound.generatedOperations)) throw new Error(`${language}: BoundMap generated operations are missing`);
+  if (bound.generatedOperations === undefined) throw new Error(`${language}: BoundMap generated operations are missing`);
 }
-if (manifest.languages['javascript-esm'].entry !== '@polyspec/template/render') throw new Error('javascript-esm: the browser entry is missing');
+if (languageMapping(manifest, 'javascript-esm').entry !== '@polyspec/template/render') throw new Error('javascript-esm: the browser entry is missing');
 
 function classDeclaration(source: Source, name: string): Class | undefined {
   for (const statement of source.statements.map(declared)) {
@@ -284,8 +223,8 @@ const runtimeEnvironment = classDeclaration(runtimeEnvironmentSource, 'RuntimeEn
 if (!runtimeEnvironment || !heritage(runtimeEnvironmentSource, runtimeEnvironment).includes('RuntimeServices')) throw new Error('typescript: RuntimeEnvironment does not implement RuntimeServices');
 const runtimeEnvironmentFields = runtimeEnvironment.body.body.filter(isProperty).map(item => memberName(runtimeEnvironmentSource, item));
 const runtimeEnvironmentMethods = runtimeEnvironment.body.body.filter(isMethod).map(item => memberName(runtimeEnvironmentSource, item));
-if (runtimeEnvironmentFields.join(',') !== manifest.languages.typescript.runtimeEnvironmentFields.join(',')) throw new Error('typescript: RuntimeEnvironment fields differ');
-if (runtimeEnvironmentMethods.join(',') !== manifest.languages.typescript.runtimeEnvironmentOperations.join(',')) throw new Error('typescript: RuntimeEnvironment operations differ');
+if (runtimeEnvironmentFields.join(',') !== required(typescriptMapping.runtimeEnvironmentFields, 'typescript runtimeEnvironmentFields').join(',')) throw new Error('typescript: RuntimeEnvironment fields differ');
+if (runtimeEnvironmentMethods.join(',') !== required(typescriptMapping.runtimeEnvironmentOperations, 'typescript runtimeEnvironmentOperations').join(',')) throw new Error('typescript: RuntimeEnvironment operations differ');
 for (const operation of runtime.RuntimeEnvironment.operations) {
   const method = runtimeEnvironment.body.body.filter(isMethod).find(item => memberName(runtimeEnvironmentSource, item) === operation.name);
   if (method?.value.params.length !== operation.parameters.length) throw new Error(`typescript: RuntimeEnvironment.${operation.name} signature differs`);
@@ -305,7 +244,7 @@ for (const operation of runtime.RuntimeBindings.operations) {
 // its static block, and both entries export bind and merge under the names of the manifest.
 const boundPath = process.env.TEMPLATE_TS_BOUND_SOURCE ? resolve(process.env.TEMPLATE_TS_BOUND_SOURCE) : resolve(root, 'packages/ts/src/value/bound.ts');
 const boundSource = parseSource(boundPath);
-const boundClass = classDeclaration(boundSource, manifest.languages.typescript.boundMap.type);
+const boundClass = classDeclaration(boundSource, typescriptMapping.boundMap.type);
 if (!boundClass) throw new Error('typescript: BoundMap class is missing');
 for (const member of boundClass.body.body) {
   const allowed = isConstructor(member) || member.type === 'StaticBlock' ||
@@ -320,7 +259,7 @@ for (const [language, entry] of boundEntries) {
     .flatMap(statement => statement.type === 'ExportNamedDeclaration' && !statement.declaration
       ? statement.specifiers.map(specifier => specifier.exported.type === 'Literal' ? specifier.exported.value : specifier.exported.name)
       : []);
-  const boundMap = languageMapping(language).boundMap;
+  const boundMap = languageMapping(manifest, language).boundMap;
   for (const name of [...Object.values(boundMap.operations), boundMap.type]) {
     if (!exported.includes(name)) throw new Error(`${language}: ${entry} does not export ${name}`);
   }
@@ -330,7 +269,7 @@ const contextPath = resolve(root, 'packages/ts/src/render/context.ts');
 const contextSource = parseSource(contextPath);
 const services = interfaceDeclaration(contextSource, 'RuntimeServices');
 const serviceMethods = services?.body.body.filter(member => member.type === 'TSMethodSignature');
-if (serviceMethods?.map(item => textOf(contextSource, item.key)).join(',') !== runtimeServiceOperations.join(',')) throw new Error('typescript: RuntimeServices operations differ');
+if (serviceMethods?.map(item => textOf(contextSource, item.key)).join(',') !== runtimeServiceTypeOperations.join(',')) throw new Error('typescript: RuntimeServices operations differ');
 for (const operation of runtime.RuntimeServices.operations) {
   const method = serviceMethods?.find(item => textOf(contextSource, item.key) === operation.name);
   if (method?.params.length !== operation.parameters.length) throw new Error(`typescript: RuntimeServices.${operation.name} signature differs`);
@@ -338,22 +277,20 @@ for (const operation of runtime.RuntimeServices.operations) {
 const frame = classDeclaration(contextSource, 'Frame');
 const frameConstructor = frame?.body.body.find(isConstructor);
 const frameFields = frameConstructor?.value.params.map(parameter => parameterName(contextSource, parameter));
-if (frameFields?.join(',') !== manifest.languages.typescript.frameFields.join(',')) throw new Error('typescript: RenderFrame fields differ');
+if (frameFields?.join(',') !== required(typescriptMapping.frameFields, 'typescript frameFields').join(',')) throw new Error('typescript: RenderFrame fields differ');
 if (frameFields?.join(',') !== runtime.RenderFrame.fields.join(',')) throw new Error('typescript: RenderFrame logical fields differ');
 const scope = classDeclaration(contextSource, 'Scope');
 const scopeFields = scope?.body.body.filter(isProperty).map(item => memberName(contextSource, item));
 const scopeOperations = scope?.body.body.filter(isMethod).map(item => memberName(contextSource, item));
-if (scopeFields?.join(',') !== manifest.languages.typescript.scopeFields.join(',')) throw new Error('typescript: RenderScope fields differ');
-if (scopeOperations?.join(',') !== manifest.languages.typescript.scopeOperations.join(',')) throw new Error('typescript: RenderScope operations differ');
+if (scopeFields?.join(',') !== required(typescriptMapping.scopeFields, 'typescript scopeFields').join(',')) throw new Error('typescript: RenderScope fields differ');
+if (scopeOperations?.join(',') !== required(typescriptMapping.scopeOperations, 'typescript scopeOperations').join(',')) throw new Error('typescript: RenderScope operations differ');
 
 function run(label: string, command: string, args: string[], cwd: string): void {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, env: process.env });
-  if (result.error || result.status !== 0) throw new Error(`${label} failed:\n${result.error?.message ?? ''}${result.stdout}${result.stderr}`);
+  if (result.error || result.status !== 0) throw new Error(`${label} failed:\n${result.error ? `${result.error.message}\n` : ''}${result.stdout}${result.stderr}`);
 }
 run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'packages/go'));
-const home = process.env.HOME;
-if (!home) throw new Error('HOME is not set; the rust interface check runs $HOME/.cargo/bin/cargo');
-run('rust interface AST check', resolve(home, '.cargo/bin/cargo'), ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/rust'));
+run('rust interface AST check', CARGO, ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/rust'));
 run('php interface reflection check', 'php', ['vendor/bin/phpunit', '--filter', 'CompilerInterfaceTest'], resolve(root, 'packages/php'));
 run('python interface check', pythonPackageCommand(), ['tests/test_compiler_interface.py'], resolve(root, 'packages/python'));
 

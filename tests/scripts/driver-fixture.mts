@@ -14,7 +14,8 @@ export const DRIVER_FILES = [
   'scripts/publish-build.mts',
   'scripts/python-toolchain.mts',
   'scripts/python-venv.mts',
-  // python-venv.mjs reads the venv of the python implementation from the parity declaration.
+  // python-venv.mts reads the venv of the python implementation from the parity declaration through parity-config.mts.
+  'scripts/parity-config.mts',
   'config/parity.json',
   'scripts/test-progress/step.mts',
 ];

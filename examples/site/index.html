@@ -4,7 +4,7 @@
 <main><section class="panel"><div class="section-heading"><div><p class="eyebrow">03 · NATIVE VALUES</p><h2>Assign keeps the host instance</h2></div><p>A class instance passed through assign stays that instance. The template reads a public field, calls the instance method and calls a separately registered logical class function.</p></div><div class="native-proof"><details open><summary>template</summary><pre class="template-files">&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">order</span><span class="syntax-property">.label</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">order</span><span class="syntax-function">.status_label</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;ready&quot;</span><span class="syntax-operator">)</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;<span class="syntax-template syntax-echo"><span class="syntax-delimiter">{</span><span class="syntax-keyword">=</span> <span class="syntax-variable">Order</span><span class="syntax-operator">::</span><span class="syntax-function">suffix</span><span class="syntax-operator">(</span><span class="syntax-string">&quot;!&quot;</span><span class="syntax-operator">)</span><span class="syntax-delimiter">}</span></span>&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
 </pre></details><details open><summary>host assign</summary><pre>class Order { public label = &#39;Order 12&#39;; public status_label(prefix) { return prefix + &#39;:12&#39;; } }
 const assign = { order: new Order() };</pre></details><p class="output-label">Rendered output · 64 bytes · 5f94e0e9fe74…</p><pre>&lt;<span class="syntax-tag">article</span>&gt;&lt;<span class="syntax-tag">h1</span>&gt;Order 12&lt;/<span class="syntax-tag">h1</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;ready:12&lt;/<span class="syntax-tag">p</span>&gt;&lt;<span class="syntax-tag">p</span>&gt;done!&lt;/<span class="syntax-tag">p</span>&gt;&lt;/<span class="syntax-tag">article</span>&gt;
-</pre></div></section><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>351</td><td>f9e5af2122de…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
+</pre></div></section><section class="panel"><div class="section-heading"><div><p class="eyebrow">01 · EVIDENCE</p><h2>Same bytes from AST mode</h2></div><p>Source parsing occurs during the build. Runtime checks load the committed artifacts, apply assign and define, and compare UTF-8 output bytes. Generated mode must produce the same bytes before it can be enabled for a language.</p></div><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Bytes</th><th>SHA-256</th><th>ts</th><th>go</th><th>rust</th><th>php</th><th>python</th></tr></thead><tbody><tr><td><a href="#compiler-coverage">compiler-coverage</a></td><td>351</td><td>f9e5af2122de…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#empty-state">empty-state</a></td><td>78</td><td>d98cc268d4c4…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#html-slot">html-slot</a></td><td>111</td><td>b1fc22f8d29c…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#react-boundary">react-boundary</a></td><td>124</td><td>4c247742a44e…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr><tr><td><a href="#scope-precedence">scope-precedence</a></td><td>177</td><td>7b160d439d3d…</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></div></section>
 <section class="panel"><div class="section-heading"><div><p class="eyebrow">02 · INPUT AND OUTPUT</p><h2>Small SSR situations</h2></div><p>Each card shows the exact assign data, define map, every template file, compiled artifact manifest and final HTML.</p></div><div class="scenario-list"><article class="scenario" id="compiler-coverage">
   <header class="scenario-header"><div><h3>Generated compiler coverage</h3><p>One readable page executes every canonical statement and expression family through AST and generated modes.</p></div><div class="tags"><span class="tag">expressions</span><span class="tag">loops and loop metadata</span><span class="tag">include scope</span><span class="tag">define and block scope</span></div></header>
   <div class="scenario-meta">
@@ -79,7 +79,7 @@ const assign = { order: new Order() };</pre></details><p class="output-label">Re
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;111bafa642c65a841a1eb0717e6585dbf8864ef951a2ccf5d7de551efbed5e47&quot;,
+  &quot;compilerDigest&quot;: &quot;02cae81e0d291ff0f577d8e12ab722cce33a57c2b3143d19c9c5913ca3e6b09c&quot;,
   &quot;files&quot;: {
     &quot;card.tpl&quot;: {
       &quot;path&quot;: &quot;card.tpl.ast.json&quot;,
@@ -1288,7 +1288,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;1f8675c08b19eb302a53880d9a0d6d66ffadb3aad4fcf07073ed4fc12c796fbf&quot;,
+  &quot;compilerDigest&quot;: &quot;39869daeabd7003a213f169c19b86eec2e0d8d8b2ea02dec2bd345b8e46a7458&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
@@ -2960,7 +2960,7 @@ final class GeneratedTemplates
 &lt;<span class="syntax-tag">p</span>&gt;defined&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;card&quot;</span>&gt;Guide&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">section</span>&gt;
-</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th><th>python</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article>
 <article class="scenario" id="empty-state">
@@ -2988,7 +2988,7 @@ final class GeneratedTemplates
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;111bafa642c65a841a1eb0717e6585dbf8864ef951a2ccf5d7de551efbed5e47&quot;,
+  &quot;compilerDigest&quot;: &quot;02cae81e0d291ff0f577d8e12ab722cce33a57c2b3143d19c9c5913ca3e6b09c&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -3141,7 +3141,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;1f8675c08b19eb302a53880d9a0d6d66ffadb3aad4fcf07073ed4fc12c796fbf&quot;,
+  &quot;compilerDigest&quot;: &quot;39869daeabd7003a213f169c19b86eec2e0d8d8b2ea02dec2bd345b8e46a7458&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
       &quot;path&quot;: &quot;empty-state.js&quot;,
@@ -3827,7 +3827,7 @@ final class GeneratedTemplates
     <section class="output"><p class="output-label">Output · 78 bytes · d98cc268d4c4…</p><pre>&lt;<span class="syntax-tag">main</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty-page&quot;</span>&gt;
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;empty&quot;</span>&gt;No content definition.&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">main</span>&gt;
-</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th><th>python</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article>
 <article class="scenario" id="html-slot">
@@ -3855,7 +3855,7 @@ final class GeneratedTemplates
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;111bafa642c65a841a1eb0717e6585dbf8864ef951a2ccf5d7de551efbed5e47&quot;,
+  &quot;compilerDigest&quot;: &quot;02cae81e0d291ff0f577d8e12ab722cce33a57c2b3143d19c9c5913ca3e6b09c&quot;,
   &quot;files&quot;: {
     &quot;layout.tpl&quot;: {
       &quot;path&quot;: &quot;layout.tpl.ast.json&quot;,
@@ -4006,7 +4006,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;1f8675c08b19eb302a53880d9a0d6d66ffadb3aad4fcf07073ed4fc12c796fbf&quot;,
+  &quot;compilerDigest&quot;: &quot;39869daeabd7003a213f169c19b86eec2e0d8d8b2ea02dec2bd345b8e46a7458&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
       &quot;path&quot;: &quot;html-slot.js&quot;,
@@ -4715,7 +4715,7 @@ final class GeneratedTemplates
 &lt;<span class="syntax-tag">h1</span>&gt;&amp;lt;server slot&amp;gt;&lt;/<span class="syntax-tag">h1</span>&gt;
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;server&quot;</span>&gt;pre-rendered &amp;amp; safe&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">section</span>&gt;
-</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th><th>python</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article>
 <article class="scenario" id="react-boundary">
@@ -4756,7 +4756,7 @@ createRoot(document.getElementById(&#39;counter&#39;)!).render(&lt;Counter /&gt;
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;111bafa642c65a841a1eb0717e6585dbf8864ef951a2ccf5d7de551efbed5e47&quot;,
+  &quot;compilerDigest&quot;: &quot;02cae81e0d291ff0f577d8e12ab722cce33a57c2b3143d19c9c5913ca3e6b09c&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -4980,7 +4980,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;1f8675c08b19eb302a53880d9a0d6d66ffadb3aad4fcf07073ed4fc12c796fbf&quot;,
+  &quot;compilerDigest&quot;: &quot;39869daeabd7003a213f169c19b86eec2e0d8d8b2ea02dec2bd345b8e46a7458&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
       &quot;path&quot;: &quot;react-boundary.js&quot;,
@@ -5857,7 +5857,7 @@ final class GeneratedTemplates
 &lt;<span class="syntax-tag">p</span>&gt;Interactive island&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">section</span>&gt;
 &lt;/<span class="syntax-tag">main</span>&gt;
-</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th><th>python</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article>
 <article class="scenario" id="scope-precedence">
@@ -5902,7 +5902,7 @@ final class GeneratedTemplates
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;111bafa642c65a841a1eb0717e6585dbf8864ef951a2ccf5d7de551efbed5e47&quot;,
+  &quot;compilerDigest&quot;: &quot;02cae81e0d291ff0f577d8e12ab722cce33a57c2b3143d19c9c5913ca3e6b09c&quot;,
   &quot;files&quot;: {
     &quot;content.tpl&quot;: {
       &quot;path&quot;: &quot;content.tpl.ast.json&quot;,
@@ -6231,7 +6231,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020&quot;,
-  &quot;compilerDigest&quot;: &quot;1f8675c08b19eb302a53880d9a0d6d66ffadb3aad4fcf07073ed4fc12c796fbf&quot;,
+  &quot;compilerDigest&quot;: &quot;39869daeabd7003a213f169c19b86eec2e0d8d8b2ea02dec2bd345b8e46a7458&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
@@ -7225,7 +7225,7 @@ final class GeneratedTemplates
 &lt;<span class="syntax-tag">p</span> <span class="syntax-attr">class</span>=<span class="syntax-string">&quot;local&quot;</span>&gt;missing&lt;/<span class="syntax-tag">p</span>&gt;
 &lt;/<span class="syntax-tag">article</span>&gt;
 &lt;/<span class="syntax-tag">section</span>&gt;
-</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
+</pre><table><thead><tr><th>Implementation</th><th>ts</th><th>go</th><th>rust</th><th>php</th><th>python</th></tr></thead><tbody><tr><td>artifact render</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td><td class="pass">PASS</td></tr></tbody></table></section>
   </div>
 </article></div></section>
 <section class="panel"><div class="section-heading"><div><p class="eyebrow">04 · PERFORMANCE</p><h2>Same request, two execution modes</h2></div><p>Independent samples use production artifacts with the page cache disabled. Cold includes process startup and loading. Full render includes request binding; prepared render reuses one normalized request. Every row must match the same UTF-8 bytes before it is recorded.</p></div><div class="table-wrap"><table><thead><tr><th>Language</th><th>Mode</th><th>Cold median</th><th>Full render</th><th>Prepared render</th><th>RSS median</th><th>Bytes</th><th>Output</th></tr></thead><tbody><tr><td>typescript</td><td>ast</td><td>137.41 ms</td><td>0.0080 ms</td><td>0.0020 ms</td><td>94.25 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>typescript</td><td>generated</td><td>131.65 ms</td><td>0.0073 ms</td><td>0.0010 ms</td><td>92.97 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>ast</td><td>7.11 ms</td><td>0.0030 ms</td><td>0.0016 ms</td><td>11.34 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>go</td><td>generated</td><td>8.60 ms</td><td>0.0038 ms</td><td>0.0008 ms</td><td>10.70 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>ast</td><td>9.64 ms</td><td>0.0051 ms</td><td>0.0024 ms</td><td>2.80 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>rust</td><td>generated</td><td>5.81 ms</td><td>0.0043 ms</td><td>0.0017 ms</td><td>2.53 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>ast</td><td>70.12 ms</td><td>0.0178 ms</td><td>0.0106 ms</td><td>28.08 MiB</td><td>177</td><td>7b160d439d3d…</td></tr><tr><td>php</td><td>generated</td><td>81.61 ms</td><td>0.0130 ms</td><td>0.0045 ms</td><td>28.22 MiB</td><td>177</td><td>7b160d439d3d…</td></tr></tbody></table></div><details><summary>Package throughput samples</summary><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>ts</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>go</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>rust</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>empty-state</td><td>php</td><td>20</td><td>d98cc268d4c4…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>ts</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>go</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>rust</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>html-slot</td><td>php</td><td>20</td><td>b1fc22f8d29c…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>ts</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>go</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>rust</td><td>20</td><td>7b160d439d3d…</td></tr><tr><td>scope-precedence</td><td>php</td><td>20</td><td>7b160d439d3d…</td></tr></tbody></table></div></details></section></main>

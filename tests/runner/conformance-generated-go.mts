@@ -9,7 +9,8 @@ import { goString } from '../../packages/compiler/backend-support.mjs';
 import { compileSource } from '../../packages/compiler/compiler.mjs';
 import { deriveTypeManifest } from '../../packages/compiler/type-manifest.mjs';
 import { parse } from '../../packages/ts/dist/index.mjs';
-import { caseTestFailures, errorField, firstDifference, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
+import { caseTestFailures, errorField, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
+import { errorDifference } from './generated-errors.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { goWorkspace } from '../../scripts/temporary-workspace.mts';
@@ -19,7 +20,6 @@ const CASE_TIMEOUT_SECONDS = 30;
 
 // A module of the system temporary directory that uses the module of packages/go from that directory.
 const temporary = goWorkspace('generated-conformance-go');
-function errorObject(error: unknown): { code: string; template: unknown; line: unknown; col: unknown } | null { const code = errorField(error, 'code'); return typeof code === 'string' ? { code, template: errorField(error, 'template') ?? 'input.tpl', line: errorField(error, 'line') ?? 0, col: errorField(error, 'col') ?? 0 } : null; }
 function parsedTemplates(testCase: TestCase): Map<string, ReturnType<typeof parse>> { const templates = new Map<string, ReturnType<typeof parse>>(), pending: [string, string][] = [[testCase.dir, '']]; for (let next = pending.pop(); next !== undefined; next = pending.pop()) { const [directory, prefix] = next; for (const entry of readdirSync(directory, { withFileTypes: true })) { const path = join(directory, entry.name), name = prefix ? `${prefix}/${entry.name}` : entry.name; if (entry.isDirectory()) pending.push([path, name]); else if (entry.isFile() && entry.name.endsWith('.tpl')) templates.set(name, parse(readFileSync(path), name, testCase.options)); } } return templates; }
 // Paths and expected output are embedded as exact Go string literals.
 const q = goString;
@@ -55,8 +55,7 @@ func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeS
       runnable.push(testCase);
       progress.pass(step);
     } catch (error) {
-      const actual = errorObject(error);
-      const difference = testCase.expectedError === null || actual === null ? 'unexpected compile failure' : firstDifference(testCase.expectedError, actual);
+      const difference = errorDifference(testCase.expectedError, error, 'compile');
       if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${String(errorField(error, 'message'))}`); progress.fail(step, undefined, difference); }
       else { passed++; progress.pass(step); }
     }

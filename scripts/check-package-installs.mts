@@ -15,11 +15,15 @@ import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node
 import { join, relative, resolve } from 'node:path';
 import { installCargoLock, createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mts';
 import { pythonCommand, pythonEnvironment } from './python-toolchain.mts';
+import { captured } from './required.mts';
+import { CARGO } from './temporary-workspace.mts';
+import { readToml, tomlString, tomlTable } from './toml.mts';
+import { composerLockDocument, composerManifestDocument, npmManifestDocument } from './package-manifests.mts';
 import { buildRequirements, requireWheelhouse, wheelhouse } from './python-wheelhouse.mts';
 import { checkLanguages } from './language-checks.mts';
 import { runStepSync } from './test-progress/step.mts';
-import { showcasePythonModule } from '../examples/showcase/python-module.mjs';
-import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mjs';
+import { showcasePythonModule } from '../examples/showcase/python-module.mts';
+import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mts';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -27,20 +31,6 @@ const expected = readFileSync(join(scenario, 'expected.html'), 'utf8');
 const temporary = createWorkspace();
 const artifacts = join(temporary, 'artifacts');
 mkdirSync(artifacts);
-
-/** The first group of `pattern` in `text`; fails with `what` when `text` does not match. */
-function capture(pattern: RegExp, text: string, what: string): string {
-  const value = pattern.exec(text)?.[1];
-  if (value === undefined) throw new Error(`${what} is not found`);
-  return value;
-}
-
-/** The cargo of rustup in the home directory, which the Makefile runs too. */
-function cargo(): string {
-  const home = process.env.HOME;
-  if (home === undefined) throw new Error('HOME is not set, so the cargo of rustup in ~/.cargo/bin is not found');
-  return resolve(home, '.cargo/bin/cargo');
-}
 
 function run(command: string, args: string[], options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}): string {
   return runStepSync('package installs', command, args, { cwd: options.cwd ?? root, env: { ...process.env, ...options.env }, capture: true }).trim();
@@ -59,7 +49,7 @@ function checkTypeScript() {
   writeFileSync(join(directory, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
   // npm names the archive <name without @, / as ->-<version>.tgz; the name is computed, not read from the output of npm,
   // whose wording a release of npm may change (T19.11).
-  const manifest = JSON.parse(readFileSync(join(root, 'packages/ts/package.json'), 'utf8'));
+  const manifest = npmManifestDocument.read(join(root, 'packages/ts/package.json'));
   const archive = `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`;
   run('npm', ['pack', join(root, 'packages/ts'), '--pack-destination', artifacts, '--silent']);
   assert.ok(existsSync(join(artifacts, archive)), `npm pack wrote no ${archive} into ${artifacts}`);
@@ -84,7 +74,7 @@ assert.equal(ast, expected); assert.equal(generated, expected); assert.equal(ast
 function checkGo() {
   const version = 'v0.0.1';
   const module = 'github.com/polyspec/template/packages/go';
-  const goVersion = capture(/^go (\S+)$/m, readFileSync(join(root, 'packages/go/go.mod'), 'utf8'), 'the go directive of packages/go/go.mod');
+  const goVersion = captured(/^go (\S+)$/m.exec(readFileSync(join(root, 'packages/go/go.mod'), 'utf8')), 1, 'the go directive of packages/go/go.mod');
   const proxy = join(temporary, 'go-proxy');
   const endpoint = join(proxy, module, '@v');
   const zipRoot = join(temporary, 'go-zip', `${module}@${version}`);
@@ -118,8 +108,9 @@ func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(da
 
 function checkRust() {
   const target = join(temporary, 'cargo-target');
-  run(cargo(), ['package', '--locked', '--allow-dirty', '--no-verify', '--manifest-path', join(root, 'packages/rust/Cargo.toml')], { env: { CARGO_TARGET_DIR: target } });
-  const crate = `polyspec-template-${capture(/^version\s*=\s*"([^"]+)"/m, readFileSync(join(root, 'packages/rust/Cargo.toml'), 'utf8'), 'the version of packages/rust/Cargo.toml')}`;
+  run(CARGO, ['package', '--locked', '--allow-dirty', '--no-verify', '--manifest-path', join(root, 'packages/rust/Cargo.toml')], { env: { CARGO_TARGET_DIR: target } });
+  const cargoManifest = readToml(join(root, 'packages/rust/Cargo.toml'));
+  const crate = `polyspec-template-${tomlString(tomlTable(cargoManifest.package, 'the [package] of packages/rust/Cargo.toml').version, 'the version of packages/rust/Cargo.toml')}`;
   const archive = join(target, `package/${crate}.crate`);
   const packages = join(temporary, 'cargo-packages');
   mkdirSync(packages);
@@ -131,8 +122,7 @@ function checkRust() {
   writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, crate))}}\nserde={version="1",features=["derive"]}\nserde_json={version="1",features=["preserve_order","arbitrary_precision"]}\n`);
   // The install project builds with the locked versions of the package and the toolchain of the checkout. Cargo does not
   // resolve the development dependencies of a path dependency for an install project.
-  const manifest = readFileSync(join(root, 'packages/rust/Cargo.toml'), 'utf8');
-  const development = [...(/^\[dev-dependencies\]\n((?:[^[\n].*\n?)*)/m.exec(manifest)?.[1] ?? '').matchAll(/^([\w-]+)\s*=/gm)].map(([, name = '']) => name);
+  const development = Object.keys(tomlTable(cargoManifest['dev-dependencies'], 'the [dev-dependencies] of packages/rust/Cargo.toml'));
   writeFileSync(join(directory, 'Cargo.lock'), installCargoLock(readFileSync(join(root, 'packages/rust/Cargo.lock'), 'utf8'), {
     name: 'install-check', version: '0.0.1', dependencies: ['polyspec-template', 'serde', 'serde_json'], removed: { 'polyspec-template': development }, lockPath: 'packages/rust/Cargo.lock',
   }));
@@ -141,7 +131,7 @@ function checkRust() {
 use polyspec_template::{AstProgram, Engine, EngineOptions, FsLoader, Program, RenderOptions, RenderTarget, RuntimeEnvironment};
 fn main(){ let assign:serde_json::Value=serde_json::from_str(include_str!("../data.json")).unwrap(); let raw:serde_json::Value=serde_json::from_str(include_str!("../define.json")).unwrap(); let mut options=RenderOptions::default(); options.define=polyspec_template::defines_from_json(&raw).unwrap(); let expected=include_str!("../expected.html"); let ast=Engine::new(AstProgram::new(EngineOptions{loader:Some(Box::new(FsLoader::new("templates"))),..Default::default()}).unwrap()).render(RenderTarget::Name("layout"),&assign,&options).unwrap(); let program=generated::GeneratedProgram::new(RuntimeEnvironment::new(None,std::collections::HashMap::new())); let direct=program.render(RenderTarget::Name("layout"),&assign,&options).unwrap(); assert_eq!(ast,expected);assert_eq!(direct,expected);assert_eq!(ast,direct); }
 `);
-  run(cargo(), ['run', '--quiet', '--locked'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
+  run(CARGO, ['run', '--quiet', '--locked'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
 }
 
 function checkPhp() {
@@ -158,8 +148,8 @@ function checkPhp() {
   // their locked entries, which the install project requires exactly; Packagist is off, so the resolution reads no
   // metadata that only an earlier `composer update` of the machine cached. The archives of those packages come from the
   // Composer cache that the composer install of make install filled from the same lock, with the network disabled.
-  const manifest = JSON.parse(readFileSync(join(packageDirectory, 'composer.json'), 'utf8')) as { name: string; version: string };
-  const lockPackages = (JSON.parse(readFileSync(join(packageDirectory, 'composer.lock'), 'utf8')) as { packages: { name: string; version: string }[] }).packages;
+  const manifest = composerManifestDocument.read(join(packageDirectory, 'composer.json'));
+  const lockPackages = composerLockDocument.read(join(packageDirectory, 'composer.lock')).packages;
   const locked = lockPackages.map(item => [item.name, item.version]);
   writeFileSync(join(directory, 'composer.json'), JSON.stringify({
     repositories: [{ 'packagist.org': false }, { type: 'artifact', url: artifacts }, { type: 'package', package: lockPackages }],
@@ -185,7 +175,7 @@ function checkPython() {
   }
   const python = pythonCommand();
   const pip = { ...pythonEnvironment(), PIP_NO_INDEX: '1', PIP_DISABLE_PIP_VERSION_CHECK: '1' };
-  const version = capture(/^version = "([^"]+)"$/m, readFileSync(join(source, 'pyproject.toml'), 'utf8'), 'the version of packages/python/pyproject.toml');
+  const version = tomlString(tomlTable(readToml(join(source, 'pyproject.toml')).project, 'the [project] of packages/python/pyproject.toml').version, 'the version of packages/python/pyproject.toml');
   const archive = join(artifacts, `polyspec_template-${version}-py3-none-any.whl`);
   run(python, ['-m', 'pip', 'wheel', '--no-deps', '--no-index', '--find-links', requireWheelhouse(buildRequirements(), wheelhouse), '--wheel-dir', artifacts, source], { env: pip });
   assert.ok(existsSync(archive), `pip wheel wrote no ${archive} into ${artifacts}`);

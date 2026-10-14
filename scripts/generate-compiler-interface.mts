@@ -2,37 +2,20 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { compilerManifestDocument, manifestPath, typeFields as manifestTypeFields, type ManifestOperation, type RuntimeOperation } from './compiler-manifest.mts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
-interface Operation {
-  name: string;
-  parameters: string[];
-  returns: string;
-}
-
-// The parts of packages/compiler/interface.json that the diagrams show.
-interface Manifest {
-  operations: Operation[];
-  types: Record<string, { fields: string[] } | undefined>;
-  components: Record<string, { owns: string[]; operations: string[] }>;
-  runtimeContract: Record<'Program' | 'RuntimeBindings' | 'RuntimeServices', { operations: Operation[] }>;
-}
-
-const manifest = JSON.parse(readFileSync(resolve(root, 'packages/compiler/interface.json'), 'utf8')) as Manifest;
+const manifest = compilerManifestDocument.read(manifestPath(root));
 const check = process.argv.includes('--check');
-const operation = (name: string): Operation => {
+const operation = (name: string): ManifestOperation => {
   const found = manifest.operations.find(item => item.name === name);
   if (!found) throw new Error(`interface.json declares no operation ${name}`);
   return found;
 };
-const typeFields = (name: string): string[] => {
-  const type = manifest.types[name];
-  if (!type) throw new Error(`interface.json declares no type ${name}`);
-  return type.fields;
-};
+const typeFields = (name: string): string[] => manifestTypeFields(manifest, name);
 const fields = (name: string): string => typeFields(name).join(' + ');
-const signature = (item: Operation): string => `+${item.name}(${item.parameters.join(', ')}) ${item.returns}`;
+const signature = (item: RuntimeOperation | ManifestOperation): string => `+${item.name}(${item.parameters.join(', ')}) ${item.returns}`;
 
 const flow = [
   'flowchart LR',

@@ -5,10 +5,10 @@
 // installs packages/python editable, so it imports the package from the sources of the checkout through its
 // environment, with no changed import path (PRINCIPLES S3).
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse } from 'smol-toml';
+import { readToml, tomlTable } from './toml.mts';
 import { pythonPackageCommandPath } from './python-venv.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -21,8 +21,8 @@ export const pythonPackageInterpreter = join(root, pythonPackageCommandPath());
 
 /** The minor release of the python of mise.toml, such as `3.14` of `python = "3.14.8"`. */
 export function pythonMinor(): string {
-  const tools = parse(readFileSync(join(root, 'mise.toml'), 'utf8')).tools;
-  const python = typeof tools === 'object' && 'python' in tools ? tools.python : undefined;
+  const tools = tomlTable(readToml(join(root, 'mise.toml')).tools, 'the [tools] of mise.toml');
+  const python = tools.python;
   const minor = typeof python === 'string' ? /^(\d+\.\d+)\.\d+$/.exec(python)?.[1] : undefined;
   if (!minor) throw new Error('mise.toml declares no python as an exact release such as python = "3.14.8"');
   return minor;

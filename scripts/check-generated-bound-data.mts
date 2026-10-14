@@ -3,7 +3,7 @@
 // that the generated program renders a bound map (VAL-22) as assign and as definition data with the
 // bytes of the host map (RT-61). The root is typed, so the program converts a bound assign to its
 // root record and bound definition data to the data record of `part` (RT-68).
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../packages/compiler/ast-artifact.mjs';
@@ -11,13 +11,14 @@ import { compileFiles, compileSource } from '../packages/compiler/compiler.mjs';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mts';
-import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
 import { checkLanguages } from './language-checks.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
+import { boundDataCasesDocument } from './fixture-documents.mts';
 import { tsc } from './tools.mts';
 
 const fixture = join(root, 'tests/fixtures/bound-data');
-const cases = JSON.parse(readFileSync(join(fixture, 'cases.json'), 'utf8'));
+const cases = boundDataCasesDocument.read(join(fixture, 'cases.json'));
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-bound-data');
 const run = (command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): string => {
@@ -107,7 +108,7 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
 }
 `);
       try {
-        run(process.env.HOME + '/.cargo/bin/cargo', ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }

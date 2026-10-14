@@ -55,7 +55,7 @@ include scripts/kit/kit-bootstrap.mk
 	install build-language test-language build-lsp test-lsp build-codemirror test-codemirror format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
 	conformance-cases function-inventory-check typecheck
 
-SHOWCASE_LANGS  ?= ts,go,rust,php
+SHOWCASE_LANGS  ?= ts,go,rust,php,python
 
 TS_DIR   := packages/ts
 GO_DIR   := packages/go
@@ -243,7 +243,7 @@ test-php: build-php ## PHP unit tests
 test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
-# The infrastructure of scripts/, tests/runner, tests/scripts and tests/browser is TypeScript, which Node.js
+# The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
 # runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
 # packages/ts and packages/language, whose declarations tsc reads.
 typecheck: build-ts build-language ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
@@ -493,15 +493,15 @@ contract-check: cargo-downloads-check build-ts build-php python-package ## Verif
 	node scripts/check-showcase-contract.mts
 
 showcase: cargo-downloads-check typed-generator build-php python-package ## Build the executable example site and its result artifacts
-	node examples/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
+	node examples/showcase/build.mts --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mts
-	node examples/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
+	node examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mts
 	node scripts/update-benchmark-docs.mts
-	node examples/showcase/build-site.mjs
+	node examples/showcase/build-site.mts
 
 bench: cargo-downloads-check typed-generator build-php ## Measure production AST and generated artifacts
-	node examples/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
+	node examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mts
 	node scripts/update-benchmark-docs.mts
 
@@ -540,16 +540,16 @@ showcase-check: artifact-digest-check typed-generator-compile-check showcase-bui
 artifact-digest-check: ## Fail when a committed compiled artifact records the digest of another compiler; names make showcase
 	node scripts/check-artifact-digests.mts
 showcase-ast-check: build-ts
-	node examples/showcase/compile.mjs --refresh false
+	node examples/showcase/compile.mts --refresh false
 showcase-build-check: cargo-downloads-check showcase-ast-check build-php
-	node examples/showcase/build.mjs --check --langs $(SHOWCASE_LANGS)
+	node examples/showcase/build.mts --check --langs $(SHOWCASE_LANGS)
 showcase-site-check: build-ts
-	node examples/showcase/build-site.mjs --check
+	node examples/showcase/build-site.mts --check
 showcase-html-check: build-ts
 	node scripts/check-showcase-html.mts
 
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
-	node examples/showcase/compile.mjs --refresh true
+	node examples/showcase/compile.mts --refresh true
 
 generated-native-check: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
 
@@ -564,10 +564,10 @@ generated-bound-data-check: cargo-downloads-check build-ts build-php python-pack
 	node scripts/check-generated-bound-data.mts
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
-	node examples/showcase/compile-generated.mjs --refresh true
+	node examples/showcase/compile-generated.mts --refresh true
 
 typed-generator-check: showcase-ast-check ## Verify type-fixed generated source is reproducible
-	node examples/showcase/compile-generated.mjs --refresh dev --check
+	node examples/showcase/compile-generated.mts --refresh dev --check
 
 compiler-ir-check: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
 

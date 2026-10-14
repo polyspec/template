@@ -3,15 +3,8 @@
 // when the list was written; the test reads no network. A pin whose commit is not in the list fails with its file,
 // line, action and commit.
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-// The workflows of template; a workflow that kit copies (kit.copies of @polyspec/kit) is kit's, and make kit-check compares it.
-const KIT_COPIES = new Set(Object.keys(JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json')), 'utf8')).kit.copies));
-const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml')).map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
+import { pinsOf, WORKFLOWS } from './workflows.mts';
 
 const VERIFIED = [
   { action: 'actions/checkout', version: 'v6.1.0', commit: 'd23441a48e516b6c34aea4fa41551a30e30af803' },
@@ -23,19 +16,13 @@ const VERIFIED = [
   { action: 'shivammathur/setup-php', version: '2.37.2', commit: 'f3e473d116dcccaddc5834248c87452386958240' },
 ];
 
-// Each `uses:` line of every workflow, with its file, line, action, commit and version comment.
+// Each `uses:` value of every workflow, with its file, line, action, commit and version comment.
 function pins() {
-  const found: { file: string; line: number; action: string; commit: string; version: string | null }[] = [];
-  for (const file of WORKFLOWS) {
-    readFileSync(path.join(ROOT, file), 'utf8').split('\n').forEach((line, index) => {
-      const match = line.match(/uses:\s+([\w.-]+\/[\w.-]+)@(\S+)(?:\s+#\s+(\S+))?/);
-      if (!match) return;
-      const [, action, commit, version] = match;
-      if (action === undefined || commit === undefined) throw new Error(`${file}:${index + 1}: the uses line names no action and commit`);
-      found.push({ file, line: index + 1, action, commit, version: version ?? null });
-    });
-  }
-  return found;
+  return WORKFLOWS.flatMap(pinsOf).map(pin => {
+    const at = pin.uses.indexOf('@');
+    if (at <= 0) throw new Error(`${pin.file}:${pin.line}: ${pin.uses} names no action and commit`);
+    return { file: pin.file, line: pin.line, action: pin.uses.slice(0, at), commit: pin.uses.slice(at + 1), version: pin.comment };
+  });
 }
 
 test('every action pin names a commit that GitHub holds for its version', () => {

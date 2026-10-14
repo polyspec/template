@@ -23,6 +23,7 @@ import { copyFileSync, existsSync, readdirSync, readFileSync, renameSync, rmSync
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { jsonDocument } from './json-document.mts';
 import { publishBuild } from './publish-build.mts';
 import { temporaryDirectory } from './temporary-workspace.mts';
 import { runStepSync } from './test-progress/step.mts';
@@ -114,13 +115,20 @@ function extensionName(source: string): string {
   return match;
 }
 
+/** The record `<destination>.inputs.json` of the build that published the library: the hash of its inputs. */
+const buildRecordDocument = jsonDocument<{ hash: string }>('build record', {
+  type: 'object',
+  required: ['hash'],
+  properties: { hash: { type: 'string' } },
+});
+
 /** Builds the extension of `source` into `destination` when its inputs changed. */
 export function buildExtension(source: string, destination: string): boolean {
   checkArginfo(source);
   const identity = phpIdentity();
   const hash = inputsHash(source, identity);
   const stamp = `${destination}.inputs.json`;
-  if (existsSync(destination) && existsSync(stamp) && (JSON.parse(readFileSync(stamp, 'utf8')) as { hash?: string }).hash === hash) {
+  if (existsSync(destination) && existsSync(stamp) && buildRecordDocument.read(stamp).hash === hash) {
     console.log(`build-php-extension: ${destination} is current with ${source} for PHP ${identity.version}`);
     return false;
   }

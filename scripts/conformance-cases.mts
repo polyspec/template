@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runs the conformance of the given cases only, in every mode: the AST conformance of every language and the
-// generated conformance of TypeScript, Go, Rust and PHP (T13.1-4). It is the owner check of a change under
+// generated conformance of every language that generates code (T13.1-4). It is the owner check of a change under
 // tests/cases; `make conformance-all-modes` runs every case in the full suite. Each path names a file or the
 // directory of a case, tests/cases/<group>/<name>[/...]; a case whose directory no longer exists was removed and has
 // nothing to run. Each runner runs to its end, prints its result and elapsed time, and has no time limit of its own
@@ -11,14 +11,15 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { profileImplementations } from './parity-config.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+// The AST runner over every implementation, and the generated runner of each implementation of the profile manifest of
+// config/parity.json, the implementations with the generated-compiler level of packages/compiler/interface.json (the PHP
+// extension renders and generates nothing).
 export const RUNNERS = [
   'tests/runner/conformance.mts',
-  'tests/runner/conformance-generated-ts.mts',
-  'tests/runner/conformance-generated-go.mts',
-  'tests/runner/conformance-generated-rust.mts',
-  'tests/runner/conformance-generated-php.mts',
+  ...profileImplementations('manifest').map(name => `tests/runner/conformance-generated-${name}.mts`),
 ];
 
 /** The case ids of the paths, in order and without repetition; a path outside a case directory is an error. */

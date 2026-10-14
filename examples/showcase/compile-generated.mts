@@ -6,32 +6,32 @@ import { transformSync } from 'esbuild';
 import { root } from '../../tests/runner/drivers.mts';
 import { compileFiles, compileSource } from '../../packages/compiler/compiler.mjs';
 import { generatedCompilerDigest } from '../../packages/compiler/compiler-digest.mjs';
-import { typescriptDeliveryDigest } from './delivery-digest.mjs';
+import { typescriptDeliveryDigest } from './delivery-digest.mts';
 import { compileGeneratedArtifact } from '../../packages/compiler/generated-artifact.mjs';
-import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mjs';
-import { showcasePythonModule } from './python-module.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mts';
+import { showcasePythonModule } from './python-module.mts';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
 const adapterRoot = join(root, 'examples/showcase/adapters');
 const argv = process.argv.slice(2);
 const refreshAt = argv.indexOf('--refresh');
 const check = argv.includes('--check');
-if (refreshAt < 0 || !argv[refreshAt + 1] || argv.some((value, index) => index !== refreshAt && index !== refreshAt + 1 && value !== '--check')) {
-  throw new Error('usage: compile-generated.mjs --refresh dev|true|false [--check]');
-}
 const refresh = argv[refreshAt + 1];
+if (refreshAt < 0 || refresh === undefined || argv.some((value, index) => index !== refreshAt && index !== refreshAt + 1 && value !== '--check')) {
+  throw new Error('usage: compile-generated.mts --refresh dev|true|false [--check]');
+}
 const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
   .filter(item => item.isDirectory() && existsSync(join(scenariosRoot, item.name, 'scenario.json')))
   .map(item => item.name)
   .sort();
 
-export function generatedOutput(id, language) {
+/** The generated artifact of a scenario in a target: a file, or the directory of the PHP files. */
+function generatedOutput(id: string, language: string): string {
   if (language === 'go') return join(adapterRoot, 'go/generated', id, 'generated.go');
   if (language === 'js') return join(adapterRoot, 'generated/javascript', `${id}.js`);
   if (language === 'php') return join(root, showcasePhpDirectory(id));
   if (language === 'python') return join(adapterRoot, 'generated/typed', `${showcasePythonModule(id)}.py`);
-  const extension = { rust: 'rust' }[language] ?? language;
-  return join(adapterRoot, 'generated/typed', `${id}.${extension}`);
+  return join(adapterRoot, 'generated/typed', `${id}.${language}`);
 }
 
 for (const id of scenarios) {
