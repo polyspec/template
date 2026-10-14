@@ -34,8 +34,16 @@ final class NativeAnalyzer implements Analyzer
     /**
      * The error of the extension as the error type that the formatter reads; the fields are the same (ERR-1).
      */
-    private static function packageError(TemplateError $error): PackageTemplateError
+    public static function packageError(TemplateError $error): PackageTemplateError
     {
-        return new PackageTemplateError($error->getErrorCode(), $error->getTemplate(), $error->getErrorLine(), $error->getErrorCol(), $error->getOffset(), $error->getEnd(), $error->getMessage());
+        return new PackageTemplateError(
+            $error->getErrorCode(),
+            $error->getTemplate(),
+            $error->getErrorLine(),
+            $error->getErrorCol(),
+            $error->getOffset(),
+            $error->getEnd(),
+            $error->getMessage(),
+        );
     }
 }
