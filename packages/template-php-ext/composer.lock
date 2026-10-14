@@ -4,8 +4,55 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d033659595e6371b924d71a0ca28fb0",
-    "packages": [],
+    "content-hash": "37c65ba416209c231b734b66e4b6fadd",
+    "packages": [
+        {
+            "name": "polyspec/template",
+            "version": "0.0.6",
+            "dist": {
+                "type": "path",
+                "url": "../template-php",
+                "reference": "5bbc46612248c42db81f63aa43dd379a98986722"
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": ">=8.5"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "phpunit/phpunit": "^11.5"
+            },
+            "bin": [
+                "bin/template.php"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Polyspec\\Template\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Polyspec\\Template\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "lint": [
+                    "pint --test"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Template language implementation: lexer, parser, renderer, functions and CLI",
+            "transport-options": {
+                "relative": true
+            }
+        }
+    ],
     "packages-dev": [
         {
             "name": "myclabs/deep-copy",

@@ -78,7 +78,10 @@ php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/te
 php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 이 패키지의 개발용 오토로더로 불러온 PHP 패키지(`packages/template-php`)의 포매터를 네이티브 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
+`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 PHP 패키지의 포매터를 네이티브 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
+
+이 패키지는 포매터를 가진 PHP 패키지 `polyspec/template`을 같은 버전으로 요구하므로(`composer.json`의 `require`) `composer install --no-dev` 뒤에도 `format`이 실행된다. 릴리스는 그것을 버전으로만 적고 `repositories`를 선언하지 않는다(`docs/operations/publication.md`). 이 저장소에서는 `composer.lock`이 그것을 `path` 소스 `../template-php`로 해석하므로 `composer install`이 체크아웃의 패키지를 링크한다. Composer는 `path` 저장소를 `composer.json`이 아니라 `COMPOSER_HOME`의 설정에서 받아 그 lock을 쓴다. 디렉터리 `DIR`에 `{"repositories": [{"type": "path", "url": "../template-php"}]}`의 `config.json`을 두고 이 디렉터리에서 `COMPOSER_HOME=DIR composer update polyspec/template`을 실행하면 갱신된다.
+
 ## 테스트
 
 ```sh
