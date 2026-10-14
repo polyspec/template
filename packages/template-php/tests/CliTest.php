@@ -36,7 +36,7 @@ final class CliTest extends TestCase
 
     public function testRenderAndErrorExitStatus(): void
     {
-        $rendered = self::runCli(['render', Support::casesDir() . '/echo/path/input.tpl', '--data', 'data.json']);
+        $rendered = self::runCli(['render', '--data', 'data.json', Support::casesDir() . '/echo/path/input.tpl']);
         self::assertSame(0, $rendered['status']);
         $failed = self::runCli(['render', Support::casesDir() . '/errors/unclosed-block/input.tpl']);
         self::assertSame(2, $failed['status']);
@@ -46,7 +46,7 @@ final class CliTest extends TestCase
     public function testTokensPrintsTheTokensWithByteOffsets(): void
     {
         $dir = Support::casesDir() . '/echo/path';
-        $result = self::runCli(['tokens', "{$dir}/input.tpl", '--root', $dir]);
+        $result = self::runCli(['tokens', '--root', $dir, "{$dir}/input.tpl"]);
         self::assertSame(0, $result['status'], $result['stderr']);
         self::assertSame(Support::readJson("{$dir}/expected.tokens.json"), Support::json($result['stdout']));
         $failed = self::runCli(['tokens', Support::casesDir() . '/errors/unclosed-block/input.tpl']);
@@ -61,11 +61,11 @@ final class CliTest extends TestCase
         file_put_contents($file, "<ul>\n<li>{=a}</li>\n</ul>");
         try {
             self::assertSame(['status' => 0, 'stdout' => "<ul>\n  <li>{= a}</li>\n</ul>", 'stderr' => ''], self::runCli(['format', $file]));
-            self::assertSame("<ul>\n\t<li>{= a}</li>\n</ul>", self::runCli(['format', $file, '--indent', 'tab'])['stdout']);
-            self::assertSame("<ul>\n    <li>{= a}</li>\n</ul>", self::runCli(['format', $file, '--indent', '4'])['stdout']);
-            self::assertSame("<ul>\n<li>{= a}</li>\n</ul>", self::runCli(['format', $file, '--indent', 'none'])['stdout']);
+            self::assertSame("<ul>\n\t<li>{= a}</li>\n</ul>", self::runCli(['format', '--indent', 'tab', $file])['stdout']);
+            self::assertSame("<ul>\n    <li>{= a}</li>\n</ul>", self::runCli(['format', '--indent', '4', $file])['stdout']);
+            self::assertSame("<ul>\n<li>{= a}</li>\n</ul>", self::runCli(['format', '--indent', 'none', $file])['stdout']);
             file_put_contents($file, '[= a+1]');
-            self::assertSame('[= a + 1]', self::runCli(['format', $file, '--delimiters', '[]'])['stdout']);
+            self::assertSame('[= a + 1]', self::runCli(['format', '--delimiters', '[]', $file])['stdout']);
             file_put_contents($file, "<p>\n  {? a}\n</p>");
             $failed = self::runCli(['format', $file]);
             self::assertSame(2, $failed['status']);
@@ -73,8 +73,8 @@ final class CliTest extends TestCase
             self::assertIsArray($error);
             self::assertSame(['reason', 'code', 'line', 'col', 'message'], array_keys($error));
             self::assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error['reason'], $error['code'], $error['line'], $error['col']]);
-            self::assertSame(1, self::runCli(['format', $file, '--indent', '9'])['status']);
-            self::assertSame(1, self::runCli(['format', $file, '--root', '/'])['status']);
+            self::assertSame(1, self::runCli(['format', '--indent', '9', $file])['status']);
+            self::assertSame(1, self::runCli(['format', '--root', '/', $file])['status']);
         } finally {
             unlink($file);
         }
@@ -83,6 +83,6 @@ final class CliTest extends TestCase
     public function testUsageErrors(): void
     {
         self::assertSame(1, self::runCli(['parse'])['status']);
-        self::assertSame(1, self::runCli(['render', 'x.tpl', '--unknown', '1'])['status']);
+        self::assertSame(1, self::runCli(['render', '--unknown', '1', 'x.tpl'])['status']);
     }
 }

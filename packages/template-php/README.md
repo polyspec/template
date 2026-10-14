@@ -63,13 +63,16 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 ## Command line
 
 ```sh
-php bin/template.php parse FILE [--root DIR] [--delimiters OC]
-php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
-php bin/template.php tokens FILE [--root DIR] [--delimiters OC]
-php bin/template.php format FILE [--indent none|tab|N] [--delimiters OC]
+php bin/template.php parse [--root DIR] [--delimiters OC] FILE
+php bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+php bin/template.php tokens [--root DIR] [--delimiters OC] FILE
+php bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
 `parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. `format` prints the formatted text without adding a newline (indent unit `N` spaces from 1 to 8, `tab`, or `none` to keep every line's indentation; two spaces by default); a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
+
+The command is a Symfony Console application (`Polyspec\Template\Cli\CommandLine`, the runtime dependency `symfony/console`), so the options come before FILE, an option takes its value as `--name value` or `--name=value`, and a usage error prints the usage of the command and exits with status 1. The PHP extension runs the same commands over its native engine.
+
 ## Development
 
 ```sh

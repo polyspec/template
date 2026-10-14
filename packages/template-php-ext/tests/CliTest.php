@@ -57,7 +57,7 @@ final class CliTest extends TestCase
     public function testTokensPrintsTheTokensWithByteOffsets(): void
     {
         $directory = Support::casesDirectory() . '/echo/path';
-        $result = $this->invoke(['tokens', $directory . '/input.tpl', '--root', $directory]);
+        $result = $this->invoke(['tokens', '--root', $directory, $directory . '/input.tpl']);
         $this->assertSame(0, $result['status'], $result['stderr']);
         $this->assertSame(Support::readJson($directory . '/expected.tokens.json'), Support::json($result['stdout']));
         $failed = $this->invoke(['tokens', Support::casesDirectory() . '/errors/unclosed-block/input.tpl']);
@@ -72,14 +72,14 @@ final class CliTest extends TestCase
         file_put_contents($file, "<ul>\n<li>{=a}</li>\n</ul>");
         try {
             $this->assertSame(['status' => 0, 'stdout' => "<ul>\n  <li>{= a}</li>\n</ul>", 'stderr' => ''], $this->invoke(['format', $file]));
-            $this->assertSame("<ul>\n<li>{= a}</li>\n</ul>", $this->invoke(['format', $file, '--indent', 'none'])['stdout']);
+            $this->assertSame("<ul>\n<li>{= a}</li>\n</ul>", $this->invoke(['format', '--indent', 'none', $file])['stdout']);
             file_put_contents($file, "<p>\n  {? a}\n</p>");
             $failed = $this->invoke(['format', $file]);
             $this->assertSame(2, $failed['status']);
             $error = Support::json($failed['stderr']);
             $this->assertIsArray($error);
             $this->assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error['reason'], $error['code'], $error['line'], $error['col']]);
-            $this->assertSame(1, $this->invoke(['format', $file, '--indent', 'x'])['status']);
+            $this->assertSame(1, $this->invoke(['format', '--indent', 'x', $file])['status']);
         } finally {
             unlink($file);
         }
@@ -88,6 +88,6 @@ final class CliTest extends TestCase
     public function testUsageErrorExitsWithStatusOne(): void
     {
         $this->assertSame(1, $this->invoke(['parse'])['status']);
-        $this->assertSame(1, $this->invoke(['render', __DIR__ . '/templates/echo.tpl', '--unknown', '1'])['status']);
+        $this->assertSame(1, $this->invoke(['render', '--unknown', '1', __DIR__ . '/templates/echo.tpl'])['status']);
     }
 }

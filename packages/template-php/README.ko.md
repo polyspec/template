@@ -64,13 +64,16 @@ $json = Ast::toJson($ast);
 ## 명령줄
 
 ```sh
-php bin/template.php parse FILE [--root DIR] [--delimiters OC]
-php bin/template.php render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
-php bin/template.php tokens FILE [--root DIR] [--delimiters OC]
-php bin/template.php format FILE [--indent none|tab|N] [--delimiters OC]
+php bin/template.php parse [--root DIR] [--delimiters OC] FILE
+php bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+php bin/template.php tokens [--root DIR] [--delimiters OC] FILE
+php bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 포맷된 텍스트를 줄바꿈을 덧붙이지 않고 출력한다(들여쓰기 단위는 공백 `N`칸(1~8), `tab`, 또는 모든 줄의 들여쓰기를 유지하는 `none`이며 기본은 공백 두 칸). 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
+
+명령은 Symfony Console 애플리케이션(`Polyspec\Template\Cli\CommandLine`, 런타임 의존성 `symfony/console`)이므로 옵션은 FILE 앞에 오고, 옵션 값은 `--name value` 또는 `--name=value`로 주며, 사용법 오류는 명령의 사용법을 출력하고 상태 1로 종료한다. PHP 확장은 같은 명령을 네이티브 엔진 위에서 실행한다.
+
 ## 개발
 
 ```sh
