@@ -79,10 +79,10 @@ engine := template.NewEngine(program)
 
 ```sh
 go build -o template ./cmd/template
-./template parse FILE [--root DIR] [--delimiters OC]
-./template tokens FILE [--root DIR] [--delimiters OC]
-./template format FILE [--indent none|tab|N] [--delimiters OC]
-./template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+./template parse [--root DIR] [--delimiters OC] FILE
+./template tokens [--root DIR] [--delimiters OC] FILE
+./template format [--indent none|tab|N] [--delimiters OC] FILE
+./template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
 ```
 
 `parse` prints the AST JSON. `tokens` prints the tokens as `[start, end, type]` triples. `format` prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
