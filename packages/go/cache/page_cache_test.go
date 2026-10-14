@@ -45,3 +45,26 @@ func TestPageCacheGetOrSetSkipsRendererOnHit(t *testing.T) {
 		t.Fatalf("calls = %d, want 1", calls)
 	}
 }
+
+// TestPageCacheDeleteAndClear: Delete removes one entry and Clear every entry.
+func TestPageCacheDeleteAndClear(t *testing.T) {
+	cache := NewPageCache(func() time.Time { return time.Unix(100, 0) })
+	for _, key := range []string{"a", "b", "c"} {
+		if err := cache.Set(key, key, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cache.Delete("a")
+	if _, ok := cache.Get("a"); ok {
+		t.Error("a remained after Delete")
+	}
+	if value, ok := cache.Get("b"); !ok || value != "b" {
+		t.Error("Delete removed another entry")
+	}
+	cache.Clear()
+	for _, key := range []string{"b", "c"} {
+		if _, ok := cache.Get(key); ok {
+			t.Errorf("%s remained after Clear", key)
+		}
+	}
+}

@@ -22,26 +22,6 @@ func readIf(path string) []byte {
 	return data
 }
 
-func plainJSON(v value.Value) any {
-	switch x := v.(type) {
-	case value.SafeString:
-		return x.Text
-	case value.List:
-		out := make([]any, len(x))
-		for i, item := range x {
-			out[i] = plainJSON(item)
-		}
-		return out
-	case *value.OrderedMap:
-		out := map[string]any{}
-		for _, k := range x.Keys() {
-			out[k] = plainJSON(x.MustGet(k))
-		}
-		return out
-	}
-	return v
-}
-
 func errorFields(err error) map[string]any {
 	var te *errs.Error
 	if errors.As(err, &te) {

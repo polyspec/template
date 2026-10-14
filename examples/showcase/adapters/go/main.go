@@ -249,12 +249,7 @@ func (a *Adapter) BuildRequest(scenario Scenario) (RenderRequest, error) {
 	if scenario.Target == "" {
 		return RenderRequest{}, fmt.Errorf("scenario target is empty")
 	}
-	return RenderRequest{
-		Target: scenario.Target,
-		Assign: scenario.Assign,
-		Define: scenario.Define,
-		Env:    scenario.Env,
-	}, nil
+	return RenderRequest(scenario), nil
 }
 
 func nativeDefines(defines DefineRegistry) map[string]template.DefineInput {

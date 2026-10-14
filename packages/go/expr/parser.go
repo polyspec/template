@@ -44,6 +44,9 @@ func (p *Parser) Peek() (*Token, error) { return p.lexer.Peek() }
 // Next consumes the next token.
 func (p *Parser) Next() (*Token, error) { return p.lexer.Next() }
 
+// Consume consumes the token that the last Peek returned (Lexer.Consume).
+func (p *Parser) Consume() { p.lexer.Consume() }
+
 // Unexpected creates the error for a token the grammar does not accept.
 func (p *Parser) Unexpected(tok *Token) error {
 	if p.options.OpenIndex >= 0 && p.options.Close != "" {
@@ -76,7 +79,7 @@ func (p *Parser) ExpectClose() (int, error) {
 		return 0, err
 	}
 	if tok.Type == "CLOSE" {
-		p.Next()
+		p.Consume()
 		return tok.End, nil
 	}
 	if tok.Type == "EOF" {
@@ -91,7 +94,7 @@ func (p *Parser) ExpectClose() (int, error) {
 		if part.Value != p.options.Close || (k > 0 && part.Start != end) {
 			return 0, p.Unexpected(part)
 		}
-		p.Next()
+		p.Consume()
 		end = part.End
 	}
 	return end, nil
@@ -143,7 +146,7 @@ func (p *Parser) ParseExpression() (ast.Expr, error) {
 		if typ != "PIPE" {
 			return left, nil
 		}
-		p.Next()
+		p.Consume()
 		name, err := p.Expect("IDENT")
 		if err != nil {
 			return nil, err
@@ -153,7 +156,7 @@ func (p *Parser) ParseExpression() (ast.Expr, error) {
 		if typ, _, err := p.peekType(); err != nil {
 			return nil, err
 		} else if typ == "LPAREN" {
-			p.Next()
+			p.Consume()
 			if args, err = p.parseArguments(args); err != nil {
 				return nil, err
 			}
@@ -182,7 +185,7 @@ func (p *Parser) parseTernary() (ast.Expr, error) {
 	}
 	switch typ {
 	case "QUESTION":
-		p.Next()
+		p.Consume()
 		then, err := p.parseTernary()
 		if err != nil {
 			return nil, err
@@ -196,7 +199,7 @@ func (p *Parser) parseTernary() (ast.Expr, error) {
 		}
 		return &ast.Ternary{Type: "Ternary", Test: test, Then: then, Else: otherwise, Span: p.span(start, p.End())}, nil
 	case "ELVIS":
-		p.Next()
+		p.Consume()
 		otherwise, err := p.parseTernary()
 		if err != nil {
 			return nil, err
@@ -256,7 +259,7 @@ func (p *Parser) parseLeftAssoc(next func() (ast.Expr, error), ops map[TokenType
 		if !ok {
 			return left, nil
 		}
-		p.Next()
+		p.Consume()
 		right, err := next()
 		if err != nil {
 			return nil, err
@@ -282,7 +285,7 @@ func (p *Parser) parseNonAssoc(next func() (ast.Expr, error), ops map[TokenType]
 	if !ok {
 		return left, nil
 	}
-	p.Next()
+	p.Consume()
 	right, err := next()
 	if err != nil {
 		return nil, err
@@ -328,7 +331,7 @@ func (p *Parser) parseUnary() (ast.Expr, error) {
 		return nil, err
 	}
 	if tok.Type == "BANG" || tok.Type == "MINUS" {
-		p.Next()
+		p.Consume()
 		if err := p.enter(); err != nil {
 			return nil, err
 		}
@@ -359,14 +362,14 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 	start := first.Start
 	var node ast.Expr
 	if first.Type == "IDENT" {
-		p.Next()
+		p.Consume()
 		after, err := p.Peek()
 		if err != nil {
 			return nil, err
 		}
 		switch {
 		case after.Type == "DOUBLE_COLON":
-			p.Next()
+			p.Consume()
 			method, err := p.Expect("IDENT")
 			if err != nil {
 				return nil, err
@@ -384,7 +387,7 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 			}
 			node = &ast.ClassCall{Type: "ClassCall", ClassName: first.Value, Method: method.Value, Args: args, Span: p.span(start, close.End)}
 		case after.Type == "LPAREN" && (!adjacentOnly || after.Start == first.End):
-			p.Next()
+			p.Consume()
 			args, err := p.parseArguments(nil)
 			if err != nil {
 				return nil, err
@@ -395,7 +398,7 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 			}
 			node = &ast.Call{Type: "Call", Name: first.Value, Args: args, Span: p.span(start, close.End)}
 		case after.Type == "DOT_IDENT" && ast.LoopMetaFields[after.Value[1:]]:
-			p.Next()
+			p.Consume()
 			node = &ast.LoopMeta{Type: "LoopMeta", Loop: first.Value, Field: after.Value[1:], Span: p.span(start, after.End)}
 		default:
 			node = &ast.Var{Type: "Var", Name: first.Value, Span: p.span(start, first.End)}
@@ -416,14 +419,14 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 		}
 		switch tok.Type {
 		case "DOT_IDENT", "DOT_INDEX":
-			p.Next()
+			p.Consume()
 			method := tok.Value[1:]
 			next, peekErr := p.Peek()
 			if peekErr != nil {
 				return nil, peekErr
 			}
 			if next.Type == "LPAREN" && (!adjacentOnly || next.Start == tok.End) {
-				p.Next()
+				p.Consume()
 				args, err := p.parseArguments(nil)
 				if err != nil {
 					return nil, err
@@ -437,7 +440,7 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 				node = &ast.Member{Type: "Member", Object: node, Key: method, Span: p.span(start, tok.End)}
 			}
 		case "LBRACKET":
-			p.Next()
+			p.Consume()
 			index, err := p.ParseExpression()
 			if err != nil {
 				return nil, err
@@ -462,20 +465,20 @@ func (p *Parser) parsePrimary() (ast.Expr, error) {
 	}
 	switch tok.Type {
 	case "NULL":
-		p.Next()
+		p.Consume()
 		return &ast.Literal{Type: "Literal", Kind: "null", Value: nil, Span: p.span(tok.Start, tok.End)}, nil
 	case "TRUE", "FALSE":
-		p.Next()
+		p.Consume()
 		return &ast.Literal{Type: "Literal", Kind: "bool", Value: tok.Type == "TRUE", Span: p.span(tok.Start, tok.End)}, nil
 	case "NUMBER":
-		p.Next()
+		p.Consume()
 		f, _ := strconv.ParseFloat(tok.Value, 64)
 		return &ast.Literal{Type: "Literal", Kind: "number", Value: f, Span: p.span(tok.Start, tok.End)}, nil
 	case "STRING":
-		p.Next()
+		p.Consume()
 		return &ast.Literal{Type: "Literal", Kind: "string", Value: tok.Decoded, Span: p.span(tok.Start, tok.End)}, nil
 	case "LPAREN":
-		p.Next()
+		p.Consume()
 		inner, err := p.ParseExpression()
 		if err != nil {
 			return nil, err
@@ -509,7 +512,7 @@ func (p *Parser) parseBracket() (ast.Expr, error) {
 			break
 		}
 		if tok.Type == "SPREAD" {
-			p.Next()
+			p.Consume()
 			expr, err := p.ParseExpression()
 			if err != nil {
 				return nil, err
@@ -525,7 +528,7 @@ func (p *Parser) parseBracket() (ast.Expr, error) {
 				return nil, err
 			}
 			if typ == "ARROW" {
-				p.Next()
+				p.Consume()
 				arrows++
 				value, err := p.ParseExpression()
 				if err != nil {
@@ -541,7 +544,7 @@ func (p *Parser) parseBracket() (ast.Expr, error) {
 			return nil, err
 		}
 		if tok.Type == "COMMA" {
-			p.Next()
+			p.Consume()
 			continue
 		}
 		if tok.Type != "RBRACKET" {
@@ -598,7 +601,7 @@ func (p *Parser) parseArguments(args []ast.Expr) ([]ast.Expr, error) {
 			return nil, err
 		}
 		if tok.Type == "COMMA" {
-			p.Next()
+			p.Consume()
 			continue
 		}
 		if tok.Type != "RPAREN" {

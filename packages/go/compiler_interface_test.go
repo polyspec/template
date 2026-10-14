@@ -4,10 +4,11 @@ package template_test
 import (
 	"encoding/json"
 	"go/ast"
+	"go/build"
 	"go/parser"
 	"go/token"
-	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -345,9 +346,20 @@ func TestBoundMapInterface(t *testing.T) {
 	for _, name := range mapping.GeneratedOperations {
 		allowed[strings.TrimPrefix(name, "value.")] = true
 	}
-	packages, err := parser.ParseDir(token.NewFileSet(), "value", func(info fs.FileInfo) bool { return !strings.HasSuffix(info.Name(), "_test.go") }, 0)
+	// The Go files of the package value that a build of this platform compiles, as go/build selects them; their tests
+	// are no files of the package.
+	valuePackage, err := build.ImportDir("value", 0)
 	if err != nil {
 		t.Fatal(err)
+	}
+	fileSet := token.NewFileSet()
+	var valueFiles []*ast.File
+	for _, name := range valuePackage.GoFiles {
+		file, err := parser.ParseFile(fileSet, filepath.Join("value", name), nil, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		valueFiles = append(valueFiles, file)
 	}
 	mentions := func(fields *ast.FieldList) bool {
 		found := false
@@ -363,7 +375,7 @@ func TestBoundMapInterface(t *testing.T) {
 		return found
 	}
 	found := map[string]bool{}
-	for _, file := range packages["value"].Files {
+	for _, file := range valueFiles {
 		for _, declaration := range file.Decls {
 			switch current := declaration.(type) {
 			case *ast.GenDecl:

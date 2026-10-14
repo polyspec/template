@@ -116,12 +116,13 @@ func words(text string) []string {
 		c := text[index]
 		if quote != 0 {
 			current.WriteByte(c)
-			if c == '\\' {
+			switch c {
+			case '\\':
 				if index+1 < len(text) {
 					current.WriteByte(text[index+1])
 				}
 				index++
-			} else if c == quote {
+			case quote:
 				quote = 0
 			}
 			continue

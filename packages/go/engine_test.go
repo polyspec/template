@@ -27,6 +27,23 @@ func TestEngineRender(t *testing.T) {
 	}
 }
 
+// TestEnginePrepare: the prepared render of an engine renders the same bytes on every call (RT-62).
+func TestEnginePrepare(t *testing.T) {
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": "<b>{= x}</b>"})})
+	if err != nil {
+		t.Fatal(err)
+	}
+	prepared, err := template.NewEngine(program).Prepare("a.tpl", map[string]any{"x": "<"}, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 2 {
+		if out, err := prepared.Render(); err != nil || out != "<b>&lt;</b>" {
+			t.Fatalf("prepared render: %q %v", out, err)
+		}
+	}
+}
+
 func TestArtifactRefreshPolicies(t *testing.T) {
 	devLoader := template.NewMapLoader(map[string]string{"a.tpl": "1"})
 	devProgram, err := template.NewAstProgram(template.Options{Loader: devLoader, ArtifactRefresh: render.ArtifactRefreshDev})

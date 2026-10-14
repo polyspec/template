@@ -5,7 +5,6 @@ import (
 	"math"
 	"reflect"
 	"sort"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/polyspec/template/packages/go/errs"
@@ -203,33 +202,6 @@ func bindSlice(rv reflect.Value, level int) (Value, error) {
 			return nil, err
 		}
 		out[i] = v
-	}
-	return out, nil
-}
-
-func bindStruct(rv reflect.Value) (Value, error) {
-	out := NewOrderedMap()
-	t := rv.Type()
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		if !field.IsExported() {
-			continue
-		}
-		name := field.Name
-		if tag, ok := field.Tag.Lookup("json"); ok {
-			tagName, _, _ := strings.Cut(tag, ",")
-			if tagName == "-" {
-				continue
-			}
-			if tagName != "" {
-				name = tagName
-			}
-		}
-		v, err := BindValue(rv.Field(i).Interface())
-		if err != nil {
-			return nil, err
-		}
-		out.Set(name, v)
 	}
 	return out, nil
 }

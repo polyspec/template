@@ -54,6 +54,11 @@ func nodes(data json.RawMessage) ([]Node, error) {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, err
 	}
+	// JSON null, the absent branch of a block (AST-3), stays nil, which encodes as null again; an empty list is an
+	// empty slice.
+	if raw == nil {
+		return nil, nil
+	}
 	result := make([]Node, 0, len(raw))
 	for _, item := range raw {
 		node, err := decodeNode(item)
@@ -443,9 +448,12 @@ func decodeExpr(data []byte) (Expr, error) {
 		if err != nil {
 			return nil, err
 		}
-		thenExpr, err := decodeExpr(thenRaw)
-		if err != nil {
-			return nil, err
+		// The elvis form a ?: b has no then branch, which the artifact writes as null.
+		var thenExpr Expr
+		if string(thenRaw) != "null" {
+			if thenExpr, err = decodeExpr(thenRaw); err != nil {
+				return nil, err
+			}
 		}
 		elseExpr, err := decodeExpr(elseRaw)
 		if err != nil {
