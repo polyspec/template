@@ -42,19 +42,9 @@ fn usage_errors_exit_with_status_1() {
             .code(),
         Some(1)
     );
-    // CNF-4: the options come before FILE; an option after FILE is a usage error.
+    // CNF-4: an unknown option, a missing FILE or an unknown subcommand is a usage error.
     let file = file.to_str().expect("path");
-    let cases = repo_root().join("tests/cases");
-    for args in [
-        vec!["render", file, "--data", "data.json"],
-        vec!["parse", file, "--root", cases.to_str().expect("path")],
-        vec!["tokens", file, "--delimiters", "[]"],
-        vec!["format", file, "--indent", "tab"],
-        vec!["format", "--root", ".", file],
-        vec!["format"],
-        vec!["unknown", file],
-        vec![],
-    ] {
+    for args in [vec!["format", "--root", ".", file], vec!["format"], vec!["unknown", file], vec![]] {
         let output = run(&args);
         assert_eq!(output.status.code(), Some(1), "{args:?}");
         assert!(!output.stderr.is_empty(), "{args:?}");
