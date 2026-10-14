@@ -41,14 +41,12 @@ export function astPresenceFailures(cases) {
 
 /**
  * The Ajv validators of schema/tokens.schema.json and schema/format.schema.json, which hold the shape of the token and
- * format files of CNF-2.
+ * format files of CNF-2, with the Ajv instance that describes their errors.
  */
 export function caseFileValidators(ajv, root) {
   const compile = name => ajv.compile(JSON.parse(readFileSync(join(root, 'schema', name), 'utf8')));
-  return { tokens: compile('tokens.schema.json'), format: compile('format.schema.json') };
+  return { ajv, tokens: compile('tokens.schema.json'), format: compile('format.schema.json') };
 }
-
-const describe = validate => validate.errors.map(error => `${error.instancePath || '/'} ${error.message}`).join('; ');
 
 // The first token of a schema-valid token array that is empty or starts before the end of the token before it: CNF-2
 // sorts the tokens and lets none overlap, which JSON Schema cannot express.
@@ -71,13 +69,13 @@ export function formatFileFailures(cases, validators) {
       if (!testCase.hasAst && value !== null) failures.push(`${testCase.id}: ${name} exists although the case has no expected.ast.json`);
     }
     if (testCase.tokens !== null) {
-      if (!validators.tokens(testCase.tokens)) failures.push(`${testCase.id}: expected.tokens.json: ${describe(validators.tokens)}`);
+      if (!validators.tokens(testCase.tokens)) failures.push(`${testCase.id}: expected.tokens.json: ${validators.ajv.errorsText(validators.tokens.errors)}`);
       else {
         const defect = orderDefect(testCase.tokens);
         if (defect) failures.push(`${testCase.id}: expected.tokens.json ${defect}`);
       }
     }
-    if (testCase.format !== null && !validators.format(testCase.format)) failures.push(`${testCase.id}: expected.format.json: ${describe(validators.format)}`);
+    if (testCase.format !== null && !validators.format(testCase.format)) failures.push(`${testCase.id}: expected.format.json: ${validators.ajv.errorsText(validators.format.errors)}`);
   }
   return failures;
 }

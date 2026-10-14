@@ -19,7 +19,7 @@ addFormats(ajv);
 
 for (const path of [schemaPath, 'schema/tokens.schema.json', 'schema/format.schema.json']) {
   if (ajv.validateSchema(JSON.parse(readFileSync(join(root, path), 'utf8')))) continue;
-  for (const error of ajv.errors) errors.push(`${path}: ${error.instancePath} ${error.message}`);
+  errors.push(`${path}: ${ajv.errorsText(ajv.errors)}`);
 }
 if (errors.length) report();
 
@@ -28,10 +28,6 @@ for (const failure of [...astPresenceFailures(cases), ...formatFileFailures(case
 
 const validateTemplate = ajv.compile(schema);
 const validateExpr = ajv.compile({ $ref: `${schema.$id}#/definitions/Expr` });
-
-function describe(validate) {
-  return (validate.errors ?? []).map(e => `${e.instancePath || '/'} ${e.message}`).join('; ');
-}
 
 function collectAstFiles(directory, files) {
   if (!existsSync(directory)) return files;
@@ -53,7 +49,7 @@ for (const path of astFiles) {
     errors.push(`${relative}: ${error.message}`);
     continue;
   }
-  if (!validateTemplate(ast)) errors.push(`${relative}: ${describe(validateTemplate)}`);
+  if (!validateTemplate(ast)) errors.push(`${relative}: ${ajv.errorsText(validateTemplate.errors)}`);
 }
 
 let exprCount = 0;
@@ -63,7 +59,7 @@ if (existsSync(exprPath)) {
   for (const item of cases) {
     if (item.ast === undefined) continue;
     exprCount += 1;
-    if (!validateExpr(item.ast)) errors.push(`tests/fixtures/expr/cases.json: ${item.name}: ${describe(validateExpr)}`);
+    if (!validateExpr(item.ast)) errors.push(`tests/fixtures/expr/cases.json: ${item.name}: ${ajv.errorsText(validateExpr.errors)}`);
   }
 }
 
