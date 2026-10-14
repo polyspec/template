@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-14T15:58:47.735Z",
+  "reviewed": "2026-10-14T17:45:27.781Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "f3815d51c7be7b4631da38a3b7ac3279591651a2a0790948a2c7fd080a38053e",
+      "sha256": "7bc6f02f0c4f93f7a6977bf75cb8a7b8cb8384ca5676fad0f1f31310f5a0e745",
       "advisories": [
         {
           "package": "sprintf-js",
@@ -42,48 +42,6 @@
     {
       "ecosystem": "npm",
       "manifest": "package.json",
-      "package": "@codemirror/commands",
-      "version": "6.11.1",
-      "latest": "6.11.1"
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
-      "package": "@codemirror/lang-html",
-      "version": "6.4.12",
-      "latest": "6.4.12"
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
-      "package": "@codemirror/language",
-      "version": "6.13.1",
-      "latest": "6.13.1"
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
-      "package": "@codemirror/lint",
-      "version": "6.9.7",
-      "latest": "6.9.7"
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
-      "package": "@codemirror/state",
-      "version": "6.7.6",
-      "latest": "6.7.6"
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
-      "package": "@codemirror/view",
-      "version": "6.43.14",
-      "latest": "6.43.14"
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
       "package": "@playwright/test",
       "version": "1.64.0",
       "latest": "1.64.1"
@@ -115,13 +73,6 @@
       "package": "@vscode/test-electron",
       "version": "3.1.0",
       "latest": "3.1.0"
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
-      "package": "@vscode/vsce",
-      "version": "4.0.0",
-      "latest": "4.0.0"
     },
     {
       "ecosystem": "npm",
@@ -209,6 +160,48 @@
     },
     {
       "ecosystem": "npm",
+      "manifest": "packages/codemirror/package.json",
+      "package": "@codemirror/commands",
+      "version": "6.11.1",
+      "latest": "6.11.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/codemirror/package.json",
+      "package": "@codemirror/lang-html",
+      "version": "6.4.12",
+      "latest": "6.4.12"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/codemirror/package.json",
+      "package": "@codemirror/language",
+      "version": "6.13.1",
+      "latest": "6.13.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/codemirror/package.json",
+      "package": "@codemirror/lint",
+      "version": "6.9.7",
+      "latest": "6.9.7"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/codemirror/package.json",
+      "package": "@codemirror/state",
+      "version": "6.7.6",
+      "latest": "6.7.6"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/codemirror/package.json",
+      "package": "@codemirror/view",
+      "version": "6.43.14",
+      "latest": "6.43.14"
+    },
+    {
+      "ecosystem": "npm",
       "manifest": "packages/lsp/package.json",
       "package": "vscode-languageserver",
       "version": "10.1.2",
@@ -227,6 +220,13 @@
       "package": "vscode-languageclient",
       "version": "10.1.2",
       "latest": "10.1.2"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "packages/vscode/package.json",
+      "package": "@vscode/vsce",
+      "version": "4.0.0",
+      "latest": "4.0.0"
     },
     {
       "ecosystem": "composer",

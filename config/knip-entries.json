@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "entries": {
+    "docs/.vitepress/config.mts": "The VitePress configuration of the documentation site: make docs runs vitepress build docs, which loads it.",
+    "examples/showcase/*.mts": "The builder of the example site: make showcase, showcase-compile, typed-generator, showcase-*-check and bench run these scripts by path.",
+    "examples/showcase/adapters/typescript.ts": "The TypeScript adapter of the showcase: scripts/check-showcase-contract.mts and examples/showcase/benchmark-modes.mts run it by path.",
+    "examples/showcase/adapters/javascript.mjs": "The JavaScript adapter of the showcase: scripts/check-showcase-contract.mts and examples/showcase/benchmark-modes.mts run it by path.",
+    "tests/runner/*.mts": "The cross-language runners: make conformance, conformance-generated-*, delimiter-matrix, function-contract-check and function-inventory-check run them by path.",
+    "tests/browser/{playwright.config.ts,server.mts}": "The browser test: tests/browser/run.mts (make test-browser) starts server.mts by path and Playwright, which reads playwright.config.ts.",
+    "examples/showcase/adapters/generated/**/*.{ts,mjs,js}": "The generated programs and contract declarations of the showcase: scripts/generate-showcase-contract.mts and the compiler write them, and their exports are the API that a host of a generated program imports, of which the showcase adapters use a part."
+  },
+  "binaries": {
+    "gmake": "GNU Make of Homebrew: tests/scripts/toolchain-files.test.mts runs the recipes with it where the make of the machine is the GNU Make 3.81 of macOS."
+  },
+  "workspaces": {
+    "packages/ts": {
+      "reason": "The npm package @polyspec/template, a workspace of the root package.json.",
+      "entries": {
+        "src/index.ts": "The main entry of the package, which tsup builds into dist/index.mjs (tsup.config.ts).",
+        "src/render.ts": "The entry @polyspec/template/render of the package, which tsup builds into dist/render.mjs (tsup.config.ts).",
+        "src/node/index.ts": "The entry @polyspec/template/node of the package, which tsup builds into dist/node.mjs (tsup.config.ts)."
+      }
+    },
+    "packages/codemirror": {
+      "reason": "The npm package @polyspec/template-codemirror, a workspace of the root package.json.",
+      "entries": {
+        "tests/browser/page.ts": "The page script of the browser test: tests/browser/setup.ts, the global setup of the Playwright configuration, bundles it by path with esbuild."
+      }
+    },
+    "packages/vscode": {
+      "reason": "The VS Code extension polyspec-template, a workspace of the root package.json.",
+      "entries": {
+        "src/extension.ts": "The entry of the extension: scripts/build-package.mts bundles it with esbuild into dist/extension.cjs, the main of package.json.",
+        "tests/integration/run.mjs": "make test-vscode-integration runs it by path.",
+        "tests/integration/suite/index.cjs": "tests/integration/run.mjs passes it to VS Code as --extensionTestsPath."
+      }
+    }
+  }
+}

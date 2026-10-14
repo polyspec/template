@@ -847,6 +847,7 @@
       "paths": [
         ".oxlintrc.json",
         "knip.json",
+        "config/knip-entries.json",
         "config/api-extractor.kit.json"
       ],
       "targets": [
