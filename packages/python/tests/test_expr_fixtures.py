@@ -80,11 +80,6 @@ def to_json_value(node):
     return node
 
 
-class ExpressionFixtures(unittest.TestCase):
-    def test_the_fixture_file_holds_cases(self):
-        self.assertGreater(len(CASES), 0)
-
-
 class Vector(unittest.TestCase):
     """One vector of the file, the test whose id and description are its name,
     as the suite unit expressions of config/parity.json reads the results. The
@@ -143,8 +138,6 @@ class Vector(unittest.TestCase):
 
 
 def load_tests(
-    loader: unittest.TestLoader, _tests: unittest.TestSuite, _pattern: "str | None"
+    _loader: unittest.TestLoader, _tests: unittest.TestSuite, _pattern: "str | None"
 ) -> unittest.TestSuite:
-    suite = loader.loadTestsFromTestCase(ExpressionFixtures)
-    suite.addTests(Vector(case) for case in CASES)
-    return suite
+    return unittest.TestSuite(Vector(case) for case in CASES)

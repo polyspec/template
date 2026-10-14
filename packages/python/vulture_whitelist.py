@@ -11,7 +11,6 @@ Functions
 ValuesAndErrors
 CommandLine
 CompilerInterface
-ExpressionFixtures
 JoinTokens
 Fixtures
 Format
