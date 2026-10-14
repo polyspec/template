@@ -4,7 +4,8 @@
 // resolves modules only from the proxy of the run, verifies no checksum against a database of the network and runs the
 // installed Go toolchain of the go directive of packages/template-go/go.mod; the Rust install project builds with the toolchain
 // of rust-toolchain.toml and a lock derived from packages/template-rust/Cargo.lock; the PHP install project reads only the
-// package of the run; the Python install project builds the wheel of the package with the build requirements of
+// archive of the run, by its own composer.json, and its locked dependencies from the Composer cache with the network
+// disabled; the Python install project builds the wheel of the package with the build requirements of
 // var/python/wheelhouse (scripts/python-wheelhouse.mjs), reads no index and installs only that wheel.
 // Each command is a step without a time limit that prints its start, its output and its result with
 // its elapsed time on standard error and is judged by its exit status.
@@ -127,18 +128,23 @@ fn main(){ let assign:serde_json::Value=serde_json::from_str(include_str!("../da
 }
 
 function checkPhp() {
-  run('composer', ['archive', '--format=zip', `--dir=${artifacts}`, '--file=polyspec-template'], { cwd: join(root, 'packages/template-php') });
-  const archive = join(artifacts, 'polyspec-template.zip');
+  const packageDirectory = join(root, 'packages/template-php');
+  const offline = { COMPOSER_DISABLE_NETWORK: '1' };
+  run('composer', ['archive', '--format=zip', `--dir=${artifacts}`, '--file=polyspec-template'], { cwd: packageDirectory, env: offline });
   const directory = join(temporary, 'php');
   mkdirSync(directory);
   stageScenario(directory);
   cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.php'), join(directory, 'generated.php'));
-  const dist = `file://${archive}`;
+  // The artifact repository reads the composer.json of the archive, so the install takes the require of the manifest
+  // itself. Its dependencies come from the Composer cache that make install filled, with the network disabled, at the
+  // versions of packages/template-php/composer.lock, which the install project requires exactly.
+  const manifest = JSON.parse(readFileSync(join(packageDirectory, 'composer.json'), 'utf8'));
+  const locked = JSON.parse(readFileSync(join(packageDirectory, 'composer.lock'), 'utf8')).packages.map(item => [item.name, item.version]);
   writeFileSync(join(directory, 'composer.json'), JSON.stringify({
-    repositories: [{ 'packagist.org': false }, { type: 'package', package: { name: 'polyspec/template', version: '0.0.1', dist: { url: dist, type: 'zip' }, autoload: { 'psr-4': { 'Polyspec\\Template\\': 'src/' } }, require: { php: '^8.2', 'ext-mbstring': '*' } } }],
-    require: { 'polyspec/template': '0.0.1' }, config: { 'allow-plugins': false },
+    repositories: [{ type: 'artifact', url: artifacts }],
+    require: { [manifest.name]: manifest.version, ...Object.fromEntries(locked) }, config: { 'allow-plugins': false },
   }));
-  run('composer', ['install', '--no-interaction', '--no-progress', '--prefer-dist'], { cwd: directory });
+  run('composer', ['install', '--no-interaction', '--no-progress', '--prefer-dist'], { cwd: directory, env: offline });
   writeFileSync(join(directory, 'check.php'), `<?php declare(strict_types=1);
 require __DIR__.'/vendor/autoload.php'; require __DIR__.'/generated.php';
 use Polyspec\\Template\\AstProgram; use Polyspec\\Template\\Engine; use Polyspec\\Template\\Loader\\FilesystemLoader; use Polyspec\\Template\\Value\\Json; use Polyspec\\Template\\Value\\MapValue;
