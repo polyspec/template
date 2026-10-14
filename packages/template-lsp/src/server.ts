@@ -1,5 +1,6 @@
 // Server: declares the capabilities of EDT-14 and answers every request from the analysis of the document version.
 import { TOKEN_TYPES } from '@polyspec/template-language';
+import { pathToFileURL } from 'node:url';
 import { TextDocuments, TextDocumentSyncKind, type Connection, type InitializeResult } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Analyses } from './documents.js';
@@ -13,7 +14,7 @@ import {
   type TagRangesParams,
   type TagRangesResult,
 } from './index.js';
-import { diagnosticsOf, foldingRangesOf, highlightsOf, matchingTagOf, semanticTokensOf, tagRangesOf } from './results.js';
+import { diagnosticsOf, protocolDiagnostics, foldingRangesOf, highlightsOf, matchingTagOf, semanticTokensOf, tagRangesOf } from './results.js';
 
 /** The characters that request typing indentation. */
 const TYPING_TRIGGERS = ['\n', '>', '}'] as const;
@@ -50,7 +51,13 @@ export function startServer(connection: Connection): void {
   });
 
   texts.onDidChangeContent(({ document: text }) => {
-    void connection.sendDiagnostics({ uri: text.uri, version: text.version, diagnostics: diagnosticsOf(text, analyses.of(text)) });
+    const document = analyses.of(text);
+    void connection.sendDiagnostics({ uri: text.uri, version: text.version, diagnostics: diagnosticsOf(text, document) });
+    // The marker of the document gets its own diagnostics, an empty list when it is valid (EDT-19).
+    if (document.root !== null) {
+      const uri = pathToFileURL(document.root.marker).href;
+      void connection.sendDiagnostics({ uri, diagnostics: protocolDiagnostics(TextDocument.create(uri, 'json', 0, document.root.text), document.root.diagnostics) });
+    }
   });
   texts.onDidClose(({ document: text }) => {
     analyses.delete(text.uri);

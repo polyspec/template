@@ -1,0 +1,160 @@
+{
+  "diagnostics": [
+    {
+      "start": 7,
+      "end": 28,
+      "code": "E_LOAD_NOT_FOUND"
+    },
+    {
+      "start": 29,
+      "end": 54,
+      "code": "E_LOAD_NOT_FOUND"
+    },
+    {
+      "start": 64,
+      "end": 82,
+      "code": "E_LOAD_OUTSIDE_ROOT"
+    }
+  ],
+  "tokens": [
+    [
+      7,
+      8,
+      "delimiter"
+    ],
+    [
+      8,
+      9,
+      "keyword"
+    ],
+    [
+      10,
+      27,
+      "path"
+    ],
+    [
+      27,
+      28,
+      "delimiter"
+    ],
+    [
+      29,
+      30,
+      "delimiter"
+    ],
+    [
+      30,
+      31,
+      "keyword"
+    ],
+    [
+      32,
+      36,
+      "path"
+    ],
+    [
+      37,
+      53,
+      "string"
+    ],
+    [
+      53,
+      54,
+      "delimiter"
+    ],
+    [
+      55,
+      56,
+      "delimiter"
+    ],
+    [
+      56,
+      57,
+      "keyword"
+    ],
+    [
+      58,
+      62,
+      "path"
+    ],
+    [
+      62,
+      63,
+      "delimiter"
+    ],
+    [
+      64,
+      65,
+      "delimiter"
+    ],
+    [
+      65,
+      66,
+      "keyword"
+    ],
+    [
+      67,
+      81,
+      "path"
+    ],
+    [
+      81,
+      82,
+      "delimiter"
+    ]
+  ],
+  "tags": [
+    [
+      7,
+      28
+    ],
+    [
+      29,
+      54
+    ],
+    [
+      55,
+      63
+    ],
+    [
+      64,
+      82
+    ]
+  ],
+  "foldingRanges": [],
+  "highlights": {},
+  "matchingTags": {
+    "0": null,
+    "7": null,
+    "28": null,
+    "29": null,
+    "54": null,
+    "55": null,
+    "63": null,
+    "64": null,
+    "82": null,
+    "83": null,
+    "91": null
+  },
+  "lineIndentation": {
+    "indent": [
+      "",
+      "  ",
+      "  ",
+      "  ",
+      "  ",
+      "",
+      ""
+    ],
+    "flat": [
+      "",
+      "  ",
+      "  ",
+      "  ",
+      "  ",
+      "",
+      ""
+    ]
+  },
+  "formatted": "<main>\n  {+ parts/missing.tpl}\n  {# side \"parts/side.tpl\"}\n  {# side}\n  {+ ../outside.tpl}\n</main>\n"
+}

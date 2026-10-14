@@ -86,3 +86,24 @@ describe('document field', () => {
     expect(changed.field(templateDocument).text).toBe(' <p>{= x}</p>');
   });
 });
+
+describe('template root', () => {
+  // A host of one directory /w with a marker and part.tpl.
+  const files: Record<string, string> = { '/w/template-root.json': '{"schema": 1}', '/w/part.tpl': 'x' };
+  const location = {
+    path: '/w/page.tpl',
+    host: {
+      entryType: (path: string) => (path in files ? ('file' as const) : path === '/' || path === '/w' ? ('directory' as const) : null),
+      readText: (path: string) => files[path] as string,
+    },
+  };
+
+  it('resolves include paths against the marker of the location option (EDT-16, EDT-20)', () => {
+    const diagnostics = templateDiagnostics(createState('{+ part.tpl}{+ missing.tpl}', { location }));
+    expect(diagnostics.map(item => [item.from, item.to, item.message])).toEqual([[12, 27, 'E_LOAD_NOT_FOUND: template missing.tpl does not exist']]);
+  });
+
+  it('reports every include path without the location option', () => {
+    expect(templateDiagnostics(createState('{+ part.tpl}')).map(item => item.message)).toEqual(['E_ROOT_UNDECLARED: no template root declared (template-root.json)']);
+  });
+});

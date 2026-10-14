@@ -3,12 +3,13 @@ import { StateField, type EditorState } from '@codemirror/state';
 import { openDocument, type DocumentOptions, type TemplateDocument } from '@polyspec/template-language';
 import { templateOptions } from './options.js';
 
-/** Opens a language service document for a text with the name and delimiters of the state's template options. */
+/** Opens a language service document for a text with the name, delimiters and location of the state's template options. */
 export function documentOf(state: EditorState, text: string): TemplateDocument {
-  const { name, delimiters } = state.facet(templateOptions);
+  const { name, delimiters, location } = state.facet(templateOptions);
   const options: DocumentOptions = {};
   if (name !== undefined) options.name = name;
   if (delimiters !== undefined) options.delimiters = delimiters;
+  if (location !== undefined) options.location = location;
   return openDocument(text, options);
 }
 

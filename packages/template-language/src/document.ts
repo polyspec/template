@@ -1,8 +1,9 @@
 // Language service document: one analysis of a template text and every editor result of EDT-4 to EDT-13.
-import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template';
+import { analyzePrefix, type SyntaxTag, type Template, type TemplateError } from '@polyspec/template';
 import { format, type FormatOptions, type FormatResult } from './format.js';
 import { lineIndentations } from './indent.js';
 import { indexOfByte } from './positions.js';
+import { findRoot, pathDiagnostics, type DocumentLocation, type TemplateRoot } from './root.js';
 import { constructAt, constructsOf, matchingTagOf, type Construct } from './structure.js';
 import type { Token } from './tokens.js';
 
@@ -12,9 +13,11 @@ export interface DocumentOptions {
   name?: string;
   /** Engine delimiter option as two characters (LEX-22). The default is `{}`. */
   delimiters?: string;
+  /** The file of the document and the host that reaches the files around it (EDT-18). Without it no root is declared. */
+  location?: DocumentLocation;
 }
 
-/** A parser error of the text (EDT-7). */
+/** A parser error of the text, a path diagnostic (EDT-7, EDT-20) or a marker diagnostic (EDT-19). */
 export interface Diagnostic {
   start: number;
   end: number;
@@ -56,8 +59,10 @@ const BOM = '﻿';
 
 /** One analysis of a template text and its editor results. Positions are UTF-16 string indexes into `text` (EDT-5). */
 export class TemplateDocument {
-  /** The parser error of the text, or nothing when the text parses (EDT-7). */
+  /** The parser error of a text that does not parse, otherwise the path diagnostics (EDT-7, EDT-20). */
   readonly diagnostics: readonly Diagnostic[];
+  /** The marker in the nearest ancestor of the document, or null when none declares a root (EDT-18). */
+  readonly root: TemplateRoot | null;
   /** Every accepted tag except comments (EDT-9). */
   readonly tags: readonly TagRange[];
   /** The highlight tokens of the accepted tags, sorted and not overlapping (EDT-8). */
@@ -73,7 +78,10 @@ export class TemplateDocument {
     const name = options.name ?? 'template.tpl';
     const analysis = analyzePrefix(source, name, options.delimiters === undefined ? {} : { delimiters: options.delimiters });
     this.accepted = analysis.tags.map(tag => ({ kind: tag.kind, start: tag.start + shift, end: tag.end + shift }));
-    this.diagnostics = analysis.error === null ? [] : [diagnosticOf(source, analysis.error, shift)];
+    this.root = options.location === undefined ? null : findRoot(options.location);
+    this.diagnostics = analysis.error !== null
+      ? [diagnosticOf(source, analysis.error, shift)]
+      : pathDiagnostics(analysis.ast as Template, options.location, this.root).map(item => rangeOf(source, item.span[0], item.span[1], item.code, item.message, shift));
     this.tags = this.accepted.filter(tag => tag.kind !== 'comment');
     this.tokens = analysis.tokens.map(token => ({ start: token.start + shift, end: token.end + shift, type: token.kind }));
     this.constructs = constructsOf(this.accepted);
@@ -156,8 +164,13 @@ export function openDocument(text: string, options: DocumentOptions = {}): Templ
 }
 
 function diagnosticOf(source: string, error: TemplateError, shift: number): Diagnostic {
-  const start = Math.min(indexOfByte(source, error.offset), source.length);
-  let end = Math.max(indexOfByte(source, error.end), start);
+  return rangeOf(source, error.offset, error.end, error.code, error.message, shift);
+}
+
+// A diagnostic over the string range of a byte range, at least one character long when the text has one.
+function rangeOf(source: string, offset: number, endOffset: number, code: string, message: string, shift: number): Diagnostic {
+  const start = Math.min(indexOfByte(source, offset), source.length);
+  let end = Math.max(indexOfByte(source, endOffset), start);
   if (end === start) end = Math.min(start + 1, source.length);
-  return { start: start + shift, end: Math.max(end, start) + shift, code: error.code, message: error.message, severity: 'error', source: 'polyspec-template' };
+  return { start: start + shift, end: Math.max(end, start) + shift, code, message, severity: 'error', source: 'polyspec-template' };
 }

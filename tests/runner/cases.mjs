@@ -44,7 +44,7 @@ export function listCases(filter) {
   return cases.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-export const filesystemCasesFile = join(root, 'tests', 'fixtures', 'filesystem', 'cases.json');
+const filesystemCasesFile = join(root, 'tests', 'fixtures', 'filesystem', 'cases.json');
 
 /**
  * Writes the file trees of the filesystem cases (CNF-16) into one new directory of the system temporary directory and

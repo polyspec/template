@@ -112,6 +112,7 @@ describe('prefix analysis', () => {
     expect(result.error).toBeNull();
     expect(result.tags).toEqual(analyze(source, 't.tpl').tags);
     expect(result.tokens).toEqual(analyze(source, 't.tpl').tokens);
+    expect(result.ast).toEqual(parse(source, 't.tpl'));
   });
 
   it('returns every tag of a source whose block is not closed, with the parser error', () => {
@@ -119,6 +120,7 @@ describe('prefix analysis', () => {
     const result = analyzePrefix(source, 't.tpl');
     expect(result.error).toBeInstanceOf(TemplateError);
     expect(result.error?.code).toBe('E_PARSE_UNCLOSED_BLOCK');
+    expect(result.ast).toBeNull();
     expect(kinds(source, result)).toEqual(['for {@ x = xs}', 'echo {= x}']);
     expect(result.tokens.map(token => source.slice(token.start, token.end))).toEqual(['{', '@', 'x', '=', 'xs', '}', '{', '=', 'x', '}']);
   });

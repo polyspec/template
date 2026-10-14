@@ -14,7 +14,7 @@ export { bindValue, bindMap, bindData, checkText, BindError } from './value/bind
 export { bind, merge } from './value/bound-operations.js';
 export type { BoundMap } from './value/bound.js';
 export { parseJson, parseJsonBytes } from './value/json.js';
-export { MapLoader, resolvePath, type Loader, type LoadResult } from './loader.js';
+export { MapLoader, PathError, resolvePath, type Loader, type LoadResult } from './loader.js';
 export type { ArtifactRefresh, EngineOptions, Program, RenderOptions, DefineInput } from './render/engine.js';
 export { Engine } from './render/engine.js';
 export { RuntimeEnvironment } from './render/runtime-environment.js';
