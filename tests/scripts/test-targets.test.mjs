@@ -37,11 +37,11 @@ for (const [target, runner] of [
 // that reads them. A target installs them first with build-php, so it passes on a checkout without vendor (T19.5).
 for (const [target, reader] of [
   ['conformance-generated-php', 'tests/runner/conformance-generated-php.mjs'],
-  ['contract-check', 'scripts/check-showcase-contract.mjs runs tools/showcase/adapters/php.php'],
-  ['benchmark-smoke', 'scripts/check-benchmark-smoke.mjs runs tools/showcase/adapters/php.php'],
+  ['contract-check', 'scripts/check-showcase-contract.mjs runs examples/showcase/adapters/php.php'],
+  ['benchmark-smoke', 'scripts/check-benchmark-smoke.mjs runs examples/showcase/adapters/php.php'],
   ['generated-native-check', 'scripts/check-generated-native-calls.mjs'],
-  ['bench', 'tools/showcase/benchmark-modes.mjs runs tools/showcase/adapters/php.php'],
-  ['showcase', 'tools/showcase/build.mjs runs tools/showcase/adapters/php.php'],
+  ['bench', 'examples/showcase/benchmark-modes.mjs runs examples/showcase/adapters/php.php'],
+  ['showcase', 'examples/showcase/build.mjs runs examples/showcase/adapters/php.php'],
   ['typed-generator-compile-check', 'scripts/check-typed-generator.mjs'],
   ['compiler-interface-check', 'scripts/check-compiler-interface.mjs'],
   ['test-php', 'node_modules/@polyspec/kit/dist/run-tests.mjs phpunit'],

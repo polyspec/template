@@ -17,7 +17,7 @@ const graph = {
       { type: 'Echo', expr: { type: 'Call', name: 'default', args: [variable('page'), variable('fallback')], span }, span },
       { type: 'Echo', expr: { type: 'Unary', op: '!', operand: variable('flag'), span }, span },
       { type: 'Echo', expr: { type: 'Binary', op: '==', left: variable('fallback'), right: literal('string', 'x'), span }, span },
-      // oxlint-disable-next-line unicorn/no-thenable -- the Ternary node of schema/ast.schema.json names its branch then
+      // oxlint-disable-next-line unicorn/no-thenable -- the Ternary node of contracts/schema/ast.schema.json names its branch then
       { type: 'Echo', expr: { type: 'Ternary', test: variable('flag'), then: literal('string', 'yes'), else: literal('string', 'no'), span }, span },
       { type: 'Echo', expr: { type: 'List', items: [literal('number', 1), { type: 'Spread', expr: variable('numbers'), span }], span }, span },
       { type: 'Echo', expr: { type: 'Map', entries: [{ key: literal('string', 'x'), value: literal('string', 'y') }, { type: 'Spread', expr: variable('lookup'), span }], span }, span },

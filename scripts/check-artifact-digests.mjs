@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Checks that every committed compiled artifact records the digest of the compiler that the tree holds (T17.1-6): the AST
 // artifacts of examples/site/scenarios/*/compiled/ast record astCompilerDigest, the generated programs of
-// tools/showcase/adapters record generatedCompilerDigest of their language and the JavaScript delivery
+// examples/showcase/adapters record generatedCompilerDigest of their language and the JavaScript delivery
 // typescriptDeliveryDigest. A change of the compiler, such as a change of packages/ts/src, leaves them stale
 // until `make showcase` writes them again; a stale artifact is found here, from the tracked sources alone and without a
 // build, so the job push-gate runs this check.
@@ -10,7 +10,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { astCompilerDigest, generatedCompilerDigest } from '../packages/compiler/compiler-digest.mjs';
-import { typescriptDeliveryDigest } from '../tools/showcase/delivery-digest.mjs';
+import { typescriptDeliveryDigest } from '../examples/showcase/delivery-digest.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -21,12 +21,12 @@ export function artifactManifests(base = root) {
   for (const id of readdirSync(scenarios).sort()) {
     manifests.push({ path: `examples/site/scenarios/${id}/compiled/ast/manifest.json`, expected: astCompilerDigest() });
   }
-  for (const directory of ['tools/showcase/adapters/generated/typed', 'tools/showcase/adapters/generated/javascript', 'tools/showcase/adapters/generated/php']) {
+  for (const directory of ['examples/showcase/adapters/generated/typed', 'examples/showcase/adapters/generated/javascript', 'examples/showcase/adapters/generated/php']) {
     for (const name of readdirSync(join(base, directory)).filter(file => file.endsWith('.manifest.json')).sort()) {
       manifests.push({ path: `${directory}/${name}` });
     }
   }
-  const go = 'tools/showcase/adapters/go/generated';
+  const go = 'examples/showcase/adapters/go/generated';
   for (const id of readdirSync(join(base, go)).sort()) manifests.push({ path: `${go}/${id}/generated.go.manifest.json` });
   for (const manifest of manifests) {
     if (manifest.expected) continue;

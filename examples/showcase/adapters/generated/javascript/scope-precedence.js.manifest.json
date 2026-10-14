@@ -1,0 +1,16 @@
+{
+  "schema": 3,
+  "mode": "gen",
+  "target": "js",
+  "entry": "layout.tpl",
+  "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
+  "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
+  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
+  "compilerDigest": "38d5072d0205aa104647efde47b4ccdd7bc524d13dfeda440259dea85205838b",
+  "files": {
+    "scope-precedence.js": {
+      "path": "scope-precedence.js",
+      "artifactDigest": "86adc71c5fe197ce8009a74fde55ab61d7d83f5aaa33e1eb9111f64a5de432ad"
+    }
+  }
+}

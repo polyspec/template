@@ -66,7 +66,7 @@ EXT_DIR  := packages/php-ext
 # target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1). The C PHP
 # extension is built by phpize as polyspec_template.so on every platform (T21.4).
 EXT_LIBRARY := var/build/polyspec_template.so
-SHOWCASE_RUST := tools/showcase/adapters/rust
+SHOWCASE_RUST := examples/showcase/adapters/rust
 LANGUAGE_DIR := packages/language
 LSP_DIR      := packages/lsp
 VSCODE_DIR := packages/vscode
@@ -105,7 +105,7 @@ help: ## List targets
 	@echo "  rules-check            Check case.json rule identifiers against docs/spec"
 	@echo "  editor-boundary-check  Check the editor layer boundaries (EDT-2, EDT-3)"
 	@echo "  doc-coverage           Check that public symbols carry documentation comments"
-	@echo "  schema-check           Validate schema/ast.schema.json and every expected.ast.json"
+	@echo "  schema-check           Validate contracts/schema/ast.schema.json and every expected.ast.json"
 	@echo "  docs-check             Document links, translation pairs, code blocks, status fields"
 	@echo "  contract-check         Generate and verify the cross-language showcase contract"
 	@echo "  docs                   Build the documentation site"
@@ -391,7 +391,7 @@ package-installs-check: cargo-downloads-check typed-generator
 parity-check: cargo-downloads-check build-php build-ext-php ext python-package
 
 test-browser: build-ts ## Browser rendering test
-	node tests/browser/run.mjs
+	node packages/ts/tests/browser/run.mjs
 
 # The PHP extension is a C implementation in $(EXT_DIR)/src: scripts/build-php-extension.mjs builds it with phpize,
 # configure and make of the php-config of PATH in a temporary directory, with every compiler warning as an error, and
@@ -494,15 +494,15 @@ contract-check: cargo-downloads-check build-ts build-php python-package ## Verif
 	node scripts/check-showcase-contract.mjs
 
 showcase: cargo-downloads-check typed-generator build-php python-package ## Build the executable example site and its result artifacts
-	node tools/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
+	node examples/showcase/build.mjs --write --langs $(SHOWCASE_LANGS)
 	node scripts/check-showcase-contract.mjs
-	node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
+	node examples/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs
-	node tools/showcase/build-site.mjs
+	node examples/showcase/build-site.mjs
 
 bench: cargo-downloads-check typed-generator build-php ## Measure production AST and generated artifacts
-	node tools/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
+	node examples/showcase/benchmark-modes.mjs --output examples/site/data/mode-benchmark.json
 	node scripts/check-benchmark-results.mjs
 	node scripts/update-benchmark-docs.mjs
 
@@ -541,16 +541,16 @@ showcase-check: artifact-digest-check typed-generator-compile-check showcase-bui
 artifact-digest-check: ## Fail when a committed compiled artifact records the digest of another compiler; names make showcase
 	node scripts/check-artifact-digests.mjs
 showcase-ast-check: build-ts
-	node tools/showcase/compile.mjs --refresh false
+	node examples/showcase/compile.mjs --refresh false
 showcase-build-check: cargo-downloads-check showcase-ast-check build-php
-	node tools/showcase/build.mjs --check --langs $(SHOWCASE_LANGS)
+	node examples/showcase/build.mjs --check --langs $(SHOWCASE_LANGS)
 showcase-site-check: build-ts
-	node tools/showcase/build-site.mjs --check
+	node examples/showcase/build-site.mjs --check
 showcase-html-check: build-ts
 	node scripts/check-showcase-html.mjs
 
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
-	node tools/showcase/compile.mjs --refresh true
+	node examples/showcase/compile.mjs --refresh true
 
 generated-native-check: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
 
@@ -565,10 +565,10 @@ generated-bound-data-check: cargo-downloads-check build-ts build-php python-pack
 	node scripts/check-generated-bound-data.mjs
 
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
-	node tools/showcase/compile-generated.mjs --refresh true
+	node examples/showcase/compile-generated.mjs --refresh true
 
 typed-generator-check: showcase-ast-check ## Verify type-fixed generated source is reproducible
-	node tools/showcase/compile-generated.mjs --refresh dev --check
+	node examples/showcase/compile-generated.mjs --refresh dev --check
 
 compiler-ir-check: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
 
@@ -590,4 +590,4 @@ generated-lint-check: cargo-downloads-check build-php ## Lint the generated Go, 
 	node scripts/check-generated-lint.mjs
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target tools/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go

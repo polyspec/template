@@ -4,8 +4,8 @@ import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSy
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { showcasePhpDirectory, showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
-import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mjs';
+import { showcasePythonModule } from '../examples/showcase/python-module.mjs';
 import { checkLanguages } from './language-checks.mjs';
 import { phpString } from '../packages/compiler/backend-support.mjs';
 import { phpProgramAutoload } from './php-program.mjs';
@@ -14,14 +14,14 @@ import { tsc } from './tools.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
-const generated = resolve(root, 'tools/showcase/adapters/generated/typed');
+const generated = resolve(root, 'examples/showcase/adapters/generated/typed');
 const scenarioRoot = resolve(root, 'examples/site/scenarios');
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-program');
 const scenarios = ['compiler-coverage', 'empty-state', 'html-slot', 'react-boundary', 'scope-precedence'];
 
 function generatedSource(id, language) {
-  if (language === 'go') return join(root, 'tools/showcase/adapters/go/generated', id, 'generated.go');
+  if (language === 'go') return join(root, 'examples/showcase/adapters/go/generated', id, 'generated.go');
   if (language === 'php') return join(root, showcasePhpDirectory(id));
   if (language === 'python') return join(generated, `${showcasePythonModule(id)}.py`);
   const extension = { rust: 'rust' }[language] ?? language;
@@ -197,7 +197,7 @@ function checkPhp() {
     assert.equal(coverageSource.includes(duplicate), false, `PHP generated source duplicates runtime semantics: ${duplicate}`);
   }
   for (const id of scenarios) {
-    // The generated program of a scenario is declared in the namespace of tools/showcase/php-namespace.mjs.
+    // The generated program of a scenario is declared in the namespace of examples/showcase/php-namespace.mjs.
     const phpClass = `\\${showcasePhpNamespace(id)}\\GeneratedProgram`;
     const limit = id === scenarios[0] ? ` $limited = new ${phpClass}(new Polyspec\\Template\\Render\\RuntimeEnvironment(['outputBytes' => 1])); $failed = false; try { $limited->render(${JSON.stringify(target(id))}, $assign, $options); } catch (Polyspec\\Template\\TemplateError $error) { $failed = $error->errorCode === 'E_RUNTIME_LIMIT' && $error->errorLine > 0 && $error->errorCol > 0; } if (!$failed) throw new RuntimeException('PHP generated output limit did not preserve a positioned template error');` : '';
     // Composer loads the classes of the program from its PSR-4 directory (T25.1).

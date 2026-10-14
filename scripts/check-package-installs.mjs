@@ -18,8 +18,8 @@ import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { buildRequirements, requireWheelhouse, wheelhouse } from './python-wheelhouse.mjs';
 import { checkLanguages } from './language-checks.mjs';
 import { runStepSync } from './test-progress/step.mjs';
-import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
-import { showcasePhpDirectory, showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
+import { showcasePythonModule } from '../examples/showcase/python-module.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -51,7 +51,7 @@ function checkTypeScript() {
   assert.ok(existsSync(join(artifacts, archive)), `npm pack wrote no ${archive} into ${artifacts}`);
   run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', join(artifacts, archive)], { cwd: directory });
   stageScenario(directory);
-  cpSync(join(root, 'tools/showcase/adapters/generated/javascript/scope-precedence.js'), join(directory, 'generated.mjs'));
+  cpSync(join(root, 'examples/showcase/adapters/generated/javascript/scope-precedence.js'), join(directory, 'generated.mjs'));
   writeFileSync(join(directory, 'check.mjs'), `import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { AstProgram, Engine, parseJson } from '@polyspec/template';
@@ -90,7 +90,7 @@ function checkGo() {
   const directory = join(temporary, 'go');
   mkdirSync(join(directory, 'generated'), { recursive: true });
   stageScenario(directory);
-  cpSync(join(root, 'tools/showcase/adapters/go/generated/scope-precedence/generated.go'), join(directory, 'generated/generated.go'));
+  cpSync(join(root, 'examples/showcase/adapters/go/generated/scope-precedence/generated.go'), join(directory, 'generated/generated.go'));
   writeFileSync(join(directory, 'go.mod'), `module installcheck\n\ngo ${goVersion}\n\nrequire ${module} ${version}\n`);
   writeFileSync(join(directory, 'main.go'), `package main
 import ("encoding/json"; "fmt"; "os"; template "github.com/polyspec/template/packages/go"; "installcheck/generated")
@@ -113,7 +113,7 @@ function checkRust() {
   const directory = join(temporary, 'rust');
   mkdirSync(join(directory, 'src'), { recursive: true });
   stageScenario(directory);
-  cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.rust'), join(directory, 'generated.rs'));
+  cpSync(join(root, 'examples/showcase/adapters/generated/typed/scope-precedence.rust'), join(directory, 'generated.rs'));
   writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, crate))}}\nserde={version="1",features=["derive"]}\nserde_json={version="1",features=["preserve_order","arbitrary_precision"]}\n`);
   // The install project builds with the locked versions of the package and the toolchain of the checkout. Cargo does not
   // resolve the development dependencies of a path dependency for an install project.
@@ -181,7 +181,7 @@ function checkPython() {
   const installed = join(directory, 'venv/bin/python');
   run(installed, ['-m', 'pip', 'install', '--no-deps', '--no-index', archive], { env: pip });
   stageScenario(directory);
-  cpSync(join(root, 'tools/showcase/adapters/generated/typed', `${showcasePythonModule('scope-precedence')}.py`), join(directory, 'generated.py'));
+  cpSync(join(root, 'examples/showcase/adapters/generated/typed', `${showcasePythonModule('scope-precedence')}.py`), join(directory, 'generated.py'));
   writeFileSync(join(directory, 'check.py'), `import json
 from pathlib import Path
 

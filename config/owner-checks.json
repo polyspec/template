@@ -11,7 +11,7 @@
       "paths": [
         "docs/**",
         "*.md",
-        "schema/*.md",
+        "contracts/schema/*.md",
         "packages/*/README*.md"
       ],
       "targets": [
@@ -45,7 +45,7 @@
     },
     {
       "paths": [
-        "schema/{ast,tokens,format}.schema.json",
+        "contracts/schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema*.mjs",
         "scripts/conformance-case-files.mjs"
       ],
@@ -124,8 +124,8 @@
     },
     {
       "paths": [
-        "tests/browser/**",
-        "playwright.config.ts"
+        "packages/ts/tests/browser/**",
+        "packages/ts/playwright.config.ts"
       ],
       "targets": [
         "test-browser"
@@ -357,7 +357,7 @@
     },
     {
       "paths": [
-        "tools/showcase/benchmark-modes.mjs"
+        "examples/showcase/benchmark-modes.mjs"
       ],
       "tests": [
         "tests/scripts/atomic-publish.test.mjs"
@@ -427,7 +427,7 @@
     {
       "paths": [
         "scripts/check-showcase-html.mjs",
-        "tools/showcase/**",
+        "examples/showcase/**",
         "examples/site/**"
       ],
       "targets": [
@@ -903,7 +903,7 @@
       "paths": [
         "docs/**",
         "*.md",
-        "schema/*.md",
+        "contracts/schema/*.md",
         "packages/*/README*.md",
         "config/documents.json",
         "config/checklist.json"
@@ -930,7 +930,7 @@
     {
       "check": "make schema-fixtures-check",
       "paths": [
-        "schema/{ast,tokens,format}.schema.json",
+        "contracts/schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema.mjs",
         "scripts/conformance-case-files.mjs"
       ]
@@ -938,7 +938,7 @@
     {
       "check": "make schema-mutations-check",
       "paths": [
-        "schema/{ast,tokens,format}.schema.json",
+        "contracts/schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema-mutations.mjs"
       ]
     },
@@ -1016,7 +1016,7 @@
       "check": "make contract-check",
       "paths": [
         "scripts/check-showcase-contract.mjs",
-        "tools/showcase/adapters/**",
+        "examples/showcase/adapters/**",
         "scripts/python-toolchain.mjs",
         "packages/python/**",
         "mise.toml"
@@ -1069,7 +1069,7 @@
       "check": "make lint-go",
       "paths": [
         "packages/go/**",
-        "tools/showcase/adapters/go/**",
+        "examples/showcase/adapters/go/**",
         ".golangci.yml"
       ]
     },
@@ -1083,19 +1083,19 @@
       "check": "make lint-rust",
       "paths": [
         "packages/rust/**",
-        "tools/showcase/adapters/rust/**"
+        "examples/showcase/adapters/rust/**"
       ]
     },
     {
       "check": "make lint-showcase-format",
       "paths": [
-        "tools/showcase/adapters/rust/**"
+        "examples/showcase/adapters/rust/**"
       ]
     },
     {
       "check": "make lint-showcase-warnings",
       "paths": [
-        "tools/showcase/adapters/rust/**"
+        "examples/showcase/adapters/rust/**"
       ]
     },
     {
@@ -1402,7 +1402,7 @@
       "check": "make typed-generator-check",
       "paths": [
         "packages/compiler/**",
-        "tools/showcase/compile-generated.mjs"
+        "examples/showcase/compile-generated.mjs"
       ]
     },
     {
@@ -1429,15 +1429,15 @@
     {
       "check": "make test-browser",
       "paths": [
-        "tests/browser/**",
-        "playwright.config.ts",
+        "packages/ts/tests/browser/**",
+        "packages/ts/playwright.config.ts",
         "packages/ts/**"
       ]
     },
     {
       "check": "make showcase-build-check",
       "paths": [
-        "tools/showcase/**",
+        "examples/showcase/**",
         "examples/site/**",
         "packages/compiler/**"
       ]
@@ -1445,7 +1445,7 @@
     {
       "check": "make showcase-site-check",
       "paths": [
-        "tools/showcase/build-site.mjs",
+        "examples/showcase/build-site.mjs",
         "examples/site/**"
       ]
     },
@@ -1457,7 +1457,7 @@
         "packages/ts/**",
         "package-lock.json",
         "examples/site/**",
-        "tools/showcase/**"
+        "examples/showcase/**"
       ]
     },
     {
@@ -1471,8 +1471,8 @@
       "check": "make benchmark-smoke",
       "paths": [
         "scripts/check-benchmark-smoke.mjs",
-        "tools/showcase/benchmark-modes.mjs",
-        "tools/showcase/adapters/**"
+        "examples/showcase/benchmark-modes.mjs",
+        "examples/showcase/adapters/**"
       ]
     },
     {

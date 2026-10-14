@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Proves that the presence checks of CNF-15 reject a case without its AST, token or format file, a parse error case
-// with such a file, and that schema/tokens.schema.json, schema/format.schema.json and the token order check reject a
+// with such a file, and that contracts/schema/tokens.schema.json, contracts/schema/format.schema.json and the token order check reject a
 // token or format file without the content of CNF-2.
 import { resolve } from 'node:path';
 import Ajv from 'ajv';

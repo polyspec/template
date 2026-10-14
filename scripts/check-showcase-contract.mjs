@@ -7,10 +7,10 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { pythonCommand, pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
-import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
+import { showcasePythonModule } from '../examples/showcase/python-module.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const adapterRoot = join(root, 'tools', 'showcase', 'adapters');
+const adapterRoot = join(root, 'examples', 'showcase', 'adapters');
 const scenariosRoot = join(root, 'examples', 'site', 'scenarios');
 const manifest = JSON.parse(readFileSync(join(root, 'packages', 'compiler', 'interface.json'), 'utf8')).showcaseAdapter;
 const operationNames = manifest.operations.map(operation => operation.name);
@@ -38,7 +38,7 @@ function run(label, command, args, cwd = root, extraEnv = {}) {
 
 function readContractFile(relativePath) {
   const path = join(adapterRoot, relativePath);
-  if (!existsSync(path)) throw new Error(`contract file is missing: tools/showcase/adapters/${relativePath}`);
+  if (!existsSync(path)) throw new Error(`contract file is missing: examples/showcase/adapters/${relativePath}`);
   return readFileSync(path, 'utf8');
 }
 
@@ -64,7 +64,7 @@ function checkSupportLevels() {
 
 function checkGeneratedEngineRoute() {
   for (const removed of [
-    join(root, 'tools/showcase/generate-direct.mjs'),
+    join(root, 'examples/showcase/generate-direct.mjs'),
     join(adapterRoot, 'generated/native_direct.ts'),
     join(adapterRoot, 'generated/native_direct.mjs'),
     join(adapterRoot, 'generated/native_direct.php'),
@@ -263,10 +263,10 @@ async function main() {
   checkSupportLevels();
   checkGeneratedEngineRoute();
   run('manifest generator', process.execPath, ['scripts/generate-showcase-contract.mjs', '--check']);
-  run('product generated compiler', process.execPath, ['tools/showcase/compile-generated.mjs', '--refresh', 'dev', '--check']);
+  run('product generated compiler', process.execPath, ['examples/showcase/compile-generated.mjs', '--refresh', 'dev', '--check']);
   for (const language of languageNames) checkStaticImplementation(language);
 
-  run('TypeScript declarations', 'node', [tsc, '--noEmit', '-p', 'tools/showcase/adapters/tsconfig.json']);
+  run('TypeScript declarations', 'node', [tsc, '--noEmit', '-p', 'examples/showcase/adapters/tsconfig.json']);
   const gofmt = run('Go formatting', 'gofmt', ['-d', join(adapterRoot, 'go', 'main.go'), join(adapterRoot, 'go', 'render_adapter.go')]);
   assert(gofmt.trim() === '', `Go sources are not formatted:\n${gofmt}`);
   run('Go contract compilation', 'go', ['test', './...'], join(adapterRoot, 'go'));

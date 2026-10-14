@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Validates the schemas of schema/, every tests/cases/**/expected.ast.json and every ast field of
+// Validates the schemas of contracts/schema/, every tests/cases/**/expected.ast.json and every ast field of
 // tests/fixtures/expr/cases.json, and checks that every case whose input.tpl parses has its expected.ast.json,
-// expected.tokens.json and expected.format.json, the last two valid against schema/tokens.schema.json and
-// schema/format.schema.json with sorted, non-overlapping tokens (CNF-2, CNF-15).
+// expected.tokens.json and expected.format.json, the last two valid against contracts/schema/tokens.schema.json and
+// contracts/schema/format.schema.json with sorted, non-overlapping tokens (CNF-2, CNF-15).
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,13 +11,13 @@ import addFormats from 'ajv-formats';
 import { astPresenceFailures, caseFileValidators, formatFileFailures, readCaseFiles } from './conformance-case-files.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const schemaPath = 'schema/ast.schema.json';
+const schemaPath = 'contracts/schema/ast.schema.json';
 const schema = JSON.parse(readFileSync(join(root, schemaPath), 'utf8'));
 const errors = [];
 const ajv = new Ajv({ strict: true, allErrors: true });
 addFormats(ajv);
 
-for (const path of [schemaPath, 'schema/tokens.schema.json', 'schema/format.schema.json']) {
+for (const path of [schemaPath, 'contracts/schema/tokens.schema.json', 'contracts/schema/format.schema.json']) {
   if (ajv.validateSchema(JSON.parse(readFileSync(join(root, path), 'utf8')))) continue;
   errors.push(`${path}: ${ajv.errorsText(ajv.errors)}`);
 }

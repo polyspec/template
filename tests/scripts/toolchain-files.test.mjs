@@ -170,7 +170,7 @@ test('go builds into the build cache of the checkout, and no script names anothe
   // T19.14: the generated checks set GOCACHE to the fixed /tmp/template-go-cache, which every checkout and run shared.
   assert.equal(recipe('echo "$GOCACHE"', { GOCACHE: '/tmp/elsewhere' }), path.join(ROOT, 'var/go/cache'), 'the recipes of the Makefile use another Go build cache');
   // The copies of kit under scripts/kit are kit's: its mise bootstrap keeps the Go cache of mise under var/tools.
-  const named = spawnSync('git', ['grep', '-n', 'GOCACHE', '--', 'scripts', 'tests/runner', 'tools', ':!scripts/kit'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  const named = spawnSync('git', ['grep', '-n', 'GOCACHE', '--', 'scripts', 'tests/runner', 'examples/showcase', ':!scripts/kit'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   assert.deepEqual(named, [], 'scripts that set their own Go build cache');
 });
 
