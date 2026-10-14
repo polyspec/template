@@ -14,8 +14,8 @@ use Polyspec\Template\Cli\PackageRuntime;
 final class CliTest extends TestCase
 {
     /**
-     * The proxy of a command of bin/ in the vendor/bin of the Composer project that runs PHPUnit, which Composer names in
-     * $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of that project.
+     * The proxy of a command of bin/ in the vendor/bin of the Composer project that runs PHPUnit, which Composer names
+     * in $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of that project.
      */
     private static function command(string $name): string
     {

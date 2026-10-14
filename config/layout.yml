@@ -14,12 +14,6 @@ rules:
     id: layout-go-module-path
     vars: { repo: template }
 
-  # S5: the root files of template beyond the list of kit (K145): composer.json with composer.lock, the development root
-  # of the Composer packages of packages/, which is never published and installs vendor/ with packages/php through its
-  # path repository (T24.16).
-  - id: layout-root-files
-    vars: { root_files: "{composer.json,composer.lock}" }
-
   # S5: the runtime ports of the main spec (ts, go, rust, php, php-ext, python) and five components without ports, each
   # one TypeScript or JavaScript package: the compiler of AST and generated host code (compiler), the language service
   # with the formatter (language), the language server (lsp), the CodeMirror 6 adapter (codemirror) and the VS Code

@@ -12,8 +12,9 @@ use PHPUnit\Framework\TestCase;
 final class CliTest extends TestCase
 {
     /**
-     * The proxy of bin/template-ext.php of polyspec/template in the vendor/bin of the Composer project that runs PHPUnit,
-     * which Composer names in $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of that project.
+     * The proxy of bin/template-ext.php of polyspec/template in the vendor/bin of the Composer project that runs
+     * PHPUnit, which Composer names in $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of
+     * that project.
      */
     private static function command(): string
     {
