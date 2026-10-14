@@ -7,7 +7,7 @@ pub mod standalone;
 
 use crate::ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, Node, Template};
 use crate::error::{ErrorCode, TemplateError};
-use crate::expr::lexer::LexerOptions;
+use crate::expr::lexer::{LexerOptions, Token, TokenType};
 use crate::expr::parser::ExpressionParser;
 use crate::parser::block_tag::RawTagReader;
 use crate::parser::scanner::{
@@ -18,6 +18,203 @@ use crate::parser::standalone::{Range, TagRange, standalone_ranges};
 use crate::source::Source;
 
 const RESERVED: &[&str] = &["true", "false", "null", "in"];
+
+/// The kind of an accepted tag.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum TagKind {
+    /// `{: name = value}` and the other assignment forms.
+    Assignment,
+    /// `{# ...}`.
+    Block,
+    /// `{/}`.
+    Close,
+    /// `{* ... *}`.
+    Comment,
+    /// `{% delimiter OC}`.
+    Directive,
+    /// `{= ...}`.
+    Echo,
+    /// `{:}`.
+    Else,
+    /// `{:? ...}`.
+    Elseif,
+    /// `{@ name = ...}`.
+    For,
+    /// `{? ...}`.
+    If,
+    /// `{?# id}`.
+    Ifblock,
+    /// `{+ path}`.
+    Include,
+}
+
+impl TagKind {
+    /// The name of the kind.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            TagKind::Assignment => "assignment",
+            TagKind::Block => "block",
+            TagKind::Close => "close",
+            TagKind::Comment => "comment",
+            TagKind::Directive => "directive",
+            TagKind::Echo => "echo",
+            TagKind::Else => "else",
+            TagKind::Elseif => "elseif",
+            TagKind::For => "for",
+            TagKind::If => "if",
+            TagKind::Ifblock => "ifblock",
+            TagKind::Include => "include",
+        }
+    }
+}
+
+/// Parser-owned source range of one accepted tag. `body_start` and `body_end` are the byte offsets of the text
+/// between the open and the close delimiters, sigil included.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SyntaxTag {
+    /// Start byte offset, wrapper included.
+    pub start: usize,
+    /// End byte offset, wrapper included.
+    pub end: usize,
+    /// Whether the tag is an echo tag.
+    pub echo: bool,
+    /// Kind of the tag.
+    pub kind: TagKind,
+    /// Byte offset after the open delimiter.
+    pub body_start: usize,
+    /// Byte offset of the close delimiter.
+    pub body_end: usize,
+}
+
+/// The token classes of EDT-8.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum TokenKind {
+    /// Open and close delimiters with their wrappers.
+    Delimiter,
+    /// Sigils, `null`, `true`, `false`, `in` and `delimiter`.
+    Keyword,
+    /// Variable names.
+    Variable,
+    /// Property accessors.
+    Property,
+    /// Function and method names.
+    Function,
+    /// String literals.
+    String,
+    /// Number literals.
+    Number,
+    /// Operators and punctuation.
+    Operator,
+    /// A whole comment tag.
+    Comment,
+    /// Template paths and block tag words.
+    Path,
+}
+
+impl TokenKind {
+    /// The name of the class.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            TokenKind::Delimiter => "delimiter",
+            TokenKind::Keyword => "keyword",
+            TokenKind::Variable => "variable",
+            TokenKind::Property => "property",
+            TokenKind::Function => "function",
+            TokenKind::String => "string",
+            TokenKind::Number => "number",
+            TokenKind::Operator => "operator",
+            TokenKind::Comment => "comment",
+            TokenKind::Path => "path",
+        }
+    }
+}
+
+/// A classified byte range of an accepted tag (EDT-8).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SyntaxToken {
+    /// Start byte offset.
+    pub start: usize,
+    /// End byte offset.
+    pub end: usize,
+    /// Class of the range.
+    pub kind: TokenKind,
+}
+
+/// The AST of a template with the tags accepted while producing it and their tokens, in source order.
+#[derive(Debug, Clone)]
+pub struct TemplateAnalysis {
+    /// The AST.
+    pub ast: Template,
+    /// The accepted tags.
+    pub tags: Vec<SyntaxTag>,
+    /// The tokens of the accepted tags.
+    pub tokens: Vec<SyntaxToken>,
+}
+
+// The EDT-8 class of an expression token, which depends on its neighbours for names.
+fn expression_kind(token: &Token, previous: Option<&Token>, next: Option<&Token>) -> TokenKind {
+    match token.kind {
+        TokenType::Str => TokenKind::String,
+        TokenType::Number => TokenKind::Number,
+        TokenType::Null | TokenType::True | TokenType::False | TokenType::In => TokenKind::Keyword,
+        TokenType::Ident => {
+            if next.is_some_and(|next| next.kind == TokenType::LParen) || previous.is_some_and(|previous| previous.kind == TokenType::Pipe)
+            {
+                TokenKind::Function
+            } else {
+                TokenKind::Variable
+            }
+        }
+        TokenType::DotIdent => {
+            if next.is_some_and(|next| next.kind == TokenType::LParen) {
+                TokenKind::Function
+            } else {
+                TokenKind::Property
+            }
+        }
+        TokenType::DotIndex => TokenKind::Property,
+        _ => TokenKind::Operator,
+    }
+}
+
+fn expression_tokens(parser: &ExpressionParser) -> Vec<SyntaxToken> {
+    let tokens: Vec<&Token> = parser
+        .consumed()
+        .iter()
+        .filter(|token| token.kind != TokenType::Close && token.kind != TokenType::Eof)
+        .collect();
+    tokens
+        .iter()
+        .enumerate()
+        .map(|(index, token)| SyntaxToken {
+            start: token.start,
+            end: token.end,
+            kind: expression_kind(token, index.checked_sub(1).map(|i| tokens[i]), tokens.get(index + 1).copied()),
+        })
+        .collect()
+}
+
+fn syntax_kind(sigil: &str, assignment: bool) -> TagKind {
+    if assignment {
+        return TagKind::Assignment;
+    }
+    match sigil {
+        "*" => TagKind::Comment,
+        "=" => TagKind::Echo,
+        "@" => TagKind::For,
+        "?" => TagKind::If,
+        "?#" => TagKind::Ifblock,
+        ":?" => TagKind::Elseif,
+        ":" => TagKind::Else,
+        "/" => TagKind::Close,
+        "+" => TagKind::Include,
+        "#" => TagKind::Block,
+        "%" => TagKind::Directive,
+        other => unreachable!("unknown accepted tag sigil {other:?}"),
+    }
+}
 
 #[derive(Debug, Clone)]
 struct TextPiece {
@@ -51,6 +248,11 @@ struct TagContext {
 
 /// Parses a source into a template AST.
 pub fn parse_template(source: &Source, delimiters: Delimiters) -> Result<Template, TemplateError> {
+    Ok(analyze_template(source, delimiters)?.ast)
+}
+
+/// Parses a source once and returns its AST with the parser-owned tag ranges and tokens.
+pub fn analyze_template(source: &Source, delimiters: Delimiters) -> Result<TemplateAnalysis, TemplateError> {
     TemplateParser::new(source, delimiters).parse()
 }
 
@@ -59,7 +261,11 @@ struct TemplateParser<'a> {
     delimiters: Delimiters,
     root: Vec<Item>,
     frames: Vec<Frame>,
-    tags: Vec<TagRange>,
+    tags: Vec<SyntaxTag>,
+    tokens: Vec<SyntaxToken>,
+    // The tokens of the tag being parsed outside expressions, and those of its expressions.
+    tag_marks: Vec<SyntaxToken>,
+    tag_expressions: Vec<SyntaxToken>,
     comments: Vec<Comment>,
     saw_tag: bool,
     text_before_first_tag_is_whitespace: bool,
@@ -73,6 +279,9 @@ impl<'a> TemplateParser<'a> {
             root: Vec::new(),
             frames: Vec::new(),
             tags: Vec::new(),
+            tokens: Vec::new(),
+            tag_marks: Vec::new(),
+            tag_expressions: Vec::new(),
             comments: Vec::new(),
             saw_tag: false,
             text_before_first_tag_is_whitespace: true,
@@ -101,7 +310,15 @@ impl<'a> TemplateParser<'a> {
         self.push_item(Item::Text(TextPiece { start, end, value }));
     }
 
-    fn parse(mut self) -> Result<Template, TemplateError> {
+    fn mark(&mut self, start: usize, end: usize, kind: TokenKind) {
+        self.tag_marks.push(SyntaxToken { start, end, kind });
+    }
+
+    fn collect(&mut self, parser: &ExpressionParser) {
+        self.tag_expressions.extend(expression_tokens(parser));
+    }
+
+    fn parse(mut self) -> Result<TemplateAnalysis, TemplateError> {
         self.scan()?;
         if let Some(frame) = self.frames.last() {
             return Err(self.fail(
@@ -111,12 +328,25 @@ impl<'a> TemplateParser<'a> {
                 "block is not closed before the end of the file",
             ));
         }
-        let removed = standalone_ranges(self.bytes(), &self.tags);
+        let ranges: Vec<TagRange> = self
+            .tags
+            .iter()
+            .map(|tag| TagRange {
+                start: tag.start,
+                end: tag.end,
+                echo: tag.echo,
+            })
+            .collect();
+        let removed = standalone_ranges(self.bytes(), &ranges);
         let root = std::mem::take(&mut self.root);
-        Ok(Template {
-            name: self.source.name.clone(),
-            body: finalize(root, &removed),
-            comments: std::mem::take(&mut self.comments),
+        Ok(TemplateAnalysis {
+            ast: Template {
+                name: self.source.name.clone(),
+                body: finalize(root, &removed),
+                comments: std::mem::take(&mut self.comments),
+            },
+            tags: self.tags,
+            tokens: self.tokens,
         })
     }
 
@@ -192,6 +422,8 @@ impl<'a> TemplateParser<'a> {
         let is_directive = sigil == Some("%");
         let first_tag = !self.saw_tag;
         self.saw_tag = true;
+        self.tag_marks.clear();
+        self.tag_expressions.clear();
         let mut echo = false;
         let end = match sigil {
             Some("*") => self.parse_comment(&context, body_start)?,
@@ -200,6 +432,7 @@ impl<'a> TemplateParser<'a> {
                 let mut parser = ExpressionParser::new(self.source, body_start, self.lexer_options(&context));
                 let expr = parser.parse_expression()?;
                 let end = self.finish_tag(&context, parser.expect_close()?)?;
+                self.collect(&parser);
                 self.push_item(Item::Node(Node::Echo {
                     expr,
                     span: [context.start, end],
@@ -211,6 +444,7 @@ impl<'a> TemplateParser<'a> {
                 let mut parser = ExpressionParser::new(self.source, body_start, self.lexer_options(&context));
                 let test = parser.parse_expression()?;
                 let end = self.finish_tag(&context, parser.expect_close()?)?;
+                self.collect(&parser);
                 let span = [context.start, end];
                 let node = Node::If {
                     branches: vec![IfBranch {
@@ -232,8 +466,9 @@ impl<'a> TemplateParser<'a> {
             }
             Some("?#") => {
                 let mut parser = ExpressionParser::new(self.source, body_start, self.lexer_options(&context));
-                let id = parser.expect(crate::expr::lexer::TokenType::Ident)?;
+                let id = parser.expect(TokenType::Ident)?;
                 let end = self.finish_tag(&context, parser.expect_close()?)?;
+                self.collect(&parser);
                 let node = Node::IfBlock {
                     id: id.value,
                     body: Vec::new(),
@@ -277,6 +512,7 @@ impl<'a> TemplateParser<'a> {
                 let mut parser = ExpressionParser::new(self.source, body_start, self.lexer_options(&context));
                 let test = parser.parse_expression()?;
                 let end = self.finish_tag(&context, parser.expect_close()?)?;
+                self.collect(&parser);
                 let frame = self.frames.last_mut().expect("frame");
                 if let Node::If { branches, .. } = &mut frame.node {
                     branches.push(IfBranch {
@@ -330,10 +566,11 @@ impl<'a> TemplateParser<'a> {
             }
             Some("+") => {
                 let reader = RawTagReader::new(self.source, self.delimiters.close, context.close_count);
-                let (path, path_end) = reader.read_include_path(body_start)?;
-                let end = self.finish_tag(&context, self.expect_close_raw(&context, path_end)?)?;
+                let path = reader.read_include_path(body_start)?;
+                self.mark(path.start, path.end, if path.quoted { TokenKind::String } else { TokenKind::Path });
+                let end = self.finish_tag(&context, self.expect_close_raw(&context, path.end)?)?;
                 self.push_item(Item::Node(Node::Include {
-                    path,
+                    path: path.path,
                     span: [context.start, end],
                 }));
                 end
@@ -341,6 +578,9 @@ impl<'a> TemplateParser<'a> {
             Some("#") => {
                 let reader = RawTagReader::new(self.source, self.delimiters.close, context.close_count);
                 let body = reader.read_block_body(body_start)?;
+                for word in &body.words {
+                    self.mark(word.start, word.end, if word.quoted { TokenKind::String } else { TokenKind::Path });
+                }
                 let end = self.finish_tag(&context, self.expect_close_raw(&context, body.end)?)?;
                 self.push_item(Item::Node(Node::Block {
                     id: body.id,
@@ -362,12 +602,59 @@ impl<'a> TemplateParser<'a> {
                 "delimiter directive is not the first tag",
             ));
         }
-        self.tags.push(TagRange {
+        let sigil = sigil.expect("accepted tag sigil");
+        let kind = syntax_kind(sigil, sigil == ":" && crate::parser::scanner::assignment_form(bytes, body_start));
+        let tag_body_start = context.open + 1;
+        let tag_body_end = self.close_start(&context, end);
+        self.tags.push(SyntaxTag {
             start: context.start,
             end,
             echo,
+            kind,
+            body_start: tag_body_start,
+            body_end: tag_body_end,
+        });
+        if kind == TagKind::Comment {
+            self.tokens.push(SyntaxToken {
+                start: context.start,
+                end,
+                kind: TokenKind::Comment,
+            });
+            return Ok(end);
+        }
+        self.tokens.push(SyntaxToken {
+            start: context.start,
+            end: tag_body_start,
+            kind: TokenKind::Delimiter,
+        });
+        let sigil_start = skip_horizontal_space(bytes, tag_body_start);
+        self.tokens.push(SyntaxToken {
+            start: sigil_start,
+            end: sigil_start + sigil.len(),
+            kind: TokenKind::Keyword,
+        });
+        self.tokens.append(&mut self.tag_marks);
+        self.tokens.append(&mut self.tag_expressions);
+        self.tokens.push(SyntaxToken {
+            start: tag_body_end,
+            end,
+            kind: TokenKind::Delimiter,
         });
         Ok(end)
+    }
+
+    // The byte offset of the close delimiters of the tag that ends at `end`: before the wrapper closer and the
+    // horizontal whitespace in front of it (LEX-19).
+    fn close_start(&self, context: &TagContext, end: usize) -> usize {
+        let bytes = self.bytes();
+        let mut tail = end;
+        if let Some(wrapper) = context.wrapper {
+            tail -= wrapper.closer.len();
+            while is_horizontal_space(bytes[tail - 1]) {
+                tail -= 1;
+            }
+        }
+        tail - context.close_count
     }
 
     fn expect_close_raw(&self, context: &TagContext, index: usize) -> Result<usize, TemplateError> {
@@ -456,9 +743,12 @@ impl<'a> TemplateParser<'a> {
                 format!("{name} is a reserved word"),
             ));
         }
+        self.mark(name_start, name_start + name_length, TokenKind::Variable);
+        self.mark(after_name, after_name + 1, TokenKind::Operator);
         let mut parser = ExpressionParser::new(self.source, after_name + 1, self.lexer_options(context));
         let iter = parser.parse_expression()?;
         let end = self.finish_tag(context, parser.expect_close()?)?;
+        self.collect(&parser);
         let node = Node::For {
             name,
             iter,
@@ -499,6 +789,8 @@ impl<'a> TemplateParser<'a> {
             span: [body_start, body_start + name_length],
         };
         let after_operator = operator_start + operator_length;
+        self.mark(body_start, body_start + name_length, TokenKind::Variable);
+        self.mark(operator_start, after_operator, TokenKind::Operator);
         let (expr, end) = if operator == "++" || operator == "--" {
             let end = self.finish_tag(context, self.expect_close_raw(context, after_operator)?)?;
             let one = Expr::Literal {
@@ -520,6 +812,7 @@ impl<'a> TemplateParser<'a> {
             let mut parser = ExpressionParser::new(self.source, after_operator, self.lexer_options(context));
             let value = parser.parse_expression()?;
             let end = self.finish_tag(context, parser.expect_close()?)?;
+            self.collect(&parser);
             if operator == "=" {
                 (value, end)
             } else {
@@ -551,16 +844,19 @@ impl<'a> TemplateParser<'a> {
     }
 
     fn parse_directive(&mut self, context: &TagContext, body_start: usize, first_tag: bool) -> Result<usize, TemplateError> {
-        let invalid = |message: &str| self.fail(ErrorCode::E_PARSE_INVALID_DIRECTIVE, context.start, context.start + 1, message);
+        let invalid =
+            |parser: &Self, message: &str| parser.fail(ErrorCode::E_PARSE_INVALID_DIRECTIVE, context.start, context.start + 1, message);
         if !first_tag || !self.text_before_first_tag_is_whitespace {
-            return Err(invalid("delimiter directive is not the first tag"));
+            return Err(invalid(self, "delimiter directive is not the first tag"));
         }
         let bytes = self.bytes();
         let mut index = skip_horizontal_space(bytes, body_start);
         if !bytes[index.min(bytes.len())..].starts_with(b"delimiter") {
-            return Err(invalid("directive is not \"delimiter\""));
+            return Err(invalid(self, "directive is not \"delimiter\""));
         }
+        self.mark(index, index + "delimiter".len(), TokenKind::Keyword);
         index = skip_horizontal_space(bytes, index + "delimiter".len());
+        let value_start = index;
         let sequence = self.close_sequence(context);
         let mut value = Vec::new();
         while index < bytes.len() && !is_horizontal_space(bytes[index]) && !bytes[index..].starts_with(&sequence) {
@@ -572,8 +868,9 @@ impl<'a> TemplateParser<'a> {
         }
         let text = String::from_utf8_lossy(&value).to_string();
         let Some(delimiters) = parse_delimiters(&text) else {
-            return Err(invalid(&format!("{text:?} is not a delimiter pair")));
+            return Err(invalid(self, &format!("{text:?} is not a delimiter pair")));
         };
+        self.mark(value_start, index, TokenKind::String);
         let end = self.finish_tag(context, self.expect_close_raw(context, index)?)?;
         self.delimiters = delimiters;
         Ok(end)

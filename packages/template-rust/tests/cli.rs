@@ -43,3 +43,18 @@ fn usage_errors_exit_with_status_1() {
         Some(1)
     );
 }
+
+#[test]
+fn tokens_prints_the_classified_ranges_and_errors_exit_with_status_2() {
+    let file = repo_root().join("tests/cases/echo/path/input.tpl");
+    let output = run(&["tokens", file.to_str().expect("path")]);
+    assert_eq!(output.status.code(), Some(0));
+    let tokens: serde_json::Value = serde_json::from_slice(&output.stdout).expect("json");
+    assert_eq!(tokens[0][2], "delimiter");
+    assert_eq!(tokens[1][2], "keyword");
+    let file = repo_root().join("tests/cases/errors/unclosed-block/input.tpl");
+    let output = run(&["tokens", file.to_str().expect("path")]);
+    assert_eq!(output.status.code(), Some(2));
+    let error: serde_json::Value = serde_json::from_slice(&output.stderr).expect("json");
+    assert_eq!(error["code"], "E_PARSE_UNCLOSED_BLOCK");
+}

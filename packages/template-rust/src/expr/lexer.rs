@@ -280,6 +280,7 @@ pub struct ExpressionLexer<'a> {
     nesting_depth: usize,
     options: LexerOptions,
     close_is_expression_char: bool,
+    consumed: Vec<Token>,
 }
 
 impl<'a> ExpressionLexer<'a> {
@@ -294,6 +295,7 @@ impl<'a> ExpressionLexer<'a> {
             nesting_depth: 0,
             options,
             close_is_expression_char,
+            consumed: Vec::new(),
         }
     }
 
@@ -327,7 +329,13 @@ impl<'a> ExpressionLexer<'a> {
         if matches!(token.kind, TokenType::RParen | TokenType::RBracket) && self.nesting_depth > 0 {
             self.nesting_depth -= 1;
         }
+        self.consumed.push(token.clone());
         Ok(token)
+    }
+
+    /// The tokens consumed so far, the close delimiter included.
+    pub fn consumed(&self) -> &[Token] {
+        &self.consumed
     }
 
     /// Byte offset after the last consumed token.
