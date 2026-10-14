@@ -4,7 +4,7 @@ import { errorAt, internalBoundary, TemplateError, type Span } from '../errors.j
 import { type Env, type HostFunction } from '../functions/index.js';
 import { MapLoader, resolvePath, type Loader, type LoadResult, PathError } from '../loader.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from '../parser/scanner.js';
-import { BindError, bindData, bindMap, checkText } from '../value/bind.js';
+import { BindError, bindData, bindMap, checkText, isPlainObject } from '../value/bind.js';
 import type { MapValue } from '../value/value.js';
 import { Frame, RenderContext, Scope, type DefineEntry, type Limits, type ParsedTemplate, type RuntimeServices } from './context.js';
 import { RuntimeEnvironment } from './runtime-environment.js';
@@ -36,10 +36,12 @@ export type DefineInput = string | {
   html?: string;
 };
 
-// What one render call receives besides assigned variables: template definitions and the environment (RT-4).
+// What one render call receives besides assigned variables: template definitions, an object of DefineInput by id,
+// and the environment, an object with the fields of Env (RT-4). A request carries them as data, so the engine checks
+// them when it binds the request and fails with a BindError.
 export interface RenderOptions {
-  define?: Record<string, DefineInput>;
-  env?: Partial<Env>;
+  define?: unknown;
+  env?: unknown;
 }
 
 class AstPreparedExecution {
@@ -189,8 +191,8 @@ export class AstProgramCore implements RuntimeServices, Program {
     let env: Env;
     try {
       rootData = bindMap(assign);
-      registry = this.bindDefines(options.define ?? {});
-      env = this.bindEnv(options.env ?? {});
+      registry = this.bindDefines(options.define);
+      env = this.bindEnv(options.env);
     } catch (error) {
       if (error instanceof BindError) {
         throw new TemplateError({ code: error.code, template: name, line: 0, col: 0, offset: 0, end: 0, message: error.message });
@@ -209,14 +211,19 @@ export class AstProgramCore implements RuntimeServices, Program {
     return this.prepare(target, assign, options).render();
   }
 
-  private bindDefines(defines: Record<string, DefineInput>): Map<string, DefineEntry> {
+  private bindDefines(defines: unknown): Map<string, DefineEntry> {
     const registry = new Map<string, DefineEntry>();
-    for (const [id, input] of Object.entries(defines)) {
+    if (defines === undefined || defines === null) return registry;
+    if (typeof defines !== 'object' || !isPlainObject(defines)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'define is not an object');
+    const entries = Object.entries(defines);
+    for (const [id, input] of entries) {
       checkText(id);
-      if (typeof input !== 'string' && typeof input.html === 'string') {
-        registry.set(id, { html: input.html });
+      const entry = typeof input === 'object' && input !== null ? input : null;
+      const html = entry !== null && 'html' in entry ? entry.html : undefined;
+      if (typeof html === 'string') {
+        registry.set(id, { html });
       } else {
-        const template = typeof input === 'string' ? input : input.template;
+        const template = typeof input === 'string' ? input : entry !== null && 'template' in entry ? entry.template : undefined;
         if (typeof template !== 'string') throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: entry needs "template" or "html"`);
         let name: string;
         try {
@@ -225,7 +232,7 @@ export class AstProgramCore implements RuntimeServices, Program {
           if (error instanceof PathError) throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: ${error.message}`);
           throw error;
         }
-        const data = typeof input === 'string' || input.data === undefined ? null : bindData(input.data);
+        const data = entry === null || !('data' in entry) || entry.data === undefined ? null : bindData(entry.data);
         if (data !== null && !(data instanceof Map)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', `define ${id}: data is not a map`);
         registry.set(id, { template: name, data });
       }
@@ -233,9 +240,11 @@ export class AstProgramCore implements RuntimeServices, Program {
     return registry;
   }
 
-  private bindEnv(env: Partial<Env>): Env {
-    const timezone = env.timezone ?? 'Z';
-    const now = env.now ?? Math.floor(Date.now() / 1000);
+  private bindEnv(env: unknown): Env {
+    if (env !== undefined && env !== null && (typeof env !== 'object' || !isPlainObject(env))) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env is not an object');
+    const fields = env ?? {};
+    const timezone = fields.timezone ?? 'Z';
+    const now = fields.now ?? Math.floor(Date.now() / 1000);
     if (typeof timezone !== 'string') throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string');
     if (typeof now !== 'number') throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number');
     return { timezone, now };

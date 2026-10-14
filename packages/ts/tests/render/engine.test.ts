@@ -78,4 +78,24 @@ describe('Engine', () => {
     immutableLoader.set('a.tpl', '2');
     expect(immutable.render('a.tpl', {})).toBe('1');
   });
+
+  it('binds define and env given as request data, and rejects them when they are no object', () => {
+    const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': '{= date(0, "Y")}|{+ "b.tpl"}', 'b.tpl': 'B' }) }));
+    expect(engine.render('a.tpl', {}, { define: null, env: null })).toBe('1970|B');
+    expect(engine.render('a.tpl', {}, { define: { b: 'b.tpl' }, env: { timezone: 'Z' } })).toBe('1970|B');
+    const failure = (options: { define?: unknown; env?: unknown }): string => {
+      try {
+        engine.render('a.tpl', {}, options);
+      } catch (error) {
+        if (!(error instanceof TemplateError)) throw error;
+        return `${error.code}: ${error.message}`;
+      }
+      return 'rendered';
+    };
+    expect(failure({ define: 'b.tpl' })).toBe('E_DATA_UNSUPPORTED_TYPE: define is not an object');
+    expect(failure({ env: 0 })).toBe('E_DATA_UNSUPPORTED_TYPE: env is not an object');
+    expect(failure({ define: new Map([['b', 'b.tpl']]) })).toBe('E_DATA_UNSUPPORTED_TYPE: define is not an object');
+    expect(failure({ env: ['Z'] })).toBe('E_DATA_UNSUPPORTED_TYPE: env is not an object');
+    expect(failure({ env: { now: 'today' } })).toBe('E_DATA_UNSUPPORTED_TYPE: env.now is not a number');
+  });
 });

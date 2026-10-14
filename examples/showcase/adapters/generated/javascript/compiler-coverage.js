@@ -1,80 +1,137 @@
 import { BindError, Frame, RenderContext, RuntimeBindings, RuntimeEnvironment, Scope, TemplateError, bindData, bindMap, checkText, internalBoundary } from "@polyspec/template";
-const generatedRecords = { "Page": { "title": { "kind": "string", "optional": false } }, "Row": { "name": { "kind": "string", "optional": false } }, "Slot": { "template": { "kind": "string", "optional": true }, "html": { "kind": "string", "optional": true } } };
-const generatedAssign = { "flag": { "kind": "boolean", "optional": false }, "dangerous": { "kind": "string", "optional": false }, "empty_list": { "kind": "list", "item": { "kind": "string", "optional": false }, "optional": false }, "empty_map": { "kind": "map", "key": { "kind": "string", "optional": false }, "value": { "kind": "string", "optional": false }, "optional": false }, "page": { "kind": "record", "name": "Page", "optional": false }, "numbers": { "kind": "list", "item": { "kind": "number", "optional": false }, "optional": false }, "lookup": { "kind": "map", "key": { "kind": "string", "optional": false }, "value": { "kind": "string", "optional": false }, "optional": false }, "rows": { "kind": "list", "item": { "kind": "record", "name": "Row", "optional": false }, "optional": false } };
-const generatedDefinitionSpecs = { "content": { "field": "content", "target": "card.tpl", "html": true, "input": { "label": { "kind": "string", "optional": false } } }, "layout": { "field": "layout", "target": "layout.tpl", "html": false, "input": {} } };
-function generatedObject(value, path) {
+function generatedTypeError(value, path, expected) {
+  return new Error(value === null || value === void 0 ? path + " is required" : path + " is not " + expected);
+}
+function generatedChecked(decode, value, path, runtime, frame, span) {
+  try {
+    return decode(value, path);
+  } catch (error) {
+    if (error instanceof Error) throw runtime.error(frame, span, "E_RUNTIME_TYPE", error.message);
+    throw error;
+  }
+}
+function generatedDataObject(value, path) {
   if (value instanceof Map) return value;
   throw new Error(path + " is not an object");
 }
-function generatedBindType(value, type, path) {
-  if (value === null || value === void 0) {
-    if (type.optional || type.kind === "null" || type.kind === "any") return null;
-    throw new Error(path + " is required");
-  }
-  if (type.kind === "any") return value;
-  if (type.kind === "null") {
-    if (value !== null) throw new Error(path + " is not null");
-    return null;
-  }
-  if (type.kind === "string" || type.kind === "number" || type.kind === "boolean") {
-    if (typeof value !== type.kind) throw new Error(path + " is not a " + type.kind);
-    return value;
-  }
-  if (type.kind === "list") {
-    if (!Array.isArray(value)) throw new Error(path + " is not a list");
-    return value.map((item, index) => generatedBindType(item, type.item, path + "[" + index + "]"));
-  }
-  if (type.kind === "map") {
-    const object = generatedObject(value, path);
-    return new Map([...object].map(([key, item]) => [generatedBindType(key, type.key, path + ".key"), generatedBindType(item, type.value, path + "." + key)]));
-  }
-  if (type.kind === "record") return generatedBindRecord(value, generatedRecords[type.name], path);
-  throw new Error(path + " has an unknown generated type");
+function generatedPlain(value) {
+  if (typeof value !== "object" || value === null) return false;
+  const prototype = Reflect.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
 }
-function generatedBindRecord(value, fields, path, partial = false) {
+function generatedObject(value, path) {
+  if (value instanceof Map) return value;
+  throw generatedTypeError(value, path, "an object");
+}
+function generatedString(value, path) {
+  if (typeof value === "string") return value;
+  throw generatedTypeError(value, path, "a string");
+}
+function generatedNumber(value, path) {
+  if (typeof value === "number") return value;
+  throw generatedTypeError(value, path, "a number");
+}
+function generatedBoolean(value, path) {
+  if (typeof value === "boolean") return value;
+  throw generatedTypeError(value, path, "a boolean");
+}
+function generatedOptional(decode) {
+  return (value, path) => value === null || value === void 0 ? null : decode(value, path);
+}
+function generatedListOf(item) {
+  return (value, path) => {
+    if (Array.isArray(value)) return value.map((element, index) => item(element, path + "[" + index + "]"));
+    throw generatedTypeError(value, path, "a list");
+  };
+}
+function generatedMapOf(item) {
+  return (value, path) => new Map([...generatedObject(value, path)].map(([key, element]) => [key, item(element, path + "." + key)]));
+}
+function generatedEncodeList(encode) {
+  return (value) => value.map((item) => encode(item));
+}
+function generatedDecode_Page(value, path) {
   const object = generatedObject(value, path);
-  const result = {};
-  for (const [name, type] of Object.entries(fields)) {
-    if (!object.has(name)) {
-      if (!partial && !type.optional) throw new Error(path + "." + name + " is required");
-      if (!partial) result[name] = null;
-      continue;
-    }
-    result[name] = generatedBindType(object.get(name), type, path + "." + name);
-  }
-  return result;
+  return { title: generatedString(object.get("title"), path + ".title") };
+}
+function generatedDecode_Row(value, path) {
+  const object = generatedObject(value, path);
+  return { name: generatedString(object.get("name"), path + ".name") };
+}
+function generatedEncode_Row(value) {
+  return /* @__PURE__ */ new Map([["name", value.name]]);
+}
+function generatedDecodeAssign(value, path) {
+  const object = generatedObject(value, path);
+  return { flag: generatedBoolean(object.get("flag"), path + ".flag"), dangerous: generatedString(object.get("dangerous"), path + ".dangerous"), empty_list: generatedListOf(generatedString)(object.get("empty_list"), path + ".empty_list"), empty_map: generatedMapOf(generatedString)(object.get("empty_map"), path + ".empty_map"), page: generatedDecode_Page(object.get("page"), path + ".page"), numbers: generatedListOf(generatedNumber)(object.get("numbers"), path + ".numbers"), lookup: generatedMapOf(generatedString)(object.get("lookup"), path + ".lookup"), rows: generatedListOf(generatedDecode_Row)(object.get("rows"), path + ".rows") };
+}
+function generatedDecodeData_Input_card_tpl(value, path) {
+  const object = generatedDataObject(value, path);
+  const data = {};
+  if (object.has("label")) data.label = generatedString(object.get("label"), path + ".label");
+  return data;
+}
+function generatedDecodeData_Input_layout_tpl(value, path) {
+  generatedDataObject(value, path);
+  return {};
 }
 function generatedBindAssign(value) {
-  const root = bindMap(value ?? /* @__PURE__ */ new Map());
-  return { assign: generatedBindRecord(root, generatedAssign, "assign"), root };
+  const root = bindMap(value);
+  return { assign: generatedDecodeAssign(root, "assign"), root };
 }
 function generatedBindDefinitions(input) {
   const definitions = {};
   const targets = /* @__PURE__ */ new Map();
-  for (const [id, raw] of Object.entries(input ?? {})) {
+  if (input === void 0 || input === null) return { definitions, targets };
+  if (!generatedPlain(input)) throw new BindError("E_DATA_UNSUPPORTED_TYPE", "define is not an object");
+  const entries = Object.entries(input);
+  for (const [id, raw] of entries) {
     checkText(id);
-    const spec = generatedDefinitionSpecs[id];
-    if (spec === void 0) throw new Error("define." + id + " is not declared");
-    if (typeof raw === "string") {
-      if (spec.target === null || raw !== spec.target) throw new Error("define." + id + " has an invalid template");
-      definitions[spec.field] = { template: spec.target };
-      targets.set(id, { target: spec.target });
-      continue;
+    switch (id) {
+      case "content": {
+        if (typeof raw === "string") {
+          if (raw !== "card.tpl") throw new Error("define.content has an invalid template");
+          definitions.content = { template: "card.tpl" };
+          targets.set("content", { target: "card.tpl" });
+          break;
+        }
+        if (typeof raw !== "object" || raw === null) throw new Error("define.content is not an object");
+        const template = "template" in raw ? raw.template : void 0;
+        const html = "html" in raw ? raw.html : void 0;
+        const data = "data" in raw && raw.data !== void 0 ? bindData(raw.data) : void 0;
+        if (typeof html === "string") {
+          if (template !== void 0 || data !== void 0) throw new Error("define.content has an invalid html entry");
+          definitions.content = { html };
+          targets.set("content", { target: null, html });
+          break;
+        }
+        if (template !== "card.tpl") throw new Error("define.content has an invalid template");
+        definitions.content = { template: "card.tpl", data: data === void 0 ? {} : generatedDecodeData_Input_card_tpl(data, "define.content.data") };
+        targets.set("content", { target: "card.tpl" });
+        break;
+      }
+      case "layout": {
+        if (typeof raw === "string") {
+          if (raw !== "layout.tpl") throw new Error("define.layout has an invalid template");
+          definitions.layout = { template: "layout.tpl" };
+          targets.set("layout", { target: "layout.tpl" });
+          break;
+        }
+        if (typeof raw !== "object" || raw === null) throw new Error("define.layout is not an object");
+        const template = "template" in raw ? raw.template : void 0;
+        const html = "html" in raw ? raw.html : void 0;
+        const data = "data" in raw && raw.data !== void 0 ? bindData(raw.data) : void 0;
+        if (typeof html === "string") {
+          throw new Error("define.layout has an invalid html entry");
+        }
+        if (template !== "layout.tpl") throw new Error("define.layout has an invalid template");
+        definitions.layout = { template: "layout.tpl", data: data === void 0 ? {} : generatedDecodeData_Input_layout_tpl(data, "define.layout.data") };
+        targets.set("layout", { target: "layout.tpl" });
+        break;
+      }
+      default:
+        throw new Error("define." + id + " is not declared");
     }
-    if (typeof raw !== "object" || raw === null) throw new Error("define." + id + " is not an object");
-    const template = raw.template;
-    const html = raw.html;
-    const data = raw.data === void 0 ? void 0 : bindData(raw.data);
-    if (typeof html === "string") {
-      if (!spec.html || template !== void 0 || data !== void 0) throw new Error("define." + id + " has an invalid html entry");
-      definitions[spec.field] = { html };
-      targets.set(id, { target: null, html });
-      continue;
-    }
-    if (typeof template !== "string" || spec.target === null || template !== spec.target) throw new Error("define." + id + " has an invalid template");
-    const boundData = data === void 0 ? {} : generatedBindRecord(data, spec.input, "define." + id + ".data", true);
-    definitions[spec.field] = { template: spec.target, data: boundData };
-    targets.set(id, { target: spec.target });
   }
   return { definitions, targets };
 }
@@ -84,18 +141,18 @@ function render_card_tpl(_assign, _definitions, input, context, runtime, rootDat
   context.at(frame, [0, 16]);
   context.output.write('<p class="card">');
   context.at(frame, [16, 25]);
-  context.output.write(runtime.escape(scope.lookup(frame, "label"), frame, [19, 24]));
+  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, "label"), "label", runtime, frame, [19, 24]), frame, [19, 24]));
   context.at(frame, [25, 30]);
   context.output.write("</p>\n");
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
   const frame = new Frame("layout.tpl", [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], rootData);
-  scope.locals.set("values", runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16, 26])], frame, [12, 27]));
-  scope.locals.set("merged", runtime.depth(new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify("z", frame, [53, 56]), "Z"]]), frame, [41, 64]));
+  scope.locals.set("values", generatedChecked(generatedListOf(generatedNumber), runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16, 26])], frame, [12, 27]), "list", runtime, frame, [12, 27]));
+  scope.locals.set("merged", generatedChecked(generatedMapOf(generatedString), runtime.depth(new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify("z", frame, [53, 56]), "Z"]]), frame, [41, 64]), "map", runtime, frame, [41, 64]));
   context.at(frame, [66, 80]);
   context.output.write("<section>\n<h1>");
   context.at(frame, [80, 94]);
-  context.output.write(runtime.escape(assign.page?.title, frame, [83, 93]));
+  context.output.write(runtime.escape(assign.page.title, frame, [83, 93]));
   context.at(frame, [94, 119]);
   context.output.write('</h1>\n<p class="escaped">');
   context.at(frame, [119, 132]);
@@ -131,16 +188,16 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
   context.at(frame, [263, 271]);
   context.output.write("</p>\n<p>");
   context.at(frame, [271, 284]);
-  context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "values"), 1, frame, [274, 283]), frame, [274, 283]));
+  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, "values"), "values", runtime, frame, [274, 280]), 1, frame, [274, 283]), "index", runtime, frame, [274, 283]), frame, [274, 283]));
   context.at(frame, [284, 285]);
   context.output.write("|");
   context.at(frame, [285, 300]);
-  context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "merged"), "z", frame, [288, 299]), frame, [288, 299]));
+  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedString), runtime.index(generatedChecked(generatedMapOf(generatedString), scope.lookup(frame, "merged"), "merged", runtime, frame, [288, 294]), "z", frame, [288, 299]), "index", runtime, frame, [288, 299]), frame, [288, 299]));
   context.at(frame, [300, 305]);
   context.output.write("</p>\n");
   if (runtime.truthy((() => {
     const left = assign.flag;
-    return runtime.truthy(left) ? runtime.truthy(runtime.binary("==", assign.page?.title, "Guide", frame, [316, 337])) : false;
+    return runtime.truthy(left) ? runtime.truthy(generatedChecked(generatedBoolean, runtime.binary("==", assign.page.title, "Guide", frame, [316, 337]), "==", runtime, frame, [316, 337])) : false;
   })())) {
     context.at(frame, [338, 362]);
     context.output.write("<strong>matched</strong>");
@@ -155,22 +212,20 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
   context.at(frame, [418, 419]);
   context.output.write("|");
   context.at(frame, [419, 429]);
-  context.output.write(runtime.escape(runtime.binary("+", runtime.unary("-", 1, frame, [422, 424]), 3, frame, [422, 428]), frame, [422, 428]));
+  context.output.write(runtime.escape(generatedChecked(generatedNumber, runtime.binary("+", generatedChecked(generatedNumber, runtime.unary("-", 1, frame, [422, 424]), "-", runtime, frame, [422, 424]), 3, frame, [422, 428]), "+", runtime, frame, [422, 428]), frame, [422, 428]));
   context.at(frame, [429, 430]);
   context.output.write("|");
   context.at(frame, [430, 458]);
-  context.output.write(runtime.escape(runtime.call("default", ["", "fallback"], frame, [433, 457]), frame, [433, 457]));
+  context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call("default", ["", "fallback"], frame, [433, 457]), "default", runtime, frame, [433, 457]), frame, [433, 457]));
   context.at(frame, [458, 468]);
   context.output.write("</p>\n<ul>\n");
   {
-    const row_entries = runtime.entries(assign.rows, frame, [468, 585]);
+    const row_entries = runtime.entries(generatedEncodeList(generatedEncode_Row)(assign.rows), frame, [468, 585]);
     const row_size = row_entries.length;
     const row_last_index = row_size - 1;
-    const row_had = scope.locals.has("row");
     const row_previous = scope.locals.get("row");
     try {
-      for (let row_index = 0; row_index < row_size; row_index += 1) {
-        const [, row_value] = row_entries[row_index];
+      for (const [row_index, [, row_value]] of row_entries.entries()) {
         scope.locals.set("row", row_value);
         const row_first = row_index === 0;
         const row_last = row_index === row_last_index;
@@ -187,7 +242,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
         context.at(frame, [515, 516]);
         context.output.write(":");
         context.at(frame, [516, 528]);
-        context.output.write(runtime.escape(scope.lookup(frame, "row")?.name, frame, [519, 527]));
+        context.output.write(runtime.escape(generatedChecked(generatedDecode_Row, scope.lookup(frame, "row"), "row", runtime, frame, [519, 522]).name, frame, [519, 527]));
         context.at(frame, [528, 529]);
         context.output.write(":");
         context.at(frame, [529, 543]);
@@ -200,7 +255,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
         context.output.write("</li>\n");
       }
     } finally {
-      if (row_had) scope.locals.set("row", row_previous);
+      if (row_previous !== void 0) scope.locals.set("row", row_previous);
       else scope.locals.delete("row");
     }
     if (row_size === 0) {
@@ -212,7 +267,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
   context.output.write("</ul>\n");
   context.enter("partial.tpl", frame, [592, 607]);
   try {
-    render_partial_tpl(assign, definitions, { values: scope.lookup(frame, "values") }, context, runtime, rootData, scope);
+    render_partial_tpl(assign, definitions, { values: generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, "values"), "values", runtime, frame, [592, 607]) }, context, runtime, rootData, scope);
   } finally {
     context.leave();
   }
@@ -232,7 +287,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
       context.at(frame, [655, 683]);
       context.output.write(definition.html);
     } else {
-      const input2 = Object.assign({}, definition?.data ?? {}, { label: assign.page?.title });
+      const input2 = { label: assign.page.title };
       const blockScope = new Scope();
       context.enter("card.tpl", frame, [655, 683]);
       try {
@@ -251,7 +306,7 @@ function render_partial_tpl(_assign, _definitions, input, context, runtime, root
   context.at(frame, [0, 20]);
   context.output.write('<p class="included">');
   context.at(frame, [20, 33]);
-  context.output.write(runtime.escape(runtime.index(scope.lookup(frame, "values"), 2, frame, [23, 32]), frame, [23, 32]));
+  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, "values"), "values", runtime, frame, [23, 29]), 2, frame, [23, 32]), "index", runtime, frame, [23, 32]), frame, [23, 32]));
   context.at(frame, [33, 38]);
   context.output.write("</p>\n");
 }
@@ -265,8 +320,10 @@ function renderTemplate(target, assign, definitions, context, runtime, rootData,
   }
 }
 function generatedEnv(input) {
-  const timezone = input?.timezone ?? "Z";
-  const now = input?.now ?? Math.floor(Date.now() / 1e3);
+  if (input === void 0 || input === null) return { timezone: "Z", now: Math.floor(Date.now() / 1e3) };
+  if (!generatedPlain(input)) throw new BindError("E_DATA_UNSUPPORTED_TYPE", "env is not an object");
+  const timezone = ("timezone" in input ? input.timezone : void 0) ?? "Z";
+  const now = ("now" in input ? input.now : void 0) ?? Math.floor(Date.now() / 1e3);
   if (typeof timezone !== "string") throw new BindError("E_DATA_UNSUPPORTED_TYPE", "env.timezone is not a string");
   if (typeof now !== "number") throw new BindError("E_DATA_UNSUPPORTED_TYPE", "env.now is not a number");
   return { timezone, now };
@@ -304,7 +361,8 @@ export class GeneratedProgram {
       throw error;
     }
     const registered = bound.targets.get(target);
-    if (registered?.html !== void 0) return new GeneratedPreparedRender(target, () => registered.html);
+    const html = registered?.html;
+    if (html !== void 0) return new GeneratedPreparedRender(target, () => html);
     const targetName = registered?.target ?? target;
     return new GeneratedPreparedRender(target, () => {
       const context = new RenderContext(this.runtime, boundAssign.root, env, targetName);
