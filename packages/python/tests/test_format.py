@@ -12,11 +12,7 @@ from polyspec.template.format_expression import join_tokens
 from polyspec.template.format_invariant import same_tree
 
 LANGUAGE_FIXTURES = (
-    Path(__file__).resolve().parents[3]
-    / "packages"
-    / "language"
-    / "tests"
-    / "fixtures"
+    Path(__file__).resolve().parents[3] / "packages" / "language" / "tests" / "fixtures"
 )
 
 

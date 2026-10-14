@@ -16,10 +16,7 @@ from polyspec.template.engine import Program
 MANIFEST_PATH = Path(
     os.environ.get("TEMPLATE_INTERFACE_MANIFEST")
     or (
-        Path(__file__).resolve().parents[3]
-        / "packages"
-        / "compiler"
-        / "interface.json"
+        Path(__file__).resolve().parents[3] / "packages" / "compiler" / "interface.json"
     )
 )
 MANIFEST = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
