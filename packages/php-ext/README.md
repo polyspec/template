@@ -79,13 +79,12 @@ php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ex
 
 `parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. The commands are those of the PHP package (`Polyspec\Template\Cli\CommandLine`) over `Polyspec\Template\Native\NativeRuntime`, the native engine as their runtime. `format` runs the formatter of the PHP package over the native analysis and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
 
-The package requires the PHP package `polyspec/template` at the same version (`require` of `composer.json`), which holds the formatter, so `format` also runs after `composer install --no-dev`. A release names it by version only and declares no `repositories`, as `docs/operations/publication.md` requires. In this repository `composer.lock` resolves it to `../template-php` with a `path` source, so `composer install` links the package of the checkout. Composer writes that lock when the `path` repository comes from the configuration of `COMPOSER_HOME` rather than from `composer.json`: with a `config.json` of `{"repositories": [{"type": "path", "url": "../template-php"}]}` in a directory `DIR`, `COMPOSER_HOME=DIR composer update polyspec/template` run in this directory updates it.
+The package requires the PHP package `polyspec/template` at the same version (`require` of `composer.json`), which holds the formatter, so `format` also runs after `composer install --no-dev`. A release names it by version only and declares no `repositories`, as `docs/operations/publication.md` requires. The package has no lock of its own. Composer installs no package of the type `php-ext`, so in this repository the root `composer.json`, which is not published, resolves `polyspec/template` to `packages/php` through its `path` repository and maps the classes of `php/` and the tests of `tests/`; `composer install` at the root installs them into the root `vendor/`, which `bin/template-ext.php` loads.
 
 ## Test
 
 ```sh
-composer install
 make test-ext
 ```
 
-`make test-ext` runs the conformance cases through the command line interface and the suite in `tests/` with PHPUnit through `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. The templates of the unit tests are in `tests/templates`.
+`make test-ext` installs the root `vendor/` with `make build-php`, runs the conformance cases through the command line interface and the suite in `tests/` with PHPUnit through `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. The templates of the unit tests are in `tests/templates`.

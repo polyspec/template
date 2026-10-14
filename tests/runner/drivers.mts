@@ -87,10 +87,11 @@ export const drivers: Record<Language, Driver> = {
   php: {
     dir: join(packages, 'php'),
     build() {
-      build('php', process.execPath, [join(root, 'scripts/composer-install.mts'), join(packages, 'php')], root);
+      build('php', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
     },
     command(args) {
-      return ['php', [join(packages, 'php', 'bin', 'template.php'), ...args]];
+      // The proxy of vendor/bin sets the autoloader of the development root composer.json for bin/template.php.
+      return ['php', [join(root, 'vendor', 'bin', 'template.php'), ...args]];
     },
   },
   // The command is the python of var/python/venv, where make python-package installs packages/python editable, so
@@ -108,6 +109,8 @@ export const drivers: Record<Language, Driver> = {
   'php-ext': {
     dir: join(packages, 'php-ext'),
     build() {
+      // bin/template-ext.php loads the Composer packages of the development root composer.json.
+      build('php-ext', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
       // The C extension builds with phpize, configure and make and publishes its library itself (T21.4).
       build('php-ext', process.execPath, [join(root, 'scripts/build-php-extension.mts'), join(packages, 'php-ext', 'src'), published['php-ext']], root);
     },

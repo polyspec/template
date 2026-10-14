@@ -2,11 +2,7 @@
   "schema": 1,
   "composerPlatforms": [
     {
-      "manifest": "packages/php/composer.json",
-      "php": "8.5.0"
-    },
-    {
-      "manifest": "packages/php-ext/composer.json",
+      "manifest": "composer.json",
       "php": "8.5.0"
     }
   ],

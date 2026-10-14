@@ -160,7 +160,7 @@ lint: lint-ts lint-go lint-rust lint-php lint-python lint-go-format lint-rust-fo
 # golangci-lint and deadcode, clippy, phpcs and PHPStan, and ruff and vulture with the configuration that kit copies (T24.6).
 # They read the installed Composer packages and the crates, which these prerequisites provide. The format checks are
 # template's.
-lint-php: build-php build-ext-php
+lint-php: build-php
 lint-rust: cargo-downloads-check
 
 .PHONY: lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php-format
@@ -173,7 +173,7 @@ lint-showcase-format:
 lint-showcase-warnings: cargo-downloads-check
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
 lint-php-format: build-php
-	$(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR) $(EXT_DIR)
+	vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR) $(EXT_DIR)
 
 # make install-tools TOOLS=npm installs the npm of packageManager and make install-packages installs package-lock.json with
 # it, @polyspec/kit included, whose kit.mk has the other targets (T24.1); make install then installs the rest. It downloads
@@ -184,8 +184,7 @@ lint-php-format: build-php
 # var/tools/mise/shims/python3 of the python of mise.toml, so every job has that interpreter after make install and no job
 # sets up a Python of its own (T24.12).
 install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages and the Python build requirements
-	$(ONLINE) node scripts/composer-install.mts $(PHP_DIR)
-	$(ONLINE) node scripts/composer-install.mts $(EXT_DIR)
+	$(ONLINE) node scripts/composer-install.mts .
 	$(ONLINE) node scripts/python-wheelhouse.mts
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
@@ -210,8 +209,8 @@ build-go: ## Build the Go CLI
 build-rust: cargo-downloads-check ## Build the Rust CLI
 	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && node scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust
 
-build-php: ## Install PHP dependencies
-	node scripts/composer-install.mts $(PHP_DIR)
+build-php: ## Install the Composer packages of the development root composer.json into vendor/
+	node scripts/composer-install.mts .
 
 test-ts: test-ts-unit test-ts-types test-ts-types-node test-ts-types-tests ## TypeScript unit tests and type check
 
@@ -245,7 +244,7 @@ test-rust-unit: cargo-downloads-check
 	node $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked
 
 test-php: build-php ## PHP unit tests
-	node $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
+	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor node $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
 test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
@@ -420,7 +419,7 @@ package-installs-check: cargo-downloads-check typed-generator
 
 # parity-check and parity-declarations-check of kit read config/parity.json (T24.7): parity-check runs the native test of each
 # implementation that binds a shared suite, which reads the installed Composer packages, the PHP extension and the crates.
-parity-check: cargo-downloads-check build-php build-ext-php ext python-package
+parity-check: cargo-downloads-check build-php ext python-package
 
 test-browser: build-ts ## Browser rendering test
 	node tests/browser/run.mts
@@ -438,13 +437,11 @@ test-ext: test-ext-conformance test-ext-unit ## Test the PHP extension
 ext-arginfo: ## Generate the arginfo header of the C extension from its stub with gen_stub.php
 	node scripts/build-php-extension.mts --arginfo $(EXT_DIR)/src
 
-.PHONY: build-ext-php test-ext-conformance test-ext-unit
-build-ext-php:
-	node scripts/composer-install.mts $(EXT_DIR)
-test-ext-conformance: cargo-downloads-check ext
+.PHONY: test-ext-conformance test-ext-unit
+test-ext-conformance: cargo-downloads-check ext build-php
 	node tests/runner/conformance.mts --langs php-ext
-test-ext-unit: ext build-ext-php
-	node $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
+test-ext-unit: ext build-php
+	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor node $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
 rules-check: ## Check case.json rule identifiers against the specification
 	node scripts/check-rules.mts

@@ -5,7 +5,7 @@
 // installed Go toolchain of the go directive of packages/go/go.mod; the Rust install project builds with the toolchain
 // of rust-toolchain.toml and a lock derived from packages/rust/Cargo.lock; the PHP install project reads only the
 // archive of the run, by its own composer.json, and resolves its dependencies among the packages of
-// packages/php/composer.lock, not on Packagist, whose archives it takes from the Composer cache that make install
+// the composer.lock of the development root, not on Packagist, whose archives it takes from the Composer cache that make install
 // filled, with the network disabled; the Python install project builds the wheel of the package with the build requirements of
 // var/python/wheelhouse (scripts/python-wheelhouse.mts), reads no index and installs only that wheel.
 // Each command is a step without a time limit that prints its start, its output and its result with
@@ -144,12 +144,12 @@ function checkPhp() {
   // The generated program is a directory of PSR-4 files, which the install project autoloads (T25.1).
   cpSync(join(root, showcasePhpDirectory('scope-precedence')), join(directory, 'generated'), { recursive: true });
   // The artifact repository reads the composer.json of the archive, so the install takes the require of the manifest
-  // itself. Its dependencies resolve among the packages of packages/php/composer.lock, a package repository of
-  // their locked entries, which the install project requires exactly; Packagist is off, so the resolution reads no
+  // itself. Its dependencies resolve among the other packages of the composer.lock of the development root, a package
+  // repository of their locked entries, which the install project requires exactly; Packagist is off, so the resolution reads no
   // metadata that only an earlier `composer update` of the machine cached. The archives of those packages come from the
   // Composer cache that the composer install of make install filled from the same lock, with the network disabled.
   const manifest = composerManifestDocument.read(join(packageDirectory, 'composer.json'));
-  const lockPackages = composerLockDocument.read(join(packageDirectory, 'composer.lock')).packages;
+  const lockPackages = composerLockDocument.read(join(root, 'composer.lock')).packages.filter(item => item.name !== manifest.name);
   const locked = lockPackages.map((item): [string, string] => [item.name, item.version]);
   writeFileSync(join(directory, 'composer.json'), JSON.stringify({
     repositories: [{ 'packagist.org': false }, { type: 'artifact', url: artifacts }, { type: 'package', package: lockPackages }],

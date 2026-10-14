@@ -63,10 +63,10 @@ A parsed template can be passed to `render()` or stored in an `ArrayLoader`.
 ## Command line
 
 ```sh
-php bin/template.php parse [--root DIR] [--delimiters OC] FILE
-php bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-php bin/template.php tokens [--root DIR] [--delimiters OC] FILE
-php bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
+vendor/bin/template.php parse [--root DIR] [--delimiters OC] FILE
+vendor/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+vendor/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
+vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
 `parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. `format` prints the formatted text without adding a newline (indent unit `N` spaces from 1 to 8, `tab`, or `none` to keep every line's indentation; two spaces by default); a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
@@ -76,9 +76,11 @@ The command is a Symfony Console application (`Polyspec\Template\Cli\CommandLine
 ## Development
 
 ```sh
-composer install
-vendor/bin/pint --test
-vendor/bin/phpunit
+make build-php
+make test-php
+make lint-php-format
 ```
+
+The package has no lock of its own: in the repository, `composer install` at the root installs it with its dependencies into the root `vendor/` through the `path` repository of the root `composer.json`, and `make test-php` runs `vendor/bin/phpunit` of that directory with `phpunit.xml` of the package.
 
 Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process.

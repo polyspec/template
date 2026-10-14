@@ -117,7 +117,7 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
       // PHP.
       const phpNamespace = 'Polyspec\\Generated\\BoundData';
       writePhpProgram(join(temporary, 'php'), files('php', { phpNamespace }));
-      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/php/vendor/autoload.php')), phpNamespace, phpString(join(temporary, 'php')))}
+      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(join(temporary, 'php')))}
 use Polyspec\\Template\\BoundMap;
 $cases = json_decode(${phpString(json(cases))}, true, flags: JSON_THROW_ON_ERROR);
 $check = static function (string $actual, string $expected, string $label): void { if ($actual !== $expected) throw new RuntimeException('PHP generated ' . $label . ': ' . $actual); };

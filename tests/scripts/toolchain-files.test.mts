@@ -251,7 +251,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const kit = 'node_modules/@polyspec/kit/dist';
   // make prints the empty TOOLS of install-tools of kit as a trailing space.
-  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts packages/php`, `${online} node scripts/composer-install.mts packages/php-ext`, `${online} node scripts/python-wheelhouse.mts`]);
+  assert.deepEqual(install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd()), [`${online} node ${kit}/install-tools.mjs`, `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts .`, `${online} node scripts/python-wheelhouse.mts`]);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
     const env = workflowOf(read(file), file).env;

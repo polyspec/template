@@ -5,8 +5,7 @@ packages/*/dist.next-*/
 *.tsbuildinfo
 target/
 packages/go/template
-packages/php/vendor/
-packages/php-ext/vendor/
+/vendor/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
 docs/api/

@@ -96,7 +96,7 @@ try {
       const programFiles = writePhpProgram(programDirectory, compileFiles(join(graphPath, 'manifest.json'), typePath, 'php', { phpNamespace: namespace }));
       const lint = await php(['-l', ...programFiles], 'php -l');
       if (lint.status !== 0) throw new Error(`${lint.stdout}${lint.stderr}`);
-      const result = await php([runner, join(root, 'packages/php/vendor/autoload.php'), programDirectory,
+      const result = await php([runner, join(root, 'vendor/autoload.php'), programDirectory,
         testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], 'the case process');
       if (result.status !== 0) throw new Error(result.stderr || `PHP exited with ${result.status}`);
       const actual = parsedCaseResult(result.stdout, 'PHP');

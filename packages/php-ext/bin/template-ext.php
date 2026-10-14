@@ -13,8 +13,9 @@ declare(strict_types=1);
 use Polyspec\Template\Cli\CommandLine;
 use Polyspec\Template\Native\NativeRuntime;
 
-// Composer sets $_composer_autoload_path in the proxy of vendor/bin; run from the package, the autoloader is its own.
-require $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
+// Composer installs no package of type php-ext (PIE builds it), so no proxy of vendor/bin runs this command: it runs
+// from the checkout with the autoloader of the development root composer.json of the repository.
+require dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 if (!extension_loaded('polyspec_template')) {
     fwrite(STDERR, "the polyspec_template extension is not loaded\n");

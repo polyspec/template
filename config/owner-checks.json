@@ -35,7 +35,8 @@
         "config/dependency-review.json",
         "package.json",
         "package-lock.json",
-        "packages/*/composer.{json,lock}"
+        "composer.{json,lock}",
+        "packages/*/composer.json"
       ],
       "targets": [
         "artifact-digest-check",
@@ -313,6 +314,15 @@
       "tests": [
         "tests/scripts/install-vscode.test.mts",
         "tests/scripts/toolchain-files.test.mts"
+      ]
+    },
+    {
+      "paths": [
+        "composer.{json,lock}"
+      ],
+      "targets": [
+        "test-php",
+        "test-ext"
       ]
     },
     {
@@ -1004,7 +1014,8 @@
         "config/dependency-review.json",
         "package.json",
         "package-lock.json",
-        "packages/*/composer.{json,lock}"
+        "composer.{json,lock}",
+        "packages/*/composer.json"
       ]
     },
     {
@@ -1014,7 +1025,8 @@
         "config/dependency-review.json",
         "package.json",
         "package-lock.json",
-        "packages/*/composer.{json,lock}"
+        "composer.{json,lock}",
+        "packages/*/composer.json"
       ]
     },
     {
@@ -1251,6 +1263,7 @@
     {
       "check": "make test-php",
       "paths": [
+        "composer.{json,lock}",
         "packages/php/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "scripts/composer-install.mts"

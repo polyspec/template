@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: 7da63eae380b0af7f61e6fe6eafb3693413c00eb566d27e2fabc484d66722ba5 -->
+<!-- source-sha256: a612926bc9375a23f81f918c2e1b3bbf876f1b653dab7c7beb5ad4c0fd01a2da -->
 # polyspec/template
 
 [English](README.md).
@@ -64,10 +64,10 @@ $json = Ast::toJson($ast);
 ## 명령줄
 
 ```sh
-php bin/template.php parse [--root DIR] [--delimiters OC] FILE
-php bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-php bin/template.php tokens [--root DIR] [--delimiters OC] FILE
-php bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
+vendor/bin/template.php parse [--root DIR] [--delimiters OC] FILE
+vendor/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+vendor/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
+vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 포맷된 텍스트를 줄바꿈을 덧붙이지 않고 출력한다(들여쓰기 단위는 공백 `N`칸(1~8), `tab`, 또는 모든 줄의 들여쓰기를 유지하는 `none`이며 기본은 공백 두 칸). 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
@@ -77,9 +77,11 @@ php bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ## 개발
 
 ```sh
-composer install
-vendor/bin/pint --test
-vendor/bin/phpunit
+make build-php
+make test-php
+make lint-php-format
 ```
+
+패키지는 자기 lock을 갖지 않는다. 저장소에서는 root에서 실행한 `composer install`이 root `composer.json`의 `path` repository로 이 패키지와 그 의존성을 root `vendor/`에 설치하고, `make test-php`는 그 directory의 `vendor/bin/phpunit`을 패키지의 `phpunit.xml`로 실행한다.
 
 테스트는 `tests/`에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.

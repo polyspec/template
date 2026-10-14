@@ -3,23 +3,17 @@
 
 // Runs the PHP adapter of the showcase on one scenario directory and prints its JSON report, or with
 // SHOWCASE_BENCH_ITERATIONS the measurements of its renders. The adapter classes are PSR-4 classes: the generated
-// declarations of the contract in generated/php-adapter and the adapter in php, which the class loader of the PHP
-// package loads.
+// declarations of the contract in generated/php-adapter and the adapter in php, which the autoload-dev of the root
+// composer.json maps.
 
 declare(strict_types=1);
 
-use Composer\Autoload\ClassLoader;
 use Polyspec\Showcase\Adapter\Php\Adapter;
 use Polyspec\Showcase\Adapter\Php\Output;
 use Polyspec\Showcase\Adapter\RenderRequest;
 use Polyspec\Template\PreparedRender;
 
-$loader = require dirname(__DIR__, 3) . '/packages/php/vendor/autoload.php';
-if (!$loader instanceof ClassLoader) {
-    throw new RuntimeException('packages/php/vendor/autoload.php returned no class loader');
-}
-$loader->addPsr4('Polyspec\\Showcase\\Adapter\\', __DIR__ . '/generated/php-adapter');
-$loader->addPsr4('Polyspec\\Showcase\\Adapter\\Php\\', __DIR__ . '/php');
+require dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 $scenarioRoot = $argv[1] ?? null;
 if ($scenarioRoot === null) {

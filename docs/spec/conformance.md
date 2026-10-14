@@ -55,7 +55,7 @@ The runner passes each option as one argument, `--name=value`, so that a value t
 | ts | `node packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
 | go | `packages/go/template` |
 | rust | `packages/rust/target/release/template` |
-| php | `php packages/php/bin/template.php` |
+| php | `php vendor/bin/template.php` |
 | php-ext | `php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ext.php` |
 | python | `var/python/venv/bin/python -m polyspec.template.cli` (`make python-package` installs `packages/python` into `var/python/venv`) |
 

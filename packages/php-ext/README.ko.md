@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-ext-readme -->
-<!-- source-sha256: b8497bf6fa64232f8f69cec882e0af817d6617c00f693623aacb4f07e2a5d6fe -->
+<!-- source-sha256: d8ac9c864d0cb98bf16234f35bbd5b9cfc4d77484730d2e2db7fdab7b26613d9 -->
 # polyspec_template PHP 확장
 
 [English](README.md).
@@ -80,13 +80,12 @@ php -d extension=var/build/polyspec_template.so packages/php-ext/bin/template-ex
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. 명령은 PHP 패키지의 명령(`Polyspec\Template\Cli\CommandLine`)이며 네이티브 엔진을 런타임으로 쓰는 `Polyspec\Template\Native\NativeRuntime` 위에서 실행된다. `format`은 PHP 패키지의 포매터를 네이티브 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
 
-이 패키지는 포매터를 가진 PHP 패키지 `polyspec/template`을 같은 버전으로 요구하므로(`composer.json`의 `require`) `composer install --no-dev` 뒤에도 `format`이 실행된다. 릴리스는 그것을 버전으로만 적고 `repositories`를 선언하지 않는다(`docs/operations/publication.md`). 이 저장소에서는 `composer.lock`이 그것을 `path` 소스 `../template-php`로 해석하므로 `composer install`이 체크아웃의 패키지를 링크한다. Composer는 `path` 저장소를 `composer.json`이 아니라 `COMPOSER_HOME`의 설정에서 받아 그 lock을 쓴다. 디렉터리 `DIR`에 `{"repositories": [{"type": "path", "url": "../template-php"}]}`의 `config.json`을 두고 이 디렉터리에서 `COMPOSER_HOME=DIR composer update polyspec/template`을 실행하면 갱신된다.
+이 패키지는 포매터를 가진 PHP 패키지 `polyspec/template`을 같은 버전으로 요구하므로(`composer.json`의 `require`) `composer install --no-dev` 뒤에도 `format`이 실행된다. 릴리스는 그것을 버전으로만 적고 `repositories`를 선언하지 않는다(`docs/operations/publication.md`). 패키지는 자기 lock을 갖지 않는다. Composer는 `php-ext` type의 패키지를 설치하지 않으므로, 이 저장소에서는 발행하지 않는 root `composer.json`이 `path` repository로 `polyspec/template`을 `packages/php`로 해석하고 `php/`의 class와 `tests/`의 test를 map한다. root에서 실행한 `composer install`이 그것들을 root `vendor/`에 설치하고 `bin/template-ext.php`가 그것을 로드한다.
 
 ## 테스트
 
 ```sh
-composer install
 make test-ext
 ```
 
-`make test-ext`는 명령줄 인터페이스로 적합성 케이스를 실행하고, `tests/`의 스위트를 `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`으로 PHPUnit에서 실행한다. 이것은 빌드된 라이브러리를 로드하고 각 test를 경과 시간과 함께 출력한다. 단위 테스트의 템플릿은 `tests/templates`에 있다.
+`make test-ext`는 `make build-php`로 root `vendor/`를 설치하고, 명령줄 인터페이스로 적합성 케이스를 실행하고, `tests/`의 스위트를 `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`으로 PHPUnit에서 실행한다. 이것은 빌드된 라이브러리를 로드하고 각 test를 경과 시간과 함께 출력한다. 단위 테스트의 템플릿은 `tests/templates`에 있다.

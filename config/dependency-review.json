@@ -18,13 +18,8 @@
       ]
     },
     {
-      "lock": "packages/php/composer.lock",
-      "sha256": "6a76556453f5bada136ff196ab3ff31f4f4fa717a2e370735181ebd2ecb55e05",
-      "advisories": []
-    },
-    {
-      "lock": "packages/php-ext/composer.lock",
-      "sha256": "4e2861f7319a4fb8bce72d8235cbb1b15bad31792e574c75149744e3c2356d5f",
+      "lock": "composer.lock",
+      "sha256": "0d83b6863f0fba789b4cfd8ff2baf263a497daf8254e99afbfa592fee2f33ca7",
       "advisories": []
     },
     {
@@ -272,28 +267,14 @@
     },
     {
       "ecosystem": "composer",
-      "manifest": "packages/php/composer.json",
-      "package": "symfony/console",
-      "version": "v8.1.9",
-      "latest": "v8.1.9"
-    },
-    {
-      "ecosystem": "composer",
-      "manifest": "packages/php/composer.json",
+      "manifest": "composer.json",
       "package": "laravel/pint",
       "version": "v1.32.1",
       "latest": "v1.32.1"
     },
     {
       "ecosystem": "composer",
-      "manifest": "packages/php/composer.json",
-      "package": "phpunit/phpunit",
-      "version": "13.4.2",
-      "latest": "13.4.2"
-    },
-    {
-      "ecosystem": "composer",
-      "manifest": "packages/php-ext/composer.json",
+      "manifest": "composer.json",
       "package": "phpunit/phpunit",
       "version": "13.4.2",
       "latest": "13.4.2"

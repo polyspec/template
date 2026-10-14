@@ -64,6 +64,7 @@
     "packages/python/pyproject.toml": "archive"
   },
   "notReleased": {
+    "composer.json": "the development root of the Composer packages of packages/, never published",
     "packages/vscode/tests/integration/harness/package.json": "the harness of the VS Code integration test",
     "examples/showcase/adapters/rust/Cargo.toml": "the Rust adapter of the showcase",
     "examples/showcase/adapters/go/go.mod": "the Go adapter of the showcase, a module local to the repository",
