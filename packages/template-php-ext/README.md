@@ -77,7 +77,10 @@ php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/te
 php -d extension=var/build/polyspec_template.so packages/template-php-ext/bin/template-ext.php format FILE [--indent none|tab|N] [--delimiters OC]
 ```
 
-`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. `format` runs the formatter of the PHP package (`packages/template-php`, loaded through the development autoloader of this package) over the native analysis and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
+`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. `format` runs the formatter of the PHP package over the native analysis and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
+
+The package requires the PHP package `polyspec/template` at the same version (`require` of `composer.json`), which holds the formatter, so `format` also runs after `composer install --no-dev`. A release names it by version only and declares no `repositories`, as `docs/operations/publication.md` requires. In this repository `composer.lock` resolves it to `../template-php` with a `path` source, so `composer install` links the package of the checkout. Composer writes that lock when the `path` repository comes from the configuration of `COMPOSER_HOME` rather than from `composer.json`: with a `config.json` of `{"repositories": [{"type": "path", "url": "../template-php"}]}` in a directory `DIR`, `COMPOSER_HOME=DIR composer update polyspec/template` run in this directory updates it.
+
 ## Test
 
 ```sh
