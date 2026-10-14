@@ -11,12 +11,32 @@ use polyspec_template::{
 use std::fs;
 use std::path::Path;
 
-fn read_json(path: &Path) -> Option<Result<serde_json::Value, ErrorCode>> {
-    let bytes = fs::read(path).ok()?;
-    let Ok(text) = std::str::from_utf8(&bytes) else {
-        return Some(Err(ErrorCode::E_DATA_INVALID_UTF8));
+/// The bytes of an optional file of a case, or None when the case has no such file; any other read error fails the case.
+fn read_optional(path: &Path) -> Result<Option<Vec<u8>>, Failed> {
+    match fs::read(path) {
+        Ok(bytes) => Ok(Some(bytes)),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(error) => Err(format!("{}: {error}", path.display()).into()),
+    }
+}
+
+/// The JSON of an optional file of a case as the command line reads it: None when the case has no such file, or the
+/// value, or the code of the data error of its text.
+fn read_json(path: &Path) -> Result<Option<Result<serde_json::Value, ErrorCode>>, Failed> {
+    let Some(bytes) = read_optional(path)? else {
+        return Ok(None);
     };
-    Some(polyspec_template::read_json(text).map_err(|error| error.code))
+    let Ok(text) = std::str::from_utf8(&bytes) else {
+        return Ok(Some(Err(ErrorCode::E_DATA_INVALID_UTF8)));
+    };
+    Ok(Some(polyspec_template::read_json(text).map_err(|error| error.code)))
+}
+
+/// The text of an optional expected file of a case, or None when the case has no such file.
+fn read_text(path: &Path) -> Result<Option<String>, Failed> {
+    read_optional(path)?
+        .map(|bytes| String::from_utf8(bytes).map_err(|error| format!("{}: {error}", path.display()).into()))
+        .transpose()
 }
 
 enum Outcome {
@@ -24,7 +44,7 @@ enum Outcome {
     Error(TemplateError),
 }
 
-fn render_case(dir: &Path) -> Outcome {
+fn render_case(dir: &Path) -> Result<Outcome, Failed> {
     let engine = Engine::new(
         AstProgram::new(EngineOptions {
             loader: Some(Box::new(FsLoader::new(dir))),
@@ -33,34 +53,34 @@ fn render_case(dir: &Path) -> Outcome {
             delimiters: case_delimiters(dir),
             artifact_refresh: Default::default(),
         })
-        .expect("valid engine options"),
+        .map_err(|error| format!("engine options: {error}"))?,
     );
-    let assign = match read_json(&dir.join("data.json")) {
+    let assign = match read_json(&dir.join("data.json"))? {
         None => serde_json::Value::Object(Default::default()),
         Some(Ok(value)) => value,
-        Some(Err(code)) => return Outcome::Error(TemplateError::without_position(code, "input.tpl", "data")),
+        Some(Err(code)) => return Ok(Outcome::Error(TemplateError::without_position(code, "input.tpl", "data"))),
     };
     let mut options = RenderOptions::default();
-    match read_json(&dir.join("define.json")) {
+    match read_json(&dir.join("define.json"))? {
         None => {}
-        Some(Ok(define)) => options.define = defines_from_json(&define).expect("define"),
-        Some(Err(code)) => return Outcome::Error(TemplateError::without_position(code, "input.tpl", "define")),
+        Some(Ok(define)) => options.define = defines_from_json(&define).map_err(|error| format!("define.json: {error:?}"))?,
+        Some(Err(code)) => return Ok(Outcome::Error(TemplateError::without_position(code, "input.tpl", "define"))),
     }
-    match read_json(&dir.join("env.json")) {
+    match read_json(&dir.join("env.json"))? {
         None => {}
-        Some(Ok(env)) => options.env = Some(env_from_json(&env).expect("env")),
-        Some(Err(code)) => return Outcome::Error(TemplateError::without_position(code, "input.tpl", "env")),
+        Some(Ok(env)) => options.env = Some(env_from_json(&env).map_err(|error| format!("env.json: {error:?}"))?),
+        Some(Err(code)) => return Ok(Outcome::Error(TemplateError::without_position(code, "input.tpl", "env"))),
     }
     match engine.render(RenderTarget::Name("input.tpl"), &assign, &options) {
-        Ok(html) => Outcome::Html(html),
-        Err(RequestError::Template(error)) => Outcome::Error(error),
-        Err(RequestError::Argument(error)) => panic!("an AST program reported an argument error: {error}"),
+        Ok(html) => Ok(Outcome::Html(html)),
+        Err(RequestError::Template(error)) => Ok(Outcome::Error(error)),
+        Err(RequestError::Argument(error)) => Err(format!("an AST program reported an argument error: {error}").into()),
     }
 }
 
 /// One case: the AST of a case with expected.ast.json, then the output or the error of its render.
 fn conformance(dir: &Path) -> Result<(), Failed> {
-    if let Ok(expected) = fs::read_to_string(dir.join("expected.ast.json")) {
+    if let Some(expected) = read_text(&dir.join("expected.ast.json"))? {
         let source = fs::read(dir.join("input.tpl")).map_err(|error| format!("input.tpl: {error}"))?;
         let ast = parse(
             &source,
@@ -81,8 +101,8 @@ expected {expected}"
             .into());
         }
     }
-    let outcome = render_case(dir);
-    if let Ok(expected) = fs::read_to_string(dir.join("expected.error.json")) {
+    let outcome = render_case(dir)?;
+    if let Some(expected) = read_text(&dir.join("expected.error.json"))? {
         let expected: serde_json::Value = serde_json::from_str(&expected).map_err(|error| format!("expected.error.json: {error}"))?;
         return match outcome {
             Outcome::Error(error) => {
@@ -113,7 +133,14 @@ expected {expected:?}"
 /// libtest has no tests made at run time, so the target runs with libtest-mimic (`harness = false`).
 fn main() {
     let arguments = Arguments::from_args();
-    let trials = cases()
+    let all = cases();
+    // The suite holds every case of tests/cases; an empty or short list is a broken lister, not a passing suite.
+    assert!(
+        all.len() >= 200,
+        "expected the conformance cases of tests/cases, found {}",
+        all.len()
+    );
+    let trials = all
         .into_iter()
         .map(|(id, dir)| Trial::test(format!("conformance::{id}"), move || conformance(&dir)))
         .collect();

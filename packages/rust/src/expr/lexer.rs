@@ -5,50 +5,86 @@ use crate::source::Source;
 
 /// Token types. `Close` is the close delimiter of a tag when it is not an expression character.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(
-    missing_docs,
-    reason = "the variants are the token types of the expression lexer, named by their text"
-)]
 pub enum TokenType {
+    /// `IDENT`: an identifier.
     Ident,
+    /// `NUMBER`: a number literal.
     Number,
+    /// `STRING`: a string literal.
     Str,
+    /// `DOT_IDENT`: `.` followed by a member name.
     DotIdent,
+    /// `DOT_INDEX`: `.` followed by digits, as in `a.0`.
     DotIndex,
+    /// `LPAREN`: `(`.
     LParen,
+    /// `RPAREN`: `)`.
     RParen,
+    /// `LBRACKET`: `[`.
     LBracket,
+    /// `RBRACKET`: `]`.
     RBracket,
+    /// `COMMA`: `,`.
     Comma,
+    /// `PIPE`: `|`.
     Pipe,
+    /// `QUESTION`: `?`.
     Question,
+    /// `COLON`: `:`.
     Colon,
+    /// `DOUBLE_COLON`: `::` of a class call.
     DoubleColon,
+    /// `ELVIS`: `?:`.
     Elvis,
+    /// `COALESCE`: `??`.
     Coalesce,
+    /// `ARROW`: `=>` of a map entry.
     Arrow,
+    /// `SPREAD`: `...`.
     Spread,
+    /// `PLUS`: `+`.
     Plus,
+    /// `MINUS`: `-`.
     Minus,
+    /// `STAR`: `*`.
     Star,
+    /// `SLASH`: `/`.
     Slash,
+    /// `PERCENT`: `%`.
     Percent,
+    /// `BANG`: `!`.
     Bang,
+    /// `EQ`: `==`.
     Eq,
+    /// `NE`: `!=`.
     Ne,
+    /// `SEQ`: `===`.
     Seq,
+    /// `SNE`: `!==`.
     Sne,
+    /// `LT`: `<`.
     Lt,
+    /// `GT`: `>`.
     Gt,
+    /// `LE`: `<=`.
     Le,
+    /// `GE`: `>=`.
     Ge,
+    /// `AND`: `&&`.
     And,
+    /// `OR`: `||`.
     Or,
+    /// `IN`: the keyword `in`.
     In,
+    /// `NULL`: the keyword `null`.
     Null,
+    /// `TRUE`: the keyword `true`.
     True,
+    /// `FALSE`: the keyword `false`.
     False,
+    /// `EOF`: the end of the expression.
     Eof,
+    /// `CLOSE`: the close delimiter of the tag.
     Close,
 }
 

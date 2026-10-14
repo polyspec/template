@@ -1,5 +1,5 @@
 //! Shared test helpers: repository paths and structural JSON comparison.
-#![allow(dead_code, reason = "each test crate uses only some of the shared helpers")]
+#![expect(dead_code, reason = "each test crate uses only some of the shared helpers")]
 
 use std::path::{Path, PathBuf};
 
