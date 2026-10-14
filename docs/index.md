@@ -21,6 +21,7 @@
 | [`spec/conformance.md`](spec/conformance.md) | Fixture layout, CLI contract, comparison rules |
 | [`spec/examples.md`](spec/examples.md) | Complete page example |
 | [`spec/editor.md`](spec/editor.md) | Language service, LSP server and editor adapters |
+| [`spec/formatting.md`](spec/formatting.md) | Tokens, formatting style, indentation and the safety invariant of the formatter |
 
 The [execution plan](plans/execution-plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence. The [execution checklist](plans/execution-checklist.md) lists the tasks, their verification and their states.
 

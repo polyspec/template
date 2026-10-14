@@ -70,9 +70,10 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 ```sh
 node bin/template.mjs parse FILE [--root DIR] [--delimiters OC]
 node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+node bin/template.mjs tokens FILE [--root DIR] [--delimiters OC]
 ```
 
-`parse` prints the AST JSON. `render` prints the output. A template error prints the error JSON on stderr and exits with status 2.
+`parse` prints the AST JSON. `render` prints the output. `tokens` prints the tokens of the template as `[start, end, type]` with UTF-8 byte offsets ([formatting](../../docs/spec/formatting.md), FMT-1, FMT-2). A template error prints the error JSON on stderr and exits with status 2.
 ## Development
 
 ```sh

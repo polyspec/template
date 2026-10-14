@@ -1,5 +1,5 @@
 <!-- doc-id: docs-index -->
-<!-- source-sha256: 2a8f6903456a60b2d222815bd2fb7cc10cfad01fc90fc33d9bcf5bd43da8e449 -->
+<!-- source-sha256: 4dc1518d207d1573ba4fa57c9971f638176126b85f87d394b5ffe1bb9304d6a8 -->
 # 문서
 
 [English](/).
@@ -22,6 +22,7 @@
 | [`spec/conformance.md`](/ko/spec/conformance) | 픽스처 구조, CLI 계약, 비교 규칙 |
 | [`spec/examples.md`](/ko/spec/examples) | 완전한 페이지 예제 |
 | [`spec/editor.md`](/ko/spec/editor) | 언어 서비스, LSP 서버, 에디터 어댑터 |
+| [`spec/formatting.md`](/ko/spec/formatting) | 토큰, 포맷 스타일, 들여쓰기, 포매터의 안전 불변식 |
 
 [실행 계획](/ko/plans/execution-plan)은 웨이브, 그 의존 관계와 원인, 완료 기준, 완료 정의와 그 증거를 적는다. [실행 체크리스트](/ko/plans/execution-checklist)는 작업, 검증 방법, 상태를 나열한다.
 

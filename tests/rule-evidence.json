@@ -29,7 +29,7 @@
     },
     {
       "name": "conformance-protocol",
-      "rules": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "ERR-1", "ERR-3", "ERR-4", "ERR-6"],
+      "rules": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-16", "CNF-17", "ERR-1", "ERR-3", "ERR-4", "ERR-6"],
       "verification": "make conformance-all-modes",
       "files": ["tests/runner/conformance.mjs", "config/parity.json"]
     },
@@ -92,6 +92,12 @@
       "rules": ["EDT-1", "EDT-2", "EDT-3"],
       "verification": "make editor-boundary-check",
       "files": ["config/editor-boundaries.json"]
+    },
+    {
+      "name": "formatting",
+      "rules": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
+      "verification": "make test-ts test-language test-go test-rust test-python",
+      "files": ["packages/template-ts/tests/tokens.test.ts", "packages/template-ts/tests/parser/parser.test.ts", "packages/template-language/tests/format.test.ts", "packages/template-language/tests/indent.test.ts", "packages/template-language/tests/invariant.test.ts", "packages/template-language/tests/conformance.test.ts", "packages/template-go/parser/analyze_test.go", "packages/template-go/format/format_test.go", "packages/template-rust/tests/analyze.rs", "packages/template-rust/tests/format.rs", "packages/template-rust/tests/cases.rs", "packages/template-python/tests/test_case_tokens.py", "packages/template-python/tests/test_case_format.py", "packages/template-python/tests/test_format_cases.py"]
     },
     {
       "name": "editor-language-service",

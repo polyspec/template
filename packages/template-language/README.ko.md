@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-language-readme -->
-<!-- source-sha256: 99d9a1e532c2deed98f28eb9fff0557dc2936a23476af9394fa42b78731ba71f -->
+<!-- source-sha256: 883bd5a5f600b074a61cfd62137e003a5bd9dae499e46e629d8098911f26abdd -->
 # @polyspec/template-language
 
 [English](README.md).
@@ -31,4 +31,6 @@ template-fmt < page.tpl
 
 종료 상태 0은 성공, 1은 `--check`가 포맷되지 않은 파일을 찾았음, 2는 파싱되지 않는 파일, 다른 AST 또는 잘못된 인자가 있음을 뜻한다.
 
-포맷 스타일, 안전 불변식, 명령줄은 [포매터, 언어 서버, 에디터](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.
+`template-language format FILE [--indent none|tab|N] [--delimiters OC]`는 적합성 계약(CNF-4)의 format 명령이다. 포맷한 텍스트를 출력하거나, 포맷 오류를 표준 오류에 JSON으로 쓰고 종료 상태 2로 끝난다.
+
+포맷 스타일, 들여쓰기, 안전 불변식은 [포맷](../../docs/spec/formatting.ko.md)의 규칙이다. 명령줄은 [포매터, 언어 서버, 에디터](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.
