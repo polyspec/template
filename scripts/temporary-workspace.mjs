@@ -5,8 +5,9 @@
 //
 // - nodeWorkspace: an ES module directory whose node_modules holds copies of installed packages of this repository, so
 //   that tsc and Node.js resolve `@polyspec/template` from it as from the checkout. No symbolic link (AGENTS).
-// - rustWorkspace: a crate that depends on packages/template-rust by path, with the versions of its Cargo.lock; its
-//   tests build into the target of packages/template-rust, the target of this checkout (T18.7).
+// - rustWorkspace: a crate that depends on packages/template-rust by path, with the versions of its Cargo.lock and the
+//   rust-toolchain.toml of the repository; its tests build into the target of packages/template-rust, the target of this
+//   checkout (T18.7).
 // - goWorkspace: a module that requires the module of packages/template-go and replaces it with that directory.
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -67,6 +68,9 @@ publish = false
 polyspec-template = { path = ${JSON.stringify(RUST)} }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
 `);
+  // rustup selects the toolchain of the nearest rust-toolchain.toml above the working directory; the workspace is outside
+  // the checkout, so it carries the toolchain file of the repository and builds with the pinned Rust.
+  cpSync(join(root, 'rust-toolchain.toml'), join(directory, 'rust-toolchain.toml'));
   mkdirSync(join(directory, 'src'));
   writeFileSync(join(directory, 'src/lib.rs'), '');
   mkdirSync(join(directory, 'tests'));
