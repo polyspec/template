@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Polyspec\Template\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polyspec\Template\Cli\FormatCommand;
+use Polyspec\Template\Cli\PackageRuntime;
 
 /**
  * Command line contract (CNF-4).
@@ -55,6 +57,12 @@ final class CliTest extends TestCase
         $failed = self::runCli(['tokens', Support::casesDir() . '/errors/unclosed-block/input.tpl']);
         self::assertSame(2, $failed['status']);
         self::assertSame('E_PARSE_UNCLOSED_BLOCK', Support::json($failed['stderr'])['code']);
+    }
+
+    public function testFormatLeavesAnAbsentIndentToTheFormatter(): void
+    {
+        $indent = (new FormatCommand(new PackageRuntime()))->getDefinition()->getOption('indent');
+        self::assertNull($indent->getDefault());
     }
 
     public function testFormatPrintsTheFormattedText(): void

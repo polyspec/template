@@ -1,6 +1,7 @@
 // Command line arguments of template-fmt and of the conformance command template-language. Both parse with
 // node:util parseArgs.
 import { parseArgs, type ParseArgsOptionsConfig } from 'node:util';
+import type { FormatOptions } from '../format.js';
 
 /** What the command does with each input. */
 export type Mode = 'print' | 'write' | 'check';
@@ -9,10 +10,8 @@ export type Mode = 'print' | 'write' | 'check';
 export interface Arguments {
   mode: Mode;
   help: boolean;
-  delimiters: string | undefined;
-  /** The indent unit, or null for --indent none. */
-  indent: string | null;
-  templateBlocks: 'indent' | 'flat';
+  /** The format options of the arguments; an option that is absent is left out, so the default of format applies. */
+  format: FormatOptions;
   paths: string[];
 }
 
@@ -81,15 +80,25 @@ export function parseArguments(argv: readonly string[]): Arguments | string {
   if (typeof shared === 'string') return shared;
   const templateBlocks = values['template-blocks'];
   if (templateBlocks !== 'indent' && templateBlocks !== 'flat') return '--template-blocks requires indent or flat';
-  return { mode: values.write ? 'write' : values.check ? 'check' : 'print', help: values.help, ...shared, templateBlocks, paths: positionals };
+  return { mode: values.write ? 'write' : values.check ? 'check' : 'print', help: values.help, format: { ...shared, templateBlocks }, paths: positionals };
 }
 
-/** The indent unit and delimiters of the values of FORMAT_OPTIONS, or the message of an invalid value. */
-export function formatOptions(values: { indent?: string | undefined; delimiters?: string | undefined }): { indent: string | null; delimiters: string | undefined } | string {
-  const indent = values.indent === undefined ? '  ' : indentUnit(values.indent);
-  if (indent === undefined) return '--indent requires a number from 1 to 8, tab or none';
-  if (values.delimiters !== undefined && values.delimiters.length !== 2) return '--delimiters requires two characters';
-  return { indent, delimiters: values.delimiters };
+/**
+ * The indent unit and delimiters of the values of FORMAT_OPTIONS, or the message of an invalid value. An option that is
+ * absent is left out, so the default of format applies.
+ */
+export function formatOptions(values: { indent?: string | undefined; delimiters?: string | undefined }): Pick<FormatOptions, 'indent' | 'delimiters'> | string {
+  const options: Pick<FormatOptions, 'indent' | 'delimiters'> = {};
+  if (values.indent !== undefined) {
+    const indent = indentUnit(values.indent);
+    if (indent === undefined) return '--indent requires a number from 1 to 8, tab or none';
+    options.indent = indent;
+  }
+  if (values.delimiters !== undefined) {
+    if (values.delimiters.length !== 2) return '--delimiters requires two characters';
+    options.delimiters = values.delimiters;
+  }
+  return options;
 }
 
 /** The indent unit of an --indent value: `N` (1 to 8 spaces), `tab`, or `none` (null); undefined for any other value. */

@@ -5,6 +5,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { formatOptions } from '../src/cli/args.js';
 import { packageRoot } from './helpers.js';
 
 const bin = join(packageRoot, 'bin', 'template-language.mjs');
@@ -76,4 +77,11 @@ describe('template-language format', () => {
     expect(missing.stderr).toMatch(/cannot read .*missing\.tpl: ENOENT/);
   });
 
+});
+
+describe('formatOptions', () => {
+  it('leaves out an absent --indent and --delimiters, so the defaults of format apply', () => {
+    expect(formatOptions({})).toStrictEqual({});
+    expect(formatOptions({ indent: 'none', delimiters: '<>' })).toStrictEqual({ indent: null, delimiters: '<>' });
+  });
 });

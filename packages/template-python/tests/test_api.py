@@ -29,6 +29,7 @@ from polyspec.template import (
     parse_json_bytes,
     resolve_path,
 )
+from polyspec.template.cli import _arguments
 from polyspec.template.errors import TemplateError as TE
 from polyspec.template.number import format_number, number_to_string, round_number
 from polyspec.template.values import loose_equals, parse_numeric_string
@@ -454,6 +455,10 @@ class CommandLine(unittest.TestCase):
         result = command("tokens", "broken.tpl")
         self.assertEqual(result.returncode, 2)
         self.assertEqual(json.loads(result.stderr)["code"], "E_PARSE_UNTERMINATED_TAG")
+
+    def test_format_leaves_an_absent_indent_to_the_formatter(self):
+        arguments = _arguments().parse_args(["format", "t.tpl"])
+        self.assertNotIn("indent", vars(arguments))
 
     def test_format_writes_the_formatted_text_without_a_newline(self):
         with tempfile.TemporaryDirectory() as directory:
