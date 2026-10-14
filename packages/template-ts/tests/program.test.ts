@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { AstProgram, Engine, MapLoader, type Program } from '../src/index.js';
+import { stringify } from '../src/value/stringify.js';
 
 describe('program', () => {
   it('delegates prepare and render to one complete program', () => {
@@ -30,7 +31,7 @@ describe('program', () => {
   it('calls a registered logical class function', () => {
     const engine = new AstProgram({
       loader: new MapLoader(new Map([['page.tpl', '{= Order::status_label("ready")}']])),
-      classFunctions: { 'Order::status_label': ([value]) => `${value}:ok` },
+      classFunctions: { 'Order::status_label': ([value]) => `${stringify(value)}:ok` },
     });
     expect(engine.render('page.tpl', {})).toBe('ready:ok');
   });

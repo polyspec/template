@@ -56,12 +56,12 @@ if (formatFileFailures(original, validators).length) throw new Error(`the commit
 for (const [name, mutate] of mutations) {
   const cases = structuredClone(original);
   mutate(cases);
-  if (!astPresenceFailures(cases).length) throw new Error(`accepted mutation: ${name}`);
+  if (!astPresenceFailures(cases).length) throw new Error(`accepted mutation: ${String(name)}`);
 }
 for (const [name, mutate] of fileMutations) {
   const cases = structuredClone(original);
   mutate(cases.find(testCase => testCase.id === withAst.id));
-  if (!formatFileFailures(cases, validators).length) throw new Error(`accepted mutation: ${name}`);
+  if (!formatFileFailures(cases, validators).length) throw new Error(`accepted mutation: ${String(name)}`);
 }
 for (const [name, mutate] of [
   ['expected.tokens.json for a parse error', testCase => { testCase.tokens = []; }],
@@ -69,6 +69,6 @@ for (const [name, mutate] of [
 ]) {
   const cases = structuredClone(original);
   mutate(cases.find(testCase => testCase.id === parseError.id));
-  if (!formatFileFailures(cases, validators).length) throw new Error(`accepted mutation: ${name}`);
+  if (!formatFileFailures(cases, validators).length) throw new Error(`accepted mutation: ${String(name)}`);
 }
 process.stdout.write(`[schema] ${mutations.length} AST presence mutations and ${fileMutations.length + 2} token and format file mutations rejected\n`);

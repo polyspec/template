@@ -45,7 +45,7 @@ try {
       encoding: 'utf8',
       maxBuffer: 16 * 1024 * 1024,
     });
-    if (result.status === 0) throw new Error(`${name} was accepted`);
+    if (result.status === 0) throw new Error(`${String(name)} was accepted`);
     rejected++;
   }
   const backendDirectory = join(directory, 'backends');
