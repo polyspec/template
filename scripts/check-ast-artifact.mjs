@@ -38,7 +38,7 @@ try {
   assert.equal(customAst.body[1].type, 'Echo');
   const customBytes = readFileSync(join(output, 'manifest.json'));
 
-  const customUnchanged = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true', delimiters: '[]' });
+  compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true', delimiters: '[]' });
   assert.deepEqual(readFileSync(join(output, 'manifest.json')), customBytes);
 
   writeFileSync(join(source, 'layout.tpl'), "[[+ 'notes']]");

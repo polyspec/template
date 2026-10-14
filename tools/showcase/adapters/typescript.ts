@@ -71,12 +71,6 @@ function numberField(object: JsonObject, name: string): number {
   return value;
 }
 
-function booleanField(object: JsonObject, name: string): boolean {
-  const value = object.get(name);
-  if (typeof value !== 'boolean') throw new Error(name + ' must be a boolean');
-  return value;
-}
-
 function defineValue(value: unknown): DefineRegistry {
   const object = objectValue(value, 'define.json');
   const define: DefineRegistry = new Map();

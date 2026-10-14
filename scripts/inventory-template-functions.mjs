@@ -3,7 +3,7 @@
 // The input root is explicit because it is an external source tree.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
 const args = process.argv.slice(2);
 const valueFor = name => {

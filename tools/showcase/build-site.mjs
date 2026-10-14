@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds the showcase as complete static HTML. The browser does not parse or render templates.
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { analyze, AstProgram, MapLoader } from '../../packages/template-ts/dist/index.mjs';
 import { root } from '../../tests/runner/drivers.mjs';
