@@ -1,11 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 39d2a274e7dd4e5d14c4cb10d984c0bff282721a5a928984b6d98234b6f40613 -->
+<!-- source-sha256: 64b7111f5ed0352cfdef9fb455de85cfbde0f6c920182e5386231db40df21d5b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T25.2: 생성된 Rust의 소비자는 program을 crate의 module 파일(`mod generated;`로 선언한 `src/generated.rs` 같은)이 아니라 `include!`로, `build.rs` 뒤의 `OUT_DIR`에서 또는 commit한 파일에서 crate에 넣습니다: rustfmt는 crate의 module 파일을 format하고 그 배치가 compiler의 것인 include된 파일은 format하지 않으며, clippy가 include된 코드를 lint합니다(`docs/spec/compiler.md`).
+- T25.2: 생성된 PHP는 줄을 PSR-12의 120열 안에 둡니다: 그 열을 넘을 인자 목록, 배열, 제어 구조의 조건, 연산자 연결은 한 줄에 항목 하나씩 한 단계 들여 나누고, 긴 schema 상수는 `.`로 이은 literal의 상수 식입니다. `&&`, `||`, `??`의 오른쪽 피연산자는 lazy로 남습니다(case `expr/lazy-long-operands`, `tests/scripts/generated-php-layout.test.mjs`). PHP literal은 모든 제어 문자를 큰따옴표 escape로 씁니다. `make generated-lint-check`는 phpcs를 경고와 함께 실행합니다.
 - T24.3: generated 검사와 generated Rust 적합성 runner의 임시 Rust crate는 저장소의 `rust-toolchain.toml`을 가지므로, rustup은 기계의 기본 toolchain이 아니라 crate의 `rust-version`이 요구하는 고정된 Rust 1.99.0으로 build합니다.
 - T24.6: compiler가 oxlint를 통과합니다: backend는 쓰는 것만 import하고 없는 record나 field map을 빈 fallback 없이 spread하며, IR의 ternary는 node를 thenable로 만들던 `then` 대신 참 분기를 `consequent`라 부르고, type manifest의 함수 목록은 명시적 비교로 정렬합니다.
 - T25.1: PHP target은 출력 directory에 PSR-12로 class마다 PSR-4 파일 하나를 쓰며, class 이름은 PascalCase이고 template은 `GeneratedTemplates`의 static method, program이 쓰는 helper는 `GeneratedRuntime`의 static method입니다. `compileFiles`가 파일을 반환하고 `compileSource`는 파일 하나의 target을 위한 것이며, artifact manifest는 모든 파일을 나열합니다. Showcase는 PHP program을 `tools/showcase/adapters/generated/php/<scenario>/`에 쓰고, showcase adapter, generated PHP 적합성 runner, generated 검사, package install 검사는 Composer의 PSR-4 autoload로 이를 load합니다(`scripts/php-program.mjs`).

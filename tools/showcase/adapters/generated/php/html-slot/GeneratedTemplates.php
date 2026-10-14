@@ -12,19 +12,41 @@ use Polyspec\Template\Value\MapValue;
 
 final class GeneratedTemplates
 {
-    public static function render(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    public static function render(
+        string $target,
+        Assign $assign,
+        Definitions $definitions,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         switch ($target) {
             case 'layout.tpl':
-                self::renderLayoutTpl($assign, $definitions, new InputLayoutTpl(), $context, $runtime, $rootData, $scope);
+                self::renderLayoutTpl(
+                    $assign,
+                    $definitions,
+                    new InputLayoutTpl(),
+                    $context,
+                    $runtime,
+                    $rootData,
+                    $scope,
+                );
                 return;
             default:
                 throw $context->fail('E_LOAD_NOT_FOUND', null, null, 'template ' . $target . ' does not exist');
         }
     }
 
-    private static function renderLayoutTpl(Assign $assign, Definitions $definitions, InputLayoutTpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    private static function renderLayoutTpl(
+        Assign $assign,
+        Definitions $definitions,
+        InputLayoutTpl $input,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         $frame = new Frame('layout.tpl', [0, 25, 46, 58, 69], $rootData);
         $context->at($frame, [0, 29]);
         $context->write(('<section class="notice">' . "\n" . '<h1>'));

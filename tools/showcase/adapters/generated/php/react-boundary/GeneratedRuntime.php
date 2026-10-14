@@ -11,9 +11,18 @@ use Polyspec\Template\Value\MapValue;
 
 final class GeneratedRuntime
 {
-    private const RECORDS_SCHEMA = 'eyJQYWdlIjp7InRpdGxlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX19LCJTbG90Ijp7InRlbXBsYXRlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX0sImh0bWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjp0cnVlfX19';
-    private const ASSIGN_SCHEMA = 'eyJ0aXRsZSI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOnRydWV9LCJoZWFkaW5nIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX0sImlzbGFuZF9sYWJlbCI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOnRydWV9LCJyb290X2xhYmVsIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX0sImRlZmluZWRfbGFiZWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbmFsIjp0cnVlfSwicGFnZSI6eyJraW5kIjoicmVjb3JkIiwibmFtZSI6IlBhZ2UiLCJvcHRpb25hbCI6dHJ1ZX19';
-    private const DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6ImNvbnRlbnQudHBsIiwiaHRtbCI6dHJ1ZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YUNvbnRlbnRUcGwiLCJpbnB1dCI6e319LCJsYXlvdXQiOnsiZmllbGQiOiJsYXlvdXQiLCJ0YXJnZXQiOiJsYXlvdXQudHBsIiwiaHRtbCI6ZmFsc2UsImNsYXNzIjoiRGVmaW5pdGlvbkRhdGFMYXlvdXRUcGwiLCJpbnB1dCI6e319fQ==';
+    private const RECORDS_SCHEMA = 'eyJQYWdlIjp7InRpdGxlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX19LCJTbG90Ijp7In'
+        . 'RlbXBsYXRlIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX0sImh0bWwiOnsia2luZCI6InN0cmluZyIsIm9wdGlvbm'
+        . 'FsIjp0cnVlfX19';
+    private const ASSIGN_SCHEMA = 'eyJ0aXRsZSI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOnRydWV9LCJoZWFkaW5nIjp7ImtpbmQiOiJ'
+        . 'zdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX0sImlzbGFuZF9sYWJlbCI6eyJraW5kIjoic3RyaW5nIiwib3B0aW9uYWwiOnRydWV9LCJ'
+        . 'yb290X2xhYmVsIjp7ImtpbmQiOiJzdHJpbmciLCJvcHRpb25hbCI6dHJ1ZX0sImRlZmluZWRfbGFiZWwiOnsia2luZCI6InN0cml'
+        . 'uZyIsIm9wdGlvbmFsIjp0cnVlfSwicGFnZSI6eyJraW5kIjoicmVjb3JkIiwibmFtZSI6IlBhZ2UiLCJvcHRpb25hbCI6dHJ1ZX1'
+        . '9';
+    private const DEFINITION_SCHEMA = 'eyJjb250ZW50Ijp7ImZpZWxkIjoiY29udGVudCIsInRhcmdldCI6ImNvbnRlbnQudHBsIiwiaHRtbCI'
+        . '6dHJ1ZSwiY2xhc3MiOiJEZWZpbml0aW9uRGF0YUNvbnRlbnRUcGwiLCJpbnB1dCI6e319LCJsYXlvdXQiOnsiZmllbGQiOiJsYXl'
+        . 'vdXQiLCJ0YXJnZXQiOiJsYXlvdXQudHBsIiwiaHRtbCI6ZmFsc2UsImNsYXNzIjoiRGVmaW5pdGlvbkRhdGFMYXlvdXRUcGwiLCJ'
+        . 'pbnB1dCI6e319fQ==';
 
     public static function schema(string $encoded): array
     {

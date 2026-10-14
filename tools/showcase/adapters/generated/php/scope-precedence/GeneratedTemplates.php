@@ -12,19 +12,41 @@ use Polyspec\Template\Value\MapValue;
 
 final class GeneratedTemplates
 {
-    public static function render(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    public static function render(
+        string $target,
+        Assign $assign,
+        Definitions $definitions,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         switch ($target) {
             case 'layout.tpl':
-                self::renderLayoutTpl($assign, $definitions, new InputLayoutTpl(), $context, $runtime, $rootData, $scope);
+                self::renderLayoutTpl(
+                    $assign,
+                    $definitions,
+                    new InputLayoutTpl(),
+                    $context,
+                    $runtime,
+                    $rootData,
+                    $scope,
+                );
                 return;
             default:
                 throw $context->fail('E_LOAD_NOT_FOUND', null, null, 'template ' . $target . ' does not exist');
         }
     }
 
-    private static function renderContentTpl(Assign $assign, Definitions $definitions, InputContentTpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    private static function renderContentTpl(
+        Assign $assign,
+        Definitions $definitions,
+        InputContentTpl $input,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         $frame = new Frame('content.tpl', [0, 10, 29, 64, 105, 164, 175], $rootData);
         $scope->locals->set('title', $input->title);
         $scope->locals->set('root_label', $input->root_label);
@@ -45,13 +67,26 @@ final class GeneratedTemplates
         $context->at($frame, [100, 122]);
         $context->write(('</p>' . "\n" . '<p class="local">'));
         $context->at($frame, [122, 159]);
-        $context->write($runtime->escape($runtime->call('default', [$scope->lookup($frame, 'layout_local'), 'missing'], $frame, [125, 158]), $frame, [125, 158]));
+        $context->write(
+            $runtime->escape(
+                $runtime->call('default', [$scope->lookup($frame, 'layout_local'), 'missing'], $frame, [125, 158]),
+                $frame,
+                [125, 158],
+            ),
+        );
         $context->at($frame, [159, 175]);
         $context->write(('</p>' . "\n" . '</article>' . "\n"));
     }
 
-    private static function renderLayoutTpl(Assign $assign, Definitions $definitions, InputLayoutTpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    private static function renderLayoutTpl(
+        Assign $assign,
+        Definitions $definitions,
+        InputLayoutTpl $input,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         $frame = new Frame('layout.tpl', [0, 44, 68, 97, 108], $rootData);
         $scope->locals->set('layout_local', 'visible only in layout');
         $context->at($frame, [44, 68]);
@@ -65,9 +100,26 @@ final class GeneratedTemplates
             $context->write($definition->html);
         } else {
             if ($definition?->data !== null && !($definition->data instanceof DefinitionDataContentTpl)) {
-                throw $runtime->error($frame, [68, 96], 'E_RUNTIME_TYPE', 'generated definition content data has an invalid type');
+                throw $runtime->error(
+                    $frame,
+                    [68, 96],
+                    'E_RUNTIME_TYPE',
+                    'generated definition content data has an invalid type',
+                );
             }
-            $input = new InputContentTpl(title: ($definition?->data !== null && $definition->data->has_title ? $definition->data->title : throw $runtime->error($frame, [68, 96], 'E_RUNTIME_TYPE', 'generated input content.tpl.title is missing')), root_label: $assign->root_label, defined_label: $assign->defined_label, layout_local: null);
+            $input = new InputContentTpl(
+                title: ($definition?->data !== null && $definition->data->has_title
+                    ? $definition->data->title
+                    : throw $runtime->error(
+                        $frame,
+                        [68, 96],
+                        'E_RUNTIME_TYPE',
+                        'generated input content.tpl.title is missing',
+                    )),
+                root_label: $assign->root_label,
+                defined_label: $assign->defined_label,
+                layout_local: null,
+            );
             if ($definition?->data !== null) {
                 if ($definition->data->has_title) {
                     $input->title = $definition->data->title;

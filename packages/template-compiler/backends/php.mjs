@@ -23,6 +23,63 @@ const lines = (...parts) => parts.flat().filter(part => part !== '').join('\n');
 const braced = (head, ...body) => `${head} {\n${spaces(1, lines(...body))}\n}`;
 /** A method or function with its brace on the next line, as PSR-12 places it. */
 const method = (head, ...body) => `${head}\n{\n${spaces(1, lines(...body))}\n}`;
+// A group stays on one line, or, when its line passes 120 columns, splits as PSR-12 splits it: an argument list or the
+// elements of an array hold one item per line, indented once, with a trailing comma (sections 4.7 and 4.5); the
+// condition of a control structure goes on its own line between its parentheses (section 5); an operator chain keeps
+// its first operand on the line and starts each further operand, with its operator, on a line indented once
+// (section 6). The markers are control characters, which no PHP literal of the program holds (phpString escapes them).
+const kinds = {
+  list: { open: '\u0001', separator: '\u0002', close: '\u0003' },
+  condition: { open: '\u0004', separator: '\u0005', close: '\u0006' },
+  operator: { open: '\u000e', separator: '\u000f', close: '\u0010' },
+};
+const markers = Object.values(kinds).flatMap(kind => [kind.open, kind.separator, kind.close]);
+const group = (kind, items, joiner) => items.length === 0 ? '' : `${kinds[kind].open}${items.join(`${joiner}${kinds[kind].separator}`)}${kinds[kind].close}`;
+const call = (callee, items) => `${callee}(${group('list', items, ',')})`;
+const array = items => `[${group('list', items, ',')}]`;
+const condition = test => group('condition', [test], '');
+const chain = (first, ...rest) => group('operator', [first, ...rest], '');
+const flat = line => [...line].map(character => Object.values(kinds).some(kind => kind.separator === character) ? ' ' : markers.includes(character) ? '' : character).join('');
+const WIDTH = 120;
+
+/** The lines of `line`: the line itself when it fits, or its first group split, and every resulting line in turn. */
+function layout(line) {
+  const start = [...line].findIndex(character => Object.values(kinds).some(kind => kind.open === character));
+  if (flat(line).length <= WIDTH || start < 0) return [flat(line)];
+  const kind = Object.values(kinds).find(item => item.open === line[start]);
+  const indentation = /^ */.exec(line)[0];
+  const items = [];
+  let depth = 0;
+  let item = start + 1;
+  let end = -1;
+  for (let index = start + 1; index < line.length && end < 0; index += 1) {
+    const character = line[index];
+    if (Object.values(kinds).some(other => other.open === character)) depth += 1;
+    else if (Object.values(kinds).some(other => other.close === character) && depth > 0) depth -= 1;
+    else if (character === kind.close) end = index;
+    else if (character === kind.separator && depth === 0) {
+      items.push(line.slice(item, index));
+      item = index + 1;
+    }
+  }
+  items.push(line.slice(item, end));
+  const head = line.slice(0, start);
+  const tail = line.slice(end + 1);
+  const inner = text => `${indentation}    ${text}`;
+  if (kind === kinds.operator) {
+    return [
+      ...layout(`${head}${items[0]}`),
+      ...items.slice(1).flatMap((text, index) => layout(inner(index === items.length - 2 ? `${text}${tail}` : text))),
+    ];
+  }
+  const trailing = kind === kinds.list ? ',' : '';
+  return [
+    ...layout(head),
+    ...items.flatMap((text, index) => layout(inner(`${text}${index === items.length - 1 ? trailing : ''}`))),
+    ...layout(`${indentation}${tail}`),
+  ];
+}
+
 const guarded = (call, cleanup) => `${braced('try', call)} ${braced('finally', cleanup)}`;
 
 // The classes that a file may use, by their short names.
@@ -49,7 +106,8 @@ function phpFile(namespace, code) {
     .filter(([name]) => new RegExp(`(?<![\\\\$>:\\w])${name}\\b`).test(code))
     .map(([, name]) => `use ${name};`)
     .sort();
-  return ['<?php', 'declare(strict_types=1);', `namespace ${namespace};`, ...(uses.length > 0 ? [uses.join('\n')] : []), code].join('\n\n');
+  const laid = code.split('\n').flatMap(layout).join('\n');
+  return ['<?php', 'declare(strict_types=1);', `namespace ${namespace};`, ...(uses.length > 0 ? [uses.join('\n')] : []), laid].join('\n\n');
 }
 
 /** A final class whose constructor promotes `parameters`, one per line. */
@@ -92,18 +150,18 @@ const encoded = value => Buffer.from(JSON.stringify(value)).toString('base64');
 export function createTarget({ program }) {
   const target = baseTarget(language);
   const span = node => phpLiteral(node.span);
-  target.var = (name, _type, node) => program.dynamicRoot ? node.scope ? `$scope->lookup($frame, ${phpLiteral(name)})` : `$runtime->member($rootData, ${phpLiteral(name)}, $frame, ${span(node)})` : `$assign->${name}`;
-  target.local = name => `$scope->lookup($frame, ${phpLiteral(name)})`;
-  target.set = (name, value, level) => spaces(level, `$scope->locals->set(${phpLiteral(name)}, ${value});`);
-  target.member = (object, key, owner, node) => owner.kind === 'any' ? `$runtime->member(${object}, ${phpLiteral(key)}, $frame, ${span(node)})` : `${object}?->${key}`;
-  const write = (node, value) => `$context->at($frame, ${span(node)});\n$context->write(${value});`;
+  target.var = (name, _type, node) => program.dynamicRoot ? node.scope ? call('$scope->lookup', ['$frame', phpLiteral(name)]) : call('$runtime->member', ['$rootData', phpLiteral(name), '$frame', span(node)]) : `$assign->${name}`;
+  target.local = name => call('$scope->lookup', ['$frame', phpLiteral(name)]);
+  target.set = (name, value, level) => spaces(level, `${call('$scope->locals->set', [phpLiteral(name), value])};`);
+  target.member = (object, key, owner, node) => owner.kind === 'any' ? call('$runtime->member', [object, phpLiteral(key), '$frame', span(node)]) : `${object}?->${key}`;
+  const write = (node, value) => `${call('$context->at', ['$frame', span(node)])};\n${call('$context->write', [value])};`;
   target.text = (value, level, node) => spaces(level, write(node, phpLiteral(value)));
-  target.echo = (expression, level, node) => spaces(level, write(node, `$runtime->escape(${expression}, $frame, ${phpLiteral(node.expr.span)})`));
-  const error = (node, code, message) => `$runtime->error($frame, ${span(node)}, '${code}', ${phpLiteral(message)})`;
-  const enter = (node, call) => [
+  target.echo = (expression, level, node) => spaces(level, write(node, call('$runtime->escape', [expression, '$frame', phpLiteral(node.expr.span)])));
+  const error = (node, code, message) => call('$runtime->error', ['$frame', span(node), `'${code}'`, phpLiteral(message)]);
+  const enter = (node, render) => [
     '$blockScope = new Scope();',
-    `$context->enter(${phpLiteral(node.target)}, $frame, ${span(node)});`,
-    guarded(`self::${call};`, '$context->leave();'),
+    `${call('$context->enter', [phpLiteral(node.target), '$frame', span(node)])};`,
+    guarded(`self::${render};`, '$context->leave();'),
   ];
   target.block = (node, n) => {
     if (node.target === null) {
@@ -116,18 +174,18 @@ export function createTarget({ program }) {
     const fallbackValue = item => {
       if (item.root) return emitExpression(item.root, target);
       if (item.valueType.optional) return 'null';
-      if (node.id !== null) return `($definition?->data !== null && $definition->data->has_${fieldName(item.name)} ? $definition->data->${fieldName(item.name)} : ${missing(item)})`;
+      if (node.id !== null) return `(${chain(`$definition?->data !== null && $definition->data->has_${fieldName(item.name)}`, `? $definition->data->${fieldName(item.name)}`, `: ${missing(item)}`)})`;
       return missing(item);
     };
-    const construct = `$input = new ${inputClass(node.target)}(${node.inputs.map(item => `${fieldName(item.name)}: ${fallbackValue(item)}`).join(', ')});`;
+    const construct = `$input = ${call(`new ${inputClass(node.target)}`, node.inputs.map(item => `${fieldName(item.name)}: ${fallbackValue(item)}`))};`;
     const defined = node.inputs.map(item => braced(`if ($definition->data->has_${fieldName(item.name)})`, `$input->${fieldName(item.name)} = $definition->data->${fieldName(item.name)};`));
     const scoped = node.inputs.filter(item => item.scope).map(item => `$input->${fieldName(item.name)} = ${emitExpression(item.scope, target)};`);
-    const call = `${renderMethod(node.target)}($assign, $definitions, $input, $context, $runtime, $rootData, $blockScope)`;
-    if (node.id === null) return spaces(n, lines(construct, scoped, enter(node, call)));
+    const render = call(renderMethod(node.target), ['$assign', '$definitions', '$input', '$context', '$runtime', '$rootData', '$blockScope']);
+    if (node.id === null) return spaces(n, lines(construct, scoped, enter(node, render)));
     const field = fieldName(node.id);
     const registration = node.path === null
       ? braced('if ($definition === null)', `throw ${error(node, 'E_RUNTIME_BLOCK_UNDEFINED', `define ${node.id} is not registered`)};`)
-      : `${braced('if ($definition === null)', `$definition = new Definition(template: ${phpLiteral(node.target)});`, `$definitions->${field} = $definition;`)} ${braced(`elseif ($definition->html !== null || $definition->template !== ${phpLiteral(node.target)})`, `throw ${error(node, 'E_RUNTIME_BLOCK_REDEFINED', `define ${node.id} is registered with a different template`)};`)}`;
+      : `${braced('if ($definition === null)', `$definition = ${call('new Definition', [`template: ${phpLiteral(node.target)}`])};`, `$definitions->${field} = $definition;`)} ${braced(`elseif ($definition->html !== null || $definition->template !== ${phpLiteral(node.target)})`, `throw ${error(node, 'E_RUNTIME_BLOCK_REDEFINED', `define ${node.id} is registered with a different template`)};`)}`;
     return spaces(n, lines(
       `$definition = $definitions->${field};`,
       registration,
@@ -136,34 +194,34 @@ export function createTarget({ program }) {
         construct,
         defined.length > 0 ? braced('if ($definition?->data !== null)', defined) : '',
         scoped,
-        enter(node, call))}`));
+        enter(node, render))}`));
   };
   target.ifBlock = (node, n) => spaces(n, `${braced(`if ($definitions->${fieldName(node.id)} !== null)`, emitNodes(node.body, target, 0))}${node.otherwise ? ` ${braced('else', emitNodes(node.otherwise, target, 0))}` : ''}`);
-  target.loopMeta = (loop, field) => `$scope->loopMeta(${phpLiteral(loop)})[${phpLiteral(field)}]`;
-  target.index = (object, index, _owner, node) => `$runtime->index(${object}, ${index}, $frame, ${span(node)})`;
-  target.memberCall = (object, method, args, node) => `$runtime->memberCall(${object}, ${phpLiteral(method)}, [${args.join(', ')}], $frame, ${span(node)})`;
-  target.classCall = (className, method, args, node) => `$runtime->classCall(${phpLiteral(className)}, ${phpLiteral(method)}, [${args.join(', ')}], $frame, ${span(node)})`;
-  target.toValue = (value, type) => `GeneratedRuntime::toValue(${value}, GeneratedRuntime::schema('${encoded(descriptor(type.source))}'))`;
-  target.call = (name, args, node) => `$runtime->call(${phpLiteral(name)}, [${args.join(', ')}], $frame, ${span(node)})`;
-  target.unary = (operator, operand, node) => `$runtime->unary(${phpLiteral(operator)}, ${operand}, $frame, ${span(node)})`;
+  target.loopMeta = (loop, field) => `${call('$scope->loopMeta', [phpLiteral(loop)])}[${phpLiteral(field)}]`;
+  target.index = (object, index, _owner, node) => call('$runtime->index', [object, index, '$frame', span(node)]);
+  target.memberCall = (object, method, args, node) => call('$runtime->memberCall', [object, phpLiteral(method), array(args), '$frame', span(node)]);
+  target.classCall = (className, method, args, node) => call('$runtime->classCall', [phpLiteral(className), phpLiteral(method), array(args), '$frame', span(node)]);
+  target.toValue = (value, type) => call('GeneratedRuntime::toValue', [value, call('GeneratedRuntime::schema', [`'${encoded(descriptor(type.source))}'`])]);
+  target.call = (name, args, node) => call('$runtime->call', [phpLiteral(name), array(args), '$frame', span(node)]);
+  target.unary = (operator, operand, node) => call('$runtime->unary', [phpLiteral(operator), operand, '$frame', span(node)]);
   target.binary = (operator, left, right, node) => {
-    if (operator === '&&') return `($runtime->truthy(${left}) && $runtime->truthy(${right}))`;
-    if (operator === '||') return `($runtime->truthy(${left}) || $runtime->truthy(${right}))`;
-    if (operator === '??') return `((${left}) ?? (${right}))`;
-    return `$runtime->binary(${phpLiteral(operator)}, ${left}, ${right}, $frame, ${span(node)})`;
+    if (operator === '&&') return `(${chain(call('$runtime->truthy', [left]), `&& ${call('$runtime->truthy', [right])}`)})`;
+    if (operator === '||') return `(${chain(call('$runtime->truthy', [left]), `|| ${call('$runtime->truthy', [right])}`)})`;
+    if (operator === '??') return `(${chain(`(${left})`, `?? (${right})`)})`;
+    return call('$runtime->binary', [phpLiteral(operator), left, right, '$frame', span(node)]);
   };
-  target.ternary = (test, thenValue, elseValue) => `($runtime->truthy(${test}) ? ${thenValue} : ${elseValue})`;
-  target.list = (items, _type, node) => `$runtime->depth(GeneratedRuntime::list([${items.map(item => `['spread' => ${item.spread}, 'value' => ${item.spread ? `$runtime->listSpread(${item.value}, $frame, ${phpLiteral(item.span)})` : item.value}]`).join(', ')}]), $frame, ${span(node)})`;
-  target.map = (entries, _type, node) => `$runtime->depth(GeneratedRuntime::map([${entries.map(item => item.spread ? `['spread' => true, 'value' => $runtime->mapSpread(${item.value}, $frame, ${phpLiteral(item.span)})]` : `['spread' => false, 'key' => ${item.value[0]}, 'value' => ${item.value[1]}]`).join(', ')}]), $frame, ${span(node)})`;
+  target.ternary = (test, thenValue, elseValue) => `(${chain(call('$runtime->truthy', [test]), `? ${thenValue}`, `: ${elseValue}`)})`;
+  target.list = (items, _type, node) => call('$runtime->depth', [call('GeneratedRuntime::list', [array(items.map(item => array([`'spread' => ${item.spread}`, `'value' => ${item.spread ? call('$runtime->listSpread', [item.value, '$frame', phpLiteral(item.span)]) : item.value}`])))]), '$frame', span(node)]);
+  target.map = (entries, _type, node) => call('$runtime->depth', [call('GeneratedRuntime::map', [array(entries.map(item => item.spread ? array(["'spread' => true", `'value' => ${call('$runtime->mapSpread', [item.value, '$frame', phpLiteral(item.span)])}`]) : array(["'spread' => false", `'key' => ${item.value[0]}`, `'value' => ${item.value[1]}`])))]), '$frame', span(node)]);
   target.ifNode = (node, n) => {
-    const branches = node.branches.map((branch, index) => braced(`${index ? 'elseif' : 'if'} ($runtime->truthy(${emitExpression(branch.test, target)}))`, emitNodes(branch.body, target, 0)));
+    const branches = node.branches.map((branch, index) => braced(`${index ? 'elseif' : 'if'} (${condition(call('$runtime->truthy', [emitExpression(branch.test, target)]))})`, emitNodes(branch.body, target, 0)));
     return spaces(n, `${branches.join(' ')}${node.otherwise ? ` ${braced('else', emitNodes(node.otherwise, target, 0))}` : ''}`);
   };
   target.forNode = (node, n) => {
     const name = fieldName(node.name);
     const loop = phpLiteral(node.name);
     return spaces(n, lines(
-      `$${name}_entries = $runtime->entries(${emitExpression(node.iter, target)}, $frame, ${span(node)});`,
+      `$${name}_entries = ${call('$runtime->entries', [emitExpression(node.iter, target), '$frame', span(node)])};`,
       `$${name}_size = count($${name}_entries);`,
       `$${name}_last_index = $${name}_size - 1;`,
       `$${name}_had = $scope->locals->has(${loop});`,
@@ -171,10 +229,10 @@ export function createTarget({ program }) {
       braced(`foreach ($${name}_entries as $${name}_index => [$${name}_key, $${name}_value])`,
         `$scope->locals->set(${loop}, $${name}_value);`,
         `$${name}_stack = $scope->loops[${loop}] ?? [];`,
-        `$${name}_stack[] = ['index_' => (float) $${name}_index, 'size_' => (float) $${name}_size, 'first_' => $${name}_index === 0, 'last_' => $${name}_index === $${name}_last_index, 'key_' => $${name}_key, 'value_' => $${name}_value];`,
+        `$${name}_stack[] = ${array([`'index_' => (float) $${name}_index`, `'size_' => (float) $${name}_size`, `'first_' => $${name}_index === 0`, `'last_' => $${name}_index === $${name}_last_index`, `'key_' => $${name}_key`, `'value_' => $${name}_value`])};`,
         `$scope->loops[${loop}] = $${name}_stack;`,
         '$context->iterations++;',
-        `$runtime->limit('iteration', $context->iterations, $frame, ${span(node)});`,
+        `${call('$runtime->limit', ["'iteration'", '$context->iterations', '$frame', span(node)])};`,
         emitNodes(node.body, target, 0),
         `$${name}_stack = $scope->loops[${loop}];`,
         `array_pop($${name}_stack);`,
@@ -183,8 +241,8 @@ export function createTarget({ program }) {
       node.empty ? braced(`if ($${name}_size === 0)`, emitNodes(node.empty, target, 0)) : ''));
   };
   target.include = (node, n) => spaces(n, lines(
-    `$context->enter(${phpLiteral(node.target)}, $frame, ${span(node)});`,
-    guarded(`self::${renderMethod(node.target)}($assign, $definitions, new ${inputClass(node.target)}(${node.inputs.map(item => `${fieldName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')}), $context, $runtime, $rootData, $scope);`, '$context->leave();')));
+    `${call('$context->enter', [phpLiteral(node.target), '$frame', span(node)])};`,
+    guarded(`${call(`self::${renderMethod(node.target)}`, ['$assign', '$definitions', call(`new ${inputClass(node.target)}`, node.inputs.map(item => `${fieldName(item.name)}: ${emitExpression(item.value, target)}`)), '$context', '$runtime', '$rootData', '$scope'])};`, '$context->leave();')));
   return target;
 }
 
@@ -211,7 +269,14 @@ export function emitDeclarations(context) {
 function runtimeMembers(context) {
   const schema = bindingSchema(context);
   const method = (name, code) => definition(name, code, new RegExp(`::${name}\\(`));
-  const constant = (name, value) => definition(name, `private const ${name} = '${encoded(value)}';`, new RegExp(`::${name}\\b`));
+  // A schema longer than a line is a constant expression of literals joined with `.`, which stays a constant: the
+  // first literal fills the line of the declaration, a member of the class, and each further one a line of its own.
+  const constant = (name, value) => {
+    const text = encoded(value);
+    const first = WIDTH - `    private const ${name} = '';`.length;
+    const chunks = [text.slice(0, first), ...(text.slice(first).match(/.{1,100}/g) ?? [])];
+    return definition(name, `private const ${name} = ${chunks.map(chunk => `'${chunk}'`).join('\n    . ')};`, new RegExp(`::${name}\\b`));
+  };
   return [
     constant('RECORDS_SCHEMA', schema.records),
     constant('ASSIGN_SCHEMA', schema.assign),
@@ -463,18 +528,30 @@ export function emitRuntime(context) {
   })];
 }
 
-const templateParameters = 'Assign $assign, Definitions $definitions, %INPUT% $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope';
+const templateParameters = input => ['Assign $assign', 'Definitions $definitions', ...(input ? [`${input} $input`] : []), 'Context $context', 'RuntimeBindings $runtime', 'MapValue $rootData', 'Scope $scope'];
+
+/**
+ * A method of a class: its parameters on its line and its brace on the next line, or, when that line passes 120 columns
+ * at the level of a class member, one parameter per line with the closing parenthesis, the return type and the brace
+ * on their own line, as PSR-12 places a split argument list (section 4.4).
+ */
+function classMethod(head, parameters, returns, ...body) {
+  const single = `${head}(${parameters.join(', ')}): ${returns}`;
+  if (4 + single.length <= WIDTH) return method(single, ...body);
+  return `${head}(\n${spaces(1, parameters.map(parameter => `${parameter},`).join('\n'))}\n): ${returns} {\n${spaces(1, lines(...body))}\n}`;
+}
 
 export function emitTemplates(context) {
   const { program, templateBodies } = context;
-  const dispatch = templateBodies.filter(template => template.inputs.size === 0).map(template => `case ${phpLiteral(template.name)}:\n${spaces(1, `self::${renderMethod(template.name)}($assign, $definitions, new ${inputClass(template.name)}(), $context, $runtime, $rootData, $scope);\nreturn;`)}`);
-  const render = method(`public static function render(string $target, ${templateParameters.replace('%INPUT% $input, ', '')}): void`,
+  const arguments_ = input => ['$assign', '$definitions', ...(input ? [input] : []), '$context', '$runtime', '$rootData', '$scope'];
+  const dispatch = templateBodies.filter(template => template.inputs.size === 0).map(template => `case ${phpLiteral(template.name)}:\n${spaces(1, `${call(`self::${renderMethod(template.name)}`, arguments_(`new ${inputClass(template.name)}()`))};\nreturn;`)}`);
+  const render = classMethod('public static function render', ['string $target', ...templateParameters(null)], 'void',
     braced('switch ($target)', dispatch, 'default:', spaces(1, "throw $context->fail('E_LOAD_NOT_FOUND', null, null, 'template ' . $target . ' does not exist');")));
   const methods = templateBodies.map(template => {
     const typed = program.templates.get(template.name);
-    return method(`private static function ${renderMethod(template.name)}(${templateParameters.replace('%INPUT%', inputClass(template.name))}): void`,
-      `$frame = new Frame(${phpLiteral(template.name)}, ${phpLiteral(typed.lines)}, $rootData);`,
-      [...template.inputs].map(([name]) => `$scope->locals->set(${phpLiteral(name)}, $input->${fieldName(name)});`),
+    return classMethod(`private static function ${renderMethod(template.name)}`, templateParameters(inputClass(template.name)), 'void',
+      `$frame = ${call('new Frame', [phpLiteral(template.name), array(typed.lines.map(String)), '$rootData'])};`,
+      [...template.inputs].map(([name]) => `${call('$scope->locals->set', [phpLiteral(name), `$input->${fieldName(name)}`])};`),
       emitNodes(typed.body, context.target, 0));
   });
   return [file('GeneratedTemplates.php'), phpFile(context.options.phpNamespace, `final class GeneratedTemplates\n{\n${spaces(1, [render, ...methods].join('\n\n'))}\n}`)];
@@ -557,7 +634,15 @@ export function emitEntry(context) {
         $resolved = $targets[$target] ?? null;
         $targetName = $resolved['target'] ?? $target;
         $html = $resolved['html'] ?? null;
-        $execution = new GeneratedExecution($targetName, $typedAssign, $definitions, $rootData, $env, $this->runtime, $html);
+        $execution = new GeneratedExecution(
+            $targetName,
+            $typedAssign,
+            $definitions,
+            $rootData,
+            $env,
+            $this->runtime,
+            $html,
+        );
 
         return new PreparedRender($target, $execution);
     }

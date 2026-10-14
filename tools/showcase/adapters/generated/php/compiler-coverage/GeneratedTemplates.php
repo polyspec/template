@@ -12,19 +12,41 @@ use Polyspec\Template\Value\MapValue;
 
 final class GeneratedTemplates
 {
-    public static function render(string $target, Assign $assign, Definitions $definitions, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    public static function render(
+        string $target,
+        Assign $assign,
+        Definitions $definitions,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         switch ($target) {
             case 'layout.tpl':
-                self::renderLayoutTpl($assign, $definitions, new InputLayoutTpl(), $context, $runtime, $rootData, $scope);
+                self::renderLayoutTpl(
+                    $assign,
+                    $definitions,
+                    new InputLayoutTpl(),
+                    $context,
+                    $runtime,
+                    $rootData,
+                    $scope,
+                );
                 return;
             default:
                 throw $context->fail('E_LOAD_NOT_FOUND', null, null, 'template ' . $target . ' does not exist');
         }
     }
 
-    private static function renderCardTpl(Assign $assign, Definitions $definitions, InputCardTpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    private static function renderCardTpl(
+        Assign $assign,
+        Definitions $definitions,
+        InputCardTpl $input,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         $frame = new Frame('card.tpl', [0, 30], $rootData);
         $scope->locals->set('label', $input->label);
         $context->at($frame, [0, 16]);
@@ -35,11 +57,46 @@ final class GeneratedTemplates
         $context->write(('</p>' . "\n"));
     }
 
-    private static function renderLayoutTpl(Assign $assign, Definitions $definitions, InputLayoutTpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
-        $frame = new Frame('layout.tpl', [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], $rootData);
-        $scope->locals->set('values', $runtime->depth(GeneratedRuntime::list([['spread' => false, 'value' => 0], ['spread' => true, 'value' => $runtime->listSpread($assign->numbers, $frame, [16, 26])]]), $frame, [12, 27]));
-        $scope->locals->set('merged', $runtime->depth(GeneratedRuntime::map([['spread' => true, 'value' => $runtime->mapSpread($assign->lookup, $frame, [42, 51])], ['spread' => false, 'key' => 'z', 'value' => 'Z']]), $frame, [41, 64]));
+    private static function renderLayoutTpl(
+        Assign $assign,
+        Definitions $definitions,
+        InputLayoutTpl $input,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
+        $frame = new Frame(
+            'layout.tpl',
+            [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695],
+            $rootData,
+        );
+        $scope->locals->set(
+            'values',
+            $runtime->depth(
+                GeneratedRuntime::list(
+                    [
+                        ['spread' => false, 'value' => 0],
+                        ['spread' => true, 'value' => $runtime->listSpread($assign->numbers, $frame, [16, 26])],
+                    ],
+                ),
+                $frame,
+                [12, 27],
+            ),
+        );
+        $scope->locals->set(
+            'merged',
+            $runtime->depth(
+                GeneratedRuntime::map(
+                    [
+                        ['spread' => true, 'value' => $runtime->mapSpread($assign->lookup, $frame, [42, 51])],
+                        ['spread' => false, 'key' => 'z', 'value' => 'Z'],
+                    ],
+                ),
+                $frame,
+                [41, 64],
+            ),
+        );
         $context->at($frame, [66, 80]);
         $context->write(('<section>' . "\n" . '<h1>'));
         $context->at($frame, [80, 94]);
@@ -51,7 +108,9 @@ final class GeneratedTemplates
         $context->at($frame, [132, 156]);
         $context->write(('</p>' . "\n" . '<p class="logical">'));
         $context->at($frame, [156, 171]);
-        $context->write($runtime->escape(($runtime->truthy($assign->flag) && $runtime->truthy('x')), $frame, [159, 170]));
+        $context->write(
+            $runtime->escape(($runtime->truthy($assign->flag) && $runtime->truthy('x')), $frame, [159, 170]),
+        );
         $context->at($frame, [171, 172]);
         $context->write('|');
         $context->at($frame, [172, 186]);
@@ -59,22 +118,51 @@ final class GeneratedTemplates
         $context->at($frame, [186, 219]);
         $context->write(('</p>' . "\n" . '<p class="empty-truthiness">'));
         $context->at($frame, [219, 241]);
-        $context->write($runtime->escape(($runtime->truthy($assign->empty_list) && $runtime->truthy($assign->flag)), $frame, [222, 240]));
+        $context->write(
+            $runtime->escape(
+                ($runtime->truthy($assign->empty_list) && $runtime->truthy($assign->flag)),
+                $frame,
+                [222, 240],
+            ),
+        );
         $context->at($frame, [241, 242]);
         $context->write('|');
         $context->at($frame, [242, 263]);
-        $context->write($runtime->escape(($runtime->truthy($assign->empty_map) && $runtime->truthy($assign->flag)), $frame, [245, 262]));
+        $context->write(
+            $runtime->escape(
+                ($runtime->truthy($assign->empty_map) && $runtime->truthy($assign->flag)),
+                $frame,
+                [245, 262],
+            ),
+        );
         $context->at($frame, [263, 271]);
         $context->write(('</p>' . "\n" . '<p>'));
         $context->at($frame, [271, 284]);
-        $context->write($runtime->escape($runtime->index($scope->lookup($frame, 'values'), 1, $frame, [274, 283]), $frame, [274, 283]));
+        $context->write(
+            $runtime->escape(
+                $runtime->index($scope->lookup($frame, 'values'), 1, $frame, [274, 283]),
+                $frame,
+                [274, 283],
+            ),
+        );
         $context->at($frame, [284, 285]);
         $context->write('|');
         $context->at($frame, [285, 300]);
-        $context->write($runtime->escape($runtime->index($scope->lookup($frame, 'merged'), 'z', $frame, [288, 299]), $frame, [288, 299]));
+        $context->write(
+            $runtime->escape(
+                $runtime->index($scope->lookup($frame, 'merged'), 'z', $frame, [288, 299]),
+                $frame,
+                [288, 299],
+            ),
+        );
         $context->at($frame, [300, 305]);
         $context->write(('</p>' . "\n"));
-        if ($runtime->truthy(($runtime->truthy($assign->flag) && $runtime->truthy($runtime->binary('==', $assign->page?->title, 'Guide', $frame, [316, 337]))))) {
+        if (
+            $runtime->truthy(
+                ($runtime->truthy($assign->flag)
+                    && $runtime->truthy($runtime->binary('==', $assign->page?->title, 'Guide', $frame, [316, 337]))),
+            )
+        ) {
             $context->at($frame, [338, 362]);
             $context->write('<strong>matched</strong>');
         } else {
@@ -88,11 +176,19 @@ final class GeneratedTemplates
         $context->at($frame, [418, 419]);
         $context->write('|');
         $context->at($frame, [419, 429]);
-        $context->write($runtime->escape($runtime->binary('+', $runtime->unary('-', 1, $frame, [422, 424]), 3, $frame, [422, 428]), $frame, [422, 428]));
+        $context->write(
+            $runtime->escape(
+                $runtime->binary('+', $runtime->unary('-', 1, $frame, [422, 424]), 3, $frame, [422, 428]),
+                $frame,
+                [422, 428],
+            ),
+        );
         $context->at($frame, [429, 430]);
         $context->write('|');
         $context->at($frame, [430, 458]);
-        $context->write($runtime->escape($runtime->call('default', ['', 'fallback'], $frame, [433, 457]), $frame, [433, 457]));
+        $context->write(
+            $runtime->escape($runtime->call('default', ['', 'fallback'], $frame, [433, 457]), $frame, [433, 457]),
+        );
         $context->at($frame, [458, 468]);
         $context->write(('</p>' . "\n" . '<ul>' . "\n"));
         $row_entries = $runtime->entries($assign->rows, $frame, [468, 585]);
@@ -103,7 +199,14 @@ final class GeneratedTemplates
         foreach ($row_entries as $row_index => [$row_key, $row_value]) {
             $scope->locals->set('row', $row_value);
             $row_stack = $scope->loops['row'] ?? [];
-            $row_stack[] = ['index_' => (float) $row_index, 'size_' => (float) $row_size, 'first_' => $row_index === 0, 'last_' => $row_index === $row_last_index, 'key_' => $row_key, 'value_' => $row_value];
+            $row_stack[] = [
+                'index_' => (float) $row_index,
+                'size_' => (float) $row_size,
+                'first_' => $row_index === 0,
+                'last_' => $row_index === $row_last_index,
+                'key_' => $row_key,
+                'value_' => $row_value,
+            ];
             $scope->loops['row'] = $row_stack;
             $context->iterations++;
             $runtime->limit('iteration', $context->iterations, $frame, [468, 585]);
@@ -150,7 +253,15 @@ final class GeneratedTemplates
         $context->write(('</ul>' . "\n"));
         $context->enter('partial.tpl', $frame, [592, 607]);
         try {
-            self::renderPartialTpl($assign, $definitions, new InputPartialTpl(values: $scope->lookup($frame, 'values')), $context, $runtime, $rootData, $scope);
+            self::renderPartialTpl(
+                $assign,
+                $definitions,
+                new InputPartialTpl(values: $scope->lookup($frame, 'values')),
+                $context,
+                $runtime,
+                $rootData,
+                $scope,
+            );
         } finally {
             $context->leave();
         }
@@ -172,9 +283,23 @@ final class GeneratedTemplates
             $context->write($definition->html);
         } else {
             if ($definition?->data !== null && !($definition->data instanceof DefinitionDataCardTpl)) {
-                throw $runtime->error($frame, [655, 683], 'E_RUNTIME_TYPE', 'generated definition content data has an invalid type');
+                throw $runtime->error(
+                    $frame,
+                    [655, 683],
+                    'E_RUNTIME_TYPE',
+                    'generated definition content data has an invalid type',
+                );
             }
-            $input = new InputCardTpl(label: ($definition?->data !== null && $definition->data->has_label ? $definition->data->label : throw $runtime->error($frame, [655, 683], 'E_RUNTIME_TYPE', 'generated input card.tpl.label is missing')));
+            $input = new InputCardTpl(
+                label: ($definition?->data !== null && $definition->data->has_label
+                    ? $definition->data->label
+                    : throw $runtime->error(
+                        $frame,
+                        [655, 683],
+                        'E_RUNTIME_TYPE',
+                        'generated input card.tpl.label is missing',
+                    )),
+            );
             if ($definition?->data !== null) {
                 if ($definition->data->has_label) {
                     $input->label = $definition->data->label;
@@ -193,14 +318,23 @@ final class GeneratedTemplates
         $context->write(('</section>' . "\n"));
     }
 
-    private static function renderPartialTpl(Assign $assign, Definitions $definitions, InputPartialTpl $input, Context $context, RuntimeBindings $runtime, MapValue $rootData, Scope $scope): void
-    {
+    private static function renderPartialTpl(
+        Assign $assign,
+        Definitions $definitions,
+        InputPartialTpl $input,
+        Context $context,
+        RuntimeBindings $runtime,
+        MapValue $rootData,
+        Scope $scope,
+    ): void {
         $frame = new Frame('partial.tpl', [0, 38], $rootData);
         $scope->locals->set('values', $input->values);
         $context->at($frame, [0, 20]);
         $context->write('<p class="included">');
         $context->at($frame, [20, 33]);
-        $context->write($runtime->escape($runtime->index($scope->lookup($frame, 'values'), 2, $frame, [23, 32]), $frame, [23, 32]));
+        $context->write(
+            $runtime->escape($runtime->index($scope->lookup($frame, 'values'), 2, $frame, [23, 32]), $frame, [23, 32]),
+        );
         $context->at($frame, [33, 38]);
         $context->write(('</p>' . "\n"));
     }

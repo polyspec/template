@@ -47,7 +47,15 @@ final class GeneratedProgram implements Program
         $resolved = $targets[$target] ?? null;
         $targetName = $resolved['target'] ?? $target;
         $html = $resolved['html'] ?? null;
-        $execution = new GeneratedExecution($targetName, $typedAssign, $definitions, $rootData, $env, $this->runtime, $html);
+        $execution = new GeneratedExecution(
+            $targetName,
+            $typedAssign,
+            $definitions,
+            $rootData,
+            $env,
+            $this->runtime,
+            $html,
+        );
 
         return new PreparedRender($target, $execution);
     }
