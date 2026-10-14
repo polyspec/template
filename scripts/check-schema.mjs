@@ -23,7 +23,7 @@ for (const path of [schemaPath, 'schema/tokens.schema.json', 'schema/format.sche
 }
 if (errors.length) report();
 
-const cases = readCaseFiles(join(root, 'tests', 'cases'));
+const cases = readCaseFiles();
 for (const failure of [...astPresenceFailures(cases), ...formatFileFailures(cases, caseFileValidators(ajv, root))]) errors.push(failure);
 
 const validateTemplate = ajv.compile(schema);

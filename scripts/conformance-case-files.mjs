@@ -1,31 +1,26 @@
 // Reads the expected files of the conformance cases and checks the presence rules of CNF-2 and CNF-15 and, with the
 // schemas of schema/, the content of the token and format files.
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { caseIds, casesDir } from '../tests/runner/case-list.mjs';
 
 /**
  * Returns one record per case directory: its id, whether it has an AST file, its expected error and the content of its
  * token and format files, or null for an absent file.
  */
-export function readCaseFiles(casesDir) {
-  const cases = [];
-  if (!existsSync(casesDir)) return cases;
-  for (const group of readdirSync(casesDir, { withFileTypes: true })) {
-    if (!group.isDirectory()) continue;
-    for (const entry of readdirSync(join(casesDir, group.name), { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const dir = join(casesDir, group.name, entry.name);
-      const read = name => (existsSync(join(dir, name)) ? JSON.parse(readFileSync(join(dir, name), 'utf8')) : null);
-      cases.push({
-        id: `${group.name}/${entry.name}`,
-        hasAst: existsSync(join(dir, 'expected.ast.json')),
-        expectedError: read('expected.error.json'),
-        tokens: read('expected.tokens.json'),
-        format: read('expected.format.json'),
-      });
-    }
-  }
-  return cases.sort((a, b) => a.id.localeCompare(b.id));
+export function readCaseFiles() {
+  if (!existsSync(casesDir)) return [];
+  return caseIds().map(id => {
+    const dir = join(casesDir, id);
+    const read = name => (existsSync(join(dir, name)) ? JSON.parse(readFileSync(join(dir, name), 'utf8')) : null);
+    return {
+      id,
+      hasAst: existsSync(join(dir, 'expected.ast.json')),
+      expectedError: read('expected.error.json'),
+      tokens: read('expected.tokens.json'),
+      format: read('expected.format.json'),
+    };
+  });
 }
 
 /** Whether the expected error is a lexical or parse error of the entry template, which has no AST. */

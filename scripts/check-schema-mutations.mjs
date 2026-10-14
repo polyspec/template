@@ -2,13 +2,13 @@
 // Proves that the presence checks of CNF-15 reject a case without its AST, token or format file, a parse error case
 // with such a file, and that schema/tokens.schema.json, schema/format.schema.json and the token order check reject a
 // token or format file without the content of CNF-2.
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import Ajv from 'ajv';
 import { astPresenceFailures, caseFileValidators, formatFileFailures, readCaseFiles } from './conformance-case-files.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const validators = caseFileValidators(new Ajv({ strict: true, allErrors: true }), root);
-const original = readCaseFiles(join(root, 'tests', 'cases'));
+const original = readCaseFiles();
 const withAst = original.find(testCase => testCase.hasAst);
 const parseError = original.find(testCase => !testCase.hasAst);
 if (!withAst || !parseError) throw new Error('the case set has no AST case or no parse error case');
