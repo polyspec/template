@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-functions -->
-<!-- source-sha256: bdf00843bef5d33e14c35853ab6c7268d3e9d0980ae3bd6734ffc97ea1c78ee8 -->
+<!-- source-sha256: a9e416abe1f6bb3f94d8d4954d0df266b7acb8620908811f9aa012ce315a4f98 -->
 # 함수
 
 [English](/spec/functions).
