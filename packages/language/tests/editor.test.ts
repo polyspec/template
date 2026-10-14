@@ -3,20 +3,19 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error The fixture script is plain JavaScript without declarations.
 import { editorResults, fixtureDirectory, fixtureNames, fixtureOptions } from '../../../scripts/editor-fixtures.mts';
-import { openDocument, type DocumentOptions } from '../src/index.js';
+import { openDocument } from '../src/index.js';
 
 describe('editor fixtures', () => {
-  const names = (fixtureNames as () => string[])();
+  const names = fixtureNames();
   it('has fixtures', () => {
     expect(names.length).toBeGreaterThan(0);
   });
   for (const name of names) {
     it(name, () => {
-      const text = readFileSync(join(fixtureDirectory as string, name), 'utf8');
-      const expected: unknown = JSON.parse(readFileSync(join(fixtureDirectory as string, name.replace(/\.tpl$/, '.json')), 'utf8'));
-      expect((editorResults as (document: unknown) => unknown)(openDocument(text, (fixtureOptions as (name: string) => DocumentOptions)(name)))).toEqual(expected);
+      const text = readFileSync(join(fixtureDirectory, name), 'utf8');
+      const expected: unknown = JSON.parse(readFileSync(join(fixtureDirectory, name.replace(/\.tpl$/, '.json')), 'utf8'));
+      expect(editorResults(openDocument(text, fixtureOptions(name)))).toEqual(expected);
     });
   }
 });

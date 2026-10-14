@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
-import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError } from '../src/index.js';
+import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError, type RenderOptions } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
 import { caseIds, casesDir } from '../../../tests/runner/case-list.mts';
 import { toJsonValue } from './helpers.js';
@@ -32,7 +32,7 @@ function run(testCase: Case): { html: string } | { error: TemplateError } {
     const assign = readIf(join(testCase.dir, 'data.json'));
     const define = plain(readIf(join(testCase.dir, 'define.json'))) as Record<string, string | { template?: string; data?: unknown; html?: string }> | undefined;
     const env = plain(readIf(join(testCase.dir, 'env.json'))) as { timezone?: string; now?: number } | undefined;
-    const renderOptions: { define?: typeof define; env?: typeof env } = {};
+    const renderOptions: RenderOptions = {};
     if (define) renderOptions.define = define;
     if (env) renderOptions.env = env;
     const html = engine.render('input.tpl', assign === null ? {} : parseJsonBytes(assign), renderOptions);
