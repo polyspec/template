@@ -22,9 +22,11 @@
       ],
       "sources": "src",
       "forbiddenModules": [
-        "node:**",
+        "node:*",
+        "node:*/**",
         "vscode",
         "vscode-*",
+        "vscode-*/**",
         "codemirror",
         "@codemirror/**"
       ],
