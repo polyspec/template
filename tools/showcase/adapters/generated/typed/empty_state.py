@@ -3,7 +3,7 @@ import math
 import time
 
 from polyspec.template.bind import BindError, bind_data, bind_map, check_number
-from polyspec.template.context import Frame, LoopMeta, RenderContext, Scope
+from polyspec.template.context import Frame, RenderContext, Scope
 from polyspec.template.engine import PreparedRender, Program, RenderOptions
 from polyspec.template.errors import TemplateError, internal_boundary
 from polyspec.template.functions import Env
@@ -12,7 +12,10 @@ from polyspec.template.runtime_bindings import RuntimeBindings
 
 _GENERATED_RECORDS_SCHEMA = {}
 _GENERATED_ASSIGN_SCHEMA = {"page": {"kind": "string", "optional": False}}
-_GENERATED_DEFINITION_SCHEMA = {"content": {"field": "content", "target": None, "html": True, "input": {}}, "layout": {"field": "layout", "target": "layout.tpl", "html": False, "input": {}}}
+_GENERATED_DEFINITION_SCHEMA = {
+    "content": {"field": "content", "target": None, "html": True, "input": {}},
+    "layout": {"field": "layout", "target": "layout.tpl", "html": False, "input": {}},
+}
 
 
 class _Definition:
@@ -23,68 +26,65 @@ class _Definition:
 
 
 class _Input_layout_tpl:
-    def __init__(self, ):
-        pass
+    pass
 
 
 class Assign:
     def __init__(self, page=None):
         self.page = page
+
+
 def _generated_bind_type(value, type_, path):
     if value is None:
-        if type_.get('optional') or type_['kind'] in ('null', 'any'):
+        if type_.get("optional") or type_["kind"] in ("null", "any"):
             return None
-        raise ValueError(f'{path} is required')
-    kind = type_['kind']
-    if kind == 'any':
+        raise ValueError(f"{path} is required")
+    kind = type_["kind"]
+    if kind == "any":
         return value
-    if kind in ('string', 'number', 'boolean'):
-        valid = (isinstance(value, str) if kind == 'string'
-                 else (isinstance(value, (int, float)) and not isinstance(value, bool)) if kind == 'number'
-                 else isinstance(value, bool))
+    if kind in ("string", "number", "boolean"):
+        valid = (
+            isinstance(value, str)
+            if kind == "string"
+            else (isinstance(value, (int, float)) and not isinstance(value, bool))
+            if kind == "number"
+            else isinstance(value, bool)
+        )
         if not valid:
-            raise ValueError(f'{path} has an invalid type')
-        return check_number(value) if kind == 'number' else value
-    if kind == 'list':
+            raise ValueError(f"{path} has an invalid type")
+        return check_number(value) if kind == "number" else value
+    if kind == "list":
         if not isinstance(value, list):
-            raise ValueError(f'{path} is not a list')
-        return [_generated_bind_type(item, type_['item'], f'{path}[{index}]') for index, item in enumerate(value)]
-    if kind == 'map':
+            raise ValueError(f"{path} is not a list")
+        return [
+            _generated_bind_type(item, type_["item"], f"{path}[{index}]")
+            for index, item in enumerate(value)
+        ]
+    if kind == "map":
         if not isinstance(value, dict):
-            raise ValueError(f'{path} is not a map')
-        return {key: _generated_bind_type(item, type_['value'], f'{path}.{key}') for key, item in value.items()}
-    if kind == 'record':
-        return _generated_bind_record(value, _GENERATED_RECORDS_SCHEMA[type_['name']], path)
-    raise ValueError(f'{path} has an unknown generated type')
+            raise ValueError(f"{path} is not a map")
+        return {
+            key: _generated_bind_type(item, type_["value"], f"{path}.{key}")
+            for key, item in value.items()
+        }
+    if kind == "record":
+        return _generated_bind_record(
+            value, _GENERATED_RECORDS_SCHEMA[type_["name"]], path
+        )
+    raise ValueError(f"{path} has an unknown generated type")
 
 
 def _generated_bind_record(value, fields, path):
     if not isinstance(value, dict):
-        raise ValueError(f'{path} is not an object')
+        raise ValueError(f"{path} is not an object")
     result = {}
     for name, type_ in fields.items():
         if name not in value:
-            if not type_.get('optional'):
-                raise ValueError(f'{path}.{name} is required')
+            if not type_.get("optional"):
+                raise ValueError(f"{path}.{name} is required")
             continue
-        result[name] = _generated_bind_type(value[name], type_, f'{path}.{name}')
+        result[name] = _generated_bind_type(value[name], type_, f"{path}.{name}")
     return result
-
-
-def _generated_member(value, key):
-    # A typed record is a map of its present fields; an absent optional field and a null record read as null.
-    return None if value is None else value.get(key)
-
-
-def _generated_bind_assign(value):
-    root = bind_map(value)
-    if False:
-        return Assign(), root
-    values = {}
-    for name, type_ in _GENERATED_ASSIGN_SCHEMA.items():
-        if name in root:
-            values[name] = _generated_bind_type(root[name], type_, 'assign.' + name)
-    return Assign(**values), root
 
 
 def _generated_bind_definitions(raw):
@@ -93,93 +93,124 @@ def _generated_bind_definitions(raw):
     for id_, entry in (raw or {}).items():
         spec = _GENERATED_DEFINITION_SCHEMA.get(id_)
         if spec is None:
-            raise ValueError(f'define.{id_} is not declared')
+            raise ValueError(f"define.{id_} is not declared")
         if isinstance(entry, str):
-            if spec['target'] is None or entry != spec['target']:
-                raise ValueError(f'define.{id_} has an invalid template')
-            definitions[id_] = _Definition(template=spec['target'])
-            targets[id_] = {'target': spec['target']}
+            if spec["target"] is None or entry != spec["target"]:
+                raise ValueError(f"define.{id_} has an invalid template")
+            definitions[id_] = _Definition(template=spec["target"])
+            targets[id_] = {"target": spec["target"]}
             continue
         if not isinstance(entry, dict):
-            raise ValueError(f'define.{id_} is not an object')
-        template = entry.get('template')
-        html = entry.get('html')
-        data = bind_data(entry['data']) if 'data' in entry else None
+            raise ValueError(f"define.{id_} is not an object")
+        template = entry.get("template")
+        html = entry.get("html")
+        data = bind_data(entry["data"]) if "data" in entry else None
         if isinstance(html, str):
-            if not spec['html'] or 'template' in entry or 'data' in entry:
-                raise ValueError(f'define.{id_} has an invalid html entry')
+            if not spec["html"] or "template" in entry or "data" in entry:
+                raise ValueError(f"define.{id_} has an invalid html entry")
             definitions[id_] = _Definition(html=html)
-            targets[id_] = {'target': None, 'html': html}
+            targets[id_] = {"target": None, "html": html}
             continue
-        if not isinstance(template, str) or spec['target'] is None or template != spec['target']:
-            raise ValueError(f'define.{id_} has an invalid template')
+        if (
+            not isinstance(template, str)
+            or spec["target"] is None
+            or template != spec["target"]
+        ):
+            raise ValueError(f"define.{id_} has an invalid template")
         bound = None
-        if 'data' in entry:
+        if "data" in entry:
             if not isinstance(data, dict):
-                raise ValueError(f'define.{id_}.data is not an object')
+                raise ValueError(f"define.{id_}.data is not an object")
             bound = {}
-            for name, type_ in spec['input'].items():
+            for name, type_ in spec["input"].items():
                 if name in data:
-                    bound[name] = _generated_bind_type(data[name], type_, f'define.{id_}.data.{name}')
-        definitions[id_] = _Definition(template=spec['target'], data=bound)
-        targets[id_] = {'target': spec['target']}
+                    bound[name] = _generated_bind_type(
+                        data[name], type_, f"define.{id_}.data.{name}"
+                    )
+        definitions[id_] = _Definition(template=spec["target"], data=bound)
+        targets[id_] = {"target": spec["target"]}
     return definitions, targets
-
-
-def _generated_list(items):
-    result = []
-    for spread, value in items:
-        if spread:
-            result.extend(value)
-        else:
-            result.append(value)
-    return result
-
-
-def _generated_map(items):
-    result = {}
-    for spread, key, value in items:
-        if spread:
-            result.update(value)
-        else:
-            result[key] = value
-    return result
 
 
 def _generated_env(raw):
     entry = raw if raw is not None else {}
     if not isinstance(entry, dict):
-        raise BindError('E_DATA_UNSUPPORTED_TYPE', 'env is not an object')
-    timezone = entry.get('timezone', 'Z')
-    now = entry.get('now', math.floor(time.time()))
+        raise BindError("E_DATA_UNSUPPORTED_TYPE", "env is not an object")
+    timezone = entry.get("timezone", "Z")
+    now = entry.get("now", math.floor(time.time()))
     if not isinstance(timezone, str):
-        raise BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string')
+        raise BindError("E_DATA_UNSUPPORTED_TYPE", "env.timezone is not a string")
     if not isinstance(now, (int, float)) or isinstance(now, bool):
-        raise BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number')
+        raise BindError("E_DATA_UNSUPPORTED_TYPE", "env.now is not a number")
     return Env(timezone, float(now))
 
-def render_layout_tpl(_assign, _definitions, _input, _context, _runtime, _root_data, _scope):
-    _frame = Frame("layout.tpl", [0,26,39,51,55,99,103,111], _root_data)
 
-    _context.at(_frame, [0,26])
-    _context.output.write("<main class=\"empty-page\">\n")
+def _generated_bind_assign(value):
+    root = bind_map(value)
+    values = {}
+    for name, type_ in _GENERATED_ASSIGN_SCHEMA.items():
+        if name in root:
+            values[name] = _generated_bind_type(root[name], type_, "assign." + name)
+    return Assign(**values), root
+
+
+def render_layout_tpl(
+    _assign,
+    _definitions,
+    _input,
+    _context,
+    _runtime,
+    _root_data,
+    _scope,
+):
+    _frame = Frame("layout.tpl", [0, 26, 39, 51, 55, 99, 103, 111], _root_data)
+    _context.at(_frame, [0, 26])
+    _context.output.write('<main class="empty-page">\n')
     if "content" in _definitions:
-            _definition = _definitions.get("content")
-            if _definition is None or _definition.html is None:
-                raise _runtime.error(_frame, [39,50], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered")
-            _context.at(_frame, [39,50])
-            _context.output.write(_definition.html)
+        _definition = _definitions.get("content")
+        if _definition is None or _definition.html is None:
+            raise _runtime.error(
+                _frame,
+                [39, 50],
+                "E_RUNTIME_BLOCK_UNDEFINED",
+                "define content is not registered",
+            )
+        _context.at(_frame, [39, 50])
+        _context.output.write(_definition.html)
     else:
-            _context.at(_frame, [55,99])
-            _context.output.write("<p class=\"empty\">No content definition.</p>\n")
-    _context.at(_frame, [103,111])
+        _context.at(_frame, [55, 99])
+        _context.output.write('<p class="empty">No content definition.</p>\n')
+    _context.at(_frame, [103, 111])
     _context.output.write("</main>\n")
-def _render_template(target, _assign, _definitions, _context, _runtime, _root_data, _scope):
+
+
+def _render_template(
+    target,
+    _assign,
+    _definitions,
+    _context,
+    _runtime,
+    _root_data,
+    _scope,
+):
     if target == "layout.tpl":
-        render_layout_tpl(_assign, _definitions, _Input_layout_tpl(), _context, _runtime, _root_data, _scope)
+        render_layout_tpl(
+            _assign,
+            _definitions,
+            _Input_layout_tpl(),
+            _context,
+            _runtime,
+            _root_data,
+            _scope,
+        )
         return
     else:
-        raise _context.fail('E_LOAD_NOT_FOUND', None, None, 'template ' + target + ' does not exist')
+        raise _context.fail(
+            "E_LOAD_NOT_FOUND",
+            None,
+            None,
+            "template " + target + " does not exist",
+        )
 
 
 class _GeneratedExecution:
@@ -201,7 +232,15 @@ class _GeneratedExecution:
             if self.html is not None:
                 context.output.write(self.html)
             else:
-                _render_template(self.target, self.assign, self.definitions, context, runtime, self.root_data, scope)
+                _render_template(
+                    self.target,
+                    self.assign,
+                    self.definitions,
+                    context,
+                    runtime,
+                    self.root_data,
+                    scope,
+                )
             return context.output.text()
         finally:
             context.leave()
@@ -223,7 +262,7 @@ class GeneratedProgram(Program):
     def prepare(self, target, assign=None, options=None):
         options = options or RenderOptions()
         if not isinstance(target, str):
-            raise ValueError('generated target must be a template name')
+            raise ValueError("generated target must be a template name")
         # A request that does not match the declared types raises a ValueError before rendering starts; it is the
         # argument error of Python and no template error (ERR-13), so it passes the boundary of render only.
         return self._prepare_bound(target, assign, options)
@@ -236,10 +275,20 @@ class GeneratedProgram(Program):
         except BindError as error:
             raise TemplateError(error.code, target, 0, 0, 0, 0, str(error)) from None
         resolved = targets.get(target)
-        target_name = resolved['target'] if resolved else target
-        html = resolved.get('html') if resolved else None
-        return _PreparedRender(target, _GeneratedExecution(target_name, typed_assign, definitions, root_data, env, self.runtime, html))
+        target_name = resolved["target"] if resolved else target
+        html = resolved.get("html") if resolved else None
+        return _PreparedRender(
+            target,
+            _GeneratedExecution(
+                target_name,
+                typed_assign,
+                definitions,
+                root_data,
+                env,
+                self.runtime,
+                html,
+            ),
+        )
 
     def render(self, target, assign=None, options=None):
         return self.prepare(target, assign, options).render()
-

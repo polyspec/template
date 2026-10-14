@@ -1,13 +1,83 @@
-// Python backend: emits one Python module per source graph. The generated code
-// imports the runtime of the polyspec.template package and follows the same
-// observable semantics as the AST engine (docs/spec/compiler.md).
+// Python backend: emits one Python module per source graph. The generated code imports the runtime of the
+// polyspec.template package and follows the same observable semantics as the AST engine (docs/spec/compiler.md). It
+// writes the canonical form of ruff format itself (T25.3): double quotes unless a string holds more double than single
+// quotes, two blank lines between top-level definitions, and a group (an argument list, a parameter list, a collection
+// or a parenthesized operator chain) that does not fit in 88 columns split one item per line, a list with a magic
+// trailing comma; and it writes only the helpers, imports and loop metadata that the program uses (T25.1).
 import {
-  baseTarget, emitExpression, emitNodes, fieldName, functionName, indent, inputName,
+  baseTarget, definition, dependent, emitExpression, emitNodes, fieldName, functionName, inputName,
 } from '../backend-support.mjs';
 
 export const language = 'python';
 
-const py = value => JSON.stringify(value);
+/**
+ * A Python string literal: double quotes, or single quotes when the text holds more double than single quotes, the
+ * quotes that need fewer escapes; JSON escapes the other characters, which Python reads alike.
+ */
+function py(value) {
+  if (typeof value !== 'string') return JSON.stringify(value);
+  const doubles = [...value].filter(character => character === '"').length;
+  const singles = [...value].filter(character => character === "'").length;
+  const json = JSON.stringify(value);
+  if (doubles <= singles) return json;
+  return `'${json.slice(1, -1).replaceAll('\\"', '"').replaceAll("'", "\\'")}'`;
+}
+
+// The markers of a group are control characters, which no literal of the program holds: py escapes them.
+const kinds = {
+  list: { open: '\u0001', separator: '\u0002', close: '\u0003' },
+  chain: { open: '\u0004', separator: '\u0005', close: '\u0006' },
+};
+const markers = Object.values(kinds).flatMap(kind => [kind.open, kind.separator, kind.close]);
+const isOpen = character => Object.values(kinds).some(kind => kind.open === character);
+const isClose = character => Object.values(kinds).some(kind => kind.close === character);
+const group = (kind, items, joiner) => items.length === 0 ? '' : `${kinds[kind].open}${items.join(`${joiner}${kinds[kind].separator}`)}${kinds[kind].close}`;
+const call = (callee, items) => `${callee}(${group('list', items, ',')})`;
+const list = items => `[${group('list', items, ',')}]`;
+const tuple = items => `(${group('list', items, ',')})`;
+const dict = entries => `{${group('list', entries, ',')}}`;
+const chain = (...items) => `(${group('chain', items, '')})`;
+const flat = line => [...line].map(character => Object.values(kinds).some(kind => kind.separator === character) ? ' ' : markers.includes(character) ? '' : character).join('');
+const WIDTH = 88;
+
+/**
+ * The lines of `line`: the line itself when it fits, or its first group split, and every resulting line in turn. A
+ * list holds one item per line with a trailing comma, which ruff format keeps split; a chain holds its operands on one
+ * line between its parentheses when they fit there, or one operand per line.
+ */
+function layout(line) {
+  const start = [...line].findIndex(isOpen);
+  if (flat(line).length <= WIDTH || start < 0) return [flat(line)];
+  const kind = Object.values(kinds).find(item => item.open === line[start]);
+  const indentation = /^ */.exec(line)[0];
+  const items = [];
+  let depth = 0;
+  let item = start + 1;
+  let end = -1;
+  for (let index = start + 1; index < line.length && end < 0; index += 1) {
+    const character = line[index];
+    if (isOpen(character)) depth += 1;
+    else if (isClose(character) && depth > 0) depth -= 1;
+    else if (character === kind.close) end = index;
+    else if (character === kind.separator && depth === 0) {
+      items.push(line.slice(item, index));
+      item = index + 1;
+    }
+  }
+  items.push(line.slice(item, end));
+  const inner = `${indentation}    `;
+  const body = kind === kinds.list
+    ? items.map((text, index) => `${inner}${text}${index === items.length - 1 ? ',' : ''}`)
+    : flat(`${inner}${items.join(' ')}`).length <= WIDTH ? [`${inner}${items.join(' ')}`] : items.map(text => `${inner}${text}`);
+  return [...layout(line.slice(0, start)), ...body.flatMap(layout), ...layout(`${indentation}${line.slice(end + 1)}`)];
+}
+
+/** `code` at `level`: every line that is not empty starts with four spaces per level. */
+const spaces = (level, code) => code.split('\n').map(text => text === '' ? '' : '    '.repeat(level) + text).join('\n');
+const lines = (...parts) => parts.flat().filter(part => part !== '').join('\n');
+/** `code` laid out in 88 columns, line by line. */
+const laid = code => code.split('\n').flatMap(layout).join('\n');
+const block = (head, ...body) => `${head}:\n${spaces(1, lines(...body) || 'pass')}`;
 
 // A Python literal of a JSON-shaped value (null -> None, true/false -> True/False).
 function pyLiteral(value) {
@@ -15,15 +85,17 @@ function pyLiteral(value) {
   if (value === true) return 'True';
   if (value === false) return 'False';
   if (typeof value === 'string') return py(value);
-  if (Array.isArray(value)) return `[${value.map(pyLiteral).join(', ')}]`;
-  return `{${Object.entries(value).map(([key, item]) => `${py(key)}: ${pyLiteral(item)}`).join(', ')}}`;
+  if (typeof value === 'number') return String(value);
+  if (Array.isArray(value)) return list(value.map(pyLiteral));
+  return dict(Object.entries(value).map(([key, item]) => `${py(key)}: ${pyLiteral(item)}`));
 }
+const span = value => list(value.map(String));
 
 function descriptor(source) {
   const optional = source.endsWith('?');
   const value = optional ? source.slice(0, -1) : source;
-  const list = /^list<(.+)>$/.exec(value);
-  if (list) return { kind: 'list', item: descriptor(list[1]), optional };
+  const listMatch = /^list<(.+)>$/.exec(value);
+  if (listMatch) return { kind: 'list', item: descriptor(listMatch[1]), optional };
   const map = /^map<([^,]+),(.+)>$/.exec(value);
   if (map) return { kind: 'map', key: descriptor(map[1].trim()), value: descriptor(map[2].trim()), optional };
   if (['null', 'boolean', 'number', 'string', 'any'].includes(value)) return { kind: value, optional };
@@ -59,141 +131,308 @@ export function createTarget({ program }) {
     return value ? 'True' : 'False';
   };
   target.var = (name, _type, node) => program.dynamicRoot
-    ? (node.scope ? `_scope.lookup(_frame, ${py(name)})` : `_runtime.member(_root_data, ${py(name)}, _frame, ${py(node.span)})`)
+    ? (node.scope ? call('_scope.lookup', ['_frame', py(name)]) : call('_runtime.member', ['_root_data', py(name), '_frame', span(node.span)]))
     : `_assign.${fieldName(name)}`;
-  target.local = name => `_scope.lookup(_frame, ${py(name)})`;
-  target.set = (name, value, level) => indent(level, `_scope.locals[${py(name)}] = ${value}`);
+  target.local = name => call('_scope.lookup', ['_frame', py(name)]);
+  target.set = (name, value, level) => spaces(level, `_scope.locals[${py(name)}] = ${value}`);
   target.member = (object, key, owner, node) => owner.kind === 'any'
-    ? `_runtime.member(${object}, ${py(key)}, _frame, ${py(node.span)})`
-    : `_generated_member(${object}, ${py(key)})`;
-  target.text = (value, level, node) => indent(level, `_context.at(_frame, ${py(node.span)})\n_context.output.write(${py(value)})`);
-  target.echo = (expression, level, node) => indent(level, `_context.at(_frame, ${py(node.span)})\n_context.output.write(_runtime.escape(${expression}, _frame, ${py(node.expr.span)}))`);
+    ? call('_runtime.member', [object, py(key), '_frame', span(node.span)])
+    : call('_generated_member', [object, py(key)]);
+  const write = (node, value) => `${call('_context.at', ['_frame', span(node.span)])}\n${call('_context.output.write', [value])}`;
+  target.text = (value, level, node) => spaces(level, write(node, py(value)));
+  target.echo = (expression, level, node) => spaces(level, write(node, call('_runtime.escape', [expression, '_frame', span(node.expr.span)])));
+  const error = (node, code, message) => `raise ${call('_runtime.error', ['_frame', span(node.span), py(code), py(message)])}`;
   target.block = (node, n) => {
-    const undefinedMessage = 'define ' + node.id + ' is not registered';
-    if (node.target === null) return indent(n, `_definition = _definitions.get(${py(node.id)})\nif _definition is None or _definition.html is None:\n${indent(1, `raise _runtime.error(_frame, ${py(node.span)}, 'E_RUNTIME_BLOCK_UNDEFINED', ${py(undefinedMessage)})`)}\n_context.at(_frame, ${py(node.span)})\n_context.output.write(_definition.html)`);
-    const input = `${inputClass(node.target)}`;
-    const call = `${functionName(node.target)}(_assign, _definitions, _input, _context, _runtime, _root_data, _block_scope)`;
-    // The input starts from the root fallback, the definition data replaces the
-    // fields it carries, and the scope of the call site replaces them again.
-    const fallbackValue = item => {
-      if (item.root) return emitExpression(item.root, target);
-      if (item.valueType.optional) return 'None';
-      return `raise _runtime.error(_frame, ${py(node.span)}, 'E_RUNTIME_TYPE', ${py(`generated input ${node.target}.${item.name} is missing`)})`;
-    };
-    const base = node.inputs.filter(item => item.root);
-    const construct = `${input}(${base.map(item => `${fieldName(item.name)}=${fallbackValue(item)}`).join(', ')})`;
-    const defined = node.inputs
-      .map(item => `_input.${fieldName(item.name)} = (_definition.data.get(${py(item.name)}) if _definition.data is not None and ${py(item.name)} in _definition.data else _input.${fieldName(item.name)})`)
-      .join('\n');
-    const scoped = node.inputs.filter(item => item.scope)
-      .map(item => `_input.${fieldName(item.name)} = ${emitExpression(item.scope, target)}`)
-      .join('\n');
-    const callBlock = `_block_scope = Scope()\n_context.enter(${py(node.target)}, _frame, ${py(node.span)})\ntry:\n${indent(1, call)}\nfinally:\n    _context.leave()`;
-    if (node.id === null) {
-      return indent(n, `_input = ${construct}\n${scoped}\n${callBlock}`);
+    if (node.target === null) {
+      return spaces(n, lines(
+        `_definition = ${call('_definitions.get', [py(node.id)])}`,
+        block('if _definition is None or _definition.html is None', error(node, 'E_RUNTIME_BLOCK_UNDEFINED', `define ${node.id} is not registered`)),
+        write(node, '_definition.html')));
     }
-    const undefinedError = `if _definition is None:\n${indent(1, `raise _runtime.error(_frame, ${py(node.span)}, 'E_RUNTIME_BLOCK_UNDEFINED', ${py('define ' + node.id + ' is not registered')})`)}`;
-    const register = node.path === null ? undefinedError
-      : `if _definition is None:\n${indent(1, `_definition = _Definition(template=${py(node.target)}, data=None)\n_definitions[${py(node.id)}] = _definition`)}\nelif _definition.html is not None or _definition.template != ${py(node.target)}:\n${indent(1, `raise _runtime.error(_frame, ${py(node.span)}, 'E_RUNTIME_BLOCK_REDEFINED', ${py('define ' + node.id + ' is registered with a different template')})`)}`;
-    return indent(n, `_definition = _definitions.get(${py(node.id)})\n${register}\nif _definition.html is not None:\n${indent(1, `_context.at(_frame, ${py(node.span)})\n_context.output.write(_definition.html)`)}\nelse:\n${indent(1, `_input = ${construct}`)}\n${defined ? indent(1, defined) + '\n' : ''}${scoped ? indent(1, scoped) + '\n' : ''}${indent(1, callBlock)}`);
+    const render = call(functionName(node.target), ['_assign', '_definitions', '_input', '_context', '_runtime', '_root_data', '_block_scope']);
+    // The input starts from the root fallback, the definition data replaces the fields it carries, and the scope of
+    // the call site replaces them again.
+    const construct = `_input = ${call(inputClass(node.target), node.inputs.filter(item => item.root).map(item => `${fieldName(item.name)}=${emitExpression(item.root, target)}`))}`;
+    const defined = node.inputs.map(item => block(`if _definition.data is not None and ${py(item.name)} in _definition.data`, `_input.${fieldName(item.name)} = _definition.data[${py(item.name)}]`));
+    const scoped = node.inputs.filter(item => item.scope).map(item => `_input.${fieldName(item.name)} = ${emitExpression(item.scope, target)}`);
+    const callBlock = [
+      '_block_scope = Scope()',
+      call('_context.enter', [py(node.target), '_frame', span(node.span)]),
+      block('try', render),
+      block('finally', '_context.leave()'),
+    ];
+    if (node.id === null) return spaces(n, lines(construct, scoped, callBlock));
+    const register = node.path === null
+      ? block('if _definition is None', error(node, 'E_RUNTIME_BLOCK_UNDEFINED', `define ${node.id} is not registered`))
+      : lines(
+        block('if _definition is None', `_definition = ${call('_Definition', [`template=${py(node.target)}`, 'data=None'])}`, `_definitions[${py(node.id)}] = _definition`),
+        block(`elif _definition.html is not None or _definition.template != ${py(node.target)}`, error(node, 'E_RUNTIME_BLOCK_REDEFINED', `define ${node.id} is registered with a different template`)));
+    return spaces(n, lines(
+      `_definition = ${call('_definitions.get', [py(node.id)])}`,
+      register,
+      block('if _definition.html is not None', write(node, '_definition.html')),
+      block('else', construct, defined, scoped, callBlock)));
   };
-  target.ifBlock = (node, n) => indent(n, `if ${py(node.id)} in _definitions:\n${emitNodes(node.body, target, n + 1)}${node.otherwise ? `\nelse:\n${emitNodes(node.otherwise, target, n + 1)}` : ''}`);
-  target.loopMeta = (loop, field) => `_scope.loop_meta(${py(loop)}).${field}`;
-  target.index = (object, index, _owner, node) => `_runtime.index(${object}, ${index}, _frame, ${py(node.span)})`;
-  target.memberCall = (object, method, args, node) => `_runtime.member_call(${object}, ${py(method)}, [${args.join(', ')}], _frame, ${py(node.span)})`;
-  target.classCall = (className, method, args, node) => `_runtime.class_call(${py(className)}, ${py(method)}, [${args.join(', ')}], _frame, ${py(node.span)})`;
-  target.toValue = value => value;  // A Python record is already the map of its fields.
-  target.call = (name, args, node) => `_runtime.call(${py(name)}, [${args.join(', ')}], _frame, ${py(node.span)})`;
-  target.unary = (operator, operand, node) => `_runtime.unary(${py(operator)}, ${operand}, _frame, ${py(node.span)})`;
+  target.ifBlock = (node, n) => spaces(n, lines(
+    block(`if ${py(node.id)} in _definitions`, emitNodes(node.body, target, 0)),
+    node.otherwise ? block('else', emitNodes(node.otherwise, target, 0)) : ''));
+  target.loopMeta = (loop, field) => `${call('_scope.loop_meta', [py(loop)])}.${field}`;
+  target.index = (object, index, _owner, node) => call('_runtime.index', [object, index, '_frame', span(node.span)]);
+  target.memberCall = (object, method, args, node) => call('_runtime.member_call', [object, py(method), list(args), '_frame', span(node.span)]);
+  target.classCall = (className, method, args, node) => call('_runtime.class_call', [py(className), py(method), list(args), '_frame', span(node.span)]);
+  target.toValue = value => value; // A Python record is already the map of its fields.
+  target.call = (name, args, node) => call('_runtime.call', [py(name), list(args), '_frame', span(node.span)]);
+  target.unary = (operator, operand, node) => call('_runtime.unary', [py(operator), operand, '_frame', span(node.span)]);
   target.binary = (operator, left, right, node) => {
-    if (operator === '&&') return `(_runtime.truthy(${left}) and _runtime.truthy(${right}))`;
-    if (operator === '||') return `(_runtime.truthy(${left}) or _runtime.truthy(${right}))`;
-    if (operator === '??') return `(${left} if ${left} is not None else ${right})`;
-    return `_runtime.binary(${py(operator)}, ${left}, ${right}, _frame, ${py(node.span)})`;
+    if (operator === '&&') return chain(call('_runtime.truthy', [left]), `and ${call('_runtime.truthy', [right])}`);
+    if (operator === '||') return chain(call('_runtime.truthy', [left]), `or ${call('_runtime.truthy', [right])}`);
+    if (operator === '??') return chain(left, `if ${left} is not None`, `else ${right}`);
+    return call('_runtime.binary', [py(operator), left, right, '_frame', span(node.span)]);
   };
-  target.ternary = (test, thenValue, elseValue) => `(${thenValue} if _runtime.truthy(${test}) else ${elseValue})`;
-  target.list = (items, _type, node) => `_runtime.depth(_generated_list([${items.map(item => `(${item.spread ? 'True' : 'False'}, ${item.spread ? `_runtime.list_spread(${item.value}, _frame, ${py(item.span)})` : item.value})`).join(', ')}]), _frame, ${py(node.span)})`;
-  target.map = (entries, _type, node) => `_runtime.depth(_generated_map([${entries.map(item => item.spread ? `(True, None, _runtime.map_spread(${item.value}, _frame, ${py(item.span)}))` : `(False, _runtime.stringify(${item.value[0]}, _frame, ${py(item.node.key.span)}), ${item.value[1]})`).join(', ')}]), _frame, ${py(node.span)})`;
-  target.ifNode = (node, n) => {
-    const parts = node.branches.map((branch, index) =>
-      `${'    '.repeat(n)}${index ? 'elif' : 'if'} _runtime.truthy(${emitExpression(branch.test, target)}):\n${emitNodes(branch.body, target, n + 1)}`);
-    if (node.otherwise) parts.push(`${'    '.repeat(n)}else:\n${emitNodes(node.otherwise, target, n + 1)}`);
-    return parts.join('\n');
-  };
+  target.ternary = (test, thenValue, elseValue) => chain(thenValue, `if ${call('_runtime.truthy', [test])}`, `else ${elseValue}`);
+  target.list = (items, _type, node) => call('_runtime.depth', [call('_generated_list', [list(items.map(item => tuple([item.spread ? 'True' : 'False', item.spread ? call('_runtime.list_spread', [item.value, '_frame', span(item.span)]) : item.value])))]), '_frame', span(node.span)]);
+  target.map = (entries, _type, node) => call('_runtime.depth', [call('_generated_map', [list(entries.map(item => item.spread
+    ? tuple(['True', 'None', call('_runtime.map_spread', [item.value, '_frame', span(item.span)])])
+    : tuple(['False', call('_runtime.stringify', [item.value[0], '_frame', span(item.node.key.span)]), item.value[1]])))]), '_frame', span(node.span)]);
+  target.ifNode = (node, n) => spaces(n, lines(
+    node.branches.map((branch, index) => block(`${index ? 'elif' : 'if'} ${call('_runtime.truthy', [emitExpression(branch.test, target)])}`, emitNodes(branch.body, target, 0))),
+    node.otherwise ? block('else', emitNodes(node.otherwise, target, 0)) : ''));
   target.forNode = (node, n) => {
-    const name = fieldName(node.name);
-    const pad = '    '.repeat(n + 1);
-    const body = emitNodes(node.body, target, n + 3);
-    const empty = node.empty ? emitNodes(node.empty, target, n + 1) : `${'    '.repeat(n + 1)}pass`;
-    return `${'    '.repeat(n)}_${name}_entries = _runtime.entries(${emitExpression(node.iter, target)}, _frame, ${py(node.span)})
-${'    '.repeat(n)}_${name}_size = len(_${name}_entries)
-${'    '.repeat(n)}_${name}_had = ${py(node.name)} in _scope.locals
-${'    '.repeat(n)}_${name}_previous = _scope.locals.get(${py(node.name)})
-${'    '.repeat(n)}if _${name}_size == 0:
-${empty}
-${'    '.repeat(n)}else:
-${pad}_${name}_stack = _scope.loops.setdefault(${py(node.name)}, [])
-${pad}_${name}_stack.append(LoopMeta(_${name}_size))
-${pad}try:
-${pad}    for _${name}_index, (_${name}_key, _${name}_value) in enumerate(_${name}_entries):
-${pad}        _context.iterations += 1
-${pad}        _runtime.limit('iteration', _context.iterations, _frame, ${py(node.span)})
-${pad}        _${name}_stack[-1].index_ = float(_${name}_index)
-${pad}        _${name}_stack[-1].key_ = _${name}_key
-${pad}        _${name}_stack[-1].value_ = _${name}_value
-${pad}        _${name}_stack[-1].first_ = _${name}_index == 0
-${pad}        _${name}_stack[-1].last_ = _${name}_index == _${name}_size - 1
-${pad}        _scope.locals[${py(node.name)}] = _${name}_value
-${body}
-${pad}finally:
-${pad}    _${name}_stack.pop()
-${pad}    if _${name}_had:
-${pad}        _scope.locals[${py(node.name)}] = _${name}_previous
-${pad}    else:
-${pad}        _scope.locals.pop(${py(node.name)}, None)`;
+    const name = `_${fieldName(node.name)}`;
+    const body = emitNodes(node.body, target, 0);
+    // The loop records the metadata that its body reads, and no other.
+    const meta = field => new RegExp(`\\.${field}\\b`).test(body) ? [`${name}_stack[-1].${field} = ${{ index_: `float(${name}_index)`, key_: `${name}_key`, value_: `${name}_value`, first_: `${name}_index == 0`, last_: `${name}_index == ${name}_size - 1` }[field]}`] : [];
+    const recorded = ['index_', 'key_', 'value_', 'first_', 'last_'].flatMap(meta);
+    const index = /_index\b/.test(recorded.join('\n')) ? `${name}_index` : '_';
+    const key = recorded.some(line => line.includes('.key_ ')) ? `${name}_key` : '_';
+    return spaces(n, lines(
+      `${name}_entries = ${call('_runtime.entries', [emitExpression(node.iter, target), '_frame', span(node.span)])}`,
+      `${name}_size = len(${name}_entries)`,
+      `${name}_had = ${py(node.name)} in _scope.locals`,
+      `${name}_previous = ${call('_scope.locals.get', [py(node.name)])}`,
+      block(`if ${name}_size == 0`, node.empty ? emitNodes(node.empty, target, 0) : 'pass'),
+      block('else',
+        `${name}_stack = ${call('_scope.loops.setdefault', [py(node.name), '[]'])}`,
+        `${name}_stack.append(LoopMeta(${name}_size))`,
+        block('try',
+          block(`for ${index}, (${key}, ${name}_value) in enumerate(${name}_entries)`,
+            '_context.iterations += 1',
+            call('_runtime.limit', [py('iteration'), '_context.iterations', '_frame', span(node.span)]),
+            recorded,
+            `_scope.locals[${py(node.name)}] = ${name}_value`,
+            body)),
+        block('finally',
+          `${name}_stack.pop()`,
+          block(`if ${name}_had`, `_scope.locals[${py(node.name)}] = ${name}_previous`),
+          block('else', call('_scope.locals.pop', [py(node.name), 'None']))))));
   };
-  target.include = (node, n) => indent(n, `_context.enter(${py(node.target)}, _frame, ${py(node.span)})\ntry:\n${indent(1, `${functionName(node.target)}(_assign, _definitions, ${inputClass(node.target)}(${node.inputs.map(item => `${fieldName(item.name)}=${emitExpression(item.value, target)}`).join(', ')}), _context, _runtime, _root_data, _scope)`)}\nfinally:\n    _context.leave()`);
+  target.include = (node, n) => spaces(n, lines(
+    call('_context.enter', [py(node.target), '_frame', span(node.span)]),
+    block('try', call(functionName(node.target), ['_assign', '_definitions', call(inputClass(node.target), node.inputs.map(item => `${fieldName(item.name)}=${emitExpression(item.value, target)}`)), '_context', '_runtime', '_root_data', '_scope'])),
+    block('finally', '_context.leave()')));
   return target;
+}
+
+// The names that the generated module imports, by module; a name is imported when the module uses it.
+const imports = [
+  ['math', null], ['time', null],
+  ['polyspec.template.bind', ['BindError', 'bind_data', 'bind_map', 'check_number']],
+  ['polyspec.template.context', ['Frame', 'LoopMeta', 'RenderContext', 'Scope']],
+  ['polyspec.template.engine', ['PreparedRender', 'Program', 'RenderOptions']],
+  ['polyspec.template.errors', ['TemplateError', 'internal_boundary']],
+  ['polyspec.template.functions', ['Env']],
+  ['polyspec.template.runtime_environment', ['RuntimeEnvironment']],
+  ['polyspec.template.runtime_bindings', ['RuntimeBindings']],
+];
+
+/** A class whose `__init__` stores each of `names`, which default to None. */
+function recordClass(name, names) {
+  if (names.length === 0) return block(`class ${name}`, 'pass');
+  return block(`class ${name}`, block(`def __init__${tuple(['self', ...names.map(field => `${field}=None`)])}`, names.map(field => `self.${field} = ${field}`)));
 }
 
 export function emitDeclarations(context) {
   const { program, manifest } = context;
-  const fields = manifest.fields ?? {};
   const schema = bindingSchema(context);
-  const inputClasses = context.templateBodies.map(template => {
-    const typed = program.templates.get(template.name);
-    return `class ${inputClass(template.name)}:\n    def __init__(self, ${[...typed.inputs].map(([name]) => `${fieldName(name)}=None`).join(', ')}):\n${[...typed.inputs].map(([name]) => `        self.${fieldName(name)} = ${fieldName(name)}`).join('\n') || '        pass'}`;
-  }).join('\n\n');
-  const assignClass = `class Assign:\n    def __init__(self, ${Object.keys(fields).map(name => `${fieldName(name)}=None`).join(', ')}):\n${Object.keys(fields).map(name => `        self.${fieldName(name)} = ${fieldName(name)}`).join('\n') || '        pass'}`;
-  return `# Generated by the polyspec template compiler. Do not edit.\nimport math\nimport time\n\nfrom polyspec.template.bind import BindError, bind_data, bind_map, check_number\nfrom polyspec.template.context import Frame, LoopMeta, RenderContext, Scope\nfrom polyspec.template.engine import PreparedRender, Program, RenderOptions\nfrom polyspec.template.errors import TemplateError, internal_boundary\nfrom polyspec.template.functions import Env\nfrom polyspec.template.runtime_environment import RuntimeEnvironment\nfrom polyspec.template.runtime_bindings import RuntimeBindings\n\n_GENERATED_RECORDS_SCHEMA = ${pyLiteral(schema.records)}\n_GENERATED_ASSIGN_SCHEMA = ${pyLiteral(schema.assign)}\n_GENERATED_DEFINITION_SCHEMA = ${pyLiteral(schema.definitions)}\n\n\nclass _Definition:\n    def __init__(self, template=None, html=None, data=None):\n        self.template = template\n        self.html = html\n        self.data = data\n\n\n${inputClasses}\n\n\n${assignClass}`;
+  const used = (text, name) => new RegExp(`\\b${name}\\b`).test(text.replace(/^(import|from) .*$/gm, ''));
+  return [
+    '# Generated by the polyspec template compiler. Do not edit.',
+    dependent(text => imports.flatMap(([module, names]) => {
+      if (names === null) return used(text, module) ? [`import ${module}`] : [];
+      const kept = names.filter(name => used(text, name));
+      return kept.length === 0 ? [] : [`from ${module} import ${kept.join(', ')}`];
+    }).map((line, index, all) => index === all.findIndex(other => other.startsWith('from')) ? `\n${line}` : line).join('\n')),
+    '',
+    // A schema is kept when a helper that the program keeps reads it.
+    definition('_GENERATED_RECORDS_SCHEMA', laid(`_GENERATED_RECORDS_SCHEMA = ${pyLiteral(schema.records)}`)),
+    definition('_GENERATED_ASSIGN_SCHEMA', laid(`_GENERATED_ASSIGN_SCHEMA = ${pyLiteral(schema.assign)}`)),
+    definition('_GENERATED_DEFINITION_SCHEMA', laid(`_GENERATED_DEFINITION_SCHEMA = ${pyLiteral(schema.definitions)}`)),
+    laid(`\n\n${block('class _Definition', block(`def __init__${tuple(['self', 'template=None', 'html=None', 'data=None'])}`, 'self.template = template', 'self.html = html', 'self.data = data'))}`),
+    ...context.templateBodies.map(template => laid(`\n\n${recordClass(inputClass(template.name), [...program.templates.get(template.name).inputs].map(([name]) => fieldName(name)))}`)),
+    laid(`\n\n${recordClass('Assign', Object.keys(manifest.fields ?? {}).map(fieldName))}`),
+  ];
 }
 
+// The helpers of the program, each kept only when the program uses it.
+const helpers = {
+  _generated_bind_type: `def _generated_bind_type(value, type_, path):
+    if value is None:
+        if type_.get("optional") or type_["kind"] in ("null", "any"):
+            return None
+        raise ValueError(f"{path} is required")
+    kind = type_["kind"]
+    if kind == "any":
+        return value
+    if kind in ("string", "number", "boolean"):
+        valid = (
+            isinstance(value, str)
+            if kind == "string"
+            else (isinstance(value, (int, float)) and not isinstance(value, bool))
+            if kind == "number"
+            else isinstance(value, bool)
+        )
+        if not valid:
+            raise ValueError(f"{path} has an invalid type")
+        return check_number(value) if kind == "number" else value
+    if kind == "list":
+        if not isinstance(value, list):
+            raise ValueError(f"{path} is not a list")
+        return [
+            _generated_bind_type(item, type_["item"], f"{path}[{index}]")
+            for index, item in enumerate(value)
+        ]
+    if kind == "map":
+        if not isinstance(value, dict):
+            raise ValueError(f"{path} is not a map")
+        return {
+            key: _generated_bind_type(item, type_["value"], f"{path}.{key}")
+            for key, item in value.items()
+        }
+    if kind == "record":
+        return _generated_bind_record(
+            value, _GENERATED_RECORDS_SCHEMA[type_["name"]], path
+        )
+    raise ValueError(f"{path} has an unknown generated type")`,
+  _generated_bind_record: `def _generated_bind_record(value, fields, path):
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} is not an object")
+    result = {}
+    for name, type_ in fields.items():
+        if name not in value:
+            if not type_.get("optional"):
+                raise ValueError(f"{path}.{name} is required")
+            continue
+        result[name] = _generated_bind_type(value[name], type_, f"{path}.{name}")
+    return result`,
+  _generated_member: `def _generated_member(value, key):
+    # A typed record is a map of its present fields; an absent optional field and a null record read as null.
+    return None if value is None else value.get(key)`,
+  _generated_bind_assign: `def _generated_bind_assign(value):
+    root = bind_map(value)
+    values = {}
+    for name, type_ in _GENERATED_ASSIGN_SCHEMA.items():
+        if name in root:
+            values[name] = _generated_bind_type(root[name], type_, "assign." + name)
+    return Assign(**values), root`,
+  _generated_bind_definitions: `def _generated_bind_definitions(raw):
+    definitions = {}
+    targets = {}
+    for id_, entry in (raw or {}).items():
+        spec = _GENERATED_DEFINITION_SCHEMA.get(id_)
+        if spec is None:
+            raise ValueError(f"define.{id_} is not declared")
+        if isinstance(entry, str):
+            if spec["target"] is None or entry != spec["target"]:
+                raise ValueError(f"define.{id_} has an invalid template")
+            definitions[id_] = _Definition(template=spec["target"])
+            targets[id_] = {"target": spec["target"]}
+            continue
+        if not isinstance(entry, dict):
+            raise ValueError(f"define.{id_} is not an object")
+        template = entry.get("template")
+        html = entry.get("html")
+        data = bind_data(entry["data"]) if "data" in entry else None
+        if isinstance(html, str):
+            if not spec["html"] or "template" in entry or "data" in entry:
+                raise ValueError(f"define.{id_} has an invalid html entry")
+            definitions[id_] = _Definition(html=html)
+            targets[id_] = {"target": None, "html": html}
+            continue
+        if (
+            not isinstance(template, str)
+            or spec["target"] is None
+            or template != spec["target"]
+        ):
+            raise ValueError(f"define.{id_} has an invalid template")
+        bound = None
+        if "data" in entry:
+            if not isinstance(data, dict):
+                raise ValueError(f"define.{id_}.data is not an object")
+            bound = {}
+            for name, type_ in spec["input"].items():
+                if name in data:
+                    bound[name] = _generated_bind_type(
+                        data[name], type_, f"define.{id_}.data.{name}"
+                    )
+        definitions[id_] = _Definition(template=spec["target"], data=bound)
+        targets[id_] = {"target": spec["target"]}
+    return definitions, targets`,
+  _generated_list: `def _generated_list(items):
+    result = []
+    for spread, value in items:
+        if spread:
+            result.extend(value)
+        else:
+            result.append(value)
+    return result`,
+  _generated_map: `def _generated_map(items):
+    result = {}
+    for spread, key, value in items:
+        if spread:
+            result.update(value)
+        else:
+            result[key] = value
+    return result`,
+  _generated_env: `def _generated_env(raw):
+    entry = raw if raw is not None else {}
+    if not isinstance(entry, dict):
+        raise BindError("E_DATA_UNSUPPORTED_TYPE", "env is not an object")
+    timezone = entry.get("timezone", "Z")
+    now = entry.get("now", math.floor(time.time()))
+    if not isinstance(timezone, str):
+        raise BindError("E_DATA_UNSUPPORTED_TYPE", "env.timezone is not a string")
+    if not isinstance(now, (int, float)) or isinstance(now, bool):
+        raise BindError("E_DATA_UNSUPPORTED_TYPE", "env.now is not a number")
+    return Env(timezone, float(now))`,
+  _generated_bind_assign_dynamic: `def _generated_bind_assign_dynamic(value):
+    root = bind_map(value)
+    return Assign(), root`,
+};
+
 export function emitRuntime(context) {
-  const dynamic = context.program.dynamicRoot;
-  const text = "def _generated_bind_type(value, type_, path):\n    if value is None:\n        if type_.get('optional') or type_['kind'] in ('null', 'any'):\n            return None\n        raise ValueError(f'{path} is required')\n    kind = type_['kind']\n    if kind == 'any':\n        return value\n    if kind in ('string', 'number', 'boolean'):\n        valid = (isinstance(value, str) if kind == 'string'\n                 else (isinstance(value, (int, float)) and not isinstance(value, bool)) if kind == 'number'\n                 else isinstance(value, bool))\n        if not valid:\n            raise ValueError(f'{path} has an invalid type')\n        return check_number(value) if kind == 'number' else value\n    if kind == 'list':\n        if not isinstance(value, list):\n            raise ValueError(f'{path} is not a list')\n        return [_generated_bind_type(item, type_['item'], f'{path}[{index}]') for index, item in enumerate(value)]\n    if kind == 'map':\n        if not isinstance(value, dict):\n            raise ValueError(f'{path} is not a map')\n        return {key: _generated_bind_type(item, type_['value'], f'{path}.{key}') for key, item in value.items()}\n    if kind == 'record':\n        return _generated_bind_record(value, _GENERATED_RECORDS_SCHEMA[type_['name']], path)\n    raise ValueError(f'{path} has an unknown generated type')\n\n\ndef _generated_bind_record(value, fields, path):\n    if not isinstance(value, dict):\n        raise ValueError(f'{path} is not an object')\n    result = {}\n    for name, type_ in fields.items():\n        if name not in value:\n            if not type_.get('optional'):\n                raise ValueError(f'{path}.{name} is required')\n            continue\n        result[name] = _generated_bind_type(value[name], type_, f'{path}.{name}')\n    return result\n\n\ndef _generated_member(value, key):\n    # A typed record is a map of its present fields; an absent optional field and a null record read as null.\n    return None if value is None else value.get(key)\n\n\ndef _generated_bind_assign(value):\n    root = bind_map(value)\n    if DYNAMIC_ROOT_PLACEHOLDER:\n        return Assign(), root\n    values = {}\n    for name, type_ in _GENERATED_ASSIGN_SCHEMA.items():\n        if name in root:\n            values[name] = _generated_bind_type(root[name], type_, 'assign.' + name)\n    return Assign(**values), root\n\n\ndef _generated_bind_definitions(raw):\n    definitions = {}\n    targets = {}\n    for id_, entry in (raw or {}).items():\n        spec = _GENERATED_DEFINITION_SCHEMA.get(id_)\n        if spec is None:\n            raise ValueError(f'define.{id_} is not declared')\n        if isinstance(entry, str):\n            if spec['target'] is None or entry != spec['target']:\n                raise ValueError(f'define.{id_} has an invalid template')\n            definitions[id_] = _Definition(template=spec['target'])\n            targets[id_] = {'target': spec['target']}\n            continue\n        if not isinstance(entry, dict):\n            raise ValueError(f'define.{id_} is not an object')\n        template = entry.get('template')\n        html = entry.get('html')\n        data = bind_data(entry['data']) if 'data' in entry else None\n        if isinstance(html, str):\n            if not spec['html'] or 'template' in entry or 'data' in entry:\n                raise ValueError(f'define.{id_} has an invalid html entry')\n            definitions[id_] = _Definition(html=html)\n            targets[id_] = {'target': None, 'html': html}\n            continue\n        if not isinstance(template, str) or spec['target'] is None or template != spec['target']:\n            raise ValueError(f'define.{id_} has an invalid template')\n        bound = None\n        if 'data' in entry:\n            if not isinstance(data, dict):\n                raise ValueError(f'define.{id_}.data is not an object')\n            bound = {}\n            for name, type_ in spec['input'].items():\n                if name in data:\n                    bound[name] = _generated_bind_type(data[name], type_, f'define.{id_}.data.{name}')\n        definitions[id_] = _Definition(template=spec['target'], data=bound)\n        targets[id_] = {'target': spec['target']}\n    return definitions, targets\n\n\ndef _generated_list(items):\n    result = []\n    for spread, value in items:\n        if spread:\n            result.extend(value)\n        else:\n            result.append(value)\n    return result\n\n\ndef _generated_map(items):\n    result = {}\n    for spread, key, value in items:\n        if spread:\n            result.update(value)\n        else:\n            result[key] = value\n    return result\n\n\ndef _generated_env(raw):\n    entry = raw if raw is not None else {}\n    if not isinstance(entry, dict):\n        raise BindError('E_DATA_UNSUPPORTED_TYPE', 'env is not an object')\n    timezone = entry.get('timezone', 'Z')\n    now = entry.get('now', math.floor(time.time()))\n    if not isinstance(timezone, str):\n        raise BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string')\n    if not isinstance(now, (int, float)) or isinstance(now, bool):\n        raise BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number')\n    return Env(timezone, float(now))\n";
-  return text.replace('DYNAMIC_ROOT_PLACEHOLDER', dynamic ? 'True' : 'False');
+  const { _generated_bind_assign: typed, _generated_bind_assign_dynamic: dynamic, ...others } = helpers;
+  const bindAssign = context.program.dynamicRoot ? dynamic.replace('_generated_bind_assign_dynamic', '_generated_bind_assign') : typed;
+  return Object.entries({ ...others, _generated_bind_assign: bindAssign }).map(([name, code]) => definition(name, `\n\n${code}`));
 }
 
 export function emitTemplates(context) {
   const { program } = context;
   return context.templateBodies.map(template => {
     const typed = program.templates.get(template.name);
-    const locals = [...typed.inputs].map(([name]) => `    _scope.locals[${py(name)}] = _input.${fieldName(name)}`).join('\n');
-    return `def ${template.function}(_assign, _definitions, _input, _context, _runtime, _root_data, _scope):\n    _frame = Frame(${py(template.name)}, ${JSON.stringify(typed.lines)}, _root_data)\n${locals}\n${template.body}`;
-  }).join('\n\n');
+    return laid(`\n\n${block(`def ${template.function}${tuple(['_assign', '_definitions', '_input', '_context', '_runtime', '_root_data', '_scope'])}`,
+      `_frame = ${call('Frame', [py(template.name), list(typed.lines.map(String)), '_root_data'])}`,
+      [...typed.inputs].map(([name]) => `_scope.locals[${py(name)}] = _input.${fieldName(name)}`),
+      emitNodes(typed.body, context.target, 0))}`);
+  });
 }
 
 export function emitEntry(context) {
   const entries = context.templateBodies.filter(template => template.inputs.size === 0);
-  const dispatch = entries.map((template, index) =>
-    `    ${index ? 'elif' : 'if'} target == ${py(template.name)}:\n        ${functionName(template.name)}(_assign, _definitions, ${inputClass(template.name)}(), _context, _runtime, _root_data, _scope)\n        return`).join('\n');
-  return `def _render_template(target, _assign, _definitions, _context, _runtime, _root_data, _scope):
-${dispatch}
-    else:
-        raise _context.fail('E_LOAD_NOT_FOUND', None, None, 'template ' + target + ' does not exist')
-
-
-class _GeneratedExecution:
+  const fail = `raise ${call('_context.fail', [py('E_LOAD_NOT_FOUND'), 'None', 'None', `${py('template ')} + target + ${py(' does not exist')}`])}`;
+  const dispatch = entries.map((template, index) => block(`${index ? 'elif' : 'if'} target == ${py(template.name)}`, call(functionName(template.name), ['_assign', '_definitions', `${inputClass(template.name)}()`, '_context', '_runtime', '_root_data', '_scope']), 'return'));
+  return [
+    laid(`\n\n${block(`def _render_template${tuple(['target', '_assign', '_definitions', '_context', '_runtime', '_root_data', '_scope'])}`, dispatch, entries.length > 0 ? block('else', fail) : fail)}`),
+    `\n\nclass _GeneratedExecution:
     def __init__(self, target, assign, definitions, root_data, env, services, html):
         self.target = target
         self.assign = assign
@@ -212,7 +451,15 @@ class _GeneratedExecution:
             if self.html is not None:
                 context.output.write(self.html)
             else:
-                _render_template(self.target, self.assign, self.definitions, context, runtime, self.root_data, scope)
+                _render_template(
+                    self.target,
+                    self.assign,
+                    self.definitions,
+                    context,
+                    runtime,
+                    self.root_data,
+                    scope,
+                )
             return context.output.text()
         finally:
             context.leave()
@@ -234,7 +481,7 @@ class GeneratedProgram(Program):
     def prepare(self, target, assign=None, options=None):
         options = options or RenderOptions()
         if not isinstance(target, str):
-            raise ValueError('generated target must be a template name')
+            raise ValueError("generated target must be a template name")
         # A request that does not match the declared types raises a ValueError before rendering starts; it is the
         # argument error of Python and no template error (ERR-13), so it passes the boundary of render only.
         return self._prepare_bound(target, assign, options)
@@ -247,11 +494,23 @@ class GeneratedProgram(Program):
         except BindError as error:
             raise TemplateError(error.code, target, 0, 0, 0, 0, str(error)) from None
         resolved = targets.get(target)
-        target_name = resolved['target'] if resolved else target
-        html = resolved.get('html') if resolved else None
-        return _PreparedRender(target, _GeneratedExecution(target_name, typed_assign, definitions, root_data, env, self.runtime, html))
+        target_name = resolved["target"] if resolved else target
+        html = resolved.get("html") if resolved else None
+        return _PreparedRender(
+            target,
+            _GeneratedExecution(
+                target_name,
+                typed_assign,
+                definitions,
+                root_data,
+                env,
+                self.runtime,
+                html,
+            ),
+        )
 
     def render(self, target, assign=None, options=None):
-        return self.prepare(target, assign, options).render()
-`;
+        return self.prepare(target, assign, options).render()`,
+  ];
 }
+
