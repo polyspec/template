@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, dirname, resolve } from 'node:path';
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const contractPath = fileURLToPath(new URL('./interface.json', import.meta.url));
@@ -11,6 +11,20 @@ export function generatedManifestPath(output) {
   return `${output}.manifest.json`;
 }
 
+// An artifact is one file at `output`, or a directory at `output` with one file per class (the PHP target, T25.1); the
+// manifest beside it lists every file with its path, relative to the directory of a file artifact or to the directory
+// artifact itself, and the digest of its bytes.
+const isDirectory = path => existsSync(path) && statSync(path).isDirectory();
+const artifactBase = output => isDirectory(output) ? output : dirname(output);
+
+/** The files under a directory, as paths relative to it with `/`, sorted. */
+function directoryFiles(directory) {
+  return readdirSync(directory, { recursive: true, withFileTypes: true })
+    .filter(entry => entry.isFile())
+    .map(entry => relative(directory, join(entry.parentPath, entry.name)).split('\\').join('/'))
+    .sort();
+}
+
 export function verifyGeneratedArtifact(output, target, expected = null) {
   const manifestPath = generatedManifestPath(output);
   if (!existsSync(manifestPath)) throw new Error(`generated artifact manifest is missing: ${manifestPath}`);
@@ -18,10 +32,12 @@ export function verifyGeneratedArtifact(output, target, expected = null) {
   if (manifest.schema !== 3 || manifest.mode !== 'gen' || manifest.target !== target) {
     throw new Error('generated artifact manifest identity differs');
   }
-  const file = manifest.files?.[basename(output)];
-  if (!file || file.path !== basename(output) || !existsSync(output) || hash(readFileSync(output)) !== file.artifactDigest) {
-    throw new Error(`generated artifact is missing or corrupt: ${output}`);
-  }
+  const files = Object.entries(manifest.files ?? {});
+  const listed = isDirectory(output)
+    ? files.length > 0 && directoryFiles(output).join('\n') === files.map(([name]) => name).sort().join('\n')
+    : files.length === 1 && files[0][0] === basename(output);
+  const intact = files.every(([name, file]) => file.path === name && existsSync(join(artifactBase(output), name)) && hash(readFileSync(join(artifactBase(output), name))) === file.artifactDigest);
+  if (!listed || !intact) throw new Error(`generated artifact is missing or corrupt: ${output}`);
   if (expected) {
     for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest', 'compilerDigest']) {
       if (manifest[key] !== expected[key]) throw new Error(`generated artifact ${key} differs`);
@@ -59,32 +75,45 @@ export function compileGeneratedArtifact({ graphPath, typeManifestPath, target, 
       // A stale or damaged generated artifact is rebuilt under the true policy.
     }
   }
-  const source = compile();
-  const artifactDigest = hash(source);
+  // compile returns the source of a file artifact, or the sources of a directory artifact by their relative paths.
+  const compiled = compile();
+  const directory = typeof compiled !== 'string';
+  const sources = directory ? compiled : { [basename(output)]: compiled };
   const manifest = {
     schema: 3,
     mode: 'gen',
     target,
     ...expected,
-    files: { [basename(output)]: { path: basename(output), artifactDigest } },
+    files: Object.fromEntries(Object.entries(sources).map(([name, source]) => [name, { path: name, artifactDigest: hash(source) }])),
   };
   const manifestSource = json(manifest);
   const manifestPath = generatedManifestPath(output);
+  const base = directory ? output : dirname(output);
   if (check) {
-    if (!existsSync(output) || readFileSync(output, 'utf8') !== source) throw new Error(`compiler artifact is stale: ${output}`);
+    const current = directory ? isDirectory(output) && directoryFiles(output).join('\n') === Object.keys(sources).sort().join('\n') : existsSync(output);
+    if (!current || Object.entries(sources).some(([name, source]) => readFileSync(join(base, name), 'utf8') !== source)) throw new Error(`compiler artifact is stale: ${output}`);
     if (!existsSync(manifestPath) || readFileSync(manifestPath, 'utf8') !== manifestSource) throw new Error(`compiler artifact manifest is stale: ${manifestPath}`);
     return manifest;
   }
   mkdirSync(dirname(output), { recursive: true });
-  const temporarySource = `${output}.tmp-${process.pid}`;
+  const temporaryOutput = `${output}.tmp-${process.pid}`;
   const temporaryManifest = `${manifestPath}.tmp-${process.pid}`;
   try {
-    writeFileSync(temporarySource, source);
+    if (directory) {
+      for (const [name, source] of Object.entries(sources)) {
+        mkdirSync(dirname(join(temporaryOutput, name)), { recursive: true });
+        writeFileSync(join(temporaryOutput, name), source);
+      }
+    } else {
+      writeFileSync(temporaryOutput, sources[basename(output)]);
+    }
     writeFileSync(temporaryManifest, manifestSource);
-    renameSync(temporarySource, output);
+    // A directory artifact replaces the whole directory, so it holds no file of an earlier build.
+    rmSync(output, { recursive: true, force: true });
+    renameSync(temporaryOutput, output);
     renameSync(temporaryManifest, manifestPath);
   } finally {
-    rmSync(temporarySource, { force: true });
+    rmSync(temporaryOutput, { recursive: true, force: true });
     rmSync(temporaryManifest, { force: true });
   }
   return manifest;

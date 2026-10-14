@@ -72,24 +72,63 @@ export const definition = (name, code, pattern = new RegExp(`\\b${name}\\b`)) =>
  */
 export const dependent = render => ({ render });
 
-/**
- * The code of a program from its parts in order: every string, every definition that a kept part uses, until no
- * further definition is used, and every dependent part, so the program carries no helper, type, method or import that
- * it does not use.
- */
-export function usedCode(parts) {
-  const kept = parts.map(part => typeof part === 'string');
-  let text = parts.filter(part => typeof part === 'string').join('\n');
+/** The start of a file of a target that writes one file per declaration, at `path` under the output directory. */
+export const file = path => ({ file: path });
+
+/** The definitions that `text` uses, with the definitions that those use, in their order. */
+export function usedDefinitions(definitions, text) {
+  const kept = new Set();
+  let used = text;
   for (let changed = true; changed;) {
     changed = false;
-    parts.forEach((part, index) => {
-      if (kept[index] || part.render || !part.pattern.test(text)) return;
-      kept[index] = true;
-      text += `\n${part.code}`;
+    for (const item of definitions) {
+      if (kept.has(item) || !item.pattern.test(used)) continue;
+      kept.add(item);
+      used += `\n${item.code}`;
       changed = true;
-    });
+    }
   }
-  return parts.filter((part, index) => kept[index] || part.render).map(part => typeof part === 'string' ? part : part.render ? part.render(text) : part.code).join('\n');
+  return definitions.filter(item => kept.has(item));
+}
+
+/**
+ * The parts of a program in order, each a string or a file start: every string, every definition that a kept part
+ * uses, until no further definition is used, and every dependent part, so the program carries no helper, type, method
+ * or import that it does not use.
+ */
+export function usedParts(parts) {
+  const strings = parts.filter(part => typeof part === 'string').join('\n');
+  const definitions = new Set(usedDefinitions(parts.filter(part => part.pattern), strings));
+  const text = [strings, ...[...definitions].map(item => item.code)].join('\n');
+  return parts.flatMap(part => {
+    if (typeof part === 'string' || part.file) return [part];
+    if (part.render) return [part.render(text)];
+    return definitions.has(part) ? [part.code] : [];
+  });
+}
+
+/** The code of a program that is one file: its used parts, one per line. */
+export function usedCode(parts) {
+  const used = usedParts(parts);
+  if (used.some(part => part.file)) throw new Error('compiler backend: a program of one file has no file start');
+  return used.join('\n');
+}
+
+/** The files of a program that is one file per declaration: the used parts after each file start, by path. */
+export function usedFiles(parts) {
+  const files = {};
+  let current = null;
+  for (const part of usedParts(parts)) {
+    if (part.file) {
+      current = part.file;
+      files[current] = [];
+    } else if (current === null) {
+      throw new Error('compiler backend: code before the first file start');
+    } else {
+      files[current].push(part);
+    }
+  }
+  return Object.fromEntries(Object.entries(files).map(([path, code]) => [path, `${code.join('\n')}\n`]));
 }
 
 export const indent = (level, source) => source.split('\n').map(line => line.length === 0 ? '' : '    '.repeat(level) + line).join('\n');

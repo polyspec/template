@@ -97,7 +97,7 @@ function checkGeneratedEngineRoute() {
     javascript: id => [`generated/javascript/${id}.js`, /export class GeneratedProgram/],
     go: id => [`go/generated/${id}/generated.go`, /type GeneratedProgram struct[\s\S]*?func \(p \*GeneratedProgram\) Prepare/],
     rust: id => [`generated/typed/${id}.rust`, /pub struct GeneratedProgram[\s\S]*?impl Program for GeneratedProgram/],
-    php: id => [`generated/typed/${id}.php`, /final class GeneratedProgram implements Program/],
+    php: id => [`generated/php/${id}/GeneratedProgram.php`, /final class GeneratedProgram implements Program/],
     python: id => [`generated/typed/${showcasePythonModule(id)}.py`, /class GeneratedProgram\(Program\):/],
   };
   for (const [language, generatedCheck] of Object.entries(generatedChecks)) {

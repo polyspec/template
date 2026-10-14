@@ -7,7 +7,8 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../packages/template-compiler/ast-artifact.mjs';
-import { compileSource } from '../packages/template-compiler/compiler.mjs';
+import { compileFiles, compileSource } from '../packages/template-compiler/compiler.mjs';
+import { phpProgramAutoload, writePhpProgram } from './php-program.mjs';
 import { goString, phpString, rustString } from '../packages/template-compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
@@ -102,9 +103,9 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
     PHP: () => {
       // PHP.
       const phpNamespace = 'Polyspec\\Generated\\TypedValues';
-      const phpSource = join(temporary, 'typed.php');
-      writeFileSync(phpSource, compileSource(graphManifest, types, 'php', { phpNamespace }));
-      run('php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))}; require ${phpString(phpSource)}; function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
+      const phpDirectory = join(temporary, 'php');
+      writePhpProgram(phpDirectory, compileFiles(graphManifest, types, 'php', { phpNamespace }));
+      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/template-php/vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
     },
     Python: () => {
       // Python: the generated program renders through Engine like the AST program; the python of var/python/venv imports the package (scripts/python-toolchain.mjs).

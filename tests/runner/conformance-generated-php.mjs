@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
-import { compileSource } from '../../packages/template-compiler/compiler.mjs';
+import { compileFiles } from '../../packages/template-compiler/compiler.mjs';
+import { phpProgramAutoload, writePhpProgram } from '../../scripts/php-program.mjs';
 import { deriveTypeManifest } from '../../packages/template-compiler/type-manifest.mjs';
 import { parse } from '../../packages/template-ts/dist/index.mjs';
 import { firstDifference, generatedCases, typeDefinitions } from './cases.mjs';
@@ -44,10 +45,11 @@ function parsedTemplates(testCase) {
 
 // Every case runs in its own PHP process, so all cases share one namespace.
 const namespace = 'Polyspec\\Generated\\Conformance';
+// The runner loads the program of a case, one PSR-4 file per class (T25.1), through the Composer autoload of argv[1] with
+// the directory of argv[2].
 writeFileSync(runner, `<?php
 declare(strict_types=1);
-require $argv[1];
-require $argv[2];
+${phpProgramAutoload('$argv[1]', namespace, '$argv[2]')}
 use Polyspec\\Template\\TemplateError;
 use Polyspec\\Template\\Value\\BindError;
 use Polyspec\\Template\\Value\\Json;
@@ -91,13 +93,13 @@ try {
       const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
       const typePath = join(temporary, `${id}.types.json`);
       const graphPath = join(temporary, `${id}.ast`);
-      const sourcePath = join(sources, `${id}.php`);
+      const programDirectory = join(sources, id);
       writeFileSync(typePath, JSON.stringify(typeManifest));
       compileAst({ root: testCase.dir, output: graphPath, entry: 'input.tpl', refresh: 'dev', typeManifest: typePath, delimiters: testCase.options.delimiters ?? null });
-      writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'php', { phpNamespace: namespace }));
-      const lint = await php(['-l', sourcePath], 'php -l');
+      const programFiles = writePhpProgram(programDirectory, compileFiles(join(graphPath, 'manifest.json'), typePath, 'php', { phpNamespace: namespace }));
+      const lint = await php(['-l', ...programFiles], 'php -l');
       if (lint.status !== 0) throw new Error(`${lint.stdout}${lint.stderr}`);
-      const result = await php([runner, join(root, 'packages/template-php/vendor/autoload.php'), sourcePath,
+      const result = await php([runner, join(root, 'packages/template-php/vendor/autoload.php'), programDirectory,
         testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], 'the case process');
       if (result.status !== 0) throw new Error(result.stderr || `PHP exited with ${result.status}`);
       let actual;

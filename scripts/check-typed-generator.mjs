@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // Compiles each generated artifact in an install project and exercises its Program implementation.
-import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
 import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
 import { checkLanguages } from './language-checks.mjs';
+import { phpString } from '../packages/template-compiler/backend-support.mjs';
+import { phpProgramAutoload } from './php-program.mjs';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
@@ -20,6 +22,7 @@ const scenarios = ['compiler-coverage', 'empty-state', 'html-slot', 'react-bound
 
 function generatedSource(id, language) {
   if (language === 'go') return join(root, 'tools/showcase/adapters/go/generated', id, 'generated.go');
+  if (language === 'php') return join(root, showcasePhpDirectory(id));
   if (language === 'python') return join(generated, `${showcasePythonModule(id)}.py`);
   const extension = { rust: 'rust' }[language] ?? language;
   return join(generated, `${id}.${extension}`);
@@ -185,7 +188,8 @@ fn generated_${index}_matches() {
 
 function checkPhp() {
   const autoload = join(root, 'packages/template-php/vendor/autoload.php');
-  const coverageSource = readFileSync(generatedSource(scenarios[0], 'php'), 'utf8');
+  const phpFiles = id => readdirSync(generatedSource(id, 'php')).filter(name => name.endsWith('.php')).map(name => join(generatedSource(id, 'php'), name));
+  const coverageSource = phpFiles(scenarios[0]).map(path => readFileSync(path, 'utf8')).join('\n');
   assert.match(coverageSource, /new RuntimeBindings\(\$context\)/);
   assert.match(coverageSource, /\$runtime->binary\(/);
   assert.match(coverageSource, /\$runtime->call\(/);
@@ -196,8 +200,9 @@ function checkPhp() {
     // The generated program of a scenario is declared in the namespace of tools/showcase/php-namespace.mjs.
     const phpClass = `\\${showcasePhpNamespace(id)}\\GeneratedProgram`;
     const limit = id === scenarios[0] ? ` $limited = new ${phpClass}(new Polyspec\\Template\\Render\\RuntimeEnvironment(['outputBytes' => 1])); $failed = false; try { $limited->render(${JSON.stringify(target(id))}, $assign, $options); } catch (Polyspec\\Template\\TemplateError $error) { $failed = $error->errorCode === 'E_RUNTIME_LIMIT' && $error->errorLine > 0 && $error->errorCol > 0; } if (!$failed) throw new RuntimeException('PHP generated output limit did not preserve a positioned template error');` : '';
-    const probe = `require ${JSON.stringify(autoload)}; require ${JSON.stringify(generatedSource(id, 'php'))}; $assign = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'data.json'))})); $defineValue = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'define.json'))})); $define = []; foreach ($defineValue->entries() as $name => $entry) { if (is_string($entry)) { $define[$name] = $entry; continue; } $item = []; foreach ($entry->entries() as $key => $value) $item[$key] = $value; $define[$name] = $item; } $options = ['define' => $define]; ${fixtureExists(id, 'env.json') ? `$options['env'] = json_decode(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}), true, flags: JSON_THROW_ON_ERROR);` : ''} $actual = (new ${phpClass}())->render(${JSON.stringify(target(id))}, $assign, $options); if ($actual !== ${JSON.stringify(expected(id))}) throw new RuntimeException(${JSON.stringify(`${id}: PHP GeneratedProgram output differs`)});${limit}`;
-    run('php', ['-l', join(generated, `${id}.php`)]);
+    // Composer loads the classes of the program from its PSR-4 directory (T25.1).
+    const probe = `${phpProgramAutoload(phpString(autoload), showcasePhpNamespace(id), phpString(generatedSource(id, 'php')))} $assign = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'data.json'))})); $defineValue = Polyspec\\Template\\Value\\Json::parse(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'define.json'))})); $define = []; foreach ($defineValue->entries() as $name => $entry) { if (is_string($entry)) { $define[$name] = $entry; continue; } $item = []; foreach ($entry->entries() as $key => $value) $item[$key] = $value; $define[$name] = $item; } $options = ['define' => $define]; ${fixtureExists(id, 'env.json') ? `$options['env'] = json_decode(file_get_contents(${JSON.stringify(join(scenarioRoot, id, 'env.json'))}), true, flags: JSON_THROW_ON_ERROR);` : ''} $actual = (new ${phpClass}())->render(${JSON.stringify(target(id))}, $assign, $options); if ($actual !== ${JSON.stringify(expected(id))}) throw new RuntimeException(${JSON.stringify(`${id}: PHP GeneratedProgram output differs`)});${limit}`;
+    for (const path of phpFiles(id)) run('php', ['-l', path]);
     run('php', ['-r', probe]);
   }
 }

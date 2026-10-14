@@ -4,11 +4,11 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { transformSync } from 'esbuild';
 import { root } from '../../tests/runner/drivers.mjs';
-import { compileSource } from '../../packages/template-compiler/compiler.mjs';
+import { compileFiles, compileSource } from '../../packages/template-compiler/compiler.mjs';
 import { generatedCompilerDigest } from '../../packages/template-compiler/compiler-digest.mjs';
 import { typescriptDeliveryDigest } from './delivery-digest.mjs';
 import { compileGeneratedArtifact } from '../../packages/template-compiler/generated-artifact.mjs';
-import { showcasePhpNamespace } from './php-namespace.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mjs';
 import { showcasePythonModule } from './python-module.mjs';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
@@ -28,6 +28,7 @@ const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
 export function generatedOutput(id, language) {
   if (language === 'go') return join(adapterRoot, 'go/generated', id, 'generated.go');
   if (language === 'js') return join(adapterRoot, 'generated/javascript', `${id}.js`);
+  if (language === 'php') return join(root, showcasePhpDirectory(id));
   if (language === 'python') return join(adapterRoot, 'generated/typed', `${showcasePythonModule(id)}.py`);
   const extension = { rust: 'rust' }[language] ?? language;
   return join(adapterRoot, 'generated/typed', `${id}.${extension}`);
@@ -47,7 +48,7 @@ for (const id of scenarios) {
       refresh,
       check,
       compilerDigest: generatedCompilerDigest(language),
-      compile: () => compileSource(graph, manifest, language, { phpNamespace: showcasePhpNamespace(id) }),
+      compile: () => language === 'php' ? compileFiles(graph, manifest, language, { phpNamespace: showcasePhpNamespace(id) }) : compileSource(graph, manifest, language),
     });
   }
   const typescriptOutput = generatedOutput(id, 'ts');

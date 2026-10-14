@@ -7,9 +7,9 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileAst } from '../../packages/template-compiler/ast-artifact.mjs';
-import { compileSource } from '../../packages/template-compiler/compiler.mjs';
+import { compileFiles, compileSource } from '../../packages/template-compiler/compiler.mjs';
 import { publishBuild } from '../../scripts/publish-build.mjs';
-import { showcasePhpNamespace } from './php-namespace.mjs';
+import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mjs';
 
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -61,6 +61,7 @@ function directoryBytes(path) {
 
 function generatedPath(language) {
   if (language === 'go') return join(root, 'tools/showcase/adapters/go/generated/scope-precedence/generated.go');
+  if (language === 'php') return join(root, showcasePhpDirectory('scope-precedence'));
   const extension = language === 'typescript' ? 'ts' : language;
   return join(root, `tools/showcase/adapters/generated/typed/scope-precedence.${extension}`);
 }
@@ -74,8 +75,11 @@ function compileSamples(language, mode) {
     compileAst({ root: scenario, output, entry: 'layout.tpl', refresh: 'dev', typeManifest: join(scenario, 'types.json') });
     if (mode === 'generated') {
       const target = language === 'typescript' ? 'ts' : language;
-      const source = compileSource(join(output, 'manifest.json'), join(scenario, 'types.json'), target, { phpNamespace: showcasePhpNamespace(basename(scenario)) });
-      sizes.push(Buffer.byteLength(source));
+      const graph = join(output, 'manifest.json');
+      const types = join(scenario, 'types.json');
+      // The PHP target writes a file per class, whose bytes count together (T25.1).
+      const sources = target === 'php' ? Object.values(compileFiles(graph, types, target, { phpNamespace: showcasePhpNamespace(basename(scenario)) })) : [compileSource(graph, types, target)];
+      sizes.push(sources.reduce((total, source) => total + Buffer.byteLength(source), 0));
     } else {
       sizes.push(directoryBytes(output));
     }
@@ -126,7 +130,7 @@ function measure(language, command, args, mode) {
   return {
     language, mode, samples: sampleCount, iterations, warmup,
     compile_ms: compiled.compile_ms,
-    artifact_bytes: mode === 'generated' ? statSync(artifact).size + statSync(`${artifact}.manifest.json`).size : compiled.artifact_bytes,
+    artifact_bytes: mode === 'generated' ? (statSync(artifact).isDirectory() ? directoryBytes(artifact) : statSync(artifact).size) + statSync(`${artifact}.manifest.json`).size : compiled.artifact_bytes,
     cold_process_ms: summary(cold.map(item => item.processMs)),
     cold_rss_mib: summary(cold.map(item => item.rssMiB)),
     render_ms: summary(persistent.map(item => item.renderMs)),

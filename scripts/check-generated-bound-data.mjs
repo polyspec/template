@@ -7,7 +7,8 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { compileAst } from '../packages/template-compiler/ast-artifact.mjs';
-import { compileSource } from '../packages/template-compiler/compiler.mjs';
+import { compileFiles, compileSource } from '../packages/template-compiler/compiler.mjs';
+import { phpProgramAutoload, writePhpProgram } from './php-program.mjs';
 import { goString, phpString, rustString } from '../packages/template-compiler/backend-support.mjs';
 import { root } from '../tests/runner/drivers.mjs';
 import { goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mjs';
@@ -31,6 +32,7 @@ try {
   const graph = join(temporary, 'ast');
   compileAst({ root: fixture, output: graph, entry: 'page.tpl', refresh: 'dev', typeManifest: types });
   const source = (language, options) => compileSource(join(graph, 'manifest.json'), types, language, options);
+  const files = (language, options) => compileFiles(join(graph, 'manifest.json'), types, language, options);
 
   checkLanguages('generated bound data', {
     TypeScript: () => {
@@ -113,9 +115,8 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
     PHP: () => {
       // PHP.
       const phpNamespace = 'Polyspec\\Generated\\BoundData';
-      writeFileSync(join(temporary, 'bound.php'), source('php', { phpNamespace }));
-      run('php', ['-r', `require ${phpString(join(root, 'packages/template-php/vendor/autoload.php'))};
-require ${phpString(join(temporary, 'bound.php'))};
+      writePhpProgram(join(temporary, 'php'), files('php', { phpNamespace }));
+      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'packages/template-php/vendor/autoload.php')), phpNamespace, phpString(join(temporary, 'php')))}
 use Polyspec\\Template\\BoundMap;
 $cases = json_decode(${phpString(json(cases))}, true, flags: JSON_THROW_ON_ERROR);
 $check = static function (string $actual, string $expected, string $label): void { if ($actual !== $expected) throw new RuntimeException('PHP generated ' . $label . ': ' . $actual); };
