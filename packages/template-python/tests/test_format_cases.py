@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
-"""The conformance cases of tests/cases for the token analysis and the
-formatter (CNF-2): the tokens of every input that parses equal
-expected.tokens.json, the formatted texts and errors equal
-expected.format.json, and over every .tpl under tests/cases the formatter holds
-the safety invariant and is idempotent. Python ranges are code point indexes;
-this suite converts them to the UTF-8 byte offsets of the case files, counted
-after a byte order mark is removed."""
+"""Over every .tpl under tests/cases the formatter holds the safety invariant
+and is idempotent (FMT-13, FMT-15). The tokens and the format results of each
+case are compared in test_case_tokens.py and test_case_format.py."""
 
 import json
 import re
@@ -66,75 +62,6 @@ def outside_tags(text: str, delimiters: "str | None") -> list[str]:
 
 def without_indentation(pieces: list[str]) -> list[str]:
     return [_LINE_INDENTATION.sub(r"\1", piece) for piece in pieces]
-
-
-def result_object(result: FormatResult) -> dict:
-    """The form of a result in expected.format.json (no message)."""
-    if result.ok:
-        return {"text": result.text}
-    error = result.error
-    return {
-        "error": {
-            "reason": error.reason,
-            "code": error.code,
-            "line": error.line,
-            "col": error.col,
-        }
-    }
-
-
-def readable_inputs() -> list[Path]:
-    """The case inputs that are valid UTF-8; an input with invalid UTF-8 is a
-    lexical error case without a source string (LEX-1)."""
-    return [path for path in sorted(CASES.glob("*/*/input.tpl")) if _readable(path)]
-
-
-class ExpectedFiles(unittest.TestCase):
-    def test_finds_the_conformance_inputs(self):
-        self.assertGreater(len(readable_inputs()), 200)
-
-    def test_tokens_of_every_input_that_parses_equal_expected_tokens(self):
-        for path in readable_inputs():
-            delimiters = delimiters_for(path)
-            source = Source.from_bytes("input.tpl", path.read_bytes())
-            expected_file = path.parent / "expected.tokens.json"
-            with self.subTest(case=str(path.parent.relative_to(CASES))):
-                try:
-                    analysis = analyze_template(source, delimiter_pair(delimiters))
-                except TemplateError:
-                    self.assertFalse(expected_file.exists())
-                    continue
-                tokens = [
-                    [source.byte_at(t["start"]), source.byte_at(t["end"]), t["kind"]]
-                    for t in analysis.tokens
-                ]
-                self.assertEqual(tokens, json.loads(expected_file.read_text("utf-8")))
-
-    def test_formatted_text_of_every_input_that_parses_equals_expected_format(self):
-        for path in readable_inputs():
-            delimiters = delimiters_for(path)
-            text = path.read_bytes().decode("utf-8")
-            expected_file = path.parent / "expected.format.json"
-            with self.subTest(case=str(path.parent.relative_to(CASES))):
-                if parsed(text.removeprefix("﻿"), delimiters) is None:
-                    self.assertFalse(expected_file.exists())
-                    continue
-                expected = json.loads(expected_file.read_text("utf-8"))
-                options = FormatOptions(name="input.tpl", delimiters=delimiters)
-                self.assertEqual(
-                    {
-                        "indent": result_object(format_template(text, options)),
-                        "keep": result_object(
-                            format_template(
-                                text,
-                                FormatOptions(
-                                    name="input.tpl", delimiters=delimiters, indent=None
-                                ),
-                            )
-                        ),
-                    },
-                    expected,
-                )
 
 
 class SafetyInvariant(unittest.TestCase):

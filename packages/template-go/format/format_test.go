@@ -335,11 +335,13 @@ func withoutIndentation(pieces []string) []string {
 	return result
 }
 
-// Every conformance case with expected.format.json formats to its expected text or error in both modes (CNF-2).
+// Every conformance case whose input parses formats to the text or error of its expected.format.json in both modes, and
+// a case whose input does not parse has no such file (CNF-2, CNF-17). Each case is the subtest
+// TestConformanceFormat/<group>/<name>, as the suite unit formatting of config/parity.json reads the results.
 func TestConformanceFormat(t *testing.T) {
-	expectedFiles, _ := filepath.Glob(filepath.Join(repositoryRoot, "tests", "cases", "*", "*", "expected.format.json"))
-	if len(expectedFiles) < 200 {
-		t.Fatalf("found %d expected.format.json files", len(expectedFiles))
+	dirs, _ := filepath.Glob(filepath.Join(repositoryRoot, "tests", "cases", "*", "*"))
+	if len(dirs) < 200 {
+		t.Fatalf("found %d case directories", len(dirs))
 	}
 	type expectedResult struct {
 		Text  *string `json:"text"`
@@ -350,35 +352,49 @@ func TestConformanceFormat(t *testing.T) {
 			Col    int     `json:"col"`
 		} `json:"error"`
 	}
-	for _, path := range expectedFiles {
-		dir := filepath.Dir(path)
-		data, _ := os.ReadFile(path)
-		var expected map[string]expectedResult
-		if err := json.Unmarshal(data, &expected); err != nil {
-			t.Fatalf("%s: %v", path, err)
-		}
-		source, _ := os.ReadFile(filepath.Join(dir, "input.tpl"))
-		for mode, options := range map[string]Options{"indent": {Name: "input.tpl"}, "keep": {Name: "input.tpl", KeepIndentation: true}} {
-			options.Delimiters = delimitersFor(filepath.Join(dir, "input.tpl"))
-			want := expected[mode]
-			result, err := Format(string(source), options)
-			switch {
-			case want.Text != nil:
-				if err != nil || result.Text != *want.Text {
-					t.Errorf("%s %s: %q %v, want %q", dir, mode, result.Text, err, *want.Text)
+	for _, dir := range dirs {
+		t.Run(filepath.Base(filepath.Dir(dir))+"/"+filepath.Base(dir), func(t *testing.T) {
+			path := filepath.Join(dir, "expected.format.json")
+			if _, err := os.Stat(filepath.Join(dir, "expected.ast.json")); err != nil {
+				if _, err := os.Stat(path); err == nil {
+					t.Fatalf("%s exists although the case has no expected.ast.json", path)
 				}
-			case want.Error != nil:
-				failure, ok := err.(*Error)
-				code := ""
-				if want.Error.Code != nil {
-					code = *want.Error.Code
-				}
-				if !ok || failure.Reason != want.Error.Reason || string(failure.Code) != code || failure.Line != want.Error.Line || failure.Col != want.Error.Col {
-					t.Errorf("%s %s: %v, want %+v", dir, mode, err, *want.Error)
-				}
-			default:
-				t.Errorf("%s: no %s result", path, mode)
+				return
 			}
-		}
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var expected map[string]expectedResult
+			if err := json.Unmarshal(data, &expected); err != nil {
+				t.Fatalf("%s: %v", path, err)
+			}
+			source, err := os.ReadFile(filepath.Join(dir, "input.tpl"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			for mode, options := range map[string]Options{"indent": {Name: "input.tpl"}, "keep": {Name: "input.tpl", KeepIndentation: true}} {
+				options.Delimiters = delimitersFor(filepath.Join(dir, "input.tpl"))
+				want := expected[mode]
+				result, err := Format(string(source), options)
+				switch {
+				case want.Text != nil:
+					if err != nil || result.Text != *want.Text {
+						t.Errorf("%s: %q %v, want %q", mode, result.Text, err, *want.Text)
+					}
+				case want.Error != nil:
+					failure, ok := err.(*Error)
+					code := ""
+					if want.Error.Code != nil {
+						code = *want.Error.Code
+					}
+					if !ok || failure.Reason != want.Error.Reason || string(failure.Code) != code || failure.Line != want.Error.Line || failure.Col != want.Error.Col {
+						t.Errorf("%s: %v, want %+v", mode, err, *want.Error)
+					}
+				default:
+					t.Errorf("no %s result", mode)
+				}
+			}
+		})
 	}
 }

@@ -7,7 +7,7 @@
     { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/template-rust"], "tests": ["packages/template-rust/tests/*.rs"], "support": ["packages/template-rust/tests/common/*.rs"] },
     { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/template-php"], "tests": ["packages/template-php/tests/**/*Test.php"] },
     { "name": "php-ext", "runner": "php", "prose": ["PHP extension"], "roots": ["packages/template-php-ext"], "tests": ["packages/template-php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"] },
-    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/template-python"], "tests": ["packages/template-python/tests/test_*.py"] }
+    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/template-python"], "tests": ["packages/template-python/tests/test_*.py"], "env": [{ "name": "PYTHONPATH", "value": "packages/template-python/src" }] }
   ],
   "profiles": [
     { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] }
@@ -52,8 +52,8 @@
       "bindings": [
         { "implementation": "ts", "test": "packages/template-ts/tests/tokens.test.ts" },
         { "implementation": "go", "test": "packages/template-go/parser/analyze_test.go", "symbol": "TestConformanceTokens" },
-        { "implementation": "rust", "test": "packages/template-rust/tests/analyze.rs", "symbol": "tokens_of_every_case_equal_the_expected_tokens" },
-        { "implementation": "python", "test": "packages/template-python/tests/test_format_cases.py" }
+        { "implementation": "rust", "test": "packages/template-rust/tests/cases.rs", "symbol": "tokens" },
+        { "implementation": "python", "test": "packages/template-python/tests/test_case_tokens.py" }
       ]
     },
     {
@@ -65,8 +65,8 @@
       "bindings": [
         { "implementation": "ts", "test": "packages/template-language/tests/conformance.test.ts" },
         { "implementation": "go", "test": "packages/template-go/format/format_test.go", "symbol": "TestConformanceFormat" },
-        { "implementation": "rust", "test": "packages/template-rust/tests/format.rs", "symbol": "formats_every_case_as_expected" },
-        { "implementation": "python", "test": "packages/template-python/tests/test_format_cases.py" }
+        { "implementation": "rust", "test": "packages/template-rust/tests/cases.rs", "symbol": "formatting" },
+        { "implementation": "python", "test": "packages/template-python/tests/test_case_format.py" }
       ]
     },
     {
