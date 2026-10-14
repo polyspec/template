@@ -289,6 +289,13 @@ class Functions(unittest.TestCase):
             "+09:30",
         )
 
+    def test_date_string_with_an_offset_out_of_range_is_not_a_date(self):
+        env = RenderOptions(env={"timezone": "Z", "now": 0})
+        for text in ("2024-01-01T12:00:00+25:00", "2024-01-01T12:00:00+05:60"):
+            with self.assertRaises(TE, msg=text) as caught:
+                render(f'{{= date("{text}", "Y") }}', {}, env)
+            self.assertEqual(caught.exception.code, "E_RUNTIME_TYPE")
+
     def test_arity_and_unknown_function(self):
         with self.assertRaises(TE) as caught:
             render("{= upper() }")

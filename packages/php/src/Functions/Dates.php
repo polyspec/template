@@ -112,7 +112,10 @@ final class Dates
             if ($month < 1 || $month > 12 || $day < 1 || $day > 31 || $hour > 23 || $minute > 59 || $second > 59) {
                 throw Helpers::typeError(json_encode($text) . ' is not a date');
             }
-            $offset = isset($m[7]) && $m[7] !== '' ? (int) self::parseOffset($m[7]) : $envOffset;
+            $offset = isset($m[7]) && $m[7] !== '' ? self::parseOffset($m[7]) : $envOffset;
+            if ($offset === null) {
+                throw Helpers::typeError(json_encode($text) . ' is not a date');
+            }
 
             return self::daysFromCivil($year, $month, $day) * 86400 + $hour * 3600 + $minute * 60 + $second - $offset;
         }

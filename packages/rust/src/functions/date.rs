@@ -63,18 +63,19 @@ fn civil_from_days(days: i64) -> (i64, i64, i64) {
     (if month <= 2 { y + 1 } else { y }, month, day)
 }
 
-/// Fields of a parsed date text: year, month, day, hour, minute, second and the offset text.
-struct DateText<'a> {
+/// Fields of a parsed date text: year, month, day, hour, minute, second and the offset.
+struct DateText {
     year: i64,
     month: i64,
     day: i64,
     hour: i64,
     minute: i64,
     second: i64,
-    offset: Option<&'a str>,
+    /// The offset in seconds that the text names, or None when it names none.
+    offset: Option<i64>,
 }
 
-fn parse_date_text(text: &str) -> Option<DateText<'_>> {
+fn parse_date_text(text: &str) -> Option<DateText> {
     let bytes = text.as_bytes();
     if bytes.len() < 10 || bytes[4] != b'-' || bytes[7] != b'-' {
         return None;
@@ -111,10 +112,8 @@ fn parse_date_text(text: &str) -> Option<DateText<'_>> {
         second = time_digits(6..8)?;
         rest = rest.get(9..)?;
     }
-    let offset = if rest.is_empty() { None } else { Some(rest) };
-    if let Some(offset) = offset {
-        parse_offset(offset)?;
-    }
+    // An offset that the text names but that is out of range makes the text no date (FUN-37).
+    let offset = if rest.is_empty() { None } else { Some(parse_offset(rest)?) };
     Some(DateText {
         year,
         month,
@@ -146,7 +145,8 @@ pub fn to_unix_seconds(value: &Value, env_offset: i64) -> Result<i64, FunctionEr
             if !(1..=12).contains(&month) || !(1..=31).contains(&day) || hour > 23 || minute > 59 || second > 59 {
                 return Err(type_error(format!("{text:?} is not a date")));
             }
-            let offset = offset.and_then(parse_offset).unwrap_or(env_offset);
+            // A text without offset is read in env.timezone (FUN-37).
+            let offset = offset.unwrap_or(env_offset);
             Ok(days_from_civil(year, month, day) * 86400 + hour * 3600 + minute * 60 + second - offset)
         }
         _ => Err(type_error("date requires a number or a string")),

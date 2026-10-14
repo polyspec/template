@@ -30,6 +30,11 @@ func TestDate(t *testing.T) {
 	if _, err := functions.ToUnixSeconds("1970-13-01", 0); err == nil {
 		t.Error("invalid month accepted")
 	}
+	for _, text := range []string{"2024-01-01T12:00:00+25:00", "2024-01-01T12:00:00+05:60"} {
+		if _, err := functions.ToUnixSeconds(text, 0); err == nil {
+			t.Errorf("offset out of range accepted: %s", text)
+		}
+	}
 }
 
 func mustJSON(t *testing.T, v value.Value) string {

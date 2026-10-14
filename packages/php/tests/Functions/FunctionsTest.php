@@ -7,6 +7,7 @@ namespace Polyspec\Template\Tests\Functions;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Functions\Dates;
 use Polyspec\Template\Functions\Encoding;
+use Polyspec\Template\Functions\FunctionError;
 use Polyspec\Template\Functions\Registry;
 use Polyspec\Template\Value\MapValue;
 use Polyspec\Template\Value\SafeString;
@@ -31,6 +32,18 @@ final class FunctionsTest extends TestCase
         self::assertSame(86400, Dates::toUnixSeconds('1970-01-02', 0));
         self::assertSame(-3600, Dates::toUnixSeconds('1970-01-01T00:00:00+01:00', 0));
         self::assertSame(-3600, Dates::toUnixSeconds('1970-01-01 00:00:00', 3600));
+    }
+
+    public function testDateStringWithAnOffsetOutOfRangeIsNotADate(): void
+    {
+        foreach (['2024-01-01T12:00:00+25:00', '2024-01-01T12:00:00+05:60'] as $text) {
+            try {
+                Dates::toUnixSeconds($text, 0);
+                self::fail("{$text} is accepted");
+            } catch (FunctionError $error) {
+                self::assertSame('E_RUNTIME_TYPE', $error->errorCode, $text);
+            }
+        }
     }
 
     public function testJsonAndUrl(): void

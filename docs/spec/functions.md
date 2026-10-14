@@ -145,7 +145,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 ## date
 
-- **FUN-37** `v` is a number of unix seconds (a fraction is truncated toward zero), or a string in one of the forms `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS`, `YYYY-MM-DDTHH:MM:SS`, each optionally followed by `Z` or `±HH:MM`. A string without offset is interpreted in `env.timezone`. A date-only string has the time `00:00:00`.
+- **FUN-37** `v` is a number of unix seconds (a fraction is truncated toward zero), or a string in one of the forms `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS`, `YYYY-MM-DDTHH:MM:SS`, each optionally followed by `Z` or `±HH:MM`. A string without offset is interpreted in `env.timezone`. A date-only string has the time `00:00:00`. An offset `±HH:MM` has `HH` from `00` to `23` and `MM` from `00` to `59`; a string with an offset outside that range is unparseable (FUN-38).
 - **FUN-38** `v` equal to `null` returns `""`. Any other type or an unparseable string fails with `E_RUNTIME_TYPE`.
 - **FUN-39** The output is computed in `env.timezone`. `env.timezone` is `Z` or a fixed offset `±HH:MM`. Named time zones are not supported and no time zone database is used.
 - **FUN-40** Format tokens:
