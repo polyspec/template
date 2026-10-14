@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-14T17:45:27.781Z",
+  "reviewed": "2026-10-14T20:22:35.797Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "7bc6f02f0c4f93f7a6977bf75cb8a7b8cb8384ca5676fad0f1f31310f5a0e745",
+      "sha256": "4afa09d8d318517c8b51261ff1f91af907619620c666fa5ca1243db25f4ffdfc",
       "advisories": [
         {
           "package": "sprintf-js",
@@ -19,12 +19,12 @@
     },
     {
       "lock": "packages/php/composer.lock",
-      "sha256": "12ec5fe4bb4d825112a4ca8d40ec065f86dd0e44e71391055e62dbbd4faecbe8",
+      "sha256": "6a76556453f5bada136ff196ab3ff31f4f4fa717a2e370735181ebd2ecb55e05",
       "advisories": []
     },
     {
       "lock": "packages/php-ext/composer.lock",
-      "sha256": "a962cfb050f7591b983b91d3c7b56a7e62b75de192c5fb55e37afc7cc642eaa0",
+      "sha256": "4e2861f7319a4fb8bce72d8235cbb1b15bad31792e574c75149744e3c2356d5f",
       "advisories": []
     },
     {
@@ -43,7 +43,7 @@
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "@playwright/test",
-      "version": "1.64.0",
+      "version": "1.64.1",
       "latest": "1.64.1"
     },
     {
@@ -99,7 +99,7 @@
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "oxc-parser",
-      "version": "0.153.0",
+      "version": "0.154.0",
       "latest": "0.154.0"
     },
     {
@@ -120,7 +120,7 @@
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "tsup",
-      "version": "8.5.1",
+      "version": "9.0.0",
       "latest": "9.0.0"
     },
     {
@@ -141,7 +141,7 @@
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "vitest",
-      "version": "5.0.3",
+      "version": "5.0.4",
       "latest": "5.0.4"
     },
     {
@@ -239,21 +239,21 @@
       "ecosystem": "composer",
       "manifest": "packages/php/composer.json",
       "package": "laravel/pint",
-      "version": "v1.30.4",
+      "version": "v1.32.1",
       "latest": "v1.32.1"
     },
     {
       "ecosystem": "composer",
       "manifest": "packages/php/composer.json",
       "package": "phpunit/phpunit",
-      "version": "11.5.57",
+      "version": "13.4.2",
       "latest": "13.4.2"
     },
     {
       "ecosystem": "composer",
       "manifest": "packages/php-ext/composer.json",
       "package": "phpunit/phpunit",
-      "version": "11.5.57",
+      "version": "13.4.2",
       "latest": "13.4.2"
     },
     {
