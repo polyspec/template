@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { countColumn } from '@codemirror/state';
 import { getIndentation } from '@codemirror/language';
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error The fixture script is plain JavaScript without declarations.
 import { fixtureDirectory, fixtureNames, fixtureOptions } from '../../../scripts/editor-fixtures.mts';
 import { formatTemplate, goToMatchingTag, templateDiagnostics, type TemplateOptions } from '../src/index.js';
 import { createState, foldingRanges, marks, run } from './state.js';

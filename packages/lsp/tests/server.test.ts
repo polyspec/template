@@ -8,7 +8,6 @@ import { openDocument, TOKEN_TYPES } from '@polyspec/template-language';
 import type { Position, SemanticTokens, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-// @ts-expect-error The fixture script is plain JavaScript without declarations.
 import { editorResults, fixtureDirectory, fixtureNames, queryIndexes } from '../../../scripts/editor-fixtures.mts';
 import { Client } from './client.js';
 import { decodeTokens, serverResults, SPACES } from './results.js';

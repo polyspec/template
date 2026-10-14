@@ -208,15 +208,18 @@ build-rust: cargo-downloads-check ## Build the Rust CLI
 build-php: ## Install PHP dependencies
 	node scripts/composer-install.mts $(PHP_DIR)
 
-test-ts: test-ts-unit test-ts-types test-ts-types-node ## TypeScript unit tests and type check
+test-ts: test-ts-unit test-ts-types test-ts-types-node test-ts-types-tests ## TypeScript unit tests and type check
 
-.PHONY: test-ts-unit test-ts-types test-ts-types-node
+.PHONY: test-ts-unit test-ts-types test-ts-types-node test-ts-types-tests
 test-ts-unit: build-ts
 	node $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(TS_DIR)
 test-ts-types: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json
 test-ts-types-node: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.node.json
+# The tests of the package, with the types of Node.js, the build of the package and the scripts that they import.
+test-ts-types-tests: build-ts
+	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.tests.json
 
 test-go: test-go-vet test-go-unit ## Go unit tests
 
