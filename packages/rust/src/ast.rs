@@ -569,34 +569,111 @@ impl Expr {
     }
 }
 
-/// The failure of [`decode_template`]: the JSON is not a template AST of `contracts/schema/ast.schema.json`.
+// The JSON Schema of the template AST, a copy of contracts/schema/ast.schema.json that tests/decode.rs compares with
+// it, which decode_template validates against (AST-10).
+const AST_SCHEMA: &str = include_str!("ast.schema.json");
+
+/// The failure of [`decode_template`].
 #[derive(Debug)]
-pub struct AstDecodeError(serde_path_to_error::Error<serde_json::Error>);
+pub enum AstDecodeError {
+    /// The text is not JSON.
+    Json(serde_json::Error),
+    /// The JSON is not a template AST of `contracts/schema/ast.schema.json`.
+    Invalid {
+        /// The JSON Pointer (RFC 6901) of the invalid node, empty for the root.
+        path: String,
+        /// The rule of the schema that the node breaks.
+        reason: String,
+    },
+}
 
 impl AstDecodeError {
-    /// The path of the first invalid value, such as `body[0]` or `comments`, or `.` for the root. A node reads its fields
-    /// through its `type` tag, so the path of a value inside a statement node ends at that node, and the message names
-    /// the field.
-    pub fn path(&self) -> String {
-        self.0.path().to_string()
+    /// The JSON Pointer of the invalid node (AST-10), empty for the root, or None when the text is not JSON.
+    pub fn path(&self) -> Option<&str> {
+        match self {
+            AstDecodeError::Json(_) => None,
+            AstDecodeError::Invalid { path, .. } => Some(path),
+        }
     }
 }
 
 impl std::fmt::Display for AstDecodeError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(formatter, "invalid template AST at {}: {}", self.0.path(), self.0.inner())
+        match self {
+            AstDecodeError::Json(error) => write!(formatter, "the template AST is not JSON: {error}"),
+            AstDecodeError::Invalid { path, reason } if path.is_empty() => {
+                write!(formatter, "invalid template AST at the root: {reason}")
+            }
+            AstDecodeError::Invalid { path, reason } => write!(formatter, "invalid template AST at {path}: {reason}"),
+        }
     }
 }
 
 impl std::error::Error for AstDecodeError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        Some(self.0.inner())
+        match self {
+            AstDecodeError::Json(error) => Some(error),
+            AstDecodeError::Invalid { .. } => None,
+        }
     }
 }
 
+// The validator of AST_SCHEMA, built on the first decode.
+static VALIDATOR: std::sync::OnceLock<jsonschema::Validator> = std::sync::OnceLock::new();
+
+fn validator() -> &'static jsonschema::Validator {
+    VALIDATOR.get_or_init(|| {
+        let schema: serde_json::Value = serde_json::from_str(AST_SCHEMA).expect("AST_SCHEMA is JSON");
+        jsonschema::draft7::new(&schema).expect("AST_SCHEMA is a JSON Schema of draft 7")
+    })
+}
+
+// The invalid node (AST-10): the deepest instance location of the errors, and of several at that depth the least in
+// code point order. The schema selects the schema of a node by its type with if/then, so an error names a value of the
+// node itself.
+fn invalid_node(errors: &[jsonschema::ValidationError<'_>]) -> Option<AstDecodeError> {
+    let depth = |error: &jsonschema::ValidationError<'_>| error.instance_path().as_str().matches('/').count();
+    let deepest = errors.iter().map(depth).max()?;
+    let error = errors
+        .iter()
+        .filter(|error| depth(error) == deepest)
+        .min_by(|a, b| a.instance_path().as_str().cmp(b.instance_path().as_str()))?;
+    Some(AstDecodeError::Invalid {
+        path: error.instance_path().as_str().to_owned(),
+        reason: error.to_string(),
+    })
+}
+
+// The JSON Pointer of a path of serde_path_to_error, up to its first segment that names no value of the JSON.
+fn json_pointer(path: &serde_path_to_error::Path) -> String {
+    let mut pointer = String::new();
+    for segment in path.iter() {
+        match segment {
+            serde_path_to_error::Segment::Seq { index } => pointer.push_str(&format!("/{index}")),
+            serde_path_to_error::Segment::Map { key } => {
+                pointer.push('/');
+                pointer.push_str(&key.replace('~', "~0").replace('/', "~1"));
+            }
+            serde_path_to_error::Segment::Enum { .. } | serde_path_to_error::Segment::Unknown => break,
+        }
+    }
+    pointer
+}
+
 /// Decodes the canonical JSON text of a template AST (AST-7) into the [`Template`] that `parse` returns, so a program
-/// renders it without parsing a source (RT-41). Every node is checked against its type, with no unknown field and no
-/// missing one (AST-10); the error names the path of the first invalid value ([`AstDecodeError::path`]).
+/// renders it without parsing a source (RT-41). The JSON is validated against `contracts/schema/ast.schema.json` (AST-10), and the error
+/// names the JSON Pointer of the invalid node ([`AstDecodeError::path`]). A valid value that the AST types cannot
+/// hold, such as a span offset beyond `usize`, fails with the pointer of the node that holds it.
 pub fn decode_template(json: &str) -> Result<Template, AstDecodeError> {
-    serde_path_to_error::deserialize(&mut serde_json::Deserializer::from_str(json)).map_err(AstDecodeError)
+    let value: serde_json::Value = serde_json::from_str(json).map_err(AstDecodeError::Json)?;
+    let errors: Vec<_> = validator().iter_errors(&value).collect();
+    if let Some(error) = invalid_node(&errors) {
+        return Err(error);
+    }
+    // The AST is read from the text, not from the validated value: under arbitrary_precision, a serde_json::Value
+    // hands an integer beyond u64 to its visitor as a u128, which a literal value, read as a serde_json::Value, rejects.
+    serde_path_to_error::deserialize(&mut serde_json::Deserializer::from_str(json)).map_err(|error| AstDecodeError::Invalid {
+        path: json_pointer(error.path()),
+        reason: error.inner().to_string(),
+    })
 }

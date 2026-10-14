@@ -359,8 +359,20 @@
         { "implementation": "ts", "test": "packages/ts/tests/decode.test.ts", "id": "decodeTemplate › renders a decoded template without its source through the render-only entry (RT-41)" },
         { "implementation": "go", "test": "packages/go/ast/json_test.go", "id": "TestADecodedTemplateRendersWithoutItsSource" },
         { "implementation": "rust", "test": "packages/rust/tests/decode.rs", "id": "a_decoded_template_renders_without_its_source" },
-        { "implementation": "php", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testRendersAParsedAst" },
-        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_renders_a_parsed_ast" }
+        { "implementation": "php", "test": "packages/php/tests/AstDecodeTest.php", "id": "testADecodedTemplateIsTheAstThatParseReturnsAndRenders" },
+        { "implementation": "python", "test": "packages/python/tests/test_decode.py", "id": "test_a_decoded_template_is_the_ast_that_parse_returns_and_renders" }
+      ]
+    },
+    {
+      "id": "ast-decode-errors",
+      "kind": "feature",
+      "profile": "manifest",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/decode.test.ts", "id": "decodeTemplate › fails on every invalid AST of the shared fixture with the JSON Pointer of its invalid node" },
+        { "implementation": "go", "test": "packages/go/ast/json_test.go", "id": "TestDecodeTemplateNamesTheInvalidNode" },
+        { "implementation": "rust", "test": "packages/rust/tests/decode.rs", "id": "decode_fails_naming_the_json_pointer_of_the_invalid_node" },
+        { "implementation": "php", "test": "packages/php/tests/AstDecodeTest.php", "id": "testDecodeFailsNamingTheJsonPointerOfTheInvalidNode" },
+        { "implementation": "python", "test": "packages/python/tests/test_decode.py", "id": "test_decode_fails_naming_the_json_pointer_of_the_invalid_node" }
       ]
     },
     {

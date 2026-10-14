@@ -1,10 +1,10 @@
 <!-- doc-id: packages-template-go-readme -->
-<!-- source-sha256: 7217c38d1c40aa680d45cb3635b19cdc98afff170955087a6633c29c700711df -->
+<!-- source-sha256: 06d164b704081bd26781df4016baa3dfbf856ac46203cfd2a5334aae6dabdf51 -->
 # github.com/polyspec/template/packages/go
 
 [English](README.md).
 
-템플릿 언어의 Go 구현: 렉서, 파서, 렌더러, 내장 함수, 명령줄 인터페이스. 모듈은 표준 라이브러리 밖의 의존성이 없다.
+템플릿 언어의 Go 구현: 렉서, 파서, 렌더러, 내장 함수, 명령줄 인터페이스. 표준 라이브러리 밖의 의존성은 `github.com/santhosh-tekuri/jsonschema/v6`와 `golang.org/x/text`이며, `ast.DecodeTemplate`은 이것으로 AST JSON을 AST 스키마에 대해 검증한다.
 
 ## 설치
 
@@ -64,6 +64,7 @@ engine := template.NewEngine(program)
 | 심볼 | 설명 |
 | --- | --- |
 | `Parse(source, name, ParseOptions)` | 템플릿 하나를 AST로 파싱한다. `ParseOptions.Delimiters`는 구분자 쌍을 선택한다. |
+| `ast.DecodeTemplate(json)` | AST JSON 텍스트를 패키지가 embed한 `contracts/schema/ast.schema.json`으로 검증해 `Parse`가 반환하는 AST로 읽는다. 스키마가 거부한 JSON은 `Path`가 잘못된 노드의 JSON Pointer인 `*ast.DecodeError`로 실패한다(AST-10). |
 | `Analyze(source, name, ParseOptions)` | 템플릿을 한 번 파싱해 AST, 받아들인 `Tags`(종류, 범위, 본문 범위)와 그 EDT-8 `Tokens`를 돌려준다. 오프셋은 앞의 바이트 순서 표시를 뺀 UTF-8 바이트 오프셋이다. |
 | `Format(source, FormatOptions)` | 태그 안의 공백과 줄 들여쓰기를 정리한다. `FormatOptions`에는 `Name`, `Delimiters`, `Range`, `Indent`(공백 묶음 또는 탭 하나, 기본은 공백 두 개), `KeepIndentation`, `TemplateBlocks`(`indent` 또는 `flat`)가 있다. 정리한 텍스트가 같은 AST로 파싱될 때만 결과를 돌려주고, 아니면 `Reason`이 `parse`, `invariant`, `html`인 `*FormatError`를 돌려준다. |
 | `NewAstProgram(Options)` | `Loader`, `Functions`, `Limits`, `Delimiters`를 가진 AST program을 생성한다. |

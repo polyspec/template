@@ -1,8 +1,7 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-14T22:54:07.882Z",
-  "reviewed": "2026-10-14T22:53:34.504Z",
+  "reviewed": "2026-10-14T23:27:14.307Z",
   "locks": [
     {
       "lock": "package-lock.json",
@@ -20,17 +19,27 @@
     },
     {
       "lock": "composer.lock",
-      "sha256": "7b4496678abb0cc8e484a20219bef935729a8b7e98cf9a2d68fea48a45020726",
+      "sha256": "7cbff076d14953d03749a1b6f89620e08232f75f1c50b4c209f1ad966e020a3c",
+      "advisories": []
+    },
+    {
+      "lock": "packages/python/pylock.toml",
+      "sha256": "ec3fdcf7dcdfaeea4c2ba3fed7eac34898107e4412d6d55a6ddc0f203876d427",
+      "advisories": []
+    },
+    {
+      "lock": "packages/go/go.sum",
+      "sha256": "da615e479f84e5f7278666ec31f14478644b08f1b3c6f62b5b4a4fb6e417ba50",
       "advisories": []
     },
     {
       "lock": "examples/showcase/adapters/rust/Cargo.lock",
-      "sha256": "05121ccd1a8d9ef35a5daa6ffd3b7c6093cf6419be60e6d3a8963d78f5f9c02e",
+      "sha256": "07e7631cac62c31b417057381e76d3683f5e46d9df2ecb6db112c07718b4f9b4",
       "advisories": []
     },
     {
       "lock": "packages/rust/Cargo.lock",
-      "sha256": "caf866a501662db254620290450dfe237894dbc0e354c0571644396c9cd6a8ca",
+      "sha256": "9d8ddc96a568271283acee510682645df5a68b874163098a585216de6c77179f",
       "advisories": []
     }
   ],
@@ -283,9 +292,51 @@
     {
       "ecosystem": "composer",
       "manifest": "packages/php/composer.json",
+      "package": "opis/json-schema",
+      "version": "2.6.0",
+      "latest": "2.6.0"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/php/composer.json",
       "package": "symfony/console",
       "version": "v8.1.9",
       "latest": "v8.1.9"
+    },
+    {
+      "ecosystem": "pypi",
+      "manifest": "packages/python/pylock.toml",
+      "package": "attrs",
+      "version": "26.1.0",
+      "latest": "26.1.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "manifest": "packages/python/pylock.toml",
+      "package": "jsonschema",
+      "version": "4.26.0",
+      "latest": "4.26.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "manifest": "packages/python/pylock.toml",
+      "package": "jsonschema-specifications",
+      "version": "2025.9.1",
+      "latest": "2025.9.1"
+    },
+    {
+      "ecosystem": "pypi",
+      "manifest": "packages/python/pylock.toml",
+      "package": "referencing",
+      "version": "0.37.0",
+      "latest": "0.37.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "manifest": "packages/python/pylock.toml",
+      "package": "rpds-py",
+      "version": "2026.9.1",
+      "latest": "2026.9.1"
     },
     {
       "ecosystem": "pypi",
@@ -300,6 +351,20 @@
       "package": "ruff",
       "version": "0.17.0",
       "latest": "0.17.0"
+    },
+    {
+      "ecosystem": "go",
+      "manifest": "packages/go/go.mod",
+      "package": "github.com/santhosh-tekuri/jsonschema/v6",
+      "version": "v6.0.3",
+      "latest": "v6.0.3"
+    },
+    {
+      "ecosystem": "go",
+      "manifest": "packages/go/go.mod",
+      "package": "golang.org/x/text",
+      "version": "v0.43.0",
+      "latest": "v0.43.0"
     }
   ],
   "vcs": []

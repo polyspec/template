@@ -56,6 +56,20 @@ final class AstProgram implements Program, RuntimeServices
     }
 
     /**
+     * Decodes the canonical JSON text of a template AST (AST-7) into the AST arrays that parse returns, so a program
+     * renders it without parsing a source (RT-41). The JSON is validated against contracts/schema/ast.schema.json
+     * (AST-10).
+     *
+     * @return array<string, mixed>
+     * @throws \JsonException when the text is not JSON
+     * @throws AstDecodeError naming the JSON Pointer of the invalid node when the JSON is not a template AST
+     */
+    public static function decodeTemplate(string $json): array
+    {
+        return AstDecoder::decode($json);
+    }
+
+    /**
      * RT-2: parses one template source without loading other templates.
      *
      * @param array{delimiters?: string} $options

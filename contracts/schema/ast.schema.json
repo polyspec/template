@@ -40,15 +40,20 @@
       "items": { "$ref": "#/definitions/Node" }
     },
     "Node": {
-      "oneOf": [
-        { "$ref": "#/definitions/Text" },
-        { "$ref": "#/definitions/Echo" },
-        { "$ref": "#/definitions/If" },
-        { "$ref": "#/definitions/For" },
-        { "$ref": "#/definitions/Set" },
-        { "$ref": "#/definitions/Include" },
-        { "$ref": "#/definitions/Block" },
-        { "$ref": "#/definitions/IfBlock" }
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["Text", "Echo", "If", "For", "Set", "Include", "Block", "IfBlock"] }
+      },
+      "allOf": [
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Text" } } }, "then": { "$ref": "#/definitions/Text" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Echo" } } }, "then": { "$ref": "#/definitions/Echo" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "If" } } }, "then": { "$ref": "#/definitions/If" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "For" } } }, "then": { "$ref": "#/definitions/For" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Set" } } }, "then": { "$ref": "#/definitions/Set" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Include" } } }, "then": { "$ref": "#/definitions/Include" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Block" } } }, "then": { "$ref": "#/definitions/Block" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "IfBlock" } } }, "then": { "$ref": "#/definitions/IfBlock" } }
       ]
     },
     "Text": {
@@ -92,9 +97,7 @@
           "minItems": 1,
           "items": { "$ref": "#/definitions/IfBranch" }
         },
-        "else": {
-          "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/NodeList" }]
-        },
+        "else": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/NodeList" } },
         "span": { "$ref": "#/definitions/Span" }
       }
     },
@@ -107,9 +110,7 @@
         "name": { "$ref": "#/definitions/Identifier" },
         "iter": { "$ref": "#/definitions/Expr" },
         "body": { "$ref": "#/definitions/NodeList" },
-        "empty": {
-          "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/NodeList" }]
-        },
+        "empty": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/NodeList" } },
         "span": { "$ref": "#/definitions/Span" }
       }
     },
@@ -149,8 +150,8 @@
       "required": ["type", "id", "path", "scope", "span"],
       "properties": {
         "type": { "const": "Block" },
-        "id": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/Identifier" }] },
-        "path": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+        "id": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/Identifier" } },
+        "path": { "type": ["null", "string"], "minLength": 1 },
         "scope": { "type": "array", "items": { "$ref": "#/definitions/ScopeItem" } },
         "span": { "$ref": "#/definitions/Span" }
       }
@@ -163,9 +164,7 @@
         "type": { "const": "IfBlock" },
         "id": { "$ref": "#/definitions/Identifier" },
         "body": { "$ref": "#/definitions/NodeList" },
-        "else": {
-          "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/NodeList" }]
-        },
+        "else": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/NodeList" } },
         "span": { "$ref": "#/definitions/Span" }
       }
     },
@@ -174,20 +173,25 @@
       "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
     },
     "Expr": {
-      "oneOf": [
-        { "$ref": "#/definitions/Literal" },
-        { "$ref": "#/definitions/Var" },
-        { "$ref": "#/definitions/LoopMeta" },
-        { "$ref": "#/definitions/Member" },
-        { "$ref": "#/definitions/MemberCall" },
-        { "$ref": "#/definitions/ClassCall" },
-        { "$ref": "#/definitions/Index" },
-        { "$ref": "#/definitions/Call" },
-        { "$ref": "#/definitions/Unary" },
-        { "$ref": "#/definitions/Binary" },
-        { "$ref": "#/definitions/Ternary" },
-        { "$ref": "#/definitions/List" },
-        { "$ref": "#/definitions/Map" }
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["Literal", "Var", "LoopMeta", "Member", "MemberCall", "ClassCall", "Index", "Call", "Unary", "Binary", "Ternary", "List", "Map"] }
+      },
+      "allOf": [
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Literal" } } }, "then": { "$ref": "#/definitions/Literal" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Var" } } }, "then": { "$ref": "#/definitions/Var" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "LoopMeta" } } }, "then": { "$ref": "#/definitions/LoopMeta" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Member" } } }, "then": { "$ref": "#/definitions/Member" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "MemberCall" } } }, "then": { "$ref": "#/definitions/MemberCall" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "ClassCall" } } }, "then": { "$ref": "#/definitions/ClassCall" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Index" } } }, "then": { "$ref": "#/definitions/Index" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Call" } } }, "then": { "$ref": "#/definitions/Call" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Unary" } } }, "then": { "$ref": "#/definitions/Unary" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Binary" } } }, "then": { "$ref": "#/definitions/Binary" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Ternary" } } }, "then": { "$ref": "#/definitions/Ternary" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "List" } } }, "then": { "$ref": "#/definitions/List" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Map" } } }, "then": { "$ref": "#/definitions/Map" } }
       ]
     },
     "Literal": {
@@ -200,11 +204,11 @@
         "value": {},
         "span": { "$ref": "#/definitions/Span" }
       },
-      "oneOf": [
-        { "properties": { "kind": { "const": "null" }, "value": { "type": "null" } } },
-        { "properties": { "kind": { "const": "bool" }, "value": { "type": "boolean" } } },
-        { "properties": { "kind": { "const": "number" }, "value": { "type": "number" } } },
-        { "properties": { "kind": { "const": "string" }, "value": { "type": "string" } } }
+      "allOf": [
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "null" } } }, "then": { "properties": { "value": { "type": "null" } } } },
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "bool" } } }, "then": { "properties": { "value": { "type": "boolean" } } } },
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "number" } } }, "then": { "properties": { "value": { "type": "number" } } } },
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "string" } } }, "then": { "properties": { "value": { "type": "string" } } } }
       ]
     },
     "Var": {
@@ -317,7 +321,7 @@
       "properties": {
         "type": { "const": "Ternary" },
         "test": { "$ref": "#/definitions/Expr" },
-        "then": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/Expr" }] },
+        "then": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/Expr" } },
         "else": { "$ref": "#/definitions/Expr" },
         "span": { "$ref": "#/definitions/Span" }
       }
@@ -341,7 +345,9 @@
         "items": {
           "type": "array",
           "items": {
-            "oneOf": [{ "$ref": "#/definitions/Expr" }, { "$ref": "#/definitions/Spread" }]
+            "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Spread" } } },
+            "then": { "$ref": "#/definitions/Spread" },
+            "else": { "$ref": "#/definitions/Expr" }
           }
         },
         "span": { "$ref": "#/definitions/Span" }
@@ -365,7 +371,9 @@
         "entries": {
           "type": "array",
           "items": {
-            "oneOf": [{ "$ref": "#/definitions/MapEntry" }, { "$ref": "#/definitions/Spread" }]
+            "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Spread" } } },
+            "then": { "$ref": "#/definitions/Spread" },
+            "else": { "$ref": "#/definitions/MapEntry" }
           }
         },
         "span": { "$ref": "#/definitions/Span" }

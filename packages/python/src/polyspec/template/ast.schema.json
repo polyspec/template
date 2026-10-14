@@ -1,0 +1,383 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://polyspec.dev/template/ast.schema.json",
+  "title": "Template AST",
+  "description": "Result of parsing one template file.",
+  "$ref": "#/definitions/Template",
+  "definitions": {
+    "Span": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "Template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name", "body", "comments"],
+      "properties": {
+        "type": { "const": "Template" },
+        "name": { "type": "string" },
+        "body": { "$ref": "#/definitions/NodeList" },
+        "comments": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Comment" }
+        }
+      }
+    },
+    "Comment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value", "span"],
+      "properties": {
+        "type": { "const": "Comment" },
+        "value": { "type": "string" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "NodeList": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Node" }
+    },
+    "Node": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["Text", "Echo", "If", "For", "Set", "Include", "Block", "IfBlock"] }
+      },
+      "allOf": [
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Text" } } }, "then": { "$ref": "#/definitions/Text" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Echo" } } }, "then": { "$ref": "#/definitions/Echo" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "If" } } }, "then": { "$ref": "#/definitions/If" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "For" } } }, "then": { "$ref": "#/definitions/For" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Set" } } }, "then": { "$ref": "#/definitions/Set" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Include" } } }, "then": { "$ref": "#/definitions/Include" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Block" } } }, "then": { "$ref": "#/definitions/Block" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "IfBlock" } } }, "then": { "$ref": "#/definitions/IfBlock" } }
+      ]
+    },
+    "Text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value", "span"],
+      "properties": {
+        "type": { "const": "Text" },
+        "value": { "type": "string" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Echo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "expr", "span"],
+      "properties": {
+        "type": { "const": "Echo" },
+        "expr": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "IfBranch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["test", "body", "span"],
+      "properties": {
+        "test": { "$ref": "#/definitions/Expr" },
+        "body": { "$ref": "#/definitions/NodeList" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "If": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "branches", "else", "span"],
+      "properties": {
+        "type": { "const": "If" },
+        "branches": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/IfBranch" }
+        },
+        "else": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/NodeList" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "For": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name", "iter", "body", "empty", "span"],
+      "properties": {
+        "type": { "const": "For" },
+        "name": { "$ref": "#/definitions/Identifier" },
+        "iter": { "$ref": "#/definitions/Expr" },
+        "body": { "$ref": "#/definitions/NodeList" },
+        "empty": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/NodeList" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name", "expr", "span"],
+      "properties": {
+        "type": { "const": "Set" },
+        "name": { "$ref": "#/definitions/Identifier" },
+        "expr": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Include": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "path", "span"],
+      "properties": {
+        "type": { "const": "Include" },
+        "path": { "type": "string", "minLength": 1 },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "ScopeItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "expr"],
+      "properties": {
+        "name": { "$ref": "#/definitions/Identifier" },
+        "expr": { "$ref": "#/definitions/Expr" }
+      }
+    },
+    "Block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "path", "scope", "span"],
+      "properties": {
+        "type": { "const": "Block" },
+        "id": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/Identifier" } },
+        "path": { "type": ["null", "string"], "minLength": 1 },
+        "scope": { "type": "array", "items": { "$ref": "#/definitions/ScopeItem" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "IfBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "body", "else", "span"],
+      "properties": {
+        "type": { "const": "IfBlock" },
+        "id": { "$ref": "#/definitions/Identifier" },
+        "body": { "$ref": "#/definitions/NodeList" },
+        "else": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/NodeList" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "Expr": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["Literal", "Var", "LoopMeta", "Member", "MemberCall", "ClassCall", "Index", "Call", "Unary", "Binary", "Ternary", "List", "Map"] }
+      },
+      "allOf": [
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Literal" } } }, "then": { "$ref": "#/definitions/Literal" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Var" } } }, "then": { "$ref": "#/definitions/Var" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "LoopMeta" } } }, "then": { "$ref": "#/definitions/LoopMeta" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Member" } } }, "then": { "$ref": "#/definitions/Member" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "MemberCall" } } }, "then": { "$ref": "#/definitions/MemberCall" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "ClassCall" } } }, "then": { "$ref": "#/definitions/ClassCall" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Index" } } }, "then": { "$ref": "#/definitions/Index" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Call" } } }, "then": { "$ref": "#/definitions/Call" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Unary" } } }, "then": { "$ref": "#/definitions/Unary" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Binary" } } }, "then": { "$ref": "#/definitions/Binary" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Ternary" } } }, "then": { "$ref": "#/definitions/Ternary" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "List" } } }, "then": { "$ref": "#/definitions/List" } },
+        { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Map" } } }, "then": { "$ref": "#/definitions/Map" } }
+      ]
+    },
+    "Literal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "kind", "value", "span"],
+      "properties": {
+        "type": { "const": "Literal" },
+        "kind": { "enum": ["null", "bool", "number", "string"] },
+        "value": {},
+        "span": { "$ref": "#/definitions/Span" }
+      },
+      "allOf": [
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "null" } } }, "then": { "properties": { "value": { "type": "null" } } } },
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "bool" } } }, "then": { "properties": { "value": { "type": "boolean" } } } },
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "number" } } }, "then": { "properties": { "value": { "type": "number" } } } },
+        { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "string" } } }, "then": { "properties": { "value": { "type": "string" } } } }
+      ]
+    },
+    "Var": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name", "span"],
+      "properties": {
+        "type": { "const": "Var" },
+        "name": { "$ref": "#/definitions/Identifier" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "LoopMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "loop", "field", "span"],
+      "properties": {
+        "type": { "const": "LoopMeta" },
+        "loop": { "$ref": "#/definitions/Identifier" },
+        "field": { "enum": ["index_", "key_", "value_", "last_", "first_", "size_"] },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "object", "key", "span"],
+      "properties": {
+        "type": { "const": "Member" },
+        "object": { "$ref": "#/definitions/Expr" },
+        "key": { "type": "string" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "object", "index", "span"],
+      "properties": {
+        "type": { "const": "Index" },
+        "object": { "$ref": "#/definitions/Expr" },
+        "index": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "MemberCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "object", "method", "args", "span"],
+      "properties": {
+        "type": { "const": "MemberCall" },
+        "object": { "$ref": "#/definitions/Expr" },
+        "method": { "$ref": "#/definitions/Identifier" },
+        "args": { "type": "array", "items": { "$ref": "#/definitions/Expr" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "ClassCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "className", "method", "args", "span"],
+      "properties": {
+        "type": { "const": "ClassCall" },
+        "className": { "$ref": "#/definitions/Identifier" },
+        "method": { "$ref": "#/definitions/Identifier" },
+        "args": { "type": "array", "items": { "$ref": "#/definitions/Expr" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name", "args", "span"],
+      "properties": {
+        "type": { "const": "Call" },
+        "name": { "$ref": "#/definitions/Identifier" },
+        "args": { "type": "array", "items": { "$ref": "#/definitions/Expr" } },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Unary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "op", "operand", "span"],
+      "properties": {
+        "type": { "const": "Unary" },
+        "op": { "enum": ["!", "-"] },
+        "operand": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Binary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "op", "left", "right", "span"],
+      "properties": {
+        "type": { "const": "Binary" },
+        "op": {
+          "enum": ["+", "-", "*", "/", "%", "==", "!=", "===", "!==", "<", ">", "<=", ">=", "&&", "||", "??", "in"]
+        },
+        "left": { "$ref": "#/definitions/Expr" },
+        "right": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Ternary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "test", "then", "else", "span"],
+      "properties": {
+        "type": { "const": "Ternary" },
+        "test": { "$ref": "#/definitions/Expr" },
+        "then": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/Expr" } },
+        "else": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "Spread": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "expr", "span"],
+      "properties": {
+        "type": { "const": "Spread" },
+        "expr": { "$ref": "#/definitions/Expr" },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "List": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items", "span"],
+      "properties": {
+        "type": { "const": "List" },
+        "items": {
+          "type": "array",
+          "items": {
+            "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Spread" } } },
+            "then": { "$ref": "#/definitions/Spread" },
+            "else": { "$ref": "#/definitions/Expr" }
+          }
+        },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    },
+    "MapEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "value"],
+      "properties": {
+        "key": { "$ref": "#/definitions/Expr" },
+        "value": { "$ref": "#/definitions/Expr" }
+      }
+    },
+    "Map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "entries", "span"],
+      "properties": {
+        "type": { "const": "Map" },
+        "entries": {
+          "type": "array",
+          "items": {
+            "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Spread" } } },
+            "then": { "$ref": "#/definitions/Spread" },
+            "else": { "$ref": "#/definitions/MapEntry" }
+          }
+        },
+        "span": { "$ref": "#/definitions/Span" }
+      }
+    }
+  }
+}

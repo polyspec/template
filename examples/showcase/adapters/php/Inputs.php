@@ -6,6 +6,7 @@ namespace Polyspec\Showcase\Adapter\Php;
 
 use Polyspec\Showcase\Adapter\DefineEntry;
 use Polyspec\Showcase\Adapter\Environment;
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\Loader\ArrayLoader;
 use Polyspec\Template\Program;
 use Polyspec\Template\Value\Json;
@@ -55,7 +56,7 @@ final class Inputs
             if (!is_array($entry) || !is_string($entry['path'] ?? null)) {
                 throw new RuntimeException($base . '/manifest.json names no path of ' . $name);
             }
-            $templates[$name] = json_decode(self::read($base . '/' . $entry['path']), true, 512, JSON_THROW_ON_ERROR);
+            $templates[$name] = AstProgram::decodeTemplate(self::read($base . '/' . $entry['path']));
         }
 
         return new ArrayLoader($templates);

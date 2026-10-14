@@ -106,6 +106,28 @@
     },
     {
       "paths": [
+        "contracts/schema/ast.schema.json",
+        "tests/fixtures/ast-decode/**"
+      ],
+      "targets": [
+        "test-ts",
+        "test-go",
+        "test-rust",
+        "test-php",
+        "test-python"
+      ]
+    },
+    {
+      "paths": [
+        "config/dependency-policy.json",
+        "packages/python/{pyproject.toml,constraints.txt,pylock.toml}"
+      ],
+      "targets": [
+        "python-lock-check"
+      ]
+    },
+    {
+      "paths": [
         "tests/fixtures/{typed-arguments,typed-values}/**",
         "scripts/check-generated-{arguments,typed-values,native-calls,bound-data}.mts"
       ],
@@ -895,7 +917,8 @@
     },
     {
       "paths": [
-        "go.work"
+        "go.work",
+        "go.work.sum"
       ],
       "targets": [
         "lint-go",
@@ -1136,7 +1159,9 @@
       "check": "make test-ts-unit",
       "paths": [
         "packages/ts/**",
-        "tests/fixtures/{bound-data,expr,native-object}/**"
+        "tests/fixtures/{bound-data,expr,native-object}/**",
+        "contracts/schema/ast.schema.json",
+        "tests/fixtures/ast-decode/**"
       ]
     },
     {
@@ -1237,14 +1262,17 @@
       "paths": [
         "packages/compiler/backends/go/**",
         "packages/go/**",
-        "go.work"
+        "go.work",
+        "go.work.sum"
       ]
     },
     {
       "check": "make test-go-unit",
       "paths": [
         "packages/go/**",
-        "tests/fixtures/{bound-data,expr,native-object}/**"
+        "tests/fixtures/{bound-data,expr,native-object}/**",
+        "contracts/schema/ast.schema.json",
+        "tests/fixtures/ast-decode/**"
       ]
     },
     {
@@ -1257,7 +1285,9 @@
       "check": "make test-rust-unit",
       "paths": [
         "packages/rust/**",
-        "tests/fixtures/{bound-data,expr,native-object}/**"
+        "tests/fixtures/{bound-data,expr,native-object}/**",
+        "contracts/schema/ast.schema.json",
+        "tests/fixtures/ast-decode/**"
       ]
     },
     {
@@ -1266,7 +1296,9 @@
         "composer.{json,lock}",
         "packages/php/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
-        "scripts/composer-install.mts"
+        "scripts/composer-install.mts",
+        "contracts/schema/ast.schema.json",
+        "tests/fixtures/ast-decode/**"
       ]
     },
     {
@@ -1505,7 +1537,9 @@
     {
       "check": "make test-python",
       "paths": [
-        "packages/python/**"
+        "packages/python/**",
+        "contracts/schema/ast.schema.json",
+        "tests/fixtures/ast-decode/**"
       ]
     },
     {
@@ -1541,6 +1575,13 @@
         "tests/cases/**",
         "tests/fixtures/expr/**",
         "packages/{ts,go,rust,php,php-ext,python}/**"
+      ]
+    },
+    {
+      "check": "make python-lock-check",
+      "paths": [
+        "config/dependency-policy.json",
+        "packages/python/{pyproject.toml,constraints.txt,pylock.toml}"
       ]
     }
   ]

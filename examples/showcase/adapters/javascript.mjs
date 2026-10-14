@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { AstProgram, Engine, MapLoader, parseJsonBytes } from '../../../packages/ts/dist/index.mjs';
+import { AstProgram, Engine, MapLoader, decodeTemplate, parseJsonBytes } from '../../../packages/ts/dist/index.mjs';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.mjs';
 import { GeneratedProgram as CompilerCoverageProgram } from './generated/javascript/compiler-coverage.js';
 import { GeneratedProgram as EmptyStateProgram } from './generated/javascript/empty-state.js';
@@ -38,7 +38,7 @@ function readArtifactTemplates(root) {
   const manifest = JSON.parse(readFileSync(join(artifactRoot, 'manifest.json'), 'utf8'));
   const templates = new Map();
   for (const [name, entry] of Object.entries(manifest.files)) {
-    templates.set(name, JSON.parse(readFileSync(join(artifactRoot, entry.path), 'utf8')));
+    templates.set(name, decodeTemplate(readFileSync(join(artifactRoot, entry.path), 'utf8')));
   }
   return templates;
 }

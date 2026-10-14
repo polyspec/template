@@ -6,7 +6,7 @@ import type { Template } from './ast.js';
 
 /** The failure of {@link decodeTemplate}: the JSON is not a template AST of the schema. */
 export class AstDecodeError extends Error {
-  /** The JSON Pointer (RFC 6901) of the first invalid value, `''` for the root. */
+  /** The JSON Pointer (RFC 6901) of the invalid node, `''` for the root (AST-10). */
   readonly path: string;
 
   /** Creates the error of the invalid value at `path`, with the schema rule that it breaks. */
@@ -18,13 +18,11 @@ export class AstDecodeError extends Error {
 }
 
 // The validator compiles on the first decode, so a program that never decodes an AST does not
-// compile the schema.
+// compile the schema. allErrors reports every invalid node, as the validators of the other runtimes do.
 let validator: ValidateFunction<Template> | undefined;
 
 function validate(): ValidateFunction<Template> {
-  // verbose adds the schema and the value of each error, from which `firstInvalid` picks the
-  // node type that the value names.
-  validator ??= new Ajv({ strict: true, verbose: true }).compile<Template>(schema);
+  validator ??= new Ajv({ strict: true, allErrors: true }).compile<Template>(schema);
   return validator;
 }
 
@@ -32,35 +30,21 @@ function depth(error: ErrorObject): number {
   return error.instancePath === '' ? 0 : error.instancePath.split('/').length;
 }
 
-// The node type that a schema of the AST declares, as its `properties.type.const`.
-function declaredType(error: ErrorObject): unknown {
-  const parent: unknown = error.parentSchema;
-  if (typeof parent !== 'object' || parent === null || !('properties' in parent)) return undefined;
-  const properties: unknown = parent.properties;
-  if (typeof properties !== 'object' || properties === null || !('type' in properties)) return undefined;
-  const type: unknown = properties.type;
-  return typeof type === 'object' && type !== null && 'const' in type ? type.const : undefined;
+// Whether the error `a` is chosen over `b` as the invalid node (AST-10): a deeper instance location,
+// a smaller pointer at the same depth (the pointers name properties of the schema and indexes, so
+// UTF-16 order is code point order), or another keyword than an if at the same location. The schema
+// selects the schema of a node by its type with if/then, so an error names a value of the node
+// itself, and the errors of an enclosing if lie above it or carry no reason of their own.
+function chosenOver(a: ErrorObject, b: ErrorObject): boolean {
+  if (depth(a) !== depth(b)) return depth(a) > depth(b);
+  if (a.instancePath !== b.instancePath) return a.instancePath < b.instancePath;
+  return a.keyword !== 'if' && b.keyword === 'if';
 }
 
-// A value that matches no branch of a `oneOf` fails every branch, so ajv reports an error of each
-// branch. The innermost failing value is the first invalid node. An error of the schema of another
-// node type than the one the value names, and a `const` (it rejects a branch, such as the kind of a
-// literal whose value has another type), only reject a branch; the first other error explains the
-// value, and a value that no branch explains, such as one of an unknown node type, fails the `oneOf`.
-function firstInvalid(errors: readonly ErrorObject[]): ErrorObject {
-  const deepest = Math.max(...errors.map(depth));
-  const candidates = errors.filter(error => depth(error) === deepest);
-  const rejectsBranch = (error: ErrorObject): boolean => {
-    if (error.keyword === 'const') return true;
-    const declared = declaredType(error);
-    const data: unknown = error.data;
-    if (declared === undefined || typeof data !== 'object' || data === null) return false;
-    return declared !== ('type' in data ? data.type : undefined);
-  };
-  const found = candidates.find(error => error.keyword !== 'oneOf' && !rejectsBranch(error)) ?? candidates.find(error => error.keyword === 'oneOf') ?? candidates[0];
-  // ajv reports at least one error of a value that fails the schema.
-  if (found === undefined) throw new RangeError('the validation of an invalid AST reported no error');
-  return found;
+function invalidNode(errors: readonly ErrorObject[]): ErrorObject {
+  const [first, ...rest] = errors;
+  if (first === undefined) throw new Error('ajv rejected the template AST without an error');
+  return rest.reduce((found, error) => (chosenOver(error, found) ? error : found), first);
 }
 
 function reason(error: ErrorObject): string {
@@ -74,13 +58,13 @@ function reason(error: ErrorObject): string {
  * (AST-8, AST-10), so a program renders the result without parsing a source (RT-41).
  *
  * @throws SyntaxError when `json` is a string that is not JSON text.
- * @throws {@link AstDecodeError} naming the JSON Pointer of the first invalid node when the value is
+ * @throws {@link AstDecodeError} naming the JSON Pointer of the invalid node when the value is
  * not a template AST.
  */
 export function decodeTemplate(json: unknown): Template {
   const value: unknown = typeof json === 'string' ? JSON.parse(json) : json;
   const check = validate();
   if (check(value)) return value;
-  const error = firstInvalid(check.errors ?? []);
+  const error = invalidNode(check.errors ?? []);
   throw new AstDecodeError(error.instancePath, reason(error));
 }

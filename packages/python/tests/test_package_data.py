@@ -2,8 +2,8 @@
 
 """Package data tests of the polyspec-template distribution.
 
-The package data keys of pyproject.toml name importable packages, so the py.typed marker of polyspec.template ships
-in the wheel under the package it marks.
+The package data keys of pyproject.toml name importable packages, so the py.typed marker of polyspec.template and the
+AST schema that decode_template reads ship in the wheel under that package.
 """
 
 import tomllib
@@ -31,10 +31,10 @@ class PackageDataTest(unittest.TestCase):
                 f"write the dotted name of the package, for example polyspec.template",
             )
 
-    def test_py_typed_marker_is_declared_for_polyspec_template(self):
+    def test_package_data_of_polyspec_template_is_declared(self):
         keys = self.pyproject["tool"]["setuptools"]["package-data"]
         self.assertIn("polyspec.template", keys)
-        self.assertEqual(keys["polyspec.template"], ["py.typed"])
+        self.assertEqual(keys["polyspec.template"], ["py.typed", "ast.schema.json"])
 
 
 if __name__ == "__main__":
