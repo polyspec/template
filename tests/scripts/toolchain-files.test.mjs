@@ -435,7 +435,8 @@ test('make dependency-review installs the Rust toolchain before cargo-audit and 
 test('the unit tests of the Python package run in var/python/venv, which python-venv of kit makes from the python of mise.toml', () => {
   // T23.2: the package is installed editable into that environment, so the tests import it with no changed import path (S3).
   const makefile = read('Makefile');
-  assert.match(makefile, /^PYTHON_VENV := var\/python\/venv$/m);
+  assert.match(makefile, /^PYTHON_VENV := \$\(shell node scripts\/python-venv\.mjs\)$/m);
+  assert.ok(!makefile.includes('var/python/venv'), 'the Makefile restates the environment that config/parity.json declares');
   assert.match(makefile, /^\t\$\(MAKE\) python-venv DIR=\$\(PYTHON_VENV\)$/m);
   assert.match(makefile, /^test-python: python-package .*\n\tnode \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
 });

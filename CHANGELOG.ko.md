@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3600d7c0155fca4d8b6ebd556527e5a10071c2854e29495de8a5c0765bf8c795 -->
+<!-- source-sha256: c71edc52599f0003f7fdd86ebdfe3ad02756786a50dcbcd136139ea2ed5e5a11 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T23.2: Python package의 environment는 `config/parity.json`의 implementation python command `var/python/venv/bin/python`으로 한 번만 적힙니다. `scripts/python-venv.mjs`가 이를 읽고, Makefile의 `PYTHON_VENV`와 `scripts/python-toolchain.mjs`의 `pythonPackageInterpreter`가 이로부터 정해집니다.
 - T23.2: PHP package와 PHP 확장은 다른 runtime처럼 case의 `expected.ast.json`으로 tokens와 format 여부를 정하고, 그런 case에 `expected.tokens.json`과 `expected.format.json`을 요구합니다. Package의 `ConformanceTest`와 확장의 `AnalyzeTest`는 expected 파일이 없는 case를 통과시켰습니다.
 - T23.2: `packages/template-compiler/interface.json`의 core support level이 적합성 case 수를 다시 적지 않습니다. Case 수는 `tests/cases`의 case 목록에만 있고, compiler, runtime, testing 문서는 248 대신 모든 canonical case를 말합니다. RED: 세 `errors/assign-head-*` case로 case가 251개가 된 뒤 `make compiler-interface-languages-check`가 `core support level is incomplete`로 실패했습니다.
 - T23.2: 모든 런타임(TypeScript, Go, Rust, PHP, PHP 확장, Python)이 `tokens`와 `format`을 제공한다. `tokens`는 받아들인 각 태그의 모든 부분을 EDT-8로 분류해 UTF-8 바이트 오프셋의 `[start, end, type]`으로 돌려준다(Go `Analyze`, Rust `analyze`, PHP `AstProgram::analyze`, PHP 확장 `Engine::analyze`, 그리고 `analyze`가 이제 토큰을 돌려주는 Python). `format`은 새 `docs/spec/formatting.md`의 규칙 FMT-1~FMT-15를 적용한다. 이 규칙은 포맷 스타일, HTML 요소와 템플릿 블록에 따른 들여쓰기, 안전 불변식을 `docs/operations/editor-tools.md`에서 가져온 것이다. 결과는 같은 AST로 파싱될 때만 돌려주며, 다시 포맷해도 바뀌지 않는다. `docs/features.md`는 `formatting`을 모든 런타임에서 통과로 적는다.
