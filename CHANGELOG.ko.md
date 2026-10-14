@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 783f16d5320dd000f05ed5342f8cc9357abf3162f252f8724e37108978d3158e -->
+<!-- source-sha256: 21f0c6b2367c39f7c86ea959dd54e4cb386e3f5e7b10909139c96ee534b97883 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.11: 구현의 모든 test 파일은 `config/parity.json`의 unit의 native test입니다: feature unit 40개가 각 구현의 native test 하나를 bind하며, 모든 runtime의 profile이나 그보다 좁고 이유가 spec을 인용하는 profile에 속합니다(support level을 선언하지 않는 PHP extension을 뺀 `manifest`, interface gate의 선언 test인 `interface`, TypeScript와 Python의 `export-list`, TypeScript의 `language-service`, Go와 Python의 `concurrent-renders`). 구현에 없던 test를 더합니다: TypeScript와 PHP는 delimiter 쌍이 아닌 delimiter option이 그 언어의 argument error임을(ERR-13), Python은 artifact refresh 정책, 실패하는 loader, filesystem loader가 읽지 못하는 파일, 문서 하나가 아닌 JSON text, 잘못된 delimiter option(`test_loading.py`)과 thread에서 한 program과 한 bound map을 동시에 렌더하는 것(`test_concurrency.py`, RT-70)을 검사합니다. browser test는 comparator `tests/browser/`에 남으며, 그곳에서는 parity의 어느 runner도 그 Playwright spec을 `packages/ts`의 test로 세지 않습니다.
 - T24.8: 공유 suite의 모든 native test는 `make parity-check`가 읽는 대로 각 케이스를 그 runner의 이름으로 보고합니다: TypeScript의 적합성과 표현식 test는 케이스마다 top-level test 하나, Rust의 적합성과 표현식 test는 케이스마다 libtest-mimic trial `conformance::<case>`와 `expressions::<name>` 하나, PHP의 적합성 케이스는 AST와 렌더를 검사하는 `ConformanceTest::testCase`의 data set, Python의 표현식 vector는 vector마다 test 하나입니다. Python은 적합성 케이스의 native test(`test_case_conformance.py`)를, PHP extension은 표현식 vector의 native test(`ExprFixturesTest.php`, echo tag로)를 갖게 되어 `config/parity.json`의 exclusion 둘이 사라집니다.
 - T24.10: 인프라는 TypeScript입니다(kit의 S9): `scripts/`의 모든 script, `tests/runner/`의 runner, `tests/scripts/`의 tool test, browser test의 harness는 `.mts`이고, Node.js가 type stripping으로 실행하며 root `tsconfig.json`이 kit의 엄격한 option(`erasableSyntaxOnly`, `verbatimModuleSyntax`, `allowImportingTsExtensions`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`)으로 검사합니다. `make typecheck`는 `make build-ts` 뒤에 `tsc`를 실행하며, `make layout-check`와 함께 docs job과 `CHECK_TARGETS`의 검사 target입니다. runner는 복사본 `scripts/test-progress/progress.mjs` 대신 `@polyspec/kit/test-progress`의 `createProgress`로 진행을 출력하고, 쓰이지 않던 reporter `scripts/test-progress/node-reporter.mjs`, `vitest-reporter.mjs`와 선언 파일 `tests/runner/case-list.d.mts`는 제거됩니다.
 - T24.10: `packages/rust`와 showcase의 Rust adapter는 각각 `unsafe_code`와 `clippy::allow_attributes_without_reason`을 금지하는 Cargo workspace이고, 그 package는 workspace의 lint를 따릅니다(kit의 `config/cargo.schema.json`). 모든 `allow` attribute는 이유를 적고, adapter는 clippy가 요구하는 대로 define 항목의 조건을 하나의 `if let` chain으로 합칩니다.

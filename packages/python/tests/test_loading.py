@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Loading and its failures, as the other implementations test them: the
+artifact refresh policies of a program (RT-64), a loader that fails (RT-9,
+ERR-6), the files that the filesystem loader cannot load (RT-10), JSON text that
+is not one document (VAL-12) and a delimiter option that is not a delimiter pair,
+which is the argument error of Python (ERR-13)."""
+
+import os
+import tempfile
+import unittest
+from pathlib import Path
+
+from polyspec.template import (
+    AstProgram,
+    BindError,
+    Engine,
+    EngineOptions,
+    FsLoader,
+    MapLoader,
+    TemplateError,
+    parse_json_bytes,
+)
+
+
+def engine_of(loader, refresh: str = "true") -> Engine:
+    return Engine(AstProgram(EngineOptions(loader=loader, artifact_refresh=refresh)))
+
+
+def code_of(run) -> "str | None":
+    """The code of the template error that `run` raises, or None."""
+    try:
+        run()
+    except TemplateError as error:
+        return error.code
+    return None
+
+
+class FailingLoader:
+    def load(self, name: str):
+        raise OSError(f"cannot reach {name}")
+
+
+class Loading(unittest.TestCase):
+    def test_artifact_refresh_policies(self):
+        dev_loader = MapLoader({"a.tpl": "1"})
+        dev = engine_of(dev_loader, "dev")
+        self.assertEqual(dev.render("a.tpl", {}), "1")
+        dev_loader.set("a.tpl", "2")
+        self.assertEqual(dev.render("a.tpl", {}), "2")
+
+        immutable_loader = MapLoader({"a.tpl": "1"})
+        immutable = engine_of(immutable_loader, "false")
+        self.assertEqual(immutable.render("a.tpl", {}), "1")
+        immutable_loader.set("a.tpl", "2")
+        self.assertEqual(immutable.render("a.tpl", {}), "1")
+
+    def test_a_loader_error_is_a_load_failure(self):
+        self.assertEqual(
+            code_of(lambda: engine_of(FailingLoader()).render("a.tpl", {})),
+            "E_LOAD_FAILED",
+        )
+
+    def test_the_filesystem_loader_separates_missing_and_unreadable_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            locked = root / "locked.tpl"
+            locked.write_text("x")
+            locked.chmod(0o000)
+            (root / "folder.tpl").mkdir()
+            try:
+                engine = engine_of(FsLoader(directory))
+                # Root reads a file of mode 0o000 and every other user cannot
+                # (T19.11): the file fails to load exactly when the process
+                # cannot read it.
+                readable = os.access(locked, os.R_OK)
+                self.assertEqual(readable, os.geteuid() == 0)
+                if readable:
+                    self.assertEqual(engine.render("locked.tpl", {}), "x")
+                else:
+                    self.assertEqual(
+                        code_of(lambda: engine.render("locked.tpl", {})),
+                        "E_LOAD_FAILED",
+                    )
+                for name in ("folder.tpl", "missing.tpl"):
+                    self.assertEqual(
+                        code_of(lambda: engine.render(name, {})), "E_LOAD_NOT_FOUND"
+                    )
+            finally:
+                locked.chmod(0o600)
+
+    def test_text_that_is_not_one_json_document_is_invalid_json(self):
+        for text in ("", " ", "{", '{"a": }', "[1,]", '{"a": 1} x', "nul", '"a', "01"):
+            with self.assertRaises(BindError, msg=text) as caught:
+                parse_json_bytes(text.encode())
+            self.assertEqual(caught.exception.code, "E_DATA_INVALID_JSON", text)
+
+    def test_an_invalid_delimiter_option_is_a_value_error(self):
+        with self.assertRaisesRegex(ValueError, "is not a delimiter pair"):
+            AstProgram(EngineOptions(delimiters="[[["))
