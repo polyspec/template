@@ -144,52 +144,81 @@ pub struct Comment {
 /// Statement nodes.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
-#[allow(
-    missing_docs,
-    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
-)]
 pub enum Node {
+    /// Literal text between tags (AST-1).
     Text {
+        /// The text, with escapes and standalone lines applied.
         value: String,
+        /// From the first to the last source byte that contributes to the value.
         span: Span,
     },
+    /// An echo tag `{= expr}`.
     Echo {
+        /// The echoed expression.
         expr: Expr,
+        /// The tag.
         span: Span,
     },
+    /// A conditional `{? test}` with its `{:? test}` branches and an optional `{:}` branch.
     If {
+        /// The branches in source order, each with its condition and body.
         branches: Vec<IfBranch>,
+        /// The body of the `{:}` branch, or None.
         #[serde(rename = "else")]
         r#else: Option<Vec<Node>>,
+        /// From the opening tag to the end of the closing tag.
         span: Span,
     },
+    /// A loop `{@ name = iter}` with an optional `{:}` branch for an empty iterable.
     For {
+        /// The loop variable.
         name: String,
+        /// The iterated expression.
         iter: Expr,
+        /// The body rendered for each entry.
         body: Vec<Node>,
+        /// The body rendered when the iterable has no entry, or None.
         empty: Option<Vec<Node>>,
+        /// From the opening tag to the end of the closing tag.
         span: Span,
     },
+    /// An assignment `{= name = expr}` to a local variable.
     Set {
+        /// The assigned variable.
         name: String,
+        /// The assigned expression.
         expr: Expr,
+        /// The tag.
         span: Span,
     },
+    /// An include tag `{+ path}`.
     Include {
+        /// The included path as written in the tag.
         path: String,
+        /// The tag.
         span: Span,
     },
+    /// A block tag `{# id path scope}`.
     Block {
+        /// The identifier of the template definition, or None.
         id: Option<String>,
+        /// The template path, or None.
         path: Option<String>,
+        /// The scope arguments of the tag.
         scope: Vec<ScopeItem>,
+        /// The tag.
         span: Span,
     },
+    /// An if-block `{?# id}` that renders its body when the definition `id` is registered.
     IfBlock {
+        /// The identifier of the template definition.
         id: String,
+        /// The body rendered when the definition is registered.
         body: Vec<Node>,
+        /// The body of the `{:}` branch, or None.
         #[serde(rename = "else")]
         r#else: Option<Vec<Node>>,
+        /// From the opening tag to the end of the closing tag.
         span: Span,
     },
 }
@@ -233,14 +262,14 @@ pub struct ScopeItem {
 /// Literal value of a `Literal` node.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(untagged)]
-#[allow(
-    missing_docs,
-    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
-)]
 pub enum LiteralValue {
+    /// `null`.
     Null,
+    /// `true` or `false`.
     Bool(bool),
+    /// A number.
     Number(f64),
+    /// The decoded string.
     String(String),
 }
 
@@ -262,21 +291,23 @@ impl Serialize for LiteralValue {
 
 /// Loop meta fields.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[allow(
-    missing_docs,
-    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
-)]
 pub enum LoopMetaField {
+    /// `index_`: the position of the entry, from 0.
     #[serde(rename = "index_")]
     Index,
+    /// `key_`: the key of the entry.
     #[serde(rename = "key_")]
     Key,
+    /// `value_`: the value of the entry.
     #[serde(rename = "value_")]
     Value,
+    /// `last_`: whether the entry is the last one.
     #[serde(rename = "last_")]
     Last,
+    /// `first_`: whether the entry is the first one.
     #[serde(rename = "first_")]
     First,
+    /// `size_`: the number of entries.
     #[serde(rename = "size_")]
     Size,
 }
@@ -299,92 +330,147 @@ impl LoopMetaField {
 /// Entry of a map literal.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
-#[allow(
-    missing_docs,
-    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
-)]
 pub enum MapEntry {
-    Entry { key: Expr, value: Expr },
+    /// An entry `key => value`.
+    Entry {
+        /// The key expression.
+        key: Expr,
+        /// The value expression.
+        value: Expr,
+    },
+    /// A spread `...expr` of a map.
     Spread(Expr),
 }
 
 /// Expression nodes. `Spread` appears only inside `List` items and `Map` entries.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
-#[allow(
-    missing_docs,
-    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
-)]
 pub enum Expr {
+    /// A literal.
     Literal {
+        /// `null`, `bool`, `number` or `string`.
         kind: String,
+        /// The value of the literal.
         value: LiteralValue,
+        /// The literal in the source.
         span: Span,
     },
+    /// A variable.
     Var {
+        /// The name of the variable.
         name: String,
+        /// The name in the source.
         span: Span,
     },
+    /// A loop meta `loop.field_` of an enclosing loop.
     LoopMeta {
+        /// The loop variable that names the loop.
         r#loop: String,
+        /// The meta field.
         field: LoopMetaField,
+        /// The expression in the source.
         span: Span,
     },
+    /// A member `object.key`; `a.0` has the key `"0"`.
     Member {
+        /// The object expression.
         object: Box<Expr>,
+        /// The member name.
         key: String,
+        /// The expression in the source.
         span: Span,
     },
+    /// A call of a declared method of an assigned object.
     MemberCall {
+        /// The object expression.
         object: Box<Expr>,
+        /// The method name.
         method: String,
+        /// The argument expressions.
         args: Vec<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A call `Class::method(args)` of a declared logical class function.
     ClassCall {
+        /// The class name.
         #[serde(rename = "className")]
         class_name: String,
+        /// The method name.
         method: String,
+        /// The argument expressions.
         args: Vec<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// An index `object[index]`.
     Index {
+        /// The object expression.
         object: Box<Expr>,
+        /// The index expression.
         index: Box<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A function call `name(args)`, also written as a pipe.
     Call {
+        /// The function name.
         name: String,
+        /// The argument expressions.
         args: Vec<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A unary operation `!` or `-`.
     Unary {
+        /// The operator.
         op: UnaryOp,
+        /// The operand.
         operand: Box<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A binary operation.
     Binary {
+        /// The operator.
         op: BinaryOp,
+        /// The left operand.
         left: Box<Expr>,
+        /// The right operand.
         right: Box<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A conditional `test ? then : else`, or `test ?: else`.
     Ternary {
+        /// The condition.
         test: Box<Expr>,
+        /// The value when the condition is truthy, or None for `?:`.
         then: Option<Box<Expr>>,
+        /// The value when the condition is falsy.
         r#else: Box<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A list literal.
     List {
+        /// The items, each an expression or a `Spread`.
         items: Vec<Expr>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A map literal.
     Map {
+        /// The entries, each `key => value` or a `Spread`.
         entries: Vec<MapEntry>,
+        /// The expression in the source.
         span: Span,
     },
+    /// A spread `...expr` inside a list or map literal.
     Spread {
+        /// The spread expression.
         expr: Box<Expr>,
+        /// The expression in the source.
         span: Span,
     },
 }

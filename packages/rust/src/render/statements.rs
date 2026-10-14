@@ -49,7 +49,17 @@ impl<'c, 'e> Renderer<'c, 'e> {
                 body,
                 empty,
                 span,
-            } => self.render_for(name, iter, body, empty.as_deref(), *span, frame, scope),
+            } => self.render_for(
+                ForLoop {
+                    name,
+                    iter,
+                    body,
+                    empty: empty.as_deref(),
+                    span: *span,
+                },
+                frame,
+                scope,
+            ),
             Node::Set { name, expr, .. } => {
                 let value = self.evaluate(expr, frame, scope)?;
                 scope.locals.insert(name.clone(), value);
@@ -87,20 +97,14 @@ impl<'c, 'e> Renderer<'c, 'e> {
         Ok(())
     }
 
-    #[allow(
-        clippy::too_many_arguments,
-        reason = "the arguments are the parts of a For node of the AST, which render_for takes apart at its caller"
-    )]
-    fn render_for(
-        &mut self,
-        name: &str,
-        iter: &Expr,
-        body: &[Node],
-        empty: Option<&[Node]>,
-        span: Span,
-        frame: &Frame,
-        scope: &mut Scope,
-    ) -> Result<(), TemplateError> {
+    fn render_for(&mut self, node: ForLoop<'_>, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
+        let ForLoop {
+            name,
+            iter,
+            body,
+            empty,
+            span,
+        } = node;
         let iterable = self.evaluate(iter, frame, scope)?;
         let entries = RuntimeBindings::new().entries(self.context, &iterable, frame, span)?;
         if entries.is_empty() {
@@ -258,4 +262,14 @@ impl<'c, 'e> Renderer<'c, 'e> {
         self.context.leave();
         result
     }
+}
+
+/// The parts of a For node of the AST that a loop renders (GRM-4): the loop variable, the iterated expression, the body
+/// and the optional `{:}` branch for an empty iterable, and the span of the tag.
+struct ForLoop<'a> {
+    name: &'a str,
+    iter: &'a Expr,
+    body: &'a [Node],
+    empty: Option<&'a [Node]>,
+    span: Span,
 }
