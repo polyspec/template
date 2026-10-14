@@ -1,10 +1,11 @@
 //! Command line interface (CNF-4).
 //!   parse FILE [--root DIR] [--delimiters OC]
 //!   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+//!   tokens FILE [--root DIR] [--delimiters OC]
 
 use polyspec_template::{
     ArgumentError, AstProgram, BindError, Engine, EngineOptions, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
-    defines_from_json, env_from_json, parse, read_json as parse_json_text,
+    analyze, defines_from_json, env_from_json, parse, read_json as parse_json_text,
 };
 use std::path::{Path, PathBuf};
 use std::process::exit;
@@ -13,6 +14,7 @@ fn usage(message: &str) -> ! {
     eprintln!("{message}");
     eprintln!("usage: template parse FILE [--root DIR] [--delimiters OC]");
     eprintln!("       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]");
+    eprintln!("       template tokens FILE [--root DIR] [--delimiters OC]");
     exit(1);
 }
 
@@ -56,7 +58,7 @@ fn bind_failure(template: &str, error: BindError) -> ! {
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let (command, file) = match (args.first(), args.get(1)) {
-        (Some(command), Some(file)) if command == "parse" || command == "render" => (command.clone(), file.clone()),
+        (Some(command), Some(file)) if matches!(command.as_str(), "parse" | "render" | "tokens") => (command.clone(), file.clone()),
         _ => usage("command and FILE are required"),
     };
     let mut options = Options {
@@ -99,15 +101,28 @@ fn main() {
         .map(|c| c.as_os_str().to_string_lossy().to_string())
         .collect::<Vec<_>>()
         .join("/");
+    let parse_options = ParseOptions {
+        delimiters: options.delimiters.clone(),
+    };
+    if command == "tokens" {
+        let source = std::fs::read(&file_path).unwrap_or_else(|error| usage(&format!("cannot read {file}: {error}")));
+        match analyze(&source, &name, &parse_options) {
+            Ok(analysis) => {
+                let tokens: Vec<serde_json::Value> = analysis
+                    .tokens
+                    .iter()
+                    .map(|token| serde_json::json!([token.start, token.end, token.kind]))
+                    .collect();
+                print!("{}", serde_json::Value::Array(tokens));
+            }
+            Err(RequestError::Template(error)) => fail(error),
+            Err(RequestError::Argument(error)) => argument(error),
+        }
+        return;
+    }
     if command == "parse" {
         let source = std::fs::read(&file_path).unwrap_or_else(|error| usage(&format!("cannot read {file}: {error}")));
-        match parse(
-            &source,
-            &name,
-            &ParseOptions {
-                delimiters: options.delimiters.clone(),
-            },
-        ) {
+        match parse(&source, &name, &parse_options) {
             Ok(ast) => print!("{}", serde_json::to_string(&ast).unwrap_or_default()),
             Err(RequestError::Template(error)) => fail(error),
             Err(RequestError::Argument(error)) => argument(error),

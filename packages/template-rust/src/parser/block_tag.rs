@@ -12,8 +12,40 @@ fn is_path_char(byte: u8) -> bool {
 }
 
 enum RawToken {
-    Path { value: String, start: usize, end: usize },
-    Ident { value: String, start: usize, end: usize },
+    Path {
+        value: String,
+        start: usize,
+        end: usize,
+        quoted: bool,
+    },
+    Ident {
+        value: String,
+        start: usize,
+        end: usize,
+    },
+}
+
+/// The range of one word of a raw tag body, and whether it is a quoted string.
+#[derive(Debug, Clone, Copy)]
+pub struct RawWord {
+    /// Start byte offset.
+    pub start: usize,
+    /// End byte offset.
+    pub end: usize,
+    /// Whether the word is a string literal.
+    pub quoted: bool,
+}
+
+/// The path of an include tag.
+pub struct IncludePath {
+    /// Decoded path.
+    pub path: String,
+    /// Start byte offset.
+    pub start: usize,
+    /// End byte offset.
+    pub end: usize,
+    /// Whether the path is a string literal.
+    pub quoted: bool,
 }
 
 /// The parsed body of a block tag.
@@ -24,6 +56,8 @@ pub struct BlockBody {
     pub path: Option<String>,
     /// Scope items.
     pub scope: Vec<ScopeItem>,
+    /// The words of the body: the id, the path and each scope item with its value.
+    pub words: Vec<RawWord>,
     /// Byte offset after the body.
     pub end: usize,
 }
@@ -68,6 +102,7 @@ impl<'a> RawTagReader<'a> {
                 value: decoded,
                 start: index,
                 end,
+                quoted: true,
             }));
         }
         let mut end = index;
@@ -76,7 +111,12 @@ impl<'a> RawTagReader<'a> {
         }
         let value = self.source.text[index..end].to_string();
         if value.contains('.') || value.contains('/') {
-            return Ok(Some(RawToken::Path { value, start: index, end }));
+            return Ok(Some(RawToken::Path {
+                value,
+                start: index,
+                end,
+                quoted: false,
+            }));
         }
         if !value.is_empty() && ident_length(bytes, index) == value.len() {
             return Ok(Some(RawToken::Ident { value, start: index, end }));
@@ -89,9 +129,14 @@ impl<'a> RawTagReader<'a> {
     }
 
     /// GRM-12: `+ path`.
-    pub fn read_include_path(&self, index: usize) -> Result<(String, usize), TemplateError> {
+    pub fn read_include_path(&self, index: usize) -> Result<IncludePath, TemplateError> {
         match self.read_token(index)? {
-            Some(RawToken::Path { value, end, .. }) => Ok((value, end)),
+            Some(RawToken::Path { value, start, end, quoted }) => Ok(IncludePath {
+                path: value,
+                start,
+                end,
+                quoted,
+            }),
             Some(RawToken::Ident { value, start, end }) if !value.is_empty() => {
                 Err(self
                     .source
@@ -112,18 +157,22 @@ impl<'a> RawTagReader<'a> {
         let mut id = None;
         let mut path = None;
         let mut scope = Vec::new();
+        let mut words = Vec::new();
         let mut cursor = index;
         match self.read_token(cursor)? {
-            Some(RawToken::Path { value, end, .. }) => {
+            Some(RawToken::Path { value, start, end, quoted }) => {
                 path = Some(value);
                 cursor = end;
+                words.push(RawWord { start, end, quoted });
             }
-            Some(RawToken::Ident { value, end, .. }) if !value.is_empty() => {
+            Some(RawToken::Ident { value, start, end }) if !value.is_empty() => {
                 id = Some(value);
                 cursor = end;
-                if let Some(RawToken::Path { value, end, .. }) = self.read_token(cursor)? {
+                words.push(RawWord { start, end, quoted: false });
+                if let Some(RawToken::Path { value, start, end, quoted }) = self.read_token(cursor)? {
                     path = Some(value);
                     cursor = end;
+                    words.push(RawWord { start, end, quoted });
                 }
             }
             _ => {
@@ -169,7 +218,13 @@ impl<'a> RawTagReader<'a> {
                 let expr: Expr = parser.parse_postfix(true)?;
                 scope.push(ScopeItem { name: value, expr });
                 cursor = parser.end();
+                words.push(RawWord {
+                    start,
+                    end: cursor,
+                    quoted: false,
+                });
             } else {
+                words.push(RawWord { start, end, quoted: false });
                 scope.push(ScopeItem {
                     name: value.clone(),
                     expr: Expr::Var {
@@ -183,6 +238,7 @@ impl<'a> RawTagReader<'a> {
             id,
             path,
             scope,
+            words,
             end: cursor,
         })
     }

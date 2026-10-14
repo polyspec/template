@@ -90,6 +90,11 @@ impl<'a> ExpressionParser<'a> {
         self.lexer.consumed_end()
     }
 
+    /// The tokens consumed so far, the close delimiter included.
+    pub fn consumed(&self) -> &[Token] {
+        self.lexer.consumed()
+    }
+
     /// The next token without advancing past it.
     pub fn peek(&mut self) -> Result<Token, TemplateError> {
         self.lexer.peek().cloned()

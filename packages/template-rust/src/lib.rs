@@ -33,7 +33,9 @@ pub use value::bound::{BindInput, BoundMap, DefineData, bind, bind_data, bound_r
 pub use value::json::{parse_json, parse_json_bytes, read_json};
 pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value};
 
-use parser::scanner::{DEFAULT_DELIMITERS, parse_delimiters};
+pub use parser::{SyntaxTag, SyntaxToken, TagKind, TemplateAnalysis, TokenKind};
+
+use parser::scanner::{DEFAULT_DELIMITERS, Delimiters, parse_delimiters};
 
 /// Parse options.
 #[derive(Debug, Clone, Default)]
@@ -49,12 +51,24 @@ pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Templa
 }
 
 fn parse_source(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, RequestError> {
-    let delimiters = match &options.delimiters {
+    let parsed = source::Source::from_bytes(name, source)?;
+    Ok(parser::parse_template(&parsed, option_delimiters(options)?)?)
+}
+
+/// EDT-8: parses one template like [`parse`] and also returns the tags the parser accepted, with their kind and body
+/// ranges, and the class of every part of them. Offsets are byte offsets after a leading BOM, as in AST spans.
+pub fn analyze(source: &[u8], name: &str, options: &ParseOptions) -> Result<TemplateAnalysis, RequestError> {
+    internal_boundary(name, || {
+        let parsed = source::Source::from_bytes(name, source)?;
+        Ok(parser::analyze_template(&parsed, option_delimiters(options)?)?)
+    })
+}
+
+fn option_delimiters(options: &ParseOptions) -> Result<Delimiters, ArgumentError> {
+    match &options.delimiters {
         Some(value) => parse_delimiters(value).ok_or_else(|| ArgumentError {
             message: format!("{value:?} is not a delimiter pair"),
-        })?,
-        None => DEFAULT_DELIMITERS,
-    };
-    let parsed = source::Source::from_bytes(name, source)?;
-    Ok(parser::parse_template(&parsed, delimiters)?)
+        }),
+        None => Ok(DEFAULT_DELIMITERS),
+    }
 }
