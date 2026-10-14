@@ -67,6 +67,7 @@ python -m polyspec.template.cli render FILE [--data F] [--define F] [--env F] [-
 | `parse(source, name, options)` | Parses one template into its AST. `options.delimiters` selects the delimiters. |
 | `analyze(source, name, options)` | Parses once and returns the AST, the tag ranges with their body ranges, and the EDT-8 class of every part of each tag. Ranges are code point indexes into the source; `Source.byte_at` gives the UTF-8 byte offset. |
 | `analyze_prefix(source, name, options)` | Returns the tags accepted before the first error, the tokens of those tags, and that error. |
+| `format_template(source, options)` | Formats the whitespace inside tags and the indentation of lines, and returns `FormatResult(ok, text, changed, error)`. `FormatOptions`: `name`, `delimiters`, `range` (code point indexes), `indent` (a run of spaces or one tab, default two spaces; `None` keeps every line), `template_blocks` (`"indent"` or `"flat"`). The result is refused with `FormatError(reason, code, line, col, message)` when the source does not parse (`parse`), the HTML structure cannot be indented (`html`) or the formatted AST differs (`invariant`). |
 | `AstProgram(options)` | Creates an AST program. Options: `loader`, `functions`, `class_functions`, `limits`, `delimiters`, `artifact_refresh`. |
 | `Engine(program)` | Creates an engine that delegates to one AST or generated program. |
 | `RenderOptions(define, env)` | One render call: template definitions and the environment. |

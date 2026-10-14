@@ -8,6 +8,7 @@ from .bind_operations import bind, merge
 from .context import Frame, RenderContext, Scope
 from .engine import AstProgram, Engine, EngineOptions, PreparedRender, RenderOptions
 from .errors import ERROR_CODES, TemplateError, internal_boundary
+from .formatter import FormatError, FormatOptions, FormatResult, format_template
 from .functions import BUILTINS, Env, FunctionContext, HostFunction
 from .json_parse import parse_json, parse_json_bytes
 from .loader import LoadedAst, LoadedSource, MapLoader, PathError, resolve_path
@@ -40,6 +41,9 @@ __all__ = [
     "Env",
     "Evaluator",
     "Frame",
+    "FormatError",
+    "FormatOptions",
+    "FormatResult",
     "FsLoader",
     "FunctionContext",
     "HostFunction",
@@ -72,6 +76,7 @@ __all__ = [
     "bind_map",
     "bind_value",
     "check_text",
+    "format_template",
     "internal_boundary",
     "merge",
     "parse",
