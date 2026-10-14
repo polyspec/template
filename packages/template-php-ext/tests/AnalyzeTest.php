@@ -208,15 +208,15 @@ final class AnalyzeTest extends TestCase
         $this->assertSame($expected['tags'], $actual['tags']);
         $this->assertSame($expected['tokens'], $actual['tokens']);
         $this->assertSame(Engine::parse($source, 'input.tpl', $options), $actual['ast']);
-        $expectedTokens = Support::readOptional($directory . '/expected.tokens.json');
-        if ($expectedTokens !== null) {
-            $this->assertSame(
-                Support::json($expectedTokens),
-                array_map(
-                    static fn (array $token): array => [$token['start'], $token['end'], $token['kind']],
-                    $actual['tokens'],
-                ),
-            );
+        if (!is_file($directory . '/expected.ast.json')) {
+            return;
         }
+        $this->assertSame(
+            Support::readJson($directory . '/expected.tokens.json'),
+            array_map(
+                static fn (array $token): array => [$token['start'], $token['end'], $token['kind']],
+                $actual['tokens'],
+            ),
+        );
     }
 }

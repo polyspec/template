@@ -57,7 +57,7 @@ final class ConformanceTest extends TestCase
     #[DataProvider('cases')]
     public function testTokens(string $dir): void
     {
-        if (!is_file("{$dir}/expected.tokens.json")) {
+        if (!is_file("{$dir}/expected.ast.json")) {
             $this->expectNotToPerformAssertions();
 
             return;
@@ -77,7 +77,7 @@ final class ConformanceTest extends TestCase
     #[DataProvider('cases')]
     public function testFormat(string $dir): void
     {
-        if (!is_file("{$dir}/expected.format.json")) {
+        if (!is_file("{$dir}/expected.ast.json")) {
             $this->expectNotToPerformAssertions();
 
             return;
