@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= floor(1.9)}\n{= floor(-1.1)}\n{= floor('2.5')}\n"
+  },
+  "keep": {
+    "text": "{= floor(1.9)}\n{= floor(-1.1)}\n{= floor('2.5')}\n"
+  }
+}

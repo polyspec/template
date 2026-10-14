@@ -1,5 +1,6 @@
 // Language drivers for the conformance and parity runners.
-// Each driver builds its CLI before a run, which does nothing when its inputs are unchanged, and runs `parse` or `render`. A build is a
+// Each driver builds its CLI before a run, which does nothing when its inputs are unchanged, and runs `parse`, `render`,
+// `tokens` or `format` (CNF-4). A build is a
 // long-running step without a time limit; it prints its start, its output and its result on
 // standard error, so the result lines of the runners on standard output stay in order. Each CLI
 // call is a case and keeps its own timeout.
@@ -38,10 +39,14 @@ export const published = {
 export const drivers = {
   ts: {
     dir: join(packages, 'template-ts'),
+    // make build-language builds the template package first and then the formatter package.
     build() {
-      build('ts', 'make', ['build-ts'], root);
+      build('ts', 'make', ['build-language'], root);
     },
+    // The formatter of TypeScript is the package template-language, which depends on the template package, so its
+    // command template-language runs `format` and the command template runs the other subcommands (CNF-5).
     command(args) {
+      if (args[0] === 'format') return ['node', [join(packages, 'template-language', 'bin', 'template-language.mjs'), ...args]];
       return ['node', [join(packages, 'template-ts', 'bin', 'template.mjs'), ...args]];
     },
   },

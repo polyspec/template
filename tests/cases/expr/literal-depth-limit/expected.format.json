@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{:a = []}{@ i = range(1, 63)}{:a = [a]}{/}{= length(json(a))}\n"
+  },
+  "keep": {
+    "text": "{:a = []}{@ i = range(1, 63)}{:a = [a]}{/}{= length(json(a))}\n"
+  }
+}

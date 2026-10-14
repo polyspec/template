@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{@ v = m}\n  {= v.key_}={= v}\n{/}\n"
+  },
+  "keep": {
+    "text": "{@ v = m}\n{= v.key_}={= v}\n{/}\n"
+  }
+}

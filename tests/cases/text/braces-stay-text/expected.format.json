@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{ debug: true }\n{}\n${x}\n{a:1}\n{\ncolor: red;\n}\n{ x = 1 }\n"
+  },
+  "keep": {
+    "text": "{ debug: true }\n{}\n${x}\n{a:1}\n{\n  color: red;\n}\n{ x = 1 }\n"
+  }
+}

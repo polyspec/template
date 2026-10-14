@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "[{= n}][{= n + 'x'}][{= n + 1}][{= missing}]\n"
+  },
+  "keep": {
+    "text": "[{= n}][{= n + 'x'}][{= n + 1}][{= missing}]\n"
+  }
+}

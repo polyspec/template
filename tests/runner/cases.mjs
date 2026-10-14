@@ -91,6 +91,8 @@ function loadCase(id, dir) {
   const expectedHtml = readIf(join(dir, 'expected.html'));
   const expectedError = readIf(join(dir, 'expected.error.json'));
   const expectedAst = readIf(join(dir, 'expected.ast.json'));
+  const expectedTokens = readIf(join(dir, 'expected.tokens.json'));
+  const expectedFormat = readIf(join(dir, 'expected.format.json'));
   return {
     id,
     dir,
@@ -104,6 +106,8 @@ function loadCase(id, dir) {
     expectedHtml,
     expectedError: expectedError === null ? null : JSON.parse(expectedError),
     expectedAst: expectedAst === null ? null : JSON.parse(expectedAst),
+    expectedTokens: expectedTokens === null ? null : JSON.parse(expectedTokens),
+    expectedFormat: expectedFormat === null ? null : JSON.parse(expectedFormat),
   };
 }
 
@@ -133,6 +137,40 @@ export function parseArgs(testCase) {
   const args = ['parse', testCase.input, '--root', testCase.dir];
   if (testCase.options.delimiters) args.push('--delimiters', testCase.options.delimiters);
   return args;
+}
+
+export function tokensArgs(testCase) {
+  const args = ['tokens', testCase.input, '--root', testCase.dir];
+  if (testCase.options.delimiters) args.push('--delimiters', testCase.options.delimiters);
+  return args;
+}
+
+// The modes of expected.format.json: `indent` formats with the default options, `keep` with indent null (CNF-2).
+export const FORMAT_MODES = { indent: [], keep: ['--indent', 'none'] };
+
+// The arguments of `format` for a mode; the command runs in the case directory.
+export function formatArgs(testCase, mode) {
+  const args = ['format', testCase.input, ...FORMAT_MODES[mode]];
+  if (testCase.options.delimiters) args.push('--delimiters', testCase.options.delimiters);
+  return args;
+}
+
+// The result of one `format` call as an entry of expected.format.json: {text} for exit status 0, {error} with the
+// reason, the code and the position of the stderr JSON for exit status 2, and null for any other outcome.
+export function formatOutcome(result) {
+  if (result.status === 0) return { text: result.stdout };
+  if (result.status !== 2) return null;
+  try {
+    const { reason, code, line, col } = JSON.parse(result.stderr.trim());
+    return { error: { reason, code, line, col } };
+  } catch {
+    return null;
+  }
+}
+
+// The text of expected.tokens.json: one [start, end, type] token per line.
+export function tokensText(tokens) {
+  return tokens.length === 0 ? '[]\n' : `[\n${tokens.map(token => `  ${JSON.stringify(token)}`).join(',\n')}\n]\n`;
 }
 
 // Structural JSON equality: key order is ignored, numbers compare by value.

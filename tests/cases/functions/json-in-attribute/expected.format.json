@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<div id=\"box\" data-state=\"{= json(state)}\"></div>\n<div id=\"box2\" data-state='{= json(state)}'></div>\n<script type=\"application/json\">{= json(state) | raw}</script>\n"
+  },
+  "keep": {
+    "text": "<div id=\"box\" data-state=\"{= json(state)}\"></div>\n<div id=\"box2\" data-state='{= json(state)}'></div>\n<script type=\"application/json\">{= json(state) | raw}</script>\n"
+  }
+}

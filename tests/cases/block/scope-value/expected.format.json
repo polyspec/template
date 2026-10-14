@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{@ item = items}\n  {# card.tpl item no:item.index_}\n{/}\n"
+  },
+  "keep": {
+    "text": "{@ item = items}\n{# card.tpl item no:item.index_}\n{/}\n"
+  }
+}

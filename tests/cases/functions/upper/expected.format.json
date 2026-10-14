@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= upper(s)}\n{= s | upper}\n"
+  },
+  "keep": {
+    "text": "{= upper(s)}\n{= s | upper}\n"
+  }
+}

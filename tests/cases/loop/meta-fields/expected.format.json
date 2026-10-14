@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{@ x = xs}\n  {= x.index_}/{= x.size_} {= x.key_} {= x.value_} {= x.first_} {= x.last_}\n{/}\n"
+  },
+  "keep": {
+    "text": "{@ x = xs}\n{= x.index_}/{= x.size_} {= x.key_} {= x.value_} {= x.first_} {= x.last_}\n{/}\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<p>{= title}</p>\n"
+  },
+  "keep": {
+    "text": "<p>{= title}</p>\n"
+  }
+}

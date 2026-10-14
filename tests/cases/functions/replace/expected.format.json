@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= replace(s, '.', '-')}\n{= replace(s, '', 'x')}\n{= replace(s, 'b', '')}\n"
+  },
+  "keep": {
+    "text": "{= replace(s, '.', '-')}\n{= replace(s, '', 'x')}\n{= replace(s, 'b', '')}\n"
+  }
+}

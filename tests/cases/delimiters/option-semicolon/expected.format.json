@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<p>;= x;</p>\n;? x;\n  yes\n;/;\n"
+  },
+  "keep": {
+    "text": "<p>;= x;</p>\n;? x;\nyes\n;/;\n"
+  }
+}

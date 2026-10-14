@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{@ item = items}\n  <li>{= item}</li>\n{:}\n  <li>none</li>\n{/}\n"
+  },
+  "keep": {
+    "text": "{@ item = items}\n<li>{= item}</li>\n{:}\n<li>none</li>\n{/}\n"
+  }
+}

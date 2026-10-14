@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= json(split('a,b,,c', ',')) | raw}\n{= json(split('abc', 'x')) | raw}\n{= json(split('', ',')) | raw}\n"
+  },
+  "keep": {
+    "text": "{= json(split('a,b,,c', ',')) | raw}\n{= json(split('abc', 'x')) | raw}\n{= json(split('', ',')) | raw}\n"
+  }
+}

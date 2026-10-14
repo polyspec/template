@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<main>\n  <!-- {{# content}} -->\n</main>\n"
+  },
+  "keep": {
+    "text": "<main>\n<!-- {{# content}} -->\n</main>\n"
+  }
+}
