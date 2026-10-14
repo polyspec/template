@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-14T08:27:53.608Z",
+  "reviewed": "2026-10-14T12:23:40.062Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "e444f3b30a7b69c3b4cfaf8234b37ae0f10b20e21e4e2e52d788972a02197889",
+      "sha256": "1782cb297d09a4e5ec02412c2652b8e889574c4f0dc3ad0c0c7132761057eca1",
       "advisories": [
         {
           "package": "sprintf-js",
@@ -19,22 +19,22 @@
     },
     {
       "lock": "packages/template-php/composer.lock",
-      "sha256": "bb86d9eea35032ae8795d12b5b449610c1692d7c1cb49eea4db1f5a531b889e0",
+      "sha256": "12ec5fe4bb4d825112a4ca8d40ec065f86dd0e44e71391055e62dbbd4faecbe8",
       "advisories": []
     },
     {
       "lock": "packages/template-php-ext/composer.lock",
-      "sha256": "862d7d7da42da14f9fd84ca5799ab00d3a64eedf98b8a4b3c90ca2c6d787bfad",
+      "sha256": "7d2d7e5e6c23b37e2f478a97b207d7a6baba2bcff31b297fb959272f4d98fc28",
       "advisories": []
     },
     {
       "lock": "packages/template-rust/Cargo.lock",
-      "sha256": "97d0acab5e400fdf8a06223b1bda000ee1b529bbe58a2c9069a77e5a104b5e34",
+      "sha256": "43dc53c83e8ff96eec5245f8dba2a9a099cb539f655b1bdacd4f7562b29c5539",
       "advisories": []
     },
     {
       "lock": "tools/showcase/adapters/rust/Cargo.lock",
-      "sha256": "e26900833caa9000d46e4ca36fffcb4f44764567fca2bda92e5f52688897d818",
+      "sha256": "c6d4d0330343e3a7d69ef4b3215651183ba1d195e535f0debec6723aa1f63130",
       "advisories": []
     }
   ],
@@ -86,7 +86,7 @@
       "manifest": "package.json",
       "package": "@playwright/test",
       "version": "1.64.0",
-      "latest": "1.64.0"
+      "latest": "1.64.1"
     },
     {
       "ecosystem": "npm",
@@ -154,6 +154,13 @@
     {
       "ecosystem": "npm",
       "manifest": "package.json",
+      "package": "smol-toml",
+      "version": "1.9.1",
+      "latest": "1.9.1"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
       "package": "tsup",
       "version": "8.5.1",
       "latest": "8.5.1"
@@ -206,6 +213,13 @@
       "package": "vscode-languageclient",
       "version": "10.1.2",
       "latest": "10.1.2"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/template-php/composer.json",
+      "package": "symfony/console",
+      "version": "v8.1.9",
+      "latest": "v8.1.9"
     },
     {
       "ecosystem": "composer",
