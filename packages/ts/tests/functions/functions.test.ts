@@ -22,6 +22,10 @@ describe('date', () => {
     expect(toUnixSeconds('1970-01-01 00:00:00', 3600)).toBe(-3600);
     expect(() => toUnixSeconds('1970-13-01', 0)).toThrow();
   });
+  it('rejects a date string whose offset is out of range', () => {
+    expect(() => toUnixSeconds('2024-01-01T12:00:00+25:00', 0)).toThrow('is not a date');
+    expect(() => toUnixSeconds('2024-01-01T12:00:00+05:60', 0)).toThrow('is not a date');
+  });
 });
 
 describe('json and url', () => {

@@ -1104,9 +1104,9 @@ static bool pt_unix_seconds(pt_value value, zend_long env_offset, zend_long *sec
         if (!zone) {
             return pt_not_a_date(text, error);
         }
-        /* An offset beyond 23:59 matches the text but is no offset; it counts as 0 like (int) null. */
+        /* An offset beyond 23:59 matches the text but is no offset, so the text is no date (FUN-37). */
         if (!pt_offset_at(s + at, length - at, &offset)) {
-            offset = 0;
+            return pt_not_a_date(text, error);
         }
     }
     int year = pt_number_of(s, 4), month = pt_number_of(s + 5, 2), day = pt_number_of(s + 8, 2);

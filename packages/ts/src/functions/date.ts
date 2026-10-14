@@ -60,7 +60,8 @@ export function toUnixSeconds(value: Value, envOffset: number): number {
     if (month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59) {
       throw typeError(`${JSON.stringify(textOf(value))} is not a date`);
     }
-    const offset = match[7] === undefined ? envOffset : (parseOffset(match[7]) as number);
+    const offset = match[7] === undefined ? envOffset : parseOffset(match[7]);
+    if (offset === null) throw typeError(`${JSON.stringify(textOf(value))} is not a date`);
     return daysFromCivil(year, month, day) * 86400 + hour * 3600 + minute * 60 + second - offset;
   }
   throw typeError('date requires a number or a string');

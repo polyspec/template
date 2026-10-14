@@ -625,6 +625,8 @@ def to_unix_seconds(value: Value, env_offset: float) -> float:
         ):
             raise type_error(f"{json_text(text)} is not a date")
         offset = env_offset if match.group(7) is None else parse_offset(match.group(7))
+        if offset is None:
+            raise type_error(f"{json_text(text)} is not a date")
         return float(
             _days_from_civil(year, month, day) * 86400
             + hour * 3600

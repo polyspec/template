@@ -27,6 +27,12 @@ fn date_parsing_and_formatting() {
 }
 
 #[test]
+fn date_text_with_an_offset_out_of_range_is_not_a_date() {
+    assert!(to_unix_seconds(&Value::text("2024-01-01T12:00:00+25:00".to_string()), 0).is_err());
+    assert!(to_unix_seconds(&Value::text("2024-01-01T12:00:00+05:60".to_string()), 0).is_err());
+}
+
+#[test]
 fn json_and_url_encoding() {
     let mut map = OrderedMap::new();
     map.insert("a".to_string(), Value::text("<&>\u{2028}".to_string()));

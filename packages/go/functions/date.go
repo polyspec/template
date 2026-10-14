@@ -107,7 +107,10 @@ func ToUnixSeconds(v value.Value, envOffset int64) (int64, error) {
 	}
 	offset := envOffset
 	if m[7] != "" {
-		offset, _ = ParseOffset(m[7])
+		var ok bool
+		if offset, ok = ParseOffset(m[7]); !ok {
+			return 0, typeError("%q is not a date", text)
+		}
 	}
 	return daysFromCivil(year, month, day)*86400 + hour*3600 + minute*60 + second - offset, nil
 }
