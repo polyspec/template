@@ -44,7 +44,7 @@ export function positional(value: number): { negative: boolean; integer: string;
 
 // FUN-22: rounds a positional digit string to the given number of fraction digits,
 // half away from zero on the decimal digits.
-export function roundDecimal(value: number, decimals: number): { negative: boolean; integer: string; fraction: string } {
+function roundDecimal(value: number, decimals: number): { negative: boolean; integer: string; fraction: string } {
   const { negative, integer, fraction } = positional(value);
   if (fraction.length <= decimals) {
     return { negative, integer, fraction: fraction + '0'.repeat(decimals - fraction.length) };

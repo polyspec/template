@@ -44,4 +44,4 @@ function bounded(name, check, timeoutMs = CHECK_TIMEOUT_MS) {
   return Promise.race([Promise.resolve().then(check), timeout]).finally(() => clearTimeout(timer));
 }
 
-module.exports = { CHECK_TIMEOUT_MS, bounded, eventually, textBecomes };
+module.exports = { bounded, eventually, textBecomes };

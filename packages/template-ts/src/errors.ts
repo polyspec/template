@@ -70,7 +70,7 @@ export function lineIndexOf(bytes: Uint8Array): LineIndex {
   return starts;
 }
 
-export function positionOf(lines: LineIndex, offset: number): { line: number; col: number } {
+function positionOf(lines: LineIndex, offset: number): { line: number; col: number } {
   let low = 0;
   let high = lines.length - 1;
   while (low < high) {

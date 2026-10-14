@@ -11,7 +11,7 @@ export const SPACES = { tabSize: 2, insertSpaces: true };
 const REASONS: Record<string, string> = { 'HTML structure': 'html', 'formatted AST differs': 'invariant' };
 
 /** The string index where every line of the language service starts (EDT-5). */
-export function lineStarts(text: string): number[] {
+function lineStarts(text: string): number[] {
   const starts = [0];
   for (let index = text.indexOf('\n'); index >= 0; index = text.indexOf('\n', index + 1)) starts.push(index + 1);
   return starts;

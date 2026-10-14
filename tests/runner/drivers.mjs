@@ -21,7 +21,10 @@ const environment = () => ({ ...process.env, PATH: `${process.env.HOME}/.cargo/b
 // The time limit of one CLI call.
 const INVOKE_TIMEOUT_MS = 10_000;
 
-/** Builds the CLI of the driver `name` as a logged step; throws when the build fails. */
+/**
+ * Builds the CLI of the driver `name` as a logged step; throws when the build fails.
+ * @public tests/scripts/long-steps.test.mjs imports it in the code of a child process, which knip does not read.
+ */
 export function build(name, command, args, cwd) {
   runStepSync(`build ${name}`, command, args, { cwd, env: environment() });
 }
@@ -30,12 +33,13 @@ export function build(name, command, args, cwd) {
 // links target/release again on every build, and macOS checks a new executable file on its first run, which outlived
 // the 10 s limit of a call on a loaded machine (T19.6-1). `make build-go`, `make build-rust` and `make ext` publish to
 // the same files.
-export const published = {
+const published = {
   go: join(root, 'var', 'build', 'template-go'),
   rust: join(root, 'var', 'build', 'template-rust'),
   'php-ext': join(root, 'var', 'build', 'polyspec_template.so'),
 };
 
+/** @public the tests of tests/scripts import a copy of this module by a computed path, which knip does not resolve. */
 export const drivers = {
   ts: {
     dir: join(packages, 'template-ts'),

@@ -8,8 +8,6 @@ import { fileURLToPath } from 'node:url';
 import { caseIds, caseOptions, casesDir } from './case-list.mjs';
 import { root } from './drivers.mjs';
 
-export { casesDir };
-
 // Returns the cases that the arguments of a generated runner select: every case without arguments,
 // or one case or group with `--case group/name | group`. Other arguments and a filter that selects
 // no case end the process, so a run never passes without running a case.
@@ -167,7 +165,7 @@ export function tokensText(tokens) {
 }
 
 // Structural JSON equality: key order is ignored, numbers compare by value.
-export function deepEqual(a, b) {
+function deepEqual(a, b) {
   if (a === b) return true;
   if (typeof a !== typeof b || a === null || b === null) return false;
   if (Array.isArray(a)) {

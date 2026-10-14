@@ -1,12 +1,12 @@
 // Loader interface, map loader and template name resolution (RT-7 to RT-10).
 import type { Template } from './ast.js';
 
-export interface LoadedSource {
+interface LoadedSource {
   source: string | Uint8Array;
   version: string;
 }
 
-export interface LoadedAst {
+interface LoadedAst {
   ast: Template;
   version: string;
 }
@@ -23,7 +23,7 @@ export interface Loader {
 }
 
 // FNV-1a hash of a string, used as the version of in-memory sources.
-export function contentHash(text: string): string {
+function contentHash(text: string): string {
   let hash = 0x811c9dc5;
   for (let i = 0; i < text.length; i++) {
     hash ^= text.charCodeAt(i);

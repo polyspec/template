@@ -3,7 +3,7 @@ import type { SyntaxTag, SyntaxToken } from '@polyspec/template';
 import { joinTokens, type ExpressionToken } from './expression.js';
 
 /** The tag kinds that the parser reports for accepted tags. */
-export type TagKind = SyntaxTag['kind'];
+type TagKind = SyntaxTag['kind'];
 
 const WHITESPACE = /^[ \t\r\n]*$/;
 

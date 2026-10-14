@@ -11,7 +11,7 @@ export type TemplateBlocks = 'indent' | 'flat';
 const LABELS: Record<FormatError['reason'], string> = { parse: 'parse error', html: 'HTML structure', invariant: 'formatted AST differs' };
 
 /** The indent unit of the client options: `tabSize` spaces, or a tab when `insertSpaces` is off. */
-export function indentOf(options: FormattingOptions): string {
+function indentOf(options: FormattingOptions): string {
   return options.insertSpaces ? ' '.repeat(options.tabSize) : '\t';
 }
 

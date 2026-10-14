@@ -4,7 +4,7 @@ import { parseArgs, type ParseArgsOptionsConfig } from 'node:util';
 import type { FormatOptions } from '../format.js';
 
 /** What the command does with each input. */
-export type Mode = 'print' | 'write' | 'check';
+type Mode = 'print' | 'write' | 'check';
 
 /** Parsed command line of template-fmt. `paths` is empty when the input is standard input. */
 export interface Arguments {

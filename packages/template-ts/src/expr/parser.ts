@@ -13,7 +13,7 @@ const EXPRESSION_START: ReadonlySet<TokenType> = new Set([
   'IDENT', 'NUMBER', 'STRING', 'NULL', 'TRUE', 'FALSE', 'LPAREN', 'LBRACKET', 'BANG', 'MINUS',
 ]);
 
-export const EXPRESSION_DEPTH_LIMIT = 64;
+const EXPRESSION_DEPTH_LIMIT = 64;
 
 interface BracketEntry {
   key: Expr;
