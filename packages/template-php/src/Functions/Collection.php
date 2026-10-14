@@ -39,7 +39,11 @@ final class Collection
     {
         $keyed = [];
         foreach ($list as $index => $item) {
-            $keyed[] = ['item' => $item, 'key' => $key === null ? $item : self::lookupPath($item, $key), 'index' => $index];
+            $keyed[] = [
+                'item' => $item,
+                'key' => $key === null ? $item : self::lookupPath($item, $key),
+                'index' => $index,
+            ];
         }
         $allNumbers = true;
         $allStrings = true;
@@ -170,7 +174,10 @@ final class Collection
                 }
                 $count = (int) floor(($end - $start) / $increment) + 1;
                 if ($count > self::RANGE_LIMIT) {
-                    throw new FunctionError('E_RUNTIME_LIMIT', 'range would produce more than ' . self::RANGE_LIMIT . ' elements');
+                    throw new FunctionError(
+                        'E_RUNTIME_LIMIT',
+                        'range would produce more than ' . self::RANGE_LIMIT . ' elements',
+                    );
                 }
                 $result = [];
                 for ($i = 0; $i < $count; $i++) {
@@ -179,7 +186,11 @@ final class Collection
 
                 return $result;
             }],
-            'default' => ['min' => 2, 'max' => 2, 'call' => static fn (array $a) => Value::isTruthy($a[0]) ? $a[0] : $a[1]],
+            'default' => [
+                'min' => 2,
+                'max' => 2,
+                'call' => static fn (array $a) => Value::isTruthy($a[0]) ? $a[0] : $a[1],
+            ],
         ];
     }
 }

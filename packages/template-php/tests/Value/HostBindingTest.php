@@ -68,7 +68,11 @@ final class HostBindingTest extends TestCase
         $broken = new AstProgram(new class () implements LoaderInterface {
             public function load(string $name): ?array
             {
-                return ['ast' => ['type' => 'Template', 'name' => $name, 'body' => 'not a node list'], 'version' => '1'];
+                return ['ast' => [
+                    'type' => 'Template',
+                    'name' => $name,
+                    'body' => 'not a node list',
+                ], 'version' => '1'];
             }
         });
         try {
@@ -93,7 +97,10 @@ final class HostBindingTest extends TestCase
         foreach ([['m' => ["\xff" => 1]], ['m' => [["\xff" => 1]]], ['m' => (object) ["\xff" => 1]]] as $assign) {
             $this->assertSame('E_DATA_INVALID_UTF8', $this->failure('keys.tpl', $assign)->errorCode);
         }
-        $this->assertSame('E_DATA_INVALID_UTF8', $this->failure('keys.tpl', [], ['define' => ["\xff" => 'keys.tpl']])->errorCode);
+        $this->assertSame(
+            'E_DATA_INVALID_UTF8',
+            $this->failure('keys.tpl', [], ['define' => ["\xff" => 'keys.tpl']])->errorCode,
+        );
     }
 
     public function testVisibilityDoesNotDependOnTheCallerScope(): void
@@ -113,7 +120,11 @@ final class HostBindingTest extends TestCase
     {
         // VAL-19: a name that only __call handles and a private method of a class with __call are unknown.
         foreach (['object-magic.tpl', 'object-hidden.tpl'] as $template) {
-            $this->assertSame('E_RUNTIME_UNKNOWN_FUNCTION', $this->failure($template, ['o' => new MagicHolder()])->errorCode, $template);
+            $this->assertSame(
+                'E_RUNTIME_UNKNOWN_FUNCTION',
+                $this->failure($template, ['o' => new MagicHolder()])->errorCode,
+                $template,
+            );
         }
     }
 
@@ -123,7 +134,11 @@ final class HostBindingTest extends TestCase
         $object = new InvalidName();
         foreach (['object-name.tpl', 'object-index.tpl', 'object-result.tpl'] as $template) {
             $error = $this->failure($template, ['o' => $object]);
-            $this->assertSame(['E_DATA_INVALID_UTF8', 1, 5], [$error->errorCode, $error->errorLine, $error->errorCol], $template);
+            $this->assertSame(
+                ['E_DATA_INVALID_UTF8', 1, 5],
+                [$error->errorCode, $error->errorLine, $error->errorCol],
+                $template,
+            );
         }
     }
 
@@ -158,14 +173,20 @@ final class HostBindingTest extends TestCase
         $this->program->register('twice', static function (array $args): int {
             throw new \RuntimeException('function exploded');
         });
-        $this->assertStringContainsString('function exploded', $this->failure('host-function.tpl', ['n' => 1])->getMessage());
+        $this->assertStringContainsString(
+            'function exploded',
+            $this->failure('host-function.tpl', ['n' => 1])->getMessage(),
+        );
     }
 
     public function testNativeObjectArgumentsArriveAsTheOriginalObject(): void
     {
         // VAL-18: a host function, a method and a class function receive the same PHP object.
         $object = new Exploding();
-        $this->program->register('same', static fn (array $args): bool => $args[0] === $object && $args[1][0] === $object);
+        $this->program->register(
+            'same',
+            static fn (array $args): bool => $args[0] === $object && $args[1][0] === $object,
+        );
         $this->program->registerClass('Order', 'same', static fn (array $args): bool => $args[0] === $object);
         $this->assertSame("true|true|true\n", $this->program->render('object-same.tpl', ['o' => $object]));
     }
@@ -195,9 +216,14 @@ final class HostBindingTest extends TestCase
         foreach ([$cycle, $deep, $reference, new SelfSerializing()] as $value) {
             $this->assertSame('E_DATA_DEPTH', $this->failure('keys.tpl', ['m' => $value])->errorCode);
         }
-        $this->assertSame(str_repeat('[', 63) . str_repeat(']', 63) . "\n", $this->program->render('keys.tpl', ['m' => self::nested(63)]));
+        $this->assertSame(
+            str_repeat('[', 63) . str_repeat(']', 63) . "\n",
+            $this->program->render('keys.tpl', ['m' => self::nested(63)]),
+        );
         $this->assertSame('E_DATA_DEPTH', $this->failure('keys.tpl', ['m' => self::nested(64)])->errorCode);
-        $define = static fn (int $levels): array => ['define' => ['content' => ['template' => 'define-body.tpl', 'data' => ['y' => self::nested($levels)]]]];
+        $define = static fn (int $levels): array => [
+            'define' => ['content' => ['template' => 'define-body.tpl', 'data' => ['y' => self::nested($levels)]]],
+        ];
         $this->assertSame("[\n]\n", $this->program->render('define-object.tpl', [], $define(63)));
         $this->assertSame('E_DATA_DEPTH', $this->failure('define-object.tpl', [], $define(64))->errorCode);
     }
@@ -209,7 +235,10 @@ final class HostBindingTest extends TestCase
             $this->assertSame('E_DATA_NUMBER_RANGE', $this->failure('echo.tpl', ['title' => $value])->errorCode);
         }
         $this->assertSame('E_DATA_NUMBER_NOT_FINITE', $this->failure('echo.tpl', ['title' => NAN])->errorCode);
-        $this->assertSame("<p>-9007199254740991</p>\n", $this->program->render('echo.tpl', ['title' => -9007199254740991.0]));
+        $this->assertSame(
+            "<p>-9007199254740991</p>\n",
+            $this->program->render('echo.tpl', ['title' => -9007199254740991.0]),
+        );
     }
 
     public function testJsonTextFailsAtTheFirstViolationInDocumentOrder(): void
@@ -247,102 +276,5 @@ final class HostBindingTest extends TestCase
         }
 
         return $value;
-    }
-}
-
-final class SecretHolder
-{
-    public string $name = 'n';
-    private string $secret = 's';
-
-    public function renderInside(AstProgram $program, string $template): string
-    {
-        return $program->render($template, ['o' => $this]) . ($this->secret === '' ? $this->hidden() : '');
-    }
-
-    private function hidden(): string
-    {
-        return 'h';
-    }
-}
-
-final class MagicHolder
-{
-    /**
-     * @param list<mixed> $arguments
-     */
-    public function __call(string $name, array $arguments): string
-    {
-        return 'magic:' . $name;
-    }
-
-    public function visible(): string
-    {
-        return $this->hidden();
-    }
-
-    private function hidden(): string
-    {
-        return 'h';
-    }
-}
-
-final class InvalidName
-{
-    public string $name = "\xff";
-
-    public function bad(): string
-    {
-        return "\xff";
-    }
-}
-
-class Bag extends \stdClass
-{
-    public int $a = 1;
-    private int $p = 3;
-
-    public function hiddenValue(): int
-    {
-        return $this->p;
-    }
-}
-
-final class SerializableBag extends \stdClass implements \JsonSerializable
-{
-    public int $a = 1;
-
-    public function jsonSerialize(): mixed
-    {
-        return ['j' => true];
-    }
-}
-
-final class FailingSerializable implements \JsonSerializable
-{
-    public function jsonSerialize(): mixed
-    {
-        throw new \RuntimeException('serialize exploded');
-    }
-}
-
-final class SelfSerializing implements \JsonSerializable
-{
-    public function jsonSerialize(): mixed
-    {
-        return $this;
-    }
-}
-
-final class Exploding
-{
-    public function fail(): string
-    {
-        throw new \RuntimeException('method exploded');
-    }
-
-    public function same(object $other): bool
-    {
-        return $other === $this;
     }
 }

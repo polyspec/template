@@ -99,13 +99,22 @@ final class IndentTest extends TestCase
     public function testUsesTheIndentUnitAndReplacesExistingIndentation(): void
     {
         $source = self::lines('<ul>', '        <li>a</li>', "\t<li>b</li>", '</ul>');
-        self::assertSame(self::lines('<ul>', "\t<li>a</li>", "\t<li>b</li>", '</ul>'), self::formatted($source, ['indent' => "\t"]));
-        self::assertSame(self::lines('<ul>', '    <li>a</li>', '    <li>b</li>', '</ul>'), self::formatted($source, ['indent' => '    ']));
+        self::assertSame(
+            self::lines('<ul>', "\t<li>a</li>", "\t<li>b</li>", '</ul>'),
+            self::formatted($source, ['indent' => "\t"]),
+        );
+        self::assertSame(
+            self::lines('<ul>', '    <li>a</li>', '    <li>b</li>', '</ul>'),
+            self::formatted($source, ['indent' => '    ']),
+        );
     }
 
     public function testKeepsEveryLineWithIndentNull(): void
     {
-        self::assertSame("<ul>\n        <li>{= a}</li>\n</ul>", self::formatted("<ul>\n        <li>{=a}</li>\n</ul>", ['indent' => null]));
+        self::assertSame(
+            "<ul>\n        <li>{= a}</li>\n</ul>",
+            self::formatted("<ul>\n        <li>{=a}</li>\n</ul>", ['indent' => null]),
+        );
     }
 
     public function testEmptiesBlankLinesAndKeepsTheTextAfterTheIndentation(): void
@@ -159,32 +168,87 @@ final class IndentTest extends TestCase
 
     public function testIndentsAMultiLineStartTagAndKeepsQuotedValues(): void
     {
-        $source = self::lines('<div>', '<input', 'type="text"', '      name="q">', '<p title="first', '      second">x</p>', '</div>');
+        $source = self::lines(
+            '<div>',
+            '<input',
+            'type="text"',
+            '      name="q">',
+            '<p title="first',
+            '      second">x</p>',
+            '</div>',
+        );
         self::assertSame(
-            self::lines('<div>', '  <input', '    type="text"', '    name="q">', '  <p title="first', '      second">x</p>', '</div>'),
+            self::lines(
+                '<div>',
+                '  <input',
+                '    type="text"',
+                '    name="q">',
+                '  <p title="first',
+                '      second">x</p>',
+                '</div>',
+            ),
             self::formatted($source),
         );
     }
 
     public function testKeepsTheContinuationLinesOfATagThatSpansLines(): void
     {
-        self::assertSame(self::lines('<div>', '  {= a +', '      b}', '</div>'), self::formatted(self::lines('<div>', '{= a +', '      b}', '</div>')));
+        self::assertSame(
+            self::lines('<div>', '  {= a +', '      b}', '</div>'),
+            self::formatted(self::lines('<div>', '{= a +', '      b}', '</div>')),
+        );
     }
 
     public function testOpensNoElementForVoidAndSelfClosingTagsDoctypeAndInstructions(): void
     {
-        $source = self::lines('<!DOCTYPE html>', '<div>', '<br>', '<img src="a.png" />', '<svg><path d="M0"/></svg>', '<p>x</p>', '</div>');
+        $source = self::lines(
+            '<!DOCTYPE html>',
+            '<div>',
+            '<br>',
+            '<img src="a.png" />',
+            '<svg><path d="M0"/></svg>',
+            '<p>x</p>',
+            '</div>',
+        );
         self::assertSame(
-            self::lines('<!DOCTYPE html>', '<div>', '  <br>', '  <img src="a.png" />', '  <svg><path d="M0"/></svg>', '  <p>x</p>', '</div>'),
+            self::lines(
+                '<!DOCTYPE html>',
+                '<div>',
+                '  <br>',
+                '  <img src="a.png" />',
+                '  <svg><path d="M0"/></svg>',
+                '  <p>x</p>',
+                '</div>',
+            ),
             self::formatted($source),
         );
     }
 
     public function testIndentsEachBranchFromTheStartOfTheBlock(): void
     {
-        $source = self::lines('<main>', '{? a}', '<div class="x">', '{:}', '<div class="y">', '{/}', '<p>{= b}</p>', '</div>', '</main>');
+        $source = self::lines(
+            '<main>',
+            '{? a}',
+            '<div class="x">',
+            '{:}',
+            '<div class="y">',
+            '{/}',
+            '<p>{= b}</p>',
+            '</div>',
+            '</main>',
+        );
         self::assertSame(
-            self::lines('<main>', '  {? a}', '    <div class="x">', '  {:}', '    <div class="y">', '  {/}', '    <p>{= b}</p>', '  </div>', '</main>'),
+            self::lines(
+                '<main>',
+                '  {? a}',
+                '    <div class="x">',
+                '  {:}',
+                '    <div class="y">',
+                '  {/}',
+                '    <p>{= b}</p>',
+                '  </div>',
+                '</main>',
+            ),
             self::formatted($source),
         );
     }
@@ -192,7 +256,10 @@ final class IndentTest extends TestCase
     public function testReadsTemplateTagsInsideAStartTagAndEndTagsInAnyCase(): void
     {
         $source = self::lines('<DIV {? a}class="x"{/}>', '<span>{= b}</span>', '</div>');
-        self::assertSame(self::lines('<DIV {? a}class="x"{/}>', '  <span>{= b}</span>', '</div>'), self::formatted($source));
+        self::assertSame(
+            self::lines('<DIV {? a}class="x"{/}>', '  <span>{= b}</span>', '</div>'),
+            self::formatted($source),
+        );
     }
 
     public function testIndentsWithCustomDelimitersAndKeepsAByteOrderMarkAndCrlf(): void
@@ -239,6 +306,9 @@ final class IndentTest extends TestCase
 
     public function testFormatsTheSameSourceWithIndentNullDespiteAnHtmlError(): void
     {
-        self::assertSame("<div>\n<p>{= a}</div>", FormatterTest::text(Formatter::format("<div>\n<p>{=a}</div>", ['indent' => null])));
+        self::assertSame(
+            "<div>\n<p>{= a}</div>",
+            FormatterTest::text(Formatter::format("<div>\n<p>{=a}</div>", ['indent' => null])),
+        );
     }
 }

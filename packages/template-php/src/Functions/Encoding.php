@@ -120,11 +120,27 @@ final class Encoding
     public static function table(): array
     {
         return [
-            'escape' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => Helpers::safe(Escape::html(Helpers::stringify($a[0])))],
-            'raw' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => Helpers::safe(Helpers::stringify($a[0]))],
+            'escape' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => Helpers::safe(Escape::html(Helpers::stringify($a[0]))),
+            ],
+            'raw' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => Helpers::safe(Helpers::stringify($a[0])),
+            ],
             'json' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => self::toJson($a[0])],
-            'url' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => self::percentEncode(Helpers::stringify($a[0]))],
-            'nl2br' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => preg_replace('/\r\n|\n/', "<br>\n", Helpers::string($a[0], 'nl2br'))],
+            'url' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => self::percentEncode(Helpers::stringify($a[0])),
+            ],
+            'nl2br' => [
+                'min' => 1,
+                'max' => 1,
+                'call' => static fn (array $a) => preg_replace('/\r\n|\n/', "<br>\n", Helpers::string($a[0], 'nl2br')),
+            ],
             'str' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => Helpers::stringify($a[0])],
             'type' => ['min' => 1, 'max' => 1, 'call' => static fn (array $a) => Value::typeOf($a[0])],
         ];

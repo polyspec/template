@@ -22,15 +22,114 @@ final class AnalyzeTest extends TestCase
     public static function tagKinds(): iterable
     {
         yield 'comment' => ['{* note *}', ['comment {* note *}']];
-        yield 'echo' => ['{= (user.name ?? null) | upper(1, "x")}', ['delimiter {', 'keyword =', 'operator (', 'variable user', 'property .name', 'operator ??', 'keyword null', 'operator )', 'operator |', 'function upper', 'operator (', 'number 1', 'operator ,', 'string "x"', 'operator )', 'delimiter }']];
-        yield 'for' => ['{@ item = items}{/}', ['delimiter {', 'keyword @', 'variable item', 'operator =', 'variable items', 'delimiter }', 'delimiter {', 'keyword /', 'delimiter }']];
-        yield 'assignment' => ['{: count += 1}', ['delimiter {', 'keyword :', 'variable count', 'operator +=', 'number 1', 'delimiter }']];
-        yield 'increment' => ['{: count++}', ['delimiter {', 'keyword :', 'variable count', 'operator ++', 'delimiter }']];
-        yield 'if' => ['{? a in b}{:? !c}{:}{/}', ['delimiter {', 'keyword ?', 'variable a', 'keyword in', 'variable b', 'delimiter }', 'delimiter {', 'keyword :?', 'operator !', 'variable c', 'delimiter }', 'delimiter {', 'keyword :', 'delimiter }', 'delimiter {', 'keyword /', 'delimiter }']];
-        yield 'ifblock' => ['{?# side}{/}', ['delimiter {', 'keyword ?#', 'variable side', 'delimiter }', 'delimiter {', 'keyword /', 'delimiter }']];
-        yield 'include' => ['{+ parts/head.tpl}{+ "quoted.tpl"}', ['delimiter {', 'keyword +', 'path parts/head.tpl', 'delimiter }', 'delimiter {', 'keyword +', 'string "quoted.tpl"', 'delimiter }']];
-        yield 'block' => ['{# card cards/card.tpl title:page.title x}', ['delimiter {', 'keyword #', 'path card', 'path cards/card.tpl', 'path title:page.title', 'path x', 'delimiter }']];
-        yield 'directive' => ['{% delimiter []}[= a]', ['delimiter {', 'keyword %', 'keyword delimiter', 'string []', 'delimiter }', 'delimiter [', 'keyword =', 'variable a', 'delimiter ]']];
+        yield 'echo' => [
+            '{= (user.name ?? null) | upper(1, "x")}',
+            [
+                'delimiter {',
+                'keyword =',
+                'operator (',
+                'variable user',
+                'property .name',
+                'operator ??',
+                'keyword null',
+                'operator )',
+                'operator |',
+                'function upper',
+                'operator (',
+                'number 1',
+                'operator ,',
+                'string "x"',
+                'operator )',
+                'delimiter }',
+            ],
+        ];
+        yield 'for' => [
+            '{@ item = items}{/}',
+            [
+                'delimiter {',
+                'keyword @',
+                'variable item',
+                'operator =',
+                'variable items',
+                'delimiter }',
+                'delimiter {',
+                'keyword /',
+                'delimiter }',
+            ],
+        ];
+        yield 'assignment' => [
+            '{: count += 1}',
+            ['delimiter {', 'keyword :', 'variable count', 'operator +=', 'number 1', 'delimiter }'],
+        ];
+        yield 'increment' => [
+            '{: count++}',
+            ['delimiter {', 'keyword :', 'variable count', 'operator ++', 'delimiter }'],
+        ];
+        yield 'if' => [
+            '{? a in b}{:? !c}{:}{/}',
+            [
+                'delimiter {',
+                'keyword ?',
+                'variable a',
+                'keyword in',
+                'variable b',
+                'delimiter }',
+                'delimiter {',
+                'keyword :?',
+                'operator !',
+                'variable c',
+                'delimiter }',
+                'delimiter {',
+                'keyword :',
+                'delimiter }',
+                'delimiter {',
+                'keyword /',
+                'delimiter }',
+            ],
+        ];
+        yield 'ifblock' => [
+            '{?# side}{/}',
+            ['delimiter {', 'keyword ?#', 'variable side', 'delimiter }', 'delimiter {', 'keyword /', 'delimiter }'],
+        ];
+        yield 'include' => [
+            '{+ parts/head.tpl}{+ "quoted.tpl"}',
+            [
+                'delimiter {',
+                'keyword +',
+                'path parts/head.tpl',
+                'delimiter }',
+                'delimiter {',
+                'keyword +',
+                'string "quoted.tpl"',
+                'delimiter }',
+            ],
+        ];
+        yield 'block' => [
+            '{# card cards/card.tpl title:page.title x}',
+            [
+                'delimiter {',
+                'keyword #',
+                'path card',
+                'path cards/card.tpl',
+                'path title:page.title',
+                'path x',
+                'delimiter }',
+            ],
+        ];
+        yield 'directive' => [
+            '{% delimiter []}[= a]',
+            [
+                'delimiter {',
+                'keyword %',
+                'keyword delimiter',
+                'string []',
+                'delimiter }',
+                'delimiter [',
+                'keyword =',
+                'variable a',
+                'delimiter ]',
+            ],
+        ];
         yield 'wrapped' => ['<a href="{{= url }}">', ['delimiter "{{', 'keyword =', 'variable url', 'delimiter }}"']];
     }
 
@@ -41,7 +140,17 @@ final class AnalyzeTest extends TestCase
     public function testClassifiesEveryPartOfEveryTagKind(string $source, array $expected): void
     {
         $tokens = Engine::analyze($source, 't.tpl')['tokens'];
-        $this->assertSame($expected, array_map(static fn (array $token): string => $token['kind'] . ' ' . substr($source, $token['start'], $token['end'] - $token['start']), $tokens));
+        $this->assertSame(
+            $expected,
+            array_map(
+                static fn (array $token): string => $token['kind'] . ' ' . substr(
+                    $source,
+                    $token['start'],
+                    $token['end'] - $token['start'],
+                ),
+                $tokens,
+            ),
+        );
     }
 
     public function testGivesEachTagItsKindAndTheRangeOfItsBody(): void
@@ -51,7 +160,13 @@ final class AnalyzeTest extends TestCase
         $text = substr($source, 3);
         $this->assertSame(
             [['echo', '= url '], ['comment', '* c *'], ['if', '? ok'], ['else', ':'], ['close', '/']],
-            array_map(static fn (array $tag): array => [$tag['kind'], substr($text, $tag['bodyStart'], $tag['bodyEnd'] - $tag['bodyStart'])], $result['tags']),
+            array_map(
+                static fn (array $tag): array => [
+                    $tag['kind'],
+                    substr($text, $tag['bodyStart'], $tag['bodyEnd'] - $tag['bodyStart']),
+                ],
+                $result['tags'],
+            ),
         );
         $this->assertSame(Engine::parse($source, 't.tpl'), $result['ast']);
     }
@@ -95,7 +210,13 @@ final class AnalyzeTest extends TestCase
         $this->assertSame(Engine::parse($source, 'input.tpl', $options), $actual['ast']);
         $expectedTokens = Support::readOptional($directory . '/expected.tokens.json');
         if ($expectedTokens !== null) {
-            $this->assertSame(Support::json($expectedTokens), array_map(static fn (array $token): array => [$token['start'], $token['end'], $token['kind']], $actual['tokens']));
+            $this->assertSame(
+                Support::json($expectedTokens),
+                array_map(
+                    static fn (array $token): array => [$token['start'], $token['end'], $token['kind']],
+                    $actual['tokens'],
+                ),
+            );
         }
     }
 }

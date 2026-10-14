@@ -66,7 +66,12 @@ final class Evaluator
             case 'LoopMeta':
                 $meta = $this->scope->loopMeta($expr['loop']);
                 if ($meta === null) {
-                    throw $this->fail($frame, $expr['span'], 'E_RUNTIME_UNKNOWN_LOOP', $expr['loop'] . ' is not an active loop variable');
+                    throw $this->fail(
+                        $frame,
+                        $expr['span'],
+                        'E_RUNTIME_UNKNOWN_LOOP',
+                        $expr['loop'] . ' is not an active loop variable',
+                    );
                 }
 
                 return match ($expr['field']) {
@@ -78,15 +83,31 @@ final class Evaluator
                     'size_' => (float) $meta['size'],
                 };
             case 'Member':
-                return $this->runtime->member($this->evaluate($expr['object'], $frame), $expr['key'], $frame, $expr['span']);
+                return $this->runtime->member(
+                    $this->evaluate($expr['object'], $frame),
+                    $expr['key'],
+                    $frame,
+                    $expr['span'],
+                );
             case 'MemberCall':
                 $args = array_map(fn (array $arg): mixed => $this->evaluate($arg, $frame), $expr['args']);
-                return $this->runtime->memberCall($this->evaluate($expr['object'], $frame), $expr['method'], $args, $frame, $expr['span']);
+                return $this->runtime->memberCall(
+                    $this->evaluate($expr['object'], $frame),
+                    $expr['method'],
+                    $args,
+                    $frame,
+                    $expr['span'],
+                );
             case 'ClassCall':
                 $args = array_map(fn (array $arg): mixed => $this->evaluate($arg, $frame), $expr['args']);
                 return $this->runtime->classCall($expr['className'], $expr['method'], $args, $frame, $expr['span']);
             case 'Index':
-                return $this->runtime->index($this->evaluate($expr['object'], $frame), $this->evaluate($expr['index'], $frame), $frame, $expr['span']);
+                return $this->runtime->index(
+                    $this->evaluate($expr['object'], $frame),
+                    $this->evaluate($expr['index'], $frame),
+                    $frame,
+                    $expr['span'],
+                );
             case 'Call':
                 $args = [];
                 foreach ($expr['args'] as $arg) {
@@ -105,12 +126,19 @@ final class Evaluator
                     return $this->runtime->truthy($test) ? $test : $this->evaluate($expr['else'], $frame);
                 }
 
-                return $this->runtime->truthy($test) ? $this->evaluate($expr['then'], $frame) : $this->evaluate($expr['else'], $frame);
+                return $this->runtime->truthy($test) ? $this->evaluate(
+                    $expr['then'],
+                    $frame,
+                ) : $this->evaluate($expr['else'], $frame);
             case 'List':
                 $list = [];
                 foreach ($expr['items'] as $item) {
                     if ($item['type'] === 'Spread') {
-                        $spread = $this->runtime->listSpread($this->evaluate($item['expr'], $frame), $frame, $item['span']);
+                        $spread = $this->runtime->listSpread(
+                            $this->evaluate($item['expr'], $frame),
+                            $frame,
+                            $item['span'],
+                        );
                         foreach ($spread as $element) {
                             $list[] = $element;
                         }
@@ -124,12 +152,20 @@ final class Evaluator
                 $map = new MapValue();
                 foreach ($expr['entries'] as $entry) {
                     if (isset($entry['type'])) {
-                        $spread = $this->runtime->mapSpread($this->evaluate($entry['expr'], $frame), $frame, $entry['span']);
+                        $spread = $this->runtime->mapSpread(
+                            $this->evaluate($entry['expr'], $frame),
+                            $frame,
+                            $entry['span'],
+                        );
                         foreach ($spread->entries() as $key => $value) {
                             $map->set($key, $value);
                         }
                     } else {
-                        $key = $this->runtime->stringify($this->evaluate($entry['key'], $frame), $frame, $entry['key']['span']);
+                        $key = $this->runtime->stringify(
+                            $this->evaluate($entry['key'], $frame),
+                            $frame,
+                            $entry['key']['span'],
+                        );
                         $map->set($key, $this->evaluate($entry['value'], $frame));
                     }
                 }
@@ -149,11 +185,17 @@ final class Evaluator
             case '&&':
                 $left = $this->evaluate($expr['left'], $frame);
 
-                return $this->runtime->truthy($left) ? $this->runtime->truthy($this->evaluate($expr['right'], $frame)) : false;
+                return $this->runtime->truthy($left) ? $this->runtime->truthy($this->evaluate(
+                    $expr['right'],
+                    $frame,
+                )) : false;
             case '||':
                 $left = $this->evaluate($expr['left'], $frame);
 
-                return $this->runtime->truthy($left) ? true : $this->runtime->truthy($this->evaluate($expr['right'], $frame));
+                return $this->runtime->truthy($left) ? true : $this->runtime->truthy($this->evaluate(
+                    $expr['right'],
+                    $frame,
+                ));
             case '??':
                 $left = $this->evaluate($expr['left'], $frame);
 
@@ -163,5 +205,4 @@ final class Evaluator
         $right = $this->evaluate($expr['right'], $frame);
         return $this->runtime->binary($expr['op'], $left, $right, $frame, $expr['span']);
     }
-
 }

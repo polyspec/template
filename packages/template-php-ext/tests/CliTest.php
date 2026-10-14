@@ -19,7 +19,10 @@ final class CliTest extends TestCase
     {
         // The library that make ext publishes (T21.4).
         $library = Support::repositoryRoot() . '/var/build/polyspec_template.so';
-        $command = array_merge([PHP_BINARY, '-d', 'extension=' . $library, dirname(__DIR__) . '/bin/template-ext.php'], $arguments);
+        $command = array_merge(
+            [PHP_BINARY, '-d', 'extension=' . $library, dirname(__DIR__) . '/bin/template-ext.php'],
+            $arguments,
+        );
         $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
         $process = proc_open($command, $descriptors, $pipes);
         $this->assertIsResource($process);
@@ -71,14 +74,23 @@ final class CliTest extends TestCase
         $this->assertIsString($file);
         file_put_contents($file, "<ul>\n<li>{=a}</li>\n</ul>");
         try {
-            $this->assertSame(['status' => 0, 'stdout' => "<ul>\n  <li>{= a}</li>\n</ul>", 'stderr' => ''], $this->invoke(['format', $file]));
-            $this->assertSame("<ul>\n<li>{= a}</li>\n</ul>", $this->invoke(['format', '--indent', 'none', $file])['stdout']);
+            $this->assertSame(
+                ['status' => 0, 'stdout' => "<ul>\n  <li>{= a}</li>\n</ul>", 'stderr' => ''],
+                $this->invoke(['format', $file]),
+            );
+            $this->assertSame(
+                "<ul>\n<li>{= a}</li>\n</ul>",
+                $this->invoke(['format', '--indent', 'none', $file])['stdout'],
+            );
             file_put_contents($file, "<p>\n  {? a}\n</p>");
             $failed = $this->invoke(['format', $file]);
             $this->assertSame(2, $failed['status']);
             $error = Support::json($failed['stderr']);
             $this->assertIsArray($error);
-            $this->assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error['reason'], $error['code'], $error['line'], $error['col']]);
+            $this->assertSame(
+                ['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3],
+                [$error['reason'], $error['code'], $error['line'], $error['col']],
+            );
             $this->assertSame(1, $this->invoke(['format', '--indent', 'x', $file])['status']);
         } finally {
             unlink($file);

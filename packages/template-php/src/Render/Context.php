@@ -42,7 +42,12 @@ final class Context
         $this->outputBytes += strlen($text);
         $limits = $this->services->limits();
         if ($this->outputBytes > $limits['outputBytes']) {
-            throw $this->fail('E_RUNTIME_LIMIT', $this->currentFrame, $this->currentSpan, 'output exceeds ' . $limits['outputBytes'] . ' bytes');
+            throw $this->fail(
+                'E_RUNTIME_LIMIT',
+                $this->currentFrame,
+                $this->currentSpan,
+                'output exceeds ' . $limits['outputBytes'] . ' bytes',
+            );
         }
         $this->output .= $text;
     }
@@ -92,5 +97,4 @@ final class Context
     {
         array_pop($this->chain);
     }
-
 }

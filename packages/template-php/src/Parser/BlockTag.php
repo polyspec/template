@@ -84,10 +84,20 @@ final class BlockTag
             throw $this->fail('E_PARSE_INVALID_PATH', $at, $at + 1, 'include requires a path');
         }
         if ($token['kind'] !== 'path') {
-            throw $this->fail('E_PARSE_INVALID_PATH', $token['start'], $token['end'], json_encode($token['value']) . ' is not a path');
+            throw $this->fail(
+                'E_PARSE_INVALID_PATH',
+                $token['start'],
+                $token['end'],
+                json_encode($token['value']) . ' is not a path',
+            );
         }
 
-        return ['path' => $token['value'], 'start' => $token['start'], 'end' => $token['end'], 'quoted' => $token['quoted']];
+        return [
+            'path' => $token['value'],
+            'start' => $token['start'],
+            'end' => $token['end'],
+            'quoted' => $token['quoted'],
+        ];
     }
 
     /**
@@ -95,7 +105,13 @@ final class BlockTag
      *
      * The words are the id, the path and each scope item with its value.
      *
-     * @return array{id: string|null, path: string|null, scope: list<array{name: string, expr: array<string, mixed>}>, words: list<array{start: int, end: int, quoted: bool}>, end: int}
+     * @return array{
+     *     id: string|null,
+     *     path: string|null,
+     *     scope: list<array{name: string, expr: array<string, mixed>}>,
+     *     words: list<array{start: int, end: int, quoted: bool}>,
+     *     end: int,
+     * }
      */
     public function readBlockBody(int $index): array
     {
@@ -131,21 +147,45 @@ final class BlockTag
                 break;
             }
             if ($token['kind'] !== 'ident' || $token['value'] === '') {
-                throw $this->fail('E_PARSE_INVALID_BLOCK_TAG', $token['start'], $token['end'], 'unexpected ' . json_encode(substr($text, $token['start'], $token['end'] - $token['start'])) . ' in block tag');
+                throw $this->fail(
+                    'E_PARSE_INVALID_BLOCK_TAG',
+                    $token['start'],
+                    $token['end'],
+                    'unexpected ' . json_encode(substr(
+                        $text,
+                        $token['start'],
+                        $token['end'] - $token['start'],
+                    )) . ' in block tag',
+                );
             }
             $cursor = $token['end'];
             if (($text[$cursor] ?? '') === ':') {
                 $valueStart = $cursor + 1;
                 if ($valueStart >= strlen($text) || Scanner::isHorizontalSpace($text[$valueStart])) {
-                    throw $this->fail('E_PARSE_INVALID_BLOCK_TAG', $cursor, $cursor + 1, 'scope item requires a value after ":"');
+                    throw $this->fail(
+                        'E_PARSE_INVALID_BLOCK_TAG',
+                        $cursor,
+                        $cursor + 1,
+                        'scope item requires a value after ":"',
+                    );
                 }
-                $parser = new ExpressionParser($this->source, $valueStart, $this->close, $this->closeCount, null, $this->template);
+                $parser = new ExpressionParser(
+                    $this->source,
+                    $valueStart,
+                    $this->close,
+                    $this->closeCount,
+                    null,
+                    $this->template,
+                );
                 $scope[] = ['name' => $token['value'], 'expr' => $parser->parsePostfix(true)];
                 $cursor = $parser->end();
                 $words[] = ['start' => $token['start'], 'end' => $cursor, 'quoted' => false];
             } else {
                 $words[] = ['start' => $token['start'], 'end' => $token['end'], 'quoted' => false];
-                $scope[] = ['name' => $token['value'], 'expr' => Ast::variable($token['value'], $token['start'], $token['end'])];
+                $scope[] = [
+                    'name' => $token['value'],
+                    'expr' => Ast::variable($token['value'], $token['start'], $token['end']),
+                ];
             }
         }
 

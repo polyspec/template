@@ -29,8 +29,14 @@ final class TemplateError extends \RuntimeException
      *
      * @param list<int>|null $lines
      */
-    public static function at(string $code, string $template, ?array $lines, int $start, int $end, string $message): self
-    {
+    public static function at(
+        string $code,
+        string $template,
+        ?array $lines,
+        int $start,
+        int $end,
+        string $message,
+    ): self {
         if ($lines === null) {
             return new self($code, $template, 0, 0, $start, $end, $message);
         }

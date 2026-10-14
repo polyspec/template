@@ -9,44 +9,12 @@ use Polyspec\Template\Loader\LoaderInterface;
 use Polyspec\Template\Loader\Path;
 use Polyspec\Template\Parser\Parser;
 use Polyspec\Template\Parser\Scanner;
-use Polyspec\Template\Render\Context;
 use Polyspec\Template\Render\Frame;
-use Polyspec\Template\Render\Renderer;
 use Polyspec\Template\Render\RuntimeEnvironment;
 use Polyspec\Template\Render\RuntimeServices;
-use Polyspec\Template\Render\Scope;
 use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\BindError;
 use Polyspec\Template\Value\MapValue;
-
-/** Prepared AST interpreter execution. */
-final class AstPreparedExecution implements PreparedExecution
-{
-    /** Creates an AST execution from normalized request state. */
-    public function __construct(
-        private readonly AstProgram $engine,
-        private readonly MapValue $rootData,
-        /** @var array<string, array{template: string, data: MapValue|null}|array{html: string}> */
-        private readonly array $registry,
-        /** @var array{timezone: string, now: float} */
-        private readonly array $env,
-        private readonly string $targetName,
-        /** @var array{ast: array<string, mixed>, lines: list<int>|null} */
-        private readonly array $template,
-    ) {
-    }
-
-    /** Interprets the prepared AST with fresh execution state. */
-    public function render(): string
-    {
-        $context = new Context($this->engine, $this->rootData, $this->env, $this->targetName);
-        $context->registry = $this->registry;
-        $context->enter($this->targetName, null, null);
-        (new Renderer($context, $this->engine))->renderNodes($this->template['ast']['body'], new Frame($this->template['ast']['name'], $this->template['lines'], $this->rootData), new Scope());
-
-        return $context->output();
-    }
-}
 
 /** AstProgram: template loading, caching, function registration and rendering. */
 final class AstProgram implements Program, RuntimeServices
@@ -61,7 +29,12 @@ final class AstProgram implements Program, RuntimeServices
     private array $cache = [];
 
     /**
-     * @param array{functions?: array<string, callable>, limits?: array<string, int>, delimiters?: string, artifact_refresh?: 'dev'|'true'|'false'} $options
+     * @param array{
+     *     functions?: array<string, callable>,
+     *     limits?: array<string, int>,
+     *     delimiters?: string,
+     *     artifact_refresh?: 'dev'|'true'|'false',
+     * } $options
      */
     public function __construct(?LoaderInterface $loader = null, array $options = [])
     {
@@ -92,7 +65,10 @@ final class AstProgram implements Program, RuntimeServices
     {
         $delimiters = self::delimitersOf($options);
 
-        return InternalBoundary::run($name, static fn (): array => Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]));
+        return InternalBoundary::run(
+            $name,
+            static fn (): array => Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]),
+        );
     }
 
     /**
@@ -100,13 +76,20 @@ final class AstProgram implements Program, RuntimeServices
      * parts. Offsets are UTF-8 byte offsets after a leading byte order mark (LEX-2, EDT-8).
      *
      * @param array{delimiters?: string} $options
-     * @return array{ast: array<string, mixed>, tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>, tokens: list<array{start: int, end: int, kind: string}>}
+     * @return array{
+     *     ast: array<string, mixed>,
+     *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
+     *     tokens: list<array{start: int, end: int, kind: string}>,
+     * }
      */
     public static function analyze(string $source, string $name, array $options = []): array
     {
         $delimiters = self::delimitersOf($options);
 
-        return InternalBoundary::run($name, static fn (): array => Parser::analyze(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]));
+        return InternalBoundary::run(
+            $name,
+            static fn (): array => Parser::analyze(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]),
+        );
     }
 
     /**
@@ -181,14 +164,19 @@ final class AstProgram implements Program, RuntimeServices
             throw $fail('E_LOAD_NOT_FOUND', "template {$name} does not exist");
         }
         $cached = $this->cache[$name] ?? null;
-        if ($cached !== null && ($this->artifactRefresh === 'false' || ($this->artifactRefresh === 'true' && $cached['version'] === $loaded['version']))) {
+        $fresh = $this->artifactRefresh === 'false'
+            || ($this->artifactRefresh === 'true' && $cached !== null && $cached['version'] === $loaded['version']);
+        if ($cached !== null && $fresh) {
             return $cached['template'];
         }
         if (isset($loaded['ast'])) {
             $template = ['ast' => $loaded['ast'], 'lines' => null];
         } else {
             $source = Source::fromBytes($name, $loaded['source'] ?? '');
-            $template = ['ast' => Parser::parse($source, $this->delimiters[0], $this->delimiters[1]), 'lines' => $source->lines];
+            $template = [
+                'ast' => Parser::parse($source, $this->delimiters[0], $this->delimiters[1]),
+                'lines' => $source->lines,
+            ];
         }
         $this->cache[$name] = ['version' => $loaded['version'], 'template' => $template];
 
@@ -199,18 +187,27 @@ final class AstProgram implements Program, RuntimeServices
      * Renders a template name or a parsed template.
      *
      * @param string|array<string, mixed> $target
-     * @param array{define?: array<string, string|array{template?: string, data?: mixed, html?: string}>, env?: array{timezone?: string, now?: float|int}} $options
+     * @param array{
+     *     define?: array<string, string|array{template?: string, data?: mixed, html?: string}>,
+     *     env?: array{timezone?: string, now?: float|int},
+     * } $options
      */
     public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender
     {
         $name = is_string($target) ? $target : (string) $target['name'];
 
-        return InternalBoundary::run($name, fn (): PreparedRender => $this->prepareBound($name, $target, $assign, $options));
+        return InternalBoundary::run(
+            $name,
+            fn (): PreparedRender => $this->prepareBound($name, $target, $assign, $options),
+        );
     }
 
     /**
      * @param string|array<string, mixed> $target
-     * @param array{define?: array<string, string|array{template?: string, data?: mixed, html?: string}>, env?: array{timezone?: string, now?: float|int}} $options
+     * @param array{
+     *     define?: array<string, string|array{template?: string, data?: mixed, html?: string}>,
+     *     env?: array{timezone?: string, now?: float|int},
+     * } $options
      */
     private function prepareBound(string $name, string|array $target, mixed $assign, array $options): PreparedRender
     {
@@ -223,16 +220,26 @@ final class AstProgram implements Program, RuntimeServices
         }
         $targetEntry = is_string($target) ? ($registry[$target] ?? null) : null;
         $targetName = is_array($targetEntry) && isset($targetEntry['template']) ? $targetEntry['template'] : $name;
-        $template = is_string($target) ? $this->loadTemplate($targetName, null, null) : ['ast' => $target, 'lines' => null];
+        $template = is_string($target) ? $this->loadTemplate(
+            $targetName,
+            null,
+            null,
+        ) : ['ast' => $target, 'lines' => null];
 
-        return new PreparedRender($name, new AstPreparedExecution($this, $rootData, $registry, $env, $targetName, $template));
+        return new PreparedRender(
+            $name,
+            new AstPreparedExecution($this, $rootData, $registry, $env, $targetName, $template),
+        );
     }
 
     /**
      * Renders a template name or a parsed template.
      *
      * @param string|array<string, mixed> $target
-     * @param array{define?: array<string, string|array{template?: string, data?: mixed, html?: string}>, env?: array{timezone?: string, now?: float|int}} $options
+     * @param array{
+     *     define?: array<string, string|array{template?: string, data?: mixed, html?: string}>,
+     *     env?: array{timezone?: string, now?: float|int},
+     * } $options
      */
     public function render(string|array $target, mixed $assign = [], array $options = []): string
     {
@@ -253,11 +260,17 @@ final class AstProgram implements Program, RuntimeServices
             }
             if (is_array($input) && isset($input['html']) && is_string($input['html'])) {
                 $registry[$id] = ['html' => $input['html']];
-            } elseif (is_string($input) || (is_array($input) && isset($input['template']) && is_string($input['template']))) {
+            } elseif (
+                is_string($input)
+                || (is_array($input) && isset($input['template']) && is_string($input['template']))
+            ) {
                 $template = is_string($input) ? $input : $input['template'];
                 $name = Path::resolve('', $template);
                 if ($name === null) {
-                    throw new BindError('E_DATA_UNSUPPORTED_TYPE', "define {$id}: template path leaves the loader root");
+                    throw new BindError(
+                        'E_DATA_UNSUPPORTED_TYPE',
+                        "define {$id}: template path leaves the loader root",
+                    );
                 }
                 $data = null;
                 if (is_array($input) && array_key_exists('data', $input)) {

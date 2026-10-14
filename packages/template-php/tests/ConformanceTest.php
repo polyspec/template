@@ -48,7 +48,10 @@ final class ConformanceTest extends TestCase
         }
         $ast = AstProgram::parse(Support::read("{$dir}/input.tpl"), 'input.tpl', Support::delimiterOptions($dir));
         $expected = Support::readJson("{$dir}/expected.ast.json");
-        self::assertSame(Support::normalize($expected), Support::normalize(Support::json(\Polyspec\Template\Ast::toJson($ast))));
+        self::assertSame(
+            Support::normalize($expected),
+            Support::normalize(Support::json(\Polyspec\Template\Ast::toJson($ast))),
+        );
     }
 
     #[DataProvider('cases')]
@@ -59,8 +62,15 @@ final class ConformanceTest extends TestCase
 
             return;
         }
-        $analysis = AstProgram::analyze(Support::read("{$dir}/input.tpl"), 'input.tpl', Support::delimiterOptions($dir));
-        $tokens = array_map(static fn (array $token): array => [$token['start'], $token['end'], $token['kind']], $analysis['tokens']);
+        $analysis = AstProgram::analyze(
+            Support::read("{$dir}/input.tpl"),
+            'input.tpl',
+            Support::delimiterOptions($dir),
+        );
+        $tokens = array_map(
+            static fn (array $token): array => [$token['start'], $token['end'], $token['kind']],
+            $analysis['tokens'],
+        );
         self::assertSame(Support::readJson("{$dir}/expected.tokens.json"), $tokens);
     }
 
@@ -78,7 +88,14 @@ final class ConformanceTest extends TestCase
             $result = Formatter::format($source, ['name' => 'input.tpl'] + $options + Support::delimiterOptions($dir));
             $actual[$mode] = $result->error === null
                 ? ['text' => $result->text]
-                : ['error' => ['reason' => $result->error->reason, 'code' => $result->error->code, 'line' => $result->error->line, 'col' => $result->error->col]];
+                : [
+                    'error' => [
+                        'reason' => $result->error->reason,
+                        'code' => $result->error->code,
+                        'line' => $result->error->line,
+                        'col' => $result->error->col,
+                    ],
+                ];
         }
         self::assertSame(Support::readJson("{$dir}/expected.format.json"), $actual);
     }
@@ -90,7 +107,15 @@ final class ConformanceTest extends TestCase
         $result = self::render($dir);
         if ($expectedError !== null) {
             self::assertInstanceOf(TemplateError::class, $result, is_string($result) ? $result : '');
-            self::assertSame($expectedError, ['code' => $result->errorCode, 'template' => $result->template, 'line' => $result->errorLine, 'col' => $result->errorCol]);
+            self::assertSame(
+                $expectedError,
+                [
+                    'code' => $result->errorCode,
+                    'template' => $result->template,
+                    'line' => $result->errorLine,
+                    'col' => $result->errorCol,
+                ],
+            );
         } else {
             if ($result instanceof TemplateError) {
                 self::fail(json_encode($result->toArray(), JSON_THROW_ON_ERROR));

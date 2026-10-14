@@ -57,7 +57,11 @@ final class BoundMap
                 return new self(new MapValue());
             }
             if (!$bound instanceof MapValue) {
-                throw TemplateError::withoutPosition('E_DATA_UNSUPPORTED_TYPE', '', 'bind takes a value that binds to a map');
+                throw TemplateError::withoutPosition(
+                    'E_DATA_UNSUPPORTED_TYPE',
+                    '',
+                    'bind takes a value that binds to a map',
+                );
             }
 
             return new self($bound);

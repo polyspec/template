@@ -57,7 +57,12 @@ final class ExtConformanceTest extends TestCase
             $actual = $error->toArray();
             $this->assertSame(
                 $expected,
-                ['code' => $actual['code'], 'template' => $actual['template'], 'line' => $actual['line'], 'col' => $actual['col']],
+                [
+                    'code' => $actual['code'],
+                    'template' => $actual['template'],
+                    'line' => $actual['line'],
+                    'col' => $actual['col'],
+                ],
             );
 
             return;

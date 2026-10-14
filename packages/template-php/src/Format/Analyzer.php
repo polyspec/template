@@ -17,7 +17,11 @@ interface Analyzer
      * byte offsets after a leading byte order mark.
      *
      * @param array{delimiters?: string} $options
-     * @return array{ast: array<string, mixed>, tags: list<array{start: int, end: int, kind: string, bodyStart: int, bodyEnd: int}>, tokens: list<array{start: int, end: int, kind: string}>}
+     * @return array{
+     *     ast: array<string, mixed>,
+     *     tags: list<array{start: int, end: int, kind: string, bodyStart: int, bodyEnd: int}>,
+     *     tokens: list<array{start: int, end: int, kind: string}>,
+     * }
      * @throws TemplateError when the source does not parse
      * @throws \InvalidArgumentException when the delimiters option is not a delimiter pair
      */

@@ -21,7 +21,14 @@ final class Source
     {
         $invalid = Utf8::firstInvalid($bytes);
         if ($invalid >= 0) {
-            throw TemplateError::at('E_LEX_INVALID_UTF8', $name, self::lineIndex($bytes), $invalid, $invalid + 1, "invalid UTF-8 byte at offset {$invalid}");
+            throw TemplateError::at(
+                'E_LEX_INVALID_UTF8',
+                $name,
+                self::lineIndex($bytes),
+                $invalid,
+                $invalid + 1,
+                "invalid UTF-8 byte at offset {$invalid}",
+            );
         }
         if (str_starts_with($bytes, "\xEF\xBB\xBF")) {
             $bytes = substr($bytes, 3);

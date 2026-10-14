@@ -133,7 +133,10 @@ final class EngineTest extends TestCase
     {
         // VAL-14: a stdClass is a map of its properties, also when it is empty or its keys look like a list.
         $engine = new Engine($this->root);
-        $this->assertSame("{\"0\":\"a\",\"x\":1}\n", $engine->render('keys.tpl', ['m' => (object) ['0' => 'a', 'x' => 1]]));
+        $this->assertSame(
+            "{\"0\":\"a\",\"x\":1}\n",
+            $engine->render('keys.tpl', ['m' => (object) ['0' => 'a', 'x' => 1]]),
+        );
         $this->assertSame("{}\n", $engine->render('keys.tpl', ['m' => new \stdClass()]));
         $this->assertSame("{}\n", $engine->render('keys.tpl', (object) ['m' => new \stdClass()]));
     }
@@ -156,7 +159,12 @@ final class EngineTest extends TestCase
         // VAL-14, VAL-18, VAL-19: other objects keep the instance; only public properties and methods are visible.
         $engine = new Engine($this->root);
         $this->assertSame("1|||x:1|y\n", $engine->render('object.tpl', ['o' => self::object()]));
-        foreach (['object-hidden.tpl' => 'E_RUNTIME_UNKNOWN_FUNCTION', 'object-fail.tpl' => 'E_RUNTIME_HOST_FUNCTION', 'object-echo.tpl' => 'E_RUNTIME_STRINGIFY'] as $template => $code) {
+        $codes = [
+            'object-hidden.tpl' => 'E_RUNTIME_UNKNOWN_FUNCTION',
+            'object-fail.tpl' => 'E_RUNTIME_HOST_FUNCTION',
+            'object-echo.tpl' => 'E_RUNTIME_STRINGIFY',
+        ];
+        foreach ($codes as $template => $code) {
             try {
                 $engine->render($template, ['o' => self::object()]);
                 $this->fail("expected {$code} for {$template}");
@@ -228,7 +236,10 @@ final class EngineTest extends TestCase
     {
         $engine = new Engine($this->root);
         $engine->register('twice', static fn (array $args, array $env) => $env['timezone']);
-        $this->assertSame("+09:00\n", $engine->render('host-function.tpl', ['n' => 1], ['env' => ['timezone' => '+09:00', 'now' => 0]]));
+        $this->assertSame(
+            "+09:00\n",
+            $engine->render('host-function.tpl', ['n' => 1], ['env' => ['timezone' => '+09:00', 'now' => 0]]),
+        );
     }
 
     public function testRegisterReportsAFailingFunction(): void

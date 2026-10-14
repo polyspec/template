@@ -48,7 +48,10 @@ final class HostValuesTest extends TestCase
     {
         $order = new HostValueOrder();
         $program = new AstProgram(new FilesystemLoader(self::fixtureDirectory()));
-        $program->register('describe', static fn (array $args): string => HostValueOrder::describeArguments($args, $order));
+        $program->register(
+            'describe',
+            static fn (array $args): string => HostValueOrder::describeArguments($args, $order),
+        );
         $program->register('mutate', static function (array $args): mixed {
             $args[0][0] = 'changed';
             $args[0][] = 'added';
@@ -59,9 +62,16 @@ final class HostValuesTest extends TestCase
             return null;
         });
         $program->register('pick', static fn (array $args): mixed => $args[0]);
-        $program->registerClass('Order', 'describe', static fn (array $args): string => HostValueOrder::describeArguments($args, $order));
+        $program->registerClass(
+            'Order',
+            'describe',
+            static fn (array $args): string => HostValueOrder::describeArguments($args, $order),
+        );
 
-        return $program->render($target, ['order' => $order, 'same' => $order, 'other' => new HostValueOrder(), 'items' => [1]]);
+        return $program->render(
+            $target,
+            ['order' => $order, 'same' => $order, 'other' => new HostValueOrder(), 'items' => [1]],
+        );
     }
 
     #[DataProvider('outputs')]
@@ -91,57 +101,9 @@ final class HostValuesTest extends TestCase
             array_keys($args[0]),
         ), JSON_THROW_ON_ERROR));
         $assign = Json::parse('{"m": {"b": 1, "2": 2, "-0": 3, "01": 4, "-3": 5}}');
-        $this->assertSame("[\"string:b\",\"int:2\",\"string:-0\",\"string:01\",\"int:-3\"]\n", $program->render('map-keys.tpl', $assign));
-    }
-}
-
-/**
- * The order class of the shared fixture; `describe` receives every argument in the form of VAL-21.
- */
-final class HostValueOrder
-{
-    public function describe(mixed ...$args): string
-    {
-        return self::describeArguments($args, $this);
-    }
-
-    /**
-     * @param list<mixed> $args
-     */
-    public static function describeArguments(array $args, object $order): string
-    {
-        return implode(',', array_map(static fn (mixed $item): string => self::describeValue($item, $order), $args));
-    }
-
-    private static function describeValue(mixed $value, object $order): string
-    {
-        if ($value === null) {
-            return 'null';
-        }
-        if (is_bool($value)) {
-            return 'bool(' . ($value ? 'true' : 'false') . ')';
-        }
-        if (is_float($value)) {
-            return 'number(' . $value . ')';
-        }
-        if (is_string($value)) {
-            return "string({$value})";
-        }
-        if (is_array($value) && array_is_list($value)) {
-            return 'list(' . self::describeArguments($value, $order) . ')';
-        }
-        if (is_array($value)) {
-            $parts = [];
-            foreach ($value as $key => $item) {
-                $parts[] = $key . '=' . self::describeValue($item, $order);
-            }
-
-            return 'map(' . implode(',', $parts) . ')';
-        }
-        if ($value === $order) {
-            return 'object(order)';
-        }
-
-        return 'unexpected(' . get_debug_type($value) . ')';
+        $this->assertSame(
+            "[\"string:b\",\"int:2\",\"string:-0\",\"string:01\",\"int:-3\"]\n",
+            $program->render('map-keys.tpl', $assign),
+        );
     }
 }

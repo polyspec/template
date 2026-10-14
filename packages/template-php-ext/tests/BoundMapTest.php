@@ -67,7 +67,14 @@ final class BoundMapTest extends TestCase
     {
         self::assertSame(
             [$code, '', 0, 0, 0, 0],
-            [$error->getErrorCode(), $error->getTemplate(), $error->getErrorLine(), $error->getErrorCol(), $error->getOffset(), $error->getEnd()],
+            [
+                $error->getErrorCode(),
+                $error->getTemplate(),
+                $error->getErrorLine(),
+                $error->getErrorCol(),
+                $error->getOffset(),
+                $error->getEnd(),
+            ],
             $error->getMessage(),
         );
     }
@@ -75,7 +82,10 @@ final class BoundMapTest extends TestCase
     public function testBoundMapRendersTheBytesOfTheHostMap(): void
     {
         $cases = self::cases();
-        self::assertSame($cases['outputs']['page'], self::engine()->render('page.tpl', BoundMap::bind($cases['assign'])));
+        self::assertSame(
+            $cases['outputs']['page'],
+            self::engine()->render('page.tpl', BoundMap::bind($cases['assign'])),
+        );
         self::assertSame($cases['outputs']['page'], self::engine()->render('page.tpl', $cases['assign']));
     }
 
@@ -89,13 +99,23 @@ final class BoundMapTest extends TestCase
     public function testBoundMapIsDefinitionData(): void
     {
         $cases = self::cases();
-        self::assertSame($cases['outputs']['define'], self::engine()->render('define.tpl', $cases['assign'], self::definition(BoundMap::bind($cases['definitionData']))));
+        self::assertSame(
+            $cases['outputs']['define'],
+            self::engine()->render(
+                'define.tpl',
+                $cases['assign'],
+                self::definition(BoundMap::bind($cases['definitionData'])),
+            ),
+        );
     }
 
     public function testNullAndTheEmptyArrayGiveTheEmptyBoundMap(): void
     {
         foreach ([null, []] as $empty) {
-            self::assertSame(self::cases()['outputs']['empty'], self::engine()->render('empty.tpl', BoundMap::bind($empty)));
+            self::assertSame(
+                self::cases()['outputs']['empty'],
+                self::engine()->render('empty.tpl', BoundMap::bind($empty)),
+            );
         }
     }
 
@@ -121,10 +141,20 @@ final class BoundMapTest extends TestCase
         $cases = self::cases();
         $bound = BoundMap::bind(['k' => 'v']);
         $error = match ($name) {
-            'list' => self::failure(static fn () => self::engine()->render('page.tpl', [...$cases['assign'], 'items' => [$bound]])),
-            'map' => self::failure(static fn () => self::engine()->render('page.tpl', [...$cases['assign'], 'inner' => ['k' => $bound]])),
+            'list' => self::failure(
+                static fn () => self::engine()->render('page.tpl', [...$cases['assign'], 'items' => [$bound]]),
+            ),
+            'map' => self::failure(
+                static fn () => self::engine()->render('page.tpl', [...$cases['assign'], 'inner' => ['k' => $bound]]),
+            ),
             'bind' => self::failure(static fn () => BoundMap::bind(['k' => $bound])),
-            'definitionData' => self::failure(static fn () => self::engine()->render('define.tpl', $cases['assign'], self::definition(['k' => $bound]))),
+            'definitionData' => self::failure(
+                static fn () => self::engine()->render(
+                    'define.tpl',
+                    $cases['assign'],
+                    self::definition(['k' => $bound]),
+                ),
+            ),
             'result' => self::failure(static fn () => self::engine($bound)->render('result.tpl', [])),
         };
         $position = $cases['rejections'][$name];
@@ -140,15 +170,25 @@ final class BoundMapTest extends TestCase
         $cases = self::cases();
         $native = BoundMap::bind($cases['assign']);
         $php = PhpBoundMap::bind($cases['assign']);
-        self::assertSame('E_DATA_UNSUPPORTED_TYPE', self::failure(static fn () => self::engine()->render('page.tpl', $php))->getErrorCode());
-        self::assertSame('E_DATA_UNSUPPORTED_TYPE', self::failure(static fn () => BoundMap::bind($php))->getErrorCode());
-        self::assertBindFailure(self::failure(static fn () => BoundMap::merge($native, $php)), 'E_DATA_UNSUPPORTED_TYPE');
+        self::assertSame(
+            'E_DATA_UNSUPPORTED_TYPE',
+            self::failure(static fn () => self::engine()->render('page.tpl', $php))->getErrorCode(),
+        );
+        self::assertSame(
+            'E_DATA_UNSUPPORTED_TYPE',
+            self::failure(static fn () => BoundMap::bind($php))->getErrorCode(),
+        );
+        self::assertBindFailure(
+            self::failure(static fn () => BoundMap::merge($native, $php)),
+            'E_DATA_UNSUPPORTED_TYPE',
+        );
         $program = new AstProgram(new FilesystemLoader(self::fixtureDirectory()));
-        foreach ([
+        $operations = [
             static fn () => $program->render('page.tpl', $native),
             static fn () => PhpBoundMap::bind($native),
             static fn () => PhpBoundMap::merge($php, $native),
-        ] as $operation) {
+        ];
+        foreach ($operations as $operation) {
             try {
                 $operation();
                 self::fail('the PHP implementation accepted a bound map of the extension');
@@ -163,7 +203,10 @@ final class BoundMapTest extends TestCase
         foreach ([5, [1], '{"a":1}'] as $value) {
             self::assertBindFailure(self::failure(static fn () => BoundMap::bind($value)), 'E_DATA_UNSUPPORTED_TYPE');
         }
-        self::assertBindFailure(self::failure(static fn () => BoundMap::bind(['n' => NAN])), 'E_DATA_NUMBER_NOT_FINITE');
+        self::assertBindFailure(
+            self::failure(static fn () => BoundMap::bind(['n' => NAN])),
+            'E_DATA_NUMBER_NOT_FINITE',
+        );
         self::assertBindFailure(self::failure(static fn () => BoundMap::bind(['n' => 2 ** 53])), 'E_DATA_NUMBER_RANGE');
         self::assertBindFailure(self::failure(static fn () => BoundMap::bind(['s' => "\xff"])), 'E_DATA_INVALID_UTF8');
         $deep = 1;
@@ -183,30 +226,42 @@ final class BoundMapTest extends TestCase
     public function testMergeFailsWhenAnArgumentIsNotABoundMap(): void
     {
         $bound = BoundMap::bind(['a' => 1]);
-        self::assertBindFailure(self::failure(static fn () => BoundMap::merge($bound, ['b' => 2])), 'E_DATA_UNSUPPORTED_TYPE');
-        self::assertBindFailure(self::failure(static fn () => BoundMap::merge(['b' => 2], $bound)), 'E_DATA_UNSUPPORTED_TYPE');
+        self::assertBindFailure(
+            self::failure(static fn () => BoundMap::merge($bound, ['b' => 2])),
+            'E_DATA_UNSUPPORTED_TYPE',
+        );
+        self::assertBindFailure(
+            self::failure(static fn () => BoundMap::merge(['b' => 2], $bound)),
+            'E_DATA_UNSUPPORTED_TYPE',
+        );
     }
 
     public function testTheTypeCannotBeCreatedClonedOrUnserialized(): void
     {
         // VAL-22: the class has exactly the operations of the manifest; its constructor is the hook
         // through which `new` fails.
-        $mapping = Support::readJson(Support::repositoryRoot() . '/packages/template-compiler/interface.json')['languages']['php-extension']['boundMap'];
+        $mapping = Support::readJson(
+            Support::repositoryRoot() . '/packages/template-compiler/interface.json',
+        )['languages']['php-extension']['boundMap'];
         $type = new \ReflectionClass($mapping['type']);
         self::assertSame(BoundMap::class, $type->getName());
         self::assertTrue($type->isFinal());
-        $public = array_map(static fn (\ReflectionMethod $method): string => $method->getName(), $type->getMethods(\ReflectionMethod::IS_PUBLIC));
+        $public = array_map(
+            static fn (\ReflectionMethod $method): string => $method->getName(),
+            $type->getMethods(\ReflectionMethod::IS_PUBLIC),
+        );
         $expected = array_values($mapping['operations']);
         sort($public);
         sort($expected);
         self::assertSame($expected, array_values(array_diff($public, ['__construct'])));
         $bound = BoundMap::bind(['a' => 1]);
-        foreach ([
+        $operations = [
             static fn () => new BoundMap(),
             static fn () => clone $bound,
             static fn () => serialize($bound),
             static fn () => unserialize('O:' . strlen(BoundMap::class) . ':"' . BoundMap::class . '":0:{}'),
-        ] as $operation) {
+        ];
+        foreach ($operations as $operation) {
             try {
                 $operation();
                 self::fail('the operation succeeded');

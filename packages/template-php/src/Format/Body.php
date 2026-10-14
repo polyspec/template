@@ -12,7 +12,9 @@ final class Body
     private const WHITESPACE = '/^[ \t\r\n]*$/';
 
     // The characters that JavaScript's String.prototype.trim removes: WhiteSpace and LineTerminator of ECMA-262.
-    private const TRIM = '/^[\t\n\v\f\r \x{A0}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}\x{202F}\x{205F}\x{3000}\x{FEFF}]+|[\t\n\v\f\r \x{A0}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}\x{202F}\x{205F}\x{3000}\x{FEFF}]+$/u';
+    private const TRIM_CLASS = '[\t\n\v\f\r \x{A0}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}'
+        . '\x{202F}\x{205F}\x{3000}\x{FEFF}]';
+    private const TRIM = '/^' . self::TRIM_CLASS . '+|' . self::TRIM_CLASS . '+$/u';
 
     /**
      * Returns the formatted body of a tag, or null when the tag is kept as written: comments, directives, bodies that
@@ -59,7 +61,10 @@ final class Body
                 // The assigned name and its operator, then the value unless the operator is `++` or `--`.
                 [$name, $operator] = $rest;
                 if (count($rest) === 2) {
-                    return preg_match(self::WHITESPACE, substr($source, $operator['end'], $bodyEnd - $operator['end'])) === 1 ? ':' . $text($name) . $text($operator) : null;
+                    return preg_match(
+                        self::WHITESPACE,
+                        substr($source, $operator['end'], $bodyEnd - $operator['end']),
+                    ) === 1 ? ':' . $text($name) . $text($operator) : null;
                 }
                 $value = self::expressionText($input, array_slice($rest, 2), $operator['end']);
 
@@ -94,10 +99,14 @@ final class Body
             if (preg_match(self::WHITESPACE, substr($source, $cursor, $token['start'] - $cursor)) !== 1) {
                 return null;
             }
-            $joined[] = ['text' => substr($source, $token['start'], $token['end'] - $token['start']), 'kind' => $token['kind']];
+            $joined[] = [
+                'text' => substr($source, $token['start'], $token['end'] - $token['start']),
+                'kind' => $token['kind'],
+            ];
             $cursor = $token['end'];
         }
-        if (preg_match(self::WHITESPACE, substr($source, $cursor, $input['bodyEnd'] - $cursor)) !== 1 || $joined === []) {
+        $trailing = substr($source, $cursor, $input['bodyEnd'] - $cursor);
+        if (preg_match(self::WHITESPACE, $trailing) !== 1 || $joined === []) {
             return null;
         }
 

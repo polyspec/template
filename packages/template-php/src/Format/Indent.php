@@ -12,7 +12,22 @@ namespace Polyspec\Template\Format;
  */
 final class Indent
 {
-    private const VOID = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+    private const VOID = [
+        'area',
+        'base',
+        'br',
+        'col',
+        'embed',
+        'hr',
+        'img',
+        'input',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
+    ];
     // Elements whose content is not HTML markup: the indentation does not read tags inside them.
     private const RAW = ['script', 'style', 'textarea'];
     // Elements whose lines keep their indentation.
@@ -35,8 +50,11 @@ final class Indent
     /**
      * @param list<array{kind: string, start: int, end: int}> $tags
      */
-    private function __construct(private readonly string $text, private readonly array $tags, private readonly bool $counted)
-    {
+    private function __construct(
+        private readonly string $text,
+        private readonly array $tags,
+        private readonly bool $counted,
+    ) {
     }
 
     /**
@@ -45,7 +63,8 @@ final class Indent
      *
      * @param list<array{kind: string, start: int, end: int}> $tags
      * @param array{start: int, end: int}|null $range only lines that start inside it are indented
-     * @return array{edits: list<array{start: int, end: int, text: string}>}|array{error: array{index: int, message: string}}
+     * @return array{edits: list<array{start: int, end: int, text: string}>}
+     *     |array{error: array{index: int, message: string}}
      */
     public static function edits(string $text, array $tags, string $unit, string $templateBlocks, ?array $range): array
     {
@@ -107,7 +126,11 @@ final class Indent
                     $level--;
                 }
                 // The formatter empties a blank line.
-                $lines[] = ['start' => $lineStart, 'end' => $first, 'indentation' => $blank ? '' : str_repeat($unit, max($level, 0))];
+                $lines[] = [
+                    'start' => $lineStart,
+                    'end' => $first,
+                    'indentation' => $blank ? '' : str_repeat($unit, max($level, 0)),
+                ];
             }
             $newline = strpos($text, "\n", $lineStart);
             if ($newline === false) {
@@ -218,11 +241,18 @@ final class Indent
                     return ['index' => $position, 'message' => "the end tag </{$name}> has no open element"];
                 }
                 if ($open['name'] !== $name) {
-                    return ['index' => $position, 'message' => "the end tag </{$name}> does not match the open element <{$open['name']}>"];
+                    return [
+                        'index' => $position,
+                        'message' => "the end tag </{$name}> does not match the open element <{$open['name']}>",
+                    ];
                 }
                 $this->steps[] = ['index' => $position, 'delta' => -1, 'dedent' => true];
                 array_pop($this->elements);
-                if (in_array($name, self::KEPT, true) && !array_intersect($this->names(), self::KEPT) && $keptStart !== null) {
+                if (
+                    in_array($name, self::KEPT, true)
+                    && !array_intersect($this->names(), self::KEPT)
+                    && $keptStart !== null
+                ) {
                     $newline = strpos($text, "\n", $position);
                     $this->kept[] = [$keptStart, $newline === false ? $length : $newline];
                     $keptStart = null;
@@ -283,11 +313,18 @@ final class Indent
         $block = $this->blocks[$last];
         $end = $this->names();
         if ($block['branchEnd'] !== null && $block['branchEnd'] !== $end) {
-            return ['index' => $tag['start'], 'message' => 'the HTML elements open at the end of this branch differ from those of the first branch'];
+            return [
+                'index' => $tag['start'],
+                'message' => 'the HTML elements open at the end of this branch differ from those of the first branch',
+            ];
         }
         if ($tag['kind'] === 'close') {
             if (!$block['hasElse'] && array_column($block['start'], 'name') !== $end) {
-                return ['index' => $tag['start'], 'message' => 'a template block without an else branch must end with the HTML elements open at its start'];
+                return [
+                    'index' => $tag['start'],
+                    'message' => 'a template block without an else branch must end with the HTML elements open at its '
+                        . 'start',
+                ];
             }
             array_pop($this->blocks);
             // The close tag aligns with the start of its block; the elements that every branch opened apply after it.
@@ -307,7 +344,11 @@ final class Indent
             $this->blocks[$last]['hasElse'] = true;
         }
         // The next branch starts from the elements open at the start of the block.
-        $this->steps[] = ['index' => $this->beforeLine($tag['start']), 'delta' => count($block['start']) - count($this->elements), 'dedent' => false];
+        $this->steps[] = [
+            'index' => $this->beforeLine($tag['start']),
+            'delta' => count($block['start']) - count($this->elements),
+            'dedent' => false,
+        ];
         $this->elements = $block['start'];
         if ($this->counted) {
             $this->steps[] = ['index' => $tag['start'], 'delta' => 0, 'dedent' => true];
@@ -365,6 +406,9 @@ final class Indent
         $newline = $index > 0 ? strrpos(substr($this->text, 0, $index), "\n") : false;
         $lineStart = $newline === false ? 0 : $newline + 1;
 
-        return preg_match('/^[ \t]*$/', substr($this->text, $lineStart, $index - $lineStart)) === 1 ? $lineStart - 1 : $index;
+        return preg_match(
+            '/^[ \t]*$/',
+            substr($this->text, $lineStart, $index - $lineStart),
+        ) === 1 ? $lineStart - 1 : $index;
     }
 }

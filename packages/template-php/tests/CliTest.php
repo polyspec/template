@@ -17,7 +17,10 @@ final class CliTest extends TestCase
      */
     private static function runCli(array $args): array
     {
-        $command = implode(' ', array_map('escapeshellarg', array_merge([PHP_BINARY, dirname(__DIR__) . '/bin/template.php'], $args)));
+        $command = implode(
+            ' ',
+            array_map('escapeshellarg', array_merge([PHP_BINARY, dirname(__DIR__) . '/bin/template.php'], $args)),
+        );
         $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
         self::assertIsResource($process);
         $stdout = (string) stream_get_contents($pipes[1]);
@@ -60,10 +63,22 @@ final class CliTest extends TestCase
         self::assertIsString($file);
         file_put_contents($file, "<ul>\n<li>{=a}</li>\n</ul>");
         try {
-            self::assertSame(['status' => 0, 'stdout' => "<ul>\n  <li>{= a}</li>\n</ul>", 'stderr' => ''], self::runCli(['format', $file]));
-            self::assertSame("<ul>\n\t<li>{= a}</li>\n</ul>", self::runCli(['format', '--indent', 'tab', $file])['stdout']);
-            self::assertSame("<ul>\n    <li>{= a}</li>\n</ul>", self::runCli(['format', '--indent', '4', $file])['stdout']);
-            self::assertSame("<ul>\n<li>{= a}</li>\n</ul>", self::runCli(['format', '--indent', 'none', $file])['stdout']);
+            self::assertSame(
+                ['status' => 0, 'stdout' => "<ul>\n  <li>{= a}</li>\n</ul>", 'stderr' => ''],
+                self::runCli(['format', $file]),
+            );
+            self::assertSame(
+                "<ul>\n\t<li>{= a}</li>\n</ul>",
+                self::runCli(['format', '--indent', 'tab', $file])['stdout'],
+            );
+            self::assertSame(
+                "<ul>\n    <li>{= a}</li>\n</ul>",
+                self::runCli(['format', '--indent', '4', $file])['stdout'],
+            );
+            self::assertSame(
+                "<ul>\n<li>{= a}</li>\n</ul>",
+                self::runCli(['format', '--indent', 'none', $file])['stdout'],
+            );
             file_put_contents($file, '[= a+1]');
             self::assertSame('[= a + 1]', self::runCli(['format', '--delimiters', '[]', $file])['stdout']);
             file_put_contents($file, "<p>\n  {? a}\n</p>");
@@ -72,7 +87,10 @@ final class CliTest extends TestCase
             $error = Support::json($failed['stderr']);
             self::assertIsArray($error);
             self::assertSame(['reason', 'code', 'line', 'col', 'message'], array_keys($error));
-            self::assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error['reason'], $error['code'], $error['line'], $error['col']]);
+            self::assertSame(
+                ['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3],
+                [$error['reason'], $error['code'], $error['line'], $error['col']],
+            );
             self::assertSame(1, self::runCli(['format', '--indent', '9', $file])['status']);
             self::assertSame(1, self::runCli(['format', '--root', '/', $file])['status']);
         } finally {
