@@ -54,7 +54,7 @@ The program diagrams are generated from the single product manifest:
 ```
 
 ```mermaid
-<!--@include: ../../tools/runtime/generated/prepared-execution-classes.mmd-->
+<!--@include: ../../packages/compiler/generated/compiler-classes.mmd-->
 ```
 
 The compiler manifest also fixes the public `Program`, `Engine`, `AstProgram` and generated-program declaration structure. The interface gate reads TypeScript through oxc-parser, Go through `go/parser`, Rust through `syn` and PHP through Reflection. A missing or additional operation, changed argument count, changed owner or absent concrete AST program fails the build.

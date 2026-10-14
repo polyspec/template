@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 3b2136a7c194b2137b6ac36261f2625b07745b98ba5a1b1c50fb6f8feb079498 -->
+<!-- source-sha256: fe196d50ab7fbe19256dadbfc5c5d7da18af339b2b8e6d4c4470ffabdb0755da -->
 # 런타임
 
 [English](/spec/runtime).
@@ -54,7 +54,7 @@ program 도표는 단일 제품 manifest에서 생성한다.
 ```
 
 ```mermaid
-<!--@include: ../../tools/runtime/generated/prepared-execution-classes.mmd-->
+<!--@include: ../../packages/compiler/generated/compiler-classes.mmd-->
 ```
 
 compiler manifest는 공개 `Program`, `Engine`, `AstProgram`, generated program 선언 구조도 고정한다. interface gate는 TypeScript는 oxc-parser, Go는 `go/parser`, Rust는 `syn`, PHP는 Reflection으로 읽는다. 연산 누락·추가, 인자 수 변경, 소유자 변경, 구체 AST program 누락이 있으면 빌드가 실패한다.
