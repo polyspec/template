@@ -49,7 +49,12 @@ function loadCases(): BrowserCase[] {
       const env = read('env.json');
       if (define !== undefined) item.define = define;
       if (env !== undefined) item.env = env;
-      if (options) item.delimiters = (JSON.parse(options) as { delimiters?: string }).delimiters;
+      if (options) {
+        const parsed: unknown = JSON.parse(options);
+        const delimiters = typeof parsed === 'object' && parsed !== null ? Reflect.get(parsed, 'delimiters') : undefined;
+        if (typeof delimiters !== 'string') throw new Error(`${item.id}/options.json names no delimiters string`);
+        item.delimiters = delimiters;
+      }
       const html = read('expected.html');
       const error = read('expected.error.json');
       if (html !== undefined) item.expectedHtml = html;
@@ -60,19 +65,33 @@ function loadCases(): BrowserCase[] {
   return cases.sort((a, b) => a.id.localeCompare(b.id));
 }
 
+/** The result of one case in the page: its output, or the object of its error. */
+interface RenderResult {
+  id: string;
+  html?: string;
+  error?: unknown;
+}
+
+function isRenderResult(value: unknown): value is RenderResult {
+  if (typeof value !== 'object' || value === null) return false;
+  const html: unknown = Reflect.get(value, 'html');
+  return typeof Reflect.get(value, 'id') === 'string' && (html === undefined || typeof html === 'string');
+}
+
 test('renders every fixture case in the browser', async ({ page, baseURL }) => {
   expect(baseURL, 'TEMPLATE_BROWSER_URL names the static server; run the browser test with tests/browser/run.mts').toBeTruthy();
   const cases = loadCases();
   await page.goto('/tests/browser/index.html');
-  const results = (await page.evaluate(async items => (window as unknown as { renderCases: (c: unknown) => Promise<unknown> }).renderCases(items), cases)) as {
-    id: string;
-    html?: string;
-    error?: unknown;
-  }[];
+  // index.html defines renderCases on the window of the page, where TypeScript does not see it: the global of the page
+  // is no type of this file, so its one function is named here.
+  const rendered: unknown = await page.evaluate(async items => (window as unknown as { renderCases: (c: unknown) => Promise<unknown> }).renderCases(items), cases);
+  if (!Array.isArray(rendered) || !rendered.every(isRenderResult)) throw new Error(`renderCases returned no list of results: ${JSON.stringify(rendered)}`);
+  const results: RenderResult[] = rendered;
   expect(results).toHaveLength(cases.length);
   const failures: string[] = [];
   for (const [index, item] of cases.entries()) {
-    const result = results[index] as { id: string; html?: string; error?: unknown };
+    const result = results[index];
+    if (result === undefined) throw new Error(`no result for ${item.id}`);
     if (item.expectedError !== undefined) {
       if (JSON.stringify(result.error) !== JSON.stringify(item.expectedError)) failures.push(`${item.id}: expected error ${JSON.stringify(item.expectedError)}, got ${JSON.stringify(result)}`);
     } else if (result.html !== item.expectedHtml) {

@@ -82,7 +82,7 @@ function checkSupportLevels() {
 
 function checkGeneratedEngineRoute() {
   for (const removed of [
-    join(root, 'examples/showcase/generate-direct.mjs'),
+    join(root, 'examples/showcase/generate-direct.mts'),
     join(adapterRoot, 'generated/native_direct.ts'),
     join(adapterRoot, 'generated/native_direct.mjs'),
     join(adapterRoot, 'generated/native_direct.php'),
