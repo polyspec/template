@@ -60,6 +60,38 @@ const phpNullable = type => optional(type) && phpType(type) !== 'mixed' ? '?' : 
 export const phpField = (name, type) => `public readonly ${phpNullable(type)}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
 export const phpInputField = (name, type) => `public ${phpNullable(type)}${phpType(type)} $${name}${optional(type) ? ' = null' : ''}`;
 export const phpDefinitionDataField = (name, type) => `public bool $has_${name} = false, public ${phpType(type) === 'mixed' ? 'mixed' : `?${phpType(type)}`} $${name} = null`;
+/**
+ * A definition of generated code that the program keeps only when the code it keeps uses it (T25.1): `name` is the
+ * identifier that the definition declares, and `pattern` a use of it, the whole word `name` by default.
+ */
+export const definition = (name, code, pattern = new RegExp(`\\b${name}\\b`)) => ({ name, code, pattern });
+
+/**
+ * Code that is written from the rest of the program, such as an import list that names what the program uses: `render`
+ * receives the code of every other kept part and returns this part.
+ */
+export const dependent = render => ({ render });
+
+/**
+ * The code of a program from its parts in order: every string, every definition that a kept part uses, until no
+ * further definition is used, and every dependent part, so the program carries no helper, type, method or import that
+ * it does not use.
+ */
+export function usedCode(parts) {
+  const kept = parts.map(part => typeof part === 'string');
+  let text = parts.filter(part => typeof part === 'string').join('\n');
+  for (let changed = true; changed;) {
+    changed = false;
+    parts.forEach((part, index) => {
+      if (kept[index] || part.render || !part.pattern.test(text)) return;
+      kept[index] = true;
+      text += `\n${part.code}`;
+      changed = true;
+    });
+  }
+  return parts.filter((part, index) => kept[index] || part.render).map(part => typeof part === 'string' ? part : part.render ? part.render(text) : part.code).join('\n');
+}
+
 export const indent = (level, source) => source.split('\n').map(line => line.length === 0 ? '' : '    '.repeat(level) + line).join('\n');
 
 export function emitExpression(node, target) {

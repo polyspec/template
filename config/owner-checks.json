@@ -453,6 +453,14 @@
     },
     {
       "paths": [
+        "scripts/check-generated-lint.mjs"
+      ],
+      "targets": [
+        "generated-lint-check"
+      ]
+    },
+    {
+      "paths": [
         "scripts/check-typed-generator.mjs"
       ],
       "targets": [
@@ -539,6 +547,7 @@
         "artifact-digest-check",
         "compiler-interface-check",
         "compiler-ir-check",
+        "generated-lint-check",
         "conformance-generated-go",
         "conformance-generated-php",
         "conformance-generated-python",

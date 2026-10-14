@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-benchmark -->
-<!-- source-sha256: f75de7a348e811bf2985a2ac63e0bf4efb8b0f1287361888193a99f34ad3db6b -->
+<!-- source-sha256: 15adfb963c6c7ac9644faba1f96a9e1b89c403bb4dc8323ca00e026871141259 -->
 # 성능 측정
 
 제품 산출물 벤치마크는 다음 명령으로 실행한다.
@@ -26,14 +26,14 @@ make bench
 <!-- benchmark-results:start -->
 | 언어 | 모드 | Cold process | 전체 render | Prepared render | Persistent RSS |
 | --- | --- | ---: | ---: | ---: | ---: |
-| TypeScript | AST | 192.71 ms | 0.0159 ms | 0.0044 ms | 95.58 MiB |
-| TypeScript | generated | 180.80 ms | 0.0125 ms | 0.0024 ms | 93.55 MiB |
-| Go | AST | 15.36 ms | 0.0058 ms | 0.0030 ms | 11.27 MiB |
-| Go | generated | 12.77 ms | 0.0055 ms | 0.0014 ms | 10.72 MiB |
-| Rust | AST | 10.84 ms | 0.0073 ms | 0.0036 ms | 2.78 MiB |
-| Rust | generated | 10.29 ms | 0.0056 ms | 0.0029 ms | 2.53 MiB |
-| Php | AST | 146.72 ms | 0.0243 ms | 0.0163 ms | 28.11 MiB |
-| Php | generated | 119.88 ms | 0.0168 ms | 0.0068 ms | 28.25 MiB |
+| TypeScript | AST | 122.33 ms | 0.0064 ms | 0.0017 ms | 93.34 MiB |
+| TypeScript | generated | 115.71 ms | 0.0072 ms | 0.0009 ms | 91.55 MiB |
+| Go | AST | 6.72 ms | 0.0026 ms | 0.0014 ms | 11.44 MiB |
+| Go | generated | 6.77 ms | 0.0034 ms | 0.0007 ms | 10.72 MiB |
+| Rust | AST | 6.78 ms | 0.0051 ms | 0.0023 ms | 2.80 MiB |
+| Rust | generated | 5.94 ms | 0.0044 ms | 0.0017 ms | 2.53 MiB |
+| Php | AST | 68.64 ms | 0.0149 ms | 0.0093 ms | 27.97 MiB |
+| Php | generated | 67.85 ms | 0.0129 ms | 0.0045 ms | 28.22 MiB |
 <!-- benchmark-results:end -->
 
 Generated 모드는 네 구현 모두에서 prepared render를 개선했다. 작은 페이지에서는 요청 바인딩이 지배적인 비용이 될 수 있다. Go generated의 전체 render는 AST보다 느리지만 prepared renderer는 더 빠르고, Rust의 전체 render는 두 모드가 비슷하다. 모드를 선택할 때 두 측정값을 함께 봐야 하며 prepared render 하나만으로 전체 요청 비용을 설명할 수 없다.

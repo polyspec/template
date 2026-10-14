@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { loadSourceGraph, lowerSourceGraph } from './ir.mjs';
-import { templateBodies } from './backend-support.mjs';
+import { templateBodies, usedCode } from './backend-support.mjs';
 import { compileGeneratedArtifact } from './generated-artifact.mjs';
 import { generatedCompilerDigest } from './compiler-digest.mjs';
 import * as typescript from './backends/typescript.mjs';
@@ -29,7 +29,8 @@ export function compileSource(graphPath, manifestPath, language, options = {}) {
   const program = lowerSourceGraph(loadSourceGraph(graphPath), manifest);
   const target = backend.createTarget({ program, manifest });
   const context = { program, manifest, options, target, templateBodies: templateBodies(program, target) };
-  return [...backendOperations.map(operation => backend[operation](context)), ''].join('\n');
+  // An operation returns its code, or a list of code and definitions that the program keeps only when it uses them.
+  return `${usedCode(backendOperations.flatMap(operation => backend[operation](context)))}\n`;
 }
 
 function main(args) {

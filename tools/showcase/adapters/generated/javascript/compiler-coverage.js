@@ -31,17 +31,6 @@ function generatedBindType(value, type, path) {
   if (type.kind === "record") return generatedBindRecord(value, generatedRecords[type.name], path);
   throw new Error(path + " has an unknown generated type");
 }
-function generatedToValue(value, type) {
-  if (value === null || value === void 0) return null;
-  if (type.kind === "record") {
-    if (value instanceof Map) return value;
-    const fields = generatedRecords[type.name];
-    return new Map(Object.entries(fields).map(([name, field]) => [name, generatedToValue(value[name], field)]));
-  }
-  if (type.kind === "list") return value.map((item) => generatedToValue(item, type.item));
-  if (type.kind === "map") return new Map([...value].map(([key, item]) => [key, generatedToValue(item, type.value)]));
-  return value;
-}
 function generatedBindRecord(value, fields, path, partial = false) {
   const object = generatedObject(value, path);
   const result = {};
@@ -89,7 +78,7 @@ function generatedBindDefinitions(input) {
   }
   return { definitions, targets };
 }
-function render_card_tpl(assign, definitions, input, context, runtime, rootData, scope) {
+function render_card_tpl(_assign, _definitions, input, context, runtime, rootData, scope) {
   const frame = new Frame("card.tpl", [0, 30], rootData);
   scope.locals.set("label", input.label);
   context.at(frame, [0, 16]);
@@ -181,7 +170,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
     const row_previous = scope.locals.get("row");
     try {
       for (let row_index = 0; row_index < row_size; row_index += 1) {
-        const [row_key, row_value] = row_entries[row_index];
+        const [, row_value] = row_entries[row_index];
         scope.locals.set("row", row_value);
         const row_first = row_index === 0;
         const row_last = row_index === row_last_index;
@@ -256,7 +245,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
   context.at(frame, [684, 695]);
   context.output.write("</section>\n");
 }
-function render_partial_tpl(assign, definitions, input, context, runtime, rootData, scope) {
+function render_partial_tpl(_assign, _definitions, input, context, runtime, rootData, scope) {
   const frame = new Frame("partial.tpl", [0, 38], rootData);
   scope.locals.set("values", input.values);
   context.at(frame, [0, 20]);

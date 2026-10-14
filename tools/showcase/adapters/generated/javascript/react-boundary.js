@@ -31,17 +31,6 @@ function generatedBindType(value, type, path) {
   if (type.kind === "record") return generatedBindRecord(value, generatedRecords[type.name], path);
   throw new Error(path + " has an unknown generated type");
 }
-function generatedToValue(value, type) {
-  if (value === null || value === void 0) return null;
-  if (type.kind === "record") {
-    if (value instanceof Map) return value;
-    const fields = generatedRecords[type.name];
-    return new Map(Object.entries(fields).map(([name, field]) => [name, generatedToValue(value[name], field)]));
-  }
-  if (type.kind === "list") return value.map((item) => generatedToValue(item, type.item));
-  if (type.kind === "map") return new Map([...value].map(([key, item]) => [key, generatedToValue(item, type.value)]));
-  return value;
-}
 function generatedBindRecord(value, fields, path, partial = false) {
   const object = generatedObject(value, path);
   const result = {};
@@ -89,7 +78,7 @@ function generatedBindDefinitions(input) {
   }
   return { definitions, targets };
 }
-function render_content_tpl(assign, definitions, input, context, runtime, rootData, scope) {
+function render_content_tpl(assign, _definitions, _input, context, runtime, rootData, _scope) {
   const frame = new Frame("content.tpl", [0, 41, 65, 76], rootData);
   context.at(frame, [0, 44]);
   context.output.write('<section data-react-island id="counter">\n<p>');
@@ -98,7 +87,7 @@ function render_content_tpl(assign, definitions, input, context, runtime, rootDa
   context.at(frame, [60, 76]);
   context.output.write("</p>\n</section>\n");
 }
-function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
+function render_layout_tpl(assign, definitions, input, context, runtime, rootData, _scope) {
   const frame = new Frame("layout.tpl", [0, 7, 26, 38, 46], rootData);
   context.at(frame, [0, 11]);
   context.output.write("<main>\n<h1>");
