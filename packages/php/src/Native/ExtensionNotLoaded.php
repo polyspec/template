@@ -17,7 +17,8 @@ final class ExtensionNotLoaded extends RuntimeException
     {
         if (!extension_loaded('polyspec_template')) {
             throw new self(
-                'the polyspec_template extension is not loaded; install it with PIE: pie install polyspec/template-php-ext',
+                'the polyspec_template extension is not loaded; '
+                . 'install it with PIE: pie install polyspec/template-php-ext',
             );
         }
     }
