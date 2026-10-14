@@ -4,7 +4,6 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseSync } from 'oxc-parser';
-import { listCases } from '../tests/runner/cases.mjs';
 import { pythonPackageCommand } from './python-toolchain.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -113,7 +112,7 @@ for (const [language, filename] of Object.entries(backendFiles)) {
 
 const core = manifest.supportLevels?.core;
 if (core?.languages?.join(',') !== 'typescript,go,rust,php,python') throw new Error('core languages are missing or reordered');
-if (core?.compileModes?.join(',') !== 'ast,gen' || core.conformanceCases !== listCases().length) throw new Error('core support level is incomplete');
+if (core?.compileModes?.join(',') !== 'ast,gen') throw new Error('core support level is incomplete');
 for (const language of core.languages) {
   const mapping = manifest.languages?.[language];
   if (!mapping?.backend || mapping.program?.join(',') !== 'AstProgram,GeneratedProgram' || mapping.runtimeServices !== 'RuntimeServices' || !mapping.error) {

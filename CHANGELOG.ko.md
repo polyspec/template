@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: eb0a221f87ddb520c5d19f9d2fb2625aa1b6afacb1c8218d8371d6125a94cc80 -->
+<!-- source-sha256: 2d91b89e89ccddf733d4ab492a18ba63a1505e7ceaf591529f90dd3e4952fb92 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T23.2: `packages/template-compiler/interface.json`의 core support level이 적합성 case 수를 다시 적지 않습니다. Case 수는 `tests/cases`의 case 목록에만 있고, compiler, runtime, testing 문서는 248 대신 모든 canonical case를 말합니다. RED: 세 `errors/assign-head-*` case로 case가 251개가 된 뒤 `make compiler-interface-languages-check`가 `core support level is incomplete`로 실패했습니다.
 - T23.2: 모든 런타임(TypeScript, Go, Rust, PHP, PHP 확장, Python)이 `tokens`와 `format`을 제공한다. `tokens`는 받아들인 각 태그의 모든 부분을 EDT-8로 분류해 UTF-8 바이트 오프셋의 `[start, end, type]`으로 돌려준다(Go `Analyze`, Rust `analyze`, PHP `AstProgram::analyze`, PHP 확장 `Engine::analyze`, 그리고 `analyze`가 이제 토큰을 돌려주는 Python). `format`은 새 `docs/spec/formatting.md`의 규칙 FMT-1~FMT-15를 적용한다. 이 규칙은 포맷 스타일, HTML 요소와 템플릿 블록에 따른 들여쓰기, 안전 불변식을 `docs/operations/editor-tools.md`에서 가져온 것이다. 결과는 같은 AST로 파싱될 때만 돌려주며, 다시 포맷해도 바뀌지 않는다. `docs/features.md`는 `formatting`을 모든 런타임에서 통과로 적는다.
 - T23.2: 입력이 파싱되는 적합성 케이스는 `expected.tokens.json`과 `expected.format.json`(기본 들여쓰기와 `indent: null`의 결과)을 가지며, `make schema-check`에서 `schema/tokens.schema.json`과 `schema/format.schema.json`이 이를 검증한다(CNF-2, CNF-15). `tests/runner/conformance.mjs`는 모든 언어에서 이를 비교하고(CNF-17, CNF-18) `--update tokens|format`으로 TypeScript의 결과를 쓴다. 각 런타임의 네이티브 suite가 케이스마다 이를 비교하며, `config/parity.json`은 이를 unit `formatting`으로 bind한다.
 - T23.2: CNF-4는 하위 명령 `parse`, `render`, `tokens`, `format`에서 POSIX 유틸리티 문법 지침의 순서대로 옵션을 `FILE`보다 앞에 넘기며, 각 명령줄은 자기 언어의 표준 파서로 인자를 파싱한다. Go `flag`, Rust `clap`, Python `argparse`, TypeScript node:util `parseArgs`, PHP Symfony Console(`symfony/console`, PHP 확장도 이를 실행한다)이다. `parse FILE [options]` 순서는 더 이상 받지 않는다.

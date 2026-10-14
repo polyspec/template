@@ -46,8 +46,7 @@
       "compileModes": [
         "ast",
         "gen"
-      ],
-      "conformanceCases": 248
+      ]
     },
     "extension": {
       "languages": [
