@@ -32,7 +32,7 @@ from polyspec.template import (
 from polyspec.template.cli import _arguments
 from polyspec.template.errors import TemplateError as TE
 from polyspec.template.number import format_number, number_to_string, round_number
-from polyspec.template.values import loose_equals, parse_numeric_string
+from polyspec.template.values import is_truthy, loose_equals, parse_numeric_string
 
 
 def render(source: str, assign=None, options=None, engine=None):
@@ -193,6 +193,14 @@ class Expressions(unittest.TestCase):
         self.assertFalse(loose_equals("1.50x", 1.5))
         self.assertIsNone(parse_numeric_string("nan"))
 
+    def test_only_the_listed_values_are_falsy(self):
+        # EXP-33: null, false, 0, -0, the empty string, the empty list and the
+        # empty map are falsy; every other value, also the string "0", is truthy.
+        for value in (None, False, 0.0, -0.0, "", [], {}):
+            self.assertFalse(is_truthy(value), repr(value))
+        for value in ("0", " ", 1.0, [0], {"a": 0}, True):
+            self.assertTrue(is_truthy(value), repr(value))
+
 
 class Functions(unittest.TestCase):
     def test_string_functions(self):
@@ -257,7 +265,7 @@ class Functions(unittest.TestCase):
     def test_number_and_date_functions(self):
         self.assertEqual(render("{= number(1234.567, 2) }"), "1,234.57")
         self.assertEqual(render("{= round(1.5) }"), "2")
-        (self.assertEqual(render("{= floor(1.7) }"), "1"),)
+        self.assertEqual(render("{= floor(1.7) }"), "1")
         self.assertEqual(render("{= ceil(1.2) }"), "2")
         self.assertEqual(render("{= min(3, 1, 2) }"), "1")
         self.assertEqual(render("{= max(3, 1, 2) }"), "3")
@@ -294,6 +302,26 @@ class ValuesAndErrors(unittest.TestCase):
     def test_escape_boundary_of_echo(self):
         self.assertEqual(render('{= "<i>" }'), "&lt;i&gt;")
         self.assertEqual(render('{= raw("<i>") }'), "<i>")
+
+    def test_numbers_are_checked_by_value(self):
+        # VAL-2: a number outside the safe integer range fails by its value,
+        # whatever its host type or its spelling in JSON text.
+        for value in (2**53, 1e19, -9007199254740992.0, 2**60):
+            with self.assertRaises(TE, msg=repr(value)) as caught:
+                bind({"n": value})
+            self.assertEqual(caught.exception.code, "E_DATA_NUMBER_RANGE", repr(value))
+        for text in (
+            "9007199254740992",
+            "9007199254740992.0",
+            "1e19",
+            "-9.007199254740992e15",
+        ):
+            with self.assertRaises(BindError, msg=text) as caught:
+                parse_json(text)
+            self.assertEqual(caught.exception.code, "E_DATA_NUMBER_RANGE", text)
+        self.assertEqual(
+            render("{= n }", {"n": -9007199254740991.0}), "-9007199254740991"
+        )
 
     def test_bind_rules(self):
         with self.assertRaises(BindError):
@@ -343,6 +371,11 @@ class ValuesAndErrors(unittest.TestCase):
         with self.assertRaises(TE) as caught:
             engine.render("missing.tpl", {})
         self.assertEqual(caught.exception.code, "E_LOAD_NOT_FOUND")
+
+    def test_spans_count_bytes(self):
+        # é is two bytes, so the echo after it starts at byte 2 (LEX-2).
+        ast = parse("é{= a}", "t.tpl")
+        self.assertEqual(ast["body"][1]["span"], (2, 7))
 
     def test_error_positions_are_bytes(self):
         # 한 is three bytes, so the error at the string start reports a byte offset.
