@@ -171,7 +171,7 @@ final class BoundMapTest extends TestCase
             $deep = [$deep];
         }
         self::assertBindFailure(self::failure(static fn () => BoundMap::bind(['deep' => $deep])), 'E_DATA_DEPTH');
-        $failing = new class implements \JsonSerializable {
+        $failing = new class () implements \JsonSerializable {
             public function jsonSerialize(): mixed
             {
                 throw new \RuntimeException('host failure');

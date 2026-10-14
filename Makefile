@@ -167,7 +167,7 @@ lint-showcase-format:
 lint-showcase-warnings: cargo-downloads-check
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
 lint-php-format: build-php
-	$(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR)
+	$(PHP_DIR)/vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR) $(EXT_DIR)
 
 # make install-tools TOOLS=npm installs the npm of packageManager and make install-packages installs package-lock.json with
 # it, @polyspec/kit included, whose kit.mk has the other targets (T24.1); make install then installs the rest. It downloads
