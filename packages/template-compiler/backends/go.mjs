@@ -104,7 +104,7 @@ export function createTarget({ program }) {
     }
     return `generatedBinary[${goResult(node)}](runtime, ${goString(operator)}, ${left}, ${right}, frame, ${goSpan(node.span)})`;
   };
-  target.ternary = (test, thenValue, elseValue, node) => called(`func() ${goResult(node)}`, braced(`if generatedTruthy(runtime, ${test})`, `return ${goOperand(thenValue, node.then, node)}`), `return ${goOperand(elseValue, node.otherwise, node)}`);
+  target.ternary = (test, thenValue, elseValue, node) => called(`func() ${goResult(node)}`, braced(`if generatedTruthy(runtime, ${test})`, `return ${goOperand(thenValue, node.consequent, node)}`), `return ${goOperand(elseValue, node.otherwise, node)}`);
   target.list = (items, type, node) => `generatedDepth(runtime, ${called(`func() ${goType(type.source)}`,
     `result := ${goType(type.source)}{}`,
     items.map(item => item.spread ? `result = append(result, generatedListSpread[${goType(type.item.source)}](runtime, ${item.value}, frame, ${goSpan(item.span)})...)` : `result = append(result, ${item.value})`),
@@ -154,7 +154,7 @@ const imports = [
 export function emitDeclarations(context) {
   const { program, manifest, templateBodies } = context;
   const fields = manifest.fields ?? {};
-  const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
+  const records = { ...manifest.records, ...manifest.recordsExtra };
   const tag = name => `\`json:"${name}"\``;
   // A record reaches a runtime operation as a map of its declared fields in declaration order (VAL-21).
   const goRecords = Object.entries(records).flatMap(([name, members]) => [

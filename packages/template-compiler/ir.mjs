@@ -226,9 +226,10 @@ export function lowerSourceGraph(graph, manifest) {
       }
       case 'Ternary': {
         const test = lowerExpr(node.test, scope, loops);
-        const then = node.then === null ? test : lowerExpr(node.then, scope, loops);
+        // The IR names the branch taken on a truthy test `consequent`: an object with a `then` property is a thenable.
+        const consequent = node.then === null ? test : lowerExpr(node.then, scope, loops);
         const otherwise = lowerExpr(node.else, scope, loops);
-        return { op: 'ternary', test, then, otherwise, valueType: mergeType(then.valueType, otherwise.valueType), span: node.span };
+        return { op: 'ternary', test, consequent, otherwise, valueType: mergeType(consequent.valueType, otherwise.valueType), span: node.span };
       }
       case 'List': {
         const items = node.items.map(item => ({ spread: item.type === 'Spread', value: lowerExpr(item.type === 'Spread' ? item.expr : item, scope, loops), span: item.span }));

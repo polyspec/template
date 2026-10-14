@@ -1,8 +1,5 @@
 import {
-  baseTarget, definition, definitionDataName, emitExpression, emitNodes, exportedName,
-  fieldName, functionName, goType, indent, inputName, optional,
-  phpDefinitionDataField, phpField, phpInputField, phpType, rustString,
-  rustType, tsField,
+  baseTarget, definition, emitExpression, emitNodes, fieldName, functionName, indent, rustString, rustType,
 } from '../backend-support.mjs';
 
 export const language = 'rust';
@@ -138,7 +135,7 @@ const recordConvert = (name, members) => `impl GeneratedConvert for ${name} { fn
 export function emitDeclarations(context) {
   const { program, manifest, templateBodies } = context;
   const fields = manifest.fields ?? {};
-  const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
+  const records = { ...manifest.records, ...manifest.recordsExtra };
   const rustRecords = Object.entries(records).map(([name, members]) => `#[derive(Clone, Default)] pub struct ${name} { ${Object.entries(members).map(([key, type]) => `pub ${key}: ${rustType(type)}`).join(', ')} }\n${recordConvert(name, members)}`).join('\n');
   const inputTypes = templateBodies.map(template => `#[derive(Clone, Default)] pub struct ${rustInput(template.name)} { ${[...template.inputs].map(([name, type]) => `pub ${fieldName(name)}: ${rustType(type.source)}`).join(', ')} }`).join('\n');
   const definitionDataTypes = templateBodies.map(template => `#[derive(Clone, Default)] pub struct ${rustDefinitionData(template.name)} { ${[...template.inputs].map(([name, type]) => `pub ${fieldName(name)}: Option<${rustType(type.source)}>`).join(', ')} }`).join('\n');

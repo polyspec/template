@@ -1,8 +1,6 @@
 import {
-  baseTarget, definition, definitionDataName, dependent, emitExpression, emitNodes, exportedName,
-  fieldName, functionName, goType, indent, inputName, optional,
-  phpDefinitionDataField, phpField, phpInputField, phpType, quote,
-  rustType, tsField, tsType,
+  baseTarget, definition, dependent, emitExpression, emitNodes, fieldName, functionName, indent, inputName,
+  quote, tsField, tsType,
 } from '../backend-support.mjs';
 
 export const language = 'ts';
@@ -20,7 +18,7 @@ function descriptor(source) {
 
 function bindingSchema(context) {
   const { manifest, program } = context;
-  const records = Object.fromEntries(Object.entries({ ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) })
+  const records = Object.fromEntries(Object.entries({ ...manifest.records, ...manifest.recordsExtra })
     .map(([name, fields]) => [name, Object.fromEntries(Object.entries(fields).map(([field, type]) => [field, descriptor(type)]))]));
   const assign = Object.fromEntries(Object.entries(manifest.fields ?? {}).map(([field, type]) => [field, descriptor(type)]));
   const definitions = Object.fromEntries([...program.definitions].map(([id, definition]) => [id, {
@@ -89,7 +87,7 @@ export function createTarget({ program }) {
 export function emitDeclarations(context) {
   const { program, manifest, templateBodies } = context;
   const fields = manifest.fields ?? {};
-  const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
+  const records = { ...manifest.records, ...manifest.recordsExtra };
   const tsRecords = Object.entries(records).map(([name, members]) => `export interface ${name} {\n${Object.entries(members).map(([key, type]) => `  ${tsField(key, type)}`).join('\n')}\n}`).join('\n');
   const assignType = program.dynamicRoot ? 'export type Assign = MapValue;' : `export interface Assign {\n${Object.entries(fields).map(([name, type]) => `  ${tsField(name, type)}`).join('\n')}\n}`;
   const inputTypes = templateBodies.map(template => `export interface ${template.input} { ${[...template.inputs].map(([name, type]) => tsField(name, type.source)).join(' ')} }`).join('\n');
@@ -134,7 +132,7 @@ export function emitTemplates(context) {
 }
 
 export function emitEntry(context) {
-  const { program, templateBodies } = context;
+  const { templateBodies } = context;
   const dispatch = templateBodies.filter(template => template.inputs.size === 0).map(template => `    case ${quote(template.name)}: ${template.function}(assign, definitions, {}, context, runtime, rootData, scope); return;`).join('\n');
   return `function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {\n  switch (target) {\n${dispatch}\n    default: throw context.fail('E_LOAD_NOT_FOUND', null, null, 'template ' + target + ' does not exist');\n  }\n}\nfunction generatedEnv(input: RenderOptions['env']): { timezone: string; now: number } { const timezone = input?.timezone ?? 'Z'; const now = input?.now ?? Math.floor(Date.now() / 1000); if (typeof timezone !== 'string') throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string'); if (typeof now !== 'number') throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number'); return { timezone, now }; }\nclass GeneratedPreparedRender implements PreparedRender { private readonly name: string; private readonly execute: () => string; constructor(name: string, execute: () => string) { this.name = name; this.execute = execute; } render(): string { return internalBoundary(this.name, this.execute); } }\nexport class GeneratedProgram implements Program {\n  readonly runtime: RuntimeEnvironment;\n  constructor(runtime: RuntimeEnvironment = new RuntimeEnvironment()) { this.runtime = runtime; }\n  prepare(target: string | Template, assign: unknown, options: RenderOptions = {}): PreparedRender { if (typeof target !== 'string') throw new Error('generated target must be a template name'); return internalBoundary(target, () => this.prepareBound(target, assign, options)); }\n  private prepareBound(target: string, assign: unknown, options: RenderOptions): PreparedRender { let boundAssign: { assign: Assign; root: MapValue }; let bound: GeneratedBoundDefinitions; let env: { timezone: string; now: number }; try { boundAssign = generatedBindAssign(assign); bound = generatedBindDefinitions(options.define); env = generatedEnv(options.env); } catch (error) { if (error instanceof BindError) throw new TemplateError({ code: error.code, template: target, line: 0, col: 0, offset: 0, end: 0, message: error.message }); throw error; } const registered = bound.targets.get(target); if (registered?.html !== undefined) return new GeneratedPreparedRender(target, () => registered.html as string); const targetName = registered?.target ?? target; return new GeneratedPreparedRender(target, () => { const context = new RenderContext(this.runtime, boundAssign.root, env, targetName); const runtime = new RuntimeBindings(context); const scope = new Scope(); context.enter(targetName, null, null); try { renderTemplate(targetName, boundAssign.assign, bound.definitions, context, runtime, boundAssign.root, scope); return context.output.toString(); } finally { context.leave(); } }); }\n  render(target: string | Template, assign: unknown, options: RenderOptions = {}): string { return this.prepare(target, assign, options).render(); }\n}`;
 }

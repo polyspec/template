@@ -74,7 +74,7 @@ function descriptor(source) {
 }
 
 function bindingSchema(context) {
-  const records = Object.fromEntries(Object.entries({ ...(context.manifest.records ?? {}), ...(context.manifest.recordsExtra ?? {}) })
+  const records = Object.fromEntries(Object.entries({ ...context.manifest.records, ...context.manifest.recordsExtra })
     .map(([name, fields]) => [name, Object.fromEntries(Object.entries(fields).map(([field, type]) => [field, descriptor(type)]))]));
   const assign = Object.fromEntries(Object.entries(context.manifest.fields ?? {}).map(([field, type]) => [field, descriptor(type)]));
   const definitions = Object.fromEntries([...context.program.definitions].map(([id, definition]) => [id, {
@@ -191,7 +191,7 @@ export function createTarget({ program }) {
 export function emitDeclarations(context) {
   const { program, manifest, templateBodies, options } = context;
   const namespace = options.phpNamespace;
-  const records = { ...(manifest.records ?? {}), ...(manifest.recordsExtra ?? {}) };
+  const records = { ...manifest.records, ...manifest.recordsExtra };
   const fileOf = (name, code) => [file(`${name}.php`), phpFile(namespace, code)];
   return [
     ...Object.entries(records).flatMap(([name, members]) => fileOf(name, promotedClass(name, Object.entries(members).map(([key, type]) => readonlyField(key, type))))),
