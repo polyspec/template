@@ -47,10 +47,10 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 ## Command line
 
 ```sh
-template parse FILE [--root DIR] [--delimiters OC]
-template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
-template tokens FILE [--root DIR] [--delimiters OC]
-template format FILE [--indent none|tab|N] [--delimiters OC]
+template parse [--root DIR] [--delimiters OC] FILE
+template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+template tokens [--root DIR] [--delimiters OC] FILE
+template format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
 `parse` prints the AST JSON. `render` prints the output. `tokens` prints `[start, end, type]` for every token. `format` prints the formatted text, or exits with status 2 and prints `{reason, code, line, col, message}` on stderr. A template error prints the error JSON on stderr and exits with status 2.

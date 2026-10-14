@@ -22,6 +22,7 @@ path = "tests/cases.rs"
 harness = false
 
 [dependencies]
+clap = { version = "4", features = ["derive"] }
 same-file = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }

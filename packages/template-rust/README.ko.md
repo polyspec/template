@@ -48,10 +48,10 @@ assign 데이터는 `serde_json::Value`다. 객체는 문서 순서를 유지하
 ## 명령줄
 
 ```sh
-template parse FILE [--root DIR] [--delimiters OC]
-template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
-template tokens FILE [--root DIR] [--delimiters OC]
-template format FILE [--indent none|tab|N] [--delimiters OC]
+template parse [--root DIR] [--delimiters OC] FILE
+template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+template tokens [--root DIR] [--delimiters OC] FILE
+template format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 모든 토큰의 `[start, end, type]`을 출력한다. `format`은 정리한 텍스트를 출력하거나, stderr에 `{reason, code, line, col, message}`를 출력하고 상태 2로 종료한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
