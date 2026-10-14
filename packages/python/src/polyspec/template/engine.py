@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import re
+import threading
 import time
 from typing import Any, Union
 
@@ -167,6 +168,11 @@ class AstProgramCore(Program):
         else:
             self.delimiters = DEFAULT_DELIMITERS
         self._cache: dict[str, tuple[str, dict]] = {}
+        # RT-70: renders of one program run in concurrent threads, and the
+        # cache is the state that they share and write, so the check of the
+        # cached parse, the parse and the store are one step under this lock.
+        # The loader runs outside it, as concurrent renders call it.
+        self._cache_lock = threading.Lock()
 
     # FUN-43, FUN-44.
     def register(self, name: str, function: HostFunction) -> None:
@@ -202,21 +208,22 @@ class AstProgramCore(Program):
             ) from None
         if loaded is None:
             raise fail("E_LOAD_NOT_FOUND", f"template {name} does not exist")
-        cached = self._cache.get(name)
-        if self.artifact_refresh == "false" and cached is not None:
-            return cached[1]
-        if (
-            self.artifact_refresh == "true"
-            and cached is not None
-            and cached[0] == loaded.version
-        ):
-            return cached[1]
-        if isinstance(loaded, LoadedAst):
-            template = {"ast": loaded.ast, "lines": None}
-        else:
-            template = parse_with_lines(loaded.source, name, self.delimiters)
-        self._cache[name] = (loaded.version, template)
-        return template
+        with self._cache_lock:
+            cached = self._cache.get(name)
+            if self.artifact_refresh == "false" and cached is not None:
+                return cached[1]
+            if (
+                self.artifact_refresh == "true"
+                and cached is not None
+                and cached[0] == loaded.version
+            ):
+                return cached[1]
+            if isinstance(loaded, LoadedAst):
+                template = {"ast": loaded.ast, "lines": None}
+            else:
+                template = parse_with_lines(loaded.source, name, self.delimiters)
+            self._cache[name] = (loaded.version, template)
+            return template
 
     def prepare(
         self, target: "str | dict", assign, options: "RenderOptions | None" = None
