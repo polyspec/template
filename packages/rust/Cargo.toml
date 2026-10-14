@@ -21,6 +21,18 @@ name = "cases"
 path = "tests/cases.rs"
 harness = false
 
+[lints]
+workspace = true
+
+# The lints of kit (config/cargo.schema.json): no unsafe code, and every allow attribute names its reason.
+[workspace]
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+allow_attributes_without_reason = "deny"
+
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }

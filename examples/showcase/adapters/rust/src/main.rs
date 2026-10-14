@@ -3,7 +3,10 @@ mod render_adapter;
 // A generated module declares the complete API of its program: the typed records, the artifact
 // manifest and the value helpers. This adapter calls only `GeneratedProgram::render`, so the
 // declarations that it does not use are expected; the allowance covers the generated modules only.
-#[allow(dead_code)]
+#[allow(
+    dead_code,
+    reason = "the generated modules declare the complete API of their programs, and the adapter calls only render"
+)]
 mod generated {
     pub mod compiler_coverage {
         include!(concat!(
@@ -317,11 +320,12 @@ fn digest(text: &str) -> String {
 fn request_json(request: &RenderRequest) -> Value {
     let mut define = Map::new();
     for (id, entry) in &request.define {
-        if let Some(template) = &entry.template {
-            if entry.data.is_none() && entry.html.is_none() {
-                define.insert(id.clone(), Value::String(template.clone()));
-                continue;
-            }
+        if let Some(template) = &entry.template
+            && entry.data.is_none()
+            && entry.html.is_none()
+        {
+            define.insert(id.clone(), Value::String(template.clone()));
+            continue;
         }
         let mut item = Map::new();
         if let Some(template) = &entry.template {

@@ -5,7 +5,10 @@ use crate::source::Source;
 
 /// Token types. `Close` is the close delimiter of a tag when it is not an expression character.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(missing_docs)]
+#[allow(
+    missing_docs,
+    reason = "the variants are the token types of the expression lexer, named by their text"
+)]
 pub enum TokenType {
     Ident,
     Number,

@@ -144,7 +144,10 @@ pub struct Comment {
 /// Statement nodes.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
-#[allow(missing_docs)]
+#[allow(
+    missing_docs,
+    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
+)]
 pub enum Node {
     Text {
         value: String,
@@ -230,7 +233,10 @@ pub struct ScopeItem {
 /// Literal value of a `Literal` node.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(untagged)]
-#[allow(missing_docs)]
+#[allow(
+    missing_docs,
+    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
+)]
 pub enum LiteralValue {
     Null,
     Bool(bool),
@@ -256,7 +262,10 @@ impl Serialize for LiteralValue {
 
 /// Loop meta fields.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[allow(missing_docs)]
+#[allow(
+    missing_docs,
+    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
+)]
 pub enum LoopMetaField {
     #[serde(rename = "index_")]
     Index,
@@ -290,7 +299,10 @@ impl LoopMetaField {
 /// Entry of a map literal.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
-#[allow(missing_docs)]
+#[allow(
+    missing_docs,
+    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
+)]
 pub enum MapEntry {
     Entry { key: Expr, value: Expr },
     Spread(Expr),
@@ -299,7 +311,10 @@ pub enum MapEntry {
 /// Expression nodes. `Spread` appears only inside `List` items and `Map` entries.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
-#[allow(missing_docs)]
+#[allow(
+    missing_docs,
+    reason = "the variants and fields are the nodes of contracts/schema/ast.schema.json, which documents them"
+)]
 pub enum Expr {
     Literal {
         kind: String,
