@@ -22,9 +22,10 @@ SafetyInvariant
 FunctionContract
 ObjectCalls
 
-# unittest runs the test method that the constructor of a case of tests/cases.py names, run_case, and reads
-# shortDescription of a test for its report.
+# unittest runs the test method that the constructor of a case of tests/cases.py names, run_case, and of a vector of
+# tests/test_expr_fixtures.py, run_vector, and reads shortDescription of a test for its report.
 _.run_case
+_.run_vector
 _.shortDescription
 
 # unittest calls load_tests of a test module to build its suite (the load_tests protocol).

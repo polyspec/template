@@ -1,5 +1,5 @@
 // Expression fixtures: tokens, AST and evaluation (CNF-14).
-import { describe, expect, it } from 'vitest';
+import { expect, it } from 'vitest';
 import { evaluateExpression, parseExpression, tokenizeExpression } from '../../src/expr/index.js';
 import { TemplateError } from '../../src/errors.js';
 import { exprFixture, readJson, toJsonValue } from '../helpers.js';
@@ -15,32 +15,25 @@ interface ExprCase {
 
 const cases = readJson(exprFixture) as ExprCase[];
 
-describe('expression fixtures', () => {
-  for (const item of cases) {
-    if (item.error) {
-      it(`${item.name} raises ${item.error}`, () => {
-        let code: string | null = null;
-        try {
-          parseExpression(item.expr);
-        } catch (error) {
-          if (error instanceof TemplateError) code = error.code;
-          else throw error;
-        }
-        expect(code).toBe(item.error);
-      });
-      continue;
+// Each vector is a top-level test named by its name, as the suite unit expressions of config/parity.json reads the
+// results: an error vector fails the parse with its code, and any other vector has its tokens, its AST and the value of
+// each evaluation.
+it.each(cases.map(item => [item.name, item] as const))('%s', (_name, item) => {
+  if (item.error) {
+    let code: string | null = null;
+    try {
+      parseExpression(item.expr);
+    } catch (error) {
+      if (error instanceof TemplateError) code = error.code;
+      else throw error;
     }
-    it(`${item.name} tokens`, () => {
-      expect(tokenizeExpression(item.expr)).toEqual(item.tokens);
-    });
-    it(`${item.name} ast`, () => {
-      expect(JSON.parse(JSON.stringify(parseExpression(item.expr)))).toEqual(item.ast);
-    });
-    for (const [index, evaluation] of (item.cases ?? []).entries()) {
-      it(`${item.name} value ${index}`, () => {
-        const ast = parseExpression(item.expr);
-        expect(toJsonValue(evaluateExpression(ast, evaluation.data))).toEqual(evaluation.value);
-      });
-    }
+    expect(code).toBe(item.error);
+    return;
+  }
+  expect(tokenizeExpression(item.expr)).toEqual(item.tokens);
+  const ast = parseExpression(item.expr);
+  expect(JSON.parse(JSON.stringify(ast))).toEqual(item.ast);
+  for (const [index, evaluation] of (item.cases ?? []).entries()) {
+    expect(toJsonValue(evaluateExpression(ast, evaluation.data)), `evaluation ${index}`).toEqual(evaluation.value);
   }
 });

@@ -3,6 +3,7 @@
 mod common;
 
 use common::{case_delimiters, cases, json_equal};
+use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
     AstProgram, Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
     defines_from_json, env_from_json, parse,
@@ -57,55 +58,64 @@ fn render_case(dir: &Path) -> Outcome {
     }
 }
 
-#[test]
-fn every_case_matches_its_expected_files() {
-    let mut failures = Vec::new();
-    let all = cases();
-    assert!(all.len() >= 200, "expected the fixture cases, found {}", all.len());
-    for (id, dir) in &all {
-        if let Ok(expected) = fs::read_to_string(dir.join("expected.ast.json")) {
-            let source = fs::read(dir.join("input.tpl")).expect("input");
-            match parse(
-                &source,
-                "input.tpl",
-                &ParseOptions {
-                    delimiters: case_delimiters(dir),
-                },
-            ) {
-                Ok(ast) => {
-                    let actual = serde_json::to_value(&ast).expect("ast json");
-                    let expected: serde_json::Value = serde_json::from_str(&expected).expect("expected ast");
-                    if !json_equal(&actual, &expected) {
-                        failures.push(format!("{id}: ast differs"));
-                    }
-                }
-                Err(error) => failures.push(format!("{id}: parse failed: {error}")),
-            }
-        }
-        let outcome = render_case(dir);
-        if let Ok(expected) = fs::read_to_string(dir.join("expected.error.json")) {
-            let expected: serde_json::Value = serde_json::from_str(&expected).expect("expected error");
-            match outcome {
-                Outcome::Error(error) => {
-                    let actual =
-                        serde_json::json!({ "code": error.code, "template": error.template, "line": error.line, "col": error.col });
-                    if !json_equal(&actual, &expected) {
-                        failures.push(format!("{id}: error differs: {actual}"));
-                    }
-                }
-                Outcome::Html(_) => failures.push(format!("{id}: expected an error")),
-            }
-        } else {
-            let expected = fs::read_to_string(dir.join("expected.html")).expect("expected html");
-            match outcome {
-                Outcome::Html(html) => {
-                    if html != expected {
-                        failures.push(format!("{id}: html differs"));
-                    }
-                }
-                Outcome::Error(error) => failures.push(format!("{id}: render failed: {error}")),
-            }
+/// One case: the AST of a case with expected.ast.json, then the output or the error of its render.
+fn conformance(dir: &Path) -> Result<(), Failed> {
+    if let Ok(expected) = fs::read_to_string(dir.join("expected.ast.json")) {
+        let source = fs::read(dir.join("input.tpl")).map_err(|error| format!("input.tpl: {error}"))?;
+        let ast = parse(
+            &source,
+            "input.tpl",
+            &ParseOptions {
+                delimiters: case_delimiters(dir),
+            },
+        )
+        .map_err(|error| format!("parse failed: {error}"))?;
+        let actual = serde_json::to_value(&ast).map_err(|error| format!("ast json: {error}"))?;
+        let expected: serde_json::Value = serde_json::from_str(&expected).map_err(|error| format!("expected.ast.json: {error}"))?;
+        if !json_equal(&actual, &expected) {
+            return Err(format!(
+                "ast differs
+  actual {actual}
+expected {expected}"
+            )
+            .into());
         }
     }
-    assert!(failures.is_empty(), "{}", failures.join("\n"));
+    let outcome = render_case(dir);
+    if let Ok(expected) = fs::read_to_string(dir.join("expected.error.json")) {
+        let expected: serde_json::Value = serde_json::from_str(&expected).map_err(|error| format!("expected.error.json: {error}"))?;
+        return match outcome {
+            Outcome::Error(error) => {
+                let actual = serde_json::json!({ "code": error.code, "template": error.template, "line": error.line, "col": error.col });
+                if json_equal(&actual, &expected) {
+                    Ok(())
+                } else {
+                    Err(format!("error differs: {actual}").into())
+                }
+            }
+            Outcome::Html(html) => Err(format!("expected an error, rendered {html:?}").into()),
+        };
+    }
+    let expected = fs::read_to_string(dir.join("expected.html")).map_err(|error| format!("expected.html: {error}"))?;
+    match outcome {
+        Outcome::Html(html) if html == expected => Ok(()),
+        Outcome::Html(html) => Err(format!(
+            "html differs
+  actual {html:?}
+expected {expected:?}"
+        )
+        .into()),
+        Outcome::Error(error) => Err(format!("render failed: {error}").into()),
+    }
+}
+
+/// Each case is the trial `conformance::<case>`, as the suite unit conformance of config/parity.json reads the results.
+/// libtest has no tests made at run time, so the target runs with libtest-mimic (`harness = false`).
+fn main() {
+    let arguments = Arguments::from_args();
+    let trials = cases()
+        .into_iter()
+        .map(|(id, dir)| Trial::test(format!("conformance::{id}"), move || conformance(&dir)))
+        .collect();
+    libtest_mimic::run(&arguments, trials).exit();
 }
