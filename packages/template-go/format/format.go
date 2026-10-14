@@ -153,7 +153,7 @@ func Format(source string, options Options) (Result, error) {
 	if !options.KeepIndentation {
 		indentation, failure := indentEdits(text, analysis.Tags, indentOptions{unit: indent, templateBlocks: templateBlocks, limits: limits})
 		if failure != nil {
-			line, col := positionOf(text, failure.index)
+			line, col := errs.NewLineIndex([]byte(text)).Position(failure.index)
 			return Result{}, &Error{Reason: ReasonHTML, Line: line, Col: col, Message: failure.message}
 		}
 		edits = append(edits, indentation...)
@@ -166,7 +166,7 @@ func Format(source string, options Options) (Result, error) {
 	formatted := apply(text, edits)
 	after, err := analyze(formatted, name, delimiters)
 	if err != nil {
-		line, col := positionOf(text, edits[0].start)
+		line, col := errs.NewLineIndex([]byte(text)).Position(edits[0].start)
 		return Result{}, &Error{Reason: ReasonInvariant, Line: line, Col: col, Message: "formatted text does not parse: " + err.Error()}
 	}
 	before, err := treeValue(analysis.AST)
@@ -181,7 +181,7 @@ func Format(source string, options Options) (Result, error) {
 		before, result = withoutLineIndentation(before), withoutLineIndentation(result)
 	}
 	if !sameTree(before, result) {
-		line, col := positionOf(text, edits[0].start)
+		line, col := errs.NewLineIndex([]byte(text)).Position(edits[0].start)
 		return Result{}, &Error{Reason: ReasonInvariant, Line: line, Col: col, Message: "formatted text parses to a different AST"}
 	}
 	return Result{Text: prefix + formatted, Changed: true}, nil
@@ -223,13 +223,6 @@ func parseError(err error) *Error {
 func lineStartBefore(text string, index int) int {
 	from := max(index-1, 0)
 	return strings.LastIndex(text[:min(from+1, len(text))], "\n") + 1
-}
-
-// positionOf is the 1-based line and byte column of a byte offset, counted as the parser counts them.
-func positionOf(text string, index int) (line, col int) {
-	lineStart := lineStartBefore(text, index)
-	line = strings.Count(text[:lineStart], "\n") + 1
-	return line, max(index-lineStart, 0) + 1
 }
 
 // treeValue is the JSON value of an AST, whose objects compare without key order.
