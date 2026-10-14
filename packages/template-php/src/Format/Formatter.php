@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Format;
 
+use Polyspec\Template\Source;
 use Polyspec\Template\TemplateError;
 
 /**
@@ -70,7 +71,7 @@ final class Formatter
         if ($indent !== null) {
             $indentation = Indent::edits($text, $analysis['tags'], $indent, $templateBlocks, $range);
             if (isset($indentation['error'])) {
-                [$line, $col] = self::positionOf($text, $indentation['error']['index']);
+                [$line, $col] = Source::position(Source::lineIndex($text), $indentation['error']['index']);
 
                 return FormatResult::error(new FormatError('html', null, $line, $col, $indentation['error']['message']));
             }
@@ -82,7 +83,7 @@ final class Formatter
         }
 
         $formatted = self::apply($text, $edits);
-        [$line, $col] = self::positionOf($text, $edits[0]['start']);
+        [$line, $col] = Source::position(Source::lineIndex($text), $edits[0]['start']);
         try {
             $after = $analyzer->parse($formatted, $name, $parseOptions);
         } catch (TemplateError $error) {
@@ -112,18 +113,5 @@ final class Formatter
         }
 
         return $output . substr($text, $cursor);
-    }
-
-    /**
-     * The 1-based line and byte column of a byte offset, counted as the parser counts them.
-     *
-     * @return array{0: int, 1: int}
-     */
-    private static function positionOf(string $text, int $index): array
-    {
-        $newline = $index > 0 ? strrpos(substr($text, 0, $index), "\n") : false;
-        $lineStart = $newline === false ? 0 : $newline + 1;
-
-        return [substr_count($text, "\n", 0, $lineStart) + 1, $index - $lineStart + 1];
     }
 }
