@@ -66,8 +66,8 @@ python -m polyspec.template.cli render FILE [--data F] [--define F] [--env F] [-
 | 구성원 | 설명 |
 | --- | --- |
 | `parse(source, name, options)` | 하나의 template을 AST로 파싱합니다. `options.delimiters`가 구분자를 고릅니다. |
-| `analyze(source, name, options)` | 한 번 파싱해 AST와 tag 범위, 식 token을 돌려줍니다. |
-| `analyze_prefix(source, name, options)` | 첫 오류 전에 받아들인 범위와 그 오류를 돌려줍니다. |
+| `analyze(source, name, options)` | 한 번 파싱해 AST, 본문 범위를 포함한 tag 범위, 각 tag의 모든 부분에 대한 EDT-8 분류를 돌려줍니다. 범위는 source의 code point index이며 `Source.byte_at`이 UTF-8 byte offset을 줍니다. |
+| `analyze_prefix(source, name, options)` | 첫 오류 전에 받아들인 tag, 그 tag들의 token, 그 오류를 돌려줍니다. |
 | `AstProgram(options)` | AST program을 만듭니다. 옵션: `loader`, `functions`, `class_functions`, `limits`, `delimiters`, `artifact_refresh`. |
 | `Engine(program)` | 하나의 AST 또는 생성된 program에 위임하는 engine을 만듭니다. |
 | `RenderOptions(define, env)` | 한 번의 render 호출: template 정의와 환경. |
