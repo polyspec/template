@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: bbba2110390e131e68b2249172b6bf1ab2055787f46dea67aeb6dd60c23a6e47 -->
+<!-- source-sha256: 6e48fbc2cb2936812eef00b4fd44d408a7eee42aa443a0fd9ad278f3e43738e8 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -145,7 +145,7 @@ code --list-extensions --show-versions | grep polyspec
 
 확장은 언어 서버 `template-lsp`에 연결해 동작한다(EDT-15). 확장의 언어 클라이언트(`vscode-languageclient`)가 VS Code의 Node.js 런타임으로 `dist/server.cjs`를 실행하고, 표준 입력과 출력으로 서버와 통신한다. 클라이언트는 URI scheme과 관계없이 언어 `polyspec-template`의 열린 문서마다 텍스트를 서버에 보낸다.
 
-확장과 서버는 열린 문서의 텍스트만 읽고 작업 공간의 코드를 실행하지 않으므로 확장은 `capabilities.untrustedWorkspaces.supported`를 선언한다. 이 선언이 없으면 VS Code는 Restricted Mode에서 문법을 포함한 확장 전체를 비활성화하고, 신뢰하지 않은 폴더의 `.tpl` 파일은 일반 텍스트로 열린다. 확장은 `capabilities.virtualWorkspaces`도 선언한다. 서버는 문서 텍스트를 프로토콜로만 받고 파일 시스템을 읽지 않으므로, 가상 작업 공간의 문서도 파일과 같이 분석하며 그 URI가 진단의 템플릿 이름이 된다. 확장은 `main` 진입점만 있고 `browser` 진입점이 없으므로, Node.js 확장 호스트가 없는 VS Code for the Web은 확장을 실행하지 않는다. VS Code는 Electron 빌드에 포함된 Node.js로 확장과 서버를 실행하므로 확장은 `engines.vscode` `^1.138.0`만 선언하고 `engines.node`는 선언하지 않는다. VS Code 1.138.0은 Node.js 24.18.1을 가진 Electron 42.10.0을 사용하므로 두 번들의 대상은 `node24`다.
+확장과 서버는 열린 문서의 텍스트만 읽고 작업 공간의 코드를 실행하지 않으므로 확장은 `capabilities.untrustedWorkspaces.supported`를 선언한다. 이 선언이 없으면 VS Code는 Restricted Mode에서 문법을 포함한 확장 전체를 비활성화하고, 신뢰하지 않은 폴더의 `.tpl` 파일은 일반 텍스트로 열린다. 확장은 `capabilities.virtualWorkspaces`도 선언한다. 서버는 문서 텍스트를 프로토콜로만 받고 파일 시스템을 읽지 않으므로, 가상 작업 공간의 문서도 파일과 같이 분석하며 그 URI가 진단의 템플릿 이름이 된다. 확장은 `main` 진입점만 있고 `browser` 진입점이 없으므로, Node.js 확장 호스트가 없는 VS Code for the Web은 확장을 실행하지 않는다. VS Code는 Electron 빌드에 포함된 Node.js로 확장과 서버를 실행한다. VS Code 1.138.0은 Node.js 24.18.1을 가진 Electron 42.10.0을 사용하므로 두 번들의 대상은 `node24`이고, 확장은 `engines.vscode` `^1.138.0`과 그 Electron의 Node.js인 `engines.node` `>=24.18.1`을 선언한다. kit의 Node.js pin 26.11.1은 다른 package의 하한이다. scope가 `packages/template-vscode`이고 channel이 24.18.1인 `config/toolchain.json`의 exception이 toolchain 검사가 확장의 하한을 받아들이게 한다.
 
 확장은 `.tpl` 파일에 언어 `polyspec-template`을 등록하고 다음을 제공한다.
 

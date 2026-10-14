@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d17326d96fee6caed42fceab4f83afde38b20af4fef1f2cc86ef94d2903c5967 -->
+<!-- source-sha256: 8b055cb38f5adfc28d95fea22d3ebe78d0ff721c83db304d9cfeaad389aa0396 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.3: VS Code 확장은 최소 `engines.vscode`인 VS Code 1.138.0의 Electron이 가진 Node.js로 `engines.node` `>=24.18.1`을 선언한다. VS Code는 이 Node.js로 확장과 서버를 실행하므로 kit의 pin 26.11.1은 그 runtime에 맞지 않는다. scope가 `packages/template-vscode`이고 channel이 24.18.1인 `config/toolchain.json`의 exception이 toolchain 검사가 이를 받아들이게 한다. RED: `make test-vscode-unit`이 `manifest supports untrusted and virtual workspaces and declares no Node.js engine`에서 engines `node`와 `vscode`로 실패했다. GREEN: Electron의 Node.js로 이름을 바꾼 이 case와 다른 11개 case가 통과하고, `make toolchain-check TOOLS=node`가 하한이나 exception의 finding을 보고하지 않는다.
 - T23.1: 파서가 유일한 문법이다. `@polyspec/template`의 `analyze`와 `analyzePrefix`는 받아들인 각 태그의 모든 부분(구분자, sigil, 반복과 대입의 머리, 경로, 블록 단어, 지시문)을 EDT-8로 분류한 토큰을 돌려주고, 각 태그는 `bodyStart`와 `bodyEnd`를 가진다. `analyzePrefix`는 받아들인 태그의 토큰만 돌려준다. `@polyspec/template-language`는 파서 옆에 두던 어휘 표(`SIGILS`, `OPERATOR`, `WRAPPERS`, `LOOP_HEAD`, `ASSIGN_HEAD`, `RESERVED`, `IDENT`, 구분자 지시문 정규식)와 `tags.ts`를 지운다. `tests/lexical-tables.test.ts`는 언어 서비스의 정규식이나 문자열 목록 중 이유와 함께 나열하지 않은 것이 있으면 실패한다.
 - T24.3: TypeScript package가 TypeScript 7 compiler로 declaration을 낸다. tsup의 declaration 빌드(`dts`)는 TypeScript 7에 없는 compiler의 JavaScript API를 호출하므로, `scripts/build-package.mjs`는 `dts` 없이 tsup을 실행한 뒤 `template-ts`는 `tsconfig.json`과 `tsconfig.node.json`으로, `template-language`, `template-lsp`, `template-codemirror`는 새 `tsconfig.build.json`(소스만)으로 `tsc --emitDeclarationOnly`를 실행한다. declaration은 소스의 directory를 따르므로 빌드는 하위 directory의 file도 내보내고, `@polyspec/template/node`의 `types`는 `dist/node/index.d.ts`이며, `template-codemirror`는 `dist/**/*.d.ts`를 묶는다. RED: 새로 설치한 checkout에서 `make build-ts`가 `TypeError: Cannot read properties of undefined (reading 'useCaseSensitiveFileNames')`로 실패했다. GREEN: `make build-vscode`와 `make build-codemirror`가 빌드되고, 다섯 package의 type 검사가 통과하며, reader가 하위 directory의 declaration도 따라가는 `node --test tests/scripts/build-package.test.mjs`의 12개 case가 통과한다.
 - T24.9: `config/owner-checks.json`은 `tests/scripts/driver-fixture.mjs`를 그것으로 driver를 복사하는 test `tests/scripts/drivers.test.mjs`, `tests/scripts/failure-messages.test.mjs`, `tests/scripts/no-silent-skips.test.mjs`와 함께 소유합니다. RED: `make owner-validate`가 `tests/scripts/driver-fixture.mjs: the path matches no owner in config/owner-checks.json`으로 실패했습니다. GREEN: 설정이 추적되는 모든 경로를 소유한다고 보고합니다.
