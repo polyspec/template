@@ -29,7 +29,7 @@ A template whose output is not HTML is formatted with `indent: null`.
 
 The invariant test (`packages/template-language/tests/invariant.test.ts`) formats every `.tpl` file under `tests/cases` (with the delimiters of `options.json`), `tests/fixtures`, `examples` and the formatter fixtures, once with `indent: null` and once with the default indentation. For each file that parses, `indent: null` must give the same AST without spans and the same text outside tags. The default indentation must give either the `html` error or the same AST and the same text outside tags once the spaces and tabs at the start of lines are removed. Both must not change on a second run (FMT-13, FMT-15). `packages/template-language/tests/conformance.test.ts` compares the results of every conformance case with its `expected.format.json`.
 
-The command `template-language format FILE [--indent none|tab|N] [--delimiters OC]` (`packages/template-language/bin/template-language.mjs`) is the format command of TypeScript in the conformance contract (CNF-4, CNF-5): it prints the formatted text, or the error as JSON on standard error with exit status 2.
+The command `template-language format [--indent none|tab|N] [--delimiters OC] FILE` (`packages/template-language/bin/template-language.mjs`) is the format command of TypeScript in the conformance contract (CNF-4, CNF-5); like `template-fmt`, it parses its options with node:util `parseArgs`: it prints the formatted text, or the error as JSON on standard error with exit status 2.
 
 ## Command line
 
@@ -43,7 +43,7 @@ template-fmt < page.tpl
 ```
 
 ```
-usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
+usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|none]
                     [--template-blocks indent|flat] [PATH ...]
 ```
 
@@ -52,7 +52,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 - A directory: the command formats every `.tpl` file below it, in sorted order, and skips `node_modules` and directories whose name starts with `.`. Several paths or a directory require `--write` or `--check`.
 - `--write`: rewrites every file that is not formatted and prints its path.
 - `--check`: changes nothing and prints the path of every file that is not formatted.
-- `--indent`: the indent unit, `N` spaces (1 to 8), `tab`, or `keep` for `indent: null`. The default is `2`.
+- `--indent`: the indent unit, `N` spaces (1 to 8), `tab`, or `none` for `indent: null` (every line keeps its indentation). The default is `2`.
 - `--template-blocks`: `indent` (default) or `flat`, the `templateBlocks` option.
 - A file that does not parse, whose formatted AST differs or whose HTML structure is not balanced (FMT-14) is printed to standard error as `path:line:col: LABEL: message` and is not changed. `LABEL` is the parser error code, `formatted AST differs` or `HTML structure`.
 

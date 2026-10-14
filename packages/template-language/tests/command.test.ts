@@ -1,5 +1,5 @@
-// Command line contract of the conformance command template-language (CNF-4): format FILE [--indent none|tab|N]
-// [--delimiters OC] prints the formatted text, or the format error as JSON on standard error with exit status 2.
+// Command line contract of the conformance command template-language (CNF-4): format [--indent none|tab|N]
+// [--delimiters OC] FILE prints the formatted text, or the format error as JSON on standard error with exit status 2.
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -37,9 +37,9 @@ describe('template-language format', () => {
 
   it('selects the indent unit with --indent', () => {
     const path = file(source);
-    expect(run(['format', path, '--indent', '4']).stdout).toBe('<ul>\n    {@ x = xs}\n        <li>{= x}</li>\n    {/}\n</ul>');
-    expect(run(['format', path, '--indent', 'tab']).stdout).toBe('<ul>\n\t{@ x = xs}\n\t\t<li>{= x}</li>\n\t{/}\n</ul>');
-    expect(run(['format', path, '--indent', 'none']).stdout).toBe('<ul>\n{@ x = xs}\n<li>{= x}</li>\n{/}\n</ul>');
+    expect(run(['format', '--indent', '4', path]).stdout).toBe('<ul>\n    {@ x = xs}\n        <li>{= x}</li>\n    {/}\n</ul>');
+    expect(run(['format', '--indent', 'tab', path]).stdout).toBe('<ul>\n\t{@ x = xs}\n\t\t<li>{= x}</li>\n\t{/}\n</ul>');
+    expect(run(['format', '--indent', 'none', path]).stdout).toBe('<ul>\n{@ x = xs}\n<li>{= x}</li>\n{/}\n</ul>');
   });
 
   it('prints unchanged text when nothing changes, with the byte order mark', () => {
@@ -47,7 +47,7 @@ describe('template-language format', () => {
   });
 
   it('formats with the delimiter option', () => {
-    expect(run(['format', file('[=a[0]]'), '--delimiters', '[]']).stdout).toBe('[= a[0]]');
+    expect(run(['format', '--delimiters', '[]', file('[=a[0]]')]).stdout).toBe('[= a[0]]');
   });
 
   it('reports each error reason as JSON with exit status 2', () => {
@@ -65,10 +65,15 @@ describe('template-language format', () => {
     expect(run([]).status).toBe(1);
     expect(run(['parse', file('x')]).status).toBe(1);
     expect(run(['format']).status).toBe(1);
-    expect(run(['format', file('x'), '--indent', 'keep']).status).toBe(1);
-    expect(run(['format', file('x'), '--indent', '9']).status).toBe(1);
-    expect(run(['format', file('x'), '--delimiters', '[']).status).toBe(1);
-    expect(run(['format', file('x'), '--template-blocks', 'flat']).status).toBe(1);
-    expect(run(['format', join(work, 'missing.tpl')]).status).toBe(1);
+    expect(run(['format', '--indent', 'keep', file('x')]).status).toBe(1);
+    expect(run(['format', '--indent', '9', file('x')]).status).toBe(1);
+    expect(run(['format', '--indent', file('x')]).status).toBe(1);
+    expect(run(['format', '--delimiters', '[', file('x')]).status).toBe(1);
+    expect(run(['format', '--template-blocks', 'flat', file('x')]).status).toBe(1);
+    expect(run(['format', file('x'), file('x')]).status).toBe(1);
+    const missing = run(['format', join(work, 'missing.tpl')]);
+    expect(missing.status).toBe(1);
+    expect(missing.stderr).toMatch(/cannot read .*missing\.tpl: ENOENT/);
   });
+
 });

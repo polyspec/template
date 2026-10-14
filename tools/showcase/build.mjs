@@ -121,11 +121,12 @@ function listScenarios() {
 }
 
 function renderArgs(scenario) {
-  const args = ['render', scenario.target, '--root', scenario.dir];
+  // CNF-4: the options before the operand.
+  const args = ['render', '--root', scenario.dir];
   if (existsSync(join(scenario.dir, 'data.json'))) args.push('--data', 'data.json');
   if (existsSync(join(scenario.dir, 'define.json'))) args.push('--define', 'define.json');
   if (existsSync(join(scenario.dir, 'env.json'))) args.push('--env', 'env.json');
-  return args;
+  return [...args, scenario.target];
 }
 
 function renderOptions(scenario) {

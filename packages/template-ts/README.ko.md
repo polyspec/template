@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-ts-readme -->
-<!-- source-sha256: 519e7bd6c9e078ba80135fc40afc981a2d0d7923fd307adc4f6374f27463a0ac -->
+<!-- source-sha256: bbd116e940e9e6140d66868c41c734a98e7d824ca05f8e4d0447bce4af70d851 -->
 # @polyspec/template
 
 [English](README.md).
@@ -69,9 +69,9 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 ## 명령줄
 
 ```sh
-node bin/template.mjs parse FILE [--root DIR] [--delimiters OC]
-node bin/template.mjs render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
-node bin/template.mjs tokens FILE [--root DIR] [--delimiters OC]
+node bin/template.mjs parse [--root DIR] [--delimiters OC] FILE
+node bin/template.mjs render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+node bin/template.mjs tokens [--root DIR] [--delimiters OC] FILE
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 템플릿의 토큰을 UTF-8 바이트 오프셋의 `[start, end, type]`으로 출력한다([포맷](../../docs/spec/formatting.ko.md), FMT-1, FMT-2). 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.

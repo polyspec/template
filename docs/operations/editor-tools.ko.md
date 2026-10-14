@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: 9bb54c4ec51dcac92cce59eb1a9d3ba139b92ca057eeebac86aa920680473ca7 -->
+<!-- source-sha256: 666d3d40ade2cfb6abd21ec380e24d63aea73128a84a188f95cb4ce0b25e82f6 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -30,7 +30,7 @@
 
 불변식 테스트(`packages/template-language/tests/invariant.test.ts`)는 `tests/cases`(`options.json`의 구분자 적용), `tests/fixtures`, `examples`, 포매터 픽스처 아래의 모든 `.tpl` 파일을 `indent: null`로 한 번, 기본 들여쓰기로 한 번 포맷한다. 파싱되는 파일마다 `indent: null`은 span을 제외한 AST와 태그 밖의 텍스트가 같아야 한다. 기본 들여쓰기는 `html` 오류이거나, 줄 앞 공백과 탭을 제거한 상태에서 AST와 태그 밖의 텍스트가 같아야 한다. 둘 다 두 번째 실행에서 바뀌지 않아야 한다(FMT-13, FMT-15). `packages/template-language/tests/conformance.test.ts`는 모든 적합성 케이스의 결과를 그 `expected.format.json`과 비교한다.
 
-명령 `template-language format FILE [--indent none|tab|N] [--delimiters OC]`(`packages/template-language/bin/template-language.mjs`)는 적합성 계약에서 TypeScript의 format 명령이다(CNF-4, CNF-5). 포맷한 텍스트를 출력하거나, 오류를 표준 오류에 JSON으로 쓰고 종료 상태 2로 끝난다.
+명령 `template-language format [--indent none|tab|N] [--delimiters OC] FILE`(`packages/template-language/bin/template-language.mjs`)는 적합성 계약에서 TypeScript의 format 명령이다(CNF-4, CNF-5). `template-fmt`처럼 node:util `parseArgs`로 옵션을 파싱한다. 포맷한 텍스트를 출력하거나, 오류를 표준 오류에 JSON으로 쓰고 종료 상태 2로 끝난다.
 
 ## 명령줄
 
@@ -44,7 +44,7 @@ template-fmt < page.tpl
 ```
 
 ```
-usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
+usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|none]
                     [--template-blocks indent|flat] [PATH ...]
 ```
 
@@ -53,7 +53,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|keep]
 - 디렉터리를 주면 그 아래의 모든 `.tpl` 파일을 정렬 순서로 포맷하고, `node_modules`와 이름이 `.`으로 시작하는 디렉터리는 건너뛴다. 경로가 여러 개이거나 디렉터리이면 `--write`나 `--check`가 필요하다.
 - `--write`: 포맷되지 않은 파일을 다시 쓰고 그 경로를 출력한다.
 - `--check`: 아무것도 바꾸지 않고 포맷되지 않은 파일의 경로를 출력한다.
-- `--indent`: 들여쓰기 단위. 공백 `N`개(1~8), `tab`, 또는 `indent: null`인 `keep`이다. 기본값은 `2`다.
+- `--indent`: 들여쓰기 단위. 공백 `N`개(1~8), `tab`, 또는 `indent: null`(모든 줄이 들여쓰기를 유지)인 `none`이다. 기본값은 `2`다.
 - `--template-blocks`: `templateBlocks` 옵션인 `indent`(기본값) 또는 `flat`.
 - 파싱되지 않거나, 포맷한 AST가 다르거나, HTML 구조의 짝이 맞지 않는 파일(FMT-14)은 표준 오류에 `path:line:col: LABEL: message` 형식으로 출력하고 바꾸지 않는다. `LABEL`은 파서 오류 코드, `formatted AST differs` 또는 `HTML structure`다.
 
