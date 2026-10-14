@@ -6,7 +6,7 @@
   "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "98f53d4a1ce334618aa0d86f8576c08a0d058648cc960914a837b62bfe7c3cfd",
+  "compilerDigest": "f83ac00e66a3e56b948477564fc31ca1c6182446f8ad4e5f7df02e787025a3e6",
   "files": {
     "empty-state.ts": {
       "path": "empty-state.ts",

@@ -6,7 +6,7 @@
   "sourceDigest": "8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1",
   "typeDigest": "97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "b5264cbac744e57007164b7d17e756074bdffff75109660d9fee90fae2e923ec",
+  "compilerDigest": "ec8fc7ae21fe9a3e3618fee1178200c8c4cb5df37928800069ea18efb75a6f56",
   "files": {
     "html-slot.js": {
       "path": "html-slot.js",
