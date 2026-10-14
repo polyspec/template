@@ -1,4 +1,4 @@
-// The format results of the conformance cases (CNF-17): every case whose input parses formats to the entries of its
+// The format results of the conformance cases (CNF-18): every case whose input parses formats to the entries of its
 // expected.format.json, with the default options (indent) and with indent null (keep); a case whose input does not
 // parse, also one that is not UTF-8, has no such file and formats to the parse error. The bytes are formatted as the
 // command formats them.

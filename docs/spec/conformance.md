@@ -28,7 +28,7 @@ Conformance is verified by fixture cases that every implementation renders throu
 
 **CNF-15** `scripts/check-schema.mjs` checks the presence of `expected.ast.json` in every case directory. It fails when a case has no `expected.ast.json` and its `expected.error.json` does not name an `E_LEX_*` or `E_PARSE_*` code with `template` equal to `input.tpl`, and when a case has an `expected.ast.json` although its `expected.error.json` names such an error. It also fails when `expected.tokens.json` or `expected.format.json` is missing in a case with `expected.ast.json`, present in a case without it, or does not have the content of CNF-2. `make schema-check` and `make docs-check` run it, so `make check` fails for a missing file. Reason: CNF-9 compares the parse, token and format results of every case whose input parses, and a case without its files would otherwise pass without those comparisons.
 
-**CNF-16** `tests/fixtures/filesystem/cases.json` lists the filesystem cases of the filesystem loader (RT-10), which a case directory cannot hold because a checkout holds no symbolic or hard link. Each case has `name`, `rules`, `files` (a template name mapped to its text, `input.tpl` among them), optional `symbolicLinks` and `hardLinks` (a name mapped to the name of its target), and `expected` with `html` or `error` (`{code, template, line, col}`). `tests/runner/conformance.mjs` writes the tree of each case into a directory of the system temporary directory, runs `render input.tpl --root <directory>` of every selected implementation as the case `filesystem/<name>` and compares the result by CNF-7 and CNF-8; `--case filesystem` selects them.
+**CNF-16** `tests/fixtures/filesystem/cases.json` lists the filesystem cases of the filesystem loader (RT-10), which a case directory cannot hold because a checkout holds no symbolic or hard link. Each case has `name`, `rules`, `files` (a template name mapped to its text, `input.tpl` among them), optional `symbolicLinks` and `hardLinks` (a name mapped to the name of its target), and `expected` with `html` or `error` (`{code, template, line, col}`). `tests/runner/conformance.mjs` writes the tree of each case into a directory of the system temporary directory, runs `render --root <directory> input.tpl` of every selected implementation as the case `filesystem/<name>` and compares the result by CNF-7 and CNF-8; `--case filesystem` selects them.
 
 **CNF-3** `scripts/check-rules.mjs` collects every rule identifier defined in `docs/spec/*.md` and every identifier listed in `case.json` files. It fails when a `case.json` names a rule that no document defines, and it reports the rules that no case covers. `make check` runs it.
 
@@ -69,11 +69,11 @@ The formatter of TypeScript is the package `@polyspec/template-language`, which 
 
 **CNF-8** Error comparison compares `code`, `template`, `line` and `col` of the stderr JSON with `expected.error.json`. A case with `expected.error.json` passes only when the exit status is 2.
 
-**CNF-16** Token comparison parses the stdout of `tokens` and requires the array to equal `expected.tokens.json` element by element, with the exit status 0.
+**CNF-17** Token comparison parses the stdout of `tokens` and requires the array to equal `expected.tokens.json` element by element, with the exit status 0.
 
-**CNF-17** Format comparison runs `format` once with the default options and once with `--indent none`, and compares each with the entry `indent` or `keep` of `expected.format.json`: for `text`, the exit status is 0 and the bytes of stdout equal the text; for `error`, the exit status is 2 and `reason`, `code`, `line` and `col` of the stderr JSON equal the expected fields. `message` is not compared.
+**CNF-18** Format comparison runs `format` once with the default options and once with `--indent none`, and compares each with the entry `indent` or `keep` of `expected.format.json`: for `text`, the exit status is 0 and the bytes of stdout equal the text; for `error`, the exit status is 2 and `reason`, `code`, `line` and `col` of the stderr JSON equal the expected fields. `message` is not compared.
 
-**CNF-9** A case passes for an implementation when the `render` result satisfies CNF-7 or CNF-8 and, for a case with `expected.ast.json`, the `parse` result equals it and the `tokens` and `format` results satisfy CNF-16 and CNF-17. An implementation without one of the subcommands fails the case.
+**CNF-9** A case passes for an implementation when the `render` result satisfies CNF-7 or CNF-8 and, for a case with `expected.ast.json`, the `parse` result equals it and the `tokens` and `format` results satisfy CNF-17 and CNF-18. An implementation without one of the subcommands fails the case.
 
 ## Runners
 
@@ -86,7 +86,7 @@ The formatter of TypeScript is the package `@polyspec/template-language`, which 
 | `--list` | Print the case ids and the count without running. |
 | `--update ast\|html\|error\|tokens\|format` | Write the expected file of the given kind from the `ts` implementation; `tokens` and `format` write the files of the cases with `expected.ast.json`. `ts` must be among the selected implementations. |
 
-**CNF-11** `config/parity.json` declares the implementations and the shared suites: the conformance cases of `tests/cases` (unit `conformance`, whose native tests compare the AST, the tokens and the render result), the format results of those cases (unit `formatting`, CNF-17) and the expression vectors of `tests/fixtures/expr/cases.json`. `make parity-check` of kit runs the native test of each implementation that binds a suite and fails unless every case of the suite passed in every implementation of its profile; an exclusion fails until the task that it names removes it.
+**CNF-11** `config/parity.json` declares the implementations and the shared suites: the conformance cases of `tests/cases` (unit `conformance`, whose native tests compare the AST and the render result), the tokens of those cases (unit `tokens`, CNF-17), their format results (unit `formatting`, CNF-18) and the expression vectors of `tests/fixtures/expr/cases.json`. `make parity-check` of kit runs the native test of each implementation that binds a suite and fails unless every case of the suite passed in every implementation of its profile; an exclusion fails until the task that it names removes it.
 
 ## Expression fixtures
 

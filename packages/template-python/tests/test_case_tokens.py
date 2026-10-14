@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The tokens of the conformance cases (CNF-16): every case whose input parses
+"""The tokens of the conformance cases (CNF-17): every case whose input parses
 has the tokens of expected.tokens.json, the EDT-8 tokens of the analysis as
 [start, end, type] with UTF-8 byte offsets counted after a byte order mark
 (FMT-1, FMT-2), and a case whose input does not parse has no such file. Each

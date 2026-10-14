@@ -14,7 +14,7 @@ Only the language service reads the template syntax from `@polyspec/template`: t
 
 ## Formatter
 
-The formatting style, the indentation, the parts that the formatter keeps and the safety invariant are rules of the specification ([formatting](../spec/formatting.md), FMT-3 to FMT-15); every implementation formats by them, and the conformance cases compare the results (CNF-17). This section describes the TypeScript formatter `format()` of `@polyspec/template-language`.
+The formatting style, the indentation, the parts that the formatter keeps and the safety invariant are rules of the specification ([formatting](../spec/formatting.md), FMT-3 to FMT-15); every implementation formats by them, and the conformance cases compare the results (CNF-18). This section describes the TypeScript formatter `format()` of `@polyspec/template-language`.
 
 `format(source, options)` takes the options `indent` (FMT-9, two spaces by default, `null` keeps the indentation), `templateBlocks` (`'indent'` or `'flat'`), `delimiters` (the engine delimiters, FMT-8), `name` (the template name of errors) and `range` (only the tags that lie completely inside the range and the lines that start inside it are formatted). It parses the source with `analyze()` of `@polyspec/template`, formats each tag from the parser's tag body and tokens, and returns one of these results (FMT-14):
 

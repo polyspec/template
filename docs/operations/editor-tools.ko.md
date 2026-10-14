@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: 666d3d40ade2cfb6abd21ec380e24d63aea73128a84a188f95cb4ce0b25e82f6 -->
+<!-- source-sha256: e9fc7b522919c5d27caeb320ddccbcc6a79a3aa43548a66dd0bc50e1ddc2f61a -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -15,7 +15,7 @@
 
 ## 포매터
 
-포맷 스타일, 들여쓰기, 포매터가 유지하는 부분, 안전 불변식은 명세의 규칙이다([포맷](/ko/spec/formatting), FMT-3~FMT-15). 모든 구현이 이 규칙으로 포맷하고, 적합성 케이스가 그 결과를 비교한다(CNF-17). 이 절은 `@polyspec/template-language`의 TypeScript 포매터 `format()`을 설명한다.
+포맷 스타일, 들여쓰기, 포매터가 유지하는 부분, 안전 불변식은 명세의 규칙이다([포맷](/ko/spec/formatting), FMT-3~FMT-15). 모든 구현이 이 규칙으로 포맷하고, 적합성 케이스가 그 결과를 비교한다(CNF-18). 이 절은 `@polyspec/template-language`의 TypeScript 포매터 `format()`을 설명한다.
 
 `format(source, options)`는 옵션 `indent`(FMT-9, 기본값 공백 두 개, `null`은 들여쓰기를 유지한다), `templateBlocks`(`'indent'` 또는 `'flat'`), `delimiters`(엔진 구분자, FMT-8), `name`(오류의 템플릿 이름), `range`(범위 안에 완전히 들어가는 태그와 범위 안에서 시작하는 줄만 포맷한다)를 받는다. `@polyspec/template`의 `analyze()`로 소스를 파싱하고, 파서의 태그 본문과 토큰으로 각 태그를 포맷하며, 다음 결과 중 하나를 돌려준다(FMT-14).
 

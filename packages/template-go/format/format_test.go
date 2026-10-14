@@ -355,7 +355,7 @@ func withoutIndentation(pieces []string) []string {
 }
 
 // Every conformance case whose input parses formats to the text or error of its expected.format.json in both modes, and
-// a case whose input does not parse has no such file (CNF-2, CNF-17). Each case is the subtest
+// a case whose input does not parse has no such file (CNF-2, CNF-18). Each case is the subtest
 // TestConformanceFormat/<group>/<name>, as the suite unit formatting of config/parity.json reads the results.
 func TestConformanceFormat(t *testing.T) {
 	dirs, err := filepath.Glob(filepath.Join(repositoryRoot, "tests", "cases", "*", "*"))

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-conformance -->
-<!-- source-sha256: ff0064d54f767a4b22e6b6e4b246fc749db6e0b573c1d143114938885999c185 -->
+<!-- source-sha256: f3f4c3d1e89e2546dd7b58e8736ce1e63d1c219de443dc6f2718b4012e8f2d3c -->
 # 적합성
 
 [English](/spec/conformance).
@@ -29,7 +29,7 @@
 
 **CNF-15** `scripts/check-schema.mjs`는 모든 케이스 디렉터리에서 `expected.ast.json`이 있는지 검사한다. 케이스에 `expected.ast.json`이 없고 그 `expected.error.json`이 `template`이 `input.tpl`인 `E_LEX_*` 또는 `E_PARSE_*` 코드를 지정하지 않으면 실패하고, `expected.error.json`이 그런 오류를 지정하는데 `expected.ast.json`이 있어도 실패한다. `expected.ast.json`이 있는 케이스에 `expected.tokens.json`이나 `expected.format.json`이 없을 때, 그것이 없는 케이스에 있을 때, 또는 CNF-2의 내용을 갖지 않을 때도 실패한다. `make schema-check`와 `make docs-check`가 이를 실행하므로 파일이 없으면 `make check`가 실패한다. 이유: CNF-9는 입력이 파싱되는 모든 케이스의 파싱, 토큰, 포맷 결과를 비교하며, 파일이 없는 케이스는 그렇지 않으면 그 비교 없이 통과한다.
 
-**CNF-16** `tests/fixtures/filesystem/cases.json`은 파일시스템 로더(RT-10)의 filesystem 케이스를 나열한다. checkout은 symbolic link와 hard link를 담지 않으므로 케이스 디렉터리는 이 케이스를 담을 수 없다. 각 케이스는 `name`, `rules`, `files`(template 이름에서 그 텍스트로의 map, `input.tpl` 포함), 선택적 `symbolicLinks`와 `hardLinks`(이름에서 대상 이름으로의 map), 그리고 `html` 또는 `error`(`{code, template, line, col}`)를 가진 `expected`를 가진다. `tests/runner/conformance.mjs`는 각 케이스의 tree를 시스템 임시 디렉터리의 한 디렉터리에 쓰고, 선택된 모든 구현의 `render input.tpl --root <directory>`를 케이스 `filesystem/<name>`으로 실행해 결과를 CNF-7과 CNF-8로 비교한다. `--case filesystem`이 이 케이스들을 선택한다.
+**CNF-16** `tests/fixtures/filesystem/cases.json`은 파일시스템 로더(RT-10)의 filesystem 케이스를 나열한다. checkout은 symbolic link와 hard link를 담지 않으므로 케이스 디렉터리는 이 케이스를 담을 수 없다. 각 케이스는 `name`, `rules`, `files`(template 이름에서 그 텍스트로의 map, `input.tpl` 포함), 선택적 `symbolicLinks`와 `hardLinks`(이름에서 대상 이름으로의 map), 그리고 `html` 또는 `error`(`{code, template, line, col}`)를 가진 `expected`를 가진다. `tests/runner/conformance.mjs`는 각 케이스의 tree를 시스템 임시 디렉터리의 한 디렉터리에 쓰고, 선택된 모든 구현의 `render --root <directory> input.tpl`을 케이스 `filesystem/<name>`으로 실행해 결과를 CNF-7과 CNF-8로 비교한다. `--case filesystem`이 이 케이스들을 선택한다.
 
 **CNF-3** `scripts/check-rules.mjs`는 `docs/spec/*.md`에 정의된 모든 규칙 식별자와 `case.json` 파일에 나열된 모든 식별자를 수집한다. 어떤 문서도 정의하지 않은 규칙을 `case.json`이 지정하면 실패하고, 어떤 케이스도 다루지 않는 규칙을 보고한다. `make check`가 이를 실행한다.
 
@@ -70,11 +70,11 @@ TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@poly
 
 **CNF-8** 오류 비교는 stderr JSON의 `code`, `template`, `line`, `col`을 `expected.error.json`과 비교한다. `expected.error.json`이 있는 케이스는 종료 상태가 2일 때만 통과한다.
 
-**CNF-16** 토큰 비교는 `tokens`의 stdout을 파싱하고, 종료 상태가 0이며 배열이 `expected.tokens.json`과 원소마다 같기를 요구한다.
+**CNF-17** 토큰 비교는 `tokens`의 stdout을 파싱하고, 종료 상태가 0이며 배열이 `expected.tokens.json`과 원소마다 같기를 요구한다.
 
-**CNF-17** 포맷 비교는 `format`을 기본 옵션으로 한 번, `--indent none`으로 한 번 실행하고, 각각을 `expected.format.json`의 `indent` 또는 `keep` 항목과 비교한다. `text`이면 종료 상태가 0이고 stdout의 바이트가 텍스트와 같아야 한다. `error`이면 종료 상태가 2이고 stderr JSON의 `reason`, `code`, `line`, `col`이 기대 필드와 같아야 한다. `message`는 비교하지 않는다.
+**CNF-18** 포맷 비교는 `format`을 기본 옵션으로 한 번, `--indent none`으로 한 번 실행하고, 각각을 `expected.format.json`의 `indent` 또는 `keep` 항목과 비교한다. `text`이면 종료 상태가 0이고 stdout의 바이트가 텍스트와 같아야 한다. `error`이면 종료 상태가 2이고 stderr JSON의 `reason`, `code`, `line`, `col`이 기대 필드와 같아야 한다. `message`는 비교하지 않는다.
 
-**CNF-9** `render` 결과가 CNF-7 또는 CNF-8을 만족하고, `expected.ast.json`이 있는 케이스에서는 `parse` 결과가 그것과 같고 `tokens`와 `format` 결과가 CNF-16과 CNF-17을 만족할 때 케이스가 그 구현에서 통과한다. 하위 명령 하나라도 없는 구현은 그 케이스에서 실패한다.
+**CNF-9** `render` 결과가 CNF-7 또는 CNF-8을 만족하고, `expected.ast.json`이 있는 케이스에서는 `parse` 결과가 그것과 같고 `tokens`와 `format` 결과가 CNF-17과 CNF-18을 만족할 때 케이스가 그 구현에서 통과한다. 하위 명령 하나라도 없는 구현은 그 케이스에서 실패한다.
 
 ## 러너
 
@@ -87,7 +87,7 @@ TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@poly
 | `--list` | 실행하지 않고 케이스 id와 건수를 출력한다. |
 | `--update ast\|html\|error\|tokens\|format` | 지정한 종류의 기대 파일을 `ts` 구현의 결과로 쓴다. `tokens`와 `format`은 `expected.ast.json`이 있는 케이스의 파일을 쓴다. `ts`가 선택된 구현에 포함되어야 한다. |
 
-**CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스(unit `conformance`, native test가 AST, 토큰, 렌더 결과를 비교한다), 그 케이스의 포맷 결과(unit `formatting`, CNF-17), `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다.
+**CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스(unit `conformance`, native test가 AST와 렌더 결과를 비교한다), 그 케이스의 토큰(unit `tokens`, CNF-17), 그 포맷 결과(unit `formatting`, CNF-18), `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다.
 
 ## 표현식 픽스처
 
