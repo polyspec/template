@@ -2,6 +2,7 @@ package value_test
 
 import (
 	"errors"
+	"math"
 	"testing"
 
 	"github.com/polyspec/template/packages/go/value"
@@ -15,7 +16,7 @@ func TestNumberToString(t *testing.T) {
 			t.Errorf("NumberToString(%v) = %q, want %q", input, got, want)
 		}
 	}
-	if got := value.NumberToString(-0.0 * 1); got != "0" {
+	if got := value.NumberToString(math.Copysign(0, -1)); got != "0" {
 		t.Errorf("negative zero = %q", got)
 	}
 }

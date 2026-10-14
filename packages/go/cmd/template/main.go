@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -22,17 +21,24 @@ const usageText = "usage: template parse [--root DIR] [--delimiters OC] FILE\n" 
 	"       template format [--indent none|tab|N] [--delimiters OC] FILE\n" +
 	"       template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE\n"
 
+// report writes a line to stderr and returns status; when stderr cannot be written, the command ends with the status
+// of a write error, 1 (CNF-4), since the report reaches no one.
+func report(stderr io.Writer, status int, line string) int {
+	if _, err := io.WriteString(stderr, line+"\n"); err != nil {
+		return 1
+	}
+	return status
+}
+
 // usage reports a usage error of CNF-4: a message on stderr and exit status 1.
 func usage(stderr io.Writer, message string) int {
-	fmt.Fprintf(stderr, "%s\n%s", message, usageText)
-	return 1
+	return report(stderr, 1, message+"\n"+strings.TrimSuffix(usageText, "\n"))
 }
 
 // write writes a result to stdout; a write error ends the command with status 1.
 func write(stdout, stderr io.Writer, data []byte) int {
 	if _, err := stdout.Write(data); err != nil {
-		fmt.Fprintln(stderr, err)
-		return 1
+		return report(stderr, 1, err.Error())
 	}
 	return 0
 }
@@ -88,10 +94,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 	flags.StringVar(&delimiters, "delimiters", "", "delimiter pair")
 	if err := flags.Parse(args[1:]); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
-			_, err := io.WriteString(stdout, usageText)
-			if err != nil {
-				fmt.Fprintln(stderr, err)
-				return 1
+			if _, err := io.WriteString(stdout, usageText); err != nil {
+				return report(stderr, 1, err.Error())
 			}
 			return 0
 		}
@@ -120,11 +124,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 	fail := func(err error) int {
 		var te *errs.Error
 		if errors.As(err, &te) {
-			fmt.Fprintln(stderr, string(te.JSON()))
-			return 2
+			return report(stderr, 2, string(te.JSON()))
 		}
-		fmt.Fprintln(stderr, err.Error())
-		return 1
+		return report(stderr, 1, err.Error())
 	}
 	readJSON := func(path string) (value.Value, error) {
 		data, err := os.ReadFile(filepath.Join(root, path))
@@ -243,11 +245,9 @@ func formatCommand(filePath string, formatOptions template.FormatOptions, stdout
 			Message string  `json:"message"`
 		}{string(failure.Reason), code, failure.Line, failure.Col, failure.Message})
 		if err != nil {
-			fmt.Fprintln(stderr, err)
-			return 1
+			return report(stderr, 1, err.Error())
 		}
-		fmt.Fprintln(stderr, string(out))
-		return 2
+		return report(stderr, 2, string(out))
 	}
 	if err != nil {
 		return usage(stderr, err.Error())

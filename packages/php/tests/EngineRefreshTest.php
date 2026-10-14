@@ -45,4 +45,12 @@ final class EngineRefreshTest extends TestCase
             self::assertSame('expression nesting exceeds 1', $error->getMessage());
         }
     }
+
+    /** A program renders the AST that its loader holds without parsing a source (RT-40). */
+    public function testRendersAParsedAst(): void
+    {
+        $ast = AstProgram::parse('{= a + 1}', 'x.tpl');
+        $engine = new Engine(new AstProgram(new ArrayLoader(['x.tpl' => $ast])));
+        self::assertSame('3', $engine->render('x.tpl', ['a' => 2]));
+    }
 }

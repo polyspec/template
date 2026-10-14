@@ -86,9 +86,18 @@ func (l *Lexer) Peek() (*Token, error) {
 
 // Next consumes and returns the next token.
 func (l *Lexer) Next() (*Token, error) {
-	tok, err := l.Peek()
-	if err != nil {
+	if _, err := l.Peek(); err != nil {
 		return nil, err
+	}
+	return l.Consume(), nil
+}
+
+// Consume consumes the token that the last Peek returned and returns it. The lexer holds that token, so Consume reads
+// nothing and has no error; a call without a token from Peek is a fault of the parser, which panics.
+func (l *Lexer) Consume() *Token {
+	tok := l.lookahead
+	if tok == nil {
+		panic("expr: Consume without a token from Peek")
 	}
 	l.lookahead = nil
 	l.previous = tok
@@ -99,7 +108,7 @@ func (l *Lexer) Next() (*Token, error) {
 	if tok.Type == "RPAREN" || tok.Type == "RBRACKET" {
 		l.nestingDepth--
 	}
-	return tok, nil
+	return tok
 }
 
 // Consumed returns the tokens consumed by the parser, including the close delimiter.
@@ -320,7 +329,7 @@ func isHex(s string) bool {
 	}
 	for i := 0; i < len(s); i++ {
 		c := s[i]
-		if !(isDigit(c) || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') {
+		if !isDigit(c) && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') {
 			return false
 		}
 	}

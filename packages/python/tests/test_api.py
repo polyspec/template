@@ -372,6 +372,13 @@ class ValuesAndErrors(unittest.TestCase):
             engine.render("missing.tpl", {})
         self.assertEqual(caught.exception.code, "E_LOAD_NOT_FOUND")
 
+    def test_renders_a_parsed_ast(self):
+        # RT-40: a program renders the AST that its loader holds without
+        # parsing a source.
+        ast = parse("{= a + 1}", "x.tpl")
+        engine = Engine(AstProgram(EngineOptions(loader=MapLoader({"x.tpl": ast}))))
+        self.assertEqual(engine.render("x.tpl", {"a": 2}), "3")
+
     def test_spans_count_bytes(self):
         # é is two bytes, so the echo after it starts at byte 2 (LEX-2).
         ast = parse("é{= a}", "t.tpl")
