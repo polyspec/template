@@ -72,7 +72,7 @@ function usageError(message: string): number {
 }
 
 // Decodes UTF-8 and formats. Invalid UTF-8 is reported with the parser's E_LEX_INVALID_UTF8 position.
-function formatBytes(bytes: Uint8Array, name: string, options: FormatOptions): FormatResult {
+export function formatBytes(bytes: Uint8Array, name: string, options: FormatOptions): FormatResult {
   let source: string;
   try {
     source = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);

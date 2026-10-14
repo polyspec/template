@@ -2,23 +2,24 @@
 // Command line interface as defined in docs/spec/conformance.md (CNF-4).
 //   parse FILE [--root DIR] [--delimiters OC]
 //   render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]
+//   tokens FILE [--root DIR] [--delimiters OC]
 import { readFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const distDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
-const { AstProgram, Engine, TemplateError, parse, parseJsonBytes, BindError } = await import(`${distDir}/index.mjs`);
+const { AstProgram, Engine, Source, TemplateError, analyze, parse, parseJsonBytes, BindError } = await import(`${distDir}/index.mjs`);
 const { FsLoader } = await import(`${distDir}/node.mjs`);
 
 function usage(message) {
-  process.stderr.write(`${message}\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n`);
+  process.stderr.write(`${message}\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n       template tokens FILE [--root DIR] [--delimiters OC]\n`);
   process.exit(1);
 }
 
 const [command, file, ...rest] = process.argv.slice(2);
-if (!command || !file || !['parse', 'render'].includes(command)) usage('command and FILE are required');
+if (!command || !file || !['parse', 'render', 'tokens'].includes(command)) usage('command and FILE are required');
 
-const options = { data: null, define: null, env: null, root: null, delimiters: null };
+const options = command === 'render' ? { data: null, define: null, env: null, root: null, delimiters: null } : { root: null, delimiters: null };
 for (let i = 0; i < rest.length; i++) {
   const flag = rest[i];
   const value = rest[i + 1];
@@ -62,7 +63,7 @@ function toPlain(value) {
 try {
   const engineOptions = { loader: new FsLoader(root) };
   if (options.delimiters !== null) engineOptions.delimiters = options.delimiters;
-  if (command === 'parse') {
+  if (command === 'parse' || command === 'tokens') {
     let source;
     try {
       source = new Uint8Array(readFileSync(filePath));
@@ -71,8 +72,15 @@ try {
     }
     const parseOptions = {};
     if (options.delimiters !== null) parseOptions.delimiters = options.delimiters;
-    const ast = parse(source, name, parseOptions);
-    process.stdout.write(JSON.stringify(ast));
+    if (command === 'parse') {
+      process.stdout.write(JSON.stringify(parse(source, name, parseOptions)));
+    } else {
+      // EDT-8 tokens as [start, end, type] with UTF-8 byte offsets counted after the byte order mark, as AST spans
+      // count them (LEX-2, FMT-11); analyze returns string indexes of the same decoded source.
+      const { tokens } = analyze(source, name, parseOptions);
+      const text = Source.fromBytes(name, source);
+      process.stdout.write(JSON.stringify(tokens.map(token => [text.byteAt(token.start), text.byteAt(token.end), token.kind])));
+    }
   } else {
     const engine = new Engine(new AstProgram(engineOptions));
     const renderOptions = {};
