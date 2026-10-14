@@ -29,7 +29,7 @@
     },
     {
       "name": "conformance-protocol",
-      "rules": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-16", "CNF-17", "ERR-1", "ERR-3", "ERR-4", "ERR-6"],
+      "rules": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-17", "CNF-18", "ERR-1", "ERR-3", "ERR-4", "ERR-6"],
       "verification": "make conformance-all-modes",
       "files": ["tests/runner/conformance.mjs", "config/parity.json"]
     },

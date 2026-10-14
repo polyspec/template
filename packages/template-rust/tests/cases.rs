@@ -1,4 +1,4 @@
-//! The tokens and the format results of every conformance case (CNF-16, CNF-17), one trial per case: `tokens::<case>`
+//! The tokens and the format results of every conformance case (CNF-17, CNF-18), one trial per case: `tokens::<case>`
 //! and `formatting::<case>`, as the suite units tokens and formatting of config/parity.json read the results. libtest has
 //! no tests made at run time, so the target runs with libtest-mimic (`harness = false`).
 
@@ -24,7 +24,7 @@ fn expected(dir: &Path, name: &str) -> Result<Option<serde_json::Value>, Failed>
     Ok(Some(serde_json::from_str(&text).map_err(|error| format!("{name}: {error}"))?))
 }
 
-/// CNF-16: the EDT-8 tokens of analyze as `[start, end, type]` with byte offsets equal expected.tokens.json.
+/// CNF-17: the EDT-8 tokens of analyze as `[start, end, type]` with byte offsets equal expected.tokens.json.
 fn tokens(dir: &Path) -> Result<(), Failed> {
     let Some(expected) = expected(dir, "expected.tokens.json")? else {
         return Ok(());
@@ -59,7 +59,7 @@ fn result_json(result: Result<Formatted, FormatError>) -> serde_json::Value {
     }
 }
 
-/// CNF-17: the text or the error of format with the default options ("indent") and with indent None ("keep") equal
+/// CNF-18: the text or the error of format with the default options ("indent") and with indent None ("keep") equal
 /// expected.format.json.
 fn formatting(dir: &Path) -> Result<(), Failed> {
     let Some(expected) = expected(dir, "expected.format.json")? else {

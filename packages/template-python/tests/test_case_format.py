@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The format results of the conformance cases (CNF-17): every case whose input
+"""The format results of the conformance cases (CNF-18): every case whose input
 parses formats to the entries of expected.format.json, with the default options
 ("indent") and with indent None ("keep"), and a case whose input does not parse
 has no such file. Each case is the test `<group>/<name>`, as the suite unit

@@ -1,4 +1,4 @@
-// The tokens of the conformance cases (CNF-16): every case whose input parses has the tokens of expected.tokens.json, the
+// The tokens of the conformance cases (CNF-17): every case whose input parses has the tokens of expected.tokens.json, the
 // EDT-8 tokens of analyze() as [start, end, type] with UTF-8 byte offsets counted after the byte order mark (FMT-1,
 // FMT-2), and a case whose input does not parse has no such file. Each case is a top-level test named by its id, as the
 // suite unit tokens of config/parity.json reads the results.

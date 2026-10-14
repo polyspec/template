@@ -86,7 +86,7 @@ func TestAnalyzeGivesEachTagItsKindAndBodyRange(t *testing.T) {
 }
 
 // Every conformance case whose input parses gives the tokens of its expected.tokens.json, and a case whose input does
-// not parse has no such file (CNF-2, CNF-16). Each case is the subtest TestConformanceTokens/<group>/<name>, as the
+// not parse has no such file (CNF-2, CNF-17). Each case is the subtest TestConformanceTokens/<group>/<name>, as the
 // suite unit tokens of config/parity.json reads the results.
 func TestConformanceTokens(t *testing.T) {
 	dirs, err := filepath.Glob(filepath.Join("..", "..", "..", "tests", "cases", "*", "*"))
