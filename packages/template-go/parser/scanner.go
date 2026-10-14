@@ -47,17 +47,6 @@ func sigilAfter(text string, open int) string {
 	return ""
 }
 
-func limit(text string, from, count int) string {
-	if from > len(text) {
-		return ""
-	}
-	end := from + count
-	if end > len(text) {
-		end = len(text)
-	}
-	return text[from:end]
-}
-
 // startsTag reports whether the open delimiter at open starts a tag (LEX-5, LEX-6).
 func startsTag(text string, open int, d Delimiters) bool {
 	sigil := sigilAfter(text, open)
@@ -70,7 +59,7 @@ func startsTag(text string, open int, d Delimiters) bool {
 		at := skipHorizontalSpace(text, after)
 		return strings.HasPrefix(text[at:], d.Close)
 	case "@":
-		return loopForm.MatchString(limit(text, after, 80))
+		return loopForm.MatchString(text[after:])
 	}
 	return true
 }

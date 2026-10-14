@@ -23,7 +23,8 @@ export const WRAPPERS: readonly Wrapper[] = [
   { opener: '<!--', closer: '-->' },
 ];
 
-const LOOP_FORM = /^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/;
+// Sticky: it matches at its lastIndex, on the rest of the text without a copy (LEX-5).
+const LOOP_FORM = /[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/y;
 
 export function isHorizontalSpace(code: number): boolean {
   return code === 0x20 || code === 0x09;
@@ -50,7 +51,10 @@ export function startsTag(text: string, open: number, delimiters: Delimiters): b
   if (sigil === null) return false;
   const after = skipHorizontalSpace(text, open + 1) + sigil.length;
   if (sigil === '/') return text[skipHorizontalSpace(text, after)] === delimiters.close;
-  if (sigil === '@') return LOOP_FORM.test(text.slice(after, after + 80));
+  if (sigil === '@') {
+    LOOP_FORM.lastIndex = after;
+    return LOOP_FORM.test(text);
+  }
   return true;
 }
 

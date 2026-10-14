@@ -1015,10 +1015,10 @@ static const char *pt_sigil_after(const pt_source *source, size_t open)
     return NULL;
 }
 
-/* /^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/ on at most `window` bytes from `index`. */
-static bool pt_loop_form(const pt_source *source, size_t index, size_t window)
+/* /^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/ on the text from `index` (LEX-5). */
+static bool pt_loop_form(const pt_source *source, size_t index)
 {
-    size_t limit = index + window < source->length ? index + window : source->length;
+    size_t limit = source->length;
     size_t i = index;
     while (i < limit && pt_horizontal((unsigned char)source->text[i])) {
         i++;
@@ -1047,7 +1047,7 @@ static bool pt_starts_tag(const pt_source *source, size_t open, char close)
         return pt_char_at(source, pt_skip_horizontal(source, after)) == (unsigned char)close;
     }
     if (strcmp(sigil, "@") == 0) {
-        return pt_loop_form(source, after, 80);
+        return pt_loop_form(source, after);
     }
     return true;
 }

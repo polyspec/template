@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T23.2: TypeScript, Go, PHP, Python and the PHP extension decide the loop form after `@` on the rest of the text, as LEX-5 states and Rust does; each matched it on the first 80 bytes only, so a loop variable name longer than about 78 bytes turned the loop tag into text. The case `lexical/loop-head-long-name` holds every implementation to it, and the showcase artifacts are compiled again for the changed parser.
 - T23.2: the Go tests list the conformance cases and read their `options.json` with one internal test helper, `internal/casetest`, instead of three copies in `parser/analyze_test.go`, `format/format_test.go` and `conformance_test.go`; it finds `tests/cases` from the directory of `go.mod` and fails when the list is empty, where the tests required at least 200 cases. The Python format test requires a non-empty list of templates instead of more than 200.
 - T23.2: `make schema-check` describes the schema errors with `ajv.errorsText` instead of two copies of a hand-written `describe` in `scripts/check-schema.mjs` and `scripts/conformance-case-files.mjs`.
 - T23.2: the format commands of TypeScript (`template-language format` and `template-fmt`), PHP and Python leave an absent `--indent` out of the format options, so the default indent of the formatter applies; each restated it (`'  '`, `'2'`, `"2"`).
