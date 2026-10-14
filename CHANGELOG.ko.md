@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 98faf74219a621eeca15305d1a7e502d37af1581e438038cc6dc5d356fe3e4ce -->
+<!-- source-sha256: 83bf37bf1e9ef98746fcad698d79fc515e022493e90b2ad0d3afcc7b9291109d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.5: Python package가 vulture를 통과합니다: 쓰지 않는 `BIND_ERROR_CODES`, `FAIL_CODES`, alias `ErrorCode`, `ExprParser.at_end`, `FsLoader.path_of`, `PageCache.delete`, `code_point_length`를 지우고, 테스트는 상수 조건 두 개를 없애고 `load_tests`와 host 함수의 쓰지 않는 parameter 이름 앞에 `_`를 붙이며, `packages/template-python/vulture_whitelist.py`는 unittest와 테스트의 template이 쓰는 코드를 이유와 함께 나열합니다.
 - T25.3: Python target은 compile 시점의 formatter 없이 ruff format의 정규 형식을 쓰고 program이 쓰는 helper, schema 상수, import, loop metadata만 남깁니다. `make generated-lint-check`는 showcase의 생성된 Python을 `ruff format --check`, `ruff check`, vulture로 lint합니다.
 - T25.2: 생성된 Rust의 소비자는 program을 crate의 module 파일(`mod generated;`로 선언한 `src/generated.rs` 같은)이 아니라 `include!`로, `build.rs` 뒤의 `OUT_DIR`에서 또는 commit한 파일에서 crate에 넣습니다: rustfmt는 crate의 module 파일을 format하고 그 배치가 compiler의 것인 include된 파일은 format하지 않으며, clippy가 include된 코드를 lint합니다(`docs/spec/compiler.md`).
 - T25.2: 생성된 PHP는 줄을 PSR-12의 120열 안에 둡니다: 그 열을 넘을 인자 목록, 배열, 제어 구조의 조건, 연산자 연결은 한 줄에 항목 하나씩 한 단계 들여 나누고, 긴 schema 상수는 `.`로 이은 literal의 상수 식입니다. `&&`, `||`, `??`의 오른쪽 피연산자는 lazy로 남습니다(case `expr/lazy-long-operands`, `tests/scripts/generated-php-layout.test.mjs`). PHP literal은 모든 제어 문자를 큰따옴표 escape로 씁니다. `make generated-lint-check`는 phpcs를 경고와 함께 실행합니다.

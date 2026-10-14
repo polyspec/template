@@ -48,7 +48,3 @@ class FsLoader:
         with open(path, "rb") as handle:
             data = handle.read()
         return LoadedSource(data, f"{stats.st_mtime}:{stats.st_size}")
-
-    def path_of(self, name: str) -> str:
-        """The file system path of a template name."""
-        return os.path.join(self.root, *name.split("/"))

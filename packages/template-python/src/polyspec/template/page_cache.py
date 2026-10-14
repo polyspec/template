@@ -43,8 +43,5 @@ class PageCache:
         self.set(key, html, ttl)
         return html
 
-    def delete(self, key: str) -> None:
-        del self._entries[key]
-
     def clear(self) -> None:
         self._entries.clear()

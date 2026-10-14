@@ -63,10 +63,6 @@ class ExpressionParser:
             end = part.end
         return end
 
-    def at_end(self) -> bool:
-        token = self.peek()
-        return token.type in ("CLOSE", "EOF")
-
     @property
     def end(self) -> int:
         """The code point index after the last consumed token."""
