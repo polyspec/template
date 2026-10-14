@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T24.3: `tests/scripts/process-group-exit-window.test.mjs` is a test, no longer an experiment of 40 runs in up to 300 s that tallied probe results: one run asserts that `stopProcessGroup` resolves only after the member of a group whose leader exited is gone, kills in `t.after` every pid it recorded and has not seen gone, and its member ends by itself after 60 s instead of running forever; the finding of the experiment is kept in its header.
 - T23.2: TypeScript, Go, PHP, Python and the PHP extension decide the loop form after `@` on the rest of the text, as LEX-5 states and Rust does; each matched it on the first 80 bytes only, so a loop variable name longer than about 78 bytes turned the loop tag into text. The case `lexical/loop-head-long-name` holds every implementation to it, and the showcase artifacts are compiled again for the changed parser.
 - T23.2: the Go tests list the conformance cases and read their `options.json` with one internal test helper, `internal/casetest`, instead of three copies in `parser/analyze_test.go`, `format/format_test.go` and `conformance_test.go`; it finds `tests/cases` from the directory of `go.mod` and fails when the list is empty, where the tests required at least 200 cases. The Python format test requires a non-empty list of templates instead of more than 200.
 - T23.2: `make schema-check` describes the schema errors with `ajv.errorsText` instead of two copies of a hand-written `describe` in `scripts/check-schema.mjs` and `scripts/conformance-case-files.mjs`.
