@@ -56,7 +56,9 @@ export class MapLoader implements Loader {
   }
 }
 
+/** The error of a template path that leaves the loader root or names no file under it (RT-8, RT-10). */
 export class PathError extends Error {
+  /** Creates the error with the message that names the path and why it is refused. */
   constructor(message: string) {
     super(message);
     this.name = 'PathError';
