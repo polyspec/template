@@ -140,7 +140,8 @@ export function formatArgs(testCase, mode) {
 }
 
 function delimiterOptions(testCase) {
-  return testCase.options.delimiters ? ['--delimiters', testCase.options.delimiters] : [];
+  // One argument, so that a value which starts with a hyphen is never read as an option (CNF-4).
+  return testCase.options.delimiters ? [`--delimiters=${testCase.options.delimiters}`] : [];
 }
 
 // The result of one `format` call as an entry of expected.format.json: {text} for exit status 0, {error} with the
