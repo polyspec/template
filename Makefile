@@ -236,7 +236,7 @@ test-rust-unit: cargo-downloads-check
 test-php: build-php ## PHP unit tests
 	node $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
-test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php ## Tests of the test runner and the conformance runners
+test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	node $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
