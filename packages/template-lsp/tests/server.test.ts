@@ -1,6 +1,7 @@
 // The server through its protocol over standard input and output: capabilities (EDT-14), the editor fixtures (EDT-17)
 // and the conversion of UTF-16 positions (EDT-5).
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { openDocument, TOKEN_TYPES } from '@polyspec/template-language';
@@ -185,3 +186,39 @@ describe('custom requests', () => {
     expect(await client.request('polyspec-template/matchingTag', { textDocument, position: { line: 0, character: 0 } })).toBeNull();
   });
 });
+
+describe('template root', () => {
+  let directory: string;
+  beforeAll(() => {
+    directory = realpathSync(mkdtempSync(join(tmpdir(), 'template-lsp-root-')));
+  });
+  afterAll(() => {
+    rmSync(directory, { recursive: true, force: true });
+  });
+
+  it('reports a missing include against the marker of the nearest ancestor (EDT-18, EDT-20)', async () => {
+    writeFileSync(join(directory, 'template-root.json'), '{"schema": 1}');
+    writeFileSync(join(directory, 'part.tpl'), 'x');
+    const uri = pathToFileURL(join(directory, 'page.tpl')).href;
+    await client.open(uri, '{+ part.tpl}\n{+ missing.tpl}');
+    const published = await client.diagnosticsOf(uri, params => params.version === 1);
+    expect(published.diagnostics.map(item => [item.range.start.line, item.code, item.message])).toEqual([[1, 'E_LOAD_NOT_FOUND', 'template missing.tpl does not exist']]);
+    const marker = await client.diagnosticsOf(pathToFileURL(join(directory, 'template-root.json')).href, () => true);
+    expect(marker.diagnostics).toEqual([]);
+    await client.close(uri);
+  });
+
+  it('publishes an invalid marker on its own URI and reports the paths as undeclared (EDT-19)', async () => {
+    writeFileSync(join(directory, 'template-root.json'), '{"schema": 1, "root": "src"}');
+    const uri = pathToFileURL(join(directory, 'other.tpl')).href;
+    await client.open(uri, '{+ part.tpl}');
+    const published = await client.diagnosticsOf(uri, params => params.version === 1);
+    expect(published.diagnostics.map(item => [item.code, item.message])).toEqual([['E_ROOT_UNDECLARED', 'no template root declared (template-root.json)']]);
+    const marker = await client.diagnosticsOf(pathToFileURL(join(directory, 'template-root.json')).href, params => params.diagnostics.length > 0);
+    expect(marker.diagnostics.map(item => [item.range, item.code, item.message])).toEqual([
+      [{ start: { line: 0, character: 0 }, end: { line: 0, character: 28 } }, 'E_ROOT_INVALID', 'template-root.json has the unknown key "root"'],
+    ]);
+    await client.close(uri);
+  });
+});
+

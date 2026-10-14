@@ -47,7 +47,7 @@ describe('constructs', () => {
 describe('tags and diagnostics', () => {
   it('lists every tag except comments, after a byte order mark', () => {
     const document = openDocument('﻿{* note *}{:n = 1}{= n}{? n}{+ "p.tpl"}{/}{# box}');
-    expect(document.diagnostics).toEqual([]);
+    expect(document.diagnostics).toEqual([expect.objectContaining({ code: 'E_ROOT_UNDECLARED', start: 29, end: 40 })]);
     expect(document.tags.map(tag => [tag.kind, document.text.slice(tag.start, tag.end)])).toEqual([
       ['assignment', '{:n = 1}'], ['echo', '{= n}'], ['if', '{? n}'], ['include', '{+ "p.tpl"}'], ['close', '{/}'], ['block', '{# box}'],
     ]);
@@ -216,7 +216,8 @@ describe('agreement with the AST', () => {
         expect(document.diagnostics).toHaveLength(1);
         return;
       }
-      expect(document.diagnostics).toEqual([]);
+      // A text that parses has only path diagnostics, here without a declared root (EDT-20).
+      expect(document.diagnostics.filter(item => item.code !== 'E_ROOT_UNDECLARED')).toEqual([]);
       const text = source.startsWith('﻿') ? source.slice(1) : source;
       const shift = source.length - text.length;
       const bytes = (index: number): number => Buffer.byteLength(text.slice(0, index - shift));

@@ -120,17 +120,19 @@ export interface PrefixAnalysis {
   tags: readonly SyntaxTag[];
   tokens: readonly SyntaxToken[];
   error: TemplateError | null;
+  /** The AST of a source that parses, null with an error. */
+  ast: Template | null;
 }
 
 /** Parses a template and returns what the parser accepted before its first error instead of only the error. */
 export function analyzeTemplatePrefix(source: Source, delimiters: Delimiters = DEFAULT_DELIMITERS): PrefixAnalysis {
   const parser = new TemplateParser(source, delimiters);
   try {
-    const { tags, tokens } = parser.parse();
-    return { tags, tokens, error: null };
+    const { ast, tags, tokens } = parser.parse();
+    return { tags, tokens, error: null, ast };
   } catch (error) {
     if (!(error instanceof TemplateError)) throw error;
-    return { tags: parser.acceptedTags, tokens: parser.acceptedTokens, error };
+    return { tags: parser.acceptedTags, tokens: parser.acceptedTokens, error, ast: null };
   }
 }
 

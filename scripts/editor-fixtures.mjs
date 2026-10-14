@@ -2,12 +2,37 @@
 // Editor fixtures (EDT-17): writes or checks the expected language service results of every template under
 // packages/template-language/tests/editor. Every editor adapter compares its own results with these files.
 //   node scripts/editor-fixtures.mjs --write | --check
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { lstatSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const fixtureDirectory = join(root, 'packages/template-language/tests/editor');
+
+/**
+ * The host of root resolution over the file system (EDT-21): `lstat` that never follows a link, and a missing path or a
+ * path under a file names nothing.
+ */
+const fileHost = {
+  entryType(path) {
+    let stats;
+    try {
+      stats = lstatSync(path);
+    } catch (error) {
+      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return null;
+      throw error;
+    }
+    return stats.isSymbolicLink() ? 'symlink' : stats.isFile() ? 'file' : stats.isDirectory() ? 'directory' : 'other';
+  },
+  readText(path) {
+    return readFileSync(path, 'utf8');
+  },
+};
+
+/** The options of the language service document of a fixture: its name and its location under the fixture root. */
+export function fixtureOptions(name) {
+  return { name, location: { path: join(fixtureDirectory, name), host: fileHost } };
+}
 
 /** The indent unit of the expected indentation and formatted text. */
 export const INDENT = '  ';
@@ -56,7 +81,7 @@ async function main(mode) {
   let drift = 0;
   for (const name of fixtureNames()) {
     const text = readFileSync(join(fixtureDirectory, name), 'utf8');
-    const expected = `${JSON.stringify(editorResults(openDocument(text, { name })), null, 2)}\n`;
+    const expected = `${JSON.stringify(editorResults(openDocument(text, fixtureOptions(name))), null, 2)}\n`;
     const path = join(fixtureDirectory, name.replace(/\.tpl$/, '.json'));
     if (mode === '--write') {
       writeFileSync(path, expected);

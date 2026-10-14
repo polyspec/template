@@ -5,8 +5,8 @@ import { countColumn } from '@codemirror/state';
 import { getIndentation } from '@codemirror/language';
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error The fixture script is plain JavaScript without declarations.
-import { fixtureDirectory, fixtureNames } from '../../../scripts/editor-fixtures.mjs';
-import { formatTemplate, goToMatchingTag, templateDiagnostics } from '../src/index.js';
+import { fixtureDirectory, fixtureNames, fixtureOptions } from '../../../scripts/editor-fixtures.mjs';
+import { formatTemplate, goToMatchingTag, templateDiagnostics, type TemplateOptions } from '../src/index.js';
 import { createState, foldingRanges, marks, run } from './state.js';
 
 interface Fixture {
@@ -31,7 +31,8 @@ describe('editor fixtures', () => {
     describe(name, () => {
       const text = readFileSync(join(directory, name), 'utf8');
       const expected = JSON.parse(readFileSync(join(directory, name.replace(/\.tpl$/, '.json')), 'utf8')) as Fixture;
-      const state = createState(text, { name });
+      const options = (fixtureOptions as (name: string) => TemplateOptions)(name);
+      const state = createState(text, options);
 
       it('diagnostics', () => {
         const diagnostics = templateDiagnostics(state);
@@ -76,7 +77,7 @@ describe('editor fixtures', () => {
 
       for (const mode of ['indent', 'flat'] as const) {
         it(`indentation with templateBlocks ${mode}`, () => {
-          const modeState = createState(text, { name, templateBlocks: mode });
+          const modeState = createState(text, { ...options, templateBlocks: mode });
           const widths = Array.from({ length: modeState.doc.lines }, (_, line) => getIndentation(modeState, modeState.doc.line(line + 1).from));
           expect(widths).toEqual(expected.lineIndentation[mode].map(indentation => countColumn(indentation, modeState.tabSize)));
         });

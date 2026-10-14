@@ -13,3 +13,4 @@ export {
 } from './document.js';
 export type { Construct, ConstructTag } from './structure.js';
 export { TOKEN_TYPES, type Token, type TokenType } from './tokens.js';
+export { checkRootMarker, findRoot, ROOT_MARKER, type DocumentLocation, type EntryType, type RootHost, type TemplateRoot } from './root.js';

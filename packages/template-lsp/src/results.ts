@@ -1,5 +1,5 @@
 // Result conversion: language service results at UTF-16 string indexes to Language Server Protocol positions (EDT-5).
-import { TOKEN_TYPES, type TemplateDocument } from '@polyspec/template-language';
+import { TOKEN_TYPES, type Diagnostic as LanguageDiagnostic, type TemplateDocument } from '@polyspec/template-language';
 import {
   DiagnosticSeverity,
   DocumentHighlightKind,
@@ -17,9 +17,14 @@ export function rangeOf(text: TextDocument, start: number, end: number): Range {
   return { start: text.positionAt(start), end: text.positionAt(end) };
 }
 
-/** The parser error of the document (EDT-7). */
+/** The parser error or the path diagnostics of the document (EDT-7, EDT-20). */
 export function diagnosticsOf(text: TextDocument, document: TemplateDocument): Diagnostic[] {
-  return document.diagnostics.map(item => ({
+  return protocolDiagnostics(text, document.diagnostics);
+}
+
+/** Language service diagnostics as protocol diagnostics over a text. */
+export function protocolDiagnostics(text: TextDocument, diagnostics: readonly LanguageDiagnostic[]): Diagnostic[] {
+  return diagnostics.map(item => ({
     range: rangeOf(text, item.start, item.end),
     severity: DiagnosticSeverity.Error,
     code: item.code,

@@ -1,0 +1,15 @@
+[
+  { "text": "{\"schema\": 1}", "message": null },
+  { "text": "{\"schema\":1}\n", "message": null },
+  { "text": "\n  { \"schema\" : 1 }\n", "message": null },
+  { "text": "", "message": "template-root.json is not one JSON document: " },
+  { "text": "{\"schema\": 1,}", "message": "template-root.json is not one JSON document: " },
+  { "text": "{\"schema\": 1} {}", "message": "template-root.json is not one JSON document: " },
+  { "text": "[]", "message": "template-root.json must be a JSON object" },
+  { "text": "null", "message": "template-root.json must be a JSON object" },
+  { "text": "1", "message": "template-root.json must be a JSON object" },
+  { "text": "{}", "message": "template-root.json must have the key \"schema\"" },
+  { "text": "{\"schema\": 2}", "message": "the schema of template-root.json must be 1, not 2" },
+  { "text": "{\"schema\": \"1\"}", "message": "the schema of template-root.json must be 1, not \"1\"" },
+  { "text": "{\"schema\": 1, \"root\": \"src\"}", "message": "template-root.json has the unknown key \"root\"" }
+]
