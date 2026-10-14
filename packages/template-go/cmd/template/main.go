@@ -4,6 +4,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -16,56 +17,104 @@ import (
 	"github.com/polyspec/template/packages/template-go/value"
 )
 
-func usage(message string) int {
-	fmt.Fprintf(os.Stderr, "%s\nusage: template parse FILE [--root DIR] [--delimiters OC]\n       template tokens FILE [--root DIR] [--delimiters OC]\n       template format FILE [--indent none|tab|N] [--delimiters OC]\n       template render FILE [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC]\n", message)
+const usageText = `usage: template parse [--root DIR] [--delimiters OC] FILE
+       template tokens [--root DIR] [--delimiters OC] FILE
+       template format [--indent none|tab|N] [--delimiters OC] FILE
+       template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+`
+
+// usage reports a usage error of CNF-4: a message on stderr and exit status 1.
+func usage(stderr io.Writer, message string) int {
+	fmt.Fprintf(stderr, "%s\n%s", message, usageText)
 	return 1
+}
+
+// write writes a result to stdout; a write error ends the command with status 1.
+func write(stdout, stderr io.Writer, data []byte) int {
+	if _, err := stdout.Write(data); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	return 0
+}
+
+// indentFlag is the --indent option of format (FMT-9): none, tab or a number of spaces from 1 to 8.
+type indentFlag struct{ options *template.FormatOptions }
+
+func (f indentFlag) String() string { return "" }
+
+func (f indentFlag) Set(indent string) error {
+	switch indent {
+	case "none":
+		f.options.KeepIndentation = true
+	case "tab":
+		f.options.Indent = "\t"
+	default:
+		width, err := strconv.Atoi(indent)
+		if err != nil || width < 1 || width > 8 {
+			return errors.New("--indent is none, tab or a number of spaces from 1 to 8")
+		}
+		f.options.Indent = strings.Repeat(" ", width)
+	}
+	return nil
 }
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
+// run parses `<subcommand> [options] FILE` (CNF-4): the options come before the operand, as the flag package reads them.
 func run(args []string, stdout, stderr io.Writer) int {
-	optionsOf := map[string][]string{
-		"parse":  {"root", "delimiters"},
-		"tokens": {"root", "delimiters"},
-		"format": {"indent", "delimiters"},
-		"render": {"data", "define", "env", "root", "delimiters"},
+	if len(args) == 0 {
+		return usage(stderr, "a subcommand is required")
 	}
-	if len(args) < 2 || optionsOf[args[0]] == nil {
-		return usage("command and FILE are required")
+	command := args[0]
+	flags := flag.NewFlagSet(command, flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	var rootOption, delimiters, dataFile, defineFile, envFile string
+	var formatOptions template.FormatOptions
+	switch command {
+	case "parse", "tokens":
+		flags.StringVar(&rootOption, "root", "", "template root directory")
+	case "format":
+		flags.Var(indentFlag{&formatOptions}, "indent", "indent unit: none, tab or 1 to 8 spaces")
+	case "render":
+		flags.StringVar(&dataFile, "data", "", "data JSON file")
+		flags.StringVar(&defineFile, "define", "", "define JSON file")
+		flags.StringVar(&envFile, "env", "", "env JSON file")
+		flags.StringVar(&rootOption, "root", "", "template root directory")
+	default:
+		return usage(stderr, "unknown subcommand "+strconv.Quote(command))
 	}
-	command, file := args[0], args[1]
-	options := map[string]string{}
-	for _, key := range optionsOf[command] {
-		options[key] = ""
-	}
-	rest := args[2:]
-	for i := 0; i < len(rest); i++ {
-		flag := rest[i]
-		if !strings.HasPrefix(flag, "--") || i+1 >= len(rest) {
-			return usage("invalid option " + flag)
+	flags.StringVar(&delimiters, "delimiters", "", "delimiter pair")
+	if err := flags.Parse(args[1:]); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			_, err := io.WriteString(stdout, usageText)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			return 0
 		}
-		key := flag[2:]
-		if _, ok := options[key]; !ok {
-			return usage("unknown option " + flag)
-		}
-		options[key] = rest[i+1]
-		i++
+		return usage(stderr, err.Error())
 	}
+	if flags.NArg() != 1 {
+		return usage(stderr, "exactly one FILE is required after the options")
+	}
+	file := flags.Arg(0)
 	filePath, err := filepath.Abs(file)
 	if err != nil {
-		return usage(err.Error())
+		return usage(stderr, err.Error())
 	}
 	root := filepath.Dir(filePath)
-	if options["root"] != "" {
-		if root, err = filepath.Abs(options["root"]); err != nil {
-			return usage(err.Error())
+	if rootOption != "" {
+		if root, err = filepath.Abs(rootOption); err != nil {
+			return usage(stderr, err.Error())
 		}
 	}
 	name, err := filepath.Rel(root, filePath)
 	if err != nil || strings.HasPrefix(name, "..") {
-		return usage("FILE is outside of --root")
+		return usage(stderr, "FILE is outside of --root")
 	}
 	name = filepath.ToSlash(name)
 
@@ -95,14 +144,16 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	if command == "format" {
-		return formatCommand(filePath, name, options, stdout, stderr)
+		formatOptions.Name = name
+		formatOptions.Delimiters = delimiters
+		return formatCommand(filePath, formatOptions, stdout, stderr)
 	}
 	if command == "tokens" {
 		source, err := os.ReadFile(filePath)
 		if err != nil {
-			return usage(err.Error())
+			return usage(stderr, err.Error())
 		}
-		analysis, err := template.Analyze(source, name, template.ParseOptions{Delimiters: options["delimiters"]})
+		analysis, err := template.Analyze(source, name, template.ParseOptions{Delimiters: delimiters})
 		if err != nil {
 			return fail(err)
 		}
@@ -114,15 +165,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 		if err != nil {
 			return fail(err)
 		}
-		_, _ = stdout.Write(out)
-		return 0
+		return write(stdout, stderr, out)
 	}
 	if command == "parse" {
 		source, err := os.ReadFile(filePath)
 		if err != nil {
-			return usage(err.Error())
+			return usage(stderr, err.Error())
 		}
-		tree, err := template.Parse(source, name, template.ParseOptions{Delimiters: options["delimiters"]})
+		tree, err := template.Parse(source, name, template.ParseOptions{Delimiters: delimiters})
 		if err != nil {
 			return fail(err)
 		}
@@ -130,24 +180,23 @@ func run(args []string, stdout, stderr io.Writer) int {
 		if err != nil {
 			return fail(err)
 		}
-		_, _ = stdout.Write(out)
-		return 0
+		return write(stdout, stderr, out)
 	}
 
-	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS(root)), Delimiters: options["delimiters"]})
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewFSLoader(os.DirFS(root)), Delimiters: delimiters})
 	if err != nil {
 		return fail(err)
 	}
 	engine := template.NewEngine(program)
 	var assign value.Value = value.NewOrderedMap()
-	if options["data"] != "" {
-		if assign, err = readJSON(options["data"]); err != nil {
+	if dataFile != "" {
+		if assign, err = readJSON(dataFile); err != nil {
 			return fail(err)
 		}
 	}
 	renderOptions := template.RenderOptions{}
-	if options["define"] != "" {
-		defines, err := readJSON(options["define"])
+	if defineFile != "" {
+		defines, err := readJSON(defineFile)
 		if err != nil {
 			return fail(err)
 		}
@@ -156,8 +205,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return fail(err)
 		}
 	}
-	if options["env"] != "" {
-		envValue, err := readJSON(options["env"])
+	if envFile != "" {
+		envValue, err := readJSON(envFile)
 		if err != nil {
 			return fail(err)
 		}
@@ -170,29 +219,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return fail(err)
 	}
-	_, _ = io.WriteString(stdout, output)
-	return 0
+	return write(stdout, stderr, []byte(output))
 }
 
 // formatCommand writes the formatted text, or the format error as JSON with exit status 2.
-func formatCommand(filePath, name string, options map[string]string, stdout, stderr io.Writer) int {
-	formatOptions := template.FormatOptions{Name: name, Delimiters: options["delimiters"]}
-	switch indent := options["indent"]; indent {
-	case "":
-	case "none":
-		formatOptions.KeepIndentation = true
-	case "tab":
-		formatOptions.Indent = "\t"
-	default:
-		width, err := strconv.Atoi(indent)
-		if err != nil || width < 1 || width > 8 {
-			return usage("--indent is none, tab or a number of spaces from 1 to 8")
-		}
-		formatOptions.Indent = strings.Repeat(" ", width)
-	}
+func formatCommand(filePath string, formatOptions template.FormatOptions, stdout, stderr io.Writer) int {
 	source, err := os.ReadFile(filePath)
 	if err != nil {
-		return usage(err.Error())
+		return usage(stderr, err.Error())
 	}
 	result, err := template.Format(string(source), formatOptions)
 	var failure *template.FormatError
@@ -202,21 +236,24 @@ func formatCommand(filePath, name string, options map[string]string, stdout, std
 			value := string(failure.Code)
 			code = &value
 		}
-		out, _ := json.Marshal(struct {
+		out, err := json.Marshal(struct {
 			Reason  string  `json:"reason"`
 			Code    *string `json:"code"`
 			Line    int     `json:"line"`
 			Col     int     `json:"col"`
 			Message string  `json:"message"`
 		}{string(failure.Reason), code, failure.Line, failure.Col, failure.Message})
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
 		fmt.Fprintln(stderr, string(out))
 		return 2
 	}
 	if err != nil {
-		return usage(err.Error())
+		return usage(stderr, err.Error())
 	}
-	_, _ = io.WriteString(stdout, result.Text)
-	return 0
+	return write(stdout, stderr, []byte(result.Text))
 }
 
 func defineInputs(v value.Value, name string) (map[string]template.DefineInput, error) {

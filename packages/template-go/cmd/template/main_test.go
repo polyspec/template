@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +25,7 @@ func TestParseCommand(t *testing.T) {
 
 func TestRenderCommand(t *testing.T) {
 	var stdout, stderr bytes.Buffer
-	if status := run([]string{"render", filepath.Join(casesDir, "echo", "path", "input.tpl"), "--data", "data.json"}, &stdout, &stderr); status != 0 {
+	if status := run([]string{"render", "--data", "data.json", filepath.Join(casesDir, "echo", "path", "input.tpl")}, &stdout, &stderr); status != 0 {
 		t.Fatalf("status %d: %s", status, stderr.String())
 	}
 	stdout.Reset()
@@ -42,12 +44,47 @@ func TestUsageErrors(t *testing.T) {
 	if status := run([]string{"parse"}, &stdout, &stderr); status != 1 {
 		t.Errorf("status %d", status)
 	}
-	if status := run([]string{"render", "x.tpl", "--unknown", "1"}, &stdout, &stderr); status != 1 {
+	if status := run([]string{"render", "--unknown", "1", "x.tpl"}, &stdout, &stderr); status != 1 {
 		t.Errorf("status %d", status)
 	}
 	// CNF-4: a data file that cannot be read is a usage error.
-	if status := run([]string{"render", filepath.Join(casesDir, "echo", "path", "input.tpl"), "--data", "missing.json"}, &stdout, &stderr); status != 1 {
+	if status := run([]string{"render", "--data", "missing.json", filepath.Join(casesDir, "echo", "path", "input.tpl")}, &stdout, &stderr); status != 1 {
 		t.Errorf("missing data file status %d", status)
+	}
+	// CNF-4: options come before FILE; an option after FILE is a usage error.
+	file := filepath.Join(casesDir, "echo", "path", "input.tpl")
+	for _, args := range [][]string{
+		{"render", file, "--data", "data.json"},
+		{"parse", file, "--root", casesDir},
+		{"tokens", file, "--delimiters", "[]"},
+		{"format", file, "--indent", "tab"},
+		{"format"},
+		{"unknown", file},
+		{},
+	} {
+		stderr.Reset()
+		if status := run(args, &stdout, &stderr); status != 1 || stderr.Len() == 0 {
+			t.Errorf("%v: status %d, stderr %q", args, status, stderr.String())
+		}
+	}
+}
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) { return 0, errors.New("disk full") }
+
+// A result that cannot be written to stdout ends the command with status 1 and the write error on stderr.
+func TestWriteErrors(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "t.tpl")
+	if err := os.WriteFile(file, []byte("<p>{=a}</p>"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, command := range []string{"parse", "tokens", "format", "render"} {
+		var stderr bytes.Buffer
+		if status := run([]string{command, file}, failingWriter{}, &stderr); status != 1 || !strings.Contains(stderr.String(), "disk full") {
+			t.Errorf("%s: status %d, stderr %q", command, status, stderr.String())
+		}
 	}
 }
 
@@ -58,7 +95,7 @@ func TestTokensCommand(t *testing.T) {
 	if err := os.WriteFile(file, []byte("\xef\xbb\xbfé[= a | f]"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if status := run([]string{"tokens", file, "--delimiters", "[]"}, &stdout, &stderr); status != 0 {
+	if status := run([]string{"tokens", "--delimiters", "[]", file}, &stdout, &stderr); status != 0 {
 		t.Fatalf("status %d: %s", status, stderr.String())
 	}
 	want := `[[2,3,"delimiter"],[3,4,"keyword"],[5,6,"variable"],[7,8,"operator"],[9,10,"function"],[10,11,"delimiter"]]`
@@ -99,7 +136,7 @@ func TestFormatCommand(t *testing.T) {
 	}
 	for _, c := range cases {
 		var stdout, stderr bytes.Buffer
-		if status := run(append([]string{"format", write(c.source)}, c.args...), &stdout, &stderr); status != 0 {
+		if status := run(append(append([]string{"format"}, c.args...), write(c.source)), &stdout, &stderr); status != 0 {
 			t.Fatalf("%q %v: status %d: %s", c.source, c.args, status, stderr.String())
 		}
 		if stdout.String() != c.want {
@@ -122,7 +159,7 @@ func TestFormatCommand(t *testing.T) {
 		t.Errorf("stderr %q", stderr.String())
 	}
 	for _, indent := range []string{"0", "9", "x"} {
-		if status := run([]string{"format", write("<p></p>"), "--indent", indent}, &stdout, &stderr); status != 1 {
+		if status := run([]string{"format", "--indent", indent, write("<p></p>")}, &stdout, &stderr); status != 1 {
 			t.Errorf("--indent %s status %d", indent, status)
 		}
 	}
