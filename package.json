@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "node tests/runner/conformance.mts",
-    "test:browser": "node packages/ts/tests/browser/run.mts",
+    "test:browser": "node tests/browser/run.mts",
     "schema:check": "node scripts/check-schema.mts",
     "docs:coverage": "node scripts/check-doc-coverage.mts"
   },

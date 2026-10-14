@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const casesDir = join(root, 'tests', 'cases');
 const CASE_FILES = new Set(['case.json', 'data.json', 'define.json', 'env.json', 'options.json']);
 
@@ -61,9 +61,9 @@ function loadCases(): BrowserCase[] {
 }
 
 test('renders every fixture case in the browser', async ({ page, baseURL }) => {
-  expect(baseURL, 'TEMPLATE_BROWSER_URL names the static server; run the browser test with packages/ts/tests/browser/run.mts').toBeTruthy();
+  expect(baseURL, 'TEMPLATE_BROWSER_URL names the static server; run the browser test with tests/browser/run.mts').toBeTruthy();
   const cases = loadCases();
-  await page.goto('/packages/ts/tests/browser/index.html');
+  await page.goto('/tests/browser/index.html');
   const results = (await page.evaluate(async items => (window as unknown as { renderCases: (c: unknown) => Promise<unknown> }).renderCases(items), cases)) as {
     id: string;
     html?: string;
