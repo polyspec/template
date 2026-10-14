@@ -21,7 +21,7 @@ final class CompilerInterfaceTest extends TestCase
     public function testRuntimeDeclarationsMatchManifest(): void
     {
         $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../template-compiler/interface.json';
-        $manifest = json_decode((string) file_get_contents($manifestPath), true, flags: JSON_THROW_ON_ERROR);
+        $manifest = Support::readJson($manifestPath);
         $contract = $manifest['runtimeContract'];
         $program = new \ReflectionClass(Program::class);
         self::assertTrue($program->isInterface());
@@ -103,7 +103,7 @@ final class CompilerInterfaceTest extends TestCase
     public function testBoundMapDeclarationsMatchManifest(): void
     {
         $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__.'/../../template-compiler/interface.json';
-        $manifest = json_decode((string) file_get_contents($manifestPath), true, flags: JSON_THROW_ON_ERROR);
+        $manifest = Support::readJson($manifestPath);
         $mapping = $manifest['languages']['php']['boundMap'];
         $type = new \ReflectionClass($mapping['type']);
         self::assertTrue($type->isFinal());

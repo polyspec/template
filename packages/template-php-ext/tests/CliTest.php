@@ -35,7 +35,7 @@ final class CliTest extends TestCase
     {
         $result = $this->invoke(['parse', __DIR__ . '/templates/echo.tpl']);
         $this->assertSame(0, $result['status']);
-        $this->assertSame('Template', json_decode($result['stdout'], true)['type']);
+        $this->assertSame('Template', Support::json($result['stdout'])['type']);
     }
 
     public function testRenderPrintsTheOutputWithoutATrailingNewline(): void
@@ -49,7 +49,7 @@ final class CliTest extends TestCase
     {
         $result = $this->invoke(['render', Support::casesDirectory() . '/errors/unclosed-block/input.tpl']);
         $this->assertSame(2, $result['status']);
-        $error = json_decode(trim($result['stderr']), true);
+        $error = Support::json(trim($result['stderr']));
         $this->assertSame('E_PARSE_UNCLOSED_BLOCK', $error['code']);
         $this->assertSame('input.tpl', $error['template']);
     }
@@ -59,10 +59,10 @@ final class CliTest extends TestCase
         $directory = Support::casesDirectory() . '/echo/path';
         $result = $this->invoke(['tokens', $directory . '/input.tpl', '--root', $directory]);
         $this->assertSame(0, $result['status'], $result['stderr']);
-        $this->assertSame(json_decode((string) Support::read($directory . '/expected.tokens.json'), true), json_decode($result['stdout'], true));
+        $this->assertSame(Support::readJson($directory . '/expected.tokens.json'), Support::json($result['stdout']));
         $failed = $this->invoke(['tokens', Support::casesDirectory() . '/errors/unclosed-block/input.tpl']);
         $this->assertSame(2, $failed['status']);
-        $this->assertSame('E_PARSE_UNCLOSED_BLOCK', json_decode(trim($failed['stderr']), true)['code']);
+        $this->assertSame('E_PARSE_UNCLOSED_BLOCK', Support::json(trim($failed['stderr']))['code']);
     }
 
     public function testFormatPrintsTheFormattedText(): void
@@ -76,7 +76,7 @@ final class CliTest extends TestCase
             file_put_contents($file, "<p>\n  {? a}\n</p>");
             $failed = $this->invoke(['format', $file]);
             $this->assertSame(2, $failed['status']);
-            $error = json_decode($failed['stderr'], true);
+            $error = Support::json($failed['stderr']);
             $this->assertIsArray($error);
             $this->assertSame(['parse', 'E_PARSE_UNCLOSED_BLOCK', 2, 3], [$error['reason'], $error['code'], $error['line'], $error['col']]);
             $this->assertSame(1, $this->invoke(['format', $file, '--indent', 'x'])['status']);

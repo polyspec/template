@@ -31,7 +31,7 @@ final class BoundMapTest extends TestCase
      */
     private static function cases(): array
     {
-        return json_decode((string) file_get_contents(self::fixtureDirectory() . '/cases.json'), true, flags: JSON_THROW_ON_ERROR);
+        return Support::readJson(self::fixtureDirectory() . '/cases.json');
     }
 
     private static function program(mixed $result = null): AstProgram

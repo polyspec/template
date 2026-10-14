@@ -19,7 +19,7 @@ final class FormatterTest extends TestCase
     public static function text(FormatResult $result): string
     {
         if ($result->error !== null) {
-            self::fail('format failed: ' . json_encode((array) $result->error));
+            self::fail('format failed: ' . json_encode((array) $result->error, JSON_THROW_ON_ERROR));
         }
 
         return (string) $result->text;
@@ -31,9 +31,9 @@ final class FormatterTest extends TestCase
     public static function fixtures(): iterable
     {
         $root = Support::repoRoot() . '/packages/template-language/tests/fixtures';
-        $names = array_values(array_filter(scandir("{$root}/input") ?: [], static fn (string $name): bool => str_ends_with($name, '.tpl')));
+        $names = array_values(array_filter(Support::entries("{$root}/input"), static fn (string $name): bool => str_ends_with($name, '.tpl')));
         foreach ($names as $name) {
-            yield $name => [(string) file_get_contents("{$root}/input/{$name}"), (string) file_get_contents("{$root}/expected/{$name}")];
+            yield $name => [Support::read("{$root}/input/{$name}"), Support::read("{$root}/expected/{$name}")];
         }
     }
 

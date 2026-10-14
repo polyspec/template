@@ -25,30 +25,17 @@ final class ConformanceTest extends TestCase
     public static function cases(): iterable
     {
         $root = Support::casesDir();
-        foreach (scandir($root) ?: [] as $group) {
+        foreach (Support::entries($root) as $group) {
             if ($group[0] === '.' || !is_dir("{$root}/{$group}")) {
                 continue;
             }
-            foreach (scandir("{$root}/{$group}") ?: [] as $name) {
+            foreach (Support::entries("{$root}/{$group}") as $name) {
                 if ($name[0] === '.' || !is_dir("{$root}/{$group}/{$name}")) {
                     continue;
                 }
                 yield "{$group}/{$name}" => ["{$root}/{$group}/{$name}"];
             }
         }
-    }
-
-    /**
-     * @return array{delimiters?: string}
-     */
-    private static function options(string $dir): array
-    {
-        if (!is_file("{$dir}/options.json")) {
-            return [];
-        }
-        $options = Support::plain(Json::parse((string) file_get_contents("{$dir}/options.json")));
-
-        return is_array($options) && isset($options['delimiters']) ? ['delimiters' => $options['delimiters']] : [];
     }
 
     #[DataProvider('cases')]
@@ -59,9 +46,9 @@ final class ConformanceTest extends TestCase
 
             return;
         }
-        $ast = AstProgram::parse((string) file_get_contents("{$dir}/input.tpl"), 'input.tpl', self::options($dir));
-        $expected = json_decode((string) file_get_contents("{$dir}/expected.ast.json"), true);
-        self::assertSame(Support::normalize($expected), Support::normalize(json_decode(\Polyspec\Template\Ast::toJson($ast), true)));
+        $ast = AstProgram::parse(Support::read("{$dir}/input.tpl"), 'input.tpl', Support::delimiterOptions($dir));
+        $expected = Support::readJson("{$dir}/expected.ast.json");
+        self::assertSame(Support::normalize($expected), Support::normalize(Support::json(\Polyspec\Template\Ast::toJson($ast))));
     }
 
     #[DataProvider('cases')]
@@ -72,9 +59,9 @@ final class ConformanceTest extends TestCase
 
             return;
         }
-        $analysis = AstProgram::analyze((string) file_get_contents("{$dir}/input.tpl"), 'input.tpl', self::options($dir));
+        $analysis = AstProgram::analyze(Support::read("{$dir}/input.tpl"), 'input.tpl', Support::delimiterOptions($dir));
         $tokens = array_map(static fn (array $token): array => [$token['start'], $token['end'], $token['kind']], $analysis['tokens']);
-        self::assertSame(json_decode((string) file_get_contents("{$dir}/expected.tokens.json"), true), $tokens);
+        self::assertSame(Support::readJson("{$dir}/expected.tokens.json"), $tokens);
     }
 
     #[DataProvider('cases')]
@@ -85,44 +72,44 @@ final class ConformanceTest extends TestCase
 
             return;
         }
-        $source = (string) file_get_contents("{$dir}/input.tpl");
+        $source = Support::read("{$dir}/input.tpl");
         $actual = [];
         foreach (['indent' => [], 'keep' => ['indent' => null]] as $mode => $options) {
-            $result = Formatter::format($source, ['name' => 'input.tpl'] + $options + self::options($dir));
+            $result = Formatter::format($source, ['name' => 'input.tpl'] + $options + Support::delimiterOptions($dir));
             $actual[$mode] = $result->error === null
                 ? ['text' => $result->text]
                 : ['error' => ['reason' => $result->error->reason, 'code' => $result->error->code, 'line' => $result->error->line, 'col' => $result->error->col]];
         }
-        self::assertSame(json_decode((string) file_get_contents("{$dir}/expected.format.json"), true), $actual);
+        self::assertSame(Support::readJson("{$dir}/expected.format.json"), $actual);
     }
 
     #[DataProvider('cases')]
     public function testRender(string $dir): void
     {
-        $expectedError = is_file("{$dir}/expected.error.json") ? json_decode((string) file_get_contents("{$dir}/expected.error.json"), true) : null;
+        $expectedError = is_file("{$dir}/expected.error.json") ? Support::readJson("{$dir}/expected.error.json") : null;
         $result = self::render($dir);
         if ($expectedError !== null) {
             self::assertInstanceOf(TemplateError::class, $result, is_string($result) ? $result : '');
             self::assertSame($expectedError, ['code' => $result->errorCode, 'template' => $result->template, 'line' => $result->errorLine, 'col' => $result->errorCol]);
         } else {
             if ($result instanceof TemplateError) {
-                self::fail(json_encode($result->toArray()) ?: '');
+                self::fail(json_encode($result->toArray(), JSON_THROW_ON_ERROR));
             }
-            self::assertSame((string) file_get_contents("{$dir}/expected.html"), $result);
+            self::assertSame(Support::read("{$dir}/expected.html"), $result);
         }
     }
 
     private static function render(string $dir): string|TemplateError
     {
         try {
-            $engine = new Engine(new AstProgram(new FilesystemLoader($dir), self::options($dir)));
-            $assign = is_file("{$dir}/data.json") ? Json::parse((string) file_get_contents("{$dir}/data.json")) : [];
+            $engine = new Engine(new AstProgram(new FilesystemLoader($dir), Support::delimiterOptions($dir)));
+            $assign = is_file("{$dir}/data.json") ? Json::parse(Support::read("{$dir}/data.json")) : [];
             $options = [];
             if (is_file("{$dir}/define.json")) {
-                $options['define'] = Support::plain(Json::parse((string) file_get_contents("{$dir}/define.json")));
+                $options['define'] = Support::plain(Json::parse(Support::read("{$dir}/define.json")));
             }
             if (is_file("{$dir}/env.json")) {
-                $options['env'] = Support::plain(Json::parse((string) file_get_contents("{$dir}/env.json")));
+                $options['env'] = Support::plain(Json::parse(Support::read("{$dir}/env.json")));
             }
 
             return $engine->render('input.tpl', $assign, $options);

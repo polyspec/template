@@ -34,7 +34,7 @@ final class BoundMapTest extends TestCase
      */
     private static function cases(): array
     {
-        return json_decode((string) file_get_contents(self::fixtureDirectory() . '/cases.json'), true, flags: JSON_THROW_ON_ERROR);
+        return Support::readJson(self::fixtureDirectory() . '/cases.json');
     }
 
     private static function engine(mixed $result = null): Engine
@@ -191,7 +191,7 @@ final class BoundMapTest extends TestCase
     {
         // VAL-22: the class has exactly the operations of the manifest; its constructor is the hook
         // through which `new` fails.
-        $mapping = json_decode((string) file_get_contents(Support::repositoryRoot() . '/packages/template-compiler/interface.json'), true, flags: JSON_THROW_ON_ERROR)['languages']['php-extension']['boundMap'];
+        $mapping = Support::readJson(Support::repositoryRoot() . '/packages/template-compiler/interface.json')['languages']['php-extension']['boundMap'];
         $type = new \ReflectionClass($mapping['type']);
         self::assertSame(BoundMap::class, $type->getName());
         self::assertTrue($type->isFinal());

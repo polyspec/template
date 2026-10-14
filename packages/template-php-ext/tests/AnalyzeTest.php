@@ -75,7 +75,7 @@ final class AnalyzeTest extends TestCase
     #[DataProvider('caseProvider')]
     public function testEqualsTheAnalysisOfThePhpPackage(string $directory): void
     {
-        $source = Support::read($directory . '/input.tpl') ?? '';
+        $source = Support::read($directory . '/input.tpl');
         $options = Support::delimiterOptions($directory);
         try {
             $expected = AstProgram::analyze($source, 'input.tpl', $options);
@@ -93,9 +93,9 @@ final class AnalyzeTest extends TestCase
         $this->assertSame($expected['tags'], $actual['tags']);
         $this->assertSame($expected['tokens'], $actual['tokens']);
         $this->assertSame(Engine::parse($source, 'input.tpl', $options), $actual['ast']);
-        $expectedTokens = Support::read($directory . '/expected.tokens.json');
+        $expectedTokens = Support::readOptional($directory . '/expected.tokens.json');
         if ($expectedTokens !== null) {
-            $this->assertSame(json_decode($expectedTokens, true), array_map(static fn (array $token): array => [$token['start'], $token['end'], $token['kind']], $actual['tokens']));
+            $this->assertSame(Support::json($expectedTokens), array_map(static fn (array $token): array => [$token['start'], $token['end'], $token['kind']], $actual['tokens']));
         }
     }
 }
