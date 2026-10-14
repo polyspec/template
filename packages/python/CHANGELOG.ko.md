@@ -1,11 +1,11 @@
 <!-- doc-id: packages-template-python-changelog -->
-<!-- source-sha256: 58331f7f432ae5ad4b7c96b563d834d58e5df1de5ca6e615942eb15466345cba -->
+<!-- source-sha256: 24b7550a75ba5110260e8c6df410d652aeb0758d186b3a24ee7e549706ec3147 -->
 # 변경 기록
 
 [English](CHANGELOG.md)
 
 ## Unreleased
 
-- `RuntimeServices`는 package의 class이고 `RuntimeEnvironment`가 이를 구현합니다. `packages/template-compiler/interface.json`이 이렇게 선언합니다.
+- `RuntimeServices`는 package의 class이고 `RuntimeEnvironment`가 이를 구현합니다. `packages/compiler/interface.json`이 이렇게 선언합니다.
 - 인터프리터가 정의하지 않은 class의 인스턴스는 native object로 바인딩됩니다(VAL-23). 따라서 host 함수가 `pick(order)`처럼 할당된 객체를 반환할 수 있습니다. 이전에는 `E_DATA_UNSUPPORTED_TYPE`로 실패했습니다.
 - 인자 상한이 없는 built-in을 인자가 모자라게 호출하면 `E_RUNTIME_ARITY`가 발생합니다. 이전에는 메시지를 만들다 `OverflowError`가 발생했습니다.
