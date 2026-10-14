@@ -1,8 +1,9 @@
 //! Loader trait, map loader, filesystem loader and template name resolution (RT-7 to RT-10).
 
 use crate::ast::Template;
+use same_file::Handle;
 use std::collections::HashMap;
-use std::os::unix::fs::MetadataExt;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -88,12 +89,14 @@ impl Loader for MapLoader {
 }
 
 /// Filesystem loader rooted at a directory (RT-10). It never follows a symbolic link and gives each
-/// file, identified by its device and inode number, one name.
+/// file one name. A file is identified by a `same_file::Handle`, which compares the device and inode
+/// number on Unix and the volume serial number, file index and size on Windows; the loader keeps the
+/// handle, and so an open file, of each file that it read.
 #[derive(Debug)]
 pub struct FsLoader {
     root: PathBuf,
-    /// The name of each file that the loader read, by device and inode number.
-    files: Mutex<HashMap<(u64, u64), String>>,
+    /// The name of each file that the loader read, by the handle of the file.
+    files: Mutex<HashMap<Handle, String>>,
 }
 
 impl FsLoader {
@@ -139,14 +142,18 @@ impl Loader for FsLoader {
         let Some(metadata) = found.filter(|metadata| metadata.is_file()) else {
             return Ok(None);
         };
-        {
-            let mut files = self.files.lock().map_err(|error| error.to_string())?;
-            let owner = files.entry((metadata.dev(), metadata.ino())).or_insert_with(|| name.to_string());
-            if owner != name {
-                return Err(format!("{name} is the file of {owner}"));
-            }
+        let handle = Handle::from_path(&path).map_err(|error| format!("{}: {error}", path.display()))?;
+        let mut files = self.files.lock().map_err(|error| error.to_string())?;
+        if let Some(owner) = files.get(&handle).filter(|owner| owner.as_str() != name) {
+            return Err(format!("{name} is the file of {owner}"));
         }
-        let bytes = std::fs::read(&path).map_err(|error| format!("{}: {error}", path.display()))?;
+        let mut bytes = Vec::new();
+        handle
+            .as_file()
+            .read_to_end(&mut bytes)
+            .map_err(|error| format!("{}: {error}", path.display()))?;
+        files.entry(handle).or_insert_with(|| name.to_string());
+        drop(files);
         let modified = metadata
             .modified()
             .ok()
