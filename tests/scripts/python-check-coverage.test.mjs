@@ -7,6 +7,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { showcasePythonModule } from '../../tools/showcase/python-module.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const checks = [
@@ -57,5 +58,8 @@ test('the showcase contract checks a Python adapter and the generated Python pro
   for (const file of [python.file, python.generated]) assert.ok(existsSync(join(adapters, file)), `tools/showcase/adapters/${file} is missing`);
   const scenarios = readdirSync(join(root, 'examples/site/scenarios'), { withFileTypes: true }).filter(entry => entry.isDirectory() && existsSync(join(root, 'examples/site/scenarios', entry.name, 'scenario.json'))).map(entry => entry.name);
   assert.ok(scenarios.length >= 5, `found ${scenarios.length} showcase scenarios, expected at least 5`);
-  for (const id of scenarios) assert.ok(existsSync(join(adapters, 'generated/typed', `${id}.py`)), `generated/typed/${id}.py is missing`);
+  for (const id of scenarios) {
+    const module = showcasePythonModule(id);
+    assert.ok(existsSync(join(adapters, 'generated/typed', `${module}.py`)), `generated/typed/${module}.py is missing`);
+  }
 });

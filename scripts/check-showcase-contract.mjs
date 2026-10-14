@@ -7,6 +7,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { pythonCommand, pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
+import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const adapterRoot = join(root, 'tools', 'showcase', 'adapters');
@@ -97,7 +98,7 @@ function checkGeneratedEngineRoute() {
     go: id => [`go/generated/${id}/generated.go`, /type GeneratedProgram struct[\s\S]*?func \(p \*GeneratedProgram\) Prepare/],
     rust: id => [`generated/typed/${id}.rust`, /pub struct GeneratedProgram[\s\S]*?impl Program for GeneratedProgram/],
     php: id => [`generated/typed/${id}.php`, /final class GeneratedProgram implements Program/],
-    python: id => [`generated/typed/${id}.py`, /class GeneratedProgram\(Program\):/],
+    python: id => [`generated/typed/${showcasePythonModule(id)}.py`, /class GeneratedProgram\(Program\):/],
   };
   for (const [language, generatedCheck] of Object.entries(generatedChecks)) {
     for (const scenario of scenarios) {

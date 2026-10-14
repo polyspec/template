@@ -8,8 +8,8 @@
   "contractDigest": "d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e",
   "compilerDigest": "cf67b8ad1e3ac40a194a2c78b58ddf168f30719d1b2fa62d7b58eb3b0d7f03e1",
   "files": {
-    "compiler-coverage.py": {
-      "path": "compiler-coverage.py",
+    "compiler_coverage.py": {
+      "path": "compiler_coverage.py",
       "artifactDigest": "785237dd0801713954336593732b4f2808889f0a7a1c50fed643a3a14feb8f02"
     }
   }

@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { showcasePhpNamespace } from '../tools/showcase/php-namespace.mjs';
+import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
 import { checkLanguages } from './language-checks.mjs';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mjs';
 import { tsc } from './tools.mjs';
@@ -19,7 +20,8 @@ const scenarios = ['compiler-coverage', 'empty-state', 'html-slot', 'react-bound
 
 function generatedSource(id, language) {
   if (language === 'go') return join(root, 'tools/showcase/adapters/go/generated', id, 'generated.go');
-  const extension = { rust: 'rust', python: 'py' }[language] ?? language;
+  if (language === 'python') return join(generated, `${showcasePythonModule(id)}.py`);
+  const extension = { rust: 'rust' }[language] ?? language;
   return join(generated, `${id}.${extension}`);
 }
 

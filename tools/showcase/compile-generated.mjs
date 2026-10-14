@@ -9,6 +9,7 @@ import { generatedCompilerDigest } from '../../packages/template-compiler/compil
 import { typescriptDeliveryDigest } from './delivery-digest.mjs';
 import { compileGeneratedArtifact } from '../../packages/template-compiler/generated-artifact.mjs';
 import { showcasePhpNamespace } from './php-namespace.mjs';
+import { showcasePythonModule } from './python-module.mjs';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
 const adapterRoot = join(root, 'tools/showcase/adapters');
@@ -27,7 +28,8 @@ const scenarios = readdirSync(scenariosRoot, { withFileTypes: true })
 export function generatedOutput(id, language) {
   if (language === 'go') return join(adapterRoot, 'go/generated', id, 'generated.go');
   if (language === 'js') return join(adapterRoot, 'generated/javascript', `${id}.js`);
-  const extension = { rust: 'rust', python: 'py' }[language] ?? language;
+  if (language === 'python') return join(adapterRoot, 'generated/typed', `${showcasePythonModule(id)}.py`);
+  const extension = { rust: 'rust' }[language] ?? language;
   return join(adapterRoot, 'generated/typed', `${id}.${extension}`);
 }
 

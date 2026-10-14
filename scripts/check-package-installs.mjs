@@ -17,6 +17,7 @@ import { pythonCommand, pythonEnvironment } from './python-toolchain.mjs';
 import { buildRequirements, requireWheelhouse, wheelhouse } from './python-wheelhouse.mjs';
 import { checkLanguages } from './language-checks.mjs';
 import { runStepSync } from './test-progress/step.mjs';
+import { showcasePythonModule } from '../tools/showcase/python-module.mjs';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const scenario = join(root, 'examples/site/scenarios/scope-precedence');
@@ -173,7 +174,7 @@ function checkPython() {
   const installed = join(directory, 'venv/bin/python');
   run(installed, ['-m', 'pip', 'install', '--no-deps', '--no-index', archive], { env: pip });
   stageScenario(directory);
-  cpSync(join(root, 'tools/showcase/adapters/generated/typed/scope-precedence.py'), join(directory, 'generated.py'));
+  cpSync(join(root, 'tools/showcase/adapters/generated/typed', `${showcasePythonModule('scope-precedence')}.py`), join(directory, 'generated.py'));
   writeFileSync(join(directory, 'check.py'), `import json
 from pathlib import Path
 

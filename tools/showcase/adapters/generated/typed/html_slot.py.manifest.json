@@ -8,8 +8,8 @@
   "contractDigest": "d2287d5683390d91401192bfd633263164a4d92f01944aece7d7d16032a4070e",
   "compilerDigest": "cf67b8ad1e3ac40a194a2c78b58ddf168f30719d1b2fa62d7b58eb3b0d7f03e1",
   "files": {
-    "html-slot.py": {
-      "path": "html-slot.py",
+    "html_slot.py": {
+      "path": "html_slot.py",
       "artifactDigest": "4cd8410ac7ae21299479f198ab808be3ce50a17af8837c15ea639aed3ff599e6"
     }
   }

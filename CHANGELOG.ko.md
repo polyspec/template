@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d108ec13dd1071593c0c50fbff331841e41fd5a6e81c41b7422c8ab0db9e8fb8 -->
+<!-- source-sha256: 0af37479304042dd58901074e80b5e2fca63dada85e3782cde45303811f2dd4d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.12: Python showcase adapter는 `ruff.toml`이 금지하는(S3) `importlib.util.spec_from_file_location` 대신 import 문 `from generated.typed import compiler_coverage, …`로 각 scenario의 generated program을 가져옵니다. Generated Python program은 `tools/showcase/python-module.mjs`에 따라 module 이름을 가집니다(`compiler-coverage`는 `generated/typed/compiler_coverage.py`). Showcase compiler, 그 검사, package install 검사가 이를 씁니다.
 - T23.5: Rust filesystem loader는 열린 `same_file::Handle`이 아니라 읽은 각 파일의 identity를 보관합니다. Unix에서는 `std::os::unix::fs::MetadataExt`의 device와 inode 번호, Windows에서는 `winapi-util`의 volume serial number와 file index이며, 읽기 위해 연 파일에서 읽습니다. 그래서 많은 template을 읽은 loader도 그 descriptor를 갖지 않습니다(EMFILE). Crate는 `same-file` 대신 Windows에서만 `winapi-util`에 의존합니다.
 - T24.3: `tests/scripts/process-group-exit-window.test.mjs`는 최대 300 s 동안 40번 실행하며 probe 결과를 집계하던 실험이 아니라 테스트입니다. 한 번의 실행으로 leader가 끝난 group의 member가 사라진 뒤에만 `stopProcessGroup`이 반환함을 확인하고, 기록했지만 사라짐을 확인하지 못한 모든 pid를 `t.after`에서 종료하며, member는 영원히 실행되지 않고 60 s 뒤 스스로 끝납니다. 실험의 결과는 파일 머리말에 남깁니다.
 - T23.2: TypeScript, Go, PHP, Python, PHP 확장은 LEX-5와 Rust처럼 `@` 뒤의 loop 형식을 텍스트의 나머지 전체에서 판단합니다. 각 구현은 처음 80 byte에서만 맞추었기 때문에 약 78 byte보다 긴 loop 변수 이름은 loop tag를 텍스트로 만들었습니다. Case `lexical/loop-head-long-name`이 모든 구현에 이를 요구하고, 바뀐 parser에 맞추어 showcase artifact를 다시 compile했습니다.
