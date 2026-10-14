@@ -43,7 +43,7 @@ test('a tool that cannot start fails with its command and the install fix', (t) 
   const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'go', '--cwd', bin, '--', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
-  assert.match(run.stdout, /✖ go .*: cannot start go: spawn go ENOENT; run make install-tools, which installs Go into var\/tools/);
+  assert.match(run.stdout, /✖ go .*: cannot start go: spawn go ENOENT; declare go in mise.toml and run make install-tools, which installs it into var\/tools\/mise/);
 });
 
 test('a CLI call of the drivers that outlives its limit names the limit and the command', async (t) => {
