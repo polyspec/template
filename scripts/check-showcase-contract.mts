@@ -180,7 +180,8 @@ function runtimeCommand(language: string, scenarioPath: string, mode = 'ast'): [
     return [CARGO, ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root, env];
   }
   if (language === 'python') return [pythonPackageCommand(), [source, scenarioPath], root, { ...env, ...pythonEnvironment() }];
-  return ['php', [source, scenarioPath], root, env];
+  // The adapter class is PSR-4 code that php.php loads and runs.
+  return ['php', [join(adapterRoot, 'php.php'), scenarioPath], root, env];
 }
 
 function checkStaticImplementation(language: string): void {
@@ -240,15 +241,20 @@ async function checkRuntimeAssertionHelpers() {
 
 function checkPhpReflection() {
   const php = languageDefinition('php');
-  const source = join(adapterRoot, php.file);
   const expected = JSON.stringify(operationNames.map(name => php.operationNames[name]));
+  // The adapter is a PSR-4 class of the namespace Polyspec\Showcase\Adapter\Php, loaded with the generated
+  // declarations by the class loader of the PHP package, as php.php loads it.
+  const adapterClass = 'Polyspec\\Showcase\\Adapter\\Php\\' + php.type;
   const probe = [
-    `require ${JSON.stringify(source)};`,
-    `$reflection = new ReflectionClass('Adapter');`,
+    `$loader = require ${JSON.stringify(join(root, 'packages/php/vendor/autoload.php'))};`,
+    `$loader->addPsr4('Polyspec\\\\Showcase\\\\Adapter\\\\', ${JSON.stringify(join(adapterRoot, 'generated/php-adapter'))});`,
+    `$loader->addPsr4('Polyspec\\\\Showcase\\\\Adapter\\\\Php\\\\', ${JSON.stringify(join(adapterRoot, 'php'))});`,
+    `$class = ${JSON.stringify(adapterClass)};`,
+    `$reflection = new ReflectionClass($class);`,
     `$expected = json_decode(${JSON.stringify(expected)}, true);`,
     `$actual = [];`,
     `foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {`,
-    `    if ($method->getDeclaringClass()->getName() === 'Adapter' && $method->getName() !== '__construct') $actual[] = $method->getName();`,
+    `    if ($method->getDeclaringClass()->getName() === $class && $method->getName() !== '__construct') $actual[] = $method->getName();`,
     `}`,
     `if ($actual !== $expected) { fwrite(STDERR, 'Adapter methods do not match the manifest' . PHP_EOL); exit(1); }`,
     `$constructor = $reflection->getConstructor();`,

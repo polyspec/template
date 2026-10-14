@@ -1688,8 +1688,8 @@
           "artifact-runtime",
           "generated-compiler"
         ],
-        "file": "php.php",
-        "generated": "generated/render_adapter.php",
+        "file": "php/Adapter.php",
+        "generated": "generated/php-adapter/RenderAdapter.php",
         "type": "Adapter",
         "constructorName": "__construct",
         "operationNames": {

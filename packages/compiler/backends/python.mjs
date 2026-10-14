@@ -16,8 +16,8 @@ export const language = 'python';
  */
 function py(value) {
   if (typeof value !== 'string') return JSON.stringify(value);
-  const doubles = [...value].filter(character => character === '"').length;
-  const singles = [...value].filter(character => character === "'").length;
+  const doubles = value.split('"').length - 1;
+  const singles = value.split("'").length - 1;
   const json = JSON.stringify(value);
   if (doubles <= singles) return json;
   return `'${json.slice(1, -1).replaceAll('\\"', '"').replaceAll("'", "\\'")}'`;
@@ -233,7 +233,9 @@ export function createTarget({ program }) {
   return target;
 }
 
-// The names that the generated module imports, by module; a name is imported when the module uses it.
+// The names that the generated module imports, by module; a name is imported when the module uses it, and a module
+// with null is imported whole.
+/** @type {[string, string[] | null][]} */
 const imports = [
   ['math', null], ['time', null],
   ['polyspec.template.bind', ['BindError', 'bind_data', 'bind_map', 'check_number']],

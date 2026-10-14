@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8217a13780f30963958e5dc9992174c26b3356a513f63e5328e55b4bb9ce403c -->
+<!-- source-sha256: fda514a77f7a35f65a5430654ef07bccfe65a91fe2d003ebeef4e43e5ff8f880 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.6: compiler가 oxlint를 통과하고 Go backend는 `.editorconfig`의 들여쓰기를 지킵니다: helper의 Go source는 tag `gofmt` 아래 공백 두 칸으로 쓰이고, tag가 줄 앞의 공백 두 칸마다 gofmt의 tab으로 바꾸므로 생성되는 Go는 그대로입니다. `phpString`은 제어 문자 정규식 없이 제어 문자를 나누고, Python backend는 문자열을 펼치지 않고 따옴표를 셉니다. showcase의 PHP adapter는 PSR-1과 PSR-12를 따릅니다: 계약의 생성 선언은 `generated/php-adapter`에 파일마다 PSR-4 class 하나이고, adapter는 `php/`의 class `Polyspec\\Showcase\\Adapter\\Php\\Adapter`이며, `php.php`는 그것을 실행하기만 합니다.
 - T24.10: TypeScript 인프라는 읽는 문서를 cast하지 않고 검증합니다: `scripts/` 아래 JSON 문서마다 module 하나(compiler manifest, function contract, artifact manifest, package manifest와 lock, fixture, showcase 문서, benchmark 결과)가 type과 ajv validator를 갖고, `expected.error.json`은 schema 하나를 가지며, TOML은 smol-toml로, `.github/workflows`의 workflow는 yaml package로 읽고, `check-doc-coverage`는 TypeScript를 oxc-parser로 읽으며, 없는 값은 기본값 대신 `scripts/required.mts`로 실패하고, generated runner는 위치가 없는 오류를 실패시키며(`tests/runner/generated-errors.mts`), `conformance-cases`(이제 generated Python runner 포함), `check-function-contract`, delimiter matrix의 언어 목록은 `config/parity.json`, manifest, driver table에서 옵니다. `examples/showcase`의 script는 엄격한 `tsconfig.json` 아래의 `.mts`이고, `SHOWCASE_LANGS`는 Python을 포함합니다.
 - T24.10: Rust crate는 missing docs를 허용하는 대신 공개 enum(`Node`, `Expr`, `MapEntry`, `LiteralValue`, `LoopMetaField`, `ErrorCode`, `TokenType`)의 모든 variant와 field를 문서화하고, `render_for`는 For node의 field를 struct 하나로 받으며, 남은 lint 예외는 `#[expect(..., reason)]`입니다. Rust 적합성 test는 케이스 수를 확인하고, 없는 파일이 아닌 읽기 오류에서 케이스를 실패시키며, 표현식 test는 vector를 `Deserialize` struct로 읽습니다.
 - T24.11: TypeScript는 unit `compiler-interface`와 `bound-map-interface`를 `packages/ts/tests/compiler-interface.test.ts`로 bind합니다. 이 test는 package가 내보내는 engine, program, runtime environment, bound map 연산을 `packages/compiler/interface.json`의 mapping과 비교합니다. TypeScript를 뺀 profile `interface`는 사라집니다.

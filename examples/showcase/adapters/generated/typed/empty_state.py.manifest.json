@@ -5,8 +5,8 @@
   "entry": "layout.tpl",
   "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
-  "contractDigest": "8d83ac714ef658f3ad9dd6f951075326f183fd65a4b85fc870f3fe0e3422c020",
-  "compilerDigest": "4cf83d2c9c994c4af214b49c8779e64ec159fefd25f4e7d711c5e772c2f3f047",
+  "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
+  "compilerDigest": "2fb6af4f2abe1cf1250dbec9ce543ef9880c4bc4f93846bfb8dd2a89b56001c2",
   "files": {
     "empty_state.py": {
       "path": "empty_state.py",
