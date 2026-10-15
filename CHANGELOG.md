@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T24.32: `@polyspec/template/decode` exports `decodeTemplate` and `AstDecodeError` alone, and a browser bundle that imports only `decodeTemplate`, from that entry or from `@polyspec/template/render`, is 86,538 bytes minified and 7,490 gzip instead of 127,057 and 13,479. The validator of the AST schema calls one function for each definition of the schema instead of a copy of its code at each `$ref` (ajv `inlineRefs: false`), with every check and message kept, and the decode entry has a chunk without the runtime that the other entries share.
 - T24.31: a generated Rust program declares only the records that its types name, the fields of `Assign` that a template reads, the template and data of a definition only when a block reads them, and `to_value` only when a value is converted back, so each showcase program passes clippy `-D warnings` as a private module of a binary crate. A root field or definition data that the program does not read is checked against its declared type without a value of that type, and fails with the same field path, such as `page: name: expected a string` or `define.card.data.name: expected a string`.
 
 ## 0.0.9

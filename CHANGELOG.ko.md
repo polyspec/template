@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4d4656130d480f2f1aa82719d2b957a77e33d1cfaaff9ff4b1889f9314100a92 -->
+<!-- source-sha256: cddea5c741be78d8c9f31fb3b3bdc69d80d8ca73fe3a93b0f133d2b4af82bf8d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.32: `@polyspec/template/decode`는 `decodeTemplate`과 `AstDecodeError`만 내보내며, 그 진입점이나 `@polyspec/template/render`에서 `decodeTemplate`만 import하는 browser bundle은 127,057 byte, gzip 13,479 byte 대신 minify 86,538 byte, gzip 7,490 byte입니다. AST 스키마의 validator는 각 `$ref`에 그 code를 복사하는 대신 스키마의 definition마다 함수 하나를 호출하며(ajv `inlineRefs: false`) 모든 검사와 message를 유지하고, decode 진입점은 다른 진입점이 공유하는 runtime이 없는 chunk를 가집니다.
 - T24.31: 생성된 Rust program은 type이 가리키는 record, template이 읽는 `Assign`의 field, block이 읽을 때만 definition의 template과 data, 값을 다시 변환할 때만 `to_value`를 선언하므로, 각 showcase program은 binary crate의 private module로서 clippy `-D warnings`를 통과합니다. program이 읽지 않는 root field나 definition data는 그 type의 값을 만들지 않고 선언된 type에 대해 검사되며, `page: name: expected a string`이나 `define.card.data.name: expected a string`처럼 같은 field 경로로 실패합니다.
 
 ## 0.0.9

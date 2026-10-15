@@ -25,6 +25,7 @@
       "entries": {
         "src/index.ts": "The main entry of the package, which tsup builds into dist/index.mjs (tsup.config.ts).",
         "src/render.ts": "The entry @polyspec/template/render of the package, which tsup builds into dist/render.mjs (tsup.config.ts).",
+        "src/decode.ts": "The entry @polyspec/template/decode of the package, which tsup builds into dist/decode.mjs (tsup.config.ts).",
         "src/node/index.ts": "The entry @polyspec/template/node of the package, which tsup builds into dist/node.mjs (tsup.config.ts)."
       }
     },

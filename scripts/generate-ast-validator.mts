@@ -24,8 +24,10 @@ const { values } = parseArgs({ options: { check: { type: 'boolean' } } });
 const schemaText = readFileSync(SCHEMA, 'utf8');
 const schema: unknown = JSON.parse(schemaText);
 if (typeof schema !== 'object' || schema === null) throw new Error(`${relative(root, SCHEMA)} is not a JSON Schema object`);
-// The options of the validator: strict schema checks, and every error, so that decodeTemplate chooses the deepest one.
-const ajv = new Ajv({ strict: true, allErrors: true, code: { source: true, esm: true } });
+// The options of the validator: strict schema checks, and every error, so that decodeTemplate chooses the deepest one. Each
+// definition of the schema is one function that every $ref calls (inlineRefs: false), instead of a copy of its code at each
+// $ref, which made the validator 110,656 bytes minified instead of 85,678 (T24.32).
+const ajv = new Ajv({ strict: true, allErrors: true, inlineRefs: false, code: { source: true, esm: true } });
 ajv.addSchema(schema, 'ast');
 const source = standalone.default(ajv, { validateTemplate: 'ast' });
 

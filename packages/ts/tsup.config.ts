@@ -6,6 +6,9 @@ const entry = {
   index: 'src/index.ts',
   render: 'src/render.ts',
   node: 'src/node/index.ts',
+  // The decode of a template AST has an entry of its own, so its modules form a chunk without the runtime that the other
+  // entries share, and a bundle that imports only decodeTemplate takes no runtime code (T24.32).
+  decode: 'src/decode.ts',
 };
 
 export default defineConfig((options) => ({
