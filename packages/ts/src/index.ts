@@ -21,7 +21,7 @@ export { Engine } from './render/engine.js';
 export { RuntimeEnvironment } from './render/runtime-environment.js';
 export { Frame, RenderContext, Scope } from './render/context.js';
 export { RuntimeBindings } from './render/runtime-bindings.js';
-export type { Limits } from './render/context.js';
+export type { Limits, RuntimeServices } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';
 export type { Delimiters } from './parser/scanner.js';
 export type { PrefixAnalysis, SyntaxTag, SyntaxToken } from './parser/parser.js';

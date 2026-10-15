@@ -5,7 +5,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { AstProgram, bind, Engine, merge, RuntimeEnvironment, TemplateError } from '../src/index.js';
+import { AstProgram, bind, Engine, merge, RuntimeEnvironment, TemplateError, type RuntimeServices } from '../src/index.js';
+import type { RuntimeServices as RenderRuntimeServices } from '../src/render.js';
 
 interface Operation {
   name: string;
@@ -45,6 +46,15 @@ describe('compiler interface', () => {
     for (const field of manifest.runtimeContract.AstProgram.owns) expect(Object.keys(new AstProgram())).toContain(field);
     expect(TemplateError.name).toBe(mapping.error);
     expect(methodsOf(RuntimeEnvironment)).toEqual(mapping.runtimeEnvironmentOperations);
+  });
+
+  it('runtime services', () => {
+    // RuntimeServices is the common runtime interface of both program modes, which RuntimeEnvironment implements and
+    // RenderContext takes (compiler.md, public structures), so both entries of the package export it.
+    const services: RuntimeServices = new RuntimeEnvironment();
+    const rendering: RenderRuntimeServices = services;
+    expect(rendering.limits()).toEqual(services.limits());
+    expect(rendering.hostFunction('missing')).toBeUndefined();
   });
 
   it('bound map', () => {

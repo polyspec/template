@@ -12,5 +12,5 @@ export { AstProgramCore as AstProgram, Engine, type EngineOptions, type Program,
 export { Frame, RenderContext, Scope } from './render/context.js';
 export { RuntimeBindings } from './render/runtime-bindings.js';
 export { RuntimeEnvironment } from './render/runtime-environment.js';
-export type { Limits } from './render/context.js';
+export type { Limits, RuntimeServices } from './render/context.js';
 export type { HostFunction, Env, FunctionContext } from './functions/index.js';
