@@ -1,6 +1,6 @@
 {
   "name": "@polyspec/template-language",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Formatter, command line tool and tag structure analysis for template sources; formatting changes whitespace inside tags and the indentation of lines",
   "license": "MIT",
   "type": "module",
@@ -26,6 +26,6 @@
     "node": ">=26.12.0"
   },
   "dependencies": {
-    "@polyspec/template": "0.0.10"
+    "@polyspec/template": "0.0.11"
   }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "44874d9f0acdd368e899273ddbca0b7d",
+    "content-hash": "a059d9e4797df1df3a95ffa12709a78f",
     "packages": [
         {
             "name": "opis/json-schema",
@@ -198,10 +198,10 @@
         },
         {
             "name": "polyspec/template",
-            "version": "0.0.10",
+            "version": "0.0.11",
             "dist": {
                 "type": "zip",
-                "url": "artifacts/polyspec-template-php-0.0.10.zip",
+                "url": "artifacts/polyspec-template-php-0.0.11.zip",
                 "shasum": ""
             },
             "require": {

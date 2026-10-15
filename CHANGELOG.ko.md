@@ -1,11 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 310af589fbb7a5b846996f723268281c3f3a0c45734c8ff750e2a0c6dd008180 -->
+<!-- source-sha256: e3659c65ef0092a530969299b123de27331531ddb27550e32a3c102cb3e5a9fd -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+## 0.0.11
+
+- T24.38: 0.0.11을 release합니다. `config/release.json`의 모든 manifest가 0.0.11을 선언하고, lock, dependency review, compile된 artifact, release asset의 consumer project가 이를 기록합니다.
 - T24.37: 생성된 PHP program은 `{# part.tpl name:title}`처럼 root 값이 없는 인자를 가진 template 경로 block을 다른 target처럼 렌더합니다. block scope에서 인자를 읽기 전에 입력을 만들었으므로 `E_RUNTIME_TYPE` `generated input part.tpl.name is missing`으로 실패했습니다.
 - T24.36: 생성된 TypeScript, PHP, Python program은 object가 아닌 `define` 옵션에서 인자 오류 `define is not an object`로 실패합니다(ERR-13). TypeScript는 `E_DATA_UNSUPPORTED_TYPE`의 `BindError`를, PHP는 매개변수 type의 `E_INTERNAL` 오류를, Python은 `AttributeError`를 냈습니다.
 - T24.35: template은 `@polyspec/kit` 0.0.52를 고정하고, `make kit-sync`가 그 복사본(어떤 release 단계보다 먼저 kit-check를 실행하는 `release.yml`, `kit-bootstrap.mk`, `config/layout.kit.yml`)을 썼습니다. `make lint-ts`는 더 이상 knip.json 복사본에 대한 configuration hint를 내지 않고, npm은 모든 recipe에서 원격 kit package를 허용합니다.
