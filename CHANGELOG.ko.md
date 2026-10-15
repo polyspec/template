@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9a76b52c26b1198a62cc71054b0ef3703d67bd2954ff09fc6985683636e95134 -->
+<!-- source-sha256: 63c83cc5d17aef621cb36b74d2d575eb660f0ef7a808aa1f3689d1e1eb76052d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T24.36: 생성된 TypeScript, PHP, Python program은 object가 아닌 `define` 옵션에서 인자 오류 `define is not an object`로 실패합니다(ERR-13). TypeScript는 `E_DATA_UNSUPPORTED_TYPE`의 `BindError`를, PHP는 매개변수 type의 `E_INTERNAL` 오류를, Python은 `AttributeError`를 냈습니다.
 - T24.35: template은 `@polyspec/kit` 0.0.52를 고정하고, `make kit-sync`가 그 복사본(어떤 release 단계보다 먼저 kit-check를 실행하는 `release.yml`, `kit-bootstrap.mk`, `config/layout.kit.yml`)을 썼습니다. `make lint-ts`는 더 이상 knip.json 복사본에 대한 configuration hint를 내지 않고, npm은 모든 recipe에서 원격 kit package를 허용합니다.
 
 ## 0.0.10

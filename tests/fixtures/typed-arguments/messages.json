@@ -6,5 +6,6 @@
   {"assign": {"title": "T"}, "define": {"card": {"template": "part.tpl", "data": 5}}, "result": "argument: define.card.data is not an object"},
   {"assign": {"title": "T"}, "define": {"other": {"template": "part.tpl"}}, "result": "argument: define.other is not declared"},
   {"assign": {"title": "T"}, "define": {"card": {"template": "input.tpl"}}, "result": "argument: define.card has an invalid template"},
-  {"assign": {"title": "T"}, "define": {"card": {"html": "<b>H</b>"}}, "result": "argument: define.card has an invalid html entry"}
+  {"assign": {"title": "T"}, "define": {"card": {"html": "<b>H</b>"}}, "result": "argument: define.card has an invalid html entry"},
+  {"assign": {"title": "T"}, "define": 5, "result": "argument: define is not an object", "targets": ["TypeScript", "PHP", "Python"]}
 ]

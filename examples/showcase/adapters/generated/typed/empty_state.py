@@ -97,6 +97,8 @@ def _generated_bind_record(value, fields, path):
 def _generated_bind_definitions(raw):
     definitions = {}
     targets = {}
+    if raw is not None and not isinstance(raw, dict):
+        raise ValueError("define is not an object")
     for id_, entry in (raw or {}).items():
         spec = _GENERATED_DEFINITION_SCHEMA.get(id_)
         if spec is None:

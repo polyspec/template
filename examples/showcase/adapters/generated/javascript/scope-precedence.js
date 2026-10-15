@@ -59,7 +59,7 @@ function generatedBindDefinitions(input) {
   const definitions = {};
   const targets = /* @__PURE__ */ new Map();
   if (input === void 0 || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError("E_DATA_UNSUPPORTED_TYPE", "define is not an object");
+  if (!generatedPlain(input)) throw new Error("define is not an object");
   const entries = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);

@@ -358,7 +358,7 @@ export function emitRuntime(context: BackendContext): Part[] {
   const definitions: Definitions = {};
   const targets = new Map<string, GeneratedTarget>();
   if (input === undefined || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'define is not an object');
+  if (!generatedPlain(input)) throw new Error('define is not an object');
   const entries: [string, unknown][] = Object.entries(input);
   for (const [id${program.definitions.size > 0 ? ', raw' : ''}] of entries) {
     checkText(id);

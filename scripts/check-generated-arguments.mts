@@ -23,18 +23,34 @@ import { checkLanguages } from './language-checks.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
 
-/** A request of messages.json and its result: `rendered: <output>` or `argument: <message>`. */
-interface Vector { assign: Record<string, unknown>; define: Record<string, unknown>; result: string }
+/**
+ * A request of messages.json and its result: `rendered: <output>` or `argument: <message>`. `targets` names the targets
+ * whose request type can hold the request, such as a `define` that is not an object, which the typed options of Go and
+ * Rust cannot hold; a request without it runs in every target.
+ */
+interface Vector { assign: Record<string, unknown>; define: unknown; result: string; targets?: string[] }
 const vectorsDocument = jsonDocument<Vector[]>('list of requests', {
   type: 'array',
-  items: { type: 'object', required: ['assign', 'define', 'result'], properties: { assign: { type: 'object' }, define: { type: 'object' }, result: { type: 'string' } } },
+  items: {
+    type: 'object',
+    required: ['assign', 'define', 'result'],
+    properties: { assign: { type: 'object' }, define: {}, result: { type: 'string' }, targets: { type: 'array', items: { type: 'string' }, nullable: true } },
+  },
 });
+type Fixture = { name: string; vectors: Vector[]; id: string };
+const forTarget = (fixture: Fixture, language: string): Vector[] => fixture.vectors.filter(vector => vector.targets === undefined || vector.targets.includes(language));
+/** The requests of `fixture` that `language` renders, in a file of the temporary directory that its runner reads. */
+const vectorsFor = (fixture: Fixture, language: string): string => {
+  const path = join(temporary, `${fixture.id}-${language}.json`);
+  writeFileSync(path, JSON.stringify(forTarget(fixture, language).map(({ assign, define, result }) => ({ assign, define, result }))));
+  return path;
+};
 
 const fixtures = ['typed-arguments', 'typed-arguments-unread'].map(name => {
   const directory = join(root, 'tests/fixtures', name);
   const vectors = vectorsDocument.read(join(directory, 'messages.json'));
   if (vectors.length === 0) throw new Error(`${name}/messages.json holds no request`);
-  return { name, id: name.replaceAll('-', '_'), directory, types: join(directory, 'types.json'), vectorsPath: join(directory, 'messages.json'), vectors };
+  return { name, id: name.replaceAll('-', '_'), directory, types: join(directory, 'types.json'), vectors };
 });
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-arguments');
@@ -60,7 +76,7 @@ function compare(language: string, output: string): void {
     const line = output.split('\n').find(text => text.startsWith(`${fixture.name} `));
     if (line === undefined) throw new Error(`${language} printed no results of ${fixture.name}\n${output}`);
     const actual: unknown = JSON.parse(line.slice(fixture.name.length + 1));
-    assert.deepEqual(actual, fixture.vectors.map(vector => vector.result), `${language}: the results of ${fixture.name}/messages.json`);
+    assert.deepEqual(actual, forTarget(fixture, language).map(vector => vector.result), `${language}: the results of ${fixture.name}/messages.json`);
   }
 }
 
@@ -78,7 +94,7 @@ try {
 import { RuntimeEnvironment, TemplateError } from '@polyspec/template';
 ${fixtures.map(fixture => `import { GeneratedProgram as ${fixture.id} } from './ts/${fixture.id}.js';`).join('\n')}
 const result = (request) => { try { return 'rendered: ' + request(); } catch (error) { if (error instanceof TemplateError) return 'template: ' + error.code; return Object.getPrototypeOf(error) === Error.prototype ? 'argument: ' + error.message : 'other ' + error?.constructor?.name + ': ' + error?.message; } };
-${fixtures.map(fixture => `{ const program = new ${fixture.id}(new RuntimeEnvironment()); const vectors = JSON.parse(readFileSync(${JSON.stringify(fixture.vectorsPath)}, 'utf8')); console.log(${JSON.stringify(fixture.name)} + ' ' + JSON.stringify(vectors.map(vector => result(() => program.render('input.tpl', vector.assign, { define: vector.define }))))); }`).join('\n')}
+${fixtures.map(fixture => `{ const program = new ${fixture.id}(new RuntimeEnvironment()); const vectors = JSON.parse(readFileSync(${JSON.stringify(vectorsFor(fixture, 'TypeScript'))}, 'utf8')); console.log(${JSON.stringify(fixture.name)} + ' ' + JSON.stringify(vectors.map(vector => result(() => program.render('input.tpl', vector.assign, { define: vector.define }))))); }`).join('\n')}
 `);
       compare('TypeScript', run(process.execPath, [runner], root));
     },
@@ -91,7 +107,7 @@ ${fixtures.map(fixture => `{ const program = new ${fixture.id}(new RuntimeEnviro
 import ("encoding/json"; "errors"; "fmt"; "os"; "testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/errs"; "github.com/polyspec/template/packages/go/render"; "github.com/polyspec/template/packages/go/value")
 type vector struct { Assign json.RawMessage \`json:"assign"\`; Define map[string]struct { Template *string \`json:"template"\`; HTML *string \`json:"html"\`; Data json.RawMessage \`json:"data"\` } \`json:"define"\` }
 func result(output string, err error) string { if err == nil { return "rendered: " + output }; var te *errs.Error; if errors.As(err, &te) { return "template: " + string(te.Code) }; var be *value.BindError; if errors.As(err, &be) { return "bind: " + be.Error() }; return "argument: " + err.Error() }
-func TestGeneratedArguments(t *testing.T) { text, err := os.ReadFile(${goString(fixture.vectorsPath)}); if err != nil { t.Fatal(err) }; var vectors []vector; if err := json.Unmarshal(text, &vectors); err != nil { t.Fatal(err) }; program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; results := []string{}; for _, item := range vectors { assign, err := value.ParseJSON(item.Assign); if err != nil { t.Fatal(err) }; define := map[string]render.DefineInput{}; for id, entry := range item.Define { input := render.DefineInput{HTML: entry.HTML}; if entry.Template != nil { input.Template = *entry.Template }; if entry.Data != nil { data, err := value.ParseJSON(entry.Data); if err != nil { t.Fatal(err) }; input.Data = data }; define[id] = input }; results = append(results, result(program.Render("input.tpl", assign, template.RenderOptions{Define: define}))) }; encoded, _ := json.Marshal(results); fmt.Println(${goString(fixture.name)} + " " + string(encoded)) }
+func TestGeneratedArguments(t *testing.T) { text, err := os.ReadFile(${goString(vectorsFor(fixture, 'Go'))}); if err != nil { t.Fatal(err) }; var vectors []vector; if err := json.Unmarshal(text, &vectors); err != nil { t.Fatal(err) }; program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; results := []string{}; for _, item := range vectors { assign, err := value.ParseJSON(item.Assign); if err != nil { t.Fatal(err) }; define := map[string]render.DefineInput{}; for id, entry := range item.Define { input := render.DefineInput{HTML: entry.HTML}; if entry.Template != nil { input.Template = *entry.Template }; if entry.Data != nil { data, err := value.ParseJSON(entry.Data); if err != nil { t.Fatal(err) }; input.Data = data }; define[id] = input }; results = append(results, result(program.Render("input.tpl", assign, template.RenderOptions{Define: define}))) }; encoded, _ := json.Marshal(results); fmt.Println(${goString(fixture.name)} + " " + string(encoded)) }
 `);
           return run('go', ['test', '-v', '-count=1', '.'], goDir);
         } finally {
@@ -112,7 +128,7 @@ func TestGeneratedArguments(t *testing.T) { text, err := os.ReadFile(${goString(
 use polyspec_template::{Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, defines_from_json};
 fn result(rendered: Result<String, RequestError>) -> String { match rendered { Ok(output) => format!("rendered: {output}"), Err(RequestError::Argument(error)) => format!("argument: {}", error.message), Err(RequestError::Template(error)) => format!("template: {}", error.code.as_str()) } }
 fn results(path: &str, render: impl Fn(&serde_json::Value, &RenderOptions) -> Result<String, RequestError>) -> String { let vectors: Vec<serde_json::Value> = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap(); let all: Vec<String> = vectors.iter().map(|vector| { let mut options = RenderOptions::default(); options.define = defines_from_json(&vector["define"]).unwrap(); result(render(&vector["assign"], &options)) }).collect(); serde_json::to_string(&all).unwrap() }
-#[test] fn generated_arguments() { ${fixtures.map(fixture => `let program = ${fixture.id}::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); println!("${fixture.name} {}", results(${rustString(fixture.vectorsPath)}, |assign, options| program.render(RenderTarget::Name("input.tpl"), assign, options)));`).join(' ')} }
+#[test] fn generated_arguments() { ${fixtures.map(fixture => `let program = ${fixture.id}::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); println!("${fixture.name} {}", results(${rustString(vectorsFor(fixture, 'Rust'))}, |assign, options| program.render(RenderTarget::Name("input.tpl"), assign, options)));`).join(' ')} }
 `);
       try {
         compare('Rust', run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check', '--', '--nocapture'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' }));
@@ -125,7 +141,7 @@ fn results(path: &str, render: impl Fn(&serde_json::Value, &RenderOptions) -> Re
         const phpNamespace = `Polyspec\\Generated\\${fixture.id === 'typed_arguments' ? 'TypedArguments' : 'TypedArgumentsUnread'}`;
         const phpDirectory = join(temporary, `${fixture.id}-php`);
         writePhpProgram(phpDirectory, compileFiles(graphOf(fixture.name), fixture.types, 'php', { phpNamespace }));
-        return run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $result = static function (callable $request): string { try { return 'rendered: ' . $request(); } catch (Polyspec\\Template\\TemplateError $error) { return 'template: ' . $error->errorCode . ' ' . $error->getMessage(); } catch (InvalidArgumentException $error) { return 'argument: ' . $error->getMessage(); } catch (Throwable $error) { return 'other ' . $error::class . ': ' . $error->getMessage(); } }; $vectors = json_decode(file_get_contents(${phpString(fixture.vectorsPath)}), true, 512, JSON_THROW_ON_ERROR); echo ${phpString(fixture.name)}, ' ', json_encode(array_map(static fn (array $vector): string => $result(static fn () => $program->render('input.tpl', $vector['assign'], ['define' => $vector['define']])), $vectors), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\\n";`], root);
+        return run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $result = static function (callable $request): string { try { return 'rendered: ' . $request(); } catch (Polyspec\\Template\\TemplateError $error) { return 'template: ' . $error->errorCode . ' ' . $error->getMessage(); } catch (InvalidArgumentException $error) { return 'argument: ' . $error->getMessage(); } catch (Throwable $error) { return 'other ' . $error::class . ': ' . $error->getMessage(); } }; $vectors = json_decode(file_get_contents(${phpString(vectorsFor(fixture, 'PHP'))}), true, 512, JSON_THROW_ON_ERROR); echo ${phpString(fixture.name)}, ' ', json_encode(array_map(static fn (array $vector): string => $result(static fn () => $program->render('input.tpl', $vector['assign'], ['define' => $vector['define']])), $vectors), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\\n";`], root);
       }).join('\n');
       compare('PHP', output);
     },
@@ -149,7 +165,7 @@ def result(request):
         return 'other ' + type(error).__name__ + ': ' + str(error)
 
 
-for name, module, path in [${fixtures.map(fixture => `(${JSON.stringify(fixture.name)}, ${fixture.id}, ${JSON.stringify(fixture.vectorsPath)})`).join(', ')}]:
+for name, module, path in [${fixtures.map(fixture => `(${JSON.stringify(fixture.name)}, ${fixture.id}, ${JSON.stringify(vectorsFor(fixture, 'Python'))})`).join(', ')}]:
     program = Engine(module.GeneratedProgram(RuntimeEnvironment()))
     with open(path, encoding='utf-8') as handle:
         vectors = json.load(handle)
