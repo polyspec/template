@@ -21,6 +21,7 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -63,12 +64,18 @@ function run(command: string, args: string[], options: { cwd: string }): void {
   if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} exited with ${result.status ?? result.signal}`);
 }
 
-// The two bundles of the VS Code extension: the extension and the language server it starts.
+// The two bundles of the VS Code extension: the extension and the language server it starts. Each has the metafile of
+// esbuild beside it, whose external imports tests/extension.test.mjs reads; .vscodeignore packages the bundles only.
+// esbuild runs in `next`, so the paths of a metafile are relative to the build and do not name the folder of the process;
+// the entry points are therefore absolute, the server resolved from the extension as Node.js resolves it.
 if (values['esbuild-vscode']) {
   const next = values['esbuild-vscode'];
+  const vscode = join(root, 'packages/vscode');
   const common = ['--bundle', '--platform=node', '--format=cjs', '--target=node24'];
-  run(ESBUILD, ['src/extension.ts', ...common, '--external:vscode', `--outfile=${join(next, 'extension.cjs')}`], { cwd: join(root, 'packages/vscode') });
-  run(ESBUILD, ['@polyspec/template-lsp/server', ...common, `--outfile=${join(next, 'server.cjs')}`], { cwd: join(root, 'packages/vscode') });
+  const bundle = (name: string): string[] => [`--outfile=${name}.cjs`, `--metafile=${name}.meta.json`];
+  const server = createRequire(join(vscode, 'package.json')).resolve('@polyspec/template-lsp/server');
+  run(ESBUILD, [join(vscode, 'src/extension.ts'), ...common, '--external:vscode', ...bundle('extension')], { cwd: next });
+  run(ESBUILD, [server, ...common, ...bundle('server')], { cwd: next });
   process.exit(0);
 }
 
@@ -118,9 +125,9 @@ function workspacePackages(dependencies: Record<string, string> | undefined, see
   return [...seen.values()].sort(compareText);
 }
 
-// The input files of the build, sorted.
+// The input files of the build, sorted: with this script, which holds the build commands of each package.
 function inputFiles(): string[] {
-  const own = [...files(join(pkg, 'src')), ...CONFIGURATION.map(name => join(pkg, name)).filter(existsSync)];
+  const own = [...files(join(pkg, 'src')), ...CONFIGURATION.map(name => join(pkg, name)).filter(existsSync), fileURLToPath(import.meta.url)];
   const dependencies = workspacePackages(manifest.dependencies).flatMap(directory => [join(directory, 'package.json'), ...(existsSync(join(directory, 'dist')) ? files(join(directory, 'dist')) : [])]);
   return [...own, join(root, 'package-lock.json'), ...dependencies].map(file => relative(root, file)).sort();
 }

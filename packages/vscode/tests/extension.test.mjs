@@ -1,9 +1,9 @@
 // Extension manifest, bundles and the bundled language server. The client side runs in VS Code in tests/integration.
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { builtinModules } from 'node:module';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { after, before, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createMessageConnection, StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node';
@@ -16,9 +16,14 @@ const SERVER = 'dist/server.cjs';
 const STANDARD_TOKEN_TYPES = new Set(['namespace', 'class', 'enum', 'interface', 'struct', 'typeParameter', 'type', 'parameter', 'variable', 'property', 'enumMember', 'decorator', 'event', 'function', 'method', 'macro', 'label', 'comment', 'string', 'keyword', 'number', 'regexp', 'operator']);
 
 const builtins = new Set(builtinModules.flatMap(name => [name, `node:${name}`]));
-// The modules that a bundle requires: the calls of require, not a text inside a string, such as the code property that the
-// runtime functions of ajv carry for the code that ajv generates, 'require("ajv/dist/runtime/ucs2length").default'.
-const requiredBy = path => [...new Set(readFileSync(join(root, path), 'utf8').match(/(?<!['"`\w$.])require\("[^"]+"\)/g).map(call => call.slice(9, -2)))];
+// The modules that a bundle loads at run time: the imports that esbuild left external, as its metafile records them for
+// each output (scripts/build-package.mts writes dist/<bundle>.meta.json with the bundle, the paths relative to dist).
+const externalsOf = bundle => {
+  const metafile = JSON.parse(readFileSync(join(root, bundle.replace(/\.cjs$/, '.meta.json')), 'utf8'));
+  const output = metafile.outputs[basename(bundle)];
+  assert.ok(output, `the metafile of ${bundle} records no output ${basename(bundle)}`);
+  return [...new Set(output.imports.filter(entry => entry.external).map(entry => entry.path))];
+};
 
 let server;
 let connection;
@@ -90,11 +95,13 @@ test('manifest contributes every token type of the server legend that VS Code do
 });
 
 test('the bundles load no workspace package at run time and are packaged', () => {
-  assert.deepEqual(requiredBy(manifest.main).filter(name => !builtins.has(name)), ['vscode']);
-  assert.deepEqual(requiredBy(SERVER).filter(name => !builtins.has(name)), []);
-  const packaged = readFileSync(join(root, '.vscodeignore'), 'utf8').split('\n');
-  assert.ok(packaged.includes(`!${manifest.main.replace(/^\.\//, '')}`));
-  assert.ok(packaged.includes(`!${SERVER}`));
+  assert.deepEqual(externalsOf(manifest.main).filter(name => !builtins.has(name)), ['vscode']);
+  assert.deepEqual(externalsOf(SERVER).filter(name => !builtins.has(name)), []);
+  // The files that vsce packages: of dist, the two bundles only, not their metafiles.
+  const listed = spawnSync(join(root, '../../node_modules/.bin/vsce'), ['ls', '--no-dependencies'], { cwd: root, encoding: 'utf8' });
+  assert.equal(listed.status, 0, listed.stderr);
+  const packaged = listed.stdout.split('\n').filter(path => path.startsWith('dist/')).sort();
+  assert.deepEqual(packaged, [manifest.main.replace(/^\.\//, ''), SERVER].sort());
 });
 
 test('the bundled server publishes diagnostics and answers the requests of the extension', async () => {
