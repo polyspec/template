@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 689f7d4d0e2aeeb3c6a3fb0220caa6b7f5821ba3f0f9ea78a27725854403c8b9 -->
+<!-- source-sha256: 3a93d8199bb3f37226861e9a8e5425d9d5be05f751d8b1e00878ff224287e478 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T24.39: template은 다른 저장소와 같은 kit인 `@polyspec/kit` 0.0.53을 고정하고, `make kit-sync`는 복사본을 바꾸지 않습니다. owner check는 module의 test를 그 importer로 고를 수 있고(K191), kit-check는 template이 선언한 `.php-version`을 요구하며(K193), release proof는 각 sibling wheel을 나열합니다(K195).
 
 - T22.6-15: `docs/spec/errors.md`의 code table이 error code의 catalog입니다. `make error-codes`가 이로부터 TypeScript의 `ErrorCode` union, Go package `errs`의 상수, 조건을 단 Rust `ErrorCode`의 variant, Python의 `ERROR_CODES`, PHP package의 새 class `Polyspec\Template\ErrorCode`, PHP extension의 header `pt_error_codes.h`를 씁니다. PHP package와 PHP extension은 모든 error를 string literal 대신 이 상수로 내고, 두 parity check는 먼저 `make error-codes-check`를 실행한 뒤 모든 목록을 catalog와 비교합니다(R7).
 
