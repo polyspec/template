@@ -14,7 +14,10 @@
     "packages/ts/src/ast-validator.mjs": "The AST validator that scripts/generate-ast-validator.mts generates with ajv standalone validation code (make ast-validator): esbuild wraps the CommonJS module of ajv/dist/runtime that the code requires, whose exports.default knip reads as an unused export of the file."
   },
   "binaries": {
-    "gmake": "GNU Make of Homebrew: tests/scripts/toolchain-files.test.mts runs the recipes with it where the make of the machine is the GNU Make 3.81 of macOS."
+    "gmake": "GNU Make of Homebrew: tests/scripts/toolchain-files.test.mts runs the recipes with it where the make of the machine is the GNU Make 3.81 of macOS.",
+    "make": "The make of the machine: the tests of tests/scripts run the recipes of the Makefile with it (make -n or a target), such as test-targets.test.mts and toolchain-files.test.mts.",
+    "php": "The PHP of the machine (setup-php in CI): scripts/check-function-contract.mts asks Registry::builtins() of the PHP package for the arities of its functions.",
+    "composer": "The Composer of mise.toml (http:composer): scripts/composer-install.mts runs composer install in the folder of a Composer project."
   },
   "workspaces": {
     "packages/ts": {
