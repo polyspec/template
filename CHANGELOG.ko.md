@@ -1,10 +1,16 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 18e47adf144f9bb007d5ab1413987a513a86190eca3b729fc36a4bb34014a4cc -->
+<!-- source-sha256: 3f2f24a1034fce2e1e7cc63c265d46f190fafc70068a3a9afa09f74d47d146b5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.8
+
+- T24.28: 0.0.7을 대체하는 0.0.8을 release합니다. tag v0.0.7에는 게시된 release가 없습니다: release workflow의 proof가 runner의 PHP 8.3.6으로 Composer consumer를 실행했고, Composer의 platform check가 이를 거부했습니다. `config/release.json`의 모든 manifest가 0.0.8을 선언하고, lock, dependency review, compile된 artifact, release asset의 consumer project가 이를 기록합니다.
+- T24.27: `.php-version`은 `config/toolchain.json`의 최소 release인 PHP 8.5를 선언합니다. kit의 release workflow는 이 파일이 있을 때만 setup-php를 시작하며, `ci.yml`과 `dependency-review.yml`의 모든 setup-php step이 이를 읽습니다.
+- T24.26: wheel `polyspec-template`은 `packages/python/pylock.toml`이 고정하는 version인 `jsonschema==4.26.0`을 요구하고, 그 lock이 consumer의 lock이므로 `make release-assets`가 wheel을 받아들입니다.
 
 ## 0.0.7
 
