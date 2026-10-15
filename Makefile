@@ -183,7 +183,10 @@ lint-php-format: build-php
 # make install installs every tool of mise.lock with make install-tools: every Python check runs the shim
 # var/tools/mise/shims/python3 of the python of mise.toml, so every job has that interpreter after make install and no job
 # sets up a Python of its own (T24.12).
-install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
+# The Go modules that the modules of go.work require go into the module cache with go mod download, since every check
+# runs go with GOPROXY=off (T25.6-1).
+install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Go modules of go.work, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
+	$(ONLINE) $(GO) mod download
 	$(ONLINE) $(NODE) scripts/composer-install.mts .
 	$(ONLINE) $(NODE) scripts/python-wheelhouse.mts
 	$(MAKE) python-package
