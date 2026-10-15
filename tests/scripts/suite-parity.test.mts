@@ -25,7 +25,7 @@ function dryRun(target: string) {
 const CHECK_TARGETS = captured(read('Makefile').match(/^CHECK_TARGETS := (.*)$/m), 1, 'CHECK_TARGETS of the Makefile').split(/\s+/).filter(Boolean);
 
 test('make release-test-matrix runs the targets of make check through the same guard', () => {
-  const guard = `node node_modules/@polyspec/kit/dist/full-run.mjs run ${CHECK_TARGETS.join(' ')}`;
+  const guard = `${path.join(ROOT, 'var/tools/bin/node')} node_modules/@polyspec/kit/dist/full-run.mjs run ${CHECK_TARGETS.join(' ')}`;
   assert.deepEqual(dryRun('check'), [guard]);
   assert.deepEqual(dryRun('release-test-matrix'), [guard]);
 });

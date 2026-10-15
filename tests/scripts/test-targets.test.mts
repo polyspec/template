@@ -7,6 +7,8 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
+const NODE = path.join(ROOT, 'var/tools/bin/node');
 
 // The commands that make prints for `target` without running them. A make started by another make, as `make check`
 // starts `make test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
@@ -20,17 +22,17 @@ function commands(target: string) {
 const RUNS_TESTS_DIRECTLY = /\bnpm (?:test|run test:extension)\b|\bvitest\b(?! --cwd)|\bnode --test\b/;
 
 const RUNNERS: [string, string][] = [
-  ['test-ts', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/ts'],
-  ['test-language', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/language'],
-  ['test-lsp', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/lsp'],
-  ['test-codemirror', 'node node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/codemirror'],
-  ['test-vscode', 'node node_modules/@polyspec/kit/dist/run-tests.mjs node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs'],
+  ['test-ts', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/ts`],
+  ['test-language', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/language`],
+  ['test-lsp', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/lsp`],
+  ['test-codemirror', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/codemirror`],
+  ['test-vscode', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs`],
 ];
 for (const [target, runner] of RUNNERS) {
   test(`${target} runs its unit tests through the run-tests tool of @polyspec/kit`, () => {
     const lines = commands(target);
     assert.ok(lines.includes(runner), lines.join('\n'));
-    assert.deepEqual(lines.filter(line => !line.startsWith('node node_modules/@polyspec/kit/dist/run-tests.mjs') && RUNS_TESTS_DIRECTLY.test(line)), []);
+    assert.deepEqual(lines.filter(line => !line.startsWith(`${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs`) && RUNS_TESTS_DIRECTLY.test(line)), []);
   });
 }
 
@@ -50,7 +52,7 @@ const PHP_READERS: [string, string][] = [
 for (const [target, reader] of PHP_READERS) {
   test(`${target} installs the Composer packages of the root composer.json before ${reader}`, () => {
     const lines = commands(target);
-    const install = lines.indexOf('node scripts/composer-install.mts .');
+    const install = lines.indexOf(`${NODE} scripts/composer-install.mts .`);
     assert.notEqual(install, -1, `make -n ${target} does not install the Composer packages of the root composer.json:\n${lines.join('\n')}`);
   });
 }

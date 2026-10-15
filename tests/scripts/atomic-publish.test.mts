@@ -15,6 +15,8 @@ import test, { before } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
+const NODE = path.join(ROOT, 'var/tools/bin/node');
 const SCRIPT = path.join(ROOT, 'scripts/install-cli.mts');
 
 function commands(target: string) {
@@ -33,7 +35,7 @@ before(() => {
 test('make showcase and make bench write the mode benchmark with --output, not with a shell redirection', () => {
   for (const target of ['showcase', 'bench']) {
     const lines = commands(target).filter(line => line.includes('benchmark-modes.mts'));
-    assert.deepEqual(lines, ['node examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json'], `make -n ${target}`);
+    assert.deepEqual(lines, [`${NODE} examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json`], `make -n ${target}`);
   }
 });
 
