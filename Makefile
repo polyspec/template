@@ -442,7 +442,10 @@ package-installs-check: cargo-downloads-check typed-generator
 
 # parity-check and parity-declarations-check of kit read config/parity.json (T24.7): parity-check runs the native test of each
 # implementation that binds a shared suite, which reads the installed Composer packages, the PHP extension and the crates.
+# The ts symbol extractor reads the declarations that the build of the TypeScript package emits (packages/ts/dist/index.d.ts),
+# which both checks need to exist (symbols of config/parity.json, T22.6-14).
 parity-check: cargo-downloads-check build-php ext python-package
+parity-check parity-declarations-check: build-ts
 
 # R7 of the parity checks compares the error-code list of each implementation with the code tables of docs/spec/errors.md
 # (errors of config/parity.json); scripts/generate-error-codes.mts writes the lists from those tables (T22.6-15), and both
