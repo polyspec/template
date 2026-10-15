@@ -221,22 +221,18 @@ test('rust-toolchain.toml names the toolchain and the components that cargo of t
   }
 });
 
-test('PHP is a minor version of config/toolchain.json, also in every CI job, and Composer the release of mise.toml', () => {
+test('PHP is a minor version of config/toolchain.json, setup-php installs no tools, and Composer is the release of mise.toml', () => {
   const actual = recipe('cd . && php -r "echo PHP_MAJOR_VERSION, \'.\', PHP_MINOR_VERSION;"');
   assert.ok(TOOLCHAIN.php.includes(actual), `php of the recipes: expected a minor version of ${TOOLCHAIN.php.join(', ')} (config/toolchain.json), actual ${actual}`);
   const declared = textOf(tableOf(MISE_TOOLS['http:composer'], 'the http:composer tool of mise.toml').version, 'the version of the http:composer tool of mise.toml');
   assert.equal(recipe('command -v composer || true'), path.join(SHIMS, 'composer'), 'composer of the recipes is not the shim of mise; run make install-tools');
   const composer = /Composer version (\S+)/.exec(recipe('composer --version --no-ansi 2>/dev/null'))?.[1];
   assert.equal(composer, declared, `composer of the recipes: expected ${declared} (mise.toml), actual ${composer}`);
+  // The PHP that each setup-php step starts, .php-version or the matrix of config/toolchain.json, is checked by
+  // tests/scripts/php-version.test.mts (T24.27).
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
-      const strategy = job.value.strategy;
-      const matrix = isJsonObject(strategy) && isJsonObject(strategy.matrix) ? strategy.matrix : {};
-      if (matrix.php !== undefined) assert.deepEqual(matrix.php, TOOLCHAIN.php, `${file}: the PHP matrix differs from config/toolchain.json`);
       for (const step of usesOf(job, 'shivammathur/setup-php@')) {
-        const version = step.with['php-version'];
-        // A job of the PHP matrix takes its version from the matrix, which the line above checks.
-        if (version !== '${{ matrix.php }}') assert.ok(typeof version === 'string' && TOOLCHAIN.php.includes(version), `${file}: php-version ${shown(version)}, expected one of ${TOOLCHAIN.php.join(', ')}`);
         // Composer is a tool of mise.toml, so setup-php installs no tools of its own (T24.12).
         assert.equal(step.with.tools, 'none', `${file}: setup-php installs tools ${shown(step.with.tools)}; make install-tools installs Composer from mise.toml`);
       }

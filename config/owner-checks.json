@@ -788,12 +788,14 @@
     {
       "paths": [
         ".github/workflows/*.yml",
-        "config/toolchain.json"
+        "config/toolchain.json",
+        ".php-version"
       ],
       "tests": [
         "tests/scripts/suite-parity.test.mts",
         "tests/scripts/action-pins.test.mts",
-        "tests/scripts/job-timeouts.test.mts"
+        "tests/scripts/job-timeouts.test.mts",
+        "tests/scripts/php-version.test.mts"
       ],
       "targets": []
     },
