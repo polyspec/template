@@ -48,6 +48,7 @@
       "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema*.mts",
+        "scripts/generate-ast-validator.mts",
         "scripts/conformance-case-files.mts"
       ],
       "targets": [
@@ -984,6 +985,14 @@
       "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema-mutations.mts"
+      ]
+    },
+    {
+      "check": "make ast-validator-check",
+      "paths": [
+        "contracts/schema/ast.schema.json",
+        "scripts/generate-ast-validator.mts",
+        "packages/ts/src/ast-validator.mjs"
       ]
     },
     {
