@@ -13,7 +13,8 @@ const rustSymbol = (prefix: string, name: string): string => prefix + name.split
 const rustInput = (name: string): string => rustSymbol('Input', name);
 const rustDefinitionData = (name: string): string => rustSymbol('DefinitionData', name);
 // A typed value of generated Rust is read from a canonical Value into the Rust type of its destination.
-const convert = (value: string, destination: ValueType): string => `generated_result::<${rustType(destination.source)}>(&${value})?`;
+// A runtime conversion names the value by the input that it fills (ERR-13 paths name request values only).
+const convert = (value: string, destination: ValueType, name: string): string => `generated_result::<${rustType(destination.source)}>(&${value}, ${rustString(name)})?`;
 const unaryVariant: Record<ExprOf<'unary'>['operator'], string> = { '!': 'polyspec_template::ast::UnaryOp::Not', '-': 'polyspec_template::ast::UnaryOp::Negate' };
 const binaryVariant: Record<Exclude<ExprOf<'binary'>['operator'], '&&' | '||' | '??'>, string> = {
   '+': 'polyspec_template::ast::BinaryOp::Add', '-': 'polyspec_template::ast::BinaryOp::Subtract', '*': 'polyspec_template::ast::BinaryOp::Multiply',
@@ -40,7 +41,7 @@ export function createTarget({ program }: { program: Program }): Target {
 let Some(html) = definition.and_then(|value| value.html.as_ref()) else { return Err(runtime.error(context, &frame, ${rustSpan(node.span)}, ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, ${rustString(`define ${node.id} is not registered`)})); };
 context.write(html, &frame, ${rustSpan(node.span)})?;
 }`);
-    const value = (item: BlockInput, expression: Expr | null): [string, string][] => expression === null ? [] : [[fieldName(item.name), convert(emitExpression(expression, target), item.valueType)]];
+    const value = (item: BlockInput, expression: Expr | null): [string, string][] => expression === null ? [] : [[fieldName(item.name), convert(emitExpression(expression, target), item.valueType, item.name)]];
     const defaults = node.inputs.flatMap(item => value(item, item.root));
     const scopedFields = node.inputs.flatMap(item => value(item, item.scope));
     // Definition data replaces each field that it holds, one `if let` chain per field.
@@ -126,16 +127,13 @@ ${emitNodes(node.empty, target, n + 1)}
 }`);
   },
   include: (node, n) => indent(n, `context.enter(${rustString(node.target)}, Some(&frame), Some(${rustSpan(node.span)}))?;
-let rendered = ${functionName(node.target)}(assign, definitions, ${rustInput(node.target)} { ${node.inputs.map(item => `${fieldName(item.name)}: ${convert(emitExpression(item.value, target), item.valueType)}`).join(', ')} }, context, runtime, root_data, scope);
+let rendered = ${functionName(node.target)}(assign, definitions, ${rustInput(node.target)} { ${node.inputs.map(item => `${fieldName(item.name)}: ${convert(emitExpression(item.value, target), item.valueType, item.name)}`).join(', ')} }, context, runtime, root_data, scope);
 context.leave();
 rendered?;`),
   };
   return target;
 }
 
-// Generated Rust converts between runtime values and typed structs with GeneratedConvert, never
-// through JSON, so a native object in an `any` value reaches includes, blocks and definition data
-// as the same TemplateObject (VAL-18).
 /** What the templates of a program use, so the program declares nothing else (T24.29, T24.31). */
 interface RustUsage {
   /** Whether a value is converted back to a Value: a read of a typed root field or a template input. */
@@ -160,30 +158,33 @@ function rustUsage(context: BackendContext): RustUsage {
 
 /** An implementation of GeneratedConvert: `from_value` with the body `from`, and `to_value` with the body `to` when the program uses it. */
 const convertImpl = (usage: RustUsage, header: string, from: string, to: string): string =>
-  `${header} { fn from_value(input: &Value) -> Result<Self, TemplateError> ${from}${usage.toValue ? ` fn to_value(&self) -> Value ${to}` : ''} }`;
+  `${header} { fn from_value(input: &Value, path: &str) -> Result<Self, TemplateError> ${from}${usage.toValue ? ` fn to_value(&self) -> Value ${to}` : ''} }`;
 
 // A value that the program checks but never reads, such as a root field that no template reads or the data of a definition
 // that no block merges, is checked without a value of its type, so the program constructs no type that it does not read
 // and fails on the same values with the same messages as from_value (T24.31).
 const recordCheck = (name: string): string => `generated_check_${name.replace(/[A-Z]/g, (letter, at: number) => `${at === 0 ? '' : '_'}${letter.toLowerCase()}`).replace(/[^a-z0-9_]/g, '_')}`;
 
-/** A Rust expression of `Result<(), TemplateError>` that checks the `&Value` expression `value` against the manifest type `type`. */
+/**
+ * A Rust expression of `Result<(), TemplateError>` that checks the `&Value` expression `value` against the manifest type
+ * `type`, where the Rust variable `path` is the path of the value in the request (T24.33).
+ */
 function checkOf(type: string, value: string): string {
   return checkDescriptor(descriptor(type), value);
 }
 
 function checkDescriptor(type: Descriptor, value: string): string {
   if (type.optional) return `match ${value} { Value::Null => Ok(()), other => ${checkDescriptor({ ...type, optional: false }, 'other')} }`;
-  if (type.kind === 'list') return `match ${value} { Value::List(items) => items.iter().try_for_each(|item| ${checkDescriptor(type.item, 'item')}), _ => Err(generated_conversion_error("expected a list")) }`;
-  if (type.kind === 'map') return `match ${value} { Value::Map(map) => map.iter().try_for_each(|(key, item)| { ${checkDescriptor(type.key, '&Value::text(key.clone())')}?; ${checkDescriptor(type.value, 'item')} }), _ => Err(generated_conversion_error("expected a map")) }`;
-  if (type.kind === 'record') return `${recordCheck(type.name)}(${value})`;
-  return `<${rustType(type.kind)} as GeneratedConvert>::from_value(${value}).map(drop)`;
+  if (type.kind === 'list') return `match ${value} { Value::List(items) => items.iter().enumerate().try_for_each(|(index, item)| { let path = &format!("{path}[{index}]"); ${checkDescriptor(type.item, 'item')} }), other => Err(generated_type_error(other, path, "a list")) }`;
+  if (type.kind === 'map') return `match ${value} { Value::Map(map) => map.iter().try_for_each(|(key, item)| { ${checkDescriptor(type.key, '&Value::text(key.clone())')}?; let path = &format!("{path}.{key}"); ${checkDescriptor(type.value, 'item')} }), other => Err(generated_type_error(other, path, "an object")) }`;
+  if (type.kind === 'record') return `${recordCheck(type.name)}(${value}, path)`;
+  return `<${rustType(type.kind)} as GeneratedConvert>::from_value(${value}, path).map(drop)`;
 }
 
 const recordCheckCode = (name: string, members: Record<string, string>): string => {
-  const fields = Object.entries(members).map(([key, type]) => `generated_check_field(map, ${rustString(key)}, |value| ${checkOf(type, 'value')})?;`);
-  const map = fields.length > 0 ? `let Value::Map(map) = input else { return Err(generated_conversion_error(${rustString(`${name} is not a map`)})); }; ${fields.join(' ')}` : `if !matches!(input, Value::Map(_)) { return Err(generated_conversion_error(${rustString(`${name} is not a map`)})); }`;
-  return `fn ${recordCheck(name)}(input: &Value) -> Result<(), TemplateError> { ${map} Ok(()) }`;
+  const fields = Object.entries(members).map(([key, type]) => `generated_check_field(map, path, ${rustString(key)}, |value, path| ${checkOf(type, 'value')})?;`);
+  const map = fields.length > 0 ? `let Value::Map(map) = input else { return Err(generated_type_error(input, path, "an object")); }; ${fields.join(' ')}` : `if !matches!(input, Value::Map(_)) { return Err(generated_type_error(input, path, "an object")); }`;
+  return `fn ${recordCheck(name)}(input: &Value, path: &str) -> Result<(), TemplateError> { ${map} Ok(()) }`;
 };
 
 // Generated Rust converts between runtime values and typed structs with GeneratedConvert, never
@@ -191,8 +192,8 @@ const recordCheckCode = (name: string, members: Record<string, string>): string 
 // as the same TemplateObject (VAL-18). `read` names the members that the struct holds; every other member is checked.
 const recordConvert = (usage: RustUsage, name: string, members: Record<string, string>, read: (member: string) => boolean = () => true): string => {
   const held = Object.keys(members).filter(read);
-  const steps = Object.entries(members).map(([key, type]) => read(key) ? `let ${key} = generated_field(map, ${rustString(key)})?;` : `generated_check_field(map, ${rustString(key)}, |value| ${checkOf(type, 'value')})?;`);
-  const from = `{ let Value::Map(map) = input else { return Err(generated_conversion_error(${rustString(`${name} is not a map`)})); }; let _ = &map; ${steps.join(' ')} Ok(${name} { ${held.join(', ')} }) }`;
+  const steps = Object.entries(members).map(([key, type]) => read(key) ? `let ${key} = generated_field(map, path, ${rustString(key)})?;` : `generated_check_field(map, path, ${rustString(key)}, |value, path| ${checkOf(type, 'value')})?;`);
+  const from = `{ let Value::Map(map) = input else { return Err(generated_type_error(input, path, "an object")); }; let _ = (&map, path); ${steps.join(' ')} Ok(${name} { ${held.join(', ')} }) }`;
   const to = `{ let ${held.length ? 'mut ' : ''}map = RuntimeOrderedMap::new(); ${held.map(key => `map.insert(${rustString(key)}.to_string(), self.${key}.to_value());`).join(' ')} Value::map(map) }`;
   return convertImpl(usage, `impl GeneratedConvert for ${name}`, from, to);
 };
@@ -226,20 +227,23 @@ export function emitRuntime(context: BackendContext): Part[] {
   return [
     definition('GeneratedValue', `type GeneratedValue = Value;`),
     // The OrderedMap of the program, not polyspec_template::OrderedMap, which the program imports as RuntimeOrderedMap.
-    definition('OrderedMap', `#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }\n#[derive(Clone, Default)] pub struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }\nimpl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } }\n${convertImpl(usage, 'impl<K: GeneratedConvert + PartialEq, V: GeneratedConvert> GeneratedConvert for OrderedMap<K, V>', '{ let Value::Map(map) = input else { return Err(generated_conversion_error("expected a map")); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&Value::text(key.clone()))?, V::from_value(value)?); } Ok(result) }', '{ let mut map = RuntimeOrderedMap::new(); for entry in &self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) }')}`, /(?<![:\w])OrderedMap\b(?! as )/),
+    definition('OrderedMap', `#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }\n#[derive(Clone, Default)] pub struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }\nimpl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } }\n${convertImpl(usage, 'impl<K: GeneratedConvert + PartialEq, V: GeneratedConvert> GeneratedConvert for OrderedMap<K, V>', '{ let Value::Map(map) = input else { return Err(generated_type_error(input, path, "an object")); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&Value::text(key.clone()), path)?, V::from_value(value, &format!("{path}.{key}"))?); } Ok(result) }', '{ let mut map = RuntimeOrderedMap::new(); for entry in &self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) }')}`, /(?<![:\w])OrderedMap\b(?! as )/),
     definition('generated_conversion_error', `fn generated_conversion_error(message: impl Into<String>) -> TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message) }`),
-    `pub trait GeneratedConvert: Sized { fn from_value(input: &Value) -> Result<Self, TemplateError>;${usage.toValue ? ' fn to_value(&self) -> Value;' : ''} }`,
-    convertImpl(usage, 'impl GeneratedConvert for Value', '{ Ok(input.clone()) }', '{ self.clone() }'),
-    convertImpl(usage, 'impl GeneratedConvert for String', '{ input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error("expected a string")) }', '{ Value::text(self.clone()) }'),
-    convertImpl(usage, 'impl GeneratedConvert for f64', '{ match input { Value::Number(number) => Ok(*number), _ => Err(generated_conversion_error("expected a number")) } }', '{ Value::Number(*self) }'),
-    convertImpl(usage, 'impl GeneratedConvert for bool', '{ match input { Value::Bool(value) => Ok(*value), _ => Err(generated_conversion_error("expected a boolean")) } }', '{ Value::Bool(*self) }'),
-    convertImpl(usage, 'impl<T: GeneratedConvert> GeneratedConvert for Option<T>', '{ match input { Value::Null => Ok(None), other => T::from_value(other).map(Some) } }', '{ self.as_ref().map_or(Value::Null, T::to_value) }'),
-    convertImpl(usage, 'impl<T: GeneratedConvert> GeneratedConvert for Vec<T>', '{ match input { Value::List(items) => items.iter().map(T::from_value).collect(), _ => Err(generated_conversion_error("expected a list")) } }', '{ Value::list(self.iter().map(T::to_value).collect()) }'),
-    definition('generated_field', `fn generated_field<T: GeneratedConvert>(map: &RuntimeOrderedMap, name: &str) -> Result<T, TemplateError> { T::from_value(map.get(name).unwrap_or(&Value::Null)).map_err(|error| generated_conversion_error(format!("{name}: {}", error.message))) }`),
-    definition('generated_check_field', `fn generated_check_field(map: &RuntimeOrderedMap, name: &str, check: impl Fn(&Value) -> Result<(), TemplateError>) -> Result<(), TemplateError> { check(map.get(name).unwrap_or(&Value::Null)).map_err(|error| generated_conversion_error(format!("{name}: {}", error.message))) }`),
+    `pub trait GeneratedConvert: Sized { fn from_value(input: &Value, path: &str) -> Result<Self, TemplateError>;${usage.toValue ? ' fn to_value(&self) -> Value;' : ''} }`,
+    convertImpl(usage, 'impl GeneratedConvert for Value', '{ let _ = path; Ok(input.clone()) }', '{ self.clone() }'),
+    convertImpl(usage, 'impl GeneratedConvert for String', '{ input.as_text().map(str::to_string).ok_or_else(|| generated_type_error(input, path, "a string")) }', '{ Value::text(self.clone()) }'),
+    convertImpl(usage, 'impl GeneratedConvert for f64', '{ match input { Value::Number(number) => Ok(*number), _ => Err(generated_type_error(input, path, "a number")) } }', '{ Value::Number(*self) }'),
+    convertImpl(usage, 'impl GeneratedConvert for bool', '{ match input { Value::Bool(value) => Ok(*value), _ => Err(generated_type_error(input, path, "a boolean")) } }', '{ Value::Bool(*self) }'),
+    convertImpl(usage, 'impl<T: GeneratedConvert> GeneratedConvert for Option<T>', '{ match input { Value::Null => Ok(None), other => T::from_value(other, path).map(Some) } }', '{ self.as_ref().map_or(Value::Null, T::to_value) }'),
+    convertImpl(usage, 'impl<T: GeneratedConvert> GeneratedConvert for Vec<T>', '{ match input { Value::List(items) => items.iter().enumerate().map(|(index, item)| T::from_value(item, &format!("{path}[{index}]"))).collect(), _ => Err(generated_type_error(input, path, "a list")) } }', '{ Value::list(self.iter().map(T::to_value).collect()) }'),
+    // A value of a request that does not match its declared type fails with the message of ERR-13: `<path> is required` or
+    // `<path> is not <expected>`, with the path of the value in the request (T24.33).
+    definition('generated_type_error', `fn generated_type_error(input: &Value, path: &str, expected: &str) -> TemplateError { generated_conversion_error(if matches!(input, Value::Null) { format!("{path} is required") } else { format!("{path} is not {expected}") }) }`),
+    definition('generated_field', `fn generated_field<T: GeneratedConvert>(map: &RuntimeOrderedMap, path: &str, name: &str) -> Result<T, TemplateError> { T::from_value(map.get(name).unwrap_or(&Value::Null), &format!("{path}.{name}")) }`),
+    definition('generated_check_field', `fn generated_check_field(map: &RuntimeOrderedMap, path: &str, name: &str, check: impl Fn(&Value, &str) -> Result<(), TemplateError>) -> Result<(), TemplateError> { check(map.get(name).unwrap_or(&Value::Null), &format!("{path}.{name}")) }`),
     ...Object.entries(context.manifest.records).map(([name, members]) => definition(recordCheck(name), recordCheckCode(name, members))),
     definition('generated_value', `fn generated_value<T: GeneratedConvert>(input: &T) -> Result<Value, TemplateError> { Ok(input.to_value()) }`),
-    definition('generated_result', `fn generated_result<T: GeneratedConvert>(input: &Value) -> Result<T, TemplateError> { T::from_value(input) }`),
+    definition('generated_result', `fn generated_result<T: GeneratedConvert>(input: &Value, path: &str) -> Result<T, TemplateError> { T::from_value(input, path) }`),
     definition('generated_loop_meta', `fn generated_loop_meta(runtime: &RuntimeBindings, context: &RenderContext<'_>, scope: &Scope, frame: &Frame, span: polyspec_template::error::Span, name: &str, field: &str) -> Result<Value, TemplateError> { let meta = scope.loop_meta(name).ok_or_else(|| runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} is not active")))?; Ok(match field { "index_" => Value::Number(meta.index as f64), "size_" => Value::Number(meta.size as f64), "first_" => Value::Bool(meta.first), "last_" => Value::Bool(meta.last), "key_" => meta.key.clone(), "value_" => meta.value.clone(), _ => return Err(runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} has no metadata {field}"))) }) }`),
   ];
 }
@@ -261,11 +265,11 @@ export function emitEntry(context: BackendContext): string {
     const bound = `polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))?`;
     const notObject = `_ => return Err(generated_error(format!("define.{id}.data is not an object")))`;
     // The data of a definition that no block merges is checked as the data that a block merges is read (T24.31).
-    const checks = inputs.map(([inputName, type]) => `if let Some(value) = map.get(${rustString(inputName)}) { ${checkOf(type.source, 'value')}.map_err(|error| generated_error(format!("define.{id}.data.${inputName}: {}", error.message)))?; }`);
+    const checks = inputs.map(([inputName, type]) => `if let Some(value) = map.get(${rustString(inputName)}) { let path = &format!("define.{id}.data.${inputName}"); ${checkOf(type.source, 'value')}.map_err(|error| generated_error(error.message))?; }`);
     const data = !definition.template
       ? (usage.definitionData ? 'let data: Option<()> = None;' : '')
       : usage.definitionData
-        ? `let data = match &input.data { None => None, Some(data) => match ${bound} { Value::Map(map) => { let _ = &map; Some(${dataType} { ${inputs.map(([inputName]) => `${fieldName(inputName)}: map.get(${rustString(inputName)}).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!("define.{id}.data.${inputName}: {}", error.message)))?`).join(', ')} }) }, ${notObject} } };`
+        ? `let data = match &input.data { None => None, Some(data) => match ${bound} { Value::Map(map) => { let _ = &map; Some(${dataType} { ${inputs.map(([inputName]) => `${fieldName(inputName)}: map.get(${rustString(inputName)}).map(|value| GeneratedConvert::from_value(value, &format!("define.{id}.data.${inputName}"))).transpose().map_err(|error| generated_error(error.message))?`).join(', ')} }) }, ${notObject} } };`
         : `if let Some(data) = &input.data { match ${bound} { Value::Map(${checks.length > 0 ? 'map' : '_'}) => { ${checks.join(' ')} }, ${notObject} } }`;
     const held = [usage.definitionTemplate ? 'template: input.template.clone()' : '', usage.definitionData ? 'data' : ''].filter(Boolean);
     const templateDefinition = held.length > 0 ? `Definition { ${held.join(', ')}, ..Default::default() }` : 'Definition::default()';
@@ -282,7 +286,7 @@ definitions.${field} = Some(${templateDefinition}); targets.insert(id.clone(), G
   const bindDefinitions = context.program.definitions.size > 0
     ? `fn generated_bind_definitions(${bindParameters}) -> Result<(Definitions, HashMap<String, GeneratedTarget>), RequestError> { let mut definitions = Definitions::default(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {\n${definitionCases}\n            _ => return Err(generated_error(format!("define.{id} is not declared"))),\n        } } Ok((definitions, targets)) }`
     : `fn generated_bind_definitions(${bindParameters}) -> Result<(Definitions, HashMap<String, GeneratedTarget>), RequestError> { if let Some(id) = input.keys().next() { return Err(generated_error(format!("define.{id} is not declared"))); } Ok((Definitions::default(), HashMap::new())) }`;
-  const bindAssign = context.program.dynamicRoot ? 'Assign::default()' : 'Assign::from_value(&Value::Map(Rc::clone(&root_data))).map_err(|error| generated_error(error.message))?';
+  const bindAssign = context.program.dynamicRoot ? 'Assign::default()' : 'Assign::from_value(&Value::Map(Rc::clone(&root_data)), "assign").map_err(|error| generated_error(error.message))?';
   const nativeRender = context.program.dynamicRoot
     ? `pub fn render_values(&self, target: RenderTarget<'_>, assign: RuntimeOrderedMap, options: &RenderOptions) -> Result<String, RequestError> { let RenderTarget::Name(name) = target else { return Err(generated_error("native generated target must be a template name".to_string())); }; internal_boundary(name, || self.render_bound_values(name, &assign, options)) } fn render_bound_values(&self, name: &str, assign: &RuntimeOrderedMap, options: &RenderOptions) -> Result<String, RequestError> { let root_data = Rc::new(polyspec_template::bind_values(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); let typed_assign = Assign::default(); let (definitions, targets) = ${bindCall}?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: "Z".to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); let mut context = RenderContext::new(&self.runtime, Rc::clone(&root_data), env, &target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions; context.enter(&target_name, None, None)?; let result = if let Some(html) = &html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&root_data) }; context.write(html, &frame, [0, 0]) } else { render_template(&target_name, &typed_assign, &mut render_definitions, &mut context, &runtime, &root_data, &mut scope) }; context.leave(); result?; Ok(context.output) }`
     : '';

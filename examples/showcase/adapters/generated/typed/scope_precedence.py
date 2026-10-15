@@ -81,7 +81,14 @@ def _generated_bind_type(value, type_, path):
             else isinstance(value, bool)
         )
         if not valid:
-            raise ValueError(f"{path} has an invalid type")
+            expected = (
+                "a string"
+                if kind == "string"
+                else "a number"
+                if kind == "number"
+                else "a boolean"
+            )
+            raise ValueError(f"{path} is not {expected}")
         return check_number(value) if kind == "number" else value
     if kind == "list":
         if not isinstance(value, list):
@@ -92,7 +99,7 @@ def _generated_bind_type(value, type_, path):
         ]
     if kind == "map":
         if not isinstance(value, dict):
-            raise ValueError(f"{path} is not a map")
+            raise ValueError(f"{path} is not an object")
         return {
             key: _generated_bind_type(item, type_["value"], f"{path}.{key}")
             for key, item in value.items()
@@ -184,8 +191,7 @@ def _generated_bind_assign(value):
     root = bind_map(value)
     values = {}
     for name, type_ in _GENERATED_ASSIGN_SCHEMA.items():
-        if name in root:
-            values[name] = _generated_bind_type(root[name], type_, "assign." + name)
+        values[name] = _generated_bind_type(root.get(name), type_, "assign." + name)
     return Assign(**values), root
 
 

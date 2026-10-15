@@ -1,1 +1,1 @@
-{= title}|{# part.tpl name:title}
+{= title}|{# part.tpl}

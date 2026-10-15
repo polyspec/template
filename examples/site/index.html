@@ -1754,11 +1754,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;683a9d19ef03ec52f1181824b452d4c12716dfd1c1cd281b0d95fdbfb951e974&quot;,
+  &quot;compilerDigest&quot;: &quot;45312e93dc75fa9cac0af4448f4b43508dff97b90f52d7c3d1407e5852dbc284&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;690d0133c6e79eadb11d3a818151b27bea68650c4d5defa65229fc10893ea6a6&quot;
+      &quot;artifactDigest&quot;: &quot;3e46e99df34537416e9f7a268f6ff88b7b01369b786988c096d7ee3f433f988d&quot;
     }
   }
 }
@@ -1866,6 +1866,8 @@ type ArtifactManifest struct {
 	ContractDigest string
 	Files          map[string]string
 }
+
+var generatedRecordFields = map[string][]generatedField{&quot;Page&quot;: []generatedField{{Name: &quot;title&quot;, Type: generatedType{Kind: &quot;string&quot;}}}, &quot;Row&quot;: []generatedField{{Name: &quot;name&quot;, Type: generatedType{Kind: &quot;string&quot;}}}, &quot;Slot&quot;: []generatedField{{Name: &quot;template&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}, {Name: &quot;html&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}}}
 
 type OrderedEntry[K comparable, V any] struct {
 	Key   K
@@ -2097,6 +2099,84 @@ func generatedPlain(input any) any {
 	default:
 		return input
 	}
+}
+
+type generatedType struct {
+	Kind     string
+	Optional bool
+	Name     string
+	Item     *generatedType
+	Key      *generatedType
+	Value    *generatedType
+}
+
+type generatedField struct {
+	Name string
+	Type generatedType
+}
+
+func generatedCheck(input value.Value, kind generatedType, records map[string][]generatedField, path string) error {
+	if input == nil {
+		if kind.Optional || kind.Kind == &quot;any&quot; {
+			return nil
+		}
+		return fmt.Errorf(&quot;%s is required&quot;, path)
+	}
+	actual := value.TypeOf(input)
+	switch kind.Kind {
+	case &quot;any&quot;:
+		return nil
+	case &quot;string&quot;:
+		if actual != value.TypeString {
+			return fmt.Errorf(&quot;%s is not a string&quot;, path)
+		}
+	case &quot;number&quot;:
+		if actual != value.TypeNumber {
+			return fmt.Errorf(&quot;%s is not a number&quot;, path)
+		}
+	case &quot;boolean&quot;:
+		if actual != value.TypeBool {
+			return fmt.Errorf(&quot;%s is not a boolean&quot;, path)
+		}
+	case &quot;list&quot;:
+		items, ok := input.(value.List)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not a list&quot;, path)
+		}
+		for index, item := range items {
+			if err := generatedCheck(item, *kind.Item, records, fmt.Sprintf(&quot;%s[%d]&quot;, path, index)); err != nil {
+				return err
+			}
+		}
+	case &quot;map&quot;:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		for _, key := range entries.Keys() {
+			item, _ := entries.Get(key)
+			if err := generatedCheck(item, *kind.Value, records, path+&quot;.&quot;+key); err != nil {
+				return err
+			}
+		}
+	default:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		return generatedCheckFields(entries, records[kind.Name], records, path)
+	}
+	return nil
+}
+
+func generatedCheckFields(input *value.OrderedMap, fields []generatedField, records map[string][]generatedField, path string) error {
+	for _, field := range fields {
+		item, _ := input.Get(field.Name)
+		if err := generatedCheck(item, field.Type, records, path+&quot;.&quot;+field.Name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func generatedDecode(input any, output any) error {
@@ -2331,10 +2411,13 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 				}
 				data, ok := bound.(*value.OrderedMap)
 				if !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_card_tpl{}
 				if raw, found := data.Get(&quot;label&quot;); found {
+					if err := generatedCheck(raw, generatedType{Kind: &quot;string&quot;}, generatedRecordFields, &quot;define.&quot;+id+&quot;.data.&quot;+&quot;label&quot;); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf(&quot;define.%s.data.%s: %w&quot;, id, &quot;label&quot;, err)
@@ -2359,7 +2442,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_layout_tpl{}
 				entry.Data = &amp;definitionData
@@ -2442,6 +2525,9 @@ func (p *GeneratedProgram) prepare(name string, assign any, options template.Ren
 		return nil, generatedBindFailure(name, err)
 	}
 	var typedAssign Assign
+	if err := generatedCheckFields(rootData, []generatedField{{Name: &quot;flag&quot;, Type: generatedType{Kind: &quot;boolean&quot;}}, {Name: &quot;dangerous&quot;, Type: generatedType{Kind: &quot;string&quot;}}, {Name: &quot;empty_list&quot;, Type: generatedType{Kind: &quot;list&quot;, Item: &amp;generatedType{Kind: &quot;string&quot;}}}, {Name: &quot;empty_map&quot;, Type: generatedType{Kind: &quot;map&quot;, Key: &amp;generatedType{Kind: &quot;string&quot;}, Value: &amp;generatedType{Kind: &quot;string&quot;}}}, {Name: &quot;page&quot;, Type: generatedType{Kind: &quot;record&quot;, Name: &quot;Page&quot;}}, {Name: &quot;numbers&quot;, Type: generatedType{Kind: &quot;list&quot;, Item: &amp;generatedType{Kind: &quot;number&quot;}}}, {Name: &quot;lookup&quot;, Type: generatedType{Kind: &quot;map&quot;, Key: &amp;generatedType{Kind: &quot;string&quot;}, Value: &amp;generatedType{Kind: &quot;string&quot;}}}, {Name: &quot;rows&quot;, Type: generatedType{Kind: &quot;list&quot;, Item: &amp;generatedType{Kind: &quot;record&quot;, Name: &quot;Row&quot;}}}}, generatedRecordFields, &quot;assign&quot;); err != nil {
+		return nil, err
+	}
 	if err := generatedDecode(rootData, &amp;typedAssign); err != nil {
 		return nil, err
 	}
@@ -2477,11 +2563,11 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;867f3b8779d2c8efc4c033304403289a26a341a8b9d0dc75e78d6d226eaae431&quot;,
+  &quot;compilerDigest&quot;: &quot;88d74f055ec030758070b516d0cd35473b90e243ae8571128c3187ba0162631f&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.rust&quot;,
-      &quot;artifactDigest&quot;: &quot;7ca34859205fc504edce7e91f80056a2275686ee17bca47030352773716fe8f7&quot;
+      &quot;artifactDigest&quot;: &quot;02a59e563c9a631b45a902749a27d20611407108b112fb622ddc077c92eb4e6f&quot;
     }
   }
 }
@@ -2504,7 +2590,7 @@ use std::rc::Rc;
     pub lookup: OrderedMap&lt;String, String&gt;,
     pub rows: Vec&lt;Row&gt;,
 }
-impl GeneratedConvert for Assign { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Assign is not a map&quot;)); }; let _ = &amp;map; let flag = generated_field(map, &quot;flag&quot;)?; let dangerous = generated_field(map, &quot;dangerous&quot;)?; let empty_list = generated_field(map, &quot;empty_list&quot;)?; let empty_map = generated_field(map, &quot;empty_map&quot;)?; let page = generated_field(map, &quot;page&quot;)?; let numbers = generated_field(map, &quot;numbers&quot;)?; let lookup = generated_field(map, &quot;lookup&quot;)?; let rows = generated_field(map, &quot;rows&quot;)?; Ok(Assign { flag, dangerous, empty_list, empty_map, page, numbers, lookup, rows }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;flag&quot;.to_string(), self.flag.to_value()); map.insert(&quot;dangerous&quot;.to_string(), self.dangerous.to_value()); map.insert(&quot;empty_list&quot;.to_string(), self.empty_list.to_value()); map.insert(&quot;empty_map&quot;.to_string(), self.empty_map.to_value()); map.insert(&quot;page&quot;.to_string(), self.page.to_value()); map.insert(&quot;numbers&quot;.to_string(), self.numbers.to_value()); map.insert(&quot;lookup&quot;.to_string(), self.lookup.to_value()); map.insert(&quot;rows&quot;.to_string(), self.rows.to_value()); Value::map(map) } }
+impl GeneratedConvert for Assign { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); let flag = generated_field(map, path, &quot;flag&quot;)?; let dangerous = generated_field(map, path, &quot;dangerous&quot;)?; let empty_list = generated_field(map, path, &quot;empty_list&quot;)?; let empty_map = generated_field(map, path, &quot;empty_map&quot;)?; let page = generated_field(map, path, &quot;page&quot;)?; let numbers = generated_field(map, path, &quot;numbers&quot;)?; let lookup = generated_field(map, path, &quot;lookup&quot;)?; let rows = generated_field(map, path, &quot;rows&quot;)?; Ok(Assign { flag, dangerous, empty_list, empty_map, page, numbers, lookup, rows }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;flag&quot;.to_string(), self.flag.to_value()); map.insert(&quot;dangerous&quot;.to_string(), self.dangerous.to_value()); map.insert(&quot;empty_list&quot;.to_string(), self.empty_list.to_value()); map.insert(&quot;empty_map&quot;.to_string(), self.empty_map.to_value()); map.insert(&quot;page&quot;.to_string(), self.page.to_value()); map.insert(&quot;numbers&quot;.to_string(), self.numbers.to_value()); map.insert(&quot;lookup&quot;.to_string(), self.lookup.to_value()); map.insert(&quot;rows&quot;.to_string(), self.rows.to_value()); Value::map(map) } }
 #[derive(Clone, Default)] pub struct InputCardTpl { pub label: String }
 #[derive(Clone, Default)] pub struct InputLayoutTpl {  }
 #[derive(Clone, Default)] pub struct InputPartialTpl { pub values: Vec&lt;f64&gt; }
@@ -2513,24 +2599,25 @@ impl GeneratedConvert for Assign { fn from_value(input: &amp;Value) -&gt; Result
 #[derive(Clone, Default)] pub struct Definition&lt;T&gt; { pub html: Option&lt;String&gt;, pub data: Option&lt;T&gt; }
 #[derive(Clone, Default)] pub struct Definitions { pub content: Option&lt;Definition&lt;DefinitionDataCardTpl&gt;&gt;, pub layout: Option&lt;Definition&lt;DefinitionDataLayoutTpl&gt;&gt; }
 #[derive(Clone, Default)] pub struct Page { pub title: String }
-impl GeneratedConvert for Page { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Page is not a map&quot;)); }; let _ = &amp;map; let title = generated_field(map, &quot;title&quot;)?; Ok(Page { title }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;title&quot;.to_string(), self.title.to_value()); Value::map(map) } }
+impl GeneratedConvert for Page { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); let title = generated_field(map, path, &quot;title&quot;)?; Ok(Page { title }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;title&quot;.to_string(), self.title.to_value()); Value::map(map) } }
 #[derive(Clone, Default)] pub struct Row { pub name: String }
-impl GeneratedConvert for Row { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Row is not a map&quot;)); }; let _ = &amp;map; let name = generated_field(map, &quot;name&quot;)?; Ok(Row { name }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;name&quot;.to_string(), self.name.to_value()); Value::map(map) } }
+impl GeneratedConvert for Row { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); let name = generated_field(map, path, &quot;name&quot;)?; Ok(Row { name }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;name&quot;.to_string(), self.name.to_value()); Value::map(map) } }
 #[derive(Clone)] struct OrderedEntry&lt;K, V&gt; { key: K, value: V }
 #[derive(Clone, Default)] pub struct OrderedMap&lt;K, V&gt; { entries: Vec&lt;OrderedEntry&lt;K, V&gt;&gt; }
 impl&lt;K: PartialEq, V&gt; OrderedMap&lt;K, V&gt; { fn new() -&gt; Self { Self { entries: Vec::new() } } fn set(&amp;mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } }
-impl&lt;K: GeneratedConvert + PartialEq, V: GeneratedConvert&gt; GeneratedConvert for OrderedMap&lt;K, V&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;expected a map&quot;)); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&amp;Value::text(key.clone()))?, V::from_value(value)?); } Ok(result) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); for entry in &amp;self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) } }
+impl&lt;K: GeneratedConvert + PartialEq, V: GeneratedConvert&gt; GeneratedConvert for OrderedMap&lt;K, V&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&amp;Value::text(key.clone()), path)?, V::from_value(value, &amp;format!(&quot;{path}.{key}&quot;))?); } Ok(result) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); for entry in &amp;self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) } }
 fn generated_conversion_error(message: impl Into&lt;String&gt;) -&gt; TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &quot;generated&quot;, message) }
-pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
-impl GeneratedConvert for Value { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
-impl GeneratedConvert for String { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error(&quot;expected a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
-impl GeneratedConvert for f64 { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_conversion_error(&quot;expected a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
-impl GeneratedConvert for bool { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_conversion_error(&quot;expected a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().map(T::from_value).collect(), _ =&gt; Err(generated_conversion_error(&quot;expected a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
-fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null)).map_err(|error| generated_conversion_error(format!(&quot;{name}: {}&quot;, error.message))) }
+pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
+impl GeneratedConvert for Value { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let _ = path; Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
+impl GeneratedConvert for String { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_type_error(input, path, &quot;a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
+impl GeneratedConvert for f64 { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_type_error(input, path, &quot;a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
+impl GeneratedConvert for bool { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_type_error(input, path, &quot;a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other, path).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().enumerate().map(|(index, item)| T::from_value(item, &amp;format!(&quot;{path}[{index}]&quot;))).collect(), _ =&gt; Err(generated_type_error(input, path, &quot;a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
+fn generated_type_error(input: &amp;Value, path: &amp;str, expected: &amp;str) -&gt; TemplateError { generated_conversion_error(if matches!(input, Value::Null) { format!(&quot;{path} is required&quot;) } else { format!(&quot;{path} is not {expected}&quot;) }) }
+fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, path: &amp;str, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null), &amp;format!(&quot;{path}.{name}&quot;)) }
 fn generated_value&lt;T: GeneratedConvert&gt;(input: &amp;T) -&gt; Result&lt;Value, TemplateError&gt; { Ok(input.to_value()) }
-fn generated_result&lt;T: GeneratedConvert&gt;(input: &amp;Value) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(input) }
+fn generated_result&lt;T: GeneratedConvert&gt;(input: &amp;Value, path: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(input, path) }
 fn generated_loop_meta(runtime: &amp;RuntimeBindings, context: &amp;RenderContext&lt;&#39;_&gt;, scope: &amp;Scope, frame: &amp;Frame, span: polyspec_template::error::Span, name: &amp;str, field: &amp;str) -&gt; Result&lt;Value, TemplateError&gt; { let meta = scope.loop_meta(name).ok_or_else(|| runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!(&quot;loop {name} is not active&quot;)))?; Ok(match field { &quot;index_&quot; =&gt; Value::Number(meta.index as f64), &quot;size_&quot; =&gt; Value::Number(meta.size as f64), &quot;first_&quot; =&gt; Value::Bool(meta.first), &quot;last_&quot; =&gt; Value::Bool(meta.last), &quot;key_&quot; =&gt; meta.key.clone(), &quot;value_&quot; =&gt; meta.value.clone(), _ =&gt; return Err(runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!(&quot;loop {name} has no metadata {field}&quot;))) }) }
 fn render_card_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputCardTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;card.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 30])), context: Rc::clone(root_data) };
 scope.locals.insert(&quot;label&quot;.to_string(), generated_value(&amp;input.label)?);
@@ -2600,7 +2687,7 @@ fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, inp
     }
     context.write(&quot;&lt;/ul&gt;\u{a}&quot;, &amp;frame, [586, 592])?;
     context.enter(&quot;partial.tpl&quot;, Some(&amp;frame), Some([592, 607]))?;
-    let rendered = render_partial_tpl(assign, definitions, InputPartialTpl { values: generated_result::&lt;Vec&lt;f64&gt;&gt;(&amp;scope.lookup(&amp;frame, &quot;values&quot;))? }, context, runtime, root_data, scope);
+    let rendered = render_partial_tpl(assign, definitions, InputPartialTpl { values: generated_result::&lt;Vec&lt;f64&gt;&gt;(&amp;scope.lookup(&amp;frame, &quot;values&quot;), &quot;values&quot;)? }, context, runtime, root_data, scope);
     context.leave();
     rendered?;
     if definitions.content.is_some() {
@@ -2614,7 +2701,7 @@ fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, inp
     if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &amp;frame, [655, 683])?; } else {
         let mut input = InputCardTpl::default();
         if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) &amp;&amp; let Some(value) = data.label.clone() { input.label = value; }
-        input.label = generated_result::&lt;String&gt;(&amp;runtime.member(context, &amp;generated_value(&amp;assign.page)?, &quot;title&quot;, &amp;frame, [672, 682])?)?;
+        input.label = generated_result::&lt;String&gt;(&amp;runtime.member(context, &amp;generated_value(&amp;assign.page)?, &quot;title&quot;, &amp;frame, [672, 682])?, &quot;label&quot;)?;
         let mut block_scope = Scope::default();
         context.enter(&quot;card.tpl&quot;, Some(&amp;frame), Some([655, 683]))?;
         let rendered = render_card_tpl(assign, definitions, input, context, runtime, root_data, &amp;mut block_scope);
@@ -2638,7 +2725,7 @@ fn generated_error(message: String) -&gt; RequestError { RequestError::Argument(
 struct GeneratedTarget { target: Option&lt;String&gt;, html: Option&lt;String&gt; }
 fn generated_bind_definitions(name: &amp;str, input: &amp;HashMap&lt;String, polyspec_template::DefineInput&gt;) -&gt; Result&lt;(Definitions, HashMap&lt;String, GeneratedTarget&gt;), RequestError&gt; { let mut definitions = Definitions::default(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {
             &quot;content&quot; =&gt; { if let Some(html) = &amp;input.html { if false || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!(&quot;define.{id} has an invalid html entry&quot;))); } definitions.content = Some(Definition { html: Some(html.clone()), ..Default::default() }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some(&quot;card.tpl&quot;) { return Err(generated_error(format!(&quot;define.{id} has an invalid template&quot;))); }
-let data = match &amp;input.data { None =&gt; None, Some(data) =&gt; match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) =&gt; { let _ = &amp;map; Some(DefinitionDataCardTpl { label: map.get(&quot;label&quot;).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!(&quot;define.{id}.data.label: {}&quot;, error.message)))? }) }, _ =&gt; return Err(generated_error(format!(&quot;define.{id}.data is not an object&quot;))) } };
+let data = match &amp;input.data { None =&gt; None, Some(data) =&gt; match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) =&gt; { let _ = &amp;map; Some(DefinitionDataCardTpl { label: map.get(&quot;label&quot;).map(|value| GeneratedConvert::from_value(value, &amp;format!(&quot;define.{id}.data.label&quot;))).transpose().map_err(|error| generated_error(error.message))? }) }, _ =&gt; return Err(generated_error(format!(&quot;define.{id}.data is not an object&quot;))) } };
 definitions.content = Some(Definition { data, ..Default::default() }); targets.insert(id.clone(), GeneratedTarget { target: Some(&quot;card.tpl&quot;.to_string()), html: None }); } },
             &quot;layout&quot; =&gt; { if let Some(html) = &amp;input.html { if true || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!(&quot;define.{id} has an invalid html entry&quot;))); } definitions.layout = Some(Definition { html: Some(html.clone()), ..Default::default() }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some(&quot;layout.tpl&quot;) { return Err(generated_error(format!(&quot;define.{id} has an invalid template&quot;))); }
 let data = match &amp;input.data { None =&gt; None, Some(data) =&gt; match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) =&gt; { let _ = &amp;map; Some(DefinitionDataLayoutTpl {  }) }, _ =&gt; return Err(generated_error(format!(&quot;define.{id}.data is not an object&quot;))) } };
@@ -2648,7 +2735,7 @@ definitions.layout = Some(Definition { data, ..Default::default() }); targets.in
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }
 impl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -&gt; GeneratedProgram { GeneratedProgram { runtime } }  }
 impl Program for GeneratedProgram { fn prepare(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || { let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); self.prepare_root(name, root_data, options) }) } fn render(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare(target, assign, options)?.render()?) } fn prepare_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || self.prepare_root(name, polyspec_template::bound_root(assign), options)) } fn render_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare_bound(target, assign, options)?.render()?) } }
-impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data))).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
+impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data)), &quot;assign&quot;).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
 
 
 php · product generated program
@@ -2660,7 +2747,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e22e61a6f550d552f35f3379260b92a398855933b960deaa9b328f86fa4a783b&quot;,
+  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -2716,7 +2803,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;dedb9642eb34ac28d69d44042614620676afbdf5eb1ad8544a7f9aa31cf956c5&quot;
+      &quot;artifactDigest&quot;: &quot;2e76717a7207049fe74de320015ae8ddf2a6e015b11dcc7d345a8ebc3717b59f&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -3507,11 +3594,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;683a9d19ef03ec52f1181824b452d4c12716dfd1c1cd281b0d95fdbfb951e974&quot;,
+  &quot;compilerDigest&quot;: &quot;45312e93dc75fa9cac0af4448f4b43508dff97b90f52d7c3d1407e5852dbc284&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;5dfc5cf4224acf02196aa656927fe322617466dfa157de81016fdde713d1b81e&quot;
+      &quot;artifactDigest&quot;: &quot;1ad27bd79c1dab5d79046f65e54d2d5492513d9820f54f429183457e23dceb94&quot;
     }
   }
 }
@@ -3564,6 +3651,8 @@ type ArtifactManifest struct {
 	Files          map[string]string
 }
 
+var generatedRecordFields = map[string][]generatedField{}
+
 func generatedPanic(err error) {
 	if err != nil {
 		panic(err)
@@ -3592,6 +3681,84 @@ func generatedPlain(input any) any {
 	default:
 		return input
 	}
+}
+
+type generatedType struct {
+	Kind     string
+	Optional bool
+	Name     string
+	Item     *generatedType
+	Key      *generatedType
+	Value    *generatedType
+}
+
+type generatedField struct {
+	Name string
+	Type generatedType
+}
+
+func generatedCheck(input value.Value, kind generatedType, records map[string][]generatedField, path string) error {
+	if input == nil {
+		if kind.Optional || kind.Kind == &quot;any&quot; {
+			return nil
+		}
+		return fmt.Errorf(&quot;%s is required&quot;, path)
+	}
+	actual := value.TypeOf(input)
+	switch kind.Kind {
+	case &quot;any&quot;:
+		return nil
+	case &quot;string&quot;:
+		if actual != value.TypeString {
+			return fmt.Errorf(&quot;%s is not a string&quot;, path)
+		}
+	case &quot;number&quot;:
+		if actual != value.TypeNumber {
+			return fmt.Errorf(&quot;%s is not a number&quot;, path)
+		}
+	case &quot;boolean&quot;:
+		if actual != value.TypeBool {
+			return fmt.Errorf(&quot;%s is not a boolean&quot;, path)
+		}
+	case &quot;list&quot;:
+		items, ok := input.(value.List)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not a list&quot;, path)
+		}
+		for index, item := range items {
+			if err := generatedCheck(item, *kind.Item, records, fmt.Sprintf(&quot;%s[%d]&quot;, path, index)); err != nil {
+				return err
+			}
+		}
+	case &quot;map&quot;:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		for _, key := range entries.Keys() {
+			item, _ := entries.Get(key)
+			if err := generatedCheck(item, *kind.Value, records, path+&quot;.&quot;+key); err != nil {
+				return err
+			}
+		}
+	default:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		return generatedCheckFields(entries, records[kind.Name], records, path)
+	}
+	return nil
+}
+
+func generatedCheckFields(input *value.OrderedMap, fields []generatedField, records map[string][]generatedField, path string) error {
+	for _, field := range fields {
+		item, _ := input.Get(field.Name)
+		if err := generatedCheck(item, field.Type, records, path+&quot;.&quot;+field.Name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func generatedDecode(input any, output any) error {
@@ -3672,7 +3839,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := struct{}{}
 				entry.Data = &amp;definitionData
@@ -3693,7 +3860,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_layout_tpl{}
 				entry.Data = &amp;definitionData
@@ -3776,6 +3943,9 @@ func (p *GeneratedProgram) prepare(name string, assign any, options template.Ren
 		return nil, generatedBindFailure(name, err)
 	}
 	var typedAssign Assign
+	if err := generatedCheckFields(rootData, []generatedField{{Name: &quot;page&quot;, Type: generatedType{Kind: &quot;string&quot;}}}, generatedRecordFields, &quot;assign&quot;); err != nil {
+		return nil, err
+	}
 	if err := generatedDecode(rootData, &amp;typedAssign); err != nil {
 		return nil, err
 	}
@@ -3811,11 +3981,11 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;867f3b8779d2c8efc4c033304403289a26a341a8b9d0dc75e78d6d226eaae431&quot;,
+  &quot;compilerDigest&quot;: &quot;88d74f055ec030758070b516d0cd35473b90e243ae8571128c3187ba0162631f&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
       &quot;path&quot;: &quot;empty-state.rust&quot;,
-      &quot;artifactDigest&quot;: &quot;e1c6f68a5245fdd1374ddb6b08a83e73db05603be56db5b33d1c2d805ac26b85&quot;
+      &quot;artifactDigest&quot;: &quot;e83456aee19ca61515cbdde2e2c4551bcbb6cb6d4d75924b3947a2fa420ab7fb&quot;
     }
   }
 }
@@ -3831,20 +4001,21 @@ use std::rc::Rc;
 #[derive(Clone, Default)] pub struct Assign {
 
 }
-impl GeneratedConvert for Assign { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Assign is not a map&quot;)); }; let _ = &amp;map; generated_check_field(map, &quot;page&quot;, |value| &lt;String as GeneratedConvert&gt;::from_value(value).map(drop))?; Ok(Assign {  }) } }
+impl GeneratedConvert for Assign { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); generated_check_field(map, path, &quot;page&quot;, |value, path| &lt;String as GeneratedConvert&gt;::from_value(value, path).map(drop))?; Ok(Assign {  }) } }
 #[derive(Clone, Default)] pub struct InputLayoutTpl {  }
 
 #[derive(Clone, Default)] pub struct Definition { pub html: Option&lt;String&gt; }
 #[derive(Clone, Default)] pub struct Definitions { pub content: Option&lt;Definition&gt;, pub layout: Option&lt;Definition&gt; }
 fn generated_conversion_error(message: impl Into&lt;String&gt;) -&gt; TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &quot;generated&quot;, message) }
-pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt;; }
-impl GeneratedConvert for Value { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { Ok(input.clone()) } }
-impl GeneratedConvert for String { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error(&quot;expected a string&quot;)) } }
-impl GeneratedConvert for f64 { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_conversion_error(&quot;expected a number&quot;)) } } }
-impl GeneratedConvert for bool { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_conversion_error(&quot;expected a boolean&quot;)) } } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other).map(Some) } } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().map(T::from_value).collect(), _ =&gt; Err(generated_conversion_error(&quot;expected a list&quot;)) } } }
-fn generated_check_field(map: &amp;RuntimeOrderedMap, name: &amp;str, check: impl Fn(&amp;Value) -&gt; Result&lt;(), TemplateError&gt;) -&gt; Result&lt;(), TemplateError&gt; { check(map.get(name).unwrap_or(&amp;Value::Null)).map_err(|error| generated_conversion_error(format!(&quot;{name}: {}&quot;, error.message))) }
+pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt;; }
+impl GeneratedConvert for Value { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let _ = path; Ok(input.clone()) } }
+impl GeneratedConvert for String { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_type_error(input, path, &quot;a string&quot;)) } }
+impl GeneratedConvert for f64 { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_type_error(input, path, &quot;a number&quot;)) } } }
+impl GeneratedConvert for bool { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_type_error(input, path, &quot;a boolean&quot;)) } } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other, path).map(Some) } } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().enumerate().map(|(index, item)| T::from_value(item, &amp;format!(&quot;{path}[{index}]&quot;))).collect(), _ =&gt; Err(generated_type_error(input, path, &quot;a list&quot;)) } } }
+fn generated_type_error(input: &amp;Value, path: &amp;str, expected: &amp;str) -&gt; TemplateError { generated_conversion_error(if matches!(input, Value::Null) { format!(&quot;{path} is required&quot;) } else { format!(&quot;{path} is not {expected}&quot;) }) }
+fn generated_check_field(map: &amp;RuntimeOrderedMap, path: &amp;str, name: &amp;str, check: impl Fn(&amp;Value, &amp;str) -&gt; Result&lt;(), TemplateError&gt;) -&gt; Result&lt;(), TemplateError&gt; { check(map.get(name).unwrap_or(&amp;Value::Null), &amp;format!(&quot;{path}.{name}&quot;)) }
 fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputLayoutTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;layout.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 26, 39, 51, 55, 99, 103, 111])), context: Rc::clone(root_data) };
 
     context.write(&quot;&lt;main class=\&quot;empty-page\&quot;&gt;\u{a}&quot;, &amp;frame, [0, 26])?;
@@ -3876,7 +4047,7 @@ definitions.layout = Some(Definition::default()); targets.insert(id.clone(), Gen
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }
 impl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -&gt; GeneratedProgram { GeneratedProgram { runtime } }  }
 impl Program for GeneratedProgram { fn prepare(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || { let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); self.prepare_root(name, root_data, options) }) } fn render(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare(target, assign, options)?.render()?) } fn prepare_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || self.prepare_root(name, polyspec_template::bound_root(assign), options)) } fn render_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare_bound(target, assign, options)?.render()?) } }
-impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data))).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
+impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data)), &quot;assign&quot;).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
 
 
 php · product generated program
@@ -3888,7 +4059,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e22e61a6f550d552f35f3379260b92a398855933b960deaa9b328f86fa4a783b&quot;,
+  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -3916,7 +4087,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;d64b29ffadd412b2fda5c7c15dbd27808723fd988f65e382a73c585f83337fb8&quot;
+      &quot;artifactDigest&quot;: &quot;b5e2ab0bf72387949dc3fd51317ac21e90bcf9f0b5b3c1997ff12317cb871693&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -4422,11 +4593,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;683a9d19ef03ec52f1181824b452d4c12716dfd1c1cd281b0d95fdbfb951e974&quot;,
+  &quot;compilerDigest&quot;: &quot;45312e93dc75fa9cac0af4448f4b43508dff97b90f52d7c3d1407e5852dbc284&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;b5a832774aa11707bdc54b6c4d7af4a46650207d34e26fa977093cedb5a029a0&quot;
+      &quot;artifactDigest&quot;: &quot;79a7460b4286e20a70d9821b0ab6cd4de3f47f181f88d36da828dd4827f74039&quot;
     }
   }
 }
@@ -4478,6 +4649,8 @@ type ArtifactManifest struct {
 	ContractDigest string
 	Files          map[string]string
 }
+
+var generatedRecordFields = map[string][]generatedField{}
 
 func generatedPanic(err error) {
 	if err != nil {
@@ -4539,6 +4712,84 @@ func generatedPlain(input any) any {
 	default:
 		return input
 	}
+}
+
+type generatedType struct {
+	Kind     string
+	Optional bool
+	Name     string
+	Item     *generatedType
+	Key      *generatedType
+	Value    *generatedType
+}
+
+type generatedField struct {
+	Name string
+	Type generatedType
+}
+
+func generatedCheck(input value.Value, kind generatedType, records map[string][]generatedField, path string) error {
+	if input == nil {
+		if kind.Optional || kind.Kind == &quot;any&quot; {
+			return nil
+		}
+		return fmt.Errorf(&quot;%s is required&quot;, path)
+	}
+	actual := value.TypeOf(input)
+	switch kind.Kind {
+	case &quot;any&quot;:
+		return nil
+	case &quot;string&quot;:
+		if actual != value.TypeString {
+			return fmt.Errorf(&quot;%s is not a string&quot;, path)
+		}
+	case &quot;number&quot;:
+		if actual != value.TypeNumber {
+			return fmt.Errorf(&quot;%s is not a number&quot;, path)
+		}
+	case &quot;boolean&quot;:
+		if actual != value.TypeBool {
+			return fmt.Errorf(&quot;%s is not a boolean&quot;, path)
+		}
+	case &quot;list&quot;:
+		items, ok := input.(value.List)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not a list&quot;, path)
+		}
+		for index, item := range items {
+			if err := generatedCheck(item, *kind.Item, records, fmt.Sprintf(&quot;%s[%d]&quot;, path, index)); err != nil {
+				return err
+			}
+		}
+	case &quot;map&quot;:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		for _, key := range entries.Keys() {
+			item, _ := entries.Get(key)
+			if err := generatedCheck(item, *kind.Value, records, path+&quot;.&quot;+key); err != nil {
+				return err
+			}
+		}
+	default:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		return generatedCheckFields(entries, records[kind.Name], records, path)
+	}
+	return nil
+}
+
+func generatedCheckFields(input *value.OrderedMap, fields []generatedField, records map[string][]generatedField, path string) error {
+	for _, field := range fields {
+		item, _ := input.Get(field.Name)
+		if err := generatedCheck(item, field.Type, records, path+&quot;.&quot;+field.Name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func generatedDecode(input any, output any) error {
@@ -4617,7 +4868,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := struct{}{}
 				entry.Data = &amp;definitionData
@@ -4638,7 +4889,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_layout_tpl{}
 				entry.Data = &amp;definitionData
@@ -4721,6 +4972,9 @@ func (p *GeneratedProgram) prepare(name string, assign any, options template.Ren
 		return nil, generatedBindFailure(name, err)
 	}
 	var typedAssign Assign
+	if err := generatedCheckFields(rootData, []generatedField{{Name: &quot;heading&quot;, Type: generatedType{Kind: &quot;string&quot;}}}, generatedRecordFields, &quot;assign&quot;); err != nil {
+		return nil, err
+	}
 	if err := generatedDecode(rootData, &amp;typedAssign); err != nil {
 		return nil, err
 	}
@@ -4756,11 +5010,11 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;867f3b8779d2c8efc4c033304403289a26a341a8b9d0dc75e78d6d226eaae431&quot;,
+  &quot;compilerDigest&quot;: &quot;88d74f055ec030758070b516d0cd35473b90e243ae8571128c3187ba0162631f&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
       &quot;path&quot;: &quot;html-slot.rust&quot;,
-      &quot;artifactDigest&quot;: &quot;9e502b2136ca68e5059b7ec7ab769762b5f5102245c2692bcb2907cbc36c8275&quot;
+      &quot;artifactDigest&quot;: &quot;aaa175dc22ed5686ea376558912b42c69056545aa5be04519f7165333d7a1f49&quot;
     }
   }
 }
@@ -4776,20 +5030,21 @@ use std::rc::Rc;
 #[derive(Clone, Default)] pub struct Assign {
     pub heading: String,
 }
-impl GeneratedConvert for Assign { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Assign is not a map&quot;)); }; let _ = &amp;map; let heading = generated_field(map, &quot;heading&quot;)?; Ok(Assign { heading }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;heading&quot;.to_string(), self.heading.to_value()); Value::map(map) } }
+impl GeneratedConvert for Assign { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); let heading = generated_field(map, path, &quot;heading&quot;)?; Ok(Assign { heading }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;heading&quot;.to_string(), self.heading.to_value()); Value::map(map) } }
 #[derive(Clone, Default)] pub struct InputLayoutTpl {  }
 
 #[derive(Clone, Default)] pub struct Definition { pub html: Option&lt;String&gt; }
 #[derive(Clone, Default)] pub struct Definitions { pub content: Option&lt;Definition&gt;, pub layout: Option&lt;Definition&gt; }
 fn generated_conversion_error(message: impl Into&lt;String&gt;) -&gt; TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &quot;generated&quot;, message) }
-pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
-impl GeneratedConvert for Value { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
-impl GeneratedConvert for String { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error(&quot;expected a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
-impl GeneratedConvert for f64 { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_conversion_error(&quot;expected a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
-impl GeneratedConvert for bool { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_conversion_error(&quot;expected a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().map(T::from_value).collect(), _ =&gt; Err(generated_conversion_error(&quot;expected a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
-fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null)).map_err(|error| generated_conversion_error(format!(&quot;{name}: {}&quot;, error.message))) }
+pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
+impl GeneratedConvert for Value { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let _ = path; Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
+impl GeneratedConvert for String { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_type_error(input, path, &quot;a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
+impl GeneratedConvert for f64 { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_type_error(input, path, &quot;a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
+impl GeneratedConvert for bool { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_type_error(input, path, &quot;a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other, path).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().enumerate().map(|(index, item)| T::from_value(item, &amp;format!(&quot;{path}[{index}]&quot;))).collect(), _ =&gt; Err(generated_type_error(input, path, &quot;a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
+fn generated_type_error(input: &amp;Value, path: &amp;str, expected: &amp;str) -&gt; TemplateError { generated_conversion_error(if matches!(input, Value::Null) { format!(&quot;{path} is required&quot;) } else { format!(&quot;{path} is not {expected}&quot;) }) }
+fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, path: &amp;str, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null), &amp;format!(&quot;{path}.{name}&quot;)) }
 fn generated_value&lt;T: GeneratedConvert&gt;(input: &amp;T) -&gt; Result&lt;Value, TemplateError&gt; { Ok(input.to_value()) }
 fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputLayoutTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;layout.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 25, 46, 58, 69])), context: Rc::clone(root_data) };
 
@@ -4820,7 +5075,7 @@ definitions.layout = Some(Definition::default()); targets.insert(id.clone(), Gen
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }
 impl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -&gt; GeneratedProgram { GeneratedProgram { runtime } }  }
 impl Program for GeneratedProgram { fn prepare(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || { let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); self.prepare_root(name, root_data, options) }) } fn render(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare(target, assign, options)?.render()?) } fn prepare_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || self.prepare_root(name, polyspec_template::bound_root(assign), options)) } fn render_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare_bound(target, assign, options)?.render()?) } }
-impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data))).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
+impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data)), &quot;assign&quot;).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
 
 
 php · product generated program
@@ -4832,7 +5087,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e22e61a6f550d552f35f3379260b92a398855933b960deaa9b328f86fa4a783b&quot;,
+  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -4860,7 +5115,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;9ff86e3d3904211215df582945ec1ac68f3637daa2db2c1d48ab1ed0bf6db5c1&quot;
+      &quot;artifactDigest&quot;: &quot;bfbe07283c3f605db5e4a9757a8721cfc7e15ad14976e4282207b24df12ad09b&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -5495,11 +5750,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;683a9d19ef03ec52f1181824b452d4c12716dfd1c1cd281b0d95fdbfb951e974&quot;,
+  &quot;compilerDigest&quot;: &quot;45312e93dc75fa9cac0af4448f4b43508dff97b90f52d7c3d1407e5852dbc284&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;1ce3fed09e133de2822283c8304c271b48b06e3b199a77dc47dd15af38f1d3fe&quot;
+      &quot;artifactDigest&quot;: &quot;7574cf4a9d59b9b7f79385322f30e333636592f0451c69f8e6a50d8847ad6092&quot;
     }
   }
 }
@@ -5583,6 +5838,8 @@ type ArtifactManifest struct {
 	Files          map[string]string
 }
 
+var generatedRecordFields = map[string][]generatedField{&quot;Page&quot;: []generatedField{{Name: &quot;title&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}}, &quot;Slot&quot;: []generatedField{{Name: &quot;template&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}, {Name: &quot;html&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}}}
+
 func generatedPanic(err error) {
 	if err != nil {
 		panic(err)
@@ -5647,6 +5904,84 @@ func generatedPlain(input any) any {
 	default:
 		return input
 	}
+}
+
+type generatedType struct {
+	Kind     string
+	Optional bool
+	Name     string
+	Item     *generatedType
+	Key      *generatedType
+	Value    *generatedType
+}
+
+type generatedField struct {
+	Name string
+	Type generatedType
+}
+
+func generatedCheck(input value.Value, kind generatedType, records map[string][]generatedField, path string) error {
+	if input == nil {
+		if kind.Optional || kind.Kind == &quot;any&quot; {
+			return nil
+		}
+		return fmt.Errorf(&quot;%s is required&quot;, path)
+	}
+	actual := value.TypeOf(input)
+	switch kind.Kind {
+	case &quot;any&quot;:
+		return nil
+	case &quot;string&quot;:
+		if actual != value.TypeString {
+			return fmt.Errorf(&quot;%s is not a string&quot;, path)
+		}
+	case &quot;number&quot;:
+		if actual != value.TypeNumber {
+			return fmt.Errorf(&quot;%s is not a number&quot;, path)
+		}
+	case &quot;boolean&quot;:
+		if actual != value.TypeBool {
+			return fmt.Errorf(&quot;%s is not a boolean&quot;, path)
+		}
+	case &quot;list&quot;:
+		items, ok := input.(value.List)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not a list&quot;, path)
+		}
+		for index, item := range items {
+			if err := generatedCheck(item, *kind.Item, records, fmt.Sprintf(&quot;%s[%d]&quot;, path, index)); err != nil {
+				return err
+			}
+		}
+	case &quot;map&quot;:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		for _, key := range entries.Keys() {
+			item, _ := entries.Get(key)
+			if err := generatedCheck(item, *kind.Value, records, path+&quot;.&quot;+key); err != nil {
+				return err
+			}
+		}
+	default:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		return generatedCheckFields(entries, records[kind.Name], records, path)
+	}
+	return nil
+}
+
+func generatedCheckFields(input *value.OrderedMap, fields []generatedField, records map[string][]generatedField, path string) error {
+	for _, field := range fields {
+		item, _ := input.Get(field.Name)
+		if err := generatedCheck(item, field.Type, records, path+&quot;.&quot;+field.Name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func generatedDecode(input any, output any) error {
@@ -5745,7 +6080,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_content_tpl{}
 				entry.Data = &amp;definitionData
@@ -5766,7 +6101,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_layout_tpl{}
 				entry.Data = &amp;definitionData
@@ -5849,6 +6184,9 @@ func (p *GeneratedProgram) prepare(name string, assign any, options template.Ren
 		return nil, generatedBindFailure(name, err)
 	}
 	var typedAssign Assign
+	if err := generatedCheckFields(rootData, []generatedField{{Name: &quot;title&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}, {Name: &quot;heading&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}, {Name: &quot;island_label&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}, {Name: &quot;root_label&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}, {Name: &quot;defined_label&quot;, Type: generatedType{Kind: &quot;string&quot;, Optional: true}}, {Name: &quot;page&quot;, Type: generatedType{Kind: &quot;record&quot;, Optional: true, Name: &quot;Page&quot;}}}, generatedRecordFields, &quot;assign&quot;); err != nil {
+		return nil, err
+	}
 	if err := generatedDecode(rootData, &amp;typedAssign); err != nil {
 		return nil, err
 	}
@@ -5884,11 +6222,11 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;867f3b8779d2c8efc4c033304403289a26a341a8b9d0dc75e78d6d226eaae431&quot;,
+  &quot;compilerDigest&quot;: &quot;88d74f055ec030758070b516d0cd35473b90e243ae8571128c3187ba0162631f&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
       &quot;path&quot;: &quot;react-boundary.rust&quot;,
-      &quot;artifactDigest&quot;: &quot;4b432f6264a571bfeb198d306b201a48485f305b2f53058b65608f4c81745ff0&quot;
+      &quot;artifactDigest&quot;: &quot;3f4c6f4a5fd935f6be0dae52ba7cec7a41473094e79046ad66b101946f9ffa27&quot;
     }
   }
 }
@@ -5905,23 +6243,24 @@ use std::rc::Rc;
     pub title: Option&lt;String&gt;,
     pub island_label: Option&lt;String&gt;,
 }
-impl GeneratedConvert for Assign { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Assign is not a map&quot;)); }; let _ = &amp;map; let title = generated_field(map, &quot;title&quot;)?; generated_check_field(map, &quot;heading&quot;, |value| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other).map(drop) })?; let island_label = generated_field(map, &quot;island_label&quot;)?; generated_check_field(map, &quot;root_label&quot;, |value| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other).map(drop) })?; generated_check_field(map, &quot;defined_label&quot;, |value| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other).map(drop) })?; generated_check_field(map, &quot;page&quot;, |value| match value { Value::Null =&gt; Ok(()), other =&gt; generated_check_page(other) })?; Ok(Assign { title, island_label }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;title&quot;.to_string(), self.title.to_value()); map.insert(&quot;island_label&quot;.to_string(), self.island_label.to_value()); Value::map(map) } }
+impl GeneratedConvert for Assign { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); let title = generated_field(map, path, &quot;title&quot;)?; generated_check_field(map, path, &quot;heading&quot;, |value, path| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other, path).map(drop) })?; let island_label = generated_field(map, path, &quot;island_label&quot;)?; generated_check_field(map, path, &quot;root_label&quot;, |value, path| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other, path).map(drop) })?; generated_check_field(map, path, &quot;defined_label&quot;, |value, path| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other, path).map(drop) })?; generated_check_field(map, path, &quot;page&quot;, |value, path| match value { Value::Null =&gt; Ok(()), other =&gt; generated_check_page(other, path) })?; Ok(Assign { title, island_label }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;title&quot;.to_string(), self.title.to_value()); map.insert(&quot;island_label&quot;.to_string(), self.island_label.to_value()); Value::map(map) } }
 #[derive(Clone, Default)] pub struct InputContentTpl {  }
 #[derive(Clone, Default)] pub struct InputLayoutTpl {  }
 
 #[derive(Clone, Default)] pub struct Definition { pub html: Option&lt;String&gt; }
 #[derive(Clone, Default)] pub struct Definitions { pub content: Option&lt;Definition&gt;, pub layout: Option&lt;Definition&gt; }
 fn generated_conversion_error(message: impl Into&lt;String&gt;) -&gt; TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &quot;generated&quot;, message) }
-pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
-impl GeneratedConvert for Value { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
-impl GeneratedConvert for String { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error(&quot;expected a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
-impl GeneratedConvert for f64 { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_conversion_error(&quot;expected a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
-impl GeneratedConvert for bool { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_conversion_error(&quot;expected a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().map(T::from_value).collect(), _ =&gt; Err(generated_conversion_error(&quot;expected a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
-fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null)).map_err(|error| generated_conversion_error(format!(&quot;{name}: {}&quot;, error.message))) }
-fn generated_check_field(map: &amp;RuntimeOrderedMap, name: &amp;str, check: impl Fn(&amp;Value) -&gt; Result&lt;(), TemplateError&gt;) -&gt; Result&lt;(), TemplateError&gt; { check(map.get(name).unwrap_or(&amp;Value::Null)).map_err(|error| generated_conversion_error(format!(&quot;{name}: {}&quot;, error.message))) }
-fn generated_check_page(input: &amp;Value) -&gt; Result&lt;(), TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Page is not a map&quot;)); }; generated_check_field(map, &quot;title&quot;, |value| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other).map(drop) })?; Ok(()) }
+pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
+impl GeneratedConvert for Value { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let _ = path; Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
+impl GeneratedConvert for String { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_type_error(input, path, &quot;a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
+impl GeneratedConvert for f64 { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_type_error(input, path, &quot;a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
+impl GeneratedConvert for bool { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_type_error(input, path, &quot;a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other, path).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().enumerate().map(|(index, item)| T::from_value(item, &amp;format!(&quot;{path}[{index}]&quot;))).collect(), _ =&gt; Err(generated_type_error(input, path, &quot;a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
+fn generated_type_error(input: &amp;Value, path: &amp;str, expected: &amp;str) -&gt; TemplateError { generated_conversion_error(if matches!(input, Value::Null) { format!(&quot;{path} is required&quot;) } else { format!(&quot;{path} is not {expected}&quot;) }) }
+fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, path: &amp;str, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null), &amp;format!(&quot;{path}.{name}&quot;)) }
+fn generated_check_field(map: &amp;RuntimeOrderedMap, path: &amp;str, name: &amp;str, check: impl Fn(&amp;Value, &amp;str) -&gt; Result&lt;(), TemplateError&gt;) -&gt; Result&lt;(), TemplateError&gt; { check(map.get(name).unwrap_or(&amp;Value::Null), &amp;format!(&quot;{path}.{name}&quot;)) }
+fn generated_check_page(input: &amp;Value, path: &amp;str) -&gt; Result&lt;(), TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; generated_check_field(map, path, &quot;title&quot;, |value, path| match value { Value::Null =&gt; Ok(()), other =&gt; &lt;String as GeneratedConvert&gt;::from_value(other, path).map(drop) })?; Ok(()) }
 fn generated_value&lt;T: GeneratedConvert&gt;(input: &amp;T) -&gt; Result&lt;Value, TemplateError&gt; { Ok(input.to_value()) }
 fn render_content_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputContentTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;content.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 41, 65, 76])), context: Rc::clone(root_data) };
 
@@ -5966,7 +6305,7 @@ definitions.layout = Some(Definition::default()); targets.insert(id.clone(), Gen
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }
 impl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -&gt; GeneratedProgram { GeneratedProgram { runtime } }  }
 impl Program for GeneratedProgram { fn prepare(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || { let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); self.prepare_root(name, root_data, options) }) } fn render(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare(target, assign, options)?.render()?) } fn prepare_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || self.prepare_root(name, polyspec_template::bound_root(assign), options)) } fn render_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare_bound(target, assign, options)?.render()?) } }
-impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data))).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
+impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data)), &quot;assign&quot;).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
 
 
 php · product generated program
@@ -5978,7 +6317,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e22e61a6f550d552f35f3379260b92a398855933b960deaa9b328f86fa4a783b&quot;,
+  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -6022,7 +6361,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;beab6c48c3f1d391e610698b15479f215ec7929491156adfe6b69878a3415c93&quot;
+      &quot;artifactDigest&quot;: &quot;137ca3989e4fe71d4defa5cb6a03d013a2db2eebae732d277d2bb019b36853d8&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -6840,11 +7179,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;683a9d19ef03ec52f1181824b452d4c12716dfd1c1cd281b0d95fdbfb951e974&quot;,
+  &quot;compilerDigest&quot;: &quot;45312e93dc75fa9cac0af4448f4b43508dff97b90f52d7c3d1407e5852dbc284&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;b094d8aca040f9034b843f6a2ff5ad9b02807493c80faa1cd2b5788d1ffa0eb5&quot;
+      &quot;artifactDigest&quot;: &quot;b89f993bc70d1de383402bddcada4cf1d08b55275e2f0e367770c5e7007567f3&quot;
     }
   }
 }
@@ -6922,6 +7261,8 @@ type ArtifactManifest struct {
 	ContractDigest string
 	Files          map[string]string
 }
+
+var generatedRecordFields = map[string][]generatedField{&quot;Page&quot;: []generatedField{{Name: &quot;title&quot;, Type: generatedType{Kind: &quot;string&quot;}}}}
 
 func generatedPanic(err error) {
 	if err != nil {
@@ -7008,6 +7349,84 @@ func generatedPlain(input any) any {
 	default:
 		return input
 	}
+}
+
+type generatedType struct {
+	Kind     string
+	Optional bool
+	Name     string
+	Item     *generatedType
+	Key      *generatedType
+	Value    *generatedType
+}
+
+type generatedField struct {
+	Name string
+	Type generatedType
+}
+
+func generatedCheck(input value.Value, kind generatedType, records map[string][]generatedField, path string) error {
+	if input == nil {
+		if kind.Optional || kind.Kind == &quot;any&quot; {
+			return nil
+		}
+		return fmt.Errorf(&quot;%s is required&quot;, path)
+	}
+	actual := value.TypeOf(input)
+	switch kind.Kind {
+	case &quot;any&quot;:
+		return nil
+	case &quot;string&quot;:
+		if actual != value.TypeString {
+			return fmt.Errorf(&quot;%s is not a string&quot;, path)
+		}
+	case &quot;number&quot;:
+		if actual != value.TypeNumber {
+			return fmt.Errorf(&quot;%s is not a number&quot;, path)
+		}
+	case &quot;boolean&quot;:
+		if actual != value.TypeBool {
+			return fmt.Errorf(&quot;%s is not a boolean&quot;, path)
+		}
+	case &quot;list&quot;:
+		items, ok := input.(value.List)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not a list&quot;, path)
+		}
+		for index, item := range items {
+			if err := generatedCheck(item, *kind.Item, records, fmt.Sprintf(&quot;%s[%d]&quot;, path, index)); err != nil {
+				return err
+			}
+		}
+	case &quot;map&quot;:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		for _, key := range entries.Keys() {
+			item, _ := entries.Get(key)
+			if err := generatedCheck(item, *kind.Value, records, path+&quot;.&quot;+key); err != nil {
+				return err
+			}
+		}
+	default:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf(&quot;%s is not an object&quot;, path)
+		}
+		return generatedCheckFields(entries, records[kind.Name], records, path)
+	}
+	return nil
+}
+
+func generatedCheckFields(input *value.OrderedMap, fields []generatedField, records map[string][]generatedField, path string) error {
+	for _, field := range fields {
+		item, _ := input.Get(field.Name)
+		if err := generatedCheck(item, field.Type, records, path+&quot;.&quot;+field.Name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func generatedDecode(input any, output any) error {
@@ -7129,10 +7548,13 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 				}
 				data, ok := bound.(*value.OrderedMap)
 				if !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_content_tpl{}
 				if raw, found := data.Get(&quot;title&quot;); found {
+					if err := generatedCheck(raw, generatedType{Kind: &quot;string&quot;}, generatedRecordFields, &quot;define.&quot;+id+&quot;.data.&quot;+&quot;title&quot;); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf(&quot;define.%s.data.%s: %w&quot;, id, &quot;title&quot;, err)
@@ -7140,6 +7562,9 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					definitionData.Title = &amp;converted
 				}
 				if raw, found := data.Get(&quot;root_label&quot;); found {
+					if err := generatedCheck(raw, generatedType{Kind: &quot;string&quot;}, generatedRecordFields, &quot;define.&quot;+id+&quot;.data.&quot;+&quot;root_label&quot;); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf(&quot;define.%s.data.%s: %w&quot;, id, &quot;root_label&quot;, err)
@@ -7147,6 +7572,9 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					definitionData.Root_label = &amp;converted
 				}
 				if raw, found := data.Get(&quot;defined_label&quot;); found {
+					if err := generatedCheck(raw, generatedType{Kind: &quot;string&quot;}, generatedRecordFields, &quot;define.&quot;+id+&quot;.data.&quot;+&quot;defined_label&quot;); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf(&quot;define.%s.data.%s: %w&quot;, id, &quot;defined_label&quot;, err)
@@ -7154,6 +7582,9 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					definitionData.Defined_label = &amp;converted
 				}
 				if raw, found := data.Get(&quot;layout_local&quot;); found {
+					if err := generatedCheck(raw, generatedType{Kind: &quot;string&quot;, Optional: true}, generatedRecordFields, &quot;define.&quot;+id+&quot;.data.&quot;+&quot;layout_local&quot;); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[*string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf(&quot;define.%s.data.%s: %w&quot;, id, &quot;layout_local&quot;, err)
@@ -7178,7 +7609,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &amp;value.BindError{Code: errs.DataUnsupportedType, Message: &quot;define &quot; + id + &quot;: data is not a map&quot;}
+					return nil, nil, fmt.Errorf(&quot;define.%s.data is not an object&quot;, id)
 				}
 				definitionData := DefinitionData_layout_tpl{}
 				entry.Data = &amp;definitionData
@@ -7261,6 +7692,9 @@ func (p *GeneratedProgram) prepare(name string, assign any, options template.Ren
 		return nil, generatedBindFailure(name, err)
 	}
 	var typedAssign Assign
+	if err := generatedCheckFields(rootData, []generatedField{{Name: &quot;page&quot;, Type: generatedType{Kind: &quot;record&quot;, Name: &quot;Page&quot;}}, {Name: &quot;root_label&quot;, Type: generatedType{Kind: &quot;string&quot;}}, {Name: &quot;defined_label&quot;, Type: generatedType{Kind: &quot;string&quot;}}}, generatedRecordFields, &quot;assign&quot;); err != nil {
+		return nil, err
+	}
 	if err := generatedDecode(rootData, &amp;typedAssign); err != nil {
 		return nil, err
 	}
@@ -7296,11 +7730,11 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;867f3b8779d2c8efc4c033304403289a26a341a8b9d0dc75e78d6d226eaae431&quot;,
+  &quot;compilerDigest&quot;: &quot;88d74f055ec030758070b516d0cd35473b90e243ae8571128c3187ba0162631f&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
       &quot;path&quot;: &quot;scope-precedence.rust&quot;,
-      &quot;artifactDigest&quot;: &quot;f02a5fbb8b4e6f1f346dc2e93bec1931153894b64b4954753b0d3863b593ff29&quot;
+      &quot;artifactDigest&quot;: &quot;737850319f43527240e008fd5f6c62166573c36794a839eeaa6091b8b7d32c67&quot;
     }
   }
 }
@@ -7318,7 +7752,7 @@ use std::rc::Rc;
     pub root_label: String,
     pub defined_label: String,
 }
-impl GeneratedConvert for Assign { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Assign is not a map&quot;)); }; let _ = &amp;map; let page = generated_field(map, &quot;page&quot;)?; let root_label = generated_field(map, &quot;root_label&quot;)?; let defined_label = generated_field(map, &quot;defined_label&quot;)?; Ok(Assign { page, root_label, defined_label }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;page&quot;.to_string(), self.page.to_value()); map.insert(&quot;root_label&quot;.to_string(), self.root_label.to_value()); map.insert(&quot;defined_label&quot;.to_string(), self.defined_label.to_value()); Value::map(map) } }
+impl GeneratedConvert for Assign { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); let page = generated_field(map, path, &quot;page&quot;)?; let root_label = generated_field(map, path, &quot;root_label&quot;)?; let defined_label = generated_field(map, path, &quot;defined_label&quot;)?; Ok(Assign { page, root_label, defined_label }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;page&quot;.to_string(), self.page.to_value()); map.insert(&quot;root_label&quot;.to_string(), self.root_label.to_value()); map.insert(&quot;defined_label&quot;.to_string(), self.defined_label.to_value()); Value::map(map) } }
 #[derive(Clone, Default)] pub struct InputContentTpl { pub title: String, pub root_label: String, pub defined_label: String, pub layout_local: Option&lt;String&gt; }
 #[derive(Clone, Default)] pub struct InputLayoutTpl {  }
 #[derive(Clone, Default)] pub struct DefinitionDataContentTpl { pub title: Option&lt;String&gt;, pub root_label: Option&lt;String&gt;, pub defined_label: Option&lt;String&gt;, pub layout_local: Option&lt;Option&lt;String&gt;&gt; }
@@ -7326,18 +7760,19 @@ impl GeneratedConvert for Assign { fn from_value(input: &amp;Value) -&gt; Result
 #[derive(Clone, Default)] pub struct Definition&lt;T&gt; { pub html: Option&lt;String&gt;, pub data: Option&lt;T&gt; }
 #[derive(Clone, Default)] pub struct Definitions { pub content: Option&lt;Definition&lt;DefinitionDataContentTpl&gt;&gt;, pub layout: Option&lt;Definition&lt;DefinitionDataLayoutTpl&gt;&gt; }
 #[derive(Clone, Default)] pub struct Page { pub title: String }
-impl GeneratedConvert for Page { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_conversion_error(&quot;Page is not a map&quot;)); }; let _ = &amp;map; let title = generated_field(map, &quot;title&quot;)?; Ok(Page { title }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;title&quot;.to_string(), self.title.to_value()); Value::map(map) } }
+impl GeneratedConvert for Page { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let Value::Map(map) = input else { return Err(generated_type_error(input, path, &quot;an object&quot;)); }; let _ = (&amp;map, path); let title = generated_field(map, path, &quot;title&quot;)?; Ok(Page { title }) } fn to_value(&amp;self) -&gt; Value { let mut map = RuntimeOrderedMap::new(); map.insert(&quot;title&quot;.to_string(), self.title.to_value()); Value::map(map) } }
 fn generated_conversion_error(message: impl Into&lt;String&gt;) -&gt; TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, &quot;generated&quot;, message) }
-pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
-impl GeneratedConvert for Value { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
-impl GeneratedConvert for String { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error(&quot;expected a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
-impl GeneratedConvert for f64 { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_conversion_error(&quot;expected a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
-impl GeneratedConvert for bool { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_conversion_error(&quot;expected a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
-impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().map(T::from_value).collect(), _ =&gt; Err(generated_conversion_error(&quot;expected a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
-fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null)).map_err(|error| generated_conversion_error(format!(&quot;{name}: {}&quot;, error.message))) }
+pub trait GeneratedConvert: Sized { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt;; fn to_value(&amp;self) -&gt; Value; }
+impl GeneratedConvert for Value { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { let _ = path; Ok(input.clone()) } fn to_value(&amp;self) -&gt; Value { self.clone() } }
+impl GeneratedConvert for String { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { input.as_text().map(str::to_string).ok_or_else(|| generated_type_error(input, path, &quot;a string&quot;)) } fn to_value(&amp;self) -&gt; Value { Value::text(self.clone()) } }
+impl GeneratedConvert for f64 { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Number(number) =&gt; Ok(*number), _ =&gt; Err(generated_type_error(input, path, &quot;a number&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Number(*self) } }
+impl GeneratedConvert for bool { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Bool(value) =&gt; Ok(*value), _ =&gt; Err(generated_type_error(input, path, &quot;a boolean&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::Bool(*self) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Option&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::Null =&gt; Ok(None), other =&gt; T::from_value(other, path).map(Some) } } fn to_value(&amp;self) -&gt; Value { self.as_ref().map_or(Value::Null, T::to_value) } }
+impl&lt;T: GeneratedConvert&gt; GeneratedConvert for Vec&lt;T&gt; { fn from_value(input: &amp;Value, path: &amp;str) -&gt; Result&lt;Self, TemplateError&gt; { match input { Value::List(items) =&gt; items.iter().enumerate().map(|(index, item)| T::from_value(item, &amp;format!(&quot;{path}[{index}]&quot;))).collect(), _ =&gt; Err(generated_type_error(input, path, &quot;a list&quot;)) } } fn to_value(&amp;self) -&gt; Value { Value::list(self.iter().map(T::to_value).collect()) } }
+fn generated_type_error(input: &amp;Value, path: &amp;str, expected: &amp;str) -&gt; TemplateError { generated_conversion_error(if matches!(input, Value::Null) { format!(&quot;{path} is required&quot;) } else { format!(&quot;{path} is not {expected}&quot;) }) }
+fn generated_field&lt;T: GeneratedConvert&gt;(map: &amp;RuntimeOrderedMap, path: &amp;str, name: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(map.get(name).unwrap_or(&amp;Value::Null), &amp;format!(&quot;{path}.{name}&quot;)) }
 fn generated_value&lt;T: GeneratedConvert&gt;(input: &amp;T) -&gt; Result&lt;Value, TemplateError&gt; { Ok(input.to_value()) }
-fn generated_result&lt;T: GeneratedConvert&gt;(input: &amp;Value) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(input) }
+fn generated_result&lt;T: GeneratedConvert&gt;(input: &amp;Value, path: &amp;str) -&gt; Result&lt;T, TemplateError&gt; { T::from_value(input, path) }
 fn render_content_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, input: InputContentTpl, context: &amp;mut RenderContext&lt;&#39;_&gt;, runtime: &amp;RuntimeBindings, root_data: &amp;Rc&lt;RuntimeOrderedMap&gt;, scope: &amp;mut Scope) -&gt; Result&lt;(), TemplateError&gt; { let _ = (&amp;assign, &amp;definitions, &amp;input, &amp;runtime, &amp;scope); let frame = Frame { name: &quot;content.tpl&quot;.to_string(), lines: Some(LineIndex::from_starts(vec![0, 10, 29, 64, 105, 164, 175])), context: Rc::clone(root_data) };
 scope.locals.insert(&quot;title&quot;.to_string(), generated_value(&amp;input.title)?);
 scope.locals.insert(&quot;root_label&quot;.to_string(), generated_value(&amp;input.root_label)?);
@@ -7360,12 +7795,12 @@ fn render_layout_tpl(assign: &amp;Assign, definitions: &amp;mut Definitions, inp
     { if definitions.content.is_none() { return Err(runtime.error(context, &amp;frame, [68, 96], ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, &quot;define content is not registered&quot;)); }
     let definition = definitions.content.clone();
     if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &amp;frame, [68, 96])?; } else {
-        let mut input = InputContentTpl { root_label: generated_result::&lt;String&gt;(&amp;generated_value(&amp;assign.root_label)?)?, defined_label: generated_result::&lt;String&gt;(&amp;generated_value(&amp;assign.defined_label)?)?, ..Default::default() };
+        let mut input = InputContentTpl { root_label: generated_result::&lt;String&gt;(&amp;generated_value(&amp;assign.root_label)?, &quot;root_label&quot;)?, defined_label: generated_result::&lt;String&gt;(&amp;generated_value(&amp;assign.defined_label)?, &quot;defined_label&quot;)?, ..Default::default() };
         if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) &amp;&amp; let Some(value) = data.title.clone() { input.title = value; }
         if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) &amp;&amp; let Some(value) = data.root_label.clone() { input.root_label = value; }
         if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) &amp;&amp; let Some(value) = data.defined_label.clone() { input.defined_label = value; }
         if let Some(data) = definition.as_ref().and_then(|value| value.data.as_ref()) &amp;&amp; let Some(value) = data.layout_local.clone() { input.layout_local = value; }
-        input.title = generated_result::&lt;String&gt;(&amp;runtime.member(context, &amp;generated_value(&amp;assign.page)?, &quot;title&quot;, &amp;frame, [85, 95])?)?;
+        input.title = generated_result::&lt;String&gt;(&amp;runtime.member(context, &amp;generated_value(&amp;assign.page)?, &quot;title&quot;, &amp;frame, [85, 95])?, &quot;title&quot;)?;
         let mut block_scope = Scope::default();
         context.enter(&quot;content.tpl&quot;, Some(&amp;frame), Some([68, 96]))?;
         let rendered = render_content_tpl(assign, definitions, input, context, runtime, root_data, &amp;mut block_scope);
@@ -7383,7 +7818,7 @@ fn generated_error(message: String) -&gt; RequestError { RequestError::Argument(
 struct GeneratedTarget { target: Option&lt;String&gt;, html: Option&lt;String&gt; }
 fn generated_bind_definitions(name: &amp;str, input: &amp;HashMap&lt;String, polyspec_template::DefineInput&gt;) -&gt; Result&lt;(Definitions, HashMap&lt;String, GeneratedTarget&gt;), RequestError&gt; { let mut definitions = Definitions::default(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {
             &quot;content&quot; =&gt; { if let Some(html) = &amp;input.html { if false || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!(&quot;define.{id} has an invalid html entry&quot;))); } definitions.content = Some(Definition { html: Some(html.clone()), ..Default::default() }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some(&quot;content.tpl&quot;) { return Err(generated_error(format!(&quot;define.{id} has an invalid template&quot;))); }
-let data = match &amp;input.data { None =&gt; None, Some(data) =&gt; match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) =&gt; { let _ = &amp;map; Some(DefinitionDataContentTpl { title: map.get(&quot;title&quot;).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!(&quot;define.{id}.data.title: {}&quot;, error.message)))?, root_label: map.get(&quot;root_label&quot;).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!(&quot;define.{id}.data.root_label: {}&quot;, error.message)))?, defined_label: map.get(&quot;defined_label&quot;).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!(&quot;define.{id}.data.defined_label: {}&quot;, error.message)))?, layout_local: map.get(&quot;layout_local&quot;).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!(&quot;define.{id}.data.layout_local: {}&quot;, error.message)))? }) }, _ =&gt; return Err(generated_error(format!(&quot;define.{id}.data is not an object&quot;))) } };
+let data = match &amp;input.data { None =&gt; None, Some(data) =&gt; match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) =&gt; { let _ = &amp;map; Some(DefinitionDataContentTpl { title: map.get(&quot;title&quot;).map(|value| GeneratedConvert::from_value(value, &amp;format!(&quot;define.{id}.data.title&quot;))).transpose().map_err(|error| generated_error(error.message))?, root_label: map.get(&quot;root_label&quot;).map(|value| GeneratedConvert::from_value(value, &amp;format!(&quot;define.{id}.data.root_label&quot;))).transpose().map_err(|error| generated_error(error.message))?, defined_label: map.get(&quot;defined_label&quot;).map(|value| GeneratedConvert::from_value(value, &amp;format!(&quot;define.{id}.data.defined_label&quot;))).transpose().map_err(|error| generated_error(error.message))?, layout_local: map.get(&quot;layout_local&quot;).map(|value| GeneratedConvert::from_value(value, &amp;format!(&quot;define.{id}.data.layout_local&quot;))).transpose().map_err(|error| generated_error(error.message))? }) }, _ =&gt; return Err(generated_error(format!(&quot;define.{id}.data is not an object&quot;))) } };
 definitions.content = Some(Definition { data, ..Default::default() }); targets.insert(id.clone(), GeneratedTarget { target: Some(&quot;content.tpl&quot;.to_string()), html: None }); } },
             &quot;layout&quot; =&gt; { if let Some(html) = &amp;input.html { if true || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!(&quot;define.{id} has an invalid html entry&quot;))); } definitions.layout = Some(Definition { html: Some(html.clone()), ..Default::default() }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some(&quot;layout.tpl&quot;) { return Err(generated_error(format!(&quot;define.{id} has an invalid template&quot;))); }
 let data = match &amp;input.data { None =&gt; None, Some(data) =&gt; match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) =&gt; { let _ = &amp;map; Some(DefinitionDataLayoutTpl {  }) }, _ =&gt; return Err(generated_error(format!(&quot;define.{id}.data is not an object&quot;))) } };
@@ -7393,7 +7828,7 @@ definitions.layout = Some(Definition { data, ..Default::default() }); targets.in
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }
 impl GeneratedProgram { pub fn new(runtime: RuntimeEnvironment) -&gt; GeneratedProgram { GeneratedProgram { runtime } }  }
 impl Program for GeneratedProgram { fn prepare(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || { let root_data = Rc::new(polyspec_template::value::bind::bind_map(assign).map_err(|error| TemplateError::without_position(error.code, name, error.message))?); self.prepare_root(name, root_data, options) }) } fn render(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;JsonValue, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare(target, assign, options)?.render()?) } fn prepare_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;_&gt;, RequestError&gt; { let RenderTarget::Name(name) = target else { return Err(generated_error(&quot;generated target must be a template name&quot;.to_string())); }; internal_boundary(name, || self.prepare_root(name, polyspec_template::bound_root(assign), options)) } fn render_bound(&amp;self, target: RenderTarget&lt;&#39;_&gt;, assign: &amp;polyspec_template::BoundMap, options: &amp;RenderOptions) -&gt; Result&lt;String, RequestError&gt; { Ok(self.prepare_bound(target, assign, options)?.render()?) } }
-impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data))).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
+impl GeneratedProgram { fn prepare_root&lt;&#39;e&gt;(&amp;&#39;e self, name: &amp;str, root_data: Rc&lt;RuntimeOrderedMap&gt;, options: &amp;RenderOptions) -&gt; Result&lt;PreparedRender&lt;&#39;e&gt;, RequestError&gt; { let typed_assign: Assign = Assign::from_value(&amp;Value::Map(Rc::clone(&amp;root_data)), &quot;assign&quot;).map_err(|error| generated_error(error.message))?; let (definitions, targets) = generated_bind_definitions(name, &amp;options.define)?; let resolved = targets.get(name); let target_name = resolved.and_then(|value| value.target.clone()).unwrap_or_else(|| name.to_string()); let html = resolved.and_then(|value| value.html.clone()); let env = options.env.clone().unwrap_or_else(|| polyspec_template::Env { timezone: &quot;Z&quot;.to_string(), now: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|duration| duration.as_secs() as f64).unwrap_or(0.0) }); Ok(PreparedRender::new(name, move || { let mut context = RenderContext::new(&amp;self.runtime, Rc::clone(&amp;root_data), env.clone(), &amp;target_name); let runtime = RuntimeBindings::new(); let mut scope = Scope::default(); let mut render_definitions = definitions.clone(); context.enter(&amp;target_name, None, None)?; let result = if let Some(html) = &amp;html { let frame = Frame { name: target_name.clone(), lines: None, context: Rc::clone(&amp;root_data) }; context.write(html, &amp;frame, [0, 0]) } else { render_template(&amp;target_name, &amp;typed_assign, &amp;mut render_definitions, &amp;mut context, &amp;runtime, &amp;root_data, &amp;mut scope) }; context.leave(); result?; Ok(context.output) })) } }
 
 
 php · product generated program
@@ -7405,7 +7840,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e22e61a6f550d552f35f3379260b92a398855933b960deaa9b328f86fa4a783b&quot;,
+  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -7445,7 +7880,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;f1b6e080ca5a7f1f67d879ae9af8f079c83392a373444d816c64f5e11af4d742&quot;
+      &quot;artifactDigest&quot;: &quot;8ecf89faf2a3fd42c5e9281c61414e7bf3912868a66822fd7ae0f72e0872ad7c&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,

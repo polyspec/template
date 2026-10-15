@@ -1,154 +1,166 @@
 #!/usr/bin/env node
-// Compiles tests/fixtures/typed-arguments with its typed manifest in every generated backend and checks
-// that a request whose `assign` or definition `data` does not match the declared types fails with the
-// argument error of the host language, which passes to the host unchanged and is not an ERR-1 error
-// (ERR-13): an `Error` of TypeScript that is not a `TemplateError` or a built-in subclass, a Go error
-// that is not an `*errs.Error`, `RequestError::Argument` of Rust, `\InvalidArgumentException` of PHP and `ValueError` of Python.
-// A request that matches the declared types renders `T|N`.
-// tests/fixtures/typed-arguments-unread declares a root record field that no template reads and definition data that no
-// block merges: generated Rust checks them without holding them (T24.31) and fails with the field path of each, as it does
-// for a value that it reads.
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+// Compiles the programs of tests/fixtures/typed-arguments and tests/fixtures/typed-arguments-unread with their typed
+// manifests in every generated backend, renders the requests of messages.json of each, and checks the result of every
+// request in every target: the output of a request that matches the declared types, and for any other request the
+// argument error of the host language with the exact text that ERR-13 defines (T24.33). The argument error passes to the
+// host unchanged and is not an ERR-1 error: an `Error` of TypeScript that is not a `TemplateError` or a built-in
+// subclass, a Go error that is not an `*errs.Error` or a bind error, `RequestError::Argument` of Rust,
+// `\InvalidArgumentException` of PHP and `ValueError` of Python. typed-arguments-unread declares a root record field and
+// a list that no template reads and definition data that no block merges, which generated Rust checks without holding
+// them (T24.31).
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import assert from 'node:assert/strict';
 import { compileAst } from '../packages/compiler/src/ast-artifact.mts';
 import { compileFiles, compileSource } from '../packages/compiler/src/compiler.mts';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
-import { phpString, rustString } from '../packages/compiler/src/backend-support.mts';
+import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
 import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { jsonDocument } from './json-document.mts';
 import { checkLanguages } from './language-checks.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
 
-const fixture = join(root, 'tests/fixtures/typed-arguments');
-const types = join(fixture, 'types.json');
-const expected = readFileSync(join(fixture, 'expected.html'), 'utf8');
-const unread = join(root, 'tests/fixtures/typed-arguments-unread');
-const unreadTypes = join(unread, 'types.json');
+/** A request of messages.json and its result: `rendered: <output>` or `argument: <message>`. */
+interface Vector { assign: Record<string, unknown>; define: Record<string, unknown>; result: string }
+const vectorsDocument = jsonDocument<Vector[]>('list of requests', {
+  type: 'array',
+  items: { type: 'object', required: ['assign', 'define', 'result'], properties: { assign: { type: 'object' }, define: { type: 'object' }, result: { type: 'string' } } },
+});
+
+const fixtures = ['typed-arguments', 'typed-arguments-unread'].map(name => {
+  const directory = join(root, 'tests/fixtures', name);
+  const vectors = vectorsDocument.read(join(directory, 'messages.json'));
+  if (vectors.length === 0) throw new Error(`${name}/messages.json holds no request`);
+  return { name, id: name.replaceAll('-', '_'), directory, types: join(directory, 'types.json'), vectorsPath: join(directory, 'messages.json'), vectors };
+});
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-arguments');
-const run = (language: string, command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): void => {
+const run = (command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): string => {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
   if (result.status !== 0) throw new Error(`${command} exited with ${result.status}\n${result.stdout}${result.stderr}`);
+  return result.stdout;
+};
+const graphs = new Map(fixtures.map(fixture => {
+  const graph = join(temporary, `${fixture.id}-ast`);
+  compileAst({ root: fixture.directory, output: graph, entry: 'input.tpl', refresh: 'dev', typeManifest: fixture.types });
+  return [fixture.name, join(graph, 'manifest.json')];
+}));
+const graphOf = (name: string): string => {
+  const graph = graphs.get(name);
+  if (graph === undefined) throw new Error(`no graph of ${name}`);
+  return graph;
 };
 
-try {
-  const graph = join(temporary, 'ast');
-  compileAst({ root: fixture, output: graph, entry: 'input.tpl', refresh: 'dev', typeManifest: types });
-  const graphManifest = join(graph, 'manifest.json');
-  const unreadGraph = join(temporary, 'unread-ast');
-  compileAst({ root: unread, output: unreadGraph, entry: 'input.tpl', refresh: 'dev', typeManifest: unreadTypes });
+/** Compares the results that a target printed, one JSON array per fixture after the marker of the fixture, with messages.json. */
+function compare(language: string, output: string): void {
+  for (const fixture of fixtures) {
+    const line = output.split('\n').find(text => text.startsWith(`${fixture.name} `));
+    if (line === undefined) throw new Error(`${language} printed no results of ${fixture.name}\n${output}`);
+    const actual: unknown = JSON.parse(line.slice(fixture.name.length + 1));
+    assert.deepEqual(actual, fixture.vectors.map(vector => vector.result), `${language}: the results of ${fixture.name}/messages.json`);
+  }
+}
 
+try {
   checkLanguages('generated arguments', {
     TypeScript: () => {
-      // TypeScript.
-      const tsSource = join(temporary, 'typed.ts');
-      writeFileSync(tsSource, compileSource(graphManifest, types, 'ts'));
-      const compiled = spawnSync('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], { cwd: root, encoding: 'utf8' });
-      if (compiled.status !== 0) throw new Error(`tsc exited with ${compiled.status}\n${compiled.stdout}${compiled.stderr}`);
-      const tsRunner = join(temporary, 'typed.mjs');
-      writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/typed.js';
+      const lines = fixtures.map(fixture => {
+        const source = join(temporary, `${fixture.id}.ts`);
+        writeFileSync(source, compileSource(graphOf(fixture.name), fixture.types, 'ts'));
+        return fixture;
+      });
+      run('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), ...lines.map(fixture => join(temporary, `${fixture.id}.ts`))], root);
+      const runner = join(temporary, 'arguments.mjs');
+      writeFileSync(runner, `import { readFileSync } from 'node:fs';
 import { RuntimeEnvironment, TemplateError } from '@polyspec/template';
-const program = new GeneratedProgram(new RuntimeEnvironment());
-const card = name => ({ define: { card: { template: 'part.tpl', data: { name } } } });
-const rendered = program.render('input.tpl', { title: 'T' }, card('N'));
-if (rendered !== ${JSON.stringify(expected)}) throw new Error('TypeScript renders ' + JSON.stringify(rendered));
-const kind = request => { try { request(); return 'rendered'; } catch (error) { if (error instanceof TemplateError) return 'template ' + error.code; return Object.getPrototypeOf(error) === Error.prototype ? 'argument' : 'other ' + error?.constructor?.name; } };
-const kinds = [kind(() => program.render('input.tpl', { title: 1 }, card('N'))), kind(() => program.render('input.tpl', { title: 'T' }, card(2)))];
-if (kinds.some(item => item !== 'argument')) throw new Error('TypeScript reports ' + kinds.join(', '));
+${fixtures.map(fixture => `import { GeneratedProgram as ${fixture.id} } from './ts/${fixture.id}.js';`).join('\n')}
+const result = (request) => { try { return 'rendered: ' + request(); } catch (error) { if (error instanceof TemplateError) return 'template: ' + error.code; return Object.getPrototypeOf(error) === Error.prototype ? 'argument: ' + error.message : 'other ' + error?.constructor?.name + ': ' + error?.message; } };
+${fixtures.map(fixture => `{ const program = new ${fixture.id}(new RuntimeEnvironment()); const vectors = JSON.parse(readFileSync(${JSON.stringify(fixture.vectorsPath)}, 'utf8')); console.log(${JSON.stringify(fixture.name)} + ' ' + JSON.stringify(vectors.map(vector => result(() => program.render('input.tpl', vector.assign, { define: vector.define }))))); }`).join('\n')}
 `);
-      run('TypeScript', process.execPath, [tsRunner], root);
+      compare('TypeScript', run(process.execPath, [runner], root));
     },
     Go: () => {
-      // Go.
-      const goDir = goWorkspace('generated-arguments-go');
-      try {
-        writeFileSync(join(goDir, 'generated.go'), compileSource(graphManifest, types, 'go'));
-        writeFileSync(join(goDir, 'generated_test.go'), `package generated
-import ("errors"; "testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/errs"; "github.com/polyspec/template/packages/go/render"; "github.com/polyspec/template/packages/go/value")
-func request(title any, name any) (value.Value, template.RenderOptions) { assign := value.NewOrderedMap(); assign.Set("title", title); data := value.NewOrderedMap(); data.Set("name", name); return assign, template.RenderOptions{Define: map[string]render.DefineInput{"card": {Template: "part.tpl", Data: data}}} }
-func kind(err error) string { if err == nil { return "rendered" }; var te *errs.Error; if errors.As(err, &te) { return "template " + string(te.Code) }; return "argument" }
-func TestGeneratedArguments(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; assign, options := request("T", "N"); actual, err := program.Render("input.tpl", assign, options); if err != nil || actual != "T|N" { t.Fatalf("Go renders %q %v", actual, err) }; first, firstOptions := request(1.0, "N"); _, firstErr := program.Render("input.tpl", first, firstOptions); second, secondOptions := request("T", 2.0); _, secondErr := program.Render("input.tpl", second, secondOptions); if kind(firstErr) != "argument" || kind(secondErr) != "argument" { t.Fatalf("Go reports %s, %s", kind(firstErr), kind(secondErr)) } }
+      const output = fixtures.map(fixture => {
+        const goDir = goWorkspace(`generated-arguments-go-${fixture.id}`);
+        try {
+          writeFileSync(join(goDir, 'generated.go'), compileSource(graphOf(fixture.name), fixture.types, 'go'));
+          writeFileSync(join(goDir, 'generated_test.go'), `package generated
+import ("encoding/json"; "errors"; "fmt"; "os"; "testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/errs"; "github.com/polyspec/template/packages/go/render"; "github.com/polyspec/template/packages/go/value")
+type vector struct { Assign json.RawMessage \`json:"assign"\`; Define map[string]struct { Template *string \`json:"template"\`; HTML *string \`json:"html"\`; Data json.RawMessage \`json:"data"\` } \`json:"define"\` }
+func result(output string, err error) string { if err == nil { return "rendered: " + output }; var te *errs.Error; if errors.As(err, &te) { return "template: " + string(te.Code) }; var be *value.BindError; if errors.As(err, &be) { return "bind: " + be.Error() }; return "argument: " + err.Error() }
+func TestGeneratedArguments(t *testing.T) { text, err := os.ReadFile(${goString(fixture.vectorsPath)}); if err != nil { t.Fatal(err) }; var vectors []vector; if err := json.Unmarshal(text, &vectors); err != nil { t.Fatal(err) }; program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; results := []string{}; for _, item := range vectors { assign, err := value.ParseJSON(item.Assign); if err != nil { t.Fatal(err) }; define := map[string]render.DefineInput{}; for id, entry := range item.Define { input := render.DefineInput{HTML: entry.HTML}; if entry.Template != nil { input.Template = *entry.Template }; if entry.Data != nil { data, err := value.ParseJSON(entry.Data); if err != nil { t.Fatal(err) }; input.Data = data }; define[id] = input }; results = append(results, result(program.Render("input.tpl", assign, template.RenderOptions{Define: define}))) }; encoded, _ := json.Marshal(results); fmt.Println(${goString(fixture.name)} + " " + string(encoded)) }
 `);
-        run('Go', 'go', ['test', '.'], goDir);
-      } finally {
-        rmSync(goDir, { recursive: true, force: true });
-      }
+          return run('go', ['test', '-v', '-count=1', '.'], goDir);
+        } finally {
+          rmSync(goDir, { recursive: true, force: true });
+        }
+      }).join('\n');
+      compare('Go', output);
     },
     Rust: () => {
-      // Rust.
-      const rustSource = join(temporary, 'typed.rust');
-      writeFileSync(rustSource, compileSource(graphManifest, types, 'rust'));
-      const unreadSource = join(temporary, 'unread.rust');
-      writeFileSync(unreadSource, compileSource(join(unreadGraph, 'manifest.json'), unreadTypes, 'rust'));
       const rust = rustWorkspace('generated-arguments-rust');
       const rustTest = rust.test('generated_arguments_check');
-      writeFileSync(rustTest, `mod generated { include!(${rustString(rustSource)}); }
-use polyspec_template::{DefineData, DefineInput, OrderedMap, Program, RenderOptions, RenderTarget, RuntimeEnvironment, Value};
-fn options(name: Value) -> RenderOptions { let mut options = RenderOptions::default(); let mut data = OrderedMap::new(); data.insert("name".to_string(), name); options.define.insert("card".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(DefineData::Value(Value::map(data))), html: None }); options }
-fn kind<T, E: std::fmt::Debug>(result: Result<T, E>) -> String { match result { Ok(_) => "rendered".to_string(), Err(error) => { let text = format!("{error:?}"); if text.starts_with("Argument(") { "argument".to_string() } else { text } } } }
-#[test] fn generated_arguments_fail_as_argument_errors() { let program = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); assert_eq!(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::text("N"))).unwrap(), ${rustString(expected)}); let first = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": 1 }), &options(Value::text("N")))); let second = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::Number(2.0)))); assert!(first == "argument" && second == "argument", "Rust reports {first}, {second}"); }
-mod unread { include!(${rustString(unreadSource)}); }
-fn unread_message(page: serde_json::Value, name: Value) -> String { let program = unread::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); match program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T", "page": page }), &options(name)) { Ok(output) => format!("rendered {output}"), Err(polyspec_template::RequestError::Argument(error)) => error.message, Err(error) => format!("{error:?}") } }
-#[test] fn generated_unread_values_fail_with_their_field_path() { assert_eq!(unread_message(serde_json::json!({ "name": "P" }), Value::text("N")), "rendered T|T"); assert_eq!(unread_message(serde_json::json!({ "name": 1 }), Value::text("N")), "page: name: expected a string"); assert_eq!(unread_message(serde_json::json!({ "name": "P" }), Value::Number(2.0)), "define.card.data.name: expected a string"); }
+      const modules = fixtures.map(fixture => {
+        const source = join(temporary, `${fixture.id}.rust`);
+        writeFileSync(source, compileSource(graphOf(fixture.name), fixture.types, 'rust'));
+        return `mod ${fixture.id} { include!(${rustString(source)}); }`;
+      }).join('\n');
+      writeFileSync(rustTest, `${modules}
+use polyspec_template::{Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, defines_from_json};
+fn result(rendered: Result<String, RequestError>) -> String { match rendered { Ok(output) => format!("rendered: {output}"), Err(RequestError::Argument(error)) => format!("argument: {}", error.message), Err(RequestError::Template(error)) => format!("template: {}", error.code.as_str()) } }
+fn results(path: &str, render: impl Fn(&serde_json::Value, &RenderOptions) -> Result<String, RequestError>) -> String { let vectors: Vec<serde_json::Value> = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap(); let all: Vec<String> = vectors.iter().map(|vector| { let mut options = RenderOptions::default(); options.define = defines_from_json(&vector["define"]).unwrap(); result(render(&vector["assign"], &options)) }).collect(); serde_json::to_string(&all).unwrap() }
+#[test] fn generated_arguments() { ${fixtures.map(fixture => `let program = ${fixture.id}::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); println!("${fixture.name} {}", results(${rustString(fixture.vectorsPath)}, |assign, options| program.render(RenderTarget::Name("input.tpl"), assign, options)));`).join(' ')} }
 `);
       try {
-        run('Rust', CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        compare('Rust', run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check', '--', '--nocapture'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' }));
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }
     },
     PHP: () => {
-      // PHP.
-      const phpNamespace = 'Polyspec\\Generated\\TypedArguments';
-      const phpDirectory = join(temporary, 'php');
-      writePhpProgram(phpDirectory, compileFiles(graphManifest, types, 'php', { phpNamespace }));
-      run('PHP', 'php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $card = static fn (mixed $name): array => ['define' => ['card' => ['template' => 'part.tpl', 'data' => ['name' => $name]]]]; $rendered = $program->render('input.tpl', ['title' => 'T'], $card('N')); if ($rendered !== ${phpString(expected)}) throw new RuntimeException('PHP renders ' . $rendered); $kind = static function (callable $request): string { try { $request(); return 'rendered'; } catch (Polyspec\\Template\\TemplateError $error) { return 'template ' . $error->errorCode; } catch (InvalidArgumentException) { return 'argument'; } catch (Throwable $error) { return 'other ' . $error::class; } }; $kinds = [$kind(static fn () => $program->render('input.tpl', ['title' => 1], $card('N'))), $kind(static fn () => $program->render('input.tpl', ['title' => 'T'], $card(2)))]; if ($kinds !== ['argument', 'argument']) throw new RuntimeException('PHP reports ' . implode(', ', $kinds));`], root);
+      const output = fixtures.map(fixture => {
+        const phpNamespace = `Polyspec\\Generated\\${fixture.id === 'typed_arguments' ? 'TypedArguments' : 'TypedArgumentsUnread'}`;
+        const phpDirectory = join(temporary, `${fixture.id}-php`);
+        writePhpProgram(phpDirectory, compileFiles(graphOf(fixture.name), fixture.types, 'php', { phpNamespace }));
+        return run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $result = static function (callable $request): string { try { return 'rendered: ' . $request(); } catch (Polyspec\\Template\\TemplateError $error) { return 'template: ' . $error->errorCode . ' ' . $error->getMessage(); } catch (InvalidArgumentException $error) { return 'argument: ' . $error->getMessage(); } catch (Throwable $error) { return 'other ' . $error::class . ': ' . $error->getMessage(); } }; $vectors = json_decode(file_get_contents(${phpString(fixture.vectorsPath)}), true, 512, JSON_THROW_ON_ERROR); echo ${phpString(fixture.name)}, ' ', json_encode(array_map(static fn (array $vector): string => $result(static fn () => $program->render('input.tpl', $vector['assign'], ['define' => $vector['define']])), $vectors), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\\n";`], root);
+      }).join('\n');
+      compare('PHP', output);
     },
     Python: () => {
-      // Python: the argument error is a ValueError, which no template error is (ERR-13).
       const pythonDir = join(temporary, 'python');
       mkdirSync(pythonDir);
-      writeFileSync(join(pythonDir, 'generated.py'), compileSource(graphManifest, types, 'python'));
-      writeFileSync(join(pythonDir, 'expected.html'), expected);
-      writeFileSync(join(pythonDir, 'check.py'), `import sys
+      for (const fixture of fixtures) writeFileSync(join(pythonDir, `${fixture.id}.py`), compileSource(graphOf(fixture.name), fixture.types, 'python'));
+      writeFileSync(join(pythonDir, 'check.py'), `import json
 from polyspec.template import Engine, RenderOptions, RuntimeEnvironment, TemplateError
-from generated import GeneratedProgram
-
-program = Engine(GeneratedProgram(RuntimeEnvironment()))
+${fixtures.map(fixture => `import ${fixture.id}`).join('\n')}
 
 
-def card(name):
-    return RenderOptions(define={'card': {'template': 'part.tpl', 'data': {'name': name}}})
-
-
-def kind(request):
+def result(request):
     try:
-        request()
+        return 'rendered: ' + request()
     except TemplateError as error:
-        return 'template ' + error.code
-    except ValueError:
-        return 'argument'
+        return 'template: ' + error.code
+    except ValueError as error:
+        return 'argument: ' + str(error)
     except Exception as error:  # noqa: BLE001  any other exception names its class in the failure
-        return 'other ' + type(error).__name__
-    return 'rendered'
+        return 'other ' + type(error).__name__ + ': ' + str(error)
 
 
-with open('expected.html', encoding='utf-8', newline='') as handle:
-    expected = handle.read()
-rendered = program.render('input.tpl', {'title': 'T'}, card('N'))
-if rendered != expected:
-    sys.exit('Python renders ' + repr(rendered))
-kinds = [kind(lambda: program.render('input.tpl', {'title': 1}, card('N'))), kind(lambda: program.render('input.tpl', {'title': 'T'}, card(2)))]
-if kinds != ['argument', 'argument']:
-    sys.exit('Python reports ' + ', '.join(kinds))
+for name, module, path in [${fixtures.map(fixture => `(${JSON.stringify(fixture.name)}, ${fixture.id}, ${JSON.stringify(fixture.vectorsPath)})`).join(', ')}]:
+    program = Engine(module.GeneratedProgram(RuntimeEnvironment()))
+    with open(path, encoding='utf-8') as handle:
+        vectors = json.load(handle)
+    results = [result(lambda vector=vector: program.render('input.tpl', vector['assign'], RenderOptions(define=vector['define']))) for vector in vectors]
+    print(name, json.dumps(results, ensure_ascii=False))
 `);
-      run('Python', pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment());
+      compare('Python', run(pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment()));
     },
   });
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write('generated arguments: TypeScript, Go, Rust, PHP and Python report a request that does not match the declared types as an argument error of the language\n');
+process.stdout.write('generated arguments: TypeScript, Go, Rust, PHP and Python render the requests of messages.json with the results and argument error messages of ERR-13\n');

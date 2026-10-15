@@ -6,9 +6,9 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  assignedNames, baseTarget, definition, definitionDataName, emitExpression, emitNodes, exportedName,
+  assignedNames, baseTarget, definition, definitionDataName, descriptor, emitExpression, emitNodes, exportedName,
   fieldName, FunctionLocals, functionName, goString, goType, inputName, typeKey,
-  type BackendContext, type MergedLocal, type Part, type Target,
+  type BackendContext, type Descriptor, type MergedLocal, type Part, type Target,
 } from '../backend-support.mts';
 import type { Span } from '@polyspec/template';
 import { loweredTemplate, type Definition, type Expr, type LoweredTemplate, type Node, type NodeOf, type Program, type ValueType } from '../ir.mts';
@@ -28,6 +28,17 @@ function goSource(file: string): string {
   const text = readFileSync(join(packageRoot, 'backends/go', `${file}.go`), 'utf8');
   return text.slice(text.search(/^(?:func|type) /m), -1);
 }
+
+/** The Go literal of the type of a request value that generatedCheck checks it against (generated_check.go, T24.33). */
+function goCheckType(type: Descriptor): string {
+  const fields = [`Kind: ${goString(type.kind)}`];
+  if (type.optional) fields.push('Optional: true');
+  if (type.kind === 'record') fields.push(`Name: ${goString(type.name)}`);
+  if (type.kind === 'list') fields.push(`Item: &${goCheckType(type.item)}`);
+  if (type.kind === 'map') fields.push(`Key: &${goCheckType(type.key)}`, `Value: &${goCheckType(type.value)}`);
+  return `generatedType{${fields.join(', ')}}`;
+}
+const goCheckFields = (fields: Record<string, string>): string => `[]generatedField{${Object.entries(fields).map(([name, type]) => `{Name: ${goString(name)}, Type: ${goCheckType(descriptor(type))}}`).join(', ')}}`;
 
 const goSpan = (span: Span): string => `ast.Span{${span.join(', ')}}`;
 const goLines = (lines: number[]): string => `errs.LineIndex{${lines.join(', ')}}`;
@@ -299,6 +310,8 @@ export function emitDeclarations(context: BackendContext): Part[] {
       goStruct('Definition[T any]', [['Template', 'string', tag('template')], ['HTML', '*string', tag('html')], ['Data', '*T', tag('data')]]),
       definitionsType,
       goStruct('ArtifactManifest', ['Schema int', 'Mode string', 'Target string', 'Entry string', 'SourceDigest string', 'TypeDigest string', 'ContractDigest string', 'Files map[string]string'].map(row => row.split(' ')))].map(code => `\n${code}`),
+    // The declared types of the request values, which generatedCheck reads; kept when the program checks a request value.
+    definition('generatedRecordFields', `\nvar generatedRecordFields = map[string][]generatedField{${Object.entries(records).map(([name, members]) => `${goString(name)}: ${goCheckFields(members)}`).join(', ')}}`),
     definition('OrderedMap', `\n${goSource('ordered_map')}`,
     // The OrderedMap of the program, not value.OrderedMap of the runtime.
     /(?<![.\w])OrderedMap\b/),
@@ -310,11 +323,14 @@ const helpers = [
   'generatedPanic', 'generatedValue', 'generatedResult', 'generatedAs', 'generatedTruthy', 'generatedUnary', 'generatedBinary',
   'generatedMember', 'generatedIndex', 'generatedDepth', 'generatedMemberCall', 'generatedClassCall', 'generatedCall',
   'generatedEscape', 'generatedEntries', 'generatedEntry', 'generatedListEntries', 'generatedMapEntries', 'generatedDeref', 'generatedListSpread', 'generatedMapSpread', 'generatedLoopMeta', 'generatedWrite',
-  'generatedEnter', 'generatedLimit', 'generatedPointer', 'generatedPlain', 'generatedDecode', 'generatedEnv',
+  'generatedEnter', 'generatedLimit', 'generatedPointer', 'generatedPlain', 'generatedCheck', 'generatedDecode', 'generatedEnv',
 ];
 
+// A helper file that declares more than its name, used by any of its declarations.
+const helperPatterns: Record<string, RegExp> = { generatedCheck: /\bgeneratedCheck(?:Fields)?\b/ };
+
 export function emitRuntime(): Part[] {
-  return helpers.map(name => definition(name, `\n${goSource(name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`))}`));
+  return helpers.map(name => definition(name, `\n${goSource(name.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`))}`, helperPatterns[name]));
 }
 
 /** The statements of the body of `template` at level 0. */
@@ -349,10 +365,11 @@ function definitionCase(context: BackendContext, id: string, definition: Definit
   // Definition data is bound as its own value and converted field by field, so a native object in an `any` field stays
   // the original value (VAL-18, VAL-20).
   const converted = inputs.map(([name, type]) => braced(`if raw, found := data.Get(${goString(name)}); found`,
+    braced(`if err := generatedCheck(raw, ${goCheckType(descriptor(type.source))}, generatedRecordFields, "define."+id+".data."+${goString(name)}); err != nil`, 'return nil, nil, err'),
     `converted, err := generatedAs[${goType(type.source)}](raw)`,
     braced('if err != nil', `return nil, nil, fmt.Errorf("define.%s.data.%s: %w", id, ${goString(name)}, err)`),
     `definitionData.${exportedName(name)} = &converted`));
-  const notMap = 'return nil, nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": data is not a map"}';
+  const notMap = fail('define.%s.data is not an object');
   const data = braced('if input.Data != nil',
     'bound, err := value.BindData(input.Data)',
     braced('if err != nil', 'return nil, nil, err'),
@@ -373,7 +390,11 @@ export function emitEntry(context: BackendContext): Part[] {
   const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `case ${goString(template.name)}:\n${tabs(1, `${template.function}(assign, definitions, ${template.input}{}, context, runtime, rootData, scope)\nreturn`)}`);
   const definitions = [...context.program.definitions];
   const cases = definitions.map(([id, definition]) => definitionCase(context, id, definition));
-  const bindAssign = context.program.dynamicRoot ? '' : braced('if err := generatedDecode(rootData, &typedAssign); err != nil', 'return nil, err');
+  // The values of the request are checked against their declared types, with the messages of ERR-13, before they are
+  // decoded (T24.33).
+  const bindAssign = context.program.dynamicRoot ? '' : lines(
+    braced(`if err := generatedCheckFields(rootData, ${goCheckFields(context.manifest.fields)}, generatedRecordFields, "assign"); err != nil`, 'return nil, err'),
+    braced('if err := generatedDecode(rootData, &typedAssign); err != nil', 'return nil, err'));
   const failure = (message: string): string => `return "", ${message}`;
   return [
     `\n${braced('func renderTemplate(target string, assign Assign, definitions *Definitions, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope)',

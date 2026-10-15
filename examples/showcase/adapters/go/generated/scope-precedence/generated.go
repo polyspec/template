@@ -72,6 +72,8 @@ type ArtifactManifest struct {
 	Files          map[string]string
 }
 
+var generatedRecordFields = map[string][]generatedField{"Page": []generatedField{{Name: "title", Type: generatedType{Kind: "string"}}}}
+
 func generatedPanic(err error) {
 	if err != nil {
 		panic(err)
@@ -157,6 +159,84 @@ func generatedPlain(input any) any {
 	default:
 		return input
 	}
+}
+
+type generatedType struct {
+	Kind     string
+	Optional bool
+	Name     string
+	Item     *generatedType
+	Key      *generatedType
+	Value    *generatedType
+}
+
+type generatedField struct {
+	Name string
+	Type generatedType
+}
+
+func generatedCheck(input value.Value, kind generatedType, records map[string][]generatedField, path string) error {
+	if input == nil {
+		if kind.Optional || kind.Kind == "any" {
+			return nil
+		}
+		return fmt.Errorf("%s is required", path)
+	}
+	actual := value.TypeOf(input)
+	switch kind.Kind {
+	case "any":
+		return nil
+	case "string":
+		if actual != value.TypeString {
+			return fmt.Errorf("%s is not a string", path)
+		}
+	case "number":
+		if actual != value.TypeNumber {
+			return fmt.Errorf("%s is not a number", path)
+		}
+	case "boolean":
+		if actual != value.TypeBool {
+			return fmt.Errorf("%s is not a boolean", path)
+		}
+	case "list":
+		items, ok := input.(value.List)
+		if !ok {
+			return fmt.Errorf("%s is not a list", path)
+		}
+		for index, item := range items {
+			if err := generatedCheck(item, *kind.Item, records, fmt.Sprintf("%s[%d]", path, index)); err != nil {
+				return err
+			}
+		}
+	case "map":
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf("%s is not an object", path)
+		}
+		for _, key := range entries.Keys() {
+			item, _ := entries.Get(key)
+			if err := generatedCheck(item, *kind.Value, records, path+"."+key); err != nil {
+				return err
+			}
+		}
+	default:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf("%s is not an object", path)
+		}
+		return generatedCheckFields(entries, records[kind.Name], records, path)
+	}
+	return nil
+}
+
+func generatedCheckFields(input *value.OrderedMap, fields []generatedField, records map[string][]generatedField, path string) error {
+	for _, field := range fields {
+		item, _ := input.Get(field.Name)
+		if err := generatedCheck(item, field.Type, records, path+"."+field.Name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func generatedDecode(input any, output any) error {
@@ -278,10 +358,13 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 				}
 				data, ok := bound.(*value.OrderedMap)
 				if !ok {
-					return nil, nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": data is not a map"}
+					return nil, nil, fmt.Errorf("define.%s.data is not an object", id)
 				}
 				definitionData := DefinitionData_content_tpl{}
 				if raw, found := data.Get("title"); found {
+					if err := generatedCheck(raw, generatedType{Kind: "string"}, generatedRecordFields, "define."+id+".data."+"title"); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf("define.%s.data.%s: %w", id, "title", err)
@@ -289,6 +372,9 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					definitionData.Title = &converted
 				}
 				if raw, found := data.Get("root_label"); found {
+					if err := generatedCheck(raw, generatedType{Kind: "string"}, generatedRecordFields, "define."+id+".data."+"root_label"); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf("define.%s.data.%s: %w", id, "root_label", err)
@@ -296,6 +382,9 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					definitionData.Root_label = &converted
 				}
 				if raw, found := data.Get("defined_label"); found {
+					if err := generatedCheck(raw, generatedType{Kind: "string"}, generatedRecordFields, "define."+id+".data."+"defined_label"); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf("define.%s.data.%s: %w", id, "defined_label", err)
@@ -303,6 +392,9 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					definitionData.Defined_label = &converted
 				}
 				if raw, found := data.Get("layout_local"); found {
+					if err := generatedCheck(raw, generatedType{Kind: "string", Optional: true}, generatedRecordFields, "define."+id+".data."+"layout_local"); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[*string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf("define.%s.data.%s: %w", id, "layout_local", err)
@@ -327,7 +419,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": data is not a map"}
+					return nil, nil, fmt.Errorf("define.%s.data is not an object", id)
 				}
 				definitionData := DefinitionData_layout_tpl{}
 				entry.Data = &definitionData
@@ -410,6 +502,9 @@ func (p *GeneratedProgram) prepare(name string, assign any, options template.Ren
 		return nil, generatedBindFailure(name, err)
 	}
 	var typedAssign Assign
+	if err := generatedCheckFields(rootData, []generatedField{{Name: "page", Type: generatedType{Kind: "record", Name: "Page"}}, {Name: "root_label", Type: generatedType{Kind: "string"}}, {Name: "defined_label", Type: generatedType{Kind: "string"}}}, generatedRecordFields, "assign"); err != nil {
+		return nil, err
+	}
 	if err := generatedDecode(rootData, &typedAssign); err != nil {
 		return nil, err
 	}

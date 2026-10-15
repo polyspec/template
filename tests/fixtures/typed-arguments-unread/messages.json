@@ -1,0 +1,8 @@
+[
+  {"assign": {"title": "T", "page": {"name": "P"}, "tags": ["a"]}, "define": {"card": {"template": "part.tpl", "data": {"title": "N"}}}, "result": "rendered: T|T"},
+  {"assign": {"title": "T", "page": {"name": 1}, "tags": []}, "define": {}, "result": "argument: assign.page.name is not a string"},
+  {"assign": {"title": "T", "tags": []}, "define": {}, "result": "argument: assign.page is required"},
+  {"assign": {"title": "T", "page": {"name": "P"}, "tags": ["a", 1]}, "define": {}, "result": "argument: assign.tags[1] is not a string"},
+  {"assign": {"title": "T", "page": {"name": "P"}, "tags": []}, "define": {"card": {"template": "part.tpl", "data": {"title": 2}}}, "result": "argument: define.card.data.title is not a string"},
+  {"assign": {"title": "T", "page": {"name": "P"}, "tags": []}, "define": {"card": {"template": "part.tpl", "data": 5}}, "result": "argument: define.card.data is not an object"}
+]

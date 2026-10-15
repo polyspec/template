@@ -47,7 +47,11 @@ final class GeneratedRuntime
                 default => is_bool($value),
             };
             if (!$valid) {
-                throw new InvalidArgumentException($path . ' has an invalid type');
+                throw new InvalidArgumentException($path . ' is not ' . match ($type['kind']) {
+                    'string' => 'a string',
+                    'number' => 'a number',
+                    default => 'a boolean',
+                });
             }
 
             return $type['kind'] === 'number' ? (float) $value : $value;
@@ -65,7 +69,7 @@ final class GeneratedRuntime
         }
         if ($type['kind'] === 'map') {
             if (!$value instanceof MapValue) {
-                throw new InvalidArgumentException($path . ' is not a map');
+                throw new InvalidArgumentException($path . ' is not an object');
             }
             $result = new MapValue();
             foreach ($value->entries() as $key => $item) {
