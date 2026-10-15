@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: b9fbdb1f7b25a0c692b9d1ef57a391079da065ea8dd1a4a1a734d92d32ad64eb -->
+<!-- source-sha256: 1642474008c0b41c57306abf557e8fb2ec0d158bb19fa0a18b5d7af1a29b12cb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-19-1: PHP extension의 expression vector는 각 expression을 두 level을 더하던 `json`의 인자 대신 assignment의 값인 `{:value = <expr>}{= json(value) | raw}`로, 다른 binding과 같은 depth에서 평가합니다. depth vector `depth-limit-parentheses`와 `depth-limit-unary`는 모든 implementation에서 다시 evaluation을 갖습니다.
 
 - T22.6-19: runtime specification은 TypeScript, PHP, PHP extension, Python이 그대로 받고 Go와 Rust가 `Limits`의 field로 적는 `limits`의 key를 적고(RT-33), 생략한 limit이 각 언어에서 기본값을 유지하는 방식을 적으며(RT-6), `program.register`를 적고(RT-1), expression depth의 단위를 적습니다(RT-34). 새 expression vector 네 개가 모든 implementation에서 그 경계를 괄호 31겹과 prefix 연산자 62개로 고정합니다. 동작은 바뀌지 않습니다.
 

@@ -13,8 +13,10 @@ use Polyspec\Template\Native\TemplateError;
  * The expression vectors of tests/fixtures/expr/cases.json in the extension (CNF-12 to CNF-14). The extension exposes
  * no expression lexer or evaluator of its own, so each vector runs as the echo tag `{=<expr>}`: an error vector fails
  * the parse with its code, the expression of the parsed echo is the AST of the vector with every span two bytes later,
- * after `{=`, and each evaluation renders `{= json(<expr>) | raw}` with its data to the JSON text of its value. The
- * token vectors name the tokens of the expression lexer, which the extension does not expose.
+ * after `{=`, and each evaluation renders `{:value = <expr>}{= json(value) | raw}` with its data to the JSON text of
+ * its value: the assignment parses the expression at the depth of the other bindings, and only the read of `value` is
+ * an argument of `json` (RT-34). The token vectors name the tokens of the expression lexer, which the extension does
+ * not expose.
  */
 final class ExprFixturesTest extends TestCase
 {
@@ -86,7 +88,7 @@ final class ExprFixturesTest extends TestCase
         if (!is_dir(self::$root)) {
             mkdir(self::$root, 0o700, true);
         }
-        file_put_contents(self::$root . '/value.tpl', '{= json(' . $case['expr'] . ') | raw}');
+        file_put_contents(self::$root . '/value.tpl', '{:value = ' . $case['expr'] . '}{= json(value) | raw}');
         $engine = new Engine(self::$root);
         foreach ($case['cases'] as $index => $evaluation) {
             self::assertSame(
