@@ -1,11 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ff59e343a7fab12faf237f63f68a854e7bf5f1eba6a93912d474e14302724ed7 -->
+<!-- source-sha256: 18e47adf144f9bb007d5ab1413987a513a86190eca3b729fc36a4bb34014a4cc -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+## 0.0.7
+
+- T24.25: 0.0.7을 release합니다. `config/release.json`의 모든 manifest가 0.0.7을 선언하고, lock, dependency review, compile된 artifact, release asset의 consumer project가 이를 기록합니다.
 - T24.22: template은 `@polyspec/kit` 0.0.50을 고정하고, `make kit-sync`가 그 복사본(`knip.json`, `kit-bootstrap.mk`)을 썼습니다. parity의 php binding은 root `vendor/`의 PHPUnit을 실행합니다. kit 0.0.48은 이를 실행되지 않음으로 보고했습니다. `config/knip-entries.json`은 script와 test가 실행하는 make, php, composer를 `binaries`에 선언합니다. `packages/php-ext/composer.json`은 `config/dependency-policy.json`의 `composerPlatforms`에 자기 항목과 `composer.lock`을 가지므로 `composer validate --strict`가 이를 읽습니다. Composer는 `php-ext` type의 package를 root의 path repository로 load하지 않습니다.
 - T25.8: 생성된 TypeScript나 Go program은 값을 runtime, render scope, 요청에서 들어오는 곳에서 한 번만 decode하고 읽을 때는 decode하지 않는다. local은 type이 정해진 값을 담는 생성된 함수의 변수이고 모든 읽기는 검사 없이 그 변수를 쓴다. 전에는 local을 읽을 때마다 render scope에서 값 전체를 decode했다(TypeScript는 decoder로, Go는 JSON 왕복으로). scope는 include와 동적 조회를 위해 각 local의 Value를 유지하며, include 뒤에 program은 include된 template이 assign할 수 있는 각 local을 한 번 decode한다(RT-21). loop는 type이 정해진 list나 map을 encode하고 각 item을 decode하는 대신 그대로 순회한다. TypeScript에서 중간 결과의 오류는 `index`, `+`, 함수 이름 대신 `label(page.title) is not a string`처럼 template 문법으로 그 표현식을 말한다. 모든 program의 출력은 그대로이며, commit된 artifact, manifest, `examples/site/index.html`은 새 compiler digest를 기록한다.
 - T24.20: template은 `@polyspec/kit` 0.0.48을 고정하고, `make kit-sync`가 그 복사본(`release.yml`, bootstrap script, `config/layout.kit.yml`)을 썼다. 각 checkout은 `mise.toml`의 Node.js 26.12.0을 실행하며, `make install-tools TOOLS=npm`이 이를 mise로 `var/tools`에 설치한다. `.node-version`은 사라지고 모든 package의 `engines.node`는 `>=26.12.0`이며, make 3.81은 맨 이름의 `node`에 machine의 node를 실행했으므로 모든 recipe는 node를 `$(NODE)`, go를 `$(GO)`로 시작한다. workflow는 actions/checkout v7.0.1, actions/setup-node v7.1.0, shivammathur/setup-php 2.40.0을 SHA로 고정하고, job ci-passed는 `make ci-passed` 전에 bootstrap과 package를 설치한다. 이 job은 kit.mk가 없어서 모든 실행에서 실패했다.
