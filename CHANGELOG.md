@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T24.35: template pins `@polyspec/kit` 0.0.52, and `make kit-sync` wrote its copies (`release.yml`, which runs kit-check before any release step, `kit-bootstrap.mk`, `config/layout.kit.yml`). `make lint-ts` gives no configuration hint about the copy of knip.json any more, and npm allows the remote kit package in every recipe.
+
 ## 0.0.10
 
 - T24.34: release 0.0.10. Every manifest of `config/release.json` declares 0.0.10, and the locks, the dependency review, the compiled artifacts and the consumer projects of the release assets record it.
