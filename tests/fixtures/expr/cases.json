@@ -3827,5 +3827,1052 @@
     "name": "error-brace-map",
     "expr": "{'a': 1}",
     "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "depth-limit-parentheses",
+    "expr": "(((((((((((((((((((((((((((((((1)))))))))))))))))))))))))))))))",
+    "tokens": [
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "number",
+      "value": 1,
+      "span": [
+        31,
+        32
+      ]
+    }
+  },
+  {
+    "name": "error-depth-parentheses",
+    "expr": "((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))",
+    "error": "E_RUNTIME_LIMIT"
+  },
+  {
+    "name": "depth-limit-unary",
+    "expr": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!a",
+    "tokens": [
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Unary",
+      "op": "!",
+      "operand": {
+        "type": "Unary",
+        "op": "!",
+        "operand": {
+          "type": "Unary",
+          "op": "!",
+          "operand": {
+            "type": "Unary",
+            "op": "!",
+            "operand": {
+              "type": "Unary",
+              "op": "!",
+              "operand": {
+                "type": "Unary",
+                "op": "!",
+                "operand": {
+                  "type": "Unary",
+                  "op": "!",
+                  "operand": {
+                    "type": "Unary",
+                    "op": "!",
+                    "operand": {
+                      "type": "Unary",
+                      "op": "!",
+                      "operand": {
+                        "type": "Unary",
+                        "op": "!",
+                        "operand": {
+                          "type": "Unary",
+                          "op": "!",
+                          "operand": {
+                            "type": "Unary",
+                            "op": "!",
+                            "operand": {
+                              "type": "Unary",
+                              "op": "!",
+                              "operand": {
+                                "type": "Unary",
+                                "op": "!",
+                                "operand": {
+                                  "type": "Unary",
+                                  "op": "!",
+                                  "operand": {
+                                    "type": "Unary",
+                                    "op": "!",
+                                    "operand": {
+                                      "type": "Unary",
+                                      "op": "!",
+                                      "operand": {
+                                        "type": "Unary",
+                                        "op": "!",
+                                        "operand": {
+                                          "type": "Unary",
+                                          "op": "!",
+                                          "operand": {
+                                            "type": "Unary",
+                                            "op": "!",
+                                            "operand": {
+                                              "type": "Unary",
+                                              "op": "!",
+                                              "operand": {
+                                                "type": "Unary",
+                                                "op": "!",
+                                                "operand": {
+                                                  "type": "Unary",
+                                                  "op": "!",
+                                                  "operand": {
+                                                    "type": "Unary",
+                                                    "op": "!",
+                                                    "operand": {
+                                                      "type": "Unary",
+                                                      "op": "!",
+                                                      "operand": {
+                                                        "type": "Unary",
+                                                        "op": "!",
+                                                        "operand": {
+                                                          "type": "Unary",
+                                                          "op": "!",
+                                                          "operand": {
+                                                            "type": "Unary",
+                                                            "op": "!",
+                                                            "operand": {
+                                                              "type": "Unary",
+                                                              "op": "!",
+                                                              "operand": {
+                                                                "type": "Unary",
+                                                                "op": "!",
+                                                                "operand": {
+                                                                  "type": "Unary",
+                                                                  "op": "!",
+                                                                  "operand": {
+                                                                    "type": "Unary",
+                                                                    "op": "!",
+                                                                    "operand": {
+                                                                      "type": "Unary",
+                                                                      "op": "!",
+                                                                      "operand": {
+                                                                        "type": "Unary",
+                                                                        "op": "!",
+                                                                        "operand": {
+                                                                          "type": "Unary",
+                                                                          "op": "!",
+                                                                          "operand": {
+                                                                            "type": "Unary",
+                                                                            "op": "!",
+                                                                            "operand": {
+                                                                              "type": "Unary",
+                                                                              "op": "!",
+                                                                              "operand": {
+                                                                                "type": "Unary",
+                                                                                "op": "!",
+                                                                                "operand": {
+                                                                                  "type": "Unary",
+                                                                                  "op": "!",
+                                                                                  "operand": {
+                                                                                    "type": "Unary",
+                                                                                    "op": "!",
+                                                                                    "operand": {
+                                                                                      "type": "Unary",
+                                                                                      "op": "!",
+                                                                                      "operand": {
+                                                                                        "type": "Unary",
+                                                                                        "op": "!",
+                                                                                        "operand": {
+                                                                                          "type": "Unary",
+                                                                                          "op": "!",
+                                                                                          "operand": {
+                                                                                            "type": "Unary",
+                                                                                            "op": "!",
+                                                                                            "operand": {
+                                                                                              "type": "Unary",
+                                                                                              "op": "!",
+                                                                                              "operand": {
+                                                                                                "type": "Unary",
+                                                                                                "op": "!",
+                                                                                                "operand": {
+                                                                                                  "type": "Unary",
+                                                                                                  "op": "!",
+                                                                                                  "operand": {
+                                                                                                    "type": "Unary",
+                                                                                                    "op": "!",
+                                                                                                    "operand": {
+                                                                                                      "type": "Unary",
+                                                                                                      "op": "!",
+                                                                                                      "operand": {
+                                                                                                        "type": "Unary",
+                                                                                                        "op": "!",
+                                                                                                        "operand": {
+                                                                                                          "type": "Unary",
+                                                                                                          "op": "!",
+                                                                                                          "operand": {
+                                                                                                            "type": "Unary",
+                                                                                                            "op": "!",
+                                                                                                            "operand": {
+                                                                                                              "type": "Unary",
+                                                                                                              "op": "!",
+                                                                                                              "operand": {
+                                                                                                                "type": "Unary",
+                                                                                                                "op": "!",
+                                                                                                                "operand": {
+                                                                                                                  "type": "Unary",
+                                                                                                                  "op": "!",
+                                                                                                                  "operand": {
+                                                                                                                    "type": "Unary",
+                                                                                                                    "op": "!",
+                                                                                                                    "operand": {
+                                                                                                                      "type": "Unary",
+                                                                                                                      "op": "!",
+                                                                                                                      "operand": {
+                                                                                                                        "type": "Unary",
+                                                                                                                        "op": "!",
+                                                                                                                        "operand": {
+                                                                                                                          "type": "Unary",
+                                                                                                                          "op": "!",
+                                                                                                                          "operand": {
+                                                                                                                            "type": "Unary",
+                                                                                                                            "op": "!",
+                                                                                                                            "operand": {
+                                                                                                                              "type": "Unary",
+                                                                                                                              "op": "!",
+                                                                                                                              "operand": {
+                                                                                                                                "type": "Unary",
+                                                                                                                                "op": "!",
+                                                                                                                                "operand": {
+                                                                                                                                  "type": "Var",
+                                                                                                                                  "name": "a",
+                                                                                                                                  "span": [
+                                                                                                                                    62,
+                                                                                                                                    63
+                                                                                                                                  ]
+                                                                                                                                },
+                                                                                                                                "span": [
+                                                                                                                                  61,
+                                                                                                                                  63
+                                                                                                                                ]
+                                                                                                                              },
+                                                                                                                              "span": [
+                                                                                                                                60,
+                                                                                                                                63
+                                                                                                                              ]
+                                                                                                                            },
+                                                                                                                            "span": [
+                                                                                                                              59,
+                                                                                                                              63
+                                                                                                                            ]
+                                                                                                                          },
+                                                                                                                          "span": [
+                                                                                                                            58,
+                                                                                                                            63
+                                                                                                                          ]
+                                                                                                                        },
+                                                                                                                        "span": [
+                                                                                                                          57,
+                                                                                                                          63
+                                                                                                                        ]
+                                                                                                                      },
+                                                                                                                      "span": [
+                                                                                                                        56,
+                                                                                                                        63
+                                                                                                                      ]
+                                                                                                                    },
+                                                                                                                    "span": [
+                                                                                                                      55,
+                                                                                                                      63
+                                                                                                                    ]
+                                                                                                                  },
+                                                                                                                  "span": [
+                                                                                                                    54,
+                                                                                                                    63
+                                                                                                                  ]
+                                                                                                                },
+                                                                                                                "span": [
+                                                                                                                  53,
+                                                                                                                  63
+                                                                                                                ]
+                                                                                                              },
+                                                                                                              "span": [
+                                                                                                                52,
+                                                                                                                63
+                                                                                                              ]
+                                                                                                            },
+                                                                                                            "span": [
+                                                                                                              51,
+                                                                                                              63
+                                                                                                            ]
+                                                                                                          },
+                                                                                                          "span": [
+                                                                                                            50,
+                                                                                                            63
+                                                                                                          ]
+                                                                                                        },
+                                                                                                        "span": [
+                                                                                                          49,
+                                                                                                          63
+                                                                                                        ]
+                                                                                                      },
+                                                                                                      "span": [
+                                                                                                        48,
+                                                                                                        63
+                                                                                                      ]
+                                                                                                    },
+                                                                                                    "span": [
+                                                                                                      47,
+                                                                                                      63
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  "span": [
+                                                                                                    46,
+                                                                                                    63
+                                                                                                  ]
+                                                                                                },
+                                                                                                "span": [
+                                                                                                  45,
+                                                                                                  63
+                                                                                                ]
+                                                                                              },
+                                                                                              "span": [
+                                                                                                44,
+                                                                                                63
+                                                                                              ]
+                                                                                            },
+                                                                                            "span": [
+                                                                                              43,
+                                                                                              63
+                                                                                            ]
+                                                                                          },
+                                                                                          "span": [
+                                                                                            42,
+                                                                                            63
+                                                                                          ]
+                                                                                        },
+                                                                                        "span": [
+                                                                                          41,
+                                                                                          63
+                                                                                        ]
+                                                                                      },
+                                                                                      "span": [
+                                                                                        40,
+                                                                                        63
+                                                                                      ]
+                                                                                    },
+                                                                                    "span": [
+                                                                                      39,
+                                                                                      63
+                                                                                    ]
+                                                                                  },
+                                                                                  "span": [
+                                                                                    38,
+                                                                                    63
+                                                                                  ]
+                                                                                },
+                                                                                "span": [
+                                                                                  37,
+                                                                                  63
+                                                                                ]
+                                                                              },
+                                                                              "span": [
+                                                                                36,
+                                                                                63
+                                                                              ]
+                                                                            },
+                                                                            "span": [
+                                                                              35,
+                                                                              63
+                                                                            ]
+                                                                          },
+                                                                          "span": [
+                                                                            34,
+                                                                            63
+                                                                          ]
+                                                                        },
+                                                                        "span": [
+                                                                          33,
+                                                                          63
+                                                                        ]
+                                                                      },
+                                                                      "span": [
+                                                                        32,
+                                                                        63
+                                                                      ]
+                                                                    },
+                                                                    "span": [
+                                                                      31,
+                                                                      63
+                                                                    ]
+                                                                  },
+                                                                  "span": [
+                                                                    30,
+                                                                    63
+                                                                  ]
+                                                                },
+                                                                "span": [
+                                                                  29,
+                                                                  63
+                                                                ]
+                                                              },
+                                                              "span": [
+                                                                28,
+                                                                63
+                                                              ]
+                                                            },
+                                                            "span": [
+                                                              27,
+                                                              63
+                                                            ]
+                                                          },
+                                                          "span": [
+                                                            26,
+                                                            63
+                                                          ]
+                                                        },
+                                                        "span": [
+                                                          25,
+                                                          63
+                                                        ]
+                                                      },
+                                                      "span": [
+                                                        24,
+                                                        63
+                                                      ]
+                                                    },
+                                                    "span": [
+                                                      23,
+                                                      63
+                                                    ]
+                                                  },
+                                                  "span": [
+                                                    22,
+                                                    63
+                                                  ]
+                                                },
+                                                "span": [
+                                                  21,
+                                                  63
+                                                ]
+                                              },
+                                              "span": [
+                                                20,
+                                                63
+                                              ]
+                                            },
+                                            "span": [
+                                              19,
+                                              63
+                                            ]
+                                          },
+                                          "span": [
+                                            18,
+                                            63
+                                          ]
+                                        },
+                                        "span": [
+                                          17,
+                                          63
+                                        ]
+                                      },
+                                      "span": [
+                                        16,
+                                        63
+                                      ]
+                                    },
+                                    "span": [
+                                      15,
+                                      63
+                                    ]
+                                  },
+                                  "span": [
+                                    14,
+                                    63
+                                  ]
+                                },
+                                "span": [
+                                  13,
+                                  63
+                                ]
+                              },
+                              "span": [
+                                12,
+                                63
+                              ]
+                            },
+                            "span": [
+                              11,
+                              63
+                            ]
+                          },
+                          "span": [
+                            10,
+                            63
+                          ]
+                        },
+                        "span": [
+                          9,
+                          63
+                        ]
+                      },
+                      "span": [
+                        8,
+                        63
+                      ]
+                    },
+                    "span": [
+                      7,
+                      63
+                    ]
+                  },
+                  "span": [
+                    6,
+                    63
+                  ]
+                },
+                "span": [
+                  5,
+                  63
+                ]
+              },
+              "span": [
+                4,
+                63
+              ]
+            },
+            "span": [
+              3,
+              63
+            ]
+          },
+          "span": [
+            2,
+            63
+          ]
+        },
+        "span": [
+          1,
+          63
+        ]
+      },
+      "span": [
+        0,
+        63
+      ]
+    }
+  },
+  {
+    "name": "error-depth-unary",
+    "expr": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!a",
+    "error": "E_RUNTIME_LIMIT"
   }
 ]

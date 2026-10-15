@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.6-19: the runtime specification names the keys of `limits` (RT-33), which TypeScript, PHP, the PHP extension and Python take as written and Go and Rust spell as fields of `Limits`; states how an omitted limit keeps its default in each language (RT-6); writes `program.register` (RT-1); and states the unit of the expression depth (RT-34), which four new expression vectors pin at 31 nested parentheses and 62 prefix operators in every implementation. No behavior changes.
+
 - T22.6-12: the parity check compares the lists and counts of implementations with the profiles: `languageLists` reads `SHOWCASE_LANGS` of the `Makefile` (R9) and `documents` reads the README files, `docs`, `docs/spec` and `docs/operations` (R10), except the benchmark documents until Python is measured (T22.6-17) and the two Korean sentences of T22.6-12-1. The showcase document shows the request in PHP and Python too and counts five implementations and the five targets of the closed template dispatch, and the testing document counts five languages, five generated backends and the Python wheel among the package installs.
 
 - T22.6-13: the README of the compiler names Python among the languages into which `compileSource` compiles.
