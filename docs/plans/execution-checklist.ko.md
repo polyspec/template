@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 297ea96041347fee95b669736ef53b300dc01f36bc74ccd4cd981ed48c0fd94c -->
+<!-- source-sha256: 4ca01985f4fd33d7ed0ed0465abb4352f37c247d7e1ff124b2815ed89e7f2bfa -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -484,6 +484,7 @@
 | T24.35 | kit 0.0.52로 옮긴다: 게시된 파일의 integrity로 `@polyspec/kit` 0.0.52를 고정하고 `make kit-sync`로 그 복사본(어떤 release 단계보다 먼저 kit-check를 실행하는 K193의 release workflow)을 쓴다. knip.json 복사본은 knip이 필요한 곳에서만 ignore를 유지하므로(K188) `make lint-ts`는 `@polyspec/kit`에 대한 hint를 내지 않고, npm은 `kit-bootstrap.mk`의 `allow-remote=root`로 실행되며(K189), `.mise/locks/pypi-vulture`는 mise.lock과 함께 추적되고(K192), checkout은 모든 setup-php step이 읽는 `.php-version`에 PHP를 선언한다(T24.27, K193) | `make kit-check`; `make toolchain-check`; `make layout-check`; `make lint-ts`; `make dependency-policy-check` | [o] |
 | T24.36 | object가 아닌 `define` 옵션을 요청에 담을 수 있는 모든 target에서 인자 오류 `define is not an object`로 보고한다. 생성된 TypeScript program은 이를 `E_DATA_UNSUPPORTED_TYPE`의 `BindError`로, PHP는 `bindDefinitions`의 type에서 `E_INTERNAL`로, Python은 `AttributeError`로 실패했다. Go와 Rust의 typed option은 그런 값을 담을 수 없다. `E_DATA_UNSUPPORTED_TYPE`은 binding이 binding 없는 값에 내는 data model의 code로 남는다(ERR-5, ERR-14). RED: `tests/fixtures/typed-arguments/messages.json`에서 `define`이 5인 요청이 TypeScript, PHP, Python에서 실패한다 | `make generated-arguments-check`; `make docs-check` | [o] |
 | T24.37 | root 값이 없는 인자를 가진 template 경로 block을 생성된 PHP program에서 렌더한다. `{# part.tpl name:title}`은 `part.tpl`의 입력 `name`에 block scope의 `title` 값을 주지만, PHP backend는 입력을 root 값이나 정의 data로만 만들었고, scope 값을 대입하기 전에 `generated input part.tpl.name is missing`을 던졌으므로 TypeScript, Go, Rust, Python이 렌더하는 곳에서 `E_RUNTIME_TYPE`으로 실패했다. RED: `tests/fixtures/typed-arguments-scoped/messages.json`의 요청이 PHP에서 실패한다 | `make generated-arguments-check`; `make conformance-generated-php` | [o] |
+| T24.38 | T24.35, T24.36, T24.37로 0.0.11을 release한다. `config/release.json`의 모든 manifest가 0.0.11을 선언하고, 저장소 package 사이의 의존성, PHP extension header, `package-lock.json`, Cargo lock, Composer lock도 그렇게 하며, 각 Composer lock은 그 폴더에서 다시 잠근다(kit K180). release asset의 consumer project는 0.0.11을 기록하고(`make release-consumer-lock`), 그 smoke command는 archive에서 통과한다(`make release-consumer`). `CHANGELOG.md`와 `CHANGELOG.ko.md`는 새 빈 `## Unreleased` 아래에 `## 0.0.11`을 얻는다. review는 새 lock을 기록한다. tag `v0.0.11`과 `packages/go/v0.0.11`은 release commit을 가리킨다 | `make release-versions TAG=v0.0.11`; `make release-consumer TAG=v0.0.11`; `make dependency-policy-check`; `make artifact-digest-check` | [ ] |
 
 ## Wave 25 — 소비자의 코드인 generated program
 
