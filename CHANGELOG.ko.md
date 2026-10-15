@@ -1,11 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 765cddfe33921b7daa8d9702168f6c7214697f08f6ed0ac7d20410a7ee2c111c -->
+<!-- source-sha256: c8c078f3ab7698c57aa8989be95dc4f7cd83709e93bf0001346199b397a42f56 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+## 0.0.10
+
+- T24.34: 0.0.10을 release합니다. `config/release.json`의 모든 manifest가 0.0.10을 선언하고, lock, dependency review, compile된 artifact, release asset의 consumer project가 이를 기록합니다.
 - T24.33: generated program의 선언 type과 맞지 않는 요청은 모든 target에서 같은 인자 오류 문장으로 실패합니다(ERR-13): `<path> is required` 또는 `<path> is not <expected>`이며, 경로는 `assign.page.name is not a string`, `assign.tags[1] is not a string`, `define.card.data.title is not a string`처럼 요청 안의 값의 경로입니다. Rust는 `title: expected a string`을, PHP와 Python은 `has an invalid type`을, Go는 encoding/json의 오류를 썼습니다. Go와 Python은 없는 필수 root field를 받아들였고, Go는 object가 아닌 정의 data를 인자 오류 `define.<id>.data is not an object` 대신 `E_DATA_UNSUPPORTED_TYPE`으로 보고했습니다. `make generated-arguments-check`는 `tests/fixtures/typed-arguments`와 `typed-arguments-unread`의 `messages.json` 요청을 모든 target에서 렌더하고 결과를 정확히 비교합니다.
 - T24.32: `@polyspec/template/decode`는 `decodeTemplate`과 `AstDecodeError`만 내보내며, 그 진입점이나 `@polyspec/template/render`에서 `decodeTemplate`만 import하는 browser bundle은 127,057 byte, gzip 13,479 byte 대신 minify 86,538 byte, gzip 7,490 byte입니다. AST 스키마의 validator는 각 `$ref`에 그 code를 복사하는 대신 스키마의 definition마다 함수 하나를 호출하며(ajv `inlineRefs: false`) 모든 검사와 message를 유지하고, decode 진입점은 다른 진입점이 공유하는 runtime이 없는 chunk를 가집니다.
 - T24.31: 생성된 Rust program은 type이 가리키는 record, template이 읽는 `Assign`의 field, block이 읽을 때만 definition의 template과 data, 값을 다시 변환할 때만 `to_value`를 선언하므로, 각 showcase program은 binary crate의 private module로서 clippy `-D warnings`를 통과합니다. program이 읽지 않는 root field나 definition data는 그 type의 값을 만들지 않고 선언된 type에 대해 검사되며, `page: name: expected a string`이나 `define.card.data.name: expected a string`처럼 같은 field 경로로 실패합니다.
