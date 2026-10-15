@@ -14,7 +14,7 @@
       "channel": "24.18.1",
       "scope": "packages/vscode",
       "reason": "VS Code 1.138, the minimum of engines.vscode, runs the extension and its server on the Node.js 24.18.1 of its Electron 42.10.0, so the floor of the extension is that Node.js",
-      "retry": "when the minimum engines.vscode of the extension ships an Electron with Node.js 26.11.1 or later"
+      "retry": "when the minimum engines.vscode of the extension ships an Electron with Node.js 26.12.0 or later"
     }
   ],
   "mise": {
