@@ -7,12 +7,27 @@ from .bind import BoundMap
 from .bind_operations import bind, merge
 from .context import Frame, RenderContext, Scope
 from .decode import AstDecodeError, decode_template
-from .engine import AstProgram, Engine, EngineOptions, PreparedRender, RenderOptions
+from .engine import (
+    AstProgram,
+    Engine,
+    EngineOptions,
+    PreparedRender,
+    Program,
+    RenderOptions,
+)
 from .errors import ERROR_CODES, TemplateError, internal_boundary
 from .formatter import FormatError, FormatOptions, FormatResult, format_template
 from .functions import BUILTINS, Env, FunctionContext, HostFunction
 from .json_parse import parse_json, parse_json_bytes
-from .loader import LoadedAst, LoadedSource, MapLoader, PathError, resolve_path
+from .loader import (
+    LoadedAst,
+    LoadedSource,
+    Loader,
+    LoadResult,
+    MapLoader,
+    PathError,
+    resolve_path,
+)
 from .number import MAX_SAFE
 from .page_cache import PageCache
 from .parser import (
@@ -51,6 +66,8 @@ __all__ = [
     "HostFunction",
     "LoadedAst",
     "LoadedSource",
+    "Loader",
+    "LoadResult",
     "MapLoader",
     "NativeObject",
     "PageCache",
@@ -58,6 +75,7 @@ __all__ = [
     "PathError",
     "PreparedRender",
     "PrefixAnalysis",
+    "Program",
     "RenderContext",
     "RenderOptions",
     "Renderer",

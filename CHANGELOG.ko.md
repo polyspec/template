@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3a93d8199bb3f37226861e9a8e5425d9d5be05f751d8b1e00878ff224287e478 -->
+<!-- source-sha256: 29466103a958b3e780a8c4d715df0e61a7c17aa742c80da862d778eb3361bc4f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-14-1: `polyspec.template`은 다른 implementation처럼 `Engine`이 렌더하는 program interface `Program`과 loader protocol 및 그 결과인 `Loader`와 `LoadResult`를 export합니다. `AstProgram`의 base class는 private인 `_AstProgramCore`이고, export test는 `engine.py`와 `loader.py`의 모든 public class를 검사합니다.
 
 - T24.39: template은 다른 저장소와 같은 kit인 `@polyspec/kit` 0.0.53을 고정하고, `make kit-sync`는 복사본을 바꾸지 않습니다. owner check는 module의 test를 그 importer로 고를 수 있고(K191), kit-check는 template이 선언한 `.php-version`을 요구하며(K193), release proof는 각 sibling wheel을 나열합니다(K195).
 

@@ -79,7 +79,7 @@ def parse_with_lines(
 class _AstPreparedExecution:
     def __init__(
         self,
-        engine: "AstProgramCore",
+        engine: "_AstProgramCore",
         root_data: dict,
         registry: dict,
         env: Env,
@@ -145,7 +145,7 @@ class Engine:
         return self.program.render(target, assign, options or RenderOptions())
 
 
-class AstProgramCore(Program):
+class _AstProgramCore(Program):
     """AST program core with template loading, host functions, limits and parsed artifacts."""
 
     def __init__(self, options: "EngineOptions | None" = None):
@@ -327,5 +327,5 @@ def math_floor(value: float) -> float:
     return math.floor(value)
 
 
-class AstProgram(AstProgramCore):
+class AstProgram(_AstProgramCore):
     """An engine that parses the sources its loader returns."""
