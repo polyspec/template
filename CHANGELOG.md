@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.6-14-1: `polyspec.template` exports `Program`, the program interface that `Engine` renders, and `Loader` and `LoadResult`, the loader protocol and its result, as the other implementations do; the base class of `AstProgram` is the private `_AstProgramCore`, and the export test checks every public class of `engine.py` and `loader.py`.
+
 - T24.39: template pins `@polyspec/kit` 0.0.53, the kit of the other repositories, and `make kit-sync` leaves its copies unchanged. The owner check can select the tests of a module by its importers (K191), kit-check requires the `.php-version` that template declares (K193), and the release proof lists each sibling wheel (K195).
 
 - T22.6-15: the code tables of `docs/spec/errors.md` are the catalog of the error codes. `make error-codes` writes from them the `ErrorCode` union of TypeScript, the constants of the Go package `errs`, the variants of the Rust `ErrorCode` with their conditions, `ERROR_CODES` of Python, the new class `Polyspec\Template\ErrorCode` of the PHP package and the header `pt_error_codes.h` of the PHP extension; the PHP package and the PHP extension raise every error through these constants instead of string literals, and both parity checks first run `make error-codes-check` and then compare every list with the catalog (R7).

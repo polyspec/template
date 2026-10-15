@@ -12,6 +12,7 @@ import unittest
 from pathlib import Path
 
 import polyspec.template as template
+from polyspec.template import engine, loader
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -59,6 +60,23 @@ class ExportTests(unittest.TestCase):
         unexported = sorted(set(defined) - set(template.__all__))
         self.assertEqual(
             unexported, [], f"public names missing from __all__: {unexported}"
+        )
+
+    def test_every_public_class_of_the_engine_and_loader_modules_is_exported(self):
+        # The program and loader interfaces live in these modules (RT-1, RT-3); a public class there is API.
+        defined = [
+            name
+            for module in (engine, loader)
+            for name, value in vars(module).items()
+            if not name.startswith("_")
+            and inspect.isclass(value)
+            and value.__module__ == module.__name__
+        ]
+        unexported = sorted(set(defined) - set(template.__all__))
+        self.assertEqual(
+            unexported,
+            [],
+            f"public classes of engine.py and loader.py missing from __all__: {unexported}",
         )
 
     def test_every_name_the_documents_import_is_exported(self):
