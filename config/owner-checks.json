@@ -486,7 +486,8 @@
     },
     {
       "paths": [
-        "scripts/check-generated-lint.mts"
+        "scripts/check-generated-lint.mts",
+        "tests/fixtures/generated-lint/**"
       ],
       "targets": [
         "generated-lint-check"

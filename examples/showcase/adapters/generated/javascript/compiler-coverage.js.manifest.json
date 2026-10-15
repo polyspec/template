@@ -6,7 +6,7 @@
   "sourceDigest": "936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "9c9f9e048b6cd8ff7cc55ff74b8fc0f512e824843fe2290220787b6f14eb8050",
+  "compilerDigest": "efa83ba7e274f95031f7a0626ae75a5e5e406f7ec6993cda1d3cf0d016a1fb83",
   "files": {
     "compiler-coverage.js": {
       "path": "compiler-coverage.js",

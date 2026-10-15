@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3f2f24a1034fce2e1e7cc63c265d46f190fafc70068a3a9afa09f74d47d146b5 -->
+<!-- source-sha256: 91eb6b3b475e0010098f4aaf024309d202a08ca1aa506387bfcdfa8728ae5840 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T24.29: 생성된 Rust나 TypeScript program은 쓰는 것만 선언하므로, Rust program을 binary crate의 private module로 포함하는 consumer는 clippy `-D warnings`를, TypeScript program은 oxlint `no-unused-vars`를 통과합니다. Rust는 program이 definition을 선언할 때만 `Definition<T>`를, definition이 가리키는 template에만 `DefinitionData<T>`를 선언하고, `ArtifactManifest`와 오류만 반환하던 static root의 `render_values`는 선언하지 않습니다. definition이 없으면 `generated_bind_definitions`는 요청의 첫 항목에서 실패합니다. TypeScript는 definition이 선언될 때만 definition 항목의 `raw`를 읽고, loop가 size나 마지막 item을 읽거나 empty branch가 있을 때만 loop의 size를 선언합니다.
 
 ## 0.0.8
 

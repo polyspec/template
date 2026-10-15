@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T24.29: a generated Rust or TypeScript program declares only what it uses, so a consumer that includes the Rust program as a private module of a binary crate passes clippy `-D warnings` and the TypeScript program passes oxlint `no-unused-vars`. Rust declares `Definition<T>` only when the program declares a definition, `DefinitionData<T>` only for a template that a definition names, no `ArtifactManifest` and no `render_values` for a static root, which only returned an error; without definitions `generated_bind_definitions` fails on the first entry of the request. TypeScript reads `raw` of a definition entry only when a definition is declared and declares the size of a loop only when the loop reads it, its last item or has an empty branch.
+
 ## 0.0.8
 
 - T24.28: release 0.0.8, which supersedes 0.0.7. The tag v0.0.7 has no published release: the proof of the release workflow ran the Composer consumer with the PHP 8.3.6 of the runner, which the platform check of Composer refused. Every manifest of `config/release.json` declares 0.0.8, and the locks, the dependency review, the compiled artifacts and the consumer projects of the release assets record it.
