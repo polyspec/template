@@ -64,6 +64,10 @@ export class Scope {
   }
 }
 
+/**
+ * The common runtime interface of both program modes: the limits, the registered host functions and the logical class
+ * functions, which RuntimeEnvironment implements and generated programs read (compiler.md, public structures).
+ */
 export interface RuntimeServices {
   limits(): Limits;
   hostFunction(name: string): HostFunction | undefined;
