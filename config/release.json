@@ -129,7 +129,7 @@
         ]
       },
       "lock": {
-        "polyspec-template": "packages/python/pylock.wheel.toml"
+        "polyspec-template": "packages/python/pylock.toml"
       },
       "polyspec": {}
     }

@@ -8,9 +8,10 @@ version = "0.0.6"
 description = "Templates with document order, typed data and HTML rendering"
 readme = "README.md"
 requires-python = ">=3.14"
-# decode_template validates the AST JSON against contracts/schema/ast.schema.json (AST-10). pylock.toml, which make
-# python-lock writes from this declaration and constraints.txt, pins it and its dependencies.
-dependencies = ["jsonschema>=4.26.0"]
+# decode_template validates the AST JSON against contracts/schema/ast.schema.json (AST-10). The wheel requires the
+# version that pylock.toml pins (kit K49); pylock.toml, which make python-lock writes from this declaration and
+# constraints.txt, pins it and its dependencies and is the lock of the consumer of the wheel (config/release.json).
+dependencies = ["jsonschema==4.26.0"]
 
 [project.scripts]
 template = "polyspec.template.cli:main"
