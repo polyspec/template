@@ -1,0 +1,15 @@
+{
+  "schema": 3,
+  "root": "Assign",
+  "entry": "page.tpl",
+  "fields": {
+    "page": "Page"
+  },
+  "records": {
+    "Page": { "sections": "list<Section>" },
+    "Section": { "heading": "string", "items": "list<string>" }
+  },
+  "defines": {},
+  "functions": {},
+  "templates": {}
+}

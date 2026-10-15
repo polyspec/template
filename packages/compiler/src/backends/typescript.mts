@@ -175,12 +175,15 @@ export function createTarget({ program }: { program: Program }): Target {
     // The loop declares the metadata that its body reads, and no other.
     const uses = (meta: string): boolean => new RegExp(`\\b${name}_${meta}\\b`).test(body);
     const indexed = uses('index') || uses('first') || uses('last');
+    // The size is read by the metadata size_, by the last index and by the test of the empty branch (T24.29).
+    const sized = uses('size') || uses('last') || empty !== null;
+    const size = sized ? `\nconst ${name}_size = ${entries}.length;` : '';
     const lastIndex = uses('last') ? ` const ${name}_last_index = ${name}_size - 1;` : '';
     const first = uses('first') ? `\n    const ${name}_first = ${name}_index === 0;` : '';
     const last = uses('last') ? `\n    const ${name}_last = ${name}_index === ${name}_last_index;` : '';
     const entry = `[${uses('key') ? `${name}_key` : ''}, ${item}]`;
     const loop = indexed ? `for (const [${name}_index, ${entry}] of ${entries}.entries())` : `for (const ${entry} of ${entries})`;
-    return [...declarations.map(line => indent(n, line)), indent(n, `{ const ${entries} = ${iterate};\nconst ${name}_size = ${entries}.length;${lastIndex}\nconst ${name}_previous = scope.locals.get(${quote(node.name)});\ntry {\n${loop} {\n    scope.locals.set(${quote(node.name)}, ${valueOf(item, node.itemType)});${first}${last}\n    context.iterations += 1;\n    runtime.limit('iteration', context.iterations, frame, ${span(node)});\n${body}\n}\n} finally { if (${name}_previous !== undefined) scope.locals.set(${quote(node.name)}, ${name}_previous); else scope.locals.delete(${quote(node.name)}); }${empty === null ? '' : `\nif (${name}_size === 0) {\n${empty}\n}`}\n}`)].join('\n');
+    return [...declarations.map(line => indent(n, line)), indent(n, `{ const ${entries} = ${iterate};${size}${lastIndex}\nconst ${name}_previous = scope.locals.get(${quote(node.name)});\ntry {\n${loop} {\n    scope.locals.set(${quote(node.name)}, ${valueOf(item, node.itemType)});${first}${last}\n    context.iterations += 1;\n    runtime.limit('iteration', context.iterations, frame, ${span(node)});\n${body}\n}\n} finally { if (${name}_previous !== undefined) scope.locals.set(${quote(node.name)}, ${name}_previous); else scope.locals.delete(${quote(node.name)}); }${empty === null ? '' : `\nif (${name}_size === 0) {\n${empty}\n}`}\n}`)].join('\n');
   };
   const loopItem = (loop: string): string => {
     const item = loopItems.findLast(([name]) => name === loop);
@@ -357,7 +360,7 @@ export function emitRuntime(context: BackendContext): Part[] {
   if (input === undefined || input === null) return { definitions, targets };
   if (!generatedPlain(input)) throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'define is not an object');
   const entries: [string, unknown][] = Object.entries(input);
-  for (const [id, raw] of entries) {
+  for (const [id${program.definitions.size > 0 ? ', raw' : ''}] of entries) {
     checkText(id);
     switch (id) {
     ${cases}
