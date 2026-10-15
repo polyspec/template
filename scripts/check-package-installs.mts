@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds immutable package artifacts and verifies AST/generated installation outside the workspace.
 // The install projects read no source of the network and use the toolchains of the checkout (T19.1): the Go install project
-// resolves modules only from the proxy of the run, verifies no checksum against a database of the network and runs the
+// resolves modules only from the proxy of the run and the module cache that make install filled, verifies no checksum against a database of the network and runs the
 // installed Go toolchain of the go directive of packages/go/go.mod; the Rust install project builds with the toolchain
 // of rust-toolchain.toml and a lock derived from packages/rust/Cargo.lock; the PHP install project reads only the
 // archive of the run, by its own composer.json, and resolves its dependencies among the packages of
@@ -102,7 +102,11 @@ import ("encoding/json"; "fmt"; "os"; template "github.com/polyspec/template/pac
 func definitions(data []byte) map[string]template.DefineInput { var raw map[string]json.RawMessage; if err:=json.Unmarshal(data,&raw);err!=nil{panic(err)}; out:=map[string]template.DefineInput{}; for name,value:=range raw { var path string; if json.Unmarshal(value,&path)==nil { out[name]=template.DefineInput{Template:path}; continue }; var entry struct{Template string \`json:"template"\`;Data any \`json:"data"\`;HTML *string \`json:"html"\`}; if err:=json.Unmarshal(value,&entry);err!=nil{panic(err)}; out[name]=template.DefineInput{Template:entry.Template,Data:entry.Data,HTML:entry.HTML} }; return out }
 func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(data);if err!=nil{panic(err)}; defineBytes,_:=os.ReadFile("define.json"); options:=template.RenderOptions{Define:definitions(defineBytes)}; expected,_:=os.ReadFile("expected.html"); astProgram,err:=template.NewAstProgram(template.Options{Loader:template.NewFSLoader(os.DirFS("templates"))});if err!=nil{panic(err)}; ast,err:=astProgram.Render("layout",assign,options);if err!=nil{panic(err)}; generatedProgram,err:=generated.NewGeneratedProgram(template.Options{});if err!=nil{panic(err)}; direct,err:=generatedProgram.Render("layout",assign,options);if err!=nil{panic(err)}; for _,result:=range []struct{name,actual string}{{"AST program",ast},{"generated program",direct}}{ if result.actual!=string(expected){fmt.Fprintf(os.Stderr,"Go %s output differs\\nexpected: %q\\nactual:   %q\\n",result.name,string(expected),result.actual);os.Exit(1)} };fmt.Print("ok")}
 `);
-  const environment = { GOPROXY: `file://${proxy}`, GOSUMDB: 'off', GOTOOLCHAIN: 'local', ...goModuleEnvironment(temporary) };
+  // The modules that packages/go requires come from the module cache of the checkout, which the go mod download of make
+  // install filled (T25.6-1): its cache/download directory is a module proxy (go help goproxy), listed after the proxy of
+  // the run, which serves only the package.
+  const downloads = join(run('go', ['env', 'GOMODCACHE']).trim(), 'cache/download');
+  const environment = { GOPROXY: `file://${proxy},file://${downloads}`, GOSUMDB: 'off', GOTOOLCHAIN: 'local', ...goModuleEnvironment(temporary) };
   run('go', ['mod', 'tidy'], { cwd: directory, env: environment });
   run('go', ['run', '-mod=readonly', '.'], { cwd: directory, env: environment });
 }
