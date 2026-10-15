@@ -5,6 +5,12 @@
 
 ## Unreleased
 
+## 0.0.8
+
+- T24.28: release 0.0.8, which supersedes 0.0.7. The tag v0.0.7 has no published release: the proof of the release workflow ran the Composer consumer with the PHP 8.3.6 of the runner, which the platform check of Composer refused. Every manifest of `config/release.json` declares 0.0.8, and the locks, the dependency review, the compiled artifacts and the consumer projects of the release assets record it.
+- T24.27: `.php-version` declares PHP 8.5, the minimum release of `config/toolchain.json`; the release workflow of kit starts setup-php only with that file, and every setup-php step of `ci.yml` and `dependency-review.yml` reads it.
+- T24.26: the wheel `polyspec-template` requires `jsonschema==4.26.0`, the version that `packages/python/pylock.toml` pins, and that lock is the lock of its consumer, so `make release-assets` accepts the wheel.
+
 ## 0.0.7
 
 - T24.25: release 0.0.7. Every manifest of `config/release.json` declares 0.0.7, and the locks, the dependency review, the compiled artifacts and the consumer projects of the release assets record it.
