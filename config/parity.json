@@ -2,12 +2,12 @@
   "schema": 1,
   "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The conformance cases of tests/cases, their tokens and format results and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools; every other test file of an implementation is the native test of a feature unit (T24.8, T24.11).",
   "implementations": [
-    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"] },
-    { "name": "go", "runner": "go", "prose": ["Go"], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"] },
-    { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs"], "support": ["packages/rust/tests/common/*.rs"] },
-    { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"] },
-    { "name": "php-ext", "runner": "php", "prose": ["PHP extension"], "roots": ["packages/php-ext"], "tests": ["packages/php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"] },
-    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/python"], "tests": ["packages/python/tests/test_*.py"], "command": "var/python/venv/bin/python" }
+    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" } },
+    { "name": "go", "runner": "go", "prose": ["Go"], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"], "errors": { "file": "packages/go/errs/errs.go", "pattern": "^\\t\\w+\\s+Code = \"(E_[A-Z0-9_]+)\"$" } },
+    { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs"], "support": ["packages/rust/tests/common/*.rs"], "errors": { "file": "packages/rust/src/error.rs", "pattern": "^    (E_[A-Z0-9_]+),$" } },
+    { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"], "errors": { "file": "packages/php/src/ErrorCode.php", "pattern": "^    public const (E_[A-Z0-9_]+) = '" } },
+    { "name": "php-ext", "runner": "php", "prose": ["PHP extension"], "roots": ["packages/php-ext"], "tests": ["packages/php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"], "errors": { "file": "packages/php-ext/src/pt_error_codes.h", "pattern": "^#define PT_(E_[A-Z0-9_]+) \"" } },
+    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/python"], "tests": ["packages/python/tests/test_*.py"], "command": "var/python/venv/bin/python", "errors": { "file": "packages/python/src/polyspec/template/errors.py", "pattern": "^    \"(E_[A-Z0-9_]+)\",$" } }
   ],
   "profiles": [
     { "name": "runtime", "implementations": ["ts", "go", "rust", "php", "php-ext", "python"] },
@@ -17,6 +17,7 @@
     { "name": "concurrent-renders", "implementations": ["go", "python"], "reason": "Renders of one program run at the same time where the host language runs code concurrently (RT-70): Go renders one program and one bound map from concurrent goroutines and Python from concurrent threads, while a Rust program and its bound maps stay in the thread that created them, TypeScript and PHP run one render at a time in a process or worker, and the PHP extension keeps the objects of a request in that request.", "spec": ["docs/spec/runtime.md#api", "docs/spec/data-model.md#bound-data"] }
   ],
   "suites": ["tests/fixtures/expr/cases.json"],
+  "errors": { "profile": "runtime", "catalog": { "file": "docs/spec/errors.md", "pattern": "^\\| `(E_[A-Z0-9_]+)` \\||^(?!\\| `E_)" } },
   "comparators": ["tests/runner", "tests/browser", "examples/showcase"],
   "tools": [
     { "root": "packages/lsp", "reason": "The language server is a TypeScript tool of the editors." },

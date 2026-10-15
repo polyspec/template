@@ -22,7 +22,7 @@ final class Source
         $invalid = Utf8::firstInvalid($bytes);
         if ($invalid >= 0) {
             throw TemplateError::at(
-                'E_LEX_INVALID_UTF8',
+                ErrorCode::E_LEX_INVALID_UTF8,
                 $name,
                 self::lineIndex($bytes),
                 $invalid,

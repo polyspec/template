@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template\Value;
 
 use Polyspec\Template\BoundMap;
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Utf8;
 
 /**
@@ -26,10 +27,10 @@ final class Bind
     public static function checkFloat(float $value): float
     {
         if (!is_finite($value)) {
-            throw new BindError('E_DATA_NUMBER_NOT_FINITE', 'number is not finite');
+            throw new BindError(ErrorCode::E_DATA_NUMBER_NOT_FINITE, 'number is not finite');
         }
         if (abs($value) > Number::MAX_SAFE) {
-            throw new BindError('E_DATA_NUMBER_RANGE', "number {$value} is outside the safe range");
+            throw new BindError(ErrorCode::E_DATA_NUMBER_RANGE, "number {$value} is outside the safe range");
         }
 
         return $value;
@@ -42,7 +43,10 @@ final class Bind
     public static function checkLevel(int $level): void
     {
         if ($level > self::MAX_DEPTH) {
-            throw new BindError('E_DATA_DEPTH', 'lists and maps nest deeper than ' . self::MAX_DEPTH . ' levels');
+            throw new BindError(
+                ErrorCode::E_DATA_DEPTH,
+                'lists and maps nest deeper than ' . self::MAX_DEPTH . ' levels',
+            );
         }
     }
 
@@ -93,7 +97,7 @@ final class Bind
         }
         if (is_int($input)) {
             if (abs($input) > Number::MAX_SAFE) {
-                throw new BindError('E_DATA_NUMBER_RANGE', "integer {$input} is outside the safe range");
+                throw new BindError(ErrorCode::E_DATA_NUMBER_RANGE, "integer {$input} is outside the safe range");
             }
 
             return (float) $input;
@@ -129,7 +133,10 @@ final class Bind
             try {
                 $serialized = $input->jsonSerialize();
             } catch (\Throwable $error) {
-                throw new BindError('E_RUNTIME_HOST_FUNCTION', 'jsonSerialize() failed: ' . $error->getMessage());
+                throw new BindError(
+                    ErrorCode::E_RUNTIME_HOST_FUNCTION,
+                    'jsonSerialize() failed: ' . $error->getMessage(),
+                );
             }
 
             return self::at($serialized, $level + 1);
@@ -140,13 +147,13 @@ final class Bind
             return self::mapOf(self::publicProperties($input), $level + 1);
         }
         if ($input instanceof \Closure) {
-            throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a closure has no binding');
+            throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, 'a closure has no binding');
         }
         // A bound map is accepted only as assign and as definition data, and a bound map of the PHP
         // extension, another implementation, at no position (VAL-22).
         if ($input instanceof BoundMap || $input instanceof \Polyspec\Template\Native\BoundMap) {
             throw new BindError(
-                'E_DATA_UNSUPPORTED_TYPE',
+                ErrorCode::E_DATA_UNSUPPORTED_TYPE,
                 'a bound map is accepted only as assign and as definition data',
             );
         }
@@ -155,7 +162,10 @@ final class Bind
             return $input;
         }
 
-        throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'a value of type ' . get_debug_type($input) . ' has no binding');
+        throw new BindError(
+            ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+            'a value of type ' . get_debug_type($input) . ' has no binding',
+        );
     }
 
     /**
@@ -174,7 +184,7 @@ final class Bind
     private static function text(string $text): string
     {
         if (!Utf8::isValid($text)) {
-            throw new BindError('E_DATA_INVALID_UTF8', 'string is not valid UTF-8');
+            throw new BindError(ErrorCode::E_DATA_INVALID_UTF8, 'string is not valid UTF-8');
         }
 
         return $text;
@@ -183,7 +193,7 @@ final class Bind
     private static function key(string $key): string
     {
         if (!Utf8::isValid($key)) {
-            throw new BindError('E_DATA_INVALID_UTF8', 'a map key is not valid UTF-8');
+            throw new BindError(ErrorCode::E_DATA_INVALID_UTF8, 'a map key is not valid UTF-8');
         }
 
         return $key;
@@ -207,7 +217,7 @@ final class Bind
                 return new MapValue();
             }
 
-            throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'assign is not a map');
+            throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, 'assign is not a map');
         }
 
         return $value;

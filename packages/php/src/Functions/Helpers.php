@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Functions;
 
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Value\SafeString;
 use Polyspec\Template\Value\Value;
 
@@ -14,7 +15,7 @@ final class Helpers
 {
     public static function typeError(string $message): FunctionError
     {
-        return new FunctionError('E_RUNTIME_TYPE', $message);
+        return new FunctionError(ErrorCode::E_RUNTIME_TYPE, $message);
     }
 
     public static function string(mixed $value, string $name): string
@@ -80,7 +81,7 @@ final class Helpers
     {
         $text = Value::stringify($value);
         if ($text === null) {
-            throw new FunctionError('E_RUNTIME_STRINGIFY', 'a list or map cannot be converted to text');
+            throw new FunctionError(ErrorCode::E_RUNTIME_STRINGIFY, 'a list or map cannot be converted to text');
         }
 
         return $text;

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e3659c65ef0092a530969299b123de27331531ddb27550e32a3c102cb3e5a9fd -->
+<!-- source-sha256: 689f7d4d0e2aeeb3c6a3fb0220caa6b7f5821ba3f0f9ea78a27725854403c8b9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-15: `docs/spec/errors.md`의 code table이 error code의 catalog입니다. `make error-codes`가 이로부터 TypeScript의 `ErrorCode` union, Go package `errs`의 상수, 조건을 단 Rust `ErrorCode`의 variant, Python의 `ERROR_CODES`, PHP package의 새 class `Polyspec\Template\ErrorCode`, PHP extension의 header `pt_error_codes.h`를 씁니다. PHP package와 PHP extension은 모든 error를 string literal 대신 이 상수로 내고, 두 parity check는 먼저 `make error-codes-check`를 실행한 뒤 모든 목록을 catalog와 비교합니다(R7).
 
 ## 0.0.11
 

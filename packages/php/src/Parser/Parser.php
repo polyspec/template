@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template\Parser;
 
 use Polyspec\Template\Ast;
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Expr\Parser as ExpressionParser;
 use Polyspec\Template\Expr\Token;
 use Polyspec\Template\Source;
@@ -124,7 +125,7 @@ final class Parser
         if ($this->frames !== []) {
             $frame = $this->frames[count($this->frames) - 1];
             throw $this->fail(
-                'E_PARSE_UNCLOSED_BLOCK',
+                ErrorCode::E_PARSE_UNCLOSED_BLOCK,
                 $frame['openStart'],
                 $frame['openStart'] + 1,
                 'block is not closed before the end of the file',
@@ -260,18 +261,23 @@ final class Parser
             case ':?':
                 $frameIndex = count($this->frames) - 1;
                 if ($frameIndex < 0) {
-                    throw $this->fail('E_PARSE_ELSE_OUTSIDE_BLOCK', $start, $start + 1, '"{:?}" outside of a block');
+                    throw $this->fail(
+                        ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK,
+                        $start,
+                        $start + 1,
+                        '"{:?}" outside of a block',
+                    );
                 }
                 if ($this->frames[$frameIndex]['node']['type'] !== 'If') {
                     throw $this->fail(
-                        'E_PARSE_ELSEIF_NOT_IN_IF',
+                        ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF,
                         $start,
                         $start + 1,
                         '"{:?}" inside a loop or if-block',
                     );
                 }
                 if ($this->frames[$frameIndex]['hasElse']) {
-                    throw $this->fail('E_PARSE_ELSEIF_AFTER_ELSE', $start, $start + 1, '"{:?}" after "{:}"');
+                    throw $this->fail(ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE, $start, $start + 1, '"{:?}" after "{:}"');
                 }
                 $parser = $this->expressionParser($open, $closeCount, $bodyStart);
                 $test = $parser->parseExpression();
@@ -292,10 +298,20 @@ final class Parser
                 }
                 $frameIndex = count($this->frames) - 1;
                 if ($frameIndex < 0) {
-                    throw $this->fail('E_PARSE_ELSE_OUTSIDE_BLOCK', $start, $start + 1, '"{:}" outside of a block');
+                    throw $this->fail(
+                        ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK,
+                        $start,
+                        $start + 1,
+                        '"{:}" outside of a block',
+                    );
                 }
                 if ($this->frames[$frameIndex]['hasElse']) {
-                    throw $this->fail('E_PARSE_DUPLICATE_ELSE', $start, $start + 1, 'second "{:}" in the same block');
+                    throw $this->fail(
+                        ErrorCode::E_PARSE_DUPLICATE_ELSE,
+                        $start,
+                        $start + 1,
+                        'second "{:}" in the same block',
+                    );
                 }
                 $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $bodyStart));
                 $this->storeBranch($frameIndex);
@@ -305,7 +321,12 @@ final class Parser
             case '/':
                 $frame = array_pop($this->frames);
                 if ($frame === null) {
-                    throw $this->fail('E_PARSE_UNEXPECTED_CLOSE', $start, $start + 1, '"{/}" without an open block');
+                    throw $this->fail(
+                        ErrorCode::E_PARSE_UNEXPECTED_CLOSE,
+                        $start,
+                        $start + 1,
+                        '"{/}" without an open block',
+                    );
                 }
                 $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $bodyStart));
                 $node = $this->closeFrame($frame);
@@ -332,9 +353,9 @@ final class Parser
                 $end = $this->parseDirective($start, $open, $closeCount, $wrapper, $bodyStart, $firstTag);
                 break;
             case null:
-                throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $bodyStart, $bodyStart + 1, 'unknown tag');
+                throw $this->fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, $bodyStart, $bodyStart + 1, 'unknown tag');
             default:
-                throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $bodyStart, $bodyStart + 1, 'unknown tag');
+                throw $this->fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, $bodyStart, $bodyStart + 1, 'unknown tag');
         }
         $kind = $assignment ? 'assignment' : self::KINDS[$sigil];
         $tagBodyStart = $open + 1;
@@ -477,11 +498,11 @@ final class Parser
             return $at + strlen($sequence);
         }
         if (strpos($this->text, $this->close, $at) === false) {
-            throw $this->fail('E_PARSE_UNTERMINATED_TAG', $open, $open + 1, 'tag is not terminated');
+            throw $this->fail(ErrorCode::E_PARSE_UNTERMINATED_TAG, $open, $open + 1, 'tag is not terminated');
         }
 
         throw $this->fail(
-            'E_PARSE_UNEXPECTED_TOKEN',
+            ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
             $at,
             $at + 1,
             'unexpected ' . json_encode($this->text[$at]) . ' before the end of the tag',
@@ -499,7 +520,7 @@ final class Parser
         $at = Scanner::skipHorizontalSpace($this->text, $afterClose);
         if (substr($this->text, $at, strlen($wrapper[1])) !== $wrapper[1]) {
             throw $this->fail(
-                'E_PARSE_INVALID_WRAPPER',
+                ErrorCode::E_PARSE_INVALID_WRAPPER,
                 $start,
                 $start + strlen($wrapper[0]),
                 'wrapped tag is not followed by ' . json_encode($wrapper[1]),
@@ -517,7 +538,7 @@ final class Parser
         $terminator = '*' . $this->closeSequence($closeCount);
         $at = strpos($this->text, $terminator, $bodyStart);
         if ($at === false) {
-            throw $this->fail('E_PARSE_UNTERMINATED_COMMENT', $open, $open + 1, 'comment is not terminated');
+            throw $this->fail(ErrorCode::E_PARSE_UNTERMINATED_COMMENT, $open, $open + 1, 'comment is not terminated');
         }
         $end = $this->finishTag($start, $wrapper, $at + strlen($terminator));
         // The value starts after the sigil `*` (AST-9).
@@ -534,13 +555,13 @@ final class Parser
     {
         if (preg_match(self::LOOP_HEAD, substr($this->text, $bodyStart), $head) !== 1) {
             $at = Scanner::skipHorizontalSpace($this->text, $bodyStart);
-            throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $at, $at + 1, 'loop requires "name = expression"');
+            throw $this->fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, $at, $at + 1, 'loop requires "name = expression"');
         }
         $name = $head[1];
         $nameStart = $bodyStart + (int) strpos($head[0], $name);
         if (isset(self::RESERVED[$name])) {
             throw $this->fail(
-                'E_PARSE_RESERVED_NAME',
+                ErrorCode::E_PARSE_RESERVED_NAME,
                 $nameStart,
                 $nameStart + strlen($name),
                 "{$name} is a reserved word",
@@ -570,14 +591,14 @@ final class Parser
     private function parseAssignment(int $start, int $open, int $closeCount, ?array $wrapper, int $bodyStart): int
     {
         if (preg_match(self::ASSIGN_HEAD, $this->text, $head, 0, $bodyStart) !== 1) {
-            throw $this->fail('E_PARSE_UNEXPECTED_TOKEN', $bodyStart, $bodyStart + 1, 'unknown tag');
+            throw $this->fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, $bodyStart, $bodyStart + 1, 'unknown tag');
         }
         $name = $head[1];
         $operator = $head[2];
         $nameStart = $bodyStart + strpos($head[0], $name);
         if (isset(self::RESERVED[$name])) {
             throw $this->fail(
-                'E_PARSE_RESERVED_NAME',
+                ErrorCode::E_PARSE_RESERVED_NAME,
                 $nameStart,
                 $nameStart + strlen($name),
                 "{$name} is a reserved word",
@@ -620,7 +641,7 @@ final class Parser
         bool $firstTag,
     ): int {
         $invalid = fn (string $message): TemplateError => $this->fail(
-            'E_PARSE_INVALID_DIRECTIVE',
+            ErrorCode::E_PARSE_INVALID_DIRECTIVE,
             $start,
             $start + 1,
             $message,

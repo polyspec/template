@@ -524,7 +524,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson)
     if (encoded == FAILURE || text.s == NULL) {
         smart_str_free(&text);
         zend_string *message = zend_string_init("cannot write the AST as JSON: a number literal is not finite", 61, 0);
-        zend_object *object = pt_error_object("E_INTERNAL", name, 0, 0, 0, 0, message);
+        zend_object *object = pt_error_object(PT_E_INTERNAL, name, 0, 0, 0, 0, message);
         zend_string_release(message);
         zval exception;
         ZVAL_OBJ(&exception, object);
@@ -564,15 +564,15 @@ static void pt_define_add(pt_run *run, pt_s name, HashTable *defines, pt_s id, c
     } else if (template != NULL) {
         pt_s resolved = {NULL, 0};
         if (!pt_resolve_path(&run->arena, PT_S(""), template->u.str, &resolved)) {
-            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
         }
         if (has_data && !data_is_map) {
-            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: data is not a map", id.s));
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: data is not a map", id.s));
         }
         entry->template = resolved;
         entry->data = has_data ? data : NULL;
     } else {
-        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: entry needs \"template\" or \"html\"", id.s));
+        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: entry needs \"template\" or \"html\"", id.s));
     }
     zend_hash_str_update_ptr(defines, id.s, id.n, entry);
 }
@@ -581,7 +581,7 @@ static void pt_define_add(pt_run *run, pt_s name, HashTable *defines, pt_s id, c
 static HashTable *pt_defines_from_json(pt_run *run, pt_s name, pt_value value)
 {
     if (value.type != PT_MAP) {
-        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("define is not an object", 23, 0));
+        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("define is not an object", 23, 0));
     }
     HashTable *defines = pt_defines_new(run);
     const pt_map *map = value.u.map;
@@ -629,19 +629,19 @@ static void pt_env_from_json(pt_run *run, pt_s name, const pt_value *value, pt_e
         return;
     }
     if (value->type != PT_MAP) {
-        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env is not an object", 20, 0));
+        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env is not an object", 20, 0));
     }
     pt_value *timezone = pt_map_get(value->u.map, "timezone", 8);
     if (timezone != NULL && timezone->type != PT_NULL) {
         if (!pt_is_string(*timezone)) {
-            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.timezone is not a string", 28, 0));
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env.timezone is not a string", 28, 0));
         }
         env->timezone = timezone->u.str;
     }
     pt_value *now = pt_map_get(value->u.map, "now", 3);
     if (now != NULL && now->type != PT_NULL) {
         if (now->type != PT_NUMBER) {
-            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.now is not a number", 23, 0));
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env.now is not a number", 23, 0));
         }
         env->now = now->u.number;
     }
@@ -685,7 +685,7 @@ static void pt_render_json_into(pt_run *run, void *context)
     } else if (data.type == PT_NULL || (data.type == PT_LIST && data.u.list->count == 0)) {
         request.data = pt_map_new(&run->arena, 0);
     } else {
-        pt_request_fail(run, request.name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("assign is not a map", 19, 0));
+        pt_request_fail(run, request.name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("assign is not a map", 19, 0));
     }
     if (define) {
         request.defines = pt_defines_from_json(run, request.name, definitions);
@@ -816,14 +816,14 @@ static pt_map *pt_define_data(pt_run *run, pt_s name, pt_s id, zval *input)
     if (value.type == PT_LIST && value.u.list->count == 0) {
         return pt_map_new(&run->arena, 0);
     }
-    pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: data is not a map", id.s));
+    pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: data is not a map", id.s));
 }
 
 static HashTable *pt_defines_from_php(pt_run *run, pt_s name, zval *input)
 {
     ZVAL_DEREF(input);
     if (Z_TYPE_P(input) != IS_ARRAY) {
-        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("define is not an object", 23, 0));
+        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("define is not an object", 23, 0));
     }
     HashTable *defines = pt_defines_new(run);
     zend_ulong index;
@@ -837,7 +837,7 @@ static HashTable *pt_defines_from_php(pt_run *run, pt_s name, zval *input)
             id = pt_strdup(&run->arena, digits, (size_t)written);
         } else {
             if (pt_utf8_first_invalid(ZSTR_VAL(key), ZSTR_LEN(key)) < ZSTR_LEN(key)) {
-                pt_request_fail(run, name, "E_DATA_INVALID_UTF8", zend_string_init("a define id is not valid UTF-8", 30, 0));
+                pt_request_fail(run, name, PT_E_DATA_INVALID_UTF8, zend_string_init("a define id is not valid UTF-8", 30, 0));
             }
             id = pt_strdup(&run->arena, ZSTR_VAL(key), ZSTR_LEN(key));
         }
@@ -859,12 +859,12 @@ static HashTable *pt_defines_from_php(pt_run *run, pt_s name, zval *input)
         } else if (template != NULL) {
             pt_s resolved = {NULL, 0};
             if (!pt_resolve_path(&run->arena, PT_S(""), (pt_s){Z_STRVAL_P(template), Z_STRLEN_P(template)}, &resolved)) {
-                pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
+                pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
             }
             define->template = pt_strdup(&run->arena, resolved.s, resolved.n);
             define->data = data != NULL ? pt_define_data(run, name, id, data) : NULL;
         } else {
-            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "define %s: entry needs \"template\" or \"html\"", id.s));
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: entry needs \"template\" or \"html\"", id.s));
         }
         zend_hash_str_update_ptr(defines, id.s, id.n, define);
     } ZEND_HASH_FOREACH_END();
@@ -883,12 +883,12 @@ static void pt_env_from_php(pt_run *run, pt_s name, zval *input, pt_env *env)
         return;
     }
     if (Z_TYPE_P(input) != IS_ARRAY) {
-        pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env is not an object", 20, 0));
+        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env is not an object", 20, 0));
     }
     zval *timezone = zend_hash_str_find_deref(Z_ARRVAL_P(input), "timezone", 8);
     if (timezone != NULL && Z_TYPE_P(timezone) != IS_NULL) {
         if (Z_TYPE_P(timezone) != IS_STRING) {
-            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.timezone is not a string", 28, 0));
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env.timezone is not a string", 28, 0));
         }
         env->timezone = pt_strdup(&run->arena, Z_STRVAL_P(timezone), Z_STRLEN_P(timezone));
     }
@@ -899,7 +899,7 @@ static void pt_env_from_php(pt_run *run, pt_s name, zval *input, pt_env *env)
         } else if (Z_TYPE_P(now) == IS_DOUBLE) {
             env->now = Z_DVAL_P(now);
         } else {
-            pt_request_fail(run, name, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("env.now is not a number", 23, 0));
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env.now is not a number", 23, 0));
         }
     }
 }
@@ -1036,7 +1036,7 @@ ZEND_METHOD(Polyspec_Template_Native_BoundMap, bind)
             bound->map = result.u.map;
         } else if (!(result.type == PT_LIST && result.u.list->count == 0)) {
             OBJ_RELEASE(object);
-            pt_throw_bare("E_DATA_UNSUPPORTED_TYPE", zend_string_init("bind takes a value that binds to a map", 38, 0));
+            pt_throw_bare(PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("bind takes a value that binds to a map", 38, 0));
             RETURN_THROWS();
         }
     }
@@ -1053,7 +1053,7 @@ ZEND_METHOD(Polyspec_Template_Native_BoundMap, merge)
 
     pt_bound *left = pt_bound_of(first), *right = pt_bound_of(second);
     if (left == NULL || right == NULL) {
-        pt_throw_bare("E_DATA_UNSUPPORTED_TYPE", zend_string_init("merge takes two bound maps of the extension", 43, 0));
+        pt_throw_bare(PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("merge takes two bound maps of the extension", 43, 0));
         RETURN_THROWS();
     }
     zend_object *object = pt_bound_create(pt_bound_ce);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Functions;
 
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Utf8;
 use Polyspec\Template\Value\MapValue;
 use Polyspec\Template\Value\Value;
@@ -175,7 +176,7 @@ final class Collection
                 $count = (int) floor(($end - $start) / $increment) + 1;
                 if ($count > self::RANGE_LIMIT) {
                     throw new FunctionError(
-                        'E_RUNTIME_LIMIT',
+                        ErrorCode::E_RUNTIME_LIMIT,
                         'range would produce more than ' . self::RANGE_LIMIT . ' elements',
                     );
                 }

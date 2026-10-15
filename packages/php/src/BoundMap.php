@@ -58,7 +58,7 @@ final class BoundMap
             }
             if (!$bound instanceof MapValue) {
                 throw TemplateError::withoutPosition(
-                    'E_DATA_UNSUPPORTED_TYPE',
+                    ErrorCode::E_DATA_UNSUPPORTED_TYPE,
                     '',
                     'bind takes a value that binds to a map',
                 );
@@ -77,7 +77,11 @@ final class BoundMap
     {
         return InternalBoundary::run('', static function () use ($first, $second): self {
             if (!$first instanceof self || !$second instanceof self) {
-                throw TemplateError::withoutPosition('E_DATA_UNSUPPORTED_TYPE', '', 'merge takes two bound maps');
+                throw TemplateError::withoutPosition(
+                    ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                    '',
+                    'merge takes two bound maps',
+                );
             }
             $entries = $first->entries->copy();
             foreach ($second->entries->entries() as $key => $value) {

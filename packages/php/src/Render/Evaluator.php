@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Render;
 
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\MapValue;
 
@@ -69,7 +70,7 @@ final class Evaluator
                     throw $this->fail(
                         $frame,
                         $expr['span'],
-                        'E_RUNTIME_UNKNOWN_LOOP',
+                        ErrorCode::E_RUNTIME_UNKNOWN_LOOP,
                         $expr['loop'] . ' is not an active loop variable',
                     );
                 }
@@ -172,7 +173,12 @@ final class Evaluator
 
                 return $this->runtime->depth($map, $frame, $expr['span']);
             default:
-                throw $this->fail($frame, $expr['span'], 'E_RUNTIME_TYPE', 'unknown expression node ' . $expr['type']);
+                throw $this->fail(
+                    $frame,
+                    $expr['span'],
+                    ErrorCode::E_RUNTIME_TYPE,
+                    'unknown expression node ' . $expr['type'],
+                );
         }
     }
 

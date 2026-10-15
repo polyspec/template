@@ -6,6 +6,7 @@ from typing import Optional
 
 # Every code is listed with its condition and position in ERR-7 to ERR-12.
 ERROR_CODES = (
+    # BEGIN GENERATED ERROR CODES
     "E_LEX_INVALID_UTF8",
     "E_PARSE_UNTERMINATED_TAG",
     "E_PARSE_UNTERMINATED_COMMENT",
@@ -47,6 +48,7 @@ ERROR_CODES = (
     "E_RUNTIME_DEPTH",
     "E_RUNTIME_LIMIT",
     "E_INTERNAL",
+    # END GENERATED ERROR CODES
 )
 
 # A byte span, the pair [start, end).

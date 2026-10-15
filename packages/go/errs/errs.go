@@ -12,6 +12,7 @@ type Code string
 
 // Error codes.
 const (
+	// BEGIN GENERATED ERROR CODES
 	LexInvalidUTF8           Code = "E_LEX_INVALID_UTF8"
 	ParseUnterminatedTag     Code = "E_PARSE_UNTERMINATED_TAG"
 	ParseUnterminatedComment Code = "E_PARSE_UNTERMINATED_COMMENT"
@@ -53,6 +54,7 @@ const (
 	RuntimeDepth             Code = "E_RUNTIME_DEPTH"
 	RuntimeLimit             Code = "E_RUNTIME_LIMIT"
 	Internal                 Code = "E_INTERNAL"
+	// END GENERATED ERROR CODES
 )
 
 // Span is a byte range [start, end) of a source.

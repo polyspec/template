@@ -137,7 +137,7 @@ static pt_s pt_string_literal(pt_source *source, size_t start, size_t *after)
     size_t index = start + 1;
     for (;;) {
         if (index >= length) {
-            pt_parse_fail(source, "E_PARSE_UNTERMINATED_STRING", start, start + 1, zend_string_init("string literal is not terminated", 32, 0));
+            pt_parse_fail(source, PT_E_PARSE_UNTERMINATED_STRING, start, start + 1, zend_string_init("string literal is not terminated", 32, 0));
         }
         char c = text[index];
         if (c == quote) {
@@ -163,7 +163,7 @@ static pt_s pt_string_literal(pt_source *source, size_t start, size_t *after)
                     int h = pt_char_at(source, index + 2 + k);
                     int v = pt_digit(h) ? h - '0' : (h >= 'a' && h <= 'f') ? h - 'a' + 10 : (h >= 'A' && h <= 'F') ? h - 'A' + 10 : -1;
                     if (v < 0) {
-                        pt_parse_fail(source, "E_PARSE_INVALID_ESCAPE", index, index + 2, zend_string_init("invalid escape sequence", 23, 0));
+                        pt_parse_fail(source, PT_E_PARSE_INVALID_ESCAPE, index, index + 2, zend_string_init("invalid escape sequence", 23, 0));
                     }
                     code = code * 16 + (uint32_t)v;
                 }
@@ -189,7 +189,7 @@ static pt_s pt_string_literal(pt_source *source, size_t start, size_t *after)
                 break;
             }
             default:
-                pt_parse_fail(source, "E_PARSE_INVALID_ESCAPE", index, index + 2, zend_string_init("invalid escape sequence", 23, 0));
+                pt_parse_fail(source, PT_E_PARSE_INVALID_ESCAPE, index, index + 2, zend_string_init("invalid escape sequence", 23, 0));
         }
     }
 }
@@ -243,7 +243,7 @@ static pt_token pt_read_number(pt_lexer *lexer, size_t start)
             }
             end = cursor;
         } else {
-            pt_parse_fail(source, "E_PARSE_INVALID_NUMBER", start, cursor, zend_strpprintf(0, "invalid number %s", ZSTR_VAL(pt_quote_range(source, start, cursor))));
+            pt_parse_fail(source, PT_E_PARSE_INVALID_NUMBER, start, cursor, zend_strpprintf(0, "invalid number %s", ZSTR_VAL(pt_quote_range(source, start, cursor))));
         }
     }
     int following = pt_char_at(source, end);
@@ -253,7 +253,7 @@ static pt_token pt_read_number(pt_lexer *lexer, size_t start)
         while (cursor < length && (pt_ident_part((unsigned char)source->text[cursor]) || source->text[cursor] == '.')) {
             cursor++;
         }
-        pt_parse_fail(source, "E_PARSE_INVALID_NUMBER", start, cursor, zend_strpprintf(0, "invalid number %s", ZSTR_VAL(pt_quote_range(source, start, cursor))));
+        pt_parse_fail(source, PT_E_PARSE_INVALID_NUMBER, start, cursor, zend_strpprintf(0, "invalid number %s", ZSTR_VAL(pt_quote_range(source, start, cursor))));
     }
     lexer->index = end;
     return pt_token_make(T_NUMBER, start, end);
@@ -290,9 +290,9 @@ static pt_token pt_read_dot(pt_lexer *lexer, size_t start)
         while (end < length && (pt_ident_part((unsigned char)source->text[end]) || source->text[end] == '.')) {
             end++;
         }
-        pt_parse_fail(source, "E_PARSE_INVALID_NUMBER", start, end, zend_strpprintf(0, "invalid number %s", ZSTR_VAL(pt_quote_range(source, start, end))));
+        pt_parse_fail(source, PT_E_PARSE_INVALID_NUMBER, start, end, zend_strpprintf(0, "invalid number %s", ZSTR_VAL(pt_quote_range(source, start, end))));
     }
-    pt_parse_fail(source, "E_PARSE_UNEXPECTED_TOKEN", start, start + 1, zend_string_init("unexpected \".\"", 14, 0));
+    pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, start, start + 1, zend_string_init("unexpected \".\"", 14, 0));
 }
 
 static pt_token pt_lexer_read(pt_lexer *lexer)
@@ -361,7 +361,7 @@ static pt_token pt_lexer_read(pt_lexer *lexer)
         }
     }
     zend_string *quoted = pt_quote_range(source, start, start + 1);
-    pt_parse_fail(source, "E_PARSE_UNEXPECTED_TOKEN", start, start + 1, zend_strpprintf(0, "unexpected character %s", ZSTR_VAL(quoted)));
+    pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, start, start + 1, zend_strpprintf(0, "unexpected character %s", ZSTR_VAL(quoted)));
 }
 
 static pt_token pt_peek(pt_lexer *lexer)
@@ -456,15 +456,15 @@ ZEND_NORETURN static void pt_unexpected(pt_eparser *parser, pt_token token)
     pt_lexer *lexer = &parser->lexer;
     pt_source *source = lexer->source;
     if (lexer->has_open && lexer->close != 0 && !pt_contains_from(source, lexer->close, token.start)) {
-        pt_parse_fail(source, "E_PARSE_UNTERMINATED_TAG", lexer->open_index, lexer->open_index + 1, zend_string_init("tag is not terminated", 21, 0));
+        pt_parse_fail(source, PT_E_PARSE_UNTERMINATED_TAG, lexer->open_index, lexer->open_index + 1, zend_string_init("tag is not terminated", 21, 0));
     }
     if (token.type == T_EOF) {
-        pt_parse_fail(source, "E_PARSE_UNEXPECTED_TOKEN", token.start, token.start, zend_string_init("unexpected end of input", 23, 0));
+        pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, token.start, token.start, zend_string_init("unexpected end of input", 23, 0));
     }
     zend_string *quoted = pt_quote_range(source, token.start, token.end);
     zend_string *message = zend_strpprintf(0, "unexpected token %s", ZSTR_VAL(quoted));
     zend_string_release(quoted);
-    pt_parse_fail(source, "E_PARSE_UNEXPECTED_TOKEN", token.start, token.end, message);
+    pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, token.start, token.end, message);
 }
 
 static pt_token pt_expect(pt_eparser *parser, pt_token_type type)
@@ -510,7 +510,7 @@ static void pt_enter(pt_eparser *parser)
     parser->depth++;
     if (parser->depth > PT_PARSE_DEPTH_LIMIT) {
         pt_token token = pt_peek(&parser->lexer);
-        pt_parse_fail(parser->lexer.source, "E_RUNTIME_LIMIT", token.start, token.end, zend_strpprintf(0, "expression nesting exceeds %d", PT_PARSE_DEPTH_LIMIT));
+        pt_parse_fail(parser->lexer.source, PT_E_RUNTIME_LIMIT, token.start, token.end, zend_strpprintf(0, "expression nesting exceeds %d", PT_PARSE_DEPTH_LIMIT));
     }
 }
 
@@ -849,7 +849,7 @@ static pt_expr *pt_parse_bracket(pt_eparser *parser)
         pt_expr *entry = entries.items[i];
         if (entry->type == X_PAIR && entry->b == NULL) {
             size_t key_start = entry->a->start;
-            pt_parse_fail(source, "E_PARSE_UNEXPECTED_TOKEN", key_start, key_start + 1, zend_string_init("map literal entry without \"=>\"", 30, 0));
+            pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, key_start, key_start + 1, zend_string_init("map literal entry without \"=>\"", 30, 0));
         }
     }
     pt_expr *map = pt_expr_new(source, X_MAP, open.start, close.end);
@@ -1335,7 +1335,7 @@ static size_t pt_finish_tag(pt_tparser *parser, size_t start, int wrapper, size_
         zend_string *quoted = pt_json_quote(closer, strlen(closer));
         zend_string *message = zend_strpprintf(0, "wrapped tag is not followed by %s", ZSTR_VAL(quoted));
         zend_string_release(quoted);
-        pt_parse_fail(source, "E_PARSE_INVALID_WRAPPER", start, start + strlen(pt_wrappers[wrapper][0]), message);
+        pt_parse_fail(source, PT_E_PARSE_INVALID_WRAPPER, start, start + strlen(pt_wrappers[wrapper][0]), message);
     }
     return at + strlen(closer);
 }
@@ -1355,12 +1355,12 @@ static size_t pt_expect_close_raw(pt_tparser *parser, size_t open, int close_cou
         return at + (size_t)close_count;
     }
     if (!pt_contains_from(source, parser->close, at)) {
-        pt_tfail(parser, "E_PARSE_UNTERMINATED_TAG", open, open + 1, "tag is not terminated");
+        pt_tfail(parser, PT_E_PARSE_UNTERMINATED_TAG, open, open + 1, "tag is not terminated");
     }
     zend_string *quoted = pt_quote_range(source, at, at + 1);
     zend_string *message = zend_strpprintf(0, "unexpected %s before the end of the tag", ZSTR_VAL(quoted));
     zend_string_release(quoted);
-    pt_parse_fail(source, "E_PARSE_UNEXPECTED_TOKEN", at, at + 1, message);
+    pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, at, at + 1, message);
 }
 
 static pt_s pt_copy(pt_tparser *parser, size_t start, size_t end)
@@ -1375,7 +1375,7 @@ static bool pt_reserved(pt_s name)
 
 ZEND_NORETURN static void pt_reserved_fail(pt_tparser *parser, pt_s name, size_t start)
 {
-    pt_parse_fail(parser->source, "E_PARSE_RESERVED_NAME", start, start + name.n, zend_strpprintf(0, "%s is a reserved word", name.s));
+    pt_parse_fail(parser->source, PT_E_PARSE_RESERVED_NAME, start, start + name.n, zend_strpprintf(0, "%s is a reserved word", name.s));
 }
 
 /* Records a token of the tag being parsed outside its expressions (EDT-8). */
@@ -1472,13 +1472,13 @@ static pt_s pt_read_include_path(pt_tparser *parser, size_t index, int close_cou
     pt_btoken token;
     if (!pt_read_btoken(parser, index, close_count, &token) || token.value.n == 0) {
         size_t at = pt_skip_horizontal(source, index);
-        pt_tfail(parser, "E_PARSE_INVALID_PATH", at, at + 1, "include requires a path");
+        pt_tfail(parser, PT_E_PARSE_INVALID_PATH, at, at + 1, "include requires a path");
     }
     if (!token.path) {
         zend_string *quoted = pt_json_quote(token.value.s, token.value.n);
         zend_string *message = zend_strpprintf(0, "%s is not a path", ZSTR_VAL(quoted));
         zend_string_release(quoted);
-        pt_parse_fail(source, "E_PARSE_INVALID_PATH", token.start, token.end, message);
+        pt_parse_fail(source, PT_E_PARSE_INVALID_PATH, token.start, token.end, message);
     }
     pt_mark(parser, token.start, token.end, token.quoted ? "string" : "path");
     *after = token.end;
@@ -1492,7 +1492,7 @@ static size_t pt_read_block_body(pt_tparser *parser, size_t index, int close_cou
     pt_btoken token;
     if (!pt_read_btoken(parser, cursor, close_count, &token) || token.value.n == 0) {
         size_t at = pt_skip_horizontal(source, cursor);
-        pt_tfail(parser, "E_PARSE_INVALID_BLOCK_TAG", at, at + 1, "block tag requires an identifier or a path");
+        pt_tfail(parser, PT_E_PARSE_INVALID_BLOCK_TAG, at, at + 1, "block tag requires an identifier or a path");
     }
     /* The words of the body (EDT-8): the id, the path and each scope item with its value. */
     pt_mark(parser, token.start, token.end, token.quoted ? "string" : "path");
@@ -1522,7 +1522,7 @@ static size_t pt_read_block_body(pt_tparser *parser, size_t index, int close_cou
             zend_string *quoted = pt_quote_range(source, token.start, token.end);
             zend_string *message = zend_strpprintf(0, "unexpected %s in block tag", ZSTR_VAL(quoted));
             zend_string_release(quoted);
-            pt_parse_fail(source, "E_PARSE_INVALID_BLOCK_TAG", token.start, token.end, message);
+            pt_parse_fail(source, PT_E_PARSE_INVALID_BLOCK_TAG, token.start, token.end, message);
         }
         cursor = token.end;
         if (count == capacity) {
@@ -1536,7 +1536,7 @@ static size_t pt_read_block_body(pt_tparser *parser, size_t index, int close_cou
         if (pt_char_at(source, cursor) == ':') {
             size_t value_start = cursor + 1;
             if (value_start >= source->length || pt_horizontal((unsigned char)source->text[value_start])) {
-                pt_tfail(parser, "E_PARSE_INVALID_BLOCK_TAG", cursor, cursor + 1, "scope item requires a value after \":\"");
+                pt_tfail(parser, PT_E_PARSE_INVALID_BLOCK_TAG, cursor, cursor + 1, "scope item requires a value after \":\"");
             }
             pt_eparser expression;
             pt_eparser_init(&expression, source, value_start, parser->close, close_count, false, 0);
@@ -1579,7 +1579,7 @@ static size_t pt_parse_comment(pt_tparser *parser, size_t start, size_t open, in
         at++;
     }
     if (!found) {
-        pt_tfail(parser, "E_PARSE_UNTERMINATED_COMMENT", open, open + 1, "comment is not terminated");
+        pt_tfail(parser, PT_E_PARSE_UNTERMINATED_COMMENT, open, open + 1, "comment is not terminated");
     }
     size_t end = pt_finish_tag(parser, start, wrapper, at + 1 + (size_t)close_count);
     /* The value starts after the sigil `*` (AST-9). */
@@ -1624,7 +1624,7 @@ static size_t pt_parse_loop(pt_tparser *parser, size_t start, size_t open, int c
     }
     if (!matched) {
         size_t at = pt_skip_horizontal(source, body_start);
-        pt_tfail(parser, "E_PARSE_UNEXPECTED_TOKEN", at, at + 1, "loop requires \"name = expression\"");
+        pt_tfail(parser, PT_E_PARSE_UNEXPECTED_TOKEN, at, at + 1, "loop requires \"name = expression\"");
     }
     pt_s name = pt_copy(parser, name_start, name_end);
     if (pt_reserved(name)) {
@@ -1686,7 +1686,7 @@ static size_t pt_parse_assignment(pt_tparser *parser, size_t start, size_t open,
     pt_source *source = parser->source;
     size_t name_end, operator_start, operator_end;
     if (!pt_assign_head(source, body_start, &name_end, &operator_start, &operator_end)) {
-        pt_tfail(parser, "E_PARSE_UNEXPECTED_TOKEN", body_start, body_start + 1, "unknown tag");
+        pt_tfail(parser, PT_E_PARSE_UNEXPECTED_TOKEN, body_start, body_start + 1, "unknown tag");
     }
     pt_s name = pt_copy(parser, body_start, name_end);
     size_t name_start = body_start;
@@ -1744,11 +1744,11 @@ static size_t pt_parse_directive(pt_tparser *parser, size_t start, size_t open, 
 {
     pt_source *source = parser->source;
     if (!first_tag || !parser->text_before_first_tag_is_whitespace) {
-        pt_tfail(parser, "E_PARSE_INVALID_DIRECTIVE", start, start + 1, "delimiter directive is not the first tag");
+        pt_tfail(parser, PT_E_PARSE_INVALID_DIRECTIVE, start, start + 1, "delimiter directive is not the first tag");
     }
     size_t index = pt_skip_horizontal(source, body_start);
     if (!pt_starts_with(source, index, "delimiter", 9)) {
-        pt_tfail(parser, "E_PARSE_INVALID_DIRECTIVE", start, start + 1, "directive is not \"delimiter\"");
+        pt_tfail(parser, PT_E_PARSE_INVALID_DIRECTIVE, start, start + 1, "directive is not \"delimiter\"");
     }
     pt_mark(parser, index, index + 9, "keyword");
     index = pt_skip_horizontal(source, index + 9);
@@ -1767,7 +1767,7 @@ static size_t pt_parse_directive(pt_tparser *parser, size_t start, size_t open, 
         zend_string *quoted = pt_json_quote(value, length);
         zend_string *message = zend_strpprintf(0, "%s is not a delimiter pair", ZSTR_VAL(quoted));
         zend_string_release(quoted);
-        pt_parse_fail(source, "E_PARSE_INVALID_DIRECTIVE", start, start + 1, message);
+        pt_parse_fail(source, PT_E_PARSE_INVALID_DIRECTIVE, start, start + 1, message);
     }
     pt_mark(parser, value_start, index, "string");
     size_t end = pt_finish_tag(parser, start, wrapper, pt_expect_close_raw(parser, open, close_count, index));
@@ -1867,7 +1867,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
     bool assignment = false;
     size_t end;
     if (sigil == NULL) {
-        pt_tfail(parser, "E_PARSE_UNEXPECTED_TOKEN", body_start, body_start + 1, "unknown tag");
+        pt_tfail(parser, PT_E_PARSE_UNEXPECTED_TOKEN, body_start, body_start + 1, "unknown tag");
     }
     if (strcmp(sigil, "*") == 0) {
         end = pt_parse_comment(parser, start, open, close_count, wrapper, body_start);
@@ -1901,14 +1901,14 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
         pt_frame_push(parser, node, start);
     } else if (strcmp(sigil, ":?") == 0) {
         if (parser->frame_count == 0) {
-            pt_tfail(parser, "E_PARSE_ELSE_OUTSIDE_BLOCK", start, start + 1, "\"{:?}\" outside of a block");
+            pt_tfail(parser, PT_E_PARSE_ELSE_OUTSIDE_BLOCK, start, start + 1, "\"{:?}\" outside of a block");
         }
         pt_frame *frame = &parser->frames[parser->frame_count - 1];
         if (frame->node->type != N_IF) {
-            pt_tfail(parser, "E_PARSE_ELSEIF_NOT_IN_IF", start, start + 1, "\"{:?}\" inside a loop or if-block");
+            pt_tfail(parser, PT_E_PARSE_ELSEIF_NOT_IN_IF, start, start + 1, "\"{:?}\" inside a loop or if-block");
         }
         if (frame->has_else) {
-            pt_tfail(parser, "E_PARSE_ELSEIF_AFTER_ELSE", start, start + 1, "\"{:?}\" after \"{:}\"");
+            pt_tfail(parser, PT_E_PARSE_ELSEIF_AFTER_ELSE, start, start + 1, "\"{:?}\" after \"{:}\"");
         }
         pt_eparser expression;
         pt_tag_expression(parser, &expression, body_start, close_count, open);
@@ -1926,11 +1926,11 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
             end = pt_parse_assignment(parser, start, open, close_count, wrapper, body_start);
         } else {
             if (parser->frame_count == 0) {
-                pt_tfail(parser, "E_PARSE_ELSE_OUTSIDE_BLOCK", start, start + 1, "\"{:}\" outside of a block");
+                pt_tfail(parser, PT_E_PARSE_ELSE_OUTSIDE_BLOCK, start, start + 1, "\"{:}\" outside of a block");
             }
             pt_frame *frame = &parser->frames[parser->frame_count - 1];
             if (frame->has_else) {
-                pt_tfail(parser, "E_PARSE_DUPLICATE_ELSE", start, start + 1, "second \"{:}\" in the same block");
+                pt_tfail(parser, PT_E_PARSE_DUPLICATE_ELSE, start, start + 1, "second \"{:}\" in the same block");
             }
             end = pt_finish_tag(parser, start, wrapper, pt_expect_close_raw(parser, open, close_count, body_start));
             pt_store_branch(frame);
@@ -1939,7 +1939,7 @@ static size_t pt_parse_tag(pt_tparser *parser, size_t start, size_t open, int cl
         }
     } else if (strcmp(sigil, "/") == 0) {
         if (parser->frame_count == 0) {
-            pt_tfail(parser, "E_PARSE_UNEXPECTED_CLOSE", start, start + 1, "\"{/}\" without an open block");
+            pt_tfail(parser, PT_E_PARSE_UNEXPECTED_CLOSE, start, start + 1, "\"{/}\" without an open block");
         }
         pt_frame frame = parser->frames[--parser->frame_count];
         end = pt_finish_tag(parser, start, wrapper, pt_expect_close_raw(parser, open, close_count, body_start));
@@ -2242,7 +2242,7 @@ static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_len
         /* The line index of an invalid source is the index of its bytes (LEX-1). */
         pt_lines lines;
         pt_lines_build(&run->arena, &lines, bytes, length);
-        pt_fail_at(run, "E_LEX_INVALID_UTF8", pt_strdup(&run->arena, name, name_length), &lines, invalid, invalid + 1, zend_strpprintf(0, "invalid UTF-8 byte at offset %zu", invalid));
+        pt_fail_at(run, PT_E_LEX_INVALID_UTF8, pt_strdup(&run->arena, name, name_length), &lines, invalid, invalid + 1, zend_strpprintf(0, "invalid UTF-8 byte at offset %zu", invalid));
     }
     /* The template owns its arena. A failed parse leaves it in the run, whose boundary releases it. */
     pt_template *template = ecalloc(1, sizeof(pt_template));
@@ -2278,7 +2278,7 @@ static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_len
     pt_scan(&parser);
     if (parser.frame_count > 0) {
         size_t at = parser.frames[parser.frame_count - 1].open_start;
-        pt_tfail(&parser, "E_PARSE_UNCLOSED_BLOCK", at, at + 1, "block is not closed before the end of the file");
+        pt_tfail(&parser, PT_E_PARSE_UNCLOSED_BLOCK, at, at + 1, "block is not closed before the end of the file");
     }
     pt_ranges removed = pt_standalone(&parser);
     template->body = pt_finalize(&parser, &parser.root, &removed);

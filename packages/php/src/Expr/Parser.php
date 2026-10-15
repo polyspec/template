@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template\Expr;
 
 use Polyspec\Template\Ast;
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Source;
 use Polyspec\Template\TemplateError;
 
@@ -72,11 +73,11 @@ final class Parser
         $close = $this->lexer->close;
         $open = $this->lexer->openIndex;
         if ($open !== null && $close !== null && strpos($this->source->text, $close, $token->start) === false) {
-            return $this->lexer->error('E_PARSE_UNTERMINATED_TAG', $open, $open + 1, 'tag is not terminated');
+            return $this->lexer->error(ErrorCode::E_PARSE_UNTERMINATED_TAG, $open, $open + 1, 'tag is not terminated');
         }
         if ($token->type === 'EOF') {
             return $this->lexer->error(
-                'E_PARSE_UNEXPECTED_TOKEN',
+                ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
                 $token->start,
                 $token->start,
                 'unexpected end of input',
@@ -84,7 +85,7 @@ final class Parser
         }
 
         return $this->lexer->error(
-            'E_PARSE_UNEXPECTED_TOKEN',
+            ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
             $token->start,
             $token->end,
             'unexpected token ' . json_encode($token->value),
@@ -135,7 +136,7 @@ final class Parser
         if ($this->depth > self::DEPTH_LIMIT) {
             $token = $this->peek();
             throw $this->lexer->error(
-                'E_RUNTIME_LIMIT',
+                ErrorCode::E_RUNTIME_LIMIT,
                 $token->start,
                 $token->end,
                 'expression nesting exceeds ' . self::DEPTH_LIMIT,
@@ -504,7 +505,7 @@ final class Parser
             } elseif ($entry['value'] === null) {
                 $keyStart = $entry['key']['span'][0];
                 throw $this->lexer->error(
-                    'E_PARSE_UNEXPECTED_TOKEN',
+                    ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
                     $keyStart,
                     $keyStart + 1,
                     'map literal entry without "=>"',

@@ -11,7 +11,7 @@
 
 static bool pt_type_error(pt_function_error *error, zend_string *message)
 {
-    error->code = "E_RUNTIME_TYPE";
+    error->code = PT_E_RUNTIME_TYPE;
     error->message = message;
     return false;
 }
@@ -78,7 +78,7 @@ static bool pt_to_integer(pt_value value, zend_long *integer, pt_function_error 
 static bool pt_stringify_arg(pt_arena *arena, pt_value value, pt_s *text, pt_function_error *error)
 {
     if (!pt_stringify(arena, value, text)) {
-        error->code = "E_RUNTIME_STRINGIFY";
+        error->code = PT_E_RUNTIME_STRINGIFY;
         error->message = zend_string_init("a list or map cannot be converted to text", 41, 0);
         return false;
     }
@@ -726,7 +726,7 @@ PT_FN(pt_fn_range)
     }
     zend_long count = zend_dval_to_lval(floor((end - start) / increment)) + 1;
     if (count > PT_RANGE_LIMIT) {
-        error->code = "E_RUNTIME_LIMIT";
+        error->code = PT_E_RUNTIME_LIMIT;
         error->message = zend_strpprintf(0, "range would produce more than %d elements", PT_RANGE_LIMIT);
         return false;
     }

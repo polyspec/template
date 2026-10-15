@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Render;
 
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Escape;
 use Polyspec\Template\Functions\FunctionError;
 use Polyspec\Template\Functions\Helpers;
@@ -35,7 +36,7 @@ final class RuntimeBindings
         return match ($operator) {
             '!' => !$this->truthy($operand),
             '-' => $this->finite(-$this->number($operand, $frame, $span), $frame, $span),
-            default => throw $this->error($frame, $span, 'E_RUNTIME_TYPE', "unknown operator {$operator}"),
+            default => throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, "unknown operator {$operator}"),
         };
     }
 
@@ -48,7 +49,7 @@ final class RuntimeBindings
                     throw $this->error(
                         $frame,
                         $span,
-                        'E_RUNTIME_STRINGIFY',
+                        ErrorCode::E_RUNTIME_STRINGIFY,
                         'a list or map cannot be converted to text',
                     );
                 }
@@ -76,7 +77,7 @@ final class RuntimeBindings
             case '/':
                 $divisor = $this->number($right, $frame, $span);
                 if ($divisor == 0.0) {
-                    throw $this->error($frame, $span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
+                    throw $this->error($frame, $span, ErrorCode::E_RUNTIME_DIV_ZERO, 'division by zero');
                 }
 
                 return $this->finite($this->number($left, $frame, $span) / $divisor, $frame, $span);
@@ -84,10 +85,10 @@ final class RuntimeBindings
                 $dividend = $this->number($left, $frame, $span);
                 $divisor = $this->number($right, $frame, $span);
                 if (!Number::isInteger($dividend) || !Number::isInteger($divisor)) {
-                    throw $this->error($frame, $span, 'E_RUNTIME_TYPE', '% requires integer operands');
+                    throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, '% requires integer operands');
                 }
                 if ($divisor == 0.0) {
-                    throw $this->error($frame, $span, 'E_RUNTIME_DIV_ZERO', 'division by zero');
+                    throw $this->error($frame, $span, ErrorCode::E_RUNTIME_DIV_ZERO, 'division by zero');
                 }
 
                 return fmod($dividend, $divisor);
@@ -127,9 +128,14 @@ final class RuntimeBindings
                 if (Value::isString($right)) {
                     return str_contains(Value::textOf($right), $this->stringify($left, $frame, $span));
                 }
-                throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'in requires a list, map or string on the right');
+                throw $this->error(
+                    $frame,
+                    $span,
+                    ErrorCode::E_RUNTIME_TYPE,
+                    'in requires a list, map or string on the right',
+                );
             default:
-                throw $this->error($frame, $span, 'E_RUNTIME_TYPE', "unknown operator {$operator}");
+                throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, "unknown operator {$operator}");
         }
     }
 
@@ -138,7 +144,12 @@ final class RuntimeBindings
     {
         $text = Value::stringify($value);
         if ($text === null) {
-            throw $this->error($frame, $span, 'E_RUNTIME_STRINGIFY', 'a list or map cannot be converted to text');
+            throw $this->error(
+                $frame,
+                $span,
+                ErrorCode::E_RUNTIME_STRINGIFY,
+                'a list or map cannot be converted to text',
+            );
         }
 
         return $text;
@@ -164,7 +175,7 @@ final class RuntimeBindings
     public function finite(float $value, Frame $frame, array $span): float
     {
         if (!is_finite($value)) {
-            throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'arithmetic result is not finite');
+            throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, 'arithmetic result is not finite');
         }
 
         return $value;
@@ -183,7 +194,7 @@ final class RuntimeBindings
             throw $this->error(
                 $frame,
                 $span,
-                'E_RUNTIME_COMPARE',
+                ErrorCode::E_RUNTIME_COMPARE,
                 Value::typeOf($left) . ' and ' . Value::typeOf($right) . ' have no order',
             );
         }
@@ -210,11 +221,11 @@ final class RuntimeBindings
     public function memberCall(mixed $container, string $method, array $args, Frame $frame, array $span): mixed
     {
         if (!is_object($container) || $container instanceof MapValue || $container instanceof SafeString) {
-            throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$method} is not a function");
+            throw $this->error($frame, $span, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, "{$method} is not a function");
         }
         $reflection = new \ReflectionObject($container);
         if (!$reflection->hasMethod($method) || !$reflection->getMethod($method)->isPublic()) {
-            throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$method} is not a function");
+            throw $this->error($frame, $span, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, "{$method} is not a function");
         }
         $target = $reflection->getMethod($method);
         $arguments = HostArgument::list($args);
@@ -240,7 +251,7 @@ final class RuntimeBindings
             throw $this->error(
                 $frame,
                 $span,
-                'E_RUNTIME_UNKNOWN_FUNCTION',
+                ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
                 "{$className}::{$method} is not a function",
             );
         }
@@ -306,7 +317,7 @@ final class RuntimeBindings
             throw $this->error(
                 $frame,
                 $span,
-                'E_RUNTIME_LIMIT',
+                ErrorCode::E_RUNTIME_LIMIT,
                 'a list or map literal nests deeper than ' . Bind::MAX_DEPTH . ' levels',
             );
         }
@@ -340,14 +351,14 @@ final class RuntimeBindings
             return $entries;
         }
 
-        throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'loop requires a list, a map or null');
+        throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, 'loop requires a list, a map or null');
     }
 
     /** @param array{0: int, 1: int} $span */
     public function listSpread(mixed $value, Frame $frame, array $span): array
     {
         if (!is_array($value)) {
-            throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'spread in a list requires a list');
+            throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, 'spread in a list requires a list');
         }
 
         return $value;
@@ -357,7 +368,7 @@ final class RuntimeBindings
     public function mapSpread(mixed $value, Frame $frame, array $span): MapValue
     {
         if (!$value instanceof MapValue) {
-            throw $this->error($frame, $span, 'E_RUNTIME_TYPE', 'spread in a map requires a map');
+            throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, 'spread in a map requires a map');
         }
 
         return $value;
@@ -379,7 +390,7 @@ final class RuntimeBindings
                 throw $this->error(
                     $frame,
                     $span,
-                    'E_RUNTIME_ARITY',
+                    ErrorCode::E_RUNTIME_ARITY,
                     "{$name} accepts {$accepts} arguments, got {$count}",
                 );
             }
@@ -391,7 +402,7 @@ final class RuntimeBindings
         }
         $host = $this->context->services->hostFunction($name);
         if ($host === null) {
-            throw $this->error($frame, $span, 'E_RUNTIME_UNKNOWN_FUNCTION', "{$name} is not a function");
+            throw $this->error($frame, $span, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, "{$name} is not a function");
         }
         $env = $this->context->env;
         $arguments = HostArgument::list($args);
@@ -413,7 +424,12 @@ final class RuntimeBindings
         } catch (TemplateError $error) {
             throw $error;
         } catch (\Throwable $error) {
-            throw $this->error($frame, $span, 'E_RUNTIME_HOST_FUNCTION', "{$name} failed: " . $error->getMessage());
+            throw $this->error(
+                $frame,
+                $span,
+                ErrorCode::E_RUNTIME_HOST_FUNCTION,
+                "{$name} failed: " . $error->getMessage(),
+            );
         }
 
         return $this->bound($result, $frame, $span);
@@ -442,7 +458,7 @@ final class RuntimeBindings
             return;
         }
         $message = $kind === 'expression' ? 'expression nesting exceeds ' : 'loop iterations exceed ';
-        throw $this->error($frame, $span, 'E_RUNTIME_LIMIT', $message . $maximum);
+        throw $this->error($frame, $span, ErrorCode::E_RUNTIME_LIMIT, $message . $maximum);
     }
 
     /** @param array{0: int, 1: int} $span */
