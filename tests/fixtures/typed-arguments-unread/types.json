@@ -4,10 +4,13 @@
   "entry": "input.tpl",
   "fields": {
     "title": "string",
-    "page": "Page"
+    "page": "Page",
+    "tags": "list<string>"
   },
   "records": {
-    "Page": { "name": "string" }
+    "Page": {
+      "name": "string"
+    }
   },
   "defines": {
     "card": {
@@ -18,7 +21,7 @@
   "templates": {
     "input.tpl": {},
     "part.tpl": {
-      "name": "string"
+      "title": "string"
     }
   }
 }

@@ -102,6 +102,8 @@ type ArtifactManifest struct {
 	Files          map[string]string
 }
 
+var generatedRecordFields = map[string][]generatedField{"Page": []generatedField{{Name: "title", Type: generatedType{Kind: "string"}}}, "Row": []generatedField{{Name: "name", Type: generatedType{Kind: "string"}}}, "Slot": []generatedField{{Name: "template", Type: generatedType{Kind: "string", Optional: true}}, {Name: "html", Type: generatedType{Kind: "string", Optional: true}}}}
+
 type OrderedEntry[K comparable, V any] struct {
 	Key   K
 	Value V
@@ -332,6 +334,84 @@ func generatedPlain(input any) any {
 	default:
 		return input
 	}
+}
+
+type generatedType struct {
+	Kind     string
+	Optional bool
+	Name     string
+	Item     *generatedType
+	Key      *generatedType
+	Value    *generatedType
+}
+
+type generatedField struct {
+	Name string
+	Type generatedType
+}
+
+func generatedCheck(input value.Value, kind generatedType, records map[string][]generatedField, path string) error {
+	if input == nil {
+		if kind.Optional || kind.Kind == "any" {
+			return nil
+		}
+		return fmt.Errorf("%s is required", path)
+	}
+	actual := value.TypeOf(input)
+	switch kind.Kind {
+	case "any":
+		return nil
+	case "string":
+		if actual != value.TypeString {
+			return fmt.Errorf("%s is not a string", path)
+		}
+	case "number":
+		if actual != value.TypeNumber {
+			return fmt.Errorf("%s is not a number", path)
+		}
+	case "boolean":
+		if actual != value.TypeBool {
+			return fmt.Errorf("%s is not a boolean", path)
+		}
+	case "list":
+		items, ok := input.(value.List)
+		if !ok {
+			return fmt.Errorf("%s is not a list", path)
+		}
+		for index, item := range items {
+			if err := generatedCheck(item, *kind.Item, records, fmt.Sprintf("%s[%d]", path, index)); err != nil {
+				return err
+			}
+		}
+	case "map":
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf("%s is not an object", path)
+		}
+		for _, key := range entries.Keys() {
+			item, _ := entries.Get(key)
+			if err := generatedCheck(item, *kind.Value, records, path+"."+key); err != nil {
+				return err
+			}
+		}
+	default:
+		entries, ok := input.(*value.OrderedMap)
+		if !ok {
+			return fmt.Errorf("%s is not an object", path)
+		}
+		return generatedCheckFields(entries, records[kind.Name], records, path)
+	}
+	return nil
+}
+
+func generatedCheckFields(input *value.OrderedMap, fields []generatedField, records map[string][]generatedField, path string) error {
+	for _, field := range fields {
+		item, _ := input.Get(field.Name)
+		if err := generatedCheck(item, field.Type, records, path+"."+field.Name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func generatedDecode(input any, output any) error {
@@ -566,10 +646,13 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 				}
 				data, ok := bound.(*value.OrderedMap)
 				if !ok {
-					return nil, nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": data is not a map"}
+					return nil, nil, fmt.Errorf("define.%s.data is not an object", id)
 				}
 				definitionData := DefinitionData_card_tpl{}
 				if raw, found := data.Get("label"); found {
+					if err := generatedCheck(raw, generatedType{Kind: "string"}, generatedRecordFields, "define."+id+".data."+"label"); err != nil {
+						return nil, nil, err
+					}
 					converted, err := generatedAs[string](raw)
 					if err != nil {
 						return nil, nil, fmt.Errorf("define.%s.data.%s: %w", id, "label", err)
@@ -594,7 +677,7 @@ func generatedBindDefinitions(input map[string]template.DefineInput) (*Definitio
 					return nil, nil, err
 				}
 				if _, ok := bound.(*value.OrderedMap); !ok {
-					return nil, nil, &value.BindError{Code: errs.DataUnsupportedType, Message: "define " + id + ": data is not a map"}
+					return nil, nil, fmt.Errorf("define.%s.data is not an object", id)
 				}
 				definitionData := DefinitionData_layout_tpl{}
 				entry.Data = &definitionData
@@ -677,6 +760,9 @@ func (p *GeneratedProgram) prepare(name string, assign any, options template.Ren
 		return nil, generatedBindFailure(name, err)
 	}
 	var typedAssign Assign
+	if err := generatedCheckFields(rootData, []generatedField{{Name: "flag", Type: generatedType{Kind: "boolean"}}, {Name: "dangerous", Type: generatedType{Kind: "string"}}, {Name: "empty_list", Type: generatedType{Kind: "list", Item: &generatedType{Kind: "string"}}}, {Name: "empty_map", Type: generatedType{Kind: "map", Key: &generatedType{Kind: "string"}, Value: &generatedType{Kind: "string"}}}, {Name: "page", Type: generatedType{Kind: "record", Name: "Page"}}, {Name: "numbers", Type: generatedType{Kind: "list", Item: &generatedType{Kind: "number"}}}, {Name: "lookup", Type: generatedType{Kind: "map", Key: &generatedType{Kind: "string"}, Value: &generatedType{Kind: "string"}}}, {Name: "rows", Type: generatedType{Kind: "list", Item: &generatedType{Kind: "record", Name: "Row"}}}}, generatedRecordFields, "assign"); err != nil {
+		return nil, err
+	}
 	if err := generatedDecode(rootData, &typedAssign); err != nil {
 		return nil, err
 	}

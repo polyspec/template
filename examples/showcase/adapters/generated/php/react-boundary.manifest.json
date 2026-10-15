@@ -6,7 +6,7 @@
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "e22e61a6f550d552f35f3379260b92a398855933b960deaa9b328f86fa4a783b",
+  "compilerDigest": "7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513",
   "files": {
     "Page.php": {
       "path": "Page.php",
@@ -50,7 +50,7 @@
     },
     "GeneratedRuntime.php": {
       "path": "GeneratedRuntime.php",
-      "artifactDigest": "beab6c48c3f1d391e610698b15479f215ec7929491156adfe6b69878a3415c93"
+      "artifactDigest": "137ca3989e4fe71d4defa5cb6a03d013a2db2eebae732d277d2bb019b36853d8"
     },
     "GeneratedTemplates.php": {
       "path": "GeneratedTemplates.php",
