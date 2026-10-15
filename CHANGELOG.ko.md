@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8b32d2df34b41fcfd39c343ffcf870b6136770ff94a14494bc5419822e61bd94 -->
+<!-- source-sha256: f1f80b8923f939b074c70afef39fdb52cc56fbe94650dc1f9fc984183ae74806 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-12: parity check가 implementation의 list와 count를 profile과 비교합니다. `languageLists`는 `Makefile`의 `SHOWCASE_LANGS`를 읽고(R9), `documents`는 README 파일, `docs`, `docs/spec`, `docs/operations`를 읽습니다(R10). 단 benchmark 문서는 Python을 측정할 때까지(T22.6-17), T22.6-12-1의 한국어 문장 두 개는 그 kit item까지 제외합니다. showcase 문서는 요청을 PHP와 Python으로도 보여 주고 다섯 implementation과 닫힌 template dispatch의 다섯 target을 세며, testing 문서는 다섯 언어, 다섯 generated backend, package install의 Python wheel을 셉니다.
 
 - T22.6-13: compiler의 README는 `compileSource`가 compile하는 언어에 Python을 적습니다.
 

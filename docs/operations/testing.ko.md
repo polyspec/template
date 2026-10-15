@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-testing -->
-<!-- source-sha256: cbb19dee000e2250223f072ff1b51a6c0a98357a7f65f485ed23cd127ef0a2f9 -->
+<!-- source-sha256: 0726f5974c75234b98d3f85113d355b7227195c4b3cb87e43fcdd27e8ce260d9 -->
 # 릴리스 테스트
 
 [English](/operations/testing).
@@ -16,13 +16,13 @@ make release-test-matrix
 | --- | --- | --- |
 | 계약 | Manifest에서 생성한 선언과 Mermaid, 문서 쌍, schema, 공개 API 문서화, lock 의존성 보안 권고, format과 정적 분석 | 구조 이탈, 오래된 생성 파일, 알려진 의존성 취약점, 문서가 없는 API 또는 잘못된 source |
 | 단위 | 모든 core package의 lexer, parser, 데이터 모델, 함수, runtime, limit, artifact refresh, page cache | 가장 작은 package와 test가 결함을 식별한다. |
-| Compiler | Canonical AST 생명주기, typed IR 거부, generated backend 네 개와 host compiler 검사 | 거부된 IR node, 오래된 artifact 또는 target compiler 진단 |
-| 적합성 | `tests/cases`의 모든 canonical case를 AST 네 개와 generated program 네 개로 실행하고 PHP 확장 지원 수준도 검사 | 정확한 언어, 모드, case와 출력 또는 구조화 진단 차이 |
+| Compiler | Canonical AST 생명주기, typed IR 거부, generated backend 다섯 개와 host compiler 검사 | 거부된 IR node, 오래된 artifact 또는 target compiler 진단 |
+| 적합성 | `tests/cases`의 모든 canonical case를 AST 다섯 개와 generated program 다섯 개로 실행하고 PHP 확장 지원 수준도 검사 | 정확한 언어, 모드, case와 출력 또는 구조화 진단 차이 |
 | 회귀 | 위치 오류, 실패 복구, request 불변성과 interface·artifact·benchmark hash mutation | 알려진 잘못된 mutation을 받거나 복구 후 출력이 달라진다. |
-| Package 설치 | 변경 불가능한 npm, Go module, Cargo, Composer package와 browser DOM 출력 | Package 설치, 공개 import 또는 설치 프로젝트 출력 실패 |
+| Package 설치 | 변경 불가능한 npm, Go module, Cargo, Composer, Python wheel package와 browser DOM 출력 | Package 설치, 공개 import 또는 설치 프로젝트 출력 실패 |
 | 표시와 성능 | 정적 예제 HTML, parser 기반 하이라이트, 크기가 제한된 source 보기, 문서 멱등성과 출력이 같은 새 benchmark smoke | 잘못된 HTML, 오래된 site, 두 번째 build 차이 또는 잘못된 측정 행 |
 
-전체 mode matrix는 모든 canonical case를 compiler mode 두 개, 언어 네 개와 곱한다. 성공 case는 정확한 UTF-8 바이트를 비교한다. 실패 case는 오류 code, message, template 이름, source 위치를 비교한다. Generated 실행은 host source를 승인하기 전에 parser, AST interpreter, fallback 참조가 없는지도 검사한다.
+전체 mode matrix는 모든 canonical case를 compiler mode 두 개, 언어 다섯 개와 곱한다. 성공 case는 정확한 UTF-8 바이트를 비교한다. 실패 case는 오류 code, message, template 이름, source 위치를 비교한다. Generated 실행은 host source를 승인하기 전에 parser, AST interpreter, fallback 참조가 없는지도 검사한다.
 
 구현과 공유 suite는 `config/parity.json`에 선언한다(CNF-11): TypeScript, Go, Rust, PHP, PHP 확장, Python이 적합성 케이스와 표현식 vector를 가진다. `make parity-declarations-check`는 아무것도 실행하지 않고 선언을 검사하며, `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행한다. `make conformance-all-modes`, `make function-contract-check`, `make generated-native-check`가 두 mode의 coverage를 제공한다.
 
