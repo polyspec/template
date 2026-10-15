@@ -18,6 +18,11 @@
       "import": "./dist/render.mjs",
       "require": "./dist/render.cjs"
     },
+    "./decode": {
+      "types": "./dist/decode.d.ts",
+      "import": "./dist/decode.mjs",
+      "require": "./dist/decode.cjs"
+    },
     "./node": {
       "types": "./dist/node/index.d.ts",
       "import": "./dist/node.mjs",

@@ -16,7 +16,7 @@ make test-browser
 
 ## Ship templates and data to a browser
 
-- Templates: bundle the template sources or their AST JSON and give them to a `MapLoader`. The `@polyspec/template/render` entry renders AST JSON without the lexer and parser.
+- Templates: bundle the template sources or their AST JSON and give them to a `MapLoader`. The `@polyspec/template/render` entry renders AST JSON without the lexer and parser, and `@polyspec/template/decode` exports only `decodeTemplate`, which validates AST JSON against the AST schema.
 - Data: embed the assign data with `{= json(state) | raw}` inside `<script type="application/json">` and read it with `parseJson` from the package. An attribute such as `data-state="{= json(state)}"` needs no `raw`, because the echo tag escapes the JSON text. `JSON.parse` changes the order of integer-like keys and accepts integers outside the safe range.
 - Template definitions and environment: pass the same `define` and `env` values that the server used.
 

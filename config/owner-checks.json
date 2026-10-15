@@ -623,6 +623,9 @@
         "test-vscode",
         "test-browser",
         "parity-check"
+      ],
+      "tests": [
+        "tests/scripts/decode-bundle-size.test.mts"
       ]
     },
     {

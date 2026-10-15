@@ -32,9 +32,67 @@ var require_ucs2length = __commonJS({
 });
 
 // ast-validator.mjs
-var validateTemplate = validate10;
-var schema14 = { "type": "object", "required": ["type"], "properties": { "type": { "enum": ["Text", "Echo", "If", "For", "Set", "Include", "Block", "IfBlock"] } }, "allOf": [{ "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Text" } } }, "then": { "$ref": "#/definitions/Text" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Echo" } } }, "then": { "$ref": "#/definitions/Echo" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "If" } } }, "then": { "$ref": "#/definitions/If" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "For" } } }, "then": { "$ref": "#/definitions/For" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Set" } } }, "then": { "$ref": "#/definitions/Set" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Include" } } }, "then": { "$ref": "#/definitions/Include" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Block" } } }, "then": { "$ref": "#/definitions/Block" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "IfBlock" } } }, "then": { "$ref": "#/definitions/IfBlock" } }] };
-function validate14(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var validateTemplate = validate21;
+var schema9 = { "type": "object", "required": ["type"], "properties": { "type": { "enum": ["Text", "Echo", "If", "For", "Set", "Include", "Block", "IfBlock"] } }, "allOf": [{ "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Text" } } }, "then": { "$ref": "#/definitions/Text" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Echo" } } }, "then": { "$ref": "#/definitions/Echo" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "If" } } }, "then": { "$ref": "#/definitions/If" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "For" } } }, "then": { "$ref": "#/definitions/For" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Set" } } }, "then": { "$ref": "#/definitions/Set" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Include" } } }, "then": { "$ref": "#/definitions/Include" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Block" } } }, "then": { "$ref": "#/definitions/Block" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "IfBlock" } } }, "then": { "$ref": "#/definitions/IfBlock" } }] };
+function validate26(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+  let vErrors = null;
+  let errors = 0;
+  if (Array.isArray(data)) {
+    if (data.length > 2) {
+      const err0 = { instancePath, schemaPath: "#/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
+      if (vErrors === null) {
+        vErrors = [err0];
+      } else {
+        vErrors.push(err0);
+      }
+      errors++;
+    }
+    if (data.length < 2) {
+      const err1 = { instancePath, schemaPath: "#/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
+      if (vErrors === null) {
+        vErrors = [err1];
+      } else {
+        vErrors.push(err1);
+      }
+      errors++;
+    }
+    const len0 = data.length;
+    for (let i0 = 0; i0 < len0; i0++) {
+      let data0 = data[i0];
+      if (!(typeof data0 == "number" && (!(data0 % 1) && !isNaN(data0)) && isFinite(data0))) {
+        const err2 = { instancePath: instancePath + "/" + i0, schemaPath: "#/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
+        if (vErrors === null) {
+          vErrors = [err2];
+        } else {
+          vErrors.push(err2);
+        }
+        errors++;
+      }
+      if (typeof data0 == "number" && isFinite(data0)) {
+        if (data0 < 0 || isNaN(data0)) {
+          const err3 = { instancePath: instancePath + "/" + i0, schemaPath: "#/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
+          if (vErrors === null) {
+            vErrors = [err3];
+          } else {
+            vErrors.push(err3);
+          }
+          errors++;
+        }
+      }
+    }
+  } else {
+    const err4 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+    if (vErrors === null) {
+      vErrors = [err4];
+    } else {
+      vErrors.push(err4);
+    }
+    errors++;
+  }
+  validate26.errors = vErrors;
+  return errors === 0;
+}
+function validate25(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -99,75 +157,26 @@ function validate14(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data2 = data.span;
-      if (Array.isArray(data2)) {
-        if (data2.length > 2) {
-          const err6 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-        if (data2.length < 2) {
-          const err7 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-        const len0 = data2.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data3 = data2[i0];
-          if (!(typeof data3 == "number" && (!(data3 % 1) && !isNaN(data3)) && isFinite(data3))) {
-            const err8 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err8];
-            } else {
-              vErrors.push(err8);
-            }
-            errors++;
-          }
-          if (typeof data3 == "number" && isFinite(data3)) {
-            if (data3 < 0 || isNaN(data3)) {
-              const err9 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err9];
-              } else {
-                vErrors.push(err9);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err10];
-        } else {
-          vErrors.push(err10);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err11 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err6 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err11];
+      vErrors = [err6];
     } else {
-      vErrors.push(err11);
+      vErrors.push(err6);
     }
     errors++;
   }
-  validate14.errors = vErrors;
+  validate25.errors = vErrors;
   return errors === 0;
 }
-var schema18 = { "type": "object", "required": ["type"], "properties": { "type": { "enum": ["Literal", "Var", "LoopMeta", "Member", "MemberCall", "ClassCall", "Index", "Call", "Unary", "Binary", "Ternary", "List", "Map"] } }, "allOf": [{ "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Literal" } } }, "then": { "$ref": "#/definitions/Literal" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Var" } } }, "then": { "$ref": "#/definitions/Var" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "LoopMeta" } } }, "then": { "$ref": "#/definitions/LoopMeta" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Member" } } }, "then": { "$ref": "#/definitions/Member" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "MemberCall" } } }, "then": { "$ref": "#/definitions/MemberCall" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "ClassCall" } } }, "then": { "$ref": "#/definitions/ClassCall" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Index" } } }, "then": { "$ref": "#/definitions/Index" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Call" } } }, "then": { "$ref": "#/definitions/Call" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Unary" } } }, "then": { "$ref": "#/definitions/Unary" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Binary" } } }, "then": { "$ref": "#/definitions/Binary" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Ternary" } } }, "then": { "$ref": "#/definitions/Ternary" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "List" } } }, "then": { "$ref": "#/definitions/List" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Map" } } }, "then": { "$ref": "#/definitions/Map" } }] };
-var schema19 = { "type": "object", "additionalProperties": false, "required": ["type", "kind", "value", "span"], "properties": { "type": { "const": "Literal" }, "kind": { "enum": ["null", "bool", "number", "string"] }, "value": {}, "span": { "$ref": "#/definitions/Span" } }, "allOf": [{ "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "null" } } }, "then": { "properties": { "value": { "type": "null" } } } }, { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "bool" } } }, "then": { "properties": { "value": { "type": "boolean" } } } }, { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "number" } } }, "then": { "properties": { "value": { "type": "number" } } } }, { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "string" } } }, "then": { "properties": { "value": { "type": "string" } } } }] };
-function validate18(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var schema13 = { "type": "object", "required": ["type"], "properties": { "type": { "enum": ["Literal", "Var", "LoopMeta", "Member", "MemberCall", "ClassCall", "Index", "Call", "Unary", "Binary", "Ternary", "List", "Map"] } }, "allOf": [{ "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Literal" } } }, "then": { "$ref": "#/definitions/Literal" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Var" } } }, "then": { "$ref": "#/definitions/Var" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "LoopMeta" } } }, "then": { "$ref": "#/definitions/LoopMeta" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Member" } } }, "then": { "$ref": "#/definitions/Member" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "MemberCall" } } }, "then": { "$ref": "#/definitions/MemberCall" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "ClassCall" } } }, "then": { "$ref": "#/definitions/ClassCall" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Index" } } }, "then": { "$ref": "#/definitions/Index" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Call" } } }, "then": { "$ref": "#/definitions/Call" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Unary" } } }, "then": { "$ref": "#/definitions/Unary" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Binary" } } }, "then": { "$ref": "#/definitions/Binary" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Ternary" } } }, "then": { "$ref": "#/definitions/Ternary" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "List" } } }, "then": { "$ref": "#/definitions/List" } }, { "if": { "type": "object", "required": ["type"], "properties": { "type": { "const": "Map" } } }, "then": { "$ref": "#/definitions/Map" } }] };
+var schema14 = { "type": "object", "additionalProperties": false, "required": ["type", "kind", "value", "span"], "properties": { "type": { "const": "Literal" }, "kind": { "enum": ["null", "bool", "number", "string"] }, "value": {}, "span": { "$ref": "#/definitions/Span" } }, "allOf": [{ "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "null" } } }, "then": { "properties": { "value": { "type": "null" } } } }, { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "bool" } } }, "then": { "properties": { "value": { "type": "boolean" } } } }, { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "number" } } }, "then": { "properties": { "value": { "type": "number" } } } }, { "if": { "type": "object", "required": ["kind"], "properties": { "kind": { "const": "string" } } }, "then": { "properties": { "value": { "type": "string" } } } }] };
+function validate31(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   const _errs2 = errors;
@@ -525,7 +534,7 @@ function validate18(data, { instancePath = "", parentData, parentDataProperty, r
     if (data.kind !== void 0) {
       let data9 = data.kind;
       if (!(data9 === "null" || data9 === "bool" || data9 === "number" || data9 === "string")) {
-        const err26 = { instancePath: instancePath + "/kind", schemaPath: "#/properties/kind/enum", keyword: "enum", params: { allowedValues: schema19.properties.kind.enum }, message: "must be equal to one of the allowed values" };
+        const err26 = { instancePath: instancePath + "/kind", schemaPath: "#/properties/kind/enum", keyword: "enum", params: { allowedValues: schema14.properties.kind.enum }, message: "must be equal to one of the allowed values" };
         if (vErrors === null) {
           vErrors = [err26];
         } else {
@@ -535,74 +544,50 @@ function validate18(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data10 = data.span;
-      if (Array.isArray(data10)) {
-        if (data10.length > 2) {
-          const err27 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err27];
-          } else {
-            vErrors.push(err27);
-          }
-          errors++;
-        }
-        if (data10.length < 2) {
-          const err28 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err28];
-          } else {
-            vErrors.push(err28);
-          }
-          errors++;
-        }
-        const len0 = data10.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data11 = data10[i0];
-          if (!(typeof data11 == "number" && (!(data11 % 1) && !isNaN(data11)) && isFinite(data11))) {
-            const err29 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err29];
-            } else {
-              vErrors.push(err29);
-            }
-            errors++;
-          }
-          if (typeof data11 == "number" && isFinite(data11)) {
-            if (data11 < 0 || isNaN(data11)) {
-              const err30 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err30];
-              } else {
-                vErrors.push(err30);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err31 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err31];
-        } else {
-          vErrors.push(err31);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err32 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err27 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err32];
+      vErrors = [err27];
     } else {
-      vErrors.push(err32);
+      vErrors.push(err27);
     }
     errors++;
   }
-  validate18.errors = vErrors;
+  validate31.errors = vErrors;
   return errors === 0;
 }
 var pattern0 = new RegExp("^[A-Za-z_][A-Za-z0-9_]*$", "u");
-function validate20(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate35(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+  let vErrors = null;
+  let errors = 0;
+  if (typeof data === "string") {
+    if (!pattern0.test(data)) {
+      const err0 = { instancePath, schemaPath: "#/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
+      if (vErrors === null) {
+        vErrors = [err0];
+      } else {
+        vErrors.push(err0);
+      }
+      errors++;
+    }
+  } else {
+    const err1 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+    if (vErrors === null) {
+      vErrors = [err1];
+    } else {
+      vErrors.push(err1);
+    }
+    errors++;
+  }
+  validate35.errors = vErrors;
+  return errors === 0;
+}
+function validate34(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -656,96 +641,31 @@ function validate20(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.name !== void 0) {
-      let data1 = data.name;
-      if (typeof data1 === "string") {
-        if (!pattern0.test(data1)) {
-          const err5 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err5];
-          } else {
-            vErrors.push(err5);
-          }
-          errors++;
-        }
-      } else {
-        const err6 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err6];
-        } else {
-          vErrors.push(err6);
-        }
-        errors++;
+      if (!validate35(data.name, { instancePath: instancePath + "/name", parentData: data, parentDataProperty: "name", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.span !== void 0) {
-      let data2 = data.span;
-      if (Array.isArray(data2)) {
-        if (data2.length > 2) {
-          const err7 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-        if (data2.length < 2) {
-          const err8 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err8];
-          } else {
-            vErrors.push(err8);
-          }
-          errors++;
-        }
-        const len0 = data2.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data3 = data2[i0];
-          if (!(typeof data3 == "number" && (!(data3 % 1) && !isNaN(data3)) && isFinite(data3))) {
-            const err9 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err9];
-            } else {
-              vErrors.push(err9);
-            }
-            errors++;
-          }
-          if (typeof data3 == "number" && isFinite(data3)) {
-            if (data3 < 0 || isNaN(data3)) {
-              const err10 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err10];
-              } else {
-                vErrors.push(err10);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err11];
-        } else {
-          vErrors.push(err11);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err12 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err5 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err12];
+      vErrors = [err5];
     } else {
-      vErrors.push(err12);
+      vErrors.push(err5);
     }
     errors++;
   }
-  validate20.errors = vErrors;
+  validate34.errors = vErrors;
   return errors === 0;
 }
-var schema24 = { "type": "object", "additionalProperties": false, "required": ["type", "loop", "field", "span"], "properties": { "type": { "const": "LoopMeta" }, "loop": { "$ref": "#/definitions/Identifier" }, "field": { "enum": ["index_", "key_", "value_", "last_", "first_", "size_"] }, "span": { "$ref": "#/definitions/Span" } } };
-function validate22(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var schema17 = { "type": "object", "additionalProperties": false, "required": ["type", "loop", "field", "span"], "properties": { "type": { "const": "LoopMeta" }, "loop": { "$ref": "#/definitions/Identifier" }, "field": { "enum": ["index_", "key_", "value_", "last_", "first_", "size_"] }, "span": { "$ref": "#/definitions/Span" } } };
+function validate39(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -808,108 +728,43 @@ function validate22(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.loop !== void 0) {
-      let data1 = data.loop;
-      if (typeof data1 === "string") {
-        if (!pattern0.test(data1)) {
-          const err6 = { instancePath: instancePath + "/loop", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-      } else {
-        const err7 = { instancePath: instancePath + "/loop", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err7];
-        } else {
-          vErrors.push(err7);
-        }
-        errors++;
+      if (!validate35(data.loop, { instancePath: instancePath + "/loop", parentData: data, parentDataProperty: "loop", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.field !== void 0) {
       let data2 = data.field;
       if (!(data2 === "index_" || data2 === "key_" || data2 === "value_" || data2 === "last_" || data2 === "first_" || data2 === "size_")) {
-        const err8 = { instancePath: instancePath + "/field", schemaPath: "#/properties/field/enum", keyword: "enum", params: { allowedValues: schema24.properties.field.enum }, message: "must be equal to one of the allowed values" };
+        const err6 = { instancePath: instancePath + "/field", schemaPath: "#/properties/field/enum", keyword: "enum", params: { allowedValues: schema17.properties.field.enum }, message: "must be equal to one of the allowed values" };
         if (vErrors === null) {
-          vErrors = [err8];
+          vErrors = [err6];
         } else {
-          vErrors.push(err8);
+          vErrors.push(err6);
         }
         errors++;
       }
     }
     if (data.span !== void 0) {
-      let data3 = data.span;
-      if (Array.isArray(data3)) {
-        if (data3.length > 2) {
-          const err9 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err9];
-          } else {
-            vErrors.push(err9);
-          }
-          errors++;
-        }
-        if (data3.length < 2) {
-          const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err10];
-          } else {
-            vErrors.push(err10);
-          }
-          errors++;
-        }
-        const len0 = data3.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data4 = data3[i0];
-          if (!(typeof data4 == "number" && (!(data4 % 1) && !isNaN(data4)) && isFinite(data4))) {
-            const err11 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err11];
-            } else {
-              vErrors.push(err11);
-            }
-            errors++;
-          }
-          if (typeof data4 == "number" && isFinite(data4)) {
-            if (data4 < 0 || isNaN(data4)) {
-              const err12 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err12];
-              } else {
-                vErrors.push(err12);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err13 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err13];
-        } else {
-          vErrors.push(err13);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err14 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err7 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err14];
+      vErrors = [err7];
     } else {
-      vErrors.push(err14);
+      vErrors.push(err7);
     }
     errors++;
   }
-  validate22.errors = vErrors;
+  validate39.errors = vErrors;
   return errors === 0;
 }
-var wrapper0 = { validate: validate17 };
-function validate24(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var wrapper0 = { validate: validate30 };
+function validate43(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -989,73 +844,24 @@ function validate24(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data3 = data.span;
-      if (Array.isArray(data3)) {
-        if (data3.length > 2) {
-          const err7 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-        if (data3.length < 2) {
-          const err8 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err8];
-          } else {
-            vErrors.push(err8);
-          }
-          errors++;
-        }
-        const len0 = data3.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data4 = data3[i0];
-          if (!(typeof data4 == "number" && (!(data4 % 1) && !isNaN(data4)) && isFinite(data4))) {
-            const err9 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err9];
-            } else {
-              vErrors.push(err9);
-            }
-            errors++;
-          }
-          if (typeof data4 == "number" && isFinite(data4)) {
-            if (data4 < 0 || isNaN(data4)) {
-              const err10 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err10];
-              } else {
-                vErrors.push(err10);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err11];
-        } else {
-          vErrors.push(err11);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err12 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err7 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err12];
+      vErrors = [err7];
     } else {
-      vErrors.push(err12);
+      vErrors.push(err7);
     }
     errors++;
   }
-  validate24.errors = vErrors;
+  validate43.errors = vErrors;
   return errors === 0;
 }
-function validate26(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate46(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -1133,25 +939,9 @@ function validate26(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.method !== void 0) {
-      let data2 = data.method;
-      if (typeof data2 === "string") {
-        if (!pattern0.test(data2)) {
-          const err7 = { instancePath: instancePath + "/method", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-      } else {
-        const err8 = { instancePath: instancePath + "/method", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err8];
-        } else {
-          vErrors.push(err8);
-        }
-        errors++;
+      if (!validate35(data.method, { instancePath: instancePath + "/method", parentData: data, parentDataProperty: "method", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.args !== void 0) {
@@ -1165,83 +955,34 @@ function validate26(data, { instancePath = "", parentData, parentDataProperty, r
           }
         }
       } else {
-        const err9 = { instancePath: instancePath + "/args", schemaPath: "#/properties/args/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+        const err7 = { instancePath: instancePath + "/args", schemaPath: "#/properties/args/type", keyword: "type", params: { type: "array" }, message: "must be array" };
         if (vErrors === null) {
-          vErrors = [err9];
+          vErrors = [err7];
         } else {
-          vErrors.push(err9);
+          vErrors.push(err7);
         }
         errors++;
       }
     }
     if (data.span !== void 0) {
-      let data5 = data.span;
-      if (Array.isArray(data5)) {
-        if (data5.length > 2) {
-          const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err10];
-          } else {
-            vErrors.push(err10);
-          }
-          errors++;
-        }
-        if (data5.length < 2) {
-          const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err11];
-          } else {
-            vErrors.push(err11);
-          }
-          errors++;
-        }
-        const len1 = data5.length;
-        for (let i1 = 0; i1 < len1; i1++) {
-          let data6 = data5[i1];
-          if (!(typeof data6 == "number" && (!(data6 % 1) && !isNaN(data6)) && isFinite(data6))) {
-            const err12 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err12];
-            } else {
-              vErrors.push(err12);
-            }
-            errors++;
-          }
-          if (typeof data6 == "number" && isFinite(data6)) {
-            if (data6 < 0 || isNaN(data6)) {
-              const err13 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err13];
-              } else {
-                vErrors.push(err13);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err14 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err14];
-        } else {
-          vErrors.push(err14);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err15 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err8 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err15];
+      vErrors = [err8];
     } else {
-      vErrors.push(err15);
+      vErrors.push(err8);
     }
     errors++;
   }
-  validate26.errors = vErrors;
+  validate46.errors = vErrors;
   return errors === 0;
 }
-function validate28(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate50(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -1313,47 +1054,15 @@ function validate28(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.className !== void 0) {
-      let data1 = data.className;
-      if (typeof data1 === "string") {
-        if (!pattern0.test(data1)) {
-          const err7 = { instancePath: instancePath + "/className", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-      } else {
-        const err8 = { instancePath: instancePath + "/className", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err8];
-        } else {
-          vErrors.push(err8);
-        }
-        errors++;
+      if (!validate35(data.className, { instancePath: instancePath + "/className", parentData: data, parentDataProperty: "className", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.method !== void 0) {
-      let data2 = data.method;
-      if (typeof data2 === "string") {
-        if (!pattern0.test(data2)) {
-          const err9 = { instancePath: instancePath + "/method", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err9];
-          } else {
-            vErrors.push(err9);
-          }
-          errors++;
-        }
-      } else {
-        const err10 = { instancePath: instancePath + "/method", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err10];
-        } else {
-          vErrors.push(err10);
-        }
-        errors++;
+      if (!validate35(data.method, { instancePath: instancePath + "/method", parentData: data, parentDataProperty: "method", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.args !== void 0) {
@@ -1367,83 +1076,34 @@ function validate28(data, { instancePath = "", parentData, parentDataProperty, r
           }
         }
       } else {
-        const err11 = { instancePath: instancePath + "/args", schemaPath: "#/properties/args/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+        const err7 = { instancePath: instancePath + "/args", schemaPath: "#/properties/args/type", keyword: "type", params: { type: "array" }, message: "must be array" };
         if (vErrors === null) {
-          vErrors = [err11];
+          vErrors = [err7];
         } else {
-          vErrors.push(err11);
+          vErrors.push(err7);
         }
         errors++;
       }
     }
     if (data.span !== void 0) {
-      let data5 = data.span;
-      if (Array.isArray(data5)) {
-        if (data5.length > 2) {
-          const err12 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err12];
-          } else {
-            vErrors.push(err12);
-          }
-          errors++;
-        }
-        if (data5.length < 2) {
-          const err13 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err13];
-          } else {
-            vErrors.push(err13);
-          }
-          errors++;
-        }
-        const len1 = data5.length;
-        for (let i1 = 0; i1 < len1; i1++) {
-          let data6 = data5[i1];
-          if (!(typeof data6 == "number" && (!(data6 % 1) && !isNaN(data6)) && isFinite(data6))) {
-            const err14 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err14];
-            } else {
-              vErrors.push(err14);
-            }
-            errors++;
-          }
-          if (typeof data6 == "number" && isFinite(data6)) {
-            if (data6 < 0 || isNaN(data6)) {
-              const err15 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err15];
-              } else {
-                vErrors.push(err15);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err16 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err16];
-        } else {
-          vErrors.push(err16);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err17 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err8 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err17];
+      vErrors = [err8];
     } else {
-      vErrors.push(err17);
+      vErrors.push(err8);
     }
     errors++;
   }
-  validate28.errors = vErrors;
+  validate50.errors = vErrors;
   return errors === 0;
 }
-function validate30(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate55(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -1518,73 +1178,24 @@ function validate30(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data3 = data.span;
-      if (Array.isArray(data3)) {
-        if (data3.length > 2) {
-          const err6 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-        if (data3.length < 2) {
-          const err7 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-        const len0 = data3.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data4 = data3[i0];
-          if (!(typeof data4 == "number" && (!(data4 % 1) && !isNaN(data4)) && isFinite(data4))) {
-            const err8 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err8];
-            } else {
-              vErrors.push(err8);
-            }
-            errors++;
-          }
-          if (typeof data4 == "number" && isFinite(data4)) {
-            if (data4 < 0 || isNaN(data4)) {
-              const err9 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err9];
-              } else {
-                vErrors.push(err9);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err10];
-        } else {
-          vErrors.push(err10);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err11 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err6 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err11];
+      vErrors = [err6];
     } else {
-      vErrors.push(err11);
+      vErrors.push(err6);
     }
     errors++;
   }
-  validate30.errors = vErrors;
+  validate55.errors = vErrors;
   return errors === 0;
 }
-function validate32(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate58(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -1647,25 +1258,9 @@ function validate32(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.name !== void 0) {
-      let data1 = data.name;
-      if (typeof data1 === "string") {
-        if (!pattern0.test(data1)) {
-          const err6 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-      } else {
-        const err7 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err7];
-        } else {
-          vErrors.push(err7);
-        }
-        errors++;
+      if (!validate35(data.name, { instancePath: instancePath + "/name", parentData: data, parentDataProperty: "name", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.args !== void 0) {
@@ -1679,84 +1274,35 @@ function validate32(data, { instancePath = "", parentData, parentDataProperty, r
           }
         }
       } else {
-        const err8 = { instancePath: instancePath + "/args", schemaPath: "#/properties/args/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+        const err6 = { instancePath: instancePath + "/args", schemaPath: "#/properties/args/type", keyword: "type", params: { type: "array" }, message: "must be array" };
         if (vErrors === null) {
-          vErrors = [err8];
+          vErrors = [err6];
         } else {
-          vErrors.push(err8);
+          vErrors.push(err6);
         }
         errors++;
       }
     }
     if (data.span !== void 0) {
-      let data4 = data.span;
-      if (Array.isArray(data4)) {
-        if (data4.length > 2) {
-          const err9 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err9];
-          } else {
-            vErrors.push(err9);
-          }
-          errors++;
-        }
-        if (data4.length < 2) {
-          const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err10];
-          } else {
-            vErrors.push(err10);
-          }
-          errors++;
-        }
-        const len1 = data4.length;
-        for (let i1 = 0; i1 < len1; i1++) {
-          let data5 = data4[i1];
-          if (!(typeof data5 == "number" && (!(data5 % 1) && !isNaN(data5)) && isFinite(data5))) {
-            const err11 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err11];
-            } else {
-              vErrors.push(err11);
-            }
-            errors++;
-          }
-          if (typeof data5 == "number" && isFinite(data5)) {
-            if (data5 < 0 || isNaN(data5)) {
-              const err12 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err12];
-              } else {
-                vErrors.push(err12);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err13 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err13];
-        } else {
-          vErrors.push(err13);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err14 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err7 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err14];
+      vErrors = [err7];
     } else {
-      vErrors.push(err14);
+      vErrors.push(err7);
     }
     errors++;
   }
-  validate32.errors = vErrors;
+  validate58.errors = vErrors;
   return errors === 0;
 }
-var schema41 = { "type": "object", "additionalProperties": false, "required": ["type", "op", "operand", "span"], "properties": { "type": { "const": "Unary" }, "op": { "enum": ["!", "-"] }, "operand": { "$ref": "#/definitions/Expr" }, "span": { "$ref": "#/definitions/Span" } } };
-function validate34(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var schema23 = { "type": "object", "additionalProperties": false, "required": ["type", "op", "operand", "span"], "properties": { "type": { "const": "Unary" }, "op": { "enum": ["!", "-"] }, "operand": { "$ref": "#/definitions/Expr" }, "span": { "$ref": "#/definitions/Span" } } };
+function validate62(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -1821,7 +1367,7 @@ function validate34(data, { instancePath = "", parentData, parentDataProperty, r
     if (data.op !== void 0) {
       let data1 = data.op;
       if (!(data1 === "!" || data1 === "-")) {
-        const err6 = { instancePath: instancePath + "/op", schemaPath: "#/properties/op/enum", keyword: "enum", params: { allowedValues: schema41.properties.op.enum }, message: "must be equal to one of the allowed values" };
+        const err6 = { instancePath: instancePath + "/op", schemaPath: "#/properties/op/enum", keyword: "enum", params: { allowedValues: schema23.properties.op.enum }, message: "must be equal to one of the allowed values" };
         if (vErrors === null) {
           vErrors = [err6];
         } else {
@@ -1837,74 +1383,25 @@ function validate34(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data3 = data.span;
-      if (Array.isArray(data3)) {
-        if (data3.length > 2) {
-          const err7 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-        if (data3.length < 2) {
-          const err8 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err8];
-          } else {
-            vErrors.push(err8);
-          }
-          errors++;
-        }
-        const len0 = data3.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data4 = data3[i0];
-          if (!(typeof data4 == "number" && (!(data4 % 1) && !isNaN(data4)) && isFinite(data4))) {
-            const err9 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err9];
-            } else {
-              vErrors.push(err9);
-            }
-            errors++;
-          }
-          if (typeof data4 == "number" && isFinite(data4)) {
-            if (data4 < 0 || isNaN(data4)) {
-              const err10 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err10];
-              } else {
-                vErrors.push(err10);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err11];
-        } else {
-          vErrors.push(err11);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err12 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err7 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err12];
+      vErrors = [err7];
     } else {
-      vErrors.push(err12);
+      vErrors.push(err7);
     }
     errors++;
   }
-  validate34.errors = vErrors;
+  validate62.errors = vErrors;
   return errors === 0;
 }
-var schema43 = { "type": "object", "additionalProperties": false, "required": ["type", "op", "left", "right", "span"], "properties": { "type": { "const": "Binary" }, "op": { "enum": ["+", "-", "*", "/", "%", "==", "!=", "===", "!==", "<", ">", "<=", ">=", "&&", "||", "??", "in"] }, "left": { "$ref": "#/definitions/Expr" }, "right": { "$ref": "#/definitions/Expr" }, "span": { "$ref": "#/definitions/Span" } } };
-function validate36(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var schema24 = { "type": "object", "additionalProperties": false, "required": ["type", "op", "left", "right", "span"], "properties": { "type": { "const": "Binary" }, "op": { "enum": ["+", "-", "*", "/", "%", "==", "!=", "===", "!==", "<", ">", "<=", ">=", "&&", "||", "??", "in"] }, "left": { "$ref": "#/definitions/Expr" }, "right": { "$ref": "#/definitions/Expr" }, "span": { "$ref": "#/definitions/Span" } } };
+function validate65(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -1978,7 +1475,7 @@ function validate36(data, { instancePath = "", parentData, parentDataProperty, r
     if (data.op !== void 0) {
       let data1 = data.op;
       if (!(data1 === "+" || data1 === "-" || data1 === "*" || data1 === "/" || data1 === "%" || data1 === "==" || data1 === "!=" || data1 === "===" || data1 === "!==" || data1 === "<" || data1 === ">" || data1 === "<=" || data1 === ">=" || data1 === "&&" || data1 === "||" || data1 === "??" || data1 === "in")) {
-        const err7 = { instancePath: instancePath + "/op", schemaPath: "#/properties/op/enum", keyword: "enum", params: { allowedValues: schema43.properties.op.enum }, message: "must be equal to one of the allowed values" };
+        const err7 = { instancePath: instancePath + "/op", schemaPath: "#/properties/op/enum", keyword: "enum", params: { allowedValues: schema24.properties.op.enum }, message: "must be equal to one of the allowed values" };
         if (vErrors === null) {
           vErrors = [err7];
         } else {
@@ -2000,73 +1497,24 @@ function validate36(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data4 = data.span;
-      if (Array.isArray(data4)) {
-        if (data4.length > 2) {
-          const err8 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err8];
-          } else {
-            vErrors.push(err8);
-          }
-          errors++;
-        }
-        if (data4.length < 2) {
-          const err9 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err9];
-          } else {
-            vErrors.push(err9);
-          }
-          errors++;
-        }
-        const len0 = data4.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data5 = data4[i0];
-          if (!(typeof data5 == "number" && (!(data5 % 1) && !isNaN(data5)) && isFinite(data5))) {
-            const err10 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err10];
-            } else {
-              vErrors.push(err10);
-            }
-            errors++;
-          }
-          if (typeof data5 == "number" && isFinite(data5)) {
-            if (data5 < 0 || isNaN(data5)) {
-              const err11 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err11];
-              } else {
-                vErrors.push(err11);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err12 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err12];
-        } else {
-          vErrors.push(err12);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err13 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err8 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err13];
+      vErrors = [err8];
     } else {
-      vErrors.push(err13);
+      vErrors.push(err8);
     }
     errors++;
   }
-  validate36.errors = vErrors;
+  validate65.errors = vErrors;
   return errors === 0;
 }
-function validate38(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate68(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -2192,73 +1640,24 @@ function validate38(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data4 = data.span;
-      if (Array.isArray(data4)) {
-        if (data4.length > 2) {
-          const err9 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err9];
-          } else {
-            vErrors.push(err9);
-          }
-          errors++;
-        }
-        if (data4.length < 2) {
-          const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err10];
-          } else {
-            vErrors.push(err10);
-          }
-          errors++;
-        }
-        const len0 = data4.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data5 = data4[i0];
-          if (!(typeof data5 == "number" && (!(data5 % 1) && !isNaN(data5)) && isFinite(data5))) {
-            const err11 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err11];
-            } else {
-              vErrors.push(err11);
-            }
-            errors++;
-          }
-          if (typeof data5 == "number" && isFinite(data5)) {
-            if (data5 < 0 || isNaN(data5)) {
-              const err12 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err12];
-              } else {
-                vErrors.push(err12);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err13 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err13];
-        } else {
-          vErrors.push(err13);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err14 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err9 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err14];
+      vErrors = [err9];
     } else {
-      vErrors.push(err14);
+      vErrors.push(err9);
     }
     errors++;
   }
-  validate38.errors = vErrors;
+  validate68.errors = vErrors;
   return errors === 0;
 }
-function validate41(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate72(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -2318,73 +1717,24 @@ function validate41(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data2 = data.span;
-      if (Array.isArray(data2)) {
-        if (data2.length > 2) {
-          const err5 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err5];
-          } else {
-            vErrors.push(err5);
-          }
-          errors++;
-        }
-        if (data2.length < 2) {
-          const err6 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-        const len0 = data2.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data3 = data2[i0];
-          if (!(typeof data3 == "number" && (!(data3 % 1) && !isNaN(data3)) && isFinite(data3))) {
-            const err7 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err7];
-            } else {
-              vErrors.push(err7);
-            }
-            errors++;
-          }
-          if (typeof data3 == "number" && isFinite(data3)) {
-            if (data3 < 0 || isNaN(data3)) {
-              const err8 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err8];
-              } else {
-                vErrors.push(err8);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err9 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err9];
-        } else {
-          vErrors.push(err9);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err10 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err5 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err10];
+      vErrors = [err5];
     } else {
-      vErrors.push(err10);
+      vErrors.push(err5);
     }
     errors++;
   }
-  validate41.errors = vErrors;
+  validate72.errors = vErrors;
   return errors === 0;
 }
-function validate40(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate71(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -2492,8 +1842,8 @@ function validate40(data, { instancePath = "", parentData, parentDataProperty, r
           let ifClause0;
           if (_valid0) {
             const _errs10 = errors;
-            if (!validate41(data2, { instancePath: instancePath + "/items/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
-              vErrors = vErrors === null ? validate41.errors : vErrors.concat(validate41.errors);
+            if (!validate72(data2, { instancePath: instancePath + "/items/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
+              vErrors = vErrors === null ? validate72.errors : vErrors.concat(validate72.errors);
               errors = vErrors.length;
             }
             var _valid0 = _errs10 === errors;
@@ -2530,73 +1880,24 @@ function validate40(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data4 = data.span;
-      if (Array.isArray(data4)) {
-        if (data4.length > 2) {
-          const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err10];
-          } else {
-            vErrors.push(err10);
-          }
-          errors++;
-        }
-        if (data4.length < 2) {
-          const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err11];
-          } else {
-            vErrors.push(err11);
-          }
-          errors++;
-        }
-        const len1 = data4.length;
-        for (let i1 = 0; i1 < len1; i1++) {
-          let data5 = data4[i1];
-          if (!(typeof data5 == "number" && (!(data5 % 1) && !isNaN(data5)) && isFinite(data5))) {
-            const err12 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err12];
-            } else {
-              vErrors.push(err12);
-            }
-            errors++;
-          }
-          if (typeof data5 == "number" && isFinite(data5)) {
-            if (data5 < 0 || isNaN(data5)) {
-              const err13 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err13];
-              } else {
-                vErrors.push(err13);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err14 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err14];
-        } else {
-          vErrors.push(err14);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err15 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err10 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err15];
+      vErrors = [err10];
     } else {
-      vErrors.push(err15);
+      vErrors.push(err10);
     }
     errors++;
   }
-  validate40.errors = vErrors;
+  validate71.errors = vErrors;
   return errors === 0;
 }
-function validate46(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate79(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -2650,10 +1951,10 @@ function validate46(data, { instancePath = "", parentData, parentDataProperty, r
     }
     errors++;
   }
-  validate46.errors = vErrors;
+  validate79.errors = vErrors;
   return errors === 0;
 }
-function validate44(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate77(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -2761,8 +2062,8 @@ function validate44(data, { instancePath = "", parentData, parentDataProperty, r
           let ifClause0;
           if (_valid0) {
             const _errs10 = errors;
-            if (!validate41(data2, { instancePath: instancePath + "/entries/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
-              vErrors = vErrors === null ? validate41.errors : vErrors.concat(validate41.errors);
+            if (!validate72(data2, { instancePath: instancePath + "/entries/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
+              vErrors = vErrors === null ? validate72.errors : vErrors.concat(validate72.errors);
               errors = vErrors.length;
             }
             var _valid0 = _errs10 === errors;
@@ -2770,8 +2071,8 @@ function validate44(data, { instancePath = "", parentData, parentDataProperty, r
             ifClause0 = "then";
           } else {
             const _errs11 = errors;
-            if (!validate46(data2, { instancePath: instancePath + "/entries/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
-              vErrors = vErrors === null ? validate46.errors : vErrors.concat(validate46.errors);
+            if (!validate79(data2, { instancePath: instancePath + "/entries/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
+              vErrors = vErrors === null ? validate79.errors : vErrors.concat(validate79.errors);
               errors = vErrors.length;
             }
             var _valid0 = _errs11 === errors;
@@ -2799,73 +2100,24 @@ function validate44(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data4 = data.span;
-      if (Array.isArray(data4)) {
-        if (data4.length > 2) {
-          const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err10];
-          } else {
-            vErrors.push(err10);
-          }
-          errors++;
-        }
-        if (data4.length < 2) {
-          const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err11];
-          } else {
-            vErrors.push(err11);
-          }
-          errors++;
-        }
-        const len1 = data4.length;
-        for (let i1 = 0; i1 < len1; i1++) {
-          let data5 = data4[i1];
-          if (!(typeof data5 == "number" && (!(data5 % 1) && !isNaN(data5)) && isFinite(data5))) {
-            const err12 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err12];
-            } else {
-              vErrors.push(err12);
-            }
-            errors++;
-          }
-          if (typeof data5 == "number" && isFinite(data5)) {
-            if (data5 < 0 || isNaN(data5)) {
-              const err13 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err13];
-              } else {
-                vErrors.push(err13);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err14 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err14];
-        } else {
-          vErrors.push(err14);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err15 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err10 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err15];
+      vErrors = [err10];
     } else {
-      vErrors.push(err15);
+      vErrors.push(err10);
     }
     errors++;
   }
-  validate44.errors = vErrors;
+  validate77.errors = vErrors;
   return errors === 0;
 }
-function validate17(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate30(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   const _errs2 = errors;
@@ -2916,8 +2168,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid0) {
     const _errs6 = errors;
-    if (!validate18(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate18.errors : vErrors.concat(validate18.errors);
+    if (!validate31(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate31.errors : vErrors.concat(validate31.errors);
       errors = vErrors.length;
     }
     var _valid0 = _errs6 === errors;
@@ -2980,8 +2232,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid1) {
     const _errs12 = errors;
-    if (!validate20(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate20.errors : vErrors.concat(validate20.errors);
+    if (!validate34(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate34.errors : vErrors.concat(validate34.errors);
       errors = vErrors.length;
     }
     var _valid1 = _errs12 === errors;
@@ -3044,8 +2296,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid2) {
     const _errs18 = errors;
-    if (!validate22(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate22.errors : vErrors.concat(validate22.errors);
+    if (!validate39(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate39.errors : vErrors.concat(validate39.errors);
       errors = vErrors.length;
     }
     var _valid2 = _errs18 === errors;
@@ -3108,8 +2360,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid3) {
     const _errs24 = errors;
-    if (!validate24(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate24.errors : vErrors.concat(validate24.errors);
+    if (!validate43(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate43.errors : vErrors.concat(validate43.errors);
       errors = vErrors.length;
     }
     var _valid3 = _errs24 === errors;
@@ -3172,8 +2424,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid4) {
     const _errs30 = errors;
-    if (!validate26(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+    if (!validate46(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate46.errors : vErrors.concat(validate46.errors);
       errors = vErrors.length;
     }
     var _valid4 = _errs30 === errors;
@@ -3236,8 +2488,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid5) {
     const _errs36 = errors;
-    if (!validate28(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate28.errors : vErrors.concat(validate28.errors);
+    if (!validate50(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate50.errors : vErrors.concat(validate50.errors);
       errors = vErrors.length;
     }
     var _valid5 = _errs36 === errors;
@@ -3300,8 +2552,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid6) {
     const _errs42 = errors;
-    if (!validate30(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate30.errors : vErrors.concat(validate30.errors);
+    if (!validate55(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate55.errors : vErrors.concat(validate55.errors);
       errors = vErrors.length;
     }
     var _valid6 = _errs42 === errors;
@@ -3364,8 +2616,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid7) {
     const _errs48 = errors;
-    if (!validate32(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate32.errors : vErrors.concat(validate32.errors);
+    if (!validate58(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate58.errors : vErrors.concat(validate58.errors);
       errors = vErrors.length;
     }
     var _valid7 = _errs48 === errors;
@@ -3428,8 +2680,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid8) {
     const _errs54 = errors;
-    if (!validate34(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate34.errors : vErrors.concat(validate34.errors);
+    if (!validate62(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate62.errors : vErrors.concat(validate62.errors);
       errors = vErrors.length;
     }
     var _valid8 = _errs54 === errors;
@@ -3492,8 +2744,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid9) {
     const _errs60 = errors;
-    if (!validate36(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate36.errors : vErrors.concat(validate36.errors);
+    if (!validate65(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate65.errors : vErrors.concat(validate65.errors);
       errors = vErrors.length;
     }
     var _valid9 = _errs60 === errors;
@@ -3556,8 +2808,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid10) {
     const _errs66 = errors;
-    if (!validate38(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate38.errors : vErrors.concat(validate38.errors);
+    if (!validate68(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate68.errors : vErrors.concat(validate68.errors);
       errors = vErrors.length;
     }
     var _valid10 = _errs66 === errors;
@@ -3620,8 +2872,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid11) {
     const _errs72 = errors;
-    if (!validate40(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate40.errors : vErrors.concat(validate40.errors);
+    if (!validate71(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate71.errors : vErrors.concat(validate71.errors);
       errors = vErrors.length;
     }
     var _valid11 = _errs72 === errors;
@@ -3684,8 +2936,8 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid12) {
     const _errs78 = errors;
-    if (!validate44(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate44.errors : vErrors.concat(validate44.errors);
+    if (!validate77(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate77.errors : vErrors.concat(validate77.errors);
       errors = vErrors.length;
     }
     var _valid12 = _errs78 === errors;
@@ -3713,7 +2965,7 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
     if (data.type !== void 0) {
       let data13 = data.type;
       if (!(data13 === "Literal" || data13 === "Var" || data13 === "LoopMeta" || data13 === "Member" || data13 === "MemberCall" || data13 === "ClassCall" || data13 === "Index" || data13 === "Call" || data13 === "Unary" || data13 === "Binary" || data13 === "Ternary" || data13 === "List" || data13 === "Map")) {
-        const err53 = { instancePath: instancePath + "/type", schemaPath: "#/properties/type/enum", keyword: "enum", params: { allowedValues: schema18.properties.type.enum }, message: "must be equal to one of the allowed values" };
+        const err53 = { instancePath: instancePath + "/type", schemaPath: "#/properties/type/enum", keyword: "enum", params: { allowedValues: schema13.properties.type.enum }, message: "must be equal to one of the allowed values" };
         if (vErrors === null) {
           vErrors = [err53];
         } else {
@@ -3731,10 +2983,10 @@ function validate17(data, { instancePath = "", parentData, parentDataProperty, r
     }
     errors++;
   }
-  validate17.errors = vErrors;
+  validate30.errors = vErrors;
   return errors === 0;
 }
-function validate16(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate29(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -3788,80 +3040,31 @@ function validate16(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.expr !== void 0) {
-      if (!validate17(data.expr, { instancePath: instancePath + "/expr", parentData: data, parentDataProperty: "expr", rootData })) {
-        vErrors = vErrors === null ? validate17.errors : vErrors.concat(validate17.errors);
+      if (!validate30(data.expr, { instancePath: instancePath + "/expr", parentData: data, parentDataProperty: "expr", rootData })) {
+        vErrors = vErrors === null ? validate30.errors : vErrors.concat(validate30.errors);
         errors = vErrors.length;
       }
     }
     if (data.span !== void 0) {
-      let data2 = data.span;
-      if (Array.isArray(data2)) {
-        if (data2.length > 2) {
-          const err5 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err5];
-          } else {
-            vErrors.push(err5);
-          }
-          errors++;
-        }
-        if (data2.length < 2) {
-          const err6 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-        const len0 = data2.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data3 = data2[i0];
-          if (!(typeof data3 == "number" && (!(data3 % 1) && !isNaN(data3)) && isFinite(data3))) {
-            const err7 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err7];
-            } else {
-              vErrors.push(err7);
-            }
-            errors++;
-          }
-          if (typeof data3 == "number" && isFinite(data3)) {
-            if (data3 < 0 || isNaN(data3)) {
-              const err8 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err8];
-              } else {
-                vErrors.push(err8);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err9 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err9];
-        } else {
-          vErrors.push(err9);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err10 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err5 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err10];
+      vErrors = [err5];
     } else {
-      vErrors.push(err10);
+      vErrors.push(err5);
     }
     errors++;
   }
-  validate16.errors = vErrors;
+  validate29.errors = vErrors;
   return errors === 0;
 }
-var wrapper17 = { validate: validate12 };
-function validate52(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var wrapper17 = { validate: validate23 };
+function validate87(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -3904,8 +3107,8 @@ function validate52(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.test !== void 0) {
-      if (!validate17(data.test, { instancePath: instancePath + "/test", parentData: data, parentDataProperty: "test", rootData })) {
-        vErrors = vErrors === null ? validate17.errors : vErrors.concat(validate17.errors);
+      if (!validate30(data.test, { instancePath: instancePath + "/test", parentData: data, parentDataProperty: "test", rootData })) {
+        vErrors = vErrors === null ? validate30.errors : vErrors.concat(validate30.errors);
         errors = vErrors.length;
       }
     }
@@ -3916,73 +3119,24 @@ function validate52(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data2 = data.span;
-      if (Array.isArray(data2)) {
-        if (data2.length > 2) {
-          const err4 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err4];
-          } else {
-            vErrors.push(err4);
-          }
-          errors++;
-        }
-        if (data2.length < 2) {
-          const err5 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err5];
-          } else {
-            vErrors.push(err5);
-          }
-          errors++;
-        }
-        const len0 = data2.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data3 = data2[i0];
-          if (!(typeof data3 == "number" && (!(data3 % 1) && !isNaN(data3)) && isFinite(data3))) {
-            const err6 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err6];
-            } else {
-              vErrors.push(err6);
-            }
-            errors++;
-          }
-          if (typeof data3 == "number" && isFinite(data3)) {
-            if (data3 < 0 || isNaN(data3)) {
-              const err7 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err7];
-              } else {
-                vErrors.push(err7);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err8 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err8];
-        } else {
-          vErrors.push(err8);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err9 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err4 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err9];
+      vErrors = [err4];
     } else {
-      vErrors.push(err9);
+      vErrors.push(err4);
     }
     errors++;
   }
-  validate52.errors = vErrors;
+  validate87.errors = vErrors;
   return errors === 0;
 }
-function validate51(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate86(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -4058,8 +3212,8 @@ function validate51(data, { instancePath = "", parentData, parentDataProperty, r
         }
         const len0 = data1.length;
         for (let i0 = 0; i0 < len0; i0++) {
-          if (!validate52(data1[i0], { instancePath: instancePath + "/branches/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
-            vErrors = vErrors === null ? validate52.errors : vErrors.concat(validate52.errors);
+          if (!validate87(data1[i0], { instancePath: instancePath + "/branches/" + i0, parentData: data1, parentDataProperty: i0, rootData })) {
+            vErrors = vErrors === null ? validate87.errors : vErrors.concat(validate87.errors);
             errors = vErrors.length;
           }
         }
@@ -4116,73 +3270,24 @@ function validate51(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data4 = data.span;
-      if (Array.isArray(data4)) {
-        if (data4.length > 2) {
-          const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err10];
-          } else {
-            vErrors.push(err10);
-          }
-          errors++;
-        }
-        if (data4.length < 2) {
-          const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err11];
-          } else {
-            vErrors.push(err11);
-          }
-          errors++;
-        }
-        const len1 = data4.length;
-        for (let i1 = 0; i1 < len1; i1++) {
-          let data5 = data4[i1];
-          if (!(typeof data5 == "number" && (!(data5 % 1) && !isNaN(data5)) && isFinite(data5))) {
-            const err12 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err12];
-            } else {
-              vErrors.push(err12);
-            }
-            errors++;
-          }
-          if (typeof data5 == "number" && isFinite(data5)) {
-            if (data5 < 0 || isNaN(data5)) {
-              const err13 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err13];
-              } else {
-                vErrors.push(err13);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err14 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err14];
-        } else {
-          vErrors.push(err14);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err15 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err10 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err15];
+      vErrors = [err10];
     } else {
-      vErrors.push(err15);
+      vErrors.push(err10);
     }
     errors++;
   }
-  validate51.errors = vErrors;
+  validate86.errors = vErrors;
   return errors === 0;
 }
-function validate56(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate93(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -4263,30 +3368,14 @@ function validate56(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.name !== void 0) {
-      let data1 = data.name;
-      if (typeof data1 === "string") {
-        if (!pattern0.test(data1)) {
-          const err8 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err8];
-          } else {
-            vErrors.push(err8);
-          }
-          errors++;
-        }
-      } else {
-        const err9 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err9];
-        } else {
-          vErrors.push(err9);
-        }
-        errors++;
+      if (!validate35(data.name, { instancePath: instancePath + "/name", parentData: data, parentDataProperty: "name", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.iter !== void 0) {
-      if (!validate17(data.iter, { instancePath: instancePath + "/iter", parentData: data, parentDataProperty: "iter", rootData })) {
-        vErrors = vErrors === null ? validate17.errors : vErrors.concat(validate17.errors);
+      if (!validate30(data.iter, { instancePath: instancePath + "/iter", parentData: data, parentDataProperty: "iter", rootData })) {
+        vErrors = vErrors === null ? validate30.errors : vErrors.concat(validate30.errors);
         errors = vErrors.length;
       }
     }
@@ -4298,114 +3387,65 @@ function validate56(data, { instancePath = "", parentData, parentDataProperty, r
     }
     if (data.empty !== void 0) {
       let data4 = data.empty;
-      const _errs9 = errors;
-      let valid2 = true;
-      const _errs10 = errors;
+      const _errs7 = errors;
+      let valid1 = true;
+      const _errs8 = errors;
       if (data4 !== null) {
-        const err10 = {};
+        const err8 = {};
         if (vErrors === null) {
-          vErrors = [err10];
+          vErrors = [err8];
         } else {
-          vErrors.push(err10);
+          vErrors.push(err8);
         }
         errors++;
       }
-      var _valid0 = _errs10 === errors;
-      errors = _errs9;
+      var _valid0 = _errs8 === errors;
+      errors = _errs7;
       if (vErrors !== null) {
-        if (_errs9) {
-          vErrors.length = _errs9;
+        if (_errs7) {
+          vErrors.length = _errs7;
         } else {
           vErrors = null;
         }
       }
       if (!_valid0) {
-        const _errs12 = errors;
+        const _errs10 = errors;
         if (!wrapper17.validate(data4, { instancePath: instancePath + "/empty", parentData: data, parentDataProperty: "empty", rootData })) {
           vErrors = vErrors === null ? wrapper17.validate.errors : vErrors.concat(wrapper17.validate.errors);
           errors = vErrors.length;
         }
-        var _valid0 = _errs12 === errors;
-        valid2 = _valid0;
+        var _valid0 = _errs10 === errors;
+        valid1 = _valid0;
       }
-      if (!valid2) {
-        const err11 = { instancePath: instancePath + "/empty", schemaPath: "#/properties/empty/if", keyword: "if", params: { failingKeyword: "else" }, message: 'must match "else" schema' };
+      if (!valid1) {
+        const err9 = { instancePath: instancePath + "/empty", schemaPath: "#/properties/empty/if", keyword: "if", params: { failingKeyword: "else" }, message: 'must match "else" schema' };
         if (vErrors === null) {
-          vErrors = [err11];
+          vErrors = [err9];
         } else {
-          vErrors.push(err11);
+          vErrors.push(err9);
         }
         errors++;
       }
     }
     if (data.span !== void 0) {
-      let data5 = data.span;
-      if (Array.isArray(data5)) {
-        if (data5.length > 2) {
-          const err12 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err12];
-          } else {
-            vErrors.push(err12);
-          }
-          errors++;
-        }
-        if (data5.length < 2) {
-          const err13 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err13];
-          } else {
-            vErrors.push(err13);
-          }
-          errors++;
-        }
-        const len0 = data5.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data6 = data5[i0];
-          if (!(typeof data6 == "number" && (!(data6 % 1) && !isNaN(data6)) && isFinite(data6))) {
-            const err14 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err14];
-            } else {
-              vErrors.push(err14);
-            }
-            errors++;
-          }
-          if (typeof data6 == "number" && isFinite(data6)) {
-            if (data6 < 0 || isNaN(data6)) {
-              const err15 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err15];
-              } else {
-                vErrors.push(err15);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err16 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err16];
-        } else {
-          vErrors.push(err16);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err17 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err10 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err17];
+      vErrors = [err10];
     } else {
-      vErrors.push(err17);
+      vErrors.push(err10);
     }
     errors++;
   }
-  validate56.errors = vErrors;
+  validate93.errors = vErrors;
   return errors === 0;
 }
-function validate59(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate98(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -4468,102 +3508,37 @@ function validate59(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.name !== void 0) {
-      let data1 = data.name;
-      if (typeof data1 === "string") {
-        if (!pattern0.test(data1)) {
-          const err6 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-      } else {
-        const err7 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err7];
-        } else {
-          vErrors.push(err7);
-        }
-        errors++;
+      if (!validate35(data.name, { instancePath: instancePath + "/name", parentData: data, parentDataProperty: "name", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.expr !== void 0) {
-      if (!validate17(data.expr, { instancePath: instancePath + "/expr", parentData: data, parentDataProperty: "expr", rootData })) {
-        vErrors = vErrors === null ? validate17.errors : vErrors.concat(validate17.errors);
+      if (!validate30(data.expr, { instancePath: instancePath + "/expr", parentData: data, parentDataProperty: "expr", rootData })) {
+        vErrors = vErrors === null ? validate30.errors : vErrors.concat(validate30.errors);
         errors = vErrors.length;
       }
     }
     if (data.span !== void 0) {
-      let data3 = data.span;
-      if (Array.isArray(data3)) {
-        if (data3.length > 2) {
-          const err8 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err8];
-          } else {
-            vErrors.push(err8);
-          }
-          errors++;
-        }
-        if (data3.length < 2) {
-          const err9 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err9];
-          } else {
-            vErrors.push(err9);
-          }
-          errors++;
-        }
-        const len0 = data3.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data4 = data3[i0];
-          if (!(typeof data4 == "number" && (!(data4 % 1) && !isNaN(data4)) && isFinite(data4))) {
-            const err10 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err10];
-            } else {
-              vErrors.push(err10);
-            }
-            errors++;
-          }
-          if (typeof data4 == "number" && isFinite(data4)) {
-            if (data4 < 0 || isNaN(data4)) {
-              const err11 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err11];
-              } else {
-                vErrors.push(err11);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err12 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err12];
-        } else {
-          vErrors.push(err12);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err13 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err6 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err13];
+      vErrors = [err6];
     } else {
-      vErrors.push(err13);
+      vErrors.push(err6);
     }
     errors++;
   }
-  validate59.errors = vErrors;
+  validate98.errors = vErrors;
   return errors === 0;
 }
 var func2 = require_ucs2length().default;
-function validate62(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate103(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -4639,74 +3614,25 @@ function validate62(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data2 = data.span;
-      if (Array.isArray(data2)) {
-        if (data2.length > 2) {
-          const err7 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-        if (data2.length < 2) {
-          const err8 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err8];
-          } else {
-            vErrors.push(err8);
-          }
-          errors++;
-        }
-        const len0 = data2.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data3 = data2[i0];
-          if (!(typeof data3 == "number" && (!(data3 % 1) && !isNaN(data3)) && isFinite(data3))) {
-            const err9 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err9];
-            } else {
-              vErrors.push(err9);
-            }
-            errors++;
-          }
-          if (typeof data3 == "number" && isFinite(data3)) {
-            if (data3 < 0 || isNaN(data3)) {
-              const err10 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err10];
-              } else {
-                vErrors.push(err10);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err11];
-        } else {
-          vErrors.push(err11);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err12 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err7 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err12];
+      vErrors = [err7];
     } else {
-      vErrors.push(err12);
+      vErrors.push(err7);
     }
     errors++;
   }
-  validate62.errors = vErrors;
+  validate103.errors = vErrors;
   return errors === 0;
 }
-var schema67 = { "type": "object", "additionalProperties": false, "required": ["type", "id", "path", "scope", "span"], "properties": { "type": { "const": "Block" }, "id": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/Identifier" } }, "path": { "type": ["null", "string"], "minLength": 1 }, "scope": { "type": "array", "items": { "$ref": "#/definitions/ScopeItem" } }, "span": { "$ref": "#/definitions/Span" } } };
-function validate65(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var schema35 = { "type": "object", "additionalProperties": false, "required": ["type", "id", "path", "scope", "span"], "properties": { "type": { "const": "Block" }, "id": { "if": { "type": "null" }, "else": { "$ref": "#/definitions/Identifier" } }, "path": { "type": ["null", "string"], "minLength": 1 }, "scope": { "type": "array", "items": { "$ref": "#/definitions/ScopeItem" } }, "span": { "$ref": "#/definitions/Span" } } };
+function validate108(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -4740,46 +3666,30 @@ function validate65(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.name !== void 0) {
-      let data0 = data.name;
-      if (typeof data0 === "string") {
-        if (!pattern0.test(data0)) {
-          const err3 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err3];
-          } else {
-            vErrors.push(err3);
-          }
-          errors++;
-        }
-      } else {
-        const err4 = { instancePath: instancePath + "/name", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err4];
-        } else {
-          vErrors.push(err4);
-        }
-        errors++;
+      if (!validate35(data.name, { instancePath: instancePath + "/name", parentData: data, parentDataProperty: "name", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.expr !== void 0) {
-      if (!validate17(data.expr, { instancePath: instancePath + "/expr", parentData: data, parentDataProperty: "expr", rootData })) {
-        vErrors = vErrors === null ? validate17.errors : vErrors.concat(validate17.errors);
+      if (!validate30(data.expr, { instancePath: instancePath + "/expr", parentData: data, parentDataProperty: "expr", rootData })) {
+        vErrors = vErrors === null ? validate30.errors : vErrors.concat(validate30.errors);
         errors = vErrors.length;
       }
     }
   } else {
-    const err5 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err3 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err5];
+      vErrors = [err3];
     } else {
-      vErrors.push(err5);
+      vErrors.push(err3);
     }
     errors++;
   }
-  validate65.errors = vErrors;
+  validate108.errors = vErrors;
   return errors === 0;
 }
-function validate64(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate106(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -4875,34 +3785,19 @@ function validate64(data, { instancePath = "", parentData, parentDataProperty, r
       }
       if (!_valid0) {
         const _errs7 = errors;
-        if (typeof data1 === "string") {
-          if (!pattern0.test(data1)) {
-            const err8 = { instancePath: instancePath + "/id", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-            if (vErrors === null) {
-              vErrors = [err8];
-            } else {
-              vErrors.push(err8);
-            }
-            errors++;
-          }
-        } else {
-          const err9 = { instancePath: instancePath + "/id", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-          if (vErrors === null) {
-            vErrors = [err9];
-          } else {
-            vErrors.push(err9);
-          }
-          errors++;
+        if (!validate35(data1, { instancePath: instancePath + "/id", parentData: data, parentDataProperty: "id", rootData })) {
+          vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+          errors = vErrors.length;
         }
         var _valid0 = _errs7 === errors;
         valid1 = _valid0;
       }
       if (!valid1) {
-        const err10 = { instancePath: instancePath + "/id", schemaPath: "#/properties/id/if", keyword: "if", params: { failingKeyword: "else" }, message: 'must match "else" schema' };
+        const err8 = { instancePath: instancePath + "/id", schemaPath: "#/properties/id/if", keyword: "if", params: { failingKeyword: "else" }, message: 'must match "else" schema' };
         if (vErrors === null) {
-          vErrors = [err10];
+          vErrors = [err8];
         } else {
-          vErrors.push(err10);
+          vErrors.push(err8);
         }
         errors++;
       }
@@ -4910,21 +3805,21 @@ function validate64(data, { instancePath = "", parentData, parentDataProperty, r
     if (data.path !== void 0) {
       let data2 = data.path;
       if (data2 !== null && typeof data2 !== "string") {
-        const err11 = { instancePath: instancePath + "/path", schemaPath: "#/properties/path/type", keyword: "type", params: { type: schema67.properties.path.type }, message: "must be null,string" };
+        const err9 = { instancePath: instancePath + "/path", schemaPath: "#/properties/path/type", keyword: "type", params: { type: schema35.properties.path.type }, message: "must be null,string" };
         if (vErrors === null) {
-          vErrors = [err11];
+          vErrors = [err9];
         } else {
-          vErrors.push(err11);
+          vErrors.push(err9);
         }
         errors++;
       }
       if (typeof data2 === "string") {
         if (func2(data2) < 1) {
-          const err12 = { instancePath: instancePath + "/path", schemaPath: "#/properties/path/minLength", keyword: "minLength", params: { limit: 1 }, message: "must NOT have fewer than 1 characters" };
+          const err10 = { instancePath: instancePath + "/path", schemaPath: "#/properties/path/minLength", keyword: "minLength", params: { limit: 1 }, message: "must NOT have fewer than 1 characters" };
           if (vErrors === null) {
-            vErrors = [err12];
+            vErrors = [err10];
           } else {
-            vErrors.push(err12);
+            vErrors.push(err10);
           }
           errors++;
         }
@@ -4935,89 +3830,40 @@ function validate64(data, { instancePath = "", parentData, parentDataProperty, r
       if (Array.isArray(data3)) {
         const len0 = data3.length;
         for (let i0 = 0; i0 < len0; i0++) {
-          if (!validate65(data3[i0], { instancePath: instancePath + "/scope/" + i0, parentData: data3, parentDataProperty: i0, rootData })) {
-            vErrors = vErrors === null ? validate65.errors : vErrors.concat(validate65.errors);
+          if (!validate108(data3[i0], { instancePath: instancePath + "/scope/" + i0, parentData: data3, parentDataProperty: i0, rootData })) {
+            vErrors = vErrors === null ? validate108.errors : vErrors.concat(validate108.errors);
             errors = vErrors.length;
           }
         }
       } else {
-        const err13 = { instancePath: instancePath + "/scope", schemaPath: "#/properties/scope/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+        const err11 = { instancePath: instancePath + "/scope", schemaPath: "#/properties/scope/type", keyword: "type", params: { type: "array" }, message: "must be array" };
         if (vErrors === null) {
-          vErrors = [err13];
+          vErrors = [err11];
         } else {
-          vErrors.push(err13);
+          vErrors.push(err11);
         }
         errors++;
       }
     }
     if (data.span !== void 0) {
-      let data5 = data.span;
-      if (Array.isArray(data5)) {
-        if (data5.length > 2) {
-          const err14 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err14];
-          } else {
-            vErrors.push(err14);
-          }
-          errors++;
-        }
-        if (data5.length < 2) {
-          const err15 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err15];
-          } else {
-            vErrors.push(err15);
-          }
-          errors++;
-        }
-        const len1 = data5.length;
-        for (let i1 = 0; i1 < len1; i1++) {
-          let data6 = data5[i1];
-          if (!(typeof data6 == "number" && (!(data6 % 1) && !isNaN(data6)) && isFinite(data6))) {
-            const err16 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err16];
-            } else {
-              vErrors.push(err16);
-            }
-            errors++;
-          }
-          if (typeof data6 == "number" && isFinite(data6)) {
-            if (data6 < 0 || isNaN(data6)) {
-              const err17 = { instancePath: instancePath + "/span/" + i1, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err17];
-              } else {
-                vErrors.push(err17);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err18 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err18];
-        } else {
-          vErrors.push(err18);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err19 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err12 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err19];
+      vErrors = [err12];
     } else {
-      vErrors.push(err19);
+      vErrors.push(err12);
     }
     errors++;
   }
-  validate64.errors = vErrors;
+  validate106.errors = vErrors;
   return errors === 0;
 }
-function validate69(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate114(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -5089,25 +3935,9 @@ function validate69(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.id !== void 0) {
-      let data1 = data.id;
-      if (typeof data1 === "string") {
-        if (!pattern0.test(data1)) {
-          const err7 = { instancePath: instancePath + "/id", schemaPath: "#/definitions/Identifier/pattern", keyword: "pattern", params: { pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }, message: 'must match pattern "^[A-Za-z_][A-Za-z0-9_]*$"' };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-      } else {
-        const err8 = { instancePath: instancePath + "/id", schemaPath: "#/definitions/Identifier/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-        if (vErrors === null) {
-          vErrors = [err8];
-        } else {
-          vErrors.push(err8);
-        }
-        errors++;
+      if (!validate35(data.id, { instancePath: instancePath + "/id", parentData: data, parentDataProperty: "id", rootData })) {
+        vErrors = vErrors === null ? validate35.errors : vErrors.concat(validate35.errors);
+        errors = vErrors.length;
       }
     }
     if (data.body !== void 0) {
@@ -5118,114 +3948,65 @@ function validate69(data, { instancePath = "", parentData, parentDataProperty, r
     }
     if (data.else !== void 0) {
       let data3 = data.else;
-      const _errs8 = errors;
-      let valid2 = true;
-      const _errs9 = errors;
+      const _errs6 = errors;
+      let valid1 = true;
+      const _errs7 = errors;
       if (data3 !== null) {
-        const err9 = {};
+        const err7 = {};
         if (vErrors === null) {
-          vErrors = [err9];
+          vErrors = [err7];
         } else {
-          vErrors.push(err9);
+          vErrors.push(err7);
         }
         errors++;
       }
-      var _valid0 = _errs9 === errors;
-      errors = _errs8;
+      var _valid0 = _errs7 === errors;
+      errors = _errs6;
       if (vErrors !== null) {
-        if (_errs8) {
-          vErrors.length = _errs8;
+        if (_errs6) {
+          vErrors.length = _errs6;
         } else {
           vErrors = null;
         }
       }
       if (!_valid0) {
-        const _errs11 = errors;
+        const _errs9 = errors;
         if (!wrapper17.validate(data3, { instancePath: instancePath + "/else", parentData: data, parentDataProperty: "else", rootData })) {
           vErrors = vErrors === null ? wrapper17.validate.errors : vErrors.concat(wrapper17.validate.errors);
           errors = vErrors.length;
         }
-        var _valid0 = _errs11 === errors;
-        valid2 = _valid0;
+        var _valid0 = _errs9 === errors;
+        valid1 = _valid0;
       }
-      if (!valid2) {
-        const err10 = { instancePath: instancePath + "/else", schemaPath: "#/properties/else/if", keyword: "if", params: { failingKeyword: "else" }, message: 'must match "else" schema' };
+      if (!valid1) {
+        const err8 = { instancePath: instancePath + "/else", schemaPath: "#/properties/else/if", keyword: "if", params: { failingKeyword: "else" }, message: 'must match "else" schema' };
         if (vErrors === null) {
-          vErrors = [err10];
+          vErrors = [err8];
         } else {
-          vErrors.push(err10);
+          vErrors.push(err8);
         }
         errors++;
       }
     }
     if (data.span !== void 0) {
-      let data4 = data.span;
-      if (Array.isArray(data4)) {
-        if (data4.length > 2) {
-          const err11 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err11];
-          } else {
-            vErrors.push(err11);
-          }
-          errors++;
-        }
-        if (data4.length < 2) {
-          const err12 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err12];
-          } else {
-            vErrors.push(err12);
-          }
-          errors++;
-        }
-        const len0 = data4.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data5 = data4[i0];
-          if (!(typeof data5 == "number" && (!(data5 % 1) && !isNaN(data5)) && isFinite(data5))) {
-            const err13 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err13];
-            } else {
-              vErrors.push(err13);
-            }
-            errors++;
-          }
-          if (typeof data5 == "number" && isFinite(data5)) {
-            if (data5 < 0 || isNaN(data5)) {
-              const err14 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err14];
-              } else {
-                vErrors.push(err14);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err15 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err15];
-        } else {
-          vErrors.push(err15);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err16 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err9 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err16];
+      vErrors = [err9];
     } else {
-      vErrors.push(err16);
+      vErrors.push(err9);
     }
     errors++;
   }
-  validate69.errors = vErrors;
+  validate114.errors = vErrors;
   return errors === 0;
 }
-function validate13(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate24(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   const _errs2 = errors;
@@ -5276,8 +4057,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid0) {
     const _errs6 = errors;
-    if (!validate14(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate14.errors : vErrors.concat(validate14.errors);
+    if (!validate25(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate25.errors : vErrors.concat(validate25.errors);
       errors = vErrors.length;
     }
     var _valid0 = _errs6 === errors;
@@ -5340,8 +4121,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid1) {
     const _errs12 = errors;
-    if (!validate16(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate16.errors : vErrors.concat(validate16.errors);
+    if (!validate29(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate29.errors : vErrors.concat(validate29.errors);
       errors = vErrors.length;
     }
     var _valid1 = _errs12 === errors;
@@ -5404,8 +4185,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid2) {
     const _errs18 = errors;
-    if (!validate51(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate51.errors : vErrors.concat(validate51.errors);
+    if (!validate86(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate86.errors : vErrors.concat(validate86.errors);
       errors = vErrors.length;
     }
     var _valid2 = _errs18 === errors;
@@ -5468,8 +4249,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid3) {
     const _errs24 = errors;
-    if (!validate56(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate56.errors : vErrors.concat(validate56.errors);
+    if (!validate93(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate93.errors : vErrors.concat(validate93.errors);
       errors = vErrors.length;
     }
     var _valid3 = _errs24 === errors;
@@ -5532,8 +4313,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid4) {
     const _errs30 = errors;
-    if (!validate59(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate59.errors : vErrors.concat(validate59.errors);
+    if (!validate98(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate98.errors : vErrors.concat(validate98.errors);
       errors = vErrors.length;
     }
     var _valid4 = _errs30 === errors;
@@ -5596,8 +4377,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid5) {
     const _errs36 = errors;
-    if (!validate62(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate62.errors : vErrors.concat(validate62.errors);
+    if (!validate103(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate103.errors : vErrors.concat(validate103.errors);
       errors = vErrors.length;
     }
     var _valid5 = _errs36 === errors;
@@ -5660,8 +4441,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid6) {
     const _errs42 = errors;
-    if (!validate64(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate64.errors : vErrors.concat(validate64.errors);
+    if (!validate106(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate106.errors : vErrors.concat(validate106.errors);
       errors = vErrors.length;
     }
     var _valid6 = _errs42 === errors;
@@ -5724,8 +4505,8 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
   }
   if (_valid7) {
     const _errs48 = errors;
-    if (!validate69(data, { instancePath, parentData, parentDataProperty, rootData })) {
-      vErrors = vErrors === null ? validate69.errors : vErrors.concat(validate69.errors);
+    if (!validate114(data, { instancePath, parentData, parentDataProperty, rootData })) {
+      vErrors = vErrors === null ? validate114.errors : vErrors.concat(validate114.errors);
       errors = vErrors.length;
     }
     var _valid7 = _errs48 === errors;
@@ -5753,7 +4534,7 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
     if (data.type !== void 0) {
       let data8 = data.type;
       if (!(data8 === "Text" || data8 === "Echo" || data8 === "If" || data8 === "For" || data8 === "Set" || data8 === "Include" || data8 === "Block" || data8 === "IfBlock")) {
-        const err33 = { instancePath: instancePath + "/type", schemaPath: "#/properties/type/enum", keyword: "enum", params: { allowedValues: schema14.properties.type.enum }, message: "must be equal to one of the allowed values" };
+        const err33 = { instancePath: instancePath + "/type", schemaPath: "#/properties/type/enum", keyword: "enum", params: { allowedValues: schema9.properties.type.enum }, message: "must be equal to one of the allowed values" };
         if (vErrors === null) {
           vErrors = [err33];
         } else {
@@ -5771,17 +4552,17 @@ function validate13(data, { instancePath = "", parentData, parentDataProperty, r
     }
     errors++;
   }
-  validate13.errors = vErrors;
+  validate24.errors = vErrors;
   return errors === 0;
 }
-function validate12(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate23(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (Array.isArray(data)) {
     const len0 = data.length;
     for (let i0 = 0; i0 < len0; i0++) {
-      if (!validate13(data[i0], { instancePath: instancePath + "/" + i0, parentData: data, parentDataProperty: i0, rootData })) {
-        vErrors = vErrors === null ? validate13.errors : vErrors.concat(validate13.errors);
+      if (!validate24(data[i0], { instancePath: instancePath + "/" + i0, parentData: data, parentDataProperty: i0, rootData })) {
+        vErrors = vErrors === null ? validate24.errors : vErrors.concat(validate24.errors);
         errors = vErrors.length;
       }
     }
@@ -5794,10 +4575,10 @@ function validate12(data, { instancePath = "", parentData, parentDataProperty, r
     }
     errors++;
   }
-  validate12.errors = vErrors;
+  validate23.errors = vErrors;
   return errors === 0;
 }
-function validate73(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate120(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -5862,73 +4643,24 @@ function validate73(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.span !== void 0) {
-      let data2 = data.span;
-      if (Array.isArray(data2)) {
-        if (data2.length > 2) {
-          const err6 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/maxItems", keyword: "maxItems", params: { limit: 2 }, message: "must NOT have more than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err6];
-          } else {
-            vErrors.push(err6);
-          }
-          errors++;
-        }
-        if (data2.length < 2) {
-          const err7 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/minItems", keyword: "minItems", params: { limit: 2 }, message: "must NOT have fewer than 2 items" };
-          if (vErrors === null) {
-            vErrors = [err7];
-          } else {
-            vErrors.push(err7);
-          }
-          errors++;
-        }
-        const len0 = data2.length;
-        for (let i0 = 0; i0 < len0; i0++) {
-          let data3 = data2[i0];
-          if (!(typeof data3 == "number" && (!(data3 % 1) && !isNaN(data3)) && isFinite(data3))) {
-            const err8 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-            if (vErrors === null) {
-              vErrors = [err8];
-            } else {
-              vErrors.push(err8);
-            }
-            errors++;
-          }
-          if (typeof data3 == "number" && isFinite(data3)) {
-            if (data3 < 0 || isNaN(data3)) {
-              const err9 = { instancePath: instancePath + "/span/" + i0, schemaPath: "#/definitions/Span/items/minimum", keyword: "minimum", params: { comparison: ">=", limit: 0 }, message: "must be >= 0" };
-              if (vErrors === null) {
-                vErrors = [err9];
-              } else {
-                vErrors.push(err9);
-              }
-              errors++;
-            }
-          }
-        }
-      } else {
-        const err10 = { instancePath: instancePath + "/span", schemaPath: "#/definitions/Span/type", keyword: "type", params: { type: "array" }, message: "must be array" };
-        if (vErrors === null) {
-          vErrors = [err10];
-        } else {
-          vErrors.push(err10);
-        }
-        errors++;
+      if (!validate26(data.span, { instancePath: instancePath + "/span", parentData: data, parentDataProperty: "span", rootData })) {
+        vErrors = vErrors === null ? validate26.errors : vErrors.concat(validate26.errors);
+        errors = vErrors.length;
       }
     }
   } else {
-    const err11 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+    const err6 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
     if (vErrors === null) {
-      vErrors = [err11];
+      vErrors = [err6];
     } else {
-      vErrors.push(err11);
+      vErrors.push(err6);
     }
     errors++;
   }
-  validate73.errors = vErrors;
+  validate120.errors = vErrors;
   return errors === 0;
 }
-function validate11(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate22(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   if (data && typeof data == "object" && !Array.isArray(data)) {
@@ -6002,8 +4734,8 @@ function validate11(data, { instancePath = "", parentData, parentDataProperty, r
       }
     }
     if (data.body !== void 0) {
-      if (!validate12(data.body, { instancePath: instancePath + "/body", parentData: data, parentDataProperty: "body", rootData })) {
-        vErrors = vErrors === null ? validate12.errors : vErrors.concat(validate12.errors);
+      if (!validate23(data.body, { instancePath: instancePath + "/body", parentData: data, parentDataProperty: "body", rootData })) {
+        vErrors = vErrors === null ? validate23.errors : vErrors.concat(validate23.errors);
         errors = vErrors.length;
       }
     }
@@ -6012,8 +4744,8 @@ function validate11(data, { instancePath = "", parentData, parentDataProperty, r
       if (Array.isArray(data3)) {
         const len0 = data3.length;
         for (let i0 = 0; i0 < len0; i0++) {
-          if (!validate73(data3[i0], { instancePath: instancePath + "/comments/" + i0, parentData: data3, parentDataProperty: i0, rootData })) {
-            vErrors = vErrors === null ? validate73.errors : vErrors.concat(validate73.errors);
+          if (!validate120(data3[i0], { instancePath: instancePath + "/comments/" + i0, parentData: data3, parentDataProperty: i0, rootData })) {
+            vErrors = vErrors === null ? validate120.errors : vErrors.concat(validate120.errors);
             errors = vErrors.length;
           }
         }
@@ -6036,18 +4768,18 @@ function validate11(data, { instancePath = "", parentData, parentDataProperty, r
     }
     errors++;
   }
-  validate11.errors = vErrors;
+  validate22.errors = vErrors;
   return errors === 0;
 }
-function validate10(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+function validate21(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   ;
   let vErrors = null;
   let errors = 0;
-  if (!validate11(data, { instancePath, parentData, parentDataProperty, rootData })) {
-    vErrors = vErrors === null ? validate11.errors : vErrors.concat(validate11.errors);
+  if (!validate22(data, { instancePath, parentData, parentDataProperty, rootData })) {
+    vErrors = vErrors === null ? validate22.errors : vErrors.concat(validate22.errors);
     errors = vErrors.length;
   }
-  validate10.errors = vErrors;
+  validate21.errors = vErrors;
   return errors === 0;
 }
 export {
