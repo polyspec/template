@@ -275,12 +275,16 @@ export class FunctionLocals {
 
   /**
    * The locals of `names` that have a binding, each with a new variable that holds it after a branch or a loop: of its
-   * type in `widened`, the type that the IR gives it after the node, or else of its type before.
+   * type in `widened`, the type that the IR gives it after the node, which names each local of the enclosing scope that
+   * the node assigns; or, with `widened` null, for a node that the IR does not widen, of its type before.
    */
-  merged(names: Set<string>, widened: Map<string, ValueType>): MergedLocal[] {
+  merged(names: Set<string>, widened: Map<string, ValueType> | null): MergedLocal[] {
     return [...names].flatMap(name => {
       const before = this.bindings.get(name);
-      return before === undefined ? [] : [{ name, before, variable: this.variable(name, true), type: widened.get(name) ?? before.type }];
+      if (before === undefined) return [];
+      const type = widened === null ? before.type : widened.get(name);
+      if (type === undefined) throw new Error(`compiler backend: the IR gives no type after the node to local ${name}, which it assigns`);
+      return [{ name, before, variable: this.variable(name, true), type }];
     });
   }
 
