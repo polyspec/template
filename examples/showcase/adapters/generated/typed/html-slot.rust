@@ -6,15 +6,14 @@ use polyspec_template::render::runtime_bindings::RuntimeBindings;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::rc::Rc;
-
 #[derive(Clone, Default)] pub struct Assign {
     pub heading: String,
 }
-impl GeneratedConvert for Assign { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error("Assign is not a map")); }; let _ = &map; Ok(Assign { heading: generated_field(map, "heading")? }) } fn to_value(&self) -> Value { let mut map = RuntimeOrderedMap::new(); map.insert("heading".to_string(), self.heading.to_value()); Value::map(map) } }
+impl GeneratedConvert for Assign { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error("Assign is not a map")); }; let _ = &map; let heading = generated_field(map, "heading")?; Ok(Assign { heading }) } fn to_value(&self) -> Value { let mut map = RuntimeOrderedMap::new(); map.insert("heading".to_string(), self.heading.to_value()); Value::map(map) } }
 #[derive(Clone, Default)] pub struct InputLayoutTpl {  }
-#[derive(Clone, Default)] pub struct DefinitionDataLayoutTpl {  }
-#[derive(Clone)] pub struct Definition<T> { pub template: Option<String>, pub html: Option<String>, pub data: Option<T> }
-#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<()>>, pub layout: Option<Definition<DefinitionDataLayoutTpl>> }
+
+#[derive(Clone, Default)] pub struct Definition { pub html: Option<String> }
+#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition>, pub layout: Option<Definition> }
 fn generated_conversion_error(message: impl Into<String>) -> TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message) }
 pub trait GeneratedConvert: Sized { fn from_value(input: &Value) -> Result<Self, TemplateError>; fn to_value(&self) -> Value; }
 impl GeneratedConvert for Value { fn from_value(input: &Value) -> Result<Self, TemplateError> { Ok(input.clone()) } fn to_value(&self) -> Value { self.clone() } }
@@ -43,8 +42,12 @@ fn render_template(target: &str, assign: &Assign, definitions: &mut Definitions,
 fn generated_error(message: String) -> RequestError { RequestError::Argument(ArgumentError { message }) }
 struct GeneratedTarget { target: Option<String>, html: Option<String> }
 fn generated_bind_definitions(name: &str, input: &HashMap<String, polyspec_template::DefineInput>) -> Result<(Definitions, HashMap<String, GeneratedTarget>), RequestError> { let mut definitions = Definitions::default(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {
-            "content" => { if let Some(html) = &input.html { if false || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.content = Some(Definition { template: None, html: Some(html.clone()), data: None }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("") { return Err(generated_error(format!("define.{id} has an invalid template"))); } let data: Option<()> = None; definitions.content = Some(Definition { template: input.template.clone(), html: None, data }); targets.insert(id.clone(), GeneratedTarget { target: Some("".to_string()), html: None }); } },
-            "layout" => { if let Some(html) = &input.html { if true || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.layout = Some(Definition { template: None, html: Some(html.clone()), data: None }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("layout.tpl") { return Err(generated_error(format!("define.{id} has an invalid template"))); } let data = match &input.data { None => None, Some(data) => match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) => { let _ = &map; Some(DefinitionDataLayoutTpl {  }) }, _ => return Err(generated_error(format!("define.{id}.data is not an object"))) } }; definitions.layout = Some(Definition { template: input.template.clone(), html: None, data }); targets.insert(id.clone(), GeneratedTarget { target: Some("layout.tpl".to_string()), html: None }); } },
+            "content" => { if let Some(html) = &input.html { if false || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.content = Some(Definition { html: Some(html.clone()) }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("") { return Err(generated_error(format!("define.{id} has an invalid template"))); }
+
+definitions.content = Some(Definition::default()); targets.insert(id.clone(), GeneratedTarget { target: Some("".to_string()), html: None }); } },
+            "layout" => { if let Some(html) = &input.html { if true || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.layout = Some(Definition { html: Some(html.clone()) }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("layout.tpl") { return Err(generated_error(format!("define.{id} has an invalid template"))); }
+if let Some(data) = &input.data { match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(_) => {  }, _ => return Err(generated_error(format!("define.{id}.data is not an object"))) } }
+definitions.layout = Some(Definition::default()); targets.insert(id.clone(), GeneratedTarget { target: Some("layout.tpl".to_string()), html: None }); } },
             _ => return Err(generated_error(format!("define.{id} is not declared"))),
         } } Ok((definitions, targets)) }
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }

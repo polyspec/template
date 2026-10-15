@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 2a2ef8e0bea7a8a989a3e57bdd4b945ed9cd64f4c7f55d2e285be7bd151c9e35 -->
+<!-- source-sha256: 3a1064ee18a3b803077e3c8ad1dbadcd40b57eca0d4c3acd6cac2855fa60b305 -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -42,7 +42,7 @@ Local 변수는 직선 코드에서 마지막 assignment의 type을 가진다. B
 
 도출한 manifest는 알고 있는 각 내장 함수의 선언된 `minArgs`와 `maxArgs`를 복사한다. 동적 conformance source는 잘못된 호출이 AST 실행과 같은 위치의 `E_RUNTIME_ARITY`를 내도록 arity 검사를 runtime에 남기며, 명시적인 정적 manifest는 lowering 중에 그 호출을 거부할 수 있다. 알 수 없는 함수는 열린 arity 호출로 남아 runtime registry에 도달하고, 구현이 없으면 일반 runtime 오류를 낸다.
 
-모든 generated module은 논리 구조 `Assign`, `Definitions`, `Input<T>`, `GeneratedProgram`을 노출한다. 다른 target의 module은 `DefinitionData<T>`, `Definition<T>`, `ArtifactManifest`도 노출한다. Rust module은 program이 definition을 선언할 때만 `Definition<T>`를, definition이 가리키는 template에만 `DefinitionData<T>`를 선언하고 `ArtifactManifest`는 선언하지 않는다. module을 private module로 포함하는 crate는 생성되지 않는 구조를 dead code로 보고하기 때문이다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
+모든 generated module은 논리 구조 `Assign`, `Definitions`, `Input<T>`, `GeneratedProgram`을 노출한다. 다른 target의 module은 `DefinitionData<T>`, `Definition<T>`, `ArtifactManifest`도 노출한다. Rust module은 program이 definition을 선언할 때만 `Definition<T>`를 선언하고 그 template과 data는 block이 읽을 때만 두며, block이 definition data를 merge하는 template에만 `DefinitionData<T>`를, 선언된 type이 가리키는 record를, template이 읽는 `Assign`의 field를, 값을 다시 변환할 때만 `to_value`를 선언하고 `ArtifactManifest`는 선언하지 않는다. module을 private module로 포함하는 crate는 쓰이지 않는 구조, field, method를 dead code로 보고하기 때문이다. program이 읽지 않는 root field나 definition data도 그 type의 값을 만들지 않고 선언된 type에 대해 검사되며, 읽는 값과 같은 field 경로로 실패한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
 다섯 generated backend 모두 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 다섯 core 언어와 `tests/cases`의 모든 canonical case에서 완료되었다.
 

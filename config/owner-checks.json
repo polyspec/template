@@ -129,7 +129,7 @@
     },
     {
       "paths": [
-        "tests/fixtures/{typed-arguments,typed-values,typed-locals}/**",
+        "tests/fixtures/{typed-arguments,typed-arguments-unread,typed-values,typed-locals}/**",
         "scripts/check-generated-{arguments,typed-values,typed-locals,native-calls,bound-data}.mts"
       ],
       "targets": [
@@ -1404,6 +1404,7 @@
       "check": "make generated-arguments-check",
       "paths": [
         "tests/fixtures/typed-arguments/**",
+        "tests/fixtures/typed-arguments-unread/**",
         "packages/compiler/**",
         "scripts/check-generated-arguments.mts",
         "scripts/language-checks.mts",

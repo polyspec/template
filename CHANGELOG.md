@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T24.31: a generated Rust program declares only the records that its types name, the fields of `Assign` that a template reads, the template and data of a definition only when a block reads them, and `to_value` only when a value is converted back, so each showcase program passes clippy `-D warnings` as a private module of a binary crate. A root field or definition data that the program does not read is checked against its declared type without a value of that type, and fails with the same field path, such as `page: name: expected a string` or `define.card.data.name: expected a string`.
+
 ## 0.0.9
 
 - T24.30: release 0.0.9. Every manifest of `config/release.json` declares 0.0.9, and the locks, the dependency review, the compiled artifacts and the consumer projects of the release assets record it.
