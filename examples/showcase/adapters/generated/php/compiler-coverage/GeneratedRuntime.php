@@ -122,8 +122,11 @@ final class GeneratedRuntime
         return [self::bindRecord($root, self::schema(self::ASSIGN_SCHEMA), Assign::class, 'assign'), $root];
     }
 
-    public static function bindDefinitions(array $input): array
+    public static function bindDefinitions(mixed $input): array
     {
+        if (!is_array($input)) {
+            throw new InvalidArgumentException('define is not an object');
+        }
         $arguments = [];
         $targets = [];
         $specs = self::schema(self::DEFINITION_SCHEMA);

@@ -6,11 +6,11 @@
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "8d1d6f0aa1ce5dc3f07566c2240d6bf347fc8cca12bc92fee7aca36a54388a9c",
+  "compilerDigest": "c0e26c1fbcce237cf73a07308eebab7e9be0181e37c1eb8e8dd6a286a86fab0f",
   "files": {
     "react_boundary.py": {
       "path": "react_boundary.py",
-      "artifactDigest": "a47f0e837d01789ea95ef7e1d36d22e142bb9249985388a84412ec958962eb4a"
+      "artifactDigest": "8a993c6f8f77487d95b06e13b5c84c4be87e4a4eeca1084e0344c875d5cc3621"
     }
   }
 }

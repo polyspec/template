@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T24.36: a generated TypeScript, PHP or Python program fails on a `define` option that is not an object with the argument error `define is not an object` (ERR-13). TypeScript raised a `BindError` with `E_DATA_UNSUPPORTED_TYPE`, PHP an `E_INTERNAL` error of the type of its parameter and Python an `AttributeError`.
 - T24.35: template pins `@polyspec/kit` 0.0.52, and `make kit-sync` wrote its copies (`release.yml`, which runs kit-check before any release step, `kit-bootstrap.mk`, `config/layout.kit.yml`). `make lint-ts` gives no configuration hint about the copy of knip.json any more, and npm allows the remote kit package in every recipe.
 
 ## 0.0.10

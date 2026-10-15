@@ -6,11 +6,11 @@
   "sourceDigest": "112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028",
   "typeDigest": "3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "8d1d6f0aa1ce5dc3f07566c2240d6bf347fc8cca12bc92fee7aca36a54388a9c",
+  "compilerDigest": "c0e26c1fbcce237cf73a07308eebab7e9be0181e37c1eb8e8dd6a286a86fab0f",
   "files": {
     "scope_precedence.py": {
       "path": "scope_precedence.py",
-      "artifactDigest": "a1e8c6cc154e293c1d07d95f9bc99c7f30a62f07c3af9e358fd4cd49aae84fae"
+      "artifactDigest": "a7454a8a9d63511542c8085bacd5c83a7489e04d3b91a5a31502032ddcc275a4"
     }
   }
 }

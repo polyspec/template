@@ -1123,11 +1123,11 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;9cb7f00be7fb381155596860693fcfde60b2b0f0d33816833bb6e45cec1a101d&quot;,
+  &quot;compilerDigest&quot;: &quot;a81f5f0f977b099b35dd1267160848c835a8aaf7c6865ac99d066a351070cbb0&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;9f708c8ecb1f9253d6e177212e4b673639aef4a0202effd1127bc43eec7a2a11&quot;
+      &quot;artifactDigest&quot;: &quot;da324a1e34bb870912a374e84d431ff54ca44354eed16a85e02e4dc0632dcbac&quot;
     }
   }
 }
@@ -1187,7 +1187,7 @@ function generatedBindDefinitions(input: unknown): GeneratedBoundDefinitions {
   const definitions: Definitions = {};
   const targets = new Map&lt;string, GeneratedTarget&gt;();
   if (input === undefined || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;define is not an object&#39;);
+  if (!generatedPlain(input)) throw new Error(&#39;define is not an object&#39;);
   const entries: [string, unknown][] = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -1347,11 +1347,11 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e3dd68f06823edb5e0327e5ce4345330315fe2e4a3274e6e8289e6c99f0683ee&quot;,
+  &quot;compilerDigest&quot;: &quot;b40cdb1f1d7a4effb449f8ca4a5d4e9dd11187b5877ff1c9143db4b85b1da156&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
-      &quot;artifactDigest&quot;: &quot;b6cddbf2b22ff54c2218e9cddc8381104fb6135bcacd6d3c50f20fb748392058&quot;
+      &quot;artifactDigest&quot;: &quot;5d473ea122af5e8999d768919f4a3da38de3072735e95aee12a2f31496925442&quot;
     }
   }
 }
@@ -1443,7 +1443,7 @@ function generatedBindDefinitions(input) {
   const definitions = {};
   const targets = /* @__PURE__ */ new Map();
   if (input === void 0 || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;define is not an object&quot;);
+  if (!generatedPlain(input)) throw new Error(&quot;define is not an object&quot;);
   const entries = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -2747,7 +2747,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
+  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -2803,7 +2803,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;2e76717a7207049fe74de320015ae8ddf2a6e015b11dcc7d345a8ebc3717b59f&quot;
+      &quot;artifactDigest&quot;: &quot;f47c6e4c65c0c9968475b5f8212649b3ffe52c1a1b6df1bd6403248c6a257d3b&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -3289,11 +3289,11 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;9cb7f00be7fb381155596860693fcfde60b2b0f0d33816833bb6e45cec1a101d&quot;,
+  &quot;compilerDigest&quot;: &quot;a81f5f0f977b099b35dd1267160848c835a8aaf7c6865ac99d066a351070cbb0&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
       &quot;path&quot;: &quot;empty-state.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;0c2b3415ecffb3b2d37e4be46c2a9ab50d4c6f0d9abf6efca7fa15fa7b7a6c97&quot;
+      &quot;artifactDigest&quot;: &quot;e003f0c6ed34e25c452c17d2aa575af7c81ac1c911f08be726947e0b2924aab0&quot;
     }
   }
 }
@@ -3323,7 +3323,7 @@ function generatedBindDefinitions(input: unknown): GeneratedBoundDefinitions {
   const definitions: Definitions = {};
   const targets = new Map&lt;string, GeneratedTarget&gt;();
   if (input === undefined || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;define is not an object&#39;);
+  if (!generatedPlain(input)) throw new Error(&#39;define is not an object&#39;);
   const entries: [string, unknown][] = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -3402,11 +3402,11 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e3dd68f06823edb5e0327e5ce4345330315fe2e4a3274e6e8289e6c99f0683ee&quot;,
+  &quot;compilerDigest&quot;: &quot;b40cdb1f1d7a4effb449f8ca4a5d4e9dd11187b5877ff1c9143db4b85b1da156&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
       &quot;path&quot;: &quot;empty-state.js&quot;,
-      &quot;artifactDigest&quot;: &quot;fab07c0bc7a5381d387392c2f233727b1dde68990f40cd363b958fc750d79f92&quot;
+      &quot;artifactDigest&quot;: &quot;8fab434118f459ba3e314b479de5dcb1f1b929b1592ca417d20785bd701ddcc2&quot;
     }
   }
 }
@@ -3448,7 +3448,7 @@ function generatedBindDefinitions(input) {
   const definitions = {};
   const targets = /* @__PURE__ */ new Map();
   if (input === void 0 || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;define is not an object&quot;);
+  if (!generatedPlain(input)) throw new Error(&quot;define is not an object&quot;);
   const entries = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -4059,7 +4059,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
+  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -4087,7 +4087,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;b5e2ab0bf72387949dc3fd51317ac21e90bcf9f0b5b3c1997ff12317cb871693&quot;
+      &quot;artifactDigest&quot;: &quot;01187ceb3e740c6a11a40653b5023de290019d077c38c3fa3c76bcfe8e3e3046&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -4291,11 +4291,11 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;9cb7f00be7fb381155596860693fcfde60b2b0f0d33816833bb6e45cec1a101d&quot;,
+  &quot;compilerDigest&quot;: &quot;a81f5f0f977b099b35dd1267160848c835a8aaf7c6865ac99d066a351070cbb0&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
       &quot;path&quot;: &quot;html-slot.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;4c860174b72d15d0dfffe87d171a2f2922c8d5df1244c3e96adec61492ea1f16&quot;
+      &quot;artifactDigest&quot;: &quot;16210c1f7ef0a77cdfc9e4722236c6eaf60efd3902bd1dd14230a913971f19b2&quot;
     }
   }
 }
@@ -4325,7 +4325,7 @@ function generatedBindDefinitions(input: unknown): GeneratedBoundDefinitions {
   const definitions: Definitions = {};
   const targets = new Map&lt;string, GeneratedTarget&gt;();
   if (input === undefined || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;define is not an object&#39;);
+  if (!generatedPlain(input)) throw new Error(&#39;define is not an object&#39;);
   const entries: [string, unknown][] = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -4402,11 +4402,11 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e3dd68f06823edb5e0327e5ce4345330315fe2e4a3274e6e8289e6c99f0683ee&quot;,
+  &quot;compilerDigest&quot;: &quot;b40cdb1f1d7a4effb449f8ca4a5d4e9dd11187b5877ff1c9143db4b85b1da156&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
       &quot;path&quot;: &quot;html-slot.js&quot;,
-      &quot;artifactDigest&quot;: &quot;9fff7cf2c333cd98d3c03f1c2f80fffc8e168d78e6c4bec893b4b024847655ab&quot;
+      &quot;artifactDigest&quot;: &quot;930844a2f9dc18ef304548c5746620397c37ee593be334d1e1b17de48188466d&quot;
     }
   }
 }
@@ -4448,7 +4448,7 @@ function generatedBindDefinitions(input) {
   const definitions = {};
   const targets = /* @__PURE__ */ new Map();
   if (input === void 0 || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;define is not an object&quot;);
+  if (!generatedPlain(input)) throw new Error(&quot;define is not an object&quot;);
   const entries = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -5087,7 +5087,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
+  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -5115,7 +5115,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;bfbe07283c3f605db5e4a9757a8721cfc7e15ad14976e4282207b24df12ad09b&quot;
+      &quot;artifactDigest&quot;: &quot;ee0b8697bb7c8c1963f80bd3f545b78ebdb0e879e9a7393382efacc522de90ff&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -5381,11 +5381,11 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;9cb7f00be7fb381155596860693fcfde60b2b0f0d33816833bb6e45cec1a101d&quot;,
+  &quot;compilerDigest&quot;: &quot;a81f5f0f977b099b35dd1267160848c835a8aaf7c6865ac99d066a351070cbb0&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
       &quot;path&quot;: &quot;react-boundary.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;7a1b602390368c79ce9c0cca17deac82bf26b3a77ef37a34aa4b0f662074e8e2&quot;
+      &quot;artifactDigest&quot;: &quot;dca8aa420586683f288d95c4d475f8cd3eab537a803e361a15b6b50361a365df&quot;
     }
   }
 }
@@ -5431,7 +5431,7 @@ function generatedBindDefinitions(input: unknown): GeneratedBoundDefinitions {
   const definitions: Definitions = {};
   const targets = new Map&lt;string, GeneratedTarget&gt;();
   if (input === undefined || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;define is not an object&#39;);
+  if (!generatedPlain(input)) throw new Error(&#39;define is not an object&#39;);
   const entries: [string, unknown][] = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -5519,11 +5519,11 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e3dd68f06823edb5e0327e5ce4345330315fe2e4a3274e6e8289e6c99f0683ee&quot;,
+  &quot;compilerDigest&quot;: &quot;b40cdb1f1d7a4effb449f8ca4a5d4e9dd11187b5877ff1c9143db4b85b1da156&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
       &quot;path&quot;: &quot;react-boundary.js&quot;,
-      &quot;artifactDigest&quot;: &quot;a1c2083d521e30f5e301bc564ff71b3b36724fcfb264616223dc55b7f62edc12&quot;
+      &quot;artifactDigest&quot;: &quot;2353e20b17e79fb529708730f0858e173d2ac72dab953e4e36ee1c551f7c48c5&quot;
     }
   }
 }
@@ -5576,7 +5576,7 @@ function generatedBindDefinitions(input) {
   const definitions = {};
   const targets = /* @__PURE__ */ new Map();
   if (input === void 0 || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;define is not an object&quot;);
+  if (!generatedPlain(input)) throw new Error(&quot;define is not an object&quot;);
   const entries = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -6317,7 +6317,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
+  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -6361,7 +6361,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;137ca3989e4fe71d4defa5cb6a03d013a2db2eebae732d277d2bb019b36853d8&quot;
+      &quot;artifactDigest&quot;: &quot;9917bf51902f31c45cec1c6e2f420b8be4af44c32181763d442fdb3aef35e544&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
@@ -6784,11 +6784,11 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;9cb7f00be7fb381155596860693fcfde60b2b0f0d33816833bb6e45cec1a101d&quot;,
+  &quot;compilerDigest&quot;: &quot;a81f5f0f977b099b35dd1267160848c835a8aaf7c6865ac99d066a351070cbb0&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
       &quot;path&quot;: &quot;scope-precedence.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;ff7d5c2694474dcd4f4a3f9d77f27f452ea294fc875e14c546278d9f55a64623&quot;
+      &quot;artifactDigest&quot;: &quot;e9db26dbc5e5cf7ede014505eab2a05ebcef155c109b6cf6777bc19ae25f1af4&quot;
     }
   }
 }
@@ -6828,7 +6828,7 @@ function generatedBindDefinitions(input: unknown): GeneratedBoundDefinitions {
   const definitions: Definitions = {};
   const targets = new Map&lt;string, GeneratedTarget&gt;();
   if (input === undefined || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&#39;E_DATA_UNSUPPORTED_TYPE&#39;, &#39;define is not an object&#39;);
+  if (!generatedPlain(input)) throw new Error(&#39;define is not an object&#39;);
   const entries: [string, unknown][] = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -6924,11 +6924,11 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;e3dd68f06823edb5e0327e5ce4345330315fe2e4a3274e6e8289e6c99f0683ee&quot;,
+  &quot;compilerDigest&quot;: &quot;b40cdb1f1d7a4effb449f8ca4a5d4e9dd11187b5877ff1c9143db4b85b1da156&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
-      &quot;artifactDigest&quot;: &quot;690e3e07913c88a5f3e98232f8e2b6f119152defee74b06eefa454da7ebd2b4d&quot;
+      &quot;artifactDigest&quot;: &quot;2cf584f48faefd0a4765dcac2abc207aa17e42bbbfb96ecdb41cc9f914c21813&quot;
     }
   }
 }
@@ -6994,7 +6994,7 @@ function generatedBindDefinitions(input) {
   const definitions = {};
   const targets = /* @__PURE__ */ new Map();
   if (input === void 0 || input === null) return { definitions, targets };
-  if (!generatedPlain(input)) throw new BindError(&quot;E_DATA_UNSUPPORTED_TYPE&quot;, &quot;define is not an object&quot;);
+  if (!generatedPlain(input)) throw new Error(&quot;define is not an object&quot;);
   const entries = Object.entries(input);
   for (const [id, raw] of entries) {
     checkText(id);
@@ -7840,7 +7840,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;7afa80dba95967864fba831a1eb0e77a61c2427ccc1ad1f068b8227d63d7b513&quot;,
+  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -7880,7 +7880,7 @@ php · product generated program
     },
     &quot;GeneratedRuntime.php&quot;: {
       &quot;path&quot;: &quot;GeneratedRuntime.php&quot;,
-      &quot;artifactDigest&quot;: &quot;8ecf89faf2a3fd42c5e9281c61414e7bf3912868a66822fd7ae0f72e0872ad7c&quot;
+      &quot;artifactDigest&quot;: &quot;ba4ca2a90aa8daa7d2c0fba6b4c3282350f4e8c075bae07b49ea4116b179e0a4&quot;
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
