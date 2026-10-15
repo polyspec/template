@@ -9,7 +9,7 @@
     ],
     "require": {
         "php": ">=8.5",
-        "polyspec/template": "0.0.9"
+        "polyspec/template": "0.0.10"
     },
     "config": {
         "platform": {
