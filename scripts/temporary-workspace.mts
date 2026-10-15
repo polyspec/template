@@ -8,7 +8,9 @@
 // - rustWorkspace: a crate that depends on packages/rust by path, with the versions of its Cargo.lock and the
 //   rust-toolchain.toml of the repository; its tests build into the target of packages/rust, the target of this
 //   checkout (T18.7).
-// - goWorkspace: a module that requires the module of packages/go and replaces it with that directory.
+// - goWorkspace: a module that is a member of a Go workspace (go.work) together with packages/go, as the Go adapter of
+//   the showcase is, so Go resolves the module of packages/go from that directory and checks its dependencies by its
+//   go.sum (T25.6-1).
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -107,13 +109,16 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   return { directory, manifest, env, targetDirectory, test: file => join(directory, 'tests', `${file}.rs`) };
 }
 
-/** A temporary Go module that uses the module of packages/go from that directory. */
+/**
+ * A temporary Go module that uses the module of packages/go from that directory: both are the modules of the go.work of
+ * the temporary directory, so the module requires nothing and Go checks the dependencies of packages/go by its go.sum.
+ */
 export function goWorkspace(name: string): string {
   const directory = temporaryDirectory(name);
   const module = readFileSync(join(GO, 'go.mod'), 'utf8');
-  const path = module.match(/^module (\S+)$/m)?.[1];
   const version = module.match(/^go (\S+)$/m)?.[1];
-  if (path === undefined || version === undefined) throw new Error(`${relative(root, join(GO, 'go.mod'))} names no module path or go version`);
-  writeFileSync(join(directory, 'go.mod'), `module polyspec.invalid/generated\n\ngo ${version}\n\nrequire ${path} v0.0.0\n\nreplace ${path} => ${GO}\n`);
+  if (version === undefined) throw new Error(`${relative(root, join(GO, 'go.mod'))} names no go version`);
+  writeFileSync(join(directory, 'go.mod'), `module polyspec.invalid/generated\n\ngo ${version}\n`);
+  writeFileSync(join(directory, 'go.work'), `go ${version}\n\nuse .\nuse ${JSON.stringify(GO)}\n`);
   return directory;
 }
