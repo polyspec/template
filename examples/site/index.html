@@ -1123,11 +1123,11 @@ ast/partial.tpl.ast.json · partial.tpl
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;61c042ba28df0b5192c8cf92876e10881917abbbbc6344c4ca9804ddcc29ef75&quot;,
+  &quot;compilerDigest&quot;: &quot;a7c496e1f13ae28882373dfa4e8f56ae10a2e79f87d345ab85a76872f4113951&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.ts&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;371d64d16cc882549a50e89390c89019e1f082cb4c80b7868d73ab13299e699b&quot;
+      &quot;artifactDigest&quot;: &quot;9f708c8ecb1f9253d6e177212e4b673639aef4a0202effd1127bc43eec7a2a11&quot;
     }
   }
 }
@@ -1173,7 +1173,7 @@ function generatedBoolean(value: Value | undefined, path: string): boolean { if 
 function generatedOptional&lt;T&gt;(decode: GeneratedDecoder&lt;T&gt;): GeneratedDecoder&lt;T | null&gt; { return (value, path) =&gt; value === null || value === undefined ? null : decode(value, path); }
 function generatedListOf&lt;T&gt;(item: GeneratedDecoder&lt;T&gt;): GeneratedDecoder&lt;T[]&gt; { return (value, path) =&gt; { if (Array.isArray(value)) return value.map((element, index) =&gt; item(element, path + &#39;[&#39; + index + &#39;]&#39;)); throw generatedTypeError(value, path, &#39;a list&#39;); }; }
 function generatedMapOf&lt;T&gt;(item: GeneratedDecoder&lt;T&gt;): GeneratedDecoder&lt;Map&lt;string, T&gt;&gt; { return (value, path) =&gt; new Map([...generatedObject(value, path)].map(([key, element]): [string, T] =&gt; [key, item(element, path + &#39;.&#39; + key)])); }
-function generatedEncodeList&lt;T&gt;(encode: (value: T) =&gt; Value): (value: T[]) =&gt; Value { return value =&gt; value.map(item =&gt; encode(item)); }
+function generatedEntries&lt;T&gt;(value: T[] | Map&lt;string, T&gt; | null): [Value, T][] { if (value === null) return []; if (Array.isArray(value)) return value.map((item, index): [Value, T] =&gt; [index, item]); return [...value]; }
 function generatedDecode_Page(value: Value | undefined, path: string): Page { const object = generatedObject(value, path); return { title: generatedString(object.get(&quot;title&quot;), path + &quot;.title&quot;) }; }
 function generatedDecode_Row(value: Value | undefined, path: string): Row { const object = generatedObject(value, path); return { name: generatedString(object.get(&quot;name&quot;), path + &quot;.name&quot;) }; }
 function generatedEncode_Row(value: Row): Value { return new Map&lt;string, Value&gt;([[&quot;name&quot;, value.name]]); }
@@ -1232,14 +1232,16 @@ function render_card_tpl(_assign: Assign, _definitions: Definitions, input: Inpu
   const frame = new Frame(&quot;card.tpl&quot;, [0,30], rootData);
   scope.locals.set(&quot;label&quot;, input.label);
     context.at(frame, [0,16]); context.output.write(&quot;&lt;p class=\&quot;card\&quot;&gt;&quot;);
-    context.at(frame, [16,25]); context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;label&quot;), &quot;label&quot;, runtime, frame, [19,24]), frame, [19,24]));
+    context.at(frame, [16,25]); context.output.write(runtime.escape(input.label, frame, [19,24]));
     context.at(frame, [25,30]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
 function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame(&quot;layout.tpl&quot;, [0,29,66,76,100,137,191,268,305,392,463,468,483,563,567,582,586,592,608,655,684,695], rootData);
 
-    scope.locals.set(&quot;values&quot;, generatedChecked(generatedListOf(generatedNumber), runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16,26])], frame, [12,27]), &quot;list&quot;, runtime, frame, [12,27]));
-    scope.locals.set(&quot;merged&quot;, generatedChecked(generatedMapOf(generatedString), runtime.depth(new Map&lt;string, Value&gt;([...runtime.mapSpread(assign.lookup, frame, [42,51]), [runtime.stringify(&quot;z&quot;, frame, [53,56]), &quot;Z&quot;]]), frame, [41,64]), &quot;map&quot;, runtime, frame, [41,64]));
+    const local_values_1: Array&lt;number&gt; = generatedChecked(generatedListOf(generatedNumber), runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16,26])], frame, [12,27]), &quot;[0, ...numbers]&quot;, runtime, frame, [12,27]);
+    scope.locals.set(&quot;values&quot;, local_values_1);
+    const local_merged_2: Map&lt;string, string&gt; = generatedChecked(generatedMapOf(generatedString), runtime.depth(new Map&lt;string, Value&gt;([...runtime.mapSpread(assign.lookup, frame, [42,51]), [runtime.stringify(&quot;z&quot;, frame, [53,56]), &quot;Z&quot;]]), frame, [41,64]), &quot;[...lookup, \&quot;z\&quot; =&gt; \&quot;Z\&quot;]&quot;, runtime, frame, [41,64]);
+    scope.locals.set(&quot;merged&quot;, local_merged_2);
     context.at(frame, [66,80]); context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
     context.at(frame, [80,94]); context.output.write(runtime.escape((assign.page).title, frame, [83,93]));
     context.at(frame, [94,119]); context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;escaped\&quot;&gt;&quot;);
@@ -1253,27 +1255,28 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     context.at(frame, [241,242]); context.output.write(&quot;|&quot;);
     context.at(frame, [242,263]); context.output.write(runtime.escape((() =&gt; { const left = assign.empty_map; return runtime.truthy(left) ? runtime.truthy(assign.flag) : false; })(), frame, [245,262]));
     context.at(frame, [263,271]); context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
-    context.at(frame, [271,284]); context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, &quot;values&quot;), &quot;values&quot;, runtime, frame, [274,280]), 1, frame, [274,283]), &quot;index&quot;, runtime, frame, [274,283]), frame, [274,283]));
+    context.at(frame, [271,284]); context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(local_values_1, 1, frame, [274,283]), &quot;values[1]&quot;, runtime, frame, [274,283]), frame, [274,283]));
     context.at(frame, [284,285]); context.output.write(&quot;|&quot;);
-    context.at(frame, [285,300]); context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedString), runtime.index(generatedChecked(generatedMapOf(generatedString), scope.lookup(frame, &quot;merged&quot;), &quot;merged&quot;, runtime, frame, [288,294]), &quot;z&quot;, frame, [288,299]), &quot;index&quot;, runtime, frame, [288,299]), frame, [288,299]));
+    context.at(frame, [285,300]); context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedString), runtime.index(local_merged_2, &quot;z&quot;, frame, [288,299]), &quot;merged[\&quot;z\&quot;]&quot;, runtime, frame, [288,299]), frame, [288,299]));
     context.at(frame, [300,305]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
-    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(generatedChecked(generatedBoolean, runtime.binary(&quot;==&quot;, (assign.page).title, &quot;Guide&quot;, frame, [316,337]), &quot;==&quot;, runtime, frame, [316,337])) : false; })())) {
-        context.at(frame, [338,362]); context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);    } else {
+    if (runtime.truthy((() =&gt; { const left = assign.flag; return runtime.truthy(left) ? runtime.truthy(generatedChecked(generatedBoolean, runtime.binary(&quot;==&quot;, (assign.page).title, &quot;Guide&quot;, frame, [316,337]), &quot;page.title == \&quot;Guide\&quot;&quot;, runtime, frame, [316,337])) : false; })())) {
+        context.at(frame, [338,362]); context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);
+    } else {
         context.at(frame, [365,388]); context.output.write(&quot;&lt;strong&gt;missed&lt;/strong&gt;&quot;);
     }
     context.at(frame, [391,395]); context.output.write(&quot;\n&lt;p&gt;&quot;);
     context.at(frame, [395,418]); context.output.write(runtime.escape((runtime.truthy(assign.flag) ? &quot;yes&quot; : &quot;no&quot;), frame, [398,417]));
     context.at(frame, [418,419]); context.output.write(&quot;|&quot;);
-    context.at(frame, [419,429]); context.output.write(runtime.escape(generatedChecked(generatedNumber, runtime.binary(&quot;+&quot;, generatedChecked(generatedNumber, runtime.unary(&quot;-&quot;, 1, frame, [422,424]), &quot;-&quot;, runtime, frame, [422,424]), 3, frame, [422,428]), &quot;+&quot;, runtime, frame, [422,428]), frame, [422,428]));
+    context.at(frame, [419,429]); context.output.write(runtime.escape(generatedChecked(generatedNumber, runtime.binary(&quot;+&quot;, generatedChecked(generatedNumber, runtime.unary(&quot;-&quot;, 1, frame, [422,424]), &quot;-1&quot;, runtime, frame, [422,424]), 3, frame, [422,428]), &quot;-1 + 3&quot;, runtime, frame, [422,428]), frame, [422,428]));
     context.at(frame, [429,430]); context.output.write(&quot;|&quot;);
-    context.at(frame, [430,458]); context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [433,457]), &quot;default&quot;, runtime, frame, [433,457]), frame, [433,457]));
+    context.at(frame, [430,458]); context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [433,457]), &quot;default(\&quot;\&quot;, \&quot;fallback\&quot;)&quot;, runtime, frame, [433,457]), frame, [433,457]));
     context.at(frame, [458,468]); context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
-    { const row_entries = runtime.entries(generatedEncodeList(generatedEncode_Row)(assign.rows), frame, [468,585]);
+    { const row_entries = generatedEntries(assign.rows);
     const row_size = row_entries.length; const row_last_index = row_size - 1;
     const row_previous = scope.locals.get(&quot;row&quot;);
     try {
-    for (const [row_index, [, row_value]] of row_entries.entries()) {
-        scope.locals.set(&quot;row&quot;, row_value);
+    for (const [row_index, [, local_row_3]] of row_entries.entries()) {
+        scope.locals.set(&quot;row&quot;, generatedEncode_Row(local_row_3));
         const row_first = row_index === 0;
         const row_last = row_index === row_last_index;
         context.iterations += 1;
@@ -1283,7 +1286,7 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
             context.at(frame, [501,502]); context.output.write(&quot;/&quot;);
             context.at(frame, [502,515]); context.output.write(runtime.escape(row_size, frame, [505,514]));
             context.at(frame, [515,516]); context.output.write(&quot;:&quot;);
-            context.at(frame, [516,528]); context.output.write(runtime.escape((generatedChecked(generatedDecode_Row, scope.lookup(frame, &quot;row&quot;), &quot;row&quot;, runtime, frame, [519,522])).name, frame, [519,527]));
+            context.at(frame, [516,528]); context.output.write(runtime.escape((local_row_3).name, frame, [519,527]));
             context.at(frame, [528,529]); context.output.write(&quot;:&quot;);
             context.at(frame, [529,543]); context.output.write(runtime.escape(row_first, frame, [532,542]));
             context.at(frame, [543,544]); context.output.write(&quot;:&quot;);
@@ -1297,11 +1300,11 @@ function render_layout_tpl(assign: Assign, definitions: Definitions, input: Inpu
     }
     context.at(frame, [586,592]); context.output.write(&quot;&lt;/ul&gt;\n&quot;);
     context.enter(&quot;partial.tpl&quot;, frame, [592,607]);
-    try { render_partial_tpl(assign, definitions, { values: generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, &quot;values&quot;), &quot;values&quot;, runtime, frame, [592,607]) }, context, runtime, rootData, scope); } finally { context.leave(); }
+    try { render_partial_tpl(assign, definitions, { values: local_values_1 }, context, runtime, rootData, scope); } finally { context.leave(); }
     if (definitions.content !== undefined) {
-            context.at(frame, [620,634]); context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
+        context.at(frame, [620,634]); context.output.write(&quot;&lt;p&gt;defined&lt;/p&gt;&quot;);
     } else {
-            context.at(frame, [637,651]); context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
+        context.at(frame, [637,651]); context.output.write(&quot;&lt;p&gt;missing&lt;/p&gt;&quot;);
     }
     context.at(frame, [654,655]); context.output.write(&quot;\n&quot;);
     { let definition = definitions.content;
@@ -1315,7 +1318,7 @@ function render_partial_tpl(_assign: Assign, _definitions: Definitions, input: I
   const frame = new Frame(&quot;partial.tpl&quot;, [0,38], rootData);
   scope.locals.set(&quot;values&quot;, input.values);
     context.at(frame, [0,20]); context.output.write(&quot;&lt;p class=\&quot;included\&quot;&gt;&quot;);
-    context.at(frame, [20,33]); context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, &quot;values&quot;), &quot;values&quot;, runtime, frame, [23,29]), 2, frame, [23,32]), &quot;index&quot;, runtime, frame, [23,32]), frame, [23,32]));
+    context.at(frame, [20,33]); context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(input.values, 2, frame, [23,32]), &quot;values[2]&quot;, runtime, frame, [23,32]), frame, [23,32]));
     context.at(frame, [33,38]); context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
 function renderTemplate(target: string, assign: Assign, definitions: Definitions, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
@@ -1344,11 +1347,11 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;06234bf1a3b935fa2d2ec38b207879746e7755a977583f5c3c564f41517919fb&quot;,
+  &quot;compilerDigest&quot;: &quot;c46cdbf340ee009826887cfe8b34b9b4342ec4ab7c894f6ef6d543299bd0c8e6&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.js&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.js&quot;,
-      &quot;artifactDigest&quot;: &quot;f6a1f4bdbebd6b502d28d71eac87660965ce63f2f561c824cfe346279161e570&quot;
+      &quot;artifactDigest&quot;: &quot;b6cddbf2b22ff54c2218e9cddc8381104fb6135bcacd6d3c50f20fb748392058&quot;
     }
   }
 }
@@ -1402,8 +1405,10 @@ function generatedListOf(item) {
 function generatedMapOf(item) {
   return (value, path) =&gt; new Map([...generatedObject(value, path)].map(([key, element]) =&gt; [key, item(element, path + &quot;.&quot; + key)]));
 }
-function generatedEncodeList(encode) {
-  return (value) =&gt; value.map((item) =&gt; encode(item));
+function generatedEntries(value) {
+  if (value === null) return [];
+  if (Array.isArray(value)) return value.map((item, index) =&gt; [index, item]);
+  return [...value];
 }
 function generatedDecode_Page(value, path) {
   const object = generatedObject(value, path);
@@ -1496,14 +1501,16 @@ function render_card_tpl(_assign, _definitions, input, context, runtime, rootDat
   context.at(frame, [0, 16]);
   context.output.write(&#39;&lt;p class=&quot;card&quot;&gt;&#39;);
   context.at(frame, [16, 25]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;label&quot;), &quot;label&quot;, runtime, frame, [19, 24]), frame, [19, 24]));
+  context.output.write(runtime.escape(input.label, frame, [19, 24]));
   context.at(frame, [25, 30]);
   context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
   const frame = new Frame(&quot;layout.tpl&quot;, [0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695], rootData);
-  scope.locals.set(&quot;values&quot;, generatedChecked(generatedListOf(generatedNumber), runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16, 26])], frame, [12, 27]), &quot;list&quot;, runtime, frame, [12, 27]));
-  scope.locals.set(&quot;merged&quot;, generatedChecked(generatedMapOf(generatedString), runtime.depth(new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify(&quot;z&quot;, frame, [53, 56]), &quot;Z&quot;]]), frame, [41, 64]), &quot;map&quot;, runtime, frame, [41, 64]));
+  const local_values_1 = generatedChecked(generatedListOf(generatedNumber), runtime.depth([0, ...runtime.listSpread(assign.numbers, frame, [16, 26])], frame, [12, 27]), &quot;[0, ...numbers]&quot;, runtime, frame, [12, 27]);
+  scope.locals.set(&quot;values&quot;, local_values_1);
+  const local_merged_2 = generatedChecked(generatedMapOf(generatedString), runtime.depth(new Map([...runtime.mapSpread(assign.lookup, frame, [42, 51]), [runtime.stringify(&quot;z&quot;, frame, [53, 56]), &quot;Z&quot;]]), frame, [41, 64]), &#39;[...lookup, &quot;z&quot; =&gt; &quot;Z&quot;]&#39;, runtime, frame, [41, 64]);
+  scope.locals.set(&quot;merged&quot;, local_merged_2);
   context.at(frame, [66, 80]);
   context.output.write(&quot;&lt;section&gt;\n&lt;h1&gt;&quot;);
   context.at(frame, [80, 94]);
@@ -1543,16 +1550,16 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
   context.at(frame, [263, 271]);
   context.output.write(&quot;&lt;/p&gt;\n&lt;p&gt;&quot;);
   context.at(frame, [271, 284]);
-  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, &quot;values&quot;), &quot;values&quot;, runtime, frame, [274, 280]), 1, frame, [274, 283]), &quot;index&quot;, runtime, frame, [274, 283]), frame, [274, 283]));
+  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(local_values_1, 1, frame, [274, 283]), &quot;values[1]&quot;, runtime, frame, [274, 283]), frame, [274, 283]));
   context.at(frame, [284, 285]);
   context.output.write(&quot;|&quot;);
   context.at(frame, [285, 300]);
-  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedString), runtime.index(generatedChecked(generatedMapOf(generatedString), scope.lookup(frame, &quot;merged&quot;), &quot;merged&quot;, runtime, frame, [288, 294]), &quot;z&quot;, frame, [288, 299]), &quot;index&quot;, runtime, frame, [288, 299]), frame, [288, 299]));
+  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedString), runtime.index(local_merged_2, &quot;z&quot;, frame, [288, 299]), &#39;merged[&quot;z&quot;]&#39;, runtime, frame, [288, 299]), frame, [288, 299]));
   context.at(frame, [300, 305]);
   context.output.write(&quot;&lt;/p&gt;\n&quot;);
   if (runtime.truthy((() =&gt; {
     const left = assign.flag;
-    return runtime.truthy(left) ? runtime.truthy(generatedChecked(generatedBoolean, runtime.binary(&quot;==&quot;, assign.page.title, &quot;Guide&quot;, frame, [316, 337]), &quot;==&quot;, runtime, frame, [316, 337])) : false;
+    return runtime.truthy(left) ? runtime.truthy(generatedChecked(generatedBoolean, runtime.binary(&quot;==&quot;, assign.page.title, &quot;Guide&quot;, frame, [316, 337]), &#39;page.title == &quot;Guide&quot;&#39;, runtime, frame, [316, 337])) : false;
   })())) {
     context.at(frame, [338, 362]);
     context.output.write(&quot;&lt;strong&gt;matched&lt;/strong&gt;&quot;);
@@ -1567,21 +1574,21 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
   context.at(frame, [418, 419]);
   context.output.write(&quot;|&quot;);
   context.at(frame, [419, 429]);
-  context.output.write(runtime.escape(generatedChecked(generatedNumber, runtime.binary(&quot;+&quot;, generatedChecked(generatedNumber, runtime.unary(&quot;-&quot;, 1, frame, [422, 424]), &quot;-&quot;, runtime, frame, [422, 424]), 3, frame, [422, 428]), &quot;+&quot;, runtime, frame, [422, 428]), frame, [422, 428]));
+  context.output.write(runtime.escape(generatedChecked(generatedNumber, runtime.binary(&quot;+&quot;, generatedChecked(generatedNumber, runtime.unary(&quot;-&quot;, 1, frame, [422, 424]), &quot;-1&quot;, runtime, frame, [422, 424]), 3, frame, [422, 428]), &quot;-1 + 3&quot;, runtime, frame, [422, 428]), frame, [422, 428]));
   context.at(frame, [429, 430]);
   context.output.write(&quot;|&quot;);
   context.at(frame, [430, 458]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [433, 457]), &quot;default&quot;, runtime, frame, [433, 457]), frame, [433, 457]));
+  context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [&quot;&quot;, &quot;fallback&quot;], frame, [433, 457]), &#39;default(&quot;&quot;, &quot;fallback&quot;)&#39;, runtime, frame, [433, 457]), frame, [433, 457]));
   context.at(frame, [458, 468]);
   context.output.write(&quot;&lt;/p&gt;\n&lt;ul&gt;\n&quot;);
   {
-    const row_entries = runtime.entries(generatedEncodeList(generatedEncode_Row)(assign.rows), frame, [468, 585]);
+    const row_entries = generatedEntries(assign.rows);
     const row_size = row_entries.length;
     const row_last_index = row_size - 1;
     const row_previous = scope.locals.get(&quot;row&quot;);
     try {
-      for (const [row_index, [, row_value]] of row_entries.entries()) {
-        scope.locals.set(&quot;row&quot;, row_value);
+      for (const [row_index, [, local_row_3]] of row_entries.entries()) {
+        scope.locals.set(&quot;row&quot;, generatedEncode_Row(local_row_3));
         const row_first = row_index === 0;
         const row_last = row_index === row_last_index;
         context.iterations += 1;
@@ -1597,7 +1604,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
         context.at(frame, [515, 516]);
         context.output.write(&quot;:&quot;);
         context.at(frame, [516, 528]);
-        context.output.write(runtime.escape(generatedChecked(generatedDecode_Row, scope.lookup(frame, &quot;row&quot;), &quot;row&quot;, runtime, frame, [519, 522]).name, frame, [519, 527]));
+        context.output.write(runtime.escape(local_row_3.name, frame, [519, 527]));
         context.at(frame, [528, 529]);
         context.output.write(&quot;:&quot;);
         context.at(frame, [529, 543]);
@@ -1622,7 +1629,7 @@ function render_layout_tpl(assign, definitions, input, context, runtime, rootDat
   context.output.write(&quot;&lt;/ul&gt;\n&quot;);
   context.enter(&quot;partial.tpl&quot;, frame, [592, 607]);
   try {
-    render_partial_tpl(assign, definitions, { values: generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, &quot;values&quot;), &quot;values&quot;, runtime, frame, [592, 607]) }, context, runtime, rootData, scope);
+    render_partial_tpl(assign, definitions, { values: local_values_1 }, context, runtime, rootData, scope);
   } finally {
     context.leave();
   }
@@ -1661,7 +1668,7 @@ function render_partial_tpl(_assign, _definitions, input, context, runtime, root
   context.at(frame, [0, 20]);
   context.output.write(&#39;&lt;p class=&quot;included&quot;&gt;&#39;);
   context.at(frame, [20, 33]);
-  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(generatedChecked(generatedListOf(generatedNumber), scope.lookup(frame, &quot;values&quot;), &quot;values&quot;, runtime, frame, [23, 29]), 2, frame, [23, 32]), &quot;index&quot;, runtime, frame, [23, 32]), frame, [23, 32]));
+  context.output.write(runtime.escape(generatedChecked(generatedOptional(generatedNumber), runtime.index(input.values, 2, frame, [23, 32]), &quot;values[2]&quot;, runtime, frame, [23, 32]), frame, [23, 32]));
   context.at(frame, [33, 38]);
   context.output.write(&quot;&lt;/p&gt;\n&quot;);
 }
@@ -1747,11 +1754,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;43f3608d3adce7abe4277431cc9198d72f3a1941987c645819495fb654732170&quot;,
+  &quot;compilerDigest&quot;: &quot;221b24d796e81ae7deb7741e7d0ee09fa36a83888343179618357456c87b6eb9&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;66f6ecc0f1e10b0455a61221625dc4eef937d8dddced58cd0db941ea0e9beb58&quot;
+      &quot;artifactDigest&quot;: &quot;690d0133c6e79eadb11d3a818151b27bea68650c4d5defa65229fc10893ea6a6&quot;
     }
   }
 }
@@ -2019,9 +2026,16 @@ func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.F
 	return result
 }
 
-func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry {
-	result, err := runtime.Entries(generatedValue(input), frame, span)
-	generatedPanic(err)
+type generatedEntry[T any] struct {
+	Key   value.Value
+	Value T
+}
+
+func generatedListEntries[T any](items []T) []generatedEntry[T] {
+	result := make([]generatedEntry[T], len(items))
+	for index, item := range items {
+		result[index] = generatedEntry[T]{float64(index), item}
+	}
 	return result
 }
 
@@ -2108,26 +2122,28 @@ func render_card_tpl(assign Assign, definitions *Definitions, input Input_card_t
 	frame := render.NewFrame(&quot;card.tpl&quot;, errs.LineIndex{0, 30}, rootData)
 	scope.Locals[&quot;label&quot;] = generatedValue(input.Label)
 	generatedWrite(context, &quot;&lt;p class=\&quot;card\&quot;&gt;&quot;, frame, ast.Span{0, 16})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, &quot;label&quot;)), frame, ast.Span{19, 24}), frame, ast.Span{16, 25})
+	generatedWrite(context, generatedEscape(runtime, input.Label, frame, ast.Span{19, 24}), frame, ast.Span{16, 25})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&quot;, frame, ast.Span{25, 30})
 }
 
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame(&quot;layout.tpl&quot;, errs.LineIndex{0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695}, rootData)
-	scope.Locals[&quot;values&quot;] = generatedValue(generatedDepth(runtime, func() []float64 {
+	var local_values_1 []float64 = generatedDepth(runtime, func() []float64 {
 		result := []float64{}
 		result = append(result, float64(0))
 		result = append(result, generatedListSpread[float64](runtime, assign.Numbers, frame, ast.Span{16, 26})...)
 		return result
-	}(), frame, ast.Span{12, 27}))
-	scope.Locals[&quot;merged&quot;] = generatedValue(generatedDepth(runtime, func() OrderedMap[string, string] {
+	}(), frame, ast.Span{12, 27})
+	scope.Locals[&quot;values&quot;] = generatedValue(local_values_1)
+	var local_merged_2 OrderedMap[string, string] = generatedDepth(runtime, func() OrderedMap[string, string] {
 		result := NewOrderedMap[string, string]()
 		for _, entry := range generatedMapSpread[string, string](runtime, assign.Lookup, frame, ast.Span{42, 51}).Entries() {
 			result.Set(entry.Key, entry.Value)
 		}
 		result.Set(&quot;z&quot;, &quot;Z&quot;)
 		return result
-	}(), frame, ast.Span{41, 64}))
+	}(), frame, ast.Span{41, 64})
+	scope.Locals[&quot;merged&quot;] = generatedValue(local_merged_2)
 	generatedWrite(context, &quot;&lt;section&gt;\u000a&lt;h1&gt;&quot;, frame, ast.Span{66, 80})
 	generatedWrite(context, generatedEscape(runtime, assign.Page.Title, frame, ast.Span{83, 93}), frame, ast.Span{80, 94})
 	generatedWrite(context, &quot;&lt;/h1&gt;\u000a&lt;p class=\&quot;escaped\&quot;&gt;&quot;, frame, ast.Span{94, 119})
@@ -2165,9 +2181,9 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 		return generatedTruthy(runtime, assign.Flag)
 	}(), frame, ast.Span{245, 262}), frame, ast.Span{242, 263})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&lt;p&gt;&quot;, frame, ast.Span{263, 271})
-	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, &quot;values&quot;)), float64(1), frame, ast.Span{274, 283}), frame, ast.Span{274, 283}), frame, ast.Span{271, 284})
+	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, local_values_1, float64(1), frame, ast.Span{274, 283}), frame, ast.Span{274, 283}), frame, ast.Span{271, 284})
 	generatedWrite(context, &quot;|&quot;, frame, ast.Span{284, 285})
-	generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, generatedResult[OrderedMap[string, string]](scope.Lookup(frame, &quot;merged&quot;)), &quot;z&quot;, frame, ast.Span{288, 299}), frame, ast.Span{288, 299}), frame, ast.Span{285, 300})
+	generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, local_merged_2, &quot;z&quot;, frame, ast.Span{288, 299}), frame, ast.Span{288, 299}), frame, ast.Span{285, 300})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&quot;, frame, ast.Span{300, 305})
 	if generatedTruthy(runtime, func() bool {
 		left := assign.Flag
@@ -2193,12 +2209,13 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 	generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, &quot;default&quot;, []value.Value{generatedValue(&quot;&quot;), generatedValue(&quot;fallback&quot;)}, frame, ast.Span{433, 457}), frame, ast.Span{433, 457}), frame, ast.Span{430, 458})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&lt;ul&gt;\u000a&quot;, frame, ast.Span{458, 468})
 	{
-		entries := generatedEntries(runtime, assign.Rows, frame, ast.Span{468, 585})
+		entries := generatedListEntries(assign.Rows)
 		entriesSize := len(entries)
 		lastIndex := entriesSize - 1
 		previous, hadPrevious := scope.Locals[&quot;row&quot;]
 		for row_index, entry := range entries {
-			row_key, row_value := entry.Key, entry.Value
+			row_key, local_row_3 := entry.Key, entry.Value
+			row_value := generatedValue(local_row_3)
 			scope.Locals[&quot;row&quot;] = row_value
 			scope.Loops[&quot;row&quot;] = append(scope.Loops[&quot;row&quot;], &amp;render.LoopMeta{Index: row_index, Key: row_key, Value: row_value, Size: entriesSize, First: row_index == 0, Last: row_index == lastIndex})
 			context.Iterations++
@@ -2208,7 +2225,7 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 			generatedWrite(context, &quot;/&quot;, frame, ast.Span{501, 502})
 			generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).Size, frame, ast.Span{505, 514}), frame, ast.Span{502, 515})
 			generatedWrite(context, &quot;:&quot;, frame, ast.Span{515, 516})
-			generatedWrite(context, generatedEscape(runtime, generatedResult[Row](scope.Lookup(frame, &quot;row&quot;)).Name, frame, ast.Span{519, 527}), frame, ast.Span{516, 528})
+			generatedWrite(context, generatedEscape(runtime, local_row_3.Name, frame, ast.Span{519, 527}), frame, ast.Span{516, 528})
 			generatedWrite(context, &quot;:&quot;, frame, ast.Span{528, 529})
 			generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, &quot;row&quot;).First, frame, ast.Span{532, 542}), frame, ast.Span{529, 543})
 			generatedWrite(context, &quot;:&quot;, frame, ast.Span{543, 544})
@@ -2229,7 +2246,7 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 	generatedEnter(context, &quot;partial.tpl&quot;, frame, ast.Span{592, 607})
 	func() {
 		defer context.Leave()
-		render_partial_tpl(assign, definitions, Input_partial_tpl{Values: generatedResult[[]float64](scope.Lookup(frame, &quot;values&quot;))}, context, runtime, rootData, scope)
+		render_partial_tpl(assign, definitions, Input_partial_tpl{Values: local_values_1}, context, runtime, rootData, scope)
 	}()
 	if definitions.Content != nil {
 		generatedWrite(context, &quot;&lt;p&gt;defined&lt;/p&gt;&quot;, frame, ast.Span{620, 634})
@@ -2267,7 +2284,7 @@ func render_partial_tpl(assign Assign, definitions *Definitions, input Input_par
 	frame := render.NewFrame(&quot;partial.tpl&quot;, errs.LineIndex{0, 38}, rootData)
 	scope.Locals[&quot;values&quot;] = generatedValue(input.Values)
 	generatedWrite(context, &quot;&lt;p class=\&quot;included\&quot;&gt;&quot;, frame, ast.Span{0, 20})
-	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, &quot;values&quot;)), float64(2), frame, ast.Span{23, 32}), frame, ast.Span{23, 32}), frame, ast.Span{20, 33})
+	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, input.Values, float64(2), frame, ast.Span{23, 32}), frame, ast.Span{23, 32}), frame, ast.Span{20, 33})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&quot;, frame, ast.Span{33, 38})
 }
 
@@ -2460,7 +2477,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;1553fd4d05586f79637deb368254d31275e2f84f0b5975ef0e0213f8f97e1997&quot;,
+  &quot;compilerDigest&quot;: &quot;49fff1019a1320d524ff24c3c96ca3f208d26f0d82b91bbd8298d4feb205d511&quot;,
   &quot;files&quot;: {
     &quot;compiler-coverage.rust&quot;: {
       &quot;path&quot;: &quot;compiler-coverage.rust&quot;,
@@ -2643,7 +2660,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;653f957e868da9f22f5f2a0dd92275325a58309b0de694bafd39cb39d9612f2c&quot;,
+  &quot;compilerDigest&quot;: &quot;1633ecce3d689d03b1d95ff77430ee9a94f71a99e6c316bad1340eca6b01544b&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -3185,11 +3202,11 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;61c042ba28df0b5192c8cf92876e10881917abbbbc6344c4ca9804ddcc29ef75&quot;,
+  &quot;compilerDigest&quot;: &quot;a7c496e1f13ae28882373dfa4e8f56ae10a2e79f87d345ab85a76872f4113951&quot;,
   &quot;files&quot;: {
     &quot;empty-state.ts&quot;: {
       &quot;path&quot;: &quot;empty-state.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;5ec2e3d43918a90c10384993a96a4237dacc4d46a5d71fc0712f429f3fc6605d&quot;
+      &quot;artifactDigest&quot;: &quot;0c2b3415ecffb3b2d37e4be46c2a9ab50d4c6f0d9abf6efca7fa15fa7b7a6c97&quot;
     }
   }
 }
@@ -3263,12 +3280,12 @@ function render_layout_tpl(_assign: Assign, definitions: Definitions, _input: In
 
     context.at(frame, [0,26]); context.output.write(&quot;&lt;main class=\&quot;empty-page\&quot;&gt;\n&quot;);
     if (definitions.content !== undefined) {
-            { const definition = definitions.content;
-            if (definition?.html === undefined) throw runtime.error(frame, [39,50], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
-            context.at(frame, [39,50]); context.output.write(definition.html);
-            }
+        { const definition = definitions.content;
+        if (definition?.html === undefined) throw runtime.error(frame, [39,50], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
+        context.at(frame, [39,50]); context.output.write(definition.html);
+        }
     } else {
-            context.at(frame, [55,99]); context.output.write(&quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;);
+        context.at(frame, [55,99]); context.output.write(&quot;&lt;p class=\&quot;empty\&quot;&gt;No content definition.&lt;/p&gt;\n&quot;);
     }
     context.at(frame, [103,111]); context.output.write(&quot;&lt;/main&gt;\n&quot;);
 }
@@ -3298,7 +3315,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;06234bf1a3b935fa2d2ec38b207879746e7755a977583f5c3c564f41517919fb&quot;,
+  &quot;compilerDigest&quot;: &quot;c46cdbf340ee009826887cfe8b34b9b4342ec4ab7c894f6ef6d543299bd0c8e6&quot;,
   &quot;files&quot;: {
     &quot;empty-state.js&quot;: {
       &quot;path&quot;: &quot;empty-state.js&quot;,
@@ -3490,7 +3507,7 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;43f3608d3adce7abe4277431cc9198d72f3a1941987c645819495fb654732170&quot;,
+  &quot;compilerDigest&quot;: &quot;221b24d796e81ae7deb7741e7d0ee09fa36a83888343179618357456c87b6eb9&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -3794,7 +3811,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;1553fd4d05586f79637deb368254d31275e2f84f0b5975ef0e0213f8f97e1997&quot;,
+  &quot;compilerDigest&quot;: &quot;49fff1019a1320d524ff24c3c96ca3f208d26f0d82b91bbd8298d4feb205d511&quot;,
   &quot;files&quot;: {
     &quot;empty-state.rust&quot;: {
       &quot;path&quot;: &quot;empty-state.rust&quot;,
@@ -3869,7 +3886,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;653f957e868da9f22f5f2a0dd92275325a58309b0de694bafd39cb39d9612f2c&quot;,
+  &quot;compilerDigest&quot;: &quot;1633ecce3d689d03b1d95ff77430ee9a94f71a99e6c316bad1340eca6b01544b&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -4101,7 +4118,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;61c042ba28df0b5192c8cf92876e10881917abbbbc6344c4ca9804ddcc29ef75&quot;,
+  &quot;compilerDigest&quot;: &quot;a7c496e1f13ae28882373dfa4e8f56ae10a2e79f87d345ab85a76872f4113951&quot;,
   &quot;files&quot;: {
     &quot;html-slot.ts&quot;: {
       &quot;path&quot;: &quot;html-slot.ts&quot;,
@@ -4212,7 +4229,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;06234bf1a3b935fa2d2ec38b207879746e7755a977583f5c3c564f41517919fb&quot;,
+  &quot;compilerDigest&quot;: &quot;c46cdbf340ee009826887cfe8b34b9b4342ec4ab7c894f6ef6d543299bd0c8e6&quot;,
   &quot;files&quot;: {
     &quot;html-slot.js&quot;: {
       &quot;path&quot;: &quot;html-slot.js&quot;,
@@ -4403,7 +4420,7 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;43f3608d3adce7abe4277431cc9198d72f3a1941987c645819495fb654732170&quot;,
+  &quot;compilerDigest&quot;: &quot;221b24d796e81ae7deb7741e7d0ee09fa36a83888343179618357456c87b6eb9&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -4737,7 +4754,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;1553fd4d05586f79637deb368254d31275e2f84f0b5975ef0e0213f8f97e1997&quot;,
+  &quot;compilerDigest&quot;: &quot;49fff1019a1320d524ff24c3c96ca3f208d26f0d82b91bbd8298d4feb205d511&quot;,
   &quot;files&quot;: {
     &quot;html-slot.rust&quot;: {
       &quot;path&quot;: &quot;html-slot.rust&quot;,
@@ -4811,7 +4828,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;653f957e868da9f22f5f2a0dd92275325a58309b0de694bafd39cb39d9612f2c&quot;,
+  &quot;compilerDigest&quot;: &quot;1633ecce3d689d03b1d95ff77430ee9a94f71a99e6c316bad1340eca6b01544b&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -5105,7 +5122,7 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;61c042ba28df0b5192c8cf92876e10881917abbbbc6344c4ca9804ddcc29ef75&quot;,
+  &quot;compilerDigest&quot;: &quot;a7c496e1f13ae28882373dfa4e8f56ae10a2e79f87d345ab85a76872f4113951&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.ts&quot;: {
       &quot;path&quot;: &quot;react-boundary.ts&quot;,
@@ -5243,7 +5260,7 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;06234bf1a3b935fa2d2ec38b207879746e7755a977583f5c3c564f41517919fb&quot;,
+  &quot;compilerDigest&quot;: &quot;c46cdbf340ee009826887cfe8b34b9b4342ec4ab7c894f6ef6d543299bd0c8e6&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.js&quot;: {
       &quot;path&quot;: &quot;react-boundary.js&quot;,
@@ -5474,7 +5491,7 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;43f3608d3adce7abe4277431cc9198d72f3a1941987c645819495fb654732170&quot;,
+  &quot;compilerDigest&quot;: &quot;221b24d796e81ae7deb7741e7d0ee09fa36a83888343179618357456c87b6eb9&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
@@ -5863,7 +5880,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;1553fd4d05586f79637deb368254d31275e2f84f0b5975ef0e0213f8f97e1997&quot;,
+  &quot;compilerDigest&quot;: &quot;49fff1019a1320d524ff24c3c96ca3f208d26f0d82b91bbd8298d4feb205d511&quot;,
   &quot;files&quot;: {
     &quot;react-boundary.rust&quot;: {
       &quot;path&quot;: &quot;react-boundary.rust&quot;,
@@ -5961,7 +5978,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;653f957e868da9f22f5f2a0dd92275325a58309b0de694bafd39cb39d9612f2c&quot;,
+  &quot;compilerDigest&quot;: &quot;1633ecce3d689d03b1d95ff77430ee9a94f71a99e6c316bad1340eca6b01544b&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -6428,11 +6445,11 @@ ast/layout.tpl.ast.json · layout.tpl
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;61c042ba28df0b5192c8cf92876e10881917abbbbc6344c4ca9804ddcc29ef75&quot;,
+  &quot;compilerDigest&quot;: &quot;a7c496e1f13ae28882373dfa4e8f56ae10a2e79f87d345ab85a76872f4113951&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.ts&quot;: {
       &quot;path&quot;: &quot;scope-precedence.ts&quot;,
-      &quot;artifactDigest&quot;: &quot;f3048c1ea092179c2c5e3186493f695a9ed7302b42ae0889e45ab20a1e5b63a1&quot;
+      &quot;artifactDigest&quot;: &quot;ff7d5c2694474dcd4f4a3f9d77f27f452ea294fc875e14c546278d9f55a64623&quot;
     }
   }
 }
@@ -6520,19 +6537,20 @@ function render_content_tpl(_assign: Assign, _definitions: Definitions, input: I
   scope.locals.set(&quot;defined_label&quot;, input.defined_label);
   scope.locals.set(&quot;layout_local&quot;, input.layout_local);
     context.at(frame, [0,14]); context.output.write(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;);
-    context.at(frame, [14,23]); context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;title&quot;), &quot;title&quot;, runtime, frame, [17,22]), frame, [17,22]));
+    context.at(frame, [14,23]); context.output.write(runtime.escape(input.title, frame, [17,22]));
     context.at(frame, [23,45]); context.output.write(&quot;&lt;/h1&gt;\n&lt;p class=\&quot;root\&quot;&gt;&quot;);
-    context.at(frame, [45,59]); context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;root_label&quot;), &quot;root_label&quot;, runtime, frame, [48,58]), frame, [48,58]));
+    context.at(frame, [45,59]); context.output.write(runtime.escape(input.root_label, frame, [48,58]));
     context.at(frame, [59,83]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;defined\&quot;&gt;&quot;);
-    context.at(frame, [83,100]); context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;defined_label&quot;), &quot;defined_label&quot;, runtime, frame, [86,99]), frame, [86,99]));
+    context.at(frame, [83,100]); context.output.write(runtime.escape(input.defined_label, frame, [86,99]));
     context.at(frame, [100,122]); context.output.write(&quot;&lt;/p&gt;\n&lt;p class=\&quot;local\&quot;&gt;&quot;);
-    context.at(frame, [122,159]); context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [generatedChecked(generatedOptional(generatedString), scope.lookup(frame, &quot;layout_local&quot;), &quot;layout_local&quot;, runtime, frame, [125,137]), &quot;missing&quot;], frame, [125,158]), &quot;default&quot;, runtime, frame, [125,158]), frame, [125,158]));
+    context.at(frame, [122,159]); context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [input.layout_local, &quot;missing&quot;], frame, [125,158]), &quot;default(layout_local, \&quot;missing\&quot;)&quot;, runtime, frame, [125,158]), frame, [125,158]));
     context.at(frame, [159,175]); context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
 }
 function render_layout_tpl(assign: Assign, definitions: Definitions, input: Input_layout_tpl, context: RenderContext, runtime: RuntimeBindings, rootData: MapValue, scope: Scope): void {
   const frame = new Frame(&quot;layout.tpl&quot;, [0,44,68,97,108], rootData);
 
-    scope.locals.set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
+    const local_layout_local_1: string = &quot;visible only in layout&quot;;
+    scope.locals.set(&quot;layout_local&quot;, local_layout_local_1);
     context.at(frame, [44,68]); context.output.write(&quot;&lt;section class=\&quot;scope\&quot;&gt;\n&quot;);
     { let definition = definitions.content;
     if (definition === undefined) throw runtime.error(frame, [68,96], &#39;E_RUNTIME_BLOCK_UNDEFINED&#39;, &quot;define content is not registered&quot;);
@@ -6567,11 +6585,11 @@ javascript · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;06234bf1a3b935fa2d2ec38b207879746e7755a977583f5c3c564f41517919fb&quot;,
+  &quot;compilerDigest&quot;: &quot;c46cdbf340ee009826887cfe8b34b9b4342ec4ab7c894f6ef6d543299bd0c8e6&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.js&quot;: {
       &quot;path&quot;: &quot;scope-precedence.js&quot;,
-      &quot;artifactDigest&quot;: &quot;a2a626ce7ba63a3f1f224e83e7a1f57d41ca7735ac0524b4c6908b860d892cea&quot;
+      &quot;artifactDigest&quot;: &quot;690e3e07913c88a5f3e98232f8e2b6f119152defee74b06eefa454da7ebd2b4d&quot;
     }
   }
 }
@@ -6698,25 +6716,26 @@ function render_content_tpl(_assign, _definitions, input, context, runtime, root
   context.at(frame, [0, 14]);
   context.output.write(&quot;&lt;article&gt;\n&lt;h1&gt;&quot;);
   context.at(frame, [14, 23]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;title&quot;), &quot;title&quot;, runtime, frame, [17, 22]), frame, [17, 22]));
+  context.output.write(runtime.escape(input.title, frame, [17, 22]));
   context.at(frame, [23, 45]);
   context.output.write(&#39;&lt;/h1&gt;\n&lt;p class=&quot;root&quot;&gt;&#39;);
   context.at(frame, [45, 59]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;root_label&quot;), &quot;root_label&quot;, runtime, frame, [48, 58]), frame, [48, 58]));
+  context.output.write(runtime.escape(input.root_label, frame, [48, 58]));
   context.at(frame, [59, 83]);
   context.output.write(&#39;&lt;/p&gt;\n&lt;p class=&quot;defined&quot;&gt;&#39;);
   context.at(frame, [83, 100]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, &quot;defined_label&quot;), &quot;defined_label&quot;, runtime, frame, [86, 99]), frame, [86, 99]));
+  context.output.write(runtime.escape(input.defined_label, frame, [86, 99]));
   context.at(frame, [100, 122]);
   context.output.write(&#39;&lt;/p&gt;\n&lt;p class=&quot;local&quot;&gt;&#39;);
   context.at(frame, [122, 159]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [generatedChecked(generatedOptional(generatedString), scope.lookup(frame, &quot;layout_local&quot;), &quot;layout_local&quot;, runtime, frame, [125, 137]), &quot;missing&quot;], frame, [125, 158]), &quot;default&quot;, runtime, frame, [125, 158]), frame, [125, 158]));
+  context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call(&quot;default&quot;, [input.layout_local, &quot;missing&quot;], frame, [125, 158]), &#39;default(layout_local, &quot;missing&quot;)&#39;, runtime, frame, [125, 158]), frame, [125, 158]));
   context.at(frame, [159, 175]);
   context.output.write(&quot;&lt;/p&gt;\n&lt;/article&gt;\n&quot;);
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
   const frame = new Frame(&quot;layout.tpl&quot;, [0, 44, 68, 97, 108], rootData);
-  scope.locals.set(&quot;layout_local&quot;, &quot;visible only in layout&quot;);
+  const local_layout_local_1 = &quot;visible only in layout&quot;;
+  scope.locals.set(&quot;layout_local&quot;, local_layout_local_1);
   context.at(frame, [44, 68]);
   context.output.write(&#39;&lt;section class=&quot;scope&quot;&gt;\n&#39;);
   {
@@ -6821,11 +6840,11 @@ go · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;43f3608d3adce7abe4277431cc9198d72f3a1941987c645819495fb654732170&quot;,
+  &quot;compilerDigest&quot;: &quot;221b24d796e81ae7deb7741e7d0ee09fa36a83888343179618357456c87b6eb9&quot;,
   &quot;files&quot;: {
     &quot;generated.go&quot;: {
       &quot;path&quot;: &quot;generated.go&quot;,
-      &quot;artifactDigest&quot;: &quot;f0206cbb8badb4569b74c183b063d618806aff2deecd9b0496ce79cfa2111f7f&quot;
+      &quot;artifactDigest&quot;: &quot;b094d8aca040f9034b843f6a2ff5ad9b02807493c80faa1cd2b5788d1ffa0eb5&quot;
     }
   }
 }
@@ -7017,19 +7036,20 @@ func render_content_tpl(assign Assign, definitions *Definitions, input Input_con
 	scope.Locals[&quot;defined_label&quot;] = generatedValue(input.Defined_label)
 	scope.Locals[&quot;layout_local&quot;] = generatedValue(input.Layout_local)
 	generatedWrite(context, &quot;&lt;article&gt;\u000a&lt;h1&gt;&quot;, frame, ast.Span{0, 14})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, &quot;title&quot;)), frame, ast.Span{17, 22}), frame, ast.Span{14, 23})
+	generatedWrite(context, generatedEscape(runtime, input.Title, frame, ast.Span{17, 22}), frame, ast.Span{14, 23})
 	generatedWrite(context, &quot;&lt;/h1&gt;\u000a&lt;p class=\&quot;root\&quot;&gt;&quot;, frame, ast.Span{23, 45})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, &quot;root_label&quot;)), frame, ast.Span{48, 58}), frame, ast.Span{45, 59})
+	generatedWrite(context, generatedEscape(runtime, input.Root_label, frame, ast.Span{48, 58}), frame, ast.Span{45, 59})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&lt;p class=\&quot;defined\&quot;&gt;&quot;, frame, ast.Span{59, 83})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, &quot;defined_label&quot;)), frame, ast.Span{86, 99}), frame, ast.Span{83, 100})
+	generatedWrite(context, generatedEscape(runtime, input.Defined_label, frame, ast.Span{86, 99}), frame, ast.Span{83, 100})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&lt;p class=\&quot;local\&quot;&gt;&quot;, frame, ast.Span{100, 122})
-	generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, &quot;default&quot;, []value.Value{generatedValue(generatedResult[*string](scope.Lookup(frame, &quot;layout_local&quot;))), generatedValue(&quot;missing&quot;)}, frame, ast.Span{125, 158}), frame, ast.Span{125, 158}), frame, ast.Span{122, 159})
+	generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, &quot;default&quot;, []value.Value{generatedValue(input.Layout_local), generatedValue(&quot;missing&quot;)}, frame, ast.Span{125, 158}), frame, ast.Span{125, 158}), frame, ast.Span{122, 159})
 	generatedWrite(context, &quot;&lt;/p&gt;\u000a&lt;/article&gt;\u000a&quot;, frame, ast.Span{159, 175})
 }
 
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame(&quot;layout.tpl&quot;, errs.LineIndex{0, 44, 68, 97, 108}, rootData)
-	scope.Locals[&quot;layout_local&quot;] = generatedValue(&quot;visible only in layout&quot;)
+	var local_layout_local_1 string = &quot;visible only in layout&quot;
+	scope.Locals[&quot;layout_local&quot;] = generatedValue(local_layout_local_1)
 	generatedWrite(context, &quot;&lt;section class=\&quot;scope\&quot;&gt;\u000a&quot;, frame, ast.Span{44, 68})
 	{
 		definition := definitions.Content
@@ -7276,7 +7296,7 @@ rust · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;1553fd4d05586f79637deb368254d31275e2f84f0b5975ef0e0213f8f97e1997&quot;,
+  &quot;compilerDigest&quot;: &quot;49fff1019a1320d524ff24c3c96ca3f208d26f0d82b91bbd8298d4feb205d511&quot;,
   &quot;files&quot;: {
     &quot;scope-precedence.rust&quot;: {
       &quot;path&quot;: &quot;scope-precedence.rust&quot;,
@@ -7382,7 +7402,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;653f957e868da9f22f5f2a0dd92275325a58309b0de694bafd39cb39d9612f2c&quot;,
+  &quot;compilerDigest&quot;: &quot;1633ecce3d689d03b1d95ff77430ee9a94f71a99e6c316bad1340eca6b01544b&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,

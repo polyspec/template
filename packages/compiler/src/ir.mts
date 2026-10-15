@@ -58,13 +58,17 @@ type BlockNode =
   | { op: 'block'; id: string; path: string | null; target: string; definition: Definition; inputs: BlockInput[]; span: Span }
   | { op: 'block'; id: null; path: string; target: string; definition: null; inputs: BlockInput[]; span: Span };
 
-/** A lowered statement node. */
+/**
+ * A lowered statement node. `widened` of an if or a loop holds the type of each local of the enclosing scope that the
+ * node assigns, after the node, as widenLocals gives it: a backend holds the value of the local after the node in a
+ * variable of that type.
+ */
 export type Node =
   | { op: 'text'; value: string; span: Span }
   | { op: 'echo'; expr: Expr; span: Span }
   | { op: 'set'; name: string; expr: Expr; span: Span }
-  | { op: 'if'; branches: { test: Expr; body: Node[]; span: Span }[]; otherwise: Node[] | null; span: Span }
-  | { op: 'for'; name: string; iter: Expr; itemType: ValueType; body: Node[]; empty: Node[] | null; span: Span }
+  | { op: 'if'; branches: { test: Expr; body: Node[]; span: Span }[]; otherwise: Node[] | null; widened: Map<string, ValueType>; span: Span }
+  | { op: 'for'; name: string; iter: Expr; itemType: ValueType; body: Node[]; empty: Node[] | null; widened: Map<string, ValueType>; span: Span }
   | { op: 'include'; target: string; inputs: { name: string; value: Expr; valueType: ValueType }[]; span: Span }
   | BlockNode
   | { op: 'if-block'; id: string; body: Node[]; otherwise: Node[] | null; span: Span };
@@ -224,6 +228,14 @@ function widenLocals(scope: Map<string, ValueType>, assigned: Map<string, ValueT
     }
   }
   return changed;
+}
+
+// The types in `scope` of the locals that `assigned` names and `scope` holds.
+function widenedLocals(scope: Map<string, ValueType>, assigned: Map<string, ValueType>): Map<string, ValueType> {
+  return new Map([...assigned.keys()].flatMap((name): [string, ValueType][] => {
+    const type = scope.get(name);
+    return type === undefined ? [] : [[name, type]];
+  }));
 }
 
 function resolveTemplate(from: string, path: string, span: Span, lines: number[]): string {
@@ -393,8 +405,10 @@ export function lowerSourceGraph(graph: SourceGraph, manifest: TypeManifest): Pr
         return { op: 'set', name: node.name, expr, span: node.span };
       }
       case 'If': {
-        const lowered: Node = { op: 'if', branches: node.branches.map(branch => ({ test: lowerExpr(branch.test, scope, loops), body: lowerNodes(branch.body, templateName, scope, loops), span: branch.span })), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null, span: node.span };
-        widenLocals(scope, assignedTypes([lowered]));
+        const lowered: Node = { op: 'if', branches: node.branches.map(branch => ({ test: lowerExpr(branch.test, scope, loops), body: lowerNodes(branch.body, templateName, scope, loops), span: branch.span })), otherwise: node.else ? lowerNodes(node.else, templateName, scope, loops) : null, widened: new Map(), span: node.span };
+        const assigned = assignedTypes([lowered]);
+        widenLocals(scope, assigned);
+        lowered.widened = widenedLocals(scope, assigned);
         return lowered;
       }
       case 'For': {
@@ -405,7 +419,9 @@ export function lowerSourceGraph(graph: SourceGraph, manifest: TypeManifest): Pr
         const nestedLoops = new Map(loops).set(node.name, itemType);
         let body = lowerNodes(node.body, templateName, new Map(scope).set(node.name, itemType), nestedLoops);
         while (widenLocals(scope, assignedTypes(body), node.name)) body = lowerNodes(node.body, templateName, new Map(scope).set(node.name, itemType), nestedLoops);
-        return { op: 'for', name: node.name, iter, itemType, body, empty: node.empty ? lowerNodes(node.empty, templateName, scope, loops) : null, span: node.span };
+        const assigned = assignedTypes(body);
+        assigned.delete(node.name);
+        return { op: 'for', name: node.name, iter, itemType, body, empty: node.empty ? lowerNodes(node.empty, templateName, scope, loops) : null, widened: widenedLocals(scope, assigned), span: node.span };
       }
       case 'Include': {
         const target = resolveTemplate(templateName, node.path, node.span, linesOf(templateName));

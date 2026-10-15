@@ -2,12 +2,14 @@
 // type of the type manifest has its TypeScript type (tsOf), a value that the runtime of @polyspec/template returns is a
 // Value, and the program converts between the two where they meet: `encode` turns a typed value into a Value, which
 // copies only a value that holds a record, and `decode` checks a Value and returns the typed value, or throws an error
-// that names the value.
+// that names the value by its text in the template. A local is a variable of its typed value (FunctionLocals), so a
+// Value is decoded once, where it enters the program from the runtime, the scope or the request, and never on a read.
 import {
-  baseTarget, definition, dependent, descriptor, emitExpression, emitNodes, fieldName, functionName, indent, inputName, quote,
-  type BackendContext, type Descriptor, type Part, type Target,
+  assignedNames, baseTarget, definition, dependent, descriptor, emitExpression, emitNodes, expressionText, fieldName, FunctionLocals,
+  functionName, indent, inputName, quote,
+  type BackendContext, type Descriptor, type MergedLocal, type Part, type Target,
 } from '../backend-support.mts';
-import { loweredTemplate, type BlockInput, type NodeOf, type Program, type ValueType } from '../ir.mts';
+import { loweredTemplate, type BlockInput, type Expr, type Node, type NodeOf, type Program, type ValueType } from '../ir.mts';
 
 export const language = 'ts';
 
@@ -89,12 +91,41 @@ function convert(code: string, from: Descriptor, to: Descriptor, path: string, n
 
 
 export function createTarget({ program }: { program: Program }): Target {
+  let locals = new FunctionLocals([]);
+  // The item variable of each enclosing loop, innermost last.
+  const loopItems: [loop: string, item: string][] = [];
   const valueOf = (value: string, type: ValueType): string => encode(value, type);
   const values = (args: string[], nodes: { valueType: ValueType }[]): string => `[${args.map((arg, index) => {
     const node = nodes[index];
     if (node === undefined) throw new Error('compiler backend ts: an argument has no expression');
     return valueOf(arg, node.valueType);
   }).join(', ')}]`;
+  // The name of an intermediate value in an error: the text of its expression in the template.
+  const label = (node: Expr): string => quote(expressionText(node));
+  // The variables that hold the merged locals after a branch or a loop, declared before it with the value before it.
+  const declare = (merged: MergedLocal[], node: { span: readonly number[] }): string[] => merged.map(item =>
+    `let ${item.variable}: ${tsOf(item.type)} = ${convert(item.before.code, item.before.type, item.type, quote(item.name), node)};`);
+  // The statements at the end of a branch or a loop body that give each merged local the value that it has there.
+  const assignMerged = (merged: MergedLocal[], node: { span: readonly number[] }, except: string | null = null): string[] => merged.flatMap(item => {
+    const end = locals.bindings.get(item.name);
+    if (end === undefined) throw new Error(`compiler backend ts: local ${item.name} has no binding`);
+    return item.name === except || end.code === item.variable ? [] : [`${item.variable} = ${convert(end.code, end.type, item.type, quote(item.name), node)};`];
+  });
+  // The statements of a branch at level `n`, which end by giving each merged local its value.
+  const branch = (nodes: Node[], n: number, merged: MergedLocal[], node: { span: readonly number[] }, except: string | null = null): string =>
+    [emitNodes(nodes, target, n), ...assignMerged(merged, node, except).map(line => indent(n, line))].filter(line => line !== '').join('\n');
+  // A branching node that may assign locals: each branch starts from the bindings before it, and the locals hold the
+  // merged values after it.
+  const branching = (merged: MergedLocal[], node: { span: readonly number[] }, n: number, emit: (body: (nodes: Node[]) => string) => string): string => {
+    const start = locals.save();
+    const code = emit(nodes => {
+      locals.restore(start);
+      return branch(nodes, n + 1, merged, node);
+    });
+    locals.restore(start);
+    locals.enter(merged);
+    return [...declare(merged, node).map(line => indent(n, line)), code].join('\n');
+  };
   // A block of a definition or of a path: its input takes each field from the block scope, the data of the definition
   // or the root, in this order of precedence, and an optional field that none of them gives is null.
   const block = (node: NodeOf<'block'>, n: number): string => {
@@ -118,40 +149,70 @@ export function createTarget({ program }: { program: Program }): Target {
       : `if (definition === undefined) { definition = { template: ${quote(blockTarget)} }; definitions.${fieldName(node.id)} = definition; } else if (definition.html !== undefined || definition.template !== ${quote(blockTarget)}) throw runtime.error(frame, ${span(node)}, 'E_RUNTIME_BLOCK_REDEFINED', ${quote(`define ${node.id} is registered with a different template`)});`;
     return indent(n, `{ let definition = definitions.${fieldName(node.id)};\n${registration}\nif (definition?.html !== undefined) { context.at(frame, ${span(node)}); context.output.write(definition.html); }\nelse { ${input} ${render} }\n}`);
   };
+  // A loop iterates the entries of a typed list or map as they are, and the entries of a Value through the runtime; its
+  // item is a variable of the type of the items, which the body reads without a check.
   const forNode = (node: NodeOf<'for'>, n: number): string => {
     const name = fieldName(node.name);
     const entries = `${name}_entries`;
-    const body = emitNodes(node.body, target, n + 1);
+    const iter = emitExpression(node.iter, target);
+    const iterate = node.iter.valueType.kind === 'any' ? `runtime.entries(${iter}, frame, ${span(node)})` : `generatedEntries(${iter})`;
+    // The body reads the locals that it assigns as the IR widens them; the loop restores its variable.
+    const names = assignedNames(program, node.body);
+    names.delete(node.name);
+    for (const item of assignedNames(program, node.empty ?? [])) names.add(item);
+    const merged = locals.merged(names, node.widened);
+    const declarations = declare(merged, node);
+    locals.enter(merged);
+    const start = locals.save();
+    const item = locals.variable(node.name);
+    locals.bindings.set(node.name, { code: item, type: node.itemType });
+    loopItems.push([node.name, item]);
+    const body = branch(node.body, n + 1, merged, node, node.name);
+    loopItems.pop();
+    locals.restore(start);
+    const empty = node.empty ? branch(node.empty, n + 1, merged, node) : null;
+    locals.restore(start);
     // The loop declares the metadata that its body reads, and no other.
     const uses = (meta: string): boolean => new RegExp(`\\b${name}_${meta}\\b`).test(body);
     const indexed = uses('index') || uses('first') || uses('last');
     const lastIndex = uses('last') ? ` const ${name}_last_index = ${name}_size - 1;` : '';
     const first = uses('first') ? `\n    const ${name}_first = ${name}_index === 0;` : '';
     const last = uses('last') ? `\n    const ${name}_last = ${name}_index === ${name}_last_index;` : '';
-    const entry = `[${uses('key') ? `${name}_key` : ''}, ${name}_value]`;
+    const entry = `[${uses('key') ? `${name}_key` : ''}, ${item}]`;
     const loop = indexed ? `for (const [${name}_index, ${entry}] of ${entries}.entries())` : `for (const ${entry} of ${entries})`;
-    return indent(n, `{ const ${entries} = runtime.entries(${valueOf(emitExpression(node.iter, target), node.iter.valueType)}, frame, ${span(node)});\nconst ${name}_size = ${entries}.length;${lastIndex}\nconst ${name}_previous = scope.locals.get(${quote(node.name)});\ntry {\n${loop} {\n    scope.locals.set(${quote(node.name)}, ${name}_value);${first}${last}\n    context.iterations += 1;\n    runtime.limit('iteration', context.iterations, frame, ${span(node)});\n${body}\n}\n} finally { if (${name}_previous !== undefined) scope.locals.set(${quote(node.name)}, ${name}_previous); else scope.locals.delete(${quote(node.name)}); }${node.empty ? `\nif (${name}_size === 0) {\n${emitNodes(node.empty, target, n + 1)}\n}` : ''}\n}`);
+    return [...declarations.map(line => indent(n, line)), indent(n, `{ const ${entries} = ${iterate};\nconst ${name}_size = ${entries}.length;${lastIndex}\nconst ${name}_previous = scope.locals.get(${quote(node.name)});\ntry {\n${loop} {\n    scope.locals.set(${quote(node.name)}, ${valueOf(item, node.itemType)});${first}${last}\n    context.iterations += 1;\n    runtime.limit('iteration', context.iterations, frame, ${span(node)});\n${body}\n}\n} finally { if (${name}_previous !== undefined) scope.locals.set(${quote(node.name)}, ${name}_previous); else scope.locals.delete(${quote(node.name)}); }${empty === null ? '' : `\nif (${name}_size === 0) {\n${empty}\n}`}\n}`)].join('\n');
+  };
+  const loopItem = (loop: string): string => {
+    const item = loopItems.findLast(([name]) => name === loop);
+    if (item === undefined) throw new Error(`compiler backend ts: loop ${loop} has no item`);
+    return item[1];
   };
   const target: Target = {
     ...baseTarget(language),
     var: (name, type, node) => program.dynamicRoot
       ? check(node.scope ? `scope.lookup(frame, ${quote(name)})` : `runtime.member(rootData, ${quote(name)}, frame, ${span(node)})`, descriptor(type), quote(name), node)
       : `assign.${name}`,
-    local: (name, type, node) => check(`scope.lookup(frame, ${quote(name)})`, descriptor(type), quote(name), node),
-    set: (name, value, level, node) => indent(level, `scope.locals.set(${quote(name)}, ${valueOf(value, node.expr.valueType)});`),
+    local: (_name, _type, node) => locals.read(node).code,
+    set: (_name, value, level, node) => {
+      const variable = locals.variable(node.name);
+      locals.bindings.set(node.name, { code: variable, type: node.expr.valueType });
+      return indent(level, `const ${variable}: ${tsOf(node.expr.valueType)} = ${value};\nscope.locals.set(${quote(node.name)}, ${valueOf(variable, node.expr.valueType)});`);
+    },
     member: (object, key, owner, node) => owner.kind === 'any' ? `runtime.member(${object}, ${quote(key)}, frame, ${span(node)})`
       : owner.optional ? `((${object})?.${key} ?? null)` : `(${object}).${key}`,
     text: (value, level, node) => indent(level, `context.at(frame, ${span(node)}); context.output.write(${quote(value)});`),
     echo: (expression, level, node) => indent(level, `context.at(frame, ${span(node)}); context.output.write(runtime.escape(${valueOf(expression, node.expr.valueType)}, frame, ${span(node.expr)}));`),
     block,
-    ifBlock: (node, n) => indent(n, `if (definitions.${fieldName(node.id)} !== undefined) {\n${emitNodes(node.body, target, n + 1)}\n}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n}` : ''}`),
-    loopMeta: (loop, field, node) => field === 'value_' ? check(`${fieldName(loop)}_value`, node.valueType, quote(`${loop}.value_`), node) : `${fieldName(loop)}_${field.replace(/_$/, '')}`,
-    index: (object, index, _owner, node) => check(`runtime.index(${valueOf(object, node.object.valueType)}, ${valueOf(index, node.index.valueType)}, frame, ${span(node)})`, node.valueType, quote('index'), node),
+    // An if-block keeps the types of the locals that it assigns (the IR does not widen them).
+    ifBlock: (node, n) => branching(locals.merged(assignedNames(program, [...node.body, ...node.otherwise ?? []]), new Map()), node, n, body =>
+      indent(n, `if (definitions.${fieldName(node.id)} !== undefined) {`) + `\n${body(node.body)}\n${indent(n, '}')}${node.otherwise ? ` else {\n${body(node.otherwise)}\n${indent(n, '}')}` : ''}`),
+    loopMeta: (loop, field) => field === 'value_' ? loopItem(loop) : `${fieldName(loop)}_${field.replace(/_$/, '')}`,
+    index: (object, index, _owner, node) => check(`runtime.index(${valueOf(object, node.object.valueType)}, ${valueOf(index, node.index.valueType)}, frame, ${span(node)})`, node.valueType, label(node), node),
     memberCall: (object, method, args, node) => `runtime.memberCall(${valueOf(object, node.object.valueType)}, ${quote(method)}, ${values(args, node.args)}, frame, ${span(node)})`,
-    classCall: (className, method, args, node) => check(`runtime.classCall(${quote(className)}, ${quote(method)}, ${values(args, node.args)}, frame, ${span(node)})`, node.valueType, quote(`${className}::${method}`), node),
+    classCall: (className, method, args, node) => check(`runtime.classCall(${quote(className)}, ${quote(method)}, ${values(args, node.args)}, frame, ${span(node)})`, node.valueType, label(node), node),
     toValue: (value, type) => encode(value, type),
-    call: (name, args, node) => check(`runtime.call(${quote(name)}, ${values(args, node.args)}, frame, ${span(node)})`, node.valueType, quote(name), node),
-    unary: (operator, operand, node) => check(`runtime.unary(${quote(operator)}, ${valueOf(operand, node.operand.valueType)}, frame, ${span(node)})`, node.valueType, quote(operator), node),
+    call: (name, args, node) => check(`runtime.call(${quote(name)}, ${values(args, node.args)}, frame, ${span(node)})`, node.valueType, label(node), node),
+    unary: (operator, operand, node) => check(`runtime.unary(${quote(operator)}, ${valueOf(operand, node.operand.valueType)}, frame, ${span(node)})`, node.valueType, label(node), node),
     binary: (operator, left, right, node) => {
       const leftValue = valueOf('left', node.left.valueType);
       if (operator === '&&') return `(() => { const left = ${left}; return runtime.truthy(${leftValue}) ? runtime.truthy(${valueOf(right, node.right.valueType)}) : false; })()`;
@@ -160,16 +221,39 @@ export function createTarget({ program }: { program: Program }): Target {
       if (operator === '??') return node.valueType.kind === 'any'
         ? `(() => { const left = ${left}; return left !== null ? ${leftValue} : ${valueOf(right, node.right.valueType)}; })()`
         : `(() => { const left = ${left}; return left !== null ? left : ${right}; })()`;
-      return check(`runtime.binary(${quote(operator)}, ${valueOf(left, node.left.valueType)}, ${valueOf(right, node.right.valueType)}, frame, ${span(node)})`, node.valueType, quote(operator), node);
+      return check(`runtime.binary(${quote(operator)}, ${valueOf(left, node.left.valueType)}, ${valueOf(right, node.right.valueType)}, frame, ${span(node)})`, node.valueType, label(node), node);
     },
     ternary: (test, consequent, otherwise, node) => node.valueType.kind === 'any'
       ? `(runtime.truthy(${valueOf(test, node.test.valueType)}) ? ${valueOf(consequent, node.consequent.valueType)} : ${valueOf(otherwise, node.otherwise.valueType)})`
       : `(runtime.truthy(${valueOf(test, node.test.valueType)}) ? ${consequent} : ${otherwise})`,
-    list: (items, valueType, node) => check(`runtime.depth([${items.map(item => item.spread ? `...runtime.listSpread(${valueOf(item.value, item.node.valueType)}, frame, ${span(item)})` : valueOf(item.value, item.node.valueType)).join(', ')}], frame, ${span(node)})`, valueType, quote('list'), node),
-    map: (entries, valueType, node) => check(`runtime.depth(new Map<string, Value>([${entries.map(item => item.spread ? `...runtime.mapSpread(${valueOf(item.value, item.node.valueType)}, frame, ${span(item)})` : `[runtime.stringify(${valueOf(item.value[0], item.node.key.valueType)}, frame, ${span(item.node.key)}), ${valueOf(item.value[1], item.node.value.valueType)}]`).join(', ')}]), frame, ${span(node)})`, valueType, quote('map'), node),
-    ifNode: (node, n) => node.branches.map((branch, index) => `${'    '.repeat(n)}${index ? '} else if' : 'if'} (runtime.truthy(${valueOf(emitExpression(branch.test, target), branch.test.valueType)})) {\n${emitNodes(branch.body, target, n + 1)}`).join('\n') + `${'    '.repeat(n)}}${node.otherwise ? ` else {\n${emitNodes(node.otherwise, target, n + 1)}\n${'    '.repeat(n)}}` : ''}`,
+    list: (items, valueType, node) => check(`runtime.depth([${items.map(item => item.spread ? `...runtime.listSpread(${valueOf(item.value, item.node.valueType)}, frame, ${span(item)})` : valueOf(item.value, item.node.valueType)).join(', ')}], frame, ${span(node)})`, valueType, label(node), node),
+    map: (entries, valueType, node) => check(`runtime.depth(new Map<string, Value>([${entries.map(item => item.spread ? `...runtime.mapSpread(${valueOf(item.value, item.node.valueType)}, frame, ${span(item)})` : `[runtime.stringify(${valueOf(item.value[0], item.node.key.valueType)}, frame, ${span(item.node.key)}), ${valueOf(item.value[1], item.node.value.valueType)}]`).join(', ')}]), frame, ${span(node)})`, valueType, label(node), node),
+    // The tests read the locals before the if; a branch that assigns a local widens it as the IR does.
+    ifNode: (node, n) => {
+      const tests = node.branches.map(item => valueOf(emitExpression(item.test, target), item.test.valueType));
+      return branching(locals.merged(assignedNames(program, [node]), node.widened), node, n, body =>
+        node.branches.map((item, index) => `${index === 0 ? indent(n, 'if') : `${indent(n, '}')} else if`} (runtime.truthy(${tests[index] ?? ''})) {\n${body(item.body)}`).join('\n')
+        + `\n${indent(n, '}')}${node.otherwise ? ` else {\n${body(node.otherwise)}\n${indent(n, '}')}` : ''}`);
+    },
     forNode,
-    include: (node, n) => indent(n, `context.enter(${quote(node.target)}, frame, ${span(node)});\ntry { ${functionName(node.target)}(assign, definitions, { ${node.inputs.map(item => `${fieldName(item.name)}: ${convert(emitExpression(item.value, target), item.value.valueType, item.valueType, quote(`${node.target}.${item.name}`), node)}`).join(', ')} }, context, runtime, rootData, scope); } finally { context.leave(); }`),
+    // An include may assign the locals of its caller in the shared scope (RT-21): each local that it may assign is
+    // decoded once from the scope after it.
+    include: (node, n) => {
+      const call = `context.enter(${quote(node.target)}, frame, ${span(node)});\ntry { ${functionName(node.target)}(assign, definitions, { ${node.inputs.map(item => `${fieldName(item.name)}: ${convert(emitExpression(item.value, target), item.value.valueType, item.valueType, quote(`${node.target}.${item.name}`), node)}`).join(', ')} }, context, runtime, rootData, scope); } finally { context.leave(); }`;
+      const refreshed = [...assignedNames(program, [node])].flatMap(name => {
+        const before = locals.bindings.get(name);
+        if (before === undefined) return [];
+        const variable = locals.variable(name, true);
+        locals.bindings.set(name, { code: variable, type: before.type });
+        return [`const ${variable} = ${check(`scope.lookup(frame, ${quote(name)})`, before.type, quote(name), node)};`];
+      });
+      return indent(n, [call, ...refreshed].join('\n'));
+    },
+    // The inputs of the template are the fields of its input, and the body reads each local from its variable.
+    templateBody: (template, level) => {
+      locals = new FunctionLocals([...template.inputs].map(([name, type]) => [name, { code: `input.${fieldName(name)}`, type }]));
+      return locals.prune(emitNodes(template.body, target, level));
+    },
   };
   return target;
 }
@@ -257,6 +341,7 @@ export function emitRuntime(context: BackendContext): Part[] {
     definition('generatedOptional', 'function generatedOptional<T>(decode: GeneratedDecoder<T>): GeneratedDecoder<T | null> { return (value, path) => value === null || value === undefined ? null : decode(value, path); }'),
     definition('generatedListOf', `function generatedListOf<T>(item: GeneratedDecoder<T>): GeneratedDecoder<T[]> { return (value, path) => { if (Array.isArray(value)) return value.map((element, index) => item(element, path + '[' + index + ']')); throw generatedTypeError(value, path, 'a list'); }; }`),
     definition('generatedMapOf', `function generatedMapOf<T>(item: GeneratedDecoder<T>): GeneratedDecoder<Map<string, T>> { return (value, path) => new Map([...generatedObject(value, path)].map(([key, element]): [string, T] => [key, item(element, path + '.' + key)])); }`),
+    definition('generatedEntries', 'function generatedEntries<T>(value: T[] | Map<string, T> | null): [Value, T][] { if (value === null) return []; if (Array.isArray(value)) return value.map((item, index): [Value, T] => [index, item]); return [...value]; }'),
     definition('generatedEncodeOptional', 'function generatedEncodeOptional<T>(encode: (value: T) => Value): (value: T | null) => Value { return value => value === null ? null : encode(value); }'),
     definition('generatedEncodeList', 'function generatedEncodeList<T>(encode: (value: T) => Value): (value: T[]) => Value { return value => value.map(item => encode(item)); }'),
     definition('generatedEncodeMap', 'function generatedEncodeMap<T>(encode: (value: T) => Value): (value: Map<string, T>) => Value { return value => new Map([...value].map(([key, item]): [string, Value] => [key, encode(item)])); }'),

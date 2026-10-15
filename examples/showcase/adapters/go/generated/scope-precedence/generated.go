@@ -185,19 +185,20 @@ func render_content_tpl(assign Assign, definitions *Definitions, input Input_con
 	scope.Locals["defined_label"] = generatedValue(input.Defined_label)
 	scope.Locals["layout_local"] = generatedValue(input.Layout_local)
 	generatedWrite(context, "<article>\u000a<h1>", frame, ast.Span{0, 14})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, "title")), frame, ast.Span{17, 22}), frame, ast.Span{14, 23})
+	generatedWrite(context, generatedEscape(runtime, input.Title, frame, ast.Span{17, 22}), frame, ast.Span{14, 23})
 	generatedWrite(context, "</h1>\u000a<p class=\"root\">", frame, ast.Span{23, 45})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, "root_label")), frame, ast.Span{48, 58}), frame, ast.Span{45, 59})
+	generatedWrite(context, generatedEscape(runtime, input.Root_label, frame, ast.Span{48, 58}), frame, ast.Span{45, 59})
 	generatedWrite(context, "</p>\u000a<p class=\"defined\">", frame, ast.Span{59, 83})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, "defined_label")), frame, ast.Span{86, 99}), frame, ast.Span{83, 100})
+	generatedWrite(context, generatedEscape(runtime, input.Defined_label, frame, ast.Span{86, 99}), frame, ast.Span{83, 100})
 	generatedWrite(context, "</p>\u000a<p class=\"local\">", frame, ast.Span{100, 122})
-	generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(generatedResult[*string](scope.Lookup(frame, "layout_local"))), generatedValue("missing")}, frame, ast.Span{125, 158}), frame, ast.Span{125, 158}), frame, ast.Span{122, 159})
+	generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(input.Layout_local), generatedValue("missing")}, frame, ast.Span{125, 158}), frame, ast.Span{125, 158}), frame, ast.Span{122, 159})
 	generatedWrite(context, "</p>\u000a</article>\u000a", frame, ast.Span{159, 175})
 }
 
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 44, 68, 97, 108}, rootData)
-	scope.Locals["layout_local"] = generatedValue("visible only in layout")
+	var local_layout_local_1 string = "visible only in layout"
+	scope.Locals["layout_local"] = generatedValue(local_layout_local_1)
 	generatedWrite(context, "<section class=\"scope\">\u000a", frame, ast.Span{44, 68})
 	{
 		definition := definitions.Content
