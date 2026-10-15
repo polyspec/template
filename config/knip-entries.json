@@ -11,7 +11,7 @@
     "examples/site/scenarios/react-boundary/react-host.tsx": "The site shows it as the react-boundary integration source (scenario.json integrationFiles); make typecheck checks it with examples/site/scenarios/tsconfig.json."
   },
   "ignore": {
-    "packages/ts/src/ast-validator.mjs": "The AST validator that scripts/generate-ast-validator.mts generates with ajv standalone validation code (make ast-validator): esbuild wraps the CommonJS module of ajv/dist/runtime that the code requires, whose exports.default knip reads as an unused export of the file."
+    "packages/ts/src/ast-validator.mjs": "The AST validator that scripts/generate-ast-validator.mts generates with ajv standalone validation code (make ast-validator): esbuild wraps the CommonJS module of ajv/dist/runtime that the code requires, whose exports.default knip reads as an unused export of the file. The ignore also keeps it out of oxlint (kit K172): the code of ajv declares the parameters of every validation function, of which a schema uses a part, and holds the if/then of the schema."
   },
   "binaries": {
     "gmake": "GNU Make of Homebrew: tests/scripts/toolchain-files.test.mts runs the recipes with it where the make of the machine is the GNU Make 3.81 of macOS.",
