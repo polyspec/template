@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 29466103a958b3e780a8c4d715df0e61a7c17aa742c80da862d778eb3361bc4f -->
+<!-- source-sha256: 8c983c727c305b5ced708963d915ac2632f7bc845322f03d99f30c63d880027d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-11: specification은 넷을 세거나 Python 없이 넷을 나열하던 곳에서 core level의 다섯 언어를 셉니다. `interface.json`의 mapping, showcase artifact, native-call fixture, interface gate(`compiler.md`), function registry(`functions.md`), RT-56, RT-69, generated mode, native object 호출(`runtime.md`)입니다. VAL-22는 `merge`가 실행 중에 인자를 검사하는 implementation에 Python을 포함하며 새 parity profile `checked-arguments`가 이를 선언하고, CNF-2는 TypeScript command line의 parser를 언어로 적습니다.
 
 - T22.6-14-1: `polyspec.template`은 다른 implementation처럼 `Engine`이 렌더하는 program interface `Program`과 loader protocol 및 그 결과인 `Loader`와 `LoadResult`를 export합니다. `AstProgram`의 base class는 private인 `_AstProgramCore`이고, export test는 `engine.py`와 `loader.py`의 모든 public class를 검사합니다.
 
