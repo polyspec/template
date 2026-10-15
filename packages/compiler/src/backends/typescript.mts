@@ -204,7 +204,7 @@ export function createTarget({ program }: { program: Program }): Target {
     echo: (expression, level, node) => indent(level, `context.at(frame, ${span(node)}); context.output.write(runtime.escape(${valueOf(expression, node.expr.valueType)}, frame, ${span(node.expr)}));`),
     block,
     // An if-block keeps the types of the locals that it assigns (the IR does not widen them).
-    ifBlock: (node, n) => branching(locals.merged(assignedNames(program, [...node.body, ...node.otherwise ?? []]), new Map()), node, n, body =>
+    ifBlock: (node, n) => branching(locals.merged(assignedNames(program, [...node.body, ...node.otherwise ?? []]), null), node, n, body =>
       indent(n, `if (definitions.${fieldName(node.id)} !== undefined) {`) + `\n${body(node.body)}\n${indent(n, '}')}${node.otherwise ? ` else {\n${body(node.otherwise)}\n${indent(n, '}')}` : ''}`),
     loopMeta: (loop, field) => field === 'value_' ? loopItem(loop) : `${fieldName(loop)}_${field.replace(/_$/, '')}`,
     index: (object, index, _owner, node) => check(`runtime.index(${valueOf(object, node.object.valueType)}, ${valueOf(index, node.index.valueType)}, frame, ${span(node)})`, node.valueType, label(node), node),
@@ -230,9 +230,9 @@ export function createTarget({ program }: { program: Program }): Target {
     map: (entries, valueType, node) => check(`runtime.depth(new Map<string, Value>([${entries.map(item => item.spread ? `...runtime.mapSpread(${valueOf(item.value, item.node.valueType)}, frame, ${span(item)})` : `[runtime.stringify(${valueOf(item.value[0], item.node.key.valueType)}, frame, ${span(item.node.key)}), ${valueOf(item.value[1], item.node.value.valueType)}]`).join(', ')}]), frame, ${span(node)})`, valueType, label(node), node),
     // The tests read the locals before the if; a branch that assigns a local widens it as the IR does.
     ifNode: (node, n) => {
-      const tests = node.branches.map(item => valueOf(emitExpression(item.test, target), item.test.valueType));
+      const tested = node.branches.map(item => ({ test: valueOf(emitExpression(item.test, target), item.test.valueType), statements: item.body }));
       return branching(locals.merged(assignedNames(program, [node]), node.widened), node, n, body =>
-        node.branches.map((item, index) => `${index === 0 ? indent(n, 'if') : `${indent(n, '}')} else if`} (runtime.truthy(${tests[index] ?? ''})) {\n${body(item.body)}`).join('\n')
+        tested.map(({ test, statements }, index) => `${index === 0 ? indent(n, 'if') : `${indent(n, '}')} else if`} (runtime.truthy(${test})) {\n${body(statements)}`).join('\n')
         + `\n${indent(n, '}')}${node.otherwise ? ` else {\n${body(node.otherwise)}\n${indent(n, '}')}` : ''}`);
     },
     forNode,

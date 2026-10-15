@@ -6,7 +6,7 @@
   "sourceDigest": "b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78",
   "typeDigest": "5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "306333296943679e2375530d4682ddb60b32c30e438b466bbdea4cdeaa1d3537",
+  "compilerDigest": "27ef8fbeb96c7d855577e12b098b329da4542a4fc13a98236412a9f6a314c3e3",
   "files": {
     "empty_state.py": {
       "path": "empty_state.py",

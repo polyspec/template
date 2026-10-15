@@ -151,7 +151,7 @@ export function createTarget({ program }: { program: Program }): Target {
           enterBlock(node, blockTarget, call)).slice(1)}`).slice(1));
     },
     // An if-block keeps the types of the locals that it assigns (the IR does not widen them).
-    ifBlock: (node, n) => branching(locals.merged(assignedNames(program, [...node.body, ...node.otherwise ?? []]), new Map()), n, body => {
+    ifBlock: (node, n) => branching(locals.merged(assignedNames(program, [...node.body, ...node.otherwise ?? []]), null), n, body => {
       const then = body(node.body);
       const otherwise = node.otherwise ? body(node.otherwise) : null;
       return `${braced(`if definitions.${exportedName(node.id)} != nil`, then)}${otherwise === null ? '' : ` else ${braced('', otherwise).slice(1)}`}`;
@@ -190,9 +190,9 @@ export function createTarget({ program }: { program: Program }): Target {
     },
     // The tests read the locals before the if; a branch that assigns a local widens it as the IR does.
     ifNode: (node, n) => {
-      const tests = node.branches.map(item => emitExpression(item.test, target));
+      const tested = node.branches.map(item => ({ test: emitExpression(item.test, target), statements: item.body }));
       return branching(locals.merged(assignedNames(program, [node]), node.widened), n, body => {
-        const branches = node.branches.map((item, index) => braced(`if generatedTruthy(runtime, ${tests[index] ?? ''})`, body(item.body)));
+        const branches = tested.map(({ test, statements }) => braced(`if generatedTruthy(runtime, ${test})`, body(statements)));
         const otherwise = node.otherwise ? ` else ${braced('', body(node.otherwise)).slice(1)}` : '';
         return `${branches.join(' else ')}${otherwise}`;
       });

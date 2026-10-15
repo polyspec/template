@@ -26,15 +26,15 @@ const run = (command: string, args: string[], cwd: string): void => {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
   if (result.status !== 0) throw new Error(`${command} exited with ${result.status}\n${result.stdout}${result.stderr}`);
 };
-/** The functions that render the templates of a generated source. */
-const renderFunctions = (source: string, start: RegExp): string => source.split('\n').filter((_line, index, lines) => {
-  for (let at = index; at >= 0; at -= 1) {
-    const line = lines[at] ?? '';
-    if (start.test(line)) return true;
-    if (/^(?:function|func) /.test(line)) return false;
-  }
-  return false;
-}).join('\n');
+/** The functions that render the templates of a generated source: each line from a line of `start` to the next function. */
+const renderFunctions = (source: string, start: RegExp): string => {
+  let inside = false;
+  return source.split('\n').filter((line) => {
+    if (start.test(line)) inside = true;
+    else if (/^(?:function|func) /.test(line)) inside = false;
+    return inside;
+  }).join('\n');
+};
 const count = (text: string, pattern: RegExp): number => text.match(pattern)?.length ?? 0;
 
 try {

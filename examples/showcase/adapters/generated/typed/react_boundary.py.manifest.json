@@ -6,7 +6,7 @@
   "sourceDigest": "c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47",
   "typeDigest": "2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "306333296943679e2375530d4682ddb60b32c30e438b466bbdea4cdeaa1d3537",
+  "compilerDigest": "27ef8fbeb96c7d855577e12b098b329da4542a4fc13a98236412a9f6a314c3e3",
   "files": {
     "react_boundary.py": {
       "path": "react_boundary.py",
