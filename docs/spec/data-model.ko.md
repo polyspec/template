@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: 78cf2dffb8c2db3552e0f3e681ef233248264de5a5c5319f8ca4c257a957f8d7 -->
+<!-- source-sha256: 7427b931edbc75207ed7cbc412d479e9c16a6558fc0a4013736ef945682d4de3 -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -231,7 +231,7 @@ bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을
 - `bind(value)`는 호스트 바인딩(VAL-13~VAL-16, VAL-23)이 map으로 바꾸는 모든 호스트 값과 `render`가 빈 map으로 쓰는 값(RT-4)을 받는다. JSON text는 받지 않는다. 호스트는 JSON text를 package의 JSON parser(VAL-12)로 parse한 결과를 `bind`에 준다. `bind`는 호스트 바인딩(VAL-11~VAL-20)을 적용하고 bound map을 돌려준다. `render`가 빈 map으로 쓰는 값은 빈 bound map을 돌려준다. 같은 구현의 bound map은 바꾸지 않고 그대로 돌려준다. 바뀌지 않고 이미 검사했기 때문이다. 바인딩이 map으로 바꾸지 않는 그 밖의 값은 E_DATA_UNSUPPORTED_TYPE으로 실패한다. 실패는 ERR-14의 오류다. 각 구현이 bound map을 `render`와 `prepare`에 넘기는 연산이나 parameter type은 `packages/compiler/interface.json`에 적는다. 예를 들어 Rust의 `prepare_bound`와 `render_bound`, PHP extension의 `render`다. PHP extension의 `render_json`처럼 JSON text를 받는 연산은 bound map을 받지 않는다.
 - `merge(first, second)`는 RT-26의 우선순위로 `first`와 `second`의 항목을 가진 bound map을 돌려준다. `second`의 항목은 같은 key의 `first` 항목을 바꾸고 `first`의 위치를 유지한다. `second`의 나머지 항목은 그 뒤에 순서대로 붙는다. 값을 다시 읽지 않는다.
 
-TypeScript, PHP, PHP extension에서는 `bind`와 `merge`의 parameter가 모든 값을 받으므로 연산 안에서 검사한다. 같은 구현의 bound map이 아닌 `merge`의 인자는 E_DATA_UNSUPPORTED_TYPE으로 실패한다. Go와 Rust에서는 `merge`의 parameter type이 bound map type이므로 compiler가 다른 값을 거부한다.
+TypeScript, PHP, PHP extension, Python에서는 `bind`와 `merge`의 parameter가 모든 값을 받으므로 연산 안에서 검사한다. 같은 구현의 bound map이 아닌 `merge`의 인자는 E_DATA_UNSUPPORTED_TYPE으로 실패한다. Go와 Rust에서는 `merge`의 parameter type이 bound map type이므로 compiler가 다른 값을 거부한다.
 
 `render`와 `prepare`는 bound map을 `assign`(RT-4)과 템플릿 정의의 `data`(RT-24)로 받고, 다시 binding하지 않는다(RT-61). 그 밖의 위치에 있는 bound map, 즉 `bind`, `render`, `prepare`에 준 list, map, object 안의 bound map과 호스트 코드의 결과(VAL-11)인 bound map은 호스트 바인딩이 E_DATA_UNSUPPORTED_TYPE으로 실패시킨다. 다른 구현이 만든 bound map, 예를 들어 PHP 구현에 준 PHP extension의 bound map은 어느 위치에서든 E_DATA_UNSUPPORTED_TYPE으로 실패한다. bound map은 native object(VAL-19)가 되지 않는다. 이유: bound map은 `render`가 map 전체로 쓰는 위치에서만 받으므로, bound map의 depth를 그것을 만난 level과 합치는 binding 규칙이 필요 없다(VAL-20). 그리고 각각 VAL-20을 만족하는 두 map의 `merge`도 VAL-20을 만족한다.
 

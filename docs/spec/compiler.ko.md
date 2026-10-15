@@ -1,12 +1,12 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 3a1064ee18a3b803077e3c8ad1dbadcd40b57eca0d4c3acd6cac2855fa60b305 -->
+<!-- source-sha256: 5e953acf5c08cd965fdc7c46d86c1db7edae716ee4ee86f7986fd225c55f975e -->
 # Compiler 계약
 
 [English](/spec/compiler).
 
 Compiler는 template parsing, validation, lowering, artifact emission을 소유한다. Runtime package는 이미 compile한 program을 실행한다. Render request에서 source를 parse하거나 host compiler를 호출하지 않는다.
 
-compiler와 runtime의 단일 계약 원본은 [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)이다. 생성 선언부와 Mermaid 도표는 이 manifest와 일치해야 한다. TypeScript, Go, Rust, PHP mapping은 표기와 오류 전달 방식을 바꿀 수 있지만 소유 관계, field 순서, operation 위치, 상태 전이를 바꿀 수 없다.
+compiler와 runtime의 단일 계약 원본은 [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)이다. 생성 선언부와 Mermaid 도표는 이 manifest와 일치해야 한다. TypeScript, Go, Rust, PHP, Python mapping은 표기와 오류 전달 방식을 바꿀 수 있지만 소유 관계, field 순서, operation 위치, 상태 전이를 바꿀 수 없다.
 
 Manifest의 `evidence` section은 이 계약을 읽는 기계 판독 경로다. 명세 순서, 적합성 fixture, 실행 가능한 예제, 생성 artifact, 필수 검증 명령을 연결한다. Checker가 연결 대상의 누락을 거부하므로 읽는 사람은 중복 요약에 의존하지 않고 계약에서 실행 증거까지 따라갈 수 있다.
 
@@ -82,7 +82,7 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 
 ## 구현 상태
 
-AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP, Python의 구체적인 `GeneratedProgram`을 생성하고 showcase는 TypeScript, Go, Rust, PHP artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. TypeScript, Go, Rust, PHP, Python에서 모든 canonical case의 generated matrix가 통과하며, 별도의 generated native-call fixture가 TypeScript, Go, Rust, PHP에서(이 fixture는 아직 Python을 실행하지 않는다) 같은 assign object field, instance method, class function 결과를 출력하며, AST program과 같은 호스트 인자(VAL-21)와 native object 동등성(EXP-39)을 가진다.
+AST compiler와 runtime은 구현됐다. 제품 compiler는 TypeScript, Go, Rust, PHP, Python의 구체적인 `GeneratedProgram`을 생성하고 showcase는 TypeScript, Go, Rust, PHP, Python artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. TypeScript, Go, Rust, PHP, Python에서 모든 canonical case의 generated matrix가 통과하며, 별도의 generated native-call fixture가 TypeScript, Go, Rust, PHP, Python에서 같은 assign object field, instance method, class function 결과를 출력하며, AST program과 같은 호스트 인자(VAL-21)와 native object 동등성(EXP-39)을 가진다.
 
 Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract·compiler digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 
@@ -90,6 +90,6 @@ Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용�
 `make conformance-generated-php`는 각 case마다 별도로 생성하고 문법 검사한 PHP 소스로 같은 내용을 증명한다.
 `make generated-native-check`는 모든 backend로 dynamic-root program 하나를 compile하고 native object assign, public field read, instance method call, 등록된 class function call을 실행한다. 같은 matrix에서 public member 누락, 등록되지 않은 class function, native method와 class function의 실패, native 인자의 잘못된 타입과 개수도 검사한다. 모든 backend는 같은 호출 위치에서 같은 오류 코드를 반환해야 한다. 같은 객체는 include한 template, block 인자, template define 데이터에 원본 호스트 객체로 도달해야 한다(VAL-18). PHP backend는 namespace 두 개로 두 번 compile하며, 두 program은 `GeneratedProgram`과 `Assign`이라는 전역 class와 함께 한 PHP process에서 load하고 render한다. 유효한 namespace 없이 PHP로 compile하면 실패해야 한다.
 
-두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 네 언어의 필드와 연산을 검사한다.
+두 program mode는 같은 실행 상태 분리를 사용한다. `RenderFrame`은 `name`, `lines`, `context`만 소유하며 AST를 보유할 수 없다. `RenderScope`는 `locals`와 `loops`를 소유하고 `lookup`과 `loopMeta`를 제공하며 include에서 공유되고 block render마다 새로 만들어진다. Interface gate가 다섯 언어의 필드와 연산을 검사한다.
 
 같은 gate가 oxc-parser의 TypeScript AST, Go AST, Rust syntax tree, PHP Reflection으로 구체적인 `RuntimeEnvironment`의 field 순서, operation 소속과 인자 수를 검사한다. AST program이 limits나 host 함수 상태를 중복 소유하지 않고 environment를 소유하는지도 함께 확인한다.

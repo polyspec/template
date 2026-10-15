@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.6-11: the specification counts the five languages of the core level where it counted four or listed four without Python: the mappings of `interface.json`, the showcase artifacts, the native-call fixture and the interface gate (`compiler.md`), the function registries (`functions.md`), RT-56, RT-69, the generated mode and the native object calls (`runtime.md`); VAL-22 names Python among the implementations whose `merge` checks its arguments at run time, which the new parity profile `checked-arguments` declares, and CNF-2 names the parser of the TypeScript command line by its language.
+
 - T22.6-14-1: `polyspec.template` exports `Program`, the program interface that `Engine` renders, and `Loader` and `LoadResult`, the loader protocol and its result, as the other implementations do; the base class of `AstProgram` is the private `_AstProgramCore`, and the export test checks every public class of `engine.py` and `loader.py`.
 
 - T24.39: template pins `@polyspec/kit` 0.0.53, the kit of the other repositories, and `make kit-sync` leaves its copies unchanged. The owner check can select the tests of a module by its importers (K191), kit-check requires the `.php-version` that template declares (K193), and the release proof lists each sibling wheel (K195).

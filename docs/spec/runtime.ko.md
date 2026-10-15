@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: b16f3494d2bec7de1fd2e7c777cb906424e47dae3a3a1286fa27ee62abd4e372 -->
+<!-- source-sha256: 5bef9bf7ce1aaacb80d637351a2ef878243518c2730a06208b051e0108257f49 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -46,7 +46,7 @@ PageCache.getOrSet(key, ttl, render)
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
 - **RT-67** 준비된 렌더 계약은 단일 제품 manifest인 [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)에 선언한다. 인터페이스 검사는 필요한 언어 매핑, 지원 수준, 연산이 하나라도 없으면 실패한다.
-- **RT-69** `Engine`은 `Program` 하나만 소유한다. generated 실행은 AST 자리표시자, parser, AST renderer를 만들거나 보유하지 않고, AST 실행은 생성 코드를 보유하지 않는다. mode 선택이 engine 안으로 돌아오면 네 runtime의 인터페이스 검사가 실패해야 한다.
+- **RT-69** `Engine`은 `Program` 하나만 소유한다. generated 실행은 AST 자리표시자, parser, AST renderer를 만들거나 보유하지 않고, AST 실행은 생성 코드를 보유하지 않는다. mode 선택이 engine 안으로 돌아오면 다섯 runtime의 인터페이스 검사가 실패해야 한다.
 
 program 도표는 단일 제품 manifest에서 생성한다.
 
@@ -176,7 +176,7 @@ sequenceDiagram
 
 - **RT-54** 인터페이스 manifest는 하나의 compiler와 동등한 두 mode를 선언한다. `ast`는 `AstArtifact`, `gen`은 host language source와 artifact manifest를 반환한다. 둘 다 같은 prepared render 계약을 가진 `Program`을 만든다.
 - **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다.
-- **RT-56** TypeScript, Go, Rust, PHP는 `core-runtime`, `artifact-runtime`과 두 `Program` variant를 제공한다. Build compiler는 `source-compiler`와 generated target backend 네 개를 제공한다. JavaScript ESM은 TypeScript backend가 생성하며 별도 의미 구현으로 세지 않는다.
+- **RT-56** TypeScript, Go, Rust, PHP, Python은 `core-runtime`, `artifact-runtime`과 두 `Program` variant를 제공한다. Build compiler는 `source-compiler`와 generated target backend 다섯 개를 제공한다. JavaScript ESM은 TypeScript backend가 생성하며 별도 의미 구현으로 세지 않는다.
 - **RT-57** Artifact manifest는 contract format, mode, target language, entry, source digest, type digest, contract digest, output path를 포함한다. Artifact는 service 시작 전에 생성하고 process에 한 번 load하거나 정적으로 연결한다.
 - **RT-58** Artifact 갱신은 build 정책이다. `dev`는 compiler를 호출할 때마다 재생성하고, `true`는 source, type, contract digest가 달라지면 재생성하며, `false`는 source를 읽지 않고 배포 artifact만 사용한다. Development watcher는 재생성 뒤 정적으로 연결한 Go와 Rust process를 rebuild하고 restart한다.
 - **RT-59** Render request 경로에서는 parsing, source 탐색, artifact 생성, host compilation을 하지 않는다. 같은 program을 같은 assign, define, environment로 render하면 같은 output byte를 만들고 request를 변경하지 않는다.
@@ -185,9 +185,9 @@ sequenceDiagram
 인터페이스는 두 실행 모드를 선언한다.
 
 - **AST 모드**는 정규 AST artifact를 한 번 로드하고 요청마다 `assign`과 `define`을 바인딩해 AST를 해석한다. 완성된 cross-language mode다.
-- **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 네 core runtime 모두 모든 canonical case의 generated 적합성 suite를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
+- **생성 모드**는 시작 전에 정규 AST의 각 node를 TypeScript, Go, Rust, PHP, Python renderer로 lower하고 renderer를 한 번 load하거나 연결한 뒤 request마다 호출한다. 다섯 core runtime 모두 모든 canonical case의 generated 적합성 suite를 통과한다. Request에서 template AST를 parse하거나 해석하지 않는다.
 
-Native object 호출은 AST와 generated runtime에 구현됐다. 전체 mode matrix와 패키지 설치 검사는 TypeScript, Go, Rust, PHP에서 같은 assign 객체 필드, 인스턴스 메서드와 클래스 함수 동작을 실행한다.
+Native object 호출은 AST와 generated runtime에 구현됐다. 전체 mode matrix와 패키지 설치 검사는 TypeScript, Go, Rust, PHP, Python에서 같은 assign 객체 필드, 인스턴스 메서드와 클래스 함수 동작을 실행한다.
 
 ```mermaid
 flowchart LR
