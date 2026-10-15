@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 134be0f37fb674a51e62d498d58e48cdfbfd69a8a3d507253a4d4471eaadffbb -->
+<!-- source-sha256: 191ac01bd6bef955636ea0d849b11189d9b54b34ebe1a53fe52d88842b048c16 -->
 # 오류
 
 [English](/spec/errors).
@@ -21,6 +21,8 @@
 **ERR-6** 로더가 제공하지 않는 진입 템플릿의 오류는 `code`가 `E_LOAD_NOT_FOUND`이고 `template`이 요청한 이름이며 `line` 0, `col` 0이다. 로딩에 실패한 진입 템플릿의 오류(`E_LOAD_FAILED`)도 `template`, `line`, `col`이 같다.
 
 ## 코드
+
+ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-codes`가 이 table에서 각 implementation의 code 목록을 쓰고, parity check의 R7(`config/parity.json`의 `errors`)이 각 목록을 table과 비교합니다.
 
 **ERR-7** 렉시컬 오류:
 

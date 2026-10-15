@@ -160,7 +160,7 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
         pt_fail_bare(run, code, name, message_);                                                         \
     } while (0)
     if (engine->root == NULL) {
-        PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
+        PT_LOAD_FAIL(PT_E_LOAD_NOT_FOUND, "template %s does not exist", name.s);
     }
     pt_buf path;
     pt_buf_init(&path, ctx->arena);
@@ -170,7 +170,7 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
     pt_s file = pt_buf_done(&path);
     if (memchr(file.s, '\0', file.n) != NULL) {
         /* The filesystem functions of PHP reject such a path with an error, a failure of the loader. */
-        PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: the path contains a NUL byte", name.s);
+        PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: the path contains a NUL byte", name.s);
     }
     /* Each component below the root is examined without following a symbolic link (RT-10). */
     zend_stat_t info;
@@ -182,22 +182,22 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
         int missing = VCWD_LSTAT(prefix, &info) != 0;
         efree(prefix);
         if (missing) {
-            PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
+            PT_LOAD_FAIL(PT_E_LOAD_NOT_FOUND, "template %s does not exist", name.s);
         }
         if (S_ISLNK(info.st_mode)) {
-            PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: %.*s is a symbolic link", name.s,
+            PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: %.*s is a symbolic link", name.s,
                 (int)(until - ZSTR_LEN(engine->root) - 1), file.s + ZSTR_LEN(engine->root) + 1);
         }
         if (slash == NULL) {
             break;
         }
         if (!S_ISDIR(info.st_mode)) {
-            PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
+            PT_LOAD_FAIL(PT_E_LOAD_NOT_FOUND, "template %s does not exist", name.s);
         }
         component = until + 1;
     }
     if (!S_ISREG(info.st_mode)) {
-        PT_LOAD_FAIL("E_LOAD_NOT_FOUND", "template %s does not exist", name.s);
+        PT_LOAD_FAIL(PT_E_LOAD_NOT_FOUND, "template %s does not exist", name.s);
     }
     /* One file has one name: the device and inode number identify the file. */
     zend_string *identity = zend_strpprintf(0, "%llu:%llu", (unsigned long long)info.st_dev, (unsigned long long)info.st_ino);
@@ -209,10 +209,10 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
     }
     zend_string_release(identity);
     if (owner != NULL && (Z_STRLEN_P(owner) != name.n || memcmp(Z_STRVAL_P(owner), name.s, name.n) != 0)) {
-        PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: %s is the file of %s", name.s, name.s, Z_STRVAL_P(owner));
+        PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: %s is the file of %s", name.s, name.s, Z_STRVAL_P(owner));
     }
     if (VCWD_ACCESS(file.s, R_OK) != 0) {
-        PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: %s cannot be read", name.s, name.s);
+        PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: %s cannot be read", name.s, name.s);
     }
     zend_string *version = zend_strpprintf(0, "%lld:%lld", (long long)info.st_mtime, (long long)info.st_size);
     pt_template *cached = zend_hash_str_find_ptr(&engine->cache, name.s, name.n);
@@ -228,7 +228,7 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
     }
     if (stream == NULL) {
         zend_string_release(version);
-        PT_LOAD_FAIL("E_LOAD_FAILED", "template %s cannot be loaded: %s cannot be read", name.s, name.s);
+        PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: %s cannot be read", name.s, name.s);
     }
     pt_s source = bytes ? pt_strdup(ctx->arena, ZSTR_VAL(bytes), ZSTR_LEN(bytes)) : PT_S("");
     if (bytes) {
@@ -256,7 +256,7 @@ static pt_s pt_text_at(pt_ctx *ctx, pt_value value, const pt_frame *frame, size_
 {
     pt_s text = {NULL, 0};
     if (!pt_stringify(ctx->arena, value, &text)) {
-        pt_ctx_fail(ctx, "E_RUNTIME_STRINGIFY", frame, start, end, zend_string_init("a list or map cannot be converted to text", 41, 0));
+        pt_ctx_fail(ctx, PT_E_RUNTIME_STRINGIFY, frame, start, end, zend_string_init("a list or map cannot be converted to text", 41, 0));
     }
     return text;
 }
@@ -276,17 +276,17 @@ static double pt_number_at(pt_ctx *ctx, pt_value value, const pt_frame *frame, c
             zend_string *quoted = pt_json_quote(value.u.str.s, value.u.str.n);
             zend_string *message = zend_strpprintf(0, "%s is not a number", ZSTR_VAL(quoted));
             zend_string_release(quoted);
-            pt_ctx_fail(ctx, "E_RUNTIME_TYPE", frame, expr->start, expr->end, message);
+            pt_ctx_fail(ctx, PT_E_RUNTIME_TYPE, frame, expr->start, expr->end, message);
         }
         default:
-            PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, expr, "a %s is not a number", pt_type_name(value));
+            PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, expr, "a %s is not a number", pt_type_name(value));
     }
 }
 
 static double pt_finite_at(pt_ctx *ctx, double value, const pt_frame *frame, const pt_expr *expr)
 {
     if (!isfinite(value)) {
-        PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, expr, "arithmetic result is not finite");
+        PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, expr, "arithmetic result is not finite");
     }
     return value;
 }
@@ -320,7 +320,7 @@ static pt_value pt_host_result(pt_ctx *ctx, const char *name, zval *result, cons
         }
         zend_string *text = zend_strpprintf(0, "%s failed: %s", name, ZSTR_VAL(message));
         zend_string_release(message);
-        pt_ctx_fail(ctx, "E_RUNTIME_HOST_FUNCTION", frame, expr->start, expr->end, text);
+        pt_ctx_fail(ctx, PT_E_RUNTIME_HOST_FUNCTION, frame, expr->start, expr->end, text);
     }
     pt_value value = {0};
     pt_bind_error error = {NULL, NULL};
@@ -365,7 +365,7 @@ static pt_value pt_member_call(pt_ctx *ctx, pt_value container, const pt_expr *e
         }
     }
     if (method == NULL) {
-        PT_FAIL_AT(ctx, "E_RUNTIME_UNKNOWN_FUNCTION", frame, expr, "%s is not a function", expr->name.s);
+        PT_FAIL_AT(ctx, PT_E_RUNTIME_UNKNOWN_FUNCTION, frame, expr, "%s is not a function", expr->name.s);
     }
     zend_object *object = container.u.object;
     zval params, result;
@@ -479,7 +479,7 @@ static pt_value pt_index(pt_ctx *ctx, pt_value container, pt_value key, const pt
 static pt_value pt_depth_checked(pt_ctx *ctx, pt_value value, const pt_frame *frame, const pt_expr *expr)
 {
     if (!pt_depth_within(value, PT_MAX_DEPTH)) {
-        PT_FAIL_AT(ctx, "E_RUNTIME_LIMIT", frame, expr, "a list or map literal nests deeper than %d levels", PT_MAX_DEPTH);
+        PT_FAIL_AT(ctx, PT_E_RUNTIME_LIMIT, frame, expr, "a list or map literal nests deeper than %d levels", PT_MAX_DEPTH);
     }
     return value;
 }
@@ -500,9 +500,9 @@ static pt_value pt_call(pt_ctx *ctx, const pt_expr *expr, pt_value *args, const 
         uint32_t count = expr->count;
         if (count < builtin->min || count > builtin->max) {
             if (builtin->min == builtin->max) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_ARITY", frame, expr, "%s accepts %u arguments, got %u", expr->name.s, builtin->min, count);
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_ARITY, frame, expr, "%s accepts %u arguments, got %u", expr->name.s, builtin->min, count);
             }
-            PT_FAIL_AT(ctx, "E_RUNTIME_ARITY", frame, expr, "%s accepts %u to " ZEND_LONG_FMT " arguments, got %u", expr->name.s, builtin->min, builtin->max == UINT32_MAX ? ZEND_LONG_MAX : (zend_long)builtin->max, count);
+            PT_FAIL_AT(ctx, PT_E_RUNTIME_ARITY, frame, expr, "%s accepts %u to " ZEND_LONG_FMT " arguments, got %u", expr->name.s, builtin->min, builtin->max == UINT32_MAX ? ZEND_LONG_MAX : (zend_long)builtin->max, count);
         }
         pt_value result = {0};
         pt_function_error error = {NULL, NULL};
@@ -513,7 +513,7 @@ static pt_value pt_call(pt_ctx *ctx, const pt_expr *expr, pt_value *args, const 
     }
     zval *callable = zend_hash_str_find(&ctx->engine->functions, expr->name.s, expr->name.n);
     if (callable == NULL) {
-        PT_FAIL_AT(ctx, "E_RUNTIME_UNKNOWN_FUNCTION", frame, expr, "%s is not a function", expr->name.s);
+        PT_FAIL_AT(ctx, PT_E_RUNTIME_UNKNOWN_FUNCTION, frame, expr, "%s is not a function", expr->name.s);
     }
     return pt_call_callable(ctx, callable, expr->name.s, args, expr->count, frame, expr);
 }
@@ -543,7 +543,7 @@ static pt_value pt_binary(pt_ctx *ctx, const pt_expr *expr, const pt_frame *fram
     switch (op) {
         case OP_ADD:
             if (left.type == PT_LIST || left.type == PT_MAP || right.type == PT_LIST || right.type == PT_MAP) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_STRINGIFY", frame, expr, "a list or map cannot be converted to text");
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_STRINGIFY, frame, expr, "a list or map cannot be converted to text");
             }
             if (pt_is_string(left) || pt_is_string(right)) {
                 pt_s a = pt_text_at(ctx, left, frame, expr->start, expr->end);
@@ -562,7 +562,7 @@ static pt_value pt_binary(pt_ctx *ctx, const pt_expr *expr, const pt_frame *fram
         case OP_DIV: {
             double divisor = pt_number_at(ctx, right, frame, expr);
             if (divisor == 0.0) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_DIV_ZERO", frame, expr, "division by zero");
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_DIV_ZERO, frame, expr, "division by zero");
             }
             return pt_number(pt_finite_at(ctx, pt_number_at(ctx, left, frame, expr) / divisor, frame, expr));
         }
@@ -570,10 +570,10 @@ static pt_value pt_binary(pt_ctx *ctx, const pt_expr *expr, const pt_frame *fram
             double dividend = pt_number_at(ctx, left, frame, expr);
             double divisor = pt_number_at(ctx, right, frame, expr);
             if (!pt_is_integer(dividend) || !pt_is_integer(divisor)) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, expr, "%% requires integer operands");
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, expr, "%% requires integer operands");
             }
             if (divisor == 0.0) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_DIV_ZERO", frame, expr, "division by zero");
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_DIV_ZERO, frame, expr, "division by zero");
             }
             return pt_number(fmod(dividend, divisor));
         }
@@ -587,7 +587,7 @@ static pt_value pt_binary(pt_ctx *ctx, const pt_expr *expr, const pt_frame *fram
         case OP_GE: {
             int order;
             if (!pt_compare(left, right, &order)) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_COMPARE", frame, expr, "%s and %s have no order", pt_type_name(left), pt_type_name(right));
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_COMPARE, frame, expr, "%s and %s have no order", pt_type_name(left), pt_type_name(right));
             }
             switch (op) {
                 case OP_LT: return pt_bool(order < 0);
@@ -622,9 +622,9 @@ static pt_value pt_binary(pt_ctx *ctx, const pt_expr *expr, const pt_frame *fram
                 }
                 return pt_bool(false);
             }
-            PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, expr, "in requires a list, map or string on the right");
+            PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, expr, "in requires a list, map or string on the right");
         default:
-            PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, expr, "unknown operator %s", pt_operator_text(op));
+            PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, expr, "unknown operator %s", pt_operator_text(op));
     }
 }
 
@@ -638,7 +638,7 @@ static pt_value pt_evaluate_node(pt_ctx *ctx, const pt_expr *expr, const pt_fram
         case X_LOOP_META: {
             pt_loop *loop = pt_loop_of(scope, expr->name);
             if (loop == NULL || loop->count == 0) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_UNKNOWN_LOOP", frame, expr, "%s is not an active loop variable", expr->name.s);
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_UNKNOWN_LOOP, frame, expr, "%s is not an active loop variable", expr->name.s);
             }
             const pt_meta *meta = &loop->stack[loop->count - 1];
             pt_s field = expr->name2;
@@ -678,7 +678,7 @@ static pt_value pt_evaluate_node(pt_ctx *ctx, const pt_expr *expr, const pt_fram
             pt_s name = pt_buf_done(&key);
             zval *callable = zend_hash_str_find(&ctx->engine->classes, name.s, name.n);
             if (callable == NULL) {
-                PT_FAIL_AT(ctx, "E_RUNTIME_UNKNOWN_FUNCTION", frame, expr, "%s is not a function", name.s);
+                PT_FAIL_AT(ctx, PT_E_RUNTIME_UNKNOWN_FUNCTION, frame, expr, "%s is not a function", name.s);
             }
             return pt_call_callable(ctx, callable, name.s, args, expr->count, frame, expr);
         }
@@ -715,7 +715,7 @@ static pt_value pt_evaluate_node(pt_ctx *ctx, const pt_expr *expr, const pt_fram
                 if (item->type == X_SPREAD) {
                     pt_value spread = pt_evaluate(ctx, item->a, frame, scope);
                     if (spread.type != PT_LIST) {
-                        PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, item, "spread in a list requires a list");
+                        PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, item, "spread in a list requires a list");
                     }
                     for (uint32_t k = 0; k < spread.u.list->count; k++) {
                         pt_vec_push(&items, spread.u.list->items[k]);
@@ -733,7 +733,7 @@ static pt_value pt_evaluate_node(pt_ctx *ctx, const pt_expr *expr, const pt_fram
                 if (entry->type == X_SPREAD) {
                     pt_value spread = pt_evaluate(ctx, entry->a, frame, scope);
                     if (spread.type != PT_MAP) {
-                        PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, entry, "spread in a map requires a map");
+                        PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, entry, "spread in a map requires a map");
                     }
                     const pt_map *source = spread.u.map;
                     for (uint32_t k = 0; k < source->used; k++) {
@@ -750,7 +750,7 @@ static pt_value pt_evaluate_node(pt_ctx *ctx, const pt_expr *expr, const pt_fram
             return pt_depth_checked(ctx, pt_map_value(map), frame, expr);
         }
         default:
-            PT_FAIL_AT(ctx, "E_RUNTIME_TYPE", frame, expr, "unknown expression node");
+            PT_FAIL_AT(ctx, PT_E_RUNTIME_TYPE, frame, expr, "unknown expression node");
     }
 }
 
@@ -758,7 +758,7 @@ static pt_value pt_evaluate(pt_ctx *ctx, const pt_expr *expr, const pt_frame *fr
 {
     ctx->depth++;
     if (ctx->depth > ctx->engine->limits.expression_depth) {
-        PT_FAIL_AT(ctx, "E_RUNTIME_LIMIT", frame, expr, "expression nesting exceeds " ZEND_LONG_FMT, ctx->engine->limits.expression_depth);
+        PT_FAIL_AT(ctx, PT_E_RUNTIME_LIMIT, frame, expr, "expression nesting exceeds " ZEND_LONG_FMT, ctx->engine->limits.expression_depth);
     }
     pt_value value = pt_evaluate_node(ctx, expr, frame, scope);
     ctx->depth--;
@@ -777,7 +777,7 @@ static void pt_write(pt_ctx *ctx, pt_s text)
     ctx->output_bytes += (zend_long)text.n;
     zend_long limit = ctx->engine->limits.output_bytes;
     if (ctx->output_bytes > limit) {
-        pt_ctx_fail(ctx, "E_RUNTIME_LIMIT", ctx->frame, ctx->start, ctx->end, zend_strpprintf(0, "output exceeds " ZEND_LONG_FMT " bytes", limit));
+        pt_ctx_fail(ctx, PT_E_RUNTIME_LIMIT, ctx->frame, ctx->start, ctx->end, zend_strpprintf(0, "output exceeds " ZEND_LONG_FMT " bytes", limit));
     }
     smart_str_appendl(ctx->output, text.s, text.n);
 }
@@ -786,12 +786,12 @@ static void pt_enter_template(pt_ctx *ctx, pt_s name, const pt_frame *frame, siz
 {
     for (uint32_t i = 0; i < ctx->chain_count; i++) {
         if (pt_eq(ctx->chain[i], name.s, name.n)) {
-            pt_ctx_fail(ctx, "E_LOAD_CYCLE", frame, start, end, zend_strpprintf(0, "%s is already being rendered", name.s));
+            pt_ctx_fail(ctx, PT_E_LOAD_CYCLE, frame, start, end, zend_strpprintf(0, "%s is already being rendered", name.s));
         }
     }
     zend_long limit = ctx->engine->limits.depth;
     if ((zend_long)ctx->chain_count > limit) {
-        pt_ctx_fail(ctx, "E_RUNTIME_DEPTH", frame, start, end, zend_strpprintf(0, "nesting depth exceeds " ZEND_LONG_FMT, limit));
+        pt_ctx_fail(ctx, PT_E_RUNTIME_DEPTH, frame, start, end, zend_strpprintf(0, "nesting depth exceeds " ZEND_LONG_FMT, limit));
     }
     if (ctx->chain_count == ctx->chain_capacity) {
         uint32_t capacity = ctx->chain_capacity ? ctx->chain_capacity * 2 : 8;
@@ -821,7 +821,7 @@ static pt_s pt_resolve_at(pt_ctx *ctx, pt_s path, const pt_frame *frame, size_t 
         zend_string *quoted = pt_json_quote(path.s, path.n);
         zend_string *message = zend_strpprintf(0, "%s leaves the loader root", ZSTR_VAL(quoted));
         zend_string_release(quoted);
-        pt_ctx_fail(ctx, "E_LOAD_OUTSIDE_ROOT", frame, start, end, message);
+        pt_ctx_fail(ctx, PT_E_LOAD_OUTSIDE_ROOT, frame, start, end, message);
     }
     return name;
 }
@@ -837,7 +837,7 @@ static void pt_render_for(pt_ctx *ctx, const pt_node *node, const pt_frame *fram
     } else if (iterable.type == PT_MAP) {
         size = iterable.u.map->count;
     } else {
-        pt_ctx_fail(ctx, "E_RUNTIME_TYPE", frame, node->start, node->end, zend_string_init("loop requires a list, a map or null", 35, 0));
+        pt_ctx_fail(ctx, PT_E_RUNTIME_TYPE, frame, node->start, node->end, zend_string_init("loop requires a list, a map or null", 35, 0));
     }
     if (size == 0) {
         if (node->has_alt) {
@@ -892,7 +892,7 @@ static void pt_render_for(pt_ctx *ctx, const pt_node *node, const pt_frame *fram
         }
         ctx->iterations++;
         if (ctx->iterations > ctx->engine->limits.iterations) {
-            pt_ctx_fail(ctx, "E_RUNTIME_LIMIT", frame, node->start, node->end, zend_strpprintf(0, "loop iterations exceed " ZEND_LONG_FMT, ctx->engine->limits.iterations));
+            pt_ctx_fail(ctx, PT_E_RUNTIME_LIMIT, frame, node->start, node->end, zend_strpprintf(0, "loop iterations exceed " ZEND_LONG_FMT, ctx->engine->limits.iterations));
         }
         /* The scope may have grown its loops while the body ran; the loop is found by its index. */
         loop = &scope->loops[loop_index];
@@ -932,7 +932,7 @@ static void pt_render_block(pt_ctx *ctx, const pt_node *node, const pt_frame *fr
     if (node->has_id && !node->has_path) {
         entry = zend_hash_str_find_ptr(ctx->registry, node->text.s, node->text.n);
         if (entry == NULL) {
-            pt_ctx_fail(ctx, "E_RUNTIME_BLOCK_UNDEFINED", frame, node->start, node->end, zend_strpprintf(0, "define %s is not registered", node->text.s));
+            pt_ctx_fail(ctx, PT_E_RUNTIME_BLOCK_UNDEFINED, frame, node->start, node->end, zend_strpprintf(0, "define %s is not registered", node->text.s));
         }
     } else {
         pt_s name = pt_resolve_at(ctx, node->path, frame, node->start, node->end);
@@ -944,7 +944,7 @@ static void pt_render_block(pt_ctx *ctx, const pt_node *node, const pt_frame *fr
             pt_define *registered = zend_hash_str_find_ptr(ctx->registry, node->text.s, node->text.n);
             if (registered != NULL) {
                 if (registered->html || !pt_eq(registered->template, name.s, name.n)) {
-                    pt_ctx_fail(ctx, "E_RUNTIME_BLOCK_REDEFINED", frame, node->start, node->end, zend_strpprintf(0, "define %s is registered with a different template", node->text.s));
+                    pt_ctx_fail(ctx, PT_E_RUNTIME_BLOCK_REDEFINED, frame, node->start, node->end, zend_strpprintf(0, "define %s is registered with a different template", node->text.s));
                 }
                 entry = registered;
             } else {

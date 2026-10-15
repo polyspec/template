@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Value;
 
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Utf8;
 
 /**
@@ -27,7 +28,7 @@ final class Json
     {
         $invalid = Utf8::firstInvalid($bytes);
         if ($invalid >= 0) {
-            throw new BindError('E_DATA_INVALID_UTF8', "invalid UTF-8 at byte {$invalid}");
+            throw new BindError(ErrorCode::E_DATA_INVALID_UTF8, "invalid UTF-8 at byte {$invalid}");
         }
         $parser = new self($bytes);
         $value = $parser->parseValue();
@@ -44,7 +45,7 @@ final class Json
      */
     private function fail(string $message): never
     {
-        throw new BindError('E_DATA_INVALID_JSON', "{$message} at offset {$this->index}");
+        throw new BindError(ErrorCode::E_DATA_INVALID_JSON, "{$message} at offset {$this->index}");
     }
 
     private function skipWhitespace(): void
@@ -249,7 +250,7 @@ final class Json
             }
         }
         if ($code >= 0xD800 && $code <= 0xDFFF) {
-            throw new BindError('E_DATA_INVALID_UTF8', 'a \\u escape leaves a surrogate unpaired');
+            throw new BindError(ErrorCode::E_DATA_INVALID_UTF8, 'a \\u escape leaves a surrogate unpaired');
         }
 
         return Utf8::chr((int) $code);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template\Render;
 
 use Polyspec\Template\AstProgram;
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Loader\Path;
 
 /**
@@ -139,7 +140,7 @@ final class Renderer
         $name = Path::resolve($frame->name, $path);
         if ($name === null) {
             throw $this->context->fail(
-                'E_LOAD_OUTSIDE_ROOT',
+                ErrorCode::E_LOAD_OUTSIDE_ROOT,
                 $frame,
                 $span,
                 json_encode($path) . ' leaves the loader root',
@@ -174,7 +175,7 @@ final class Renderer
             $entry = $this->context->registry[$node['id']] ?? null;
             if ($entry === null) {
                 throw $this->context->fail(
-                    'E_RUNTIME_BLOCK_UNDEFINED',
+                    ErrorCode::E_RUNTIME_BLOCK_UNDEFINED,
                     $frame,
                     $node['span'],
                     'define ' . $node['id'] . ' is not registered',
@@ -187,7 +188,7 @@ final class Renderer
                 if ($registered !== null) {
                     if (isset($registered['html']) || $registered['template'] !== $name) {
                         throw $this->context->fail(
-                            'E_RUNTIME_BLOCK_REDEFINED',
+                            ErrorCode::E_RUNTIME_BLOCK_REDEFINED,
                             $frame,
                             $node['span'],
                             'define ' . $node['id'] . ' is registered with a different template',

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template\Parser;
 
 use Polyspec\Template\Ast;
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Expr\Lexer;
 use Polyspec\Template\Expr\Parser as ExpressionParser;
 use Polyspec\Template\Source;
@@ -81,11 +82,11 @@ final class BlockTag
         $token = $this->readToken($index);
         if ($token === null || $token['value'] === '') {
             $at = Scanner::skipHorizontalSpace($this->source->text, $index);
-            throw $this->fail('E_PARSE_INVALID_PATH', $at, $at + 1, 'include requires a path');
+            throw $this->fail(ErrorCode::E_PARSE_INVALID_PATH, $at, $at + 1, 'include requires a path');
         }
         if ($token['kind'] !== 'path') {
             throw $this->fail(
-                'E_PARSE_INVALID_PATH',
+                ErrorCode::E_PARSE_INVALID_PATH,
                 $token['start'],
                 $token['end'],
                 json_encode($token['value']) . ' is not a path',
@@ -124,7 +125,12 @@ final class BlockTag
         $token = $this->readToken($cursor);
         if ($token === null || $token['value'] === '') {
             $at = Scanner::skipHorizontalSpace($text, $cursor);
-            throw $this->fail('E_PARSE_INVALID_BLOCK_TAG', $at, $at + 1, 'block tag requires an identifier or a path');
+            throw $this->fail(
+                ErrorCode::E_PARSE_INVALID_BLOCK_TAG,
+                $at,
+                $at + 1,
+                'block tag requires an identifier or a path',
+            );
         }
         if ($token['kind'] === 'path') {
             $path = $token['value'];
@@ -148,7 +154,7 @@ final class BlockTag
             }
             if ($token['kind'] !== 'ident' || $token['value'] === '') {
                 throw $this->fail(
-                    'E_PARSE_INVALID_BLOCK_TAG',
+                    ErrorCode::E_PARSE_INVALID_BLOCK_TAG,
                     $token['start'],
                     $token['end'],
                     'unexpected ' . json_encode(substr(
@@ -163,7 +169,7 @@ final class BlockTag
                 $valueStart = $cursor + 1;
                 if ($valueStart >= strlen($text) || Scanner::isHorizontalSpace($text[$valueStart])) {
                     throw $this->fail(
-                        'E_PARSE_INVALID_BLOCK_TAG',
+                        ErrorCode::E_PARSE_INVALID_BLOCK_TAG,
                         $cursor,
                         $cursor + 1,
                         'scope item requires a value after ":"',

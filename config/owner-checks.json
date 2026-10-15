@@ -945,6 +945,30 @@
     },
     {
       "paths": [
+        "docs/spec/errors.md",
+        "scripts/generate-error-codes.mts"
+      ],
+      "targets": [
+        "error-codes-check",
+        "parity-declarations-check"
+      ],
+      "tests": [
+        "tests/scripts/error-codes.test.mts"
+      ]
+    },
+    {
+      "paths": [
+        "packages/php/src/**",
+        "packages/php-ext/src/**",
+        "packages/python/src/**"
+      ],
+      "tests": [
+        "tests/scripts/error-codes.test.mts"
+      ],
+      "targets": []
+    },
+    {
+      "paths": [
         "tests/scripts/driver-fixture.mts"
       ],
       "tests": [
@@ -1608,6 +1632,19 @@
       "paths": [
         "config/dependency-policy.json",
         "packages/python/{pyproject.toml,constraints.txt,pylock.toml}"
+      ]
+    },
+    {
+      "check": "make error-codes-check",
+      "paths": [
+        "docs/spec/errors.md",
+        "scripts/generate-error-codes.mts",
+        "packages/ts/src/errors.ts",
+        "packages/go/errs/errs.go",
+        "packages/rust/src/error.rs",
+        "packages/python/src/polyspec/template/errors.py",
+        "packages/php/src/ErrorCode.php",
+        "packages/php-ext/src/pt_error_codes.h"
       ]
     }
   ]

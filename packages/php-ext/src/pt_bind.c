@@ -21,7 +21,7 @@ static bool pt_bind_fail(pt_bind_error *error, const char *code, zend_string *me
 static bool pt_check_level(int level, pt_bind_error *error)
 {
     if (level > PT_MAX_DEPTH) {
-        return pt_bind_fail(error, "E_DATA_DEPTH", zend_strpprintf(0, "lists and maps nest deeper than %d levels", PT_MAX_DEPTH));
+        return pt_bind_fail(error, PT_E_DATA_DEPTH, zend_strpprintf(0, "lists and maps nest deeper than %d levels", PT_MAX_DEPTH));
     }
     return true;
 }
@@ -29,7 +29,7 @@ static bool pt_check_level(int level, pt_bind_error *error)
 static bool pt_bind_text(pt_arena *arena, const char *bytes, size_t length, pt_s *text, const char *message, pt_bind_error *error)
 {
     if (pt_utf8_first_invalid(bytes, length) < length) {
-        return pt_bind_fail(error, "E_DATA_INVALID_UTF8", zend_string_init(message, strlen(message), 0));
+        return pt_bind_fail(error, PT_E_DATA_INVALID_UTF8, zend_string_init(message, strlen(message), 0));
     }
     *text = pt_strdup(arena, bytes, length);
     return true;
@@ -109,7 +109,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
         case IS_LONG: {
             zend_long number = Z_LVAL_P(input);
             if (number > 9007199254740991LL || number < -9007199254740991LL) {
-                return pt_bind_fail(error, "E_DATA_NUMBER_RANGE", zend_strpprintf(0, "integer " ZEND_LONG_FMT " is outside the safe range", number));
+                return pt_bind_fail(error, PT_E_DATA_NUMBER_RANGE, zend_strpprintf(0, "integer " ZEND_LONG_FMT " is outside the safe range", number));
             }
             *result = pt_number((double)number);
             return true;
@@ -117,10 +117,10 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
         case IS_DOUBLE: {
             double number = Z_DVAL_P(input);
             if (!isfinite(number)) {
-                return pt_bind_fail(error, "E_DATA_NUMBER_NOT_FINITE", zend_string_init("number is not finite", 20, 0));
+                return pt_bind_fail(error, PT_E_DATA_NUMBER_NOT_FINITE, zend_string_init("number is not finite", 20, 0));
             }
             if (fabs(number) > PT_MAX_SAFE) {
-                return pt_bind_fail(error, "E_DATA_NUMBER_RANGE", zend_strpprintf(0, "number %.17G is outside the safe range", number));
+                return pt_bind_fail(error, PT_E_DATA_NUMBER_RANGE, zend_strpprintf(0, "number %.17G is outside the safe range", number));
             }
             *result = pt_number(number);
             return true;
@@ -158,7 +158,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
             /* A bound map is accepted only as assign and as definition data, and a bound map of the PHP
              * implementation, another implementation, at no position (VAL-22). Both classes are final. */
             if ((pt_bound_ce != NULL && ce == pt_bound_ce) || zend_string_equals_literal(ce->name, "Polyspec\\Template\\BoundMap")) {
-                return pt_bind_fail(error, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("a bound map is accepted only as assign and as definition data", 61, 0));
+                return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("a bound map is accepted only as assign and as definition data", 61, 0));
             }
             if (instanceof_function(ce, php_json_serializable_ce)) {
                 if (!pt_check_level(level + 1, error)) {
@@ -169,7 +169,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
                 if (EG(exception)) {
                     zend_string *message = pt_take_exception(NULL);
                     zval_ptr_dtor(&serialized);
-                    pt_bind_fail(error, "E_RUNTIME_HOST_FUNCTION", zend_strpprintf(0, "jsonSerialize() failed: %s", ZSTR_VAL(message)));
+                    pt_bind_fail(error, PT_E_RUNTIME_HOST_FUNCTION, zend_strpprintf(0, "jsonSerialize() failed: %s", ZSTR_VAL(message)));
                     zend_string_release(message);
                     return false;
                 }
@@ -189,7 +189,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
                 return pt_bind_entries(arena, properties, level + 1, true, result, error);
             }
             if (instanceof_function(ce, zend_ce_closure)) {
-                return pt_bind_fail(error, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("a closure has no binding", 24, 0));
+                return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("a closure has no binding", 24, 0));
             }
             /* Every other object keeps its instance, with its public members visible (VAL-18, VAL-19). */
             pt_arena_keep(arena, input);
@@ -198,7 +198,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
             return true;
         }
         default:
-            return pt_bind_fail(error, "E_DATA_UNSUPPORTED_TYPE", zend_strpprintf(0, "a value of type %s has no binding", zend_zval_type_name(input)));
+            return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "a value of type %s has no binding", zend_zval_type_name(input)));
     }
 }
 
@@ -232,7 +232,7 @@ bool pt_bind_map(pt_arena *arena, zval *input, pt_map **result, pt_bind_error *e
         *result = pt_map_new(arena, 0);
         return true;
     }
-    return pt_bind_fail(error, "E_DATA_UNSUPPORTED_TYPE", zend_string_init("assign is not a map", 19, 0));
+    return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("assign is not a map", 19, 0));
 }
 
 void pt_host_value(pt_value value, zval *result)

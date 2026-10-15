@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.6-15: the code tables of `docs/spec/errors.md` are the catalog of the error codes. `make error-codes` writes from them the `ErrorCode` union of TypeScript, the constants of the Go package `errs`, the variants of the Rust `ErrorCode` with their conditions, `ERROR_CODES` of Python, the new class `Polyspec\Template\ErrorCode` of the PHP package and the header `pt_error_codes.h` of the PHP extension; the PHP package and the PHP extension raise every error through these constants instead of string literals, and both parity checks first run `make error-codes-check` and then compare every list with the catalog (R7).
+
 ## 0.0.11
 
 - T24.38: release 0.0.11. Every manifest of `config/release.json` declares 0.0.11, and the locks, the dependency review, the compiled artifacts and the consumer projects of the release assets record it.

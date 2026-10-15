@@ -16,7 +16,7 @@ typedef struct pt_json {
 
 static bool pt_json_fail(pt_json *json, const char *message)
 {
-    json->error->code = "E_DATA_INVALID_JSON";
+    json->error->code = PT_E_DATA_INVALID_JSON;
     json->error->message = zend_strpprintf(0, "%s at offset %zu", message, json->index);
     return false;
 }
@@ -24,7 +24,7 @@ static bool pt_json_fail(pt_json *json, const char *message)
 static bool pt_json_level(pt_json *json)
 {
     if (++json->level > PT_MAX_DEPTH) {
-        json->error->code = "E_DATA_DEPTH";
+        json->error->code = PT_E_DATA_DEPTH;
         json->error->message = zend_strpprintf(0, "lists and maps nest deeper than %d levels", PT_MAX_DEPTH);
         return false;
     }
@@ -122,7 +122,7 @@ static bool pt_json_string(pt_json *json, pt_s *result)
                         }
                     }
                     if (code >= 0xD800 && code <= 0xDFFF) {
-                        json->error->code = "E_DATA_INVALID_UTF8";
+                        json->error->code = PT_E_DATA_INVALID_UTF8;
                         json->error->message = zend_string_init("a \\u escape leaves a surrogate unpaired", 39, 0);
                         return false;
                     }
@@ -183,12 +183,12 @@ static bool pt_json_number(pt_json *json, pt_value *result)
     /* The nearest double decides, whatever the spelling of the literal (VAL-2). */
     double value = zend_strtod(literal.s, NULL);
     if (!isfinite(value)) {
-        json->error->code = "E_DATA_NUMBER_NOT_FINITE";
+        json->error->code = PT_E_DATA_NUMBER_NOT_FINITE;
         json->error->message = zend_string_init("number is not finite", 20, 0);
         return false;
     }
     if (fabs(value) > PT_MAX_SAFE) {
-        json->error->code = "E_DATA_NUMBER_RANGE";
+        json->error->code = PT_E_DATA_NUMBER_RANGE;
         json->error->message = zend_strpprintf(0, "number %s is outside the safe range", literal.s);
         return false;
     }
@@ -319,7 +319,7 @@ bool pt_json_parse(pt_arena *arena, const char *text, size_t length, pt_value *r
 {
     size_t invalid = pt_utf8_first_invalid(text, length);
     if (invalid < length) {
-        error->code = "E_DATA_INVALID_UTF8";
+        error->code = PT_E_DATA_INVALID_UTF8;
         error->message = zend_strpprintf(0, "invalid UTF-8 at byte %zu", invalid);
         return false;
     }

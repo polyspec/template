@@ -172,10 +172,10 @@ final class AstProgram implements Program, RuntimeServices
             $loaded = $this->loader->load($name);
         } catch (\Throwable $error) {
             // RT-9: every exception of the loader is a load failure of the requested name.
-            throw $fail('E_LOAD_FAILED', "template {$name} cannot be loaded: " . $error->getMessage());
+            throw $fail(ErrorCode::E_LOAD_FAILED, "template {$name} cannot be loaded: " . $error->getMessage());
         }
         if ($loaded === null) {
-            throw $fail('E_LOAD_NOT_FOUND', "template {$name} does not exist");
+            throw $fail(ErrorCode::E_LOAD_NOT_FOUND, "template {$name} does not exist");
         }
         $cached = $this->cache[$name] ?? null;
         $fresh = $this->artifactRefresh === 'false'
@@ -270,7 +270,7 @@ final class AstProgram implements Program, RuntimeServices
         foreach ($defines as $id => $input) {
             $id = (string) $id;
             if (!Utf8::isValid($id)) {
-                throw new BindError('E_DATA_INVALID_UTF8', 'a define id is not valid UTF-8');
+                throw new BindError(ErrorCode::E_DATA_INVALID_UTF8, 'a define id is not valid UTF-8');
             }
             if (is_array($input) && isset($input['html']) && is_string($input['html'])) {
                 $registry[$id] = ['html' => $input['html']];
@@ -282,7 +282,7 @@ final class AstProgram implements Program, RuntimeServices
                 $name = Path::resolve('', $template);
                 if ($name === null) {
                     throw new BindError(
-                        'E_DATA_UNSUPPORTED_TYPE',
+                        ErrorCode::E_DATA_UNSUPPORTED_TYPE,
                         "define {$id}: template path leaves the loader root",
                     );
                 }
@@ -290,12 +290,15 @@ final class AstProgram implements Program, RuntimeServices
                 if (is_array($input) && array_key_exists('data', $input)) {
                     $data = Bind::data($input['data']);
                     if (!$data instanceof MapValue) {
-                        throw new BindError('E_DATA_UNSUPPORTED_TYPE', "define {$id}: data is not a map");
+                        throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "define {$id}: data is not a map");
                     }
                 }
                 $registry[$id] = ['template' => $name, 'data' => $data];
             } else {
-                throw new BindError('E_DATA_UNSUPPORTED_TYPE', "define {$id}: entry needs \"template\" or \"html\"");
+                throw new BindError(
+                    ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                    "define {$id}: entry needs \"template\" or \"html\"",
+                );
             }
         }
 
@@ -311,10 +314,10 @@ final class AstProgram implements Program, RuntimeServices
         $timezone = $env['timezone'] ?? 'Z';
         $now = $env['now'] ?? (float) time();
         if (!is_string($timezone)) {
-            throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.timezone is not a string');
+            throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, 'env.timezone is not a string');
         }
         if (!is_int($now) && !is_float($now)) {
-            throw new BindError('E_DATA_UNSUPPORTED_TYPE', 'env.now is not a number');
+            throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, 'env.now is not a number');
         }
 
         return ['timezone' => $timezone, 'now' => (float) $now];

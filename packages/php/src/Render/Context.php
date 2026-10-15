@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Render;
 
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\MapValue;
 
@@ -43,7 +44,7 @@ final class Context
         $limits = $this->services->limits();
         if ($this->outputBytes > $limits['outputBytes']) {
             throw $this->fail(
-                'E_RUNTIME_LIMIT',
+                ErrorCode::E_RUNTIME_LIMIT,
                 $this->currentFrame,
                 $this->currentSpan,
                 'output exceeds ' . $limits['outputBytes'] . ' bytes',
@@ -84,11 +85,11 @@ final class Context
     public function enter(string $name, ?Frame $frame, ?array $span): void
     {
         if (in_array($name, $this->chain, true)) {
-            throw $this->fail('E_LOAD_CYCLE', $frame, $span, "{$name} is already being rendered");
+            throw $this->fail(ErrorCode::E_LOAD_CYCLE, $frame, $span, "{$name} is already being rendered");
         }
         $limits = $this->services->limits();
         if (count($this->chain) > $limits['depth']) {
-            throw $this->fail('E_RUNTIME_DEPTH', $frame, $span, 'nesting depth exceeds ' . $limits['depth']);
+            throw $this->fail(ErrorCode::E_RUNTIME_DEPTH, $frame, $span, 'nesting depth exceeds ' . $limits['depth']);
         }
         $this->chain[] = $name;
     }

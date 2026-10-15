@@ -21,6 +21,8 @@
 
 ## Codes
 
+The code tables of ERR-7 to ERR-12 are the catalog of the error codes: `make error-codes` writes the code list of each implementation from them, and R7 of the parity check (`errors` of `config/parity.json`) compares each list with the tables.
+
 **ERR-7** Lexical errors:
 
 | Code | Condition | Position |

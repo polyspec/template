@@ -22,7 +22,11 @@ final class InternalBoundary
         try {
             return $operation();
         } catch (\Error $error) {
-            throw TemplateError::withoutPosition('E_INTERNAL', $template, 'internal failure: ' . $error->getMessage());
+            throw TemplateError::withoutPosition(
+                ErrorCode::E_INTERNAL,
+                $template,
+                'internal failure: ' . $error->getMessage(),
+            );
         }
     }
 }

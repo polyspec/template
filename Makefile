@@ -444,6 +444,16 @@ package-installs-check: cargo-downloads-check typed-generator
 # implementation that binds a shared suite, which reads the installed Composer packages, the PHP extension and the crates.
 parity-check: cargo-downloads-check build-php ext python-package
 
+# R7 of the parity checks compares the error-code list of each implementation with the code tables of docs/spec/errors.md
+# (errors of config/parity.json); scripts/generate-error-codes.mts writes the lists from those tables (T22.6-15), and both
+# parity checks first check that every list is current.
+.PHONY: error-codes error-codes-check
+error-codes: ## Generate the error-code list of each implementation from docs/spec/errors.md
+	$(NODE) scripts/generate-error-codes.mts
+error-codes-check: ## Check that the error-code list of each implementation matches docs/spec/errors.md
+	$(NODE) scripts/generate-error-codes.mts --check
+parity-check parity-declarations-check: error-codes-check
+
 test-browser: build-ts ## Browser rendering test
 	$(NODE) tests/browser/run.mts
 

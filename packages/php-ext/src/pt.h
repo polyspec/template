@@ -12,6 +12,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "pt_error_codes.h"
+
 /* ---------------------------------------------------------------------------------------------------
  * Memory: an arena owns the allocations of one parse, one render, one template or one bound map. It
  * also holds PHP values (objects, arrays) that must stay alive as long as the arena and are released
@@ -67,7 +69,7 @@ pt_s pt_buf_done(pt_buf *buf);
  * ------------------------------------------------------------------------------------------------- */
 
 typedef struct pt_error {
-    const char *code;     /* a static error code such as "E_PARSE_UNCLOSED_BLOCK"; NULL when unset */
+    const char *code;     /* a static error code such as PT_E_PARSE_UNCLOSED_BLOCK; NULL when unset */
     zend_string *template;
     zend_long line, col, offset, end;
     zend_string *message;

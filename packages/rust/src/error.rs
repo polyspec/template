@@ -10,6 +10,7 @@ use std::fmt;
     reason = "the variants are the error codes of the specification by their exact names"
 )]
 pub enum ErrorCode {
+    // BEGIN GENERATED ERROR CODES
     /// The source is not valid UTF-8.
     E_LEX_INVALID_UTF8,
     /// A tag has no closing `}` before the end of the file.
@@ -92,12 +93,14 @@ pub enum ErrorCode {
     E_RUNTIME_LIMIT,
     /// The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect.
     E_INTERNAL,
+    // END GENERATED ERROR CODES
 }
 
 impl ErrorCode {
     /// The code as its specification name.
     pub fn as_str(self) -> &'static str {
         match self {
+            // BEGIN GENERATED ERROR CODES
             ErrorCode::E_LEX_INVALID_UTF8 => "E_LEX_INVALID_UTF8",
             ErrorCode::E_PARSE_UNTERMINATED_TAG => "E_PARSE_UNTERMINATED_TAG",
             ErrorCode::E_PARSE_UNTERMINATED_COMMENT => "E_PARSE_UNTERMINATED_COMMENT",
@@ -139,6 +142,7 @@ impl ErrorCode {
             ErrorCode::E_RUNTIME_DEPTH => "E_RUNTIME_DEPTH",
             ErrorCode::E_RUNTIME_LIMIT => "E_RUNTIME_LIMIT",
             ErrorCode::E_INTERNAL => "E_INTERNAL",
+            // END GENERATED ERROR CODES
         }
     }
 }

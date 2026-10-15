@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Polyspec\Template\Expr;
 
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Source;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Utf8;
@@ -129,7 +130,7 @@ final class Lexer
         for (;;) {
             if ($index >= $length) {
                 throw TemplateError::at(
-                    'E_PARSE_UNTERMINATED_STRING',
+                    ErrorCode::E_PARSE_UNTERMINATED_STRING,
                     $template,
                     $source->lines,
                     $start,
@@ -176,7 +177,7 @@ final class Lexer
                     $hex = substr($text, $index + 2, 4);
                     if (preg_match('/^[0-9a-fA-F]{4}$/', $hex) !== 1) {
                         throw TemplateError::at(
-                            'E_PARSE_INVALID_ESCAPE',
+                            ErrorCode::E_PARSE_INVALID_ESCAPE,
                             $template,
                             $source->lines,
                             $index,
@@ -200,7 +201,7 @@ final class Lexer
                     break;
                 default:
                     throw TemplateError::at(
-                        'E_PARSE_INVALID_ESCAPE',
+                        ErrorCode::E_PARSE_INVALID_ESCAPE,
                         $template,
                         $source->lines,
                         $index,
@@ -284,7 +285,7 @@ final class Lexer
         }
 
         throw $this->error(
-            'E_PARSE_UNEXPECTED_TOKEN',
+            ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
             $start,
             $start + 1,
             'unexpected character ' . json_encode($char),
@@ -317,7 +318,7 @@ final class Lexer
                 $end = $cursor;
             } else {
                 throw $this->error(
-                    'E_PARSE_INVALID_NUMBER',
+                    ErrorCode::E_PARSE_INVALID_NUMBER,
                     $start,
                     $cursor,
                     'invalid number ' . json_encode(substr($text, $start, $cursor - $start)),
@@ -336,7 +337,7 @@ final class Lexer
                 $cursor++;
             }
             throw $this->error(
-                'E_PARSE_INVALID_NUMBER',
+                ErrorCode::E_PARSE_INVALID_NUMBER,
                 $start,
                 $cursor,
                 'invalid number ' . json_encode(substr($text, $start, $cursor - $start)),
@@ -384,13 +385,13 @@ final class Lexer
                 $end++;
             }
             throw $this->error(
-                'E_PARSE_INVALID_NUMBER',
+                ErrorCode::E_PARSE_INVALID_NUMBER,
                 $start,
                 $end,
                 'invalid number ' . json_encode(substr($text, $start, $end - $start)),
             );
         }
 
-        throw $this->error('E_PARSE_UNEXPECTED_TOKEN', $start, $start + 1, 'unexpected "."');
+        throw $this->error(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, $start, $start + 1, 'unexpected "."');
     }
 }
