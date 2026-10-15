@@ -253,9 +253,14 @@ test-scripts: cargo-downloads-check build-ts build-language build-lsp build-code
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
 # runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
 # packages/ts and packages/language, whose declarations tsc reads.
-typecheck: build-ts build-language ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
+# Each project is a prerequisite of one command, so a failed one keeps the others running (T19.8).
+typecheck: typecheck-infrastructure typecheck-docs typecheck-scenarios ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
+.PHONY: typecheck-infrastructure typecheck-docs typecheck-scenarios
+typecheck-infrastructure: build-ts build-language
 	$(TSC) -p tsconfig.json
+typecheck-docs: build-ts build-language
 	$(TSC) -p docs/.vitepress/tsconfig.json
+typecheck-scenarios: build-ts build-language
 	$(TSC) -p examples/site/scenarios/tsconfig.json
 
 # The type-aware lint of kit reads the same declarations: a module that imports @polyspec/template or
