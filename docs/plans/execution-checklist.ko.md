@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 4ed9928c044a24b85379e7f22170198850a4856dc970f7ddb36e33f3f75d38a8 -->
+<!-- source-sha256: a2653cf468d4cb7229d3e07955d9c8e3d6c5741ac10a98f989b7b4cf63c7be6d -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -487,6 +487,7 @@
 | T24.36 | object가 아닌 `define` 옵션을 요청에 담을 수 있는 모든 target에서 인자 오류 `define is not an object`로 보고한다. 생성된 TypeScript program은 이를 `E_DATA_UNSUPPORTED_TYPE`의 `BindError`로, PHP는 `bindDefinitions`의 type에서 `E_INTERNAL`로, Python은 `AttributeError`로 실패했다. Go와 Rust의 typed option은 그런 값을 담을 수 없다. `E_DATA_UNSUPPORTED_TYPE`은 binding이 binding 없는 값에 내는 data model의 code로 남는다(ERR-5, ERR-14). RED: `tests/fixtures/typed-arguments/messages.json`에서 `define`이 5인 요청이 TypeScript, PHP, Python에서 실패한다 | `make generated-arguments-check`; `make docs-check` | [o] |
 | T24.37 | root 값이 없는 인자를 가진 template 경로 block을 생성된 PHP program에서 렌더한다. `{# part.tpl name:title}`은 `part.tpl`의 입력 `name`에 block scope의 `title` 값을 주지만, PHP backend는 입력을 root 값이나 정의 data로만 만들었고, scope 값을 대입하기 전에 `generated input part.tpl.name is missing`을 던졌으므로 TypeScript, Go, Rust, Python이 렌더하는 곳에서 `E_RUNTIME_TYPE`으로 실패했다. RED: `tests/fixtures/typed-arguments-scoped/messages.json`의 요청이 PHP에서 실패한다 | `make generated-arguments-check`; `make conformance-generated-php` | [o] |
 | T24.38 | T24.35, T24.36, T24.37로 0.0.11을 release한다. `config/release.json`의 모든 manifest가 0.0.11을 선언하고, 저장소 package 사이의 의존성, PHP extension header, `package-lock.json`, Cargo lock, Composer lock도 그렇게 하며, 각 Composer lock은 그 폴더에서 다시 잠근다(kit K180). release asset의 consumer project는 0.0.11을 기록하고(`make release-consumer-lock`), 그 smoke command는 archive에서 통과한다(`make release-consumer`). `CHANGELOG.md`와 `CHANGELOG.ko.md`는 새 빈 `## Unreleased` 아래에 `## 0.0.11`을 얻는다. review는 새 lock을 기록한다. tag `v0.0.11`과 `packages/go/v0.0.11`은 release commit을 가리킨다 | `make release-versions TAG=v0.0.11`; `make release-consumer TAG=v0.0.11`; `make dependency-policy-check`; `make artifact-digest-check` | [o] |
+| T24.39 | kit 0.0.53으로 옮깁니다. 게시된 파일의 integrity로 `@polyspec/kit` 0.0.53을 고정하고 `make kit-sync`로 그 복사본을 써서 template이 다른 저장소와 같은 kit을 씁니다. owner check는 바뀐 module의 test를 그 importer로 고르고(K191, template에 필요 없는 선택 field), kit-check는 PHP가 필요한 checkout에 `.php-version`을 요구하며 template에는 이미 있고(K193), release proof는 각 sibling wheel을 나열합니다(K195). review는 새 lock을 기록합니다 | `make kit-check`; `make toolchain-check`; `make layout-check`; `make lint-ts`; `make dependency-policy-check` | [ ] |
 
 ## Wave 25 — 소비자의 코드인 generated program
 
