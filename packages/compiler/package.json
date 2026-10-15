@@ -1,6 +1,6 @@
 {
   "name": "@polyspec/template-compiler",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Build-time compiler of template sources: canonical AST artifacts, type manifests and generated TypeScript, Go, Rust and PHP programs",
   "license": "MIT",
   "type": "module",
@@ -30,7 +30,7 @@
     "node": ">=26.12.0"
   },
   "dependencies": {
-    "@polyspec/template": "0.0.8",
+    "@polyspec/template": "0.0.9",
     "ajv": "^8.20.0"
   }
 }

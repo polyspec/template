@@ -1,11 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 91eb6b3b475e0010098f4aaf024309d202a08ca1aa506387bfcdfa8728ae5840 -->
+<!-- source-sha256: 4f74f34549643e2fbbadb12f81bec68c912685a7d8c045a2ee438815775f8b48 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+## 0.0.9
+
+- T24.30: 0.0.9를 release합니다. `config/release.json`의 모든 manifest가 0.0.9를 선언하고, lock, dependency review, compile된 artifact, release asset의 consumer project가 이를 기록합니다.
 - T24.29: 생성된 Rust나 TypeScript program은 쓰는 것만 선언하므로, Rust program을 binary crate의 private module로 포함하는 consumer는 clippy `-D warnings`를, TypeScript program은 oxlint `no-unused-vars`를 통과합니다. Rust는 program이 definition을 선언할 때만 `Definition<T>`를, definition이 가리키는 template에만 `DefinitionData<T>`를 선언하고, `ArtifactManifest`와 오류만 반환하던 static root의 `render_values`는 선언하지 않습니다. definition이 없으면 `generated_bind_definitions`는 요청의 첫 항목에서 실패합니다. TypeScript는 definition이 선언될 때만 definition 항목의 `raw`를 읽고, loop가 size나 마지막 item을 읽거나 empty branch가 있을 때만 loop의 size를 선언합니다.
 
 ## 0.0.8
