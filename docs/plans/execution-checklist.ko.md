@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 8402e90ed8e6fc274049d2beda11762f293fd13263d0bfe4978e5c2e99b03032 -->
+<!-- source-sha256: 79914c2fb2cecff0936ca96bbae2286fbd28d624421459f5fdba0678dbf03f8e -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -452,7 +452,7 @@
 | T24.3 | toolchain floor를 kit의 pin으로 올린다: `.node-version` 26.11.1과 `engines.node` `>=26.11.1`, Composer `require.php` `>=8.5`와 `config.platform.php` `8.5`, `requires-python` `>=3.14`, toolchain 줄 없는 go.mod `go 1.27.2`, Cargo `rust-version` 1.99.0, `rust-toolchain.toml` 1.99.0, `typescript` 7.0.2. | `make toolchain-check` | [o] |
 | T24.4 | showcase adapter의 Go package를 `go.mod`의 `replace` 대신 `go.work`로 해석한다. | `make layout-check` | [o] |
 | T24.5 | Python은 kit의 root `ruff.toml`로만 lint한다: `packages/template-python/pyproject.toml`의 `[tool.ruff]`를 지운다. | `make layout-check` | [o] |
-| T24.6 | TypeScript는 eslint와 typescript-eslint 대신 kit의 oxlint, oxlint-tsgolint, knip 설정으로 lint한다(`make lint-ts`). `eslint.config.mjs`, `make lint-js`, eslint package를 지운다. | `make lint-ts` | [!] 원인: oxlint가 compiler의 TypeScript backend가 examples/showcase/adapters/generated/typed에 쓰는 TypeScript에서 196개 finding(좁히는 assertion과 불필요한 assertion, non-null assertion, `Map<any, any>` 반환)을 보고한다. 손으로 쓴 모든 파일은 통과한다; 재시도: T25.5(TypeScript backend가 cast 대신 검사를 출력한다)가 들어올 때 |
+| T24.6 | TypeScript는 eslint와 typescript-eslint 대신 kit의 oxlint, oxlint-tsgolint, knip 설정으로 lint한다(`make lint-ts`). `eslint.config.mjs`, `make lint-js`, eslint package를 지운다. | `make lint-ts` | [o] |
 | T24.7 | template의 implementation과 feature unit을 `config/parity.json`(kit parity의 schema)에 선언하고 `make parity-declarations-check`와 `make parity-check`를 실행한다. template의 feature registry를 지운다: `contracts/features.json`, `scripts/features/`, `tests/runner/parity.mjs`와 그 target. | `make parity-declarations-check` | [o] |
 | T24.8 | 모든 구현의 native test를 `config/parity.json`에 연결한다: 각 suite binding은 각 case를 runner의 이름으로 보고하고(Go의 subtest `TestX/<case>`, cargo의 test `<symbol>::<case>`, vitest의 top-level test `<case>`, PHPUnit과 unittest의 test method `test_<case>`), Python은 적합성 케이스의 native test를, PHP 확장은 표현식 vector의 native test를 가져 두 exclusion을 지우며, 구현의 다른 모든 test file은 feature unit으로 bind한다. RED: `make parity-declarations-check`가 finding 67개를 보고하며, 그중 65개는 R5 undeclared-test, 두 개는 R8 exclusion이다. | `make parity-declarations-check`, `make parity-check` | [o] |
 | T24.9 | `config/owner-checks.json`에서 `tests/scripts/driver-fixture.mjs`를 소유한다: 그것으로 driver를 복사하는 test(`tests/scripts/drivers.test.mjs`, `tests/scripts/failure-messages.test.mjs`, `tests/scripts/no-silent-skips.test.mjs`)가 그것이 바뀔 때 실행된다. RED: `make owner-validate`가 `tests/scripts/driver-fixture.mjs: the path matches no owner`로 실패한다. | `make owner-validate` | [o] |
