@@ -1,6 +1,7 @@
 // Tests that the toolchains of the recipes are the ones that the files of the checkout declare (T13.1-4, T19.2), each
 // with the expected and the actual version on failure:
-// - Node.js is the version of `.node-version`, and every CI job takes Node.js from it;
+// - Node.js is the node of mise.toml, which `make install-tools TOOLS=npm` installs into var/tools and kit.mk starts as
+//   $(NODE) (kit K171), and every CI job starts the bootstrap with the Node.js of mise.toml;
 // - npm is the version of `packageManager` in package.json, installed by `make install-tools TOOLS=npm` into var/tools/bin,
 //   and Go the go of mise.toml, which the go directive of packages/go/go.mod equals, installed by `make
 //   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); kit.mk puts both directories first on
@@ -76,6 +77,8 @@ const shown = (value: unknown) => (value === undefined ? 'nothing' : typeof valu
 // runs no check of the suite and writes no report.
 const CI_PASSED = 'ci-passed';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
+// make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the job installs both first (kit K171).
+const CI_PASSED_INSTALL = ['make install-tools TOOLS=npm', 'make install-packages'];
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
 export function ciPassedViolations(text: string) {
@@ -98,7 +101,7 @@ export function ciPassedViolations(text: string) {
   if (JSON.stringify([runsOn]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${runsOn}', not on the runner of the other jobs ${runners.join(', ')}`);
   const runs = runsOf(job);
   const last = job.steps.at(-1);
-  if (JSON.stringify(runs) !== JSON.stringify([CI_PASSED_RUN]) || last?.run === undefined || last.if !== undefined) {
+  if (JSON.stringify(runs) !== JSON.stringify([...CI_PASSED_INSTALL, CI_PASSED_RUN]) || last?.run === undefined || last.if !== undefined) {
     found.push(`ci.yml: the job ${CI_PASSED} runs [${runs.join(', ')}], not the last step ${CI_PASSED_RUN} without a condition of its own`);
   }
   return found;
@@ -122,22 +125,22 @@ function recipe(command: string, env: NodeJS.ProcessEnv = {}, make = 'make') {
   }
 }
 
-test('Node.js is the version of .node-version, which engines.node of package.json names as its floor', () => {
-  const version = read('.node-version').trim();
+test('Node.js is the node of mise.toml, which engines.node of package.json names as its floor', () => {
+  const version = textOf(MISE_TOOLS.node, 'the node of mise.toml');
   const enginesField = parsedJsonObject(read('package.json'), 'package.json').engines;
   const engines = isJsonObject(enginesField) ? enginesField.node : undefined;
   assert.ok(typeof engines === 'string', 'package.json declares no engines.node');
-  // The floor equals the pin of kit, which .node-version declares (T24.3); make toolchain-check checks every manifest.
-  assert.equal(engines, `>=${version}`, `package.json engines.node ${engines} is not >=${version} (.node-version)`);
-  const actual = recipe('cd . && node --version');
-  assert.equal(actual, `v${version}`, `node of the recipes: expected v${version} (.node-version), actual ${actual}`);
+  // The floor equals the pin of kit, which mise.toml declares (T24.3); make toolchain-check checks every manifest.
+  assert.equal(engines, `>=${version}`, `package.json engines.node ${engines} is not >=${version} (mise.toml)`);
+  const actual = recipe('$(NODE) --version');
+  assert.equal(actual, `v${version}`, `node of the recipes: expected v${version} (mise.toml), actual ${actual}; run make install-tools TOOLS=npm`);
 });
 
-test('every CI job that runs Node.js takes it from .node-version', () => {
+test('every CI job that runs Node.js starts the bootstrap with the Node.js of mise.toml', () => {
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
       if (!runLines(job).some(line => /\b(npm|node|make) /.test(line))) continue;
-      assert.ok(usesOf(job, 'actions/setup-node@').some(step => step.with['node-version-file'] === '.node-version'), `${file} job ${job.name} does not take Node.js from .node-version`);
+      assert.ok(usesOf(job, 'actions/setup-node@').some(step => step.with['node-version-file'] === 'mise.toml'), `${file} job ${job.name} does not take Node.js from mise.toml`);
       assert.ok(job.steps.every(step => !('node-version' in step.with)), `${file} job ${job.name} names a Node.js version`);
     }
   }
@@ -157,7 +160,8 @@ test('npm is the version of packageManager in package.json, from var/tools/bin f
 test('every recipe line runs the npm of var/tools/bin and the go of mise, with every make on PATH', { timeout: 240_000 }, () => {
   // GNU Make 3.81 starts a line without shell syntax itself, with the PATH that make started with, also when SHELL names
   // another shell: the line `npm --version` printed the npm of the machine. The recipes start npm as $(NPM), the path of
-  // its wrapper, and go and gofmt only in lines with shell syntax, which the shell runs with the exported PATH.
+  // its wrapper, go as $(GO), the path of its shim, and gofmt only in lines with shell syntax, which the shell runs with
+  // the exported PATH; make kit-check fails a recipe that starts a tool of the checkout by its bare name (kit K171).
   // gmake is GNU Make 4 where it is installed beside make 3.81.
   const makes = ['make', ...(spawnSync('gmake', ['--version']).status === 0 ? ['gmake'] : [])];
   const npm = packageField('packageManager').replace('npm@', '');
@@ -251,10 +255,11 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // are installed before, by make install-tools TOOLS=npm and make install-packages, which install @polyspec/kit (T24.1).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
   const kit = 'node_modules/@polyspec/kit/dist';
+  const node = path.join(ROOT, 'var/tools/bin/node');
   // make prints the empty TOOLS of install-tools of kit as a trailing space. make -n runs the recursive make of
   // python-package, which prints its own recipe after its command line when the environment is out of date.
   const lines = install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd());
-  assert.deepEqual(lines.slice(0, 4), [`${online} node ${kit}/install-tools.mjs`, `${online} node ${kit}/check-cargo-downloads.mjs --fetch`, `${online} node scripts/composer-install.mts .`, `${online} node scripts/python-wheelhouse.mts`]);
+  assert.deepEqual(lines.slice(0, 4), [`${online} ${node} ${kit}/install-tools.mjs`, `${online} ${node} ${kit}/check-cargo-downloads.mjs --fetch`, `${online} ${node} scripts/composer-install.mts .`, `${online} ${node} scripts/python-wheelhouse.mts`]);
   assert.match(lines[4] ?? '', /\bmake python-package$/);
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
   for (const file of WORKFLOWS) {
@@ -418,7 +423,8 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
     'not always': [text.replace('    if: ${{ always() }}\n', '    if: ${{ success() }}\n'), "the job ci-passed has if: '${{ success() }}'"],
     'needs one job': [text.replace(/ {4}needs: \[[^\]]*\]\n/, '    needs: [release]\n'), 'the job ci-passed needs [release], not every other job'],
     'another runner': [`${head}${job.replace('runs-on: ubuntu-24.04', 'runs-on: ubuntu-26.04')}`, "the job ci-passed runs on 'ubuntu-26.04'"],
-    'another step': [text.replace(CI_PASSED_RUN, 'make ci-passed'), 'the job ci-passed runs [make ci-passed], not the last step'],
+    'another step': [text.replace(CI_PASSED_RUN, 'make ci-passed'), 'the job ci-passed runs [make install-tools TOOLS=npm, make install-packages, make ci-passed], not the last step'],
+    'no install': [`${head}${job.replace('      - run: make install-packages\n', '')}`, 'the job ci-passed runs [make install-tools TOOLS=npm, make ci-passed RESULTS'],
     'skippable step': [text.replace(`        run: ${CI_PASSED_RUN}\n`, `        if: \${{ !cancelled() }}\n        run: ${CI_PASSED_RUN}\n`), 'without a condition of its own'],
   };
   for (const [name, [brokenText, message]] of Object.entries(broken)) {
@@ -494,8 +500,8 @@ test('make dependency-review installs the Rust toolchain before cargo-audit and 
 test('the unit tests of the Python package run in var/python/venv, which python-venv of kit makes from the python of mise.toml', () => {
   // T23.2: the package is installed editable into that environment, so the tests import it with no changed import path (S3).
   const makefile = read('Makefile');
-  assert.match(makefile, /^PYTHON_VENV := \$\(shell node scripts\/python-venv\.mts\)$/m);
+  assert.match(makefile, /^PYTHON_VENV := \$\(shell \$\(BOOTSTRAP_NODE\) scripts\/python-venv\.mts\)$/m);
   assert.ok(!makefile.includes('var/python/venv'), 'the Makefile restates the environment that config/parity.json declares');
   assert.match(makefile, /^\t\$\(MAKE\) python-venv DIR=\$\(PYTHON_VENV\)$/m);
-  assert.match(makefile, /^test-python: python-package .*\n\tnode \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
+  assert.match(makefile, /^test-python: python-package .*\n\t\$\(NODE\) \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
 });
