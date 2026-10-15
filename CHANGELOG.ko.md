@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4f74f34549643e2fbbadb12f81bec68c912685a7d8c045a2ee438815775f8b48 -->
+<!-- source-sha256: 4d4656130d480f2f1aa82719d2b957a77e33d1cfaaff9ff4b1889f9314100a92 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T24.31: 생성된 Rust program은 type이 가리키는 record, template이 읽는 `Assign`의 field, block이 읽을 때만 definition의 template과 data, 값을 다시 변환할 때만 `to_value`를 선언하므로, 각 showcase program은 binary crate의 private module로서 clippy `-D warnings`를 통과합니다. program이 읽지 않는 root field나 definition data는 그 type의 값을 만들지 않고 선언된 type에 대해 검사되며, `page: name: expected a string`이나 `define.card.data.name: expected a string`처럼 같은 field 경로로 실패합니다.
 
 ## 0.0.9
 

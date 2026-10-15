@@ -6,24 +6,23 @@ use polyspec_template::render::runtime_bindings::RuntimeBindings;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::rc::Rc;
-
 #[derive(Clone, Default)] pub struct Assign {
-    pub page: String,
+
 }
-impl GeneratedConvert for Assign { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error("Assign is not a map")); }; let _ = &map; Ok(Assign { page: generated_field(map, "page")? }) } fn to_value(&self) -> Value { let mut map = RuntimeOrderedMap::new(); map.insert("page".to_string(), self.page.to_value()); Value::map(map) } }
+impl GeneratedConvert for Assign { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error("Assign is not a map")); }; let _ = &map; generated_check_field(map, "page", |value| <String as GeneratedConvert>::from_value(value).map(drop))?; Ok(Assign {  }) } }
 #[derive(Clone, Default)] pub struct InputLayoutTpl {  }
-#[derive(Clone, Default)] pub struct DefinitionDataLayoutTpl {  }
-#[derive(Clone)] pub struct Definition<T> { pub template: Option<String>, pub html: Option<String>, pub data: Option<T> }
-#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition<()>>, pub layout: Option<Definition<DefinitionDataLayoutTpl>> }
+
+#[derive(Clone, Default)] pub struct Definition { pub html: Option<String> }
+#[derive(Clone, Default)] pub struct Definitions { pub content: Option<Definition>, pub layout: Option<Definition> }
 fn generated_conversion_error(message: impl Into<String>) -> TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message) }
-pub trait GeneratedConvert: Sized { fn from_value(input: &Value) -> Result<Self, TemplateError>; fn to_value(&self) -> Value; }
-impl GeneratedConvert for Value { fn from_value(input: &Value) -> Result<Self, TemplateError> { Ok(input.clone()) } fn to_value(&self) -> Value { self.clone() } }
-impl GeneratedConvert for String { fn from_value(input: &Value) -> Result<Self, TemplateError> { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error("expected a string")) } fn to_value(&self) -> Value { Value::text(self.clone()) } }
-impl GeneratedConvert for f64 { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Number(number) => Ok(*number), _ => Err(generated_conversion_error("expected a number")) } } fn to_value(&self) -> Value { Value::Number(*self) } }
-impl GeneratedConvert for bool { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Bool(value) => Ok(*value), _ => Err(generated_conversion_error("expected a boolean")) } } fn to_value(&self) -> Value { Value::Bool(*self) } }
-impl<T: GeneratedConvert> GeneratedConvert for Option<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Null => Ok(None), other => T::from_value(other).map(Some) } } fn to_value(&self) -> Value { self.as_ref().map_or(Value::Null, T::to_value) } }
-impl<T: GeneratedConvert> GeneratedConvert for Vec<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::List(items) => items.iter().map(T::from_value).collect(), _ => Err(generated_conversion_error("expected a list")) } } fn to_value(&self) -> Value { Value::list(self.iter().map(T::to_value).collect()) } }
-fn generated_field<T: GeneratedConvert>(map: &RuntimeOrderedMap, name: &str) -> Result<T, TemplateError> { T::from_value(map.get(name).unwrap_or(&Value::Null)).map_err(|error| generated_conversion_error(format!("{name}: {}", error.message))) }
+pub trait GeneratedConvert: Sized { fn from_value(input: &Value) -> Result<Self, TemplateError>; }
+impl GeneratedConvert for Value { fn from_value(input: &Value) -> Result<Self, TemplateError> { Ok(input.clone()) } }
+impl GeneratedConvert for String { fn from_value(input: &Value) -> Result<Self, TemplateError> { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error("expected a string")) } }
+impl GeneratedConvert for f64 { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Number(number) => Ok(*number), _ => Err(generated_conversion_error("expected a number")) } } }
+impl GeneratedConvert for bool { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Bool(value) => Ok(*value), _ => Err(generated_conversion_error("expected a boolean")) } } }
+impl<T: GeneratedConvert> GeneratedConvert for Option<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Null => Ok(None), other => T::from_value(other).map(Some) } } }
+impl<T: GeneratedConvert> GeneratedConvert for Vec<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::List(items) => items.iter().map(T::from_value).collect(), _ => Err(generated_conversion_error("expected a list")) } } }
+fn generated_check_field(map: &RuntimeOrderedMap, name: &str, check: impl Fn(&Value) -> Result<(), TemplateError>) -> Result<(), TemplateError> { check(map.get(name).unwrap_or(&Value::Null)).map_err(|error| generated_conversion_error(format!("{name}: {}", error.message))) }
 fn render_layout_tpl(assign: &Assign, definitions: &mut Definitions, input: InputLayoutTpl, context: &mut RenderContext<'_>, runtime: &RuntimeBindings, root_data: &Rc<RuntimeOrderedMap>, scope: &mut Scope) -> Result<(), TemplateError> { let _ = (&assign, &definitions, &input, &runtime, &scope); let frame = Frame { name: "layout.tpl".to_string(), lines: Some(LineIndex::from_starts(vec![0, 26, 39, 51, 55, 99, 103, 111])), context: Rc::clone(root_data) };
 
     context.write("<main class=\"empty-page\">\u{a}", &frame, [0, 26])?;
@@ -44,8 +43,12 @@ fn render_template(target: &str, assign: &Assign, definitions: &mut Definitions,
 fn generated_error(message: String) -> RequestError { RequestError::Argument(ArgumentError { message }) }
 struct GeneratedTarget { target: Option<String>, html: Option<String> }
 fn generated_bind_definitions(name: &str, input: &HashMap<String, polyspec_template::DefineInput>) -> Result<(Definitions, HashMap<String, GeneratedTarget>), RequestError> { let mut definitions = Definitions::default(); let mut targets = HashMap::new(); for (id, input) in input { match id.as_str() {
-            "content" => { if let Some(html) = &input.html { if false || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.content = Some(Definition { template: None, html: Some(html.clone()), data: None }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("") { return Err(generated_error(format!("define.{id} has an invalid template"))); } let data: Option<()> = None; definitions.content = Some(Definition { template: input.template.clone(), html: None, data }); targets.insert(id.clone(), GeneratedTarget { target: Some("".to_string()), html: None }); } },
-            "layout" => { if let Some(html) = &input.html { if true || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.layout = Some(Definition { template: None, html: Some(html.clone()), data: None }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("layout.tpl") { return Err(generated_error(format!("define.{id} has an invalid template"))); } let data = match &input.data { None => None, Some(data) => match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) => { let _ = &map; Some(DefinitionDataLayoutTpl {  }) }, _ => return Err(generated_error(format!("define.{id}.data is not an object"))) } }; definitions.layout = Some(Definition { template: input.template.clone(), html: None, data }); targets.insert(id.clone(), GeneratedTarget { target: Some("layout.tpl".to_string()), html: None }); } },
+            "content" => { if let Some(html) = &input.html { if false || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.content = Some(Definition { html: Some(html.clone()) }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("") { return Err(generated_error(format!("define.{id} has an invalid template"))); }
+
+definitions.content = Some(Definition::default()); targets.insert(id.clone(), GeneratedTarget { target: Some("".to_string()), html: None }); } },
+            "layout" => { if let Some(html) = &input.html { if true || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.layout = Some(Definition { html: Some(html.clone()) }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some("layout.tpl") { return Err(generated_error(format!("define.{id} has an invalid template"))); }
+if let Some(data) = &input.data { match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(_) => {  }, _ => return Err(generated_error(format!("define.{id}.data is not an object"))) } }
+definitions.layout = Some(Definition::default()); targets.insert(id.clone(), GeneratedTarget { target: Some("layout.tpl".to_string()), html: None }); } },
             _ => return Err(generated_error(format!("define.{id} is not declared"))),
         } } Ok((definitions, targets)) }
 pub struct GeneratedProgram { pub runtime: RuntimeEnvironment }

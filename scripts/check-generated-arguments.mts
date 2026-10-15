@@ -5,6 +5,9 @@
 // (ERR-13): an `Error` of TypeScript that is not a `TemplateError` or a built-in subclass, a Go error
 // that is not an `*errs.Error`, `RequestError::Argument` of Rust, `\InvalidArgumentException` of PHP and `ValueError` of Python.
 // A request that matches the declared types renders `T|N`.
+// tests/fixtures/typed-arguments-unread declares a root record field that no template reads and definition data that no
+// block merges: generated Rust checks them without holding them (T24.31) and fails with the field path of each, as it does
+// for a value that it reads.
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -21,6 +24,8 @@ import { tsc } from './tools.mts';
 const fixture = join(root, 'tests/fixtures/typed-arguments');
 const types = join(fixture, 'types.json');
 const expected = readFileSync(join(fixture, 'expected.html'), 'utf8');
+const unread = join(root, 'tests/fixtures/typed-arguments-unread');
+const unreadTypes = join(unread, 'types.json');
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-arguments');
 const run = (language: string, command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): void => {
@@ -32,6 +37,8 @@ try {
   const graph = join(temporary, 'ast');
   compileAst({ root: fixture, output: graph, entry: 'input.tpl', refresh: 'dev', typeManifest: types });
   const graphManifest = join(graph, 'manifest.json');
+  const unreadGraph = join(temporary, 'unread-ast');
+  compileAst({ root: unread, output: unreadGraph, entry: 'input.tpl', refresh: 'dev', typeManifest: unreadTypes });
 
   checkLanguages('generated arguments', {
     TypeScript: () => {
@@ -73,6 +80,8 @@ func TestGeneratedArguments(t *testing.T) { program, err := NewGeneratedProgram(
       // Rust.
       const rustSource = join(temporary, 'typed.rust');
       writeFileSync(rustSource, compileSource(graphManifest, types, 'rust'));
+      const unreadSource = join(temporary, 'unread.rust');
+      writeFileSync(unreadSource, compileSource(join(unreadGraph, 'manifest.json'), unreadTypes, 'rust'));
       const rust = rustWorkspace('generated-arguments-rust');
       const rustTest = rust.test('generated_arguments_check');
       writeFileSync(rustTest, `mod generated { include!(${rustString(rustSource)}); }
@@ -80,6 +89,9 @@ use polyspec_template::{DefineData, DefineInput, OrderedMap, Program, RenderOpti
 fn options(name: Value) -> RenderOptions { let mut options = RenderOptions::default(); let mut data = OrderedMap::new(); data.insert("name".to_string(), name); options.define.insert("card".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(DefineData::Value(Value::map(data))), html: None }); options }
 fn kind<T, E: std::fmt::Debug>(result: Result<T, E>) -> String { match result { Ok(_) => "rendered".to_string(), Err(error) => { let text = format!("{error:?}"); if text.starts_with("Argument(") { "argument".to_string() } else { text } } } }
 #[test] fn generated_arguments_fail_as_argument_errors() { let program = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); assert_eq!(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::text("N"))).unwrap(), ${rustString(expected)}); let first = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": 1 }), &options(Value::text("N")))); let second = kind(program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T" }), &options(Value::Number(2.0)))); assert!(first == "argument" && second == "argument", "Rust reports {first}, {second}"); }
+mod unread { include!(${rustString(unreadSource)}); }
+fn unread_message(page: serde_json::Value, name: Value) -> String { let program = unread::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); match program.render(RenderTarget::Name("input.tpl"), &serde_json::json!({ "title": "T", "page": page }), &options(name)) { Ok(output) => format!("rendered {output}"), Err(polyspec_template::RequestError::Argument(error)) => error.message, Err(error) => format!("{error:?}") } }
+#[test] fn generated_unread_values_fail_with_their_field_path() { assert_eq!(unread_message(serde_json::json!({ "name": "P" }), Value::text("N")), "rendered T|T"); assert_eq!(unread_message(serde_json::json!({ "name": 1 }), Value::text("N")), "page: name: expected a string"); assert_eq!(unread_message(serde_json::json!({ "name": "P" }), Value::Number(2.0)), "define.card.data.name: expected a string"); }
 `);
       try {
         run('Rust', CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });

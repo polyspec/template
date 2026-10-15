@@ -1,7 +1,7 @@
 import type { Span } from '@polyspec/template';
 import {
-  baseTarget, definition, emitExpression, emitNodes, fieldName, functionName, indent, rustString, rustType,
-  type BackendContext, type Part, type Target,
+  baseTarget, definition, descriptor, emitExpression, emitNodes, fieldName, functionName, indent, rustString, rustType,
+  type BackendContext, type Descriptor, type Part, type Target,
 } from '../backend-support.mts';
 import { loweredTemplate, type BlockInput, type Expr, type ExprOf, type Program, type ValueType } from '../ir.mts';
 
@@ -65,7 +65,7 @@ rendered?;
     const field = fieldName(node.id);
     const registration = node.path === null
       ? `if definitions.${field}.is_none() { return Err(runtime.error(context, &frame, ${rustSpan(node.span)}, ErrorCode::E_RUNTIME_BLOCK_UNDEFINED, ${rustString(`define ${node.id} is not registered`)})); }`
-      : `if definitions.${field}.is_none() { definitions.${field} = Some(Definition { template: Some(${rustString(node.target)}.to_string()), html: None, data: None }); } else if definitions.${field}.as_ref().is_some_and(|value| value.html.is_some() || value.template.as_deref() != Some(${rustString(node.target)})) { return Err(runtime.error(context, &frame, ${rustSpan(node.span)}, ErrorCode::E_RUNTIME_BLOCK_REDEFINED, ${rustString(`define ${node.id} is registered with a different template`)})); }`;
+      : `if definitions.${field}.is_none() { definitions.${field} = Some(Definition { template: Some(${rustString(node.target)}.to_string()), ..Default::default() }); } else if definitions.${field}.as_ref().is_some_and(|value| value.html.is_some() || value.template.as_deref() != Some(${rustString(node.target)})) { return Err(runtime.error(context, &frame, ${rustSpan(node.span)}, ErrorCode::E_RUNTIME_BLOCK_REDEFINED, ${rustString(`define ${node.id} is registered with a different template`)})); }`;
     return indent(n, `{ ${registration}
 let definition = definitions.${field}.clone();
 if let Some(html) = definition.as_ref().and_then(|value| value.html.as_ref()) { context.write(html, &frame, ${rustSpan(node.span)})?; } else {
@@ -136,39 +136,108 @@ rendered?;`),
 // Generated Rust converts between runtime values and typed structs with GeneratedConvert, never
 // through JSON, so a native object in an `any` value reaches includes, blocks and definition data
 // as the same TemplateObject (VAL-18).
-const recordConvert = (name: string, members: Record<string, string>): string => `impl GeneratedConvert for ${name} { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error(${rustString(`${name} is not a map`)})); }; let _ = &map; Ok(${name} { ${Object.keys(members).map(key => `${key}: generated_field(map, ${rustString(key)})?`).join(', ')} }) } fn to_value(&self) -> Value { let ${Object.keys(members).length ? "mut " : ""}map = RuntimeOrderedMap::new(); ${Object.keys(members).map(key => `map.insert(${rustString(key)}.to_string(), self.${key}.to_value());`).join(' ')} Value::map(map) } }`;
-
-export function emitDeclarations(context: BackendContext): string {
-  const { program, manifest, templateBodies } = context;
-  const fields = manifest.fields;
-  const rustRecords = Object.entries(manifest.records).map(([name, members]) => `#[derive(Clone, Default)] pub struct ${name} { ${Object.entries(members).map(([key, type]) => `pub ${key}: ${rustType(type)}`).join(', ')} }\n${recordConvert(name, members)}`).join('\n');
-  const inputTypes = templateBodies.map(template => `#[derive(Clone, Default)] pub struct ${rustInput(template.name)} { ${[...template.inputs].map(([name, type]) => `pub ${fieldName(name)}: ${rustType(type.source)}`).join(', ')} }`).join('\n');
-  // A program declares the definition types that its definitions use: DefinitionData<T> of each template that a definition
-  // names, and Definition<T> when it declares a definition. A binary crate reports any other as never constructed (T24.29).
-  const definitionTargets = new Set([...program.definitions.values()].flatMap(definition => definition.template ? [definition.template] : []));
-  const definitionDataTypes = templateBodies.filter(template => definitionTargets.has(template.name)).map(template => `#[derive(Clone, Default)] pub struct ${rustDefinitionData(template.name)} { ${[...template.inputs].map(([name, type]) => `pub ${fieldName(name)}: Option<${rustType(type.source)}>`).join(', ')} }`).join('\n');
-  const definitionType = program.definitions.size > 0 ? `#[derive(Clone)] pub struct Definition<T> { pub template: Option<String>, pub html: Option<String>, pub data: Option<T> }\n` : '';
-  const definitionsType = `${definitionType}#[derive(Clone, Default)] pub struct Definitions { ${[...program.definitions].map(([name, definition]) => `pub ${fieldName(name)}: Option<Definition<${definition.template ? rustDefinitionData(definition.template) : '()'}>>`).join(', ')} }`;
-  const assignMembers: Record<string, string> = program.dynamicRoot ? {} : fields;
-  const assignType = `#[derive(Clone, Default)] pub struct Assign {\n${Object.entries(assignMembers).map(([name, type]) => `    pub ${name}: ${rustType(type)},`).join('\n')}\n}\n${recordConvert('Assign', assignMembers)}`;
-  return `// Generated.\nuse polyspec_template::{ArgumentError, ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, TemplateError, Value, internal_boundary};\nuse polyspec_template::error::LineIndex;\nuse polyspec_template::render::context::{Frame, RenderContext, Scope};\nuse polyspec_template::render::runtime_bindings::RuntimeBindings;\nuse serde_json::Value as JsonValue;\nuse std::collections::HashMap;\nuse std::rc::Rc;\n${rustRecords}\n${assignType}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}`;
+/** What the templates of a program use, so the program declares nothing else (T24.29, T24.31). */
+interface RustUsage {
+  /** Whether a value is converted back to a Value: a read of a typed root field or a template input. */
+  toValue: boolean;
+  /** Whether a block reads the template of a definition, which only a registration by path does. */
+  definitionTemplate: boolean;
+  /** Whether a block merges the data of a definition into its input. */
+  definitionData: boolean;
+  /** The fields of the root that a template reads. */
+  readFields: Set<string>;
 }
 
-export function emitRuntime(): Part[] {
+function rustUsage(context: BackendContext): RustUsage {
+  const bodies = context.templateBodies.map(template => template.body).join('\n');
+  return {
+    toValue: /\bgenerated_value\(|\.to_value\(\)/.test(bodies) || context.templateBodies.some(template => template.inputs.size > 0),
+    definitionTemplate: /\bvalue\.template\b/.test(bodies),
+    definitionData: /\bvalue\.data\b/.test(bodies),
+    readFields: new Set(Object.keys(context.manifest.fields).filter(name => new RegExp(`\\bassign\\.${name}\\b`).test(bodies))),
+  };
+}
+
+/** An implementation of GeneratedConvert: `from_value` with the body `from`, and `to_value` with the body `to` when the program uses it. */
+const convertImpl = (usage: RustUsage, header: string, from: string, to: string): string =>
+  `${header} { fn from_value(input: &Value) -> Result<Self, TemplateError> ${from}${usage.toValue ? ` fn to_value(&self) -> Value ${to}` : ''} }`;
+
+// A value that the program checks but never reads, such as a root field that no template reads or the data of a definition
+// that no block merges, is checked without a value of its type, so the program constructs no type that it does not read
+// and fails on the same values with the same messages as from_value (T24.31).
+const recordCheck = (name: string): string => `generated_check_${name.replace(/[A-Z]/g, (letter, at: number) => `${at === 0 ? '' : '_'}${letter.toLowerCase()}`).replace(/[^a-z0-9_]/g, '_')}`;
+
+/** A Rust expression of `Result<(), TemplateError>` that checks the `&Value` expression `value` against the manifest type `type`. */
+function checkOf(type: string, value: string): string {
+  return checkDescriptor(descriptor(type), value);
+}
+
+function checkDescriptor(type: Descriptor, value: string): string {
+  if (type.optional) return `match ${value} { Value::Null => Ok(()), other => ${checkDescriptor({ ...type, optional: false }, 'other')} }`;
+  if (type.kind === 'list') return `match ${value} { Value::List(items) => items.iter().try_for_each(|item| ${checkDescriptor(type.item, 'item')}), _ => Err(generated_conversion_error("expected a list")) }`;
+  if (type.kind === 'map') return `match ${value} { Value::Map(map) => map.iter().try_for_each(|(key, item)| { ${checkDescriptor(type.key, '&Value::text(key.clone())')}?; ${checkDescriptor(type.value, 'item')} }), _ => Err(generated_conversion_error("expected a map")) }`;
+  if (type.kind === 'record') return `${recordCheck(type.name)}(${value})`;
+  return `<${rustType(type.kind)} as GeneratedConvert>::from_value(${value}).map(drop)`;
+}
+
+const recordCheckCode = (name: string, members: Record<string, string>): string => {
+  const fields = Object.entries(members).map(([key, type]) => `generated_check_field(map, ${rustString(key)}, |value| ${checkOf(type, 'value')})?;`);
+  const map = fields.length > 0 ? `let Value::Map(map) = input else { return Err(generated_conversion_error(${rustString(`${name} is not a map`)})); }; ${fields.join(' ')}` : `if !matches!(input, Value::Map(_)) { return Err(generated_conversion_error(${rustString(`${name} is not a map`)})); }`;
+  return `fn ${recordCheck(name)}(input: &Value) -> Result<(), TemplateError> { ${map} Ok(()) }`;
+};
+
+// Generated Rust converts between runtime values and typed structs with GeneratedConvert, never
+// through JSON, so a native object in an `any` value reaches includes, blocks and definition data
+// as the same TemplateObject (VAL-18). `read` names the members that the struct holds; every other member is checked.
+const recordConvert = (usage: RustUsage, name: string, members: Record<string, string>, read: (member: string) => boolean = () => true): string => {
+  const held = Object.keys(members).filter(read);
+  const steps = Object.entries(members).map(([key, type]) => read(key) ? `let ${key} = generated_field(map, ${rustString(key)})?;` : `generated_check_field(map, ${rustString(key)}, |value| ${checkOf(type, 'value')})?;`);
+  const from = `{ let Value::Map(map) = input else { return Err(generated_conversion_error(${rustString(`${name} is not a map`)})); }; let _ = &map; ${steps.join(' ')} Ok(${name} { ${held.join(', ')} }) }`;
+  const to = `{ let ${held.length ? 'mut ' : ''}map = RuntimeOrderedMap::new(); ${held.map(key => `map.insert(${rustString(key)}.to_string(), self.${key}.to_value());`).join(' ')} Value::map(map) }`;
+  return convertImpl(usage, `impl GeneratedConvert for ${name}`, from, to);
+};
+
+export function emitDeclarations(context: BackendContext): Part[] {
+  const { program, manifest, templateBodies } = context;
+  const usage = rustUsage(context);
+  const fields = manifest.fields;
+  // A record is kept when a kept part names it as a type; its own error message does not count (T24.31).
+  const rustRecords = Object.entries(manifest.records).map(([name, members]) => definition(name, `#[derive(Clone, Default)] pub struct ${name} { ${Object.entries(members).map(([key, type]) => `pub ${key}: ${rustType(type)}`).join(', ')} }\n${recordConvert(usage, name, members)}`, new RegExp(`\\b${name}\\b(?! is not a map)`)));
+  const inputTypes = templateBodies.map(template => `#[derive(Clone, Default)] pub struct ${rustInput(template.name)} { ${[...template.inputs].map(([name, type]) => `pub ${fieldName(name)}: ${rustType(type.source)}`).join(', ')} }`).join('\n');
+  // A program declares the definition types that its blocks read (T24.29, T24.31): DefinitionData<T> of each template that a
+  // definition names when a block merges definition data, and Definition with the template only when a block registers a
+  // definition by path. A binary crate reports any other type or field as dead code.
+  const definitionTargets = new Set([...program.definitions.values()].flatMap(definition => definition.template ? [definition.template] : []));
+  const definitionDataTypes = usage.definitionData ? templateBodies.filter(template => definitionTargets.has(template.name)).map(template => `#[derive(Clone, Default)] pub struct ${rustDefinitionData(template.name)} { ${[...template.inputs].map(([name, type]) => `pub ${fieldName(name)}: Option<${rustType(type.source)}>`).join(', ')} }`).join('\n') : '';
+  const definitionFields = [usage.definitionTemplate ? 'pub template: Option<String>' : '', 'pub html: Option<String>', usage.definitionData ? 'pub data: Option<T>' : ''].filter(Boolean).join(', ');
+  const definitionType = program.definitions.size > 0 ? `#[derive(Clone, Default)] pub struct Definition${usage.definitionData ? '<T>' : ''} { ${definitionFields} }\n` : '';
+  const definitionOf = (template: string | null | undefined): string => usage.definitionData ? `Definition<${template ? rustDefinitionData(template) : '()'}>` : 'Definition';
+  const definitionsType = `${definitionType}#[derive(Clone, Default)] pub struct Definitions { ${[...program.definitions].map(([name, definition]) => `pub ${fieldName(name)}: Option<${definitionOf(definition.template)}>`).join(', ')} }`;
+  const assignMembers: Record<string, string> = program.dynamicRoot ? {} : fields;
+  // The root holds the fields that a template reads and checks every other one (T24.31).
+  const read = (name: string): boolean => usage.readFields.has(name);
+  const assignType = `#[derive(Clone, Default)] pub struct Assign {\n${Object.entries(assignMembers).filter(([name]) => read(name)).map(([name, type]) => `    pub ${name}: ${rustType(type)},`).join('\n')}\n}\n${recordConvert(usage, 'Assign', assignMembers, read)}`;
+  return [`// Generated.\nuse polyspec_template::{ArgumentError, ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, TemplateError, Value, internal_boundary};\nuse polyspec_template::error::LineIndex;\nuse polyspec_template::render::context::{Frame, RenderContext, Scope};\nuse polyspec_template::render::runtime_bindings::RuntimeBindings;\nuse serde_json::Value as JsonValue;\nuse std::collections::HashMap;\nuse std::rc::Rc;\n${assignType}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}`, ...rustRecords];
+}
+
+export function emitRuntime(context: BackendContext): Part[] {
+  const usage = rustUsage(context);
   // A helper is kept only when the program uses it.
   return [
     definition('GeneratedValue', `type GeneratedValue = Value;`),
     // The OrderedMap of the program, not polyspec_template::OrderedMap, which the program imports as RuntimeOrderedMap.
-    definition('OrderedMap', `#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }\n#[derive(Clone, Default)] pub struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }\nimpl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } }\nimpl<K: GeneratedConvert + PartialEq, V: GeneratedConvert> GeneratedConvert for OrderedMap<K, V> { fn from_value(input: &Value) -> Result<Self, TemplateError> { let Value::Map(map) = input else { return Err(generated_conversion_error("expected a map")); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&Value::text(key.clone()))?, V::from_value(value)?); } Ok(result) } fn to_value(&self) -> Value { let mut map = RuntimeOrderedMap::new(); for entry in &self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) } }`, /(?<![:\w])OrderedMap\b(?! as )/),
+    definition('OrderedMap', `#[derive(Clone)] struct OrderedEntry<K, V> { key: K, value: V }\n#[derive(Clone, Default)] pub struct OrderedMap<K, V> { entries: Vec<OrderedEntry<K, V>> }\nimpl<K: PartialEq, V> OrderedMap<K, V> { fn new() -> Self { Self { entries: Vec::new() } } fn set(&mut self, key: K, value: V) { if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) { entry.value = value; } else { self.entries.push(OrderedEntry { key, value }); } } }\n${convertImpl(usage, 'impl<K: GeneratedConvert + PartialEq, V: GeneratedConvert> GeneratedConvert for OrderedMap<K, V>', '{ let Value::Map(map) = input else { return Err(generated_conversion_error("expected a map")); }; let mut result = OrderedMap::new(); for (key, value) in map.iter() { result.set(K::from_value(&Value::text(key.clone()))?, V::from_value(value)?); } Ok(result) }', '{ let mut map = RuntimeOrderedMap::new(); for entry in &self.entries { map.insert(entry.key.to_value().as_text().unwrap_or_default().to_string(), entry.value.to_value()); } Value::map(map) }')}`, /(?<![:\w])OrderedMap\b(?! as )/),
     definition('generated_conversion_error', `fn generated_conversion_error(message: impl Into<String>) -> TemplateError { TemplateError::without_position(ErrorCode::E_RUNTIME_TYPE, "generated", message) }`),
-    `pub trait GeneratedConvert: Sized { fn from_value(input: &Value) -> Result<Self, TemplateError>; fn to_value(&self) -> Value; }`,
-    `impl GeneratedConvert for Value { fn from_value(input: &Value) -> Result<Self, TemplateError> { Ok(input.clone()) } fn to_value(&self) -> Value { self.clone() } }`,
-    `impl GeneratedConvert for String { fn from_value(input: &Value) -> Result<Self, TemplateError> { input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error("expected a string")) } fn to_value(&self) -> Value { Value::text(self.clone()) } }`,
-    `impl GeneratedConvert for f64 { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Number(number) => Ok(*number), _ => Err(generated_conversion_error("expected a number")) } } fn to_value(&self) -> Value { Value::Number(*self) } }`,
-    `impl GeneratedConvert for bool { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Bool(value) => Ok(*value), _ => Err(generated_conversion_error("expected a boolean")) } } fn to_value(&self) -> Value { Value::Bool(*self) } }`,
-    `impl<T: GeneratedConvert> GeneratedConvert for Option<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::Null => Ok(None), other => T::from_value(other).map(Some) } } fn to_value(&self) -> Value { self.as_ref().map_or(Value::Null, T::to_value) } }`,
-    `impl<T: GeneratedConvert> GeneratedConvert for Vec<T> { fn from_value(input: &Value) -> Result<Self, TemplateError> { match input { Value::List(items) => items.iter().map(T::from_value).collect(), _ => Err(generated_conversion_error("expected a list")) } } fn to_value(&self) -> Value { Value::list(self.iter().map(T::to_value).collect()) } }`,
+    `pub trait GeneratedConvert: Sized { fn from_value(input: &Value) -> Result<Self, TemplateError>;${usage.toValue ? ' fn to_value(&self) -> Value;' : ''} }`,
+    convertImpl(usage, 'impl GeneratedConvert for Value', '{ Ok(input.clone()) }', '{ self.clone() }'),
+    convertImpl(usage, 'impl GeneratedConvert for String', '{ input.as_text().map(str::to_string).ok_or_else(|| generated_conversion_error("expected a string")) }', '{ Value::text(self.clone()) }'),
+    convertImpl(usage, 'impl GeneratedConvert for f64', '{ match input { Value::Number(number) => Ok(*number), _ => Err(generated_conversion_error("expected a number")) } }', '{ Value::Number(*self) }'),
+    convertImpl(usage, 'impl GeneratedConvert for bool', '{ match input { Value::Bool(value) => Ok(*value), _ => Err(generated_conversion_error("expected a boolean")) } }', '{ Value::Bool(*self) }'),
+    convertImpl(usage, 'impl<T: GeneratedConvert> GeneratedConvert for Option<T>', '{ match input { Value::Null => Ok(None), other => T::from_value(other).map(Some) } }', '{ self.as_ref().map_or(Value::Null, T::to_value) }'),
+    convertImpl(usage, 'impl<T: GeneratedConvert> GeneratedConvert for Vec<T>', '{ match input { Value::List(items) => items.iter().map(T::from_value).collect(), _ => Err(generated_conversion_error("expected a list")) } }', '{ Value::list(self.iter().map(T::to_value).collect()) }'),
     definition('generated_field', `fn generated_field<T: GeneratedConvert>(map: &RuntimeOrderedMap, name: &str) -> Result<T, TemplateError> { T::from_value(map.get(name).unwrap_or(&Value::Null)).map_err(|error| generated_conversion_error(format!("{name}: {}", error.message))) }`),
+    definition('generated_check_field', `fn generated_check_field(map: &RuntimeOrderedMap, name: &str, check: impl Fn(&Value) -> Result<(), TemplateError>) -> Result<(), TemplateError> { check(map.get(name).unwrap_or(&Value::Null)).map_err(|error| generated_conversion_error(format!("{name}: {}", error.message))) }`),
+    ...Object.entries(context.manifest.records).map(([name, members]) => definition(recordCheck(name), recordCheckCode(name, members))),
     definition('generated_value', `fn generated_value<T: GeneratedConvert>(input: &T) -> Result<Value, TemplateError> { Ok(input.to_value()) }`),
     definition('generated_result', `fn generated_result<T: GeneratedConvert>(input: &Value) -> Result<T, TemplateError> { T::from_value(input) }`),
     definition('generated_loop_meta', `fn generated_loop_meta(runtime: &RuntimeBindings, context: &RenderContext<'_>, scope: &Scope, frame: &Frame, span: polyspec_template::error::Span, name: &str, field: &str) -> Result<Value, TemplateError> { let meta = scope.loop_meta(name).ok_or_else(|| runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} is not active")))?; Ok(match field { "index_" => Value::Number(meta.index as f64), "size_" => Value::Number(meta.size as f64), "first_" => Value::Bool(meta.first), "last_" => Value::Bool(meta.last), "key_" => meta.key.clone(), "value_" => meta.value.clone(), _ => return Err(runtime.error(context, frame, span, ErrorCode::E_RUNTIME_UNKNOWN_LOOP, format!("loop {name} has no metadata {field}"))) }) }`),
@@ -184,14 +253,25 @@ export function emitTemplates(context: BackendContext): string {
 
 export function emitEntry(context: BackendContext): string {
   const dispatch = context.templateBodies.filter(template => template.inputs.size === 0).map(template => `        ${rustString(template.name)} => ${template.function}(assign, definitions, ${rustInput(template.name)}::default(), context, runtime, root_data, scope),`).join('\n');
+  const usage = rustUsage(context);
   const definitionCases = [...context.program.definitions].map(([id, definition]) => {
     const field = fieldName(id);
     const inputs = definition.template ? [...loweredTemplate(context.program, definition.template).inputs] : [];
     const dataType = definition.template ? rustDefinitionData(definition.template) : '()';
-    const data = definition.template
-      ? `let data = match &input.data { None => None, Some(data) => match polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))? { Value::Map(map) => { let _ = &map; Some(${dataType} { ${inputs.map(([inputName]) => `${fieldName(inputName)}: map.get(${rustString(inputName)}).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!("define.{id}.data.${inputName}: {}", error.message)))?`).join(', ')} }) }, _ => return Err(generated_error(format!("define.{id}.data is not an object"))) } };`
-      : 'let data: Option<()> = None;';
-    return `            ${rustString(id)} => { if let Some(html) = &input.html { if ${definition.html ? 'false' : 'true'} || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.${field} = Some(Definition { template: None, html: Some(html.clone()), data: None }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some(${rustString(definition.template ?? '')}) { return Err(generated_error(format!("define.{id} has an invalid template"))); } ${data} definitions.${field} = Some(Definition { template: input.template.clone(), html: None, data }); targets.insert(id.clone(), GeneratedTarget { target: Some(${rustString(definition.template ?? '')}.to_string()), html: None }); } },`;
+    const bound = `polyspec_template::bind_data(data).map_err(|error| TemplateError::without_position(error.code, name, error.message))?`;
+    const notObject = `_ => return Err(generated_error(format!("define.{id}.data is not an object")))`;
+    // The data of a definition that no block merges is checked as the data that a block merges is read (T24.31).
+    const checks = inputs.map(([inputName, type]) => `if let Some(value) = map.get(${rustString(inputName)}) { ${checkOf(type.source, 'value')}.map_err(|error| generated_error(format!("define.{id}.data.${inputName}: {}", error.message)))?; }`);
+    const data = !definition.template
+      ? (usage.definitionData ? 'let data: Option<()> = None;' : '')
+      : usage.definitionData
+        ? `let data = match &input.data { None => None, Some(data) => match ${bound} { Value::Map(map) => { let _ = &map; Some(${dataType} { ${inputs.map(([inputName]) => `${fieldName(inputName)}: map.get(${rustString(inputName)}).map(GeneratedConvert::from_value).transpose().map_err(|error| generated_error(format!("define.{id}.data.${inputName}: {}", error.message)))?`).join(', ')} }) }, ${notObject} } };`
+        : `if let Some(data) = &input.data { match ${bound} { Value::Map(${checks.length > 0 ? 'map' : '_'}) => { ${checks.join(' ')} }, ${notObject} } }`;
+    const held = [usage.definitionTemplate ? 'template: input.template.clone()' : '', usage.definitionData ? 'data' : ''].filter(Boolean);
+    const templateDefinition = held.length > 0 ? `Definition { ${held.join(', ')}, ..Default::default() }` : 'Definition::default()';
+    return `            ${rustString(id)} => { if let Some(html) = &input.html { if ${definition.html ? 'false' : 'true'} || input.template.is_some() || input.data.is_some() { return Err(generated_error(format!("define.{id} has an invalid html entry"))); } definitions.${field} = Some(Definition { html: Some(html.clone())${usage.definitionTemplate || usage.definitionData ? ', ..Default::default()' : ''} }); targets.insert(id.clone(), GeneratedTarget { target: None, html: Some(html.clone()) }); } else { if input.template.as_deref() != Some(${rustString(definition.template ?? '')}) { return Err(generated_error(format!("define.{id} has an invalid template"))); }
+${data}
+definitions.${field} = Some(${templateDefinition}); targets.insert(id.clone(), GeneratedTarget { target: Some(${rustString(definition.template ?? '')}.to_string()), html: None }); } },`;
   }).join('\n');
   // Without a declared definition every entry of the request fails, so the function fails on the first one instead of a
   // loop whose match has a single arm (clippy::never_loop, clippy::match_single_binding; T24.29).

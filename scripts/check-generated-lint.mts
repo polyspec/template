@@ -5,17 +5,15 @@
 // - Go: the header of the Go convention for generated code, `gofmt -l` lists no file, and golangci-lint `unused` reports
 //   nothing. golangci-lint skips a file with that header by default (exclusions.generated: lax), so this check runs it
 //   with a configuration of its own that lints generated files.
-// - Rust: clippy with -D warnings on a crate whose library has a public module for each program, so the public API of a
-//   program is used and only what the program does not use is dead code.
+// - Rust: clippy with -D warnings on a binary crate that includes each program as a private module and renders it, as a
+//   consumer does: an item that rendering does not use is dead code, public or not (T24.29, T24.31).
 // - TypeScript: oxlint `no-unused-vars`.
-// The Rust and TypeScript checks also compile tests/fixtures/generated-lint, a program without definitions whose loops
-// read no metadata, as template-benchmark compiles its program (T24.29). Its Rust program is a private module of the
-// binary of the crate, which renders it as a consumer does: an item that rendering does not use is dead code, public or
-// not.
 // - Python: `ruff format --check` and `ruff check` with ruff.toml, and vulture at its default confidence on the programs
 //   with the showcase adapter that uses them, so the public GeneratedProgram is used (T25.3).
 // - PHP: `pint --test --preset psr12` and phpcs with phpcs.xml.dist (PSR-12), whose warnings, such as a line of more
 //   than 120 columns, fail the check as its errors do.
+// The Rust and TypeScript checks also compile tests/fixtures/generated-lint, a program without definitions whose loops
+// read no metadata, as template-benchmark compiles its program (T24.29).
 import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -78,23 +76,19 @@ function compileFixture(directory: string, language: 'rust' | 'ts'): string {
 function checkRust() {
   const crate = rustWorkspace('generated-lint-rust');
   try {
-    const modules = scenarios.map(id => `pub mod ${id.replaceAll('-', '_')} {\n    include!(${JSON.stringify(join(typed, `${id}.rust`))});\n}\n`).join('');
-    writeFileSync(join(crate.directory, 'src/lib.rs'), modules);
-    const fixture = compileFixture(crate.directory, 'rust');
-    writeFileSync(join(crate.directory, 'src/main.rs'), `use polyspec_template::{Program, RenderOptions, RenderTarget, RuntimeEnvironment};
-use std::collections::HashMap;
-mod generated {
-    include!(${JSON.stringify(fixture)});
-}
-fn main() {
-    let program = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, HashMap::new()));
-    match program.render(RenderTarget::Name("page.tpl"), &serde_json::Value::Null, &RenderOptions::default()) {
+    const programs: [string, string, string][] = [
+      ...scenarios.map((id): [string, string, string] => [id.replaceAll('-', '_'), join(typed, `${id}.rust`), 'layout.tpl']),
+      ['generated_lint', compileFixture(crate.directory, 'rust'), 'page.tpl'],
+    ];
+    const modules = programs.map(([name, file]) => `mod ${name} {\n    include!(${JSON.stringify(file)});\n}\n`).join('');
+    const renders = programs.map(([name, , entry]) => `    let program = ${name}::GeneratedProgram::new(RuntimeEnvironment::new(None, HashMap::new()));
+    match program.render(RenderTarget::Name(${JSON.stringify(entry)}), &serde_json::Value::Null, &RenderOptions::default()) {
         Ok(output) => println!("{output}"),
         Err(error) => eprintln!("{error}"),
     }
-}
-`);
-    run(CARGO, ['clippy', '--locked', '--offline', '--manifest-path', crate.manifest, '--lib', '--bin', 'template-generated-check', '--', '-D', 'warnings'], { env: { CARGO_TARGET_DIR: crate.targetDirectory } });
+`).join('');
+    writeFileSync(join(crate.directory, 'src/main.rs'), `use polyspec_template::{Program, RenderOptions, RenderTarget, RuntimeEnvironment};\nuse std::collections::HashMap;\n${modules}fn main() {\n${renders}}\n`);
+    run(CARGO, ['clippy', '--locked', '--offline', '--manifest-path', crate.manifest, '--bin', 'template-generated-check', '--', '-D', 'warnings'], { env: { CARGO_TARGET_DIR: crate.targetDirectory } });
   } finally {
     rmSync(crate.directory, { recursive: true, force: true });
   }
