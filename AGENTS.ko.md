@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: b61d94d5c120e3c6ca124c8315036cfc271731cec3ea639dd087954a9466d870 -->
+<!-- source-sha256: 319d08fcd24d7a9121a7a1b006a2f1b076117fcfec53584c382651e8d5b6b1ef -->
 # 개발
 
 ## 문서
@@ -15,6 +15,7 @@
 
 - 하위 호환성을 유지하지 않는다. 호환 계층, 폴백, 마이그레이션을 추가하는 대신 오래된 경로를 제거한다.
 - 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 설치된 package의 `kit.mk`를 include하는 `scripts/kit/kit-bootstrap.mk`를 include하고, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `make kit-check`는 package를 `package-lock.json`과, 복사본을 package와, `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`dependency-policy`, `dependency-review`, `owner-checks`, `release`, `toolchain`, `checklist`, `documents`, `commits`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
+- polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며, link는 commit하지 않는다.
 - 현재 요구사항을 완전히 충족하는 가장 단순한 구현을 사용한다. 불확실한 미래를 위한 추상화, 설정, 간접 계층을 추가하지 않는다.
 - 관심사를 모듈로 분리한다. 책임이 둘 이상인 파일은 분리한다.
 - 아키텍처는 장기 관점에서 결정한다. 나중에 교체해야 하는 임시 조치를 받아들이지 않는다.
