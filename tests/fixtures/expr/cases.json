@@ -4097,7 +4097,13 @@
         31,
         32
       ]
-    }
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 1
+      }
+    ]
   },
   {
     "name": "error-depth-parentheses",
@@ -4868,7 +4874,15 @@
         0,
         63
       ]
-    }
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1
+        },
+        "value": true
+      }
+    ]
   },
   {
     "name": "error-depth-unary",
