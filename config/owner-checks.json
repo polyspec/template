@@ -263,7 +263,7 @@
         "packages/go/go.mod",
         "config/release.json",
         "tests/fixtures/release-consumer/**",
-        "packages/python/pylock.wheel.toml"
+        "packages/python/pylock.toml"
       ],
       "targets": [
         "release-coverage"
