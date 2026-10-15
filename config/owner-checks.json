@@ -958,6 +958,19 @@
     },
     {
       "paths": [
+        "README*.md",
+        "docs/*.md",
+        "docs/spec/*.md",
+        "docs/operations/*.md",
+        "packages/*/README*.md",
+        "Makefile"
+      ],
+      "targets": [
+        "parity-declarations-check"
+      ]
+    },
+    {
+      "paths": [
         "packages/php/src/**",
         "packages/php-ext/src/**",
         "packages/python/src/**"
@@ -1645,6 +1658,18 @@
         "packages/python/src/polyspec/template/errors.py",
         "packages/php/src/ErrorCode.php",
         "packages/php-ext/src/pt_error_codes.h"
+      ]
+    },
+    {
+      "check": "make parity-declarations-check",
+      "paths": [
+        "config/parity.json",
+        "Makefile",
+        "README*.md",
+        "docs/*.md",
+        "docs/spec/*.md",
+        "docs/operations/*.md",
+        "packages/*/README*.md"
       ]
     }
   ]

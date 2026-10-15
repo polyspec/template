@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.6-12: the parity check compares the lists and counts of implementations with the profiles: `languageLists` reads `SHOWCASE_LANGS` of the `Makefile` (R9) and `documents` reads the README files, `docs`, `docs/spec` and `docs/operations` (R10), except the benchmark documents until Python is measured (T22.6-17) and the two Korean sentences of T22.6-12-1. The showcase document shows the request in PHP and Python too and counts five implementations and the five targets of the closed template dispatch, and the testing document counts five languages, five generated backends and the Python wheel among the package installs.
+
 - T22.6-13: the README of the compiler names Python among the languages into which `compileSource` compiles.
 
 - T22.6-11: the specification counts the five languages of the core level where it counted four or listed four without Python: the mappings of `interface.json`, the showcase artifacts, the native-call fixture and the interface gate (`compiler.md`), the function registries (`functions.md`), RT-56, RT-69, the generated mode and the native object calls (`runtime.md`); VAL-22 names Python among the implementations whose `merge` checks its arguments at run time, which the new parity profile `checked-arguments` declares, and CNF-2 names the parser of the TypeScript command line by its language.

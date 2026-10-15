@@ -19,6 +19,8 @@
   ],
   "suites": ["tests/fixtures/expr/cases.json"],
   "errors": { "profile": "runtime", "catalog": { "file": "docs/spec/errors.md", "pattern": "^\\| `(E_[A-Z0-9_]+)` \\||^(?!\\| `E_)" } },
+  "languageLists": [{ "file": "Makefile", "pattern": "^SHOWCASE_LANGS\\s+\\?= (.+)$", "profile": "manifest" }],
+  "documents": { "globs": ["README*.md", "docs/*.md", "docs/spec/!(data-model.ko).md", "docs/operations/!(benchmark|benchmark.ko|development.ko).md", "packages/*/README*.md"], "nouns": ["languages", "language", "implementations", "implementation", "runtimes", "runtime", "언어", "구현", "런타임"] },
   "comparators": ["tests/runner", "tests/browser", "examples/showcase"],
   "tools": [
     { "root": "packages/lsp", "reason": "The language server is a TypeScript tool of the editors." },
