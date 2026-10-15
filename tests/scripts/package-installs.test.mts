@@ -127,11 +127,13 @@ test('the install projects read no network source and use the pinned toolchains 
   assert.equal(run.status, 0, run.stdout + run.stderr);
   const calls = readFileSync(stub.log, 'utf8').trim().split('\n').map(line => callDocument.parse(line, `the stub call ${line}`));
 
-  const goCalls = calls.filter(call => call.name === 'go');
+  // go env GOMODCACHE only names the module cache of the checkout, whose cache/download the install project reads as a
+  // file proxy; every other go command runs in the install project.
+  const goCalls = calls.filter(call => call.name === 'go' && call.args[0] !== 'env');
   assert.ok(goCalls.length > 0, 'the check started no go command');
   const goVersion = captured(/^go (\S+)$/m.exec(read('packages/go/go.mod')), 1, 'the go version of packages/go/go.mod');
   for (const call of goCalls) {
-    assert.match(required(call.env.GOPROXY, `GOPROXY of go ${call.args.join(' ')}`), /^file:\/\/[^,|]+$/, `go ${call.args.join(' ')} has GOPROXY ${call.env.GOPROXY}, expected only the file proxy of the run`);
+    assert.match(required(call.env.GOPROXY, `GOPROXY of go ${call.args.join(' ')}`), /^file:\/\/[^,|]+,file:\/\/[^,|]+\/cache\/download$/, `go ${call.args.join(' ')} has GOPROXY ${call.env.GOPROXY}, expected only the file proxy of the run and the module cache`);
     assert.equal(call.env.GOSUMDB, 'off', `go ${call.args.join(' ')} has GOSUMDB ${call.env.GOSUMDB}`);
     assert.equal(call.env.GOTOOLCHAIN, 'local', `go ${call.args.join(' ')} has GOTOOLCHAIN ${call.env.GOTOOLCHAIN}`);
     assert.match(required(call.files['go.mod'], `the go.mod of go ${call.args.join(' ')}`), new RegExp(`^go ${goVersion.replaceAll('.', '\\.')}$`, 'm'), `the install project go.mod names another Go version than packages/go/go.mod (${goVersion}):\n${call.files['go.mod']}`);
