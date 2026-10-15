@@ -263,10 +263,11 @@ typecheck-docs: build-ts build-language
 typecheck-scenarios: build-ts build-language
 	$(TSC) -p examples/site/scenarios/tsconfig.json
 
-# The type-aware lint of kit reads the same declarations: a module that imports @polyspec/template or
-# @polyspec/template-language resolves its types from the dist that package.json exports, so the lint runs after those
-# builds.
-lint-ts: build-ts build-language
+# The type-aware lint of kit reads the same declarations: a module that imports @polyspec/template,
+# @polyspec/template-language or @polyspec/template-lsp (the VS Code extension) resolves its types from the dist that
+# package.json exports, so the lint runs after those builds; without the dist of the server each of its values is an
+# error type to oxlint-tsgolint.
+lint-ts: build-ts build-language build-lsp
 
 build-language: build-ts ## Build the formatter library and the template-fmt CLI
 	$(NODE) scripts/build-package.mts --package language
