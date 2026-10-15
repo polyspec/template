@@ -16,36 +16,37 @@ import { scenarioIds } from './showcase-documents.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
+/** A committed artifact manifest and the compiler digest that it must record. */
+export interface ArtifactManifest {
+  path: string;
+  expected: string;
+}
+
 /** The manifests of the committed artifacts with the digest that each must record. */
-export function artifactManifests(base = root) {
-  const manifests = [];
+export function artifactManifests(base = root): ArtifactManifest[] {
   const scenarios = join(base, 'examples/site/scenarios');
-  for (const id of scenarioIds(scenarios)) {
-    manifests.push({ path: `examples/site/scenarios/${id}/compiled/ast/manifest.json`, expected: astCompilerDigest() });
-  }
+  const ast = scenarioIds(scenarios).map((id): ArtifactManifest => ({ path: `examples/site/scenarios/${id}/compiled/ast/manifest.json`, expected: astCompilerDigest() }));
+  // A generated program records the digest of the compiler of its target, which its manifest names.
+  const generated: string[] = [];
   for (const directory of ['examples/showcase/adapters/generated/typed', 'examples/showcase/adapters/generated/javascript', 'examples/showcase/adapters/generated/php']) {
     for (const name of readdirSync(join(base, directory)).filter(file => file.endsWith('.manifest.json')).sort()) {
-      manifests.push({ path: `${directory}/${name}` });
+      generated.push(`${directory}/${name}`);
     }
   }
   const go = 'examples/showcase/adapters/go/generated';
-  for (const id of readdirSync(join(base, go)).sort()) manifests.push({ path: `${go}/${id}/generated.go.manifest.json` });
-  for (const manifest of manifests) {
-    if (manifest.expected) continue;
-    const { target } = artifactManifestDocument.read(join(base, manifest.path));
-    manifest.expected = target === 'js' ? typescriptDeliveryDigest() : generatedCompilerDigest(target);
-  }
-  return manifests;
+  for (const id of readdirSync(join(base, go)).sort()) generated.push(`${go}/${id}/generated.go.manifest.json`);
+  return [...ast, ...generated.map((path): ArtifactManifest => {
+    const { target } = artifactManifestDocument.read(join(base, path));
+    return { path, expected: target === 'js' ? typescriptDeliveryDigest() : generatedCompilerDigest(target) };
+  })];
 }
 
 /** The lines that name each manifest whose recorded digest differs from the digest of the current compiler. */
-export function staleArtifacts(base = root) {
-  const stale = [];
-  for (const { path, expected } of artifactManifests(base)) {
+export function staleArtifacts(base = root): string[] {
+  return artifactManifests(base).flatMap(({ path, expected }) => {
     const recorded = artifactManifestDocument.read(join(base, path)).compilerDigest;
-    if (recorded !== expected) stale.push(`${path} records the compiler digest ${recorded}, but the compiler of the tree has the digest ${expected}`);
-  }
-  return stale;
+    return recorded === expected ? [] : [`${path} records the compiler digest ${recorded}, but the compiler of the tree has the digest ${expected}`];
+  });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
