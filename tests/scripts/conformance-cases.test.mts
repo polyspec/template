@@ -10,6 +10,8 @@ import { fileURLToPath } from 'node:url';
 import { caseIds, RUNNERS } from '../../scripts/conformance-cases.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
+const NODE = path.join(ROOT, 'var/tools/bin/node');
 const run = (...args: string[]) => spawnSync(process.execPath, ['scripts/conformance-cases.mts', ...args], { cwd: ROOT, encoding: 'utf8' });
 
 test('changed paths name each case once', () => {
@@ -34,5 +36,5 @@ test('a path outside a case directory fails with its name', () => {
 test('the make target passes CASES to the script', () => {
   const result = spawnSync('make', ['-n', '--no-print-directory', 'conformance-cases', 'CASES=tests/cases/text/crlf-input/input.tpl'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /^node scripts\/conformance-cases\.mts tests\/cases\/text\/crlf-input\/input\.tpl$/m);
+  assert.ok(result.stdout.split('\n').includes(`${NODE} scripts/conformance-cases.mts tests/cases/text/crlf-input/input.tpl`), result.stdout);
 });
