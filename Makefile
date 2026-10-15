@@ -581,13 +581,15 @@ showcase-html-check: build-ts
 showcase-compile: build-ts ## Generate committed canonical AST artifacts
 	$(NODE) examples/showcase/compile.mts --refresh true
 
-generated-native-check: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, and typed request argument errors, in every core language
+generated-native-check: generated-native-calls-check generated-typed-values-check generated-typed-locals-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, typed locals that decode once, and typed request argument errors, in every core language
 
-.PHONY: generated-native-calls-check generated-typed-values-check generated-arguments-check generated-bound-data-check
+.PHONY: generated-native-calls-check generated-typed-values-check generated-typed-locals-check generated-arguments-check generated-bound-data-check
 generated-native-calls-check: cargo-downloads-check build-ts build-php python-package
 	$(NODE) scripts/check-generated-native-calls.mts
 generated-typed-values-check: cargo-downloads-check build-ts build-php python-package
 	$(NODE) scripts/check-generated-typed-values.mts
+generated-typed-locals-check: build-ts
+	$(NODE) scripts/check-generated-typed-locals.mts
 generated-arguments-check: cargo-downloads-check build-ts build-php python-package
 	$(NODE) scripts/check-generated-arguments.mts
 generated-bound-data-check: cargo-downloads-check build-ts build-php python-package

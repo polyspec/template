@@ -261,9 +261,16 @@ func generatedEscape(runtime *render.RuntimeBindings, input any, frame *render.F
 	return result
 }
 
-func generatedEntries(runtime *render.RuntimeBindings, input any, frame *render.Frame, span ast.Span) []render.RuntimeEntry {
-	result, err := runtime.Entries(generatedValue(input), frame, span)
-	generatedPanic(err)
+type generatedEntry[T any] struct {
+	Key   value.Value
+	Value T
+}
+
+func generatedListEntries[T any](items []T) []generatedEntry[T] {
+	result := make([]generatedEntry[T], len(items))
+	for index, item := range items {
+		result[index] = generatedEntry[T]{float64(index), item}
+	}
 	return result
 }
 
@@ -350,26 +357,28 @@ func render_card_tpl(assign Assign, definitions *Definitions, input Input_card_t
 	frame := render.NewFrame("card.tpl", errs.LineIndex{0, 30}, rootData)
 	scope.Locals["label"] = generatedValue(input.Label)
 	generatedWrite(context, "<p class=\"card\">", frame, ast.Span{0, 16})
-	generatedWrite(context, generatedEscape(runtime, generatedResult[string](scope.Lookup(frame, "label")), frame, ast.Span{19, 24}), frame, ast.Span{16, 25})
+	generatedWrite(context, generatedEscape(runtime, input.Label, frame, ast.Span{19, 24}), frame, ast.Span{16, 25})
 	generatedWrite(context, "</p>\u000a", frame, ast.Span{25, 30})
 }
 
 func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layout_tpl, context *render.Context, runtime *render.RuntimeBindings, rootData *value.OrderedMap, scope *render.Scope) {
 	frame := render.NewFrame("layout.tpl", errs.LineIndex{0, 29, 66, 76, 100, 137, 191, 268, 305, 392, 463, 468, 483, 563, 567, 582, 586, 592, 608, 655, 684, 695}, rootData)
-	scope.Locals["values"] = generatedValue(generatedDepth(runtime, func() []float64 {
+	var local_values_1 []float64 = generatedDepth(runtime, func() []float64 {
 		result := []float64{}
 		result = append(result, float64(0))
 		result = append(result, generatedListSpread[float64](runtime, assign.Numbers, frame, ast.Span{16, 26})...)
 		return result
-	}(), frame, ast.Span{12, 27}))
-	scope.Locals["merged"] = generatedValue(generatedDepth(runtime, func() OrderedMap[string, string] {
+	}(), frame, ast.Span{12, 27})
+	scope.Locals["values"] = generatedValue(local_values_1)
+	var local_merged_2 OrderedMap[string, string] = generatedDepth(runtime, func() OrderedMap[string, string] {
 		result := NewOrderedMap[string, string]()
 		for _, entry := range generatedMapSpread[string, string](runtime, assign.Lookup, frame, ast.Span{42, 51}).Entries() {
 			result.Set(entry.Key, entry.Value)
 		}
 		result.Set("z", "Z")
 		return result
-	}(), frame, ast.Span{41, 64}))
+	}(), frame, ast.Span{41, 64})
+	scope.Locals["merged"] = generatedValue(local_merged_2)
 	generatedWrite(context, "<section>\u000a<h1>", frame, ast.Span{66, 80})
 	generatedWrite(context, generatedEscape(runtime, assign.Page.Title, frame, ast.Span{83, 93}), frame, ast.Span{80, 94})
 	generatedWrite(context, "</h1>\u000a<p class=\"escaped\">", frame, ast.Span{94, 119})
@@ -407,9 +416,9 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 		return generatedTruthy(runtime, assign.Flag)
 	}(), frame, ast.Span{245, 262}), frame, ast.Span{242, 263})
 	generatedWrite(context, "</p>\u000a<p>", frame, ast.Span{263, 271})
-	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, "values")), float64(1), frame, ast.Span{274, 283}), frame, ast.Span{274, 283}), frame, ast.Span{271, 284})
+	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, local_values_1, float64(1), frame, ast.Span{274, 283}), frame, ast.Span{274, 283}), frame, ast.Span{271, 284})
 	generatedWrite(context, "|", frame, ast.Span{284, 285})
-	generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, generatedResult[OrderedMap[string, string]](scope.Lookup(frame, "merged")), "z", frame, ast.Span{288, 299}), frame, ast.Span{288, 299}), frame, ast.Span{285, 300})
+	generatedWrite(context, generatedEscape(runtime, generatedIndex[*string](runtime, local_merged_2, "z", frame, ast.Span{288, 299}), frame, ast.Span{288, 299}), frame, ast.Span{285, 300})
 	generatedWrite(context, "</p>\u000a", frame, ast.Span{300, 305})
 	if generatedTruthy(runtime, func() bool {
 		left := assign.Flag
@@ -435,12 +444,13 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 	generatedWrite(context, generatedEscape(runtime, generatedCall[string](runtime, "default", []value.Value{generatedValue(""), generatedValue("fallback")}, frame, ast.Span{433, 457}), frame, ast.Span{433, 457}), frame, ast.Span{430, 458})
 	generatedWrite(context, "</p>\u000a<ul>\u000a", frame, ast.Span{458, 468})
 	{
-		entries := generatedEntries(runtime, assign.Rows, frame, ast.Span{468, 585})
+		entries := generatedListEntries(assign.Rows)
 		entriesSize := len(entries)
 		lastIndex := entriesSize - 1
 		previous, hadPrevious := scope.Locals["row"]
 		for row_index, entry := range entries {
-			row_key, row_value := entry.Key, entry.Value
+			row_key, local_row_3 := entry.Key, entry.Value
+			row_value := generatedValue(local_row_3)
 			scope.Locals["row"] = row_value
 			scope.Loops["row"] = append(scope.Loops["row"], &render.LoopMeta{Index: row_index, Key: row_key, Value: row_value, Size: entriesSize, First: row_index == 0, Last: row_index == lastIndex})
 			context.Iterations++
@@ -450,7 +460,7 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 			generatedWrite(context, "/", frame, ast.Span{501, 502})
 			generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").Size, frame, ast.Span{505, 514}), frame, ast.Span{502, 515})
 			generatedWrite(context, ":", frame, ast.Span{515, 516})
-			generatedWrite(context, generatedEscape(runtime, generatedResult[Row](scope.Lookup(frame, "row")).Name, frame, ast.Span{519, 527}), frame, ast.Span{516, 528})
+			generatedWrite(context, generatedEscape(runtime, local_row_3.Name, frame, ast.Span{519, 527}), frame, ast.Span{516, 528})
 			generatedWrite(context, ":", frame, ast.Span{528, 529})
 			generatedWrite(context, generatedEscape(runtime, generatedLoopMeta(scope, "row").First, frame, ast.Span{532, 542}), frame, ast.Span{529, 543})
 			generatedWrite(context, ":", frame, ast.Span{543, 544})
@@ -471,7 +481,7 @@ func render_layout_tpl(assign Assign, definitions *Definitions, input Input_layo
 	generatedEnter(context, "partial.tpl", frame, ast.Span{592, 607})
 	func() {
 		defer context.Leave()
-		render_partial_tpl(assign, definitions, Input_partial_tpl{Values: generatedResult[[]float64](scope.Lookup(frame, "values"))}, context, runtime, rootData, scope)
+		render_partial_tpl(assign, definitions, Input_partial_tpl{Values: local_values_1}, context, runtime, rootData, scope)
 	}()
 	if definitions.Content != nil {
 		generatedWrite(context, "<p>defined</p>", frame, ast.Span{620, 634})
@@ -509,7 +519,7 @@ func render_partial_tpl(assign Assign, definitions *Definitions, input Input_par
 	frame := render.NewFrame("partial.tpl", errs.LineIndex{0, 38}, rootData)
 	scope.Locals["values"] = generatedValue(input.Values)
 	generatedWrite(context, "<p class=\"included\">", frame, ast.Span{0, 20})
-	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, generatedResult[[]float64](scope.Lookup(frame, "values")), float64(2), frame, ast.Span{23, 32}), frame, ast.Span{23, 32}), frame, ast.Span{20, 33})
+	generatedWrite(context, generatedEscape(runtime, generatedIndex[*float64](runtime, input.Values, float64(2), frame, ast.Span{23, 32}), frame, ast.Span{23, 32}), frame, ast.Span{20, 33})
 	generatedWrite(context, "</p>\u000a", frame, ast.Span{33, 38})
 }
 

@@ -67,12 +67,12 @@ function render_layout_tpl(_assign: Assign, definitions: Definitions, _input: In
 
     context.at(frame, [0,26]); context.output.write("<main class=\"empty-page\">\n");
     if (definitions.content !== undefined) {
-            { const definition = definitions.content;
-            if (definition?.html === undefined) throw runtime.error(frame, [39,50], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
-            context.at(frame, [39,50]); context.output.write(definition.html);
-            }
+        { const definition = definitions.content;
+        if (definition?.html === undefined) throw runtime.error(frame, [39,50], 'E_RUNTIME_BLOCK_UNDEFINED', "define content is not registered");
+        context.at(frame, [39,50]); context.output.write(definition.html);
+        }
     } else {
-            context.at(frame, [55,99]); context.output.write("<p class=\"empty\">No content definition.</p>\n");
+        context.at(frame, [55,99]); context.output.write("<p class=\"empty\">No content definition.</p>\n");
     }
     context.at(frame, [103,111]); context.output.write("</main>\n");
 }

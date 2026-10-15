@@ -1,6 +1,6 @@
 import type { Span } from '@polyspec/template';
 import type { TypeManifest } from './documents.mts';
-import { scalarKinds, type Expr, type ExprOf, type Node, type NodeOf, type Program, type ValueType, type VariableExpr } from './ir.mts';
+import { loweredTemplate, scalarKinds, type Expr, type ExprOf, type LoweredTemplate, type Node, type NodeOf, type Program, type ValueType, type VariableExpr } from './ir.mts';
 
 const scalarTypes = {
   go: { string: 'string', number: 'float64', boolean: 'bool', any: 'any', null: 'any', Template: 'string' },
@@ -222,6 +222,160 @@ export interface Target {
   ifNode(node: NodeOf<'if'>, level: number): string;
   forNode(node: NodeOf<'for'>, level: number): string;
   include(node: NodeOf<'include'>, level: number): string;
+  /** The body of the function of `template` at `level`; without it, the nodes of the body as emitNodes emits them. */
+  templateBody?(template: LoweredTemplate, level: number): string;
+}
+
+/** A local of a generated template function: the code that reads its typed value and the type of that value. */
+export interface LocalBinding { code: string; type: ValueType }
+
+/** A local that a branch or a loop may assign: its binding before, the variable that holds it after, and its type there. */
+export interface MergedLocal { name: string; before: LocalBinding; variable: string; type: ValueType }
+
+/**
+ * The locals of the template function that a backend emits (T25.8). Each local is a variable of the function that holds
+ * its typed value: a template input is its field of the input, an assignment and a loop item declare a variable, and
+ * every read of the local reads that variable without checking it again. The render scope keeps the Value of each
+ * local for includes and dynamic lookups, so a value that the scope gives back, after an include, is decoded once where
+ * it enters. A branch or a loop that may assign a local holds it afterwards in a variable that the backend declares
+ * before it, of the type that the IR gives the local there. Such a variable, and a variable that holds a local that an
+ * include gave back, is droppable: `prune` removes it with its statements when the function reads it nowhere.
+ */
+export class FunctionLocals {
+  readonly bindings = new Map<string, LocalBinding>();
+  private readonly droppable = new Set<string>();
+  private count = 0;
+
+  constructor(inputs: Iterable<[string, LocalBinding]>) {
+    for (const [name, binding] of inputs) this.bindings.set(name, binding);
+  }
+
+  /** A new variable of the local `name`. */
+  variable(name: string, droppable = false): string {
+    this.count += 1;
+    const variable = `local_${fieldName(name)}_${this.count}`;
+    if (droppable) this.droppable.add(variable);
+    return variable;
+  }
+
+  /** The binding that a read of a local uses; its type is the type that the IR gives the read. */
+  read(node: VariableExpr): LocalBinding {
+    const binding = this.bindings.get(node.name);
+    if (binding === undefined) throw new Error(`compiler backend: local ${node.name} has no binding`);
+    if (typeKey(binding.type) !== typeKey(node.valueType)) throw new Error(`compiler backend: local ${node.name} is held as ${typeKey(binding.type)} and read as ${typeKey(node.valueType)}`);
+    return binding;
+  }
+
+  /** The bindings, to restore after a branch. */
+  save(): Map<string, LocalBinding> { return new Map(this.bindings); }
+  restore(saved: Map<string, LocalBinding>): void {
+    this.bindings.clear();
+    for (const [name, binding] of saved) this.bindings.set(name, binding);
+  }
+
+  /**
+   * The locals of `names` that have a binding, each with a new variable that holds it after a branch or a loop: of its
+   * type in `widened`, the type that the IR gives it after the node, or else of its type before.
+   */
+  merged(names: Set<string>, widened: Map<string, ValueType>): MergedLocal[] {
+    return [...names].flatMap(name => {
+      const before = this.bindings.get(name);
+      return before === undefined ? [] : [{ name, before, variable: this.variable(name, true), type: widened.get(name) ?? before.type }];
+    });
+  }
+
+  /** Binds each merged local to its variable. */
+  enter(merged: MergedLocal[]): void {
+    for (const item of merged) this.bindings.set(item.name, { code: item.variable, type: item.type });
+  }
+
+  /**
+   * `body` without the statements of each droppable variable that nothing else in it reads: a statement of a variable is
+   * a line that declares it or assigns it.
+   */
+  prune(body: string): string {
+    let lines = body.split('\n');
+    for (let changed = true; changed;) {
+      changed = false;
+      for (const variable of this.droppable) {
+        const statement = new RegExp(`^\\s*(?:(?:let|const|var) )?${variable}(?::| =| )`);
+        const statements = lines.filter(line => statement.test(line)).length;
+        if (statements === 0) continue;
+        const uses = lines.join('\n').match(new RegExp(`\\b${variable}\\b`, 'g'))?.length ?? 0;
+        if (uses !== statements) continue;
+        lines = lines.filter(line => !statement.test(line));
+        this.droppable.delete(variable);
+        changed = true;
+      }
+    }
+    return lines.join('\n');
+  }
+}
+
+/**
+ * The type of a value as text, with `?` when it is optional at its top level; any and null admit null anyway, so they
+ * have no optional form.
+ */
+export const typeKey = (type: ValueType): string => `${type.source.replace(/\?$/, '')}${type.optional && type.kind !== 'any' && type.kind !== 'null' ? '?' : ''}`;
+
+/**
+ * The locals that rendering `nodes` may assign in its scope: each assignment, in a branch, a loop or an if-block too,
+ * and the assignments of an included template (RT-21), but not the variable of a loop, which the loop restores, and
+ * nothing of a block, which renders in a scope of its own.
+ */
+export function assignedNames(program: Program, nodes: Node[], included = new Set<string>()): Set<string> {
+  const names = new Set<string>();
+  const visit = (items: Node[]): void => {
+    for (const node of items) {
+      if (node.op === 'set') names.add(node.name);
+      if (node.op === 'if') {
+        for (const branch of node.branches) visit(branch.body);
+        if (node.otherwise) visit(node.otherwise);
+      }
+      if (node.op === 'if-block') {
+        visit(node.body);
+        if (node.otherwise) visit(node.otherwise);
+      }
+      if (node.op === 'for') {
+        const assignedBefore = names.has(node.name);
+        visit(node.body);
+        if (!assignedBefore) names.delete(node.name);
+        if (node.empty) visit(node.empty);
+      }
+      // A template that the chain of includes renders already is a cycle, which fails with E_LOAD_CYCLE.
+      if (node.op === 'include' && !included.has(node.target)) {
+        for (const name of assignedNames(program, loweredTemplate(program, node.target).body, new Set([...included, node.target]))) names.add(name);
+      }
+    }
+  };
+  visit(nodes);
+  return names;
+}
+
+/**
+ * The text of a lowered expression in the syntax of the template (EXP-*), which names the expression in an error (T25.8):
+ * a variable, a member, an index or a call with its operands, an operator between its operands, an operand that is
+ * itself an operation in parentheses, and a filter as the call that it is.
+ */
+export function expressionText(node: Expr): string {
+  const operand = (item: Expr): string => item.op === 'binary' || item.op === 'ternary' ? `(${expressionText(item)})` : expressionText(item);
+  const args = (items: Expr[]): string => items.map(expressionText).join(', ');
+  switch (node.op) {
+    case 'literal': return node.value === null ? 'null' : typeof node.value === 'string' ? quote(node.value) : String(node.value);
+    case 'to-value': return expressionText(node.value);
+    case 'root': case 'local': return node.name;
+    case 'loop-meta': return `${node.loop}.${node.field}`;
+    case 'member': return `${operand(node.object)}.${node.key}`;
+    case 'index': return `${operand(node.object)}[${expressionText(node.index)}]`;
+    case 'member-call': return `${operand(node.object)}.${node.method}(${args(node.args)})`;
+    case 'class-call': return `${node.className}::${node.method}(${args(node.args)})`;
+    case 'call': return `${node.name}(${args(node.args)})`;
+    case 'unary': return `${node.operator}${operand(node.operand)}`;
+    case 'binary': return `${operand(node.left)} ${node.operator} ${operand(node.right)}`;
+    case 'ternary': return `${operand(node.test)} ? ${operand(node.consequent)} : ${operand(node.otherwise)}`;
+    case 'list': return `[${node.items.map(item => `${item.spread ? '...' : ''}${expressionText(item.value)}`).join(', ')}]`;
+    case 'map': return `[${node.entries.map(item => item.spread ? `...${expressionText(item.value)}` : `${expressionText(item.key)} => ${expressionText(item.value)}`).join(', ')}]`;
+  }
 }
 
 export function emitExpression(node: Expr, target: Target): string {
@@ -320,7 +474,7 @@ export function templateBodies(program: Program, target: Target): TemplateBody[]
     function: functionName(template.name),
     input: inputName(template.name),
     inputs: template.inputs,
-    body: emitNodes(template.body, target, 1),
+    body: target.templateBody === undefined ? emitNodes(template.body, target, 1) : target.templateBody(template, 1),
   }));
 }
 

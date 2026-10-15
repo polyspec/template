@@ -120,25 +120,26 @@ function render_content_tpl(_assign, _definitions, input, context, runtime, root
   context.at(frame, [0, 14]);
   context.output.write("<article>\n<h1>");
   context.at(frame, [14, 23]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, "title"), "title", runtime, frame, [17, 22]), frame, [17, 22]));
+  context.output.write(runtime.escape(input.title, frame, [17, 22]));
   context.at(frame, [23, 45]);
   context.output.write('</h1>\n<p class="root">');
   context.at(frame, [45, 59]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, "root_label"), "root_label", runtime, frame, [48, 58]), frame, [48, 58]));
+  context.output.write(runtime.escape(input.root_label, frame, [48, 58]));
   context.at(frame, [59, 83]);
   context.output.write('</p>\n<p class="defined">');
   context.at(frame, [83, 100]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, scope.lookup(frame, "defined_label"), "defined_label", runtime, frame, [86, 99]), frame, [86, 99]));
+  context.output.write(runtime.escape(input.defined_label, frame, [86, 99]));
   context.at(frame, [100, 122]);
   context.output.write('</p>\n<p class="local">');
   context.at(frame, [122, 159]);
-  context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call("default", [generatedChecked(generatedOptional(generatedString), scope.lookup(frame, "layout_local"), "layout_local", runtime, frame, [125, 137]), "missing"], frame, [125, 158]), "default", runtime, frame, [125, 158]), frame, [125, 158]));
+  context.output.write(runtime.escape(generatedChecked(generatedString, runtime.call("default", [input.layout_local, "missing"], frame, [125, 158]), 'default(layout_local, "missing")', runtime, frame, [125, 158]), frame, [125, 158]));
   context.at(frame, [159, 175]);
   context.output.write("</p>\n</article>\n");
 }
 function render_layout_tpl(assign, definitions, input, context, runtime, rootData, scope) {
   const frame = new Frame("layout.tpl", [0, 44, 68, 97, 108], rootData);
-  scope.locals.set("layout_local", "visible only in layout");
+  const local_layout_local_1 = "visible only in layout";
+  scope.locals.set("layout_local", local_layout_local_1);
   context.at(frame, [44, 68]);
   context.output.write('<section class="scope">\n');
   {

@@ -1,0 +1,20 @@
+{
+  "schema": 3,
+  "root": "Assign",
+  "entry": "input.tpl",
+  "fields": {
+    "page": "Page",
+    "rows": "list<Row>"
+  },
+  "records": {
+    "Page": { "title": "string" },
+    "Row": { "name": "string" }
+  },
+  "defines": {},
+  "functions": {
+    "label": { "implementation": "host", "args": ["string"], "returns": "string" }
+  },
+  "templates": {
+    "input.tpl": {}
+  }
+}
