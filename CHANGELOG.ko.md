@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8c983c727c305b5ced708963d915ac2632f7bc845322f03d99f30c63d880027d -->
+<!-- source-sha256: 8b32d2df34b41fcfd39c343ffcf870b6136770ff94a14494bc5419822e61bd94 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-13: compiler의 README는 `compileSource`가 compile하는 언어에 Python을 적습니다.
 
 - T22.6-11: specification은 넷을 세거나 Python 없이 넷을 나열하던 곳에서 core level의 다섯 언어를 셉니다. `interface.json`의 mapping, showcase artifact, native-call fixture, interface gate(`compiler.md`), function registry(`functions.md`), RT-56, RT-69, generated mode, native object 호출(`runtime.md`)입니다. VAL-22는 `merge`가 실행 중에 인자를 검사하는 implementation에 Python을 포함하며 새 parity profile `checked-arguments`가 이를 선언하고, CNF-2는 TypeScript command line의 parser를 언어로 적습니다.
 

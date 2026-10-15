@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.6-13: the README of the compiler names Python among the languages into which `compileSource` compiles.
+
 - T22.6-11: the specification counts the five languages of the core level where it counted four or listed four without Python: the mappings of `interface.json`, the showcase artifacts, the native-call fixture and the interface gate (`compiler.md`), the function registries (`functions.md`), RT-56, RT-69, the generated mode and the native object calls (`runtime.md`); VAL-22 names Python among the implementations whose `merge` checks its arguments at run time, which the new parity profile `checked-arguments` declares, and CNF-2 names the parser of the TypeScript command line by its language.
 
 - T22.6-14-1: `polyspec.template` exports `Program`, the program interface that `Engine` renders, and `Loader` and `LoadResult`, the loader protocol and its result, as the other implementations do; the base class of `AstProgram` is the private `_AstProgramCore`, and the export test checks every public class of `engine.py` and `loader.py`.

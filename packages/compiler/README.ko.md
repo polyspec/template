@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-compiler-readme -->
-<!-- source-sha256: 0a22c38cd3cf9dbbbbe57ecfc5d92a8fe5cb3d962583d1066e3e0cf7350dab3e -->
+<!-- source-sha256: 6ba7a46320b0a873838253609732d9f4f5544dd4cd561d5fec2dfed7e4a4d596 -->
 # @polyspec/template-compiler
 
 [English](README.md).
@@ -10,7 +10,7 @@
 | --- | --- |
 | `@polyspec/template-compiler/ast-artifact.mjs` | `compileAst({ root, output, entry, refresh, typeManifest, delimiters })`는 소스 directory를 `manifest.json`이 있는 canonical AST graph로 컴파일한다 |
 | `@polyspec/template-compiler/type-manifest.mjs` | `deriveTypeManifest(templates, define)`는 parse된 템플릿의 입력 타입 manifest를 만든다 |
-| `@polyspec/template-compiler/compiler.mjs` | `compileSource(graph, manifest, language, options)`는 AST graph와 타입 manifest를 TypeScript, Go, Rust, PHP 프로그램으로 컴파일한다 |
+| `@polyspec/template-compiler/compiler.mjs` | `compileSource(graph, manifest, language, options)`는 AST graph와 타입 manifest를 TypeScript, Go, Rust, PHP, Python 프로그램으로 컴파일한다 |
 | `@polyspec/template-compiler/functions.json` | 기계 판독 가능한 함수 계약([함수](../../docs/spec/functions.ko.md)) |
 
 ```sh
