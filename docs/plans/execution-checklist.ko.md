@@ -1,5 +1,5 @@
 <!-- doc-id: docs-plans-execution-checklist -->
-<!-- source-sha256: 780c67adf82d41bd7b17b20c5e8df2a75556bd927cc56ce37cb4e874fab3aa71 -->
+<!-- source-sha256: 0a0890ef97a6dc79a199ac35018c41b6a6c3ff5c9a2db11090677ff198c3257b -->
 # 실행 체크리스트
 
 ## Wave 0 — 저장소 기반 (순차)
@@ -498,7 +498,7 @@
 | T24.37 | root 값이 없는 인자를 가진 template 경로 block을 생성된 PHP program에서 렌더한다. `{# part.tpl name:title}`은 `part.tpl`의 입력 `name`에 block scope의 `title` 값을 주지만, PHP backend는 입력을 root 값이나 정의 data로만 만들었고, scope 값을 대입하기 전에 `generated input part.tpl.name is missing`을 던졌으므로 TypeScript, Go, Rust, Python이 렌더하는 곳에서 `E_RUNTIME_TYPE`으로 실패했다. RED: `tests/fixtures/typed-arguments-scoped/messages.json`의 요청이 PHP에서 실패한다 | `make generated-arguments-check`; `make conformance-generated-php` | [o] |
 | T24.38 | T24.35, T24.36, T24.37로 0.0.11을 release한다. `config/release.json`의 모든 manifest가 0.0.11을 선언하고, 저장소 package 사이의 의존성, PHP extension header, `package-lock.json`, Cargo lock, Composer lock도 그렇게 하며, 각 Composer lock은 그 폴더에서 다시 잠근다(kit K180). release asset의 consumer project는 0.0.11을 기록하고(`make release-consumer-lock`), 그 smoke command는 archive에서 통과한다(`make release-consumer`). `CHANGELOG.md`와 `CHANGELOG.ko.md`는 새 빈 `## Unreleased` 아래에 `## 0.0.11`을 얻는다. review는 새 lock을 기록한다. tag `v0.0.11`과 `packages/go/v0.0.11`은 release commit을 가리킨다 | `make release-versions TAG=v0.0.11`; `make release-consumer TAG=v0.0.11`; `make dependency-policy-check`; `make artifact-digest-check` | [o] |
 | T24.39 | kit 0.0.53으로 옮깁니다. 게시된 파일의 integrity로 `@polyspec/kit` 0.0.53을 고정하고 `make kit-sync`로 그 복사본을 써서 template이 다른 저장소와 같은 kit을 씁니다. owner check는 바뀐 module의 test를 그 importer로 고르고(K191, template에 필요 없는 선택 field), kit-check는 PHP가 필요한 checkout에 `.php-version`을 요구하며 template에는 이미 있고(K193), release proof는 각 sibling wheel을 나열합니다(K195). review는 새 lock을 기록합니다 | `make kit-check`; `make toolchain-check`; `make layout-check`; `make lint-ts`; `make dependency-policy-check` || [o] |
-| T24.40 | 0.0.x의 local link를 가리킵니다. polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며(kit K198), AGENTS.md는 그 내용 없이 이를 한 문장으로 말합니다. Acceptance: `AGENTS.md`와 `AGENTS.ko.md`가 `@polyspec/kit` 설치 옆에 그 문장을 둡니다. GREEN: `make documents-check`가 통과합니다 | `make docs-check` | [ ] |
+| T24.40 | 0.0.x의 local link를 가리킵니다. polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며(kit K198), AGENTS.md는 그 내용 없이 이를 한 문장으로 말합니다. Acceptance: `AGENTS.md`와 `AGENTS.ko.md`가 `@polyspec/kit` 설치 옆에 그 문장을 둡니다. GREEN: `make documents-check`가 통과합니다 | `make docs-check` || [o] |
 
 ## Wave 25 — 소비자의 코드인 generated program
 
