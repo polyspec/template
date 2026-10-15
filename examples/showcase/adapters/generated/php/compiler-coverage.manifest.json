@@ -6,7 +6,7 @@
   "sourceDigest": "936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625",
   "typeDigest": "30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7",
   "contractDigest": "b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d",
-  "compilerDigest": "0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442",
+  "compilerDigest": "ba7f0bfd4d8024e26cbef4e9ddf0cd1e011489480f00daebb75a11ecfa8e218f",
   "files": {
     "Page.php": {
       "path": "Page.php",
@@ -66,7 +66,7 @@
     },
     "GeneratedTemplates.php": {
       "path": "GeneratedTemplates.php",
-      "artifactDigest": "9e8c5f9e2b1a30bfa506835be44939c1c2e1270e2c901f543a582240ccacb199"
+      "artifactDigest": "8cef0a6b9e6140dd4fd3cd1b419910af458674c7f81bd3988b41923512464dd2"
     },
     "GeneratedExecution.php": {
       "path": "GeneratedExecution.php",

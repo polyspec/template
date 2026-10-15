@@ -290,22 +290,14 @@ final class GeneratedTemplates
                     'generated definition content data has an invalid type',
                 );
             }
-            $input = new InputCardTpl(
-                label: ($definition?->data !== null && $definition->data->has_label
-                    ? $definition->data->label
-                    : throw $runtime->error(
-                        $frame,
-                        [655, 683],
-                        'E_RUNTIME_TYPE',
-                        'generated input card.tpl.label is missing',
-                    )),
-            );
+            $scoped_label = $assign->page?->title;
+            $input = new InputCardTpl(label: $scoped_label);
             if ($definition?->data !== null) {
                 if ($definition->data->has_label) {
                     $input->label = $definition->data->label;
                 }
             }
-            $input->label = $assign->page?->title;
+            $input->label = $scoped_label;
             $blockScope = new Scope();
             $context->enter('card.tpl', $frame, [655, 683]);
             try {

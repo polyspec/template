@@ -2747,7 +2747,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;936a20a5f3b77bc8a454a40c57b55de1118203b69a39aedda5acb0455f495625&quot;,
   &quot;typeDigest&quot;: &quot;30c0b093d1694670ec7117cc02b36e0031780485e6218be94afbdf1be6524db7&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
+  &quot;compilerDigest&quot;: &quot;ba7f0bfd4d8024e26cbef4e9ddf0cd1e011489480f00daebb75a11ecfa8e218f&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -2807,7 +2807,7 @@ php · product generated program
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
-      &quot;artifactDigest&quot;: &quot;9e8c5f9e2b1a30bfa506835be44939c1c2e1270e2c901f543a582240ccacb199&quot;
+      &quot;artifactDigest&quot;: &quot;8cef0a6b9e6140dd4fd3cd1b419910af458674c7f81bd3988b41923512464dd2&quot;
     },
     &quot;GeneratedExecution.php&quot;: {
       &quot;path&quot;: &quot;GeneratedExecution.php&quot;,
@@ -3112,22 +3112,14 @@ final class GeneratedTemplates
                     &#39;generated definition content data has an invalid type&#39;,
                 );
             }
-            $input = new InputCardTpl(
-                label: ($definition?-&gt;data !== null &amp;&amp; $definition-&gt;data-&gt;has_label
-                    ? $definition-&gt;data-&gt;label
-                    : throw $runtime-&gt;error(
-                        $frame,
-                        [655, 683],
-                        &#39;E_RUNTIME_TYPE&#39;,
-                        &#39;generated input card.tpl.label is missing&#39;,
-                    )),
-            );
+            $scoped_label = $assign-&gt;page?-&gt;title;
+            $input = new InputCardTpl(label: $scoped_label);
             if ($definition?-&gt;data !== null) {
                 if ($definition-&gt;data-&gt;has_label) {
                     $input-&gt;label = $definition-&gt;data-&gt;label;
                 }
             }
-            $input-&gt;label = $assign-&gt;page?-&gt;title;
+            $input-&gt;label = $scoped_label;
             $blockScope = new Scope();
             $context-&gt;enter(&#39;card.tpl&#39;, $frame, [655, 683]);
             try {
@@ -4059,7 +4051,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;b35ff56c22d316b47ee800072a43ac824e2a635029c6d44d79dea93631ed3e78&quot;,
   &quot;typeDigest&quot;: &quot;5b636e35624f3d01bf615d9b970af6434b57be8080120f7da054104556517597&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
+  &quot;compilerDigest&quot;: &quot;ba7f0bfd4d8024e26cbef4e9ddf0cd1e011489480f00daebb75a11ecfa8e218f&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -5087,7 +5079,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;8161f4e59b4395fd598d60094d8d6f070b3ecab40be6821d47bd45cd4ee233a1&quot;,
   &quot;typeDigest&quot;: &quot;97e18db9ff8a29117f78c5ffb0a1fe590c00d89b20d04117721f2d64dab8e7dc&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
+  &quot;compilerDigest&quot;: &quot;ba7f0bfd4d8024e26cbef4e9ddf0cd1e011489480f00daebb75a11ecfa8e218f&quot;,
   &quot;files&quot;: {
     &quot;Assign.php&quot;: {
       &quot;path&quot;: &quot;Assign.php&quot;,
@@ -6317,7 +6309,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;c688413e9bb0e846699f0df008a45824ea5c4ffec063bc8ae0355cbe4d300c47&quot;,
   &quot;typeDigest&quot;: &quot;2e7791f397b9a5dbd6610bc51eb4255149c45f1b7671c9d752ddd3e8b4067422&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
+  &quot;compilerDigest&quot;: &quot;ba7f0bfd4d8024e26cbef4e9ddf0cd1e011489480f00daebb75a11ecfa8e218f&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -7840,7 +7832,7 @@ php · product generated program
   &quot;sourceDigest&quot;: &quot;112ab94718df18ed706f433c92ce33f65c71045800866aabe4fc052142d97028&quot;,
   &quot;typeDigest&quot;: &quot;3fec0fc166342c701a26f62cb935ae5fbb99d9f610b9fcefb50d105b79d59014&quot;,
   &quot;contractDigest&quot;: &quot;b3a300448cfa0263a9e4fb6888adb359317b6f8e0e9e7f40edc29e8c8671bf2d&quot;,
-  &quot;compilerDigest&quot;: &quot;0da416d0dd0f384bbd4a0dad96fabb5888857d6fc4934f06337a4f1f7a1cf442&quot;,
+  &quot;compilerDigest&quot;: &quot;ba7f0bfd4d8024e26cbef4e9ddf0cd1e011489480f00daebb75a11ecfa8e218f&quot;,
   &quot;files&quot;: {
     &quot;Page.php&quot;: {
       &quot;path&quot;: &quot;Page.php&quot;,
@@ -7884,7 +7876,7 @@ php · product generated program
     },
     &quot;GeneratedTemplates.php&quot;: {
       &quot;path&quot;: &quot;GeneratedTemplates.php&quot;,
-      &quot;artifactDigest&quot;: &quot;6a9aa1a4ec28a21d3f1f90aa3cc4991679ab5a6331a84fc24109d7dc53676a14&quot;
+      &quot;artifactDigest&quot;: &quot;62d9ae34e8e38f30573bd842d2717cba507a19e6223df4bfc6dc43e0e3c84eba&quot;
     },
     &quot;GeneratedExecution.php&quot;: {
       &quot;path&quot;: &quot;GeneratedExecution.php&quot;,
@@ -8006,15 +7998,9 @@ final class GeneratedTemplates
                     &#39;generated definition content data has an invalid type&#39;,
                 );
             }
+            $scoped_title = $assign-&gt;page?-&gt;title;
             $input = new InputContentTpl(
-                title: ($definition?-&gt;data !== null &amp;&amp; $definition-&gt;data-&gt;has_title
-                    ? $definition-&gt;data-&gt;title
-                    : throw $runtime-&gt;error(
-                        $frame,
-                        [68, 96],
-                        &#39;E_RUNTIME_TYPE&#39;,
-                        &#39;generated input content.tpl.title is missing&#39;,
-                    )),
+                title: $scoped_title,
                 root_label: $assign-&gt;root_label,
                 defined_label: $assign-&gt;defined_label,
                 layout_local: null,
@@ -8033,7 +8019,7 @@ final class GeneratedTemplates
                     $input-&gt;layout_local = $definition-&gt;data-&gt;layout_local;
                 }
             }
-            $input-&gt;title = $assign-&gt;page?-&gt;title;
+            $input-&gt;title = $scoped_title;
             $blockScope = new Scope();
             $context-&gt;enter(&#39;content.tpl&#39;, $frame, [68, 96]);
             try {
