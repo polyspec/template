@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f1f80b8923f939b074c70afef39fdb52cc56fbe94650dc1f9fc984183ae74806 -->
+<!-- source-sha256: b9fbdb1f7b25a0c692b9d1ef57a391079da065ea8dd1a4a1a734d92d32ad64eb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-19: runtime specification은 TypeScript, PHP, PHP extension, Python이 그대로 받고 Go와 Rust가 `Limits`의 field로 적는 `limits`의 key를 적고(RT-33), 생략한 limit이 각 언어에서 기본값을 유지하는 방식을 적으며(RT-6), `program.register`를 적고(RT-1), expression depth의 단위를 적습니다(RT-34). 새 expression vector 네 개가 모든 implementation에서 그 경계를 괄호 31겹과 prefix 연산자 62개로 고정합니다. 동작은 바뀌지 않습니다.
 
 - T22.6-12: parity check가 implementation의 list와 count를 profile과 비교합니다. `languageLists`는 `Makefile`의 `SHOWCASE_LANGS`를 읽고(R9), `documents`는 README 파일, `docs`, `docs/spec`, `docs/operations`를 읽습니다(R10). 단 benchmark 문서는 Python을 측정할 때까지(T22.6-17), T22.6-12-1의 한국어 문장 두 개는 그 kit item까지 제외합니다. showcase 문서는 요청을 PHP와 Python으로도 보여 주고 다섯 implementation과 닫힌 template dispatch의 다섯 target을 세며, testing 문서는 다섯 언어, 다섯 generated backend, package install의 Python wheel을 셉니다.
 

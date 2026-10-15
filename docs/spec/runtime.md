@@ -13,7 +13,7 @@ This document defines the engine API, template names and loading, scope, loops, 
 parse(source, name, { delimiters }) -> Template
 decodeTemplate(json) -> Template
 Engine(options: { loader, functions, limits, delimiters })
-engine.register(name, fn)
+program.register(name, fn)
 engine.render(target: name | Template, assign, { define, env }) -> string
 engine.prepare(target: name | Template, assign, { define, env }) -> PreparedRender
 prepared.render() -> string
@@ -37,7 +37,7 @@ engine.
 - **RT-3** `render` accepts a template name or a parsed template. With a name, the engine loads the template through its loader. It returns the complete output as one string.
 - **RT-4** `assign` is a map converted by the host binding rules, or a bound map (VAL-22) that is not bound again. A null `assign` (`undefined` too in TypeScript, `nil` in Go) and, in PHP, an empty array are an empty map. `define` is the template definition map (RT-24). `env` is a map with `timezone` and `now` as defined in the functions document. Each of `define` and `env` may be omitted; an omitted `define` is an empty map.
 - **RT-5** `functions` in the engine options and `register` add host functions as defined in the functions document.
-- **RT-6** `limits` in the engine options overrides the limit values of RT-33. An omitted limit keeps its default.
+- **RT-6** `limits` in the engine options overrides the limit values of RT-33. An omitted limit keeps its default: the options of TypeScript, PHP, the PHP extension and Python merge the keys that they hold over the defaults, and Go and Rust start their `Limits` value from the defaults, `DefaultLimits` and `Limits::default()`, so no limit is unset.
 - **RT-61** Both `AstProgram` and `GeneratedProgram` bind `assign`, resolve `define` and `env`, and select the target in `prepare`. A bound map (VAL-22) given as `assign` or as the `data` of a template definition is not bound again, in every implementation including the PHP extension. Rendering it produces the same bytes as rendering, at the time `bind` ran, the host map whose entries are the entries of the bound map; for a result of `merge`, the host map with the merged entries. Only the members of a native object are read when the template reads them (VAL-19). A typed generated program still converts a bound `assign` to its root record and bound definition `data` to its definition data record (RT-68). The returned program-specific state exposes the same `PreparedRender.render` operation.
 - **RT-62** `PreparedRender.render` creates only per-render scope, output and execution state. Repeated calls with unchanged input produce identical UTF-8 bytes. `render` is equivalent to `prepare(...).render()` and remains the single-call convenience operation.
 - **RT-70** Renders of one program may run at the same time where the host language runs code concurrently, after the host registered its functions and classes: renders share only the templates that the program loaded and parsed, and the program guards that cache. A Go program may be rendered from concurrent goroutines, and a Python program from concurrent threads, which it serializes only in its template cache. A Rust program is neither `Send` nor `Sync`, because its values and its template cache use `Rc` and `RefCell`, so the compiler keeps it, and its bound maps (VAL-22), in the thread that created it; a Rust host that renders in several threads creates one program in each thread. TypeScript and PHP run one render at a time in a process or worker, and the PHP extension keeps the objects of a request in that request. A host registers functions and classes before it renders; a registration while renders of the same program run is a data race of the host. A loader of a program that concurrent renders share is called by those renders at the same time.
@@ -270,14 +270,16 @@ flowchart TB
 
 - **RT-33** Default limits:
 
-| Limit | Default | Error |
-| --- | --- | --- |
-| Loop iterations per render | 1,000,000 | `E_RUNTIME_LIMIT` |
-| Include and block nesting depth | 32 | `E_RUNTIME_DEPTH` |
-| Output size | 16 MiB | `E_RUNTIME_LIMIT` |
-| Expression nesting depth | 64 | `E_RUNTIME_LIMIT` |
+| Limit | Key | Default | Error |
+| --- | --- | --- | --- |
+| Loop iterations per render | `iterations` | 1,000,000 | `E_RUNTIME_LIMIT` |
+| Include and block nesting depth | `depth` | 32 | `E_RUNTIME_DEPTH` |
+| Output size in bytes | `outputBytes` | 16 MiB | `E_RUNTIME_LIMIT` |
+| Expression nesting depth | `expressionDepth` | 64 | `E_RUNTIME_LIMIT` |
 
-- **RT-34** The expression nesting depth is checked by the parser and by the evaluator.
+TypeScript, PHP, the PHP extension and Python name each limit by its key in the `limits` option. Go and Rust name it by a field of their `Limits` type in the convention of the language: `Iterations`, `Depth`, `OutputBytes` and `ExpressionDepth` in Go, `iterations`, `depth`, `output_bytes` and `expression_depth` in Rust.
+
+- **RT-34** The expression nesting depth is checked by the parser and by the evaluator. The parser counts one level for each expression that it enters, one for each postfix expression (an operand with its accessors and calls) and one for each prefix operator `!` or `-`: an operand alone is at level 2, a parenthesized expression or a call argument adds two levels and a prefix operator one, so 31 nested parentheses around a literal parse and 32 fail, and 62 prefix operators before a variable parse and 63 fail (`tests/fixtures/expr/cases.json`).
 - **RT-35** The output size is checked as the output is written. Exceeding it fails the render.
 
 ## Errors
