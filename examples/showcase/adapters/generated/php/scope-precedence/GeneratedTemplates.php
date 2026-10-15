@@ -107,15 +107,9 @@ final class GeneratedTemplates
                     'generated definition content data has an invalid type',
                 );
             }
+            $scoped_title = $assign->page?->title;
             $input = new InputContentTpl(
-                title: ($definition?->data !== null && $definition->data->has_title
-                    ? $definition->data->title
-                    : throw $runtime->error(
-                        $frame,
-                        [68, 96],
-                        'E_RUNTIME_TYPE',
-                        'generated input content.tpl.title is missing',
-                    )),
+                title: $scoped_title,
                 root_label: $assign->root_label,
                 defined_label: $assign->defined_label,
                 layout_local: null,
@@ -134,7 +128,7 @@ final class GeneratedTemplates
                     $input->layout_local = $definition->data->layout_local;
                 }
             }
-            $input->title = $assign->page?->title;
+            $input->title = $scoped_title;
             $blockScope = new Scope();
             $context->enter('content.tpl', $frame, [68, 96]);
             try {

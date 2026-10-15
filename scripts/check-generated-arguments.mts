@@ -7,7 +7,7 @@
 // subclass, a Go error that is not an `*errs.Error` or a bind error, `RequestError::Argument` of Rust,
 // `\InvalidArgumentException` of PHP and `ValueError` of Python. typed-arguments-unread declares a root record field and
 // a list that no template reads and definition data that no block merges, which generated Rust checks without holding
-// them (T24.31).
+// them (T24.31); typed-arguments-scoped renders a block of a template path whose argument has no root value (T24.37).
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -46,7 +46,7 @@ const vectorsFor = (fixture: Fixture, language: string): string => {
   return path;
 };
 
-const fixtures = ['typed-arguments', 'typed-arguments-unread'].map(name => {
+const fixtures = ['typed-arguments', 'typed-arguments-unread', 'typed-arguments-scoped'].map(name => {
   const directory = join(root, 'tests/fixtures', name);
   const vectors = vectorsDocument.read(join(directory, 'messages.json'));
   if (vectors.length === 0) throw new Error(`${name}/messages.json holds no request`);
@@ -138,7 +138,7 @@ fn results(path: &str, render: impl Fn(&serde_json::Value, &RenderOptions) -> Re
     },
     PHP: () => {
       const output = fixtures.map(fixture => {
-        const phpNamespace = `Polyspec\\Generated\\${fixture.id === 'typed_arguments' ? 'TypedArguments' : 'TypedArgumentsUnread'}`;
+        const phpNamespace = `Polyspec\\Generated\\${fixture.name.split('-').map(part => part.slice(0, 1).toUpperCase() + part.slice(1)).join('')}`;
         const phpDirectory = join(temporary, `${fixture.id}-php`);
         writePhpProgram(phpDirectory, compileFiles(graphOf(fixture.name), fixture.types, 'php', { phpNamespace }));
         return run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $result = static function (callable $request): string { try { return 'rendered: ' . $request(); } catch (Polyspec\\Template\\TemplateError $error) { return 'template: ' . $error->errorCode . ' ' . $error->getMessage(); } catch (InvalidArgumentException $error) { return 'argument: ' . $error->getMessage(); } catch (Throwable $error) { return 'other ' . $error::class . ': ' . $error->getMessage(); } }; $vectors = json_decode(file_get_contents(${phpString(vectorsFor(fixture, 'PHP'))}), true, 512, JSON_THROW_ON_ERROR); echo ${phpString(fixture.name)}, ' ', json_encode(array_map(static fn (array $vector): string => $result(static fn () => $program->render('input.tpl', $vector['assign'], ['define' => $vector['define']])), $vectors), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\\n";`], root);

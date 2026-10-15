@@ -180,18 +180,23 @@ export function createTarget({ program }: { program: Program; manifest: TypeMani
         write(node, '$definition->html')));
     }
     const missing = (item: BlockInput): string => `throw ${error(node, 'E_RUNTIME_TYPE', `generated input ${blockTarget}.${item.name} is missing`)}`;
+    // The value of an argument in the scope of the block is computed once, before the input: it fills an input that has no
+    // root value, and replaces the root value and the definition data after them (T24.37).
+    const scopedName = (item: BlockInput): string => `$scoped_${fieldName(item.name)}`;
+    const scopedValues = node.inputs.flatMap(item => item.scope === null ? [] : [`${scopedName(item)} = ${emitExpression(item.scope, target)};`]);
     const fallbackValue = (item: BlockInput): string => {
       if (item.root) return emitExpression(item.root, target);
       if (item.valueType.optional) return 'null';
+      if (item.scope !== null) return scopedName(item);
       if (node.id !== null) return `(${chain(`$definition?->data !== null && $definition->data->has_${fieldName(item.name)}`, `? $definition->data->${fieldName(item.name)}`, `: ${missing(item)}`)})`;
       return missing(item);
     };
     const construct = `$input = ${call(`new ${inputClass(blockTarget)}`, node.inputs.map(item => `${fieldName(item.name)}: ${fallbackValue(item)}`))};`;
     const defined = node.inputs.map(item => braced(`if ($definition->data->has_${fieldName(item.name)})`, `$input->${fieldName(item.name)} = $definition->data->${fieldName(item.name)};`));
-    const scoped = node.inputs.flatMap(item => item.scope === null ? [] : [`$input->${fieldName(item.name)} = ${emitExpression(item.scope, target)};`]);
+    const scoped = node.inputs.flatMap(item => item.scope === null || (!item.root && !item.valueType.optional && node.id === null) ? [] : [`$input->${fieldName(item.name)} = ${scopedName(item)};`]);
     const render = call(renderMethod(blockTarget), ['$assign', '$definitions', '$input', '$context', '$runtime', '$rootData', '$blockScope']);
     const entered = { target: blockTarget, span: node.span };
-    if (node.id === null) return spaces(n, lines(construct, scoped, enter(entered, render)));
+    if (node.id === null) return spaces(n, lines(scopedValues, construct, scoped, enter(entered, render)));
     const field = fieldName(node.id);
     const registration = node.path === null
       ? braced('if ($definition === null)', `throw ${error(node, 'E_RUNTIME_BLOCK_UNDEFINED', `define ${node.id} is not registered`)};`)
@@ -201,6 +206,7 @@ export function createTarget({ program }: { program: Program; manifest: TypeMani
       registration,
       `${braced('if ($definition?->html !== null)', write(node, '$definition->html'))} ${braced('else',
         braced(`if ($definition?->data !== null && !($definition->data instanceof ${dataClass(blockTarget)}))`, `throw ${error(node, 'E_RUNTIME_TYPE', `generated definition ${node.id} data has an invalid type`)};`),
+        scopedValues,
         construct,
         defined.length > 0 ? braced('if ($definition?->data !== null)', defined) : '',
         scoped,
