@@ -204,8 +204,17 @@ release-consumer release-consumer-lock: build-ts build-language build-lsp build-
 install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
 
-build-ts: ## Build the TypeScript package
+# The validator of the template AST of packages/ts is ajv's standalone validation code of contracts/schema/ast.schema.json
+# (T25.6-2): make ast-validator generates packages/ts/src/ast-validator.mjs, and the build of the package checks that it is
+# current, so the package has no runtime dependency on ajv and compiles no schema at run time.
+build-ts: ast-validator-check ## Build the TypeScript package
 	$(NODE) scripts/build-package.mts --package ts
+
+.PHONY: ast-validator ast-validator-check
+ast-validator: ## Generate the AST validator of packages/ts from contracts/schema/ast.schema.json
+	$(NODE) scripts/generate-ast-validator.mts
+ast-validator-check: ## Check that the AST validator of packages/ts is current
+	$(NODE) scripts/generate-ast-validator.mts --check
 
 build-go: ## Build the Go CLI
 	cd $(GO_DIR) && $(GO) build -o template ./cmd/template && cd $(CURDIR) && $(NODE) scripts/publish-build.mts $(GO_DIR)/template var/build/template-go
@@ -476,7 +485,7 @@ dependency-review: install-tools
 doc-coverage: ## Check that public symbols carry documentation comments
 	$(NODE) scripts/check-doc-coverage.mts
 
-schema-check: schema-fixtures-check schema-mutations-check ## Validate the AST schema and fixtures
+schema-check: schema-fixtures-check schema-mutations-check ast-validator-check ## Validate the AST schema and fixtures
 
 .PHONY: schema-fixtures-check schema-mutations-check
 schema-fixtures-check:

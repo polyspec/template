@@ -10,6 +10,9 @@
     "examples/showcase/adapters/generated/**/*.{ts,mjs,js}": "The generated programs and contract declarations of the showcase: scripts/generate-showcase-contract.mts and the compiler write them, and their exports are the API that a host of a generated program imports, of which the showcase adapters use a part.",
     "examples/site/scenarios/react-boundary/react-host.tsx": "The site shows it as the react-boundary integration source (scenario.json integrationFiles); make typecheck checks it with examples/site/scenarios/tsconfig.json."
   },
+  "ignore": {
+    "packages/ts/src/ast-validator.mjs": "The AST validator that scripts/generate-ast-validator.mts generates with ajv standalone validation code (make ast-validator): esbuild wraps the CommonJS module of ajv/dist/runtime that the code requires, whose exports.default knip reads as an unused export of the file."
+  },
   "binaries": {
     "gmake": "GNU Make of Homebrew: tests/scripts/toolchain-files.test.mts runs the recipes with it where the make of the machine is the GNU Make 3.81 of macOS."
   },

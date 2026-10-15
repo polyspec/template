@@ -1,8 +1,10 @@
 // Decoding of the AST JSON (AST-10): the canonical JSON of a template AST, validated against
 // contracts/schema/ast.schema.json, read as the `Template` of the package.
-import { Ajv, type ErrorObject, type ValidateFunction } from 'ajv';
-import schema from '../../../contracts/schema/ast.schema.json' with { type: 'json' };
+// The validator is ajv's standalone validation code of the schema, which scripts/generate-ast-validator.mts generates (make
+// ast-validator), so the package compiles no schema at run time and imports no ajv (T25.6-2).
+import type { ErrorObject } from 'ajv';
 import type { Template } from './ast.js';
+import { validateTemplate } from './ast-validator.mjs';
 
 /** The failure of {@link decodeTemplate}: the JSON is not a template AST of the schema. */
 export class AstDecodeError extends Error {
@@ -15,15 +17,6 @@ export class AstDecodeError extends Error {
     this.name = 'AstDecodeError';
     this.path = path;
   }
-}
-
-// The validator compiles on the first decode, so a program that never decodes an AST does not
-// compile the schema. allErrors reports every invalid node, as the validators of the other runtimes do.
-let validator: ValidateFunction<Template> | undefined;
-
-function validate(): ValidateFunction<Template> {
-  validator ??= new Ajv({ strict: true, allErrors: true }).compile<Template>(schema);
-  return validator;
 }
 
 function depth(error: ErrorObject): number {
@@ -63,8 +56,7 @@ function reason(error: ErrorObject): string {
  */
 export function decodeTemplate(json: unknown): Template {
   const value: unknown = typeof json === 'string' ? JSON.parse(json) : json;
-  const check = validate();
-  if (check(value)) return value;
-  const error = invalidNode(check.errors ?? []);
+  if (validateTemplate(value)) return value;
+  const error = invalidNode(validateTemplate.errors ?? []);
   throw new AstDecodeError(error.instancePath, reason(error));
 }
