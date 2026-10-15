@@ -16,7 +16,9 @@ const SERVER = 'dist/server.cjs';
 const STANDARD_TOKEN_TYPES = new Set(['namespace', 'class', 'enum', 'interface', 'struct', 'typeParameter', 'type', 'parameter', 'variable', 'property', 'enumMember', 'decorator', 'event', 'function', 'method', 'macro', 'label', 'comment', 'string', 'keyword', 'number', 'regexp', 'operator']);
 
 const builtins = new Set(builtinModules.flatMap(name => [name, `node:${name}`]));
-const requiredBy = path => [...new Set(readFileSync(join(root, path), 'utf8').match(/require\("[^"]+"\)/g).map(call => call.slice(9, -2)))];
+// The modules that a bundle requires: the calls of require, not a text inside a string, such as the code property that the
+// runtime functions of ajv carry for the code that ajv generates, 'require("ajv/dist/runtime/ucs2length").default'.
+const requiredBy = path => [...new Set(readFileSync(join(root, path), 'utf8').match(/(?<!['"`\w$.])require\("[^"]+"\)/g).map(call => call.slice(9, -2)))];
 
 let server;
 let connection;
