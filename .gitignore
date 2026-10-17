@@ -24,3 +24,16 @@ packages/php/.phpunit.result.cache
 /var/
 __pycache__/
 *.pyc
+
+# Generated files of the install, build, cache and test runs (AGENTS.md, Generated files)
+dist.next/
+dist.old/
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+.phpunit.cache/
+.phpunit.result.cache
+coverage/
