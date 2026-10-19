@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: e8966f4938fc9bb9100c40cf0621c2213749919646e13717ea98b847043b2336 -->
+<!-- source-sha256: d6566b2e15f7093410b9e04b39f1c0cb83e0ff5b2d7309e769ef546dfdc2adaf -->
 # 개발
 
 ## 문서
@@ -19,8 +19,8 @@
 
 - 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 설치된 package의 `kit.mk`를 include하는 `scripts/kit/kit-bootstrap.mk`를 include하고, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `make kit-check`는 복사본을 package와, `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`dependency-policy`, `dependency-review`, `owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
   Enforced by: `make kit-check`
-- polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며, link는 commit하지 않는다.
-  Enforced by: `make link-check`
+- polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며, link는 `node_modules/`에 있는 생성 경로라 commit하지 않는다. `make link-check`는 개발 보조로 그 link를 나열한다.
+  Enforced by: `make staged-generated-hook`
 - 임시 스크립트나 임시 폴더를 사용하지 않는다. 모든 검사는 Makefile 타겟, `scripts/` 아래 스크립트, 커밋된 테스트 중 하나이며 멱등하다.
   Enforced by: `make rules-check`
 - 각 패키지 안에서 코드와 테스트를 별도 디렉터리에 둔다. 코어 테스트는 코어 패키지에 둔다. 확장 테스트는 확장 패키지에 둔다.

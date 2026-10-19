@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 915d2d1f3ad54f8e7227408482baa13bfeacbab65e939bf3e06987c1698da738 -->
+<!-- source-sha256: 83af951f7627fb3497e0075eea360f3dcdea6786b13419178db4844d5dfd9335 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,8 @@
 ## Unreleased
 
 - T26.3: 모든 Composer platform의 PHP 요구는 8.4.1이고 lock을 다시 만들었습니다(release-consumer fixture는 release를 기다립니다). 저장소의 test는 kit이 복사한 workflow를 제외하며, checklist와 test에 적힌 외부 제품 이름을 지웠습니다 (T26.3).
+
+- T26.4: pre-commit hook은 config/checklist.json에 등록된 추적 hook이며 `make staged-generated-hook`을 실행하므로 staging된 생성 경로를 거부합니다. link 규칙은 link가 `node_modules/`에 있으므로 그 check를 이름으로 들고, `make link-check`는 개발 보조로 남습니다 (T26.4).
 
 - T26.2: kit의 task를 덮어쓰던 recipe(`build-ts`, `build-go`, `build-rust`, `build-php`, `test-php`, `test-python`)는 `template-<task>-<runtime>` recipe가 되어 kit의 task가 prerequisite로 이름을 붙이므로 각각 한 번씩 실행됩니다. `rules-check`도 `template-rules-check`로 같은 방식을 따릅니다. 실행 체크리스트에는 하위 항목 T22.5-*의 상위 행 T22.5를 두고, 미완료 항목 T22.6, T22.6-12-1, T22.6-17의 Verification에 각 단위 테스트 명령을 적었습니다. 동작은 바뀌지 않습니다 (T26.2).
 
