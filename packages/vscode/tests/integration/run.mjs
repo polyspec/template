@@ -3,8 +3,8 @@
 // installed from the .vsix into an extensions directory, workspace trust is enabled and the opened folder
 // is not trusted. A second run removes `capabilities` from the installed manifest and requires the suite to
 // observe that VS Code disables the extension, which shows that the first run detects that regression.
-// The VS Code build is the minimum version of engines.vscode, installed by `make install-vscode` (the VS Code installer of @polyspec/kit)
-// into the tools directory of the required option --vscode (`make test-vscode-integration` names var/tools/vscode). The
+// The VS Code build is the minimum version of engines.vscode, installed by `make template-install-vscode` (the VS Code installer of @polyspec/kit)
+// into the tools directory of the required option --vscode (`make template-test-vscode-integration` names var/tools/vscode). The
 // run only reads that copy and never downloads; without it, it fails with `run make install-vscode` (T20.1-4, T20.1-6).
 // Every profile installation and every VS Code launch is a step without a time limit (step.mjs): it
 // prints its start, a line every 10 s while it runs and its result with its elapsed time, and is judged by its

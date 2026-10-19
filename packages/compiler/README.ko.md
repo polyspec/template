@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-compiler-readme -->
-<!-- source-sha256: 6ba7a46320b0a873838253609732d9f4f5544dd4cd561d5fec2dfed7e4a4d596 -->
+<!-- source-sha256: a39601ec836a5affe810bb821ed8c83eb2a8339d258eb3e5b18c4c4f7e9a2214 -->
 # @polyspec/template-compiler
 
 [English](README.md).
@@ -18,4 +18,4 @@ node node_modules/@polyspec/template-compiler/dist/compiler.mjs --graph compiled
   --lang go --output generated.go --refresh true
 ```
 
-package는 strict TypeScript(`src/`)로 쓰였고, `make build-compiler`가 tsup으로 이를 `dist/`에 bundle하며 진입점은 declaration과 함께 이를 export한다. parser는 같은 버전의 `@polyspec/template`이고, compiler는 읽는 문서(AST artifact, 타입 manifest)를 ajv로 검증한다. 각 artifact는 자신을 쓴 compiler의 digest를 기록하고, refresh는 그 digest가 바뀌면 artifact를 다시 컴파일한다.
+package는 strict TypeScript(`src/`)로 쓰였고, `make template-build-compiler`가 tsup으로 이를 `dist/`에 bundle하며 진입점은 declaration과 함께 이를 export한다. parser는 같은 버전의 `@polyspec/template`이고, compiler는 읽는 문서(AST artifact, 타입 manifest)를 ajv로 검증한다. 각 artifact는 자신을 쓴 compiler의 digest를 기록하고, refresh는 그 digest가 바뀌면 artifact를 다시 컴파일한다.

@@ -1,12 +1,12 @@
-<!-- doc-id: docs-plans-execution-plan -->
-<!-- source-sha256: 849530e61879bfd8cff983df3c78ca9172bb63fdc6ee3ec64b0266e2d940e125 -->
+<!-- doc-id: plan-execution -->
+<!-- source-sha256: e89d3f97b54f07c8af3b5f8455deb46932db76aaa00ce9f08fe4c77bd21f9c1c -->
 # 실행 계획
 
-[English](/plans/execution-plan).
+[English](/plans/execution/plan).
 
 이 문서는 템플릿 엔진을 완성하는 계획이다: 명세, 적합성 스위트, TypeScript·Go·Rust·PHP 구현, PHP 확장, 브라우저 빌드, 벤치마크, 문서. 작업은 웨이브로 묶고, 각 절은 웨이브의 의존 관계, 작업의 원인, 완료 기준을 적는다. 한 웨이브 안에서 `parallel` 표시가 있는 작업은 서로 독립이다. 웨이브는 명시된 의존 작업이 모두 완료된 뒤에만 시작한다.
 
-웨이브마다 작업, 검증 방법, 상태는 [실행 체크리스트](/ko/plans/execution-checklist)에 있다.
+웨이브마다 작업, 검증 방법, 상태는 [실행 체크리스트](/ko/plans/execution/checklist)에 있다.
 
 ## 의존 관계 개요
 

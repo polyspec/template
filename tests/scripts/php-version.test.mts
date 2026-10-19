@@ -1,7 +1,7 @@
 // Tests that every workflow starts the PHP that config/toolchain.json declares (T24.27). The release workflow, a copy of kit,
 // runs setup-php only when the checkout has a .php-version and otherwise keeps the PHP of the runner: without the file the
 // proof of v0.0.7 ran the composer consumer with the PHP 8.3.6 of Ubuntu, which the platform check of Composer refused
-// (">= 8.5.0"). .php-version holds the minimum PHP release of config/toolchain.json, and each setup-php step of the
+// (">= 8.4.0"). .php-version holds the minimum PHP release of config/toolchain.json, and each setup-php step of the
 // workflows of the repository reads it, or the PHP of a matrix that lists the releases of config/toolchain.json.
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';

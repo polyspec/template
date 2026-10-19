@@ -1,11 +1,11 @@
-<!-- doc-id: docs-plans-execution-plan -->
+<!-- doc-id: plan-execution -->
 # Execution plan
 
-[한국어](/ko/plans/execution-plan).
+[한국어](/ko/plans/execution/plan).
 
 This document plans the delivery of the template engine: the specification, the conformance suite, the TypeScript, Go, Rust and PHP implementations, the PHP extension, the browser build, benchmarks and documentation. Tasks are grouped into waves; each section states the dependencies of a wave, the cause of its tasks and its exit criteria. Tasks inside a wave marked `parallel` are independent of each other. A wave starts only when its listed dependencies are complete.
 
-The tasks of each wave, their verification and their states are in the [execution checklist](execution-checklist.md).
+The tasks of each wave, their verification and their states are in the [execution checklist](checklist.md).
 
 ## Dependency overview
 
@@ -101,7 +101,7 @@ Dependencies: none. A finished package install check left its temporary director
 
 ## Wave 11 — Editor language service, LSP server and CodeMirror adapter
 
-Dependencies: none. Every editor rule moves into one language service, and each editor reaches it through an adapter that only converts positions and registers features ([editor support](../spec/editor.md)). A task runs in the branch `feat/<shortname>-<id>` and the worktree `template-<shortname>-<id>`; both are removed as soon as the task is merged into `main`.
+Dependencies: none. Every editor rule moves into one language service, and each editor reaches it through an adapter that only converts positions and registers features ([editor support](../../spec/editor.md)). A task runs in the branch `feat/<shortname>-<id>` and the worktree `template-<shortname>-<id>`; both are removed as soon as the task is merged into `main`.
 
 T11.1 to T11.6 are complete. On 2026-10-02, `make check` passed on commit "Refresh the generated artifact digests after the lockfile change" of the branch `feat/language-T11.2`, including `editor-boundary-check`, `test-language`, `test-lsp`, `test-codemirror`, `test-vscode` and `test-vscode-integration`; `rules-check` reported no uncovered rule.
 

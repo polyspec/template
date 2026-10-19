@@ -1,6 +1,6 @@
 // Tests that each generated and install check runs Python beside TypeScript, Go, Rust and PHP (T22.4-20). A check
 // covers Python when its `checkLanguages` call names a `Python` entry; a language that a check cannot run is fixed in the
-// implementation, never recorded as unsupported. Each check is listed when its row of docs/plans/execution-checklist.md
+// implementation, never recorded as unsupported. Each check is listed when its row of docs/plans/execution/checklist.md
 // is done.
 import assert from 'node:assert/strict';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -33,7 +33,7 @@ for (const check of checks) {
 
 // The checks run the pinned interpreter var/tools/mise/shims/python3 (scripts/python-toolchain.mts), the python of mise.toml
 // that `make install` installs (T22.5-5, T24.12). A job that runs one of these targets runs make install, and no job sets up a Python of its own.
-const pythonTargets = ['test-scripts', 'install-check', 'generated-native-check', 'typed-generator-compile-check', 'showcase-check'];
+const pythonTargets = ['template-test-scripts', 'template-install-check', 'generated-native-check', 'typed-generator-compile-check', 'showcase-check'];
 
 test('each CI job that runs a Python check target runs make install and sets up no Python of PATH', () => {
   const all = jobs('.github/workflows/ci.yml');

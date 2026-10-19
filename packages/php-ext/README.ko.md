@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-ext-readme -->
-<!-- source-sha256: c600e112bea135c1cee4d1aaf00e8246938a55e9adb67ea5cb149bcad4cb1e45 -->
+<!-- source-sha256: 46f94ec3f4abc903e933dc170768538c18e3ce0deb500b2f23bd8e2227be82ea -->
 # polyspec_template PHP 확장
 
 [English](README.md).
@@ -8,7 +8,7 @@ C로 독립 구현해 템플릿을 렌더하는 PHP 확장이다. 클래스 `Pol
 
 ## 빌드
 
-source, `config.m4`, stub `polyspec_template.stub.php`는 `src/`에 있다. 빌드에는 C 컴파일러와, 확장을 로드할 PHP 8.5 이상의 phpize와 php-config가 필요하다.
+source, `config.m4`, stub `polyspec_template.stub.php`는 `src/`에 있다. 빌드에는 C 컴파일러와, 확장을 로드할 PHP 8.4 이상의 phpize와 php-config가 필요하다.
 
 ```sh
 make ext
@@ -85,7 +85,7 @@ php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php form
 ## 테스트
 
 ```sh
-make test-ext
+make template-test-ext
 ```
 
-`make test-ext`는 `make build-php`로 root `vendor/`를 설치하고, 명령줄 인터페이스로 적합성 케이스를 실행하고, `tests/`의 스위트를 `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`으로 PHPUnit에서 실행한다. 이것은 빌드된 라이브러리를 로드하고 각 test를 경과 시간과 함께 출력한다. 단위 테스트의 템플릿은 `tests/templates`에 있다.
+`make template-test-ext`는 `make build-php`로 root `vendor/`를 설치하고, 명령줄 인터페이스로 적합성 케이스를 실행하고, `tests/`의 스위트를 `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`으로 PHPUnit에서 실행한다. 이것은 빌드된 라이브러리를 로드하고 각 test를 경과 시간과 함께 출력한다. 단위 테스트의 템플릿은 `tests/templates`에 있다.

@@ -1,6 +1,6 @@
 # The folder layout of template (S5, S7, S9), checked by make layout-check: the common rules of config/layout.kit.yml, which
 # kit copies, and the map of this repository. The map holds the name of the repository only; each violation of the common
-# rules is a task of docs/plans/execution-checklist.md until the layout follows them.
+# rules is a task of docs/plans/execution/checklist.md until the layout follows them.
 version: 1
 extends:
   - layout.kit.yml
@@ -49,3 +49,21 @@ rules:
       - "!tests/fixtures"
       - "!tests/runner"
       - "!tests/scripts"
+
+  # K244 exception: the VS Code integration suite launches the extension of packages/vscode in VS Code. Its runner is the test
+  # of that package (make template-test-vscode-integration runs tests/integration/run.mjs in packages/vscode, and
+  # tests/scripts/install-vscode.test.mts starts it there), so the suite stays with the package whose extension it tests.
+  - id: suites-at-root
+    kind: dir_absent
+    level: error
+    paths: ["packages/**/integration", "packages/**/conformance", "!packages/vscode/tests/integration"]
+    message: "K244: an integration or conformance suite lives in tests/integration/<runtime> or tests/conformance/<runtime> of the root"
+
+  # K245 exception: packages/python/docs/documentation-manifest.json, of role package, names the AGENTS.md and the CHANGELOG.md
+  # (with their Korean twins) of the package as its development procedure and its history. Those two files stay with the
+  # package until the manifest and K245 agree.
+  - id: management-files-at-root
+    kind: file_absent
+    level: error
+    paths: ["packages/**/AGENTS*.md", "packages/**/CHANGELOG*.md", "packages/**/Makefile", "!packages/python/AGENTS*.md", "!packages/python/CHANGELOG*.md"]
+    message: "K245: AGENTS, CHANGELOG and Makefile lie at the root; a package states its rules and changes there"

@@ -1,8 +1,8 @@
 <!-- doc-id: docs-guide -->
-<!-- source-sha256: 31a2ee23e8b4e31e4961ecfefd031e9927d98bf7a8f0c09109c6fbff118af5c8 -->
+<!-- source-sha256: d74ec936fff1901e0ff1dfa1459596ae54f0bc9ebad005ce2a488d2b56aeaa16 -->
 # 사용법
 
-[English](/guide).
+[English](/operations/guide).
 
 이 문서는 템플릿을 작성하는 방법과 렌더하는 방법을 설명한다. 모든 구현이 따르는 규칙은 [명세](/ko/)에 있다. 이 문서는 페이지를 작성하는 데 필요한 부분을 다룬다. 아래 예제의 출력은 모두 엔진이 실제로 만든 것이다.
 
@@ -298,7 +298,7 @@ tag:  {= not a tag}
 
 [함수 명세](/ko/spec/functions)가 각 함수의 인자와 정확한 결과를 정의한다. `date`는 `env.timezone`의 고정 오프셋을 쓰므로 같은 데이터는 어디서나 같은 출력을 만든다.
 
-`register`는 내장 함수 집합에 함수를 더한다. 그 함수를 쓰는 템플릿은 그 함수가 등록된 곳에서만 렌더되므로, 템플릿을 렌더하는 모든 곳에 같은 이름을 등록한다. 등록한 함수는 자기 언어의 일반 값을 받는다. safe 문자열은 문자열로, list나 map은 함수가 바꿔도 템플릿이 바뀌지 않는 새 list나 map으로, assign한 객체는 원본 객체로 도착한다([VAL-21](spec/data-model.md)). 템플릿에서 assign한 두 객체는 같은 객체일 때만 같다([EXP-39](spec/expressions.md)).
+`register`는 내장 함수 집합에 함수를 더한다. 그 함수를 쓰는 템플릿은 그 함수가 등록된 곳에서만 렌더되므로, 템플릿을 렌더하는 모든 곳에 같은 이름을 등록한다. 등록한 함수는 자기 언어의 일반 값을 받는다. safe 문자열은 문자열로, list나 map은 함수가 바꿔도 템플릿이 바뀌지 않는 새 list나 map으로, assign한 객체는 원본 객체로 도착한다([VAL-21](../spec/data-model.md)). 템플릿에서 assign한 두 객체는 같은 객체일 때만 같다([EXP-39](../spec/expressions.md)).
 
 ## 템플릿 렌더
 
@@ -355,7 +355,7 @@ html = engine.render(
 
 ## 같은 데이터로 여러 번 렌더
 
-같은 데이터로 여러 템플릿을 렌더하는 페이지는 `bind`로 데이터를 한 번 검사하고, 그 bound map을 모든 render에 준다. render는 그것을 다시 검사하지 않는다. `merge`는 한 render의 데이터를 공유 데이터에 더한다. 두 번째 map의 항목이 같은 key를 가진 첫 번째 map의 항목을 바꾼다([VAL-22](spec/data-model.md)). bound map은 assign과 정의 데이터로 받는다. list 안처럼 그 밖의 위치에서는 `E_DATA_UNSUPPORTED_TYPE`으로 실패한다.
+같은 데이터로 여러 템플릿을 렌더하는 페이지는 `bind`로 데이터를 한 번 검사하고, 그 bound map을 모든 render에 준다. render는 그것을 다시 검사하지 않는다. `merge`는 한 render의 데이터를 공유 데이터에 더한다. 두 번째 map의 항목이 같은 key를 가진 첫 번째 map의 항목을 바꾼다([VAL-22](../spec/data-model.md)). bound map은 assign과 정의 데이터로 받는다. list 안처럼 그 밖의 위치에서는 `E_DATA_UNSUPPORTED_TYPE`으로 실패한다.
 
 ```ts
 import { bind, merge } from '@polyspec/template';

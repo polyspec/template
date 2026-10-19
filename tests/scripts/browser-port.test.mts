@@ -20,7 +20,7 @@ function holdPort(): Promise<Server | null> {
   });
 }
 
-// The test runs every browser case; `make test-browser` builds the package before this test runs.
+// The test runs every browser case; `make template-test-browser` builds the package before this test runs.
 test('the browser test runs on its own server while another server holds 127.0.0.1:4173', { timeout: 820_000 }, async () => {
   const foreign = await holdPort();
   try {

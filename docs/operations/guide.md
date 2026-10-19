@@ -1,9 +1,9 @@
 <!-- doc-id: docs-guide -->
 # Usage guide
 
-[한국어](/ko/guide).
+[한국어](/ko/operations/guide).
 
-This guide shows how to write templates and how to render them. The rules that every implementation follows are in the [specification](index.md); this document explains the parts you need to write a page. Every example below is the real output of the engine.
+This guide shows how to write templates and how to render them. The rules that every implementation follows are in the [specification](../index.md); this document explains the parts you need to write a page. Every example below is the real output of the engine.
 
 ## A template
 
@@ -291,9 +291,9 @@ Write `\{` where a real tag would start but you want the text. A file may also c
 | Values | `str` `type` |
 | Time | `date` `now` |
 
-The [function specification](spec/functions.md) gives the arguments and the exact result of each one. `date` uses the fixed offset of `env.timezone`, so the same data gives the same output everywhere.
+The [function specification](../spec/functions.md) gives the arguments and the exact result of each one. `date` uses the fixed offset of `env.timezone`, so the same data gives the same output everywhere.
 
-`register` adds a function to the built-in set. A template that uses one renders only where that function is registered, so register the same names in every place that renders the template. A registered function receives plain values of its language: a safe string arrives as a string, a list or map as a new list or map that the function may change without changing the template, and an assigned object as the original object ([VAL-21](spec/data-model.md)). Two assigned objects are equal in a template only when they are the same object ([EXP-39](spec/expressions.md)).
+`register` adds a function to the built-in set. A template that uses one renders only where that function is registered, so register the same names in every place that renders the template. A registered function receives plain values of its language: a safe string arrives as a string, a list or map as a new list or map that the function may change without changing the template, and an assigned object as the original object ([VAL-21](../spec/data-model.md)). Two assigned objects are equal in a template only when they are the same object ([EXP-39](../spec/expressions.md)).
 
 ## Render a template
 
@@ -350,7 +350,7 @@ The package documents give the full API: [TypeScript](https://github.com/polyspe
 
 ## Render the same data several times
 
-A page that renders several templates with the same data checks the data once with `bind` and gives the bound map to every render, which does not check it again. `merge` adds the data of one render to the shared data: an entry of the second map replaces the entry of the first with the same key ([VAL-22](spec/data-model.md)). A bound map is accepted as assign and as definition data; at every other position, such as inside a list, it fails with `E_DATA_UNSUPPORTED_TYPE`.
+A page that renders several templates with the same data checks the data once with `bind` and gives the bound map to every render, which does not check it again. `merge` adds the data of one render to the shared data: an entry of the second map replaces the entry of the first with the same key ([VAL-22](../spec/data-model.md)). A bound map is accepted as assign and as definition data; at every other position, such as inside a list, it fails with `E_DATA_UNSUPPORTED_TYPE`.
 
 ```ts
 import { bind, merge } from '@polyspec/template';
@@ -386,7 +386,7 @@ The PHP extension provides `Polyspec\Template\Native\BoundMap` with the same ope
 
 ## Render in a browser
 
-The same templates render in a browser from the TypeScript package. The server embeds the assign data as JSON, and the browser reads it and renders the same template name. [Browser rendering](operations/browser.md) describes how to ship templates and data, and how to place a component framework next to the engine.
+The same templates render in a browser from the TypeScript package. The server embeds the assign data as JSON, and the browser reads it and renders the same template name. [Browser rendering](browser.md) describes how to ship templates and data, and how to place a component framework next to the engine.
 
 For React, keep the server rendered shell and mount a client owned island at a marked element. The static `react-boundary` showcase contains the exact templates, assign data, output and host source. Use `hydrateRoot` only when the server HTML came from the same React component tree; otherwise use a separate `createRoot` island.
 
@@ -405,7 +405,7 @@ reports
 ERROR E_PARSE_UNCLOSED_BLOCK line 2 col 1
 ```
 
-The [error specification](spec/errors.md) lists every code. A missing variable is not an error; an unknown function, a wrong type and an unclosed block are.
+The [error specification](../spec/errors.md) lists every code. A missing variable is not an error; an unknown function, a wrong type and an unclosed block are.
 
 ## Keep a template portable
 

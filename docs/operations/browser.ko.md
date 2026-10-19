@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-browser -->
-<!-- source-sha256: fcbad339687376a786e76d9eb9a28e0a995dfbd3468c7406896e8db6f582e090 -->
+<!-- source-sha256: 9bb7149d3f75ff2c584acf446fb7e2aadf00fb07f52ce0adc353fcc88c7faae3 -->
 # 브라우저 렌더링
 
 [English](/operations/browser).
@@ -10,10 +10,10 @@ TypeScript 패키지는 서버에서 실행되는 것과 같은 엔진으로 브
 
 ```sh
 node node_modules/@playwright/test/cli.js install chromium
-make test-browser
+make template-test-browser
 ```
 
-`make test-browser`는 패키지를 빌드하고 `tests/browser/run.mts`를 실행한다. 이 script는 `tests/browser/server.mts`로 정적 서버를 시간 제한 없는 단계로 띄운다. 서버는 system이 배정하는 `127.0.0.1`의 port에서 listen하므로, 어느 checkout에서든 동시에 도는 실행이 서버를 공유하지 않는다. 단계는 시작, `[server]`를 붙인 서버 출력, 경과 시간이 붙은 결과를 출력하고, 서버가 `listening on http://127.0.0.1:<port>`를 출력하면 끝나며, 서버가 먼저 종료하면 실패한다. Playwright는 그 주소를 `playwright.config.ts`가 요구하는 `TEMPLATE_BROWSER_URL`로 받고, 그 뒤 Chromium에서 `tests/browser/index.html`을 열어 모든 케이스의 렌더 출력을 `expected.html` 또는 `expected.error.json`과 비교한다. 입력이 원시 바이트에 의존하는 케이스(잘못된 UTF-8, 바이트 순서 표식)는 명령줄 스위트가 다루며 브라우저에서는 건너뛴다.
+`make template-test-browser`는 패키지를 빌드하고 `tests/browser/run.mts`를 실행한다. 이 script는 `tests/browser/server.mts`로 정적 서버를 시간 제한 없는 단계로 띄운다. 서버는 system이 배정하는 `127.0.0.1`의 port에서 listen하므로, 어느 checkout에서든 동시에 도는 실행이 서버를 공유하지 않는다. 단계는 시작, `[server]`를 붙인 서버 출력, 경과 시간이 붙은 결과를 출력하고, 서버가 `listening on http://127.0.0.1:<port>`를 출력하면 끝나며, 서버가 먼저 종료하면 실패한다. Playwright는 그 주소를 `playwright.config.ts`가 요구하는 `TEMPLATE_BROWSER_URL`로 받고, 그 뒤 Chromium에서 `tests/browser/index.html`을 열어 모든 케이스의 렌더 출력을 `expected.html` 또는 `expected.error.json`과 비교한다. 입력이 원시 바이트에 의존하는 케이스(잘못된 UTF-8, 바이트 순서 표식)는 명령줄 스위트가 다루며 브라우저에서는 건너뛴다.
 
 ## 브라우저에 템플릿과 데이터 전달
 

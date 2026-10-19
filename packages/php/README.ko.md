@@ -1,10 +1,10 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: 8468681e5a4afdc13ccc7672ba854dd601addf128aa6e8406da2642f1da774dd -->
+<!-- source-sha256: 999e9e4f4bed9bc166db781e0536a29493f53619a30d4301f40e8205fd9d771c -->
 # polyspec/template
 
 [English](README.md).
 
-템플릿 언어의 PHP 구현: 렉서, 파서, 렌더러, 내장 함수, 명령줄 인터페이스. `mbstring` 확장을 가진 PHP 8.5 이상이 필요하다.
+템플릿 언어의 PHP 구현: 렉서, 파서, 렌더러, 내장 함수, 명령줄 인터페이스. `mbstring` 확장을 가진 PHP 8.4 이상이 필요하다.
 
 ## 설치
 
@@ -82,7 +82,7 @@ vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```sh
 make build-php
 make test-php
-make lint-php-format
+make template-lint-php-format
 ```
 
 패키지는 자기 lock을 갖지 않는다. 저장소에서는 root에서 실행한 `composer install`이 root `composer.json`의 `path` repository로 이 패키지와 그 의존성을 root `vendor/`에 설치하고, `make test-php`는 그 directory의 `vendor/bin/phpunit`을 패키지의 `phpunit.xml`로 실행한다.

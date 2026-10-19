@@ -38,16 +38,16 @@ One language service holds every editor rule, and each editor reaches it through
 | `@polyspec/template-codemirror` | the CodeMirror 6 extension `template()` |
 | `polyspec-template` | the VS Code extension, a client of the bundled language server |
 
-`make vscode-install` installs the VS Code extension, and `make install-cli` installs `template-fmt` as a script under `CLI_PREFIX` (`~/.local/bin`).
+`make vscode-install` installs the VS Code extension, and `make template-install-cli` installs `template-fmt` as a script under `CLI_PREFIX` (`~/.local/bin`).
 
 ## Documents
 
-- [Usage guide](docs/guide.md) shows how to write a template and how to render it.
+- [Usage guide](docs/operations/guide.md) shows how to write a template and how to render it.
 - [Specification](docs/spec/) defines the lexical rules, the grammar, the expression language, the data model, the functions, the runtime, the typed compiler, the AST, the errors and editor support.
 - [Feature status](docs/features.md) records implementation, verification and deployment per feature.
 - [Executable example site](examples/site/index.html) renders page scenarios and shows parity, repeatability and throughput artifacts.
 - [Operations](docs/operations/) describes development, conformance, release testing, dependency, documentation and publication procedures.
 - [Formatter, language server and editors](docs/operations/editor-tools.md) describes how to build, install and verify the formatter, the language server, the CodeMirror 6 adapter and the VS Code extension.
-- [Execution plan](docs/plans/execution-plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence.
-- [Execution checklist](docs/plans/execution-checklist.md) lists the tasks, their verification and their states.
+- [Execution plan](docs/plans/execution/plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence.
+- [Execution checklist](docs/plans/execution/checklist.md) lists the tasks, their verification and their states.
 - [Changelog](CHANGELOG.md) records actual changes and their verification.

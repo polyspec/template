@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.1: the repository follows the kit standard 0.0.54. The execution checklist moves to `docs/plans/execution/` as one table, the usage guide to `docs/operations/`, the VS Code integration suite and the Python package's AGENTS and CHANGELOG keep their place by the exceptions of `config/layout.yml`, `check` is the name of the suite target, `install` runs kit's bootstrap first, and the gates of kit run in CI through the vendored `gates.yml` (T26.1).
+
 - T22.6-19-1: the expression vectors of the PHP extension evaluate each expression as the value of an assignment, `{:value = <expr>}{= json(value) | raw}`, at the depth of the other bindings, instead of as an argument of `json`, which added two levels; the depth vectors `depth-limit-parentheses` and `depth-limit-unary` hold their evaluation again in every implementation.
 
 - T22.6-19: the runtime specification names the keys of `limits` (RT-33), which TypeScript, PHP, the PHP extension and Python take as written and Go and Rust spell as fields of `Limits`; states how an omitted limit keeps its default in each language (RT-6); writes `program.register` (RT-1); and states the unit of the expression depth (RT-34), which four new expression vectors pin at 31 nested parentheses and 62 prefix operators in every implementation. No behavior changes.

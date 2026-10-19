@@ -7,7 +7,7 @@ PHP extension that renders templates with an independent implementation in C. It
 
 ## Build
 
-The sources, `config.m4` and the stub `polyspec_template.stub.php` are in `src/`. The build needs a C compiler and phpize and php-config of the PHP that will load the extension, PHP 8.5 or later.
+The sources, `config.m4` and the stub `polyspec_template.stub.php` are in `src/`. The build needs a C compiler and phpize and php-config of the PHP that will load the extension, PHP 8.4 or later.
 
 ```sh
 make ext
@@ -84,7 +84,7 @@ The package is the C extension only: Composer installs no package of the type `p
 ## Test
 
 ```sh
-make test-ext
+make template-test-ext
 ```
 
-`make test-ext` installs the root `vendor/` with `make build-php`, runs the conformance cases through the command line interface and the suite in `tests/` with PHPUnit through `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. The templates of the unit tests are in `tests/templates`.
+`make template-test-ext` installs the root `vendor/` with `make build-php`, runs the conformance cases through the command line interface and the suite in `tests/` with PHPUnit through `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. The templates of the unit tests are in `tests/templates`.

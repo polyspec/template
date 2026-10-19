@@ -334,10 +334,10 @@ test('only the CI jobs that run the VS Code integration test install VS Code, be
   assert.doesNotMatch(install.stdout, /install-vscode/, 'make install downloads VS Code for every job');
   for (const job of jobs('.github/workflows/ci.yml')) {
     const steps = runsOf(job);
-    const runs = steps.findIndex(step => /\bmake\b/.test(step) && reached(makeTargets(step)).has('test-vscode-integration'));
-    const installs = steps.indexOf('make install-vscode');
+    const runs = steps.findIndex(step => /\bmake\b/.test(step) && reached(makeTargets(step)).has('template-test-vscode-integration'));
+    const installs = steps.indexOf('make template-install-vscode');
     if (runs === -1) assert.equal(installs, -1, `ci.yml job ${job.name} installs VS Code and runs no VS Code integration test`);
-    else assert.ok(installs !== -1 && installs < runs, `ci.yml job ${job.name} runs the VS Code integration test without make install-vscode before it`);
+    else assert.ok(installs !== -1 && installs < runs, `ci.yml job ${job.name} runs the VS Code integration test without make template-install-vscode before it`);
   }
 });
 
@@ -355,7 +355,7 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'install-vscode', 'install-browsers']);
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'template-install-vscode', 'template-install-browsers']);
   const REPORTS: Record<string, string> = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {

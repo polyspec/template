@@ -392,7 +392,7 @@ class ValuesAndErrors(unittest.TestCase):
         self.assertEqual(ast["body"][1]["span"], (2, 7))
 
     def test_error_positions_are_bytes(self):
-        # 한 is three bytes, so the error at the string start reports a byte offset.
+        # The Hangul syllable in the string is three bytes, so the error at the string start reports a byte offset.
         with self.assertRaises(TE) as caught:
             parse('{= "한', "k.tpl")
         error = caught.exception.to_object()

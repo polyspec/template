@@ -14,7 +14,7 @@ import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 
 // The commands that make prints for `target` without running them. A make started by another make, as `make check`
-// starts `make test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
+// starts `make template-test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
 // print them, and --no-print-directory removes them, so the lines are the commands on every make.
 function dryRun(target: string) {
   const run = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
@@ -31,7 +31,7 @@ test('make release-test-matrix runs the targets of make check through the same g
 });
 
 test('the full suite holds the release targets that make check did not run', () => {
-  for (const target of ['dependency-audit', 'benchmark-check', 'benchmark-smoke', 'docs-verify-idempotent', 'docs-static-check', 'test-ext']) {
+  for (const target of ['dependency-audit', 'benchmark-check', 'benchmark-smoke', 'docs-verify-idempotent', 'docs-static-check', 'template-test-ext']) {
     assert.ok(CHECK_TARGETS.includes(target), `CHECK_TARGETS does not hold ${target}`);
   }
 });
@@ -77,9 +77,9 @@ test('the rule of the CI suite names a missing, a repeated and an extra target a
 });
 
 // The targets that open a browser: their job installs the browsers in a step before the step that runs them.
-export const BROWSER_TARGETS = ['test-browser', 'test-scripts', 'test-codemirror'];
+export const BROWSER_TARGETS = ['template-test-browser', 'template-test-scripts', 'template-test-codemirror'];
 
-// Each job of the workflow text that runs a target of BROWSER_TARGETS without a `make install-browsers` step before it.
+// Each job of the workflow text that runs a target of BROWSER_TARGETS without a `make template-install-browsers` step before it.
 export function browserSetupViolations(text: string) {
   const found: string[] = [];
   for (const job of jobsOf(text)) {
@@ -89,7 +89,7 @@ export function browserSetupViolations(text: string) {
       if (/\bmake (?:-\S+ )*install-browsers\b/.test(step.run)) installed = true;
       for (const match of step.run.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
         for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/).filter(target => BROWSER_TARGETS.includes(target))) {
-          if (!installed) found.push(`job ${job.name} runs ${target} without make install-browsers before it`);
+          if (!installed) found.push(`job ${job.name} runs ${target} without make template-install-browsers before it`);
         }
       }
     }
@@ -100,9 +100,9 @@ export function browserSetupViolations(text: string) {
 test('a job that runs a browser target installs the browsers before it', () => {
   assert.deepEqual(browserSetupViolations(read('.github/workflows/ci.yml')), []);
   const workflow = (runs: string[]) => `name: CI\njobs:\n  one:\n    runs-on: ubuntu-24.04\n    steps:\n${runs.map(run => `      - run: ${run}\n`).join('')}`;
-  assert.deepEqual(browserSetupViolations(workflow(['make install-browsers', 'make ci-targets TARGETS="test-scripts lint-go"'])), []);
-  assert.deepEqual(browserSetupViolations(workflow(['make ci-targets TARGETS="test-scripts"', 'make install-browsers'])), [
-    'job one runs test-scripts without make install-browsers before it',
+  assert.deepEqual(browserSetupViolations(workflow(['make template-install-browsers', 'make ci-targets TARGETS="template-test-scripts lint-go"'])), []);
+  assert.deepEqual(browserSetupViolations(workflow(['make ci-targets TARGETS="template-test-scripts"', 'make template-install-browsers'])), [
+    'job one runs test-scripts without make template-install-browsers before it',
   ]);
 });
 

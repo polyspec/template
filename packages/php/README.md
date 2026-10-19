@@ -3,7 +3,7 @@
 
 [한국어](README.ko.md).
 
-PHP implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. PHP 8.5 or later with the `mbstring` extension is required.
+PHP implementation of the template language: lexer, parser, renderer, built-in functions and a command line interface. PHP 8.4 or later with the `mbstring` extension is required.
 
 ## Install
 
@@ -81,7 +81,7 @@ The command is a Symfony Console application (`Polyspec\Template\Cli\CommandLine
 ```sh
 make build-php
 make test-php
-make lint-php-format
+make template-lint-php-format
 ```
 
 The package has no lock of its own: in the repository, `composer install` at the root installs it with its dependencies into the root `vendor/` through the `path` repository of the root `composer.json`, and `make test-php` runs `vendor/bin/phpunit` of that directory with `phpunit.xml` of the package.

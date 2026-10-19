@@ -1,5 +1,5 @@
 <!-- doc-id: readme -->
-<!-- source-sha256: 11ea6e70ab5d7cbfdd263f1a8ae8e8d8a29214816e1802d778c942d0352ca8d0 -->
+<!-- source-sha256: 253e1c98a522d2b96e90a698969a3f48125fa302a80f266ea7c0133861cc2ad5 -->
 # Template
 
 [English](README.md).
@@ -39,16 +39,16 @@ make showcase
 | `@polyspec/template-codemirror` | CodeMirror 6 확장 `template()` |
 | `polyspec-template` | 언어 서버 `template-lsp`를 확장 안에 포함하고, 그 서버에 연결해 기능을 제공하는 VS Code 확장 |
 
-`make vscode-install`은 VS Code 확장을 설치하고, `make install-cli`는 `template-fmt`를 `CLI_PREFIX` 아래의 script(`~/.local/bin`)로 설치한다.
+`make vscode-install`은 VS Code 확장을 설치하고, `make template-install-cli`는 `template-fmt`를 `CLI_PREFIX` 아래의 script(`~/.local/bin`)로 설치한다.
 
 ## 문서
 
-- [사용법](docs/guide.ko.md)은 템플릿 작성 방법과 렌더 방법을 설명한다.
+- [사용법](docs/operations/guide.ko.md)은 템플릿 작성 방법과 렌더 방법을 설명한다.
 - [명세](docs/spec/)는 렉시컬 규칙, 문법, 표현식 언어, 데이터 모델, 함수, 런타임, 타입 고정 컴파일러, AST, 오류, 에디터 지원을 정의한다.
 - [기능 상태](docs/features.ko.md)는 기능별 구현, 검증, 배포를 기록한다.
 - [실행 가능한 예제 사이트](examples/site/index.html)는 페이지 시나리오를 렌더하고 일치성, 반복 렌더, 처리량 결과물을 보여준다.
 - [운영](docs/operations/)은 개발, 적합성, 릴리스 테스트, 의존성, 문서, 발행 절차를 설명한다.
 - [포매터, 언어 서버, 에디터](docs/operations/editor-tools.ko.md)는 포매터, 언어 서버, CodeMirror 6 어댑터, VS Code 확장의 빌드, 설치, 검증 방법을 설명한다.
-- [실행 계획](docs/plans/execution-plan.ko.md)은 웨이브, 그 의존 관계와 원인, 완료 기준, 완료 정의와 그 증거를 적는다.
-- [실행 체크리스트](docs/plans/execution-checklist.ko.md)는 작업, 검증 방법, 상태를 나열한다.
+- [실행 계획](docs/plans/execution/plan.ko.md)은 웨이브, 그 의존 관계와 원인, 완료 기준, 완료 정의와 그 증거를 적는다.
+- [실행 체크리스트](docs/plans/execution/checklist.ko.md)는 작업, 검증 방법, 상태를 나열한다.
 - [변경 기록](CHANGELOG.ko.md)은 실제 변경과 검증을 기록한다.

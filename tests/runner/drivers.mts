@@ -53,9 +53,9 @@ export type Language = 'ts' | 'go' | 'rust' | 'php' | 'python' | 'php-ext';
 export const drivers: Record<Language, Driver> = {
   ts: {
     dir: join(packages, 'ts'),
-    // make build-language builds the template package first and then the formatter package.
+    // make template-build-language builds the template package first and then the formatter package.
     build() {
-      build('ts', 'make', ['build-language'], root);
+      build('ts', 'make', ['template-build-language'], root);
     },
     // The formatter of TypeScript is the package packages/language, which depends on the template package, so its
     // command template-language runs `format` and the command template runs the other subcommands (CNF-5).

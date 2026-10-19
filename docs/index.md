@@ -3,7 +3,7 @@
 
 [한국어](/ko/).
 
-[Usage guide](guide.md) shows how to write and render a template.
+[Usage guide](operations/guide.md) shows how to write and render a template.
 
 ## Specification
 
@@ -23,7 +23,7 @@
 | [`spec/editor.md`](spec/editor.md) | Language service, LSP server and editor adapters |
 | [`spec/formatting.md`](spec/formatting.md) | Tokens, formatting style, indentation and the safety invariant of the formatter |
 
-The [execution plan](plans/execution-plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence. The [execution checklist](plans/execution-checklist.md) lists the tasks, their verification and their states.
+The [execution plan](plans/execution/plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence. The [execution checklist](plans/execution/checklist.md) lists the tasks, their verification and their states.
 
 ## Status and procedures
 

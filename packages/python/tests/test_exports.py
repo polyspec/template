@@ -19,8 +19,8 @@ ROOT = Path(__file__).resolve().parents[3]
 DOCUMENTS = [
     "README.md",
     "README.ko.md",
-    "docs/guide.md",
-    "docs/guide.ko.md",
+    "docs/operations/guide.md",
+    "docs/operations/guide.ko.md",
     "packages/python/README.md",
     "packages/python/README.ko.md",
 ]

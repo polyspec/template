@@ -101,7 +101,7 @@
         "test-go",
         "test-rust",
         "test-php",
-        "test-ext",
+        "template-test-ext",
         "generated-native-check"
       ]
     },
@@ -152,7 +152,7 @@
         "tests/browser/playwright.config.ts"
       ],
       "targets": [
-        "test-browser"
+        "template-test-browser"
       ],
       "tests": [
         "tests/scripts/browser-port.test.mts",
@@ -165,7 +165,7 @@
       ],
       "targets": [
         "conformance",
-        "test-language",
+        "template-test-language",
         "test-ts"
       ]
     },
@@ -183,7 +183,7 @@
         "conformance-generated-ts",
         "conformance-python",
         "delimiter-matrix",
-        "test-ext"
+        "template-test-ext"
       ],
       "tests": [
         "tests/scripts/process-group-callers.test.mts",
@@ -279,7 +279,7 @@
       "targets": [
         "conformance-generated-ts",
         "conformance-generated-php",
-        "test-vscode-integration"
+        "template-test-vscode-integration"
       ],
       "tests": [
         "tests/scripts/process-group.test.mts",
@@ -312,7 +312,7 @@
         "scripts/build-php-extension.mts"
       ],
       "targets": [
-        "test-ext"
+        "template-test-ext"
       ],
       "tests": [
         "tests/scripts/build-php-extension.test.mts"
@@ -332,7 +332,7 @@
         "packages/vscode/tests/integration/run.mjs"
       ],
       "targets": [
-        "test-vscode-integration"
+        "template-test-vscode-integration"
       ],
       "tests": [
         "tests/scripts/install-vscode.test.mts",
@@ -345,7 +345,7 @@
       ],
       "targets": [
         "test-php",
-        "test-ext"
+        "template-test-ext"
       ]
     },
     {
@@ -354,7 +354,7 @@
       ],
       "targets": [
         "test-php",
-        "test-ext"
+        "template-test-ext"
       ],
       "tests": [
         "tests/scripts/test-targets.test.mts",
@@ -371,7 +371,7 @@
         "conformance",
         "conformance-python",
         "delimiter-matrix",
-        "test-ext"
+        "template-test-ext"
       ],
       "tests": [
         "tests/scripts/publish-build.test.mts",
@@ -458,8 +458,8 @@
         "showcase-check",
         "benchmark-check",
         "benchmark-smoke",
-        "lint-showcase-format",
-        "lint-showcase-warnings",
+        "template-lint-showcase-format",
+        "template-lint-showcase-warnings",
         "lint-go",
         "lint-rust"
       ]
@@ -508,7 +508,7 @@
       "targets": [
         "generated-native-check",
         "typed-generator-compile-check",
-        "install-check"
+        "template-install-check"
       ],
       "tests": [
         "tests/scripts/failure-accumulation.test.mts"
@@ -534,9 +534,9 @@
       ],
       "targets": [
         "editor-boundary-check",
-        "test-language",
-        "test-lsp",
-        "test-codemirror"
+        "template-test-language",
+        "template-test-lsp",
+        "template-test-codemirror"
       ]
     },
     {
@@ -546,7 +546,7 @@
         "scripts/check-package-installs.mts"
       ],
       "targets": [
-        "install-check"
+        "template-install-check"
       ],
       "tests": [
         "tests/scripts/failure-messages.test.mts",
@@ -578,7 +578,7 @@
         "packages/compiler/backends/go/**"
       ],
       "targets": [
-        "lint-go-format",
+        "template-lint-go-format",
         "test-go"
       ]
     },
@@ -601,7 +601,7 @@
         "showcase-check",
         "typed-generator-compile-check",
         "lint-ts",
-        "test-compiler-types",
+        "template-test-compiler-types",
         "typecheck"
       ]
     },
@@ -616,12 +616,12 @@
         "conformance",
         "conformance-generated-ts",
         "delimiter-matrix",
-        "install-check",
-        "test-language",
-        "test-lsp",
-        "test-codemirror",
-        "test-vscode",
-        "test-browser",
+        "template-install-check",
+        "template-test-language",
+        "template-test-lsp",
+        "template-test-codemirror",
+        "template-test-vscode",
+        "template-test-browser",
         "parity-check"
       ],
       "tests": [
@@ -633,12 +633,12 @@
         "packages/language/**"
       ],
       "targets": [
-        "test-language",
+        "template-test-language",
         "format-check",
         "lint-ts",
-        "test-lsp",
-        "test-codemirror",
-        "test-vscode"
+        "template-test-lsp",
+        "template-test-codemirror",
+        "template-test-vscode"
       ]
     },
     {
@@ -646,10 +646,10 @@
         "packages/lsp/**"
       ],
       "targets": [
-        "test-lsp",
+        "template-test-lsp",
         "lint-ts",
-        "test-vscode",
-        "test-vscode-integration"
+        "template-test-vscode",
+        "template-test-vscode-integration"
       ]
     },
     {
@@ -657,7 +657,7 @@
         "packages/codemirror/**"
       ],
       "targets": [
-        "test-codemirror",
+        "template-test-codemirror",
         "lint-ts"
       ]
     },
@@ -666,9 +666,9 @@
         "packages/vscode/**"
       ],
       "targets": [
-        "test-vscode",
+        "template-test-vscode",
         "lint-ts",
-        "test-vscode-integration"
+        "template-test-vscode-integration"
       ]
     },
     {
@@ -678,11 +678,11 @@
       "targets": [
         "test-go",
         "lint-go",
-        "lint-go-format",
+        "template-lint-go-format",
         "conformance",
         "conformance-generated-go",
         "delimiter-matrix",
-        "install-check",
+        "template-install-check",
         "parity-check"
       ]
     },
@@ -693,11 +693,11 @@
       "targets": [
         "test-rust",
         "lint-rust",
-        "lint-rust-format",
+        "template-lint-rust-format",
         "conformance",
         "conformance-generated-rust",
         "delimiter-matrix",
-        "install-check",
+        "template-install-check",
         "parity-check"
       ]
     },
@@ -708,11 +708,11 @@
       "targets": [
         "test-php",
         "lint-php",
-        "lint-php-format",
+        "template-lint-php-format",
         "conformance",
         "conformance-generated-php",
         "delimiter-matrix",
-        "install-check",
+        "template-install-check",
         "parity-check"
       ]
     },
@@ -729,7 +729,7 @@
         "delimiter-matrix",
         "generated-native-check",
         "typed-generator-compile-check",
-        "install-check",
+        "template-install-check",
         "contract-check",
         "parity-check"
       ]
@@ -739,7 +739,7 @@
         "packages/php-ext/**"
       ],
       "targets": [
-        "test-ext",
+        "template-test-ext",
         "lint-php",
         "parity-check"
       ],
@@ -770,7 +770,7 @@
       "targets": [
         "generated-native-check",
         "typed-generator-compile-check",
-        "install-check",
+        "template-install-check",
         "contract-check"
       ],
       "tests": [
@@ -783,7 +783,7 @@
         "packages/python/build-requirements.json"
       ],
       "targets": [
-        "install-check"
+        "template-install-check"
       ],
       "tests": [
         "tests/scripts/python-wheelhouse.test.mts"
@@ -859,15 +859,7 @@
         "config/documents.json"
       ],
       "targets": [
-        "documents-check"
-      ]
-    },
-    {
-      "paths": [
-        "config/commits.json"
-      ],
-      "targets": [
-        "commits-check"
+        "docs-check"
       ]
     },
     {
@@ -993,7 +985,7 @@
   ],
   "inputs": [
     {
-      "check": "make documents-check",
+      "check": "make docs-check",
       "paths": [
         "docs/**",
         "*.md",
@@ -1152,7 +1144,7 @@
       ]
     },
     {
-      "check": "make lint-go-format",
+      "check": "make template-lint-go-format",
       "paths": [
         "packages/go/**",
         "packages/compiler/backends/go/**"
@@ -1167,7 +1159,7 @@
       ]
     },
     {
-      "check": "make lint-rust-format",
+      "check": "make template-lint-rust-format",
       "paths": [
         "packages/rust/**"
       ]
@@ -1180,19 +1172,19 @@
       ]
     },
     {
-      "check": "make lint-showcase-format",
+      "check": "make template-lint-showcase-format",
       "paths": [
         "examples/showcase/adapters/rust/**"
       ]
     },
     {
-      "check": "make lint-showcase-warnings",
+      "check": "make template-lint-showcase-warnings",
       "paths": [
         "examples/showcase/adapters/rust/**"
       ]
     },
     {
-      "check": "make lint-php-format",
+      "check": "make template-lint-php-format",
       "paths": [
         "packages/php/**"
       ]
@@ -1208,7 +1200,7 @@
       ]
     },
     {
-      "check": "make test-ts-unit",
+      "check": "make template-test-ts-unit",
       "paths": [
         "packages/ts/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
@@ -1217,19 +1209,19 @@
       ]
     },
     {
-      "check": "make test-ts-types",
+      "check": "make template-test-ts-types",
       "paths": [
         "packages/ts/**"
       ]
     },
     {
-      "check": "make test-ts-types-node",
+      "check": "make template-test-ts-types-node",
       "paths": [
         "packages/ts/**"
       ]
     },
     {
-      "check": "make test-language-unit",
+      "check": "make template-test-language-unit",
       "paths": [
         "packages/language/**",
         "packages/ts/src/**",
@@ -1237,7 +1229,7 @@
       ]
     },
     {
-      "check": "make test-language-types",
+      "check": "make template-test-language-types",
       "paths": [
         "packages/language/**"
       ]
@@ -1249,7 +1241,7 @@
       ]
     },
     {
-      "check": "make test-lsp-unit",
+      "check": "make template-test-lsp-unit",
       "paths": [
         "packages/lsp/**",
         "packages/language/src/**",
@@ -1258,13 +1250,13 @@
       ]
     },
     {
-      "check": "make test-lsp-types",
+      "check": "make template-test-lsp-types",
       "paths": [
         "packages/lsp/**"
       ]
     },
     {
-      "check": "make test-codemirror-unit",
+      "check": "make template-test-codemirror-unit",
       "paths": [
         "packages/codemirror/**",
         "packages/language/src/**",
@@ -1272,45 +1264,45 @@
       ]
     },
     {
-      "check": "make test-codemirror-browser",
+      "check": "make template-test-codemirror-browser",
       "paths": [
         "packages/codemirror/**"
       ]
     },
     {
-      "check": "make test-codemirror-types",
+      "check": "make template-test-codemirror-types",
       "paths": [
         "packages/codemirror/**"
       ]
     },
     {
-      "check": "make test-vscode-unit",
+      "check": "make template-test-vscode-unit",
       "paths": [
         "packages/vscode/**",
         "packages/lsp/src/**"
       ]
     },
     {
-      "check": "make test-vscode-types",
+      "check": "make template-test-vscode-types",
       "paths": [
         "packages/vscode/**"
       ]
     },
     {
-      "check": "make test-vscode-integration",
+      "check": "make template-test-vscode-integration",
       "paths": [
         "packages/vscode/**",
         "packages/lsp/src/**"
       ]
     },
     {
-      "check": "make test-go-vet",
+      "check": "make template-test-go-vet",
       "paths": [
         "packages/go/**"
       ]
     },
     {
-      "check": "make test-go-backend-vet",
+      "check": "make template-test-go-backend-vet",
       "paths": [
         "packages/compiler/backends/go/**",
         "packages/go/**",
@@ -1319,7 +1311,7 @@
       ]
     },
     {
-      "check": "make test-go-unit",
+      "check": "make template-test-go-unit",
       "paths": [
         "packages/go/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
@@ -1328,13 +1320,13 @@
       ]
     },
     {
-      "check": "make test-rust-clippy",
+      "check": "make template-test-rust-clippy",
       "paths": [
         "packages/rust/**"
       ]
     },
     {
-      "check": "make test-rust-unit",
+      "check": "make template-test-rust-unit",
       "paths": [
         "packages/rust/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
@@ -1467,7 +1459,7 @@
       ]
     },
     {
-      "check": "make test-ext-conformance",
+      "check": "make template-test-ext-conformance",
       "paths": [
         "packages/php-ext/**",
         "scripts/build-php-extension.mts",
@@ -1475,7 +1467,7 @@
       ]
     },
     {
-      "check": "make test-ext-unit",
+      "check": "make template-test-ext-unit",
       "paths": [
         "packages/php-ext/**",
         "scripts/build-php-extension.mts"
@@ -1528,7 +1520,7 @@
       ]
     },
     {
-      "check": "make install-workspace-check",
+      "check": "make template-install-workspace-check",
       "paths": [
         "scripts/check-install-workspace.mts",
         "scripts/install-workspace.mts"
@@ -1549,7 +1541,7 @@
       ]
     },
     {
-      "check": "make test-browser",
+      "check": "make template-test-browser",
       "paths": [
         "tests/browser/**",
         "tests/browser/playwright.config.ts",

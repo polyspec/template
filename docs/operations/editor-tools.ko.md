@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: 07f12ce038d0bbfbbf511db076ca7f5cafd600fce71bf706de331ad788619c60 -->
+<!-- source-sha256: 2dc88252422bacbbe706c9e984a090be4ed138488c5d0f564edd275f4488de47 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -35,7 +35,7 @@
 ## 명령줄
 
 ```sh
-make install-cli
+make template-install-cli
 template-fmt --help
 template-fmt page.tpl
 template-fmt --check templates
@@ -63,12 +63,12 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|none]
 | 1 | `--check`가 포맷되지 않은 파일을 찾았다 |
 | 2 | 파싱되지 않는 파일, 다른 AST, 짝이 맞지 않는 HTML 구조, 읽을 수 없는 경로 또는 잘못된 인자가 있다 |
 
-`make install-cli`는 명령 `template-fmt`를 symbolic link 없이 prefix `CLI_PREFIX`(기본값 `~/.local`) 아래에 설치한다. `scripts/install-cli.mts`는 build된 formatter package와 이 checkout의 template package의 사본을 bin link 없이 설치하는 npm project `<prefix>/lib/polyspec-template-fmt`와, 복사된 formatter package의 진입점을 절대 경로로 `node`에 넘겨 실행하는 실행 script `<prefix>/bin/template-fmt`를 쓴다. 설치는 `<prefix>/lib/.polyspec-template-fmt.next-<pid>`에서 준비되어 rename으로 project를 대체하고, script는 임시 파일과 rename으로 쓰이므로, 실패한 설치는 이전 설치를 그대로 둔다. `<prefix>/bin`을 `PATH`에 둔다. `make build-language` 뒤에 다시 실행해 바뀐 build를 설치하며, `make uninstall-cli`는 project와 script를 지운다.
+`make template-install-cli`는 명령 `template-fmt`를 symbolic link 없이 prefix `CLI_PREFIX`(기본값 `~/.local`) 아래에 설치한다. `scripts/install-cli.mts`는 build된 formatter package와 이 checkout의 template package의 사본을 bin link 없이 설치하는 npm project `<prefix>/lib/polyspec-template-fmt`와, 복사된 formatter package의 진입점을 절대 경로로 `node`에 넘겨 실행하는 실행 script `<prefix>/bin/template-fmt`를 쓴다. 설치는 `<prefix>/lib/.polyspec-template-fmt.next-<pid>`에서 준비되어 rename으로 project를 대체하고, script는 임시 파일과 rename으로 쓰이므로, 실패한 설치는 이전 설치를 그대로 둔다. `<prefix>/bin`을 `PATH`에 둔다. `make template-build-language` 뒤에 다시 실행해 바뀐 build를 설치하며, `make uninstall-cli`는 project와 script를 지운다.
 
 ## 언어 서버
 
 ```sh
-make build-lsp
+make template-build-lsp
 node packages/lsp/bin/template-lsp.mjs --stdio
 ```
 
@@ -181,23 +181,23 @@ Shift+Alt+F는 키맵 항목 `Shift-Alt-f`가 아니라 물리 키 F(`KeyboardEv
 ## 검증
 
 ```sh
-make test-language
-make test-lsp
+make template-test-language
+make template-test-lsp
 make format-check
-make test-codemirror
-make test-vscode
-make test-vscode-integration
+make template-test-codemirror
+make template-test-vscode
+make template-test-vscode-integration
 make format-external-check TEMPLATE_SOURCE_ROOT=/path/to/templates
 ```
 
-`make test-lsp`는 빌드한 명령 `template-lsp`를 자식 프로세스로 실행하고, `vscode-jsonrpc`로 표준 입력과 출력을 통해 프로토콜을 주고받으며, 모든 에디터 픽스처(EDT-17)에 대해 게시된 진단, 디코딩한 시맨틱 토큰, 태그 범위, 접기 범위, 픽스처 위치에서의 강조와 짝 태그, 두 `templateBlocks` 방식에서 모든 줄의 타이핑 들여쓰기, 포맷한 텍스트를 기대 결과와 비교한다. 또한 바이트 순서 표시, CRLF 줄 끝, 기본 다국어 평면 밖의 문자가 있는 텍스트를 언어 서비스와 비교하고, 선언한 기능, `multilineTokenSupport`가 없는 클라이언트에 대한 여러 줄 토큰의 분할, 설정 요청, 포맷 오류, 범위 포맷, 편집이 없는 타이핑 포맷을 검사한다.
+`make template-test-lsp`는 빌드한 명령 `template-lsp`를 자식 프로세스로 실행하고, `vscode-jsonrpc`로 표준 입력과 출력을 통해 프로토콜을 주고받으며, 모든 에디터 픽스처(EDT-17)에 대해 게시된 진단, 디코딩한 시맨틱 토큰, 태그 범위, 접기 범위, 픽스처 위치에서의 강조와 짝 태그, 두 `templateBlocks` 방식에서 모든 줄의 타이핑 들여쓰기, 포맷한 텍스트를 기대 결과와 비교한다. 또한 바이트 순서 표시, CRLF 줄 끝, 기본 다국어 평면 밖의 문자가 있는 텍스트를 언어 서비스와 비교하고, 선언한 기능, `multilineTokenSupport`가 없는 클라이언트에 대한 여러 줄 토큰의 분할, 설정 요청, 포맷 오류, 범위 포맷, 편집이 없는 타이핑 포맷을 검사한다.
 
-`make test-vscode`는 매니페스트를 테스트하고, 문법이 `text.html.basic`만 포함하는지, `dist/extension.cjs`가 `vscode`와 Node.js 내장 모듈만, `dist/server.cjs`가 Node.js 내장 모듈만 불러오는지, `.vsix`가 둘 다 담는지, 매니페스트가 서버 legend의 토큰 종류 가운데 VS Code가 정의하지 않은 것을 모두 제공하는지, 번들한 서버가 표준 입력과 출력으로 진단을 게시하고 `polyspec-template/tagRanges`, `polyspec-template/matchingTag`, 타이핑 포맷에 응답하는지 검사한다. 언어 클라이언트는 VS Code 안에서만 실행되므로 통합 테스트가 이를 검사한다. `make test-vscode-integration`은 `.vsix`를 빌드하고, `make install` 뒤에 `make install-vscode`가 kit의 VS Code installer(`@polyspec/kit/install-vscode`)로 `var/tools/vscode`(`tests/integration/run.mjs`의 option `--vscode`)에 설치한 `engines.vscode`의 최소 버전 VS Code 1.138.0을 쓰며, VS Code 명령줄로 `.vsix`를 새 확장 디렉터리에 설치한다. 사용자 설치와 같이 workspace trust를 켜고 테스트 폴더를 신뢰하지 않은 상태로 VS Code를 실행해 `.tpl` 문서가 언어 `polyspec-template`으로 열리는지, 설치한 확장이 활성화되어 번들한 서버를 시작하는지, 이 언어에서 `editor.semanticHighlighting.enabled`가 켜져 있는지, 확장이 칠하는 태그 범위가 파싱되지 않는 문서에서도 주석을 뺀 모든 태그를 덮는지, `vscode.provideDocumentSemanticTokens`가 텍스트의 태그와 HTML 속성 값 안의 태그에 서버의 토큰 종류를 돌려주는지, 이 언어에서 `editor.formatOnType`이 켜져 있고 `}`와 Enter를 입력하면 현재 줄을 들여쓰는지, 닫히지 않은 `{?`가 그 위치에 진단을 만드는지, 문서 강조, 접기 범위, Go to Matching Template Tag가 한 구성을 따르는지, 단축키가 비어 있는지, `vscode.executeFormatDocumentProvider`가 예제에 기대한 편집을 돌려주고 포맷된 문서와 파싱되지 않는 문서에는 편집을 돌려주지 않는지 검사한다. 두 번째 실행은 설치한 매니페스트에서 `capabilities`를 지우고 VS Code가 그 작업 공간에서 확장을 비활성화하는지 요구한다. 이것으로 첫 실행이 capability 누락을 찾아낸다는 것을 보인다. profile 설치와 VS Code 실행은 각각 시간 제한이 없는 단계다(`tests/integration/step.mjs`). 단계는 시작, 실행 중 10 s마다 한 줄, 경과 시간이 붙은 결과를 출력하고, 설치와 실행은 VS Code의 출력을 도착하는 대로 출력한다. 설치는 exit code로, 실행은 exit code나 suite 결과로 판단한다. check마다 20 s의 timeout이 있고, suite는 check마다 `[suite] start - <check>`를 출력한 뒤 `[suite] ok - <check> (<ms> ms)`나 `[suite] not ok - <check> (<ms> ms)`를 출력한다. 입력한 줄의 format처럼 확장을 기다리는 check에는 자기 시간 제한이 없다(`tests/integration/suite/wait.cjs`). check의 timeout만 기다림을 끝내며, 그 error는 check가 기다린 것을 기대한 text, 실제 text와 함께 밝힌다(T20.1-7). 실행은 suite 결과로 끝난다. VS Code 1.138은 suite가 `[suite] N of M checks passed`를 출력한 뒤 종료하는 데 몇 분이 걸리기도 하므로, 그 줄 뒤 20 s 안에 종료하지 않으면 process group과 함께 kill한다. 20 s는 suite 결과가 출력된 뒤에 시작하며, VS Code를 끝낼 뿐 결과를 정하지 않는다.
+`make template-test-vscode`는 매니페스트를 테스트하고, 문법이 `text.html.basic`만 포함하는지, `dist/extension.cjs`가 `vscode`와 Node.js 내장 모듈만, `dist/server.cjs`가 Node.js 내장 모듈만 불러오는지, `.vsix`가 둘 다 담는지, 매니페스트가 서버 legend의 토큰 종류 가운데 VS Code가 정의하지 않은 것을 모두 제공하는지, 번들한 서버가 표준 입력과 출력으로 진단을 게시하고 `polyspec-template/tagRanges`, `polyspec-template/matchingTag`, 타이핑 포맷에 응답하는지 검사한다. 언어 클라이언트는 VS Code 안에서만 실행되므로 통합 테스트가 이를 검사한다. `make template-test-vscode-integration`은 `.vsix`를 빌드하고, `make install` 뒤에 `make template-install-vscode`가 kit의 VS Code installer(`@polyspec/kit/install-vscode`)로 `var/tools/vscode`(`tests/integration/run.mjs`의 option `--vscode`)에 설치한 `engines.vscode`의 최소 버전 VS Code 1.138.0을 쓰며, VS Code 명령줄로 `.vsix`를 새 확장 디렉터리에 설치한다. 사용자 설치와 같이 workspace trust를 켜고 테스트 폴더를 신뢰하지 않은 상태로 VS Code를 실행해 `.tpl` 문서가 언어 `polyspec-template`으로 열리는지, 설치한 확장이 활성화되어 번들한 서버를 시작하는지, 이 언어에서 `editor.semanticHighlighting.enabled`가 켜져 있는지, 확장이 칠하는 태그 범위가 파싱되지 않는 문서에서도 주석을 뺀 모든 태그를 덮는지, `vscode.provideDocumentSemanticTokens`가 텍스트의 태그와 HTML 속성 값 안의 태그에 서버의 토큰 종류를 돌려주는지, 이 언어에서 `editor.formatOnType`이 켜져 있고 `}`와 Enter를 입력하면 현재 줄을 들여쓰는지, 닫히지 않은 `{?`가 그 위치에 진단을 만드는지, 문서 강조, 접기 범위, Go to Matching Template Tag가 한 구성을 따르는지, 단축키가 비어 있는지, `vscode.executeFormatDocumentProvider`가 예제에 기대한 편집을 돌려주고 포맷된 문서와 파싱되지 않는 문서에는 편집을 돌려주지 않는지 검사한다. 두 번째 실행은 설치한 매니페스트에서 `capabilities`를 지우고 VS Code가 그 작업 공간에서 확장을 비활성화하는지 요구한다. 이것으로 첫 실행이 capability 누락을 찾아낸다는 것을 보인다. profile 설치와 VS Code 실행은 각각 시간 제한이 없는 단계다(`tests/integration/step.mjs`). 단계는 시작, 실행 중 10 s마다 한 줄, 경과 시간이 붙은 결과를 출력하고, 설치와 실행은 VS Code의 출력을 도착하는 대로 출력한다. 설치는 exit code로, 실행은 exit code나 suite 결과로 판단한다. check마다 20 s의 timeout이 있고, suite는 check마다 `[suite] start - <check>`를 출력한 뒤 `[suite] ok - <check> (<ms> ms)`나 `[suite] not ok - <check> (<ms> ms)`를 출력한다. 입력한 줄의 format처럼 확장을 기다리는 check에는 자기 시간 제한이 없다(`tests/integration/suite/wait.cjs`). check의 timeout만 기다림을 끝내며, 그 error는 check가 기다린 것을 기대한 text, 실제 text와 함께 밝힌다(T20.1-7). 실행은 suite 결과로 끝난다. VS Code 1.138은 suite가 `[suite] N of M checks passed`를 출력한 뒤 종료하는 데 몇 분이 걸리기도 하므로, 그 줄 뒤 20 s 안에 종료하지 않으면 process group과 함께 kill한다. 20 s는 suite 결과가 출력된 뒤에 시작하며, VS Code를 끝낼 뿐 결과를 정하지 않는다.
 
-integration 실행은 VS Code를 내려받지 않는다. 설치된 사본이 없으면 `run make install-vscode`와 함께 실패한다. VS Code는 integration test를 실행하는 곳에만 필요하므로 `make install`은 이것을 내려받지 않고, CI에서는 integration test를 실행하는 job만 `make install-vscode`를 실행한다(T20.1-6). installer는 사본을 `var/tools/vscode/.next-<pid>`에 내려받고 `vscode-<platform>-<version>`으로 rename하므로, 읽는 쪽은 사본이 없거나 완전한 사본을 찾으며, 있는 사본은 다시 내려받지 않는다. 설치된 사본은 바뀌지 않으므로 lock이 필요 없다(T20.1-4).
+integration 실행은 VS Code를 내려받지 않는다. 설치된 사본이 없으면 `run make install-vscode`와 함께 실패한다. VS Code는 integration test를 실행하는 곳에만 필요하므로 `make install`은 이것을 내려받지 않고, CI에서는 integration test를 실행하는 job만 `make template-install-vscode`를 실행한다(T20.1-6). installer는 사본을 `var/tools/vscode/.next-<pid>`에 내려받고 `vscode-<platform>-<version>`으로 rename하므로, 읽는 쪽은 사본이 없거나 완전한 사본을 찾으며, 있는 사본은 다시 내려받지 않는다. 설치된 사본은 바뀌지 않으므로 lock이 필요 없다(T20.1-4).
 
-`make test-codemirror`는 어댑터를 빌드하고 두 종류의 테스트를 실행한다. Vitest 테스트는 `packages/language/tests/editor`의 모든 에디터 픽스처마다 DOM 없이 `EditorState`를 만들고, `templateDiagnostics`의 진단, 상태의 decoration 집합에 있는 토큰 마크와 태그 마크, fold service의 접기 범위, 모든 조회 위치의 강조 마크와 `goToMatchingTag` 목적지, `templateBlocks` `indent`와 `flat` 및 공백 두 개의 들여쓰기 단위로 구한 모든 줄의 들여쓰기 서비스 결과, `formatTemplate`의 결과를 픽스처의 기대 결과와 비교한다(EDT-17). 다른 테스트는 한 줄을 입력하고 `insertNewlineAndIndent`로 Enter를 누르며, 옵션, `formatTemplate`의 들여쓰기 단위, 텍스트마다 분석 하나를 재사용하는지 검사한다. Playwright 테스트는 `tests/browser/page.ts`를 esbuild로 `packages/codemirror/dist/browser/page.js`에 번들하고 빈 Chromium 페이지에 불러온 뒤, `<ul>`, Enter, `{@ x = xs}`, Enter를 입력한 뒤의 들여쓰기, 토큰 클래스, HTML 속성 값 안의 템플릿 색, 밝은 테마와 어두운 테마의 태그 배경, 닫히지 않은 블록의 lint 진단, 포맷되는 텍스트와 파싱되지 않는 텍스트에서의 Shift+Alt+F를 검사한다.
+`make template-test-codemirror`는 어댑터를 빌드하고 두 종류의 테스트를 실행한다. Vitest 테스트는 `packages/language/tests/editor`의 모든 에디터 픽스처마다 DOM 없이 `EditorState`를 만들고, `templateDiagnostics`의 진단, 상태의 decoration 집합에 있는 토큰 마크와 태그 마크, fold service의 접기 범위, 모든 조회 위치의 강조 마크와 `goToMatchingTag` 목적지, `templateBlocks` `indent`와 `flat` 및 공백 두 개의 들여쓰기 단위로 구한 모든 줄의 들여쓰기 서비스 결과, `formatTemplate`의 결과를 픽스처의 기대 결과와 비교한다(EDT-17). 다른 테스트는 한 줄을 입력하고 `insertNewlineAndIndent`로 Enter를 누르며, 옵션, `formatTemplate`의 들여쓰기 단위, 텍스트마다 분석 하나를 재사용하는지 검사한다. Playwright 테스트는 `tests/browser/page.ts`를 esbuild로 `packages/codemirror/dist/browser/page.js`에 번들하고 빈 Chromium 페이지에 불러온 뒤, `<ul>`, Enter, `{@ x = xs}`, Enter를 입력한 뒤의 들여쓰기, 토큰 클래스, HTML 속성 값 안의 템플릿 색, 밝은 테마와 어두운 테마의 태그 배경, 닫히지 않은 블록의 lint 진단, 포맷되는 텍스트와 파싱되지 않는 텍스트에서의 Shift+Alt+F를 검사한다.
 
-CI job `editor`는 `make editor-boundary-check test-language format-check test-lsp test-codemirror test-vscode`를 실행하고, VS Code가 화면을 요구하므로 `make test-vscode-integration`을 `xvfb-run`의 가상 X 서버에서 실행한다.
+CI job `editor`는 `make editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode`를 실행하고, VS Code가 화면을 요구하므로 `make template-test-vscode-integration`을 `xvfb-run`의 가상 X 서버에서 실행한다.
 
-`make check`가 `test-language`, `test-lsp`, `test-codemirror`, `format-check`, `test-vscode`, `test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
+`make check`가 `template-test-language`, `template-test-lsp`, `template-test-codemirror`, `format-check`, `template-test-vscode`, `template-test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.

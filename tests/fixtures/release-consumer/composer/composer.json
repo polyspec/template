@@ -8,12 +8,12 @@
         }
     ],
     "require": {
-        "php": ">=8.5",
+        "php": ">=8.4",
         "polyspec/template": "0.0.11"
     },
     "config": {
         "platform": {
-            "php": "8.5"
+            "php": "8.4"
         }
     }
 }

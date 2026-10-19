@@ -46,7 +46,7 @@ if (action === 'uninstall') {
     process.stdout.write(`install-cli: npm install in ${next}\n`);
     const result = spawnSync('npm', ['install', '--no-audit', '--no-fund', '--no-package-lock'], { cwd: next, stdio: 'inherit' });
     if (result.status !== 0) throw new Error(`npm install in ${next} exited with ${result.status ?? result.signal}; the previous install is unchanged`);
-    if (!existsSync(join(next, 'node_modules', '@polyspec', 'template-language', 'bin', 'template-fmt.mjs'))) throw new Error(`the formatter entry is missing in ${next}; run make build-language`);
+    if (!existsSync(join(next, 'node_modules', '@polyspec', 'template-language', 'bin', 'template-fmt.mjs'))) throw new Error(`the formatter entry is missing in ${next}; run make template-build-language`);
     // The previous project moves aside and the prepared one takes its name; the script switches to it with a rename.
     const previous = join(values.prefix, 'lib', `.polyspec-template-fmt.previous-${process.pid}`);
     if (existsSync(project)) renameSync(project, previous);

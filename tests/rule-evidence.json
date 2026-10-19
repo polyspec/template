@@ -7,7 +7,7 @@
         "VAL-22",
         "ERR-14"
       ],
-      "verification": "make test-ts test-go test-rust test-php test-ext generated-native-check compiler-interface-check",
+      "verification": "make test-ts test-go test-rust test-php template-test-ext generated-native-check compiler-interface-check",
       "files": [
         "tests/fixtures/bound-data/cases.json",
         "packages/ts/tests/value/bound.test.ts",
@@ -48,7 +48,7 @@
     {
       "name": "host-functions",
       "rules": ["FUN-9", "FUN-43", "FUN-44", "FUN-45", "FUN-46", "FUN-47", "FUN-48", "FUN-49"],
-      "verification": "make test-ts test-go test-rust test-php test-ext",
+      "verification": "make test-ts test-go test-rust test-php template-test-ext",
       "files": ["packages/ts/tests/render/engine.test.ts", "packages/go/functions/functions_test.go", "packages/rust/tests/functions.rs", "packages/php/tests/Functions/FunctionsTest.php", "packages/php-ext/tests/EngineTest.php"]
     },
     {
@@ -78,19 +78,19 @@
     {
       "name": "internal-error-boundary",
       "rules": ["ERR-12", "ERR-13"],
-      "verification": "make test-ts test-go test-rust test-php test-ext",
+      "verification": "make test-ts test-go test-rust test-php template-test-ext",
       "files": ["packages/ts/tests/render/host-binding.test.ts", "packages/go/host_binding_test.go", "packages/rust/tests/object_calls.rs", "packages/php/tests/Value/HostBindingTest.php", "packages/php-ext/tests/HostBindingTest.php"]
     },
     {
       "name": "host-value-binding",
       "rules": ["VAL-1", "VAL-7", "VAL-11", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-23"],
-      "verification": "make test-ts test-go test-rust test-php test-ext test-python",
+      "verification": "make test-ts test-go test-rust test-php template-test-ext test-python",
       "files": ["packages/ts/tests/value/value.test.ts", "packages/go/value/value_test.go", "packages/rust/tests/value.rs", "packages/php/tests/Value/ValueTest.php", "packages/php-ext/tests/EngineTest.php", "packages/python/tests/test_object_calls.py"]
     },
     {
       "name": "host-arguments-and-native-equality",
       "rules": ["VAL-21", "EXP-39"],
-      "verification": "make test-ts test-go test-rust test-php test-ext test-python generated-native-check",
+      "verification": "make test-ts test-go test-rust test-php template-test-ext test-python generated-native-check",
       "files": ["tests/fixtures/native-object/host-values.json", "packages/python/tests/test_object_calls.py", "packages/ts/tests/render/host-values.test.ts", "packages/go/host_values_test.go", "packages/rust/tests/host_values.rs", "packages/php/tests/Value/HostValuesTest.php", "packages/php-ext/tests/HostValuesTest.php", "scripts/check-generated-native-calls.mts", "tests/fixtures/typed-values/input.tpl", "scripts/check-generated-typed-values.mts"]
     },
     {
@@ -102,31 +102,31 @@
     {
       "name": "formatting",
       "rules": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
-      "verification": "make test-ts test-language test-go test-rust test-python",
+      "verification": "make test-ts template-test-language test-go test-rust test-python",
       "files": ["packages/ts/tests/tokens.test.ts", "packages/ts/tests/parser/parser.test.ts", "packages/language/tests/format.test.ts", "packages/language/tests/indent.test.ts", "packages/language/tests/invariant.test.ts", "packages/language/tests/conformance.test.ts", "packages/go/parser/analyze_test.go", "packages/go/format/format_test.go", "packages/rust/tests/analyze.rs", "packages/rust/tests/format.rs", "packages/rust/tests/cases.rs", "packages/python/tests/test_case_tokens.py", "packages/python/tests/test_case_format.py", "packages/python/tests/test_format_cases.py"]
     },
     {
       "name": "editor-language-service",
       "rules": ["EDT-4", "EDT-5", "EDT-6", "EDT-7", "EDT-8", "EDT-9", "EDT-10", "EDT-11", "EDT-12", "EDT-13", "EDT-17"],
-      "verification": "make test-ts test-language",
+      "verification": "make test-ts template-test-language",
       "files": ["packages/ts/tests/parser/parser.test.ts", "packages/language/tests/document.test.ts", "packages/language/tests/editor.test.ts", "packages/language/tests/indent.test.ts", "scripts/editor-fixtures.mts"]
     },
     {
       "name": "editor-language-server",
       "rules": ["EDT-14"],
-      "verification": "make test-lsp",
+      "verification": "make template-test-lsp",
       "files": ["packages/lsp/tests/server.test.ts", "packages/lsp/tests/results.ts"]
     },
     {
       "name": "editor-vscode-client",
       "rules": ["EDT-15"],
-      "verification": "make test-vscode test-vscode-integration",
+      "verification": "make template-test-vscode template-test-vscode-integration",
       "files": ["packages/vscode/tests/extension.test.mjs", "packages/vscode/tests/integration/suite/index.cjs"]
     },
     {
       "name": "editor-codemirror-adapter",
       "rules": ["EDT-16"],
-      "verification": "make test-codemirror",
+      "verification": "make template-test-codemirror",
       "files": ["packages/codemirror/tests/fixtures.test.ts", "packages/codemirror/tests/adapter.test.ts", "packages/codemirror/tests/browser/editor.spec.ts"]
     },
     {
@@ -144,7 +144,7 @@
     {
       "name": "editor-template-root",
       "rules": ["EDT-18", "EDT-19", "EDT-20", "EDT-21"],
-      "verification": "make test-language test-lsp test-codemirror",
+      "verification": "make template-test-language template-test-lsp template-test-codemirror",
       "files": ["packages/language/tests/root.test.ts", "packages/language/tests/root-marker/vectors.json", "packages/lsp/tests/server.test.ts", "packages/codemirror/tests/adapter.test.ts"]
     }
   ]

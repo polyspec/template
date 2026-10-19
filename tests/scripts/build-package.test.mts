@@ -5,7 +5,7 @@
 // the workspace packages of this repository that it depends on, which npm links into node_modules (T24.2). Each case
 // builds into a `dist` of its own temporary directory, never into the `dist` of the package. The test creates what it
 // depends on (T18.8-2): before the cases it builds the packages of this repository that the packages depend on with
-// scripts/build-package.mts, as `make build-lsp` does, so it passes on a checkout where nothing was built; with unchanged
+// scripts/build-package.mts, as `make template-build-lsp` does, so it passes on a checkout where nothing was built; with unchanged
 // inputs those builds do nothing.
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';

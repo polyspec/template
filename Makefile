@@ -40,19 +40,19 @@ ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_
 # failed command; a prerequisite that fails keeps the targets that depend on it from running.
 MAKEFLAGS += -k
 
-# The shared targets of kit (kit-sync, kit-check, hooks, push-gate-commit, rerun-failed, documents-check, owner-check,
+# The shared targets of kit (kit-sync, kit-check, hooks, push-gate-commit, rerun-failed, docs-check, owner-check,
 # ci-targets, ci-passed, release-*, dependency-*, install-tools, install-packages, toolchain-check, layout-check,
 # cargo-downloads-check, lint-*) come from the npm package @polyspec/kit: scripts/kit/kit-bootstrap.mk, a copy that make
 # kit-sync writes, includes the kit.mk of the installed package and runs its tools as node $(KIT)/<tool>.$(KIT_EXT). Only
 # config/*.json differ between repositories.
 include scripts/kit/kit-bootstrap.mk
 
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php test-scripts compiler-interface-generate compiler-interface-check \
-	conformance delimiter-matrix test-browser ext ext-arginfo test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
+.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php template-test-scripts compiler-interface-generate compiler-interface-check \
+	conformance delimiter-matrix template-test-browser ext ext-arginfo template-test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
-	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check install-check showcase showcase-check showcase-compile \
+	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check template-install-check showcase showcase-check showcase-compile \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-audit release-test-matrix release-check docs-static-check clean \
-	install build-language test-language build-lsp test-lsp build-codemirror test-codemirror build-compiler test-compiler-types format-check format-external-check install-cli build-vscode test-vscode test-vscode-integration vscode-package vscode-install install-vscode install-browsers uninstall-cli \
+	install template-install template-build-language template-test-language template-build-lsp template-test-lsp template-build-codemirror template-test-codemirror template-build-compiler template-test-compiler-types format-check format-external-check template-install-cli template-build-vscode template-test-vscode template-test-vscode-integration vscode-package vscode-install template-install-vscode template-install-browsers uninstall-cli \
 	conformance-cases function-inventory-check typecheck
 
 SHOWCASE_LANGS  ?= ts,go,rust,php,python
@@ -75,11 +75,11 @@ LSP_DIR      := packages/lsp
 COMPILER_DIR := packages/compiler
 VSCODE_DIR := packages/vscode
 CODEMIRROR_DIR := packages/codemirror
-# The VS Code build of the integration test, installed by make install-vscode (the VS Code installer of kit) after make
+# The VS Code build of the integration test, installed by make template-install-vscode (the VS Code installer of kit) after make
 # install and only read by the test, which never downloads (T20.1-4). Only a run of the test needs it (T20.1-6).
 VSCODE_TOOLS := $(CURDIR)/var/tools/vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
-# The prefix of `make install-cli`: the formatter copy in $(CLI_PREFIX)/lib and the script in $(CLI_PREFIX)/bin.
+# The prefix of `make template-install-cli`: the formatter copy in $(CLI_PREFIX)/lib and the script in $(CLI_PREFIX)/bin.
 CLI_PREFIX ?= $(HOME)/.local
 
 # npm links the workspace packages of this repository into node_modules and the commands of the packages into
@@ -92,7 +92,7 @@ PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
 help: ## List targets
 	@echo "Targets:"
 	@echo "  check                  The full suite through the full-run tool of @polyspec/kit: once per tree, when no checklist task is [~]"
-	@echo "  kit-sync|kit-check|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|owner-validate|documents-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|dependency-policy-check|dependency-review|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
+	@echo "  kit-sync|kit-check|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|dependency-policy-check|dependency-review|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
@@ -100,11 +100,11 @@ help: ## List targets
 	@echo "  install                After make install-tools TOOLS=npm and make install-packages: the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates, the Composer packages and the Python build requirements"
 	@echo "  build-<language>       Build one package: build-ts, build-go, build-rust or build-php"
 	@echo "  test-<language>        Unit tests of one package: test-ts, test-go, test-rust or test-php"
-	@echo "  test-scripts           Tests of the test runner and the conformance runners"
+	@echo "  template-test-scripts           Tests of the test runner and the conformance runners"
 	@echo "  typecheck              Type check of the TypeScript infrastructure (tsconfig.json, S9)"
 	@echo "  conformance            Cross-language conformance suite (tests/runner/conformance.mts)"
-	@echo "  test-browser           Browser rendering test (Playwright)"
-	@echo "  ext / test-ext         Build and test the PHP extension"
+	@echo "  template-test-browser           Browser rendering test (Playwright)"
+	@echo "  ext / template-test-ext         Build and test the PHP extension"
 	@echo "  ext-arginfo            Generate the arginfo header of the C extension from its stub with gen_stub.php"
 	@echo "  rules-check            Check case.json rule identifiers against docs/spec"
 	@echo "  editor-boundary-check  Check the editor layer boundaries (EDT-2, EDT-3)"
@@ -118,26 +118,26 @@ help: ## List targets
 	@echo "  showcase               Build the example site, parity proof and benchmark artifact"
 	@echo "  showcase-compile       Generate committed canonical AST artifacts"
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
-	@echo "  install-check         Install package artifacts and compare AST/generated output"
+	@echo "  template-install-check         Install package artifacts and compare AST/generated output"
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  release-test-matrix    The full suite of make check through the same guard"
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
 	@echo "  dependency-audit       The dependency gate and its mutation check, which also reject a lock with an advisory at its review, and the check of the Python lock"
-	@echo "  build-language           Build the formatter library and the template-fmt CLI"
-	@echo "  test-language            Formatter, safety invariant and CLI tests, type check"
-	@echo "  build-lsp              Build the language server template-lsp"
-	@echo "  test-lsp               Language server protocol tests against the editor fixtures, type check"
+	@echo "  template-build-language           Build the formatter library and the template-fmt CLI"
+	@echo "  template-test-language            Formatter, safety invariant and CLI tests, type check"
+	@echo "  template-build-lsp              Build the language server template-lsp"
+	@echo "  template-test-lsp               Language server protocol tests against the editor fixtures, type check"
 	@echo "  format-check           Run template-fmt --check on the formatter fixtures"
 	@echo "  format-external-check  Run the safety invariant on TEMPLATE_SOURCE_ROOT"
-	@echo "  install-cli            Install a copy of the formatter and the script template-fmt under CLI_PREFIX (~/.local)"
+	@echo "  template-install-cli            Install a copy of the formatter and the script template-fmt under CLI_PREFIX (~/.local)"
 	@echo "  uninstall-cli          Remove them"
-	@echo "  build-codemirror       Build the CodeMirror 6 adapter"
-	@echo "  build-compiler         Build the compiler package @polyspec/template-compiler"
-	@echo "  test-compiler-types    Build the compiler package and type check its sources"
-	@echo "  test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
-	@echo "  build-vscode           Bundle the VS Code extension"
-	@echo "  test-vscode            Extension tests and type check"
-	@echo "  test-vscode-integration Run the extension inside the VS Code that make install-vscode installs into var/tools/vscode"
+	@echo "  template-build-codemirror       Build the CodeMirror 6 adapter"
+	@echo "  template-build-compiler         Build the compiler package @polyspec/template-compiler"
+	@echo "  template-test-compiler-types    Build the compiler package and type check its sources"
+	@echo "  template-test-codemirror        CodeMirror adapter tests against the editor fixtures, browser test, type check"
+	@echo "  template-build-vscode           Bundle the VS Code extension"
+	@echo "  template-test-vscode            Extension tests and type check"
+	@echo "  template-test-vscode-integration Run the extension inside the VS Code that make template-install-vscode installs into var/tools/vscode"
 	@echo "  vscode-package         Build the .vsix with vsce"
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
@@ -149,12 +149,12 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check layout-check typecheck test-compiler-types lint-python docs-check docs-static-check test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php lint-php-format test-ts test-language test-lsp test-codemirror format-check test-vscode test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check test-ext typed-generator-compile-check generated-lint-check install-check test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	$(NODE) $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
 
-lint: lint-ts lint-go lint-rust lint-php lint-python lint-go-format lint-rust-format lint-php-format lint-showcase-format lint-showcase-warnings ## Lint every package: the lint targets of kit and the format checks of template
+lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format template-lint-rust-format template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets of kit and the format checks of template
 
 # The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python) run oxlint with oxlint-tsgolint and knip,
 # golangci-lint and deadcode, clippy, phpcs and PHPStan, and ruff and vulture with the configuration that kit copies (T24.6).
@@ -163,16 +163,16 @@ lint: lint-ts lint-go lint-rust lint-php lint-python lint-go-format lint-rust-fo
 lint-php: build-php
 lint-rust: cargo-downloads-check
 
-.PHONY: lint-go-format lint-rust-format lint-showcase-format lint-showcase-warnings lint-php-format
-lint-go-format:
+.PHONY: template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format
+template-lint-go-format:
 	@out=$$(gofmt -l $(GO_DIR) $(GO_BACKEND_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) $(GO_BACKEND_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
-lint-rust-format:
+template-lint-rust-format:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
-lint-showcase-format:
+template-lint-showcase-format:
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
-lint-showcase-warnings: cargo-downloads-check
+template-lint-showcase-warnings: cargo-downloads-check
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
-lint-php-format: build-php
+template-lint-php-format: build-php
 	vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR) $(EXT_DIR)
 
 # make install-tools TOOLS=npm installs the npm of packageManager and make install-packages installs package-lock.json with
@@ -185,7 +185,9 @@ lint-php-format: build-php
 # sets up a Python of its own (T24.12).
 # The Go modules that the modules of go.work require go into the module cache with go mod download, since every check
 # runs go with GOPROXY=off (T25.6-1).
-install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Go modules of go.work, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
+# install runs the bootstrap of kit first (install-kit); the install steps of this repository follow it (K246-2).
+install: template-install ## Install the tools and packages in the bootstrap order, then the steps of the repository; ONLINE
+template-install: install-kit cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Go modules of go.work, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
 	$(ONLINE) $(GO) mod download
 	$(ONLINE) $(NODE) scripts/composer-install.mts .
 	$(ONLINE) $(NODE) scripts/python-wheelhouse.mts
@@ -193,15 +195,15 @@ install: install-tools cargo-downloads-fetch ## After make install-tools TOOLS=n
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
-install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
+template-install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
 	$(ONLINE) $(NODE) $(KIT)/install-vscode.$(KIT_EXT) $(VSCODE_DIR) $(VSCODE_TOOLS)
 
 # The release steps and the consumer locks are the targets of the kit.mk of @polyspec/kit (config/release.json). The archives are built
 # from the built npm packages, so the targets that build or lock them run those builds first.
-release-assets: $(if $(findstring /,$(TAG)),,build-ts build-language build-lsp build-codemirror build-compiler)
-release-consumer release-consumer-lock: build-ts build-language build-lsp build-codemirror build-compiler
+release-assets: $(if $(findstring /,$(TAG)),,build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler)
+release-consumer release-consumer-lock: build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler
 
-install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
+template-install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
 
 # The validator of the template AST of packages/ts is ajv's standalone validation code of contracts/schema/ast.schema.json
@@ -225,41 +227,41 @@ build-rust: cargo-downloads-check ## Build the Rust CLI
 build-php: ## Install the Composer packages of the development root composer.json into vendor/
 	$(NODE) scripts/composer-install.mts .
 
-test-ts: test-ts-unit test-ts-types test-ts-types-node test-ts-types-tests ## TypeScript unit tests and type check
+test-ts: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests ## TypeScript unit tests and type check
 
-.PHONY: test-ts-unit test-ts-types test-ts-types-node test-ts-types-tests
-test-ts-unit: build-ts
+.PHONY: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests
+template-test-ts-unit: build-ts
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(TS_DIR)
-test-ts-types: build-ts
+template-test-ts-types: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json
-test-ts-types-node: build-ts
+template-test-ts-types-node: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.node.json
 # The tests of the package, with the types of Node.js, the build of the package and the scripts that they import.
-test-ts-types-tests: build-ts
+template-test-ts-types-tests: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.tests.json
 
-test-go: test-go-vet test-go-backend-vet test-go-unit ## Go unit tests
+test-go: template-test-go-vet template-test-go-backend-vet template-test-go-unit ## Go unit tests
 
-.PHONY: test-go-vet test-go-backend-vet test-go-unit
-test-go-vet:
+.PHONY: template-test-go-vet template-test-go-backend-vet template-test-go-unit
+template-test-go-vet:
 	cd $(GO_DIR) && $(GO) vet ./...
-test-go-backend-vet:
+template-test-go-backend-vet:
 	cd $(GO_BACKEND_DIR) && $(GO) vet *.go
-test-go-unit:
+template-test-go-unit:
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) go --cwd $(GO_DIR) -- -race ./...
 
-test-rust: test-rust-clippy test-rust-unit ## Rust clippy and tests
+test-rust: template-test-rust-clippy template-test-rust-unit ## Rust clippy and tests
 
-.PHONY: test-rust-clippy test-rust-unit
-test-rust-clippy: cargo-downloads-check
+.PHONY: template-test-rust-clippy template-test-rust-unit
+template-test-rust-clippy: cargo-downloads-check
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
-test-rust-unit: cargo-downloads-check
+template-test-rust-unit: cargo-downloads-check
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked
 
 test-php: build-php ## PHP unit tests
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
-test-scripts: cargo-downloads-check build-ts build-language build-lsp build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
+template-test-scripts: cargo-downloads-check build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
@@ -268,90 +270,92 @@ test-scripts: cargo-downloads-check build-ts build-language build-lsp build-code
 # Each project is a prerequisite of one command, so a failed one keeps the others running (T19.8).
 typecheck: typecheck-infrastructure typecheck-docs typecheck-scenarios ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
 .PHONY: typecheck-infrastructure typecheck-docs typecheck-scenarios
-typecheck-infrastructure: build-ts build-language
+typecheck-infrastructure: build-ts template-build-language
 	$(TSC) -p tsconfig.json
-typecheck-docs: build-ts build-language
+typecheck-docs: build-ts template-build-language
 	$(TSC) -p docs/.vitepress/tsconfig.json
-typecheck-scenarios: build-ts build-language
+typecheck-scenarios: build-ts template-build-language
 	$(TSC) -p examples/site/scenarios/tsconfig.json
 
 # The type-aware lint of kit reads the same declarations: a module that imports @polyspec/template,
 # @polyspec/template-language or @polyspec/template-lsp (the VS Code extension) resolves its types from the dist that
 # package.json exports, so the lint runs after those builds; without the dist of the server each of its values is an
 # error type to oxlint-tsgolint.
-lint-ts: build-ts build-language build-lsp
+lint-ts: build-ts template-build-language template-build-lsp
 
-build-language: build-ts ## Build the formatter library and the template-fmt CLI
+build: template-build-language template-build-lsp template-build-codemirror template-build-compiler template-build-vscode
+
+template-build-language: build-ts ## Build the formatter library and the template-fmt CLI
 	$(NODE) scripts/build-package.mts --package language
 
-test-language: test-language-unit test-language-types ## Formatter, safety invariant and CLI tests, type check
+template-test-language: template-test-language-unit template-test-language-types ## Formatter, safety invariant and CLI tests, type check
 
-.PHONY: test-language-unit test-language-types
-test-language-unit: build-language
+.PHONY: template-test-language-unit template-test-language-types
+template-test-language-unit: template-build-language
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LANGUAGE_DIR)
-test-language-types: build-language
+template-test-language-types: template-build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
-build-lsp: build-language ## Build the language server template-lsp
+template-build-lsp: template-build-language ## Build the language server template-lsp
 	$(NODE) scripts/build-package.mts --package lsp
 
-test-lsp: test-lsp-unit test-lsp-types ## Language server protocol tests against the editor fixtures, type check
+template-test-lsp: template-test-lsp-unit template-test-lsp-types ## Language server protocol tests against the editor fixtures, type check
 
-.PHONY: test-lsp-unit test-lsp-types
-test-lsp-unit: build-lsp
+.PHONY: template-test-lsp-unit template-test-lsp-types
+template-test-lsp-unit: template-build-lsp
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LSP_DIR)
-test-lsp-types: build-lsp
+template-test-lsp-types: template-build-lsp
 	$(TSC) --noEmit -p $(LSP_DIR)/tsconfig.json
 
-format-check: build-language ## Check that the formatter fixtures are formatted
+format-check: template-build-language ## Check that the formatter fixtures are formatted
 	$(NODE) $(LANGUAGE_DIR)/bin/template-fmt.mjs --check $(LANGUAGE_DIR)/tests/fixtures/expected
 
-format-external-check: build-language ## Run the formatter safety invariant on an explicit external template tree
+format-external-check: template-build-language ## Run the formatter safety invariant on an explicit external template tree
 	@test -n "$(TEMPLATE_SOURCE_ROOT)" || { echo "TEMPLATE_SOURCE_ROOT is required"; exit 1; }
 	cd $(LANGUAGE_DIR) && TEMPLATE_SOURCE_ROOT="$(abspath $(TEMPLATE_SOURCE_ROOT))" $(VITEST) run tests/invariant.test.ts
 
 # The repository runs the TypeScript of packages/compiler/src by type stripping; the published package ships the build of
 # dist/ that tsup bundles from it, with the declarations of tsc (S9).
-build-compiler: build-ts ## Build the compiler package @polyspec/template-compiler
+template-build-compiler: build-ts ## Build the compiler package @polyspec/template-compiler
 	$(NODE) scripts/build-package.mts --package compiler
 
-test-compiler-types: build-compiler ## Build the compiler package and type check its sources
+template-test-compiler-types: template-build-compiler ## Build the compiler package and type check its sources
 	$(TSC) --noEmit -p $(COMPILER_DIR)/tsconfig.json
 
-build-codemirror: build-language ## Build the CodeMirror 6 adapter
+template-build-codemirror: template-build-language ## Build the CodeMirror 6 adapter
 	$(NODE) scripts/build-package.mts --package codemirror
 
-test-codemirror: test-codemirror-unit test-codemirror-browser test-codemirror-types ## CodeMirror adapter tests against the editor fixtures, browser test, type check
+template-test-codemirror: template-test-codemirror-unit template-test-codemirror-browser template-test-codemirror-types ## CodeMirror adapter tests against the editor fixtures, browser test, type check
 
-.PHONY: test-codemirror-unit test-codemirror-browser test-codemirror-types
-test-codemirror-unit: build-codemirror
+.PHONY: template-test-codemirror-unit template-test-codemirror-browser template-test-codemirror-types
+template-test-codemirror-unit: template-build-codemirror
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(CODEMIRROR_DIR)
-test-codemirror-browser: build-codemirror
+template-test-codemirror-browser: template-build-codemirror
 	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
-test-codemirror-types: build-codemirror
+template-test-codemirror-types: template-build-codemirror
 	$(TSC) --noEmit -p $(CODEMIRROR_DIR)/tsconfig.json
 
-install-cli: build-language ## Install a copy of the formatter and the script $(CLI_PREFIX)/bin/template-fmt
+template-install-cli: template-build-language ## Install a copy of the formatter and the script $(CLI_PREFIX)/bin/template-fmt
 	$(NODE) scripts/install-cli.mts install --prefix $(CLI_PREFIX)
 
 uninstall-cli: ## Remove the formatter copy and the script template-fmt of $(CLI_PREFIX)
 	$(NODE) scripts/install-cli.mts uninstall --prefix $(CLI_PREFIX)
 
-build-vscode: build-lsp ## Bundle the VS Code extension
+template-build-vscode: template-build-lsp ## Bundle the VS Code extension
 	$(NODE) scripts/build-package.mts --package vscode
 
-test-vscode: test-vscode-unit test-vscode-types ## Extension tests and type check
+template-test-vscode: template-test-vscode-unit template-test-vscode-types ## Extension tests and type check
 
-.PHONY: test-vscode-unit test-vscode-types
-test-vscode-unit: build-vscode
+.PHONY: template-test-vscode-unit template-test-vscode-types
+template-test-vscode-unit: template-build-vscode
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
-test-vscode-types: build-vscode
+template-test-vscode-types: template-build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
-test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
+template-test-vscode-integration: vscode-package ## Run the extension inside the minimum supported VS Code
 	cd $(VSCODE_DIR) && $(NODE) tests/integration/run.mjs --vscode $(VSCODE_TOOLS)
 
-vscode-package: build-vscode ## Build the .vsix
+vscode-package: template-build-vscode ## Build the .vsix
 	$(NPM) run package:vsix --workspace $(VSCODE_DIR)
 
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
@@ -432,10 +436,10 @@ conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
 	$(NODE) tests/runner/function-inventory.mts
 
-install-check: install-workspace-check package-installs-check ## Install immutable package artifacts in isolated install projects
+template-install-check: template-install-workspace-check package-installs-check ## Install immutable package artifacts in isolated install projects
 
-.PHONY: install-workspace-check package-installs-check
-install-workspace-check:
+.PHONY: template-install-workspace-check package-installs-check
+template-install-workspace-check:
 	$(NODE) scripts/check-install-workspace.mts
 package-installs-check: cargo-downloads-check typed-generator
 	$(NODE) scripts/check-package-installs.mts
@@ -457,7 +461,7 @@ error-codes-check: ## Check that the error-code list of each implementation matc
 	$(NODE) scripts/generate-error-codes.mts --check
 parity-check parity-declarations-check: error-codes-check
 
-test-browser: build-ts ## Browser rendering test
+template-test-browser: build-ts ## Browser rendering test
 	$(NODE) tests/browser/run.mts
 
 # The PHP extension is a C implementation in $(EXT_DIR)/src: scripts/build-php-extension.mts builds it with phpize,
@@ -466,17 +470,17 @@ test-browser: build-ts ## Browser rendering test
 ext: ## Build the PHP extension
 	$(NODE) scripts/build-php-extension.mts $(EXT_DIR)/src $(EXT_LIBRARY)
 
-test-ext: test-ext-conformance test-ext-unit ## Test the PHP extension
+template-test-ext: template-test-ext-conformance template-test-ext-unit ## Test the PHP extension
 
 # The C extension in $(EXT_DIR)/src declares its PHP classes in polyspec_template.stub.php; gen_stub.php of the PHP
 # build generates polyspec_template_arginfo.h from it, which is committed for builds from the package (T21.1).
 ext-arginfo: ## Generate the arginfo header of the C extension from its stub with gen_stub.php
 	$(NODE) scripts/build-php-extension.mts --arginfo $(EXT_DIR)/src
 
-.PHONY: test-ext-conformance test-ext-unit
-test-ext-conformance: cargo-downloads-check ext build-php
+.PHONY: template-test-ext-conformance template-test-ext-unit
+template-test-ext-conformance: cargo-downloads-check ext build-php
 	$(NODE) tests/runner/conformance.mts --langs php-ext
-test-ext-unit: ext build-php
+template-test-ext-unit: ext build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
 rules-check: ## Check case.json rule identifiers against the specification
@@ -506,7 +510,7 @@ schema-fixtures-check:
 schema-mutations-check:
 	$(NODE) scripts/check-schema-mutations.mts
 
-docs-check: compiler-interface-diagrams-check showcase-contract-diagrams-check documents-check schema-check doc-coverage benchmark-docs-check ## Document checks
+docs-check: compiler-interface-diagrams-check showcase-contract-diagrams-check schema-check doc-coverage benchmark-docs-check ## Document checks
 
 .PHONY: compiler-interface-diagrams-check showcase-contract-diagrams-check benchmark-docs-check
 compiler-interface-diagrams-check:

@@ -5,7 +5,7 @@
     "type": "php-ext",
     "license": "MIT",
     "require": {
-        "php": ">=8.5"
+        "php": ">=8.4"
     },
     "php-ext": {
         "extension-name": "polyspec_template",
@@ -13,7 +13,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.5.0"
+            "php": "8.4.0"
         },
         "sort-packages": true
     }

@@ -1,4 +1,4 @@
-// Tests that `make install-cli` installs the command template-fmt under a declared prefix without a symbolic link
+// Tests that `make template-install-cli` installs the command template-fmt under a declared prefix without a symbolic link
 // (T18.5): a copy of the formatter package in <prefix>/lib and an executable script in <prefix>/bin that runs it, which
 // `make uninstall-cli` removes. The test builds the template and formatter packages that the script copies with
 // scripts/build-package.mts before its case, which does nothing when their inputs are unchanged (T19.6).

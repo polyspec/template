@@ -5,7 +5,7 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": ">=8.5",
+        "php": ">=8.4",
         "ext-mbstring": "*",
         "opis/json-schema": "^2.6",
         "symfony/console": "^8.1"
@@ -27,7 +27,7 @@
     "bin": ["bin/template.php", "bin/template-ext.php"],
     "config": {
         "platform": {
-            "php": "8.5.0"
+            "php": "8.4.0"
         },
         "sort-packages": true
     }

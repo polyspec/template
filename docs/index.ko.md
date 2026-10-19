@@ -1,10 +1,10 @@
 <!-- doc-id: docs-index -->
-<!-- source-sha256: 4dc1518d207d1573ba4fa57c9971f638176126b85f87d394b5ffe1bb9304d6a8 -->
+<!-- source-sha256: 479f379037c6184b2c08174132f4cf0d6487ceaddb0525607cdfa5c0db113ed9 -->
 # 문서
 
 [English](/).
 
-[사용법](/ko/guide)은 템플릿을 작성하고 렌더하는 방법을 설명한다.
+[사용법](/ko/operations/guide)은 템플릿을 작성하고 렌더하는 방법을 설명한다.
 
 ## 명세
 
@@ -24,7 +24,7 @@
 | [`spec/editor.md`](/ko/spec/editor) | 언어 서비스, LSP 서버, 에디터 어댑터 |
 | [`spec/formatting.md`](/ko/spec/formatting) | 토큰, 포맷 스타일, 들여쓰기, 포매터의 안전 불변식 |
 
-[실행 계획](/ko/plans/execution-plan)은 웨이브, 그 의존 관계와 원인, 완료 기준, 완료 정의와 그 증거를 적는다. [실행 체크리스트](/ko/plans/execution-checklist)는 작업, 검증 방법, 상태를 나열한다.
+[실행 계획](/ko/plans/execution/plan)은 웨이브, 그 의존 관계와 원인, 완료 기준, 완료 정의와 그 증거를 적는다. [실행 체크리스트](/ko/plans/execution/checklist)는 작업, 검증 방법, 상태를 나열한다.
 
 ## 상태와 절차
 

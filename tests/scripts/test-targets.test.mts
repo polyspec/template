@@ -11,7 +11,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const NODE = path.join(ROOT, 'var/tools/bin/node');
 
 // The commands that make prints for `target` without running them. A make started by another make, as `make check`
-// starts `make test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
+// starts `make template-test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
 // print them, and --no-print-directory removes them, so the lines are the commands on every make.
 function commands(target: string) {
   const run = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
@@ -23,10 +23,10 @@ const RUNS_TESTS_DIRECTLY = /\bnpm (?:test|run test:extension)\b|\bvitest\b(?! -
 
 const RUNNERS: [string, string][] = [
   ['test-ts', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/ts`],
-  ['test-language', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/language`],
-  ['test-lsp', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/lsp`],
-  ['test-codemirror', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/codemirror`],
-  ['test-vscode', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs`],
+  ['template-test-language', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/language`],
+  ['template-test-lsp', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/lsp`],
+  ['template-test-codemirror', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/codemirror`],
+  ['template-test-vscode', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs`],
 ];
 for (const [target, runner] of RUNNERS) {
   test(`${target} runs its unit tests through the run-tests tool of @polyspec/kit`, () => {
