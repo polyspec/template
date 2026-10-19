@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 83af951f7627fb3497e0075eea360f3dcdea6786b13419178db4844d5dfd9335 -->
+<!-- source-sha256: 3027f9162289a2aabc2a6d0e569bedd049212dd6a1bd610256ba2f40d1bcb69d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,8 @@
 ## Unreleased
 
 - T26.3: 모든 Composer platform의 PHP 요구는 8.4.1이고 lock을 다시 만들었습니다(release-consumer fixture는 release를 기다립니다). 저장소의 test는 kit이 복사한 workflow를 제외하며, checklist와 test에 적힌 외부 제품 이름을 지웠습니다 (T26.3).
+
+- T26.5: kit 복사본은 @polyspec/kit 0.0.54(73cf59e1)를 따르며, 그 gate는 전체 `make parity-check`를 실행합니다. PRINCIPLES.md의 S6 rule은 `make parity-declarations-check`와 함께 `make parity-check`를 enforcement로 듭니다 (T26.5).
 
 - T26.4: pre-commit hook은 config/checklist.json에 등록된 추적 hook이며 `make staged-generated-hook`을 실행하므로 staging된 생성 경로를 거부합니다. link 규칙은 link가 `node_modules/`에 있으므로 그 check를 이름으로 들고, `make link-check`는 개발 보조로 남습니다 (T26.4).
 

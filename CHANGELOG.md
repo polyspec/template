@@ -7,6 +7,8 @@
 
 - T26.3: the PHP requirement of every Composer platform is 8.4.1, and their locks are locked again (the release-consumer fixture waits for the release); the repository's tests leave out the workflows that kit copies; the outside product named in a checklist row and in a test is no longer named (T26.3).
 
+- T26.5: the kit copies follow @polyspec/kit 0.0.54 (73cf59e1), whose gates run the full `make parity-check`; rule S6 of PRINCIPLES.md names it as its enforcement beside `make parity-declarations-check` (T26.5).
+
 - T26.4: the pre-commit hook is a tracked hook of config/checklist.json and runs `make staged-generated-hook`, so a staged generated path is refused; the rule about the links names that check, since the links sit in `node_modules/`, and `make link-check` stays a development aid (T26.4).
 
 - T26.2: the recipes that overrode the tasks of kit (`build-ts`, `build-go`, `build-rust`, `build-php`, `test-php` and `test-python`) are `template-<task>-<runtime>` recipes that the task of kit names as a prerequisite, so each runs once; `rules-check` runs its recipe `template-rules-check` the same way. The execution checklist gets the parent row T22.5 of its sub-items, and the open items T22.6, T22.6-12-1 and T22.6-17 name the unit tests of their Verification. No behavior changes (T26.2).
