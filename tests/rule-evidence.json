@@ -65,7 +65,7 @@
     },
     {
       "name": "compiler-artifact-contract",
-      "rules": ["RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69"],
+      "rules": ["RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-71", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69"],
       "verification": "make typed-generator-compile-check",
       "files": ["scripts/check-ast-artifact.mts", "scripts/check-generated-artifact.mts", "scripts/check-compiler-ir.mts", "scripts/check-typed-generator.mts", "scripts/check-generated-native-calls.mts"]
     },

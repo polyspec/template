@@ -297,4 +297,4 @@ TypeScript, PHP, PHP 확장, Python은 `limits` 옵션에서 각 제한을 그 k
 
 - **RT-40** 엔진은 템플릿을 `name@version`마다 한 번 파싱하고 로더가 같은 버전을 보고하는 동안 파싱된 템플릿을 재사용한다.
 - **RT-41** 파싱된 템플릿은 AST JSON으로 저장하고 다시 로드할 수 있다. AST 렌더는 소스 렌더와 같은 출력을 만든다.
-- **RT-60** Build compiler는 `--refresh dev|true|false`를 받는다. `dev`는 항상 쓰고, `true`는 source, type, contract digest가 일치하는 artifact를 재사용하며, `false`는 source를 읽거나 parse하지 않고 artifact도 쓰지 않는다.
+- **RT-71** Build compiler는 `--refresh dev|true|false`를 받는다. `dev`는 항상 쓰고, `true`는 source, type, contract digest가 일치하는 artifact를 재사용하며, `false`는 source를 읽거나 parse하지 않고 artifact도 쓰지 않는다.
