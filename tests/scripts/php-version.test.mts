@@ -38,12 +38,6 @@ test('.php-version holds the minimum PHP release of config/toolchain.json', () =
   assert.equal(readFileSync(file, 'utf8'), `${releases[0]}\n`);
 });
 
-test('the release workflow starts the PHP of .php-version', () => {
-  const steps = setupPhp('.github/workflows/release.yml');
-  assert.equal(steps.length, 1, 'the release workflow has no single setup-php step');
-  assert.equal(steps[0]?.inputs['php-version-file'], '.php-version');
-});
-
 test('every setup-php step of the workflows of the repository reads .php-version or the releases of config/toolchain.json', () => {
   const found = WORKFLOWS.flatMap(file => setupPhp(file).map(step => ({ file, ...step })));
   assert.ok(found.length > 0, 'no setup-php step was found in .github/workflows; the check verified nothing');

@@ -1,8 +1,10 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 4191d137d6e32196f770e6dcea200a170a29ee302c6f4c6a45f09aef09842a57 -->
+<!-- source-sha256: 4edef85a7f03df3c11f649cd087ad007edcbeb7788d8ba77d00cef89dab2341d -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
 |---|---|---|---|---|
 | T26.1 | 저장소가 kit 표준 0.0.54를 따른다 | The vendored kit files, the layout, the plans and the checks of the kit standard 0.0.54 | `make kit-check` | [o] |
 | T26.2 | kit task를 덮어쓰던 recipe가 각각 한 번씩 실행되고, 체크리스트는 각 하위 항목의 상위 행과 각 미완료 항목의 단위 테스트를 적는다 | The Makefile recipes `template-build-ts`, `template-build-go`, `template-build-rust`, `template-build-php`, `template-test-php`, `template-test-python` and `template-rules-check`, each a prerequisite of its kit target; the parent row T22.5 and the unit-test commands of T22.6, T22.6-12-1 and T22.6-17 in docs/plans/execution/checklist.md and its Korean twin | `make kit-check` | [o] |
+| T26.3 | 모든 Composer platform의 PHP 요구는 8.4.1이고, 저장소 test는 kit의 workflow를 제외하며, 외부 제품 이름은 현재 파일에 없다 | The `config.platform.php` of composer.json, packages/php/composer.json, packages/php-ext/composer.json, config/php-lint/composer.json and tests/fixtures/release-consumer/composer/composer.json is 8.4.1, their composer.lock files are re-locked (the release-consumer fixture is left for the release, it needs the release archives); tests/scripts/device-paths.test.mts and php-version.test.mts leave out the workflows that kit copies; the outside product is removed from the checklist rows and tests/scripts/decode-bundle-size.test.mts | `node --test tests/scripts/device-paths.test.mts tests/scripts/php-version.test.mts tests/scripts/decode-bundle-size.test.mts` | [o] |
+| T26.4 | AGENTS.md의 모든 rule은 CI나 Git hook이 실행하는 check를 이름으로 든다. pre-commit hook이 생성 경로의 staging을 거부한다 | config/checklist.json lists the pre-commit hook, .githooks/pre-commit runs make staged-generated-hook, tests/scripts/pre-commit-hook.test.mts checks the hook, and the rule of the links of AGENTS.md names make staged-generated-hook, since the links sit in node_modules, with make link-check as a development aid | `node --test tests/scripts/pre-commit-hook.test.mts`; `make rules-check` | [ ] |

@@ -9,10 +9,12 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { WORKFLOWS } from './workflows.mts';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SELF = 'tests/scripts/device-paths.test.mts';
+// The workflows that kit copies (gates.yml and release.yml) belong to kit, which tests them, so they are left out (workflows.mts).
 const SOURCES = spawnSync('git', ['ls-files', '*.mjs', '*.mts', '*.js', '*.cjs', '*.ts', '*.sh', 'Makefile', '*.mk', '.github/workflows/*.yml'], { cwd: ROOT, encoding: 'utf8' })
-  .stdout.split('\n').filter(file => file && file !== SELF);
+  .stdout.split('\n').filter(file => file && file !== SELF && (!file.startsWith('.github/workflows/') || WORKFLOWS.includes(file)));
 const DEVICE_PATH = /\/dev\/(?:stdin|stdout|stderr|fd\/)|\/proc\/self\//;
 
 test('no tracked source reaches a stream through a device path', () => {

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2306cdbb8ec4e01c2555d16e5544eb55",
+    "content-hash": "f1ba7dec5919496aa8156b54bc7a5f8f",
     "packages": [
         {
             "name": "opis/json-schema",
@@ -202,12 +202,12 @@
             "dist": {
                 "type": "path",
                 "url": "packages/php",
-                "reference": "6376b26f2c1b6fba5a8e70f6085821920daee276"
+                "reference": "f973033b156af79474a221dd144bb7a5b40502c9"
             },
             "require": {
                 "ext-mbstring": "*",
                 "opis/json-schema": "^2.6",
-                "php": ">=8.5",
+                "php": ">=8.4",
                 "symfony/console": "^8.1"
             },
             "require-dev": {
@@ -3050,11 +3050,11 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.5"
+        "php": ">=8.4"
     },
     "platform-dev": {},
     "platform-overrides": {
-        "php": "8.5.0"
+        "php": "8.4.1"
     },
     "plugin-api-version": "2.9.0"
 }
