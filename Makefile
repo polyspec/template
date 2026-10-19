@@ -47,7 +47,7 @@ MAKEFLAGS += -k
 # config/*.json differ between repositories.
 include scripts/kit/kit-bootstrap.mk
 
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php template-test-scripts compiler-interface-generate compiler-interface-check \
+.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php template-build-ts template-build-go template-build-rust template-build-php template-test-php template-test-python template-rules-check template-test-scripts compiler-interface-generate compiler-interface-check \
 	conformance delimiter-matrix template-test-browser ext ext-arginfo template-test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check template-install-check showcase showcase-check showcase-compile \
@@ -209,7 +209,10 @@ template-install-browsers: ## Install the Chromium of Playwright and its system 
 # The validator of the template AST of packages/ts is ajv's standalone validation code of contracts/schema/ast.schema.json
 # (T25.6-2): make ast-validator generates packages/ts/src/ast-validator.mjs, and the build of the package checks that it is
 # current, so the package has no runtime dependency on ajv and compiles no schema at run time.
-build-ts: ast-validator-check ## Build the TypeScript package
+build-ts: template-build-ts ## Build the TypeScript package
+
+# The recipe of template is a prerequisite of the task of kit, which runs its own build-ts recipe as well (each runs once).
+template-build-ts: ast-validator-check
 	$(NODE) scripts/build-package.mts --package ts
 
 .PHONY: ast-validator ast-validator-check
@@ -218,13 +221,19 @@ ast-validator: ## Generate the AST validator of packages/ts from contracts/schem
 ast-validator-check: ## Check that the AST validator of packages/ts is current
 	$(NODE) scripts/generate-ast-validator.mts --check
 
-build-go: ## Build the Go CLI
+build-go: template-build-go ## Build the Go CLI
+
+template-build-go:
 	cd $(GO_DIR) && $(GO) build -o template ./cmd/template && cd $(CURDIR) && $(NODE) scripts/publish-build.mts $(GO_DIR)/template var/build/template-go
 
-build-rust: cargo-downloads-check ## Build the Rust CLI
+build-rust: template-build-rust ## Build the Rust CLI
+
+template-build-rust: cargo-downloads-check
 	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && $(NODE) scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust
 
-build-php: ## Install the Composer packages of the development root composer.json into vendor/
+build-php: template-build-php ## Install the Composer packages of the development root composer.json into vendor/
+
+template-build-php:
 	$(NODE) scripts/composer-install.mts .
 
 test-ts: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests ## TypeScript unit tests and type check
@@ -258,7 +267,9 @@ template-test-rust-clippy: cargo-downloads-check
 template-test-rust-unit: cargo-downloads-check
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked
 
-test-php: build-php ## PHP unit tests
+test-php: template-test-php ## PHP unit tests
+
+template-test-php: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
 template-test-scripts: cargo-downloads-check build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
@@ -422,7 +433,9 @@ $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/py
 	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links var/python/wheelhouse --link-mode copy --no-deps -e $(PYTHON_PACKAGE)
 	touch $@
 
-test-python: python-package ## Unit tests of the Python package
+test-python: template-test-python ## Unit tests of the Python package
+
+template-test-python: python-package
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) python --venv $(PYTHON_VENV) -- discover -s $(PYTHON_PACKAGE)/tests -t $(PYTHON_PACKAGE)
 
 conformance-generated-python: build-ts python-package ## Python generated compiler conformance suite
@@ -483,7 +496,9 @@ template-test-ext-conformance: cargo-downloads-check ext build-php
 template-test-ext-unit: ext build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
-rules-check: ## Check case.json rule identifiers against the specification
+rules-check: template-rules-check ## Check case.json rule identifiers against the specification
+
+template-rules-check:
 	$(NODE) scripts/check-rules.mts
 
 # The editor boundary checker of kit reads the boundaries of config/editor-boundaries.json (EDT-2, EDT-3, T23.4).

@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: 72fcef986cea0be26b4bbd2655b45b71abe9a9466f04e6040d9d8de54554a6dc -->
+<!-- source-sha256: e8966f4938fc9bb9100c40cf0621c2213749919646e13717ea98b847043b2336 -->
 # 개발
 
 ## 문서
@@ -53,7 +53,7 @@
 - 메시지: 실패는 실패한 것을 기대값과 실제값, 또는 명령과 해결 방법과 함께 밝힌다.
   Enforced by: none, the wording of messages is a judgement.
 - Platform: script, test, recipe는 stream을 실행의 파일이나 `-`로 다루고 `/dev/stdin`, `/dev/fd`, `/proc/self` 같은 device path로 다루지 않는다. Linux는 이 경로를 파일로 열기 때문에 Node.js가 child의 input으로 주는 socket을 열지 못한다. `tests/scripts/device-paths.test.mts`가 추적되는 모든 source를 검사한다.
-  Enforced by: `make test-scripts`
+  Enforced by: `make template-test-scripts`
 - 독립성: test는 도구 출력의 문구나 형식, test를 실행하는 사용자, 자기 timeout을 넘지 않는 소요 시간에 기대지 않는다. 계산할 수 있는 것은 계산하고, test를 실행하는 사용자와 platform에 맞는 결과를 검사한다.
   Enforced by: none, the independence of a test is a judgement.
 
@@ -88,7 +88,7 @@
 - 개발에서는 unit test만 실행한다. 작업이 진행 중일 때는 변경을 소유한 Red와 Green unit test를 실행한다. 개발 중에도, commit이나 push 전에도 전체 검사나 end-to-end 검사를 로컬에서 실행하지 않는다. `make check`, `make rerun-failed`, `make owner-check`, conformance runner, browser test, VS Code integration test가 그렇다. CI가 `main`에 대한 모든 push와 모든 수동 실행에서 이것을 실행하며(`.github/workflows/ci.yml`), job마다의 report(`var/report`)가 모든 실패를 log와 함께 밝힌다. 새 경로는 같은 변경에서 `config/owner-checks.json`에 owner를 얻고, owner check는 CI에서 실행된다.
   Enforced by: none, a local run is not observed by a tool.
 - `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 target을 `make ci-targets TARGETS="..."`로 실행하고, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`). `make check`는 같은 suite를 한 checkout에서 tree마다 한 번 실행하며, guard `node_modules/@polyspec/kit/dist/full-run.mjs`가 어떤 단계보다 먼저 이를 강제한다. 작업이 `[~]`이거나, 추적 파일의 변경이 커밋되지 않았거나, `var/full-run.json`이 현재 tree의 전체 실행을 기록하고 있으면 `make check`는 거부된다. `make rerun-failed`는 현재 tree에서 통과하지 못한 target만 다시 실행한다(`docs/operations/development.md`).
-  Enforced by: `make test-scripts`
+  Enforced by: `make template-test-scripts`
 - push는 push되는 commit에도 working tree에도 `[~]` 작업이 없을 때만 한다. pre-push hook `.githooks/pre-push`는 `make push-gate-hook`으로 push gate를 실행하고, 이 gate는 그런 push를 거부하며 각 작업을 밝힌다. 모든 make 실행은 `core.hooksPath`를 `.githooks`로 설정한다. `make hooks`는 hook을 설치하고 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패하고, guard는 hook이 없으면 `make check`를 거부한다. target `push-gate-commit`은 `.github/workflows/ci.yml`의 job `docs`에서 push된 commit에 같은 gate를 실행한다(`docs/operations/development.md`).
   Enforced by: `make push-gate-hook`
 - 버전 0.x는 `main`에서 바로 작업한다. pull request, merge queue, GitHub ruleset은 없다. checklist 행마다 로컬에서 작업한다. 소유 unit test가 통과하면 행이 `[o]`가 되고, 그 changelog 항목과 commit을 함께 남긴다. `main`은 checklist의 모든 행이 `[o]`일 때에만 한 번 push하며, force-push는 하지 않는다. CI는 그 push에서 전체 suite를 실행하고, 릴리스는 그 실행의 job `ci-passed`가 성공한 뒤에만 그 commit에 tag를 붙인다(릴리스).

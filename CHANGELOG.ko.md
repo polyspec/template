@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1642474008c0b41c57306abf557e8fb2ec0d158bb19fa0a18b5d7af1a29b12cb -->
+<!-- source-sha256: ec708e7d75aca6c531beca2604f0e0016d99ed176b821db5841af1eaec0451e3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.2: kit의 task를 덮어쓰던 recipe(`build-ts`, `build-go`, `build-rust`, `build-php`, `test-php`, `test-python`)는 `template-<task>-<runtime>` recipe가 되어 kit의 task가 prerequisite로 이름을 붙이므로 각각 한 번씩 실행됩니다. `rules-check`도 `template-rules-check`로 같은 방식을 따릅니다. 실행 체크리스트에는 하위 항목 T22.5-*의 상위 행 T22.5를 두고, 미완료 항목 T22.6, T22.6-12-1, T22.6-17의 Verification에 각 단위 테스트 명령을 적었습니다. 동작은 바뀌지 않습니다 (T26.2).
 
 - T26.1: 저장소가 kit 표준 0.0.54를 따른다. 실행 체크리스트는 하나의 표로 `docs/plans/execution/`으로 옮기고, 사용법 가이드는 `docs/operations/`로 옮긴다. VS Code 통합 suite와 Python 패키지의 AGENTS와 CHANGELOG는 `config/layout.yml`의 예외로 제자리에 둔다. suite target의 이름은 `check`이고, `install`은 kit의 bootstrap을 먼저 실행하며, kit의 gate는 vendor된 `gates.yml`로 CI에서 실행한다 (T26.1).
 
