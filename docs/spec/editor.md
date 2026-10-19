@@ -7,7 +7,7 @@ This document defines how editors support templates. One language service holds 
 
 ## Layers
 
-**EDT-1** Editor support has three layers:
+- **EDT-1** Editor support has three layers:
 
 | Layer | Package | Runs in | Contents |
 | --- | --- | --- | --- |
@@ -15,23 +15,23 @@ This document defines how editors support templates. One language service holds 
 | language service | `@polyspec/template-language` | browser, Node.js | every editor rule as functions of the document text; the formatter and the command `template-fmt` |
 | adapters | `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `polyspec-template` (VS Code) | Node.js, browser, VS Code | position conversion and feature registration |
 
-**EDT-2** An adapter contains no template rule. It depends on `@polyspec/template-language` and not on `@polyspec/template`. A check fails when an adapter package declares or imports `@polyspec/template` (`make editor-boundary-check`, the editor boundary checker of kit with `config/editor-boundaries.json`).
+- **EDT-2** An adapter contains no template rule. It depends on `@polyspec/template-language` and not on `@polyspec/template`. A check fails when an adapter package declares or imports `@polyspec/template` (`make editor-boundary-check`, the editor boundary checker of kit with `config/editor-boundaries.json`).
 
-**EDT-3** The language service has no dependency on an editor, on Node.js modules or on the DOM, except the command `template-fmt`, which is a separate entry of the package under `src/cli`. The same check fails when a source of the language service outside `src/cli` imports a `node:` module, `vscode`, a `vscode-` package or a CodeMirror package, or uses a DOM object.
+- **EDT-3** The language service has no dependency on an editor, on Node.js modules or on the DOM, except the command `template-fmt`, which is a separate entry of the package under `src/cli`. The same check fails when a source of the language service outside `src/cli` imports a `node:` module, `vscode`, a `vscode-` package or a CodeMirror package, or uses a DOM object.
 
 ## Documents and positions
 
-**EDT-4** `openDocument(text, options)` analyzes a text once; every result of the document comes from that analysis. `options.name` is the template name of diagnostics, `options.delimiters` the engine delimiter option (LEX-22) and `options.location` the file of the document with the host of EDT-21.
+- **EDT-4** `openDocument(text, options)` analyzes a text once; every result of the document comes from that analysis. `options.name` is the template name of diagnostics, `options.delimiters` the engine delimiter option (LEX-22) and `options.location` the file of the document with the host of EDT-21.
 
-**EDT-5** Every position of the language service is a UTF-16 string index into the text, including a byte order mark. A line is a range that ends with `\n`, `\r\n` or the end of the text; lines are numbered from 0. Editors and the Language Server Protocol use the same UTF-16 positions, so an adapter converts positions without counting bytes.
+- **EDT-5** Every position of the language service is a UTF-16 string index into the text, including a byte order mark. A line is a range that ends with `\n`, `\r\n` or the end of the text; lines are numbered from 0. Editors and the Language Server Protocol use the same UTF-16 positions, so an adapter converts positions without counting bytes.
 
-**EDT-6** A text that does not parse still has results. The parser returns the tags it accepted before its first error and their tokens (`analyzePrefix()` of `@polyspec/template`). An unclosed block is reported at the end of the text, so all tags of such a text are accepted. The language service computes tokens, tag ranges and indentation from the accepted tags; constructs, folding ranges and matching tags use only blocks that are closed.
+- **EDT-6** A text that does not parse still has results. The parser returns the tags it accepted before its first error and their tokens (`analyzePrefix()` of `@polyspec/template`). An unclosed block is reported at the end of the text, so all tags of such a text are accepted. The language service computes tokens, tag ranges and indentation from the accepted tags; constructs, folding ranges and matching tags use only blocks that are closed.
 
 ## Results
 
-**EDT-7** For a text that does not parse, `diagnostics` holds one error with `start`, `end` (at least one character), `code` and `message` of the parser error, `severity: 'error'` and `source: 'polyspec-template'`. For a text that parses, it holds the path diagnostics of EDT-20 in text order, in the same form over the range of their tag.
+- **EDT-7** For a text that does not parse, `diagnostics` holds one error with `start`, `end` (at least one character), `code` and `message` of the parser error, `severity: 'error'` and `source: 'polyspec-template'`. For a text that parses, it holds the path diagnostics of EDT-20 in text order, in the same form over the range of their tag.
 
-**EDT-8** `tokens` classifies the template part of the text, sorted by position and not overlapping. Text outside tags has no tokens; adapters highlight it as HTML.
+- **EDT-8** `tokens` classifies the template part of the text, sorted by position and not overlapping. Text outside tags has no tokens; adapters highlight it as HTML.
 
 | Type | Text |
 | --- | --- |
@@ -46,19 +46,19 @@ This document defines how editors support templates. One language service holds 
 | `comment` | a template comment `{* *}` |
 | `path` | an unquoted include path and the unquoted words of a block tag body |
 
-**EDT-9** `tags` lists the range of every accepted tag except comments. Editors paint these ranges with the tag background: `#16351c` in dark themes and `#e3f6dd` in light themes.
+- **EDT-9** `tags` lists the range of every accepted tag except comments. Editors paint these ranges with the tag background: `#16351c` in dark themes and `#e3f6dd` in light themes.
 
-**EDT-10** A construct is a loop, if or if-block tag, its else-if and else tags and its close tag. `foldingRanges` holds, for every construct whose close tag starts on a later line, the range from the line of the opening tag to the line before the close tag.
+- **EDT-10** A construct is a loop, if or if-block tag, its else-if and else tags and its close tag. `foldingRanges` holds, for every construct whose close tag starts on a later line, the range from the line of the opening tag to the line before the close tag.
 
-**EDT-11** `highlights(index)` returns the ranges of all tags of the construct that has a tag containing `index`, including the index after the tag; otherwise it is empty. `matchingTag(index)` returns the start of the next tag of that construct, the opening tag after the last one; outside every tag it returns the next tag of the innermost construct around `index`, or null.
+- **EDT-11** `highlights(index)` returns the ranges of all tags of the construct that has a tag containing `index`, including the index after the tag; otherwise it is empty. `matchingTag(index)` returns the start of the next tag of that construct, the opening tag after the last one; outside every tag it returns the next tag of the innermost construct around `index`, or null.
 
-**EDT-12** `format(options)` is `format()` of the formatter with the options `indent`, `templateBlocks` and `range`.
+- **EDT-12** `format(options)` is `format()` of the formatter with the options `indent`, `templateBlocks` and `range`.
 
-**EDT-13** `lineIndentation(line, options)` returns the indentation a line gets while it is typed: the indent unit repeated by the line's depth under the indentation rule of the formatter (FMT-9, FMT-10), with `options.indent` and `options.templateBlocks`. The depth comes from the text before the line. Unlike the formatter, it does not require a balanced structure: an end tag closes up to the open element of the same name and is ignored when no such element is open. A blank line, which Enter creates, gets the indentation of its depth; only the formatter empties blank lines.
+- **EDT-13** `lineIndentation(line, options)` returns the indentation a line gets while it is typed: the indent unit repeated by the line's depth under the indentation rule of the formatter (FMT-9, FMT-10), with `options.indent` and `options.templateBlocks`. The depth comes from the text before the line. Unlike the formatter, it does not require a balanced structure: an end tag closes up to the open element of the same name and is ignored when no such element is open. A blank line, which Enter creates, gets the indentation of its depth; only the formatter empties blank lines.
 
 ## Adapters
 
-**EDT-14** `@polyspec/template-lsp` is a Language Server Protocol server over standard input and output (command `template-lsp`). It uses `positionEncoding` `utf-16` and full text synchronization and provides:
+- **EDT-14** `@polyspec/template-lsp` is a Language Server Protocol server over standard input and output (command `template-lsp`). It uses `positionEncoding` `utf-16` and full text synchronization and provides:
 
 | Capability | Result |
 | --- | --- |
@@ -87,17 +87,17 @@ Positions and ranges are `Position` and `Range` values of the protocol. The cust
 - The current line of `textDocument/onTypeFormatting` is the line of the request position. The edit replaces the spaces and tabs at the start of that line; the server returns no edit when they already equal `lineIndentation`.
 - Formatting and on-type formatting request `workspace/configuration` with `{ scopeUri: <document URI>, section: 'polyspec-template' }` and use `format.templateBlocks` of the result. Any other value than `flat`, and a client without the `workspace/configuration` capability, give `indent`.
 
-**EDT-15** The VS Code extension `polyspec-template` is a client of `@polyspec/template-lsp`, which it bundles. Its TextMate grammar highlights only the HTML host with its embedded CSS and JavaScript; the template tags are colored only by the semantic tokens of the server, which the extension enables for the language. It paints the tag background from `polyspec-template/tagRanges` and moves the cursor with `polyspec-template/matchingTag`.
+- **EDT-15** The VS Code extension `polyspec-template` is a client of `@polyspec/template-lsp`, which it bundles. Its TextMate grammar highlights only the HTML host with its embedded CSS and JavaScript; the template tags are colored only by the semantic tokens of the server, which the extension enables for the language. It paints the tag background from `polyspec-template/tagRanges` and moves the cursor with `polyspec-template/matchingTag`.
 
-**EDT-16** `@polyspec/template-codemirror` exports `template(options)`, a CodeMirror 6 extension built on `@codemirror/lang-html`. It marks tokens with the classes `cm-template-<type>`, paints the tag background, reports diagnostics through `@codemirror/lint`, provides folding, matching tag highlights, an indentation service with `lineIndentation` and the command `formatTemplate` (bound to `Shift-Alt-f`), which uses the editor's indent unit. `options.templateBlocks`, `options.delimiters` and `options.location` (EDT-21) are passed to the language service.
+- **EDT-16** `@polyspec/template-codemirror` exports `template(options)`, a CodeMirror 6 extension built on `@codemirror/lang-html`. It marks tokens with the classes `cm-template-<type>`, paints the tag background, reports diagnostics through `@codemirror/lint`, provides folding, matching tag highlights, an indentation service with `lineIndentation` and the command `formatTemplate` (bound to `Shift-Alt-f`), which uses the editor's indent unit. `options.templateBlocks`, `options.delimiters` and `options.location` (EDT-21) are passed to the language service.
 
 ## Template root
 
-**EDT-18** A file `template-root.json` declares a template root: its directory. The root of a document is declared by the marker in the nearest ancestor directory of the document, the directory of the document first, up to the file system root; only a regular file is a marker. The marker serves the tools that no caller gives a root: the language service, the LSP server and the CodeMirror adapter through `options.location`. The compiler keeps its `root` argument, the filesystem loader its root, the map and artifact loaders are unchanged, and the conformance command keeps `--root` (CNF-4). The editor resolves paths against the marker and does not check the loader root of a host: a host's loader root is the host's own declaration, and a difference between the two is the host's choice.
+- **EDT-18** A file `template-root.json` declares a template root: its directory. The root of a document is declared by the marker in the nearest ancestor directory of the document, the directory of the document first, up to the file system root; only a regular file is a marker. The marker serves the tools that no caller gives a root: the language service, the LSP server and the CodeMirror adapter through `options.location`. The compiler keeps its `root` argument, the filesystem loader its root, the map and artifact loaders are unchanged, and the conformance command keeps `--root` (CNF-4). The editor resolves paths against the marker and does not check the loader root of a host: a host's loader root is the host's own declaration, and a difference between the two is the host's choice.
 
-**EDT-19** The content of a marker is `{"schema": 1}`: one JSON document that is an object whose only key is `schema` with the number 1. Text that is not one JSON document, a value that is not an object, a missing `schema`, another `schema` value and an unknown key are each an error `E_ROOT_INVALID` over the whole marker text, reported on the marker (`TemplateDocument.root.diagnostics`, published on the URI of the marker by EDT-14). An invalid marker declares no root. The vectors of `packages/language/tests/root-marker/vectors.json` accept and reject marker texts.
+- **EDT-19** The content of a marker is `{"schema": 1}`: one JSON document that is an object whose only key is `schema` with the number 1. Text that is not one JSON document, a value that is not an object, a missing `schema`, another `schema` value and an unknown key are each an error `E_ROOT_INVALID` over the whole marker text, reported on the marker (`TemplateDocument.root.diagnostics`, published on the URI of the marker by EDT-14). An invalid marker declares no root. The vectors of `packages/language/tests/root-marker/vectors.json` accept and reject marker texts.
 
-**EDT-20** For a text that parses, every include path and every block path of a block tag with a path token gets one diagnostic over its tag when it does not resolve:
+- **EDT-20** For a text that parses, every include path and every block path of a block tag with a path token gets one diagnostic over its tag when it does not resolve:
 
 | Condition | Code | Message |
 | --- | --- | --- |
@@ -108,8 +108,8 @@ Positions and ranges are `Position` and `Range` values of the protocol. The cust
 
 The path resolves against the template name of the document relative to the root, with RT-8's normalization: a leading `/` against the root, `.` and `..` normalized. A block tag of an identifier alone and a target that `define` supplies are resolved at render (RT-24, RT-25) and get no diagnostic; they fail there with `E_LOAD_NOT_FOUND` or `E_RUNTIME_BLOCK_UNDEFINED`. Files that change after the analysis are seen at the next analysis of the document.
 
-**EDT-21** The language service reaches files only through a host given in `options.location` (`{ path, host }`, `path` absolute with `/` separators): `host.entryType(path)` returns `file`, `directory`, `symlink` or `other` for the entry at a path without following a symbolic link, or null when the path names nothing, and `host.readText(path)` returns the text of a regular file. The language service stays free of Node.js (EDT-3); the LSP server passes a host over `node:fs`, and a CodeMirror host passes its own.
+- **EDT-21** The language service reaches files only through a host given in `options.location` (`{ path, host }`, `path` absolute with `/` separators): `host.entryType(path)` returns `file`, `directory`, `symlink` or `other` for the entry at a path without following a symbolic link, or null when the path names nothing, and `host.readText(path)` returns the text of a regular file. The language service stays free of Node.js (EDT-3); the LSP server passes a host over `node:fs`, and a CodeMirror host passes its own.
 
 ## Conformance
 
-**EDT-17** The editor fixtures under `packages/language/tests/editor` give, for each template, the expected diagnostics, tokens, tag ranges, folding ranges, highlights and matching tags at listed positions, the indentation of every line and the formatted text. The fixtures lie under the marker `template-root.json` of that directory, and every adapter opens them at their file path. The language service, the LSP server (through its protocol over standard input and output) and the CodeMirror adapter (through an `EditorState`) must give the same results after position conversion.
+- **EDT-17** The editor fixtures under `packages/language/tests/editor` give, for each template, the expected diagnostics, tokens, tag ranges, folding ranges, highlights and matching tags at listed positions, the indentation of every line and the formatted text. The fixtures lie under the marker `template-root.json` of that directory, and every adapter opens them at their file path. The language service, the LSP server (through its protocol over standard input and output) and the CodeMirror adapter (through an `EditorState`) must give the same results after position conversion.

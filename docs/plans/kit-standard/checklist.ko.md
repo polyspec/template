@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 0971d7b0a8a045c2926d967eab918c83d4e8cebfeb1ed8997eac16aea3d789bf -->
+<!-- source-sha256: d21ef1617949f1d8541db27060c3f71be1826026d52559ddd2a5f84d348ea638 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -9,3 +9,4 @@
 | T26.3 | 모든 Composer platform의 PHP 요구는 8.4.1이고, 저장소 test는 kit의 workflow를 제외하며, 외부 제품 이름은 현재 파일에 없다 | The `config.platform.php` of composer.json, packages/php/composer.json, packages/php-ext/composer.json, config/php-lint/composer.json and tests/fixtures/release-consumer/composer/composer.json is 8.4.1, their composer.lock files are re-locked (the release-consumer fixture is left for the release, it needs the release archives); tests/scripts/device-paths.test.mts and php-version.test.mts leave out the workflows that kit copies; the outside product is removed from the checklist rows and tests/scripts/decode-bundle-size.test.mts | `node --test tests/scripts/device-paths.test.mts tests/scripts/php-version.test.mts tests/scripts/decode-bundle-size.test.mts` | [o] |
 | T26.4 | AGENTS.md의 모든 rule은 CI나 Git hook이 실행하는 check를 이름으로 든다. pre-commit hook이 생성 경로의 staging을 거부한다 | config/checklist.json lists the pre-commit hook, .githooks/pre-commit runs make staged-generated-hook, tests/scripts/pre-commit-hook.test.mts checks the hook, and the rule of the links of AGENTS.md names make staged-generated-hook, since the links sit in node_modules, with make link-check as a development aid | `node --test tests/scripts/pre-commit-hook.test.mts`; `make rules-check` | [o] |
 | T26.5 | kit 0.0.54 복사본이 73cf59e1을 따르며, gate에서 전체 parity check를 실행한다 | PRINCIPLES.md and PRINCIPLES.ko.md, the copies that make kit-sync writes from the installed package: rule S6 names make parity-check beside make parity-declarations-check | `make kit-check` | [~] |
+| T26.6 | docs/spec의 모든 requirement는 ID를 가진 bullet이며, config/parity.json의 각 unit은 자신이 시험하는 requirement를 인용한다(K273) | The spec bullets of docs/spec/*.md and their Korean twins, config/parity.json with requirements.pattern and the requirements of every unit, and the kit copies of make kit-sync | `make kit-check` | [~] |

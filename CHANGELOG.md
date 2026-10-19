@@ -7,6 +7,8 @@
 
 - T26.3: the PHP requirement of every Composer platform is 8.4.1, and their locks are locked again (the release-consumer fixture waits for the release); the repository's tests leave out the workflows that kit copies; the outside product named in a checklist row and in a test is no longer named (T26.3).
 
+- T26.6: every requirement of `docs/spec` is a bullet `- **<ID>**` (the English and the Korean files), `config/parity.json` declares `requirements.pattern` and the requirements that each unit tests, and the kit copies follow `make kit-sync`; `make kit-check` passes again (T26.6).
+
 - T26.5: the kit copies follow @polyspec/kit 0.0.54 (73cf59e1), whose gates run the full `make parity-check`; rule S6 of PRINCIPLES.md names it as its enforcement beside `make parity-declarations-check` (T26.5).
 
 - T26.4: the pre-commit hook is a tracked hook of config/checklist.json and runs `make staged-generated-hook`, so a staged generated path is refused; the rule about the links names that check, since the links sit in `node_modules/`, and `make link-check` stays a development aid (T26.4).

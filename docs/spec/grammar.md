@@ -7,7 +7,7 @@ This document defines the body of every tag and the structure of blocks. Tag bou
 
 ## 1. Template
 
-**GRM-1** A template is a sequence of text, tags and comments.
+- **GRM-1** A template is a sequence of text, tags and comments.
 
 ```ebnf
 template   = { text | tag | wrapped | comment } ;
@@ -24,7 +24,7 @@ HWS        = { " " | "\t" } ;
 
 ## 2. Tag bodies
 
-**GRM-2** A tag body is one of the following forms. `expression` and `postfix` are defined in `expressions.md`. `IDENT` is `[A-Za-z_][A-Za-z0-9_]*`. `STRING` is a string literal as defined in `expressions.md`.
+- **GRM-2** A tag body is one of the following forms. `expression` and `postfix` are defined in `expressions.md`. `IDENT` is `[A-Za-z_][A-Za-z0-9_]*`. `STRING` is a string literal as defined in `expressions.md`.
 
 ```ebnf
 body       = sigil_body | assign ;
@@ -50,7 +50,7 @@ DELIMS     = DELIM DELIM ;
 
 `DELIM` is one character allowed as a delimiter by `lexical.md`.
 
-**GRM-3** A `BARE_PATH` contains no whitespace, consists only of the characters listed in GRM-2, and contains at least one `.` or one `/`. A token in a path position that is neither a `STRING` nor a `BARE_PATH` is rejected with `E_PARSE_INVALID_PATH`.
+- **GRM-3** A `BARE_PATH` contains no whitespace, consists only of the characters listed in GRM-2, and contains at least one `.` or one `/`. A token in a path position that is neither a `STRING` nor a `BARE_PATH` is rejected with `E_PARSE_INVALID_PATH`.
 
 ```
 {+ parts/head.tpl}
@@ -62,13 +62,13 @@ DELIMS     = DELIM DELIM ;
 
 The last tag is rejected with `E_PARSE_INVALID_PATH` because `notes` contains neither `.` nor `/`.
 
-**GRM-4** A path is resolved against the directory of the template that contains the tag. A path that starts with `/` is resolved against the loader root. The segments `.` and `..` are normalized. A path whose normalized form leaves the loader root is rejected with `E_LOAD_OUTSIDE_ROOT`. Resolution is defined in `runtime.md`.
+- **GRM-4** A path is resolved against the directory of the template that contains the tag. A path that starts with `/` is resolved against the loader root. The segments `.` and `..` are normalized. A path whose normalized form leaves the loader root is rejected with `E_LOAD_OUTSIDE_ROOT`. Resolution is defined in `runtime.md`.
 
-**GRM-5** In the sigil forms, whitespace between the sigil and the first token of the body is optional. In the assignment form, optional horizontal whitespace follows `{`, `:` follows that whitespace, optional horizontal whitespace follows `:`, and the identifier follows that whitespace, as defined in `lexical.md`. `{:x = 1}`, `{ :x = 1}` and `{: x = 1}` are the same assignment.
+- **GRM-5** In the sigil forms, whitespace between the sigil and the first token of the body is optional. In the assignment form, optional horizontal whitespace follows `{`, `:` follows that whitespace, optional horizontal whitespace follows `:`, and the identifier follows that whitespace, as defined in `lexical.md`. `{:x = 1}`, `{ :x = 1}` and `{: x = 1}` are the same assignment.
 
 ## 3. Echo
 
-**GRM-6** An echo tag is `=` followed by one expression. The value of the expression is output as defined in `runtime.md`.
+- **GRM-6** An echo tag is `=` followed by one expression. The value of the expression is output as defined in `runtime.md`.
 
 ```
 {= title}
@@ -78,14 +78,14 @@ The last tag is rejected with `E_PARSE_INVALID_PATH` because `notes` contains ne
 
 ## 4. Loop
 
-**GRM-7** A loop tag is `@`, an identifier, `=` and one expression. The identifier is the loop variable. A reserved word (`true`, `false`, `null`, `in`) as the loop variable is rejected with `E_PARSE_RESERVED_NAME`. A loop tag opens a block.
+- **GRM-7** A loop tag is `@`, an identifier, `=` and one expression. The identifier is the loop variable. A reserved word (`true`, `false`, `null`, `in`) as the loop variable is rejected with `E_PARSE_RESERVED_NAME`. A loop tag opens a block.
 
 ```
 {@ item = items}
 {@ row = rows | slice(0, 10)}
 ```
 
-**GRM-8** Inside a loop block, at most one `{:}` tag at the top level of the block starts the empty branch. The empty branch is evaluated when the loop body runs zero times, as defined in `runtime.md`.
+- **GRM-8** Inside a loop block, at most one `{:}` tag at the top level of the block starts the empty branch. The empty branch is evaluated when the loop body runs zero times, as defined in `runtime.md`.
 
 ```
 {@ item = items}
@@ -97,9 +97,9 @@ The last tag is rejected with `E_PARSE_INVALID_PATH` because `notes` contains ne
 
 ## 5. Conditional
 
-**GRM-9** An if tag is `?` followed by one expression. An if tag opens a block.
+- **GRM-9** An if tag is `?` followed by one expression. An if tag opens a block.
 
-**GRM-10** Inside an if block, zero or more `{:? expression}` tags at the top level of the block start further branches, and at most one `{:}` tag starts the else branch. The tags are ordered: every `{:?}` tag comes before the `{:}` tag.
+- **GRM-10** Inside an if block, zero or more `{:? expression}` tags at the top level of the block start further branches, and at most one `{:}` tag starts the else branch. The tags are ordered: every `{:?}` tag comes before the `{:}` tag.
 
 ```
 {? level == 1}
@@ -113,11 +113,11 @@ other
 
 ## 6. Close
 
-**GRM-11** The close tag `{/}` closes the innermost open block. The close tag has no body after `/`.
+- **GRM-11** The close tag `{/}` closes the innermost open block. The close tag has no body after `/`.
 
 ## 7. Include
 
-**GRM-12** An include tag is `+` followed by one path. The template at the path is rendered at the position of the tag with the scope of the including template, as defined in `runtime.md`.
+- **GRM-12** An include tag is `+` followed by one path. The template at the path is rendered at the position of the tag with the scope of the including template, as defined in `runtime.md`.
 
 ```
 {+ parts/head.tpl}
@@ -125,11 +125,11 @@ other
 
 ## 8. Block
 
-**GRM-13** A block tag is `#` followed by, in this order: an optional block identifier, an optional path, and zero or more scope items. The first token decides its role: an `IDENT` is the block identifier; a `STRING` or `BARE_PATH` is the path. When the first token is the block identifier, the second token may be the path. Every following token is a scope item.
+- **GRM-13** A block tag is `#` followed by, in this order: an optional block identifier, an optional path, and zero or more scope items. The first token decides its role: an `IDENT` is the block identifier; a `STRING` or `BARE_PATH` is the path. When the first token is the block identifier, the second token may be the path. Every following token is a scope item.
 
-**GRM-14** A scope item is `IDENT` or `IDENT:postfix`. The form `IDENT` is equivalent to `IDENT:IDENT`. The `postfix` is a postfix expression as defined in `expressions.md` and contains no whitespace. The identifier is the name visible inside the block; the postfix is the value.
+- **GRM-14** A scope item is `IDENT` or `IDENT:postfix`. The form `IDENT` is equivalent to `IDENT:IDENT`. The `postfix` is a postfix expression as defined in `expressions.md` and contains no whitespace. The identifier is the name visible inside the block; the postfix is the value.
 
-**GRM-15** A block tag with two paths, a scope item without an identifier, or any other token order is rejected with `E_PARSE_INVALID_BLOCK_TAG`.
+- **GRM-15** A block tag with two paths, a scope item without an identifier, or any other token order is rejected with `E_PARSE_INVALID_BLOCK_TAG`.
 
 The following block tags are valid:
 
@@ -154,7 +154,7 @@ The following block tags are rejected with `E_PARSE_INVALID_BLOCK_TAG`:
 
 ## 9. If-block
 
-**GRM-16** An if-block tag is `?#` followed by one identifier. An if-block tag opens a block. Inside an if-block, at most one `{:}` tag at the top level of the block starts the else branch; a `{:?}` tag is rejected with `E_PARSE_ELSEIF_NOT_IN_IF`. The block body is evaluated when a block with the identifier is registered, as defined in `runtime.md`.
+- **GRM-16** An if-block tag is `?#` followed by one identifier. An if-block tag opens a block. Inside an if-block, at most one `{:}` tag at the top level of the block starts the else branch; a `{:?}` tag is rejected with `E_PARSE_ELSEIF_NOT_IN_IF`. The block body is evaluated when a block with the identifier is registered, as defined in `runtime.md`.
 
 ```
 {?# contents}
@@ -166,7 +166,7 @@ The following block tags are rejected with `E_PARSE_INVALID_BLOCK_TAG`:
 
 ## 10. Assignment
 
-**GRM-17** An assignment tag is `:` followed by an identifier, then `=` and one expression, by one of `+=`, `-=`, `*=`, `/=`, `%=` and one expression, or by `++` or `--`. A reserved word as the identifier is rejected with `E_PARSE_RESERVED_NAME`. The forms are equivalent to the following assignments:
+- **GRM-17** An assignment tag is `:` followed by an identifier, then `=` and one expression, by one of `+=`, `-=`, `*=`, `/=`, `%=` and one expression, or by `++` or `--`. A reserved word as the identifier is rejected with `E_PARSE_RESERVED_NAME`. The forms are equivalent to the following assignments:
 
 ```
 {:n += e}   is   {:n = n + e}
@@ -188,7 +188,7 @@ The AST contains only the expanded form, as defined in `ast.md`.
 
 ## 11. Directive
 
-**GRM-24** A directive tag is `%`, the word `delimiter` and two delimiter characters. Its position, effect and errors are defined in `lexical.md`. A directive tag has no node in the AST.
+- **GRM-24** A directive tag is `%`, the word `delimiter` and two delimiter characters. Its position, effect and errors are defined in `lexical.md`. A directive tag has no node in the AST.
 
 ```
 {% delimiter ;;}
@@ -197,17 +197,17 @@ The AST contains only the expanded form, as defined in `ast.md`.
 
 ## 12. Block structure
 
-**GRM-18** The tags loop, if and if-block open a block. The tag `{/}` closes the innermost open block. Blocks nest. A `{/}` tag while no block is open is rejected with `E_PARSE_UNEXPECTED_CLOSE`.
+- **GRM-18** The tags loop, if and if-block open a block. The tag `{/}` closes the innermost open block. Blocks nest. A `{/}` tag while no block is open is rejected with `E_PARSE_UNEXPECTED_CLOSE`.
 
-**GRM-19** A block that is still open at the end of the source is rejected with `E_PARSE_UNCLOSED_BLOCK`. The reported position is the opening tag.
+- **GRM-19** A block that is still open at the end of the source is rejected with `E_PARSE_UNCLOSED_BLOCK`. The reported position is the opening tag.
 
-**GRM-20** Blocks balance within one source. An included template cannot open a block that the including template closes, and cannot close a block that the including template opened.
+- **GRM-20** Blocks balance within one source. An included template cannot open a block that the including template closes, and cannot close a block that the including template opened.
 
-**GRM-21** A `{:? expression}` tag outside every block is rejected with `E_PARSE_ELSE_OUTSIDE_BLOCK`. A `{:? expression}` tag whose innermost open block is a loop or an if-block is rejected with `E_PARSE_ELSEIF_NOT_IN_IF`.
+- **GRM-21** A `{:? expression}` tag outside every block is rejected with `E_PARSE_ELSE_OUTSIDE_BLOCK`. A `{:? expression}` tag whose innermost open block is a loop or an if-block is rejected with `E_PARSE_ELSEIF_NOT_IN_IF`.
 
-**GRM-22** A `{:}` tag outside every block is rejected with `E_PARSE_ELSE_OUTSIDE_BLOCK`. A second `{:}` tag in the same block is rejected with `E_PARSE_DUPLICATE_ELSE`. A `{:?}` tag after the `{:}` tag of the same block is rejected with `E_PARSE_ELSEIF_AFTER_ELSE`.
+- **GRM-22** A `{:}` tag outside every block is rejected with `E_PARSE_ELSE_OUTSIDE_BLOCK`. A second `{:}` tag in the same block is rejected with `E_PARSE_DUPLICATE_ELSE`. A `{:?}` tag after the `{:}` tag of the same block is rejected with `E_PARSE_ELSEIF_AFTER_ELSE`.
 
-**GRM-23** A tag body that satisfies none of the forms in GRM-2 is rejected with `E_PARSE_UNEXPECTED_TOKEN`. The reported position is the first token that does not match.
+- **GRM-23** A tag body that satisfies none of the forms in GRM-2 is rejected with `E_PARSE_UNEXPECTED_TOKEN`. The reported position is the first token that does not match.
 
 The following source is rejected with `E_PARSE_UNCLOSED_BLOCK` at line 1:
 

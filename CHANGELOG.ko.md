@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3027f9162289a2aabc2a6d0e569bedd049212dd6a1bd610256ba2f40d1bcb69d -->
+<!-- source-sha256: a9a7fc926e87460cbbaeff782c8ae2cd6a63f68bc89fb8c1a5951b925ce8a576 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,8 @@
 ## Unreleased
 
 - T26.3: 모든 Composer platform의 PHP 요구는 8.4.1이고 lock을 다시 만들었습니다(release-consumer fixture는 release를 기다립니다). 저장소의 test는 kit이 복사한 workflow를 제외하며, checklist와 test에 적힌 외부 제품 이름을 지웠습니다 (T26.3).
+
+- T26.6: `docs/spec`의 모든 requirement는 `- **<ID>**` bullet입니다(영어와 한국어 파일). `config/parity.json`은 `requirements.pattern`과 각 unit이 시험하는 requirement를 적고, kit 복사본은 `make kit-sync`를 따릅니다. `make kit-check`가 다시 통과합니다 (T26.6).
 
 - T26.5: kit 복사본은 @polyspec/kit 0.0.54(73cf59e1)를 따르며, 그 gate는 전체 `make parity-check`를 실행합니다. PRINCIPLES.md의 S6 rule은 `make parity-declarations-check`와 함께 `make parity-check`를 enforcement로 듭니다 (T26.5).
 

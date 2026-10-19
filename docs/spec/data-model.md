@@ -7,7 +7,7 @@ This document defines the value types that templates operate on, the safe string
 
 ## Value types
 
-**VAL-1** A value has exactly one of the following types.
+- **VAL-1** A value has exactly one of the following types.
 
 | Type | Content |
 | --- | --- |
@@ -18,23 +18,23 @@ This document defines the value types that templates operate on, the safe string
 | list | An ordered sequence of values |
 | map | An ordered sequence of entries; each entry has a string key and a value; keys are unique |
 
-**VAL-2** There is one number type. An integer is a number whose value has no fractional part. Host binding accepts a number only when it is finite and its magnitude is at most 2^53 − 1 (9007199254740991). The rule depends only on the numeric value, never on the host type or on the spelling of a JSON literal: an integer-typed host value, a floating point host value, a JSON integer literal and a JSON literal with a fraction or an exponent are checked alike. A value that is NaN or infinite is E_DATA_NUMBER_NOT_FINITE (VAL-3). A finite value whose magnitude is greater than 2^53 − 1 is E_DATA_NUMBER_RANGE. Every floating point number of such a magnitude is an integer, so `1e19`, `2^53` and `9007199254740992.0` are all E_DATA_NUMBER_RANGE. A JSON literal is first converted to the nearest double; a literal whose nearest double is infinite, such as `1e400`, is E_DATA_NUMBER_NOT_FINITE. An integer-typed host value is compared exactly. A number that template arithmetic produces is not host binding; only VAL-3 applies to it. Integer arithmetic within the binding range is exact.
+- **VAL-2** There is one number type. An integer is a number whose value has no fractional part. Host binding accepts a number only when it is finite and its magnitude is at most 2^53 − 1 (9007199254740991). The rule depends only on the numeric value, never on the host type or on the spelling of a JSON literal: an integer-typed host value, a floating point host value, a JSON integer literal and a JSON literal with a fraction or an exponent are checked alike. A value that is NaN or infinite is E_DATA_NUMBER_NOT_FINITE (VAL-3). A finite value whose magnitude is greater than 2^53 − 1 is E_DATA_NUMBER_RANGE. Every floating point number of such a magnitude is an integer, so `1e19`, `2^53` and `9007199254740992.0` are all E_DATA_NUMBER_RANGE. A JSON literal is first converted to the nearest double; a literal whose nearest double is infinite, such as `1e400`, is E_DATA_NUMBER_NOT_FINITE. An integer-typed host value is compared exactly. A number that template arithmetic produces is not host binding; only VAL-3 applies to it. Integer arithmetic within the binding range is exact.
 
-**VAL-3** The values NaN, +Infinity and -Infinity never exist. Host binding rejects them with E_DATA_NUMBER_NOT_FINITE. An arithmetic result that is not finite is E_RUNTIME_TYPE as defined in Expressions.
+- **VAL-3** The values NaN, +Infinity and -Infinity never exist. Host binding rejects them with E_DATA_NUMBER_NOT_FINITE. An arithmetic result that is not finite is E_RUNTIME_TYPE as defined in Expressions.
 
-**VAL-4** A map preserves the insertion order of its entries in every implementation. Iteration, `keys`, `values` and `json` follow that order.
+- **VAL-4** A map preserves the insertion order of its entries in every implementation. Iteration, `keys`, `values` and `json` follow that order.
 
-**VAL-5** A string is measured, indexed and sliced by Unicode code points. Two strings are ordered by comparing their code point sequences element by element; a shorter string that is a prefix of a longer string orders first.
+- **VAL-5** A string is measured, indexed and sliced by Unicode code points. Two strings are ordered by comparing their code point sequences element by element; a shorter string that is a prefix of a longer string orders first.
 
 ## Safe string
 
-**VAL-6** A safe string is a string that carries a safe mark. The functions `raw` and `escape` return safe strings. An echo tag writes a safe string without escaping. In every other position a safe string behaves as a string: functions, operators, `==` and `in` read its text and ignore the mark, and a function that returns a string returns a plain string.
+- **VAL-6** A safe string is a string that carries a safe mark. The functions `raw` and `escape` return safe strings. An echo tag writes a safe string without escaping. In every other position a safe string behaves as a string: functions, operators, `==` and `in` read its text and ignore the mark, and a function that returns a string returns a plain string.
 
-**VAL-7** Host binding never produces a safe string. A host function that returns a string returns a plain string, as defined in [Functions](functions.md).
+- **VAL-7** Host binding never produces a safe string. A host function that returns a string returns a plain string, as defined in [Functions](functions.md).
 
 ## Stringification
 
-**VAL-8** `stringify(v)` converts a value to text. It is used by the echo tag, by the `+` operator when either operand is a string, by the `in` operator, by map literal keys, and by the functions `str` and `join`.
+- **VAL-8** `stringify(v)` converts a value to text. It is used by the echo tag, by the `+` operator when either operand is a string, by the `in` operator, by map literal keys, and by the functions `str` and `join`.
 
 | Type | Result |
 | --- | --- |
@@ -44,7 +44,7 @@ This document defines the value types that templates operate on, the safe string
 | string | The string itself |
 | list, map | E_RUNTIME_STRINGIFY |
 
-**VAL-9** A number `x` is converted to text as follows.
+- **VAL-9** A number `x` is converted to text as follows.
 
 1. If `x` is 0 or -0, the result is `0`.
 2. If `x` is negative, the result is `-` followed by the conversion of `-x`.
@@ -69,7 +69,7 @@ This document defines the value types that templates operate on, the safe string
 | `1.5e-7` | `1.5e-7` |
 | `2^53 - 1` | `9007199254740991` |
 
-**VAL-10** Each implementation obtains the digits `s` and the exponent `n` with the shortest round-trip conversion of its platform and then applies steps 4 to 7 of VAL-9.
+- **VAL-10** Each implementation obtains the digits `s` and the exponent `n` with the shortest round-trip conversion of its platform and then applies steps 4 to 7 of VAL-9.
 
 | Implementation | Digit source |
 | --- | --- |
@@ -80,9 +80,9 @@ This document defines the value types that templates operate on, the safe string
 
 ## Host binding
 
-**VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 and VAL-23 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host. A bound map (VAL-22) has passed binding, so `render` uses it as `assign` or as definition data without binding it again (RT-61).
+- **VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables in VAL-12 to VAL-16 and VAL-23 are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host. A bound map (VAL-22) has passed binding, so `render` uses it as `assign` or as definition data without binding it again (RT-61).
 
-**VAL-12** JSON text is the reference form of assign data. Every implementation accepts JSON text and produces the same values. Each implementation parses JSON text with a parser that preserves document order and applies the number rule of VAL-2 and the depth limit of VAL-20; the TypeScript implementation provides this parser in the package and does not use `JSON.parse` for assign data.
+- **VAL-12** JSON text is the reference form of assign data. Every implementation accepts JSON text and produces the same values. Each implementation parses JSON text with a parser that preserves document order and applies the number rule of VAL-2 and the depth limit of VAL-20; the TypeScript implementation provides this parser in the package and does not use `JSON.parse` for assign data.
 
 | JSON | Value |
 | --- | --- |
@@ -97,7 +97,7 @@ Arrays and objects that nest deeper than the limit of VAL-20 are E_DATA_DEPTH. T
 
 A text that is not one JSON document is E_DATA_INVALID_JSON: a syntax error, an empty text, and a text with anything other than whitespace after the document. The parser reports the first violation in document order, so a depth or number error before a syntax error is reported with its own code. The rule applies to every JSON text that an implementation accepts as data: assign data, template definitions and the environment, including the files of the command line interface (CNF-4) and the JSON methods of the PHP extension. Reason: JSON text is the reference form of data, so a malformed document is a data error of the same input and is reported with the data error object of ERR-5 in every implementation, not with an implementation-specific exception.
 
-**VAL-13** TypeScript and JavaScript.
+- **VAL-13** TypeScript and JavaScript.
 
 | Input | Value |
 | --- | --- |
@@ -113,7 +113,7 @@ A text that is not one JSON document is E_DATA_INVALID_JSON: a syntax error, an 
 | bound map (VAL-22) | E_DATA_UNSUPPORTED_TYPE, except as `assign` and as definition `data` (VAL-22) |
 | class instance | object (VAL-19); the original instance is retained |
 
-**VAL-14** PHP.
+- **VAL-14** PHP.
 
 | Input | Value |
 | --- | --- |
@@ -133,7 +133,7 @@ A text that is not one JSON document is E_DATA_INVALID_JSON: a syntax error, an 
 
 The rows are tried in this order, so a `stdClass` subclass that implements `JsonSerializable` binds its `jsonSerialize()` value. The public properties of an object are the entries of `get_mangled_object_vars()` whose names are not mangled: the declared public properties that are initialized and the dynamic properties. The result does not depend on the class scope from which the host calls `render`.
 
-**VAL-15** Go.
+- **VAL-15** Go.
 
 | Input | Value |
 | --- | --- |
@@ -150,7 +150,7 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 | pointer to a value of another kind | the binding of the value it points to; `nil` is null; each such dereference counts as one level of VAL-20, so a pointer that leads back to itself fails with E_DATA_DEPTH |
 | function, channel and every other kind | E_DATA_UNSUPPORTED_TYPE |
 
-**VAL-16** Rust.
+- **VAL-16** Rust.
 
 | Input | Value |
 | --- | --- |
@@ -165,7 +165,7 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 
 A bound map (VAL-22) is a type of its own that none of these inputs can hold, so `render` receives it only as `assign` and as definition `data`.
 
-**VAL-23** Python.
+- **VAL-23** Python.
 
 | Input | Value |
 | --- | --- |
@@ -180,11 +180,11 @@ A bound map (VAL-22) is a type of its own that none of these inputs can hold, so
 | instance of a class that is not defined by the interpreter itself, that is, whose type is not in the module `builtins` | object (VAL-19); the original instance is retained |
 | function, method, class, module and every other instance of a type in `builtins`, such as `set`, `bytes`, `complex`, `range` and a generator | E_DATA_UNSUPPORTED_TYPE |
 
-**VAL-17** Map keys are strings in every host. A host map whose key is not a string is converted only where a table above defines the conversion; otherwise it is E_DATA_UNSUPPORTED_TYPE. A key is checked like a string value: a key that is not valid UTF-8, or in TypeScript a key that is not well-formed UTF-16, is E_DATA_INVALID_UTF8.
+- **VAL-17** Map keys are strings in every host. A host map whose key is not a string is converted only where a table above defines the conversion; otherwise it is E_DATA_UNSUPPORTED_TYPE. A key is checked like a string value: a key that is not valid UTF-8, or in TypeScript a key that is not well-formed UTF-16, is E_DATA_INVALID_UTF8.
 
-**VAL-18** Binding preserves an assigned native object reference without copying it. A native object that a template passes as an argument to a host function, a logical class function or an instance method, directly or inside a list or map argument, arrives as the original host object: the same PHP object, the same JavaScript instance, the same Go value, the same Python object, and in Rust the same `TemplateObject`, which the host recovers with `Value::downcast_object`. VAL-21 defines the form of every other argument value. Resource handles and functions, including PHP closures, are not template values; binding rejects them with E_DATA_UNSUPPORTED_TYPE. Rendering reads values and never writes back to host data.
+- **VAL-18** Binding preserves an assigned native object reference without copying it. A native object that a template passes as an argument to a host function, a logical class function or an instance method, directly or inside a list or map argument, arrives as the original host object: the same PHP object, the same JavaScript instance, the same Go value, the same Python object, and in Rust the same `TemplateObject`, which the host recovers with `Value::downcast_object`. VAL-21 defines the form of every other argument value. Resource handles and functions, including PHP closures, are not template values; binding rejects them with E_DATA_UNSUPPORTED_TYPE. Rendering reads values and never writes back to host data.
 
-**VAL-19** A native object is an opaque template value. It is truthy and cannot be stringified, iterated, spread or written as JSON (FUN-26).
+- **VAL-19** A native object is an opaque template value. It is truthy and cannot be stringified, iterated, spread or written as JSON (FUN-26).
 
 - Lookup (`o.name`, `o['name']`, EXP-18) with a string key reads a public field or property of the original instance and binds its value (VAL-11). A name that is not a public field or property returns `null`, and so does every key that is not a string. A field value that cannot be bound fails with its `E_DATA_*` code, and an accessor that raises an error fails with E_RUNTIME_HOST_FUNCTION; both errors point at the lookup expression (ERR-5).
 - A member call `o.name(args)` invokes a public method of the original instance with the arguments (VAL-18) and binds its result. A name that is not a public method is E_RUNTIME_UNKNOWN_FUNCTION, including a private or protected method and a name that only a dynamic dispatch hook such as PHP `__call` would handle. A method that rejects its arguments or raises an error is E_RUNTIME_HOST_FUNCTION. A result that cannot be bound fails with its `E_DATA_*` code at the call.
@@ -198,14 +198,14 @@ A bound map (VAL-22) is a type of its own that none of these inputs can hold, so
 | Rust | the value that `TemplateObject::member` returns | `TemplateObject::call` |
 | Python | an attribute whose name does not start with `_` and whose value is not callable; a callable attribute is not a field and reads as `null` | a callable attribute whose name does not start with `_` |
 
-**VAL-20** The depth of a list or a map is one more than the largest depth of its elements or values; an empty list or map has depth 1. Every other value has depth 0, including a native object, whose members are bound only when a template reads them. No template value has a depth greater than 64.
+- **VAL-20** The depth of a list or a map is one more than the largest depth of its elements or values; an empty list or map has depth 1. Every other value has depth 0, including a native object, whose members are bound only when a template reads them. No template value has a depth greater than 64.
 
 - Binding a value whose depth is greater than 64 fails with E_DATA_DEPTH. Binding stops at the 65th level and does not read deeper parts of the value. A cyclic host structure, such as a JavaScript object, a Go map or slice, or a PHP object or array that contains itself, has no finite depth and fails with E_DATA_DEPTH through the same limit, without a separate cycle check. In PHP each call of `jsonSerialize()` also counts as one level, so an object whose `jsonSerialize()` returns the object itself fails with E_DATA_DEPTH.
 - A list or map literal whose value would have a depth greater than 64 fails with E_RUNTIME_LIMIT at the literal. List and map literals are the only template operations that build a value deeper than their operands; a function returns a value no deeper than its arguments, and a host function result is bound.
 
 ## Host arguments
 
-**VAL-21** A host function, a logical class function and an instance method receive every argument as a host value of the following form. The form is the same in the AST program and in every generated program, and it applies to the elements of a list and to the values of a map at every depth.
+- **VAL-21** A host function, a logical class function and an instance method receive every argument as a host value of the following form. The form is the same in the AST program and in every generated program, and it applies to the elements of a list and to the values of a map at every depth.
 
 | Template value | TypeScript | PHP | Go | Rust | Python |
 | --- | --- | --- | --- | --- | --- |
@@ -224,7 +224,7 @@ A bound map (VAL-22) is a type of its own that none of these inputs can hold, so
 
 ## Bound data
 
-**VAL-22** A host binds data once with `bind` and renders it many times as a bound map. Every implementation provides the bound map type and two operations; their names in each language are listed in [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json) (RT-67). An implementation is one package: the TypeScript package with all its entry points and module formats, including the browser entry `@polyspec/template/render` (`typescript` and `javascript-esm` in `supportLevels`), the Go module, the Rust crate, the PHP package, the PHP extension and the Python package. Every entry point and module format of one implementation accepts the bound maps that the others create.
+- **VAL-22** A host binds data once with `bind` and renders it many times as a bound map. Every implementation provides the bound map type and two operations; their names in each language are listed in [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json) (RT-67). An implementation is one package: the TypeScript package with all its entry points and module formats, including the browser entry `@polyspec/template/render` (`typescript` and `javascript-esm` in `supportLevels`), the Go module, the Rust crate, the PHP package, the PHP extension and the Python package. Every entry point and module format of one implementation accepts the bound maps that the others create.
 
 - `bind(value)` accepts every host value that host binding (VAL-13 to VAL-16 and VAL-23) turns into a map, and the values that `render` uses as an empty map (RT-4); it does not take JSON text. A host binds JSON text by parsing it with the JSON parser of the package (VAL-12) and passing the result to `bind`. `bind` applies host binding (VAL-11 to VAL-20) and returns a bound map. A value that `render` uses as an empty map returns an empty bound map. A bound map of the same implementation is returned unchanged, because it is immutable and already checked. Any other value that binding does not turn into a map fails with E_DATA_UNSUPPORTED_TYPE. A failure is the error of ERR-14. `packages/compiler/interface.json` names the operation or parameter type through which each implementation passes a bound map to `render` and `prepare`, such as the Rust `prepare_bound` and `render_bound` and the PHP extension `render`; an operation that takes JSON text, such as the PHP extension `render_json`, does not accept a bound map.
 - `merge(first, second)` returns a bound map with the entries of `first` and `second` by the precedence of RT-26: an entry of `second` replaces the entry of `first` with the same key and keeps the position of `first`; the other entries of `second` follow in their order. It reads no value again.
