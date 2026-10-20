@@ -47,11 +47,11 @@ func TestUsageErrors(t *testing.T) {
 	if status := run([]string{"render", "--unknown", "1", "x.tpl"}, &stdout, &stderr); status != 1 {
 		t.Errorf("status %d", status)
 	}
-	// CNF-4: a data file that cannot be read is a usage error.
+	// Command line contract: a data file that cannot be read is a usage error.
 	if status := run([]string{"render", "--data", "missing.json", filepath.Join(casesDir, "echo", "path", "input.tpl")}, &stdout, &stderr); status != 1 {
 		t.Errorf("missing data file status %d", status)
 	}
-	// CNF-4: options come before FILE; an option after FILE is a usage error.
+	// Command line contract: options come before FILE; an option after FILE is a usage error.
 	file := filepath.Join(casesDir, "echo", "path", "input.tpl")
 	for _, args := range [][]string{
 		{"render", file, "--data", "data.json"},

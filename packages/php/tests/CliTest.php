@@ -9,7 +9,7 @@ use Polyspec\Template\Cli\FormatCommand;
 use Polyspec\Template\Cli\PackageRuntime;
 
 /**
- * Command line contract (CNF-4).
+ * Command line contract (docs/operations/conformance.md).
  */
 final class CliTest extends TestCase
 {

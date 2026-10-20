@@ -1,4 +1,4 @@
-//! Command line contract (CNF-4).
+//! Command line contract (docs/operations/conformance.md).
 
 mod common;
 
@@ -34,7 +34,7 @@ fn render_prints_html_and_errors_exit_with_status_2() {
 fn usage_errors_exit_with_status_1() {
     assert_eq!(run(&["parse"]).status.code(), Some(1));
     assert_eq!(run(&["render", "--unknown", "1", "x.tpl"]).status.code(), Some(1));
-    // CNF-4: a data file that cannot be read is a usage error.
+    // Command line contract: a data file that cannot be read is a usage error.
     let file = repo_root().join("tests/cases/echo/path/input.tpl");
     assert_eq!(
         run(&["render", "--data", "missing.json", file.to_str().expect("path")])
@@ -42,7 +42,7 @@ fn usage_errors_exit_with_status_1() {
             .code(),
         Some(1)
     );
-    // CNF-4: an unknown option, a missing FILE or an unknown subcommand is a usage error.
+    // Command line contract: an unknown option, a missing FILE or an unknown subcommand is a usage error.
     let file = file.to_str().expect("path");
     for args in [vec!["format", "--root", ".", file], vec!["format"], vec!["unknown", file], vec![]] {
         let output = run(&args);

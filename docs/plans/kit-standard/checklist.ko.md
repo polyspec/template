@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 6685b5905238dd5bcd7a7be2d6e994d211ea06414cb7b2dbbbbb4be4c21c2434 -->
+<!-- source-sha256: 79be87b4b183099727fe37b6c36e8b6cbd5778aed379b1a502f018d39d3067ea -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -41,3 +41,8 @@
 | T26.7-28 | 생성되는 예제 사이트(index.html, data/scenarios.json, data/results.json)는 make showcase가 만들고 추적하지 않으며 측정값과 expected.html은 기록으로 남는다 | examples/site generated files untracked; showcase-site-check and showcase-html-check build first; the pages workflow runs make showcase | `make showcase-site-check` | [o] |
 | T26.7-29 | conformance suite 자체의 규칙(CNF-*)을 docs/spec에서 docs/operations로 옮겨 추적 대상 requirement에서 뺀다 | docs/spec/conformance.md and docs/operations/conformance.md with their Korean twins, config/parity.json, the cases that list CNF ids | `make parity-declarations-check` | [o] |
 | T26.7-30 | 선언된 예외는 kit이 정의한 종류의 이유를 적고 CHECK_TARGETS는 divergence-check를 실행한다 | config/duplication.json, config/parity.json tools, Makefile, .github/workflows/ci.yml and the kit copies | `make divergence-check` | [o] |
+| T26.7-31 | config/parity.json의 각 unit은 모든 binding의 test가 이름으로 적은 requirement만 인용한다 | The requirements of the units of config/parity.json | `make parity-declarations-check` | [~] |
+| T26.7-32 | docs/spec의 모든 requirement는 이를 인용하는 unit의 모든 구현 test가 이름으로 적는다(R13). test와 unit 묶음별로 진행한다 | The tests of every implementation and the units of config/parity.json | `make parity-declarations-check` | [ ] |
+| T26.7-33 | conformance CLI의 test는 unit cli-parse와 cli-format이 아니라 각 구현의 internal test다(P32, K313) | The internal globs of config/parity.json and the removal of the units cli-parse and cli-format | `make parity-declarations-check` | [o] |
+| T26.7-34 | 중립 규칙 하나: 각 package는 자기 생태계의 manifest로 공개 진입점을 노출하며 각 구현이 자기 native test를 bind한다(export-list, package-entries) | docs/spec rule and its Korean twin, the tests of the six implementations, the units export-list and package-entries | `make parity-declarations-check` | [ ] |
+| T26.7-35 | template-fmt 명령의 test는 TypeScript language package의 internal test다(P32) | The internal glob of ts in config/parity.json and the removal of the unit template-fmt | `make parity-declarations-check` | [ ] |

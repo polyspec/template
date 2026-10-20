@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f2d1d3e3a1ebde365f1d8c4eb08d322729755074221c089ec1ff4ec8593bed2b -->
+<!-- source-sha256: 4eb47e67b4cd1a58f2eba3b0ab8b19920a426156f37ff68511e88c9a254d0c2b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-33: conformance 명령줄의 test는 각 구현의 internal test이며 `config/parity.json`의 `internal` glob(`harness:`)으로 선언하고, unit `cli-parse`와 `cli-format`은 제거했다(P32, K313). CNF-4 계약은 이제 `docs/operations/conformance.md`에 있고 test는 더 이상 이를 requirement로 적지 않는다. Python 명령줄 test는 `test_api.py`에서 `test_cli.py`로 옮겼다(9개 test, `test_api.py`는 39개를 유지하며 통과한다). Red: `make parity-declarations-check`가 R15 9746건, R2 56건을 보고했고, green: R15 9512건, R2 56건이다(T26.7-35가 `template-fmt`도 제거하면 R2는 51건). R16 한 건이 남는데 `packages/ts/tests/cli.test.ts`의 `UTF-8`이며 requirement가 아니다(kit 결함: 검사가 정의된 id가 아니라 pattern에 일치한다)(T26.7-33).
 
 - T26.7-29: conformance suite 자체의 규칙(CNF-1부터 CNF-18까지: case의 구조, 모든 구현이 suite에 제공하는 명령줄, 비교, runner)을 `docs/spec/conformance.md`에서 `docs/operations/conformance.md`로 옮기고 더 이상 `config/parity.json`이 추적하는 requirement로 두지 않는다. unit에서 CNF id 인용 90개와 `case.json`에서 4개를 제거했고, 명세 페이지와 그 navigation, index, 기능 링크는 제거하거나 operations 페이지를 가리키며, 명세 파일 이름을 적던 주석과 manifest는 operations 파일을 적는다. Red: `make parity-declarations-check`가 CNF requirement 18개를 추적하며 R15 10222건을 보고했고, green: R15 9746건이다(R1 15, R2 56, R9 1, R13 1은 그대로이고) `docs-check`, `rules-check`, `layout-check`, `owner-validate`가 통과한다(T26.7-29).
 

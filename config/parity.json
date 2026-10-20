@@ -5,12 +5,12 @@
   },
   "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The API units are the operations and types that the specification defines as public API (T22.6-14, T22.6-18), read by the symbol extractor of each implementation; every other public symbol is a nativeOnly entry with the spec anchor of its reason. The conformance cases of tests/cases, their tokens and format results and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools; every other test file of an implementation is the native test of a feature unit (T24.8, T24.11).",
   "implementations": [
-    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" }, "symbols": { "extractor": "ts", "entry": "packages/ts/dist/index.d.ts" } },
-    { "name": "go", "runner": "go", "prose": ["Go"], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"], "errors": { "file": "packages/go/errs/errs.go", "pattern": "^\\t\\w+\\s+Code = \"(E_[A-Z0-9_]+)\"$" }, "symbols": { "extractor": "go", "entry": "packages/go" } },
-    { "name": "rust", "runner": "cargo", "prose": ["Rust"], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs"], "support": ["packages/rust/tests/common/*.rs"], "errors": { "file": "packages/rust/src/error.rs", "pattern": "^    (E_[A-Z0-9_]+),$" }, "symbols": { "extractor": "rust", "entry": "packages/rust/Cargo.toml" } },
-    { "name": "php", "runner": "php", "prose": ["PHP"], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"], "errors": { "file": "packages/php/src/ErrorCode.php", "pattern": "^    public const (E_[A-Z0-9_]+) = '" }, "symbols": { "extractor": "php", "entry": "packages/php/src" } },
-    { "name": "php-ext", "runner": "php", "prose": ["PHP extension", "PHP 확장"], "roots": ["packages/php-ext"], "tests": ["packages/php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"], "errors": { "file": "packages/php-ext/src/pt_error_codes.h", "pattern": "^#define PT_(E_[A-Z0-9_]+) \"" }, "symbols": { "extractor": "php", "entry": "packages/php-ext/src/polyspec_template.stub.php" } },
-    { "name": "python", "runner": "python", "prose": ["Python"], "roots": ["packages/python"], "tests": ["packages/python/tests/test_*.py"], "command": "var/python/venv/bin/python", "errors": { "file": "packages/python/src/polyspec/template/errors.py", "pattern": "^    \"(E_[A-Z0-9_]+)\",$" }, "symbols": { "extractor": "python", "entry": "packages/python/src/polyspec/template" } }
+    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "internal": [{ "glob": "packages/ts/tests/cli.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/command.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" }, "symbols": { "extractor": "ts", "entry": "packages/ts/dist/index.d.ts" } },
+    { "name": "go", "runner": "go", "prose": ["Go"], "internal": [{ "glob": "packages/go/cmd/template/main_test.go", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"], "errors": { "file": "packages/go/errs/errs.go", "pattern": "^\\t\\w+\\s+Code = \"(E_[A-Z0-9_]+)\"$" }, "symbols": { "extractor": "go", "entry": "packages/go" } },
+    { "name": "rust", "runner": "cargo", "prose": ["Rust"], "internal": [{ "glob": "packages/rust/tests/cli.rs", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs"], "support": ["packages/rust/tests/common/*.rs"], "errors": { "file": "packages/rust/src/error.rs", "pattern": "^    (E_[A-Z0-9_]+),$" }, "symbols": { "extractor": "rust", "entry": "packages/rust/Cargo.toml" } },
+    { "name": "php", "runner": "php", "prose": ["PHP"], "internal": [{ "glob": "packages/php/tests/CliTest.php", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"], "errors": { "file": "packages/php/src/ErrorCode.php", "pattern": "^    public const (E_[A-Z0-9_]+) = '" }, "symbols": { "extractor": "php", "entry": "packages/php/src" } },
+    { "name": "php-ext", "runner": "php", "prose": ["PHP extension", "PHP 확장"], "internal": [{ "glob": "packages/php-ext/tests/CliTest.php", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/php-ext"], "tests": ["packages/php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"], "errors": { "file": "packages/php-ext/src/pt_error_codes.h", "pattern": "^#define PT_(E_[A-Z0-9_]+) \"" }, "symbols": { "extractor": "php", "entry": "packages/php-ext/src/polyspec_template.stub.php" } },
+    { "name": "python", "runner": "python", "prose": ["Python"], "internal": [{ "glob": "packages/python/tests/test_cli.py", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/python"], "tests": ["packages/python/tests/test_*.py"], "command": "var/python/venv/bin/python", "errors": { "file": "packages/python/src/polyspec/template/errors.py", "pattern": "^    \"(E_[A-Z0-9_]+)\",$" }, "symbols": { "extractor": "python", "entry": "packages/python/src/polyspec/template" } }
   ],
   "suites": ["tests/fixtures/expr/cases.json"],
   "errors": { "catalog": { "file": "docs/spec/errors.md", "pattern": "^\\| `(E_[A-Z0-9_]+)` \\||^(?!\\| `E_)" } },
@@ -90,32 +90,6 @@
         { "implementation": "php", "test": "packages/php/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Tests\\ExprFixturesTest::testCase" },
         { "implementation": "php-ext", "test": "packages/php-ext/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Native\\Tests\\ExprFixturesTest::testCase" },
         { "implementation": "python", "test": "packages/python/tests/test_expr_fixtures.py" }
-      ]
-    },
-    {
-      "id": "cli-parse",
-      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
-      "kind": "feature",
-      "bindings": [
-        { "implementation": "ts", "test": "packages/ts/tests/cli.test.ts", "id": "template CLI › parses a file to AST JSON" },
-        { "implementation": "go", "test": "packages/go/cmd/template/main_test.go", "id": "TestParseCommand" },
-        { "implementation": "rust", "test": "packages/rust/tests/cli.rs", "id": "parse_prints_the_ast" },
-        { "implementation": "php", "test": "packages/php/tests/CliTest.php", "id": "testParsePrintsAstJson" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/CliTest.php", "id": "testParsePrintsTheAst" },
-        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_parse_writes_the_ast_json" }
-      ]
-    },
-    {
-      "id": "cli-format",
-      "requirements": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
-      "kind": "feature",
-      "bindings": [
-        { "implementation": "ts", "test": "packages/language/tests/command.test.ts", "id": "template-language format › prints the formatted text without a trailing newline" },
-        { "implementation": "go", "test": "packages/go/cmd/template/main_test.go", "id": "TestFormatCommand" },
-        { "implementation": "rust", "test": "packages/rust/tests/cli.rs", "id": "format_prints_the_formatted_text_and_errors_exit_with_status_2" },
-        { "implementation": "php", "test": "packages/php/tests/CliTest.php", "id": "testFormatPrintsTheFormattedText" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/CliTest.php", "id": "testFormatPrintsTheFormattedText" },
-        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_format_writes_the_formatted_text_without_a_newline" }
       ]
     },
     {

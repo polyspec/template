@@ -1,4 +1,4 @@
-// Command line contract (CNF-4): `<subcommand> [options] FILE`.
+// Command line contract (docs/operations/conformance.md): `<subcommand> [options] FILE`.
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -47,7 +47,7 @@ describe('template CLI', () => {
   });
 
 
-  it('prints the EDT-8 tokens of a file with UTF-8 byte offsets counted after the byte order mark', () => {
+  it('prints the tokens of a file with UTF-8 byte offsets counted after the byte order mark', () => {
     const work = mkdtempSync(join(tmpdir(), 'template-tokens-'));
     try {
       const file = join(work, 'a.tpl');

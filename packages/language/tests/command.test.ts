@@ -1,4 +1,4 @@
-// Command line contract of the conformance command template-language (CNF-4): format [--indent none|tab|N]
+// Command line contract of the conformance command template-language (docs/operations/conformance.md): format [--indent none|tab|N]
 // [--delimiters OC] FILE prints the formatted text, or the format error as JSON on standard error with exit status 2.
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';

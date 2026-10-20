@@ -7,7 +7,7 @@ namespace Polyspec\Template\Native\Tests;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The command line contract (CNF-4).
+ * The command line contract (docs/operations/conformance.md).
  */
 final class CliTest extends TestCase
 {
