@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c12ce04b212ee330205ed05c3f480d12c3bc05b662b041496711e1b7793dbfad -->
+<!-- source-sha256: e333ea7fc3553e2736e1792debc83cfb5ad972a2e889d37ace0aca06a60dad7e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-2-1: PHP 확장은 `Polyspec\Template\Value\SafeString`(readonly `text`)과 `Polyspec\Template\Value\BindError`(readonly `errorCode`를 가진 `RuntimeException`)를 library와 같은 signature의 internal final class로 등록하고, data로 주어진 `SafeString`을 객체로 두지 않고 library와 같이(`Bind::text`) echo 태그가 이스케이프하는 그 텍스트로 bind한다. Red: 새 `packages/php-ext/tests/ValueClassesTest.php`가 4개 중 2개 실패했고(`SafeString is not registered by the extension`, 그리고 assign의 safe string에 대한 `a list or map cannot be converted to text`), library만으로는 4개 중 3개(등록을 뺀 모두)가 통과한다; green: 확장을 load하고 `ValueClassesTest` 4와 `Value/HostBindingTest` 14가 통과하며, `Value/ValueTest`, `Functions/FunctionsTest`, `LoadFailureTest`가 통과하고 `make lint-php-ext`가 통과한다 (T26.7-2-2-1).
 
 - T26.7-2-1-5: PHP 확장은 `Polyspec\Template\Engine`을 library와 같은 signature의 internal final class로 등록한다. private readonly `program`에 `Program`을 가지고 `prepare`와 `render`를 target, assign, option을 바꾸지 않고(생략하면 기본값 `[]`과 `[]`) 그 Program에 넘기며, 그것이 돌려주는 것을 돌려주고 던지는 것을 그대로 전달하는 `Program`이다. Red: 기록용 program `RecordingProgram.php`를 쓰는 새 `packages/php-ext/tests/ProgramEngineTest.php`가 3개 중 1개 실패했다(`Engine is not registered by the extension`); green: 확장을 load하고 `ProgramEngineTest` 3과 `EngineRefreshTest` 4가 통과하며 `make lint-php-ext`가 통과한다. `CompilerInterfaceTest`는 이제 `Engine`의 assertion을 통과하고 `AstProgram::$runtime`(T26.7-2-6)에서 멈춘다 (T26.7-2-1-5).
 

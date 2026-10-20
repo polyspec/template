@@ -21,6 +21,8 @@
 #include <limits.h>
 
 zend_class_entry *pt_error_ce;
+zend_class_entry *pt_safe_string_ce;
+static zend_class_entry *pt_bind_error_ce;
 static zend_class_entry *pt_engine_ce;
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -65,6 +67,26 @@ ZEND_METHOD(Polyspec_Template_TemplateError, __construct)
         Z_PARAM_STR(message)
     ZEND_PARSE_PARAMETERS_END();
     pt_error_fill(Z_OBJ_P(ZEND_THIS), code, template, line, col, offset, end, message);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_SafeString, __construct)
+{
+    zend_string *text;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(text)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_update_property_str(pt_safe_string_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("text"), text);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_BindError, __construct)
+{
+    zend_string *code, *message;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(code)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_update_property_str(pt_bind_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errorCode"), code);
+    zend_update_property_str(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("message"), message);
 }
 
 /* Returns the 1-based line and column of a byte offset in a line index (the offsets at which the lines start). */
@@ -1781,6 +1803,8 @@ ZEND_METHOD(Polyspec_Template_AstProgram, render)
 static PHP_MINIT_FUNCTION(polyspec_template)
 {
     pt_error_ce = register_class_Polyspec_Template_TemplateError(spl_ce_RuntimeException);
+    pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
+    pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
 
     pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
     pt_engine_ce->create_object = pt_engine_create;

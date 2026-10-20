@@ -210,6 +210,20 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
             if ((pt_bound_ce != NULL && ce == pt_bound_ce) || zend_string_equals_literal(ce->name, "Polyspec\\Template\\BoundMap")) {
                 return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("a bound map is accepted only as assign and as definition data", 61, 0));
             }
+            if (ce == pt_safe_string_ce) {
+                /* A safe string given as data binds as its text, as the library binds it. */
+                zval rv;
+                zval *text = zend_read_property(pt_safe_string_ce, object, ZEND_STRL("text"), 1, &rv);
+                if (Z_TYPE_P(text) != IS_STRING) {
+                    return pt_bind_fail(error, PT_E_INTERNAL, zend_string_init(ZEND_STRL("internal failure: a safe string holds no text"), 0));
+                }
+                pt_s value;
+                if (!pt_bind_text(arena, Z_STRVAL_P(text), Z_STRLEN_P(text), &value, "string is not valid UTF-8", error)) {
+                    return false;
+                }
+                *result = pt_string(value);
+                return true;
+            }
             if (zend_string_equals_literal(ce->name, "Polyspec\\Template\\Value\\MapValue")) {
                 return pt_bind_map_value(arena, object, level, result, error);
             }

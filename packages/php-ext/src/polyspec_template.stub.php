@@ -418,3 +418,22 @@ final class AstProgram implements Program
      */
     public function render(string|array $target, mixed $assign = [], array $options = []): string {}
 }
+
+namespace Polyspec\Template\Value;
+
+/** A string that the echo tag writes without escaping (VAL-6). */
+final class SafeString
+{
+    public readonly string $text;
+
+    /** Wraps text that the echo tag writes as it is. */
+    public function __construct(string $text) {}
+}
+
+/** Data binding failure (E_DATA_* codes). */
+final class BindError extends \RuntimeException
+{
+    public readonly string $errorCode;
+
+    public function __construct(string $errorCode, string $message) {}
+}
