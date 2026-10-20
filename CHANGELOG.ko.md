@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d3488a5eac3a429ef2b6ed9ca4fd662b494822414463ad55a572d75bd7bddf36 -->
+<!-- source-sha256: 1aeb90b60a8ddf48b18cd58e4749f606c8b6568db50c7e151903a25dd733fef0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-11: RT-33, RT-35, RT-36을 새 unit `render-limits`가 인용하고, 모든 구현의 그 test가 공개 API로 기본 제한(iterations 1,000,000, depth 32, outputBytes 16 MiB, expressionDepth 64)을 읽고, 출력 제한 4바이트에서 `ab{= 'cd'}`를 렌더하며, 3바이트에서는 제한을 넘겨 쓴 echo(1:3)에서 `E_RUNTIME_LIMIT`로 실패시키고 실패한 렌더가 출력을 반환하지 않는지 검사한다. 전에는 Rust만 기본값을, Python만 출력 제한을 검사했다. PHP 확장은 PHP test를 binding한다. concurrent-bound-map은 세 id를 더 이상 인용하지 않는다. Red: 새 test가 있는 상태에서 `make item-red`가 `make parity-declarations-check UNITS="render-limits"` exit 2와 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-33 RT-35 RT-36"` exit 2를 기록했다. Green: 둘 다 통과하고, test가 통과하며(vitest `engine.test.ts` 14, `go test` 2, `cargo test --test functions` 16, PHPUnit과 PHP 확장의 EngineRefreshTest 10, Python `test_api.py` 46), `make parity-declarations-check`는 6건 줄고 새 finding이 없다 (T26.7-32-11).
 
 - T26.7-61: php-ext test의 익명 class를 pint가 요구하는 `new class ()`로 써서, test가 PHP 형식 gate를 통과한다. Red: `make item-red ID=T26.7-61`이 `make template-lint-php-format` exit 2를 기록했고, pint가 FormatterClassTest.php, BindTest.php, RecordingProgram.php, PreparedRenderTest.php를 new_with_parentheses와 class_definition으로 실패시켰다; green: `make template-lint-php-format`이 exit 0(pint `passed`), `make build-php-ext`가 exit 0, PHPUnit 실행에서 FormatterClassTest 5, BindTest 7, PreparedRenderTest 4, ProgramEngineTest 4가 통과하고, `make lint-php`가 통과한다 (T26.7-61).
 

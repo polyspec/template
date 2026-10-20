@@ -89,6 +89,34 @@ final class EngineRefreshTest extends TestCase
         }
     }
 
+    /**
+     * RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it fails;
+     * RT-36: a failed render aborts and returns no partial output.
+     */
+    public function testRenderLimitsDefaultsOutputAndAbort(): void
+    {
+        self::assertSame(
+            ['iterations' => 1000000, 'depth' => 32, 'outputBytes' => 16777216, 'expressionDepth' => 64],
+            (new RuntimeEnvironment([], []))->limits(),
+        );
+
+        $loader = new ArrayLoader(['a.tpl' => "ab{= 'cd'}"]);
+        $engine = new Engine(new AstProgram($loader, ['limits' => ['outputBytes' => 4]]));
+        self::assertSame('abcd', $engine->render('a.tpl'));
+
+        $engine = new Engine(new AstProgram($loader, ['limits' => ['outputBytes' => 3]]));
+        $result = null;
+        try {
+            $result = $engine->render('a.tpl');
+            self::fail('render should exceed the configured output size');
+        } catch (TemplateError $error) {
+            self::assertSame('E_RUNTIME_LIMIT', $error->errorCode);
+            self::assertSame(1, $error->errorLine);
+            self::assertSame(3, $error->errorCol);
+        }
+        self::assertNull($result);
+    }
+
     /** A program renders the AST that its loader holds without parsing a source (RT-40). */
     public function testRendersAParsedAst(): void
     {

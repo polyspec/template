@@ -259,6 +259,49 @@ func TestLimits(t *testing.T) {
 	}
 }
 
+// RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it fails;
+// RT-36: a failed render aborts and returns no partial output.
+func TestRenderLimitsDefaultsOutputAndAbort(t *testing.T) {
+	want := render.Limits{Iterations: 1_000_000, Depth: 32, OutputBytes: 16 * 1024 * 1024, ExpressionDepth: 64}
+	if render.DefaultLimits != want {
+		t.Errorf("DefaultLimits = %+v, want %+v", render.DefaultLimits, want)
+	}
+	defaults, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{})})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := defaults.Limits(); got != want {
+		t.Errorf("program limits without Options.Limits = %+v, want %+v", got, want)
+	}
+
+	source := map[string]string{"a.tpl": "ab{= 'cd'}"}
+	small := render.DefaultLimits
+	small.OutputBytes = 4
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(source), Limits: &small})
+	if err != nil {
+		t.Fatal(err)
+	}
+	output, err := template.NewEngine(program).Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil || output != "abcd" {
+		t.Fatalf("render with OutputBytes 4 = %q, %v, want \"abcd\"", output, err)
+	}
+
+	tight := render.DefaultLimits
+	tight.OutputBytes = 3
+	program, err = template.NewAstProgram(template.Options{Loader: template.NewMapLoader(source), Limits: &tight})
+	if err != nil {
+		t.Fatal(err)
+	}
+	output, err = template.NewEngine(program).Render("a.tpl", nil, template.RenderOptions{})
+	var te *errs.Error
+	if !errors.As(err, &te) || te.Code != errs.RuntimeLimit || te.Line != 1 || te.Col != 3 {
+		t.Errorf("render with OutputBytes 3 = %v, want E_RUNTIME_LIMIT at line 1, col 3", err)
+	}
+	if output != "" {
+		t.Errorf("failed render returned output %q, want no partial output", output)
+	}
+}
+
 // LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
 // An invalid delimiter option is an argument error of Go, an error that is not an *errs.Error, in
 // Parse as in NewAstProgram (ERR-13, T15.3-1).

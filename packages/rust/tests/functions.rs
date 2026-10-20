@@ -142,6 +142,43 @@ fn engine_reports_host_failures_and_limits() {
     assert_eq!(error.code, ErrorCode::E_RUNTIME_LIMIT);
 }
 
+// RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it fails;
+// RT-36: a failed render aborts and returns no partial output.
+#[test]
+fn render_limits_default_output_and_abort() {
+    let Limits {
+        iterations,
+        depth,
+        output_bytes,
+        expression_depth,
+    } = Limits::default();
+    assert_eq!(
+        (iterations, depth, output_bytes, expression_depth),
+        (1_000_000, 32, 16 * 1024 * 1024, 64)
+    );
+    let program = |output_bytes: usize| {
+        let mut loader = MapLoader::new();
+        loader.set("a.tpl", "ab{= 'cd'}");
+        AstProgram::new(EngineOptions {
+            loader: Some(Box::new(loader)),
+            limits: Some(Limits {
+                output_bytes,
+                ..Limits::default()
+            }),
+            ..Default::default()
+        })
+        .expect("valid engine options")
+    };
+    let html = program(4)
+        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .expect("render");
+    assert_eq!(html, "abcd");
+    let error = program(3)
+        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .unwrap_err();
+    assert_eq!((error.code, error.line, error.col), (ErrorCode::E_RUNTIME_LIMIT, 1, 3));
+}
+
 fn templates(sources: &[(&str, &str)]) -> MapLoader {
     let mut loader = MapLoader::new();
     for (name, source) in sources {

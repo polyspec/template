@@ -199,4 +199,28 @@ describe('Engine', () => {
     expect(failure({ env: ['Z'] })).toBe('E_DATA_UNSUPPORTED_TYPE: env is not an object');
     expect(failure({ env: { now: 'today' } })).toBe('E_DATA_UNSUPPORTED_TYPE: env.now is not a number');
   });
+
+  // RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it fails;
+  // RT-36: a failed render aborts and returns no partial output.
+  it('applies the default limits, checks the output size as it writes and returns no output on an error (RT-33, RT-35, RT-36)', () => {
+    const defaults = new AstProgram({ loader: new MapLoader({ 'a.tpl': '1' }) });
+    expect(defaults.limits()).toEqual({ iterations: 1_000_000, depth: 32, outputBytes: 16 * 1024 * 1024, expressionDepth: 64 });
+
+    const fits = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': "ab{= 'cd'}" }), limits: { outputBytes: 4 } }));
+    expect(fits.render('a.tpl', {})).toBe('abcd');
+
+    const exceeds = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': "ab{= 'cd'}" }), limits: { outputBytes: 3 } }));
+    let output: string | undefined;
+    let caught: TemplateError | null = null;
+    try {
+      output = exceeds.render('a.tpl', {});
+    } catch (error: unknown) {
+      if (!(error instanceof TemplateError)) throw error;
+      caught = error;
+    }
+    expect(caught?.code).toBe('E_RUNTIME_LIMIT');
+    expect(caught?.line).toBe(1);
+    expect(caught?.col).toBe(3);
+    expect(output).toBeUndefined();
+  });
 });

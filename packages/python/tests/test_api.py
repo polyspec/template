@@ -15,6 +15,7 @@ from polyspec.template import (
     PageCache,
     ParseOptions,
     RenderOptions,
+    RuntimeEnvironment,
     SafeString,
     analyze,
     analyze_prefix,
@@ -457,6 +458,40 @@ class ValuesAndErrors(unittest.TestCase):
         self.assertEqual(error["code"], "E_RUNTIME_LIMIT")
         self.assertGreater(error["line"], 0)
         self.assertGreater(error["col"], 0)
+
+    def test_render_limits_defaults_output_and_abort(self):
+        # RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it
+        # fails; RT-36: a failed render aborts and returns no partial output.
+        self.assertEqual(
+            RuntimeEnvironment().limits(),
+            {
+                "iterations": 1_000_000,
+                "depth": 32,
+                "outputBytes": 16 * 1024 * 1024,
+                "expressionDepth": 64,
+            },
+        )
+
+        program = AstProgram(
+            EngineOptions(
+                loader=MapLoader({"a.tpl": "ab{= 'cd'}"}), limits={"outputBytes": 4}
+            )
+        )
+        self.assertEqual(Engine(program).render("a.tpl", {}), "abcd")
+
+        program = AstProgram(
+            EngineOptions(
+                loader=MapLoader({"a.tpl": "ab{= 'cd'}"}), limits={"outputBytes": 3}
+            )
+        )
+        result = None
+        with self.assertRaises(TE) as caught:
+            result = Engine(program).render("a.tpl", {})
+        self.assertIsNone(result)
+        error = caught.exception.to_object()
+        self.assertEqual(error["code"], "E_RUNTIME_LIMIT")
+        self.assertEqual(error["line"], 1)
+        self.assertEqual(error["col"], 3)
 
     def test_cycle_and_not_found(self):
         engine = Engine(
