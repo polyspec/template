@@ -95,6 +95,56 @@ static bool pt_bind_entries(pt_arena *arena, HashTable *table, int level, bool p
     return true;
 }
 
+/* A map of the PHP package (Polyspec\Template\Value\MapValue), read through its keys and values, which give one value for
+ * each key; a map that cannot be read so is an internal failure. */
+static bool pt_bind_map_value(pt_arena *arena, zend_object *object, int level, pt_value *result, pt_bind_error *error)
+{
+    if (!pt_check_level(level + 1, error)) {
+        return false;
+    }
+    zval keys, values;
+    ZVAL_UNDEF(&values);
+    zend_call_method_with_0_params(object, object->ce, NULL, "keys", &keys);
+    if (!EG(exception)) {
+        zend_call_method_with_0_params(object, object->ce, NULL, "values", &values);
+    }
+    if (EG(exception) || Z_TYPE(keys) != IS_ARRAY || Z_TYPE(values) != IS_ARRAY
+        || zend_hash_num_elements(Z_ARRVAL(keys)) != zend_hash_num_elements(Z_ARRVAL(values))) {
+        zend_string *reason = EG(exception) ? pt_take_exception(NULL) : zend_string_init(ZEND_STRL("its keys and values differ"), 0);
+        zval_ptr_dtor(&keys);
+        zval_ptr_dtor(&values);
+        pt_bind_fail(error, PT_E_INTERNAL, zend_strpprintf(0, "internal failure: a map of the PHP package cannot be read: %s", ZSTR_VAL(reason)));
+        zend_string_release(reason);
+        return false;
+    }
+    pt_map *map = pt_map_new(arena, zend_hash_num_elements(Z_ARRVAL(keys)));
+    bool bound = true;
+    uint32_t index = 0;
+    zval *key;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL(keys), key) {
+        zval *item = zend_hash_index_find(Z_ARRVAL(values), index++);
+        if (item == NULL) {
+            pt_bind_fail(error, PT_E_INTERNAL, zend_string_init(ZEND_STRL("internal failure: a map of the PHP package cannot be read: its values are not a list"), 0));
+            bound = false;
+            break;
+        }
+        pt_s name;
+        pt_value value;
+        zend_string *text = zval_get_string(key);
+        bool named = pt_bind_text(arena, ZSTR_VAL(text), ZSTR_LEN(text), &name, "a map key is not valid UTF-8", error);
+        zend_string_release(text);
+        if (!named || !pt_bind_at(arena, item, level + 1, &value, error)) {
+            bound = false;
+            break;
+        }
+        pt_map_set(map, name, value);
+    } ZEND_HASH_FOREACH_END();
+    zval_ptr_dtor(&keys);
+    zval_ptr_dtor(&values);
+    *result = pt_map_value(map);
+    return bound;
+}
+
 static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result, pt_bind_error *error)
 {
     ZVAL_DEREF(input);
@@ -159,6 +209,9 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
              * implementation, another implementation, at no position (VAL-22). Both classes are final. */
             if ((pt_bound_ce != NULL && ce == pt_bound_ce) || zend_string_equals_literal(ce->name, "Polyspec\\Template\\BoundMap")) {
                 return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("a bound map is accepted only as assign and as definition data", 61, 0));
+            }
+            if (zend_string_equals_literal(ce->name, "Polyspec\\Template\\Value\\MapValue")) {
+                return pt_bind_map_value(arena, object, level, result, error);
             }
             if (instanceof_function(ce, php_json_serializable_ce)) {
                 if (!pt_check_level(level + 1, error)) {

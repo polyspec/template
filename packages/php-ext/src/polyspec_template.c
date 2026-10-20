@@ -303,6 +303,8 @@ static zend_object *pt_engine_create(zend_class_entry *class_type)
     object->std.handlers = &pt_engine_handlers;
     pt_engine *engine = &object->engine;
     engine->root = NULL;
+    ZVAL_UNDEF(&engine->loader);
+    engine->refresh = PT_REFRESH_TRUE;
     engine->open = '{';
     engine->close = '}';
     engine->limits.iterations = 1000000;
@@ -323,6 +325,7 @@ static void pt_engine_free(zend_object *object)
     zend_hash_destroy(&engine->classes);
     zend_hash_destroy(&engine->cache);
     zend_hash_destroy(&engine->files);
+    zval_ptr_dtor(&engine->loader);
     if (engine->root) {
         zend_string_release(engine->root);
     }
@@ -341,6 +344,7 @@ static HashTable *pt_engine_get_gc(zend_object *object, zval **table, int *count
     ZEND_HASH_FOREACH_VAL(&engine->classes, value) {
         zend_get_gc_buffer_add_zval(buffer, value);
     } ZEND_HASH_FOREACH_END();
+    zend_get_gc_buffer_add_zval(buffer, &engine->loader);
     zend_get_gc_buffer_use(buffer, table, count);
     return zend_std_get_properties(object);
 }
@@ -722,6 +726,25 @@ static bool pt_identifier(zend_string *name)
     return true;
 }
 
+/* Registers a host function after validating its name (FUN-43, FUN-44); false after an exception. */
+static bool pt_register_function(pt_engine *engine, zend_string *name, zval *callable)
+{
+    if (!pt_identifier(name)) {
+        zend_string *quoted = pt_json_quote(ZSTR_VAL(name), ZSTR_LEN(name));
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is not an identifier", ZSTR_VAL(quoted));
+        zend_string_release(quoted);
+        return false;
+    }
+    if (pt_builtin_find(ZSTR_VAL(name), ZSTR_LEN(name)) != NULL) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is a built-in function", ZSTR_VAL(name));
+        return false;
+    }
+    zval function;
+    ZVAL_COPY(&function, callable);
+    zend_hash_update(&engine->functions, name, &function);
+    return true;
+}
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, register)
 {
     zend_string *name;
@@ -732,19 +755,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, register)
         Z_PARAM_FUNC(fci, fcc)
     ZEND_PARSE_PARAMETERS_END();
 
-    if (!pt_identifier(name)) {
-        zend_string *quoted = pt_json_quote(ZSTR_VAL(name), ZSTR_LEN(name));
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is not an identifier", ZSTR_VAL(quoted));
-        zend_string_release(quoted);
-        RETURN_THROWS();
-    }
-    if (pt_builtin_find(ZSTR_VAL(name), ZSTR_LEN(name)) != NULL) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is a built-in function", ZSTR_VAL(name));
-        RETURN_THROWS();
-    }
-    zval function;
-    ZVAL_COPY(&function, &fci.function_name);
-    zend_hash_update(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->functions, name, &function);
+    pt_register_function(pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, &fci.function_name);
 }
 
 ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass)
@@ -894,6 +905,7 @@ typedef struct pt_php_input {
     zval *assign;
     HashTable *options;
     smart_str *output;
+    pt_template *root; /* the prepared entry template of a prepared render, or NULL */
 } pt_php_input;
 
 static void pt_render_php_into(pt_run *run, void *context)
@@ -918,6 +930,7 @@ static void pt_render_php_into(pt_run *run, void *context)
         request.defines = pt_defines_from_php(run, request.name, define);
     }
     pt_env_from_php(run, request.name, options ? zend_hash_str_find(options, "env", 3) : NULL, &request.env);
+    request.root = input->root;
     pt_render(run, engine, &request, output);
 }
 
@@ -934,7 +947,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, render)
     ZEND_PARSE_PARAMETERS_END();
 
     smart_str output = {0};
-    pt_php_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, options, &output};
+    pt_php_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, options, &output, NULL};
     pt_return_output(pt_render_php_into, &input, &output, return_value);
 }
 
@@ -1320,6 +1333,386 @@ ZEND_METHOD(Polyspec_Template_PreparedRender, render)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
+/* AstProgram (RT-1 to RT-9, RT-40, RT-41, RT-61)                                                   */
+/* ----------------------------------------------------------------------------------------------- */
+
+static zend_class_entry *pt_ast_program_ce, *pt_ast_execution_ce, *pt_loader_interface_ce, *pt_array_loader_ce;
+
+static const char *const pt_refresh_names[] = {"true", "dev", "false"};
+
+ZEND_METHOD(Polyspec_Template_AstProgram, __construct)
+{
+    zval *loader = NULL;
+    HashTable *options = NULL;
+    ZEND_PARSE_PARAMETERS_START(0, 2)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_OBJECT_OF_CLASS_OR_NULL(loader, pt_loader_interface_ce)
+        Z_PARAM_ARRAY_HT(options)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zend_object *object = Z_OBJ_P(ZEND_THIS);
+    pt_engine *engine = pt_engine_of(object);
+    if (loader != NULL) {
+        ZVAL_COPY(&engine->loader, loader);
+    } else {
+        object_init_ex(&engine->loader, pt_array_loader_ce);
+    }
+    zval *functions = options ? zend_hash_str_find_deref(options, "functions", sizeof("functions") - 1) : NULL;
+    if (functions != NULL && Z_TYPE_P(functions) != IS_NULL && Z_TYPE_P(functions) != IS_ARRAY) {
+        zend_argument_type_error(2, "must hold the functions as an array, %s given", zend_zval_value_name(functions));
+        RETURN_THROWS();
+    }
+    if (functions != NULL && Z_TYPE_P(functions) == IS_ARRAY) {
+        zend_ulong index;
+        zend_string *key;
+        zval *callable;
+        ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(functions), index, key, callable) {
+            if (!zend_is_callable(callable, 0, NULL)) {
+                zend_argument_type_error(2, "must hold only callable functions");
+                RETURN_THROWS();
+            }
+            zend_string *name = key ? zend_string_copy(key) : zend_long_to_str((zend_long)index);
+            bool registered = pt_register_function(engine, name, callable);
+            zend_string_release(name);
+            if (!registered) {
+                RETURN_THROWS();
+            }
+        } ZEND_HASH_FOREACH_END();
+    }
+    pt_limits limits = engine->limits;
+    char open, close;
+    if (!pt_option_limits(options, &limits) || !pt_option_delimiters(options, &open, &close)) {
+        RETURN_THROWS();
+    }
+    engine->limits = limits;
+    engine->open = open;
+    engine->close = close;
+    zval *refresh = options ? zend_hash_str_find_deref(options, "artifact_refresh", sizeof("artifact_refresh") - 1) : NULL;
+    zend_string *policy = refresh != NULL && Z_TYPE_P(refresh) != IS_NULL ? zval_get_string(refresh) : zend_string_init("true", 4, 0);
+    int policies = (int)(sizeof(pt_refresh_names) / sizeof(pt_refresh_names[0]));
+    int found = -1;
+    for (int i = 0; i < policies; i++) {
+        if (zend_string_equals_cstr(policy, pt_refresh_names[i], strlen(pt_refresh_names[i]))) {
+            found = i;
+        }
+    }
+    if (found < 0) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is not an artifact refresh policy", ZSTR_VAL(policy));
+        zend_string_release(policy);
+        RETURN_THROWS();
+    }
+    engine->refresh = (uint8_t)(found == 0 ? PT_REFRESH_TRUE : found == 1 ? PT_REFRESH_DEV : PT_REFRESH_FALSE);
+    zend_update_property_str(pt_ast_program_ce, object, ZEND_STRL("artifactRefresh"), policy);
+    zend_string_release(policy);
+    zend_update_property(pt_ast_program_ce, object, ZEND_STRL("loader"), &engine->loader);
+    zval delimiters;
+    array_init_size(&delimiters, 2);
+    add_next_index_stringl(&delimiters, &open, 1);
+    add_next_index_stringl(&delimiters, &close, 1);
+    zend_update_property(pt_ast_program_ce, object, ZEND_STRL("delimiters"), &delimiters);
+    zval_ptr_dtor(&delimiters);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, parse)
+{
+    ZEND_MN(Polyspec_Template_Native_Engine_parse)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, analyze)
+{
+    ZEND_MN(Polyspec_Template_Native_Engine_analyze)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* AST-10: the decode of AstProgram is that of the class AstDecoder, as in the library. */
+ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate)
+{
+    zend_string *json;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(json)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zend_string *class_name = zend_string_init(ZEND_STRL("Polyspec\\Template\\AstDecoder"), 0);
+    zend_class_entry *decoder = zend_lookup_class(class_name);
+    zend_string_release(class_name);
+    zend_function *decode = decoder ? zend_hash_str_find_ptr(&decoder->function_table, "decode", sizeof("decode") - 1) : NULL;
+    if (decode == NULL) {
+        zend_throw_error(NULL, "The class Polyspec\\Template\\AstDecoder is not loaded");
+        RETURN_THROWS();
+    }
+    zval argument;
+    ZVAL_STR_COPY(&argument, json);
+    zend_call_known_function(decode, NULL, decoder, return_value, 1, &argument, NULL);
+    zval_ptr_dtor(&argument);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, register)
+{
+    ZEND_MN(Polyspec_Template_Native_Engine_register)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, registerClass)
+{
+    ZEND_MN(Polyspec_Template_Native_Engine_registerClass)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* The callable that a table holds under a key, or null. */
+static void pt_return_function(HashTable *table, zend_string *key, zval *return_value)
+{
+    zval *function = zend_hash_find(table, key);
+    if (function == NULL) {
+        RETURN_NULL();
+    }
+    RETURN_COPY(function);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, hostFunction)
+{
+    zend_string *name;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(name)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_return_function(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->functions, name, return_value);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, classFunction)
+{
+    zend_string *class_name, *method;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(class_name)
+        Z_PARAM_STR(method)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zend_string *key = zend_strpprintf(0, "%s::%s", ZSTR_VAL(class_name), ZSTR_VAL(method));
+    pt_return_function(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->classes, key, return_value);
+    zend_string_release(key);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, limits)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_limits limits = pt_engine_of(Z_OBJ_P(ZEND_THIS))->limits;
+    array_init_size(return_value, 4);
+    add_assoc_long_ex(return_value, "iterations", sizeof("iterations") - 1, limits.iterations);
+    add_assoc_long_ex(return_value, "depth", sizeof("depth") - 1, limits.depth);
+    add_assoc_long_ex(return_value, "outputBytes", sizeof("outputBytes") - 1, limits.output_bytes);
+    add_assoc_long_ex(return_value, "expressionDepth", sizeof("expressionDepth") - 1, limits.expression_depth);
+}
+
+/* A prepared execution (RT-61): the program, the bound assign, the options and the entry template, which stays loaded
+ * beyond the run that loaded it. */
+typedef struct pt_execution {
+    zval program, assign, options;
+    zend_string *name;
+    pt_template *root;
+    zend_object std;
+} pt_execution;
+
+static zend_object_handlers pt_execution_handlers;
+
+static inline pt_execution *pt_execution_of(zend_object *object)
+{
+    return (pt_execution *)((char *)object - XtOffsetOf(pt_execution, std));
+}
+
+static zend_object *pt_execution_create(zend_class_entry *class_type)
+{
+    pt_execution *execution = zend_object_alloc(sizeof(pt_execution), class_type);
+    zend_object_std_init(&execution->std, class_type);
+    object_properties_init(&execution->std, class_type);
+    execution->std.handlers = &pt_execution_handlers;
+    ZVAL_UNDEF(&execution->program);
+    ZVAL_UNDEF(&execution->assign);
+    ZVAL_UNDEF(&execution->options);
+    execution->name = NULL;
+    execution->root = NULL;
+    return &execution->std;
+}
+
+static void pt_execution_free(zend_object *object)
+{
+    pt_execution *execution = pt_execution_of(object);
+    zval_ptr_dtor(&execution->program);
+    zval_ptr_dtor(&execution->assign);
+    zval_ptr_dtor(&execution->options);
+    if (execution->name) {
+        zend_string_release(execution->name);
+    }
+    pt_template_release(execution->root);
+    zend_object_std_dtor(object);
+}
+
+static HashTable *pt_execution_get_gc(zend_object *object, zval **table, int *count)
+{
+    pt_execution *execution = pt_execution_of(object);
+    zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
+    zend_get_gc_buffer_add_zval(buffer, &execution->program);
+    zend_get_gc_buffer_add_zval(buffer, &execution->assign);
+    zend_get_gc_buffer_add_zval(buffer, &execution->options);
+    zend_get_gc_buffer_use(buffer, table, count);
+    return zend_std_get_properties(object);
+}
+
+ZEND_METHOD(Polyspec_Template_AstPreparedExecution, render)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_execution *execution = pt_execution_of(Z_OBJ_P(ZEND_THIS));
+    smart_str output = {0};
+    pt_php_input input = {pt_engine_of(Z_OBJ(execution->program)), execution->name, &execution->assign, Z_ARRVAL(execution->options), &output, execution->root};
+    pt_return_output(pt_render_php_into, &input, &output, return_value);
+}
+
+/* The options of a prepared render with the time of the preparation as the default now (RT-25). */
+static void pt_prepared_options(HashTable *options, zval *result)
+{
+    if (options != NULL) {
+        ZVAL_ARR(result, zend_array_dup(options));
+    } else {
+        array_init(result);
+    }
+    zval *env = zend_hash_str_find_deref(Z_ARRVAL_P(result), "env", 3);
+    zval fresh;
+    if (env == NULL || Z_TYPE_P(env) == IS_NULL) {
+        array_init(&fresh);
+    } else if (Z_TYPE_P(env) == IS_ARRAY) {
+        ZVAL_ARR(&fresh, zend_array_dup(Z_ARRVAL_P(env)));
+    } else {
+        return;
+    }
+    zval *now = zend_hash_str_find_deref(Z_ARRVAL(fresh), "now", 3);
+    if (now == NULL || Z_TYPE_P(now) == IS_NULL) {
+        add_assoc_double_ex(&fresh, "now", 3, (double)time(NULL));
+    }
+    zend_hash_str_update(Z_ARRVAL_P(result), "env", 3, &fresh);
+}
+
+typedef struct pt_prepare_input {
+    pt_engine *engine;
+    zend_string *name;
+    zval *assign;
+    HashTable *options;
+    zval *ast; /* the parsed template of an array target, or NULL */
+    pt_template *root;
+} pt_prepare_input;
+
+static void pt_prepare_into_run(pt_run *run, void *context)
+{
+    pt_prepare_input *input = context;
+    pt_request request;
+    memset(&request, 0, sizeof(request));
+    request.name = pt_strdup(&run->arena, ZSTR_VAL(input->name), ZSTR_LEN(input->name));
+    pt_bind_error error = {NULL, NULL};
+    if (!pt_bind_map(&run->arena, input->assign, &request.data, &error)) {
+        pt_bind_fail_run(run, request.name, &error);
+    }
+    zval *define = zend_hash_str_find(input->options, "define", 6);
+    if (define != NULL) {
+        request.defines = pt_defines_from_php(run, request.name, define);
+    }
+    pt_env_from_php(run, request.name, zend_hash_str_find(input->options, "env", 3), &request.env);
+    input->root = pt_prepare_root(run, input->engine, &request, input->ast);
+}
+
+/* Prepares a render of the program in `program`; the assign is bound once to a bound map, and the entry template is
+ * loaded now. */
+static void pt_prepare_into(zval *program, HashTable *target_array, zend_string *target_name, zval *assign, HashTable *options, zval *return_value)
+{
+    zend_string *name = target_name;
+    zval tree;
+    if (target_array != NULL) {
+        ZVAL_ARR(&tree, target_array);
+        zval *named = zend_hash_str_find_deref(target_array, "name", 4);
+        name = named != NULL ? zval_get_string(named) : ZSTR_EMPTY_ALLOC();
+    } else {
+        ZVAL_UNDEF(&tree);
+    }
+    pt_engine *engine = pt_engine_of(Z_OBJ_P(program));
+    zend_object *bound_object = pt_bound_create(pt_bound_ce);
+    pt_bound *bound = pt_bound_from(bound_object);
+    pt_bind_error error = {NULL, NULL};
+    zval nothing;
+    ZVAL_NULL(&nothing);
+    if (!pt_bind_map(&bound->arena, assign != NULL ? assign : &nothing, &bound->map, &error)) {
+        OBJ_RELEASE(bound_object);
+        zval exception;
+        ZVAL_OBJ(&exception, pt_error_object(error.code, name, 0, 0, 0, 0, error.message));
+        zend_string_release(error.message);
+        if (target_array != NULL) {
+            zend_string_release(name);
+        }
+        zend_throw_exception_object(&exception);
+        RETURN_THROWS();
+    }
+    zval prepared_options, bound_value;
+    pt_prepared_options(options, &prepared_options);
+    ZVAL_OBJ(&bound_value, bound_object);
+    pt_prepare_input input = {engine, name, &bound_value, Z_ARRVAL(prepared_options), target_array != NULL ? &tree : NULL, NULL};
+    bool prepared = pt_run_work(pt_prepare_into_run, &input);
+    if (!prepared) {
+        zval_ptr_dtor(&bound_value);
+        zval_ptr_dtor(&prepared_options);
+        if (target_array != NULL) {
+            zend_string_release(name);
+        }
+        RETURN_THROWS();
+    }
+    zval execution_value;
+    object_init_ex(&execution_value, pt_ast_execution_ce);
+    pt_execution *execution = pt_execution_of(Z_OBJ(execution_value));
+    ZVAL_COPY(&execution->program, program);
+    ZVAL_COPY_VALUE(&execution->assign, &bound_value);
+    ZVAL_COPY_VALUE(&execution->options, &prepared_options);
+    execution->name = zend_string_copy(name);
+    execution->root = input.root;
+    object_init_ex(return_value, pt_prepared_render_ce);
+    zend_update_property_str(pt_prepared_render_ce, Z_OBJ_P(return_value), ZEND_STRL("name"), name);
+    zend_update_property(pt_prepared_render_ce, Z_OBJ_P(return_value), ZEND_STRL("execution"), &execution_value);
+    zval_ptr_dtor(&execution_value);
+    if (target_array != NULL) {
+        zend_string_release(name);
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, prepare)
+{
+    HashTable *target_array;
+    zend_string *target_name;
+    zval *assign = NULL;
+    HashTable *options = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_ARRAY_HT_OR_STR(target_array, target_name)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ZVAL(assign)
+        Z_PARAM_ARRAY_HT(options)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_prepare_into(ZEND_THIS, target_array, target_name, assign, options, return_value);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, render)
+{
+    HashTable *target_array;
+    zend_string *target_name;
+    zval *assign = NULL;
+    HashTable *options = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_ARRAY_HT_OR_STR(target_array, target_name)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ZVAL(assign)
+        Z_PARAM_ARRAY_HT(options)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zval prepared;
+    pt_prepare_into(ZEND_THIS, target_array, target_name, assign, options, &prepared);
+    if (EG(exception)) {
+        RETURN_THROWS();
+    }
+    zend_function *render = zend_hash_str_find_ptr(&pt_prepared_render_ce->function_table, ZEND_STRL("render"));
+    zend_call_known_instance_method_with_0_params(render, Z_OBJ(prepared), return_value);
+    zval_ptr_dtor(&prepared);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
 /* Module                                                                                           */
 /* ----------------------------------------------------------------------------------------------- */
 
@@ -1343,11 +1736,22 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_bound_handlers.clone_obj = NULL;
     pt_bound_handlers.get_constructor = pt_bound_get_constructor;
 
-    register_class_Polyspec_Template_Program();
+    zend_class_entry *program = register_class_Polyspec_Template_Program();
     pt_prepared_render_ce = register_class_Polyspec_Template_PreparedRender();
+    zend_class_entry *execution = register_class_Polyspec_Template_PreparedExecution();
+    pt_ast_execution_ce = register_class_Polyspec_Template_AstPreparedExecution(execution);
+    pt_ast_execution_ce->create_object = pt_execution_create;
+    memcpy(&pt_execution_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    pt_execution_handlers.offset = XtOffsetOf(pt_execution, std);
+    pt_execution_handlers.free_obj = pt_execution_free;
+    pt_execution_handlers.clone_obj = NULL;
+    pt_execution_handlers.get_gc = pt_execution_get_gc;
+    pt_ast_program_ce = register_class_Polyspec_Template_AstProgram(program);
+    pt_ast_program_ce->create_object = pt_engine_create;
 
     zend_class_entry *loader_interface = register_class_Polyspec_Template_Loader_LoaderInterface();
-    register_class_Polyspec_Template_Loader_ArrayLoader(loader_interface);
+    pt_loader_interface_ce = loader_interface;
+    pt_array_loader_ce = register_class_Polyspec_Template_Loader_ArrayLoader(loader_interface);
     pt_filesystem_loader_ce = register_class_Polyspec_Template_Loader_FilesystemLoader(loader_interface);
     return SUCCESS;
 }

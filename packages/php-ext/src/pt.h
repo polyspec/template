@@ -356,6 +356,16 @@ bool pt_parse_delimiters(const char *value, size_t length, char *open, char *clo
 /* The AST as nested PHP arrays (RT-2). */
 void pt_ast_to_zval(const pt_template *template, zval *result);
 
+/* The template of an AST given as nested PHP arrays, with no source and no line index; an array that is not an AST is
+ * an internal failure. */
+pt_template *pt_ast_from_zval(pt_run *run, zval *ast);
+
+/* The line index of a template, or NULL for a template that has no source. */
+static inline const pt_lines *pt_template_lines(const pt_template *template)
+{
+    return template->lines.starts != NULL ? &template->lines : NULL;
+}
+
 /* ---------------------------------------------------------------------------------------------------
  * The engine state that a render reads.
  * ------------------------------------------------------------------------------------------------- */
@@ -372,7 +382,11 @@ typedef struct pt_engine {
     HashTable classes;   /* "Class::method" => callable */
     HashTable cache;     /* name => pt_template* */
     HashTable files;     /* "device:inode" => the name under which the loader read the file (RT-10) */
+    zval loader;         /* the loader object of an AstProgram; UNDEF for the built-in filesystem loader */
+    uint8_t refresh;     /* the artifact refresh policy of the loader object */
 } pt_engine;
+
+enum { PT_REFRESH_TRUE, PT_REFRESH_DEV, PT_REFRESH_FALSE };
 
 typedef struct pt_env {
     pt_s timezone;
@@ -458,7 +472,12 @@ typedef struct pt_request {
     pt_map *data;
     HashTable *defines; /* id => pt_define* (ZVAL_PTR), owned by the run */
     pt_env env;
+    pt_template *root; /* the prepared entry template, or NULL when the engine loads it by name */
 } pt_request;
+
+/* Resolves the entry template of a request like pt_render does, loads it, and keeps it beyond the run (RT-61). The
+ * template of `ast` is the entry when `ast` is not UNDEF. */
+pt_template *pt_prepare_root(pt_run *run, pt_engine *engine, const pt_request *request, zval *ast);
 
 /* Renders the template `name`; the output is appended to `output`. */
 void pt_render(pt_run *run, pt_engine *engine, const pt_request *request, smart_str *output);

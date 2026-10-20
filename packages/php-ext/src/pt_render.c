@@ -145,6 +145,8 @@ void pt_run_release_templates(pt_run *run)
 /* Loader (RT-9, RT-10, RT-40)                                                                      */
 /* ----------------------------------------------------------------------------------------------- */
 
+static void pt_hold(pt_run *run, pt_template *template);
+
 static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *from, size_t start, size_t end)
 {
     pt_engine *engine = ctx->engine;
@@ -157,6 +159,52 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
         }                                                                                                \
         pt_fail_bare(run, code, name, message_);                                                         \
     } while (0)
+    if (Z_TYPE(engine->loader) == IS_OBJECT) {
+        /* RT-9, RT-40: the loader object gives the source or the AST of a name with its version. */
+        zval argument, loaded;
+        ZVAL_STRINGL(&argument, name.s, name.n);
+        zend_function *load = zend_hash_str_find_ptr(&Z_OBJCE(engine->loader)->function_table, "load", 4);
+        zend_call_known_instance_method_with_1_params(load, Z_OBJ(engine->loader), &loaded, &argument);
+        zval_ptr_dtor(&argument);
+        if (EG(exception)) {
+            /* Every exception of the loader is a load failure of the requested name. */
+            zend_string *reason = pt_take_exception(NULL);
+            PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: %s", name.s, ZSTR_VAL(reason));
+        }
+        pt_arena_keep(ctx->arena, &loaded);
+        zval_ptr_dtor(&loaded);
+        if (Z_TYPE(loaded) == IS_NULL) {
+            PT_LOAD_FAIL(PT_E_LOAD_NOT_FOUND, "template %s does not exist", name.s);
+        }
+        zval *version_value = Z_TYPE(loaded) == IS_ARRAY ? zend_hash_str_find_deref(Z_ARRVAL(loaded), "version", 7) : NULL;
+        if (version_value == NULL || Z_TYPE_P(version_value) != IS_STRING) {
+            PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: the loader returned no version", name.s);
+        }
+        zend_string *version = Z_STR_P(version_value);
+        pt_template *cached = zend_hash_str_find_ptr(&engine->cache, name.s, name.n);
+        bool fresh = engine->refresh == PT_REFRESH_FALSE
+            || (engine->refresh == PT_REFRESH_TRUE && cached != NULL && cached->version != NULL && zend_string_equals(cached->version, version));
+        if (cached != NULL && fresh) {
+            pt_hold(run, cached);
+            return cached;
+        }
+        zval *ast = zend_hash_str_find_deref(Z_ARRVAL(loaded), "ast", 3);
+        pt_template *template;
+        if (ast != NULL && Z_TYPE_P(ast) != IS_NULL) {
+            template = pt_ast_from_zval(run, ast);
+        } else {
+            zval *source = zend_hash_str_find_deref(Z_ARRVAL(loaded), "source", 6);
+            if (source == NULL || Z_TYPE_P(source) != IS_STRING) {
+                PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: the loader returned no source text and no AST", name.s);
+            }
+            template = pt_parse(run, name.s, name.n, Z_STRVAL_P(source), Z_STRLEN_P(source), engine->open, engine->close);
+        }
+        template->version = zend_string_copy(version);
+        run->parsing = NULL;
+        zend_hash_str_update_ptr(&engine->cache, name.s, name.n, template);
+        pt_hold(run, template);
+        return template;
+    }
     if (engine->root == NULL) {
         PT_LOAD_FAIL(PT_E_LOAD_NOT_FOUND, "template %s does not exist", name.s);
     }
@@ -919,7 +967,7 @@ static void pt_render_include(pt_ctx *ctx, const pt_node *node, const pt_frame *
     pt_s name = pt_resolve_at(ctx, node->text, frame, node->start, node->end);
     pt_template *template = pt_load_template(ctx, name, frame, node->start, node->end);
     pt_enter_template(ctx, name, frame, node->start, node->end);
-    pt_frame included = {template->name, &template->lines, frame->context};
+    pt_frame included = {template->name, pt_template_lines(template), frame->context};
     pt_render_nodes(ctx, &template->body, &included, scope);
     ctx->chain_count--;
 }
@@ -968,7 +1016,7 @@ static void pt_render_block(pt_ctx *ctx, const pt_node *node, const pt_frame *fr
     }
     pt_template *template = pt_load_template(ctx, entry->template, frame, node->start, node->end);
     pt_enter_template(ctx, entry->template, frame, node->start, node->end);
-    pt_frame inner = {template->name, &template->lines, data};
+    pt_frame inner = {template->name, pt_template_lines(template), data};
     pt_scope fresh;
     pt_scope_init(ctx, &fresh);
     pt_render_nodes(ctx, &template->body, &inner, &fresh);
@@ -1037,38 +1085,67 @@ static void pt_render_nodes(pt_ctx *ctx, const pt_body *body, const pt_frame *fr
     }
 }
 
-void pt_render(pt_run *run, pt_engine *engine, const pt_request *request, smart_str *output)
+/* The entry template of a request: the prepared one, or the one the definitions and the engine give for the name. */
+static pt_template *pt_entry_template(pt_ctx *ctx, const pt_request *request)
 {
-    pt_ctx ctx;
-    memset(&ctx, 0, sizeof(ctx));
-    ctx.run = run;
-    ctx.arena = &run->arena;
-    ctx.engine = engine;
-    ctx.request = request;
-    ctx.output = output;
-    /* The registry of the render starts with the definitions of the request; a block with an id and
-     * a path adds to it (RT-24). */
-    ctx.registry = zend_new_array(request->defines ? zend_hash_num_elements(request->defines) : 0);
-    zval owner;
-    ZVAL_ARR(&owner, ctx.registry);
-    pt_arena_keep(ctx.arena, &owner);
-    zval_ptr_dtor(&owner);
-    if (request->defines) {
-        zend_string *key;
-        zval *entry;
-        ZEND_HASH_FOREACH_STR_KEY_VAL(request->defines, key, entry) {
-            zend_hash_update(ctx.registry, key, entry);
-        } ZEND_HASH_FOREACH_END();
+    pt_run *run = ctx->run;
+    if (request->root != NULL) {
+        pt_hold(run, request->root);
+        ctx->entry = request->root->name;
+        return request->root;
     }
     pt_s target = request->name;
     pt_define *defined = request->defines ? zend_hash_str_find_ptr(request->defines, request->name.s, request->name.n) : NULL;
     if (defined != NULL && !defined->html) {
         target = defined->template;
     }
-    ctx.entry = target;
-    pt_template *template = pt_load_template(&ctx, target, NULL, 0, 0);
-    pt_enter_template(&ctx, target, NULL, 0, 0);
-    pt_frame frame = {template->name, &template->lines, request->data};
+    ctx->entry = target;
+    return pt_load_template(ctx, target, NULL, 0, 0);
+}
+
+static void pt_ctx_init(pt_ctx *ctx, pt_run *run, pt_engine *engine, const pt_request *request, smart_str *output)
+{
+    memset(ctx, 0, sizeof(*ctx));
+    ctx->run = run;
+    ctx->arena = &run->arena;
+    ctx->engine = engine;
+    ctx->request = request;
+    ctx->output = output;
+    /* The registry of the render starts with the definitions of the request; a block with an id and
+     * a path adds to it (RT-24). */
+    ctx->registry = zend_new_array(request->defines ? zend_hash_num_elements(request->defines) : 0);
+    zval owner;
+    ZVAL_ARR(&owner, ctx->registry);
+    pt_arena_keep(ctx->arena, &owner);
+    zval_ptr_dtor(&owner);
+    if (request->defines) {
+        zend_string *key;
+        zval *entry;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(request->defines, key, entry) {
+            zend_hash_update(ctx->registry, key, entry);
+        } ZEND_HASH_FOREACH_END();
+    }
+}
+
+pt_template *pt_prepare_root(pt_run *run, pt_engine *engine, const pt_request *request, zval *ast)
+{
+    if (ast != NULL) {
+        return pt_ast_from_zval(run, ast);
+    }
+    pt_ctx ctx;
+    pt_ctx_init(&ctx, run, engine, request, NULL);
+    pt_template *template = pt_entry_template(&ctx, request);
+    template->refcount++;
+    return template;
+}
+
+void pt_render(pt_run *run, pt_engine *engine, const pt_request *request, smart_str *output)
+{
+    pt_ctx ctx;
+    pt_ctx_init(&ctx, run, engine, request, output);
+    pt_template *template = pt_entry_template(&ctx, request);
+    pt_enter_template(&ctx, ctx.entry, NULL, 0, 0);
+    pt_frame frame = {template->name, pt_template_lines(template), request->data};
     pt_scope scope;
     pt_scope_init(&ctx, &scope);
     pt_render_nodes(&ctx, &template->body, &frame, &scope);

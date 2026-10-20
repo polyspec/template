@@ -1,10 +1,9 @@
 /*
  * The AST as nested PHP arrays with the fields of docs/spec/ast.md in their order (RT-2). A number
- * literal that is an integer within the safe range is a PHP integer, so the JSON text writes it as
- * an integer.
+ * literal is a PHP float, as the parser of the PHP package makes it (AST-10); json_encode writes an
+ * integral float without a fraction, so the JSON text writes 1e3 as 1000 (AST-7).
  */
 #include "pt.h"
-#include <math.h>
 
 static void pt_add_string(zval *array, const char *key, pt_s value)
 {
@@ -18,15 +17,6 @@ static void pt_add_span(zval *array, size_t start, size_t end)
     add_next_index_long(&span, (zend_long)start);
     add_next_index_long(&span, (zend_long)end);
     add_assoc_zval_ex(array, "span", 4, &span);
-}
-
-static void pt_number_zval(double value, zval *result)
-{
-    if (pt_is_integer(value) && fabs(value) <= PT_MAX_SAFE) {
-        ZVAL_LONG(result, (zend_long)value);
-    } else {
-        ZVAL_DOUBLE(result, value);
-    }
 }
 
 static void pt_expr_zval(const pt_expr *expr, zval *result);
@@ -71,7 +61,7 @@ static void pt_expr_zval(const pt_expr *expr, zval *result)
             switch (expr->kind) {
                 case L_NULL: ZVAL_NULL(&value); break;
                 case L_BOOL: ZVAL_BOOL(&value, expr->literal.u.b); break;
-                case L_NUMBER: pt_number_zval(expr->literal.u.number, &value); break;
+                case L_NUMBER: ZVAL_DOUBLE(&value, expr->literal.u.number); break;
                 default: ZVAL_STRINGL(&value, expr->literal.u.str.s, expr->literal.u.str.n); break;
             }
             add_assoc_zval_ex(result, "value", 5, &value);

@@ -18,9 +18,10 @@ use Polyspec\Template\TemplateError as PhpTemplateError;
  * Bound data (VAL-22, ERR-14, RT-61) with the shared fixture of tests/fixtures/bound-data/cases.json.
  *
  * The same scenarios run against the PHP AST runtime in `packages/php/tests/Value/BoundMapTest.php`.
- * The PHP package is loaded here too, so the test checks that each implementation rejects the bound
- * maps of the other. The key order of a bound map of the extension is not observable through its
- * interface; the PHP and Rust tests check the precedence and position of `merge`.
+ * The PHP package is loaded here too, so the test checks that the bound maps of the PHP package and
+ * of the native engine reject each other, and that AstProgram, which the extension registers, renders
+ * a bound map of the extension. The key order of a bound map of the extension is not observable
+ * through its interface; the PHP and Rust tests check the precedence and position of `merge`.
  */
 final class BoundMapTest extends TestCase
 {
@@ -183,15 +184,15 @@ final class BoundMapTest extends TestCase
             'E_DATA_UNSUPPORTED_TYPE',
         );
         $program = new AstProgram(new FilesystemLoader(self::fixtureDirectory()));
+        self::assertSame(self::engine()->render('page.tpl', $native), $program->render('page.tpl', $native));
         $operations = [
-            static fn () => $program->render('page.tpl', $native),
             static fn () => PhpBoundMap::bind($native),
             static fn () => PhpBoundMap::merge($php, $native),
         ];
         foreach ($operations as $operation) {
             try {
                 $operation();
-                self::fail('the PHP implementation accepted a bound map of the extension');
+                self::fail('the bound map of the PHP package accepted a bound map of the extension');
             } catch (PhpTemplateError $error) {
                 self::assertSame('E_DATA_UNSUPPORTED_TYPE', $error->errorCode);
             }

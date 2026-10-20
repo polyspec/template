@@ -272,3 +272,134 @@ final class PreparedRender
     /** Renders the prepared request. An error of the PHP `Error` hierarchy is E_INTERNAL (ERR-13). */
     public function render(): string {}
 }
+
+/** One reusable prepared render operation. */
+interface PreparedExecution
+{
+    /** Renders the prepared request. */
+    public function render(): string;
+}
+
+/** Prepared AST interpreter execution. */
+final class AstPreparedExecution implements PreparedExecution
+{
+    /** Renders the prepared template with fresh execution state. */
+    public function render(): string {}
+}
+
+/**
+ * AstProgram: template loading, caching, function registration and rendering.
+ *
+ * @phpstan-import-type RenderOptions from Program
+ */
+final class AstProgram implements Program
+{
+    public readonly \Polyspec\Template\Loader\LoaderInterface $loader;
+
+    /**
+     * @var array
+     * @phpstan-var array{0: string, 1: string}
+     */
+    public readonly array $delimiters;
+
+    /**
+     * @var string
+     * @phpstan-var 'dev'|'true'|'false'
+     */
+    public readonly string $artifactRefresh;
+
+    /**
+     * @param \Polyspec\Template\Loader\LoaderInterface|null $loader
+     * @param array $options
+     * @phpstan-param array{
+     *     functions?: array<string, callable>,
+     *     limits?: array<string, int>,
+     *     delimiters?: string,
+     *     artifact_refresh?: 'dev'|'true'|'false',
+     * } $options
+     */
+    public function __construct(?\Polyspec\Template\Loader\LoaderInterface $loader = null, array $options = []) {}
+
+    /**
+     * Decodes the canonical JSON text of a template AST (AST-7) into the AST arrays that parse returns, so a program
+     * renders it without parsing a source (RT-41). The JSON is validated against contracts/schema/ast.schema.json
+     * (AST-10).
+     *
+     * @return array
+     * @phpstan-return array<string, mixed>
+     * @throws \JsonException when the text is not JSON
+     * @throws AstDecodeError naming the JSON Pointer of the invalid node when the JSON is not a template AST
+     */
+    public static function decodeTemplate(string $json): array {}
+
+    /**
+     * RT-2: parses one template source without loading other templates.
+     *
+     * @param array $options
+     * @phpstan-param array{delimiters?: string} $options
+     * @return array
+     * @phpstan-return array<string, mixed>
+     */
+    public static function parse(string $source, string $name, array $options = []): array {}
+
+    /**
+     * Parses one template source once and returns its AST with the accepted tags and the EDT-8 tokens of their parts.
+     * Offsets are UTF-8 byte offsets after a leading byte order mark (LEX-2, EDT-8).
+     *
+     * @param array $options
+     * @phpstan-param array{delimiters?: string} $options
+     * @return array
+     */
+    public static function analyze(string $source, string $name, array $options = []): array {}
+
+    /**
+     * FUN-43, FUN-44.
+     *
+     * @param callable $fn
+     */
+    public function register(string $name, callable $fn): void {}
+
+    /**
+     * Registers one logical class function used by `Class::method(...)`.
+     *
+     * @param callable $fn
+     */
+    public function registerClass(string $className, string $method, callable $fn): void {}
+
+    /**
+     * Returns the function registered under a name, or null when no host registered it.
+     */
+    public function hostFunction(string $name): ?callable {}
+
+    /** Returns one logical class function that the runtime of this program holds. */
+    public function classFunction(string $className, string $method): ?callable {}
+
+    /**
+     * The limits of a render of this program (RT-33).
+     *
+     * @return array
+     * @phpstan-return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int}
+     */
+    public function limits(): array {}
+
+    /**
+     * Prepares a template name or a parsed template: binds the assign, the definitions and the environment once, for
+     * any number of renders (RT-61).
+     *
+     * @param string|array $target
+     * @phpstan-param string|array<string, mixed> $target
+     * @param array $options
+     * @phpstan-param RenderOptions $options
+     */
+    public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender {}
+
+    /**
+     * Renders a template name or a parsed template.
+     *
+     * @param string|array $target
+     * @phpstan-param string|array<string, mixed> $target
+     * @param array $options
+     * @phpstan-param RenderOptions $options
+     */
+    public function render(string|array $target, mixed $assign = [], array $options = []): string {}
+}
