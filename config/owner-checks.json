@@ -73,6 +73,14 @@
     },
     {
       "paths": [
+        "config/duplication.json"
+      ],
+      "targets": [
+        "duplication-check"
+      ]
+    },
+    {
+      "paths": [
         "tests/fixtures/filesystem/**"
       ],
       "targets": [

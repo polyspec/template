@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 902a6c766120d0d265b27fa6c47369192d0026c4763b812b4760640afad72654 -->
+<!-- source-sha256: 03fdf963b65954c535902f8ea6e0ccc8d6d94371de15e8b20cdba1d2c89f79f0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-8: `config/duplication.json`은 중복 검사가 제외하는 것을 이유와 함께 선언한다: 케이스를 전부 적는 package test(`packages/*/tests/**`, `tests/scripts/**`, `**/*_test.go`), `packages/ts`의 generated AST validator, showcase의 generated fixture(`examples/**/generated/**`). `tests/runner`의 runner는 도구이므로 검사 범위에 남는다. Red: `make duplication-check`가 clone 410개를 찾았고, green: 82개를 찾으며 모두 이 repository가 쓴 코드이고 T26.7-9부터 T26.7-14가 없앤다(T26.7-8).
 
 - T26.7-6: `config/rebuild.json`은 kit이 repository의 layout으로 찾는 tool source 173개의 class를 선언한다(K286): showcase generator가 만든 commit된 산출물 88개, 생태계 도구(ajv, oxc-parser, esbuild, smol-toml, tsc, go, cargo, composer, npm)를 쓰는 script, 이 repository의 규칙을 검사하는 script, showcase 도구. `scripts/publish-build.mts`에는 재구현 기록 `docs/rebuild/publish-build.md`가 있고(byte가 바뀔 때만 rename으로 build를 게시하는 도구는 모든 platform에 없다), `scripts/python-wheelhouse.mts`는 T26.7-7에서 `pip download --require-hashes`로 `replaced`된다. Red: `make rebuild-check`가 `config/rebuild.json does not exist`로 종료 코드 2를 냈고, green: `every tool that config/rebuild.json selects has its class`를 출력하며 0으로 종료한다(T26.7-6).
 
