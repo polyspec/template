@@ -1,0 +1,6 @@
+[
+  [0,1,"delimiter"],
+  [1,2,"keyword"],
+  [3,10,"path"],
+  [10,11,"delimiter"]
+]
