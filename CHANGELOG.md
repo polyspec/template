@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-10: the backends of `packages/compiler` share the code of the loop locals (`FunctionLocals.loopNames`, `enterLoop`, `refreshed`), the line layout of the PHP and Python backends (`layoutLine`, `groupToSplit`, `flatText`) and the descriptors of the definitions (`definitionDescriptors`); the generated programs are byte for byte the same, and the committed manifests record the new digest of the compiler. Red: `make duplication-check` found 7 clones in `packages/compiler`; green: none (68 clones remain in the repository before this item, 61 after) (T26.7-10).
+
 - T26.7-17: `composerPlatforms` of `config/dependency-policy.json` declares PHP 8.4.1, the one platform of the repository (the minor of `.php-version` with the patch 1 that PHPUnit 13 needs), as the manifests and locks already resolve it. Red: `make dependency-policy-check` reported 9 findings, 6 of the platform; green: 3 remain, the locks that changed after the review of 2026-10-15, which `make dependency-review RECORD=1` records with the registries (T26.7-17).
 
 - T26.7-16: every rule of `AGENTS.md` and its Korean twin begins with `Own:` or `Refines <id>:`, and the 16 rules that restated a principle without naming a term of this repository are removed (documents, behavior change, test evidence, accepted conditions, existing code, messages, the dependency pins, the language of records, the branch rule and the use of `[!]`). Red: `make rules-check` reported 47 findings; green: it passes (T26.7-16).

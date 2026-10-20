@@ -220,15 +220,9 @@ export function createTarget({ program }: { program: Program }): Target {
         : collection.kind === 'map' ? `generatedMapEntries(${typedIter})`
         : `generatedEntries(runtime, ${iter}, frame, ${goSpan(node.span)})`;
       // The body reads the locals that it assigns as the IR widens them; the loop restores its variable.
-      const names = assignedNames(program, node.body);
-      names.delete(node.name);
-      for (const item of assignedNames(program, node.empty ?? [])) names.add(item);
-      const merged = locals.merged(names, node.widened);
+      const merged = locals.merged(locals.loopNames(program, node), node.widened);
       const declarations = declare(merged);
-      locals.enter(merged);
-      const start = locals.save();
-      const item = locals.variable(node.name);
-      locals.bindings.set(node.name, { code: item, type: node.itemType });
+      const { start, item } = locals.enterLoop(merged, node.name, node.itemType);
       loopItems.push([node.name, item]);
       const body = branch(node.body, merged, node.name);
       loopItems.pop();
@@ -261,13 +255,7 @@ export function createTarget({ program }: { program: Program }): Target {
         `generatedEnter(context, ${goString(node.target)}, frame, ${goSpan(node.span)})`,
         called('func()', 'defer context.Leave()', `${functionName(node.target)}(assign, definitions, ${inputName(node.target)}{${node.inputs.map(item => `${exportedName(item.name)}: ${emitExpression(item.value, target)}`).join(', ')}}, context, runtime, rootData, scope)`),
       ];
-      const refreshed = [...assignedNames(program, [node])].flatMap(name => {
-        const before = locals.bindings.get(name);
-        if (before === undefined) return [];
-        const variable = locals.variable(name, true);
-        locals.bindings.set(name, { code: variable, type: before.type });
-        return [`var ${variable} ${goOf(before.type)} = generatedResult[${goOf(before.type)}](scope.Lookup(frame, ${goString(name)}))`];
-      });
+      const refreshed = locals.refreshed(program, node, (variable, name, type) => `var ${variable} ${goOf(type)} = generatedResult[${goOf(type)}](scope.Lookup(frame, ${goString(name)}))`);
       return tabs(n, lines(call, refreshed));
     },
     // The inputs of the template are the fields of its input, and the body reads each local from its variable.

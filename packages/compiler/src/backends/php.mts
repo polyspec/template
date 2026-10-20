@@ -6,7 +6,7 @@
 import type { Span } from '@polyspec/template';
 import {
   baseTarget, definition, dependent, emitExpression, emitNodes, fieldName, file, optional, phpLiteral, phpType,
-  usedDefinitions, type BackendContext, type CodeDefinition, type Part, type Target,
+  definitionDescriptors, layoutLine, usedDefinitions, type BackendContext, type CodeDefinition, type GroupKind, type Part, type Target,
   descriptor, descriptors, type Descriptor,
 } from '../backend-support.mts';
 import type { TypeManifest } from '../documents.mts';
@@ -34,65 +34,36 @@ const method = (head: string, ...body: Statements[]): string => `${head}\n{\n${s
 // condition of a control structure goes on its own line between its parentheses (section 5); an operator chain keeps
 // its first operand on the line and starts each further operand, with its operator, on a line indented once
 // (section 6). The markers are control characters, which no PHP literal of the program holds (phpString escapes them).
-interface GroupKind { open: string; separator: string; close: string }
 const kinds = {
   list: { open: '\u0001', separator: '\u0002', close: '\u0003' },
   condition: { open: '\u0004', separator: '\u0005', close: '\u0006' },
   operator: { open: '\u000e', separator: '\u000f', close: '\u0010' },
 } satisfies Record<string, GroupKind>;
 const allKinds: GroupKind[] = Object.values(kinds);
-const markers = allKinds.flatMap(kind => [kind.open, kind.separator, kind.close]);
 const group = (kind: keyof typeof kinds, items: string[], joiner: string): string => items.length === 0 ? '' : `${kinds[kind].open}${items.join(`${joiner}${kinds[kind].separator}`)}${kinds[kind].close}`;
 const call = (callee: string, items: string[]): string => `${callee}(${group('list', items, ',')})`;
 const array = (items: string[]): string => `[${group('list', items, ',')}]`;
 const condition = (test: string): string => group('condition', [test], '');
 const chain = (first: string, ...rest: string[]): string => group('operator', [first, ...rest], '');
-const flat = (line: string): string => Array.from(line, character => allKinds.some(kind => kind.separator === character) ? ' ' : markers.includes(character) ? '' : character).join('');
 const WIDTH = 120;
-
-/** The first group of `line`: the index of its opening marker and its kind, or null when the line has no group. */
-function firstGroup(line: string): { start: number; kind: GroupKind } | null {
-  for (let index = 0; index < line.length; index += 1) {
-    const kind = allKinds.find(item => item.open === line[index]);
-    if (kind !== undefined) return { start: index, kind };
-  }
-  return null;
-}
 
 /** The lines of `line`: the line itself when it fits, or its first group split, and every resulting line in turn. */
 function layout(line: string): string[] {
-  const found = firstGroup(line);
-  if (flat(line).length <= WIDTH || found === null) return [flat(line)];
-  const { start, kind } = found;
-  const indentation = ' '.repeat(line.search(/[^ ]|$/));
-  const items: string[] = [];
-  let depth = 0;
-  let item = start + 1;
-  let end = -1;
-  for (let index = start + 1; index < line.length && end < 0; index += 1) {
-    const character = line[index];
-    if (allKinds.some(other => other.open === character)) depth += 1;
-    else if (allKinds.some(other => other.close === character) && depth > 0) depth -= 1;
-    else if (character === kind.close) end = index;
-    else if (character === kind.separator && depth === 0) {
-      items.push(line.slice(item, index));
-      item = index + 1;
+  return layoutLine(line, allKinds, WIDTH, ({ start, kind, items, end, indentation }) => {
+    const head = line.slice(0, start);
+    const tail = line.slice(end + 1);
+    const inner = (text: string): string => `${indentation}    ${text}`;
+    if (kind === kinds.operator) {
+      // The first operand stays on the line of the head; the last carries the tail.
+      return items.flatMap((text, index) => index === 0 ? layout(`${head}${text}`) : layout(inner(index === items.length - 1 ? `${text}${tail}` : text)));
     }
-  }
-  items.push(line.slice(item, end));
-  const head = line.slice(0, start);
-  const tail = line.slice(end + 1);
-  const inner = (text: string): string => `${indentation}    ${text}`;
-  if (kind === kinds.operator) {
-    // The first operand stays on the line of the head; the last carries the tail.
-    return items.flatMap((text, index) => index === 0 ? layout(`${head}${text}`) : layout(inner(index === items.length - 1 ? `${text}${tail}` : text)));
-  }
-  const trailing = kind === kinds.list ? ',' : '';
-  return [
-    ...layout(head),
-    ...items.flatMap((text, index) => layout(inner(`${text}${index === items.length - 1 ? trailing : ''}`))),
-    ...layout(`${indentation}${tail}`),
-  ];
+    const trailing = kind === kinds.list ? ',' : '';
+    return [
+      ...layout(head),
+      ...items.flatMap((text, index) => layout(inner(`${text}${index === items.length - 1 ? trailing : ''}`))),
+      ...layout(`${indentation}${tail}`),
+    ];
+  });
 }
 
 const guarded = (body: string, cleanup: string): string => `${braced('try', body)} ${braced('finally', cleanup)}`;
@@ -148,13 +119,7 @@ const inputField = (name: string, type: string): string => `public ${nullable(ty
 function bindingSchema(context: BackendContext): { records: Record<string, Record<string, Descriptor>>; assign: Record<string, Descriptor>; definitions: Record<string, unknown> } {
   const records = Object.fromEntries(Object.entries(context.manifest.records).map(([name, fields]) => [name, descriptors(fields)]));
   const assign = descriptors(context.manifest.fields);
-  const definitions = Object.fromEntries([...context.program.definitions].map(([id, definition]) => [id, {
-    field: fieldName(id),
-    target: definition.template,
-    html: definition.html,
-    class: definition.template === null ? null : dataClass(definition.template),
-    input: definition.template === null ? {} : Object.fromEntries([...loweredTemplate(context.program, definition.template).inputs].map(([field, type]) => [field, descriptor(type.source)])),
-  }]));
+  const definitions = definitionDescriptors(context.program, template => ({ class: template === null ? null : dataClass(template) }));
   return { records, assign, definitions };
 }
 

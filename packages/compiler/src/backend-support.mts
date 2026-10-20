@@ -294,6 +294,43 @@ export class FunctionLocals {
   }
 
   /**
+   * The locals that a loop assigns: those of its body without the loop variable, which the loop restores, and those of its
+   * empty branch.
+   */
+  loopNames(program: Program, node: { name: string; body: Node[]; empty?: Node[] | null | undefined }): Set<string> {
+    const names = assignedNames(program, node.body);
+    names.delete(node.name);
+    for (const item of assignedNames(program, node.empty ?? [])) names.add(item);
+    return names;
+  }
+
+  /**
+   * Binds the `merged` locals and a new variable of the loop item `name` of `type`; returns the bindings before the item, to
+   * restore after the loop, and the variable.
+   */
+  enterLoop(merged: MergedLocal[], name: string, type: ValueType): { start: Map<string, LocalBinding>; item: string } {
+    this.enter(merged);
+    const start = this.save();
+    const item = this.variable(name);
+    this.bindings.set(name, { code: item, type });
+    return { start, item };
+  }
+
+  /**
+   * The statements that read again, from the scope after the included template `node`, each local it assigns that has a
+   * binding: each gets a new variable, and `declare` writes its statement from the variable, the name and the type.
+   */
+  refreshed(program: Program, node: Node, declare: (variable: string, name: string, type: ValueType) => string): string[] {
+    return [...assignedNames(program, [node])].flatMap(name => {
+      const before = this.bindings.get(name);
+      if (before === undefined) return [];
+      const variable = this.variable(name, true);
+      this.bindings.set(name, { code: variable, type: before.type });
+      return [declare(variable, name, before.type)];
+    });
+  }
+
+  /**
    * `body` without the statements of each droppable variable that nothing else in it reads: a statement of a variable is
    * a line that declares it or assigns it.
    */
@@ -502,4 +539,76 @@ export interface Backend {
   emitRuntime(context: BackendContext): Part | Part[];
   emitTemplates(context: BackendContext): Part | Part[];
   emitEntry(context: BackendContext): Part | Part[];
+}
+
+/** A group of the line layout of a backend: the control characters that open it, separate its items and close it. */
+export interface GroupKind { open: string; separator: string; close: string }
+
+/** The first group that opens in `line`, by the index of its opening marker in the UTF-16 code units of the line. */
+export function firstGroup<Kind extends GroupKind>(line: string, kinds: readonly Kind[]): { start: number; kind: Kind } | null {
+  for (let index = 0; index < line.length; index += 1) {
+    const kind = kinds.find(item => item.open === line[index]);
+    if (kind !== undefined) return { start: index, kind };
+  }
+  return null;
+}
+
+/** The items of the group of `kind` that opens at `start` in `line`, and the index of its closing marker (-1 when none closes). */
+export function splitGroup(line: string, start: number, kind: GroupKind, kinds: readonly GroupKind[]): { items: string[]; end: number } {
+  const items: string[] = [];
+  let depth = 0;
+  let item = start + 1;
+  let end = -1;
+  for (let index = start + 1; index < line.length && end < 0; index += 1) {
+    const character = line[index];
+    if (kinds.some(other => other.open === character)) depth += 1;
+    else if (kinds.some(other => other.close === character) && depth > 0) depth -= 1;
+    else if (character === kind.close) end = index;
+    else if (character === kind.separator && depth === 0) {
+      items.push(line.slice(item, index));
+      item = index + 1;
+    }
+  }
+  items.push(line.slice(item, end));
+  return { items, end };
+}
+
+/** `line` on one line: the markers of its groups removed and each separator a space. A string iterates by code point, so a character outside the Basic Multilingual Plane stays one character. */
+export function flatText(line: string, kinds: readonly GroupKind[]): string {
+  const markers = kinds.flatMap(kind => [kind.open, kind.separator, kind.close]);
+  return Array.from(line, character => kinds.some(kind => kind.separator === character) ? ' ' : markers.includes(character) ? '' : character).join('');
+}
+
+/** The first group of `line` to split when `line` is longer than `width` flat, with its items and the index of its closing marker; null when `line` fits or has no group. */
+export function groupToSplit<Kind extends GroupKind>(line: string, kinds: readonly Kind[], width: number): { start: number; kind: Kind; items: string[]; end: number } | null {
+  const found = firstGroup(line, kinds);
+  if (found === null || flatText(line, kinds).length <= width) return null;
+  return { ...found, ...splitGroup(line, found.start, found.kind, kinds) };
+}
+
+/**
+ * The lines of `line` in a backend: `line` on one line when it fits in `width` columns or holds no group; otherwise the
+ * lines that `split` returns for its first group, with the indentation of `line`.
+ */
+export function layoutLine<Kind extends GroupKind>(
+  line: string, kinds: readonly Kind[], width: number,
+  split: (group: { start: number; kind: Kind; items: string[]; end: number; indentation: string }) => string[],
+): string[] {
+  const found = groupToSplit(line, kinds, width);
+  if (found === null) return [flatText(line, kinds)];
+  return split({ ...found, indentation: /^ */.exec(line)?.[0] ?? '' });
+}
+
+/**
+ * The definitions of the program as the descriptors that a backend embeds: the field, the target template, the HTML and the
+ * type of each input of the template; `extra` adds the fields of the backend after the HTML.
+ */
+export function definitionDescriptors<Extra extends object>(program: Program, extra: (template: string | null) => Extra): Record<string, { field: string; target: string | null; html: boolean; input: Record<string, Descriptor> } & Extra> {
+  return Object.fromEntries([...program.definitions].map(([id, definition]) => [id, {
+    field: fieldName(id),
+    target: definition.template,
+    html: definition.html,
+    ...extra(definition.template),
+    input: definition.template === null ? {} : Object.fromEntries([...loweredTemplate(program, definition.template).inputs].map(([field, type]) => [field, descriptor(type.source)])),
+  }]));
 }

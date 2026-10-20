@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5334082ddddf8b6319250bd6c2ad77de3008c27b1c6d46b80e9df7d9de0aa798 -->
+<!-- source-sha256: 89ec9c262a58639d7a047dc34ecd251992eef1068cd10ea04f3d69643d6722da -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-10: `packages/compiler`의 backend는 loop local의 code(`FunctionLocals.loopNames`, `enterLoop`, `refreshed`), PHP와 Python backend의 line layout(`layoutLine`, `groupToSplit`, `flatText`), definition descriptor(`definitionDescriptors`)를 공유한다. 생성된 program은 byte 단위로 같고 commit된 manifest는 compiler의 새 digest를 기록한다. Red: `make duplication-check`가 `packages/compiler`에서 clone 7개를 찾았고, green: 0개다(이 item 전 repository의 clone 68개, 후 61개)(T26.7-10).
 
 - T26.7-17: `config/dependency-policy.json`의 `composerPlatforms`는 manifest와 lock이 이미 따르는 repository의 단일 platform인 PHP 8.4.1(`.php-version`의 minor와 PHPUnit 13이 요구하는 patch 1)을 선언한다. Red: `make dependency-policy-check`가 9건(platform 6건)을 보고했고, green: 3건이 남으며 이는 2026-10-15 review 뒤에 바뀐 lock이고 `make dependency-review RECORD=1`이 registry와 함께 기록한다(T26.7-17).
 

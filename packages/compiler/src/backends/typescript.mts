@@ -157,15 +157,9 @@ export function createTarget({ program }: { program: Program }): Target {
     const iter = emitExpression(node.iter, target);
     const iterate = node.iter.valueType.kind === 'any' ? `runtime.entries(${iter}, frame, ${span(node)})` : `generatedEntries(${iter})`;
     // The body reads the locals that it assigns as the IR widens them; the loop restores its variable.
-    const names = assignedNames(program, node.body);
-    names.delete(node.name);
-    for (const item of assignedNames(program, node.empty ?? [])) names.add(item);
-    const merged = locals.merged(names, node.widened);
+    const merged = locals.merged(locals.loopNames(program, node), node.widened);
     const declarations = declare(merged, node);
-    locals.enter(merged);
-    const start = locals.save();
-    const item = locals.variable(node.name);
-    locals.bindings.set(node.name, { code: item, type: node.itemType });
+    const { start, item } = locals.enterLoop(merged, node.name, node.itemType);
     loopItems.push([node.name, item]);
     const body = branch(node.body, n + 1, merged, node, node.name);
     loopItems.pop();
@@ -243,13 +237,7 @@ export function createTarget({ program }: { program: Program }): Target {
     // decoded once from the scope after it.
     include: (node, n) => {
       const call = `context.enter(${quote(node.target)}, frame, ${span(node)});\ntry { ${functionName(node.target)}(assign, definitions, { ${node.inputs.map(item => `${fieldName(item.name)}: ${convert(emitExpression(item.value, target), item.value.valueType, item.valueType, quote(`${node.target}.${item.name}`), node)}`).join(', ')} }, context, runtime, rootData, scope); } finally { context.leave(); }`;
-      const refreshed = [...assignedNames(program, [node])].flatMap(name => {
-        const before = locals.bindings.get(name);
-        if (before === undefined) return [];
-        const variable = locals.variable(name, true);
-        locals.bindings.set(name, { code: variable, type: before.type });
-        return [`const ${variable} = ${check(`scope.lookup(frame, ${quote(name)})`, before.type, quote(name), node)};`];
-      });
+      const refreshed = locals.refreshed(program, node, (variable, name, type) => `const ${variable} = ${check(`scope.lookup(frame, ${quote(name)})`, type, quote(name), node)};`);
       return indent(n, [call, ...refreshed].join('\n'));
     },
     // The inputs of the template are the fields of its input, and the body reads each local from its variable.

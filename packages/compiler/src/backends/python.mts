@@ -5,9 +5,9 @@
 // or a parenthesized operator chain) that does not fit in 88 columns split one item per line, a list with a magic
 // trailing comma; and it writes only the helpers, imports and loop metadata that the program uses (T25.1).
 import {
-  definition, dependent, emitExpression, emitNodes, fieldName, functionName, inputName,
+  definition, definitionDescriptors, dependent, flatText, layoutLine, emitExpression, emitNodes, fieldName, functionName, inputName,
   type BackendContext, type Part, type Target,
-  descriptor, descriptors, type Descriptor,
+  descriptors, type Descriptor,
 } from '../backend-support.mts';
 import { loweredTemplate, type NodeOf, type Program } from '../ir.mts';
 
@@ -31,27 +31,14 @@ const kinds = {
   list: { open: '\u0001', separator: '\u0002', close: '\u0003' },
   chain: { open: '\u0004', separator: '\u0005', close: '\u0006' },
 };
-const markers = Object.values(kinds).flatMap(kind => [kind.open, kind.separator, kind.close]);
-const isOpen = (character: string | undefined): boolean => Object.values(kinds).some(kind => kind.open === character);
-const isClose = (character: string | undefined): boolean => Object.values(kinds).some(kind => kind.close === character);
+const allKinds = Object.values(kinds);
 const group = (kind: keyof typeof kinds, items: string[], joiner: string): string => items.length === 0 ? '' : `${kinds[kind].open}${items.join(`${joiner}${kinds[kind].separator}`)}${kinds[kind].close}`;
 const call = (callee: string, items: string[]): string => `${callee}(${group('list', items, ',')})`;
 const list = (items: string[]): string => `[${group('list', items, ',')}]`;
 const tuple = (items: string[]): string => `(${group('list', items, ',')})`;
 const dict = (entries: string[]): string => `{${group('list', entries, ',')}}`;
 const chain = (...items: string[]): string => `(${group('chain', items, '')})`;
-// A string iterates by code point, so a character outside the Basic Multilingual Plane stays one character.
-const flat = (line: string): string => Array.from(line, character => Object.values(kinds).some(kind => kind.separator === character) ? ' ' : markers.includes(character) ? '' : character).join('');
 const WIDTH = 88;
-
-/** The first group that opens in `line`, by the index of its opening marker in the UTF-16 code units of the line. */
-function firstGroup(line: string): { start: number; kind: (typeof kinds)[keyof typeof kinds] } | null {
-  for (let index = 0; index < line.length; index += 1) {
-    const kind = Object.values(kinds).find(item => item.open === line[index]);
-    if (kind !== undefined) return { start: index, kind };
-  }
-  return null;
-}
 
 /**
  * The lines of `line`: the line itself when it fits, or its first group split, and every resulting line in turn. A
@@ -59,30 +46,13 @@ function firstGroup(line: string): { start: number; kind: (typeof kinds)[keyof t
  * line between its parentheses when they fit there, or one operand per line.
  */
 function layout(line: string): string[] {
-  const found = firstGroup(line);
-  if (flat(line).length <= WIDTH || found === null) return [flat(line)];
-  const { start, kind } = found;
-  const indentation = /^ */.exec(line)?.[0] ?? '';
-  const items: string[] = [];
-  let depth = 0;
-  let item = start + 1;
-  let end = -1;
-  for (let index = start + 1; index < line.length && end < 0; index += 1) {
-    const character = line[index];
-    if (isOpen(character)) depth += 1;
-    else if (isClose(character) && depth > 0) depth -= 1;
-    else if (character === kind.close) end = index;
-    else if (character === kind.separator && depth === 0) {
-      items.push(line.slice(item, index));
-      item = index + 1;
-    }
-  }
-  items.push(line.slice(item, end));
-  const inner = `${indentation}    `;
-  const body = kind === kinds.list
-    ? items.map((text, index) => `${inner}${text}${index === items.length - 1 ? ',' : ''}`)
-    : flat(`${inner}${items.join(' ')}`).length <= WIDTH ? [`${inner}${items.join(' ')}`] : items.map(text => `${inner}${text}`);
-  return [...layout(line.slice(0, start)), ...body.flatMap(layout), ...layout(`${indentation}${line.slice(end + 1)}`)];
+  return layoutLine(line, allKinds, WIDTH, ({ start, kind, items, end, indentation }) => {
+    const inner = `${indentation}    `;
+    const body = kind === kinds.list
+      ? items.map((text, index) => `${inner}${text}${index === items.length - 1 ? ',' : ''}`)
+      : flatText(`${inner}${items.join(' ')}`, allKinds).length <= WIDTH ? [`${inner}${items.join(' ')}`] : items.map(text => `${inner}${text}`);
+    return [...layout(line.slice(0, start)), ...body.flatMap(layout), ...layout(`${indentation}${line.slice(end + 1)}`)];
+  });
 }
 
 /** `code` at `level`: every line that is not empty starts with four spaces per level. */
@@ -116,12 +86,7 @@ const inputClass = (name: string): string => `_${inputName(name)}`;
 function bindingSchema(context: BackendContext): { records: Record<string, Record<string, Descriptor>>; assign: Record<string, Descriptor>; definitions: Record<string, PyValue> } {
   const records = Object.fromEntries(Object.entries(context.manifest.records).map(([name, fields]) => [name, descriptors(fields)]));
   const assign = descriptors(context.manifest.fields);
-  const definitions = Object.fromEntries([...context.program.definitions].map(([id, definition]): [string, PyValue] => [id, {
-    field: fieldName(id),
-    target: definition.template,
-    html: definition.html,
-    input: definition.template === null ? {} : Object.fromEntries([...loweredTemplate(context.program, definition.template).inputs].map(([field, type]) => [field, descriptor(type.source)])),
-  }]));
+  const definitions = definitionDescriptors(context.program, () => ({}));
   return { records, assign, definitions };
 }
 
