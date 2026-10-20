@@ -22,6 +22,7 @@
 
 zend_class_entry *pt_error_ce;
 zend_class_entry *pt_safe_string_ce;
+zend_class_entry *pt_map_value_ce;
 static zend_class_entry *pt_bind_error_ce;
 static zend_class_entry *pt_engine_ce;
 
@@ -87,6 +88,127 @@ ZEND_METHOD(Polyspec_Template_Value_BindError, __construct)
     ZEND_PARSE_PARAMETERS_END();
     zend_update_property_str(pt_bind_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errorCode"), code);
     zend_update_property_str(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("message"), message);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* Value\MapValue (S10, VAL-1, VAL-4, VAL-17): the items are the PHP array of the one property     */
+/* slot, so numeric string keys behave as PHP array keys do; keys are cast back to strings on read. */
+/* ----------------------------------------------------------------------------------------------- */
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, set)
+{
+    zend_string *key;
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(key)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    SEPARATE_ARRAY(items);
+    Z_TRY_ADDREF_P(value);
+    zend_symtable_update(Z_ARRVAL_P(items), key, value);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, has)
+{
+    zend_string *key;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(key)
+    ZEND_PARSE_PARAMETERS_END();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    RETURN_BOOL(zend_symtable_exists(Z_ARRVAL_P(items), key));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, get)
+{
+    zend_string *key;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(key)
+    ZEND_PARSE_PARAMETERS_END();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    zval *value = zend_symtable_find(Z_ARRVAL_P(items), key);
+    if (value == NULL) {
+        RETURN_NULL();
+    }
+    RETURN_COPY_DEREF(value);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, remove)
+{
+    zend_string *key;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(key)
+    ZEND_PARSE_PARAMETERS_END();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    SEPARATE_ARRAY(items);
+    zend_symtable_del(Z_ARRVAL_P(items), key);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, count)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    RETURN_LONG(zend_hash_num_elements(Z_ARRVAL_P(items)));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, keys)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    array_init(return_value);
+    zend_ulong index;
+    zend_string *name;
+    ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(items), index, name) {
+        if (name != NULL) {
+            add_next_index_str(return_value, zend_string_copy(name));
+        } else {
+            add_next_index_str(return_value, zend_long_to_str((zend_long)index));
+        }
+    } ZEND_HASH_FOREACH_END();
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, values)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    array_init(return_value);
+    zval *value;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(items), value) {
+        Z_TRY_ADDREF_P(value);
+        add_next_index_zval(return_value, value);
+    } ZEND_HASH_FOREACH_END();
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, entries)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    array_init(return_value);
+    zend_ulong index;
+    zend_string *name;
+    zval *value;
+    ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(items), index, name, value) {
+        zval pair;
+        array_init(&pair);
+        if (name != NULL) {
+            add_next_index_str(&pair, zend_string_copy(name));
+        } else {
+            add_next_index_str(&pair, zend_long_to_str((zend_long)index));
+        }
+        Z_TRY_ADDREF_P(value);
+        add_next_index_zval(&pair, value);
+        add_next_index_zval(return_value, &pair);
+    } ZEND_HASH_FOREACH_END();
+}
+
+ZEND_METHOD(Polyspec_Template_Value_MapValue, copy)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zval *items = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0);
+    object_init_ex(return_value, pt_map_value_ce);
+    zval *target = OBJ_PROP_NUM(Z_OBJ_P(return_value), 0);
+    zval_ptr_dtor(target);
+    ZVAL_COPY(target, items);
 }
 
 /* Returns the 1-based line and column of a byte offset in a line index (the offsets at which the lines start). */
@@ -1803,6 +1925,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_error_ce = register_class_Polyspec_Template_TemplateError(spl_ce_RuntimeException);
     pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
+    pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
 
     pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
     pt_engine_ce->create_object = pt_engine_create;

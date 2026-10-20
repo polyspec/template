@@ -191,7 +191,7 @@ final class Value
                 if ($a->count() !== $b->count()) {
                     return false;
                 }
-                foreach ($a->entries() as $key => $value) {
+                foreach ($a->entries() as [$key, $value]) {
                     if (!$b->has($key) || !self::looseEquals($value, $b->get($key))) {
                         return false;
                     }

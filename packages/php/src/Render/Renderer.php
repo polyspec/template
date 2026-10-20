@@ -214,7 +214,7 @@ final class Renderer
         }
         $data = $this->context->rootData->copy();
         if ($entry['data'] !== null) {
-            foreach ($entry['data']->entries() as $key => $value) {
+            foreach ($entry['data']->entries() as [$key, $value]) {
                 $data->set($key, $value);
             }
         }

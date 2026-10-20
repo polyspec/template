@@ -162,7 +162,7 @@ final class Evaluator
                             $frame,
                             $entry['span'],
                         );
-                        foreach ($spread->entries() as $key => $value) {
+                        foreach ($spread->entries() as [$key, $value]) {
                             $map->set($key, $value);
                         }
                     } else {

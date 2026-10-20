@@ -41,7 +41,7 @@ final class Encoding implements FunctionGroup
             throw Helpers::typeError('json does not accept a native object');
         }
         $parts = [];
-        foreach ($value->entries() as $key => $entry) {
+        foreach ($value->entries() as [$key, $entry]) {
             $parts[] = self::jsonString($key) . ':' . self::toJson($entry);
         }
 

@@ -84,7 +84,7 @@ final class BoundMap
                 );
             }
             $entries = $first->entries->copy();
-            foreach ($second->entries->entries() as $key => $value) {
+            foreach ($second->entries->entries() as [$key, $value]) {
                 $entries->set($key, $value);
             }
 

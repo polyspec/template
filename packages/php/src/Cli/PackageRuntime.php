@@ -62,7 +62,7 @@ final class PackageRuntime implements Runtime
     {
         if ($value instanceof MapValue) {
             $result = [];
-            foreach ($value->entries() as $key => $item) {
+            foreach ($value->entries() as [$key, $item]) {
                 $result[$key] = self::plain($item);
             }
 

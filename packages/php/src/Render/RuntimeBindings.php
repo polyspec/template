@@ -360,7 +360,7 @@ final class RuntimeBindings
         }
         if ($value instanceof MapValue) {
             $entries = [];
-            foreach ($value->entries() as $key => $item) {
+            foreach ($value->entries() as [$key, $item]) {
                 $entries[] = [$key, $item];
             }
 

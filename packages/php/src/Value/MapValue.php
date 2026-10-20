@@ -56,16 +56,19 @@ final class MapValue
     }
 
     /**
-     * @return \Generator<string, mixed>
+     * @return list<array{0: string, 1: mixed}>
      */
-    public function entries(): \Generator
+    public function entries(): array
     {
+        $entries = [];
         foreach ($this->items as $key => $value) {
-            yield (string) $key => $value;
+            $entries[] = [(string) $key, $value];
         }
+
+        return $entries;
     }
 
-    public function copy(): self
+    public function copy(): MapValue
     {
         $map = new self();
         $map->items = $this->items;

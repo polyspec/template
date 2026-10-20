@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4fb7f43038b8d79152f4c14d9dd25edca5c4e71b44bf59ba5707c19ac4ba4085 -->
+<!-- source-sha256: 9ed9aebd3b875c152977d6036c271e693f0f7715bf0eae6d077e7f5a6324f8b8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-2-2: PHP 확장은 `Polyspec\Template\Value\MapValue`를 library와 같은 signature의 internal final class로 등록한다. private `items`의 PHP 배열 위에서 삽입 순서를 지키는 map이며 `set`, `has`, `get`, `remove`, `count`, `keys`, `values`, `entries`, `copy`를 가지고, 숫자 문자열 key는 PHP 배열 key처럼 동작하고 문자열로 다시 읽힌다. internal method는 `Generator`를 돌려줄 수 없으므로 library와 확장의 `MapValue::entries()`는 `[key, value]` 쌍의 list를 돌려주며, 호출하는 열 곳은 이를 `foreach (... as [$key, $value])`로 읽는다. gen_stub가 `self` 대신 요구하므로 `copy()`는 `MapValue`를 선언한다. Red: 새 `packages/php-ext/tests/MapValueTest.php`가 4개 중 4개 실패했다(class가 library의 것이었고 `entries()`가 Generator를 돌려줬다); green: 확장을 load하고 `MapValueTest` 4, `Value/ValueTest` 7, `Functions/FunctionsTest` 5, `ConformanceTest` 765가 통과하고, library만으로 `Value/ValueTest` 7과 `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-2-2).
 
 - T26.7-2-1-5-1: PHP 확장의 `Engine`은 target이나 option으로 받은 literal 빈 배열을 fault 없이 program에 넘긴다. 이전에는 인자를 zval을 counted로 표시하는 `ZVAL_ARR`로 다시 만들었으므로, literal `[]`의 immutable 빈 배열이 읽기 전용 메모리에서 count가 올라가 process가 SIGBUS로 끝났다. 이제 호출자의 인자를 그대로 넘긴다. Red: `ProgramEngineTest::testLiteralEmptyArraysReachTheProgram`이 끝나지 않았고, 확장을 load한 `ConformanceTest`가 `block/anonymous-path-block`에서 멈췄다(510 통과, 1 실패). T26.7-2-1-5는 이 test를 실행하지 않았다; green: 확장을 load하고 `ProgramEngineTest` 4와 `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-1-5-1).
 

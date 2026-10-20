@@ -444,6 +444,7 @@ typedef struct pt_bound {
 extern zend_class_entry *pt_bound_ce;
 extern zend_class_entry *pt_error_ce;
 extern zend_class_entry *pt_safe_string_ce;
+extern zend_class_entry *pt_map_value_ce;
 
 static inline pt_bound *pt_bound_from(zend_object *object) {
     return (pt_bound *)((char *)object - XtOffsetOf(pt_bound, std));

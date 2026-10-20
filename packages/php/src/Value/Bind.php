@@ -114,7 +114,7 @@ final class Bind
         if ($input instanceof MapValue) {
             self::checkLevel($level + 1);
             $map = new MapValue();
-            foreach ($input->entries() as $key => $value) {
+            foreach ($input->entries() as [$key, $value]) {
                 $map->set(self::key($key), self::at($value, $level + 1));
             }
 

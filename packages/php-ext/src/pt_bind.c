@@ -224,7 +224,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
                 *result = pt_string(value);
                 return true;
             }
-            if (zend_string_equals_literal(ce->name, "Polyspec\\Template\\Value\\MapValue")) {
+            if (ce == pt_map_value_ce) {
                 return pt_bind_map_value(arena, object, level, result, error);
             }
             if (instanceof_function(ce, php_json_serializable_ce)) {

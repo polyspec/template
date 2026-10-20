@@ -437,3 +437,40 @@ final class BindError extends \RuntimeException
 
     public function __construct(string $errorCode, string $message) {}
 }
+
+/**
+ * Insertion-ordered map with string keys (VAL-1, VAL-4, VAL-17).
+ *
+ * PHP arrays convert numeric string keys to integers; every key is cast back to a string on read.
+ */
+final class MapValue
+{
+    private array $items = [];
+
+    public function set(string $key, mixed $value): void {}
+
+    public function has(string $key): bool {}
+
+    public function get(string $key): mixed {}
+
+    public function remove(string $key): void {}
+
+    public function count(): int {}
+
+    /**
+     * @return list<string>
+     */
+    public function keys(): array {}
+
+    /**
+     * @return list<mixed>
+     */
+    public function values(): array {}
+
+    /**
+     * @return list<array{0: string, 1: mixed}>
+     */
+    public function entries(): array {}
+
+    public function copy(): MapValue {}
+}
