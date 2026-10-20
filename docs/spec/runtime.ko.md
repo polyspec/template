@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: bf999609f1b382675211715102ace366cd37b569a20925818f4a1d2291ace09d -->
+<!-- source-sha256: 8a4eb9aa5af446a24c7d9aded27c8f2314ea7563e694bb52b224e2a362d66d04 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -35,9 +35,9 @@ PageCache.getOrSet(key, ttl, render)
 
 - **RT-2** `parse`는 다른 템플릿을 로드하지 않고 AST 문서에 정의된 AST를 생성한다. include와 block 태그는 렌더 중에 해석한다.
 - **RT-3** `render`는 템플릿 이름 또는 파싱된 템플릿을 받는다. 이름을 받으면 엔진이 로더로 템플릿을 로드한다. 전체 출력을 하나의 문자열로 반환한다.
-- **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이거나, 다시 binding하지 않는 bound map(VAL-22)이다. null `assign`(TypeScript의 `undefined`, Go의 `nil`도)과 PHP의 빈 배열은 빈 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다.
-- **RT-5** 엔진 옵션의 `functions`와 `register`는 함수 문서에 정의된 대로 호스트 함수를 추가한다.
-- **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다. TypeScript, PHP, PHP 확장, Python의 옵션은 가진 key를 기본값 위에 합치고, Go와 Rust는 `Limits` 값을 기본값인 `DefaultLimits`와 `Limits::default()`에서 시작하므로 비어 있는 제한이 없다.
+- **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이거나, 다시 binding하지 않는 bound map(VAL-22)이다. null `assign`(TypeScript의 `undefined`, Go의 `nil`도)과 PHP의 빈 배열은 빈 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다. map이 아닌 `define`이나 `env`는 `AstProgram`의 `prepare`와 `render`에서 `E_DATA_UNSUPPORTED_TYPE`과 메시지 `define is not an object` 또는 `env is not an object`로 실패한다.
+- **RT-5** 엔진 옵션의 `functions`와 `register`는 함수 문서에 정의된 대로 호스트 함수를 추가한다. `functions`는 이름에서 호스트 함수로 가는 map이고, 각 항목은 `register`가 추가하듯이 추가된다 (FUN-43, FUN-44). map이 아닌 `functions`나 호출할 수 없는 항목은 TypeScript, PHP, PHP 확장, Python에서 ERR-13의 인자 오류 `functions is not an object` 또는 `functions.<name> is not a function`으로 program 생성에 실패하고, Go와 Rust에서는 옵션의 타입이 함수의 map만 받는다.
+- **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다. TypeScript, PHP, PHP 확장, Python의 옵션은 가진 key를 기본값 위에 합치고, Go와 Rust는 `Limits` 값을 기본값인 `DefaultLimits`와 `Limits::default()`에서 시작하므로 비어 있는 제한이 없다. map이 아닌 `limits`, RT-33이 나열하지 않는 key, 정수가 아닌 값은 TypeScript, PHP, PHP 확장, Python에서 ERR-13의 인자 오류 `limits is not an object`, `limits.<key> is not a limit`, `limits.<key> is not an integer`로 program 생성에 실패하고, Go와 Rust에서는 `Limits` 타입이 RT-33의 제한만 정수로 가진다.
 - **RT-61** `AstProgram`과 `GeneratedProgram` 모두 `prepare`에서 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target을 선택한다. `assign`이나 템플릿 정의의 `data`로 받은 bound map(VAL-22)은 PHP extension을 포함한 모든 구현에서 다시 binding하지 않는다. 그것을 렌더한 결과는 `bind`를 실행한 시점에 bound map의 항목을 항목으로 가진 호스트 map을 렌더한 결과와 byte가 같다. `merge`의 결과이면 합친 항목을 가진 호스트 map이다. native object의 member만은 템플릿이 읽을 때 읽는다(VAL-19). typed generated program은 bound `assign`을 root record로, bound 정의 `data`를 definition data record로 여전히 변환한다(RT-68). 반환된 program별 상태는 동일한 `PreparedRender.render` 연산을 제공한다.
 - **RT-62** `PreparedRender.render`는 렌더마다 필요한 scope, output, 실행 상태만 만든다. 입력이 바뀌지 않은 반복 호출은 같은 UTF-8 바이트를 출력한다. `render`는 `prepare(...).render()`와 같으며 단일 호출 편의 연산으로 유지한다.
 - **RT-70** 호스트 언어가 코드를 동시에 실행하는 곳에서는, 호스트가 함수와 class를 등록한 뒤 한 program의 렌더가 동시에 실행될 수 있다. 렌더는 program이 load하고 parse한 template만 공유하고, program은 그 cache를 보호한다. Go program은 동시에 실행되는 goroutine에서, Python program은 동시에 실행되는 thread에서 렌더할 수 있고, Python program은 template cache에서만 그 thread들을 직렬화한다. Rust program은 값과 template cache가 `Rc`와 `RefCell`을 쓰므로 `Send`도 `Sync`도 아니다. 그래서 compiler가 program과 그 bound map(VAL-22)을 만든 thread에 둔다. 여러 thread에서 렌더하는 Rust 호스트는 thread마다 program을 만든다. TypeScript와 PHP는 process나 worker마다 한 번에 하나의 렌더를 실행하고, PHP extension은 요청의 object를 그 요청 안에 둔다. 호스트는 렌더하기 전에 함수와 class를 등록한다. 같은 program의 렌더가 실행되는 동안의 등록은 호스트의 data race다. 동시에 실행되는 렌더가 공유하는 program의 loader는 그 렌더들이 동시에 호출한다.

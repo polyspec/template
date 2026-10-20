@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0dfd4d42fe16a1d05f6b5b6ee64974d94617b9d321e500fe33d1a2b795825fb3 -->
+<!-- source-sha256: f34744043675425ec05ffbdad0aafc38db0999a1a0a93a3151aa5326f39ad326 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-51-1: 전에는 적지 않았던 program 옵션의 실패 방식을 spec이 적는다 (P33). RT-6: TypeScript, PHP, PHP 확장, Python에서 map이 아닌 `limits`, RT-33이 나열하지 않는 key, 정수가 아닌 값은 ERR-13의 인자 오류로 program 생성에 실패한다 (`limits is not an object`, `limits.<key> is not a limit`, `limits.<key> is not an integer`); Go와 Rust에서는 `Limits` 타입이 RT-33의 제한만 가진다. RT-5: `functions`는 호스트 함수의 map이고 각 항목은 `register`가 추가하듯이 추가되며, map이 아닌 `functions`나 호출할 수 없는 항목은 같은 방식으로 생성에 실패한다 (`functions is not an object`, `functions.<name> is not a function`). RT-4: map이 아닌 `define`이나 `env`는 `AstProgram`의 `prepare`와 `render`에서 `E_DATA_UNSUPPORTED_TYPE`, `define is not an object` 또는 `env is not an object`로 실패한다; 지금 TypeScript와 PHP 확장은 그렇게 하고(Rust와 Go는 타입이 있는 옵션을 받고, Rust의 JSON reader는 같은 메시지를 쓴다), PHP 라이브러리와 Python은 그것을 `E_INTERNAL`로 보고하거나 받아들인다. 구현은 T26.7-51의 행들이 이어서 따른다 (T26.7-51-1).
 
 - T26.7-2-15-4: 확장은 library의 Functions\Dates(parseOffset, daysFromCivil, civilFromDays, toUnixSeconds, format, table)를 class로 등록하고, table의 date와 now callable은 받은 환경(timezone과 now의 array)으로 확장의 built-in 함수를 실행한다(date는 먼저 timezone의 offset을 읽는다). 메서드는 pt_functions.c의 날짜 연산을 다시 쓰지 않고 노출하여 실행한다. Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/DateGroupTest.php` 1 failed, "Polyspec\Template\Functions\Dates is not registered by the extension" (3 passed, 1 failed); green: 같은 명령 4 passed, 0 failed; Verification의 FunctionsTest와 ConformanceTest가 통과하고(5, 768 passed), ExprFixturesTest, ExportsTest, CompilerInterfaceTest, RenderStateTest도 통과한다(73, 18, 2, 8 passed); `make lint-php-ext`와 `make lint-php`가 exit 0; `make parity-declarations-check`는 DateGroupTest에 대한 finding을 0개 출력한다 (T26.7-2-15-4).
 
