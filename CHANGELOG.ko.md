@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3fcc68dbf31bbe0b896c5526583290b373f02b2833d2500125e3e18e54bc8ada -->
+<!-- source-sha256: f84c6ca896709688ced69a23805c932721a6f86804ba420910be1c23b42f84b7 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-28: `examples/site/index.html`, `data/scenarios.json`, `data/results.json`은 생성 산출물이므로 더 이상 추적하지 않는다. `build.mts`가 실행마다 data를 쓰고(`--write`는 golden `expected.html`도 바꾼다), `build-site.mts`가 페이지를 쓰며, `showcase-site-check`와 `showcase-html-check`가 먼저 이들을 build하고, `ci.yml`의 `showcase` job이 `examples/site`를 artifact `example-site`로 올리며, `pages` workflow는 `main`의 CI run이 성공한 뒤 추적하는 site를 복사하는 대신 같은 commit의 artifact를 게시한다. 측정값 `benchmark.json`과 `mode-benchmark.json`은 추적하는 기록으로, `expected.html`은 golden file로 남는다. Red: `git ls-files`가 생성 파일 3개를 나열했고, green: `make showcase-site-check`가 구현 6개로 data와 페이지를 쓰고 `make showcase-html-check`가 시나리오 5개에서 통과한다(첫 실행은 새 binary의 첫 실행 지연만 겪었다)(T26.7-28).
 
 - T26.7-27: `docs/spec/compiler.md`와 `runtime.md`가 include하는 Mermaid 도표 `packages/compiler/generated/*.mmd`는 `make compiler-interface-generate`가 만들고 더 이상 추적하지 않는다. `docs`, `docs-check`, `compiler-interface-check`가 이에 의존하고, generator는 byte가 바뀔 때만 파일을 쓰며, `compiler-interface-diagrams-check`는 제거했다. Red: `git ls-files`가 생성 파일 2개를 나열했고, green: 디렉터리를 지운 뒤 `make compiler-interface-generate`가 둘을 쓰고 `make docs`가 site를 build하며 `kit-check`, `owner-validate`, `rebuild-check`가 통과한다(T26.7-27).
 

@@ -170,10 +170,6 @@ function cliRender(language: string, scenario: Scenario): string {
   return result.stdout;
 }
 
-function sameJson(actual: unknown, expected: unknown): boolean {
-  return JSON.stringify(actual) === JSON.stringify(expected);
-}
-
 const languages = selectLanguages(options.langs);
 if (!languages.includes('ts')) {
   process.stderr.write('the showcase requires the ts implementation\n');
@@ -314,26 +310,16 @@ if (failures.length) {
 
 const siteDataPath = join(dataDir, 'scenarios.json');
 const resultsPath = join(dataDir, 'results.json');
+// scenarios.json and results.json are generated output and are not tracked: every run writes them. The expected.html of a
+// scenario is the golden file that --check compares and --write replaces after review.
+mkdirSync(dataDir, { recursive: true });
 if (options.mode === 'write') {
-  mkdirSync(dataDir, { recursive: true });
   for (const scenario of scenarios) {
     const site = siteScenarios.find(item => item.id === scenario.id);
     if (site === undefined) throw new Error(`${scenario.id} has no rendered site entry`);
     writeFileSync(join(scenario.dir, 'expected.html'), site.expectedHtml);
   }
-  writeFileSync(siteDataPath, JSON.stringify(siteData, null, 2) + '\n');
-  writeFileSync(resultsPath, JSON.stringify(results, null, 2) + '\n');
-  process.stdout.write(`wrote ${relative(root, siteDataPath)} and ${relative(root, resultsPath)}\n`);
-} else {
-  if (!existsSync(siteDataPath) || !sameJson(readJson(siteDataPath), siteData)) {
-    failures.push(`${relative(root, siteDataPath)} is stale; run make showcase`);
-  }
-  if (!existsSync(resultsPath) || !sameJson(readJson(resultsPath), results)) {
-    failures.push(`${relative(root, resultsPath)} is stale; run make showcase`);
-  }
-  if (failures.length) {
-    for (const failure of failures) process.stderr.write(`${failure}\n`);
-    process.exit(1);
-  }
-  process.stdout.write(`checked ${relative(root, siteDataPath)} and ${relative(root, resultsPath)}\n`);
 }
+writeFileSync(siteDataPath, JSON.stringify(siteData, null, 2) + '\n');
+writeFileSync(resultsPath, JSON.stringify(results, null, 2) + '\n');
+process.stdout.write(`wrote ${relative(root, siteDataPath)} and ${relative(root, resultsPath)}\n`);

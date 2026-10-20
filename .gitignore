@@ -57,3 +57,8 @@ packages/python/build/
 
 # The diagrams that make compiler-interface-generate writes (T26.7-27)
 packages/compiler/generated/
+
+# The example site that make showcase writes (T26.7-28): the measurements, expected.html and the scenario sources stay tracked
+examples/site/index.html
+examples/site/data/scenarios.json
+examples/site/data/results.json

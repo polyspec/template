@@ -1,12 +1,20 @@
-# The documentation site of main (T17.1-7). It builds and publishes the site of every push to main, and also on a manual
-# run (workflow_dispatch, T17.1-9). It publishes, so it stops at its first failure; it pins its actions by commit and runs
-# on ubuntu-24.04. A newer commit of main does not cancel the deployment of the previous one.
+# The documentation site of main (T17.1-7). It publishes the site of every CI run of main that succeeded (workflow_run), and
+# also on a manual run (workflow_dispatch, T17.1-9) of the CI run named by `run-id`. The example site is generated output: it is
+# the artifact `example-site` that the job showcase of that CI run built for the same commit. The workflow publishes, so it
+# stops at its first failure; it pins its actions by commit and runs on ubuntu-24.04. A newer commit of main does not cancel
+# the deployment of the previous one.
 name: Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
+    inputs:
+      run-id:
+        description: The CI run of main whose example-site artifact is published
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,6 +29,7 @@ env:
 
 jobs:
   pages:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -32,6 +41,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: mise.toml
@@ -49,7 +60,12 @@ jobs:
           name: report-pages
           path: var/report/ci-targets/
           if-no-files-found: error
-      - run: make showcase-compile
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: example-site
+          path: examples/site
+          run-id: ${{ github.event.workflow_run.id || inputs.run-id }}
+          github-token: ${{ github.token }}
       - run: |
           mkdir -p docs/.vitepress/dist/examples
           cp -R examples/site docs/.vitepress/dist/examples/site

@@ -93,7 +93,6 @@ const modeBenchmark = list(object(readJson(join(site, 'data', 'mode-benchmark.js
     outputSha256: text(row.output_sha256, `${where}.output_sha256`),
   };
 });
-const check = process.argv.includes('--check');
 
 function escapeHtml(value: string | number): string {
   return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
@@ -199,12 +198,7 @@ const html = `<!doctype html>
 <section class="panel"><div class="section-heading"><div><p class="eyebrow">04 · PERFORMANCE</p><h2>Same request, two execution modes</h2></div><p>Independent samples use production artifacts with the page cache disabled. Cold includes process startup and loading. Full render includes request binding; prepared render reuses one normalized request. Every row must match the same UTF-8 bytes before it is recorded.</p></div><div class="table-wrap"><table><thead><tr><th>Language</th><th>Mode</th><th>Cold median</th><th>Full render</th><th>Prepared render</th><th>RSS median</th><th>Bytes</th><th>Output</th></tr></thead><tbody>${modeRows}</tbody></table></div><details><summary>Package throughput samples</summary><div class="table-wrap"><table><thead><tr><th>Fixture</th><th>Implementation</th><th>Iterations</th><th>Output</th></tr></thead><tbody>${measurementRows}</tbody></table></div></details></section></main>
 <footer class="footer"><a href="../../spec/runtime.html">Runtime specification</a><a href="../../spec/ast.html">AST specification</a><a href="../../operations/showcase.html">Showcase procedure</a></footer></body></html>\n`;
 
+// index.html is generated output and is not tracked.
 const output = join(site, 'index.html');
-if (check) {
-  const current = readFileSync(output, 'utf8');
-  if (current !== html) throw new Error('examples/site/index.html is stale; run make showcase');
-  process.stdout.write('checked examples/site/index.html\n');
-} else {
-  writeFileSync(output, html);
-  process.stdout.write('wrote examples/site/index.html\n');
-}
+writeFileSync(output, html);
+process.stdout.write('wrote examples/site/index.html\n');

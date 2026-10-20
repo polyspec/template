@@ -610,9 +610,9 @@ showcase-check: typed-generator-compile-check showcase-build-check contract-chec
 # whose digests match.
 showcase-build-check: cargo-downloads-check typed-generator build-php
 	$(NODE) examples/showcase/build.mts --check --langs $(SHOWCASE_LANGS)
-showcase-site-check: showcase-compile
-	$(NODE) examples/showcase/build-site.mts --check
-showcase-html-check: build-ts
+showcase-site-check: showcase-build-check
+	$(NODE) examples/showcase/build-site.mts
+showcase-html-check: showcase-site-check
 	$(NODE) scripts/check-showcase-html.mts
 
 showcase-compile: build-ts ## Build the canonical AST artifacts of the showcase

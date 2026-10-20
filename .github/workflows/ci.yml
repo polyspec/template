@@ -145,6 +145,12 @@ jobs:
           name: report-showcase
           path: var/report/ci-targets/
           if-no-files-found: error
+      # The example site of this commit: the pages workflow publishes it (the site is generated output and is not tracked).
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: example-site
+          path: examples/site
+          if-no-files-found: error
 
   docs:
     runs-on: ubuntu-24.04
