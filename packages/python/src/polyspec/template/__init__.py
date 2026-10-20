@@ -109,7 +109,7 @@ __all__ = [
     "resolve_path",
 ]
 
-from .node_loader import FsLoader  # noqa: E402
+from .node_loader import FsLoader
 
 
 class ParseOptions:
@@ -160,5 +160,3 @@ def analyze_prefix(
         else Source.from_bytes(name, source)
     )
     return internal_boundary(name, lambda: analyze_template_prefix(parsed, delimiters))
-
-

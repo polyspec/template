@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: fb59e1b34f1a8f53f47813d207795d61d94c3267b16f9210e05861c6e4b584d3 -->
+<!-- source-sha256: 990c696af270a392182d3f2dc12284de4491ade6868dc4c8dceff9a29537d430 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-49: Python 패키지 항목(`packages/python/src/polyspec/template/__init__.py`)은 마지막 줄 뒤에 빈 줄이 없고 쓰이지 않는 noqa directive도 없다. Red: `make lint-python`이 `ruff format --check`(마지막 줄 162 뒤의 빈 줄 두 개가 많음)와 `ruff check`(RUF100, 112행의 쓰이지 않는 `# noqa: E402`)에서 실패했다; green: `make lint-python`이 통과한다(ruff check, ruff format --check, vulture) (T26.7-49).
 
 - T26.7-47: kit의 link가 Go 모듈(`examples/showcase/adapters/go`, `packages/go`)마다 쓰는 go.work와 go.work.sum을 git이 무시하므로, worktree의 link가 더 이상 이를 거부하지 않는다. Red: `var/tools/bin/node --test tests/scripts/ignored-files.test.mts`가 네 항목이 없을 때 `outputs that .gitignore does not ignore: examples/showcase/adapters/go/go.work examples/showcase/adapters/go/go.work.sum packages/go/go.work packages/go/go.work.sum`로 실패하고, `node ../kit/dist/link.mjs link --siblings`가 `examples/showcase/adapters/go/go.work is not ignored by Git in its repository`와 함께 1로 끝난다; green: test가 2개 중 2개 통과하고 같은 link가 `linked npm @polyspec/kit`과 함께 0으로 끝난다. Verification cell은 두 명령을 모두 나열하는데, checkout이 없으면 link는 아무것도 연결하지 않기 때문이다 (T26.7-47).
 
