@@ -158,6 +158,18 @@ final class FilesystemLoader implements LoaderInterface
     public function load(string $name): ?array {}
 }
 
+/**
+ * Template name resolution (RT-7, RT-8).
+ */
+final class Path
+{
+    /**
+     * Resolves a path written in a tag against the directory of the current template.
+     * Returns null when the path leaves the loader root.
+     */
+    public static function resolve(string $current, string $path): ?string {}
+}
+
 namespace Polyspec\Template\Render;
 
 /**
@@ -596,6 +608,96 @@ final class BoundMap
      * follow (RT-26). It reads no value again.
      */
     public static function merge(mixed $first, mixed $second): BoundMap {}
+}
+
+/**
+ * Template source: UTF-8 validation, BOM removal and the line index (LEX-1, LEX-2, LEX-16).
+ */
+final class Source
+{
+    /** @var list<int> byte offsets of line starts */
+    public readonly array $lines;
+
+    public readonly string $name;
+
+    public readonly string $text;
+
+    private function __construct(string $name, string $text) {}
+
+    /**
+     * Checks the bytes as UTF-8 and removes the byte order mark; an invalid byte is E_LEX_INVALID_UTF8 at its offset.
+     */
+    public static function fromBytes(string $name, string $bytes): Source {}
+
+    /**
+     * @return list<int>
+     */
+    public static function lineIndex(string $text): array {}
+
+    /**
+     * @param array $lines
+     * @phpstan-param list<int> $lines
+     * @return array
+     * @phpstan-return array{0: int, 1: int} 1-based line and byte column
+     */
+    public static function position(array $lines, int $offset): array {}
+
+    public function length(): int {}
+}
+
+/**
+ * UTF-8 helpers shared by the source reader, the data binder and the functions.
+ */
+final class Utf8
+{
+    /**
+     * Returns whether the bytes are valid UTF-8, with the same result as `firstInvalid() < 0`. Binding uses it
+     * because it checks in native code and reports no position.
+     */
+    public static function isValid(string $bytes): bool {}
+
+    /**
+     * Returns the index of the first invalid byte, or -1 when the bytes are valid UTF-8.
+     */
+    public static function firstInvalid(string $bytes): int {}
+
+    /**
+     * Encodes a code point as UTF-8.
+     */
+    public static function chr(int $code): string {}
+
+    /**
+     * @return list<string> code points of a valid UTF-8 string
+     */
+    public static function codePoints(string $text): array {}
+
+    public static function length(string $text): int {}
+}
+
+/**
+ * HTML escaping (RT-32, FUN-10).
+ */
+final class Escape
+{
+    public static function html(string $text): string {}
+}
+
+/**
+ * The boundary of the public parse, prepare and render operations (ERR-12, ERR-13).
+ */
+final class InternalBoundary
+{
+    /**
+     * Runs one operation and reports an error of the PHP `Error` hierarchy as E_INTERNAL for
+     * `$template`. A template error and every exception pass unchanged.
+     *
+     * @template T
+     * @param \Closure $operation
+     * @phpstan-param \Closure(): T $operation
+     * @return mixed
+     * @phpstan-return T
+     */
+    public static function run(string $template, \Closure $operation): mixed {}
 }
 
 namespace Polyspec\Template\Value;

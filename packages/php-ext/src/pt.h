@@ -464,6 +464,11 @@ typedef struct pt_bound {
 
 extern zend_class_entry *pt_bound_ce;
 extern zend_class_entry *pt_error_ce;
+extern zend_class_entry *pt_source_ce;
+/* A TemplateError object with the fields of an error, and the 1-based line and column of an offset in a PHP list of
+ * line starts (the error of a source and Source::position). */
+zend_object *pt_error_object(const char *code, zend_string *template, zend_long line, zend_long col, zend_long offset, zend_long end, zend_string *message);
+void pt_error_position(HashTable *lines, zend_long offset, zend_long *line, zend_long *col);
 extern zend_class_entry *pt_safe_string_ce;
 extern zend_class_entry *pt_map_value_ce;
 

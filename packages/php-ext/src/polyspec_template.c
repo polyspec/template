@@ -44,7 +44,7 @@ static void pt_error_fill(zend_object *object, zend_string *code, zend_string *t
 }
 
 /* Creates a TemplateError object with the fields of an error. */
-static zend_object *pt_error_object(const char *code, zend_string *template, zend_long line, zend_long col, zend_long offset, zend_long end, zend_string *message)
+zend_object *pt_error_object(const char *code, zend_string *template, zend_long line, zend_long col, zend_long offset, zend_long end, zend_string *message)
 {
     zval exception;
     object_init_ex(&exception, pt_error_ce);
@@ -491,7 +491,7 @@ ZEND_METHOD(Polyspec_Template_Value_Json, parse)
 }
 
 /* Returns the 1-based line and column of a byte offset in a line index (the offsets at which the lines start). */
-static void pt_error_position(HashTable *lines, zend_long offset, zend_long *line, zend_long *col)
+void pt_error_position(HashTable *lines, zend_long offset, zend_long *line, zend_long *col)
 {
     zend_long low = 0, high = (zend_long)zend_hash_num_elements(lines) - 1;
     while (low < high) {
@@ -2433,6 +2433,11 @@ ZEND_METHOD(Polyspec_Template_AstProgram, render)
 static PHP_MINIT_FUNCTION(polyspec_template)
 {
     pt_error_ce = register_class_Polyspec_Template_TemplateError(spl_ce_RuntimeException);
+    pt_source_ce = register_class_Polyspec_Template_Source();
+    register_class_Polyspec_Template_Utf8();
+    register_class_Polyspec_Template_Escape();
+    register_class_Polyspec_Template_InternalBoundary();
+    register_class_Polyspec_Template_Loader_Path();
     pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
