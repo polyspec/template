@@ -38,16 +38,17 @@ test('the generated runners name each case whose generated test failed', async (
 });
 
 test('a tool that cannot start fails with its command and the install fix', (t) => {
-  // A directory that holds only git as PATH: go cannot start; the runner itself starts with the path of node and finds
-  // the root of the checkout with git.
-  const bin = directory(t, 'template-no-go-');
+  // A directory that holds only git as PATH: go starts from the mise of the checkout, never from PATH, so it can start;
+  // cargo is the tool that run-tests still looks up on PATH, so it cannot start. The runner itself starts with the path
+  // of node and finds the root of the checkout with git.
+  const bin = directory(t, 'template-no-cargo-');
   const gitCore = spawnSync('git', ['--exec-path'], { encoding: 'utf8' });
   assert.equal(gitCore.status, 0, gitCore.stderr);
   symlinkSync(path.join(gitCore.stdout.trim(), 'git'), path.join(bin, 'git'));
-  const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'go', '--cwd', bin, '--', '-run', '^TestAny$', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
+  const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'cargo', '--cwd', bin, '--', 'any_test'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
-  assert.match(run.stdout, /✖ go .*: cannot start go: spawn go ENOENT; declare go in mise.toml and run make install-tools, which installs it into var\/tools\/mise/);
+  assert.match(run.stdout, /✖ cargo .*: cannot start cargo: spawn cargo ENOENT; install rustup and run make install, which installs the toolchain of rust-toolchain\.toml/);
 });
 
 test('a CLI call of the drivers that outlives its limit names the limit and the command', async (t) => {

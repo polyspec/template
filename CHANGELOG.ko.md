@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 215e29372d8847abf36308d0ce88c27cbe5b0addf8b951d212fc54a5f11dcc51 -->
+<!-- source-sha256: eb84198282b46773a3304e5344cb99f6c6e704785eaab55323fb8d79e9ce4073 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-60: `tests/scripts/failure-messages.test.mts`의 도구 없음 케이스는 go 대신 kit run-tests가 여전히 PATH에서 찾는 도구인 cargo를 시작한다. go는 checkout의 mise에서 실행되므로 PATH에 git만 있어도 시작될 수 있다. Red: `PATH=$PWD/var/tools/bin:$PATH node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/failure-messages.test.mts`에서 그 케이스 실패, `AssertionError ... did not match ... ✖ go ... no test ran: expected at least 1 test ...`; green: 같은 명령 `node --test: 4 passed, 0 failed`, `make lint-ts` 통과 (T26.7-60).
 
 - T26.7-32-8: RT-7, RT-11, RT-23을 conformance suite가 인용하고, 그 case가 모든 구현에서 그것을 검사한다. `define/string-path`는 이제 RT-7을 명명한다: 문자열 target `input.tpl`이 define의 템플릿 항목 `layout.tpl`과 일치하므로 그 대신 `layout.tpl`이 렌더된다. 새 case `expr/blocks-share-the-file-scope`는 if와 loop 안에서 대입하고 그 뒤에서 두 변수를 읽는다(`if 2`, RT-11). 새 case `include/depth-limit`와 `include/depth-error`는 서로 다른 템플릿의 include를 32개와 33개 중첩한다: 32개는 렌더되고(`deep`), 33번째 include는 `d32.tpl` 1:1에서 `E_RUNTIME_DEPTH`로 실패한다(RT-23). expected 파일은 TypeScript 구현으로 쓰고 spec에 비추어 읽었으며, 모든 구현이 generated 모드에서도 일치한다. concurrent-bound-map은 세 id를 더 이상 인용하지 않는다. Red: main 7a415e9f에서 `make parity-declarations-check`가 go와 python의 concurrent-bound-map에 RT-7, RT-11, RT-23의 R15를 보고했고(215건 중 6건), RT-11이나 RT-23을 검사하는 case는 없었다. Green: 그 6건이 사라지고 새 finding은 없다(209건); conformance, token, format suite가 새 case와 함께 통과하고(ts 780, go 783, rust 780, php 780, python 780), ts, go, rust, php, python의 generated runner가 새 case 셋을 통과하며, schema-check, rules-check와 conformance unit의 검사가 통과한다 (T26.7-32-8).
 
