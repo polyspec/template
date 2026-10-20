@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cbda96bad10dd6cc67741b32d3eb78d48cb2ba4142d6179c8405c2354614950c -->
+<!-- source-sha256: 295d767a34f5342607bc75fc2f10c3d0d71820b17b2c994d9c92b976cc1cde0d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-46-1: `config/owner-checks.json`이 T26.7-46이 추가한 루트 `vitest.config.ts`를 소유한다. 그 변경은 `lint-ts`와 `tests/scripts/vitest-collection.test.mts`를 실행한다. Red: 98097fa3에서 `make owner-validate` exit 2, `vitest.config.ts: the path matches no owner in config/owner-checks.json`; green: `make owner-validate` exit 0, `config/owner-checks.json owns every tracked path` (T26.7-46-1).
 
 - T26.7-2-19: 자기 unit의 parity check로 닫는다. Verification은 php-ext symbol을 적은 API unit 16개에 대한 `make parity-declarations-check UNITS="..."`(kit K400)이며 통과한다 (T26.7-2-19).
 

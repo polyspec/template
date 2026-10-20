@@ -900,6 +900,17 @@
     },
     {
       "paths": [
+        "vitest.config.ts"
+      ],
+      "targets": [
+        "lint-ts"
+      ],
+      "tests": [
+        "tests/scripts/vitest-collection.test.mts"
+      ]
+    },
+    {
+      "paths": [
         ".golangci.yml"
       ],
       "targets": [

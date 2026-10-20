@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 3f8875cf1dc7a2676bfeaa307e0fe99f79f1bb8cf926d4f0a9e6f0d286703574 -->
+<!-- source-sha256: 727a2c7b0bdd6a56dab3c0661d6f10e1fae7ef4beb8ace5fa4fa103ecafe6b09 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -99,7 +99,7 @@
 | T26.7-44 | knip이 packages/compiler/src/backend-support.mts에서 쓰이지 않는 export(firstGroup, splitGroup, groupToSplit)와 packages/ts/src/ast-validator.mjs의 낡은 ignore를 찾지 못한다 | packages/compiler/src/backend-support.mts and config/knip-entries.json | `make lint-ts` | [o] |
 | T26.7-45 | docs-check가 examples/site/index.html 링크를 통과시킨다: 문서는 추적되는 파일이 아니라 make showcase가 만드는 산출물을 가리킨다(T26.7-28의 회귀) | README.md, README.ko.md, docs/operations/showcase.md, docs/operations/showcase.ko.md and the Makefile prerequisites of docs-check | `make docs-check` | [o] |
 | T26.7-46 | vitest가 각 test 파일을 한 번만 실행한다: include와 exclude가 var/를 제외하여 var/tools/mise 아래의 사본이 실행되지 않는다 | the vitest configuration of packages/ts and the root | `var/tools/bin/node --test tests/scripts/vitest-collection.test.mts`, `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/smoke.test.ts` | [o] |
-| T26.7-46-1 | config/owner-checks.json이 vitest.config.ts를 소유한다: 그 변경은 tests/scripts/vitest-collection.test.mts와 lint-ts를 실행한다 (T26.7-46의 후속, 그 행이 owner 규칙 없이 루트 구성을 추가하여 make owner-validate가 main에서 실패한다) | config/owner-checks.json | `make owner-validate` | [ ] |
+| T26.7-46-1 | config/owner-checks.json이 vitest.config.ts를 소유한다: 그 변경은 tests/scripts/vitest-collection.test.mts와 lint-ts를 실행한다 (T26.7-46의 후속, 그 행이 owner 규칙 없이 루트 구성을 추가하여 make owner-validate가 main에서 실패한다) | config/owner-checks.json | `make owner-validate` | [o] |
 | T26.7-47 | worktree의 link가 examples/showcase/adapters/go/go.work를 Git이 무시하는 곳에만 쓰거나 repository가 이를 무시한다 | .gitignore and the tracked go.work of the root | `var/tools/bin/node --test tests/scripts/ignored-files.test.mts`, `node ../kit/dist/link.mjs link --siblings` | [o] |
 | T26.7-48 | oxlint가 tests/scripts에서 통과한다: conformance-cases.test.mts:32와 pre-commit-hook.test.mts:14가 any로부터의 unsafe assertion을 가진다 | tests/scripts/conformance-cases.test.mts and tests/scripts/pre-commit-hook.test.mts | `node_modules/.bin/oxlint --type-aware --deny-warnings --format unix -c .oxlintrc.json tests/scripts/conformance-cases.test.mts tests/scripts/pre-commit-hook.test.mts`, `node --test tests/scripts/conformance-cases.test.mts tests/scripts/pre-commit-hook.test.mts` | [o] |
 | T26.7-49 | ruff format이 packages/python/src/polyspec/template/__init__.py에서 통과한다: T26.7-14의 재구성 뒤 163행에 빈 줄이 둘 더 있다 | packages/python/src/polyspec/template/__init__.py | `make lint-python` | [o] |

@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-46-1: `config/owner-checks.json` owns the root `vitest.config.ts` that T26.7-46 added: a change of it runs `lint-ts` and `tests/scripts/vitest-collection.test.mts`. Red: `make owner-validate` exit 2 at 98097fa3, `vitest.config.ts: the path matches no owner in config/owner-checks.json`; green: `make owner-validate` exit 0, `config/owner-checks.json owns every tracked path` (T26.7-46-1).
+
 - T26.7-2-19: closed with the parity check of its own units: its Verification is `make parity-declarations-check UNITS="..."` over the 16 API units whose php-ext symbol it names (kit K400), which passes (T26.7-2-19).
 
 - T26.7-2-6-2: the PHP extension registers `Frame`, `Scope` and `Context` of the library as final classes of `Polyspec\Template\Render`, with the same properties, constructors and methods; their state is the declared properties of the objects, so the library classes and the tests read and write the same values. Red: `run-tests.mjs phpunit` of `RenderStateTest.php` 1 failure ("Polyspec\Template\Render\Frame is not registered by the extension", 7 passed), `make parity-declarations-check | grep -c "R1 missing-implementation api-render-[a-z]* php-ext"` 3; green: `RenderStateTest.php` OK (8 tests, 26 assertions), `ExprFixturesTest.php` OK (73 tests, 239 assertions), `CompilerInterfaceTest.php` OK (2 tests, 56 assertions), `ExportsTest.php` OK (18 tests, 27 assertions), `RuntimeEnvironmentTest.php` OK (4 tests, 18 assertions), `AstProgramTest.php` OK (8 tests, 11 assertions), `ConformanceTest.php` OK (765 tests, 1020 assertions); `make lint-php-ext` exit 0; the same grep prints 0 (T26.7-2-6-2).
