@@ -24,6 +24,43 @@ describe('Engine', () => {
     expect(() => program.register('upper', () => '')).toThrow();
   });
 
+  // FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name, a replaced function, the binding of a result, the same names in every host and a plain string result.
+  it('follows the host function rules (FUN-43, FUN-44, FUN-45, FUN-47, FUN-48)', () => {
+    const templates = { 'a.tpl': '{= tag()}', 'b.tpl': '{= two()}', 'c.tpl': '{= big()}' };
+    const program = new AstProgram({ loader: new MapLoader(templates) });
+    const engine = new Engine(program);
+    program.register('tag', () => '<b>');
+    expect(engine.render('a.tpl', {})).toBe('&lt;b&gt;');
+    expect(() => program.register('upper', () => '')).toThrow();
+    program.register('two', () => 'first');
+    program.register('two', () => 'second');
+    expect(engine.render('b.tpl', {})).toBe('second');
+    program.register('big', () => 1e19);
+    let bound: TemplateError | null = null;
+    try {
+      engine.render('c.tpl', {});
+    } catch (error: unknown) {
+      if (!(error instanceof TemplateError)) throw error;
+      bound = error;
+    }
+    expect(bound?.code).toBe('E_DATA_NUMBER_RANGE');
+    const other = new AstProgram({ loader: new MapLoader(templates) });
+    let unknown: TemplateError | null = null;
+    try {
+      new Engine(other).render('a.tpl', {});
+    } catch (error: unknown) {
+      if (!(error instanceof TemplateError)) throw error;
+      unknown = error;
+    }
+    expect(unknown?.code).toBe('E_RUNTIME_UNKNOWN_FUNCTION');
+  });
+
+  // FUN-9: a safe string compares, concatenates and stringifies as its text.
+  it('uses a safe string as its text (FUN-9)', () => {
+    const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': "{= raw('<b>') == '<b>'}|{= raw('<b>') + '!'}|{= str(raw('<i>'))}" }) }));
+    expect(engine.render('a.tpl', {})).toBe('true|&lt;b&gt;!|&lt;i&gt;');
+  });
+
   // FUN-46: an error that a host function reports fails the render with E_RUNTIME_HOST_FUNCTION at the position of its call.
   it('reports host function failures at the call', () => {
     const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': 'x\n{= boom()}' }), functions: { boom: () => { throw new Error('no'); } } }));

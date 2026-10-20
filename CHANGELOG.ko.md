@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8c29d72cb1df487901b0ddda1922993893e3c4f2d10db907487833f919a2b32d -->
+<!-- source-sha256: 10f7851fbc10a8965086d0627f06d400e8f764ed0aeac29819d5927449d0f21c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-41-2: unit 두 개가 마지막으로 남은 함수 requirement에 모든 구현의 test를 준다. `host-function-rules`는 FUN-43, FUN-44, FUN-45, FUN-47, FUN-48을 인용한다. 등록한 함수가 호출되고 그 문자열 결과는 plain이라 echo가 escape하며, built-in 이름의 등록은 실패하고 같은 이름을 두 번 등록하면 함수가 바뀌며, binding할 수 없는 결과(1e19)는 E_DATA_NUMBER_RANGE로 실패하고, 그 함수가 없는 program은 같은 템플릿을 E_RUNTIME_UNKNOWN_FUNCTION으로 실패한다. `safe-string-text`는 FUN-9를 인용한다. `raw('<b>') == '<b>'`는 true이고, `raw('<b>') + '!'`와 `str(raw('<i>'))`는 plain text다. test는 TypeScript(`engine.test.ts`), Go(`TestHostFunctionRules`, `TestSafeStringIsItsText`), Rust(`host_function_rules`, `a_safe_string_is_its_text`), PHP(`testHostFunctionRules`, `testASafeStringIsItsText`, PHP extension이 binding한다), Python(`test_host_function_rules`, `test_a_safe_string_is_its_text`)에 새로 있다. Red: 9191a30f에서 `make parity-declarations-check`는 R13 7(FUN-9, FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, RT-71); green: R13 1(RT-71), 새 finding 없음. owner test는 통과한다: vitest `engine.test.ts`(11), 두 test의 `go test`(2), `cargo test --test functions`(11), 두 test의 PHPUnit(2), Python `test_object_calls`(12). 확인하지 않음: T26.7-2-6-1과 T26.7-2-8까지 S10 선언 검사(AstProgram과 `Native\Engine`)에서 멈추는 PHP extension 실행. 이 항목은 그때까지 진행 중으로 남는다 (T26.7-41-2).
 
 - T26.7-56: `packages/go`와 `examples/showcase/adapters/go`의 Go가 kit K334의 규칙으로 `make lint-go`를 통과한다: 오류는 반환하거나 감싸며, type assertion은 검사하고, loader는 not-exist가 아닌 파일 시스템 실패를 오류로 보고하며, 범위를 벗어난 숫자 literal은 `E_PARSE_INVALID_NUMBER`이다. 일어날 수 없는 두 오류(`strconv.FormatFloat`의 지수, `Error`의 JSON)는 이유를 적은 `//nolint:errcheck`를 유지한다. Red: `make lint-go` exit 2, 62개 finding(errcheck 60, errorlint 1, nilerr 1)이 `packages/go`(61)와 `examples/showcase/adapters/go`(1)에 있다; green: `make lint-go` exit 0이며, `value`, `ast`, `expr`, `functions`, `loader`, `parser`, `render`와 root package의 `go test`가 통과한다 (T26.7-56).
 

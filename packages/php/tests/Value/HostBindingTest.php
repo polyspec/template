@@ -178,6 +178,53 @@ final class HostBindingTest extends TestCase
         $this->assertStringContainsString('function exploded', $error->getMessage());
     }
 
+    /**
+     * FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name, a replaced function,
+     * the binding of a result, the same names in every host and a plain string result.
+     */
+    public function testHostFunctionRules(): void
+    {
+        $program = new AstProgram(new ArrayLoader([
+            'a.tpl' => '{= tag()}',
+            'b.tpl' => '{= two()}',
+            'c.tpl' => '{= big()}',
+        ]));
+        $program->register('tag', static fn (array $args): string => '<b>');
+        $this->assertSame('&lt;b&gt;', $program->render('a.tpl', []));
+        try {
+            $program->register('upper', static fn (array $args): string => '');
+            $this->fail('a built-in name was registered');
+        } catch (\InvalidArgumentException $error) {
+            $this->assertStringContainsString('built-in', $error->getMessage());
+        }
+        $program->register('two', static fn (array $args): string => 'first');
+        $program->register('two', static fn (array $args): string => 'second');
+        $this->assertSame('second', $program->render('b.tpl', []));
+        $program->register('big', static fn (array $args): float => 1e19);
+        try {
+            $program->render('c.tpl', []);
+            $this->fail('an out-of-range result was bound');
+        } catch (TemplateError $error) {
+            $this->assertSame('E_DATA_NUMBER_RANGE', $error->errorCode);
+        }
+        $other = new AstProgram(new ArrayLoader(['a.tpl' => '{= tag()}']));
+        try {
+            $other->render('a.tpl', []);
+            $this->fail('an unregistered function was called');
+        } catch (TemplateError $error) {
+            $this->assertSame('E_RUNTIME_UNKNOWN_FUNCTION', $error->errorCode);
+        }
+    }
+
+    /** FUN-9: a safe string compares, concatenates and stringifies as its text. */
+    public function testASafeStringIsItsText(): void
+    {
+        $program = new AstProgram(new ArrayLoader([
+            'a.tpl' => "{= raw('<b>') == '<b>'}|{= raw('<b>') + '!'}|{= str(raw('<i>'))}",
+        ]));
+        $this->assertSame('true|&lt;b&gt;!|&lt;i&gt;', $program->render('a.tpl', []));
+    }
+
     public function testNativeObjectArgumentsArriveAsTheOriginalObject(): void
     {
         // VAL-18: a host function, a method and a class function receive the same PHP object.

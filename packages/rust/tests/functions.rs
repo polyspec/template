@@ -139,6 +139,78 @@ fn engine_reports_host_failures_and_limits() {
     assert_eq!(error.code, ErrorCode::E_RUNTIME_LIMIT);
 }
 
+fn templates(sources: &[(&str, &str)]) -> MapLoader {
+    let mut loader = MapLoader::new();
+    for (name, source) in sources {
+        loader.set(name, source);
+    }
+    loader
+}
+
+/// FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name, a replaced function, the binding of a result, the same names in every host and a plain string result.
+#[test]
+fn host_function_rules() {
+    let sources = [("a.tpl", "{= tag()}"), ("b.tpl", "{= two()}"), ("c.tpl", "{= big()}")];
+    let mut engine = AstProgram::new(EngineOptions {
+        loader: Some(Box::new(templates(&sources))),
+        ..Default::default()
+    })
+    .expect("valid engine options");
+    engine
+        .register("tag", Box::new(|_, _| Ok(Value::text("<b>".to_string()))))
+        .expect("register");
+    let html = engine
+        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .expect("render");
+    assert_eq!(html, "&lt;b&gt;");
+    assert!(engine.register("upper", Box::new(|_, _| Ok(Value::Null))).is_err());
+    engine
+        .register("two", Box::new(|_, _| Ok(Value::text("first".to_string()))))
+        .expect("register");
+    engine
+        .register("two", Box::new(|_, _| Ok(Value::text("second".to_string()))))
+        .expect("register");
+    let html = engine
+        .render(RenderTarget::Name("b.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .expect("render");
+    assert_eq!(html, "second");
+    engine
+        .register("big", Box::new(|_, _| Ok(Value::list(vec![Value::Number(1e19)]))))
+        .expect("register");
+    let error = engine
+        .render(RenderTarget::Name("c.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .unwrap_err();
+    assert_eq!(error.code, ErrorCode::E_DATA_NUMBER_RANGE);
+    let other = AstProgram::new(EngineOptions {
+        loader: Some(Box::new(templates(&sources))),
+        ..Default::default()
+    })
+    .expect("valid engine options");
+    let error = other
+        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .unwrap_err();
+    assert_eq!(error.code, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION);
+}
+
+/// FUN-9: a safe string compares, concatenates and stringifies as its text.
+#[test]
+fn a_safe_string_is_its_text() {
+    let program = AstProgram::new(EngineOptions {
+        loader: Some(Box::new(templates(&[(
+            "a.tpl",
+            "{= raw('<b>') == '<b>'}|{= raw('<b>') + '!'}|{= str(raw('<i>'))}",
+        )]))),
+        ..Default::default()
+    })
+    .expect("valid engine options");
+    assert_eq!(
+        program
+            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .expect("render"),
+        "true|&lt;b&gt;!|&lt;i&gt;"
+    );
+}
+
 #[test]
 fn engine_renders_a_parsed_template_and_reparses_new_versions() {
     let ast = polyspec_template::parse(b"{= a + 1}", "x.tpl", &Default::default()).expect("parse");

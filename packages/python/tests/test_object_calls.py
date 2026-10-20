@@ -131,6 +131,39 @@ class ObjectCalls(unittest.TestCase):
         error = caught.exception.to_object()
         self.assertEqual((error["code"], error["line"]), ("E_RUNTIME_HOST_FUNCTION", 2))
 
+    def test_host_function_rules(self):
+        # FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name,
+        # a replaced function, the binding of a result, the same names in every host and
+        # a plain string result.
+        templates = {"a.tpl": "{= tag()}", "b.tpl": "{= two()}", "c.tpl": "{= big()}"}
+        program = AstProgram(EngineOptions(loader=MapLoader(templates)))
+        engine = Engine(program)
+        program.register("tag", lambda _args, _context: "<b>")
+        self.assertEqual(engine.render("a.tpl", {}), "&lt;b&gt;")
+        with self.assertRaises(ValueError):
+            program.register("upper", lambda _args, _context: "")
+        program.register("two", lambda _args, _context: "first")
+        program.register("two", lambda _args, _context: "second")
+        self.assertEqual(engine.render("b.tpl", {}), "second")
+        program.register("big", lambda _args, _context: 1e19)
+        with self.assertRaises(TemplateError) as caught:
+            engine.render("c.tpl", {})
+        self.assertEqual(caught.exception.to_object()["code"], "E_DATA_NUMBER_RANGE")
+        other = AstProgram(EngineOptions(loader=MapLoader(templates)))
+        with self.assertRaises(TemplateError) as caught:
+            Engine(other).render("a.tpl", {})
+        self.assertEqual(
+            caught.exception.to_object()["code"], "E_RUNTIME_UNKNOWN_FUNCTION"
+        )
+
+    def test_a_safe_string_is_its_text(self):
+        # FUN-9: a safe string compares, concatenates and stringifies as its text.
+        source = "{= raw('<b>') == '<b>'}|{= raw('<b>') + '!'}|{= str(raw('<i>'))}"
+        program = AstProgram(EngineOptions(loader=MapLoader({"a.tpl": source})))
+        self.assertEqual(
+            Engine(program).render("a.tpl", {}), "true|&lt;b&gt;!|&lt;i&gt;"
+        )
+
     def test_member_call_class_call_and_public_field(self):
         # RT-60: an assigned native instance keeps its identity; its public fields are read
         # by member lookup and its public methods are called as object.method(args).

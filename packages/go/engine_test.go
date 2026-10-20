@@ -135,6 +135,62 @@ func TestHostFunctions(t *testing.T) {
 	}
 }
 
+// FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name, a replaced function, the binding of a result, the same names in every host and a plain string result.
+func TestHostFunctionRules(t *testing.T) {
+	templates := map[string]string{"a.tpl": "{= tag()}", "b.tpl": "{= two()}", "c.tpl": "{= big()}"}
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(templates)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := template.NewEngine(program)
+	if err := program.Register("tag", func([]template.Value, functions.Context) (any, error) { return "<b>", nil }); err != nil {
+		t.Fatal(err)
+	}
+	if out, err := engine.Render("a.tpl", nil, template.RenderOptions{}); err != nil || out != "&lt;b&gt;" {
+		t.Errorf("tag: %q %v", out, err)
+	}
+	if err := program.Register("upper", func([]template.Value, functions.Context) (any, error) { return "", nil }); err == nil {
+		t.Error("built-in name accepted")
+	}
+	if err := program.Register("two", func([]template.Value, functions.Context) (any, error) { return "first", nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := program.Register("two", func([]template.Value, functions.Context) (any, error) { return "second", nil }); err != nil {
+		t.Fatal(err)
+	}
+	if out, err := engine.Render("b.tpl", nil, template.RenderOptions{}); err != nil || out != "second" {
+		t.Errorf("replaced function: %q %v", out, err)
+	}
+	if err := program.Register("big", func([]template.Value, functions.Context) (any, error) { return float64(1e19), nil }); err != nil {
+		t.Fatal(err)
+	}
+	_, err = engine.Render("c.tpl", nil, template.RenderOptions{})
+	var bound *errs.Error
+	if !errors.As(err, &bound) || bound.Code != errs.DataNumberRange {
+		t.Errorf("unbindable result: %v", err)
+	}
+	other, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(templates)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = template.NewEngine(other).Render("a.tpl", nil, template.RenderOptions{})
+	var unknown *errs.Error
+	if !errors.As(err, &unknown) || unknown.Code != errs.RuntimeUnknownFunction {
+		t.Errorf("unregistered function: %v", err)
+	}
+}
+
+// FUN-9: a safe string compares, concatenates and stringifies as its text.
+func TestSafeStringIsItsText(t *testing.T) {
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": `{= raw('<b>') == '<b>'}|{= raw('<b>') + '!'}|{= str(raw('<i>'))}`})})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out, err := template.NewEngine(program).Render("a.tpl", nil, template.RenderOptions{}); err != nil || out != "true|&lt;b&gt;!|&lt;i&gt;" {
+		t.Errorf("safe string: %q %v", out, err)
+	}
+}
+
 // RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT.
 func TestLimits(t *testing.T) {
 	limits := template.Limits{Iterations: 5, Depth: 32, OutputBytes: 1 << 20, ExpressionDepth: 64}
