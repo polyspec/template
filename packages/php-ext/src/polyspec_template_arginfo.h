@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c9947082d14f6d8c253309ddb3432cc20f1bfc40 */
+ * Stub hash: bcb8c4b73cb02595073b61ba1da62a8be36b4e17 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -92,6 +92,58 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_classFunction arginfo_class_Polyspec_Template_Render_RuntimeServices_classFunction
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Render_Frame___construct, 0, 0, 3)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, lines, IS_ARRAY, 1)
+	ZEND_ARG_OBJ_INFO(0, context, Polyspec\\Template\\Value\\MapValue, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Render_Scope___construct, 0, 0, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, locals, Polyspec\\Template\\Value\\MapValue, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Scope_lookup, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Render_Scope_loopMeta arginfo_class_Polyspec_Template_Loader_LoaderInterface_load
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Render_Context___construct, 0, 0, 4)
+	ZEND_ARG_OBJ_INFO(0, services, Polyspec\\Template\\Render\\RuntimeServices, 0)
+	ZEND_ARG_OBJ_INFO(0, rootData, Polyspec\\Template\\Value\\MapValue, 0)
+	ZEND_ARG_TYPE_INFO(0, env, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, entryName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Context_write, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Context_output, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Context_at, 0, 2, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Render_Context_fail, 0, 4, Polyspec\\Template\\TemplateError, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 1)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Context_enter, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 1)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Context_leave, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_TemplateError___construct, 0, 0, 7)
 	ZEND_ARG_TYPE_INFO(0, errorCode, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
@@ -136,8 +188,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_PreparedRender___construc
 	ZEND_ARG_OBJ_INFO(0, execution, Polyspec\\Template\\PreparedExecution, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_PreparedRender_render, 0, 0, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Polyspec_Template_PreparedRender_render arginfo_class_Polyspec_Template_Render_Context_output
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Engine___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, program, Polyspec\\Template\\Program, 0)
@@ -147,9 +198,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Engine_render arginfo_class_Polyspec_Template_Program_render
 
-#define arginfo_class_Polyspec_Template_PreparedExecution_render arginfo_class_Polyspec_Template_PreparedRender_render
+#define arginfo_class_Polyspec_Template_PreparedExecution_render arginfo_class_Polyspec_Template_Render_Context_output
 
-#define arginfo_class_Polyspec_Template_AstPreparedExecution_render arginfo_class_Polyspec_Template_PreparedRender_render
+#define arginfo_class_Polyspec_Template_AstPreparedExecution_render arginfo_class_Polyspec_Template_Render_Context_output
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_AstProgram___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, loader, Polyspec\\Template\\Loader\\LoaderInterface, 1, "null")
@@ -188,8 +239,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_BoundMap___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_BoundMap___clone, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Polyspec_Template_BoundMap___clone arginfo_class_Polyspec_Template_Render_Context_leave
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_BoundMap___unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
@@ -292,6 +342,17 @@ ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, limits);
 ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, hostFunction);
 ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, registerClass);
 ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, classFunction);
+ZEND_METHOD(Polyspec_Template_Render_Frame, __construct);
+ZEND_METHOD(Polyspec_Template_Render_Scope, __construct);
+ZEND_METHOD(Polyspec_Template_Render_Scope, lookup);
+ZEND_METHOD(Polyspec_Template_Render_Scope, loopMeta);
+ZEND_METHOD(Polyspec_Template_Render_Context, __construct);
+ZEND_METHOD(Polyspec_Template_Render_Context, write);
+ZEND_METHOD(Polyspec_Template_Render_Context, output);
+ZEND_METHOD(Polyspec_Template_Render_Context, at);
+ZEND_METHOD(Polyspec_Template_Render_Context, fail);
+ZEND_METHOD(Polyspec_Template_Render_Context, enter);
+ZEND_METHOD(Polyspec_Template_Render_Context, leave);
 ZEND_METHOD(Polyspec_Template_TemplateError, __construct);
 ZEND_METHOD(Polyspec_Template_TemplateError, at);
 ZEND_METHOD(Polyspec_Template_TemplateError, withoutPosition);
@@ -398,6 +459,29 @@ static const zend_function_entry class_Polyspec_Template_Render_RuntimeEnvironme
 	ZEND_ME(Polyspec_Template_Render_RuntimeEnvironment, hostFunction, arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_hostFunction, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Render_RuntimeEnvironment, registerClass, arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_registerClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Render_RuntimeEnvironment, classFunction, arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_classFunction, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Render_Frame_methods[] = {
+	ZEND_ME(Polyspec_Template_Render_Frame, __construct, arginfo_class_Polyspec_Template_Render_Frame___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Render_Scope_methods[] = {
+	ZEND_ME(Polyspec_Template_Render_Scope, __construct, arginfo_class_Polyspec_Template_Render_Scope___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Scope, lookup, arginfo_class_Polyspec_Template_Render_Scope_lookup, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Scope, loopMeta, arginfo_class_Polyspec_Template_Render_Scope_loopMeta, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Render_Context_methods[] = {
+	ZEND_ME(Polyspec_Template_Render_Context, __construct, arginfo_class_Polyspec_Template_Render_Context___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Context, write, arginfo_class_Polyspec_Template_Render_Context_write, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Context, output, arginfo_class_Polyspec_Template_Render_Context_output, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Context, at, arginfo_class_Polyspec_Template_Render_Context_at, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Context, fail, arginfo_class_Polyspec_Template_Render_Context_fail, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Context, enter, arginfo_class_Polyspec_Template_Render_Context_enter, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Context, leave, arginfo_class_Polyspec_Template_Render_Context_leave, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -628,6 +712,153 @@ static zend_class_entry *register_class_Polyspec_Template_Render_RuntimeEnvironm
 	zend_string *property_classFunctions_name = zend_string_init("classFunctions", sizeof("classFunctions") - 1, 1);
 	zend_declare_typed_property(class_entry, property_classFunctions_name, &property_classFunctions_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release(property_classFunctions_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Render_Frame(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Render", "Frame", class_Polyspec_Template_Render_Frame_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_name_default_value;
+	ZVAL_UNDEF(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_name_name);
+
+	zval property_lines_default_value;
+	ZVAL_UNDEF(&property_lines_default_value);
+	zend_string *property_lines_name = zend_string_init("lines", sizeof("lines") - 1, 1);
+	zend_declare_typed_property(class_entry, property_lines_name, &property_lines_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
+	zend_string_release(property_lines_name);
+
+	zval property_context_default_value;
+	ZVAL_UNDEF(&property_context_default_value);
+	zend_string *property_context_name = zend_string_init("context", sizeof("context") - 1, 1);
+	zend_string *property_context_class_Polyspec_Template_Value_MapValue = zend_string_init("Polyspec\\Template\\Value\\MapValue", sizeof("Polyspec\\Template\\Value\\MapValue")-1, 1);
+	zend_declare_typed_property(class_entry, property_context_name, &property_context_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_context_class_Polyspec_Template_Value_MapValue, 0, 0));
+	zend_string_release(property_context_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Render_Scope(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Render", "Scope", class_Polyspec_Template_Render_Scope_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_locals_default_value;
+	ZVAL_UNDEF(&property_locals_default_value);
+	zend_string *property_locals_name = zend_string_init("locals", sizeof("locals") - 1, 1);
+	zend_string *property_locals_class_Polyspec_Template_Value_MapValue = zend_string_init("Polyspec\\Template\\Value\\MapValue", sizeof("Polyspec\\Template\\Value\\MapValue")-1, 1);
+	zend_declare_typed_property(class_entry, property_locals_name, &property_locals_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_locals_class_Polyspec_Template_Value_MapValue, 0, 0));
+	zend_string_release(property_locals_name);
+
+	zval property_loops_default_value;
+	ZVAL_UNDEF(&property_loops_default_value);
+	zend_string *property_loops_name = zend_string_init("loops", sizeof("loops") - 1, 1);
+	zend_string *property_loops_class_ArrayObject = zend_string_init("ArrayObject", sizeof("ArrayObject")-1, 1);
+	zend_declare_typed_property(class_entry, property_loops_name, &property_loops_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_loops_class_ArrayObject, 0, 0));
+	zend_string_release(property_loops_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Render_Context(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Render", "Context", class_Polyspec_Template_Render_Context_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_registry_default_value;
+	ZVAL_EMPTY_ARRAY(&property_registry_default_value);
+	zend_string *property_registry_name = zend_string_init("registry", sizeof("registry") - 1, 1);
+	zend_declare_typed_property(class_entry, property_registry_name, &property_registry_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_registry_name);
+
+	zval property_chain_default_value;
+	ZVAL_EMPTY_ARRAY(&property_chain_default_value);
+	zend_string *property_chain_name = zend_string_init("chain", sizeof("chain") - 1, 1);
+	zend_declare_typed_property(class_entry, property_chain_name, &property_chain_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_chain_name);
+
+	zval property_iterations_default_value;
+	ZVAL_LONG(&property_iterations_default_value, 0);
+	zend_string *property_iterations_name = zend_string_init("iterations", sizeof("iterations") - 1, 1);
+	zend_declare_typed_property(class_entry, property_iterations_name, &property_iterations_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_iterations_name);
+
+	zval property_output_default_value;
+	ZVAL_EMPTY_STRING(&property_output_default_value);
+	zend_string *property_output_name = zend_string_init("output", sizeof("output") - 1, 1);
+	zend_declare_typed_property(class_entry, property_output_name, &property_output_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_output_name);
+
+	zval property_outputBytes_default_value;
+	ZVAL_LONG(&property_outputBytes_default_value, 0);
+	zend_string *property_outputBytes_name = zend_string_init("outputBytes", sizeof("outputBytes") - 1, 1);
+	zend_declare_typed_property(class_entry, property_outputBytes_name, &property_outputBytes_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_outputBytes_name);
+
+	zval property_currentFrame_default_value;
+	ZVAL_NULL(&property_currentFrame_default_value);
+	zend_string *property_currentFrame_name = zend_string_init("currentFrame", sizeof("currentFrame") - 1, 1);
+	zend_string *property_currentFrame_class_Polyspec_Template_Render_Frame = zend_string_init("Polyspec\\Template\\Render\\Frame", sizeof("Polyspec\\Template\\Render\\Frame")-1, 1);
+	zend_declare_typed_property(class_entry, property_currentFrame_name, &property_currentFrame_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_currentFrame_class_Polyspec_Template_Render_Frame, 0, MAY_BE_NULL));
+	zend_string_release(property_currentFrame_name);
+
+	zval property_currentSpan_default_value;
+	ZVAL_UNDEF(&property_currentSpan_default_value);
+	zend_string *property_currentSpan_name = zend_string_init("currentSpan", sizeof("currentSpan") - 1, 1);
+	zend_declare_typed_property(class_entry, property_currentSpan_name, &property_currentSpan_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_currentSpan_name);
+
+	zval property_services_default_value;
+	ZVAL_UNDEF(&property_services_default_value);
+	zend_string *property_services_name = zend_string_init("services", sizeof("services") - 1, 1);
+	zend_string *property_services_class_Polyspec_Template_Render_RuntimeServices = zend_string_init("Polyspec\\Template\\Render\\RuntimeServices", sizeof("Polyspec\\Template\\Render\\RuntimeServices")-1, 1);
+	zend_declare_typed_property(class_entry, property_services_name, &property_services_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_services_class_Polyspec_Template_Render_RuntimeServices, 0, 0));
+	zend_string_release(property_services_name);
+
+	zval property_rootData_default_value;
+	ZVAL_UNDEF(&property_rootData_default_value);
+	zend_string *property_rootData_name = zend_string_init("rootData", sizeof("rootData") - 1, 1);
+	zend_string *property_rootData_class_Polyspec_Template_Value_MapValue = zend_string_init("Polyspec\\Template\\Value\\MapValue", sizeof("Polyspec\\Template\\Value\\MapValue")-1, 1);
+	zend_declare_typed_property(class_entry, property_rootData_name, &property_rootData_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_rootData_class_Polyspec_Template_Value_MapValue, 0, 0));
+	zend_string_release(property_rootData_name);
+
+	zval property_env_default_value;
+	ZVAL_UNDEF(&property_env_default_value);
+	zend_string *property_env_name = zend_string_init("env", sizeof("env") - 1, 1);
+	zend_declare_typed_property(class_entry, property_env_name, &property_env_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_env_name);
+
+	zval property_entryName_default_value;
+	ZVAL_UNDEF(&property_entryName_default_value);
+	zend_string *property_entryName_name = zend_string_init("entryName", sizeof("entryName") - 1, 1);
+	zend_declare_typed_property(class_entry, property_entryName_name, &property_entryName_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_entryName_name);
 
 	return class_entry;
 }

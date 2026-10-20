@@ -2154,6 +2154,65 @@ ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, classFunction)
     pt_method_class_function(pt_runtime_of(Z_OBJ_P(ZEND_THIS)), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+/* ----------------------------------------------------------------------------------------------- */
+/* Render state: Frame, Scope and Context of the library (pt_render_state.c)                       */
+/* ----------------------------------------------------------------------------------------------- */
+
+ZEND_METHOD(Polyspec_Template_Render_Frame, __construct)
+{
+    pt_frame_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Scope, __construct)
+{
+    pt_scope_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Scope, lookup)
+{
+    pt_scope_lookup(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Scope, loopMeta)
+{
+    pt_scope_loop_meta(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Context, __construct)
+{
+    pt_context_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Context, write)
+{
+    pt_context_write(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Context, output)
+{
+    pt_context_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Context, at)
+{
+    pt_context_at(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Context, fail)
+{
+    pt_context_fail(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Context, enter)
+{
+    pt_context_enter(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Context, leave)
+{
+    pt_context_leave(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* A prepared execution (RT-61): the program, the bound assign, the options and the entry template, which stays loaded
  * beyond the run that loaded it. */
 typedef struct pt_execution {
@@ -2390,6 +2449,11 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_runtime_handlers.clone_obj = NULL;
     pt_runtime_handlers.get_gc = pt_runtime_get_gc;
     pt_declare_default_limits(pt_runtime_ce);
+
+    zend_class_entry *frame = register_class_Polyspec_Template_Render_Frame();
+    zend_class_entry *scope = register_class_Polyspec_Template_Render_Scope();
+    zend_class_entry *context = register_class_Polyspec_Template_Render_Context();
+    pt_render_state_register(runtime_services, frame, scope, context);
 
     pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
     pt_engine_ce->create_object = pt_engine_create;

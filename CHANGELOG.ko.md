@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2c249905b01fbc4aa20a89607f5bfb36f82a8e106b5b7c71c175568c3bbe8990 -->
+<!-- source-sha256: cac69a37df13f70a2cc539ef6cfa8c8c2e79e7fc18523ea35f4fc65739b83cdd -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-6-2: PHP 확장은 library의 `Frame`, `Scope`, `Context`를 `Polyspec\Template\Render`의 final class로 같은 속성, 생성자, 메서드와 함께 등록한다. 상태는 객체의 선언된 속성이므로 library 클래스와 테스트가 같은 값을 읽고 쓴다. Red: `RenderStateTest.php`의 `run-tests.mjs phpunit` 실패 1개("Polyspec\Template\Render\Frame is not registered by the extension", 7 passed), `make parity-declarations-check | grep -c "R1 missing-implementation api-render-[a-z]* php-ext"` 3; green: `RenderStateTest.php` OK (8 tests, 26 assertions), `ExprFixturesTest.php` OK (73 tests, 239 assertions), `CompilerInterfaceTest.php` OK (2 tests, 56 assertions), `ExportsTest.php` OK (18 tests, 27 assertions), `RuntimeEnvironmentTest.php` OK (4 tests, 18 assertions), `AstProgramTest.php` OK (8 tests, 11 assertions), `ConformanceTest.php` OK (765 tests, 1020 assertions); `make lint-php-ext` exit 0; 같은 grep은 0을 출력한다 (T26.7-2-6-2).
 
 - T26.7-2-19: `config/parity.json`은 PHP 확장이 지금 등록하는 class의 모든 API unit에 php-ext symbol로 library의 symbol을 적는다. `api-program`, `api-ast-program`, `api-prepared-render`, `api-loader`, `api-decode-template`, `api-parse-json`, `api-bind-map`, `api-bind-data`, `api-runtime-services`, `api-runtime-environment`가 symbol을 얻고, `api-parse`, `api-engine`, `api-bound-map`, `api-bind`, `api-merge`, `api-template-error`는 `Native` class 대신 `AstProgram::parse`, `Engine`, `BoundMap`, `BoundMap::bind`, `BoundMap::merge`, `TemplateError`를 적는다. 그중 넷(`Native\BoundMap`, 그 `bind`와 `merge`, `Native\TemplateError`)은 이미 stub에 없었다. 아직 등록되지 않은 class의 unit(`api-page-cache`, `api-runtime-bindings`, `api-render-frame`, `api-render-scope`, `api-render-context`)은 그 class를 등록하는 행에서 symbol을 얻는다. Red: `make parity-declarations-check`에 php-ext의 R1 finding 15개; green: 아직 등록되지 않은 class의 5개만 남고 새 finding은 0개이며, 모든 php-ext symbol은 kit의 extractor가 `packages/php-ext/src/polyspec_template.stub.php`에서 읽는 symbol이다 (T26.7-2-19).
 
@@ -575,7 +577,6 @@
 
 - Rust·Go·TypeScript·PHP 런타임에 준비된 렌더 계약을 추가했다. `prepare`가 assign과 define 데이터를 바인딩하고 파싱된 target을 한 번 해석하며 반복 `render` 호출은 그 상태를 재사용한다. 벤치마크 드라이버, 런타임 명세, 기능 상태와 정적 showcase 성능 설명을 갱신했다.
 - 검증: Rust와 Go 패키지 검사가 통과했고 TypeScript 빌드와 PHP 문법 검사가 통과했다. 전체 언어 간 검증과 벤치마크 재실행은 이 변경을 완료로 표시하기 전에 남아 있다.
-
 
 - 실제 Composer path 의존성의 PHP 검사인 `php-path-check.mjs`와 `php-runner.php`를 추가했다. 임시 프로젝트가 symlink 없이 `polyspec/template`을 설치하고 Composer로 로드한 뒤 `FilesystemLoader`로 플랫폼 스냅샷을 렌더한다.
 

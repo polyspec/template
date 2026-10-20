@@ -508,4 +508,23 @@ void pt_render(pt_run *run, pt_engine *engine, const pt_request *request, smart_
 /* Releases the templates that a run holds. */
 void pt_run_release_templates(pt_run *run);
 
+/* ---------------------------------------------------------------------------------------------------
+ * Render state (S10): the classes Frame, Scope and Context of the library (pt_render_state.c). The
+ * methods are forwarded by the ZEND_METHOD functions of polyspec_template.c.
+ * ------------------------------------------------------------------------------------------------- */
+
+/* Called once by MINIT, after the classes that these classes refer to are registered. */
+void pt_render_state_register(zend_class_entry *runtime_services, zend_class_entry *frame, zend_class_entry *scope, zend_class_entry *context);
+void pt_frame_construct(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scope_construct(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scope_lookup(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scope_loop_meta(INTERNAL_FUNCTION_PARAMETERS);
+void pt_context_construct(INTERNAL_FUNCTION_PARAMETERS);
+void pt_context_write(INTERNAL_FUNCTION_PARAMETERS);
+void pt_context_output(INTERNAL_FUNCTION_PARAMETERS);
+void pt_context_at(INTERNAL_FUNCTION_PARAMETERS);
+void pt_context_fail(INTERNAL_FUNCTION_PARAMETERS);
+void pt_context_enter(INTERNAL_FUNCTION_PARAMETERS);
+void pt_context_leave(INTERNAL_FUNCTION_PARAMETERS);
+
 #endif

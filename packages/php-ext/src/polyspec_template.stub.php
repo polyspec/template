@@ -235,6 +235,88 @@ final class RuntimeEnvironment implements RuntimeServices
     public function classFunction(string $className, string $method): ?callable {}
 }
 
+/** One rendered template location and its context data. */
+final class Frame
+{
+    public readonly string $name;
+    /** @var list<int>|null */
+    public readonly ?array $lines;
+    public readonly \Polyspec\Template\Value\MapValue $context;
+
+    /**
+     * @param array|null $lines
+     * @phpstan-param list<int>|null $lines
+     */
+    public function __construct(string $name, ?array $lines, \Polyspec\Template\Value\MapValue $context) {}
+}
+
+/** Local variables and loop stacks shared by includes and isolated by blocks. */
+final class Scope
+{
+    public readonly \Polyspec\Template\Value\MapValue $locals;
+    /** @var \ArrayObject<string, list<array<string, mixed>>> */
+    public readonly \ArrayObject $loops;
+
+    public function __construct(?\Polyspec\Template\Value\MapValue $locals = null) {}
+
+    public function lookup(Frame $frame, string $name): mixed {}
+
+    /** @return array<string, mixed>|null */
+    public function loopMeta(string $name): ?array {}
+}
+
+/**
+ * Render state: output, template definition registry, chain, limits and error creation (docs/spec/runtime.md).
+ */
+final class Context
+{
+    /** @var array<string, array{template: string, data: \Polyspec\Template\Value\MapValue|null}|array{html: string}> */
+    public array $registry = [];
+    /** @var list<string> */
+    public array $chain = [];
+    public int $iterations = 0;
+    private string $output = '';
+    private int $outputBytes = 0;
+    private ?Frame $currentFrame = null;
+    /** @var array{0: int, 1: int} */
+    private array $currentSpan;
+    public readonly RuntimeServices $services;
+    public readonly \Polyspec\Template\Value\MapValue $rootData;
+    /** @var array{timezone: string, now: float} */
+    public readonly array $env;
+    public readonly string $entryName;
+
+    /**
+     * @param array $env
+     * @phpstan-param array{timezone: string, now: float} $env
+     */
+    public function __construct(RuntimeServices $services, \Polyspec\Template\Value\MapValue $rootData, array $env, string $entryName) {}
+
+    public function write(string $text): void {}
+
+    public function output(): string {}
+
+    /**
+     * @param array $span
+     * @phpstan-param array{0: int, 1: int} $span
+     */
+    public function at(Frame $frame, array $span): void {}
+
+    /**
+     * @param array|null $span
+     * @phpstan-param array{0: int, 1: int}|null $span
+     */
+    public function fail(string $code, ?Frame $frame, ?array $span, string $message): \Polyspec\Template\TemplateError {}
+
+    /**
+     * @param array|null $span
+     * @phpstan-param array{0: int, 1: int}|null $span
+     */
+    public function enter(string $name, ?Frame $frame, ?array $span): void {}
+
+    public function leave(): void {}
+}
+
 namespace Polyspec\Template;
 
 /**
