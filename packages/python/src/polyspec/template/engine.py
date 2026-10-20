@@ -256,6 +256,11 @@ class _AstProgramCore(Program):
     ) -> PreparedRender:
         try:
             root_data = bind_map(assign)
+            # RT-4: a define or an env that is not a map fails the prepare.
+            if options.define is not None and not isinstance(options.define, dict):
+                raise BindError("E_DATA_UNSUPPORTED_TYPE", "define is not an object")
+            if options.env is not None and not isinstance(options.env, dict):
+                raise BindError("E_DATA_UNSUPPORTED_TYPE", "env is not an object")
             registry = self._bind_defines(options.define or {})
             env = self._bind_env(options.env or {})
         except BindError as error:

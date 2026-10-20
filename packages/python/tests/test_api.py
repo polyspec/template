@@ -387,6 +387,52 @@ class ValuesAndErrors(unittest.TestCase):
             render("{= length(1) }")
         self.assertEqual(caught.exception.code, "E_RUNTIME_TYPE")
 
+    def test_the_limits_and_functions_of_a_program_are_checked(self):
+        # RT-5, RT-6: limits and functions are checked when the program is created.
+        loader = MapLoader({"main.tpl": "x"})
+        cases = [
+            ({"limits": 5}, "limits is not an object"),
+            ({"limits": [1]}, "limits is not an object"),
+            ({"limits": {"loops": 1}}, "limits.loops is not a limit"),
+            ({"limits": {"iterations": 1.5}}, "limits.iterations is not an integer"),
+            ({"limits": {"depth": "3"}}, "limits.depth is not an integer"),
+            ({"limits": {"depth": True}}, "limits.depth is not an integer"),
+            ({"functions": 5}, "functions is not an object"),
+            ({"functions": {"f": 1}}, "functions.f is not a function"),
+        ]
+        for options, message in cases:
+            with self.subTest(options=options):
+                with self.assertRaises(ValueError) as cm:
+                    AstProgram(EngineOptions(loader=loader, **options))
+                self.assertEqual(str(cm.exception), message)
+        program = AstProgram(
+            EngineOptions(
+                loader=loader,
+                limits={"iterations": 10},
+                functions={"f": lambda args: 1},
+            )
+        )
+        self.assertEqual(program.runtime.limits()["iterations"], 10)
+
+    def test_a_define_or_an_env_that_is_not_a_map_is_unsupported(self):
+        # RT-4: a define or an env that is not a map fails the render.
+        cases = [
+            (RenderOptions(define="b.tpl"), "define is not an object"),
+            (RenderOptions(define=[1]), "define is not an object"),
+            (RenderOptions(env=0), "env is not an object"),
+            (RenderOptions(env=["Z"]), "env is not an object"),
+        ]
+        for options, message in cases:
+            with self.subTest(message=message):
+                engine = Engine(
+                    AstProgram(EngineOptions(loader=MapLoader({"main.tpl": "x"})))
+                )
+                with self.assertRaises(TE) as caught:
+                    engine.render("main.tpl", {}, options)
+                error = caught.exception.to_object()
+                self.assertEqual(error["code"], "E_DATA_UNSUPPORTED_TYPE")
+                self.assertEqual(error["message"], message)
+
     def test_the_iteration_limit_is_applied(self):
         # RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT.
         program = AstProgram(

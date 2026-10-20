@@ -25,10 +25,27 @@ class RuntimeEnvironment(RuntimeServices):
     """Host functions and resource limits shared by AST and generated programs."""
 
     def __init__(self, limits: "dict | None" = None, functions: "dict | None" = None):
-        self._limits = {**DEFAULT_LIMITS, **(limits or {})}
+        # RT-5, RT-6: the options are checked when the program is created.
+        if limits is None:
+            limits = {}
+        if not isinstance(limits, dict):
+            raise ValueError("limits is not an object")
+        for key, value in limits.items():
+            if key not in DEFAULT_LIMITS:
+                raise ValueError(f"limits.{key} is not a limit")
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise ValueError(f"limits.{key} is not an integer")
+        if functions is None:
+            functions = {}
+        if not isinstance(functions, dict):
+            raise ValueError("functions is not an object")
+        for name, function in functions.items():
+            if not callable(function):
+                raise ValueError(f"functions.{name} is not a function")
+        self._limits = {**DEFAULT_LIMITS, **limits}
         self._host_functions: dict = {}
         self._class_functions: dict = {}
-        for name, function in (functions or {}).items():
+        for name, function in functions.items():
             self.register(name, function)
 
     def register(self, name: str, function) -> None:
