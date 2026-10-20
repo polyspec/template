@@ -1015,12 +1015,6 @@
       ]
     },
     {
-      "check": "make compiler-interface-diagrams-check",
-      "paths": [
-        "scripts/generate-compiler-interface.mts"
-      ]
-    },
-    {
       "check": "make schema-fixtures-check",
       "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",

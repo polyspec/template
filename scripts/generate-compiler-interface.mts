@@ -7,7 +7,6 @@ import { compilerManifestDocument, manifestPath, typeFields as manifestTypeField
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
 const manifest = compilerManifestDocument.read(manifestPath(root));
-const check = process.argv.includes('--check');
 const operation = (name: string): ManifestOperation => {
   const found = manifest.operations.find(item => item.name === name);
   if (!found) throw new Error(`interface.json declares no operation ${name}`);
@@ -82,14 +81,12 @@ const outputs: [string, string][] = [
   ['packages/compiler/generated/compiler-architecture.mmd', flow],
   ['packages/compiler/generated/compiler-classes.mmd', classes.join('\n')],
 ];
+// A file is written only when its bytes change, so the site build sees no new modification time.
 for (const [relative, content] of outputs) {
   const path = resolve(root, relative);
-  if (check) {
-    if (!existsSync(path) || readFileSync(path, 'utf8') !== content) throw new Error(`compiler interface output is stale: ${relative}`);
-  } else {
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, content);
-  }
+  if (existsSync(path) && readFileSync(path, 'utf8') === content) continue;
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, content);
 }
 
-process.stdout.write(`compiler interface: ${check ? 'checked' : 'generated'} Mermaid diagrams\n`);
+process.stdout.write('compiler interface: generated Mermaid diagrams\n');

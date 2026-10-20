@@ -528,18 +528,16 @@ schema-fixtures-check:
 schema-mutations-check:
 	$(NODE) scripts/check-schema-mutations.mts
 
-docs-check: compiler-interface-diagrams-check schema-check doc-coverage benchmark-docs-check ## Document checks
+docs-check: compiler-interface-generate schema-check doc-coverage benchmark-docs-check ## Document checks
 
-.PHONY: compiler-interface-diagrams-check benchmark-docs-check
-compiler-interface-diagrams-check:
-	$(NODE) scripts/generate-compiler-interface.mts --check
+.PHONY: benchmark-docs-check
 benchmark-docs-check:
 	$(NODE) scripts/update-benchmark-docs.mts --check
 
 compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 	$(NODE) scripts/generate-compiler-interface.mts
 
-compiler-interface-check: compiler-interface-diagrams-check compiler-interface-languages-check compiler-interface-mutations-check ## Verify the typed generated module structure in every language
+compiler-interface-check: compiler-interface-generate compiler-interface-languages-check compiler-interface-mutations-check ## Verify the typed generated module structure in every language
 
 .PHONY: compiler-interface-languages-check compiler-interface-mutations-check
 compiler-interface-languages-check: cargo-downloads-check build-php python-package
@@ -547,7 +545,7 @@ compiler-interface-languages-check: cargo-downloads-check build-php python-packa
 compiler-interface-mutations-check: cargo-downloads-check build-php python-package
 	$(NODE) scripts/check-compiler-interface-mutations.mts
 
-docs: ## Build the documentation site
+docs: compiler-interface-generate ## Build the documentation site
 	$(VITEPRESS) build docs
 
 # The copy of the first build goes into a directory of this run outside the checkout, which the recipe removes, so two

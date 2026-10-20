@@ -54,3 +54,6 @@ examples/showcase/adapters/generated/
 examples/showcase/adapters/go/render_adapter.go
 examples/showcase/adapters/rust/src/render_adapter.rs
 packages/python/build/
+
+# The diagrams that make compiler-interface-generate writes (T26.7-27)
+packages/compiler/generated/

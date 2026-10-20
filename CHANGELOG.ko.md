@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2041a6dce010592cb6fdfd9b8b7f425871b1d80b40adfa1313bd4d8a176c2d9e -->
+<!-- source-sha256: 3fcc68dbf31bbe0b896c5526583290b373f02b2833d2500125e3e18e54bc8ada -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-27: `docs/spec/compiler.md`와 `runtime.md`가 include하는 Mermaid 도표 `packages/compiler/generated/*.mmd`는 `make compiler-interface-generate`가 만들고 더 이상 추적하지 않는다. `docs`, `docs-check`, `compiler-interface-check`가 이에 의존하고, generator는 byte가 바뀔 때만 파일을 쓰며, `compiler-interface-diagrams-check`는 제거했다. Red: `git ls-files`가 생성 파일 2개를 나열했고, green: 디렉터리를 지운 뒤 `make compiler-interface-generate`가 둘을 쓰고 `make docs`가 site를 build하며 `kit-check`, `owner-validate`, `rebuild-check`가 통과한다(T26.7-27).
 
 - T26.7-26: `scripts/generate-showcase-contract.mts`가 showcase interface manifest에서 쓰는 선언과 도표(15개 파일: `examples/showcase/adapters/generated/*.mmd`, `render_adapter.{ts,mjs,py}`, `php-adapter/`, `go/render_adapter.go`, `rust/src/render_adapter.rs`)는 `make contract-generate`가 만들고 더 이상 추적하지 않는다. `make typed-generator`가 generated program과 함께 만들고, 이를 읽는 target(`lint-ts`, `lint-python`, `lint-php`, `showcase-build-check`, showcase Rust lint)은 이에 의존하며, generator는 byte가 바뀔 때만 파일을 쓰고, 추적하지 않는 파일을 자기 자신과 비교하던 `showcase-contract-diagrams-check`와 산출물의 rebuild 항목은 제거했다. `packages/python/build/`는 무시한다. Red: `git ls-files`가 생성 파일 15개를 나열했고, green: 지운 뒤 `make typed-generator`가 다시 쓰고 Rust adapter가 `cargo check --offline --locked`를 통과하며 `owner-validate`, `rebuild-check`, `kit-check`가 통과한다(T26.7-26).
 
