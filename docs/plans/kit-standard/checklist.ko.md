@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 492db3be1eae81fba2972f33f89554dae5b62a748a1701f91609251c10f06a79 -->
+<!-- source-sha256: 52699823e3961acfb380914840177981974af64ddff3893dca97dd34c0986e3a -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -62,3 +62,4 @@
 | T26.7-40 | runtime 유닛 묶음(limits, artifact-refresh, page-cache, include-resolution, filesystem-loader-files, concurrent-renders)은 test가 이름으로 적은 RT requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-41 | host 유닛 묶음(invalid-text, object-calls, host-function-failures, compiler-interface)은 test가 이름으로 적은 VAL, ERR, RT requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-42 | T26.7-11의 재구성 뒤에도 PHP package가 phpcs를 통과한다(PSR-12 줄 길이와 union type 공백) | packages/php/src | `make lint-php` | [o] |
+| T26.7-43 | lock과 manifest는 최신 안정 release를 따르고 dependency review가 기록된다(oxc-parser, vitest, @codemirror/view, phpunit, setuptools, ruff와 lock review 3건) | package.json, package-lock.json, composer.json and locks, packages/python/pyproject.toml, mise.toml and mise.lock, config/dependency-review.json | `make dependency-policy-check` | [ ] |
