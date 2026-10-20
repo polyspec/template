@@ -28,6 +28,13 @@ func (l failingLoader) Load(name string) (template.LoadResult, bool, error) {
 	return template.LoadResult{Source: []byte(source), Version: "1"}, true, nil
 }
 
+// resultLoader returns one fixed result for every name.
+type resultLoader struct{ result template.LoadResult }
+
+func (l resultLoader) Load(name string) (template.LoadResult, bool, error) {
+	return l.result, true, nil
+}
+
 func renderWith(t *testing.T, loader template.Loader, target string) (string, error) {
 	t.Helper()
 	program, err := template.NewAstProgram(template.Options{Loader: loader})
@@ -45,6 +52,27 @@ func TestLoaderErrorsAreLoadFailures(t *testing.T) {
 	_, err = renderWith(t, failingLoader{failing: "part.tpl"}, "page.tpl")
 	if got := templateError(t, err); got.Code != errs.LoadFailed || got.Template != "page.tpl" || got.Line != 2 || got.Col != 1 || !strings.Contains(got.Message, "cannot read part.tpl") {
 		t.Errorf("include = %v", got)
+	}
+}
+
+// A loader result holds a source text or an AST, and a non-empty version (RT-9).
+func TestLoadResultWithoutSourceOrVersionIsALoadFailure(t *testing.T) {
+	for name, message := range map[string]struct {
+		result  template.LoadResult
+		message string
+	}{
+		"no source": {template.LoadResult{Version: "1"}, "template page.tpl cannot be loaded: the loader returned no source text and no AST"},
+		"no version": {template.LoadResult{Source: []byte("a")}, "template page.tpl cannot be loaded: the loader returned no version"},
+		"empty version": {template.LoadResult{Source: []byte("a"), Version: ""}, "template page.tpl cannot be loaded: the loader returned no version"},
+	} {
+		_, err := renderWith(t, resultLoader{result: message.result}, "page.tpl")
+		if got := templateError(t, err); got.Code != errs.LoadFailed || got.Message != message.message {
+			t.Errorf("%s = %v, want %s: %s", name, got, errs.LoadFailed, message.message)
+		}
+	}
+	// A source that is empty and not nil is an empty template, which stays valid.
+	if out, err := renderWith(t, resultLoader{result: template.LoadResult{Source: []byte{}, Version: "1"}}, "page.tpl"); err != nil || out != "" {
+		t.Errorf("empty source = %q, %v, want an empty template", out, err)
 	}
 }
 

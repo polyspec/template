@@ -208,6 +208,18 @@ class _AstProgramCore(Program):
             ) from None
         if loaded is None:
             raise fail("E_LOAD_NOT_FOUND", f"template {name} does not exist")
+        # RT-9: a result holds a source text or an AST, and a non-empty version; an empty source is an empty template.
+        # The attributes are read here, so a result that lacks one fails as the loader does, not with AttributeError.
+        ast = getattr(loaded, "ast", None)
+        source = getattr(loaded, "source", None)
+        if ast is None and not isinstance(source, (str, bytes)):
+            raise fail(
+                "E_LOAD_FAILED",
+                f"template {name} cannot be loaded: the loader returned no source text and no AST",
+            )
+        version = getattr(loaded, "version", None)
+        if not isinstance(version, str) or version == "":
+            raise fail("E_LOAD_FAILED", f"template {name} cannot be loaded: the loader returned no version")
         with self._cache_lock:
             cached = self._cache.get(name)
             if self.artifact_refresh == "false" and cached is not None:

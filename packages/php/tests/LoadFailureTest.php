@@ -65,6 +65,41 @@ final class LoadFailureTest extends TestCase
         $this->assertStringContainsString('cannot read part.tpl', $error->getMessage());
     }
 
+    public function testALoaderResultWithoutASourceTextOrAnAstOrAVersionIsALoadFailure(): void
+    {
+        // RT-9: a result that holds neither a source text nor an AST, or no version, fails to load; an empty source is a template.
+        $cases = [
+            [['version' => ''], 'the loader returned no source text and no AST'],
+            [['version' => '1'], 'the loader returned no source text and no AST'],
+            [['source' => 'a'], 'the loader returned no version'],
+            [['source' => 'a', 'version' => ''], 'the loader returned no version'],
+        ];
+        foreach ($cases as [$result, $reason]) {
+            $error = self::failure(self::loaderResult($result), 'x.tpl');
+            $this->assertSame(
+                ['E_LOAD_FAILED', 'x.tpl', "template x.tpl cannot be loaded: {$reason}"],
+                [$error->errorCode, $error->template, $error->getMessage()],
+            );
+        }
+        $this->assertSame('', (new AstProgram(self::loaderResult(['source' => '', 'version' => '1'])))->render('x.tpl', []));
+    }
+
+    /** @param array<string, mixed> $result */
+    private static function loaderResult(array $result): LoaderInterface
+    {
+        return new class ($result) implements LoaderInterface {
+            /** @param array<string, mixed> $result */
+            public function __construct(private readonly array $result)
+            {
+            }
+
+            public function load(string $name): ?array
+            {
+                return $this->result;
+            }
+        };
+    }
+
     public function testTheFilesystemLoaderSeparatesMissingAndUnreadableFiles(): void
     {
         $root = sys_get_temp_dir() . '/template-loader-' . getmypid();

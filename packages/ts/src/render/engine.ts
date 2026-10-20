@@ -165,6 +165,13 @@ export class AstProgramCore implements RuntimeServices, Program {
       throw fail('E_LOAD_FAILED', `template ${name} cannot be loaded: ${error instanceof Error ? error.message : String(error)}`);
     }
     if (loaded === null) throw fail('E_LOAD_NOT_FOUND', `template ${name} does not exist`);
+    // RT-9: a result holds a source text or an AST, and a non-empty version; an empty source is an empty template.
+    if (!('ast' in loaded) && typeof loaded.source !== 'string' && !(loaded.source instanceof Uint8Array)) {
+      throw fail('E_LOAD_FAILED', `template ${name} cannot be loaded: the loader returned no source text and no AST`);
+    }
+    if (typeof loaded.version !== 'string' || loaded.version === '') {
+      throw fail('E_LOAD_FAILED', `template ${name} cannot be loaded: the loader returned no version`);
+    }
     const cached = this.cache.get(name);
     if (this.artifactRefresh === 'false' && cached) return cached.template;
     if (this.artifactRefresh === 'true' && cached && cached.version === loaded.version) return cached.template;

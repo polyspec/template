@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 84986c6497d20970ba26fb632da30e63db0486997054d77d1aa401a1ade11132 -->
+<!-- source-sha256: 2ebd4f9dadac2d1321e75643c54d094c2db4bb119b42989ad486981ebc9a4b31 -->
 # 오류
 
 [English](/spec/errors).
@@ -59,7 +59,7 @@ ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-
 | `E_LOAD_NOT_FOUND` | 로더에 해석된 이름의 템플릿이 없다. | include 또는 block 태그; 진입 템플릿은 ERR-6. |
 | `E_LOAD_CYCLE` | include 또는 block이 같은 체인에서 이미 렌더링 중인 템플릿을 렌더한다. | include 또는 block 태그. |
 | `E_LOAD_OUTSIDE_ROOT` | 해석된 경로가 로더 루트를 벗어난다. | include 또는 block 태그. |
-| `E_LOAD_FAILED` | 로더가 해석된 이름에 대해 실패를 보고한다(RT-9). TypeScript나 PHP 로더가 예외를 던지거나, Go나 Rust 로더가 오류를 반환하거나, 파일시스템 로더가 존재하는 일반 파일을 읽지 못한 경우다(RT-10). | include 또는 block 태그; 진입 템플릿은 ERR-6. |
+| `E_LOAD_FAILED` | 로더가 해석된 이름에 대해 실패를 보고한다(RT-9). TypeScript나 PHP 로더가 예외를 던지거나, Go나 Rust 로더가 오류를 반환하거나, 파일시스템 로더가 존재하는 일반 파일을 읽지 못한 경우이거나, 로더 결과에 소스 텍스트와 AST가 모두 없거나 버전이 없는 경우다(RT-9). | include 또는 block 태그; 진입 템플릿은 ERR-6. |
 
 - **ERR-10** 데이터 오류:
 

@@ -58,7 +58,7 @@ The code tables of ERR-7 to ERR-12 are the catalog of the error codes: `make err
 | `E_LOAD_NOT_FOUND` | The loader has no template for the resolved name. | The include or block tag; for the entry template see ERR-6. |
 | `E_LOAD_CYCLE` | An include or block renders a template that is already being rendered in the same chain. | The include or block tag. |
 | `E_LOAD_OUTSIDE_ROOT` | A resolved path leaves the loader root. | The include or block tag. |
-| `E_LOAD_FAILED` | The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10). | The include or block tag; for the entry template see ERR-6. |
+| `E_LOAD_FAILED` | The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10), or a loader result lacks a source text and an AST, or a version (RT-9). | The include or block tag; for the entry template see ERR-6. |
 
 - **ERR-10** Data errors:
 

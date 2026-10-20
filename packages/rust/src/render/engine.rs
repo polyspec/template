@@ -274,6 +274,13 @@ impl AstProgram {
                 ));
             }
         };
+        // RT-9: a loaded template holds a non-empty version; the type holds a source or an AST.
+        if loaded.version().is_empty() {
+            return Err(fail(
+                ErrorCode::E_LOAD_FAILED,
+                format!("template {name} cannot be loaded: the loader returned no version"),
+            ));
+        }
         if let Some((version, template)) = self.cache.borrow().get(name)
             && (self.artifact_refresh == ArtifactRefresh::False
                 || (self.artifact_refresh == ArtifactRefresh::True && version == loaded.version()))

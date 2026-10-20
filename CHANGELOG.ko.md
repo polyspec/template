@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 75b761716405d1a44299cc7fb2c82dab647e78ce52a5380c5d0ca226b82e4227 -->
+<!-- source-sha256: f97ef1df987d3e0575937c38610c4afbfcf0b8f2183c56dee919b9e6c07335a7 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-52: 소스 텍스트도 AST도 없거나 버전이 없는 로더 결과는 모든 구현에서 `E_LOAD_FAILED`로 실패하며(RT-9), PHP 라이브러리는 없는 소스 대신 빈 소스를 렌더링하지 않는다. Red: vitest `host-binding.test.ts` `16 passed, 1 failed`(소스가 없을 때 `E_INTERNAL`); go `-run TestLoadResult` `1 passed, 1 failed`(소스가 없을 때 오류 없음); cargo `--test load_failures` `3 passed, 1 failed`(빈 버전에 `Ok`); python `test_loading.py` `7 passed, 1 failed`(소스가 없을 때 `E_INTERNAL`); phpunit `LoadFailureTest.php` `4 passed, 1 failed`(소스가 없을 때 실패 없음); phpunit 확장 `AstProgramTest.php` `6 passed, 1 failed`(빈 버전에 `E_LOAD_FAILED` 기대); green: vitest `17 passed`; go `2 passed`; cargo `4 passed`; python `Ran 8 tests OK`; phpunit `LoadFailureTest.php` `OK (5 tests)`; 확장 `OK (7 tests)`. 순서는 모든 구현에서 같다. 소스 텍스트나 AST를 버전보다 먼저 검사하므로 둘 다 없는 결과는 소스 메시지로 실패한다. 확장은 지금까지 버전을 먼저 검사했다. 이 순서의 Red: 확장 `AstProgramTest.php` `7 passed, 1 failed`(`['version' => '']`에 `no version`); green: 확장 `OK (8 tests)`, 라이브러리 `LoadFailureTest.php` `OK (5 tests)`(같은 경우 포함) (T26.7-52).
 
 - T26.7-55: kit 복사본은 f9eb43dd의 연결된 kit을 따른다(K348, K385, K384, K360-1, K383, K380, K382, K375). `make kit-sync`가 `scripts/kit/kit-bootstrap.mk`와 `config/layout.kit.yml`을 썼고, `make hooks`가 commit-msg hook `.githooks/commit-msg`를 썼으며, 이 hook은 kit의 다른 hook 옆에서 추적되고 `config/owner-checks.json`이 소유한다. Red: `make kit-check`가 2개 finding을 보고했다(두 복사본이 다르다); green: 통과하며, `make link-check`는 `@polyspec/kit`을 linked로, repository의 package를 own으로 보이고, `make link-state-check`가 통과하고(link 사이에 복사된 install이 없다, K375) `make hooks-check`가 통과한다 (T26.7-55).
 

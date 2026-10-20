@@ -160,6 +160,13 @@ func (e *Engine) LoadTemplate(name string, from *Frame, span *ast.Span) (*Parsed
 	if !ok {
 		return nil, fail(errs.LoadNotFound, "template "+name+" does not exist")
 	}
+	// RT-9: a result holds a source text or an AST, and a non-empty version; an empty source is an empty template.
+	if loaded.AST == nil && loaded.Source == nil {
+		return nil, fail(errs.LoadFailed, "template "+name+" cannot be loaded: the loader returned no source text and no AST")
+	}
+	if loaded.Version == "" {
+		return nil, fail(errs.LoadFailed, "template "+name+" cannot be loaded: the loader returned no version")
+	}
 	e.cacheLock.Lock()
 	c, ok := e.cache[name]
 	e.cacheLock.Unlock()

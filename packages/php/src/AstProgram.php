@@ -190,16 +190,25 @@ final class AstProgram implements Program, RuntimeServices
         if ($loaded === null) {
             throw $fail(ErrorCode::E_LOAD_NOT_FOUND, "template {$name} does not exist");
         }
+        // RT-9: a result holds a source text or an AST, and a non-empty version; an empty source is an empty template.
+        $ast = $loaded['ast'] ?? null;
+        $text = $loaded['source'] ?? null;
+        if ($ast === null && !is_string($text)) {
+            throw $fail(ErrorCode::E_LOAD_FAILED, "template {$name} cannot be loaded: the loader returned no source text and no AST");
+        }
+        if (!is_string($loaded['version'] ?? null) || $loaded['version'] === '') {
+            throw $fail(ErrorCode::E_LOAD_FAILED, "template {$name} cannot be loaded: the loader returned no version");
+        }
         $cached = $this->cache[$name] ?? null;
         $fresh = $this->artifactRefresh === 'false'
             || ($this->artifactRefresh === 'true' && $cached !== null && $cached['version'] === $loaded['version']);
         if ($cached !== null && $fresh) {
             return $cached['template'];
         }
-        if (isset($loaded['ast'])) {
-            $template = ['ast' => $loaded['ast'], 'lines' => null];
+        if ($ast !== null) {
+            $template = ['ast' => $ast, 'lines' => null];
         } else {
-            $source = Source::fromBytes($name, $loaded['source'] ?? '');
+            $source = Source::fromBytes($name, $text);
             $template = [
                 'ast' => Parser::parse($source, $this->delimiters[0], $this->delimiters[1]),
                 'lines' => $source->lines,

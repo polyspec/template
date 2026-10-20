@@ -22,6 +22,21 @@ impl Loader for FailingLoader {
     }
 }
 
+/// Returns one source with a fixed version for every name.
+struct ResultLoader {
+    bytes: Vec<u8>,
+    version: &'static str,
+}
+
+impl Loader for ResultLoader {
+    fn load(&self, _name: &str) -> Result<Option<Loaded>, String> {
+        Ok(Some(Loaded::Source {
+            bytes: self.bytes.clone(),
+            version: self.version.to_string(),
+        }))
+    }
+}
+
 fn render(loader: Box<dyn Loader>, target: &str) -> Result<String, TemplateError> {
     AstProgram::new(EngineOptions {
         loader: Some(loader),
@@ -45,6 +60,18 @@ fn a_loader_error_is_a_load_failure() {
         (ErrorCode::E_LOAD_FAILED, "page.tpl", 2, 1)
     );
     assert!(include.message.contains("cannot read part.tpl"), "{}", include.message);
+}
+
+/// A loader result holds a non-empty version (RT-9); an empty source is an empty template.
+#[test]
+fn a_loader_result_without_a_version_is_a_load_failure() {
+    let error = render(Box::new(ResultLoader { bytes: b"a".to_vec(), version: "" }), "page.tpl").unwrap_err();
+    assert_eq!(
+        (error.code, error.message.as_str()),
+        (ErrorCode::E_LOAD_FAILED, "template page.tpl cannot be loaded: the loader returned no version")
+    );
+    let empty = render(Box::new(ResultLoader { bytes: Vec::new(), version: "1" }), "page.tpl").map_err(|error| error.code);
+    assert_eq!(empty, Ok(String::new()));
 }
 
 #[test]

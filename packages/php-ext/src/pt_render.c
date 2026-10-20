@@ -176,8 +176,15 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
         if (Z_TYPE(loaded) == IS_NULL) {
             PT_LOAD_FAIL(PT_E_LOAD_NOT_FOUND, "template %s does not exist", name.s);
         }
+        /* RT-9: the source text or the AST is checked before the version, as in every implementation. */
+        zval *ast = Z_TYPE(loaded) == IS_ARRAY ? zend_hash_str_find_deref(Z_ARRVAL(loaded), "ast", 3) : NULL;
+        zval *source = Z_TYPE(loaded) == IS_ARRAY ? zend_hash_str_find_deref(Z_ARRVAL(loaded), "source", 6) : NULL;
+        bool has_ast = ast != NULL && Z_TYPE_P(ast) != IS_NULL;
+        if (!has_ast && (source == NULL || Z_TYPE_P(source) != IS_STRING)) {
+            PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: the loader returned no source text and no AST", name.s);
+        }
         zval *version_value = Z_TYPE(loaded) == IS_ARRAY ? zend_hash_str_find_deref(Z_ARRVAL(loaded), "version", 7) : NULL;
-        if (version_value == NULL || Z_TYPE_P(version_value) != IS_STRING) {
+        if (version_value == NULL || Z_TYPE_P(version_value) != IS_STRING || Z_STRLEN_P(version_value) == 0) {
             PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: the loader returned no version", name.s);
         }
         zend_string *version = Z_STR_P(version_value);
@@ -188,15 +195,10 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
             pt_hold(run, cached);
             return cached;
         }
-        zval *ast = zend_hash_str_find_deref(Z_ARRVAL(loaded), "ast", 3);
         pt_template *template;
-        if (ast != NULL && Z_TYPE_P(ast) != IS_NULL) {
+        if (has_ast) {
             template = pt_ast_from_zval(run, ast);
         } else {
-            zval *source = zend_hash_str_find_deref(Z_ARRVAL(loaded), "source", 6);
-            if (source == NULL || Z_TYPE_P(source) != IS_STRING) {
-                PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: the loader returned no source text and no AST", name.s);
-            }
             template = pt_parse(run, name.s, name.n, Z_STRVAL_P(source), Z_STRLEN_P(source), engine->open, engine->close);
         }
         template->version = zend_string_copy(version);

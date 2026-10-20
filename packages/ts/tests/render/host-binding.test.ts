@@ -1,6 +1,7 @@
 // Host binding of JavaScript values and native objects (VAL-2, VAL-13, VAL-17 to VAL-20, FUN-46, ERR-13).
 import { describe, expect, it } from 'vitest';
 import { AstProgram, MapLoader, parse, parseJson, TemplateError, type ErrorCode, type Template } from '../../src/index.js';
+import type { Loader } from '../../src/loader.js';
 import { bindValue, BindError } from '../../src/value/bind.js';
 import { FsLoader } from '../../src/node/index.js';
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -210,6 +211,24 @@ describe('loader failures', () => {
       chmodSync(join(root, 'locked.tpl'), 0o600);
       rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  it('reports a loader result without a source text and an AST, or without a version, as E_LOAD_FAILED (RT-9)', () => {
+    const withResult = (result: unknown) => new AstProgram({
+      loader: { load: () => result } as unknown as Loader,
+    });
+    const reported = (result: unknown) => failure(() => withResult(result).render('page.tpl', {}));
+    const none = reported({ version: '1' });
+    expect([none.code, none.template, none.message]).toEqual([
+      'E_LOAD_FAILED', 'page.tpl', 'template page.tpl cannot be loaded: the loader returned no source text and no AST',
+    ]);
+    for (const result of [{ source: 'a' }, { source: 'a', version: '' }]) {
+      const error = reported(result);
+      expect([error.code, error.template, error.message]).toEqual([
+        'E_LOAD_FAILED', 'page.tpl', 'template page.tpl cannot be loaded: the loader returned no version',
+      ]);
+    }
+    expect(withResult({ source: '', version: '1' }).render('page.tpl', {})).toBe('');
   });
 });
 
