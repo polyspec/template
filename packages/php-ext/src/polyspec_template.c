@@ -3077,6 +3077,36 @@ ZEND_METHOD(Polyspec_Template_AstProgram, loadTemplate)
     }
 }
 
+ZEND_METHOD(Polyspec_Template_PageCache, __construct)
+{
+    pt_page_cache_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_PageCache, get)
+{
+    pt_page_cache_get(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_PageCache, set)
+{
+    pt_page_cache_set(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_PageCache, getOrSet)
+{
+    pt_page_cache_get_or_set(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_PageCache, delete)
+{
+    pt_page_cache_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_PageCache, clear)
+{
+    pt_page_cache_clear(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* ----------------------------------------------------------------------------------------------- */
 /* Module                                                                                           */
 /* ----------------------------------------------------------------------------------------------- */
@@ -3139,6 +3169,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_bound_handlers.offset = XtOffsetOf(pt_bound, std);
     pt_bound_handlers.free_obj = pt_bound_free;
     pt_bound_handlers.clone_obj = NULL;
+    pt_page_cache_register(register_class_Polyspec_Template_PageCache());
 
     zend_class_entry *program = register_class_Polyspec_Template_Program();
     pt_prepared_render_ce = register_class_Polyspec_Template_PreparedRender();

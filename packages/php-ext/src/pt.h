@@ -634,4 +634,13 @@ void pt_bindings_call(INTERNAL_FUNCTION_PARAMETERS);
 void pt_bindings_limit(INTERNAL_FUNCTION_PARAMETERS);
 void pt_bindings_error(INTERNAL_FUNCTION_PARAMETERS);
 
+/* PageCache (pt_page_cache.c): the final HTML pages of the library, held by the object. */
+void pt_page_cache_register(zend_class_entry *ce);
+void pt_page_cache_construct(INTERNAL_FUNCTION_PARAMETERS);
+void pt_page_cache_get(INTERNAL_FUNCTION_PARAMETERS);
+void pt_page_cache_set(INTERNAL_FUNCTION_PARAMETERS);
+void pt_page_cache_get_or_set(INTERNAL_FUNCTION_PARAMETERS);
+void pt_page_cache_delete(INTERNAL_FUNCTION_PARAMETERS);
+void pt_page_cache_clear(INTERNAL_FUNCTION_PARAMETERS);
+
 #endif

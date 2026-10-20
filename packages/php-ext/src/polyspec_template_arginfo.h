@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cd9afefb83c43a77a35a3b747c163df00d9a501e */
+ * Stub hash: 37169a99e759cde89f54f5b5c1adcb5292f42269 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -374,6 +374,32 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_BoundMap_
 	ZEND_ARG_TYPE_INFO(0, second, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_PageCache___construct, 0, 0, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, clock, Closure, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_PageCache_get, 0, 1, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_PageCache_set, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ttl, IS_DOUBLE, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_PageCache_getOrSet, 0, 3, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ttl, IS_DOUBLE, 1)
+	ZEND_ARG_OBJ_INFO(0, render, Closure, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_PageCache_delete, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_PageCache_clear arginfo_class_Polyspec_Template_Render_Context_leave
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Source___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
@@ -445,9 +471,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Ma
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_MapValue_remove, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Polyspec_Template_Value_MapValue_remove arginfo_class_Polyspec_Template_PageCache_delete
 
 #define arginfo_class_Polyspec_Template_Value_MapValue_count arginfo_class_Polyspec_Template_Source_length
 
@@ -723,6 +747,12 @@ ZEND_METHOD(Polyspec_Template_BoundMap, __clone);
 ZEND_METHOD(Polyspec_Template_BoundMap, __unserialize);
 ZEND_METHOD(Polyspec_Template_BoundMap, bind);
 ZEND_METHOD(Polyspec_Template_BoundMap, merge);
+ZEND_METHOD(Polyspec_Template_PageCache, __construct);
+ZEND_METHOD(Polyspec_Template_PageCache, get);
+ZEND_METHOD(Polyspec_Template_PageCache, set);
+ZEND_METHOD(Polyspec_Template_PageCache, getOrSet);
+ZEND_METHOD(Polyspec_Template_PageCache, delete);
+ZEND_METHOD(Polyspec_Template_PageCache, clear);
 ZEND_METHOD(Polyspec_Template_Source, __construct);
 ZEND_METHOD(Polyspec_Template_Source, fromBytes);
 ZEND_METHOD(Polyspec_Template_Source, lineIndex);
@@ -980,6 +1010,16 @@ static const zend_function_entry class_Polyspec_Template_BoundMap_methods[] = {
 	ZEND_ME(Polyspec_Template_BoundMap, __unserialize, arginfo_class_Polyspec_Template_BoundMap___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_BoundMap, bind, arginfo_class_Polyspec_Template_BoundMap_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_BoundMap, merge, arginfo_class_Polyspec_Template_BoundMap_merge, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_PageCache_methods[] = {
+	ZEND_ME(Polyspec_Template_PageCache, __construct, arginfo_class_Polyspec_Template_PageCache___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_PageCache, get, arginfo_class_Polyspec_Template_PageCache_get, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_PageCache, set, arginfo_class_Polyspec_Template_PageCache_set, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_PageCache, getOrSet, arginfo_class_Polyspec_Template_PageCache_getOrSet, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_PageCache, delete, arginfo_class_Polyspec_Template_PageCache_delete, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_PageCache, clear, arginfo_class_Polyspec_Template_PageCache_clear, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -2100,6 +2140,21 @@ static zend_class_entry *register_class_Polyspec_Template_BoundMap(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template", "BoundMap", class_Polyspec_Template_BoundMap_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_PageCache(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template", "PageCache", class_Polyspec_Template_PageCache_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else

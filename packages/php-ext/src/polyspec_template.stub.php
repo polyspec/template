@@ -783,6 +783,38 @@ final class BoundMap
 }
 
 /**
+ * Stores final HTML pages independently from compiled template artifacts.
+ */
+final class PageCache
+{
+    /**
+     * @param \Closure|null $clock returns the current time in seconds; microtime(true) when null
+     */
+    public function __construct(?\Closure $clock = null) {}
+
+    /**
+     * Returns the HTML of a key that has not expired, or null.
+     */
+    public function get(string $key): ?string {}
+
+    /**
+     * Stores the HTML of a key. A time to live of null or zero keeps the entry; a negative or non-finite one is refused.
+     *
+     * @throws \InvalidArgumentException when the time to live is negative or not finite
+     */
+    public function set(string $key, string $html, ?float $ttl): void {}
+
+    /** Returns a cached page or renders and stores it on a miss. */
+    public function getOrSet(string $key, ?float $ttl, \Closure $render): string {}
+
+    /** Removes one key. */
+    public function delete(string $key): void {}
+
+    /** Removes every key. */
+    public function clear(): void {}
+}
+
+/**
  * Template source: UTF-8 validation, BOM removal and the line index (LEX-1, LEX-2, LEX-16).
  */
 final class Source
