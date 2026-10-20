@@ -3,17 +3,15 @@
 // that the generated program renders a bound map (VAL-22) as assign and as definition data with the
 // bytes of the host map (RT-61). The root is typed, so the program converts a bound assign to its
 // root record and bound definition data to the data record of `part` (RT-68).
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { compileAst } from '../packages/compiler/src/ast-artifact.mts';
 import { compileFiles, compileSource } from '../packages/compiler/src/compiler.mts';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
+import { compileFixtureGraph } from './fixture-graph.mts';
 import { checkLanguages } from './language-checks.mts';
-import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { boundDataCasesDocument } from './fixture-documents.mts';
 import { tsc } from './tools.mts';
 
@@ -21,25 +19,19 @@ const fixture = join(root, 'tests/fixtures/bound-data');
 const cases = boundDataCasesDocument.read(join(fixture, 'cases.json'));
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-bound-data');
-const run = (command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): string => {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
-  if (result.status !== 0) throw new Error(`${command} failed\n${result.stdout}${result.stderr}`);
-  return result.stdout;
-};
 const json = (value: unknown): string => JSON.stringify(value);
 
 try {
   const types = join(fixture, 'types.json');
-  const graph = join(temporary, 'ast');
-  compileAst({ root: fixture, output: graph, entry: 'page.tpl', refresh: 'dev', typeManifest: types });
-  const source = (language: string, options?: object): string => compileSource(join(graph, 'manifest.json'), types, language, options);
-  const files = (language: string, options?: object) => compileFiles(join(graph, 'manifest.json'), types, language, options);
+  const graphManifest = compileFixtureGraph(temporary, fixture, 'page.tpl', types);
+  const source = (language: string, options?: object): string => compileSource(graphManifest, types, language, options);
+  const files = (language: string, options?: object) => compileFiles(graphManifest, types, language, options);
 
   checkLanguages('generated bound data', {
     TypeScript: () => {
       // TypeScript.
       writeFileSync(join(temporary, 'bound.ts'), source('ts'));
-      run('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), join(temporary, 'bound.ts')], root);
+      runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), join(temporary, 'bound.ts')], root);
       const tsRunner = join(temporary, 'bound.mjs');
       writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/bound.js';
 import { RuntimeEnvironment, bind, merge } from '@polyspec/template';
@@ -53,7 +45,7 @@ check(prepared.render() + prepared.render(), cases.outputs.page + cases.outputs.
 check(program.render('page.tpl', merge(bind(cases.assign), bind(cases.second))), cases.outputs.merged, 'merged assign');
 check(program.render('define.tpl', cases.assign, { define: { part: { template: 'part.tpl', data: bind(cases.definitionData) } } }), cases.outputs.define, 'bound definition data');
 `);
-      run(process.execPath, [tsRunner], root);
+      runChecked(process.execPath, [tsRunner], root);
     },
     Go: () => {
       // Go.
@@ -78,7 +70,7 @@ func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGenerat
   options := template.RenderOptions{Define: map[string]template.DefineInput{"part": {Template: "part.tpl", Data: bound(t, ${goString(json(cases.definitionData))})}}}
   actual, err := program.Render("define.tpl", fixture(t, ${goString(json(cases.assign))}), options); if err != nil || actual != ${goString(cases.outputs.define)} { t.Fatalf("bound definition data: %q %v", actual, err) } }
 `);
-        run('go', ['test', '.'], goDir);
+        runChecked('go', ['test', '.'], goDir);
       } finally {
         rmSync(goDir, { recursive: true, force: true });
       }
@@ -108,7 +100,7 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
 }
 `);
       try {
-        run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        runChecked(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }
@@ -117,7 +109,7 @@ fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap(
       // PHP.
       const phpNamespace = 'Polyspec\\Generated\\BoundData';
       writePhpProgram(join(temporary, 'php'), files('php', { phpNamespace }));
-      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(join(temporary, 'php')))}
+      runChecked('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(join(temporary, 'php')))}
 use Polyspec\\Template\\BoundMap;
 $cases = json_decode(${phpString(json(cases))}, true, flags: JSON_THROW_ON_ERROR);
 $check = static function (string $actual, string $expected, string $label): void { if ($actual !== $expected) throw new RuntimeException('PHP generated ' . $label . ': ' . $actual); };
@@ -129,11 +121,10 @@ $check($program->render('define.tpl', $cases['assign'], ['define' => ['part' => 
     },
     Python: () => {
       // Python: bind and merge of the package build the bound maps (VAL-22).
-      const pythonDir = join(temporary, 'python');
-      mkdirSync(pythonDir);
-      writeFileSync(join(pythonDir, 'generated.py'), source('python'));
-      writeFileSync(join(pythonDir, 'cases.json'), json(cases));
-      writeFileSync(join(pythonDir, 'check.py'), `import json
+      runPythonCheck(temporary, {
+        'generated.py': source('python'),
+        'cases.json': json(cases),
+        'check.py': `import json
 import sys
 from polyspec.template import Engine, RenderOptions, RuntimeEnvironment, bind, merge
 from generated import GeneratedProgram
@@ -155,8 +146,8 @@ check(prepared.render() + prepared.render(), cases['outputs']['page'] * 2, 'prep
 check(program.render('page.tpl', merge(bind(cases['assign']), bind(cases['second']))), cases['outputs']['merged'], 'merged assign')
 definition = RenderOptions(define={'part': {'template': 'part.tpl', 'data': bind(cases['definitionData'])}})
 check(program.render('define.tpl', cases['assign'], definition), cases['outputs']['define'], 'bound definition data')
-`);
-      run(pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment());
+`,
+      });
     },
   });
 } finally {

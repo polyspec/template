@@ -15,10 +15,7 @@ final class Output
     public static function plain(mixed $value): mixed
     {
         if ($value instanceof MapValue) {
-            $result = [];
-            foreach ($value->entries() as $key => $item) {
-                $result[$key] = self::plain($item);
-            }
+            $result = array_map(self::plain(...), iterator_to_array($value->entries()));
 
             return $result === [] ? (object) [] : $result;
         }

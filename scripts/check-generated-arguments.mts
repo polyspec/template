@@ -8,19 +8,17 @@
 // `\InvalidArgumentException` of PHP and `ValueError` of Python. typed-arguments-unread declares a root record field and
 // a list that no template reads and definition data that no block merges, which generated Rust checks without holding
 // them (T24.31); typed-arguments-scoped renders a block of a template path whose argument has no root value (T24.37).
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { compileAst } from '../packages/compiler/src/ast-artifact.mts';
 import { compileFiles, compileSource } from '../packages/compiler/src/compiler.mts';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
 import { jsonDocument } from './json-document.mts';
 import { checkLanguages } from './language-checks.mts';
-import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
 
 /**
@@ -54,11 +52,6 @@ const fixtures = ['typed-arguments', 'typed-arguments-unread', 'typed-arguments-
 });
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-arguments');
-const run = (command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): string => {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
-  if (result.status !== 0) throw new Error(`${command} exited with ${result.status}\n${result.stdout}${result.stderr}`);
-  return result.stdout;
-};
 const graphs = new Map(fixtures.map(fixture => {
   const graph = join(temporary, `${fixture.id}-ast`);
   compileAst({ root: fixture.directory, output: graph, entry: 'input.tpl', refresh: 'dev', typeManifest: fixture.types });
@@ -88,7 +81,7 @@ try {
         writeFileSync(source, compileSource(graphOf(fixture.name), fixture.types, 'ts'));
         return fixture;
       });
-      run('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), ...lines.map(fixture => join(temporary, `${fixture.id}.ts`))], root);
+      runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), ...lines.map(fixture => join(temporary, `${fixture.id}.ts`))], root);
       const runner = join(temporary, 'arguments.mjs');
       writeFileSync(runner, `import { readFileSync } from 'node:fs';
 import { RuntimeEnvironment, TemplateError } from '@polyspec/template';
@@ -96,7 +89,7 @@ ${fixtures.map(fixture => `import { GeneratedProgram as ${fixture.id} } from './
 const result = (request) => { try { return 'rendered: ' + request(); } catch (error) { if (error instanceof TemplateError) return 'template: ' + error.code; return Object.getPrototypeOf(error) === Error.prototype ? 'argument: ' + error.message : 'other ' + error?.constructor?.name + ': ' + error?.message; } };
 ${fixtures.map(fixture => `{ const program = new ${fixture.id}(new RuntimeEnvironment()); const vectors = JSON.parse(readFileSync(${JSON.stringify(vectorsFor(fixture, 'TypeScript'))}, 'utf8')); console.log(${JSON.stringify(fixture.name)} + ' ' + JSON.stringify(vectors.map(vector => result(() => program.render('input.tpl', vector.assign, { define: vector.define }))))); }`).join('\n')}
 `);
-      compare('TypeScript', run(process.execPath, [runner], root));
+      compare('TypeScript', runChecked(process.execPath, [runner], root));
     },
     Go: () => {
       const output = fixtures.map(fixture => {
@@ -109,7 +102,7 @@ type vector struct { Assign json.RawMessage \`json:"assign"\`; Define map[string
 func result(output string, err error) string { if err == nil { return "rendered: " + output }; var te *errs.Error; if errors.As(err, &te) { return "template: " + string(te.Code) }; var be *value.BindError; if errors.As(err, &be) { return "bind: " + be.Error() }; return "argument: " + err.Error() }
 func TestGeneratedArguments(t *testing.T) { text, err := os.ReadFile(${goString(vectorsFor(fixture, 'Go'))}); if err != nil { t.Fatal(err) }; var vectors []vector; if err := json.Unmarshal(text, &vectors); err != nil { t.Fatal(err) }; program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; results := []string{}; for _, item := range vectors { assign, err := value.ParseJSON(item.Assign); if err != nil { t.Fatal(err) }; define := map[string]render.DefineInput{}; for id, entry := range item.Define { input := render.DefineInput{HTML: entry.HTML}; if entry.Template != nil { input.Template = *entry.Template }; if entry.Data != nil { data, err := value.ParseJSON(entry.Data); if err != nil { t.Fatal(err) }; input.Data = data }; define[id] = input }; results = append(results, result(program.Render("input.tpl", assign, template.RenderOptions{Define: define}))) }; encoded, _ := json.Marshal(results); fmt.Println(${goString(fixture.name)} + " " + string(encoded)) }
 `);
-          return run('go', ['test', '-v', '-count=1', '.'], goDir);
+          return runChecked('go', ['test', '-v', '-count=1', '.'], goDir);
         } finally {
           rmSync(goDir, { recursive: true, force: true });
         }
@@ -131,7 +124,7 @@ fn results(path: &str, render: impl Fn(&serde_json::Value, &RenderOptions) -> Re
 #[test] fn generated_arguments() { ${fixtures.map(fixture => `let program = ${fixture.id}::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new())); println!("${fixture.name} {}", results(${rustString(vectorsFor(fixture, 'Rust'))}, |assign, options| program.render(RenderTarget::Name("input.tpl"), assign, options)));`).join(' ')} }
 `);
       try {
-        compare('Rust', run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check', '--', '--nocapture'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' }));
+        compare('Rust', runChecked(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check', '--', '--nocapture'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' }));
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }
@@ -141,15 +134,12 @@ fn results(path: &str, render: impl Fn(&serde_json::Value, &RenderOptions) -> Re
         const phpNamespace = `Polyspec\\Generated\\${fixture.name.split('-').map(part => part.slice(0, 1).toUpperCase() + part.slice(1)).join('')}`;
         const phpDirectory = join(temporary, `${fixture.id}-php`);
         writePhpProgram(phpDirectory, compileFiles(graphOf(fixture.name), fixture.types, 'php', { phpNamespace }));
-        return run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $result = static function (callable $request): string { try { return 'rendered: ' . $request(); } catch (Polyspec\\Template\\TemplateError $error) { return 'template: ' . $error->errorCode . ' ' . $error->getMessage(); } catch (InvalidArgumentException $error) { return 'argument: ' . $error->getMessage(); } catch (Throwable $error) { return 'other ' . $error::class . ': ' . $error->getMessage(); } }; $vectors = json_decode(file_get_contents(${phpString(vectorsFor(fixture, 'PHP'))}), true, 512, JSON_THROW_ON_ERROR); echo ${phpString(fixture.name)}, ' ', json_encode(array_map(static fn (array $vector): string => $result(static fn () => $program->render('input.tpl', $vector['assign'], ['define' => $vector['define']])), $vectors), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\\n";`], root);
+        return runChecked('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} $program = new \\${phpNamespace}\\GeneratedProgram(new Polyspec\\Template\\Render\\RuntimeEnvironment()); $result = static function (callable $request): string { try { return 'rendered: ' . $request(); } catch (Polyspec\\Template\\TemplateError $error) { return 'template: ' . $error->errorCode . ' ' . $error->getMessage(); } catch (InvalidArgumentException $error) { return 'argument: ' . $error->getMessage(); } catch (Throwable $error) { return 'other ' . $error::class . ': ' . $error->getMessage(); } }; $vectors = json_decode(file_get_contents(${phpString(vectorsFor(fixture, 'PHP'))}), true, 512, JSON_THROW_ON_ERROR); echo ${phpString(fixture.name)}, ' ', json_encode(array_map(static fn (array $vector): string => $result(static fn () => $program->render('input.tpl', $vector['assign'], ['define' => $vector['define']])), $vectors), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), "\\n";`], root);
       }).join('\n');
       compare('PHP', output);
     },
     Python: () => {
-      const pythonDir = join(temporary, 'python');
-      mkdirSync(pythonDir);
-      for (const fixture of fixtures) writeFileSync(join(pythonDir, `${fixture.id}.py`), compileSource(graphOf(fixture.name), fixture.types, 'python'));
-      writeFileSync(join(pythonDir, 'check.py'), `import json
+      const check = `import json
 from polyspec.template import Engine, RenderOptions, RuntimeEnvironment, TemplateError
 ${fixtures.map(fixture => `import ${fixture.id}`).join('\n')}
 
@@ -171,8 +161,9 @@ for name, module, path in [${fixtures.map(fixture => `(${JSON.stringify(fixture.
         vectors = json.load(handle)
     results = [result(lambda vector=vector: program.render('input.tpl', vector['assign'], RenderOptions(define=vector['define']))) for vector in vectors]
     print(name, json.dumps(results, ensure_ascii=False))
-`);
-      compare('Python', run(pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment()));
+`;
+      const modules = Object.fromEntries(fixtures.map(fixture => [`${fixture.id}.py`, compileSource(graphOf(fixture.name), fixture.types, 'python')]));
+      compare('Python', runPythonCheck(temporary, { ...modules, 'check.py': check }));
     },
   });
 } finally {

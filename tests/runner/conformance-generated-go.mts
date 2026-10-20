@@ -2,15 +2,13 @@
 // Go generated conformance: compiles every case into its own Go package and runs the packages with
 // scripts/kit/run-tests.mjs, which prints each case test with its elapsed time and stops a test that
 // outlives its own timeout.
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { goString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
-import { deriveTypeManifest } from '../../packages/compiler/src/type-manifest.mts';
-import { parse } from '../../packages/ts/dist/index.mjs';
-import { caseTestFailures, errorField, expectedHtml, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
-import { errorDifference } from './generated-errors.mts';
+import { caseTestFailures, expectedHtml, generatedCases, runCaseTests, type TestCase } from './cases.mts';
+import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { goWorkspace } from '../../scripts/temporary-workspace.mts';
@@ -20,7 +18,6 @@ const CASE_TIMEOUT_SECONDS = 30;
 
 // A module of the system temporary directory that uses the module of packages/go from that directory.
 const temporary = goWorkspace('generated-conformance-go');
-function parsedTemplates(testCase: TestCase): Map<string, ReturnType<typeof parse>> { const templates = new Map<string, ReturnType<typeof parse>>(), pending: [string, string][] = [[testCase.dir, '']]; for (let next = pending.pop(); next !== undefined; next = pending.pop()) { const [directory, prefix] = next; for (const entry of readdirSync(directory, { withFileTypes: true })) { const path = join(directory, entry.name), name = prefix ? `${prefix}/${entry.name}` : entry.name; if (entry.isDirectory()) pending.push([path, name]); else if (entry.isFile() && entry.name.endsWith('.tpl')) templates.set(name, parse(readFileSync(path), name, testCase.options)); } } return templates; }
 // Paths and expected output are embedded as exact Go string literals.
 const q = goString;
 const failures: string[] = [];
@@ -30,12 +27,10 @@ const { cases } = generatedCases(process.argv.slice(2));
 const progress = stepProgress();
 try {
   for (const testCase of cases) {
-    const step = `${testCase.id} › compile`;
-    progress.start(step);
-    try {
+    const compiled = compileStep(testCase, progress, failures, () => {
       const directory = join(temporary, `case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`);
       const defineText = testCase.hasDefine ? readFileSync(join(testCase.dir, 'define.json'), 'utf8') : '{}';
-      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
+      const typeManifest = caseTypeManifest(testCase);
       const typePath = join(directory, 'types.json'), graphPath = join(directory, 'ast');
       mkdirSync(directory);
       writeFileSync(typePath, JSON.stringify(typeManifest));
@@ -53,12 +48,8 @@ func generatedDefinitions(t *testing.T) map[string]template.DefineInput { var ra
 func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeString(${q(dataBase64)}); assign,runErr:=value.ParseJSON(data); if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(defineText)})) }; ${envText ? `if runErr==nil { _,runErr=value.ParseJSON([]byte(${q(envText)})) };` : ''} var actual string; if runErr==nil { options:=template.RenderOptions{Define:generatedDefinitions(t)}; ${envText ? `var env template.Env; if err:=json.Unmarshal([]byte(${q(envText)}),&env);err!=nil{t.Fatal(err)}; options.Env=&env;` : ''} program,err:=NewGeneratedProgram(template.Options{});runErr=err;if runErr==nil{actual,runErr=program.Render("input.tpl",assign,options)} }; ${expectation} }
 `);
       runnable.push(testCase);
-      progress.pass(step);
-    } catch (error) {
-      const difference = errorDifference(testCase.expectedError, error, 'compile');
-      if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${String(errorField(error, 'message'))}`); progress.fail(step, undefined, difference); }
-      else { passed++; progress.pass(step); }
-    }
+    });
+    if (compiled === 'expected') passed++;
   }
   progress.close('Go generated conformance compile');
   if (runnable.length) {
@@ -69,6 +60,4 @@ func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeS
     if (run.status === 0 || run.failed.length > 0) passed += runnable.length - run.failed.length;
   }
 } finally { rmSync(temporary, { recursive: true, force: true }); }
-for (const failure of failures) process.stderr.write(`${failure}\n`);
-process.stdout.write(`${passed}/${cases.length} Go generated conformance cases passed\n`);
-process.exit(failures.length ? 1 : 0);
+finishRun('Go', passed, cases.length, failures);

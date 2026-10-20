@@ -132,24 +132,16 @@ function callCandidates(body: string, absoluteStart: number, file: string, sourc
     let kind = beginsQualified ? 'qualified' : precededByInstanceArrow ? 'instance' : 'direct';
     let cursor = end;
     while (cursor < body.length && whitespace(body[cursor])) cursor++;
-    if (body.startsWith('::', cursor)) {
+    const operator = body.startsWith('::', cursor) ? '::' : body.startsWith('->', cursor) ? '->' : undefined;
+    if (operator !== undefined) {
       cursor += 2;
       while (cursor < body.length && whitespace(body[cursor])) cursor++;
       if (!identifierStart(body[cursor])) { index = end; continue; }
       const methodStart = cursor;
       cursor++;
       while (cursor < body.length && identifierPart(body[cursor])) cursor++;
-      name += `::${body.slice(methodStart, cursor)}`;
-      kind = 'static';
-    } else if (body.startsWith('->', cursor)) {
-      cursor += 2;
-      while (cursor < body.length && whitespace(body[cursor])) cursor++;
-      if (!identifierStart(body[cursor])) { index = end; continue; }
-      const methodStart = cursor;
-      cursor++;
-      while (cursor < body.length && identifierPart(body[cursor])) cursor++;
-      name += `->${body.slice(methodStart, cursor)}`;
-      kind = 'instance';
+      name += `${operator}${body.slice(methodStart, cursor)}`;
+      kind = operator === '::' ? 'static' : 'instance';
     }
     let after = cursor;
     while (after < body.length && whitespace(body[after])) after++;

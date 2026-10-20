@@ -17,6 +17,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseCargoLock, type LockPackage } from './install-workspace.mts';
+import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RUST = join(root, 'packages/rust');
@@ -121,4 +122,22 @@ export function goWorkspace(name: string): string {
   writeFileSync(join(directory, 'go.mod'), `module polyspec.invalid/generated\n\ngo ${version}\n`);
   writeFileSync(join(directory, 'go.work'), `go ${version}\n\nuse .\nuse ${JSON.stringify(GO)}\n`);
   return directory;
+}
+
+/** Runs `command` in `cwd` with `env` added to the environment and returns its output; a status other than 0 fails with the command and its output. */
+export function runChecked(command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): string {
+  const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
+  if (result.status !== 0) throw new Error(`${command} exited with ${result.status}\n${result.stdout}${result.stderr}`);
+  return result.stdout;
+}
+
+/**
+ * Writes `files` (names and texts) into the new directory `python` of `workspace` and runs its `check.py` with the python of the
+ * package (scripts/python-toolchain.mts); returns the output of the script.
+ */
+export function runPythonCheck(workspace: string, files: Record<string, string>): string {
+  const directory = join(workspace, 'python');
+  mkdirSync(directory);
+  for (const [name, text] of Object.entries(files)) writeFileSync(join(directory, name), text);
+  return runChecked(pythonPackageCommand(), ['check.py'], directory, pythonEnvironment());
 }

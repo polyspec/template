@@ -2,15 +2,13 @@
 // Rust generated conformance: compiles every case into a module of one integration test file whose
 // tests are named after the cases, and runs it with scripts/kit/run-tests.mjs, which prints each case
 // test with its elapsed time and stops a test that outlives its own timeout.
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { rustString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
-import { deriveTypeManifest } from '../../packages/compiler/src/type-manifest.mts';
-import { parse } from '../../packages/ts/dist/index.mjs';
-import { caseTestFailures, errorField, expectedHtml, generatedCases, runCaseTests, type TestCase, typeDefinitions } from './cases.mts';
-import { errorDifference } from './generated-errors.mts';
+import { caseTestFailures, expectedHtml, generatedCases, runCaseTests, type TestCase } from './cases.mts';
+import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { CARGO, rustWorkspace } from '../../scripts/temporary-workspace.mts';
@@ -25,21 +23,6 @@ const temporary = workspace.directory;
 const integrationTest = workspace.test('generated_conformance_check');
 // Paths and expected output are embedded as exact Rust string literals.
 const quote = rustString;
-
-function parsedTemplates(testCase: TestCase): Map<string, ReturnType<typeof parse>> {
-  const templates = new Map<string, ReturnType<typeof parse>>();
-  const pending: [string, string][] = [[testCase.dir, '']];
-  for (let next = pending.pop(); next !== undefined; next = pending.pop()) {
-    const [directory, prefix] = next;
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      const path = join(directory, entry.name);
-      const name = prefix ? `${prefix}/${entry.name}` : entry.name;
-      if (entry.isDirectory()) pending.push([path, name]);
-      else if (entry.isFile() && entry.name.endsWith('.tpl')) templates.set(name, parse(readFileSync(path), name, testCase.options));
-    }
-  }
-  return templates;
-}
 
 const failures: string[] = [];
 const runnable: { testCase: TestCase; sourcePath: string; name: string }[] = [];
@@ -59,13 +42,11 @@ function caseName(testCase: TestCase): string {
 
 try {
   for (const testCase of cases) {
-    const step = `${testCase.id} › compile`;
-    progress.start(step);
-    try {
+    const compiled = compileStep(testCase, progress, failures, () => {
       const name = caseName(testCase);
       const directory = join(temporary, name);
       mkdirSync(directory);
-      const typeManifest = deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
+      const typeManifest = caseTypeManifest(testCase);
       const typePath = join(directory, 'types.json');
       const graphPath = join(directory, 'ast');
       const sourcePath = join(directory, 'generated.rs');
@@ -73,12 +54,8 @@ try {
       compileAst({ root: testCase.dir, output: graphPath, entry: 'input.tpl', refresh: 'dev', typeManifest: typePath, delimiters: testCase.options.delimiters ?? null });
       writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'rust'));
       runnable.push({ testCase, sourcePath, name });
-      progress.pass(step);
-    } catch (error) {
-      const difference = errorDifference(testCase.expectedError, error, 'compile');
-      if (difference) { failures.push(`${testCase.id}: compile ${difference}: ${String(errorField(error, 'message'))}`); progress.fail(step, undefined, difference); }
-      else { compilePassed++; progress.pass(step); }
-    }
+    });
+    if (compiled === 'expected') compilePassed++;
   }
   progress.close('Rust generated conformance compile');
 
@@ -133,7 +110,4 @@ ${tests}
   rmSync(temporary, { recursive: true, force: true });
 }
 
-for (const failure of failures) process.stderr.write(`${failure}\n`);
-const passed = compilePassed + executed;
-process.stdout.write(`${passed}/${cases.length} Rust generated conformance cases passed\n`);
-process.exit(failures.length === 0 ? 0 : 1);
+finishRun('Rust', compilePassed + executed, cases.length, failures);

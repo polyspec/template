@@ -3,17 +3,15 @@
 // that typed records, typed lists and typed maps reach host functions, built-in functions and
 // operators as canonical values (VAL-21, EXP-34, docs/spec/compiler.md). The AST program renders the
 // same template with the same data to the same output.
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { compileAst } from '../packages/compiler/src/ast-artifact.mts';
 import { compileFiles, compileSource } from '../packages/compiler/src/compiler.mts';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { CARGO, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
+import { compileFixtureGraph } from './fixture-graph.mts';
 import { checkLanguages } from './language-checks.mts';
-import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
 
 const fixture = join(root, 'tests/fixtures/typed-values');
@@ -22,11 +20,6 @@ const source = readFileSync(join(fixture, 'input.tpl'), 'utf8');
 const expected = readFileSync(join(fixture, 'expected.html'), 'utf8');
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-typed-values');
-const run = (command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): string => {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, maxBuffer: 32 * 1024 * 1024 });
-  if (result.status !== 0) throw new Error(`${command} failed\n${result.stdout}${result.stderr}`);
-  return result.stdout;
-};
 
 // The describe function of every host: the host form of each argument (VAL-21).
 const tsDescribe = `function describeValue(value) {
@@ -42,16 +35,14 @@ const describe = args => args.map(describeValue).join(',');`;
 const assign = `{ page: { title: 'T', count: 2 }, rows: [{ name: 'a' }, { name: 'b' }], tags: new Map([['x', 1]]) }`;
 
 try {
-  const graph = join(temporary, 'ast');
-  compileAst({ root: fixture, output: graph, entry: 'input.tpl', refresh: 'dev', typeManifest: types });
-  const graphManifest = join(graph, 'manifest.json');
+  const graphManifest = compileFixtureGraph(temporary, fixture, 'input.tpl', types);
 
   checkLanguages('generated typed values', {
     TypeScript: () => {
       // TypeScript generated program and the TypeScript AST program as the reference.
       const tsSource = join(temporary, 'typed.ts');
       writeFileSync(tsSource, compileSource(graphManifest, types, 'ts'));
-      run('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
+      runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
       const tsRunner = join(temporary, 'typed.mjs');
       writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/typed.js';
 import { AstProgram, MapLoader, RuntimeEnvironment } from '@polyspec/template';
@@ -66,7 +57,7 @@ ast.register('describe', describe);
 const reference = ast.render('input.tpl', ${assign});
 if (reference !== expected) throw new Error('TypeScript AST typed values differ: ' + JSON.stringify(reference));
 `);
-      run(process.execPath, [tsRunner], root);
+      runChecked(process.execPath, [tsRunner], root);
     },
     Go: () => {
       // Go.
@@ -78,7 +69,7 @@ import ("strconv"; "strings"; "testing"; template "github.com/polyspec/template/
 func describeValue(input any) string { switch current := input.(type) { case nil: return "null"; case bool: return "bool(" + strconv.FormatBool(current) + ")"; case float64: return "number(" + strconv.FormatFloat(current, 'f', -1, 64) + ")"; case string: return "string(" + current + ")"; case value.List: parts := []string{}; for _, item := range current { parts = append(parts, describeValue(item)) }; return "list(" + strings.Join(parts, ",") + ")"; case *value.OrderedMap: parts := []string{}; for _, key := range current.Keys() { parts = append(parts, key+"="+describeValue(current.MustGet(key))) }; return "map(" + strings.Join(parts, ",") + ")" }; return "unexpected" }
 func TestGeneratedTypedValues(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; if err := program.Runtime.Register("describe", func(args []value.Value, _ functions.Context) (any, error) { parts := []string{}; for _, item := range args { parts = append(parts, describeValue(item)) }; return strings.Join(parts, ","), nil }); err != nil { t.Fatal(err) }; page := value.NewOrderedMap(); page.Set("title", "T"); page.Set("count", 2.0); first := value.NewOrderedMap(); first.Set("name", "a"); second := value.NewOrderedMap(); second.Set("name", "b"); tags := value.NewOrderedMap(); tags.Set("x", 1.0); assign := value.NewOrderedMap(); assign.Set("page", page); assign.Set("rows", value.List{first, second}); assign.Set("tags", tags); actual, err := program.Render("input.tpl", assign, template.RenderOptions{}); if err != nil || actual != ${goString(expected)} { t.Fatalf("generated Go typed values = %q %v", actual, err) } }
 `);
-        run('go', ['test', '.'], goDir);
+        runChecked('go', ['test', '.'], goDir);
       } finally {
         rmSync(goDir, { recursive: true, force: true });
       }
@@ -95,7 +86,7 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
 #[test] fn generated_typed_values_match() { let mut runtime = RuntimeEnvironment::new(None, std::collections::HashMap::new()); runtime.register("describe", Box::new(|args, _| Ok(Value::text(args.iter().map(describe_value).collect::<Vec<_>>().join(","))))).unwrap(); let program = generated::GeneratedProgram::new(runtime); let assign = serde_json::json!({ "page": { "title": "T", "count": 2 }, "rows": [{ "name": "a" }, { "name": "b" }], "tags": { "x": 1 } }); assert_eq!(program.render(RenderTarget::Name("input.tpl"), &assign, &RenderOptions::default()).unwrap(), ${rustString(expected)}); }
 `);
       try {
-        run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_typed_values_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        runChecked(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_typed_values_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }
@@ -105,15 +96,14 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
       const phpNamespace = 'Polyspec\\Generated\\TypedValues';
       const phpDirectory = join(temporary, 'php');
       writePhpProgram(phpDirectory, compileFiles(graphManifest, types, 'php', { phpNamespace }));
-      run('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
+      runChecked('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
     },
     Python: () => {
       // Python: the generated program renders through Engine like the AST program; the python of var/python/venv imports the package (scripts/python-toolchain.mts).
-      const pythonDir = join(temporary, 'python');
-      mkdirSync(pythonDir);
-      writeFileSync(join(pythonDir, 'generated.py'), compileSource(graphManifest, types, 'python'));
-      writeFileSync(join(pythonDir, 'expected.html'), expected);
-      writeFileSync(join(pythonDir, 'check.py'), `import sys
+      runPythonCheck(temporary, {
+        'generated.py': compileSource(graphManifest, types, 'python'),
+        'expected.html': expected,
+        'check.py': `import sys
 from polyspec.template import Engine, RuntimeEnvironment
 from generated import GeneratedProgram
 
@@ -142,8 +132,8 @@ with open('expected.html', encoding='utf-8', newline='') as handle:
     expected = handle.read()
 if actual != expected:
     sys.exit('Python generated typed values differ: ' + repr(actual))
-`);
-      run(pythonPackageCommand(), ['check.py'], pythonDir, pythonEnvironment());
+`,
+      });
     },
   });
 } finally {

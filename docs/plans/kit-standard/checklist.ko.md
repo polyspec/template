@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: b3a91f595bd54244420d6fcb7e77b03df52131c00ef9275a4c8ecb3f74f2963b -->
+<!-- source-sha256: f67cd9ca060c1105356658266d560685dcb42cbf5fbcb898296e9b8d87ad640b -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -19,7 +19,7 @@
 | T26.7-6 | repository의 모든 tool source는 config/rebuild.json에 class를 가진다(kit K286) | config/rebuild.json and the rebuild record docs/rebuild/publish-build.md with its Korean twin | `make rebuild-check` | [o] |
 | T26.7-7 | Python package의 build requirement를 scripts/python-wheelhouse.mts 대신 pip download --require-hashes로 내려받는다 | scripts/python-wheelhouse.mts, packages/python/build-requirements.json and the recipes that read var/python/wheelhouse | `make rebuild-check` | [ ] |
 | T26.7-8 | config/duplication.json은 중복 검사가 제외하는 generated 파일과 test를 이유와 함께 선언한다 | config/duplication.json and its owner in config/owner-checks.json | `make duplication-check` | [o] |
-| T26.7-9 | script와 runner는 같은 코드를 한 곳에만 둔다 | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [ ] |
+| T26.7-9 | script와 runner는 같은 코드를 한 곳에만 둔다 | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [o] |
 | T26.7-10 | packages/compiler의 backend는 같은 코드를 한 곳에만 둔다 | packages/compiler/src/backends without the clones that make duplication-check finds | `make duplication-check` | [ ] |
 | T26.7-11 | PHP package는 같은 코드를 한 곳에만 둔다 | packages/php/src without the clones that make duplication-check finds | `make duplication-check`, the PHPUnit tests of the changed classes | [ ] |
 | T26.7-12 | Go package는 같은 코드를 한 곳에만 둔다 | packages/go without the clones that make duplication-check finds | `make duplication-check`, the go tests of the changed packages | [ ] |

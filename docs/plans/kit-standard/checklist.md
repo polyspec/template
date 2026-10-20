@@ -18,7 +18,7 @@
 | T26.7-6 | Every tool source of the repository has its class in config/rebuild.json (kit K286) | config/rebuild.json and the rebuild record docs/rebuild/publish-build.md with its Korean twin | `make rebuild-check` | [o] |
 | T26.7-7 | pip download --require-hashes downloads the build requirements of the Python package instead of scripts/python-wheelhouse.mts | scripts/python-wheelhouse.mts, packages/python/build-requirements.json and the recipes that read var/python/wheelhouse | `make rebuild-check` | [ ] |
 | T26.7-8 | config/duplication.json declares the generated files and the tests that the duplication check leaves out, each with its reason | config/duplication.json and its owner in config/owner-checks.json | `make duplication-check` | [o] |
-| T26.7-9 | The scripts and runners hold each piece of code once | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [ ] |
+| T26.7-9 | The scripts and runners hold each piece of code once | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [o] |
 | T26.7-10 | The backends of packages/compiler hold each piece of code once | packages/compiler/src/backends without the clones that make duplication-check finds | `make duplication-check` | [ ] |
 | T26.7-11 | The PHP package holds each piece of code once | packages/php/src without the clones that make duplication-check finds | `make duplication-check`, the PHPUnit tests of the changed classes | [ ] |
 | T26.7-12 | The Go package holds each piece of code once | packages/go without the clones that make duplication-check finds | `make duplication-check`, the go tests of the changed packages | [ ] |

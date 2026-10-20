@@ -198,6 +198,37 @@ fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
     Ok(loader)
 }
 
+/// The render options of a request: its definitions with their bound data, and its environment.
+fn render_options(request: &RenderRequest) -> Result<RenderOptions, String> {
+    let mut options = RenderOptions::default();
+    for (id, entry) in &request.define {
+        options.define.insert(
+            id.clone(),
+            DefineInput {
+                template: entry.template.clone(),
+                data: entry
+                    .data
+                    .clone()
+                    .map(|data| polyspec_template::bind_json(&Value::Object(data)))
+                    .transpose()
+                    .map_err(|error| error.message)?
+                    .map(polyspec_template::DefineData::Value),
+                html: entry.html.clone(),
+            },
+        );
+    }
+    if let Some(environment) = &request.env {
+        options.env = Some(Env {
+            timezone: environment
+                .timezone
+                .clone()
+                .unwrap_or_else(|| "Z".to_string()),
+            now: environment.now.unwrap_or(0.0),
+        });
+    }
+    Ok(options)
+}
+
 impl RenderAdapter for Adapter {
     fn load_scenario(&self) -> Result<Scenario, String> {
         let assign = self.read_json("data.json")?;
@@ -225,32 +256,7 @@ impl RenderAdapter for Adapter {
     }
 
     fn render(&self, request: &RenderRequest) -> Result<String, String> {
-        let mut options = RenderOptions::default();
-        for (id, entry) in &request.define {
-            options.define.insert(
-                id.clone(),
-                DefineInput {
-                    template: entry.template.clone(),
-                    data: entry
-                        .data
-                        .clone()
-                        .map(|data| polyspec_template::bind_json(&Value::Object(data)))
-                        .transpose()
-                        .map_err(|error| error.message)?
-                        .map(polyspec_template::DefineData::Value),
-                    html: entry.html.clone(),
-                },
-            );
-        }
-        if let Some(environment) = &request.env {
-            options.env = Some(Env {
-                timezone: environment
-                    .timezone
-                    .clone()
-                    .unwrap_or_else(|| "Z".to_string()),
-                now: environment.now.unwrap_or(0.0),
-            });
-        }
+        let options = render_options(request)?;
         self.engine
             .render(
                 RenderTarget::Name(&request.target),
@@ -269,32 +275,7 @@ impl RenderAdapter for Adapter {
 
 impl Adapter {
     fn prepare<'a>(&'a self, request: &RenderRequest) -> Result<PreparedRender<'a>, String> {
-        let mut options = RenderOptions::default();
-        for (id, entry) in &request.define {
-            options.define.insert(
-                id.clone(),
-                DefineInput {
-                    template: entry.template.clone(),
-                    data: entry
-                        .data
-                        .clone()
-                        .map(|data| polyspec_template::bind_json(&Value::Object(data)))
-                        .transpose()
-                        .map_err(|error| error.message)?
-                        .map(polyspec_template::DefineData::Value),
-                    html: entry.html.clone(),
-                },
-            );
-        }
-        if let Some(environment) = &request.env {
-            options.env = Some(Env {
-                timezone: environment
-                    .timezone
-                    .clone()
-                    .unwrap_or_else(|| "Z".to_string()),
-                now: environment.now.unwrap_or(0.0),
-            });
-        }
+        let options = render_options(request)?;
         self.engine
             .prepare(
                 RenderTarget::Name(&request.target),

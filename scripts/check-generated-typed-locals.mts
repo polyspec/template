@@ -8,12 +8,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { compileAst } from '../packages/compiler/src/ast-artifact.mts';
 import { compileSource } from '../packages/compiler/src/compiler.mts';
 import { goString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { goWorkspace, nodeWorkspace } from './temporary-workspace.mts';
+import { goWorkspace, nodeWorkspace, runChecked } from './temporary-workspace.mts';
+import { compileFixtureGraph } from './fixture-graph.mts';
 import { checkLanguages } from './language-checks.mts';
 import { tsc } from './tools.mts';
 
@@ -22,10 +21,6 @@ const types = join(fixture, 'types.json');
 const expected = readFileSync(join(fixture, 'expected.html'), 'utf8');
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-typed-locals');
-const run = (command: string, args: string[], cwd: string): void => {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
-  if (result.status !== 0) throw new Error(`${command} exited with ${result.status}\n${result.stdout}${result.stderr}`);
-};
 /** The functions that render the templates of a generated source: each line from a line of `start` to the next function. */
 const renderFunctions = (source: string, start: RegExp): string => {
   let inside = false;
@@ -38,9 +33,7 @@ const renderFunctions = (source: string, start: RegExp): string => {
 const count = (text: string, pattern: RegExp): number => text.match(pattern)?.length ?? 0;
 
 try {
-  const graph = join(temporary, 'ast');
-  compileAst({ root: fixture, output: graph, entry: 'input.tpl', refresh: 'dev', typeManifest: types });
-  const graphManifest = join(graph, 'manifest.json');
+  const graphManifest = compileFixtureGraph(temporary, fixture, 'input.tpl', types);
 
   checkLanguages('generated typed locals', {
     TypeScript: () => {
@@ -51,7 +44,7 @@ try {
       assert.equal(count(render, /generatedEncodeList\(/g), 0, 'the loop encodes its typed list');
       const tsSource = join(temporary, 'typed.ts');
       writeFileSync(tsSource, source);
-      run('node', [tsc, '--ignoreConfig', '--strict', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
+      runChecked('node', [tsc, '--ignoreConfig', '--strict', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
       const runner = join(temporary, 'typed.mjs');
       writeFileSync(runner, `import { GeneratedProgram } from './ts/typed.js';
 import { RuntimeEnvironment, TemplateError } from '@polyspec/template';
@@ -68,7 +61,7 @@ if (!(error instanceof TemplateError) || error.code !== 'E_RUNTIME_TYPE' || erro
   throw new Error('TypeScript fails with ' + JSON.stringify({ code: error?.code, line: error?.line, col: error?.col, message: error?.message }));
 }
 `);
-      run(process.execPath, [runner], root);
+      runChecked(process.execPath, [runner], root);
     },
     Go: () => {
       const source = compileSource(graphManifest, types, 'go');
@@ -83,7 +76,7 @@ if (!(error instanceof TemplateError) || error.code !== 'E_RUNTIME_TYPE' || erro
 import ("testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/functions"; "github.com/polyspec/template/packages/go/value")
 func TestGeneratedTypedLocals(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; if err := program.Runtime.Register("label", func(args []value.Value, _ functions.Context) (any, error) { return args[0].(string) + "!", nil }); err != nil { t.Fatal(err) }; page := value.NewOrderedMap(); page.Set("title", "T"); first := value.NewOrderedMap(); first.Set("name", "a"); second := value.NewOrderedMap(); second.Set("name", "b"); assign := value.NewOrderedMap(); assign.Set("page", page); assign.Set("rows", value.List{first, second}); actual, err := program.Render("input.tpl", assign, template.RenderOptions{}); if err != nil || actual != ${goString(expected)} { t.Fatalf("generated Go typed locals = %q %v", actual, err) } }
 `);
-        run('go', ['test', '.'], goDir);
+        runChecked('go', ['test', '.'], goDir);
       } finally {
         rmSync(goDir, { recursive: true, force: true });
       }

@@ -2,34 +2,14 @@
 // Editor fixtures (EDT-17): writes or checks the expected language service results of every template under
 // packages/language/tests/editor. Every editor adapter compares its own results with these files.
 //   node scripts/editor-fixtures.mts --write | --check
-import { lstatSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { DocumentOptions, EntryType, RootHost, TemplateDocument } from '@polyspec/template-language';
+import type { DocumentOptions, TemplateDocument } from '@polyspec/template-language';
+import { fileHost } from '../packages/lsp/src/host.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const fixtureDirectory = join(root, 'packages/language/tests/editor');
-
-/**
- * The host of root resolution over the file system (EDT-21): `lstat` that never follows a link, and a missing path or a
- * path under a file names nothing.
- */
-const fileHost: RootHost = {
-  entryType(path: string): EntryType | null {
-    let stats;
-    try {
-      stats = lstatSync(path);
-    } catch (error) {
-      const code = error instanceof Error && 'code' in error ? error.code : undefined;
-      if (code === 'ENOENT' || code === 'ENOTDIR') return null;
-      throw error;
-    }
-    return stats.isSymbolicLink() ? 'symlink' : stats.isFile() ? 'file' : stats.isDirectory() ? 'directory' : 'other';
-  },
-  readText(path: string): string {
-    return readFileSync(path, 'utf8');
-  },
-};
 
 /** The options of the language service document of a fixture: its name and its location under the fixture root. */
 export function fixtureOptions(name: string): DocumentOptions {

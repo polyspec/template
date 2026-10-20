@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 03fdf963b65954c535902f8ea6e0ccc8d6d94371de15e8b20cdba1d2c89f79f0 -->
+<!-- source-sha256: 803bf5d44a9f1e1d16d8e719711847d53abf219338a02c944f8ab1669f23cfd0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-9: `tests/runner`의 generated runner는 `generated-cases.mts`(case의 type manifest, compile과 render 판정, compile 단계, process별 case 실행, 실행 종료)를 공유하고, `scripts/`의 generated 검사는 `runChecked`, `runPythonCheck`, `compileFixtureGraph`를 공유한다. 호출 inventory의 `::`와 `->` 분기는 하나이고, Rust showcase adapter의 render option은 한 번만 만들며, PHP showcase adapter는 map을 `array_map`으로 바꾸고, 에디터 fixture는 사본 대신 `@polyspec/template-lsp`의 file host를 쓴다. Red: `make duplication-check`가 clone 82개를 찾았고, green: 68개이며 `scripts/`, `tests/runner/`, `examples/`에는 없다(T26.7-9).
 
 - T26.7-8: `config/duplication.json`은 중복 검사가 제외하는 것을 이유와 함께 선언한다: 케이스를 전부 적는 package test(`packages/*/tests/**`, `tests/scripts/**`, `**/*_test.go`), `packages/ts`의 generated AST validator, showcase의 generated fixture(`examples/**/generated/**`). `tests/runner`의 runner는 도구이므로 검사 범위에 남는다. Red: `make duplication-check`가 clone 410개를 찾았고, green: 82개를 찾으며 모두 이 repository가 쓴 코드이고 T26.7-9부터 T26.7-14가 없앤다(T26.7-8).
 

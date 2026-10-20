@@ -52,6 +52,16 @@ export function runBounded(command: string, args: readonly string[], { cwd, env,
   return run(command, args, { cwd, env, stdio, timeoutMs });
 }
 
+/**
+ * Runs the command of one case like `runBounded` and returns its result; a command that outlives `timeoutMs` throws an error
+ * flagged `deadline` that names the `step`, which fails the case by its name.
+ */
+export async function runBoundedStep(command: string, args: readonly string[], options: StepOptions & { timeoutMs: number }, step: string): Promise<BoundedResult> {
+  const result = await runBounded(command, args, options);
+  if (result.timedOut) throw Object.assign(new Error(`${step} exceeded its ${seconds(options.timeoutMs)} deadline`), { deadline: true });
+  return result;
+}
+
 // Runs a command in its own process group; without `timeoutMs` it has no time limit. It resolves after no process of
 // the group is left, also a background process that the command started and left running (T19.13).
 function run(command: string, args: readonly string[], { cwd, env, timeoutMs, stdio }: StepOptions & { timeoutMs?: number | undefined; stdio: StepStdio }): Promise<BoundedResult> {

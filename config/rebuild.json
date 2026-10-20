@@ -594,6 +594,10 @@
       "kind": "ecosystem",
       "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
     },
+    "scripts/fixture-graph.mts": {
+      "kind": "policy",
+      "reason": "compiles a fixture into the canonical AST graph of our compiler (RT-57), which the generated checks share"
+    },
     "scripts/function-contract.mts": {
       "kind": "ecosystem",
       "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
