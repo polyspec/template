@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ec242e2140b4622777aaf237c8422d9cc804b467df56fbc2492a0634f8321bd3 -->
+<!-- source-sha256: 4d2b6394eff566f8ae6706e4ac38d8ee376c7476e0654d1438cb33111a706769 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-3-2: PHP 확장은 library의 `Polyspec\Template\ErrorCode`(docs/spec/errors.md의 상수를 담은 final class, `make error-codes`가 stub에 씀)와 `Polyspec\Template\Functions\FunctionError`(final, `RuntimeException`을 상속, `errorCode`와 `message`)를 library와 같은 모양으로 등록한다. `tests/scripts/error-codes.test.mts`는 확장이 발생시키는 code를 검사할 때 `packages/php-ext/src/polyspec_template_arginfo.h`를 뺀다. gen_stub이 stub에서 쓰는 ErrorCode 상수 선언이며 아무 error도 발생시키지 않기 때문이다. `pt_error_codes.h`가 이미 빠지는 것과 같다. Red: `run-tests.mjs phpunit`의 `ErrorClassesTest.php` 실패 1개("Polyspec\Template\ErrorCode is not registered by the extension", 2 passed); green: 같은 테스트 OK(3 tests, 10 assertions); `node --test tests/scripts/error-codes.test.mts` 8 passed (T26.7-2-3-2).
 
 - T26.7-2-13: PHP 확장은 library의 `Value`, `Number`, `HostArgument`를 `Polyspec\Template\Value`의 final class로 같은 상수, 정적 메서드, 시그니처와 함께 등록하며, 이 함수들은 PHP 값에 대해 library 코드를 따른다(PHP 배열은 키로 비교하고, 유한하지 않은 수는 십진 텍스트가 없어 library의 RuntimeException을 던진다). Red: `run-tests.mjs phpunit`의 `ValueHelpersTest.php` 실패 1개("Polyspec\Template\Value\Value is not registered by the extension", 2 passed); green: `ValueHelpersTest.php` 3 passed, `ValueTest.php` 7 passed, `NumberTest.php` 4 passed, `ConformanceTest.php` 765 passed, 그리고 280개 호출의 차이 점검 결과가 library와 같다 (T26.7-2-13).
 

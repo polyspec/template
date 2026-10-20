@@ -107,6 +107,18 @@ export const ARTIFACTS: Artifact[] = [
     ].join('\n'),
   },
   {
+    file: 'packages/php-ext/src/polyspec_template.stub.php',
+    blocks: [{
+      comment: '//',
+      indent: '    ',
+      lines: codes => codes.flatMap(({ code, condition }, index) => [
+        ...(index ? [''] : []),
+        `    /** ${condition.replaceAll('*/', '*\\/')} */`,
+        `    public const string ${code} = '${code}';`,
+      ]),
+    }],
+  },
+  {
     file: 'packages/php-ext/src/pt_error_codes.h',
     whole: codes => [
       `/* ${HEADER.join('\n * ')} */`,

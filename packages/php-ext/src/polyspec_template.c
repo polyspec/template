@@ -25,6 +25,7 @@ zend_class_entry *pt_safe_string_ce;
 zend_class_entry *pt_map_value_ce;
 static zend_class_entry *pt_bind_error_ce;
 static zend_class_entry *pt_ast_decode_error_ce;
+static zend_class_entry *pt_function_error_ce;
 static zend_class_entry *pt_engine_ce;
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -88,6 +89,17 @@ ZEND_METHOD(Polyspec_Template_Value_BindError, __construct)
         Z_PARAM_STR(message)
     ZEND_PARSE_PARAMETERS_END();
     zend_update_property_str(pt_bind_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errorCode"), code);
+    zend_update_property_str(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("message"), message);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_FunctionError, __construct)
+{
+    zend_string *code, *message;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(code)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_update_property_str(pt_function_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errorCode"), code);
     zend_update_property_str(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("message"), message);
 }
 
@@ -2721,6 +2733,8 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
     pt_ast_decode_error_ce = register_class_Polyspec_Template_AstDecodeError(spl_ce_InvalidArgumentException);
+    pt_function_error_ce = register_class_Polyspec_Template_Functions_FunctionError(spl_ce_RuntimeException);
+    register_class_Polyspec_Template_ErrorCode();
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
     register_class_Polyspec_Template_Value_Bind();
     register_class_Polyspec_Template_Value_Json();

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7ea1b0e591b602d6a01d72be2baebce2c33d5b7f */
+ * Stub hash: 3e2517eac37e8863566e36517a9221d6f2a91287 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -463,6 +463,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Ho
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_Polyspec_Template_Functions_FunctionError___construct arginfo_class_Polyspec_Template_Value_BindError___construct
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -573,6 +575,7 @@ ZEND_METHOD(Polyspec_Template_Value_Number, round);
 ZEND_METHOD(Polyspec_Template_Value_Number, isInteger);
 ZEND_METHOD(Polyspec_Template_Value_HostArgument, of);
 ZEND_METHOD(Polyspec_Template_Value_HostArgument, list);
+ZEND_METHOD(Polyspec_Template_Functions_FunctionError, __construct);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -840,6 +843,11 @@ static const zend_function_entry class_Polyspec_Template_Value_Number_methods[] 
 static const zend_function_entry class_Polyspec_Template_Value_HostArgument_methods[] = {
 	ZEND_ME(Polyspec_Template_Value_HostArgument, of, arginfo_class_Polyspec_Template_Value_HostArgument_of, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Value_HostArgument, list, arginfo_class_Polyspec_Template_Value_HostArgument_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Functions_FunctionError_methods[] = {
+	ZEND_ME(Polyspec_Template_Functions_FunctionError, __construct, arginfo_class_Polyspec_Template_Functions_FunctionError___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1120,6 +1128,472 @@ static zend_class_entry *register_class_Polyspec_Template_Render_Context(void)
 	zend_string *property_entryName_name = zend_string_init("entryName", sizeof("entryName") - 1, 1);
 	zend_declare_typed_property(class_entry, property_entryName_name, &property_entryName_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_entryName_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_ErrorCode(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template", "ErrorCode", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval const_E_LEX_INVALID_UTF8_value;
+	zend_string *const_E_LEX_INVALID_UTF8_value_str = zend_string_init("E_LEX_INVALID_UTF8", strlen("E_LEX_INVALID_UTF8"), 1);
+	ZVAL_STR(&const_E_LEX_INVALID_UTF8_value, const_E_LEX_INVALID_UTF8_value_str);
+	zend_string *const_E_LEX_INVALID_UTF8_name = zend_string_init_interned("E_LEX_INVALID_UTF8", sizeof("E_LEX_INVALID_UTF8") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_LEX_INVALID_UTF8_name, &const_E_LEX_INVALID_UTF8_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_LEX_INVALID_UTF8_name, &const_E_LEX_INVALID_UTF8_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_LEX_INVALID_UTF8_name);
+
+	zval const_E_PARSE_UNTERMINATED_TAG_value;
+	zend_string *const_E_PARSE_UNTERMINATED_TAG_value_str = zend_string_init("E_PARSE_UNTERMINATED_TAG", strlen("E_PARSE_UNTERMINATED_TAG"), 1);
+	ZVAL_STR(&const_E_PARSE_UNTERMINATED_TAG_value, const_E_PARSE_UNTERMINATED_TAG_value_str);
+	zend_string *const_E_PARSE_UNTERMINATED_TAG_name = zend_string_init_interned("E_PARSE_UNTERMINATED_TAG", sizeof("E_PARSE_UNTERMINATED_TAG") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_UNTERMINATED_TAG_name, &const_E_PARSE_UNTERMINATED_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_UNTERMINATED_TAG_name, &const_E_PARSE_UNTERMINATED_TAG_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_UNTERMINATED_TAG_name);
+
+	zval const_E_PARSE_UNTERMINATED_COMMENT_value;
+	zend_string *const_E_PARSE_UNTERMINATED_COMMENT_value_str = zend_string_init("E_PARSE_UNTERMINATED_COMMENT", strlen("E_PARSE_UNTERMINATED_COMMENT"), 1);
+	ZVAL_STR(&const_E_PARSE_UNTERMINATED_COMMENT_value, const_E_PARSE_UNTERMINATED_COMMENT_value_str);
+	zend_string *const_E_PARSE_UNTERMINATED_COMMENT_name = zend_string_init_interned("E_PARSE_UNTERMINATED_COMMENT", sizeof("E_PARSE_UNTERMINATED_COMMENT") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_UNTERMINATED_COMMENT_name, &const_E_PARSE_UNTERMINATED_COMMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_UNTERMINATED_COMMENT_name, &const_E_PARSE_UNTERMINATED_COMMENT_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_UNTERMINATED_COMMENT_name);
+
+	zval const_E_PARSE_UNTERMINATED_STRING_value;
+	zend_string *const_E_PARSE_UNTERMINATED_STRING_value_str = zend_string_init("E_PARSE_UNTERMINATED_STRING", strlen("E_PARSE_UNTERMINATED_STRING"), 1);
+	ZVAL_STR(&const_E_PARSE_UNTERMINATED_STRING_value, const_E_PARSE_UNTERMINATED_STRING_value_str);
+	zend_string *const_E_PARSE_UNTERMINATED_STRING_name = zend_string_init_interned("E_PARSE_UNTERMINATED_STRING", sizeof("E_PARSE_UNTERMINATED_STRING") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_UNTERMINATED_STRING_name, &const_E_PARSE_UNTERMINATED_STRING_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_UNTERMINATED_STRING_name, &const_E_PARSE_UNTERMINATED_STRING_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_UNTERMINATED_STRING_name);
+
+	zval const_E_PARSE_UNEXPECTED_TOKEN_value;
+	zend_string *const_E_PARSE_UNEXPECTED_TOKEN_value_str = zend_string_init("E_PARSE_UNEXPECTED_TOKEN", strlen("E_PARSE_UNEXPECTED_TOKEN"), 1);
+	ZVAL_STR(&const_E_PARSE_UNEXPECTED_TOKEN_value, const_E_PARSE_UNEXPECTED_TOKEN_value_str);
+	zend_string *const_E_PARSE_UNEXPECTED_TOKEN_name = zend_string_init_interned("E_PARSE_UNEXPECTED_TOKEN", sizeof("E_PARSE_UNEXPECTED_TOKEN") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_UNEXPECTED_TOKEN_name, &const_E_PARSE_UNEXPECTED_TOKEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_UNEXPECTED_TOKEN_name, &const_E_PARSE_UNEXPECTED_TOKEN_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_UNEXPECTED_TOKEN_name);
+
+	zval const_E_PARSE_INVALID_NUMBER_value;
+	zend_string *const_E_PARSE_INVALID_NUMBER_value_str = zend_string_init("E_PARSE_INVALID_NUMBER", strlen("E_PARSE_INVALID_NUMBER"), 1);
+	ZVAL_STR(&const_E_PARSE_INVALID_NUMBER_value, const_E_PARSE_INVALID_NUMBER_value_str);
+	zend_string *const_E_PARSE_INVALID_NUMBER_name = zend_string_init_interned("E_PARSE_INVALID_NUMBER", sizeof("E_PARSE_INVALID_NUMBER") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_INVALID_NUMBER_name, &const_E_PARSE_INVALID_NUMBER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_INVALID_NUMBER_name, &const_E_PARSE_INVALID_NUMBER_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_INVALID_NUMBER_name);
+
+	zval const_E_PARSE_INVALID_ESCAPE_value;
+	zend_string *const_E_PARSE_INVALID_ESCAPE_value_str = zend_string_init("E_PARSE_INVALID_ESCAPE", strlen("E_PARSE_INVALID_ESCAPE"), 1);
+	ZVAL_STR(&const_E_PARSE_INVALID_ESCAPE_value, const_E_PARSE_INVALID_ESCAPE_value_str);
+	zend_string *const_E_PARSE_INVALID_ESCAPE_name = zend_string_init_interned("E_PARSE_INVALID_ESCAPE", sizeof("E_PARSE_INVALID_ESCAPE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_INVALID_ESCAPE_name, &const_E_PARSE_INVALID_ESCAPE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_INVALID_ESCAPE_name, &const_E_PARSE_INVALID_ESCAPE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_INVALID_ESCAPE_name);
+
+	zval const_E_PARSE_UNEXPECTED_CLOSE_value;
+	zend_string *const_E_PARSE_UNEXPECTED_CLOSE_value_str = zend_string_init("E_PARSE_UNEXPECTED_CLOSE", strlen("E_PARSE_UNEXPECTED_CLOSE"), 1);
+	ZVAL_STR(&const_E_PARSE_UNEXPECTED_CLOSE_value, const_E_PARSE_UNEXPECTED_CLOSE_value_str);
+	zend_string *const_E_PARSE_UNEXPECTED_CLOSE_name = zend_string_init_interned("E_PARSE_UNEXPECTED_CLOSE", sizeof("E_PARSE_UNEXPECTED_CLOSE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_UNEXPECTED_CLOSE_name, &const_E_PARSE_UNEXPECTED_CLOSE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_UNEXPECTED_CLOSE_name, &const_E_PARSE_UNEXPECTED_CLOSE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_UNEXPECTED_CLOSE_name);
+
+	zval const_E_PARSE_UNCLOSED_BLOCK_value;
+	zend_string *const_E_PARSE_UNCLOSED_BLOCK_value_str = zend_string_init("E_PARSE_UNCLOSED_BLOCK", strlen("E_PARSE_UNCLOSED_BLOCK"), 1);
+	ZVAL_STR(&const_E_PARSE_UNCLOSED_BLOCK_value, const_E_PARSE_UNCLOSED_BLOCK_value_str);
+	zend_string *const_E_PARSE_UNCLOSED_BLOCK_name = zend_string_init_interned("E_PARSE_UNCLOSED_BLOCK", sizeof("E_PARSE_UNCLOSED_BLOCK") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_UNCLOSED_BLOCK_name, &const_E_PARSE_UNCLOSED_BLOCK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_UNCLOSED_BLOCK_name, &const_E_PARSE_UNCLOSED_BLOCK_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_UNCLOSED_BLOCK_name);
+
+	zval const_E_PARSE_ELSE_OUTSIDE_BLOCK_value;
+	zend_string *const_E_PARSE_ELSE_OUTSIDE_BLOCK_value_str = zend_string_init("E_PARSE_ELSE_OUTSIDE_BLOCK", strlen("E_PARSE_ELSE_OUTSIDE_BLOCK"), 1);
+	ZVAL_STR(&const_E_PARSE_ELSE_OUTSIDE_BLOCK_value, const_E_PARSE_ELSE_OUTSIDE_BLOCK_value_str);
+	zend_string *const_E_PARSE_ELSE_OUTSIDE_BLOCK_name = zend_string_init_interned("E_PARSE_ELSE_OUTSIDE_BLOCK", sizeof("E_PARSE_ELSE_OUTSIDE_BLOCK") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_ELSE_OUTSIDE_BLOCK_name, &const_E_PARSE_ELSE_OUTSIDE_BLOCK_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_ELSE_OUTSIDE_BLOCK_name, &const_E_PARSE_ELSE_OUTSIDE_BLOCK_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_ELSE_OUTSIDE_BLOCK_name);
+
+	zval const_E_PARSE_DUPLICATE_ELSE_value;
+	zend_string *const_E_PARSE_DUPLICATE_ELSE_value_str = zend_string_init("E_PARSE_DUPLICATE_ELSE", strlen("E_PARSE_DUPLICATE_ELSE"), 1);
+	ZVAL_STR(&const_E_PARSE_DUPLICATE_ELSE_value, const_E_PARSE_DUPLICATE_ELSE_value_str);
+	zend_string *const_E_PARSE_DUPLICATE_ELSE_name = zend_string_init_interned("E_PARSE_DUPLICATE_ELSE", sizeof("E_PARSE_DUPLICATE_ELSE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_DUPLICATE_ELSE_name, &const_E_PARSE_DUPLICATE_ELSE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_DUPLICATE_ELSE_name, &const_E_PARSE_DUPLICATE_ELSE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_DUPLICATE_ELSE_name);
+
+	zval const_E_PARSE_ELSEIF_AFTER_ELSE_value;
+	zend_string *const_E_PARSE_ELSEIF_AFTER_ELSE_value_str = zend_string_init("E_PARSE_ELSEIF_AFTER_ELSE", strlen("E_PARSE_ELSEIF_AFTER_ELSE"), 1);
+	ZVAL_STR(&const_E_PARSE_ELSEIF_AFTER_ELSE_value, const_E_PARSE_ELSEIF_AFTER_ELSE_value_str);
+	zend_string *const_E_PARSE_ELSEIF_AFTER_ELSE_name = zend_string_init_interned("E_PARSE_ELSEIF_AFTER_ELSE", sizeof("E_PARSE_ELSEIF_AFTER_ELSE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_ELSEIF_AFTER_ELSE_name, &const_E_PARSE_ELSEIF_AFTER_ELSE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_ELSEIF_AFTER_ELSE_name, &const_E_PARSE_ELSEIF_AFTER_ELSE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_ELSEIF_AFTER_ELSE_name);
+
+	zval const_E_PARSE_ELSEIF_NOT_IN_IF_value;
+	zend_string *const_E_PARSE_ELSEIF_NOT_IN_IF_value_str = zend_string_init("E_PARSE_ELSEIF_NOT_IN_IF", strlen("E_PARSE_ELSEIF_NOT_IN_IF"), 1);
+	ZVAL_STR(&const_E_PARSE_ELSEIF_NOT_IN_IF_value, const_E_PARSE_ELSEIF_NOT_IN_IF_value_str);
+	zend_string *const_E_PARSE_ELSEIF_NOT_IN_IF_name = zend_string_init_interned("E_PARSE_ELSEIF_NOT_IN_IF", sizeof("E_PARSE_ELSEIF_NOT_IN_IF") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_ELSEIF_NOT_IN_IF_name, &const_E_PARSE_ELSEIF_NOT_IN_IF_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_ELSEIF_NOT_IN_IF_name, &const_E_PARSE_ELSEIF_NOT_IN_IF_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_ELSEIF_NOT_IN_IF_name);
+
+	zval const_E_PARSE_RESERVED_NAME_value;
+	zend_string *const_E_PARSE_RESERVED_NAME_value_str = zend_string_init("E_PARSE_RESERVED_NAME", strlen("E_PARSE_RESERVED_NAME"), 1);
+	ZVAL_STR(&const_E_PARSE_RESERVED_NAME_value, const_E_PARSE_RESERVED_NAME_value_str);
+	zend_string *const_E_PARSE_RESERVED_NAME_name = zend_string_init_interned("E_PARSE_RESERVED_NAME", sizeof("E_PARSE_RESERVED_NAME") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_RESERVED_NAME_name, &const_E_PARSE_RESERVED_NAME_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_RESERVED_NAME_name, &const_E_PARSE_RESERVED_NAME_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_RESERVED_NAME_name);
+
+	zval const_E_PARSE_INVALID_PATH_value;
+	zend_string *const_E_PARSE_INVALID_PATH_value_str = zend_string_init("E_PARSE_INVALID_PATH", strlen("E_PARSE_INVALID_PATH"), 1);
+	ZVAL_STR(&const_E_PARSE_INVALID_PATH_value, const_E_PARSE_INVALID_PATH_value_str);
+	zend_string *const_E_PARSE_INVALID_PATH_name = zend_string_init_interned("E_PARSE_INVALID_PATH", sizeof("E_PARSE_INVALID_PATH") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_INVALID_PATH_name, &const_E_PARSE_INVALID_PATH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_INVALID_PATH_name, &const_E_PARSE_INVALID_PATH_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_INVALID_PATH_name);
+
+	zval const_E_PARSE_INVALID_BLOCK_TAG_value;
+	zend_string *const_E_PARSE_INVALID_BLOCK_TAG_value_str = zend_string_init("E_PARSE_INVALID_BLOCK_TAG", strlen("E_PARSE_INVALID_BLOCK_TAG"), 1);
+	ZVAL_STR(&const_E_PARSE_INVALID_BLOCK_TAG_value, const_E_PARSE_INVALID_BLOCK_TAG_value_str);
+	zend_string *const_E_PARSE_INVALID_BLOCK_TAG_name = zend_string_init_interned("E_PARSE_INVALID_BLOCK_TAG", sizeof("E_PARSE_INVALID_BLOCK_TAG") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_INVALID_BLOCK_TAG_name, &const_E_PARSE_INVALID_BLOCK_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_INVALID_BLOCK_TAG_name, &const_E_PARSE_INVALID_BLOCK_TAG_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_INVALID_BLOCK_TAG_name);
+
+	zval const_E_PARSE_INVALID_WRAPPER_value;
+	zend_string *const_E_PARSE_INVALID_WRAPPER_value_str = zend_string_init("E_PARSE_INVALID_WRAPPER", strlen("E_PARSE_INVALID_WRAPPER"), 1);
+	ZVAL_STR(&const_E_PARSE_INVALID_WRAPPER_value, const_E_PARSE_INVALID_WRAPPER_value_str);
+	zend_string *const_E_PARSE_INVALID_WRAPPER_name = zend_string_init_interned("E_PARSE_INVALID_WRAPPER", sizeof("E_PARSE_INVALID_WRAPPER") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_INVALID_WRAPPER_name, &const_E_PARSE_INVALID_WRAPPER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_INVALID_WRAPPER_name, &const_E_PARSE_INVALID_WRAPPER_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_INVALID_WRAPPER_name);
+
+	zval const_E_PARSE_INVALID_DIRECTIVE_value;
+	zend_string *const_E_PARSE_INVALID_DIRECTIVE_value_str = zend_string_init("E_PARSE_INVALID_DIRECTIVE", strlen("E_PARSE_INVALID_DIRECTIVE"), 1);
+	ZVAL_STR(&const_E_PARSE_INVALID_DIRECTIVE_value, const_E_PARSE_INVALID_DIRECTIVE_value_str);
+	zend_string *const_E_PARSE_INVALID_DIRECTIVE_name = zend_string_init_interned("E_PARSE_INVALID_DIRECTIVE", sizeof("E_PARSE_INVALID_DIRECTIVE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_PARSE_INVALID_DIRECTIVE_name, &const_E_PARSE_INVALID_DIRECTIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_PARSE_INVALID_DIRECTIVE_name, &const_E_PARSE_INVALID_DIRECTIVE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_PARSE_INVALID_DIRECTIVE_name);
+
+	zval const_E_LOAD_NOT_FOUND_value;
+	zend_string *const_E_LOAD_NOT_FOUND_value_str = zend_string_init("E_LOAD_NOT_FOUND", strlen("E_LOAD_NOT_FOUND"), 1);
+	ZVAL_STR(&const_E_LOAD_NOT_FOUND_value, const_E_LOAD_NOT_FOUND_value_str);
+	zend_string *const_E_LOAD_NOT_FOUND_name = zend_string_init_interned("E_LOAD_NOT_FOUND", sizeof("E_LOAD_NOT_FOUND") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_LOAD_NOT_FOUND_name, &const_E_LOAD_NOT_FOUND_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_LOAD_NOT_FOUND_name, &const_E_LOAD_NOT_FOUND_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_LOAD_NOT_FOUND_name);
+
+	zval const_E_LOAD_CYCLE_value;
+	zend_string *const_E_LOAD_CYCLE_value_str = zend_string_init("E_LOAD_CYCLE", strlen("E_LOAD_CYCLE"), 1);
+	ZVAL_STR(&const_E_LOAD_CYCLE_value, const_E_LOAD_CYCLE_value_str);
+	zend_string *const_E_LOAD_CYCLE_name = zend_string_init_interned("E_LOAD_CYCLE", sizeof("E_LOAD_CYCLE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_LOAD_CYCLE_name, &const_E_LOAD_CYCLE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_LOAD_CYCLE_name, &const_E_LOAD_CYCLE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_LOAD_CYCLE_name);
+
+	zval const_E_LOAD_OUTSIDE_ROOT_value;
+	zend_string *const_E_LOAD_OUTSIDE_ROOT_value_str = zend_string_init("E_LOAD_OUTSIDE_ROOT", strlen("E_LOAD_OUTSIDE_ROOT"), 1);
+	ZVAL_STR(&const_E_LOAD_OUTSIDE_ROOT_value, const_E_LOAD_OUTSIDE_ROOT_value_str);
+	zend_string *const_E_LOAD_OUTSIDE_ROOT_name = zend_string_init_interned("E_LOAD_OUTSIDE_ROOT", sizeof("E_LOAD_OUTSIDE_ROOT") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_LOAD_OUTSIDE_ROOT_name, &const_E_LOAD_OUTSIDE_ROOT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_LOAD_OUTSIDE_ROOT_name, &const_E_LOAD_OUTSIDE_ROOT_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_LOAD_OUTSIDE_ROOT_name);
+
+	zval const_E_LOAD_FAILED_value;
+	zend_string *const_E_LOAD_FAILED_value_str = zend_string_init("E_LOAD_FAILED", strlen("E_LOAD_FAILED"), 1);
+	ZVAL_STR(&const_E_LOAD_FAILED_value, const_E_LOAD_FAILED_value_str);
+	zend_string *const_E_LOAD_FAILED_name = zend_string_init_interned("E_LOAD_FAILED", sizeof("E_LOAD_FAILED") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_LOAD_FAILED_name, &const_E_LOAD_FAILED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_LOAD_FAILED_name, &const_E_LOAD_FAILED_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_LOAD_FAILED_name);
+
+	zval const_E_DATA_NUMBER_RANGE_value;
+	zend_string *const_E_DATA_NUMBER_RANGE_value_str = zend_string_init("E_DATA_NUMBER_RANGE", strlen("E_DATA_NUMBER_RANGE"), 1);
+	ZVAL_STR(&const_E_DATA_NUMBER_RANGE_value, const_E_DATA_NUMBER_RANGE_value_str);
+	zend_string *const_E_DATA_NUMBER_RANGE_name = zend_string_init_interned("E_DATA_NUMBER_RANGE", sizeof("E_DATA_NUMBER_RANGE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_DATA_NUMBER_RANGE_name, &const_E_DATA_NUMBER_RANGE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_DATA_NUMBER_RANGE_name, &const_E_DATA_NUMBER_RANGE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_DATA_NUMBER_RANGE_name);
+
+	zval const_E_DATA_NUMBER_NOT_FINITE_value;
+	zend_string *const_E_DATA_NUMBER_NOT_FINITE_value_str = zend_string_init("E_DATA_NUMBER_NOT_FINITE", strlen("E_DATA_NUMBER_NOT_FINITE"), 1);
+	ZVAL_STR(&const_E_DATA_NUMBER_NOT_FINITE_value, const_E_DATA_NUMBER_NOT_FINITE_value_str);
+	zend_string *const_E_DATA_NUMBER_NOT_FINITE_name = zend_string_init_interned("E_DATA_NUMBER_NOT_FINITE", sizeof("E_DATA_NUMBER_NOT_FINITE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_DATA_NUMBER_NOT_FINITE_name, &const_E_DATA_NUMBER_NOT_FINITE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_DATA_NUMBER_NOT_FINITE_name, &const_E_DATA_NUMBER_NOT_FINITE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_DATA_NUMBER_NOT_FINITE_name);
+
+	zval const_E_DATA_INVALID_UTF8_value;
+	zend_string *const_E_DATA_INVALID_UTF8_value_str = zend_string_init("E_DATA_INVALID_UTF8", strlen("E_DATA_INVALID_UTF8"), 1);
+	ZVAL_STR(&const_E_DATA_INVALID_UTF8_value, const_E_DATA_INVALID_UTF8_value_str);
+	zend_string *const_E_DATA_INVALID_UTF8_name = zend_string_init_interned("E_DATA_INVALID_UTF8", sizeof("E_DATA_INVALID_UTF8") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_DATA_INVALID_UTF8_name, &const_E_DATA_INVALID_UTF8_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_DATA_INVALID_UTF8_name, &const_E_DATA_INVALID_UTF8_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_DATA_INVALID_UTF8_name);
+
+	zval const_E_DATA_UNSUPPORTED_TYPE_value;
+	zend_string *const_E_DATA_UNSUPPORTED_TYPE_value_str = zend_string_init("E_DATA_UNSUPPORTED_TYPE", strlen("E_DATA_UNSUPPORTED_TYPE"), 1);
+	ZVAL_STR(&const_E_DATA_UNSUPPORTED_TYPE_value, const_E_DATA_UNSUPPORTED_TYPE_value_str);
+	zend_string *const_E_DATA_UNSUPPORTED_TYPE_name = zend_string_init_interned("E_DATA_UNSUPPORTED_TYPE", sizeof("E_DATA_UNSUPPORTED_TYPE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_DATA_UNSUPPORTED_TYPE_name, &const_E_DATA_UNSUPPORTED_TYPE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_DATA_UNSUPPORTED_TYPE_name, &const_E_DATA_UNSUPPORTED_TYPE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_DATA_UNSUPPORTED_TYPE_name);
+
+	zval const_E_DATA_DEPTH_value;
+	zend_string *const_E_DATA_DEPTH_value_str = zend_string_init("E_DATA_DEPTH", strlen("E_DATA_DEPTH"), 1);
+	ZVAL_STR(&const_E_DATA_DEPTH_value, const_E_DATA_DEPTH_value_str);
+	zend_string *const_E_DATA_DEPTH_name = zend_string_init_interned("E_DATA_DEPTH", sizeof("E_DATA_DEPTH") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_DATA_DEPTH_name, &const_E_DATA_DEPTH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_DATA_DEPTH_name, &const_E_DATA_DEPTH_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_DATA_DEPTH_name);
+
+	zval const_E_DATA_INVALID_JSON_value;
+	zend_string *const_E_DATA_INVALID_JSON_value_str = zend_string_init("E_DATA_INVALID_JSON", strlen("E_DATA_INVALID_JSON"), 1);
+	ZVAL_STR(&const_E_DATA_INVALID_JSON_value, const_E_DATA_INVALID_JSON_value_str);
+	zend_string *const_E_DATA_INVALID_JSON_name = zend_string_init_interned("E_DATA_INVALID_JSON", sizeof("E_DATA_INVALID_JSON") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_DATA_INVALID_JSON_name, &const_E_DATA_INVALID_JSON_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_DATA_INVALID_JSON_name, &const_E_DATA_INVALID_JSON_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_DATA_INVALID_JSON_name);
+
+	zval const_E_RUNTIME_TYPE_value;
+	zend_string *const_E_RUNTIME_TYPE_value_str = zend_string_init("E_RUNTIME_TYPE", strlen("E_RUNTIME_TYPE"), 1);
+	ZVAL_STR(&const_E_RUNTIME_TYPE_value, const_E_RUNTIME_TYPE_value_str);
+	zend_string *const_E_RUNTIME_TYPE_name = zend_string_init_interned("E_RUNTIME_TYPE", sizeof("E_RUNTIME_TYPE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_TYPE_name, &const_E_RUNTIME_TYPE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_TYPE_name, &const_E_RUNTIME_TYPE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_TYPE_name);
+
+	zval const_E_RUNTIME_COMPARE_value;
+	zend_string *const_E_RUNTIME_COMPARE_value_str = zend_string_init("E_RUNTIME_COMPARE", strlen("E_RUNTIME_COMPARE"), 1);
+	ZVAL_STR(&const_E_RUNTIME_COMPARE_value, const_E_RUNTIME_COMPARE_value_str);
+	zend_string *const_E_RUNTIME_COMPARE_name = zend_string_init_interned("E_RUNTIME_COMPARE", sizeof("E_RUNTIME_COMPARE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_COMPARE_name, &const_E_RUNTIME_COMPARE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_COMPARE_name, &const_E_RUNTIME_COMPARE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_COMPARE_name);
+
+	zval const_E_RUNTIME_DIV_ZERO_value;
+	zend_string *const_E_RUNTIME_DIV_ZERO_value_str = zend_string_init("E_RUNTIME_DIV_ZERO", strlen("E_RUNTIME_DIV_ZERO"), 1);
+	ZVAL_STR(&const_E_RUNTIME_DIV_ZERO_value, const_E_RUNTIME_DIV_ZERO_value_str);
+	zend_string *const_E_RUNTIME_DIV_ZERO_name = zend_string_init_interned("E_RUNTIME_DIV_ZERO", sizeof("E_RUNTIME_DIV_ZERO") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_DIV_ZERO_name, &const_E_RUNTIME_DIV_ZERO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_DIV_ZERO_name, &const_E_RUNTIME_DIV_ZERO_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_DIV_ZERO_name);
+
+	zval const_E_RUNTIME_STRINGIFY_value;
+	zend_string *const_E_RUNTIME_STRINGIFY_value_str = zend_string_init("E_RUNTIME_STRINGIFY", strlen("E_RUNTIME_STRINGIFY"), 1);
+	ZVAL_STR(&const_E_RUNTIME_STRINGIFY_value, const_E_RUNTIME_STRINGIFY_value_str);
+	zend_string *const_E_RUNTIME_STRINGIFY_name = zend_string_init_interned("E_RUNTIME_STRINGIFY", sizeof("E_RUNTIME_STRINGIFY") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_STRINGIFY_name, &const_E_RUNTIME_STRINGIFY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_STRINGIFY_name, &const_E_RUNTIME_STRINGIFY_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_STRINGIFY_name);
+
+	zval const_E_RUNTIME_UNKNOWN_FUNCTION_value;
+	zend_string *const_E_RUNTIME_UNKNOWN_FUNCTION_value_str = zend_string_init("E_RUNTIME_UNKNOWN_FUNCTION", strlen("E_RUNTIME_UNKNOWN_FUNCTION"), 1);
+	ZVAL_STR(&const_E_RUNTIME_UNKNOWN_FUNCTION_value, const_E_RUNTIME_UNKNOWN_FUNCTION_value_str);
+	zend_string *const_E_RUNTIME_UNKNOWN_FUNCTION_name = zend_string_init_interned("E_RUNTIME_UNKNOWN_FUNCTION", sizeof("E_RUNTIME_UNKNOWN_FUNCTION") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_UNKNOWN_FUNCTION_name, &const_E_RUNTIME_UNKNOWN_FUNCTION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_UNKNOWN_FUNCTION_name, &const_E_RUNTIME_UNKNOWN_FUNCTION_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_UNKNOWN_FUNCTION_name);
+
+	zval const_E_RUNTIME_ARITY_value;
+	zend_string *const_E_RUNTIME_ARITY_value_str = zend_string_init("E_RUNTIME_ARITY", strlen("E_RUNTIME_ARITY"), 1);
+	ZVAL_STR(&const_E_RUNTIME_ARITY_value, const_E_RUNTIME_ARITY_value_str);
+	zend_string *const_E_RUNTIME_ARITY_name = zend_string_init_interned("E_RUNTIME_ARITY", sizeof("E_RUNTIME_ARITY") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_ARITY_name, &const_E_RUNTIME_ARITY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_ARITY_name, &const_E_RUNTIME_ARITY_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_ARITY_name);
+
+	zval const_E_RUNTIME_HOST_FUNCTION_value;
+	zend_string *const_E_RUNTIME_HOST_FUNCTION_value_str = zend_string_init("E_RUNTIME_HOST_FUNCTION", strlen("E_RUNTIME_HOST_FUNCTION"), 1);
+	ZVAL_STR(&const_E_RUNTIME_HOST_FUNCTION_value, const_E_RUNTIME_HOST_FUNCTION_value_str);
+	zend_string *const_E_RUNTIME_HOST_FUNCTION_name = zend_string_init_interned("E_RUNTIME_HOST_FUNCTION", sizeof("E_RUNTIME_HOST_FUNCTION") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_HOST_FUNCTION_name, &const_E_RUNTIME_HOST_FUNCTION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_HOST_FUNCTION_name, &const_E_RUNTIME_HOST_FUNCTION_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_HOST_FUNCTION_name);
+
+	zval const_E_RUNTIME_UNKNOWN_LOOP_value;
+	zend_string *const_E_RUNTIME_UNKNOWN_LOOP_value_str = zend_string_init("E_RUNTIME_UNKNOWN_LOOP", strlen("E_RUNTIME_UNKNOWN_LOOP"), 1);
+	ZVAL_STR(&const_E_RUNTIME_UNKNOWN_LOOP_value, const_E_RUNTIME_UNKNOWN_LOOP_value_str);
+	zend_string *const_E_RUNTIME_UNKNOWN_LOOP_name = zend_string_init_interned("E_RUNTIME_UNKNOWN_LOOP", sizeof("E_RUNTIME_UNKNOWN_LOOP") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_UNKNOWN_LOOP_name, &const_E_RUNTIME_UNKNOWN_LOOP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_UNKNOWN_LOOP_name, &const_E_RUNTIME_UNKNOWN_LOOP_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_UNKNOWN_LOOP_name);
+
+	zval const_E_RUNTIME_BLOCK_UNDEFINED_value;
+	zend_string *const_E_RUNTIME_BLOCK_UNDEFINED_value_str = zend_string_init("E_RUNTIME_BLOCK_UNDEFINED", strlen("E_RUNTIME_BLOCK_UNDEFINED"), 1);
+	ZVAL_STR(&const_E_RUNTIME_BLOCK_UNDEFINED_value, const_E_RUNTIME_BLOCK_UNDEFINED_value_str);
+	zend_string *const_E_RUNTIME_BLOCK_UNDEFINED_name = zend_string_init_interned("E_RUNTIME_BLOCK_UNDEFINED", sizeof("E_RUNTIME_BLOCK_UNDEFINED") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_BLOCK_UNDEFINED_name, &const_E_RUNTIME_BLOCK_UNDEFINED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_BLOCK_UNDEFINED_name, &const_E_RUNTIME_BLOCK_UNDEFINED_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_BLOCK_UNDEFINED_name);
+
+	zval const_E_RUNTIME_BLOCK_REDEFINED_value;
+	zend_string *const_E_RUNTIME_BLOCK_REDEFINED_value_str = zend_string_init("E_RUNTIME_BLOCK_REDEFINED", strlen("E_RUNTIME_BLOCK_REDEFINED"), 1);
+	ZVAL_STR(&const_E_RUNTIME_BLOCK_REDEFINED_value, const_E_RUNTIME_BLOCK_REDEFINED_value_str);
+	zend_string *const_E_RUNTIME_BLOCK_REDEFINED_name = zend_string_init_interned("E_RUNTIME_BLOCK_REDEFINED", sizeof("E_RUNTIME_BLOCK_REDEFINED") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_BLOCK_REDEFINED_name, &const_E_RUNTIME_BLOCK_REDEFINED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_BLOCK_REDEFINED_name, &const_E_RUNTIME_BLOCK_REDEFINED_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_BLOCK_REDEFINED_name);
+
+	zval const_E_RUNTIME_DEPTH_value;
+	zend_string *const_E_RUNTIME_DEPTH_value_str = zend_string_init("E_RUNTIME_DEPTH", strlen("E_RUNTIME_DEPTH"), 1);
+	ZVAL_STR(&const_E_RUNTIME_DEPTH_value, const_E_RUNTIME_DEPTH_value_str);
+	zend_string *const_E_RUNTIME_DEPTH_name = zend_string_init_interned("E_RUNTIME_DEPTH", sizeof("E_RUNTIME_DEPTH") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_DEPTH_name, &const_E_RUNTIME_DEPTH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_DEPTH_name, &const_E_RUNTIME_DEPTH_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_DEPTH_name);
+
+	zval const_E_RUNTIME_LIMIT_value;
+	zend_string *const_E_RUNTIME_LIMIT_value_str = zend_string_init("E_RUNTIME_LIMIT", strlen("E_RUNTIME_LIMIT"), 1);
+	ZVAL_STR(&const_E_RUNTIME_LIMIT_value, const_E_RUNTIME_LIMIT_value_str);
+	zend_string *const_E_RUNTIME_LIMIT_name = zend_string_init_interned("E_RUNTIME_LIMIT", sizeof("E_RUNTIME_LIMIT") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_RUNTIME_LIMIT_name, &const_E_RUNTIME_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_LIMIT_name, &const_E_RUNTIME_LIMIT_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_RUNTIME_LIMIT_name);
+
+	zval const_E_INTERNAL_value;
+	zend_string *const_E_INTERNAL_value_str = zend_string_init("E_INTERNAL", strlen("E_INTERNAL"), 1);
+	ZVAL_STR(&const_E_INTERNAL_value, const_E_INTERNAL_value_str);
+	zend_string *const_E_INTERNAL_name = zend_string_init_interned("E_INTERNAL", sizeof("E_INTERNAL") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_INTERNAL_name, &const_E_INTERNAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_INTERNAL_name, &const_E_INTERNAL_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_INTERNAL_name);
 
 	return class_entry;
 }
@@ -1564,6 +2038,27 @@ static zend_class_entry *register_class_Polyspec_Template_Value_HostArgument(voi
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Functions_FunctionError(zend_class_entry *class_entry_RuntimeException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "FunctionError", class_Polyspec_Template_Functions_FunctionError_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_errorCode_default_value;
+	ZVAL_UNDEF(&property_errorCode_default_value);
+	zend_string *property_errorCode_name = zend_string_init("errorCode", sizeof("errorCode") - 1, 1);
+	zend_declare_typed_property(class_entry, property_errorCode_name, &property_errorCode_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_errorCode_name);
 
 	return class_entry;
 }

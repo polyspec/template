@@ -67,7 +67,9 @@ test('every list of the tree matches the catalog', { timeout: 10_000 }, () => {
 
 test('the PHP package and the PHP extension raise each error through the generated constants', { timeout: 10_000 }, () => {
   const php = sources('packages/php/src', ['.php']).filter(file => file !== 'packages/php/src/ErrorCode.php');
-  const ext = sources('packages/php-ext/src', ['.c', '.h']).filter(file => file !== 'packages/php-ext/src/pt_error_codes.h');
+  // The generated declarations of ErrorCode in the arginfo header raise nothing; gen_stub writes them from the stub.
+  const ext = sources('packages/php-ext/src', ['.c', '.h'])
+    .filter(file => file !== 'packages/php-ext/src/pt_error_codes.h' && file !== 'packages/php-ext/src/polyspec_template_arginfo.h');
   assert.deepEqual([...literals(php, "'"), ...literals(php, '"'), ...literals(ext, '"')], []);
 });
 
