@@ -17,11 +17,13 @@ use Polyspec\Template\Value\Value;
  */
 final class ValueTest extends TestCase
 {
+    /** EXP-33: only null, false, 0, -0, the empty string, the empty list and the empty map are falsy. */
     public function testTruthiness(): void
     {
         self::assertFalse(Value::isTruthy(null));
         self::assertFalse(Value::isTruthy(false));
         self::assertFalse(Value::isTruthy(0.0));
+        self::assertFalse(Value::isTruthy(-0.0));
         self::assertFalse(Value::isTruthy(''));
         self::assertFalse(Value::isTruthy([]));
         self::assertFalse(Value::isTruthy(new MapValue()));

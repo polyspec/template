@@ -2,6 +2,10 @@
   {
     "name": "literal-number",
     "expr": "42",
+    "requirements": [
+      "EXP-1",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "NUMBER",
@@ -31,6 +35,11 @@
   {
     "name": "literal-exponent",
     "expr": "1e3",
+    "requirements": [
+      "EXP-1",
+      "EXP-2",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "NUMBER",
@@ -60,6 +69,11 @@
   {
     "name": "literal-fraction-exponent",
     "expr": "2.5e-1",
+    "requirements": [
+      "EXP-1",
+      "EXP-2",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "NUMBER",
@@ -89,6 +103,11 @@
   {
     "name": "literal-string-escapes",
     "expr": "'a\\nb'",
+    "requirements": [
+      "EXP-1",
+      "EXP-3",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "STRING",
@@ -118,6 +137,11 @@
   {
     "name": "literal-string-double-quotes",
     "expr": "\"a\\\"b\"",
+    "requirements": [
+      "EXP-1",
+      "EXP-3",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "STRING",
@@ -147,6 +171,11 @@
   {
     "name": "literal-unicode-escape",
     "expr": "'\\u00e9'",
+    "requirements": [
+      "EXP-1",
+      "EXP-3",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "STRING",
@@ -176,6 +205,11 @@
   {
     "name": "literal-null",
     "expr": "null",
+    "requirements": [
+      "EXP-1",
+      "EXP-4",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "NULL",
@@ -205,6 +239,11 @@
   {
     "name": "literal-true",
     "expr": "true",
+    "requirements": [
+      "EXP-1",
+      "EXP-4",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "TRUE",
@@ -234,6 +273,11 @@
   {
     "name": "literal-false",
     "expr": "false",
+    "requirements": [
+      "EXP-1",
+      "EXP-4",
+      "EXP-7"
+    ],
     "tokens": [
       {
         "type": "FALSE",
@@ -263,6 +307,11 @@
   {
     "name": "var",
     "expr": "a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-17"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -297,6 +346,13 @@
   {
     "name": "member-path",
     "expr": "a.b.c",
+    "requirements": [
+      "EXP-1",
+      "EXP-5",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -373,6 +429,13 @@
   {
     "name": "dot-index",
     "expr": "a.0",
+    "requirements": [
+      "EXP-1",
+      "EXP-5",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -432,6 +495,12 @@
   {
     "name": "bracket-index",
     "expr": "a[i]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -538,6 +607,12 @@
   {
     "name": "index-string-literal",
     "expr": "m['k']",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -598,6 +673,11 @@
   {
     "name": "call",
     "expr": "upper(s)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -650,6 +730,11 @@
   {
     "name": "call-trailing-comma",
     "expr": "join([1, 2,], '-')",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -756,6 +841,12 @@
   {
     "name": "call-then-member",
     "expr": "first(l).n",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11",
+      "EXP-18"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -824,6 +915,11 @@
   {
     "name": "pipe",
     "expr": "a | upper",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-12"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -872,6 +968,11 @@
   {
     "name": "pipe-args",
     "expr": "a | slice(1, 2)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-12"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -972,6 +1073,11 @@
   {
     "name": "pipe-chain",
     "expr": "a | trim | upper",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-12"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -1038,6 +1144,11 @@
   {
     "name": "pipe-lowest-precedence",
     "expr": "a ?? 'n' | upper",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-13"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -1117,6 +1228,12 @@
   {
     "name": "add-numbers",
     "expr": "a + 1",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-23",
+      "EXP-24"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -1196,6 +1313,11 @@
   {
     "name": "add-concat",
     "expr": "'x' + 1",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-24"
+    ],
     "tokens": [
       {
         "type": "STRING",
@@ -1250,6 +1372,12 @@
   {
     "name": "subtract-strings",
     "expr": "'6' - 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-23",
+      "EXP-25"
+    ],
     "tokens": [
       {
         "type": "STRING",
@@ -1304,6 +1432,11 @@
   {
     "name": "multiply",
     "expr": "a * b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-25"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -1373,6 +1506,11 @@
   {
     "name": "divide",
     "expr": "7 / 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-26"
+    ],
     "tokens": [
       {
         "type": "NUMBER",
@@ -1427,6 +1565,11 @@
   {
     "name": "modulo",
     "expr": "-7 % 3",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-27"
+    ],
     "tokens": [
       {
         "type": "MINUS",
@@ -1493,6 +1636,11 @@
   {
     "name": "arithmetic-precedence",
     "expr": "1 + 2 * 3 - 4 / 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9"
+    ],
     "tokens": [
       {
         "type": "NUMBER",
@@ -1622,6 +1770,11 @@
   {
     "name": "grouping",
     "expr": "(a + b) * 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9"
+    ],
     "tokens": [
       {
         "type": "LPAREN",
@@ -1710,6 +1863,11 @@
   {
     "name": "unary-minus",
     "expr": "-a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-28"
+    ],
     "tokens": [
       {
         "type": "MINUS",
@@ -1764,6 +1922,12 @@
   {
     "name": "unary-not",
     "expr": "!a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-28",
+      "EXP-33"
+    ],
     "tokens": [
       {
         "type": "BANG",
@@ -1830,6 +1994,11 @@
   {
     "name": "less-than",
     "expr": "a < b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -1899,6 +2068,11 @@
   {
     "name": "greater-than",
     "expr": "a > b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -1961,6 +2135,11 @@
   {
     "name": "less-equal",
     "expr": "a <= b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2016,6 +2195,11 @@
   {
     "name": "greater-equal",
     "expr": "a >= b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2071,6 +2255,12 @@
   {
     "name": "equality",
     "expr": "a == b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-34",
+      "EXP-35"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2171,6 +2361,11 @@
   {
     "name": "not-equal",
     "expr": "a != b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-36"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2233,6 +2428,11 @@
   {
     "name": "strict-equality",
     "expr": "a === b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-37"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2295,6 +2495,11 @@
   {
     "name": "strict-not-equal",
     "expr": "a !== b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-37"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2350,6 +2555,12 @@
   {
     "name": "logical-and-or",
     "expr": "a && b || c",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9",
+      "EXP-30"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2446,6 +2657,11 @@
   {
     "name": "logical-result-boolean",
     "expr": "1 && 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-30"
+    ],
     "tokens": [
       {
         "type": "NUMBER",
@@ -2500,6 +2716,11 @@
   {
     "name": "coalesce",
     "expr": "a ?? b ?? 'd'",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2593,6 +2814,11 @@
   {
     "name": "coalesce-trailing",
     "expr": "a ??",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-14"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2648,6 +2874,11 @@
   {
     "name": "elvis",
     "expr": "a ?: 'd'",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2709,6 +2940,11 @@
   {
     "name": "ternary",
     "expr": "a ? 'y' : 'n'",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2786,6 +3022,12 @@
   {
     "name": "ternary-nested-right",
     "expr": "a ? 1 : b ? 2 : 3",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9",
+      "EXP-31"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2912,6 +3154,11 @@
   {
     "name": "ternary-identifier-branches",
     "expr": "c ? a : b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -2991,6 +3238,11 @@
   {
     "name": "in-operator",
     "expr": "x in l",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-32"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -3091,6 +3343,11 @@
   {
     "name": "list-literal",
     "expr": "[1, 'a', null]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
     "tokens": [
       {
         "type": "LBRACKET",
@@ -3175,6 +3432,11 @@
   {
     "name": "empty-list",
     "expr": "[]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
     "tokens": [
       {
         "type": "LBRACKET",
@@ -3207,6 +3469,11 @@
   {
     "name": "map-literal",
     "expr": "['a' => 1, 'b' => x]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
     "tokens": [
       {
         "type": "LBRACKET",
@@ -3312,6 +3579,11 @@
   {
     "name": "map-numeric-key",
     "expr": "[1 => 'a']",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
     "tokens": [
       {
         "type": "LBRACKET",
@@ -3379,6 +3651,11 @@
   {
     "name": "spread-list",
     "expr": "[0, ...l]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-16"
+    ],
     "tokens": [
       {
         "type": "LBRACKET",
@@ -3461,6 +3738,11 @@
   {
     "name": "spread-map",
     "expr": "[...m, 'z' => 1]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-16"
+    ],
     "tokens": [
       {
         "type": "LBRACKET",
@@ -3570,36 +3852,59 @@
   {
     "name": "error-non-associative",
     "expr": "a == b == c",
+    "requirements": [
+      "EXP-10"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-chained-comparison",
     "expr": "a < b < c",
+    "requirements": [
+      "EXP-10"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-invalid-number",
     "expr": "1.",
+    "requirements": [
+      "EXP-2"
+    ],
     "error": "E_PARSE_INVALID_NUMBER"
   },
   {
     "name": "error-leading-dot-number",
     "expr": ".5",
+    "requirements": [
+      "EXP-2"
+    ],
     "error": "E_PARSE_INVALID_NUMBER"
   },
   {
     "name": "error-invalid-escape",
     "expr": "'\\q'",
+    "requirements": [
+      "EXP-3"
+    ],
     "error": "E_PARSE_INVALID_ESCAPE"
   },
   {
     "name": "error-unterminated-string",
     "expr": "'abc",
+    "requirements": [
+      "EXP-3"
+    ],
     "error": "E_PARSE_UNTERMINATED_STRING"
   },
   {
     "name": "member-method-call",
     "expr": "a.f(x)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -3656,6 +3961,11 @@
   {
     "name": "class-function-call",
     "expr": "Order::status_label(x)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -3709,6 +4019,12 @@
   {
     "name": "ternary-class-call-branch",
     "expr": "c ? Order::label(a) : b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11",
+      "EXP-31"
+    ],
     "tokens": [
       {
         "type": "IDENT",
@@ -3801,36 +4117,61 @@
   {
     "name": "error-class-call-separated-colons",
     "expr": "Order: :status_label(x)",
+    "requirements": [
+      "EXP-8",
+      "EXP-11"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-call-result-call",
     "expr": "f(x)(y)",
+    "requirements": [
+      "EXP-8"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-empty",
     "expr": "",
+    "requirements": [
+      "EXP-8"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-dot-whitespace",
     "expr": "a . b",
+    "requirements": [
+      "EXP-5",
+      "EXP-8"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-arrow-operator",
     "expr": "a->b",
+    "requirements": [
+      "EXP-6"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "error-brace-map",
     "expr": "{'a': 1}",
+    "requirements": [
+      "EXP-6"
+    ],
     "error": "E_PARSE_UNEXPECTED_TOKEN"
   },
   {
     "name": "depth-limit-parentheses",
     "expr": "(((((((((((((((((((((((((((((((1)))))))))))))))))))))))))))))))",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "RT-34"
+    ],
     "tokens": [
       {
         "type": "LPAREN",
@@ -4108,11 +4449,19 @@
   {
     "name": "error-depth-parentheses",
     "expr": "((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))",
+    "requirements": [
+      "RT-34"
+    ],
     "error": "E_RUNTIME_LIMIT"
   },
   {
     "name": "depth-limit-unary",
     "expr": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "RT-34"
+    ],
     "tokens": [
       {
         "type": "BANG",
@@ -4887,6 +5236,9 @@
   {
     "name": "error-depth-unary",
     "expr": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!a",
+    "requirements": [
+      "RT-34"
+    ],
     "error": "E_RUNTIME_LIMIT"
   }
 ]

@@ -29,6 +29,7 @@ final class FunctionsTest extends TestCase
         rmdir($this->root);
     }
 
+    /** FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens. */
     public function testDateFormatsUnixSecondsAndDateStringsInTheTimezoneOfTheEnvironment(): void
     {
         $engine = new Engine($this->root);

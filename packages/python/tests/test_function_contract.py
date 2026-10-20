@@ -11,7 +11,9 @@ from pathlib import Path
 from polyspec.template import (
     BUILTINS,
     AstProgram,
+    Engine,
     EngineOptions,
+    MapLoader,
     Frame,
     RenderContext,
     RuntimeBindings,
@@ -36,6 +38,7 @@ def bindings():
 
 class FunctionContract(unittest.TestCase):
     def test_the_registry_has_the_canonical_names_and_argument_ranges(self):
+        # FUN-3: the number of arguments is checked at evaluation time against the declared minimum and maximum.
         expected = {
             fn["name"]: (
                 fn["minArgs"],
@@ -49,6 +52,13 @@ class FunctionContract(unittest.TestCase):
         }
         self.assertGreater(len(expected), 0)
         self.assertEqual(actual, expected)
+        for source in ("{= upper()}", "{= upper('a', 'b')}"):
+            program = Engine(
+                AstProgram(EngineOptions(loader=MapLoader({"a.tpl": source})))
+            )
+            with self.assertRaises(TemplateError) as caught:
+                program.render("a.tpl", {})
+            self.assertEqual(caught.exception.code, "E_RUNTIME_ARITY", source)
 
     def test_the_contract_declares_python_support(self):
         for fn in CONTRACT["canonical"]:

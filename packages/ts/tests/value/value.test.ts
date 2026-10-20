@@ -6,6 +6,7 @@ import { parseJson } from '../../src/value/json.js';
 import { compareValues, isTruthy, looseEquals, strictEquals, SafeString } from '../../src/value/value.js';
 
 describe('truthiness', () => {
+  // EXP-33: only null, false, 0, -0, the empty string, the empty list and the empty map are falsy.
   it('treats only the listed values as falsy', () => {
     expect(isTruthy(null)).toBe(false);
     expect(isTruthy(false)).toBe(false);

@@ -1,10 +1,11 @@
 //! Number formatting, truthiness, equality, ordering and binding (VAL-9, EXP-33 to EXP-38, VAL-12).
 
 use polyspec_template::value::number::{format_number, number_to_string, positional, round_number, shortest_digits};
-use polyspec_template::value::{Value, compare_values, loose_equals, strict_equals};
+use polyspec_template::value::{OrderedMap, Value, compare_values, loose_equals, strict_equals};
 use polyspec_template::{ErrorCode, bind_json, bind_value, parse_json, parse_json_bytes};
 use std::cmp::Ordering;
 
+/// VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform.
 #[test]
 fn number_to_string_follows_the_ecmascript_layout() {
     assert_eq!(number_to_string(1.0), "1");
@@ -40,10 +41,15 @@ fn format_number_rounds_half_away_from_zero_on_decimal_digits() {
     assert_eq!(round_number(-2.5, 0), -3.0);
 }
 
+/// EXP-33: only null, false, 0, -0, the empty string, the empty list and the empty map are falsy.
 #[test]
 fn truthiness_equality_and_ordering() {
+    for falsy in [Value::Null, Value::Bool(false), Value::Number(0.0), Value::Number(-0.0), Value::map(OrderedMap::new())] {
+        assert!(!falsy.is_truthy(), "{falsy:?} is truthy");
+    }
     assert!(!Value::text("".to_string()).is_truthy());
     assert!(Value::text("0".to_string()).is_truthy());
+    assert!(Value::text(" ".to_string()).is_truthy());
     assert!(!Value::list(Vec::new()).is_truthy());
     assert!(loose_equals(&Value::text("3".to_string()), &Value::Number(3.0)));
     assert!(!strict_equals(&Value::text("3".to_string()), &Value::Number(3.0)));

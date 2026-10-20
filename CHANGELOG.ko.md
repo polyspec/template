@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9ed9aebd3b875c152977d6036c271e693f0f7715bf0eae6d077e7f5a6324f8b8 -->
+<!-- source-sha256: 553a229db7952b405bc0521b60330f17bc98a3455388c8e92d39069127605d84 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-39: value와 function unit은 test가 보이는 requirement만 인용한다. `expressions`는 vector가 시험하는 EXP requirement와 RT-34(nesting limit; `depth-limit-*`와 `error-depth-*` 네 vector가 이제 이를 적는다)를 인용하고, `tests/fixtures/expr/cases.json`의 모든 vector는 자기 requirement를 적는다(`packages/rust/tests/expr_fixtures.rs`의 strict vector가 이 field를 읽는다). `truthiness`는 EXP-33, `number-to-string`은 VAL-9와 VAL-10, `function-arity`는 FUN-3, `functions-date`는 FUN-39와 FUN-40을 인용하며, 전에는 각각 23개에서 62개를 인용했다. 각 구현의 test가 그 이름을 적는다. Go, Rust, PHP의 truthiness test는 이제 -0도 확인하고(Rust는 null, false, 0, 빈 map, 공백 문자열도), arity test는 모든 구현에서 evaluation 시점의 E_RUNTIME_ARITY를 확인하며, PHP extension은 `number-to-string`, `truthiness`, `function-arity`의 PHP test에 binding된다. Red: 425c5959에서 `make parity-declarations-check`는 R1 15, R13 1, R15 8182(그중 다섯 unit에 1243), R2 43, R5 3; green: R1 15, R13 1(이 unit 밖의 RT-71), R15 6936(다섯 unit에는 없음), R2 40, R5 3. owner test는 통과한다: TS 네 파일의 vitest, 다섯 test의 `go test`(78), `cargo test --test value --test functions --test expr_fixtures`(91), PHPUnit `FunctionsTest|NumberTest|ValueTest|ExprFixturesTest`(89), Python `test_api`, `test_function_contract`, `test_expr_fixtures`(116). 확인하지 않음: 이 test의 PHP extension 실행. 425c5959에서 `make test-php-ext`가 선언 검사에서 멈추기 때문이다(extension은 library가 선언하지 않는 `Polyspec\Template\Native\Engine`과 `Polyspec\Template\Native\BoundMap`을 등록한다). 이 항목은 T26.7-2-2-5와 T26.7-2-8까지 진행 중으로 남는다 (T26.7-39).
 
 - T26.7-2-2-2: PHP 확장은 `Polyspec\Template\Value\MapValue`를 library와 같은 signature의 internal final class로 등록한다. private `items`의 PHP 배열 위에서 삽입 순서를 지키는 map이며 `set`, `has`, `get`, `remove`, `count`, `keys`, `values`, `entries`, `copy`를 가지고, 숫자 문자열 key는 PHP 배열 key처럼 동작하고 문자열로 다시 읽힌다. internal method는 `Generator`를 돌려줄 수 없으므로 library와 확장의 `MapValue::entries()`는 `[key, value]` 쌍의 list를 돌려주며, 호출하는 열 곳은 이를 `foreach (... as [$key, $value])`로 읽는다. gen_stub가 `self` 대신 요구하므로 `copy()`는 `MapValue`를 선언한다. Red: 새 `packages/php-ext/tests/MapValueTest.php`가 4개 중 4개 실패했다(class가 library의 것이었고 `entries()`가 Generator를 돌려줬다); green: 확장을 load하고 `MapValueTest` 4, `Value/ValueTest` 7, `Functions/FunctionsTest` 5, `ConformanceTest` 765가 통과하고, library만으로 `Value/ValueTest` 7과 `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-2-2).
 

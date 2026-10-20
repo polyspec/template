@@ -177,6 +177,7 @@ class Expressions(unittest.TestCase):
         self.assertEqual(render('{= "a" in ["a" => 1] }'), "true")
 
     def test_numbers_follow_ecmascript_tostring(self):
+        # VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform.
         for value, expected in (
             (0.0, "0"),
             (1.0, "1"),
@@ -268,6 +269,7 @@ class Functions(unittest.TestCase):
         self.assertEqual(render("{= type([1]) }"), "list")
 
     def test_number_and_date_functions(self):
+        # FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens.
         self.assertEqual(render("{= number(1234.567, 2) }"), "1,234.57")
         self.assertEqual(render("{= round(1.5) }"), "2")
         self.assertEqual(render("{= floor(1.7) }"), "1")

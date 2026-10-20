@@ -8,6 +8,7 @@ import (
 	"github.com/polyspec/template/packages/go/value"
 )
 
+// VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform.
 func TestNumberToString(t *testing.T) {
 	tenth, fifth := 0.1, 0.2
 	cases := map[float64]string{1: "1", 0.5: "0.5", 1234.5: "1234.5", tenth + fifth: "0.30000000000000004", 1e21: "1e+21", 1e-7: "1e-7", 1.5e-7: "1.5e-7", 0.000001: "0.000001", 123456789012345680000: "123456789012345680000", 9007199254740991: "9007199254740991"}
@@ -41,8 +42,9 @@ func TestFormatNumber(t *testing.T) {
 	}
 }
 
+// EXP-33: only null, false, 0, -0, the empty string, the empty list and the empty map are falsy.
 func TestTruthinessAndEquality(t *testing.T) {
-	for _, falsy := range []value.Value{nil, false, 0.0, "", value.List{}, value.NewOrderedMap()} {
+	for _, falsy := range []value.Value{nil, false, 0.0, math.Copysign(0, -1), "", value.List{}, value.NewOrderedMap()} {
 		if value.IsTruthy(falsy) {
 			t.Errorf("%v is truthy", falsy)
 		}

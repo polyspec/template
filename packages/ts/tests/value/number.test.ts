@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { formatNumber, numberToString, positional, roundNumber, shortestDigits } from '../../src/value/number.js';
 
 describe('numberToString', () => {
+  // VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform.
   it('follows the ECMAScript layout', () => {
     expect(numberToString(1)).toBe('1');
     expect(numberToString(-0)).toBe('0');

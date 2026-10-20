@@ -3,11 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { formatDate, parseOffset, toUnixSeconds } from '../../src/functions/date.js';
 import { percentEncode, toJson } from '../../src/functions/encoding.js';
 import { builtins } from '../../src/functions/index.js';
+import { AstProgram, Engine, MapLoader } from '../../src/index.js';
 import { SafeString } from '../../src/value/value.js';
 
 const env = { env: { timezone: 'Z', now: 0 } };
 
 describe('date', () => {
+  // FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens.
   it('parses offsets and formats civil dates', () => {
     expect(parseOffset('+09:00')).toBe(32400);
     expect(parseOffset('-05:30')).toBe(-19800);
@@ -37,10 +39,15 @@ describe('json and url', () => {
 });
 
 describe('arity table', () => {
+  // FUN-3: the number of arguments is checked at evaluation time against the declared minimum and maximum.
   it('declares minimum and maximum arguments for every built-in', () => {
     for (const [name, fn] of builtins) {
       expect(fn.min, name).toBeLessThanOrEqual(fn.max);
     }
     expect(builtins.get('now')?.call([], env)).toBe(0);
+    for (const source of ['{= upper()}', "{= upper('a', 'b')}"]) {
+      const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': source }) }));
+      expect(() => engine.render('a.tpl', {}), source).toThrow(expect.objectContaining({ code: 'E_RUNTIME_ARITY' }));
+    }
   });
 });

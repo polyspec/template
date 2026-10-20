@@ -12,6 +12,7 @@ use Polyspec\Template\Value\Number;
  */
 final class NumberTest extends TestCase
 {
+    /** VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform. */
     public function testToTextFollowsTheEcmascriptLayout(): void
     {
         self::assertSame('1', Number::toText(1.0));

@@ -1,13 +1,17 @@
 package functions_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
+	template "github.com/polyspec/template/packages/go"
+	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/functions"
 	"github.com/polyspec/template/packages/go/value"
 )
 
+// FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens.
 func TestDate(t *testing.T) {
 	if offset, ok := functions.ParseOffset("+09:00"); !ok || offset != 32400 {
 		t.Error("offset +09:00")
@@ -60,6 +64,7 @@ func TestJSONAndURL(t *testing.T) {
 	}
 }
 
+// FUN-3: the number of arguments is checked at evaluation time against the declared minimum and maximum.
 func TestArityTable(t *testing.T) {
 	for name, fn := range functions.Builtins {
 		if fn.Max >= 0 && fn.Min > fn.Max {
@@ -69,5 +74,16 @@ func TestArityTable(t *testing.T) {
 	now, err := functions.Builtins["now"].Call(nil, functions.Context{Env: functions.Env{Timezone: "Z", Now: 5}})
 	if err != nil || now != 5.0 {
 		t.Errorf("now: %v %v", now, err)
+	}
+	for _, source := range []string{"{= upper()}", "{= upper('a', 'b')}"} {
+		program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": source})})
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, err = template.NewEngine(program).Render("a.tpl", nil, template.RenderOptions{})
+		var failure *errs.Error
+		if !errors.As(err, &failure) || failure.Code != errs.RuntimeArity {
+			t.Errorf("%s: %v", source, err)
+		}
 	}
 }

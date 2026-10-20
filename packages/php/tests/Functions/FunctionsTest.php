@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace Polyspec\Template\Tests\Functions;
 
 use PHPUnit\Framework\TestCase;
+use Polyspec\Template\AstProgram;
+use Polyspec\Template\Engine;
 use Polyspec\Template\Functions\Dates;
 use Polyspec\Template\Functions\Encoding;
 use Polyspec\Template\Functions\FunctionError;
 use Polyspec\Template\Functions\Registry;
+use Polyspec\Template\Loader\ArrayLoader;
+use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\MapValue;
 use Polyspec\Template\Value\SafeString;
 
@@ -17,6 +21,7 @@ use Polyspec\Template\Value\SafeString;
  */
 final class FunctionsTest extends TestCase
 {
+    /** FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens. */
     public function testDateOffsetsAndFormatting(): void
     {
         self::assertSame(32400, Dates::parseOffset('+09:00'));
@@ -55,11 +60,21 @@ final class FunctionsTest extends TestCase
         self::assertSame('a%20b%2F%C3%A9~%21%2A%27%28%29', Encoding::percentEncode("a b/é~!*'()"));
     }
 
+    /** FUN-3: the number of arguments is checked at evaluation time against the declared minimum and maximum. */
     public function testArityTable(): void
     {
         foreach (Registry::builtins() as $name => $fn) {
             self::assertLessThanOrEqual($fn['max'], $fn['min'], $name);
         }
         self::assertSame(0.0, (Registry::builtins()['now']['call'])([], ['timezone' => 'Z', 'now' => 0.0]));
+        foreach (['{= upper()}', "{= upper('a', 'b')}"] as $source) {
+            $engine = new Engine(new AstProgram(new ArrayLoader(['a.tpl' => $source])));
+            try {
+                $engine->render('a.tpl', []);
+                self::fail($source . ' rendered');
+            } catch (TemplateError $error) {
+                self::assertSame('E_RUNTIME_ARITY', $error->errorCode, $source);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ use polyspec_template::functions::encoding::{percent_encode, to_json};
 use polyspec_template::value::{OrderedMap, Value};
 use polyspec_template::{ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, MapLoader, RenderOptions, RenderTarget};
 
+/// FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens.
 #[test]
 fn date_parsing_and_formatting() {
     assert_eq!(parse_offset("+09:00"), Some(32400));
@@ -51,12 +52,26 @@ fn json_and_url_encoding() {
     assert_eq!(percent_encode("a b/é~!*'()"), "a%20b%2F%C3%A9~%21%2A%27%28%29");
 }
 
+/// FUN-3: the number of arguments is checked at evaluation time against the declared minimum and maximum.
 #[test]
 fn builtins_declare_arity() {
     for (name, function) in builtins() {
         assert!(function.min <= function.max, "{name}");
     }
     assert!(builtins().contains_key("now"));
+    for source in ["{= upper()}", "{= upper('a', 'b')}"] {
+        let mut loader = MapLoader::new();
+        loader.set("a.tpl", source);
+        let program = AstProgram::new(EngineOptions {
+            loader: Some(Box::new(loader)),
+            ..Default::default()
+        })
+        .expect("engine");
+        let error = program
+            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .expect_err(source);
+        assert_eq!(error.code, ErrorCode::E_RUNTIME_ARITY, "{source}");
+    }
 }
 
 #[test]
