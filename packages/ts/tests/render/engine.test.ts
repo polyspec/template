@@ -96,6 +96,43 @@ describe('Engine', () => {
     }));
   });
 
+  // RT-5, RT-6: a limits or functions option that the spec does not allow fails the creation of the program (ERR-13).
+  it('fails the creation of a program on limits or functions that the spec does not allow (RT-5, RT-6)', () => {
+    const loader = new MapLoader({ 'a.tpl': '1' });
+    const failure = (build: () => unknown): Error => {
+      try {
+        build();
+      } catch (error: unknown) {
+        if (error instanceof Error) return error;
+        throw error;
+      }
+      throw new Error('no error was thrown');
+    };
+    const cases: Array<[() => unknown, string]> = [
+      // @ts-expect-error the spec's invalid values are passed on purpose
+      [() => new AstProgram({ loader, limits: 5 }), 'limits is not an object'],
+      // @ts-expect-error the spec's invalid values are passed on purpose
+      [() => new AstProgram({ loader, limits: [1] }), 'limits is not an object'],
+      // @ts-expect-error the spec's invalid values are passed on purpose
+      [() => new AstProgram({ loader, limits: { loops: 1 } }), 'limits.loops is not a limit'],
+      [() => new AstProgram({ loader, limits: { iterations: 1.5 } }), 'limits.iterations is not an integer'],
+      // @ts-expect-error the spec's invalid values are passed on purpose
+      [() => new AstProgram({ loader, limits: { depth: '3' } }), 'limits.depth is not an integer'],
+      // @ts-expect-error the spec's invalid values are passed on purpose
+      [() => new AstProgram({ loader, functions: 5 }), 'functions is not an object'],
+      // @ts-expect-error the spec's invalid values are passed on purpose
+      [() => new AstProgram({ loader, functions: { f: 1 } }), 'functions.f is not a function'],
+    ];
+    for (const [build, message] of cases) {
+      const error = failure(build);
+      expect(error).not.toBeInstanceOf(TemplateError);
+      expect(error).not.toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(RangeError);
+      expect(error.message).toBe(message);
+    }
+    expect(() => new AstProgram({ loader, limits: { iterations: 10 }, functions: { f: () => 1 } })).not.toThrow();
+  });
+
   it('renders a parsed AST through the render-only entry', () => {
     const ast = parse('{= a + 1}', 'x.tpl');
     const engine = new RenderEngine(new RenderAstProgram({ loader: new MapLoader({ 'x.tpl': ast }) }));
