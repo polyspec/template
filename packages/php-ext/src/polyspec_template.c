@@ -23,7 +23,7 @@ zend_class_entry *pt_error_ce;
 zend_class_entry *pt_safe_string_ce;
 zend_class_entry *pt_map_value_ce;
 zend_class_entry *pt_bind_error_ce;
-static zend_class_entry *pt_ast_decode_error_ce;
+zend_class_entry *pt_ast_decode_error_ce;
 zend_class_entry *pt_function_error_ce;
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -2262,7 +2262,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, analyze)
     pt_method_analyze(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-/* AST-10: the decode of AstProgram is that of the class AstDecoder, as in the library. */
+/* AST-10: the decode of AstProgram is the decode of AstDecoder, which validates the JSON against the contract schema. */
 ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate)
 {
     zend_string *json;
@@ -2270,18 +2270,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate)
         Z_PARAM_STR(json)
     ZEND_PARSE_PARAMETERS_END();
 
-    zend_string *class_name = zend_string_init(ZEND_STRL("Polyspec\\Template\\AstDecoder"), 0);
-    zend_class_entry *decoder = zend_lookup_class(class_name);
-    zend_string_release(class_name);
-    zend_function *decode = decoder ? zend_hash_str_find_ptr(&decoder->function_table, "decode", sizeof("decode") - 1) : NULL;
-    if (decode == NULL) {
-        zend_throw_error(NULL, "The class Polyspec\\Template\\AstDecoder is not loaded");
-        RETURN_THROWS();
-    }
-    zval argument;
-    ZVAL_STR_COPY(&argument, json);
-    zend_call_known_function(decode, NULL, decoder, return_value, 1, &argument, NULL);
-    zval_ptr_dtor(&argument);
+    pt_ast_decode(json, return_value);
 }
 
 /* The callable that a table holds under a key, or null. */
@@ -3113,6 +3102,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
     pt_ast_decode_error_ce = register_class_Polyspec_Template_AstDecodeError(spl_ce_InvalidArgumentException);
+    register_class_Polyspec_Template_AstDecoder();
     pt_function_error_ce = register_class_Polyspec_Template_Functions_FunctionError(spl_ce_RuntimeException);
     zend_class_entry *function_group = register_class_Polyspec_Template_Functions_FunctionGroup();
     register_class_Polyspec_Template_Functions_Helpers();

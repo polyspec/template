@@ -554,6 +554,22 @@ final class AstDecodeError extends \InvalidArgumentException
 }
 
 /**
+ * Decoding of the AST JSON (AST-10): the canonical JSON of a template AST, validated against
+ * contracts/schema/ast.schema.json, read as the AST arrays that the parser returns.
+ *
+ * @internal AstProgram::decodeTemplate is the public entry.
+ */
+final class AstDecoder
+{
+    /**
+     * @return array<string, mixed>
+     * @throws \JsonException when the text is not JSON
+     * @throws AstDecodeError when the JSON is not a template AST
+     */
+    public static function decode(string $json): array {}
+}
+
+/**
  * A complete AST or generated template program.
  *
  * @phpstan-type RenderOptions array{

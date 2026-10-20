@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: eb84198282b46773a3304e5344cb99f6c6e704785eaab55323fb8d79e9ce4073 -->
+<!-- source-sha256: 29881e6e405e5c65159e2b386ed3faa4bef304d5056d2dbdedb76acce18c9da6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-5: PHP 확장은 `AstDecoder`를 라이브러리와 같은 이름과 signature의 final class로 등록한다, `decode(string $json): array`이며, C `packages/php-ext/src/pt_ast_decode.c`로 쓴다: `contracts/schema/ast.schema.json`이 쓰는 키워드의 검증기로 사본 `pt_ast_schema.h`에 대해 JSON을 검증하며, opis/json-schema와 같은 JSON Pointer와 이유를 말한다. `AstProgram::decodeTemplate`은 그 decode를 호출하고, AST-10(두 언어)이 이를 말한다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/php-ext/polyspec_template.so -- packages/php-ext/tests/AstDecoderClassTest.php` 2 failed, `Polyspec\Template\AstDecoder is not registered by the extension`; green: 같은 명령 6 passed, 0 failed, `packages/php/tests/AstDecodeTest.php` 6 passed, `ConformanceTest.php` 771 passed, 확장의 유무에 따른 seed 입력 6004개의 differential은 결과가 같다(실패 1962, 모두 같음) (T26.7-2-5).
 
 - T26.7-60: `tests/scripts/failure-messages.test.mts`의 도구 없음 케이스는 go 대신 kit run-tests가 여전히 PATH에서 찾는 도구인 cargo를 시작한다. go는 checkout의 mise에서 실행되므로 PATH에 git만 있어도 시작될 수 있다. Red: `PATH=$PWD/var/tools/bin:$PATH node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/failure-messages.test.mts`에서 그 케이스 실패, `AssertionError ... did not match ... ✖ go ... no test ran: expected at least 1 test ...`; green: 같은 명령 `node --test: 4 passed, 0 failed`, `make lint-ts` 통과 (T26.7-60).
 

@@ -430,6 +430,10 @@ void pt_expr_register(zend_class_entry *token, zend_class_entry *lexer, zend_cla
 /* The template of an AST given as nested PHP arrays, with no source and no line index; an array that is not an AST is
  * an internal failure. */
 pt_template *pt_ast_from_zval(pt_run *run, zval *ast);
+/* AstDecoder::decode (AST-10): the JSON text as the AST array, validated against the contract schema; the failure is
+ * the JsonException or the AstDecodeError that the library throws. Also AstProgram::decodeTemplate. */
+void pt_ast_decode(zend_string *json, zval *return_value);
+extern zend_class_entry *pt_ast_decode_error_ce;
 
 /* The line index of a template, or NULL for a template that has no source. */
 static inline const pt_lines *pt_template_lines(const pt_template *template)
