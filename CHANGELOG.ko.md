@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8384b6dedfa3e398182a09a16c22f3a2caded7d173b0cdfd47524275c8fc75c4 -->
+<!-- source-sha256: 71e0e87677feeb88c302eb6d705a065da85f45701c74810fa77f8f8d5b4b80a6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-52-3: `packages/rust`는 다시 `make template-lint-rust-format`을 통과한다. T26.7-52가 `packages/rust/tests/load_failures.rs`에 더한 load-failure test를 rustfmt가 정리한다. Red: `make template-lint-rust-format` exit 2(`load_failures.rs:65`의 diff); green: 통과하며 `cargo test --test load_failures`가 4개 통과한다 (T26.7-52-3).
 
 - T26.7-2-8-1: PHP 확장의 AstProgram C 메서드 `parse`, `analyze`, `register`, `registerClass`는 이후 행이 지울 `Native\Engine`의 메서드를 호출하지 않고 공유 C 함수(`pt_method_parse`, `pt_method_analyze`, `pt_method_register`, `pt_method_register_class`)로 일한다. 동작은 바뀌지 않는다. owner test는 확장을 load하고 전후 모두 통과한다: `AstProgramTest` 8, `Parser/ParserTest` 6, `Parser/AnalyzeTest` 15, `Value/HostBindingTest` 14, `ConformanceTest` 765, 확장의 `EngineTest` 27, `make lint-php-ext` (T26.7-2-8-1).
 

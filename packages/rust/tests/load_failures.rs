@@ -65,12 +65,29 @@ fn a_loader_error_is_a_load_failure() {
 /// A loader result holds a non-empty version (RT-9); an empty source is an empty template.
 #[test]
 fn a_loader_result_without_a_version_is_a_load_failure() {
-    let error = render(Box::new(ResultLoader { bytes: b"a".to_vec(), version: "" }), "page.tpl").unwrap_err();
+    let error = render(
+        Box::new(ResultLoader {
+            bytes: b"a".to_vec(),
+            version: "",
+        }),
+        "page.tpl",
+    )
+    .unwrap_err();
     assert_eq!(
         (error.code, error.message.as_str()),
-        (ErrorCode::E_LOAD_FAILED, "template page.tpl cannot be loaded: the loader returned no version")
+        (
+            ErrorCode::E_LOAD_FAILED,
+            "template page.tpl cannot be loaded: the loader returned no version"
+        )
     );
-    let empty = render(Box::new(ResultLoader { bytes: Vec::new(), version: "1" }), "page.tpl").map_err(|error| error.code);
+    let empty = render(
+        Box::new(ResultLoader {
+            bytes: Vec::new(),
+            version: "1",
+        }),
+        "page.tpl",
+    )
+    .map_err(|error| error.code);
     assert_eq!(empty, Ok(String::new()));
 }
 
