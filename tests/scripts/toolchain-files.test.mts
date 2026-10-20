@@ -263,7 +263,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   assert.ok(last > 2, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
   const downloads = lines.slice(2, last);
   assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `)), [], 'commands of make install that keep the offline settings of the recipes');
-  for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${node} scripts/python-wheelhouse.mts`]) {
+  for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r packages/python/build-requirements.txt`]) {
     assert.ok(downloads.includes(`${online} ${download}`), `make install does not run ${download} online:\n${lines.join('\n')}`);
   }
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');

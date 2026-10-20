@@ -193,7 +193,7 @@ install: template-install ## Install the tools and packages in the bootstrap ord
 template-install: install-kit cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Go modules of go.work, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
 	$(ONLINE) $(GO) mod download
 	$(ONLINE) $(NODE) scripts/composer-install.mts .
-	$(ONLINE) $(NODE) scripts/python-wheelhouse.mts
+	$(ONLINE) $(CURDIR)/var/tools/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r $(PYTHON_PACKAGE)/build-requirements.txt
 	$(MAKE) python-package
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
@@ -429,7 +429,7 @@ UV := $(CURDIR)/var/tools/mise/shims/uv
 .PHONY: python-package
 python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed editable; offline
 
-$(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/pylock.toml $(PYTHON_PACKAGE)/build-requirements.json
+$(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/pylock.toml $(PYTHON_PACKAGE)/build-requirements.txt
 	rm -rf $(PYTHON_VENV)
 	$(MAKE) python-venv DIR=$(PYTHON_VENV)
 	$(UV) pip install --python $(PYTHON_VENV)/bin/python --link-mode copy -r $(PYTHON_PACKAGE)/pylock.toml

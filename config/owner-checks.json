@@ -780,14 +780,13 @@
     },
     {
       "paths": [
-        "scripts/python-wheelhouse.mts",
-        "packages/python/build-requirements.json"
+        "packages/python/build-requirements.txt"
       ],
       "targets": [
         "template-install-check"
       ],
       "tests": [
-        "tests/scripts/python-wheelhouse.test.mts"
+        "tests/scripts/python-build-requirements.test.mts"
       ]
     },
     {
@@ -1556,8 +1555,7 @@
         "scripts/python-toolchain.mts",
         "packages/python/**",
         "mise.toml",
-        "scripts/python-wheelhouse.mts",
-        "packages/python/build-requirements.json"
+        "packages/python/build-requirements.txt"
       ]
     },
     {

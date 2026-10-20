@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 7c6cde6fdfa54b44a1b4835aaec5b7ebafd75b10abdb04d25cc8e18f7caf46af -->
+<!-- source-sha256: 1a85d8f987a6d455bdfff5ec71dd16cbbbf294375ea6280860a5fbc524412cdb -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -57,7 +57,7 @@
 | T26.7-4-1 | -2-8-2 묶음의 loader unit은 그 test가 검사하는 것만 인용한다 (T26.7-4의 후속): filesystem-loader-failures와 map-loader는 RT-9와 RT-10을, loader-errors는 RT-9와 ERR-6을 인용하고, 각 binding의 test가 그것을 명명한다 | config/parity.json and the loader tests of ts, go, rust, php, php-ext and python | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/render/host-binding.test.ts packages/ts/tests/loader.test.ts`, `var/tools/bin/node node_modules/@polyspec/kit/dist/run-tests.mjs go --cwd packages/go -- -run 'TestFilesystemLoaderFailures\|TestLoaderErrorsAreLoadFailures\|TestMapLoader' . ./loader`, `var/tools/bin/node node_modules/@polyspec/kit/dist/run-tests.mjs cargo --cwd packages/rust -- --locked --test load_failures --test loaders`, `var/tools/bin/node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --cwd packages/php -- --filter 'LoadFailureTest\|LoaderTest'`, `var/tools/bin/node node_modules/@polyspec/kit/dist/run-tests.mjs python --venv var/python/venv -- packages/python/tests/test_loading.py`, `make test-php-ext CASES='LoadFailureTest'`, `make parity-declarations-check UNITS="filesystem-loader-failures loader-errors map-loader"` | [~] |
 | T26.7-5 | Makefile의 언어 목록은 모든 구현을 적는다(R9) | SHOWCASE_LANGS of the Makefile and the showcase adapter of the PHP extension | `make parity-declarations-check` | [ ] |
 | T26.7-6 | repository의 모든 tool source는 config/rebuild.json에 class를 가진다(kit K286) | config/rebuild.json and the rebuild record docs/rebuild/publish-build.md with its Korean twin | `make rebuild-check` | [o] |
-| T26.7-7 | Python package의 build requirement를 scripts/python-wheelhouse.mts 대신 pip download --require-hashes로 내려받는다 | scripts/python-wheelhouse.mts, packages/python/build-requirements.json and the recipes that read var/python/wheelhouse | `make rebuild-check` | [ ] |
+| T26.7-7 | Python package의 build requirement를 scripts/python-wheelhouse.mts 대신 pip download --require-hashes로 내려받는다 | scripts/python-wheelhouse.mts, packages/python/build-requirements.json and the recipes that read var/python/wheelhouse | `make rebuild-check`, `node --test tests/scripts/python-build-requirements.test.mts` | [o] |
 | T26.7-8 | config/duplication.json은 중복 검사가 제외하는 generated 파일과 test를 이유와 함께 선언한다 | config/duplication.json and its owner in config/owner-checks.json | `make duplication-check` | [o] |
 | T26.7-9 | script와 runner는 같은 코드를 한 곳에만 둔다 | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [o] |
 | T26.7-10 | packages/compiler의 backend는 같은 코드를 한 곳에만 둔다 | packages/compiler/src/backends without the clones that make duplication-check finds | `make duplication-check` | [o] |

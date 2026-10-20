@@ -310,10 +310,6 @@
       "kind": "ecosystem",
       "tool": "uv venv: the script names the directory of the environment once for make and the scripts"
     },
-    "scripts/python-wheelhouse.mts": {
-      "kind": "replaced",
-      "reason": "pip download --require-hashes replaces the download of the pinned build requirements; the item T26.7-7 replaces this script"
-    },
     "scripts/required.mts": {
       "kind": "policy",
       "reason": "PRINCIPLES.md Standards, no fallback: a required value that is missing fails with an error that names it"
