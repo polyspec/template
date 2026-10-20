@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 868e9c4e8245d444f9250678879218deaad4ee0c3b36bbf35a7b8e204bacf80d -->
+<!-- source-sha256: 280756e302125a73d3c1944daeba9f49c90c7c6352f58e844b2981b1c095902e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-3: 모든 하위 행이 끝났으므로(T26.7-2-3-1부터 T26.7-2-3-3) 행은 끝났다. Verification은 하위 행의 owner test를 제거된 `packages/php-ext/tests/EngineTest.php`를 라이브러리의 `EngineRefreshTest.php`와 `Parser/ParserTest.php`로 바꾸어 실행하고, 범위 없는 `make parity-declarations-check` 대신 행이 소유하는 unit(api-template-error)의 parity 검사를 실행한다. 명령은 통과한다 (T26.7-2-3).
 
 - T26.7-2-1: 모든 하위 행이 끝났으므로(T26.7-2-1-1, T26.7-2-1-3, T26.7-2-1-4, T26.7-2-1-5 (우회된 T26.7-2-1-2 대신 T26.7-2-1-3)) 행은 끝났다. Verification은 하위 행의 owner test를 제거된 `packages/php-ext/tests/EngineTest.php`와 `BoundMapTest.php`를 라이브러리의 `Parser/ParserTest.php`, `EngineRefreshTest.php`, `Value/BoundMapTest.php`로 바꾸어 실행하고, 범위 없는 `make parity-declarations-check` 대신 행이 소유하는 unit(api-parse api-engine api-program api-ast-program api-prepared-render api-loader)의 parity 검사를 실행한다. 명령은 통과한다 (T26.7-2-1).
 

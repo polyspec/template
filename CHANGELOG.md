@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-2-3: every child row is done (T26.7-2-3-1 to T26.7-2-3-3), so the row is done. Its Verification runs the owner tests of its children, with `EngineRefreshTest.php` and `Parser/ParserTest.php` of the library in place of the removed `packages/php-ext/tests/EngineTest.php`, and the parity check of the units it owns (api-template-error), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-3).
+
 - T26.7-2-1: every child row is done (T26.7-2-1-1, T26.7-2-1-3, T26.7-2-1-4 and T26.7-2-1-5 (T26.7-2-1-3 in place of the bypassed T26.7-2-1-2)), so the row is done. Its Verification runs the owner tests of its children, with `Parser/ParserTest.php`, `EngineRefreshTest.php` and `Value/BoundMapTest.php` of the library in place of the removed `packages/php-ext/tests/EngineTest.php` and `BoundMapTest.php`, and the parity check of the units it owns (api-parse api-engine api-program api-ast-program api-prepared-render api-loader), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-1).
 
 - T26.7-2-2: every child row is done (T26.7-2-2-1 to T26.7-2-2-5), so the row is done. Its Verification runs the owner tests of its children, with `Value/BoundMapTest.php` and `ExportsTest.php` of the library in place of the removed `packages/php-ext/tests/BoundMapTest.php` and `ExportsTest.php`, and the parity check of the units it owns (api-bound-map api-bind api-merge api-parse-json api-bind-map api-bind-data), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-2).
