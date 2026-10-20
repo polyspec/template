@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ea83913644317f8bb082bcbe42c872aacf92ec120ddacdbd5791dff25635248f -->
+<!-- source-sha256: 5f034a72e5c678a8e9cb777b0957142c0a5522b0d6c931810ba94d9b4d4996d5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-39: 확장이 이 test가 load하는 class를 등록하므로(`Render\Evaluator`는 T26.7-2-14) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (FunctionsTest, NumberTest, ValueTest, ExprFixturesTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-39).
 
 - T26.7-2-8-2: 모든 unit의 php-ext binding이 그 php binding이 명명하는 test를 명명하고(둘 다 가진 unit 49개, 다른 것 없음, php-ext만 가진 것 없음), 행이 라이브러리 test로 옮기거나 처음 binding한 unit 31개의 parity 검사가 통과하므로 행은 끝났다. Verification은 그 unit을 명명한다: 범위 없는 검사는 행이 소유하지 않는 unit의 finding도 보고한다 (T26.7-2-8-2).
 
