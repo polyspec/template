@@ -99,7 +99,8 @@ struct Operation {
     parameters: Vec<String>,
 }
 
-/// RT-67: the declarations of the package match the prepared render contract of packages/compiler/interface.json.
+/// RT-67: the declarations of the package match the prepared render contract of packages/compiler/interface.json, in
+/// ownership, field order and operation placement (CMP-1).
 #[test]
 fn runtime_declarations_match_manifest() {
     let manifest_path = match std::env::var("TEMPLATE_INTERFACE_MANIFEST") {

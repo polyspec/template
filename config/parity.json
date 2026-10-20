@@ -589,7 +589,7 @@
     },
     {
       "id": "compiler-interface",
-      "requirements": ["RT-67"],
+      "requirements": ["RT-67", "CMP-1"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/compiler-interface.test.ts", "id": "compiler interface › program and engine" },

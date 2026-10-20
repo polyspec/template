@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7b2ccf4db70c7e16686aaa7f04ae521a07996414fb6605e57540e218101fa2b0 -->
+<!-- source-sha256: 4d62e12d2e87f06e4e9f425b819ad5192803f501e967d66a11815dd09cf844f0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-7: `docs/spec/compiler.md`가 CMP-1을 정의한다: TypeScript, Go, Rust, PHP, PHP 확장, Python의 선언부는 소유 관계, field 순서, operation 위치에서 `packages/compiler/interface.json`과 일치하고, mapping은 표기와 오류 전달 방식만 바꾼다. unit `compiler-interface`가 RT-67과 함께 그것을 인용하고, 선언된 class, field, operation을 manifest와 비교하는 모든 구현의 그 test가 그것을 명명한다. manifest의 상태 전이는 그것을 검사하는 test가 없으므로 문서의 문장으로 남는다. Red: kit의 R19가 `docs/spec/compiler.md`가 요구사항을 정의하지 않는다고 보고했다. Green: compiler.md의 R19가 사라졌다; compiler interface test가 ts (3), go (1), rust (2), php (2), python (6), PHP 확장 (2)에서 통과하고, 다섯 lint와 unit 검사가 통과한다 (T26.7-32-7).
 
 - T26.7-2-6-4: PHP 확장의 C renderer와 C RuntimeBindings는 built-in 호출의 arity 메시지와 실패한 host 호출의 메시지를 각각 공유 함수 하나로 만든다(`pt_bind.c`의 `pt_arity_message`, `pt_host_failure`); 메시지와 동작은 바뀌지 않는다. Red: refactor이므로 기준은 바뀌기 전 코드다: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/RuntimeBindingsTest.php` 5 passed, ExprFixturesTest 73 passed, HostBindingTest 16 passed, ConformanceTest 768 passed, `make lint-php-ext` exit 0; green: 같은 명령이 바뀐 뒤에도 같은 수로 통과하고, `make ext`가 exit 0이다 (T26.7-2-6-4).
 

@@ -41,6 +41,7 @@ const mapping = manifest.languages.typescript;
 const methodsOf = (type: { prototype: object }) => Object.getOwnPropertyNames(type.prototype).filter(name => name !== 'constructor');
 
 describe('compiler interface', () => {
+  // RT-67, CMP-1: the declarations match the manifest in ownership, field order and operation placement.
   it('program and engine', () => {
     // The AST program implements Program: it holds every operation of the Program contract.
     for (const operation of manifest.runtimeContract.Program.operations) expect(typeof Reflect.get(AstProgram.prototype, operation.name)).toBe('function');

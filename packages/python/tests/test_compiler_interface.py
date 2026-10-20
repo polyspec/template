@@ -55,8 +55,9 @@ class CompilerInterface(unittest.TestCase):
         self.assertTrue(inspect.isclass(getattr(template, MAPPING["boundMap"]["type"])))
 
     def test_program_and_engine(self):
-        # RT-67: the declarations of the package match the prepared render contract of
-        # packages/compiler/interface.json.
+        # RT-67, CMP-1: the declarations of the package match the prepared render contract
+        # of packages/compiler/interface.json in ownership, field order and operation
+        # placement.
         operations = CONTRACT["Program"]["operations"]
         self.assertEqual(public_methods(Program), [item["name"] for item in operations])
         for item in operations:

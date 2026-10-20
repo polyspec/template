@@ -1,12 +1,14 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 947e36a4da59afa1ba726bb021d35656c26d40c06098f998d3bb8363674dc648 -->
+<!-- source-sha256: 0eac5ba848e81c4c7e61314679f031b5e7dbe5ddec4052988d223c6963a282f9 -->
 # Compiler 계약
 
 [English](/spec/compiler).
 
 Compiler는 template parsing, validation, lowering, artifact emission을 소유한다. Runtime package는 이미 compile한 program을 실행한다. Render request에서 source를 parse하거나 host compiler를 호출하지 않는다.
 
-compiler와 runtime의 단일 계약 원본은 [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)이다. 생성 선언부와 Mermaid 도표는 이 manifest와 일치해야 한다. TypeScript, Go, Rust, PHP, PHP 확장, Python mapping은 표기와 오류 전달 방식을 바꿀 수 있지만 소유 관계, field 순서, operation 위치, 상태 전이를 바꿀 수 없다.
+compiler와 runtime의 단일 계약 원본은 [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)이다. 생성 선언부와 Mermaid 도표는 이 manifest와 일치해야 하며, 어떤 mapping도 manifest가 선언한 상태 전이를 바꾸지 않는다.
+
+- **CMP-1** TypeScript, Go, Rust, PHP, PHP 확장, Python의 선언부는 소유 관계, field 순서, operation 위치에서 manifest와 일치한다; mapping은 표기와 오류 전달 방식만 바꿀 수 있다. 모든 구현의 compiler interface test가 그 구현이 선언한 class, field, operation을 manifest와 비교한다.
 
 Manifest의 `evidence` section은 이 계약을 읽는 기계 판독 경로다. 명세 순서, 적합성 fixture, 실행 가능한 예제, 생성 artifact, 필수 검증 명령을 연결한다. Checker가 연결 대상의 누락을 거부하므로 읽는 사람은 중복 요약에 의존하지 않고 계약에서 실행 증거까지 따라갈 수 있다.
 
