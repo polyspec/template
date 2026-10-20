@@ -28,7 +28,7 @@ export interface TestCase {
   hasDefine: boolean;
   hasEnv: boolean;
   options: { delimiters?: string };
-  meta: { rules: string[]; stage: number };
+  meta: { requirements: string[]; stage: number };
   expectedHtml: string | null;
   expectedError: ExpectedError | null;
   expectedAst: unknown;
@@ -46,7 +46,7 @@ export interface CallResult {
 /** A file-tree case of tests/fixtures/filesystem/cases.json (CNF-16). */
 interface FilesystemCase {
   name: string;
-  rules: string[];
+  requirements: string[];
   files: Record<string, string>;
   symbolicLinks?: Record<string, string>;
   hardLinks?: Record<string, string>;
@@ -60,7 +60,7 @@ const FILESYSTEM_CASES_SCHEMA: JSONSchemaType<FilesystemCase[]> = {
     type: 'object',
     properties: {
       name: { type: 'string' },
-      rules: { type: 'array', items: { type: 'string' } },
+      requirements: { type: 'array', items: { type: 'string' } },
       files: NAMES,
       symbolicLinks: { ...NAMES, nullable: true },
       hardLinks: { ...NAMES, nullable: true },
@@ -71,7 +71,7 @@ const FILESYSTEM_CASES_SCHEMA: JSONSchemaType<FilesystemCase[]> = {
         additionalProperties: false,
       },
     },
-    required: ['name', 'rules', 'files', 'expected'],
+    required: ['name', 'requirements', 'files', 'expected'],
     additionalProperties: false,
   },
 };
@@ -80,8 +80,8 @@ const filesystemCasesDocument = jsonDocument<FilesystemCase[]>('list of filesyst
 
 const CASE_META_SCHEMA: JSONSchemaType<TestCase['meta']> = {
   type: 'object',
-  properties: { rules: { type: 'array', items: { type: 'string' } }, stage: { type: 'integer' } },
-  required: ['rules', 'stage'],
+  properties: { requirements: { type: 'array', items: { type: 'string' } }, stage: { type: 'integer' } },
+  required: ['requirements', 'stage'],
   additionalProperties: false,
 };
 
@@ -150,7 +150,7 @@ export function filesystemCases(filter?: string): { directory: string; cases: Te
       hasDefine: false,
       hasEnv: false,
       options: {},
-      meta: { rules: entry.rules, stage: 3 },
+      meta: { requirements: entry.requirements, stage: 3 },
       expectedHtml: entry.expected.html ?? null,
       expectedError: entry.expected.error ?? null,
       expectedAst: null,
@@ -178,7 +178,7 @@ function loadCase(id: string, dir: string): TestCase {
     hasDefine: existsSync(join(dir, 'define.json')),
     hasEnv: existsSync(join(dir, 'env.json')),
     options: caseOptions(id),
-    meta: existsSync(join(dir, 'case.json')) ? caseMetaDocument.read(join(dir, 'case.json')) : { rules: [], stage: 0 },
+    meta: existsSync(join(dir, 'case.json')) ? caseMetaDocument.read(join(dir, 'case.json')) : { requirements: [], stage: 0 },
     expectedHtml,
     expectedError: expectedError === null ? null : expectedErrorDocument.parse(expectedError, join(dir, 'expected.error.json')),
     expectedAst: expectedAst === null ? null : JSON.parse(expectedAst),

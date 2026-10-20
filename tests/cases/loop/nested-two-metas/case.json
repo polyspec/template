@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "RT-14",
     "EXP-21",
     "GRM-18"

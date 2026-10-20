@@ -20,7 +20,7 @@ make parity-check
 
 ## Add a case
 
-1. Create `tests/cases/<group>/<name>/` with `input.tpl`, `case.json` (`rules` and `stage`), and `data.json`, `define.json`, `env.json`, `options.json` or additional templates as needed.
+1. Create `tests/cases/<group>/<name>/` with `input.tpl`, `case.json` (`requirements` and `stage`), and `data.json`, `define.json`, `env.json`, `options.json` or additional templates as needed.
 2. Write `expected.html` or `expected.error.json` by hand from the specification.
 3. Generate `expected.ast.json` with the TypeScript implementation and review it:
 

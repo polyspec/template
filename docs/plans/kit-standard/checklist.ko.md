@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: d21ef1617949f1d8541db27060c3f71be1826026d52559ddd2a5f84d348ea638 -->
+<!-- source-sha256: dd447384c42a1d3b5ce9f8bccbb63097289f20fc45a5a981f8d4079f3de5b441 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -11,3 +11,4 @@
 | T26.5 | kit 0.0.54 복사본이 73cf59e1을 따르며, gate에서 전체 parity check를 실행한다 | PRINCIPLES.md and PRINCIPLES.ko.md, the copies that make kit-sync writes from the installed package: rule S6 names make parity-check beside make parity-declarations-check | `make kit-check` | [!] 원인: kit이 K275와 K276으로 바뀌어 사본이 낡았다; 재시도: release된 kit으로 make kit-sync를 실행한 뒤 |
 | T26.6 | docs/spec의 모든 requirement는 ID를 가진 bullet이며, config/parity.json의 각 unit은 자신이 시험하는 requirement를 인용한다(K273) | The spec bullets of docs/spec/*.md and their Korean twins, config/parity.json with requirements.pattern and the requirements of every unit, and the kit copies of make kit-sync | `make kit-check` | [!] 원인: unit이 모든 requirement를 인용하고(R15), config/parity.json에 아직 profile, exclusions, admit이 남아 kit-check가 73건을 낸다; RT-60은 RT-60과 RT-71로 나뉘었다(완료); 재시도: 각 test가 requirement를 적고 profile 필드를 뺀 뒤 |
 | T26.7 | config/parity.json의 모든 unit은 모든 구현에서 성립하고, test가 이름으로 적은 spec requirement를 인용한다 (kit K273, K275, K276) | config/parity.json, docs/spec, the tests of every implementation | `make parity-declarations-check` | [~] |
+| T26.7-1 | 모든 case.json이 명세 규칙을 requirements로 나열하고(kit K277), check-rules는 kit에 없는 검사만 유지한다 | The requirements field of the case.json files of tests/cases, tests/runner/cases.mts, scripts/check-rules.mts, the CNF table of docs/spec/conformance.md, docs/operations/testing.md, docs/operations/conformance.md and their Korean twins | `make parity-declarations-check`, `make rules-check` | [o] |

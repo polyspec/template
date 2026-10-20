@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "GRM-22",
     "ERR-8"
   ],

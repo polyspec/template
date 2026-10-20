@@ -1,54 +1,54 @@
 [
   {
     "name": "same-name-twice",
-    "rules": ["RT-8", "RT-10"],
+    "requirements": ["RT-8", "RT-10"],
     "files": { "input.tpl": "{+ part.tpl}{+ ./part.tpl}", "part.tpl": "x" },
     "expected": { "html": "xx" }
   },
   {
     "name": "nested-directory",
-    "rules": ["RT-10"],
+    "requirements": ["RT-10"],
     "files": { "input.tpl": "{+ a/b/part.tpl}", "a/b/part.tpl": "x" },
     "expected": { "html": "x" }
   },
   {
     "name": "symbolic-link-file",
-    "rules": ["RT-10"],
+    "requirements": ["RT-10"],
     "files": { "input.tpl": "a{+ part.tpl}", "target.tpl": "x" },
     "symbolicLinks": { "part.tpl": "target.tpl" },
     "expected": { "error": { "code": "E_LOAD_FAILED", "template": "input.tpl", "line": 1, "col": 2 } }
   },
   {
     "name": "symbolic-link-directory",
-    "rules": ["RT-10"],
+    "requirements": ["RT-10"],
     "files": { "input.tpl": "{+ linked/part.tpl}", "real/part.tpl": "x" },
     "symbolicLinks": { "linked": "real" },
     "expected": { "error": { "code": "E_LOAD_FAILED", "template": "input.tpl", "line": 1, "col": 1 } }
   },
   {
     "name": "symbolic-link-dangling",
-    "rules": ["RT-10"],
+    "requirements": ["RT-10"],
     "files": { "input.tpl": "{+ part.tpl}" },
     "symbolicLinks": { "part.tpl": "missing.tpl" },
     "expected": { "error": { "code": "E_LOAD_FAILED", "template": "input.tpl", "line": 1, "col": 1 } }
   },
   {
     "name": "symbolic-link-block",
-    "rules": ["RT-10", "RT-29"],
+    "requirements": ["RT-10", "RT-29"],
     "files": { "input.tpl": "{# part.tpl}", "target.tpl": "x" },
     "symbolicLinks": { "part.tpl": "target.tpl" },
     "expected": { "error": { "code": "E_LOAD_FAILED", "template": "input.tpl", "line": 1, "col": 1 } }
   },
   {
     "name": "hard-link-second-name",
-    "rules": ["RT-10"],
+    "requirements": ["RT-10"],
     "files": { "input.tpl": "{+ part.tpl}\n{+ copy.tpl}", "part.tpl": "x" },
     "hardLinks": { "copy.tpl": "part.tpl" },
     "expected": { "error": { "code": "E_LOAD_FAILED", "template": "input.tpl", "line": 2, "col": 1 } }
   },
   {
     "name": "hard-link-of-entry",
-    "rules": ["RT-10"],
+    "requirements": ["RT-10"],
     "files": { "input.tpl": "{+ copy.tpl}" },
     "hardLinks": { "copy.tpl": "input.tpl" },
     "expected": { "error": { "code": "E_LOAD_FAILED", "template": "input.tpl", "line": 1, "col": 1 } }

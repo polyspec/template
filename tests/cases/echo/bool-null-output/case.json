@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "VAL-8",
     "EXP-4",
     "EXP-34"

@@ -46,7 +46,7 @@ const filesystem = filesystemCases(options.case);
 process.once('exit', () => rmSync(filesystem.directory, { recursive: true, force: true }));
 const cases = [...fixtureCases, ...filesystem.cases];
 if (options.list) {
-  for (const testCase of cases) process.stdout.write(`${testCase.id}  stage ${testCase.meta.stage}  ${testCase.meta.rules.join(' ')}\n`);
+  for (const testCase of cases) process.stdout.write(`${testCase.id}  stage ${testCase.meta.stage}  ${testCase.meta.requirements.join(' ')}\n`);
   process.stdout.write(`${cases.length} cases\n`);
   process.exit(0);
 }

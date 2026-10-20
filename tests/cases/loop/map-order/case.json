@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "VAL-4",
     "VAL-12",
     "RT-15",

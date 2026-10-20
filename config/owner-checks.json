@@ -57,7 +57,6 @@
     },
     {
       "paths": [
-        "tests/rule-evidence.json",
         "scripts/check-rules.mts"
       ],
       "targets": [
@@ -1051,7 +1050,6 @@
     {
       "check": "make rules-check",
       "paths": [
-        "tests/rule-evidence.json",
         "scripts/check-rules.mts"
       ]
     },

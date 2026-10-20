@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "EXP-18",
     "EXP-19",
     "AST-4",

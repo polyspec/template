@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "AST-6",
     "AST-9",
     "LEX-10",

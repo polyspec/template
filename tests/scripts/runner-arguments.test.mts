@@ -9,7 +9,7 @@ import { formatArgs, formatOutcome, parseArgs, renderArgs, tokensArgs, type Test
 // The command lines read the input, the directory, the data files and the options; the expected files are absent.
 const testCase: TestCase = {
   id: 'g/n', dir: '/cases/g/n', relative: 'g/n', input: 'input.tpl', hasData: true, hasDefine: true, hasEnv: true, options: { delimiters: '[]' },
-  meta: { rules: [], stage: 1 }, expectedHtml: null, expectedError: null, expectedAst: null,
+  meta: { requirements: [], stage: 1 }, expectedHtml: null, expectedError: null, expectedAst: null,
 };
 
 test('every subcommand passes its options before FILE', () => {

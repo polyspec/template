@@ -496,7 +496,7 @@ template-test-ext-conformance: cargo-downloads-check ext build-php
 template-test-ext-unit: ext build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
-rules-check: template-rules-check ## Check case.json rule identifiers against the specification
+rules-check: template-rules-check ## Check the stage of every case.json
 
 template-rules-check:
 	$(NODE) scripts/check-rules.mts

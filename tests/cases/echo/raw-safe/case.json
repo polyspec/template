@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "VAL-6",
     "FUN-7",
     "FUN-10",

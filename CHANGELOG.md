@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-1: every `case.json` of `tests/cases` and every case of `tests/fixtures/filesystem/cases.json` lists its specification requirements in `requirements` (before: `rules`), the field that kit reads (K277). `scripts/check-rules.mts` keeps only the check that kit lacks, the `stage` of each `case.json` (CNF-3); the comparison of the listed ids with `docs/spec`, the report of uncovered rules and `tests/rule-evidence.json` are removed, because R13, R14 and R15 of `make parity-declarations-check` do them (S1). Red: before the rename `make parity-declarations-check` reported 10879 findings (R15 10491, R10 60, R2 56, R1 15, R9 1, R13 1, and 255 case.json findings); green: after it reports 10355 (R15 10222, no case.json finding); `make rules-check` passes with `255 cases, 0 findings`. The unit R15 findings that remain are the units that cite requirements their tests do not name (T26.7-4) (T26.7-1).
+
 - T26.3: the PHP requirement of every Composer platform is 8.4.1, and their locks are locked again (the release-consumer fixture waits for the release); the repository's tests leave out the workflows that kit copies; the outside product named in a checklist row and in a test is no longer named (T26.3).
 
 - T26.6: every requirement of `docs/spec` is a bullet `- **<ID>**` (the English and the Korean files), `config/parity.json` declares `requirements.pattern` and the requirements that each unit tests, and the kit copies follow `make kit-sync`; `make kit-check` passes again (T26.6).

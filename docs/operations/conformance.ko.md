@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: 12593be922d8397eadec3aa103096569ced20ee882a9b600ac358bc77e25b3e6 -->
+<!-- source-sha256: 3ea539a668186fcceb4a0383d308945aa014469a79e2028342c4dae8eb6648b3 -->
 # 적합성
 
 [English](/operations/conformance).
@@ -21,7 +21,7 @@ make parity-check
 
 ## 케이스 추가
 
-1. `tests/cases/<group>/<name>/`을 만들고 `input.tpl`, `case.json`(`rules`와 `stage`), 필요하면 `data.json`, `define.json`, `env.json`, `options.json` 또는 추가 템플릿을 넣는다.
+1. `tests/cases/<group>/<name>/`을 만들고 `input.tpl`, `case.json`(`requirements`와 `stage`), 필요하면 `data.json`, `define.json`, `env.json`, `options.json` 또는 추가 템플릿을 넣는다.
 2. 명세에 따라 `expected.html` 또는 `expected.error.json`을 손으로 작성한다.
 3. TypeScript 구현으로 `expected.ast.json`을 생성하고 검토한다:
 

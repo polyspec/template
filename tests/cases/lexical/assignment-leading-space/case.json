@@ -1,6 +1,6 @@
 {
   "stage": 1,
-  "rules": [
+  "requirements": [
     "LEX-6"
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "EXP-11",
     "EXP-6",
     "ERR-8"

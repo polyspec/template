@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a9a7fc926e87460cbbaeff782c8ae2cd6a63f68bc89fb8c1a5951b925ce8a576 -->
+<!-- source-sha256: 597421c72807bf7daed92a4a0cd7ad4f747a31dae96196c4ca3522d67fec2544 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-1: `tests/cases`의 모든 `case.json`과 `tests/fixtures/filesystem/cases.json`의 모든 케이스는 명세 requirement를 kit이 읽는 필드 `requirements`에 나열한다(이전: `rules`)(K277). `scripts/check-rules.mts`는 kit에 없는 검사인 각 `case.json`의 `stage`(CNF-3)만 유지한다. 나열된 id와 `docs/spec`의 비교, 다루지 않는 규칙의 보고, `tests/rule-evidence.json`은 `make parity-declarations-check`의 R13, R14, R15가 하므로 제거했다(S1). Red: 이름 변경 전 `make parity-declarations-check`는 10879건(R15 10491, R10 60, R2 56, R1 15, R9 1, R13 1, case.json 255건)을 보고했고, green: 이후 10355건(R15 10222, case.json 0건)을 보고한다. `make rules-check`는 `255 cases, 0 findings`로 통과한다. 남은 R15는 test가 이름으로 적지 않은 requirement를 인용하는 unit이다(T26.7-4)(T26.7-1).
 
 - T26.3: 모든 Composer platform의 PHP 요구는 8.4.1이고 lock을 다시 만들었습니다(release-consumer fixture는 release를 기다립니다). 저장소의 test는 kit이 복사한 workflow를 제외하며, checklist와 test에 적힌 외부 제품 이름을 지웠습니다 (T26.3).
 

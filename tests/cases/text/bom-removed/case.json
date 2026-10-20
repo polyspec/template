@@ -1,5 +1,5 @@
 {
-  "rules": [
+  "requirements": [
     "LEX-2",
     "LEX-16",
     "AST-2"
