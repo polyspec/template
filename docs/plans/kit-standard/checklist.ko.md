@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 135b35ed52fcbb0a2c8eb7bcb2fc4ceb96252fe57aecae0e38fb50b9b29d7db1 -->
+<!-- source-sha256: aa554e0841398f4a323e7c72d8a8af558d0bde3500006062e12cef2a477a31d4 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -36,3 +36,7 @@
 | T26.7-23 | Go generated runner는 test를 이름으로 선택한다 | tests/runner/conformance-generated-go.mts | `var/tools/bin/node --test tests/scripts/generated-conformance.test.mts` | [o] |
 | T26.7-24 | 시작할 수 없는 도구의 test는 go test를 이름으로 선택한다 | tests/scripts/failure-messages.test.mts | `var/tools/bin/node --test tests/scripts/failure-messages.test.mts` | [o] |
 | T26.7-25 | install 검사에서 cargo package가 package build를 검증한다 | scripts/check-package-installs.mts without --no-verify | `make bypass-check` | [o] |
+| T26.7-26 | showcase contract 선언은 make contract-generate가 만들고 추적하지 않는다 | adapters/generated/*.mmd, render_adapter.*, php-adapter, go/render_adapter.go and rust/src/render_adapter.rs untracked; the targets that read them depend on contract-generate | `make contract-generate`, `make typed-generator-check` | [ ] |
+| T26.7-27 | packages/compiler/generated의 Mermaid 도표는 make compiler-interface-generate가 만들고 추적하지 않는다 | packages/compiler/generated/*.mmd untracked; docs-check, docs-static-check and the pages workflow generate them first | `make compiler-interface-generate`, `make docs-check` | [ ] |
+| T26.7-28 | 생성되는 예제 사이트(index.html, data/scenarios.json, data/results.json)는 make showcase가 만들고 추적하지 않으며 측정값과 expected.html은 기록으로 남는다 | examples/site generated files untracked; showcase-site-check and showcase-html-check build first; the pages workflow runs make showcase | `make showcase-site-check` | [ ] |
+| T26.7-29 | conformance suite 자체의 규칙(CNF-*)을 docs/spec에서 docs/operations로 옮겨 추적 대상 requirement에서 뺀다 | docs/spec/conformance.md and docs/operations/conformance.md with their Korean twins, config/parity.json, the cases that list CNF ids | `make parity-declarations-check` | [ ] |
