@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 7a7919ba97560c4bc2f21a7133b13b41122e36528c10f25c88cf0e4de9c8695f -->
+<!-- source-sha256: 1a57d125f0575a19296d7ef56f73d466e1b9e4a91121fe3b06c89b75e1e27127 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -20,7 +20,7 @@
 | T26.7-2-1-3 | PHP 확장은 interface Program과 class PreparedRender를 library와 같은 이름과 signature로 등록하며, PreparedRender는 PHP Error 계층의 오류를 E_INTERNAL로 보고한다 (ERR-13) | packages/php-ext/src (C), its stub, and a test of packages/php-ext | `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/PreparedRenderTest.php`, `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php/tests/EngineRefreshTest.php` | [o] |
 | T26.7-2-2 | PHP 확장은 BoundMap, Bind, Json, MapValue, SafeString, BindError를 library와 같은 이름과 signature로 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=BoundMapTest` | [ ] |
 | T26.7-2-3 | PHP 확장은 TemplateError, ErrorCode, FunctionError와 함수 registry(Registry)를 library와 같은 이름과 signature로 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=FunctionsTest` | [ ] |
-| T26.7-2-3-1 | PHP 확장은 TemplateError를 library와 같은 이름과 API(readonly errorCode, template, errorLine, errorCol, offset, end; at, withoutPosition, toArray)로 등록하며 RuntimeException이다 | packages/php-ext/src (C), its stub, the tests of packages/php-ext, and the Native classes of packages/php | `make parity-declarations-check`, `make test-php-ext CASES=EngineTest` | [ ] |
+| T26.7-2-3-1 | PHP 확장은 TemplateError를 library와 같은 이름과 API(readonly errorCode, template, errorLine, errorCol, offset, end; at, withoutPosition, toArray)로 등록하며 RuntimeException이다 | packages/php-ext/src (C), its stub, the tests of packages/php-ext, and the Native classes of packages/php | `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/EngineTest.php` | [o] |
 | T26.7-2-4 | PHP 확장은 library의 PageCache와 artifact refresh를 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=PageCacheTest` | [ ] |
 | T26.7-2-5 | PHP 확장은 AstDecoder와 AstProgram::decodeTemplate를 contracts/schema/ast.schema.json 검증(AST-10)과 함께 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=AstDecodeTest` | [ ] |
 | T26.7-2-6 | PHP 확장은 RuntimeServices, RuntimeEnvironment, RuntimeBindings, Frame, Scope, Context를 library와 같은 이름과 signature로 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=CompilerInterfaceTest` | [ ] |

@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-2-3-1: closed with its owner test: `EngineTest` of `packages/php-ext`, run with the extension built from the committed sources, passes 27 tests, among them the readonly `errorCode`, `template`, `errorLine` and `errorCol` and `toArray` of the error that the extension throws (T26.7-2-3-1).
+
 - T26.7-37, T26.7-38: the rows are verified by their owner tests (the Verification cells name the vitest, Go, Rust, PHPUnit and Python tests that each row changed and ran) and closed after K353 (`make item-edit`) (T26.7-37).
 
 - T26.7-38: closed with the owner tests of the parser units (T26.7-38).

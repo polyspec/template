@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 11e76225ba67a5ed678ef9c059e011e17678fb9f5dfd2db93c00d23b840fe3d6 -->
+<!-- source-sha256: cf5f138d225c5bce4e8cc1a4d38b095cdc854a66f62acf3cb2828571d8324093 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-3-1: owner test로 닫는다. commit된 source로 build한 확장을 load하고 실행한 `packages/php-ext`의 `EngineTest`가 27개 test를 통과하며, 그중에는 확장이 던지는 error의 readonly `errorCode`, `template`, `errorLine`, `errorCol`과 `toArray`가 있다 (T26.7-2-3-1).
 
 - T26.7-37, T26.7-38: 두 항목은 각 항목이 바꾸고 실행한 vitest, Go, Rust, PHPUnit, Python test를 Verification 칸에 적은 owner test로 검증하고 K353(`make item-edit`) 이후에 닫는다 (T26.7-37).
 
