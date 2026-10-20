@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 88269ed2abf906c765f0e1f9fb0ff9313514e0bbc05e374896ac177f54451474 -->
+<!-- source-sha256: 10ae9a5e42f80b6a6cbce2de0cf59f730d01351d84e00896d4bc97dc5a4521bb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,8 @@
 ## Unreleased
 
 - T26.7-51-5-1: PHP 확장의 internal test `AstProgramTest`는 map이 아닌 functions에 대해 예전 `TypeError`가 아니라 T26.7-51이 정하고 T26.7-51-5가 확장에 준 options의 argument error(`InvalidArgumentException` "functions is not an object")를 기대한다. test는 `testFunctionsThatAreNotAMapAreAnArgumentError`다. Red: 확장을 켠 `AstProgramTest`에서 1개 실패(TypeError를 기대한 자리에 InvalidArgumentException); green: 8개 통과 (T26.7-51-5-1).
+- T26.7-41: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (ObjectCallsTest, HostBindingTest, CompilerInterfaceTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-41).
+
 - T26.7-32-2: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (BoundMapTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-32-2).
 
 - T26.7-32-3: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (HostBindingTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-32-3).
