@@ -595,4 +595,43 @@ void pt_context_fail(INTERNAL_FUNCTION_PARAMETERS);
 void pt_context_enter(INTERNAL_FUNCTION_PARAMETERS);
 void pt_context_leave(INTERNAL_FUNCTION_PARAMETERS);
 
+/* ---------------------------------------------------------------------------------------------------
+ * Runtime bindings (S10): RuntimeBindings (pt_bindings.c) and the operations it shares with the render
+ * state (pt_render_state.c), the functions and the values of this extension.
+ * ------------------------------------------------------------------------------------------------- */
+
+extern zend_class_entry *pt_frame_ce, *pt_context_ce;
+extern zend_class_entry *pt_function_error_ce, *pt_bind_error_ce;
+bool pt_context_limit(zval *context, const char *name, size_t length, zend_long *value);
+void pt_context_error(zval *context, zend_string *code, zval *frame, zval *span, zend_string *message, zval *error);
+void pt_context_throw(zval *context, const char *code, zval *frame, zval *span, zend_string *message);
+bool pt_helper_number(zval *value, double *number);
+bool pt_zval_depth_within(zval *value, zend_long limit);
+bool pt_canonical_digits(pt_s text, zend_long *index);
+/* Escape::html of a string. */
+zend_string *pt_escape_html_string(zend_string *text);
+
+void pt_bindings_register(zend_class_entry *ce);
+void pt_bindings_construct(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_truthy(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_unary(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_binary(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_stringify(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_escape(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_number(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_finite(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_equal(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_compare(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_member(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_member_call(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_class_call(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_index(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_depth(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_entries(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_list_spread(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_map_spread(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_call(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_limit(INTERNAL_FUNCTION_PARAMETERS);
+void pt_bindings_error(INTERNAL_FUNCTION_PARAMETERS);
+
 #endif

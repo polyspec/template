@@ -257,6 +257,82 @@ final class Context
     public function leave(): void {}
 }
 
+/**
+ * Shared runtime value, function and error semantics for AST and generated programs (docs/spec/runtime.md). Each
+ * failure is a TemplateError located at the node.
+ */
+final class RuntimeBindings
+{
+    public function __construct(Context $context) {}
+
+    public function truthy(mixed $value): bool {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function unary(string $operator, mixed $operand, Frame $frame, array $span): mixed {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function binary(string $operator, mixed $left, mixed $right, Frame $frame, array $span): mixed {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function stringify(mixed $value, Frame $frame, array $span): string {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function escape(mixed $value, Frame $frame, array $span): string {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function number(mixed $value, Frame $frame, array $span): float {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function finite(float $value, Frame $frame, array $span): float {}
+
+    public function equal(mixed $left, mixed $right, bool $strict): bool {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function compare(mixed $left, mixed $right, Frame $frame, array $span): int {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function member(mixed $container, string $key, Frame $frame, array $span): mixed {}
+
+    /**
+     * @phpstan-param list<mixed> $args
+     * @phpstan-param array{0: int, 1: int} $span
+     */
+    public function memberCall(mixed $container, string $method, array $args, Frame $frame, array $span): mixed {}
+
+    /**
+     * @phpstan-param list<mixed> $args
+     * @phpstan-param array{0: int, 1: int} $span
+     */
+    public function classCall(string $className, string $method, array $args, Frame $frame, array $span): mixed {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function index(mixed $container, mixed $key, Frame $frame, array $span): mixed {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function depth(mixed $value, Frame $frame, array $span): mixed {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function entries(mixed $value, Frame $frame, array $span): array {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function listSpread(mixed $value, Frame $frame, array $span): array {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function mapSpread(mixed $value, Frame $frame, array $span): \Polyspec\Template\Value\MapValue {}
+
+    /**
+     * @phpstan-param list<mixed> $args
+     * @phpstan-param array{0: int, 1: int} $span
+     */
+    public function call(string $name, array $args, Frame $frame, array $span): mixed {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function limit(string $kind, int $count, Frame $frame, array $span): void {}
+
+    /** @phpstan-param array{0: int, 1: int} $span */
+    public function error(Frame $frame, array $span, string $code, string $message): \Polyspec\Template\TemplateError {}
+}
+
 namespace Polyspec\Template;
 
 /**

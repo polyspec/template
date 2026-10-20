@@ -8,7 +8,8 @@
 #include "Zend/zend_interfaces.h"
 #include "ext/spl/spl_array.h"
 
-static zend_class_entry *pt_runtime_services_ce, *pt_frame_ce, *pt_scope_ce, *pt_context_ce;
+static zend_class_entry *pt_runtime_services_ce, *pt_scope_ce;
+zend_class_entry *pt_frame_ce, *pt_context_ce;
 
 /* A declared property of a class of this file, read without a notice: the value of the slot itself, not a copy, through
  * the reference when host code holds the property by reference. */
@@ -168,7 +169,7 @@ void pt_context_construct(INTERNAL_FUNCTION_PARAMETERS)
 
 /* The limit of the services of a context: `$this->services->limits()[$name]`; false with an exception set when the
  * limit is missing or not an integer. */
-static bool pt_context_limit(zval *context, const char *name, size_t length, zend_long *value)
+bool pt_context_limit(zval *context, const char *name, size_t length, zend_long *value)
 {
     zval rv;
     zval *services = pt_prop(pt_context_ce, Z_OBJ_P(context), ZEND_STRL("services"), &rv);
@@ -195,7 +196,7 @@ static bool pt_context_limit(zval *context, const char *name, size_t length, zen
 /* The TemplateError of a failure: TemplateError::at with the lines of the frame when the frame and the span are
  * known, else TemplateError::withoutPosition named after the frame or the entry (Context::fail). An exception is set
  * when the span does not hold two offsets. The error is returned in `error`. */
-static void pt_context_error(zval *context, zend_string *code, zval *frame, zval *span, zend_string *message, zval *error)
+void pt_context_error(zval *context, zend_string *code, zval *frame, zval *span, zend_string *message, zval *error)
 {
     zval rv;
     if (frame == NULL || span == NULL) {
@@ -232,7 +233,7 @@ static void pt_context_error(zval *context, zend_string *code, zval *frame, zval
 }
 
 /* Throws the TemplateError of a failure (`throw $this->fail(...)`). */
-static void pt_context_throw(zval *context, const char *code, zval *frame, zval *span, zend_string *message)
+void pt_context_throw(zval *context, const char *code, zval *frame, zval *span, zend_string *message)
 {
     zend_string *code_str = zend_string_init(code, strlen(code), 0);
     zval error;

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7b45363209a9a5dcebeac96fceabd7d1115fd7d5 */
+ * Stub hash: 6b60ca5cbc7fb989de2b5a732baa986fa73b205f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -111,6 +111,133 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_C
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Context_leave, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, context, Polyspec\\Template\\Render\\Context, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_truthy, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_unary, 0, 4, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, operator, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, operand, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_binary, 0, 5, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, operator, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_stringify, 0, 3, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Render_RuntimeBindings_escape arginfo_class_Polyspec_Template_Render_RuntimeBindings_stringify
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_number, 0, 3, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_finite, 0, 3, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_equal, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, strict, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_compare, 0, 4, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_member, 0, 4, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, container, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_memberCall, 0, 5, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, container, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_classCall, 0, 5, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, className, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_index, 0, 4, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, container, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_depth, 0, 3, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_entries, 0, 3, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Render_RuntimeBindings_listSpread arginfo_class_Polyspec_Template_Render_RuntimeBindings_entries
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_mapSpread, 0, 3, Polyspec\\Template\\Value\\MapValue, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_call, 0, 4, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_limit, 0, 4, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, kind, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeBindings_error, 0, 4, Polyspec\\Template\\TemplateError, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_TemplateError___construct, 0, 0, 7)
@@ -359,17 +486,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Va
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_isString, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Polyspec_Template_Value_Value_isString arginfo_class_Polyspec_Template_Render_RuntimeBindings_truthy
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_textOf, 0, 1, IS_STRING, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, value, Polyspec\\Template\\Value\\SafeString, MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Polyspec_Template_Value_Value_isNumber arginfo_class_Polyspec_Template_Value_Value_isString
+#define arginfo_class_Polyspec_Template_Value_Value_isNumber arginfo_class_Polyspec_Template_Render_RuntimeBindings_truthy
 
-#define arginfo_class_Polyspec_Template_Value_Value_isTruthy arginfo_class_Polyspec_Template_Value_Value_isString
+#define arginfo_class_Polyspec_Template_Value_Value_isTruthy arginfo_class_Polyspec_Template_Render_RuntimeBindings_truthy
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_stringify, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -396,7 +521,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Va
 	ZEND_ARG_TYPE_INFO(0, b, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Polyspec_Template_Value_Value_isCollection arginfo_class_Polyspec_Template_Value_Value_isString
+#define arginfo_class_Polyspec_Template_Value_Value_isCollection arginfo_class_Polyspec_Template_Render_RuntimeBindings_truthy
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Number_toText, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
@@ -539,6 +664,27 @@ ZEND_METHOD(Polyspec_Template_Render_Context, at);
 ZEND_METHOD(Polyspec_Template_Render_Context, fail);
 ZEND_METHOD(Polyspec_Template_Render_Context, enter);
 ZEND_METHOD(Polyspec_Template_Render_Context, leave);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, __construct);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, truthy);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, unary);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, binary);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, stringify);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, escape);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, number);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, finite);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, equal);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, compare);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, member);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, memberCall);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, classCall);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, index);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, depth);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, entries);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, listSpread);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, mapSpread);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, call);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, limit);
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, error);
 ZEND_METHOD(Polyspec_Template_TemplateError, __construct);
 ZEND_METHOD(Polyspec_Template_TemplateError, at);
 ZEND_METHOD(Polyspec_Template_TemplateError, withoutPosition);
@@ -719,6 +865,31 @@ static const zend_function_entry class_Polyspec_Template_Render_Context_methods[
 	ZEND_ME(Polyspec_Template_Render_Context, fail, arginfo_class_Polyspec_Template_Render_Context_fail, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Render_Context, enter, arginfo_class_Polyspec_Template_Render_Context_enter, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Render_Context, leave, arginfo_class_Polyspec_Template_Render_Context_leave, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Render_RuntimeBindings_methods[] = {
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, __construct, arginfo_class_Polyspec_Template_Render_RuntimeBindings___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, truthy, arginfo_class_Polyspec_Template_Render_RuntimeBindings_truthy, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, unary, arginfo_class_Polyspec_Template_Render_RuntimeBindings_unary, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, binary, arginfo_class_Polyspec_Template_Render_RuntimeBindings_binary, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, stringify, arginfo_class_Polyspec_Template_Render_RuntimeBindings_stringify, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, escape, arginfo_class_Polyspec_Template_Render_RuntimeBindings_escape, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, number, arginfo_class_Polyspec_Template_Render_RuntimeBindings_number, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, finite, arginfo_class_Polyspec_Template_Render_RuntimeBindings_finite, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, equal, arginfo_class_Polyspec_Template_Render_RuntimeBindings_equal, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, compare, arginfo_class_Polyspec_Template_Render_RuntimeBindings_compare, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, member, arginfo_class_Polyspec_Template_Render_RuntimeBindings_member, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, memberCall, arginfo_class_Polyspec_Template_Render_RuntimeBindings_memberCall, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, classCall, arginfo_class_Polyspec_Template_Render_RuntimeBindings_classCall, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, index, arginfo_class_Polyspec_Template_Render_RuntimeBindings_index, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, depth, arginfo_class_Polyspec_Template_Render_RuntimeBindings_depth, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, entries, arginfo_class_Polyspec_Template_Render_RuntimeBindings_entries, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, listSpread, arginfo_class_Polyspec_Template_Render_RuntimeBindings_listSpread, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, mapSpread, arginfo_class_Polyspec_Template_Render_RuntimeBindings_mapSpread, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, call, arginfo_class_Polyspec_Template_Render_RuntimeBindings_call, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, limit, arginfo_class_Polyspec_Template_Render_RuntimeBindings_limit, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, error, arginfo_class_Polyspec_Template_Render_RuntimeBindings_error, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1227,6 +1398,21 @@ static zend_class_entry *register_class_Polyspec_Template_Render_Context(void)
 	zend_string *property_entryName_name = zend_string_init("entryName", sizeof("entryName") - 1, 1);
 	zend_declare_typed_property(class_entry, property_entryName_name, &property_entryName_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_entryName_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Render_RuntimeBindings(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Render", "RuntimeBindings", class_Polyspec_Template_Render_RuntimeBindings_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 
 	return class_entry;
 }

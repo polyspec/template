@@ -187,12 +187,9 @@ ZEND_METHOD(Polyspec_Template_Utf8, length)
     RETURN_LONG((zend_long)pt_utf8_length(ZSTR_VAL(text), ZSTR_LEN(text)));
 }
 
-ZEND_METHOD(Polyspec_Template_Escape, html)
+/* Escape::html: the text with its HTML characters escaped (RT-32, FUN-10). */
+zend_string *pt_escape_html_string(zend_string *text)
 {
-    zend_string *text;
-    ZEND_PARSE_PARAMETERS_START(1, 1)
-        Z_PARAM_STR(text)
-    ZEND_PARSE_PARAMETERS_END();
     pt_arena arena;
     pt_buf buf;
     pt_arena_init(&arena);
@@ -201,7 +198,16 @@ ZEND_METHOD(Polyspec_Template_Escape, html)
     pt_s out = pt_buf_done(&buf);
     zend_string *result = zend_string_init(out.s, out.n, 0);
     pt_arena_free(&arena);
-    RETURN_STR(result);
+    return result;
+}
+
+ZEND_METHOD(Polyspec_Template_Escape, html)
+{
+    zend_string *text;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(text)
+    ZEND_PARSE_PARAMETERS_END();
+    RETURN_STR(pt_escape_html_string(text));
 }
 
 /* InternalBoundary::run: an \Error of the operation becomes TemplateError E_INTERNAL with "internal failure: " and its

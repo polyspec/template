@@ -22,9 +22,9 @@
 zend_class_entry *pt_error_ce;
 zend_class_entry *pt_safe_string_ce;
 zend_class_entry *pt_map_value_ce;
-static zend_class_entry *pt_bind_error_ce;
+zend_class_entry *pt_bind_error_ce;
 static zend_class_entry *pt_ast_decode_error_ce;
-static zend_class_entry *pt_function_error_ce;
+zend_class_entry *pt_function_error_ce;
 
 /* ----------------------------------------------------------------------------------------------- */
 /* TemplateError (ERR-1)                                                                            */
@@ -200,7 +200,7 @@ void pt_throw_function_error(const char *code, zend_string *message)
 }
 
 /* Helpers::toNumber (EXP-23): the number of a value, or false with the FunctionError thrown. */
-static bool pt_helper_number(zval *value, double *number)
+bool pt_helper_number(zval *value, double *number)
 {
     ZVAL_DEREF(value);
     switch (Z_TYPE_P(value)) {
@@ -585,7 +585,7 @@ static zval *pt_bound_entries(zval *input, zval *rv)
 }
 
 /* VAL-20: whether the depth of a template value is at most `limit`; the walk stops below the limit. */
-static bool pt_zval_depth_within(zval *value, zend_long limit)
+bool pt_zval_depth_within(zval *value, zend_long limit)
 {
     ZVAL_DEREF(value);
     HashTable *items;
@@ -2482,6 +2482,111 @@ ZEND_METHOD(Polyspec_Template_Render_Context, leave)
     pt_context_leave(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, __construct)
+{
+    pt_bindings_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, truthy)
+{
+    pt_bindings_truthy(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, unary)
+{
+    pt_bindings_unary(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, binary)
+{
+    pt_bindings_binary(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, stringify)
+{
+    pt_bindings_stringify(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, escape)
+{
+    pt_bindings_escape(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, number)
+{
+    pt_bindings_number(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, finite)
+{
+    pt_bindings_finite(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, equal)
+{
+    pt_bindings_equal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, compare)
+{
+    pt_bindings_compare(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, member)
+{
+    pt_bindings_member(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, memberCall)
+{
+    pt_bindings_member_call(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, classCall)
+{
+    pt_bindings_class_call(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, index)
+{
+    pt_bindings_index(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, depth)
+{
+    pt_bindings_depth(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, entries)
+{
+    pt_bindings_entries(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, listSpread)
+{
+    pt_bindings_list_spread(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, mapSpread)
+{
+    pt_bindings_map_spread(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, call)
+{
+    pt_bindings_call(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, limit)
+{
+    pt_bindings_limit(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, error)
+{
+    pt_bindings_error(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* A prepared execution (RT-61): the program, the bound assign, the options and the entry template, which stays loaded
  * beyond the run that loaded it. */
 typedef struct pt_execution {
@@ -2872,6 +2977,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     zend_class_entry *context = register_class_Polyspec_Template_Render_Context();
     pt_frame_class = frame;
     pt_render_state_register(runtime_services, frame, scope, context);
+    pt_bindings_register(register_class_Polyspec_Template_Render_RuntimeBindings());
 
     memcpy(&pt_engine_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     pt_engine_handlers.offset = XtOffsetOf(pt_engine_object, std);

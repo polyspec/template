@@ -483,7 +483,7 @@ static pt_loop *pt_loop_of(pt_scope *scope, pt_s name)
     return NULL;
 }
 
-static bool pt_canonical_digits(pt_s text, zend_long *index)
+bool pt_canonical_digits(pt_s text, zend_long *index)
 {
     if (text.n == 0 || (text.n > 1 && text.s[0] == '0')) {
         return false;
