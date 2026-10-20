@@ -3,7 +3,8 @@
     "AST-9",
     "LEX-10",
     "LEX-20",
-    "FMT-8"
+    "FMT-8",
+    "AST-8"
   ],
   "stage": 3
 }

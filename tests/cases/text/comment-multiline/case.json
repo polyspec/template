@@ -2,7 +2,8 @@
   "requirements": [
     "LEX-10",
     "LEX-14",
-    "FMT-7"
+    "FMT-7",
+    "AST-8"
   ],
   "stage": 1
 }

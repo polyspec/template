@@ -3,6 +3,7 @@
   "requirements": [
     "LEX-6",
     "FMT-3",
-    "FMT-4"
+    "FMT-4",
+    "AST-8"
   ]
 }

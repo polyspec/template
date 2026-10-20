@@ -4,7 +4,8 @@
     "LEX-14",
     "LEX-15",
     "AST-6",
-    "FMT-7"
+    "FMT-7",
+    "AST-8"
   ],
   "stage": 1
 }

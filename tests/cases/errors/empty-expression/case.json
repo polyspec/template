@@ -5,7 +5,9 @@
     "ERR-8",
     "FMT-14",
     "GRM-23",
-    "LEX-8"
+    "LEX-8",
+    "ERR-3",
+    "ERR-4"
   ],
   "stage": 3
 }

@@ -2,7 +2,8 @@
   "requirements": [
     "EXP-17",
     "EXP-19",
-    "VAL-8"
+    "VAL-8",
+    "AST-8"
   ],
   "stage": 1
 }

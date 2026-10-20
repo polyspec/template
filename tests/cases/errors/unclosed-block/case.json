@@ -2,7 +2,9 @@
   "requirements": [
     "GRM-19",
     "ERR-8",
-    "FMT-14"
+    "FMT-14",
+    "ERR-3",
+    "ERR-4"
   ],
   "stage": 3
 }

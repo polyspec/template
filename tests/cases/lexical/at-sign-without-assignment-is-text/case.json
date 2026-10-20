@@ -1,4 +1,8 @@
 {
   "stage": 1,
-  "requirements": ["LEX-5", "LEX-7"]
+  "requirements": [
+    "LEX-5",
+    "LEX-7",
+    "AST-8"
+  ]
 }

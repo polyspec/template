@@ -2,7 +2,8 @@
   "requirements": [
     "GRM-10",
     "LEX-15",
-    "EXP-33"
+    "EXP-33",
+    "AST-8"
   ],
   "stage": 1
 }

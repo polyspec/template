@@ -1,6 +1,7 @@
 {
   "requirements": [
-    "RT-32"
+    "RT-32",
+    "AST-8"
   ],
   "stage": 1
 }

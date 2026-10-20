@@ -2,7 +2,10 @@
   "requirements": [
     "EXP-22",
     "RT-14",
-    "ERR-11"
+    "ERR-11",
+    "ERR-3",
+    "ERR-4",
+    "AST-8"
   ],
   "stage": 1
 }

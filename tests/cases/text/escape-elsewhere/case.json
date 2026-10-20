@@ -1,7 +1,8 @@
 {
   "requirements": [
     "LEX-7",
-    "LEX-9"
+    "LEX-9",
+    "AST-8"
   ],
   "stage": 1
 }
