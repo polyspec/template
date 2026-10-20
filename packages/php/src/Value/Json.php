@@ -116,19 +116,31 @@ final class Json
             $this->index++;
             $map->set($key, $this->parseValue());
             $this->skipWhitespace();
-            $next = $this->text[$this->index] ?? null;
-            if ($next === ',') {
-                $this->index++;
-                continue;
-            }
-            if ($next === '}') {
-                $this->index++;
-                $this->level--;
-
+            if (!$this->continues('}')) {
                 return $map;
             }
-            $this->fail('expected "," or "}"');
         }
+    }
+
+    /**
+     * After an element of an object or an array: true when a comma follows, which it consumes; false when the closing
+     * character follows, which it consumes and which leaves the level; any other character fails.
+     */
+    private function continues(string $close): bool
+    {
+        $next = $this->text[$this->index] ?? null;
+        if ($next === ',') {
+            $this->index++;
+
+            return true;
+        }
+        if ($next === $close) {
+            $this->index++;
+            $this->level--;
+
+            return false;
+        }
+        $this->fail('expected "," or "' . $close . '"');
     }
 
     /**
@@ -149,18 +161,9 @@ final class Json
         for (;;) {
             $list[] = $this->parseValue();
             $this->skipWhitespace();
-            $next = $this->text[$this->index] ?? null;
-            if ($next === ',') {
-                $this->index++;
-                continue;
-            }
-            if ($next === ']') {
-                $this->index++;
-                $this->level--;
-
+            if (!$this->continues(']')) {
                 return $list;
             }
-            $this->fail('expected "," or "]"');
         }
     }
 

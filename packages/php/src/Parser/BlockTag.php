@@ -184,13 +184,13 @@ final class BlockTag
                     $this->template,
                 );
                 $scope[] = ['name' => $token['value'], 'expr' => $parser->parsePostfix(true)];
-                $cursor = $parser->end();
+                $cursor = $parser->lexer->consumedEnd();
                 $words[] = ['start' => $token['start'], 'end' => $cursor, 'quoted' => false];
             } else {
                 $words[] = ['start' => $token['start'], 'end' => $token['end'], 'quoted' => false];
                 $scope[] = [
                     'name' => $token['value'],
-                    'expr' => Ast::variable($token['value'], $token['start'], $token['end']),
+                    'expr' => Ast::node('Var', ['name' => $token['value']], $token['start'], $token['end']),
                 ];
             }
         }

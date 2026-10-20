@@ -6,7 +6,11 @@ namespace Polyspec\Template\Render;
 
 use Polyspec\Template\Functions\Registry;
 
-/** Host functions and resource limits shared by AST and generated programs. */
+/**
+ * Host functions and resource limits shared by AST and generated programs.
+ *
+ * @phpstan-import-type Limits from RuntimeServices
+ */
 final class RuntimeEnvironment implements RuntimeServices
 {
     public const DEFAULT_LIMITS = [
@@ -16,7 +20,7 @@ final class RuntimeEnvironment implements RuntimeServices
         'expressionDepth' => 64,
     ];
 
-    /** @var array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} */
+    /** @var Limits */
     private readonly array $limits;
 
     /** @var array<string, callable> */
@@ -48,7 +52,11 @@ final class RuntimeEnvironment implements RuntimeServices
         $this->hostFunctions[$name] = $function;
     }
 
-    /** @return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} */
+    /**
+     * The limits of the environment: the defaults of RT-33 with the overrides of the options (RT-6).
+     *
+     * @return Limits
+     */
     public function limits(): array
     {
         return $this->limits;
@@ -72,7 +80,7 @@ final class RuntimeEnvironment implements RuntimeServices
         $this->classFunctions[$className . '::' . $method] = $function;
     }
 
-    /** Returns one logical class function. */
+    /** Returns the class function registered under `Class::method`, or null. */
     public function classFunction(string $className, string $method): ?callable
     {
         return $this->classFunctions[$className . '::' . $method] ?? null;

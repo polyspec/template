@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template;
 
 /**
- * AST node builders (docs/spec/ast.md). Nodes are nested arrays; spans are byte offsets.
+ * AST nodes (docs/spec/ast.md). Nodes are nested arrays; spans are byte offsets.
  */
 final class Ast
 {
@@ -16,176 +16,15 @@ final class Ast
         return in_array($name, self::LOOP_META_FIELDS, true);
     }
 
-    /** @return array{type: 'Comment', value: string, span: array{0: int, 1: int}} */
-    public static function comment(string $value, int $start, int $end): array
-    {
-        return ['type' => 'Comment', 'value' => $value, 'span' => [$start, $end]];
-    }
-
-    /** @return array<string, mixed> */
-    public static function text(string $value, int $start, int $end): array
-    {
-        return ['type' => 'Text', 'value' => $value, 'span' => [$start, $end]];
-    }
-
     /**
-     * @param array<string, mixed> $expr
+     * A node: its type, its own fields in the order of the specification (docs/spec/ast.md) and its span.
+     *
+     * @param array<string, mixed> $fields
      * @return array<string, mixed>
      */
-    public static function echo(array $expr, int $start, int $end): array
+    public static function node(string $type, array $fields, int $start, int $end): array
     {
-        return ['type' => 'Echo', 'expr' => $expr, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param array<string, mixed> $expr
-     * @return array<string, mixed>
-     */
-    public static function set(string $name, array $expr, int $start, int $end): array
-    {
-        return ['type' => 'Set', 'name' => $name, 'expr' => $expr, 'span' => [$start, $end]];
-    }
-
-    /** @return array<string, mixed> */
-    public static function include(string $path, int $start, int $end): array
-    {
-        return ['type' => 'Include', 'path' => $path, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param list<array{name: string, expr: array<string, mixed>}> $scope
-     * @return array<string, mixed>
-     */
-    public static function block(?string $id, ?string $path, array $scope, int $start, int $end): array
-    {
-        return ['type' => 'Block', 'id' => $id, 'path' => $path, 'scope' => $scope, 'span' => [$start, $end]];
-    }
-
-    /** @return array<string, mixed> */
-    public static function literal(string $kind, mixed $value, int $start, int $end): array
-    {
-        return ['type' => 'Literal', 'kind' => $kind, 'value' => $value, 'span' => [$start, $end]];
-    }
-
-    /** @return array<string, mixed> */
-    public static function variable(string $name, int $start, int $end): array
-    {
-        return ['type' => 'Var', 'name' => $name, 'span' => [$start, $end]];
-    }
-
-    /** @return array<string, mixed> */
-    public static function loopMeta(string $loop, string $field, int $start, int $end): array
-    {
-        return ['type' => 'LoopMeta', 'loop' => $loop, 'field' => $field, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param array<string, mixed> $object
-     * @return array<string, mixed>
-     */
-    public static function member(array $object, string $key, int $start, int $end): array
-    {
-        return ['type' => 'Member', 'object' => $object, 'key' => $key, 'span' => [$start, $end]];
-    }
-
-    /** @param array<string, mixed> $object @param list<array<string, mixed>> $args */
-    public static function memberCall(array $object, string $method, array $args, int $start, int $end): array
-    {
-        return [
-            'type' => 'MemberCall',
-            'object' => $object,
-            'method' => $method,
-            'args' => $args,
-            'span' => [$start, $end],
-        ];
-    }
-
-    /** @param list<array<string, mixed>> $args */
-    public static function classCall(string $className, string $method, array $args, int $start, int $end): array
-    {
-        return [
-            'type' => 'ClassCall',
-            'className' => $className,
-            'method' => $method,
-            'args' => $args,
-            'span' => [$start, $end],
-        ];
-    }
-
-    /**
-     * @param array<string, mixed> $object
-     * @param array<string, mixed> $index
-     * @return array<string, mixed>
-     */
-    public static function index(array $object, array $index, int $start, int $end): array
-    {
-        return ['type' => 'Index', 'object' => $object, 'index' => $index, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param list<array<string, mixed>> $args
-     * @return array<string, mixed>
-     */
-    public static function call(string $name, array $args, int $start, int $end): array
-    {
-        return ['type' => 'Call', 'name' => $name, 'args' => $args, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param array<string, mixed> $operand
-     * @return array<string, mixed>
-     */
-    public static function unary(string $op, array $operand, int $start, int $end): array
-    {
-        return ['type' => 'Unary', 'op' => $op, 'operand' => $operand, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param array<string, mixed> $left
-     * @param array<string, mixed> $right
-     * @return array<string, mixed>
-     */
-    public static function binary(string $op, array $left, array $right, int $start, int $end): array
-    {
-        return ['type' => 'Binary', 'op' => $op, 'left' => $left, 'right' => $right, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param array<string, mixed> $test
-     * @param array<string, mixed>|null $then
-     * @param array<string, mixed> $else
-     * @return array<string, mixed>
-     */
-    public static function ternary(array $test, ?array $then, array $else, int $start, int $end): array
-    {
-        return ['type' => 'Ternary', 'test' => $test, 'then' => $then, 'else' => $else, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param array<string, mixed> $expr
-     * @return array<string, mixed>
-     */
-    public static function spread(array $expr, int $start, int $end): array
-    {
-        return ['type' => 'Spread', 'expr' => $expr, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param list<array<string, mixed>> $items
-     * @return array<string, mixed>
-     */
-    public static function listLiteral(array $items, int $start, int $end): array
-    {
-        return ['type' => 'List', 'items' => $items, 'span' => [$start, $end]];
-    }
-
-    /**
-     * @param list<array<string, mixed>> $entries
-     * @return array<string, mixed>
-     */
-    public static function mapLiteral(array $entries, int $start, int $end): array
-    {
-        return ['type' => 'Map', 'entries' => $entries, 'span' => [$start, $end]];
+        return ['type' => $type, ...$fields, 'span' => [$start, $end]];
     }
 
     /**

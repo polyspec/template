@@ -17,10 +17,21 @@ final class Parser
 {
     public const DEPTH_LIMIT = 64;
 
+    private const OR = ['OR' => '||'];
+    private const AND = ['AND' => '&&'];
     private const EQUALITY = ['EQ' => '==', 'NE' => '!=', 'SEQ' => '===', 'SNE' => '!=='];
     private const COMPARISON = ['LT' => '<', 'GT' => '>', 'LE' => '<=', 'GE' => '>=', 'IN' => 'in'];
     private const ADDITIVE = ['PLUS' => '+', 'MINUS' => '-'];
     private const MULTIPLICATIVE = ['STAR' => '*', 'SLASH' => '/', 'PERCENT' => '%'];
+    /** The precedence levels of the binary operators, loosest first: the table of operators and whether the level chains. */
+    private const LEVELS = [
+        [self::OR, true],
+        [self::AND, true],
+        [self::EQUALITY, false],
+        [self::COMPARISON, false],
+        [self::ADDITIVE, true],
+        [self::MULTIPLICATIVE, true],
+    ];
     private const EXPRESSION_START = [
         'IDENT' => true, 'NUMBER' => true, 'STRING' => true, 'NULL' => true, 'TRUE' => true, 'FALSE' => true,
         'LPAREN' => true, 'LBRACKET' => true, 'BANG' => true, 'MINUS' => true,
@@ -38,24 +49,6 @@ final class Parser
         string $template,
     ) {
         $this->lexer = new Lexer($source, $start, $close, $closeCount, $openIndex, $template);
-    }
-
-    /**
-     * Byte index after the last consumed token.
-     */
-    public function end(): int
-    {
-        return $this->lexer->consumedEnd();
-    }
-
-    /**
-     * Tokens consumed so far, including the closing delimiter.
-     *
-     * @return list<Token>
-     */
-    public function consumed(): array
-    {
-        return $this->lexer->consumed();
     }
 
     public function peek(): Token
@@ -167,7 +160,7 @@ final class Parser
                 $this->parseArguments($args);
                 $end = $this->expect('RPAREN')->end;
             }
-            $left = Ast::call($name->value, $args, $start, $end);
+            $left = Ast::node('Call', ['name' => $name->value, 'args' => $args], $start, $end);
         }
         $this->leave();
 
@@ -175,6 +168,8 @@ final class Parser
     }
 
     /**
+     * The conditional expression and the elvis operator (EXP-9).
+     *
      * @return array<string, mixed>
      */
     private function parseTernary(): array
@@ -188,150 +183,75 @@ final class Parser
             $this->expect('COLON');
             $else = $this->parseTernary();
 
-            return Ast::ternary($test, $then, $else, $start, $this->end());
+            return Ast::node('Ternary', ['test' => $test, 'then' => $then, 'else' => $else], $start, $this->lexer->consumedEnd());
         }
         if ($token->type === 'ELVIS') {
             $this->next();
             $else = $this->parseTernary();
 
-            return Ast::ternary($test, null, $else, $start, $this->end());
+            return Ast::node('Ternary', ['test' => $test, 'then' => null, 'else' => $else], $start, $this->lexer->consumedEnd());
         }
 
         return $test;
     }
 
     /**
+     * The coalesce operator, whose missing right operand is `null` (EXP-9, EXP-14).
+     *
      * @return array<string, mixed>
      */
     private function parseCoalesce(): array
     {
         $start = $this->peek()->start;
-        $left = $this->parseOr();
+        $left = $this->parseLevel(0);
         if ($this->peek()->type !== 'COALESCE') {
             return $left;
         }
         $operator = $this->next();
         if (!isset(self::EXPRESSION_START[$this->peek()->type])) {
-            $literal = Ast::literal('null', null, $operator->end, $operator->end);
+            $literal = Ast::node('Literal', ['kind' => 'null', 'value' => null], $operator->end, $operator->end);
 
-            return Ast::binary('??', $left, $literal, $start, $operator->end);
+            return Ast::node('Binary', ['op' => '??', 'left' => $left, 'right' => $literal], $start, $operator->end);
         }
         $right = $this->parseCoalesce();
 
-        return Ast::binary('??', $left, $right, $start, $this->end());
+        return Ast::node('Binary', ['op' => '??', 'left' => $left, 'right' => $right], $start, $this->lexer->consumedEnd());
     }
 
     /**
+     * A precedence level of the binary operators, from the loosest (index 0) to the tightest, which is joined by unary
+     * expressions: operands of the next level joined by the operators of the level. The operators of a level that chains
+     * join from the left; an operator of a level that does not chain (associativity none, EXP-10) is unexpected after the
+     * second operand.
+     *
      * @return array<string, mixed>
      */
-    private function parseOr(): array
+    private function parseLevel(int $level): array
     {
+        if ($level === count(self::LEVELS)) {
+            return $this->parseUnary();
+        }
+        [$operators, $chains] = self::LEVELS[$level];
         $start = $this->peek()->start;
-        $left = $this->parseAnd();
-        while ($this->peek()->type === 'OR') {
+        $left = $this->parseLevel($level + 1);
+        while (($op = $operators[$this->peek()->type] ?? null) !== null) {
             $this->next();
-            $right = $this->parseAnd();
-            $left = Ast::binary('||', $left, $right, $start, $this->end());
+            $right = $this->parseLevel($level + 1);
+            $left = Ast::node('Binary', ['op' => $op, 'left' => $left, 'right' => $right], $start, $this->lexer->consumedEnd());
+            if (!$chains && isset($operators[$this->peek()->type])) {
+                throw $this->unexpected($this->peek());
+            }
+            if (!$chains) {
+                break;
+            }
         }
 
         return $left;
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    private function parseAnd(): array
-    {
-        $start = $this->peek()->start;
-        $left = $this->parseEquality();
-        while ($this->peek()->type === 'AND') {
-            $this->next();
-            $right = $this->parseEquality();
-            $left = Ast::binary('&&', $left, $right, $start, $this->end());
-        }
-
-        return $left;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function parseEquality(): array
-    {
-        $start = $this->peek()->start;
-        $left = $this->parseComparison();
-        $op = self::EQUALITY[$this->peek()->type] ?? null;
-        if ($op === null) {
-            return $left;
-        }
-        $this->next();
-        $right = $this->parseComparison();
-        $node = Ast::binary($op, $left, $right, $start, $this->end());
-        if (isset(self::EQUALITY[$this->peek()->type])) {
-            throw $this->unexpected($this->peek());
-        }
-
-        return $node;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function parseComparison(): array
-    {
-        $start = $this->peek()->start;
-        $left = $this->parseAdditive();
-        $op = self::COMPARISON[$this->peek()->type] ?? null;
-        if ($op === null) {
-            return $left;
-        }
-        $this->next();
-        $right = $this->parseAdditive();
-        $node = Ast::binary($op, $left, $right, $start, $this->end());
-        if (isset(self::COMPARISON[$this->peek()->type])) {
-            throw $this->unexpected($this->peek());
-        }
-
-        return $node;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function parseAdditive(): array
-    {
-        $start = $this->peek()->start;
-        $left = $this->parseMultiplicative();
-        for (;;) {
-            $op = self::ADDITIVE[$this->peek()->type] ?? null;
-            if ($op === null) {
-                return $left;
-            }
-            $this->next();
-            $right = $this->parseMultiplicative();
-            $left = Ast::binary($op, $left, $right, $start, $this->end());
-        }
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function parseMultiplicative(): array
-    {
-        $start = $this->peek()->start;
-        $left = $this->parseUnary();
-        for (;;) {
-            $op = self::MULTIPLICATIVE[$this->peek()->type] ?? null;
-            if ($op === null) {
-                return $left;
-            }
-            $this->next();
-            $right = $this->parseUnary();
-            $left = Ast::binary($op, $left, $right, $start, $this->end());
-        }
-    }
-
-    /**
+     * The prefix operators `!` and `-` (EXP-9).
+     *
      * @return array<string, mixed>
      */
     private function parseUnary(): array
@@ -343,7 +263,7 @@ final class Parser
             $operand = $this->parseUnary();
             $this->leave();
 
-            return Ast::unary($token->type === 'BANG' ? '!' : '-', $operand, $token->start, $this->end());
+            return Ast::node('Unary', ['op' => $token->type === 'BANG' ? '!' : '-', 'operand' => $operand], $token->start, $this->lexer->consumedEnd());
         }
 
         return $this->parsePostfix(false);
@@ -369,25 +289,25 @@ final class Parser
                 $args = [];
                 $this->parseArguments($args);
                 $close = $this->expect('RPAREN');
-                $node = Ast::classCall($first->value, $method->value, $args, $start, $close->end);
+                $node = Ast::node('ClassCall', ['className' => $first->value, 'method' => $method->value, 'args' => $args], $start, $close->end);
             } elseif ($after->type === 'LPAREN' && (!$adjacentOnly || $after->start === $first->end)) {
                 $this->next();
                 $args = [];
                 $this->parseArguments($args);
                 $close = $this->expect('RPAREN');
-                $node = Ast::call($first->value, $args, $start, $close->end);
+                $node = Ast::node('Call', ['name' => $first->value, 'args' => $args], $start, $close->end);
             } elseif ($after->type === 'DOT_IDENT' && Ast::isLoopMetaField(substr($after->value, 1))) {
                 $this->next();
-                $node = Ast::loopMeta($first->value, substr($after->value, 1), $start, $after->end);
+                $node = Ast::node('LoopMeta', ['loop' => $first->value, 'field' => substr($after->value, 1)], $start, $after->end);
             } else {
-                $node = Ast::variable($first->value, $start, $first->end);
+                $node = Ast::node('Var', ['name' => $first->value], $start, $first->end);
             }
         } else {
             $node = $this->parsePrimary();
         }
         for (;;) {
             $token = $this->peek();
-            if ($adjacentOnly && $token->start !== $this->end()) {
+            if ($adjacentOnly && $token->start !== $this->lexer->consumedEnd()) {
                 break;
             }
             if ($token->type === 'DOT_IDENT' || $token->type === 'DOT_INDEX') {
@@ -399,15 +319,15 @@ final class Parser
                     $args = [];
                     $this->parseArguments($args);
                     $close = $this->expect('RPAREN');
-                    $node = Ast::memberCall($node, $method, $args, $start, $close->end);
+                    $node = Ast::node('MemberCall', ['object' => $node, 'method' => $method, 'args' => $args], $start, $close->end);
                 } else {
-                    $node = Ast::member($node, $method, $start, $token->end);
+                    $node = Ast::node('Member', ['object' => $node, 'key' => $method], $start, $token->end);
                 }
             } elseif ($token->type === 'LBRACKET') {
                 $this->next();
                 $index = $this->parseExpression();
                 $close = $this->expect('RBRACKET');
-                $node = Ast::index($node, $index, $start, $close->end);
+                $node = Ast::node('Index', ['object' => $node, 'index' => $index], $start, $close->end);
             } elseif ($token->type === 'LPAREN') {
                 throw $this->unexpected($token);
             } else {
@@ -420,6 +340,8 @@ final class Parser
     }
 
     /**
+     * A primary expression: a literal, a bracket literal, a parenthesized expression or a variable (EXP-7).
+     *
      * @return array<string, mixed>
      */
     private function parsePrimary(): array
@@ -429,20 +351,20 @@ final class Parser
             case 'NULL':
                 $this->next();
 
-                return Ast::literal('null', null, $token->start, $token->end);
+                return Ast::node('Literal', ['kind' => 'null', 'value' => null], $token->start, $token->end);
             case 'TRUE':
             case 'FALSE':
                 $this->next();
 
-                return Ast::literal('bool', $token->type === 'TRUE', $token->start, $token->end);
+                return Ast::node('Literal', ['kind' => 'bool', 'value' => $token->type === 'TRUE'], $token->start, $token->end);
             case 'NUMBER':
                 $this->next();
 
-                return Ast::literal('number', (float) $token->value, $token->start, $token->end);
+                return Ast::node('Literal', ['kind' => 'number', 'value' => (float) $token->value], $token->start, $token->end);
             case 'STRING':
                 $this->next();
 
-                return Ast::literal('string', $token->decoded ?? '', $token->start, $token->end);
+                return Ast::node('Literal', ['kind' => 'string', 'value' => $token->decoded ?? ''], $token->start, $token->end);
             case 'LPAREN':
                 $this->next();
                 $inner = $this->parseExpression();
@@ -470,7 +392,7 @@ final class Parser
             if ($token->type === 'SPREAD') {
                 $this->next();
                 $expr = $this->parseExpression();
-                $entries[] = Ast::spread($expr, $token->start, $this->end());
+                $entries[] = Ast::node('Spread', ['expr' => $expr], $token->start, $this->lexer->consumedEnd());
             } else {
                 $key = $this->parseExpression();
                 if ($this->peek()->type === 'ARROW') {
@@ -496,7 +418,7 @@ final class Parser
                 $items[] = isset($entry['type']) ? $entry : $entry['key'];
             }
 
-            return Ast::listLiteral($items, $open->start, $close->end);
+            return Ast::node('List', ['items' => $items], $open->start, $close->end);
         }
         $mapEntries = [];
         foreach ($entries as $entry) {
@@ -515,7 +437,7 @@ final class Parser
             }
         }
 
-        return Ast::mapLiteral($mapEntries, $open->start, $close->end);
+        return Ast::node('Map', ['entries' => $mapEntries], $open->start, $close->end);
     }
 
     /**

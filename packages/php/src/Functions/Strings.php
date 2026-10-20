@@ -11,7 +11,7 @@ use Polyspec\Template\Value\Value;
 /**
  * upper, lower, trim, replace, split, truncate, contains, starts_with, ends_with, length (FUN-12, FUN-13).
  */
-final class Strings
+final class Strings implements FunctionGroup
 {
     private static function trimChars(string $text, string $chars): string
     {
@@ -29,9 +29,6 @@ final class Strings
         return implode('', array_slice($points, $start, $end - $start));
     }
 
-    /**
-     * @return array<string, array{min: int, max: int, call: callable}>
-     */
     public static function table(): array
     {
         return [

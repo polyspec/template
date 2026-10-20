@@ -10,6 +10,10 @@ use Polyspec\Template\Value\MapValue;
 
 /**
  * Expression evaluation (docs/spec/expressions.md).
+ *
+ * @phpstan-import-type Span from Frame
+ *
+ * @phpstan-type Expr array<string, mixed> an expression node (docs/spec/ast.md)
  */
 final class Evaluator
 {
@@ -25,7 +29,7 @@ final class Evaluator
     }
 
     /**
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     private function fail(Frame $frame, array $span, string $code, string $message): TemplateError
     {
@@ -33,7 +37,7 @@ final class Evaluator
     }
 
     /**
-     * @param array<string, mixed> $expr
+     * @param Expr $expr
      */
     public function evaluate(array $expr, Frame $frame, ?Scope $scope = null): mixed
     {
@@ -55,7 +59,7 @@ final class Evaluator
     }
 
     /**
-     * @param array<string, mixed> $expr
+     * @param Expr $expr
      */
     private function evaluateNode(array $expr, Frame $frame): mixed
     {
@@ -183,7 +187,7 @@ final class Evaluator
     }
 
     /**
-     * @param array<string, mixed> $expr
+     * @param Expr $expr
      */
     private function binary(array $expr, Frame $frame): mixed
     {

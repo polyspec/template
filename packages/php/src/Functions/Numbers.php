@@ -10,7 +10,7 @@ use Polyspec\Template\Value\Value;
 /**
  * number, round, floor, ceil, abs, min, max, num (FUN-16, FUN-17, FUN-20 to FUN-25).
  */
-final class Numbers
+final class Numbers implements FunctionGroup
 {
     private static function finite(float $value): float
     {
@@ -30,9 +30,6 @@ final class Numbers
         return (float) $value;
     }
 
-    /**
-     * @return array<string, array{min: int, max: int, call: callable}>
-     */
     public static function table(): array
     {
         return [

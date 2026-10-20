@@ -16,6 +16,13 @@ use Polyspec\Template\TemplateError;
  * (docs/spec/lexical.md, docs/spec/grammar.md).
  *
  * Items in a body are text pieces (`['kind' => 'text', ...]`) or nodes until finalize() merges the pieces.
+ *
+ * @phpstan-type Wrapper array{0: string, 1: string}
+ * @phpstan-type Analysis array{
+ *     ast: array<string, mixed>,
+ *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
+ *     tokens: list<array{start: int, end: int, kind: string}>,
+ * }
  */
 final class Parser
 {
@@ -78,11 +85,7 @@ final class Parser
      * A tag has its kind, its byte range and the byte range of its body between the open and the close delimiters,
      * sigil included. Tokens are in source order.
      *
-     * @return array{
-     *     ast: array<string, mixed>,
-     *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
-     *     tokens: list<array{start: int, end: int, kind: string}>,
-     * }
+     * @return Analysis
      */
     public static function analyze(Source $source, string $open = '{', string $close = '}'): array
     {
@@ -203,7 +206,7 @@ final class Parser
     /**
      * Parses one tag and returns the byte index after it.
      *
-     * @param array{0: string, 1: string}|null $wrapper
+     * @param Wrapper|null $wrapper
      */
     private function parseTag(int $start, int $open, int $closeCount, ?array $wrapper): int
     {
@@ -228,7 +231,7 @@ final class Parser
                 $parser = $this->expressionParser($open, $closeCount, $bodyStart);
                 $expr = $parser->parseExpression();
                 $end = $this->finishTag($start, $wrapper, $parser->expectClose());
-                $this->push(Ast::echo($expr, $start, $end));
+                $this->push(Ast::node('Echo', ['expr' => $expr], $start, $end));
                 break;
             case '@':
                 $end = $this->parseLoop($start, $open, $closeCount, $wrapper, $bodyStart);
@@ -243,7 +246,7 @@ final class Parser
                     'else' => null,
                     'span' => [$start, $end],
                 ];
-                $this->frames[] = ['node' => $node, 'items' => [], 'hasElse' => false, 'openStart' => $start];
+                $this->openFrame($node, $start);
                 break;
             case '?#':
                 $parser = $this->expressionParser($open, $closeCount, $bodyStart);
@@ -256,7 +259,7 @@ final class Parser
                     'else' => null,
                     'span' => [$start, $end],
                 ];
-                $this->frames[] = ['node' => $node, 'items' => [], 'hasElse' => false, 'openStart' => $start];
+                $this->openFrame($node, $start);
                 break;
             case ':?':
                 $frameIndex = count($this->frames) - 1;
@@ -338,7 +341,7 @@ final class Parser
                 $path = $reader->readIncludePath($bodyStart);
                 $this->mark($path['start'], $path['end'], $path['quoted'] ? 'string' : 'path');
                 $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $path['end']));
-                $this->push(Ast::include($path['path'], $start, $end));
+                $this->push(Ast::node('Include', ['path' => $path['path']], $start, $end));
                 break;
             case '#':
                 $reader = new BlockTag($this->source, $this->source->name, $this->close, $closeCount);
@@ -347,7 +350,7 @@ final class Parser
                     $this->mark($word['start'], $word['end'], $word['quoted'] ? 'string' : 'path');
                 }
                 $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $body['end']));
-                $this->push(Ast::block($body['id'], $body['path'], $body['scope'], $start, $end));
+                $this->push(Ast::node('Block', ['id' => $body['id'], 'path' => $body['path'], 'scope' => $body['scope']], $start, $end));
                 break;
             case '%':
                 $end = $this->parseDirective($start, $open, $closeCount, $wrapper, $bodyStart, $firstTag);
@@ -394,7 +397,7 @@ final class Parser
      * The byte index of the close delimiters of the tag that ends at $end: before the wrapper closer and the
      * horizontal whitespace in front of it (LEX-19).
      *
-     * @param array{0: string, 1: string}|null $wrapper
+     * @param Wrapper|null $wrapper
      */
     private function closeStart(?array $wrapper, int $closeCount, int $end): int
     {
@@ -417,7 +420,7 @@ final class Parser
     private static function expressionTokens(ExpressionParser $parser): array
     {
         $tokens = array_values(array_filter(
-            $parser->consumed(),
+            $parser->lexer->consumed(),
             static fn (Token $token): bool => $token->type !== 'CLOSE' && $token->type !== 'EOF',
         ));
         $result = [];
@@ -510,7 +513,17 @@ final class Parser
     }
 
     /**
-     * @param array{0: string, 1: string}|null $wrapper
+     * Opens a block: its tag node, with no items and no else yet.
+     *
+     * @param array<string, mixed> $node
+     */
+    private function openFrame(array $node, int $start): void
+    {
+        $this->frames[] = ['node' => $node, 'items' => [], 'hasElse' => false, 'openStart' => $start];
+    }
+
+    /**
+     * @param Wrapper|null $wrapper
      */
     private function finishTag(int $start, ?array $wrapper, int $afterClose): int
     {
@@ -530,8 +543,23 @@ final class Parser
         return $at + strlen($wrapper[1]);
     }
 
+    /** A reserved word is no loop or assignment name (GRM-7, GRM-17). */
+    private function rejectReservedName(string $name, int $nameStart): void
+    {
+        if (isset(self::RESERVED[$name])) {
+            throw $this->fail(
+                ErrorCode::E_PARSE_RESERVED_NAME,
+                $nameStart,
+                $nameStart + strlen($name),
+                "{$name} is a reserved word",
+            );
+        }
+    }
+
     /**
-     * @param array{0: string, 1: string}|null $wrapper
+     * A comment tag up to its terminator, which the AST keeps as a comment node (AST-9).
+     *
+     * @param Wrapper|null $wrapper
      */
     private function parseComment(int $start, int $open, int $closeCount, ?array $wrapper, int $bodyStart): int
     {
@@ -543,13 +571,15 @@ final class Parser
         $end = $this->finishTag($start, $wrapper, $at + strlen($terminator));
         // The value starts after the sigil `*` (AST-9).
         $valueStart = Scanner::skipHorizontalSpace($this->text, $open + 1) + 1;
-        $this->comments[] = Ast::comment(substr($this->text, $valueStart, $at - $valueStart), $start, $end);
+        $this->comments[] = Ast::node('Comment', ['value' => substr($this->text, $valueStart, $at - $valueStart)], $start, $end);
 
         return $end;
     }
 
     /**
-     * @param array{0: string, 1: string}|null $wrapper
+     * The head of a loop tag: the loop variable and the iterable, which opens a block.
+     *
+     * @param Wrapper|null $wrapper
      */
     private function parseLoop(int $start, int $open, int $closeCount, ?array $wrapper, int $bodyStart): int
     {
@@ -559,14 +589,7 @@ final class Parser
         }
         $name = $head[1];
         $nameStart = $bodyStart + (int) strpos($head[0], $name);
-        if (isset(self::RESERVED[$name])) {
-            throw $this->fail(
-                ErrorCode::E_PARSE_RESERVED_NAME,
-                $nameStart,
-                $nameStart + strlen($name),
-                "{$name} is a reserved word",
-            );
-        }
+        $this->rejectReservedName($name, $nameStart);
         $this->mark($nameStart, $nameStart + strlen($name), 'variable');
         $this->mark($bodyStart + strlen($head[0]) - 1, $bodyStart + strlen($head[0]), 'operator');
         $parser = $this->expressionParser($open, $closeCount, $bodyStart + strlen($head[0]));
@@ -580,13 +603,15 @@ final class Parser
             'empty' => null,
             'span' => [$start, $end],
         ];
-        $this->frames[] = ['node' => $node, 'items' => [], 'hasElse' => false, 'openStart' => $start];
+        $this->openFrame($node, $start);
 
         return $end;
     }
 
     /**
-     * @param array{0: string, 1: string}|null $wrapper
+     * An assignment tag: `=`, `+=` and the other compound forms, and `++` and `--`, as a Set node.
+     *
+     * @param Wrapper|null $wrapper
      */
     private function parseAssignment(int $start, int $open, int $closeCount, ?array $wrapper, int $bodyStart): int
     {
@@ -596,41 +621,28 @@ final class Parser
         $name = $head[1];
         $operator = $head[2];
         $nameStart = $bodyStart + strpos($head[0], $name);
-        if (isset(self::RESERVED[$name])) {
-            throw $this->fail(
-                ErrorCode::E_PARSE_RESERVED_NAME,
-                $nameStart,
-                $nameStart + strlen($name),
-                "{$name} is a reserved word",
-            );
-        }
-        $variable = Ast::variable($name, $nameStart, $nameStart + strlen($name));
+        $this->rejectReservedName($name, $nameStart);
+        $variable = Ast::node('Var', ['name' => $name], $nameStart, $nameStart + strlen($name));
         $afterOperator = $bodyStart + strlen($head[0]);
         $this->mark($nameStart, $nameStart + strlen($name), 'variable');
         $this->mark($afterOperator - strlen($operator), $afterOperator, 'operator');
         if ($operator === '++' || $operator === '--') {
             $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $afterOperator));
-            $one = Ast::literal('number', 1.0, $afterOperator - 2, $afterOperator);
-            $expr = Ast::binary($operator === '++' ? '+' : '-', $variable, $one, $bodyStart, $afterOperator);
+            $one = Ast::node('Literal', ['kind' => 'number', 'value' => 1.0], $afterOperator - 2, $afterOperator);
+            $expr = Ast::node('Binary', ['op' => $operator === '++' ? '+' : '-', 'left' => $variable, 'right' => $one], $bodyStart, $afterOperator);
         } else {
             $parser = $this->expressionParser($open, $closeCount, $afterOperator);
             $value = $parser->parseExpression();
             $end = $this->finishTag($start, $wrapper, $parser->expectClose());
-            $expr = $operator === '=' ? $value : Ast::binary(
-                $operator[0],
-                $variable,
-                $value,
-                $bodyStart,
-                $parser->end(),
-            );
+            $expr = $operator === '=' ? $value : Ast::node('Binary', ['op' => $operator[0], 'left' => $variable, 'right' => $value], $bodyStart, $parser->lexer->consumedEnd());
         }
-        $this->push(Ast::set($name, $expr, $start, $end));
+        $this->push(Ast::node('Set', ['name' => $name, 'expr' => $expr], $start, $end));
 
         return $end;
     }
 
     /**
-     * @param array{0: string, 1: string}|null $wrapper
+     * @param Wrapper|null $wrapper
      */
     private function parseDirective(
         int $start,
@@ -697,7 +709,7 @@ final class Parser
             }
             $value = implode('', array_column($pending, 'value'));
             if ($value !== '') {
-                $nodes[] = Ast::text($value, $pending[0]['start'], $pending[count($pending) - 1]['end']);
+                $nodes[] = Ast::node('Text', ['value' => $value], $pending[0]['start'], $pending[count($pending) - 1]['end']);
             }
             $pending = [];
         };

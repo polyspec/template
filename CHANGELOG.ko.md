@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 30c6c858ed34052df33d88dfa64aec8418dcb8426b8d478142b57a898f088c58 -->
+<!-- source-sha256: 868dd0ca30c58c8d85ae8adc7e5df8a33a79da3245735d5767d6d5b5c4f9391a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-11: `packages/php/src`는 T26.7-2-8이 제거하는 Native class 두 개를 제외하고 같은 코드를 한 곳에만 둔다. AST node는 builder 20개 대신 `Ast::node` 하나로 만들고(호출 38곳), 함수 묶음은 `FunctionGroup`을 구현하며, 표현식 parser의 binary 단계는 table로 구동하는 `parseLevel` 하나이고, parser는 `openFrame`으로 block을 열고 예약어 이름을 한 번만 거부하며, `AstProgram`은 `parsedWith`로 parse와 analyze를 하고, JSON parser는 object나 array의 다음 token을 `continues`에서 정하며, runtime binding은 함수 오류나 binding 오류를 `guarded`에서 막고, docblock에서 반복되던 type은 `@phpstan-type` 별칭(`Wrapper`, `Analysis`, `RenderOptions`, `Limits`, `Span`, `Node`, `Expr`)이다. Red: `make duplication-check`가 `packages/php/src`에서 clone 37개를 찾았고(T26.7-10부터 T26.7-14 시작 때 repository 61개), green: 1개(Native 쌍)이고 repository는 26개다. PHPUnit 파일 ConformanceTest(765개), ExprFixturesTest(73개), ParserTest, AnalyzeTest, FunctionsTest, EngineRefreshTest, ValueTest, HostBindingTest, ObjectCallsTest가 통과한다(T26.7-11).
 
 - T26.7-34: 중립 규칙 RT-72(package는 API의 공개 진입점을 자기 생태계의 진입 방식으로 노출한다)를 `docs/spec/runtime.md`에 쓰고, unit `export-list`가 이를 인용하며 각 구현의 native test를 bind한다. TypeScript와 Python은 기존 test이고 Go(`exports_test.go`), Rust(`tests/exports.rs`), PHP(`ExportsTest.php`), PHP 확장(`ExportsTest.php`)은 새 test다. Red: `export-list`는 구현 6개 중 2개에만 binding이 있었고 test가 이름으로 적지 않은 requirement 70개를 인용했다(R2 4, R15 138). green: binding 6개 중 6개, 인용 requirement 1개이고 새 test가 통과한다(`go test -run TestExportedEntryPoints`, `cargo test --test exports`, PHPUnit 17개와 1개). R2는 47건, R15는 9338건이다(T26.7-34).
 

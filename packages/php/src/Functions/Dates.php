@@ -9,7 +9,7 @@ use Polyspec\Template\Value\Value;
 /**
  * date and now (FUN-37 to FUN-42).
  */
-final class Dates
+final class Dates implements FunctionGroup
 {
     private const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     private const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -219,9 +219,6 @@ final class Dates
         return $offset;
     }
 
-    /**
-     * @return array<string, array{min: int, max: int, call: callable}>
-     */
     public static function table(): array
     {
         return [

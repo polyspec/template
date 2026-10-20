@@ -13,7 +13,7 @@ use Polyspec\Template\Value\Value;
 /**
  * escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
  */
-final class Encoding
+final class Encoding implements FunctionGroup
 {
     /**
      * FUN-26 to FUN-28.
@@ -23,11 +23,9 @@ final class Encoding
         if ($value === null) {
             return 'null';
         }
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
-        }
-        if (is_float($value) || is_int($value)) {
-            return Number::toText((float) $value);
+        if (is_bool($value) || is_float($value) || is_int($value)) {
+            // The text of a boolean and of a number is its JSON text (VAL-8).
+            return (string) Value::stringify($value);
         }
         if (is_string($value)) {
             return self::jsonString($value);
@@ -114,9 +112,6 @@ final class Encoding
         return rawurlencode($text);
     }
 
-    /**
-     * @return array<string, array{min: int, max: int, call: callable}>
-     */
     public static function table(): array
     {
         return [

@@ -29,7 +29,7 @@
 | T26.7-8 | config/duplication.json declares the generated files and the tests that the duplication check leaves out, each with its reason | config/duplication.json and its owner in config/owner-checks.json | `make duplication-check` | [o] |
 | T26.7-9 | The scripts and runners hold each piece of code once | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [o] |
 | T26.7-10 | The backends of packages/compiler hold each piece of code once | packages/compiler/src/backends without the clones that make duplication-check finds | `make duplication-check` | [o] |
-| T26.7-11 | The PHP package holds each piece of code once | packages/php/src without the clones that make duplication-check finds | `make duplication-check`, the PHPUnit tests of the changed classes | [ ] |
+| T26.7-11 | The PHP package, except its Native classes that T26.7-2-8 removes, holds each piece of code once | packages/php/src without the clones that make duplication-check finds | `make duplication-check`, the PHPUnit tests of the changed classes | [o] |
 | T26.7-12 | The Go package holds each piece of code once | packages/go without the clones that make duplication-check finds | `make duplication-check`, the go tests of the changed packages | [ ] |
 | T26.7-13 | The Rust crate holds each piece of code once | packages/rust without the clones that make duplication-check finds | `make duplication-check`, the cargo tests of the changed modules | [ ] |
 | T26.7-14 | The TypeScript, Python and C sources hold each piece of code once | packages/ts, packages/lsp, packages/python and packages/php-ext/src without the clones that make duplication-check finds | `make duplication-check` | [ ] |

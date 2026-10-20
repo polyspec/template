@@ -16,7 +16,13 @@ use Polyspec\Template\Value\Bind;
 use Polyspec\Template\Value\BindError;
 use Polyspec\Template\Value\MapValue;
 
-/** AstProgram: template loading, caching, function registration and rendering. */
+/**
+ * AstProgram: template loading, caching, function registration and rendering.
+ *
+ * @phpstan-import-type RenderOptions from Program
+ * @phpstan-import-type Analysis from Parser
+ * @phpstan-import-type Limits from RuntimeServices
+ */
 final class AstProgram implements Program, RuntimeServices
 {
     public readonly LoaderInterface $loader;
@@ -70,6 +76,23 @@ final class AstProgram implements Program, RuntimeServices
     }
 
     /**
+     * Runs a parser entry of Parser on one template source with the delimiters of the options.
+     *
+     * @param callable(Source, string, string): array<string, mixed> $parse
+     * @param array{delimiters?: string} $options
+     * @return array<string, mixed>
+     */
+    private static function parsedWith(callable $parse, string $source, string $name, array $options): array
+    {
+        $delimiters = self::delimitersOf($options);
+
+        return InternalBoundary::run(
+            $name,
+            static fn (): array => $parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]),
+        );
+    }
+
+    /**
      * RT-2: parses one template source without loading other templates.
      *
      * @param array{delimiters?: string} $options
@@ -77,12 +100,7 @@ final class AstProgram implements Program, RuntimeServices
      */
     public static function parse(string $source, string $name, array $options = []): array
     {
-        $delimiters = self::delimitersOf($options);
-
-        return InternalBoundary::run(
-            $name,
-            static fn (): array => Parser::parse(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]),
-        );
+        return self::parsedWith(Parser::parse(...), $source, $name, $options);
     }
 
     /**
@@ -90,20 +108,11 @@ final class AstProgram implements Program, RuntimeServices
      * parts. Offsets are UTF-8 byte offsets after a leading byte order mark (LEX-2, EDT-8).
      *
      * @param array{delimiters?: string} $options
-     * @return array{
-     *     ast: array<string, mixed>,
-     *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
-     *     tokens: list<array{start: int, end: int, kind: string}>,
-     * }
+     * @return Analysis
      */
     public static function analyze(string $source, string $name, array $options = []): array
     {
-        $delimiters = self::delimitersOf($options);
-
-        return InternalBoundary::run(
-            $name,
-            static fn (): array => Parser::analyze(Source::fromBytes($name, $source), $delimiters[0], $delimiters[1]),
-        );
+        return self::parsedWith(Parser::analyze(...), $source, $name, $options);
     }
 
     /**
@@ -145,13 +154,17 @@ final class AstProgram implements Program, RuntimeServices
         return $this->runtime->hostFunction($name);
     }
 
-    /** Returns one logical class function. */
+    /** Returns one logical class function that the runtime of this program holds. */
     public function classFunction(string $className, string $method): ?callable
     {
         return $this->runtime->classFunction($className, $method);
     }
 
-    /** @return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} */
+    /**
+     * The limits of a render of this program (RT-33).
+     *
+     * @return Limits
+     */
     public function limits(): array
     {
         return $this->runtime->limits();
@@ -198,13 +211,11 @@ final class AstProgram implements Program, RuntimeServices
     }
 
     /**
-     * Renders a template name or a parsed template.
+     * Prepares a template name or a parsed template: binds the assign, the definitions and the environment once, for
+     * any number of renders (RT-61).
      *
      * @param string|array<string, mixed> $target
-     * @param array{
-     *     define?: array<string, string|array{template?: string, data?: mixed, html?: string}>,
-     *     env?: array{timezone?: string, now?: float|int},
-     * } $options
+     * @param RenderOptions $options
      */
     public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender
     {
@@ -218,10 +229,7 @@ final class AstProgram implements Program, RuntimeServices
 
     /**
      * @param string|array<string, mixed> $target
-     * @param array{
-     *     define?: array<string, string|array{template?: string, data?: mixed, html?: string}>,
-     *     env?: array{timezone?: string, now?: float|int},
-     * } $options
+     * @param RenderOptions $options
      */
     private function prepareBound(string $name, string|array $target, mixed $assign, array $options): PreparedRender
     {
@@ -250,10 +258,7 @@ final class AstProgram implements Program, RuntimeServices
      * Renders a template name or a parsed template.
      *
      * @param string|array<string, mixed> $target
-     * @param array{
-     *     define?: array<string, string|array{template?: string, data?: mixed, html?: string}>,
-     *     env?: array{timezone?: string, now?: float|int},
-     * } $options
+     * @param RenderOptions $options
      */
     public function render(string|array $target, mixed $assign = [], array $options = []): string
     {

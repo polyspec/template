@@ -18,7 +18,11 @@ use Polyspec\Template\Value\Number;
 use Polyspec\Template\Value\SafeString;
 use Polyspec\Template\Value\Value;
 
-/** Shared runtime value, function and error semantics for AST and generated programs. */
+/**
+ * Shared runtime value, function and error semantics for AST and generated programs.
+ *
+ * @phpstan-import-type Span from Frame
+ */
 final class RuntimeBindings
 {
     public function __construct(private readonly Context $context)
@@ -30,7 +34,7 @@ final class RuntimeBindings
         return Value::isTruthy($value);
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function unary(string $operator, mixed $operand, Frame $frame, array $span): mixed
     {
         return match ($operator) {
@@ -40,7 +44,7 @@ final class RuntimeBindings
         };
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function binary(string $operator, mixed $left, mixed $right, Frame $frame, array $span): mixed
     {
         switch ($operator) {
@@ -139,7 +143,7 @@ final class RuntimeBindings
         }
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function stringify(mixed $value, Frame $frame, array $span): string
     {
         $text = Value::stringify($value);
@@ -155,23 +159,34 @@ final class RuntimeBindings
         return $text;
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function escape(mixed $value, Frame $frame, array $span): string
     {
         return $value instanceof SafeString ? $value->text : Escape::html($this->stringify($value, $frame, $span));
     }
 
-    /** @param array{0: int, 1: int} $span */
-    public function number(mixed $value, Frame $frame, array $span): float
+    /**
+     * Runs an operation of the value semantics; the error of the function or of the binding becomes the error of the node.
+     *
+     * @param callable(): mixed $operation
+     * @param Span $span
+     */
+    private function guarded(callable $operation, Frame $frame, array $span): mixed
     {
         try {
-            return Helpers::toNumber($value);
-        } catch (FunctionError $error) {
+            return $operation();
+        } catch (FunctionError|BindError $error) {
             throw $this->error($frame, $span, $error->errorCode, $error->getMessage());
         }
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
+    public function number(mixed $value, Frame $frame, array $span): float
+    {
+        return (float) $this->guarded(static fn (): float => Helpers::toNumber($value), $frame, $span);
+    }
+
+    /** @param Span $span */
     public function finite(float $value, Frame $frame, array $span): float
     {
         if (!is_finite($value)) {
@@ -186,7 +201,7 @@ final class RuntimeBindings
         return $strict ? Value::strictEquals($left, $right) : Value::looseEquals($left, $right);
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function compare(mixed $left, mixed $right, Frame $frame, array $span): int
     {
         $order = Value::compare($left, $right);
@@ -205,7 +220,7 @@ final class RuntimeBindings
     /**
      * Reads a fixed member name (EXP-18, VAL-19).
      *
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     public function member(mixed $container, string $key, Frame $frame, array $span): mixed
     {
@@ -216,7 +231,7 @@ final class RuntimeBindings
      * Calls a public method on the original assigned object and binds its result (VAL-19).
      *
      * @param list<mixed> $args
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     public function memberCall(mixed $container, string $method, array $args, Frame $frame, array $span): mixed
     {
@@ -242,7 +257,7 @@ final class RuntimeBindings
      * Calls a registered logical class function and binds its result.
      *
      * @param list<mixed> $args
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     public function classCall(string $className, string $method, array $args, Frame $frame, array $span): mixed
     {
@@ -269,7 +284,7 @@ final class RuntimeBindings
     /**
      * Reads a dynamic list position, a map key or a public property of a native object (EXP-19, VAL-19).
      *
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     public function index(mixed $container, mixed $key, Frame $frame, array $span): mixed
     {
@@ -309,7 +324,7 @@ final class RuntimeBindings
     /**
      * Checks the depth of a value that a list or map literal built (VAL-20).
      *
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     public function depth(mixed $value, Frame $frame, array $span): mixed
     {
@@ -326,7 +341,7 @@ final class RuntimeBindings
     }
 
     /**
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      * @return list<array{0: mixed, 1: mixed}>
      */
     public function entries(mixed $value, Frame $frame, array $span): array
@@ -354,7 +369,7 @@ final class RuntimeBindings
         throw $this->error($frame, $span, ErrorCode::E_RUNTIME_TYPE, 'loop requires a list, a map or null');
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function listSpread(mixed $value, Frame $frame, array $span): array
     {
         if (!is_array($value)) {
@@ -364,7 +379,7 @@ final class RuntimeBindings
         return $value;
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function mapSpread(mixed $value, Frame $frame, array $span): MapValue
     {
         if (!$value instanceof MapValue) {
@@ -376,7 +391,7 @@ final class RuntimeBindings
 
     /**
      * @param list<mixed> $args
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     public function call(string $name, array $args, Frame $frame, array $span): mixed
     {
@@ -415,7 +430,7 @@ final class RuntimeBindings
      * (FUN-46) and a value that cannot be bound fails with its code at the call (ERR-5).
      *
      * @param \Closure(): mixed $run
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     private function hostResult(string $name, \Closure $run, Frame $frame, array $span): mixed
     {
@@ -438,18 +453,14 @@ final class RuntimeBindings
     /**
      * Binds a host value at the expression that produced it (ERR-5, VAL-11).
      *
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     private function bound(mixed $value, Frame $frame, array $span): mixed
     {
-        try {
-            return Bind::value($value);
-        } catch (BindError $error) {
-            throw $this->error($frame, $span, $error->errorCode, $error->getMessage());
-        }
+        return $this->guarded(static fn (): mixed => Bind::value($value), $frame, $span);
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function limit(string $kind, int $count, Frame $frame, array $span): void
     {
         $limits = $this->context->services->limits();
@@ -461,7 +472,7 @@ final class RuntimeBindings
         throw $this->error($frame, $span, ErrorCode::E_RUNTIME_LIMIT, $message . $maximum);
     }
 
-    /** @param array{0: int, 1: int} $span */
+    /** @param Span $span */
     public function error(Frame $frame, array $span, string $code, string $message): TemplateError
     {
         return $this->context->fail($code, $frame, $span, $message);

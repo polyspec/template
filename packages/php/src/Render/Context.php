@@ -10,6 +10,8 @@ use Polyspec\Template\Value\MapValue;
 
 /**
  * Render state: output, template definition registry, chain, limits and error creation (docs/spec/runtime.md).
+ *
+ * @phpstan-import-type Span from Frame
  */
 final class Context
 {
@@ -21,7 +23,7 @@ final class Context
     private string $output = '';
     private int $outputBytes = 0;
     private ?Frame $currentFrame = null;
-    /** @var array{0: int, 1: int} */
+    /** @var Span */
     private array $currentSpan = [0, 0];
 
     /**
@@ -59,7 +61,7 @@ final class Context
     }
 
     /**
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     public function at(Frame $frame, array $span): void
     {
@@ -68,7 +70,7 @@ final class Context
     }
 
     /**
-     * @param array{0: int, 1: int}|null $span
+     * @param Span|null $span
      */
     public function fail(string $code, ?Frame $frame, ?array $span, string $message): TemplateError
     {
@@ -80,7 +82,7 @@ final class Context
     }
 
     /**
-     * @param array{0: int, 1: int}|null $span
+     * @param Span|null $span
      */
     public function enter(string $name, ?Frame $frame, ?array $span): void
     {

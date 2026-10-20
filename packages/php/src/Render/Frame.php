@@ -8,6 +8,8 @@ use Polyspec\Template\Value\MapValue;
 
 /**
  * One rendered template location and its context data.
+ *
+ * @phpstan-type Span array{0: int, 1: int} the start and the end byte offset of a node
  */
 final class Frame
 {

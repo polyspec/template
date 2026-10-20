@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: d0a54d0ec5f56a43f3d4fc5e7a2e9ab2a3c77c9f0fe71b688414ac6468ee72f1 -->
+<!-- source-sha256: a6f34b0d11ad8a396ceee21634b7311d559b8db64750898eec84c049ff29947e -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -30,7 +30,7 @@
 | T26.7-8 | config/duplication.json은 중복 검사가 제외하는 generated 파일과 test를 이유와 함께 선언한다 | config/duplication.json and its owner in config/owner-checks.json | `make duplication-check` | [o] |
 | T26.7-9 | script와 runner는 같은 코드를 한 곳에만 둔다 | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [o] |
 | T26.7-10 | packages/compiler의 backend는 같은 코드를 한 곳에만 둔다 | packages/compiler/src/backends without the clones that make duplication-check finds | `make duplication-check` | [o] |
-| T26.7-11 | PHP package는 같은 코드를 한 곳에만 둔다 | packages/php/src without the clones that make duplication-check finds | `make duplication-check`, the PHPUnit tests of the changed classes | [ ] |
+| T26.7-11 | PHP package는(T26.7-2-8이 제거하는 Native class는 제외) 같은 코드를 한 곳에만 둔다 | packages/php/src without the clones that make duplication-check finds | `make duplication-check`, the PHPUnit tests of the changed classes | [o] |
 | T26.7-12 | Go package는 같은 코드를 한 곳에만 둔다 | packages/go without the clones that make duplication-check finds | `make duplication-check`, the go tests of the changed packages | [ ] |
 | T26.7-13 | Rust crate는 같은 코드를 한 곳에만 둔다 | packages/rust without the clones that make duplication-check finds | `make duplication-check`, the cargo tests of the changed modules | [ ] |
 | T26.7-14 | TypeScript, Python, C source는 같은 코드를 한 곳에만 둔다 | packages/ts, packages/lsp, packages/python and packages/php-ext/src without the clones that make duplication-check finds | `make duplication-check` | [ ] |

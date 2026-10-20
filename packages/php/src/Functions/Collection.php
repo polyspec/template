@@ -12,7 +12,7 @@ use Polyspec\Template\Value\Value;
 /**
  * keys, values, first, last, reverse, slice, sort, join, range, default (FUN-14, FUN-15, FUN-31 to FUN-36).
  */
-final class Collection
+final class Collection implements FunctionGroup
 {
     public const RANGE_LIMIT = 1000000;
 
@@ -68,9 +68,6 @@ final class Collection
         return array_column($keyed, 'item');
     }
 
-    /**
-     * @return array<string, array{min: int, max: int, call: callable}>
-     */
     public static function table(): array
     {
         return [

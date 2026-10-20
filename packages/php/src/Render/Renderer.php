@@ -10,6 +10,10 @@ use Polyspec\Template\Loader\Path;
 
 /**
  * Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32).
+ *
+ * @phpstan-import-type Span from Frame
+ *
+ * @phpstan-type Node array<string, mixed> an AST node (docs/spec/ast.md)
  */
 final class Renderer
 {
@@ -31,7 +35,7 @@ final class Renderer
     }
 
     /**
-     * @param array<string, mixed> $node
+     * @param Node $node
      */
     private function renderNode(array $node, Frame $frame, Scope $scope): void
     {
@@ -88,7 +92,7 @@ final class Renderer
     }
 
     /**
-     * @param array<string, mixed> $node
+     * @param Node $node
      */
     private function renderFor(array $node, Frame $frame, Scope $scope): void
     {
@@ -133,7 +137,7 @@ final class Renderer
     }
 
     /**
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     private function resolve(string $path, Frame $frame, array $span): string
     {
@@ -151,7 +155,7 @@ final class Renderer
     }
 
     /**
-     * @param array{0: int, 1: int} $span
+     * @param Span $span
      */
     private function renderInclude(string $path, array $span, Frame $frame, Scope $scope): void
     {
@@ -167,7 +171,7 @@ final class Renderer
     }
 
     /**
-     * @param array<string, mixed> $node
+     * @param Node $node
      */
     private function renderBlock(array $node, Frame $frame, Scope $scope): void
     {
