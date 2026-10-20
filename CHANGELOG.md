@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-2-8-2: the php-ext binding of every unit names the test that its php binding names (49 units hold both, none differs, none has php-ext alone), and the parity check of the 31 units that the row moved to the tests of the library or bound for the first time passes, so the row is done. Its Verification names those units: the unscoped check also reports the findings of units that the row does not own (T26.7-2-8-2).
+
 - T26.7-2-15: every child row is done (T26.7-2-15-1 to T26.7-2-15-4), so the row is done. Its Verification runs the owner tests of its children and the parity check of the units it owns (functions-date function-arity), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-15).
 
 - T26.7-2-6: every child row is done (T26.7-2-6-1 to T26.7-2-6-4), so the row is done. Its Verification runs the owner tests of its children and the parity check of the units it owns (api-runtime-services api-runtime-environment api-runtime-bindings api-render-frame api-render-scope api-render-context), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-6).

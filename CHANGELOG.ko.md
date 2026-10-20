@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3ec47f559e286d24e0dd295bcea1f655493394617b61141f7867eb59921e946e -->
+<!-- source-sha256: ea83913644317f8bb082bcbe42c872aacf92ec120ddacdbd5791dff25635248f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-8-2: 모든 unit의 php-ext binding이 그 php binding이 명명하는 test를 명명하고(둘 다 가진 unit 49개, 다른 것 없음, php-ext만 가진 것 없음), 행이 라이브러리 test로 옮기거나 처음 binding한 unit 31개의 parity 검사가 통과하므로 행은 끝났다. Verification은 그 unit을 명명한다: 범위 없는 검사는 행이 소유하지 않는 unit의 finding도 보고한다 (T26.7-2-8-2).
 
 - T26.7-2-15: 모든 하위 행이 끝났으므로(T26.7-2-15-1부터 T26.7-2-15-4) 행은 끝났다. Verification은 하위 행의 owner test를 실행하고, 범위 없는 `make parity-declarations-check` 대신 행이 소유하는 unit(functions-date function-arity)의 parity 검사를 실행한다. 명령은 통과한다 (T26.7-2-15).
 
