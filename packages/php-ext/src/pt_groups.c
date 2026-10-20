@@ -1,8 +1,8 @@
 /*
- * The function groups Functions\Strings, Functions\Numbers, Functions\Encoding and Functions\Collection of the library
- * as classes of the extension (FUN-10 to FUN-36). table() gives the library's table: each name maps to its argument
- * counts and a Closure of a persistent internal function, whose dispatcher runs the built-in function of
- * pt_functions.c with the arguments of the call.
+ * The function groups Functions\Strings, Functions\Numbers, Functions\Encoding, Functions\Collection and Functions\Dates
+ * of the library as classes of the extension (FUN-10 to FUN-42). table() gives the library's table: each name maps to
+ * its argument counts and a Closure of a persistent internal function, whose dispatcher runs the built-in function of
+ * pt_functions.c with the arguments of the call. The date functions take the environment as a second argument.
  */
 #include "pt.h"
 #include "Zend/zend_closures.h"
@@ -21,6 +21,9 @@ static const char *const pt_encoding_names[] = {
 static const char *const pt_collection_names[] = {
     "keys", "values", "first", "last", "reverse", "slice", "sort", "join", "range", "default",
 };
+static const char *const pt_dates_names[] = {
+    "date", "now",
+};
 
 typedef struct pt_group {
     const char *const *names;
@@ -33,29 +36,29 @@ static pt_group pt_strings_group = {pt_strings_names, sizeof(pt_strings_names) /
 static pt_group pt_numbers_group = {pt_numbers_names, sizeof(pt_numbers_names) / sizeof(pt_numbers_names[0]), NULL, NULL};
 static pt_group pt_encoding_group = {pt_encoding_names, sizeof(pt_encoding_names) / sizeof(pt_encoding_names[0]), NULL, NULL};
 static pt_group pt_collection_group = {pt_collection_names, sizeof(pt_collection_names) / sizeof(pt_collection_names[0]), NULL, NULL};
+static pt_group pt_dates_group = {pt_dates_names, sizeof(pt_dates_names) / sizeof(pt_dates_names[0]), NULL, NULL};
 
-/* The signature of each function: one required parameter `array $a`. */
+/* The signature of each function of the first four groups: one required parameter `array $a`. */
 static const zend_internal_arg_info pt_group_arginfo[] = {
     {(const char *)(zend_uintptr_t)(1), ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(0, 0, 0)), NULL},
     ZEND_ARG_TYPE_INFO(0, a, IS_ARRAY, 0)
 };
 
-/* The dispatcher of every function of the groups: it runs the built-in function named by the function that is called. */
-static void pt_group_dispatch(INTERNAL_FUNCTION_PARAMETERS)
+/* The signature of each date function: `array $a` and the environment `array $env`. */
+static const zend_internal_arg_info pt_dates_arginfo[] = {
+    {(const char *)(zend_uintptr_t)(2), ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(0, 0, 0)), NULL},
+    ZEND_ARG_TYPE_INFO(0, a, IS_ARRAY, 0)
+    ZEND_ARG_TYPE_INFO(0, env, IS_ARRAY, 0)
+};
+
+/* Runs the built-in function `name` on the elements of the array `input` with the environment `env`. */
+static void pt_group_run(zend_string *name, zval *return_value, zval *input, const pt_env *env)
 {
-    zend_string *name = EX(func)->common.function_name;
     const pt_builtin *builtin = pt_builtin_find(ZSTR_VAL(name), ZSTR_LEN(name));
     if (builtin == NULL) {
         zend_throw_error(NULL, "%s is not a built-in function", ZSTR_VAL(name));
         RETURN_THROWS();
     }
-
-    /* The library calls each closure with the arguments and the environment; a closure reads its first parameter only,
-     * so the extra argument of the environment is accepted and ignored. */
-    zval *input;
-    ZEND_PARSE_PARAMETERS_START(1, -1)
-        Z_PARAM_ARRAY(input)
-    ZEND_PARSE_PARAMETERS_END();
 
     /* The library reads $a[0], $a[1], ... and ignores the elements above max; a missing element below min is null. */
     uint32_t count = zend_hash_num_elements(Z_ARRVAL_P(input));
@@ -83,10 +86,9 @@ static void pt_group_dispatch(INTERNAL_FUNCTION_PARAMETERS)
         args[index] = pt_null();
     }
 
-    pt_env env = {{NULL, 0}, 0.0};
     pt_value result = {0};
     pt_function_error error = {NULL, NULL};
-    if (!builtin->call(&arena, &env, args, arg_count, &result, &error)) {
+    if (!builtin->call(&arena, env, args, arg_count, &result, &error)) {
         pt_throw_function_error(error.code, error.message);
         pt_arena_free(&arena);
         RETURN_THROWS();
@@ -95,8 +97,55 @@ static void pt_group_dispatch(INTERNAL_FUNCTION_PARAMETERS)
     pt_arena_free(&arena);
 }
 
+/* The dispatcher of the functions of the first four groups: a closure reads its first parameter only, so the extra
+ * argument of the environment that the library passes is accepted and ignored. */
+static void pt_group_dispatch(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zval *input;
+    ZEND_PARSE_PARAMETERS_START(1, -1)
+        Z_PARAM_ARRAY(input)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_env env = {{NULL, 0}, 0.0};
+    pt_group_run(EX(func)->common.function_name, return_value, input, &env);
+}
+
+/* The environment of a date function, an array with the string `timezone` and the number `now` (FUN-37, FUN-42). */
+static bool pt_dates_env(zval *environment, pt_env *env)
+{
+    zval *timezone = zend_hash_str_find(Z_ARRVAL_P(environment), ZEND_STRL("timezone"));
+    zval *now = zend_hash_str_find(Z_ARRVAL_P(environment), ZEND_STRL("now"));
+    if (timezone == NULL || Z_TYPE_P(timezone) != IS_STRING) {
+        zend_argument_type_error(2, "must have a string timezone");
+        return false;
+    }
+    if (now == NULL || (Z_TYPE_P(now) != IS_DOUBLE && Z_TYPE_P(now) != IS_LONG)) {
+        zend_argument_type_error(2, "must have a number now");
+        return false;
+    }
+    env->timezone.s = Z_STRVAL_P(timezone);
+    env->timezone.n = Z_STRLEN_P(timezone);
+    env->now = Z_TYPE_P(now) == IS_DOUBLE ? Z_DVAL_P(now) : (double)Z_LVAL_P(now);
+    return true;
+}
+
+/* The dispatcher of the date functions: the second argument is the environment the functions read. */
+static void pt_dates_dispatch(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zval *input, *environment;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ARRAY(input)
+        Z_PARAM_ARRAY(environment)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_env env = {{NULL, 0}, 0.0};
+    if (!pt_dates_env(environment, &env)) {
+        RETURN_THROWS();
+    }
+    pt_group_run(EX(func)->common.function_name, return_value, input, &env);
+}
+
 /* Persistent functions for a group, one per name; they live as long as the process (no MSHUTDOWN frees them). */
-static void pt_group_init(pt_group *group, zend_class_entry *ce)
+static void pt_group_init(pt_group *group, zend_class_entry *ce, const zend_internal_arg_info *arginfo, uint32_t params,
+                          zif_handler handler)
 {
     group->ce = ce;
     group->functions = pemalloc(sizeof(zend_internal_function *) * group->count, 1);
@@ -107,10 +156,10 @@ static void pt_group_init(pt_group *group, zend_class_entry *ce)
         fn->function_name = zend_string_init_interned(group->names[i], strlen(group->names[i]), 1);
         fn->scope = ce;
         fn->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC;
-        fn->arg_info = (zend_internal_arg_info *)pt_group_arginfo + 1;
-        fn->num_args = 1;
-        fn->required_num_args = 1;
-        fn->handler = pt_group_dispatch;
+        fn->arg_info = (zend_internal_arg_info *)arginfo + 1;
+        fn->num_args = params;
+        fn->required_num_args = params;
+        fn->handler = handler;
         group->functions[i] = fn;
     }
 }
@@ -133,12 +182,13 @@ static void pt_group_table(zval *return_value, const pt_group *group)
 }
 
 void pt_groups_register(zend_class_entry *strings, zend_class_entry *numbers, zend_class_entry *encoding,
-                        zend_class_entry *collection)
+                        zend_class_entry *collection, zend_class_entry *dates)
 {
-    pt_group_init(&pt_strings_group, strings);
-    pt_group_init(&pt_numbers_group, numbers);
-    pt_group_init(&pt_encoding_group, encoding);
-    pt_group_init(&pt_collection_group, collection);
+    pt_group_init(&pt_strings_group, strings, pt_group_arginfo, 1, pt_group_dispatch);
+    pt_group_init(&pt_numbers_group, numbers, pt_group_arginfo, 1, pt_group_dispatch);
+    pt_group_init(&pt_encoding_group, encoding, pt_group_arginfo, 1, pt_group_dispatch);
+    pt_group_init(&pt_collection_group, collection, pt_group_arginfo, 1, pt_group_dispatch);
+    pt_group_init(&pt_dates_group, dates, pt_dates_arginfo, 2, pt_dates_dispatch);
 }
 
 void pt_strings_table(INTERNAL_FUNCTION_PARAMETERS)
@@ -163,6 +213,12 @@ void pt_collection_table(INTERNAL_FUNCTION_PARAMETERS)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     pt_group_table(return_value, &pt_collection_group);
+}
+
+void pt_dates_table(INTERNAL_FUNCTION_PARAMETERS)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_group_table(return_value, &pt_dates_group);
 }
 
 /* Runs the built-in function of a name on one argument, as a method of a group runs it: a FunctionError is thrown the
@@ -312,4 +368,95 @@ void pt_encoding_percent_encode(INTERNAL_FUNCTION_PARAMETERS)
     if (!done) {
         RETURN_THROWS();
     }
+}
+
+/* Functions\Dates::parseOffset (FUN-37): the offset in seconds of `Z` or `±HH:MM`, or null. */
+void pt_dates_parse_offset(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zend_string *text;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(text)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_s bytes = {ZSTR_VAL(text), ZSTR_LEN(text)};
+    zend_long offset = 0;
+    if (!pt_parse_offset(bytes, &offset)) {
+        RETURN_NULL();
+    }
+    RETURN_LONG(offset);
+}
+
+/* Functions\Dates::daysFromCivil (FUN-37): the days since 1970-01-01 of a proleptic Gregorian date. */
+void pt_dates_days_from_civil(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zend_long year, month, day;
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_LONG(year)
+        Z_PARAM_LONG(month)
+        Z_PARAM_LONG(day)
+    ZEND_PARSE_PARAMETERS_END();
+    RETURN_LONG(pt_days_from_civil(year, month, day));
+}
+
+/* Functions\Dates::civilFromDays (FUN-37): the year, month and day of a count of days since 1970-01-01. */
+void pt_dates_civil_from_days(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zend_long days;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_LONG(days)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_long year = 0, month = 0, day = 0;
+    pt_civil_from_days(days, &year, &month, &day);
+    array_init(return_value);
+    add_next_index_long(return_value, year);
+    add_next_index_long(return_value, month);
+    add_next_index_long(return_value, day);
+}
+
+/* Functions\Dates::toUnixSeconds (FUN-37): the Unix seconds of a number or a date text, with the offset of the
+ * environment for a text without an offset. */
+void pt_dates_to_unix_seconds(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zval *value;
+    zend_long env_offset;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(value)
+        Z_PARAM_LONG(env_offset)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_arena arena;
+    pt_arena_init(&arena);
+    pt_value input = pt_null();
+    if (!pt_host_json_value(&arena, value, &input)) {
+        pt_throw_function_error(PT_E_RUNTIME_TYPE, zend_string_init(ZEND_STRL("date requires a number or a string"), 0));
+        pt_arena_free(&arena);
+        RETURN_THROWS();
+    }
+    zend_long seconds = 0;
+    pt_function_error error = {NULL, NULL};
+    bool done = pt_unix_seconds(input, env_offset, &seconds, &error);
+    if (!done) {
+        pt_throw_function_error(error.code, error.message);
+    }
+    pt_arena_free(&arena);
+    if (!done) {
+        RETURN_THROWS();
+    }
+    RETURN_LONG(seconds);
+}
+
+/* Functions\Dates::format (FUN-38): the text of Unix seconds in the format and the offset of the library. */
+void pt_dates_format(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zend_long seconds, offset;
+    zend_string *format;
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_LONG(seconds)
+        Z_PARAM_STR(format)
+        Z_PARAM_LONG(offset)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_arena arena;
+    pt_arena_init(&arena);
+    pt_s pattern = {ZSTR_VAL(format), ZSTR_LEN(format)};
+    pt_s text = pt_format_date(&arena, seconds, pattern, offset);
+    RETVAL_STRINGL(text.s, text.n);
+    pt_arena_free(&arena);
 }

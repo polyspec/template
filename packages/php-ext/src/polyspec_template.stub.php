@@ -1183,3 +1183,30 @@ final class Collection implements FunctionGroup
 
     public static function table(): array {}
 }
+
+/**
+ * date and now (FUN-37 to FUN-42).
+ */
+final class Dates implements FunctionGroup
+{
+    /**
+     * Offset in seconds of `Z` or `±HH:MM`, or null.
+     */
+    public static function parseOffset(string $text): ?int {}
+
+    /**
+     * Days since 1970-01-01 of a proleptic Gregorian date.
+     */
+    public static function daysFromCivil(int $year, int $month, int $day): int {}
+
+    /**
+     * @return array{0: int, 1: int, 2: int} year, month, day
+     */
+    public static function civilFromDays(int $days): array {}
+
+    public static function toUnixSeconds(mixed $value, int $envOffset): int {}
+
+    public static function format(int $seconds, string $format, int $offset): string {}
+
+    public static function table(): array {}
+}

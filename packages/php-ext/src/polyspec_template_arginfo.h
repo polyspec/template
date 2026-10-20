@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 43095d2aea9838335d80533101775af0d289a713 */
+ * Stub hash: 6bc9590f4b46460a9f72f1049c0b843419dcba10 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -509,6 +509,33 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Functions_Collection_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Dates_parseOffset, 0, 1, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Dates_daysFromCivil, 0, 3, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, day, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Dates_civilFromDays, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, days, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Dates_toUnixSeconds, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, envOffset, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Dates_format, 0, 3, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Functions_Dates_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -634,6 +661,12 @@ ZEND_METHOD(Polyspec_Template_Functions_Encoding, toJson);
 ZEND_METHOD(Polyspec_Template_Functions_Encoding, percentEncode);
 ZEND_METHOD(Polyspec_Template_Functions_Encoding, table);
 ZEND_METHOD(Polyspec_Template_Functions_Collection, table);
+ZEND_METHOD(Polyspec_Template_Functions_Dates, parseOffset);
+ZEND_METHOD(Polyspec_Template_Functions_Dates, daysFromCivil);
+ZEND_METHOD(Polyspec_Template_Functions_Dates, civilFromDays);
+ZEND_METHOD(Polyspec_Template_Functions_Dates, toUnixSeconds);
+ZEND_METHOD(Polyspec_Template_Functions_Dates, format);
+ZEND_METHOD(Polyspec_Template_Functions_Dates, table);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -949,6 +982,16 @@ static const zend_function_entry class_Polyspec_Template_Functions_Encoding_meth
 
 static const zend_function_entry class_Polyspec_Template_Functions_Collection_methods[] = {
 	ZEND_ME(Polyspec_Template_Functions_Collection, table, arginfo_class_Polyspec_Template_Functions_Collection_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Functions_Dates_methods[] = {
+	ZEND_ME(Polyspec_Template_Functions_Dates, parseOffset, arginfo_class_Polyspec_Template_Functions_Dates_parseOffset, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Dates, daysFromCivil, arginfo_class_Polyspec_Template_Functions_Dates_daysFromCivil, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Dates, civilFromDays, arginfo_class_Polyspec_Template_Functions_Dates_civilFromDays, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Dates, toUnixSeconds, arginfo_class_Polyspec_Template_Functions_Dates_toUnixSeconds, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Dates, format, arginfo_class_Polyspec_Template_Functions_Dates_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Dates, table, arginfo_class_Polyspec_Template_Functions_Dates_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -2259,6 +2302,22 @@ static zend_class_entry *register_class_Polyspec_Template_Functions_Collection(z
 	zend_declare_class_constant_ex(class_entry, const_RANGE_LIMIT_name, &const_RANGE_LIMIT_value, ZEND_ACC_PUBLIC, NULL);
 #endif
 	zend_string_release(const_RANGE_LIMIT_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Functions_Dates(zend_class_entry *class_entry_Polyspec_Template_Functions_FunctionGroup)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "Dates", class_Polyspec_Template_Functions_Dates_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+	zend_class_implements(class_entry, 1, class_entry_Polyspec_Template_Functions_FunctionGroup);
 
 	return class_entry;
 }

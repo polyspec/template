@@ -1021,7 +1021,7 @@ static bool pt_offset_at(const char *s, size_t length, zend_long *offset)
 }
 
 /* parseOffset: `Z`, or `±HH:MM` before the end of a PCRE `$`. */
-static bool pt_parse_offset(pt_s text, zend_long *offset)
+bool pt_parse_offset(pt_s text, zend_long *offset)
 {
     if (text.n == 1 && text.s[0] == 'Z') {
         *offset = 0;
@@ -1040,7 +1040,7 @@ static zend_long pt_floor_div(zend_long a, zend_long b)
     return zend_dval_to_lval(floor((double)a / (double)b));
 }
 
-static zend_long pt_days_from_civil(zend_long year, zend_long month, zend_long day)
+zend_long pt_days_from_civil(zend_long year, zend_long month, zend_long day)
 {
     zend_long y = month <= 2 ? year - 1 : year;
     zend_long era = pt_floor_div(y, 400);
@@ -1051,7 +1051,7 @@ static zend_long pt_days_from_civil(zend_long year, zend_long month, zend_long d
     return era * 146097 + doe - 719468;
 }
 
-static void pt_civil_from_days(zend_long days, zend_long *year, zend_long *month, zend_long *day)
+void pt_civil_from_days(zend_long days, zend_long *year, zend_long *month, zend_long *day)
 {
     zend_long z = days + 719468;
     zend_long era = pt_floor_div(z, 146097);
@@ -1074,7 +1074,7 @@ static bool pt_not_a_date(pt_s text, pt_function_error *error)
 }
 
 /* Unix seconds of a date value (FUN-37). */
-static bool pt_unix_seconds(pt_value value, zend_long env_offset, zend_long *seconds, pt_function_error *error)
+bool pt_unix_seconds(pt_value value, zend_long env_offset, zend_long *seconds, pt_function_error *error)
 {
     if (value.type == PT_NUMBER) {
         *seconds = pt_truncate(value.u.number);
@@ -1124,7 +1124,7 @@ static void pt_append_number(pt_buf *buf, const char *format, zend_long value)
     pt_buf_add(buf, text, (size_t)written);
 }
 
-static pt_s pt_format_date(pt_arena *arena, zend_long seconds, pt_s format, zend_long offset)
+pt_s pt_format_date(pt_arena *arena, zend_long seconds, pt_s format, zend_long offset)
 {
     zend_long local = seconds + offset;
     zend_long days = pt_floor_div(local, 86400);

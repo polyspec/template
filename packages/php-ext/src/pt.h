@@ -437,6 +437,13 @@ typedef struct pt_builtin {
 
 const pt_builtin *pt_builtin_find(const char *name, size_t length);
 
+/* The date operations of pt_functions.c, which Functions\Dates (pt_groups.c) and the date built-in function share. */
+bool pt_parse_offset(pt_s text, zend_long *offset);
+zend_long pt_days_from_civil(zend_long year, zend_long month, zend_long day);
+void pt_civil_from_days(zend_long days, zend_long *year, zend_long *month, zend_long *day);
+bool pt_unix_seconds(pt_value value, zend_long env_offset, zend_long *seconds, pt_function_error *error);
+pt_s pt_format_date(pt_arena *arena, zend_long seconds, pt_s format, zend_long offset);
+
 /* JSON (VAL-12, FUN-26). */
 typedef struct pt_bind_error {
     const char *code;
@@ -521,15 +528,22 @@ void pt_host_argument_list(HashTable *args, zval *result);
 
 /* The function groups Functions\Strings, Functions\Numbers, Functions\Encoding and Functions\Collection (pt_groups.c):
  * MINIT registers them with the classes of the group interface, and their table() methods give the library tables;
- * Encoding::toJson and Encoding::percentEncode are the methods of the encoding group. */
+ * Encoding::toJson and Encoding::percentEncode are the methods of the encoding group. Functions\Dates (FUN-37 to FUN-42)
+ * takes the environment as its second argument, and its methods are the date operations of the library. */
 void pt_groups_register(zend_class_entry *strings, zend_class_entry *numbers, zend_class_entry *encoding,
-                        zend_class_entry *collection);
+                        zend_class_entry *collection, zend_class_entry *dates);
 void pt_strings_table(INTERNAL_FUNCTION_PARAMETERS);
 void pt_numbers_table(INTERNAL_FUNCTION_PARAMETERS);
 void pt_encoding_table(INTERNAL_FUNCTION_PARAMETERS);
 void pt_collection_table(INTERNAL_FUNCTION_PARAMETERS);
 void pt_encoding_to_json(INTERNAL_FUNCTION_PARAMETERS);
 void pt_encoding_percent_encode(INTERNAL_FUNCTION_PARAMETERS);
+void pt_dates_table(INTERNAL_FUNCTION_PARAMETERS);
+void pt_dates_parse_offset(INTERNAL_FUNCTION_PARAMETERS);
+void pt_dates_days_from_civil(INTERNAL_FUNCTION_PARAMETERS);
+void pt_dates_civil_from_days(INTERNAL_FUNCTION_PARAMETERS);
+void pt_dates_to_unix_seconds(INTERNAL_FUNCTION_PARAMETERS);
+void pt_dates_format(INTERNAL_FUNCTION_PARAMETERS);
 
 /* ---------------------------------------------------------------------------------------------------
  * Rendering (RT-*).

@@ -135,6 +135,37 @@ ZEND_METHOD(Polyspec_Template_Functions_Encoding, percentEncode)
     pt_encoding_percent_encode(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+/* The table() and the methods of Functions\Dates (pt_groups.c). */
+ZEND_METHOD(Polyspec_Template_Functions_Dates, table)
+{
+    pt_dates_table(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Dates, parseOffset)
+{
+    pt_dates_parse_offset(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Dates, daysFromCivil)
+{
+    pt_dates_days_from_civil(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Dates, civilFromDays)
+{
+    pt_dates_civil_from_days(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Dates, toUnixSeconds)
+{
+    pt_dates_to_unix_seconds(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Dates, format)
+{
+    pt_dates_format(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* ----------------------------------------------------------------------------------------------- */
 /* Functions\FunctionGroup and Functions\Helpers (S10): the argument helpers of the function groups. */
 /* A FunctionError is thrown with the code of ErrorCode and the message of the library.              */
@@ -2957,7 +2988,8 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_groups_register(register_class_Polyspec_Template_Functions_Strings(function_group),
         register_class_Polyspec_Template_Functions_Numbers(function_group),
         register_class_Polyspec_Template_Functions_Encoding(function_group),
-        register_class_Polyspec_Template_Functions_Collection(function_group));
+        register_class_Polyspec_Template_Functions_Collection(function_group),
+        register_class_Polyspec_Template_Functions_Dates(function_group));
     register_class_Polyspec_Template_ErrorCode();
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
     register_class_Polyspec_Template_Value_Bind();
