@@ -14,6 +14,7 @@ from polyspec.template import (
     Engine,
     EngineOptions,
     FsLoader,
+    TemplateError,
     bind,
     merge,
 )
@@ -24,6 +25,25 @@ CASES = json.loads((FIXTURE / "cases.json").read_text(encoding="utf-8"))
 
 def engine() -> Engine:
     return Engine(AstProgram(EngineOptions(loader=FsLoader(str(FIXTURE)))))
+
+
+def failure(operation) -> dict:
+    try:
+        operation()
+    except TemplateError as error:
+        return error.to_object()
+    raise AssertionError("the operation did not fail")
+
+
+def expect_failure(testcase, operation, code: str) -> None:
+    error = failure(operation)
+    testcase.assertEqual(
+        {
+            key: error[key]
+            for key in ("code", "template", "line", "col", "offset", "end")
+        },
+        {"code": code, "template": "", "line": 0, "col": 0, "offset": 0, "end": 0},
+    )
 
 
 class BoundData(unittest.TestCase):
@@ -41,3 +61,22 @@ class BoundData(unittest.TestCase):
         self.assertEqual(
             engine().render("page.tpl", merged), CASES["outputs"]["merged"]
         )
+
+    # ERR-14: a failed bind has the code of the failed check, an empty template and zero positions.
+    def test_bind_fails_with_the_code_of_the_failed_check_without_a_position(self):
+        for value in (5, [1], '{"a":1}'):
+            expect_failure(
+                self, lambda value=value: bind(value), "E_DATA_UNSUPPORTED_TYPE"
+            )
+        expect_failure(
+            self, lambda: bind({"n": float("nan")}), "E_DATA_NUMBER_NOT_FINITE"
+        )
+        expect_failure(self, lambda: bind({"n": 2**53}), "E_DATA_NUMBER_RANGE")
+        expect_failure(self, lambda: bind({"s": "\ud800"}), "E_DATA_INVALID_UTF8")
+        deep = 1
+        for _ in range(65):
+            deep = [deep]
+        expect_failure(self, lambda: bind({"deep": deep}), "E_DATA_DEPTH")
+        bound = bind({"a": 1})
+        expect_failure(self, lambda: merge(bound, {"b": 2}), "E_DATA_UNSUPPORTED_TYPE")
+        expect_failure(self, lambda: merge({"b": 2}, bound), "E_DATA_UNSUPPORTED_TYPE")

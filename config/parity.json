@@ -172,6 +172,19 @@
       ]
     },
     {
+      "id": "bind-merge-errors",
+      "requirements": ["ERR-14"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/value/bound.test.ts", "id": "bound data (VAL-22) › errors of bind and merge (ERR-14) › fails with the code of the failed check" },
+        { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestBindErrors" },
+        { "implementation": "rust", "test": "packages/rust/tests/bound.rs", "id": "bind_reports_the_code_of_the_failed_check_without_a_position" },
+        { "implementation": "php", "test": "packages/php/tests/Value/BoundMapTest.php", "id": "testBindFailsWithTheCodeOfTheFailedCheck" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/BoundMapTest.php", "id": "testBindFailsWithTheCodeOfTheFailedCheck" },
+        { "implementation": "python", "test": "packages/python/tests/test_bound.py", "id": "test_bind_fails_with_the_code_of_the_failed_check_without_a_position" }
+      ]
+    },
+    {
       "id": "host-binding-numbers",
       "requirements": ["VAL-2"],
       "kind": "feature",
@@ -199,7 +212,7 @@
     },
     {
       "id": "invalid-json",
-      "requirements": ["VAL-12", "ERR-1", "ERR-12", "ERR-13", "ERR-14"],
+      "requirements": ["VAL-12", "ERR-1", "ERR-12", "ERR-13"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "JSON text › reports text that is not one JSON document as E_DATA_INVALID_JSON (VAL-12)" },
