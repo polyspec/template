@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 610a57735ec92aafb82c9ef18520815feb61ffab626ab3ef29ff6ceb647a7827 -->
+<!-- source-sha256: 76357e1f865e487dda7491ab46957f2fc0f4077347bd2cd2108a14b3356696e8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-6-4: PHP 확장의 C renderer와 C RuntimeBindings는 built-in 호출의 arity 메시지와 실패한 host 호출의 메시지를 각각 공유 함수 하나로 만든다(`pt_bind.c`의 `pt_arity_message`, `pt_host_failure`); 메시지와 동작은 바뀌지 않는다. Red: refactor이므로 기준은 바뀌기 전 코드다: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/RuntimeBindingsTest.php` 5 passed, ExprFixturesTest 73 passed, HostBindingTest 16 passed, ConformanceTest 768 passed, `make lint-php-ext` exit 0; green: 같은 명령이 바뀐 뒤에도 같은 수로 통과하고, `make ext`가 exit 0이다 (T26.7-2-6-4).
 
 - T26.7-2-4: PHP 확장은 라이브러리의 `PageCache`를 확장의 class로 등록한다 (S10). 항목은 cache의 clock 기준으로 time to live가 지날 때까지 HTML을 보관하며(clock이 없으면 microtime), null이나 0인 time to live는 영구 보관하고, 음수나 유한하지 않은 값은 거부한다. Red: 위 PageCacheClassTest 명령이 exit 1, "PageCache is not registered by the extension", Failures: 1; green: 같은 명령 OK (3 tests, 12 assertions), `packages/php/tests/PageCacheTest.php` OK (2 tests, 6 assertions) (T26.7-2-4).
 

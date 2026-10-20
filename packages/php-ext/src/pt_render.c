@@ -374,14 +374,12 @@ static pt_value pt_host_result(pt_ctx *ctx, const char *name, zval *result, cons
     if (EG(exception)) {
         zval_ptr_dtor(result);
         zend_object *passthrough = NULL;
-        zend_string *message = pt_take_exception(&passthrough);
+        zend_string *text = pt_host_failure(name, &passthrough);
         if (passthrough != NULL) {
             pt_error_clear(&ctx->run->error);
             ctx->run->error.exception = passthrough;
             longjmp(ctx->run->jump, 1);
         }
-        zend_string *text = zend_strpprintf(0, "%s failed: %s", name, ZSTR_VAL(message));
-        zend_string_release(message);
         pt_ctx_fail(ctx, PT_E_RUNTIME_HOST_FUNCTION, frame, expr->start, expr->end, text);
     }
     pt_value value = {0};
@@ -560,11 +558,9 @@ static pt_value pt_call(pt_ctx *ctx, const pt_expr *expr, pt_value *args, const 
     const pt_builtin *builtin = pt_builtin_find(expr->name.s, expr->name.n);
     if (builtin != NULL) {
         uint32_t count = expr->count;
-        if (count < builtin->min || count > builtin->max) {
-            if (builtin->min == builtin->max) {
-                PT_FAIL_AT(ctx, PT_E_RUNTIME_ARITY, frame, expr, "%s accepts %u arguments, got %u", expr->name.s, builtin->min, count);
-            }
-            PT_FAIL_AT(ctx, PT_E_RUNTIME_ARITY, frame, expr, "%s accepts %u to " ZEND_LONG_FMT " arguments, got %u", expr->name.s, builtin->min, builtin->max == UINT32_MAX ? ZEND_LONG_MAX : (zend_long)builtin->max, count);
+        zend_string *arity = pt_arity_message(expr->name.s, builtin, count);
+        if (arity != NULL) {
+            pt_ctx_fail(ctx, PT_E_RUNTIME_ARITY, frame, expr->start, expr->end, arity);
         }
         pt_value result = {0};
         pt_function_error error = {NULL, NULL};

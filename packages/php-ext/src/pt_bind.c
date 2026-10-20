@@ -61,6 +61,29 @@ zend_string *pt_take_exception(zend_object **passthrough)
     return text;
 }
 
+zend_string *pt_host_failure(const char *name, zend_object **passthrough)
+{
+    zend_string *message = pt_take_exception(passthrough);
+    if (message == NULL) {
+        return NULL;
+    }
+    zend_string *text = zend_strpprintf(0, "%s failed: %s", name, ZSTR_VAL(message));
+    zend_string_release(message);
+    return text;
+}
+
+zend_string *pt_arity_message(const char *name, const pt_builtin *builtin, uint32_t count)
+{
+    if (count >= builtin->min && count <= builtin->max) {
+        return NULL;
+    }
+    if (builtin->min == builtin->max) {
+        return zend_strpprintf(0, "%s accepts %u arguments, got %u", name, builtin->min, count);
+    }
+    zend_long maximum = builtin->max == UINT32_MAX ? ZEND_LONG_MAX : (zend_long)builtin->max;
+    return zend_strpprintf(0, "%s accepts %u to " ZEND_LONG_FMT " arguments, got %u", name, builtin->min, maximum, count);
+}
+
 static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result, pt_bind_error *error);
 
 /* Binds the entries of a table as a map; with `public_only` the table holds object properties and

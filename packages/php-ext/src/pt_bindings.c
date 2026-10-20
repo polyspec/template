@@ -192,15 +192,13 @@ static bool pt_host_outcome(zval *self, zend_string *name, zval *outcome, zval *
     if (EG(exception)) {
         zval_ptr_dtor(outcome);
         zend_object *passthrough = NULL;
-        zend_string *message = pt_take_exception(&passthrough);
+        zend_string *text = pt_host_failure(ZSTR_VAL(name), &passthrough);
         if (passthrough != NULL) {
             zval error;
             ZVAL_OBJ(&error, passthrough);
             zend_throw_exception_object(&error);
             return false;
         }
-        zend_string *text = zend_strpprintf(0, "%s failed: %s", ZSTR_VAL(name), ZSTR_VAL(message));
-        zend_string_release(message);
         pt_throw_at(self, PT_E_RUNTIME_HOST_FUNCTION, frame, span, text);
         return false;
     }
@@ -569,15 +567,9 @@ static bool pt_class_call_at(zval *self, zend_string *class_name, zend_string *m
 static bool pt_builtin_at(zval *self, const pt_builtin *builtin, zend_string *name, zval *args, zval *frame, zval *span, zval *result)
 {
     uint32_t count = zend_hash_num_elements(Z_ARRVAL_P(args));
-    if (count < builtin->min || count > builtin->max) {
-        zend_long maximum = builtin->max == UINT32_MAX ? ZEND_LONG_MAX : (zend_long)builtin->max;
-        zend_string *message;
-        if (builtin->min == builtin->max) {
-            message = zend_strpprintf(0, "%s accepts %u arguments, got %u", ZSTR_VAL(name), builtin->min, count);
-        } else {
-            message = zend_strpprintf(0, "%s accepts %u to " ZEND_LONG_FMT " arguments, got %u", ZSTR_VAL(name), builtin->min, maximum, count);
-        }
-        pt_throw_at(self, PT_E_RUNTIME_ARITY, frame, span, message);
+    zend_string *arity = pt_arity_message(ZSTR_VAL(name), builtin, count);
+    if (arity != NULL) {
+        pt_throw_at(self, PT_E_RUNTIME_ARITY, frame, span, arity);
         return false;
     }
     pt_arena arena;

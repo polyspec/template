@@ -504,6 +504,13 @@ bool pt_object_property(pt_arena *arena, zend_object *object, pt_s name, pt_valu
  * TemplateError, which passes unchanged. */
 zend_string *pt_take_exception(zend_object **passthrough);
 
+/* The arity message of a built-in call (E_RUNTIME_ARITY), or NULL when count is within min..max. */
+zend_string *pt_arity_message(const char *name, const pt_builtin *builtin, uint32_t count);
+
+/* The message of a failed host call (E_RUNTIME_HOST_FUNCTION): "<name> failed: <message>" for the pending exception.
+ * A native TemplateError passes unchanged: NULL is returned and *passthrough is set. */
+zend_string *pt_host_failure(const char *name, zend_object **passthrough);
+
 /* ---------------------------------------------------------------------------------------------------
  * Value, Number and HostArgument on PHP values (pt_values.c): EXP-33 to EXP-38, VAL-8, VAL-9, VAL-21, FUN-20 to FUN-25.
  * A function that returns false has set an exception.
