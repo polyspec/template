@@ -83,11 +83,22 @@ func renderHostValue(t *testing.T, target string, templates map[string]string) (
 		return describeArguments(args, order), nil
 	})
 	register("mutate", func(args []value.Value, _ functions.Context) (any, error) {
-		list := args[0].(value.List)
+		list, ok := args[0].(value.List)
+		if !ok {
+			t.Fatalf("argument 1 is %T, not a list", args[0])
+		}
 		list[0] = "changed"
-		args[1].(*value.OrderedMap).Set("k", "changed")
-		args[1].(*value.OrderedMap).Set("added", true)
-		args[2].(value.List)[0] = "changed"
+		ordered, ok := args[1].(*value.OrderedMap)
+		if !ok {
+			t.Fatalf("argument 2 is %T, not a map", args[1])
+		}
+		ordered.Set("k", "changed")
+		ordered.Set("added", true)
+		next, ok := args[2].(value.List)
+		if !ok {
+			t.Fatalf("argument 3 is %T, not a list", args[2])
+		}
+		next[0] = "changed"
 		return nil, nil
 	})
 	register("pick", func(args []value.Value, _ functions.Context) (any, error) { return args[0], nil })

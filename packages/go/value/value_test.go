@@ -70,7 +70,10 @@ func TestParseJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	m := v.(*value.OrderedMap)
+	m, ok := v.(*value.OrderedMap)
+	if !ok {
+		t.Fatalf("%T is not a map", v)
+	}
 	if keys := m.Keys(); len(keys) != 3 || keys[0] != "2" || keys[1] != "1" || keys[2] != "x" {
 		t.Errorf("order %v", keys)
 	}
@@ -93,7 +96,10 @@ func TestBind(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	m := v.(*value.OrderedMap)
+	m, ok := v.(*value.OrderedMap)
+	if !ok {
+		t.Fatalf("%T is not a map", v)
+	}
 	if keys := m.Keys(); keys[0] != "a" || keys[1] != "b" {
 		t.Errorf("map keys sorted by byte order: %v", keys)
 	}

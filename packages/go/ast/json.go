@@ -317,7 +317,8 @@ func (r *fieldReader) entries(name string, decode func(raw json.RawMessage) (any
 
 // spread decodes a spread entry (EXP-16), which a list and a map hold beside their own items.
 func spread(r *fieldReader, itemType string) *Spread {
-	return &Spread{Type: itemType, Expr: r.expr("expr"), Span: spanOf(r.fields)}
+	expr := r.expr("expr")
+	return &Spread{Type: itemType, Expr: expr, Span: r.span()}
 }
 
 func decodeListItem(raw json.RawMessage) (any, error) {
@@ -345,10 +346,4 @@ func decodeMapEntry(raw json.RawMessage) (any, error) {
 	}
 	entry := &MapEntry{Key: r.expr("key"), Value: r.expr("value")}
 	return entry, r.err
-}
-
-func spanOf(fields map[string]json.RawMessage) Span {
-	var span Span
-	_ = required(fields, "span", &span)
-	return span
 }

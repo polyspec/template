@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: d026f72890ca6d2069e4f033af428816f362b5a648402b4d8faa22b0f375906f -->
+<!-- source-sha256: 0cfc8892cce90a4e83f519b4091e32fb984b16f6428de4446165e8993128d240 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -108,5 +108,5 @@
 | T26.7-53 | PHP package의 command line은 polyspec/template을 require하는 자기 Composer package로 옮긴다(spec과 docs 먼저). CLI는 Symfony Console 위의 application이며 S10이 확장에게 구현하게 하는 library API가 아니고, 두 구현 어느 쪽 위에서도 실행된다 | docs/spec and docs/operations with their Korean twins, the new package with the bin and the commands of packages/php/src/Cli, its tests, composer.json and the layout | `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/CliTest.php` | [ ] |
 | T26.7-54 | PHP package의 AST decoder는 AST의 잘못된 property만 보고한다. collect-all mode의 upstream 2.6은 올바른 property를 additionalProperties 아래에 보고하므로, package는 orm이 고정한 opis/json-schema의 fork pin 2.6.0-p1에 의존한다(S4, 모든 repository에 같은 pin) | packages/php/composer.json and composer.lock, the root composer.json and composer.lock where they resolve opis/json-schema, the dependency review, and a test in packages/php/tests/AstDecodeTest.php | `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/AstDecodeTest.php` | [o] |
 | T26.7-55 | template은 f9eb43dd의 kit 복사본을 받는다: worktree-setup, worktree link, platform 요구, 설치 순서, link-check sibling, commit-msg hook, 오래된 twin 거부, install-dir link 검사(K348 K385 K384 K360-1 K383 K380 K382 K375) | The copies that make kit-sync writes and the hooks of make hooks | `make kit-check` | [o] |
-| T26.7-56 | packages/go와 showcase의 Go는 kit K334의 규칙으로 make lint-go를 통과한다. 오류를 그럴듯한 값으로 바꾸지 않고, 필요한 사용은 그 이유와 함께 밝힌다 | packages/go, examples/showcase/adapters/go and the Go backend of packages/compiler where it writes the generated Go | `make lint-go` | [ ] |
+| T26.7-56 | packages/go와 showcase의 Go는 kit K334의 규칙으로 make lint-go를 통과한다. 오류를 그럴듯한 값으로 바꾸지 않고, 필요한 사용은 그 이유와 함께 밝힌다 | packages/go, examples/showcase/adapters/go and the Go backend of packages/compiler where it writes the generated Go | `make lint-go` | [o] |
 | T26.7-57 | packages/rust와 compiler가 showcase를 위해 만드는 Rust는 kit K334의 clippy 규칙으로 make lint-rust를 통과한다(오류를 버리는 unwrap_or, unwrap_or_else, ok, 타입 없는 let _ 없음; 필요한 사용은 이유를 가진다) | packages/rust, examples/showcase/adapters/rust and the Rust backend of packages/compiler | `make lint-rust` | [ ] |

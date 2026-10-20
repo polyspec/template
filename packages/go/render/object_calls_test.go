@@ -41,7 +41,11 @@ func TestRegisteredClassFunctionIsCallable(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := runtime.RegisterClass("Order", "status_label", func(args []value.Value, _ functions.Context) (value.Value, error) {
-		return args[0].(string) + ":ok", nil
+		text, ok := args[0].(string)
+		if !ok {
+			t.Fatalf("argument is %T, not a string", args[0])
+		}
+		return text + ":ok", nil
 	}); err != nil {
 		t.Fatal(err)
 	}

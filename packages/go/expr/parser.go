@@ -225,7 +225,10 @@ func (p *Parser) parseCoalesce() (ast.Expr, error) {
 	if typ != "COALESCE" {
 		return left, nil
 	}
-	operator, _ := p.Next()
+	operator, err := p.Next()
+	if err != nil {
+		return nil, err
+	}
 	next, _, err := p.peekType()
 	if err != nil {
 		return nil, err
@@ -441,7 +444,10 @@ func (p *Parser) parsePrimary() (ast.Expr, error) {
 		return &ast.Literal{Type: "Literal", Kind: "bool", Value: tok.Type == "TRUE", Span: p.span(tok.Start, tok.End)}, nil
 	case "NUMBER":
 		p.Consume()
-		f, _ := strconv.ParseFloat(tok.Value, 64)
+		f, err := strconv.ParseFloat(tok.Value, 64)
+		if err != nil {
+			return nil, p.lexer.Error(errs.ParseInvalidNumber, tok.Start, tok.End, fmt.Sprintf("number %s is out of range", tok.Value))
+		}
 		return &ast.Literal{Type: "Literal", Kind: "number", Value: f, Span: p.span(tok.Start, tok.End)}, nil
 	case "STRING":
 		p.Consume()
@@ -469,7 +475,10 @@ type bracketEntry struct {
 }
 
 func (p *Parser) parseBracket() (ast.Expr, error) {
-	open, _ := p.Next()
+	open, err := p.Next()
+	if err != nil {
+		return nil, err
+	}
 	var entries []bracketEntry
 	arrows := 0
 	for {
@@ -520,7 +529,10 @@ func (p *Parser) parseBracket() (ast.Expr, error) {
 			return nil, p.Unexpected(tok)
 		}
 	}
-	close, _ := p.Next()
+	close, err := p.Next()
+	if err != nil {
+		return nil, err
+	}
 	span := p.span(open.Start, close.End)
 	if arrows == 0 {
 		items := make([]any, 0, len(entries))

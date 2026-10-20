@@ -85,7 +85,11 @@ func TestFilesystemLoaderFailures(t *testing.T) {
 	if err := os.Chmod(locked, 0o000); err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = os.Chmod(locked, 0o600) })
+	t.Cleanup(func() {
+		if err := os.Chmod(locked, 0o600); err != nil {
+			t.Errorf("restore %s: %v", locked, err)
+		}
+	})
 	if err := os.Mkdir(filepath.Join(root, "folder.tpl"), 0o700); err != nil {
 		t.Fatal(err)
 	}

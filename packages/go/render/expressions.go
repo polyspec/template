@@ -1,6 +1,8 @@
 package render
 
 import (
+	"fmt"
+
 	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/value"
@@ -147,7 +149,11 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 				list = append(list, inner...)
 				continue
 			}
-			v, err := e.Evaluate(item.(ast.Expr), frame)
+			itemExpr, ok := item.(ast.Expr)
+			if !ok {
+				return nil, fmt.Errorf("list item of type %T is not an expression", item)
+			}
+			v, err := e.Evaluate(itemExpr, frame)
 			if err != nil {
 				return nil, err
 			}
@@ -171,7 +177,10 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 				}
 				continue
 			}
-			pair := entry.(*ast.MapEntry)
+			pair, ok := entry.(*ast.MapEntry)
+			if !ok {
+				return nil, fmt.Errorf("map entry of type %T is not a key and value", entry)
+			}
 			keyValue, err := e.Evaluate(pair.Key, frame)
 			if err != nil {
 				return nil, err

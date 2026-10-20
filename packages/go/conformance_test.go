@@ -115,9 +115,16 @@ func TestConformanceCases(t *testing.T) {
 					t.Fatalf("parse: %v", err)
 				}
 				var got, want any
-				data, _ := json.Marshal(tree)
-				_ = json.Unmarshal(data, &got)
-				_ = json.Unmarshal(expectedAST, &want)
+				data, err := json.Marshal(tree)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := json.Unmarshal(data, &got); err != nil {
+					t.Fatal(err)
+				}
+				if err := json.Unmarshal(expectedAST, &want); err != nil {
+					t.Fatalf("expected.ast.json: %v", err)
+				}
 				if !reflect.DeepEqual(got, want) {
 					t.Errorf("ast differs\n got %s\nwant %s", data, expectedAST)
 				}
@@ -125,7 +132,9 @@ func TestConformanceCases(t *testing.T) {
 			html, err := renderCase(t, c)
 			if expectedError := readIf(filepath.Join(c.Dir, "expected.error.json")); expectedError != nil {
 				var want map[string]any
-				_ = json.Unmarshal(expectedError, &want)
+				if err := json.Unmarshal(expectedError, &want); err != nil {
+					t.Fatalf("expected.error.json: %v", err)
+				}
 				if err == nil {
 					t.Fatalf("expected error %v, got output %q", want, html)
 				}

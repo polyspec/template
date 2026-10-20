@@ -26,7 +26,10 @@ func lookupPath(v value.Value, path string) value.Value {
 			if !indexPattern.MatchString(segment) {
 				return nil
 			}
-			i, _ := strconv.Atoi(segment)
+			i, err := strconv.Atoi(segment)
+			if err != nil {
+				return nil // an index beyond the range of int is beyond the end of any list
+			}
 			if i >= len(x) {
 				return nil
 			}

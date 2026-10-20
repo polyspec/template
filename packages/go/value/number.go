@@ -52,7 +52,7 @@ func NumberToString(x float64) string {
 func ShortestDigits(x float64) (digits string, n int) {
 	text := strconv.FormatFloat(x, 'e', -1, 64)
 	mantissa, exp, _ := strings.Cut(text, "e")
-	e, _ := strconv.Atoi(exp)
+	e, _ := strconv.Atoi(exp) //nolint:errcheck // exp is the exponent that FormatFloat writes in the 'e' format: an integer Atoi always reads
 	digits = strings.Replace(mantissa, ".", "", 1)
 	digits = strings.TrimRight(digits, "0")
 	if digits == "" {
@@ -137,7 +137,7 @@ func RoundNumber(x float64, decimals int) float64 {
 	if fraction != "" {
 		text += "." + fraction
 	}
-	result, _ := strconv.ParseFloat(text, 64)
+	result, _ := strconv.ParseFloat(text, 64) //nolint:errcheck // text is the decimal of a finite float64; out of range, ParseFloat returns ±Inf, which is the value
 	if negative && result != 0 {
 		return -result
 	}

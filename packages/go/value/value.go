@@ -3,11 +3,23 @@
 package value
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 )
+
+// must returns v as T. The callers have checked TypeOf(v), so a value of another type is a broken invariant of the package:
+// it panics with both types rather than comparing a zero value.
+func must[T any](v Value) T {
+	x, ok := v.(T)
+	if !ok {
+		var want T
+		panic(fmt.Sprintf("value: %T is not %T", v, want))
+	}
+	return x
+}
 
 // Value is a template scalar, collection, safe string or retained native object.
 type Value = any
@@ -121,9 +133,6 @@ func ParseNumericString(s string) (float64, bool) {
 	}
 	f, err := strconv.ParseFloat(t, 64)
 	if err != nil {
-		if numErr, ok := err.(*strconv.NumError); ok && numErr.Err == strconv.ErrRange {
-			return 0, false
-		}
 		return 0, false
 	}
 	return f, true
@@ -138,12 +147,12 @@ func LooseEquals(a, b Value) bool {
 	if ta == TypeNumber && tb == TypeString {
 		text, _ := TextOf(b)
 		n, ok := ParseNumericString(text)
-		return ok && n == a.(float64)
+		return ok && n == must[float64](a)
 	}
 	if ta == TypeString && tb == TypeNumber {
 		text, _ := TextOf(a)
 		n, ok := ParseNumericString(text)
-		return ok && n == b.(float64)
+		return ok && n == must[float64](b)
 	}
 	return false
 }
@@ -159,15 +168,15 @@ func sameTypeEquals(a, b Value, t Type) bool {
 	case TypeNull:
 		return true
 	case TypeBool:
-		return a.(bool) == b.(bool)
+		return must[bool](a) == must[bool](b)
 	case TypeNumber:
-		return a.(float64) == b.(float64)
+		return must[float64](a) == must[float64](b)
 	case TypeString:
 		x, _ := TextOf(a)
 		y, _ := TextOf(b)
 		return x == y
 	case TypeList:
-		la, lb := a.(List), b.(List)
+		la, lb := must[List](a), must[List](b)
 		if len(la) != len(lb) {
 			return false
 		}
@@ -178,7 +187,7 @@ func sameTypeEquals(a, b Value, t Type) bool {
 		}
 		return true
 	case TypeMap:
-		ma, mb := a.(*OrderedMap), b.(*OrderedMap)
+		ma, mb := must[*OrderedMap](a), must[*OrderedMap](b)
 		if ma.Len() != mb.Len() {
 			return false
 		}

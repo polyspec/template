@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 561dc2e81467e349ae631af8b25cf1d94826131b70cb3281113e75cb6308be64 -->
+<!-- source-sha256: 8c29d72cb1df487901b0ddda1922993893e3c4f2d10db907487833f919a2b32d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-56: `packages/go`와 `examples/showcase/adapters/go`의 Go가 kit K334의 규칙으로 `make lint-go`를 통과한다: 오류는 반환하거나 감싸며, type assertion은 검사하고, loader는 not-exist가 아닌 파일 시스템 실패를 오류로 보고하며, 범위를 벗어난 숫자 literal은 `E_PARSE_INVALID_NUMBER`이다. 일어날 수 없는 두 오류(`strconv.FormatFloat`의 지수, `Error`의 JSON)는 이유를 적은 `//nolint:errcheck`를 유지한다. Red: `make lint-go` exit 2, 62개 finding(errcheck 60, errorlint 1, nilerr 1)이 `packages/go`(61)와 `examples/showcase/adapters/go`(1)에 있다; green: `make lint-go` exit 0이며, `value`, `ast`, `expr`, `functions`, `loader`, `parser`, `render`와 root package의 `go test`가 통과한다 (T26.7-56).
 
 - T26.7-41-1: `conformance` unit은 자기 case의 `case.json`이 이름을 적는 built-in 함수를 인용한다. FUN-1부터 FUN-8, FUN-10부터 FUN-42, 그리고 FUN-49이며, `tests/cases/functions/json-in-attribute`는 큰따옴표 속성 안의 JSON 텍스트가 따옴표를 escape하는지 확인하므로 이제 FUN-49를 적는다. case는 모든 구현에서 실행되므로, T26.7-41이 unit 없이 남긴 requirement 39개는 여섯 구현 모두에서 test를 가진다. case로 시험할 수 없는 여섯 개, 즉 host 함수 requirement FUN-43, FUN-44, FUN-45, FUN-47, FUN-48과 FUN-9는 T26.7-41-2로 간다. Red: bda64c04에서 `make parity-declarations-check`는 R13 46(FUN 45개와 RT-71); green: R13 7(FUN-9, FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, RT-71), R15는 3854로 그대로. `make template-rules-check`: 255 cases, 0 findings (T26.7-41-1).
 

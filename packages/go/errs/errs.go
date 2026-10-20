@@ -78,7 +78,7 @@ func (e *Error) Error() string {
 
 // JSON returns the error object as JSON text.
 func (e *Error) JSON() []byte {
-	data, _ := json.Marshal(e)
+	data, _ := json.Marshal(e) //nolint:errcheck // Error holds only strings and integers, which json.Marshal always encodes
 	return data
 }
 

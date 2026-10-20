@@ -87,7 +87,7 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 			}
 		case *ast.FuncDecl:
 			if node.Recv != nil {
-				receiver := receiverName(node.Recv.List[0].Type)
+				receiver := receiverName(t, node.Recv.List[0].Type)
 				methods[receiver] = append(methods[receiver], node)
 			}
 		}
@@ -135,7 +135,11 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 		for _, spec := range general.Specs {
 			named, ok := spec.(*ast.TypeSpec)
 			if ok && named.Name.Name == "Engine" {
-				astEngine, _ = named.Type.(*ast.StructType)
+				structure, isStruct := named.Type.(*ast.StructType)
+				if !isStruct {
+					t.Fatal("Engine is not a struct")
+				}
+				astEngine = structure
 			}
 		}
 	}
@@ -149,7 +153,7 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 	var bindingMethods []*ast.FuncDecl
 	for _, declaration := range bindingsFile.Decls {
 		function, ok := declaration.(*ast.FuncDecl)
-		if ok && function.Recv != nil && receiverName(function.Recv.List[0].Type) == "RuntimeBindings" {
+		if ok && function.Recv != nil && receiverName(t, function.Recv.List[0].Type) == "RuntimeBindings" {
 			bindingMethods = append(bindingMethods, function)
 		}
 	}
@@ -176,7 +180,7 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 	contextMethods := map[string][]string{}
 	for _, declaration := range contextFile.Decls {
 		if function, ok := declaration.(*ast.FuncDecl); ok && function.Recv != nil {
-			receiver := receiverName(function.Recv.List[0].Type)
+			receiver := receiverName(t, function.Recv.List[0].Type)
 			contextMethods[receiver] = append(contextMethods[receiver], function.Name.Name)
 		}
 		general, ok := declaration.(*ast.GenDecl)
@@ -189,7 +193,11 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 				contextTypes[named.Name.Name] = named
 			}
 			if ok && named.Name.Name == "RuntimeServices" {
-				services, _ = named.Type.(*ast.InterfaceType)
+				iface, isInterface := named.Type.(*ast.InterfaceType)
+				if !isInterface {
+					t.Fatal("RuntimeServices is not an interface")
+				}
+				services = iface
 			}
 		}
 	}
@@ -228,7 +236,7 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 	var runtimeEnvironment *ast.StructType
 	runtimeMethods := []*ast.FuncDecl{}
 	for _, declaration := range runtimeFile.Decls {
-		if function, ok := declaration.(*ast.FuncDecl); ok && function.Recv != nil && receiverName(function.Recv.List[0].Type) == "RuntimeEnvironment" {
+		if function, ok := declaration.(*ast.FuncDecl); ok && function.Recv != nil && receiverName(t, function.Recv.List[0].Type) == "RuntimeEnvironment" {
 			runtimeMethods = append(runtimeMethods, function)
 		}
 		general, ok := declaration.(*ast.GenDecl)
@@ -238,7 +246,11 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 		for _, spec := range general.Specs {
 			named, ok := spec.(*ast.TypeSpec)
 			if ok && named.Name.Name == "RuntimeEnvironment" {
-				runtimeEnvironment, _ = named.Type.(*ast.StructType)
+				structure, isStruct := named.Type.(*ast.StructType)
+				if !isStruct {
+					t.Fatal("RuntimeEnvironment is not a struct")
+				}
+				runtimeEnvironment = structure
 			}
 		}
 	}
@@ -259,11 +271,16 @@ func TestCompilerRuntimeInterface(t *testing.T) {
 	}
 }
 
-func receiverName(expression ast.Expr) string {
+func receiverName(t *testing.T, expression ast.Expr) string {
+	t.Helper()
 	if pointer, ok := expression.(*ast.StarExpr); ok {
 		expression = pointer.X
 	}
-	return expression.(*ast.Ident).Name
+	ident, ok := expression.(*ast.Ident)
+	if !ok {
+		t.Fatalf("receiver is %T, not an identifier", expression)
+	}
+	return ident.Name
 }
 
 func fieldCount(fields *ast.FieldList) int {
@@ -382,7 +399,11 @@ func TestBoundMapInterface(t *testing.T) {
 			case *ast.GenDecl:
 				for _, specification := range current.Specs {
 					if typeSpec, ok := specification.(*ast.TypeSpec); ok && typeSpec.Name.Name == mapping.Type {
-						for _, name := range fieldNames(typeSpec.Type.(*ast.StructType)) {
+						structure, isStruct := typeSpec.Type.(*ast.StructType)
+						if !isStruct {
+							t.Fatalf("%s is not a struct", mapping.Type)
+						}
+						for _, name := range fieldNames(structure) {
 							if ast.IsExported(name) {
 								t.Errorf("BoundMap has the exported field %s", name)
 							}
@@ -394,7 +415,7 @@ func TestBoundMapInterface(t *testing.T) {
 					continue
 				}
 				if current.Recv != nil {
-					if receiverName(current.Recv.List[0].Type) == mapping.Type {
+					if receiverName(t, current.Recv.List[0].Type) == mapping.Type {
 						t.Errorf("BoundMap has the exported method %s", current.Name.Name)
 					}
 					continue
@@ -421,7 +442,11 @@ func TestBoundMapInterface(t *testing.T) {
 	for _, declaration := range root.Decls {
 		if general, ok := declaration.(*ast.GenDecl); ok && general.Tok == token.VAR {
 			for _, specification := range general.Specs {
-				for _, name := range specification.(*ast.ValueSpec).Names {
+				valueSpec, isValue := specification.(*ast.ValueSpec)
+				if !isValue {
+					t.Fatalf("package template declares %T, not a value", specification)
+				}
+				for _, name := range valueSpec.Names {
 					aliases[name.Name] = true
 				}
 			}

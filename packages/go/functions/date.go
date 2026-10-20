@@ -27,9 +27,9 @@ func ParseOffset(text string) (int64, bool) {
 	if m == nil {
 		return 0, false
 	}
-	hours, _ := strconv.Atoi(m[2])
-	minutes, _ := strconv.Atoi(m[3])
-	if hours > 23 || minutes > 59 {
+	hours, errHours := strconv.Atoi(m[2])
+	minutes, errMinutes := strconv.Atoi(m[3])
+	if errHours != nil || errMinutes != nil || hours > 23 || minutes > 59 {
 		return 0, false
 	}
 	offset := int64(hours*3600 + minutes*60)
@@ -93,15 +93,11 @@ func ToUnixSeconds(v value.Value, envOffset int64) (int64, error) {
 	if m == nil {
 		return 0, typeError("%q is not a date", text)
 	}
-	year, _ := strconv.ParseInt(m[1], 10, 64)
-	month, _ := strconv.ParseInt(m[2], 10, 64)
-	day, _ := strconv.ParseInt(m[3], 10, 64)
-	var hour, minute, second int64
-	if m[4] != "" {
-		hour, _ = strconv.ParseInt(m[4], 10, 64)
-		minute, _ = strconv.ParseInt(m[5], 10, 64)
-		second, _ = strconv.ParseInt(m[6], 10, 64)
+	fields, ok := dateFields(m[1:7])
+	if !ok {
+		return 0, typeError("%q is not a date", text)
 	}
+	year, month, day, hour, minute, second := fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]
 	if month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59 {
 		return 0, typeError("%q is not a date", text)
 	}
@@ -113,6 +109,23 @@ func ToUnixSeconds(v value.Value, envOffset int64) (int64, error) {
 		}
 	}
 	return daysFromCivil(year, month, day)*86400 + hour*3600 + minute*60 + second - offset, nil
+}
+
+// dateFields reads the decimal fields of a date match; an absent optional field is zero, and a field that does not fit int64
+// is not a date.
+func dateFields(texts []string) ([]int64, bool) {
+	fields := make([]int64, len(texts))
+	for i, text := range texts {
+		if text == "" {
+			continue
+		}
+		n, err := strconv.ParseInt(text, 10, 64)
+		if err != nil {
+			return nil, false
+		}
+		fields[i] = n
+	}
+	return fields, true
 }
 
 func pad(v int64, width int) string {

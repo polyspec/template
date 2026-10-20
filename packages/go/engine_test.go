@@ -22,7 +22,11 @@ func TestEngineRender(t *testing.T) {
 		t.Fatalf("render: %q %v", out, err)
 	}
 	loader.Set("a.tpl", "2")
-	if out, _ := engine.Render("a.tpl", nil, template.RenderOptions{}); out != "2" {
+	out, err = engine.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "2" {
 		t.Errorf("cache not refreshed: %q", out)
 	}
 }
@@ -52,11 +56,19 @@ func TestArtifactRefreshPolicies(t *testing.T) {
 		t.Fatal(err)
 	}
 	dev := template.NewEngine(devProgram)
-	if out, _ := dev.Render("a.tpl", nil, template.RenderOptions{}); out != "1" {
+	out, err := dev.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "1" {
 		t.Fatalf("dev initial: %q", out)
 	}
 	devLoader.Set("a.tpl", "2")
-	if out, _ := dev.Render("a.tpl", nil, template.RenderOptions{}); out != "2" {
+	out, err = dev.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "2" {
 		t.Fatalf("dev refresh: %q", out)
 	}
 
@@ -66,11 +78,19 @@ func TestArtifactRefreshPolicies(t *testing.T) {
 		t.Fatal(err)
 	}
 	immutable := template.NewEngine(immutableProgram)
-	if out, _ := immutable.Render("a.tpl", nil, template.RenderOptions{}); out != "1" {
+	out, err = immutable.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "1" {
 		t.Fatalf("immutable initial: %q", out)
 	}
 	immutableLoader.Set("a.tpl", "2")
-	if out, _ := immutable.Render("a.tpl", nil, template.RenderOptions{}); out != "1" {
+	out, err = immutable.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "1" {
 		t.Fatalf("immutable changed: %q", out)
 	}
 }
@@ -82,7 +102,13 @@ func TestHostFunctions(t *testing.T) {
 		t.Fatal(err)
 	}
 	engine := template.NewEngine(program)
-	if err := program.Register("twice", func(args []template.Value, _ functions.Context) (any, error) { return args[0].(float64) * 2, nil }); err != nil {
+	if err := program.Register("twice", func(args []template.Value, _ functions.Context) (any, error) {
+		number, ok := args[0].(float64)
+		if !ok {
+			return nil, errors.New("twice wants a number")
+		}
+		return number * 2, nil
+	}); err != nil {
 		t.Fatal(err)
 	}
 	if out, err := engine.Render("a.tpl", nil, template.RenderOptions{}); err != nil || out != "x\n4" {
@@ -94,9 +120,14 @@ func TestHostFunctions(t *testing.T) {
 	if err := program.Register("boom", func([]template.Value, functions.Context) (any, error) { return nil, errors.New("no") }); err != nil {
 		t.Fatal(err)
 	}
-	program2, _ := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"b.tpl": "x\n{= boom()}"})})
+	program2, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"b.tpl": "x\n{= boom()}"})})
+	if err != nil {
+		t.Fatal(err)
+	}
 	engine2 := template.NewEngine(program2)
-	_ = program2.Register("boom", func([]template.Value, functions.Context) (any, error) { return nil, errors.New("no") })
+	if err := program2.Register("boom", func([]template.Value, functions.Context) (any, error) { return nil, errors.New("no") }); err != nil {
+		t.Fatal(err)
+	}
 	_, err = engine2.Render("b.tpl", nil, template.RenderOptions{})
 	var te *errs.Error
 	if !errors.As(err, &te) || te.Code != errs.RuntimeHostFunction || te.Line != 2 {

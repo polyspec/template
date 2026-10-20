@@ -307,10 +307,16 @@ func LexStringLiteral(source *lexer.Source, start int) (StringLiteral, error) {
 			if index+6 > len(text) || !isHex(text[index+2:index+6]) {
 				return StringLiteral{}, source.Error(errs.ParseInvalidEscape, index, index+2, "invalid escape sequence")
 			}
-			code, _ := strconv.ParseUint(text[index+2:index+6], 16, 32)
+			code, err := strconv.ParseUint(text[index+2:index+6], 16, 32)
+			if err != nil {
+				return StringLiteral{}, source.Error(errs.ParseInvalidEscape, index, index+2, "invalid escape sequence")
+			}
 			index += 6
 			if code >= 0xd800 && code <= 0xdbff && index+6 <= len(text) && text[index] == '\\' && text[index+1] == 'u' && isHex(text[index+2:index+6]) {
-				low, _ := strconv.ParseUint(text[index+2:index+6], 16, 32)
+				low, err := strconv.ParseUint(text[index+2:index+6], 16, 32)
+				if err != nil {
+					return StringLiteral{}, source.Error(errs.ParseInvalidEscape, index, index+2, "invalid escape sequence")
+				}
 				if low >= 0xdc00 && low <= 0xdfff {
 					code = 0x10000 + (code-0xd800)<<10 + (low - 0xdc00)
 					index += 6

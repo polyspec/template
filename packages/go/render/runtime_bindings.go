@@ -273,7 +273,10 @@ func (r *RuntimeBindings) Index(container, key value.Value, frame *Frame, span a
 		if number, ok := key.(float64); ok && number == math.Trunc(number) {
 			position = int(number)
 		} else if text, ok := value.TextOf(key); ok && runtimeIndexPattern.MatchString(text) {
-			position, _ = strconv.Atoi(text)
+			// An index beyond the range of int is beyond the end of any list, so the position stays absent.
+			if n, err := strconv.Atoi(text); err == nil {
+				position = n
+			}
 		}
 		if position >= 0 && position < len(current) {
 			return current[position], nil
@@ -401,7 +404,11 @@ func nativeCall(container value.Value, method string, args []value.Value) (value
 		}
 		nilable := last.Kind() == reflect.Chan || last.Kind() == reflect.Func || last.Kind() == reflect.Interface || last.Kind() == reflect.Map || last.Kind() == reflect.Pointer || last.Kind() == reflect.Slice
 		if !nilable || !last.IsNil() {
-			return nil, true, last.Interface().(error)
+			callErr, ok := last.Interface().(error)
+			if !ok {
+				return nil, true, fmt.Errorf("%s returned a value that is not an error", method)
+			}
+			return nil, true, callErr
 		}
 	}
 	return nativeValue(outputs[0]), true, nil

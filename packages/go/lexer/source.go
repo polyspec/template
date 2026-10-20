@@ -30,9 +30,12 @@ func FromBytes(name string, input []byte) (*Source, error) {
 	return &Source{Name: name, Text: string(data), Lines: errs.NewLineIndex(data)}, nil
 }
 
-// FromString builds a source from text.
+// FromString builds a source from text. Text that is not valid UTF-8 is a caller's error: it panics with the error of FromBytes.
 func FromString(name, text string) *Source {
-	source, _ := FromBytes(name, []byte(text))
+	source, err := FromBytes(name, []byte(text))
+	if err != nil {
+		panic(fmt.Sprintf("lexer.FromString: %v", err))
+	}
 	return source
 }
 

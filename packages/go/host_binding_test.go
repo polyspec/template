@@ -173,8 +173,14 @@ func TestNativeObjectMembersAndArguments(t *testing.T) {
 		t.Errorf("fail = %v", got)
 	}
 	if err := program.Register("same", func(args []value.Value, _ functions.Context) (any, error) {
-		list := args[1].(value.List)
-		ordered := args[2].(*value.OrderedMap)
+		list, ok := args[1].(value.List)
+		if !ok {
+			t.Fatalf("argument 2 is %T, not a list", args[1])
+		}
+		ordered, ok := args[2].(*value.OrderedMap)
+		if !ok {
+			t.Fatalf("argument 3 is %T, not a map", args[2])
+		}
 		return args[0] == any(order) && list[0] == any(order) && ordered.MustGet("k") == any(order), nil
 	}); err != nil {
 		t.Fatal(err)

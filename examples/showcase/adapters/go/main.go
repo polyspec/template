@@ -252,10 +252,13 @@ func (a *Adapter) BuildRequest(scenario Scenario) (RenderRequest, error) {
 	return RenderRequest(scenario), nil
 }
 
-func nativeDefines(defines DefineRegistry) map[string]template.DefineInput {
+func nativeDefines(defines DefineRegistry) (map[string]template.DefineInput, error) {
 	result := make(map[string]template.DefineInput, defines.Len())
 	for _, id := range defines.Keys() {
-		entry := defines.MustGet(id).(DefineEntry)
+		entry, ok := defines.MustGet(id).(DefineEntry)
+		if !ok {
+			return nil, fmt.Errorf("define %s is not a define entry", id)
+		}
 		input := template.DefineInput{HTML: entry.HTML}
 		if entry.Template != nil {
 			input.Template = *entry.Template
@@ -265,7 +268,7 @@ func nativeDefines(defines DefineRegistry) map[string]template.DefineInput {
 		}
 		result[id] = input
 	}
-	return result
+	return result, nil
 }
 
 func (a *Adapter) Render(request RenderRequest) (string, error) {
@@ -277,7 +280,11 @@ func (a *Adapter) Render(request RenderRequest) (string, error) {
 }
 
 func (a *Adapter) Prepare(request RenderRequest) (template.Prepared, error) {
-	options := template.RenderOptions{Define: nativeDefines(request.Define)}
+	define, err := nativeDefines(request.Define)
+	if err != nil {
+		return nil, err
+	}
+	options := template.RenderOptions{Define: define}
 	if request.Env != nil {
 		env := template.Env{Timezone: "Z", Now: float64(time.Now().Unix())}
 		if request.Env.Timezone != nil {

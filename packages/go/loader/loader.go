@@ -92,7 +92,10 @@ func (l *FSLoader) Load(name string) (Result, bool, error) {
 		var err error
 		info, err = fs.Lstat(l.fsys, component)
 		if err != nil {
-			return Result{}, false, nil
+			if errors.Is(err, fs.ErrNotExist) {
+				return Result{}, false, nil
+			}
+			return Result{}, false, err
 		}
 		if info.Mode()&fs.ModeSymlink != 0 {
 			return Result{}, false, fmt.Errorf("%s is a symbolic link", component)
