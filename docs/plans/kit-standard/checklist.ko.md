@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 9c7d1b69e8c23d95727752481ebea2fe8fd55af14e655cc929b3f202023bebc5 -->
+<!-- source-sha256: a89fb67da28882d1426f5aa8de6e8ab7cbddf34bb847056ddf60d40892b239e2 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -83,7 +83,7 @@
 | T26.7-41 | host 유닛 묶음(invalid-text, object-calls, host-function-failures, compiler-interface)은 test가 이름으로 적은 VAL, ERR, RT requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-42 | T26.7-11의 재구성 뒤에도 PHP package가 phpcs를 통과한다(PSR-12 줄 길이와 union type 공백) | packages/php/src | `make lint-php` | [o] |
 | T26.7-43 | lock과 manifest는 최신 안정 release를 따르고 dependency review가 기록된다(oxc-parser, vitest, @codemirror/view, phpunit, setuptools, ruff와 lock review 3건) | package.json, package-lock.json, composer.json and locks, packages/python/pyproject.toml, mise.toml and mise.lock, config/dependency-review.json | `make dependency-policy-check` | [ ] |
-| T26.7-44 | knip이 packages/compiler/src/backend-support.mts에서 쓰이지 않는 export(firstGroup, splitGroup, groupToSplit)와 packages/ts/src/ast-validator.mjs의 낡은 ignore를 찾지 못한다 | packages/compiler/src/backend-support.mts and config/knip-entries.json | `make lint-ts` | [ ] |
+| T26.7-44 | knip이 packages/compiler/src/backend-support.mts에서 쓰이지 않는 export(firstGroup, splitGroup, groupToSplit)와 packages/ts/src/ast-validator.mjs의 낡은 ignore를 찾지 못한다 | packages/compiler/src/backend-support.mts and config/knip-entries.json | `make lint-ts` | [o] |
 | T26.7-45 | docs-check가 examples/site/index.html 링크를 통과시킨다: 문서는 추적되는 파일이 아니라 make showcase가 만드는 산출물을 가리킨다(T26.7-28의 회귀) | README.md, README.ko.md, docs/operations/showcase.md, docs/operations/showcase.ko.md and the Makefile prerequisites of docs-check | `make docs-check` | [ ] |
 | T26.7-46 | vitest가 각 test 파일을 한 번만 실행한다: include와 exclude가 var/를 제외하여 var/tools/mise 아래의 사본이 실행되지 않는다 | the vitest configuration of packages/ts and the root | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/smoke.test.ts` | [ ] |
 | T26.7-47 | worktree의 link가 examples/showcase/adapters/go/go.work를 Git이 무시하는 곳에만 쓰거나 repository가 이를 무시한다 | .gitignore and the tracked go.work of the root | `var/tools/bin/node --test tests/scripts/ignored-files.test.mts`, `node ../kit/dist/link.mjs link --siblings` | [o] |

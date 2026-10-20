@@ -545,7 +545,7 @@ export interface Backend {
 export interface GroupKind { open: string; separator: string; close: string }
 
 /** The first group that opens in `line`, by the index of its opening marker in the UTF-16 code units of the line. */
-export function firstGroup<Kind extends GroupKind>(line: string, kinds: readonly Kind[]): { start: number; kind: Kind } | null {
+function firstGroup<Kind extends GroupKind>(line: string, kinds: readonly Kind[]): { start: number; kind: Kind } | null {
   for (let index = 0; index < line.length; index += 1) {
     const kind = kinds.find(item => item.open === line[index]);
     if (kind !== undefined) return { start: index, kind };
@@ -554,7 +554,7 @@ export function firstGroup<Kind extends GroupKind>(line: string, kinds: readonly
 }
 
 /** The items of the group of `kind` that opens at `start` in `line`, and the index of its closing marker (-1 when none closes). */
-export function splitGroup(line: string, start: number, kind: GroupKind, kinds: readonly GroupKind[]): { items: string[]; end: number } {
+function splitGroup(line: string, start: number, kind: GroupKind, kinds: readonly GroupKind[]): { items: string[]; end: number } {
   const items: string[] = [];
   let depth = 0;
   let item = start + 1;
@@ -580,7 +580,7 @@ export function flatText(line: string, kinds: readonly GroupKind[]): string {
 }
 
 /** The first group of `line` to split when `line` is longer than `width` flat, with its items and the index of its closing marker; null when `line` fits or has no group. */
-export function groupToSplit<Kind extends GroupKind>(line: string, kinds: readonly Kind[], width: number): { start: number; kind: Kind; items: string[]; end: number } | null {
+function groupToSplit<Kind extends GroupKind>(line: string, kinds: readonly Kind[], width: number): { start: number; kind: Kind; items: string[]; end: number } | null {
   const found = firstGroup(line, kinds);
   if (found === null || flatText(line, kinds).length <= width) return null;
   return { ...found, ...splitGroup(line, found.start, found.kind, kinds) };
