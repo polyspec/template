@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: aaf247e3a50ab679083bc161560641b89746776d5853f8fdd3ab62c75afc9c18 -->
+<!-- source-sha256: fe1ff00262167ce39511bff66cf57633d71b7c64caa370c1a7b98e41908205bd -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-6-1: PHP 확장은 `RuntimeServices`와 `RuntimeEnvironment`를 library와 같은 이름과 signature로 등록한다. `AstProgram`은 `RuntimeServices`를 구현하고 자기 `RuntimeEnvironment`를 `runtime`으로 가지며, render는 그 environment의 함수와 limits를 읽는다. Red: `RuntimeEnvironmentTest.php`의 `run-tests.mjs phpunit` 실패 2개("Polyspec\Template\Render\RuntimeServices is not registered by the extension"), `ExprFixturesTest.php` 오류 56개(`Context::__construct()`에 `AstProgram`이 전달됨), `CompilerInterfaceTest.php` 실패 1개 (T26.7-2-6-1); green: 같은 일곱 파일이 통과한다(RuntimeEnvironmentTest OK (4 tests, 18 assertions); CompilerInterfaceTest OK (2 tests, 56 assertions); ExprFixturesTest OK (73 tests, 239 assertions); ExportsTest OK (18 tests, 27 assertions); AstProgramTest OK (8 tests, 11 assertions); ProgramEngineTest OK (4 tests, 12 assertions); ConformanceTest OK (765 tests, 1020 assertions)), `make lint-php-ext` exit 0, `make parity-declarations-check`는 RuntimeEnvironmentTest에 대해 0줄을 출력한다 (T26.7-2-6-1).
 
 - T26.7-57: `packages/rust`와 컴파일러가 showcase용으로 생성하는 Rust가 K334의 clippy 규칙 아래 `make lint-rust`를 통과한다. Rust backend(`packages/compiler/src/backends/rust.mts`)는 타입 없는 `let _ =` 대신 `let _: T = x;`를 쓰고, 시스템 시계에 `unwrap_or(0.0)`를 더 이상 쓰지 않으므로 `make typed-generator`가 만든 파일이 깨끗하게 린트된다. 파싱, 시계, 인덱스의 fallback은 이제 오류를 반환하거나(`E_PARSE_INVALID_NUMBER`; Unix epoch 이전 시계는 `E_INTERNAL`), 명시적 match로 쓰거나, 입력이 실패할 수 없는 곳에서는 `expect`를 쓰거나, 가장 작은 item에 이유를 단 allow를 둔다(`downcast_object`, `runtime_bindings`의 list 인덱스). CLI는 메시지를 그대로 유지하는 match로 종료하고, test helper는 실패한 파일을 이름으로 적는다. Red: `make lint-rust` exit 2, 최소 71개 메시지(타입 없는 `let` 27, `unwrap_or_else` 15, `ok` 14, `unwrap_or` 12, `unwrap_or_default` 1, `map_err(|_|` 2); clippy는 library가 통과한 뒤에야 CLI와 test 대상을 보고하므로 개수는 하한이다. Green: `make lint-rust` exit 0(clippy 두 번 모두 통과); 21개 cargo test 대상(decode, format, expr_fixtures, bound, cli, conformance, compiler_interface, functions, value, parser, loaders, loader_files, load_failures, host_values, object_calls, cases, analyze, delimiters, exports, package_data, page_cache)이 통과하고, `make typed-generator-check`가 artifact 30개로 exit 0 (T26.7-57).
 

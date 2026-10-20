@@ -374,17 +374,38 @@ typedef struct pt_limits {
     zend_long iterations, depth, output_bytes, expression_depth;
 } pt_limits;
 
-typedef struct pt_engine {
-    zend_string *root; /* the real path of the loader root, or NULL without a loader */
-    char open, close;
+/* The runtime services of a render: the limits and the registered callables (RT-33, FUN-43). The state lives in a
+ * RuntimeEnvironment object, which an engine holds. */
+typedef struct pt_runtime {
     pt_limits limits;
     HashTable functions; /* name => callable */
     HashTable classes;   /* "Class::method" => callable */
+} pt_runtime;
+
+typedef struct pt_runtime_object {
+    pt_runtime runtime;
+    zend_object std;
+} pt_runtime_object;
+
+static inline pt_runtime *pt_runtime_of(zend_object *object)
+{
+    return &((pt_runtime_object *)((char *)object - XtOffsetOf(pt_runtime_object, std)))->runtime;
+}
+
+typedef struct pt_engine {
+    zend_string *root; /* the real path of the loader root, or NULL without a loader */
+    char open, close;
+    zval runtime;       /* the RuntimeEnvironment object whose functions and limits a render reads */
     HashTable cache;     /* name => pt_template* */
     HashTable files;     /* "device:inode" => the name under which the loader read the file (RT-10) */
     zval loader;         /* the loader object of an AstProgram; UNDEF for the built-in filesystem loader */
     uint8_t refresh;     /* the artifact refresh policy of the loader object */
 } pt_engine;
+
+static inline pt_runtime *pt_engine_runtime(const pt_engine *engine)
+{
+    return pt_runtime_of(Z_OBJ(engine->runtime));
+}
 
 enum { PT_REFRESH_TRUE, PT_REFRESH_DEV, PT_REFRESH_FALSE };
 

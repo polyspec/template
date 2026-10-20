@@ -671,20 +671,13 @@ static bool pt_option_delimiters(HashTable *options, char *open, char *close)
     return false;
 }
 
-static bool pt_option_limits(HashTable *options, pt_limits *limits)
+/* Applies the integer entries of a limits array to the limits (RT-6); false after an exception. */
+static bool pt_apply_limits(HashTable *values, pt_limits *limits)
 {
-    zval *value = options ? zend_hash_str_find_deref(options, "limits", sizeof("limits") - 1) : NULL;
-    if (value == NULL || Z_TYPE_P(value) == IS_NULL) {
-        return true;
-    }
-    if (Z_TYPE_P(value) != IS_ARRAY) {
-        zend_throw_exception(spl_ce_InvalidArgumentException, "limits is not an array", 0);
-        return false;
-    }
     static const char *const names[] = {"iterations", "depth", "outputBytes", "expressionDepth"};
     zend_long *slots[] = {&limits->iterations, &limits->depth, &limits->output_bytes, &limits->expression_depth};
     for (int i = 0; i < 4; i++) {
-        zval *limit = zend_hash_str_find_deref(Z_ARRVAL_P(value), names[i], strlen(names[i]));
+        zval *limit = zend_hash_str_find_deref(values, names[i], strlen(names[i]));
         if (limit == NULL) {
             continue;
         }
@@ -697,9 +690,85 @@ static bool pt_option_limits(HashTable *options, pt_limits *limits)
     return true;
 }
 
+static bool pt_option_limits(HashTable *options, pt_limits *limits)
+{
+    zval *value = options ? zend_hash_str_find_deref(options, "limits", sizeof("limits") - 1) : NULL;
+    if (value == NULL || Z_TYPE_P(value) == IS_NULL) {
+        return true;
+    }
+    if (Z_TYPE_P(value) != IS_ARRAY) {
+        zend_throw_exception(spl_ce_InvalidArgumentException, "limits is not an array", 0);
+        return false;
+    }
+    return pt_apply_limits(Z_ARRVAL_P(value), limits);
+}
+
+/* The limits before any option: RuntimeEnvironment::DEFAULT_LIMITS (RT-33). */
+static const pt_limits pt_default_limits = {1000000, 32, 16 * 1024 * 1024, 64};
+
 /* ----------------------------------------------------------------------------------------------- */
-/* Engine                                                                                           */
+/* RuntimeEnvironment (RT-33, FUN-43) and engine                                                    */
 /* ----------------------------------------------------------------------------------------------- */
+
+static zend_class_entry *pt_runtime_ce;
+static zend_object_handlers pt_runtime_handlers;
+
+static zend_object *pt_runtime_create(zend_class_entry *class_type)
+{
+    pt_runtime_object *object = zend_object_alloc(sizeof(pt_runtime_object), class_type);
+    zend_object_std_init(&object->std, class_type);
+    object_properties_init(&object->std, class_type);
+    object->std.handlers = &pt_runtime_handlers;
+    object->runtime.limits = pt_default_limits;
+    zend_hash_init(&object->runtime.functions, 8, NULL, ZVAL_PTR_DTOR, 0);
+    zend_hash_init(&object->runtime.classes, 8, NULL, ZVAL_PTR_DTOR, 0);
+    return &object->std;
+}
+
+static void pt_runtime_free(zend_object *object)
+{
+    pt_runtime *runtime = pt_runtime_of(object);
+    zend_hash_destroy(&runtime->functions);
+    zend_hash_destroy(&runtime->classes);
+    zend_object_std_dtor(object);
+}
+
+/* The registered callables may hold the environment, so the collector sees them. */
+static HashTable *pt_runtime_get_gc(zend_object *object, zval **table, int *count)
+{
+    pt_runtime *runtime = pt_runtime_of(object);
+    zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
+    zval *value;
+    ZEND_HASH_FOREACH_VAL(&runtime->functions, value) {
+        zend_get_gc_buffer_add_zval(buffer, value);
+    } ZEND_HASH_FOREACH_END();
+    ZEND_HASH_FOREACH_VAL(&runtime->classes, value) {
+        zend_get_gc_buffer_add_zval(buffer, value);
+    } ZEND_HASH_FOREACH_END();
+    zend_get_gc_buffer_use(buffer, table, count);
+    return zend_std_get_properties(object);
+}
+
+/* RuntimeEnvironment::DEFAULT_LIMITS (RT-33): an immutable array in persistent memory, declared once at module start,
+ * since gen_stub does not take an array constant. */
+static void pt_declare_default_limits(zend_class_entry *ce)
+{
+    static const char *const names[] = {"iterations", "depth", "outputBytes", "expressionDepth"};
+    zend_long values[] = {pt_default_limits.iterations, pt_default_limits.depth, pt_default_limits.output_bytes, pt_default_limits.expression_depth};
+    HashTable *table = pemalloc(sizeof(HashTable), 1);
+    zend_hash_init(table, 4, NULL, NULL, 1);
+    for (int i = 0; i < 4; i++) {
+        zval value;
+        ZVAL_LONG(&value, values[i]);
+        zend_hash_update(table, zend_string_init_interned(names[i], strlen(names[i]), 1), &value);
+    }
+    GC_SET_REFCOUNT(table, 2);
+    GC_ADD_FLAGS(table, IS_ARRAY_IMMUTABLE);
+    zval array;
+    ZVAL_ARR(&array, table);
+    Z_TYPE_INFO(array) = IS_ARRAY;
+    zend_declare_class_constant_ex(ce, zend_string_init_interned("DEFAULT_LIMITS", sizeof("DEFAULT_LIMITS") - 1, 1), &array, ZEND_ACC_PUBLIC, NULL);
+}
 
 typedef struct pt_engine_object {
     pt_engine engine;
@@ -730,12 +799,7 @@ static zend_object *pt_engine_create(zend_class_entry *class_type)
     engine->refresh = PT_REFRESH_TRUE;
     engine->open = '{';
     engine->close = '}';
-    engine->limits.iterations = 1000000;
-    engine->limits.depth = 32;
-    engine->limits.output_bytes = 16 * 1024 * 1024;
-    engine->limits.expression_depth = 64;
-    zend_hash_init(&engine->functions, 8, NULL, ZVAL_PTR_DTOR, 0);
-    zend_hash_init(&engine->classes, 8, NULL, ZVAL_PTR_DTOR, 0);
+    object_init_ex(&engine->runtime, pt_runtime_ce);
     zend_hash_init(&engine->cache, 8, NULL, pt_cache_dtor, 0);
     zend_hash_init(&engine->files, 8, NULL, ZVAL_PTR_DTOR, 0);
     return &object->std;
@@ -744,8 +808,7 @@ static zend_object *pt_engine_create(zend_class_entry *class_type)
 static void pt_engine_free(zend_object *object)
 {
     pt_engine *engine = pt_engine_of(object);
-    zend_hash_destroy(&engine->functions);
-    zend_hash_destroy(&engine->classes);
+    zval_ptr_dtor(&engine->runtime);
     zend_hash_destroy(&engine->cache);
     zend_hash_destroy(&engine->files);
     zval_ptr_dtor(&engine->loader);
@@ -755,18 +818,12 @@ static void pt_engine_free(zend_object *object)
     zend_object_std_dtor(object);
 }
 
-/* The registered callables may hold the engine, so the collector sees them. */
+/* The engine holds its runtime object and the loader, so the collector sees them. */
 static HashTable *pt_engine_get_gc(zend_object *object, zval **table, int *count)
 {
     pt_engine *engine = pt_engine_of(object);
     zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
-    zval *value;
-    ZEND_HASH_FOREACH_VAL(&engine->functions, value) {
-        zend_get_gc_buffer_add_zval(buffer, value);
-    } ZEND_HASH_FOREACH_END();
-    ZEND_HASH_FOREACH_VAL(&engine->classes, value) {
-        zend_get_gc_buffer_add_zval(buffer, value);
-    } ZEND_HASH_FOREACH_END();
+    zend_get_gc_buffer_add_zval(buffer, &engine->runtime);
     zend_get_gc_buffer_add_zval(buffer, &engine->loader);
     zend_get_gc_buffer_use(buffer, table, count);
     return zend_std_get_properties(object);
@@ -783,14 +840,15 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, __construct)
     ZEND_PARSE_PARAMETERS_END();
 
     pt_engine *engine = pt_engine_of(Z_OBJ_P(ZEND_THIS));
+    pt_runtime *runtime = pt_engine_runtime(engine);
     char open, close;
-    pt_limits limits = engine->limits;
+    pt_limits limits = runtime->limits;
     if (!pt_option_delimiters(options, &open, &close) || !pt_option_limits(options, &limits)) {
         RETURN_THROWS();
     }
     engine->open = open;
     engine->close = close;
-    engine->limits = limits;
+    runtime->limits = limits;
     if (engine->root) {
         zend_string_release(engine->root);
         engine->root = NULL;
@@ -1162,7 +1220,7 @@ static bool pt_identifier(zend_string *name)
 }
 
 /* Registers a host function after validating its name (FUN-43, FUN-44); false after an exception. */
-static bool pt_register_function(pt_engine *engine, zend_string *name, zval *callable)
+static bool pt_register_function(pt_runtime *runtime, zend_string *name, zval *callable)
 {
     if (!pt_identifier(name)) {
         zend_string *quoted = pt_json_quote(ZSTR_VAL(name), ZSTR_LEN(name));
@@ -1176,12 +1234,13 @@ static bool pt_register_function(pt_engine *engine, zend_string *name, zval *cal
     }
     zval function;
     ZVAL_COPY(&function, callable);
-    zend_hash_update(&engine->functions, name, &function);
+    zend_hash_update(&runtime->functions, name, &function);
     return true;
 }
 
-/* Engine::register and AstProgram::register: a global function callable under a name. */
-static void pt_method_register(INTERNAL_FUNCTION_PARAMETERS)
+/* register of Engine, AstProgram and RuntimeEnvironment: a global function callable under a name, on the runtime
+ * that the method acts on. */
+static void pt_method_register(pt_runtime *runtime, INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *name;
     zend_fcall_info fci;
@@ -1191,16 +1250,16 @@ static void pt_method_register(INTERNAL_FUNCTION_PARAMETERS)
         Z_PARAM_FUNC(fci, fcc)
     ZEND_PARSE_PARAMETERS_END();
 
-    pt_register_function(pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, &fci.function_name);
+    pt_register_function(runtime, name, &fci.function_name);
 }
 
 ZEND_METHOD(Polyspec_Template_Native_Engine, register)
 {
-    pt_method_register(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    pt_method_register(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-/* Engine::registerClass and AstProgram::registerClass: a class method callable under Class::method. */
-static void pt_method_register_class(INTERNAL_FUNCTION_PARAMETERS)
+/* registerClass of Engine, AstProgram and RuntimeEnvironment: a class method callable under Class::method. */
+static void pt_method_register_class(pt_runtime *runtime, INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *class_name, *method;
     zend_fcall_info fci;
@@ -1218,13 +1277,13 @@ static void pt_method_register_class(INTERNAL_FUNCTION_PARAMETERS)
     zend_string *key = zend_strpprintf(0, "%s::%s", ZSTR_VAL(class_name), ZSTR_VAL(method));
     zval function;
     ZVAL_COPY(&function, &fci.function_name);
-    zend_hash_update(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->classes, key, &function);
+    zend_hash_update(&runtime->classes, key, &function);
     zend_string_release(key);
 }
 
 ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass)
 {
-    pt_method_register_class(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    pt_method_register_class(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -1879,34 +1938,25 @@ ZEND_METHOD(Polyspec_Template_AstProgram, __construct)
     } else {
         object_init_ex(&engine->loader, pt_array_loader_ce);
     }
+    /* The runtime is a RuntimeEnvironment built from the options "limits" and "functions": its constructor checks them,
+     * so a wrong option gives the TypeError of the library (empty arrays for the absent or null options). */
+    zval empty, arguments[2], retval;
+    ZVAL_EMPTY_ARRAY(&empty);
+    ZVAL_NULL(&retval);
+    zval *limits = options ? zend_hash_str_find_deref(options, "limits", sizeof("limits") - 1) : NULL;
     zval *functions = options ? zend_hash_str_find_deref(options, "functions", sizeof("functions") - 1) : NULL;
-    if (functions != NULL && Z_TYPE_P(functions) != IS_NULL && Z_TYPE_P(functions) != IS_ARRAY) {
-        zend_argument_type_error(2, "must hold the functions as an array, %s given", zend_zval_value_name(functions));
+    ZVAL_COPY_VALUE(&arguments[0], limits != NULL && Z_TYPE_P(limits) != IS_NULL ? limits : &empty);
+    ZVAL_COPY_VALUE(&arguments[1], functions != NULL && Z_TYPE_P(functions) != IS_NULL ? functions : &empty);
+    zend_call_known_instance_method_with_2_params(pt_runtime_ce->constructor, Z_OBJ(engine->runtime), &retval, &arguments[0], &arguments[1]);
+    zval_ptr_dtor(&retval);
+    if (EG(exception)) {
         RETURN_THROWS();
     }
-    if (functions != NULL && Z_TYPE_P(functions) == IS_ARRAY) {
-        zend_ulong index;
-        zend_string *key;
-        zval *callable;
-        ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(functions), index, key, callable) {
-            if (!zend_is_callable(callable, 0, NULL)) {
-                zend_argument_type_error(2, "must hold only callable functions");
-                RETURN_THROWS();
-            }
-            zend_string *name = key ? zend_string_copy(key) : zend_long_to_str((zend_long)index);
-            bool registered = pt_register_function(engine, name, callable);
-            zend_string_release(name);
-            if (!registered) {
-                RETURN_THROWS();
-            }
-        } ZEND_HASH_FOREACH_END();
-    }
-    pt_limits limits = engine->limits;
+    zend_update_property(pt_ast_program_ce, object, ZEND_STRL("runtime"), &engine->runtime);
     char open, close;
-    if (!pt_option_limits(options, &limits) || !pt_option_delimiters(options, &open, &close)) {
+    if (!pt_option_delimiters(options, &open, &close)) {
         RETURN_THROWS();
     }
-    engine->limits = limits;
     engine->open = open;
     engine->close = close;
     zval *refresh = options ? zend_hash_str_find_deref(options, "artifact_refresh", sizeof("artifact_refresh") - 1) : NULL;
@@ -1967,16 +2017,6 @@ ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate)
     zval_ptr_dtor(&argument);
 }
 
-ZEND_METHOD(Polyspec_Template_AstProgram, register)
-{
-    pt_method_register(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
-ZEND_METHOD(Polyspec_Template_AstProgram, registerClass)
-{
-    pt_method_register_class(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
 /* The callable that a table holds under a key, or null. */
 static void pt_return_function(HashTable *table, zend_string *key, zval *return_value)
 {
@@ -1987,17 +2027,19 @@ static void pt_return_function(HashTable *table, zend_string *key, zval *return_
     RETURN_COPY(function);
 }
 
-ZEND_METHOD(Polyspec_Template_AstProgram, hostFunction)
+/* hostFunction of AstProgram and RuntimeEnvironment: the function registered under a name, or null. */
+static void pt_method_host_function(pt_runtime *runtime, INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *name;
     ZEND_PARSE_PARAMETERS_START(1, 1)
         Z_PARAM_STR(name)
     ZEND_PARSE_PARAMETERS_END();
 
-    pt_return_function(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->functions, name, return_value);
+    pt_return_function(&runtime->functions, name, return_value);
 }
 
-ZEND_METHOD(Polyspec_Template_AstProgram, classFunction)
+/* classFunction of AstProgram and RuntimeEnvironment: the function registered as Class::method, or null. */
+static void pt_method_class_function(pt_runtime *runtime, INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *class_name, *method;
     ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -2006,19 +2048,110 @@ ZEND_METHOD(Polyspec_Template_AstProgram, classFunction)
     ZEND_PARSE_PARAMETERS_END();
 
     zend_string *key = zend_strpprintf(0, "%s::%s", ZSTR_VAL(class_name), ZSTR_VAL(method));
-    pt_return_function(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->classes, key, return_value);
+    pt_return_function(&runtime->classes, key, return_value);
     zend_string_release(key);
 }
 
-ZEND_METHOD(Polyspec_Template_AstProgram, limits)
+/* The limits as the array of RT-33. */
+static void pt_return_limits(pt_limits limits, zval *return_value)
 {
-    ZEND_PARSE_PARAMETERS_NONE();
-    pt_limits limits = pt_engine_of(Z_OBJ_P(ZEND_THIS))->limits;
     array_init_size(return_value, 4);
     add_assoc_long_ex(return_value, "iterations", sizeof("iterations") - 1, limits.iterations);
     add_assoc_long_ex(return_value, "depth", sizeof("depth") - 1, limits.depth);
     add_assoc_long_ex(return_value, "outputBytes", sizeof("outputBytes") - 1, limits.output_bytes);
     add_assoc_long_ex(return_value, "expressionDepth", sizeof("expressionDepth") - 1, limits.expression_depth);
+}
+
+/* AstProgram delegates its runtime methods to the RuntimeEnvironment it holds (RT-33, FUN-43). */
+ZEND_METHOD(Polyspec_Template_AstProgram, register)
+{
+    pt_method_register(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, registerClass)
+{
+    pt_method_register_class(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, hostFunction)
+{
+    pt_method_host_function(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, classFunction)
+{
+    pt_method_class_function(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, limits)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_return_limits(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS)))->limits, return_value);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* RuntimeEnvironment (RT-33, FUN-43, FUN-44)                                                       */
+/* ----------------------------------------------------------------------------------------------- */
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, __construct)
+{
+    HashTable *limits = NULL, *functions = NULL;
+    ZEND_PARSE_PARAMETERS_START(0, 2)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ARRAY_HT(limits)
+        Z_PARAM_ARRAY_HT(functions)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_runtime *runtime = pt_runtime_of(Z_OBJ_P(ZEND_THIS));
+    pt_limits applied = pt_default_limits;
+    if (limits != NULL && !pt_apply_limits(limits, &applied)) {
+        RETURN_THROWS();
+    }
+    runtime->limits = applied;
+    if (functions == NULL) {
+        return;
+    }
+    zend_ulong index;
+    zend_string *key;
+    zval *callable;
+    ZEND_HASH_FOREACH_KEY_VAL(functions, index, key, callable) {
+        if (!zend_is_callable(callable, 0, NULL)) {
+            zend_type_error("Polyspec\\Template\\Render\\RuntimeEnvironment::register(): Argument #2 ($function) must be of type callable, %s given", zend_zval_value_name(callable));
+            RETURN_THROWS();
+        }
+        zend_string *name = key ? zend_string_copy(key) : zend_long_to_str((zend_long)index);
+        bool registered = pt_register_function(runtime, name, callable);
+        zend_string_release(name);
+        if (!registered) {
+            RETURN_THROWS();
+        }
+    } ZEND_HASH_FOREACH_END();
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, register)
+{
+    pt_method_register(pt_runtime_of(Z_OBJ_P(ZEND_THIS)), INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, limits)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_return_limits(pt_runtime_of(Z_OBJ_P(ZEND_THIS))->limits, return_value);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, hostFunction)
+{
+    pt_method_host_function(pt_runtime_of(Z_OBJ_P(ZEND_THIS)), INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, registerClass)
+{
+    pt_method_register_class(pt_runtime_of(Z_OBJ_P(ZEND_THIS)), INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, classFunction)
+{
+    pt_method_class_function(pt_runtime_of(Z_OBJ_P(ZEND_THIS)), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* A prepared execution (RT-61): the program, the bound assign, the options and the entry template, which stays loaded
@@ -2247,6 +2380,17 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     register_class_Polyspec_Template_Value_Bind();
     register_class_Polyspec_Template_Value_Json();
 
+    /* The runtime services come first: AstProgram and RuntimeEnvironment implement the interface. */
+    zend_class_entry *runtime_services = register_class_Polyspec_Template_Render_RuntimeServices();
+    pt_runtime_ce = register_class_Polyspec_Template_Render_RuntimeEnvironment(runtime_services);
+    pt_runtime_ce->create_object = pt_runtime_create;
+    memcpy(&pt_runtime_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    pt_runtime_handlers.offset = XtOffsetOf(pt_runtime_object, std);
+    pt_runtime_handlers.free_obj = pt_runtime_free;
+    pt_runtime_handlers.clone_obj = NULL;
+    pt_runtime_handlers.get_gc = pt_runtime_get_gc;
+    pt_declare_default_limits(pt_runtime_ce);
+
     pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
     pt_engine_ce->create_object = pt_engine_create;
     memcpy(&pt_engine_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -2274,7 +2418,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_execution_handlers.free_obj = pt_execution_free;
     pt_execution_handlers.clone_obj = NULL;
     pt_execution_handlers.get_gc = pt_execution_get_gc;
-    pt_ast_program_ce = register_class_Polyspec_Template_AstProgram(program);
+    pt_ast_program_ce = register_class_Polyspec_Template_AstProgram(program, runtime_services);
     pt_ast_program_ce->create_object = pt_engine_create;
 
     zend_class_entry *loader_interface = register_class_Polyspec_Template_Loader_LoaderInterface();

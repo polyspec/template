@@ -559,7 +559,7 @@ static pt_value pt_call(pt_ctx *ctx, const pt_expr *expr, pt_value *args, const 
         }
         return result;
     }
-    zval *callable = zend_hash_str_find(&ctx->engine->functions, expr->name.s, expr->name.n);
+    zval *callable = zend_hash_str_find(&pt_engine_runtime(ctx->engine)->functions, expr->name.s, expr->name.n);
     if (callable == NULL) {
         PT_FAIL_AT(ctx, PT_E_RUNTIME_UNKNOWN_FUNCTION, frame, expr, "%s is not a function", expr->name.s);
     }
@@ -724,7 +724,7 @@ static pt_value pt_evaluate_node(pt_ctx *ctx, const pt_expr *expr, const pt_fram
             PT_BUF_LIT(&key, "::");
             pt_buf_adds(&key, expr->name2);
             pt_s name = pt_buf_done(&key);
-            zval *callable = zend_hash_str_find(&ctx->engine->classes, name.s, name.n);
+            zval *callable = zend_hash_str_find(&pt_engine_runtime(ctx->engine)->classes, name.s, name.n);
             if (callable == NULL) {
                 PT_FAIL_AT(ctx, PT_E_RUNTIME_UNKNOWN_FUNCTION, frame, expr, "%s is not a function", name.s);
             }
@@ -805,8 +805,8 @@ static pt_value pt_evaluate_node(pt_ctx *ctx, const pt_expr *expr, const pt_fram
 static pt_value pt_evaluate(pt_ctx *ctx, const pt_expr *expr, const pt_frame *frame, pt_scope *scope)
 {
     ctx->depth++;
-    if (ctx->depth > ctx->engine->limits.expression_depth) {
-        PT_FAIL_AT(ctx, PT_E_RUNTIME_LIMIT, frame, expr, "expression nesting exceeds " ZEND_LONG_FMT, ctx->engine->limits.expression_depth);
+    if (ctx->depth > pt_engine_runtime(ctx->engine)->limits.expression_depth) {
+        PT_FAIL_AT(ctx, PT_E_RUNTIME_LIMIT, frame, expr, "expression nesting exceeds " ZEND_LONG_FMT, pt_engine_runtime(ctx->engine)->limits.expression_depth);
     }
     pt_value value = pt_evaluate_node(ctx, expr, frame, scope);
     ctx->depth--;
@@ -823,7 +823,7 @@ static void pt_write(pt_ctx *ctx, pt_s text)
         return;
     }
     ctx->output_bytes += (zend_long)text.n;
-    zend_long limit = ctx->engine->limits.output_bytes;
+    zend_long limit = pt_engine_runtime(ctx->engine)->limits.output_bytes;
     if (ctx->output_bytes > limit) {
         pt_ctx_fail(ctx, PT_E_RUNTIME_LIMIT, ctx->frame, ctx->start, ctx->end, zend_strpprintf(0, "output exceeds " ZEND_LONG_FMT " bytes", limit));
     }
@@ -837,7 +837,7 @@ static void pt_enter_template(pt_ctx *ctx, pt_s name, const pt_frame *frame, siz
             pt_ctx_fail(ctx, PT_E_LOAD_CYCLE, frame, start, end, zend_strpprintf(0, "%s is already being rendered", name.s));
         }
     }
-    zend_long limit = ctx->engine->limits.depth;
+    zend_long limit = pt_engine_runtime(ctx->engine)->limits.depth;
     if ((zend_long)ctx->chain_count > limit) {
         pt_ctx_fail(ctx, PT_E_RUNTIME_DEPTH, frame, start, end, zend_strpprintf(0, "nesting depth exceeds " ZEND_LONG_FMT, limit));
     }
@@ -939,8 +939,8 @@ static void pt_render_for(pt_ctx *ctx, const pt_node *node, const pt_frame *fram
             value = iterable.u.list->items[position];
         }
         ctx->iterations++;
-        if (ctx->iterations > ctx->engine->limits.iterations) {
-            pt_ctx_fail(ctx, PT_E_RUNTIME_LIMIT, frame, node->start, node->end, zend_strpprintf(0, "loop iterations exceed " ZEND_LONG_FMT, ctx->engine->limits.iterations));
+        if (ctx->iterations > pt_engine_runtime(ctx->engine)->limits.iterations) {
+            pt_ctx_fail(ctx, PT_E_RUNTIME_LIMIT, frame, node->start, node->end, zend_strpprintf(0, "loop iterations exceed " ZEND_LONG_FMT, pt_engine_runtime(ctx->engine)->limits.iterations));
         }
         /* The scope may have grown its loops while the body ran; the loop is found by its index. */
         loop = &scope->loops[loop_index];

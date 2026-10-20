@@ -158,6 +158,83 @@ final class FilesystemLoader implements LoaderInterface
     public function load(string $name): ?array {}
 }
 
+namespace Polyspec\Template\Render;
+
+/**
+ * Runtime state required by both AST and generated programs.
+ */
+interface RuntimeServices
+{
+    /**
+     * The limits of a render (RT-33).
+     *
+     * @return array
+     * @phpstan-return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int}
+     */
+    public function limits(): array;
+
+    /** Returns the host function registered under a name. */
+    public function hostFunction(string $name): ?callable;
+
+    /** Returns one registered logical class function. */
+    public function classFunction(string $className, string $method): ?callable;
+}
+
+/**
+ * Host functions and resource limits shared by AST and generated programs.
+ */
+final class RuntimeEnvironment implements RuntimeServices
+{
+    /**
+     * The fields of the library class, declared so that the shape of the class matches it. The state is held by the
+     * runtime object of the extension: these properties are never set.
+     *
+     * @var array
+     * @phpstan-var array{iterations: int, depth: int, outputBytes: int, expressionDepth: int}
+     */
+    private readonly array $limits;
+
+    /**
+     * @var array
+     * @phpstan-var array<string, callable>
+     */
+    private array $hostFunctions;
+
+    /**
+     * @var array
+     * @phpstan-var array<string, callable>
+     */
+    private array $classFunctions;
+
+    /**
+     * @param array $limits
+     * @phpstan-param array<string, int> $limits
+     * @param array $hostFunctions
+     * @phpstan-param array<string, callable> $hostFunctions
+     */
+    public function __construct(array $limits = [], array $hostFunctions = []) {}
+
+    /** Registers one host function after validating its name. */
+    public function register(string $name, callable $function): void {}
+
+    /**
+     * The limits of the environment: the defaults of RT-33 with the overrides of the options (RT-6).
+     *
+     * @return array
+     * @phpstan-return array{iterations: int, depth: int, outputBytes: int, expressionDepth: int}
+     */
+    public function limits(): array {}
+
+    /** Returns one registered host function. */
+    public function hostFunction(string $name): ?callable {}
+
+    /** Registers one logical class function used by `Class::method(...)`. */
+    public function registerClass(string $className, string $method, callable $function): void {}
+
+    /** Returns the class function registered under `Class::method`, or null. */
+    public function classFunction(string $className, string $method): ?callable {}
+}
+
 namespace Polyspec\Template;
 
 /**
@@ -285,9 +362,16 @@ final class AstPreparedExecution implements PreparedExecution
  *
  * @phpstan-import-type RenderOptions from Program
  */
-final class AstProgram implements Program
+final class AstProgram implements Program, \Polyspec\Template\Render\RuntimeServices
 {
     public readonly \Polyspec\Template\Loader\LoaderInterface $loader;
+
+    /**
+     * The runtime of the program: its limits and its host functions (RT-33, FUN-43).
+     *
+     * @var \Polyspec\Template\Render\RuntimeEnvironment
+     */
+    public readonly \Polyspec\Template\Render\RuntimeEnvironment $runtime;
 
     /**
      * @var array
