@@ -65,6 +65,23 @@ final class AstDecodeTest extends TestCase
         }
     }
 
+    /**
+     * A literal with an invalid value and an extra field names the deepest invalid node, the value (AST-10), as the other
+     * runtimes do, and not the literal that holds the extra field.
+     */
+    public function testDecodeNamesTheDeepestInvalidValueOfALiteralWithAnExtraField(): void
+    {
+        $text = '{"type":"Template","name":"x","body":[{"type":"Echo","expr":{"type":"Literal","kind":"number",'
+            . '"value":"1","span":[0,1],"extra":1},"span":[0,1]}],"comments":[]}';
+        try {
+            AstProgram::decodeTemplate($text);
+            self::fail('the AST decoded');
+        } catch (AstDecodeError $error) {
+            self::assertSame('/body/0/expr/value', $error->path);
+            self::assertStringContainsString('/body/0/expr/value', $error->getMessage());
+        }
+    }
+
     /** Text that is not JSON fails with the JsonException of json_decode. */
     public function testDecodeFailsOnTextThatIsNotJson(): void
     {

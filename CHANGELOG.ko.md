@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2f3ad6decaf70e63f2a432f7f1c23cea32ff5f30bdf1af98e3341e2f5ed7a995 -->
+<!-- source-sha256: 14f8b26e0bf727cd768c7def98d6b85a10b7eb3483918a29db6c0ed0d4cc0e64 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-54: root가 opis fork `2.6.0-p1`(vcs `https://github.com/min-0-max/json-schema`, orm의 pin)을 고정하여, PHP AST decoder가 다른 runtime처럼 가장 깊은 잘못된 값을 가리킨다. Upstream opis 2.6.0은 collect-all mode에서 실패한 `properties` keyword가 검사한 property를 기록하기 전에 돌아가므로, `AstDecoder`는 값 `"1"`인 number `Literal`에 extra field가 있을 때 TypeScript가 `/body/0/expr/value`라고 하는 자리에 `/body/0/expr`를 보고했다(AST-10). Red: `AstDecodeTest::testDecodeNamesTheDeepestInvalidValueOfALiteralWithAnExtraField`가 `-'/body/0/expr/value'`와 `+'/body/0/expr'`로 실패했다(6 tests, 1 failure); green: fork에서 같은 test가 통과하고, `AstDecodeTest`는 library만으로, 그리고 확장과 함께 6개 중 6개 통과한다. 의존성 review는 fork를 기록하고, `make dependency-policy-check`는 T26.7-43의 newer-release 항목 여섯 개를 그대로 둔다 (T26.7-54).
 
 - T26.7-46: vitest는 worktree 자신의 test 파일만 수집한다. 루트 `vitest.config.ts`가 vitest 기본값에 더해 `var/**`를 제외하므로 var/tools/mise 아래의 복사본이 실행되지 않는다. 새 test `tests/scripts/vitest-collection.test.mts`가 목록을 검사한다. Red: config가 없으면 `vitest collects 7385 file(s) under var/`(`var/tools/mise/state/trusted-configs` 아래의 복사본)로 실패한다; green: `pass 1, fail 0`이다. Verification 명령은 `packages/ts/tests/smoke.test.ts`를 한 번 실행하며 `1 passed (1)`이다 (T26.7-46).
 
